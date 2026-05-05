@@ -55,7 +55,7 @@ import {
     Close as CloseIcon,
     Add as AddIcon,
 } from '@mui/icons-material';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import RecordingStudio3Modal from './RecordingStudio3Modal';
 import { createWordPreset } from '../utils/recordingStudioPresets';
 
@@ -1176,6 +1176,7 @@ function WordRowComponent({
 
             {/* Recording Studio 3 Modal */}
             <RecordingStudio3Modal
+                data-tour="audio-upload"
                 open={recordingDialogOpen}
                 onClose={() => setRecordingDialogOpen(false)}
                 onSave={async (payload) => {

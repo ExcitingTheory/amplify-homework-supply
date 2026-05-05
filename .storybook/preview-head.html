@@ -27,6 +27,14 @@
     overflow: auto;
   }
   
+  /* Respect dark mode for the story iframe before React mounts */
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #121212;
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+  
   /* For fullscreen stories, ensure proper viewport usage */
   .sb-show-main.sb-main-fullscreen {
     padding: 0;

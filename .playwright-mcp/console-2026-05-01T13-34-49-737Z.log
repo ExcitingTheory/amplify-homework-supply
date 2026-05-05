@@ -1,0 +1,51 @@
+[    2687ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    3144ms] [LOG] [Fast Refresh] done in 568ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   72353ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_cjs_react-dom_development_07i0ttg.js:25055
+[   76129ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   79290ms] [INFO] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   80107ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   80108ms] [LOG] [Fast Refresh] done in 973ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   83433ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   83483ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84485ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84513ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84516ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84531ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84534ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84547ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84550ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84636ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84650ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84669ms] [LOG] [chatTools] Vector store search function registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84682ms] [LOG] [chatTools] Practice drill callback registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84683ms] [LOG] [ChatContext] Cleaning up subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84703ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84814ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84815ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84817ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84818ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84819ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84830ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84832ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   84833ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   85037ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   85049ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   85083ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   85084ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86184ms] [LOG] [useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86187ms] [LOG] [Index] Section useEffect triggered, myUserId: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86187ms] [LOG] [Index] Unit useEffect: waiting for user authentication @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86189ms] [LOG] [FilesContext] Initializing vector store from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86285ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86286ms] [LOG] [FilesContext] User authenticated: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86287ms] [LOG] [FilesContext] Identity ID: us-east-1:b0eadde9-f0ae-c706-172f-f27e23bff588 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86287ms] [LOG] [FilesContext] About to set up File observeQuery @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86436ms] [LOG] [useChatPageContext] Cleaning up page context @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86455ms] [LOG] [useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86469ms] [LOG] [Index] Section useEffect triggered, myUserId: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86470ms] [LOG] [Index] Unit useEffect: waiting for user authentication @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86472ms] [LOG] [FilesContext] Initializing vector store from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86472ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86484ms] [LOG] [FilesContext] User authenticated: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86485ms] [LOG] [FilesContext] Identity ID: us-east-1:b0eadde9-f0ae-c706-172f-f27e23bff588 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   86486ms] [LOG] [FilesContext] About to set up File observeQuery @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233

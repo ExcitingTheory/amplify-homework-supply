@@ -53,6 +53,7 @@
     },
     "help": "Help",
     "settings": {
+      "colorMode": "Color mode",
       "darkMode": "Dark Mode",
       "disableNotifications": "Disable Notifications",
       "experimentalFeatures": "Experimental Features",
@@ -60,10 +61,21 @@
     }
   },
   "navigation": {
+    "gamification": "Gamification",
     "grades": "Grades",
+    "guilds": "Guilds",
     "home": "Home",
+    "joinPeerReview": "Join Peer Review",
+    "joinPeerReviewDesc": "Enter a review room code",
+    "joinStudyGroup": "Join Study Group",
+    "joinStudyGroupDesc": "Enter a room code",
+    "joinWorkbook": "Join Workbook Session",
+    "joinWorkbookDesc": "Enter a workbook link or ID",
+    "leaderboard": "Leaderboard",
     "profile": "Profile",
     "sections": "Sections",
+    "settings": "Settings",
+    "skills": "Skill Tree",
     "units": "Units",
     "workbook": "Workbook"
   },

@@ -14,7 +14,7 @@ import Button from '@mui/material/Button';
 import Portal from '@mui/material/Portal';
 import UnitContext from '../../../context/unitContext';
 import SaveIcon from '@mui/icons-material/Save';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import Snackbar from '@mui/material/Snackbar';
 
 export function Save() {
@@ -32,6 +32,7 @@ export function Save() {
     // a "leave page?" confirmation dialog.
     React.useEffect(() => {
         const handleBeforeUnload = () => {
+            if (!editorStateRef?.current) return;
             const content = JSON.stringify(editorStateRef.current);
             const unitContent = JSON.stringify(unit?.data || {});
             
@@ -85,7 +86,7 @@ export function Save() {
                 onClick={handleManualSave}
                 title="Save now (automatic save happens 2 seconds after you stop typing)"
             >
-                {isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                {isSaving ? <Skeleton variant="circular" width={20} height={20} /> : <SaveIcon />}
             </Button>
         </>
     );

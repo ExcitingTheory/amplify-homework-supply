@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'next-i18next'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -111,6 +112,7 @@ export function PeerReviewChat({
   onTypingChange,
   onAIMention,
 }: PeerReviewChatProps) {
+  const { t } = useTranslation('common')
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -211,7 +213,7 @@ export function PeerReviewChat({
             color="primary"
             onClick={handleSend}
             disabled={!input.trim()}
-            aria-label="Send message"
+            aria-label={t('actions.send', { ns: 'common' })}
           >
             <SendIcon />
           </IconButton>

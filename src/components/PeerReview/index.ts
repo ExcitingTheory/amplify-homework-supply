@@ -15,3 +15,5 @@ export type { JoinByCodeProps } from './JoinByCode'
 
 export { default as JoinPeerReviewDialog } from './JoinPeerReviewDialog'
 export type { JoinPeerReviewDialogProps } from './JoinPeerReviewDialog'
+
+export { PeerReviewFeedbackPrompt } from './PeerReviewFeedbackPrompt'

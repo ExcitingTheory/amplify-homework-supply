@@ -123,10 +123,12 @@ import getCachedUrl from '../../../utils/getCachedUrl';
           variant="outlined" 
           sx={{ 
             my: 2,
-            bgcolor: 'grey.100',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100',
             border: 'none',
             borderRadius: 2,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+            boxShadow: (theme) => theme.palette.mode === 'dark' 
+              ? '0 1px 3px rgba(0,0,0,0.4)' 
+              : '0 1px 3px rgba(0,0,0,0.12)',
             transition: 'all 0.2s ease',
             userSelect: 'none',
             cursor: 'default',
@@ -146,7 +148,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                       component="ruby" 
                       sx={{ 
                         fontWeight: 700,
-                        color: '#1976d2',
+                        color: 'primary.main',
                         fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
                           ? '"Noto Sans JP", sans-serif' 
                           : 'inherit',
@@ -164,7 +166,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                       component="div" 
                       sx={{ 
                         fontWeight: 700,
-                        color: '#1976d2',
+                        color: 'primary.main',
                         fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
                           ? '"Noto Sans JP", sans-serif' 
                           : 'inherit'
@@ -214,7 +216,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                 <Typography 
                   variant="body1" 
                   sx={{ 
-                    color: '#424242',
+                    color: 'text.primary',
                     lineHeight: 1.6,
                     mb: 1
                   }}

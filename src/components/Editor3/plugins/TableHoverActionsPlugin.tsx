@@ -18,6 +18,7 @@ import {
 import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
+import { useTranslation } from 'next-i18next';
 import { createPortal } from 'react-dom';
 
 const BUTTON_SIZE = 20;
@@ -38,6 +39,7 @@ function TableHoverActions({
 }): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
+  const { t } = useTranslation('common');
 
   // Top "+" button (add column)
   const [topButtonPos, setTopButtonPos] = useState<{
@@ -246,7 +248,7 @@ function TableHoverActions({
         <button
           ref={topRef}
           className="table-hover-add-button table-hover-add-column"
-          aria-label="Add column"
+          aria-label={t('table.addColumn', 'Add column')}
           type="button"
           style={{
             position: 'fixed',
@@ -262,7 +264,7 @@ function TableHoverActions({
         <button
           ref={leftRef}
           className="table-hover-add-button table-hover-add-row"
-          aria-label="Add row"
+          aria-label={t('table.addRow', 'Add row')}
           type="button"
           style={{
             position: 'fixed',

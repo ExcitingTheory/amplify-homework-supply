@@ -45,7 +45,7 @@ import { useTranslation } from 'next-i18next';
 import { isMimeType } from '@lexical/utils';
 import VectorStoreContext from '../../../context/vectorStoreContext';
 
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import SearchIcon from '@mui/icons-material/Search';
 import UploadFile from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -79,6 +79,7 @@ import {
     loadEmbeddingsFromS3
 } from '../../../utils/vectorStoreDB';
 import * as EmbeddingWorker from '../../../utils/embeddingWorkerManager';
+
 import {
     ACCEPTABLE_AUDIO_TYPES,
     ACCEPTABLE_FILE_TYPES,
@@ -102,6 +103,7 @@ import { createEmptyHistoryState } from "@lexical/react/LexicalHistoryPlugin";
 
 // FileMetadata node imports
 import { $createFileMetadataNode } from "../nodes/FileMetadataNode";
+
 import UnitContext from '../../../context/unitContext';
 import { FileManagerProvider, useFileManager } from './FileManagerContext';
 import { useTabContext } from '../../../context/tabContext';
@@ -1384,7 +1386,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
                 >
                     <Typography id="modal-text-to-image-preview" variant="h6" component="h2">
-                        {t('fileManager.textToImagePreview')} {working && <CircularProgress />}
+                        {t('fileManager.textToImagePreview')} {working && <Skeleton variant="rectangular" width={24} height={24} sx={{ display: 'inline-block', borderRadius: 1, verticalAlign: 'middle' }} />}
                     </Typography>
 
                     <Typography id="modal-text-to-image-preview-description" sx={{ mt: 2 }}>
@@ -1775,7 +1777,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 
                 >
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                        {t('fileManager.textToSpeechPreview')} {working && <CircularProgress />}
+                        {t('fileManager.textToSpeechPreview')} {working && <Skeleton variant="rectangular" width={24} height={24} sx={{ display: 'inline-block', borderRadius: 1, verticalAlign: 'middle' }} />}
                     </Typography>
 
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -2104,7 +2106,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                             }}
                         />
                     ) : (
-                        <CircularProgress />
+                        <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
                     )
                 ) : file.mimeType?.startsWith('audio/') ? (
                     audioUrl ? (
@@ -2144,7 +2146,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                             {t('fileManager2.fileDetails.videoNotSupported')}
                         </video>
                     ) : (
-                        <CircularProgress />
+                        <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
                     )
                 ) : (
                     <Box sx={{ textAlign: 'center', color: 'action.disabled' }}>
@@ -2480,7 +2482,7 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
                     </Box>
                 ) : (
                     <Box sx={{ width: '100%', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CircularProgress size={24} />
+                        <Skeleton variant="rectangular" width="80%" height={40} sx={{ borderRadius: 1 }} />
                     </Box>
                 )
             )}
@@ -2780,7 +2782,7 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
                 alignItems: 'center', 
                 justifyContent: 'center' 
             }}>
-                <CircularProgress size={24} />
+                <Skeleton variant="rectangular" width="80%" height={200} sx={{ borderRadius: 1 }} />
             </Box>
         }>
             <SelectedFileView
@@ -2801,14 +2803,6 @@ export default function FileManager2() {
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
     const [searching, setSearching] = React.useState(false);
     const [selectedItems, setSelectedItems] = React.useState(new Set());
-
-    const { files, documents, session } = React.useContext(FilesContext);
-    const { identityId } = session || {};
-    const { unit } = React.useContext(UnitContext);
-
-    // RecordingStudio3 modal state (hoisted for handleStudioSave callback)
-    const [studioOpen, setStudioOpen] = React.useState(false);
-    const [studioScriptFile, setStudioScriptFile] = React.useState(null);
 
 
 
@@ -2966,103 +2960,10 @@ export default function FileManager2() {
         const { audioFiles, scriptData } = payload;
         console.log('[FileManager2] RS3 save payload:', { audioCount: audioFiles?.length, scriptData: !!scriptData });
 
-        const client = getAmplifyClient();
-        const createdFileIds = [];
-
-        // 1. Create File model records for each audio take with an audioPath
-        if (audioFiles?.length > 0) {
-            for (const audioFile of audioFiles) {
-                if (!audioFile.audioPath) continue;
-
-                try {
-                    const { data: newFile, errors } = await client.models.File.create({
-                        path: audioFile.audioPath,
-                        owner: session?.username,
-                        identityId,
-                        name: `${audioFile.speakerName || 'audio'} - ${(audioFile.text || '').slice(0, 40)}.mp3`,
-                        mimeType: 'audio/mpeg',
-                        level: 'PROTECTED',
-                        waveformData: audioFile.waveformData ? JSON.stringify(audioFile.waveformData) : null,
-                    });
-
-                    if (errors?.length > 0 || !newFile) {
-                        console.error('[FileManager2] Error creating audio File record:', errors);
-                        continue;
-                    }
-
-                    createdFileIds.push(newFile.id);
-                    console.log('[FileManager2] Created audio File record:', newFile.id);
-                } catch (error) {
-                    console.error('[FileManager2] Error creating audio File record:', error);
-                }
-            }
-        }
-
-        // 2. Persist the script as a text/x-fountain File record for re-opening
-        if (scriptData) {
-            try {
-                const scriptTitle = scriptData.metadata?.title || 'Conversation';
-                const scriptContent = JSON.stringify(scriptData);
-                const scriptBlob = new Blob([scriptContent], { type: 'text/x-fountain' });
-                const scriptFileName = `${scriptTitle.replace(/[^a-zA-Z0-9]/g, '_')}.fountain`;
-                const s3Path = `protected/${identityId}/scripts/${scriptFileName}`;
-
-                // Upload script content to S3
-                const { uploadData } = await import('aws-amplify/storage');
-                await uploadData({
-                    path: s3Path,
-                    data: scriptBlob,
-                    options: { contentType: 'text/x-fountain' },
-                }).result;
-
-                // Create or update File record for the script
-                if (studioScriptFile) {
-                    // Update existing script file
-                    await client.models.File.update({
-                        id: studioScriptFile.id,
-                        path: s3Path,
-                        name: scriptFileName,
-                        metadata: JSON.stringify({
-                            voiceAssignments: Object.fromEntries(
-                                Object.entries(scriptData.speakers || {}).map(([id, s]) => [id, s.voice])
-                            ),
-                        }),
-                    });
-                    console.log('[FileManager2] Updated script File record:', studioScriptFile.id);
-                } else {
-                    // Create new script file
-                    const { data: scriptFile, errors } = await client.models.File.create({
-                        path: s3Path,
-                        owner: session?.username,
-                        identityId,
-                        name: scriptFileName,
-                        mimeType: 'text/x-fountain',
-                        level: 'PROTECTED',
-                        size: scriptBlob.size,
-                        metadata: JSON.stringify({
-                            voiceAssignments: Object.fromEntries(
-                                Object.entries(scriptData.speakers || {}).map(([id, s]) => [id, s.voice])
-                            ),
-                        }),
-                    });
-
-                    if (errors?.length > 0 || !scriptFile) {
-                        console.error('[FileManager2] Error creating script File record:', errors);
-                    } else {
-                        console.log('[FileManager2] Created script File record:', scriptFile.id);
-                    }
-                }
-            } catch (error) {
-                console.error('[FileManager2] Error persisting script:', error);
-            }
-        }
-
-        // 3. Insert audio files into editor via INSERT_PLAYLIST_COMMAND
-        if (createdFileIds.length > 0 && editor) {
-            editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, createdFileIds);
-            console.log('[FileManager2] Dispatched INSERT_PLAYLIST_COMMAND with', createdFileIds.length, 'files');
-        }
-    }, [identityId, session, editor, studioScriptFile]);
+        // Audio File records are already created by RS3 during take recording.
+        // The scriptData is the conversation metadata we persist for re-opening.
+        // Future: save as .fountain file and create/update UnitFile join.
+    }, []);
 
     // // Expand/Collapse handlers
     // const handleExpandAll = () => {
@@ -3150,6 +3051,12 @@ export default function FileManager2() {
         return Math.round(totalProgress / fileOperations.length);
     }, [fileOperations]);
     const [newImageFileFormOpen, setNewImageFileFormOpen] = React.useState(false);
+    const [newAudioFileFormOpen, setNewAudioFileFormOpen] = React.useState(false);
+    const [newVideoFileFormOpen, setNewVideoFileFormOpen] = React.useState(false);
+
+    // RecordingStudio3 modal state
+    const [studioOpen, setStudioOpen] = React.useState(false);
+    const [studioScriptFile, setStudioScriptFile] = React.useState(null);
 
     // Load generator tab from localStorage, default to 'all'
     const [generator, setGenerator] = React.useState(() => {
@@ -3170,11 +3077,15 @@ export default function FileManager2() {
     const [selectedDocument, setSelectedDocument] = React.useState(null);
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
+    const { files, documents, session } = React.useContext(FilesContext);
+
     // Debug: log files received
     React.useEffect(() => {
         console.log('[FileManager2] Files received from context:', files?.length || 0, files);
     }, [files]);
     const documentStatuses = documents || {};
+    const { identityId } = session || {};
+    const { unit } = React.useContext(UnitContext);
 
     // Enhanced text search function
     const performSimpleTextSearch = React.useCallback((query) => {
@@ -3398,6 +3309,8 @@ export default function FileManager2() {
                 organized[level].audio.push(file);
             } else if (mimeType.includes('video')) {
                 organized[level].video.push(file);
+            } else if (mimeType === 'text/x-fountain') {
+                organized[level].scripts.push(file);
             } else if (mimeType === 'text/x-fountain') {
                 organized[level].scripts.push(file);
             } else if (

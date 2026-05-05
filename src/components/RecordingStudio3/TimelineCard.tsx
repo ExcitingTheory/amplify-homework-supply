@@ -10,15 +10,15 @@ import React from 'react';
 import { Box, Chip, Typography, Tooltip } from '@mui/material';
 import { GraphicEq as WaveformIcon } from '@mui/icons-material';
 
-/**
- * @param {Object} props
- * @param {Object} props.line - Dialogue line from scriptData.dialogue
- * @param {Object} props.speaker - Speaker object from scriptData.speakers
- * @param {boolean} props.isSelected - Whether this card is the active selection
- * @param {number} props.left - CSS left position (px) within the track
- * @param {number} props.width - CSS width (px) of the card
- * @param {Function} props.onClick - Called with line.id when card is clicked
- */
+interface TimelineCardProps {
+  line: any;
+  speaker: any;
+  isSelected: boolean;
+  left: number;
+  width: number;
+  onClick: (id: string) => void;
+}
+
 export default function TimelineCard({
   line,
   speaker,
@@ -26,7 +26,7 @@ export default function TimelineCard({
   left,
   width,
   onClick,
-}) {
+}: TimelineCardProps) {
   const activeTake =
     line.activeTakeIndex !== null && line.takes?.[line.activeTakeIndex];
 

@@ -18,7 +18,7 @@ import MetadataEditor from './MetadataEditor';
 import { Box, Typography, Paper } from '@mui/material';
 
 const meta: Meta<typeof MetadataEditor> = {
-    title: '📚 Creating Lessons/Metadata Editor',
+    title: '✏️ Lesson Editor/Metadata',
     component: MetadataEditor,
     parameters: {
         layout: 'fullscreen',

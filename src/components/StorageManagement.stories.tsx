@@ -6,7 +6,7 @@ import StorageManagement from './StorageManagement';
  * AI model controls, and cached assignment management.
  */
 const meta: Meta<typeof StorageManagement> = {
-  title: '🔌 Offline/StorageManagement',
+  title: '🔌 Offline & Sync/Storage Management',
   component: StorageManagement,
   parameters: {
     layout: 'padded',

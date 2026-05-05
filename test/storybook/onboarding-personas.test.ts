@@ -84,7 +84,7 @@ const DATA_TOUR_SOURCE_DIRS = ['src/components', 'src/stories', 'pages', '.story
 
 // data-tour values referenced in spotlight configs but not yet implemented in components
 // These are planned features — remove from this set once the data-tour attribute is added to a component
-const KNOWN_FUTURE_DATA_TOUR = new Set(['audio-upload', 'interactive-training']);
+const KNOWN_FUTURE_DATA_TOUR = new Set(['interactive-training']);
 
 // Pre-scan: collect all data-tour values found in source
 const allDataTourValues = new Set<string>();

@@ -31,7 +31,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 
 import MainToolbar from '../src/components/MainToolbar'
-import MyAuth from "../src/components/authenticator";
+import MyAuth from "../src/components/AmplifyAuthenticator";
+import AppSkeleton from '../src/components/AppSkeleton';
 import getCachedUrl from "../src/utils/getCachedUrl";
 import InstructorDashboard from '../src/components/InstructorDashboard';
 import { useChatPageContext } from "../src/hooks/useChatPageContext";
@@ -353,7 +354,7 @@ function Sections({ user }) {
                     )}
                     
                     {!sections &&
-                        <div>{t('sections.loading')}</div>
+                        <AppSkeleton variant="cards" />
                     }
 
 {sections.length == 0 &&

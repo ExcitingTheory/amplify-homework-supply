@@ -6,7 +6,8 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../../next-i18next.config';
 
-import MyAuth from "../../src/components/authenticator";
+import MyAuth from "../../src/components/AmplifyAuthenticator";
+import AppSkeleton from '../../src/components/AppSkeleton';
 
 import { FilesProvider } from '../../src/context/fileContext'
 import { DictionaryProvider } from '../../src/context/dictionaryContext' 
@@ -19,9 +20,12 @@ function UnitPageContent() {
   const { unit, checkUnitEditPermission } = React.useContext(UnitContext);
   const { user, session } = React.useContext(AuthContext);
   
+  // Don't render the editor until unit data is loaded — prevents
+  // saveEditorContent firing before editorStateRef is populated
+  if (!unit?.id) return null;
+
   // Check edit permissions for the unit editor
   const permissionCheck = React.useMemo(() => {
-    if (!unit?.id) return { hasAccess: true, reason: null }; // Loading state
     const userGroups = session?.groups || [];
     return checkUnitEditPermission(unit, user, userGroups);
   }, [unit, user, session?.groups, checkUnitEditPermission]);
@@ -49,11 +53,7 @@ function UnitPage() {
 
   const router = useRouter()
   if (router.isFallback) {
-    return (
-      <div>
-        <h1>{t('unitDetail.loading')}</h1>
-      </div>
-    )
+    return <AppSkeleton variant="detail" />
   }
 
   const { id } = router.query

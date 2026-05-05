@@ -26,6 +26,11 @@ Automates creation of versioned component copies (Component → Component2) with
 
 **Use when**: Creating v2 of existing components, refactoring major features, migrating to new patterns
 
+### [feature-development-cycle](./feature-development-cycle/)
+The default background process for ALL development work. Automatically activates whenever planning, building, or implementing anything. Drives spec → testing plan → TODO → implementation → audit loops until verified complete.
+
+**Use when**: Always. This is the background process for any planning, feature work, implementation, or code changes. No explicit invocation needed — if work is happening, this cycle is running.
+
 ### [multi-model-ai-translation](./multi-model-ai-translation/)
 Translates content using multiple AI models in parallel (Claude, GPT-4o, Gemma) with consensus analysis, reverse translation verification, and cryptographic proof generation.
 

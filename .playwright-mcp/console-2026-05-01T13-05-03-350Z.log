@@ -1,0 +1,37 @@
+[    2189ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    3240ms] [LOG] [Fast Refresh] done in 1151ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   29131ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_cjs_react-dom_development_07i0ttg.js:25055
+[   31690ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   31787ms] [INFO] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   34443ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   34479ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35216ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35228ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35229ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35232ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35233ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35245ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35246ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35249ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35262ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35278ms] [LOG] [chatTools] Vector store search function registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35279ms] [LOG] [chatTools] Practice drill callback registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35280ms] [LOG] [ChatContext] Cleaning up subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35299ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35312ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35313ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35316ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35329ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35332ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35332ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35366ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   35383ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39121ms] [LOG] [ChatContext] Cleaning up subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39122ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39124ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39124ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39775ms] [LOG] [ChatContext] AssistantChat initialized with 5 chats @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39776ms] [LOG] [ChatContext] Setting initial chat: 3b367250-2cb8-481a-9a7a-7dec50e68e4f @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39923ms] [LOG] [ChatSidebar] Loading messages for chat: 3b367250-2cb8-481a-9a7a-7dec50e68e4f count: 0 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39924ms] [LOG] [ChatSidebar] deepCloneMessages: returning empty array @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   39926ms] [LOG] [ChatContext] Chat exists and not archived, skipping creation @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233

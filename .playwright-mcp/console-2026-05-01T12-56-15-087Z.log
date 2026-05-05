@@ -1,0 +1,86 @@
+[    1759ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    5146ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_cjs_react-dom_development_07i0ttg.js:25055
+[    8771ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    9840ms] [INFO] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13167ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13186ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13581ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13582ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13582ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13585ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13585ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13586ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13597ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13601ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13602ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13616ms] [LOG] [chatTools] Vector store search function registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13617ms] [LOG] [chatTools] Practice drill callback registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13618ms] [LOG] [ChatContext] Cleaning up subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13634ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13635ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13636ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13648ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13649ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13649ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13650ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13651ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13652ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13749ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13751ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13753ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   13765ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14182ms] [LOG] [useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14185ms] [LOG] [Index] Section useEffect triggered, myUserId: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14186ms] [LOG] [Index] Unit useEffect: waiting for user authentication @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14187ms] [LOG] [FilesContext] Initializing vector store from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14204ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14215ms] [LOG] [FilesContext] User authenticated: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14216ms] [LOG] [FilesContext] Identity ID: us-east-1:b0eadde9-f0ae-c706-172f-f27e23bff588 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14217ms] [LOG] [FilesContext] About to set up File observeQuery @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14318ms] [LOG] [useChatPageContext] Cleaning up page context @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14321ms] [LOG] [useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14333ms] [LOG] [Index] Section useEffect triggered, myUserId: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14334ms] [LOG] [Index] Unit useEffect: waiting for user authentication @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14334ms] [LOG] [FilesContext] Initializing vector store from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14335ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14335ms] [LOG] [FilesContext] User authenticated: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14336ms] [LOG] [FilesContext] Identity ID: us-east-1:b0eadde9-f0ae-c706-172f-f27e23bff588 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   14337ms] [LOG] [FilesContext] About to set up File observeQuery @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   15103ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   15104ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   15169ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   15170ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16153ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16154ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16156ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16189ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16889ms] [LOG] [ChatContext] Cleaning up subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16890ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16890ms] [LOG] [FilesContext] User authenticated: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16891ms] [LOG] [FilesContext] Identity ID: us-east-1:b0eadde9-f0ae-c706-172f-f27e23bff588 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16891ms] [LOG] [FilesContext] About to set up File observeQuery @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16905ms] [LOG] [ChatContext] Setting up AssistantChat subscriptions @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16906ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   16906ms] [LOG] [SettingsContext] Setting up Settings subscription for user: e408f488-d061-70bc-1ee2-c5de8adf79f5 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17037ms] [LOG] [FilesContext] Initial files: 1 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17072ms] [LOG] [FilesContext] Initial files: 1 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17142ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17143ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17308ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17309ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17590ms] [LOG] [FilesContext] Vector store population triggered {isInitialLoad: true, filesCount: 1, currentVectorStoreSize: 0, documentsCount: 1} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17591ms] [LOG] [FilesContext] Vector store population complete - 0 total embeddings @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17642ms] [LOG] [FilesContext] Initial files: 1 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17675ms] [LOG] [ChatContext] AssistantChat initialized with 2 chats @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17676ms] [LOG] [ChatContext] Setting initial chat: dde64da8-481e-4657-8466-cc1ead5f715b @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17792ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17793ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17810ms] [LOG] [Index] Component render, user: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   17811ms] [LOG] Grades.grades [] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18495ms] [LOG] [ChatSidebar] Loading messages for chat: dde64da8-481e-4657-8466-cc1ead5f715b count: 0 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18495ms] [LOG] [ChatSidebar] deepCloneMessages: returning empty array @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18508ms] [LOG] [ChatContext] Chat exists and not archived, skipping creation @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18595ms] [LOG] [VectorStoreDB] Loaded 0 total embeddings from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18596ms] [LOG] [VectorStore] Loaded 0 embeddings from IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18596ms] [LOG] [FilesContext] No cached embeddings found in IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18607ms] [LOG] [FilesContext] No cached embeddings found in IndexedDB @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233

@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e7]:
+      - tablist [ref=e8]:
+        - tab "Sign In" [selected] [ref=e9]
+        - tab "Create Account" [ref=e10]
+      - tabpanel "Sign In" [ref=e11]:
+        - generic [ref=e14]:
+          - group [ref=e15]:
+            - generic [ref=e17]: Sign in
+            - generic [ref=e18]:
+              - generic [ref=e19]: Email
+              - textbox "Email" [ref=e22]:
+                - /placeholder: Enter your Email
+            - generic [ref=e23]:
+              - generic [ref=e24]: Password
+              - generic [ref=e25]:
+                - textbox "Password" [ref=e27]:
+                  - /placeholder: Enter your Password
+                - switch "Show password" [ref=e29] [cursor=pointer]:
+                  - generic [ref=e30]: Password is hidden
+                  - img [ref=e32]
+          - button "Sign in" [ref=e34] [cursor=pointer]
+          - button "Forgot your password?" [ref=e36] [cursor=pointer]
+    - button "Open AI Assistant"
+  - generic [ref=e41] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e42]:
+      - img [ref=e43]
+    - generic [ref=e46]:
+      - button "Open issues overlay" [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: "0"
+          - generic [ref=e50]: "1"
+        - generic [ref=e51]: Issue
+      - button "Collapse issues badge" [ref=e52]:
+        - img [ref=e53]
+  - alert [ref=e55]

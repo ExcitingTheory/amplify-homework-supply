@@ -5,7 +5,7 @@ import {
     Alert,
     TextField,
     Button,
-    CircularProgress,
+    Skeleton,
     Box,
     IconButton,
     Typography,
@@ -42,6 +42,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import CloseIcon from '@mui/icons-material/Close';
 import UnitContext from "../context/unitContext";
+import serializeLexicalToSparseText from "../utils/serializeLexicalToSparseText";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
 import AuthContext from "../context/authContext";
@@ -72,6 +73,7 @@ import { INSERT_QUIZ_COMMAND } from '../components/Editor3/plugins/QuizPlugin';
 import { INSERT_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/AnswerPlugin';
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from '../components/Editor3/plugins/MeaningAssociationPlugin';
 import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/CustomAnswerPlugin';
+import { BotAvatar } from './BotAvatar';
 
 const ChatSidebar = ({ onClose }) => {
     const { t, ready } = useTranslation('components');
@@ -210,8 +212,12 @@ const ChatSidebar = ({ onClose }) => {
     // Refs for DOM interaction
     const chatContainerRef = useRef(null);
     const fileInputRef = useRef(null);
+    const lastChatIdRef = useRef(null);
 
     const unitContext = React.useContext(UnitContext);
+
+    // Consume document data from FilesContext (avoids duplicate Document.observeQuery subscription)
+    const { documents: filesContextDocuments } = React.useContext(FilesContext) || {};
     const {
         unit,
         files,
@@ -220,6 +226,8 @@ const ChatSidebar = ({ onClose }) => {
         editorRef,
         insertWord,
         insertQuestion,
+        sectionId,
+        grade,
     } = unitContext;
 
     // Get chat state from ChatContext
@@ -243,20 +251,29 @@ const ChatSidebar = ({ onClose }) => {
         if (!user?.username) return;
         const client = getAmplifyClient();
         if (!client?.models?.StudentMemory) return;
-        const sub = client.models.StudentMemory.observeQuery({
+        
+        // Initial fetch
+        client.models.StudentMemory.list({
+            filter: { studentId: { eq: user.username } },
+        }).then(({ data }) => {
+            const valid = (data || []).filter(i => i != null && i.id != null);
+            if (valid.length > 0) {
+                setStudentMemory(valid[0].memoryMarkdown || null);
+            }
+        }).catch(err => console.warn('[ChatSidebar] StudentMemory fetch error:', err?.message));
+        
+        // Subscribe to updates only
+        const updateSub = client.models.StudentMemory.onUpdate({
             filter: { studentId: { eq: user.username } },
         }).subscribe({
-            next: ({ items }) => {
-                const valid = items.filter(i => i != null && i.id != null);
-                if (valid.length > 0) {
-                    setStudentMemory(valid[0].memoryMarkdown || null);
+            next: (item) => {
+                if (item?.memoryMarkdown != null) {
+                    setStudentMemory(item.memoryMarkdown || null);
                 }
             },
-            error: (err) => {
-                console.warn('[ChatSidebar] StudentMemory fetch error:', err?.message);
-            },
+            error: (err) => console.warn('[ChatSidebar] StudentMemory subscription error:', err?.message),
         });
-        return () => sub.unsubscribe();
+        return () => updateSub.unsubscribe();
     }, [user?.username]);
 
     // Get tour context (optional - may not be available in all pages)
@@ -311,10 +328,10 @@ const ChatSidebar = ({ onClose }) => {
     // Load chat data when chat changes
     useEffect(() => {
         if (!assistantChat || isLoadingChat) return;
-        const chatChanged = lastChatId !== assistantChat.id;
+        const chatChanged = lastChatIdRef.current !== assistantChat.id;
 
         if (chatChanged) {
-            dispatch({ type: ACTIONS.SET_LAST_CHAT_ID, payload: assistantChat.id });
+            lastChatIdRef.current = assistantChat.id;
 
             // Load messages - ensure it's always an array
             // Messages are stored as JSON string in database
@@ -337,12 +354,16 @@ const ChatSidebar = ({ onClose }) => {
             // Load draft (only on chat change, not version updates)
             dispatch({ type: ACTIONS.SET_INPUT, payload: assistantChat.draft || '' });
 
-            // Load files
-            assistantChat.chatFiles?.()
+            // Load files via direct list() call instead of lazy loader to avoid
+            // auto-pagination (which fires 11+ separate GraphQL queries)
+            const client = getAmplifyClient();
+            client.models.AssistantChatFile.list({
+                filter: { chatID: { eq: assistantChat.id } }
+            })
                 .then(result => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: result?.data || [] }))
                 .catch(err => console.error('[ChatSidebar] Error loading files:', err));
         }
-    }, [assistantChat?.id, assistantChat?._version, isLoadingChat]);
+    }, [assistantChat?.id, isLoadingChat]);
 
     const vectorStoreCtx = React.useContext(VectorStoreContext);
 
@@ -370,37 +391,76 @@ const ChatSidebar = ({ onClose }) => {
         return () => setPracticeDrillCallback(null);
     }, []);
 
-    // Simple context data for chat API
-    const contextData = useMemo(() => ({
-        unit: unit ? {
-            id: unit.id,
-            name: unit.name,
-            description: unit.description,
-            data: unit.data,
-        } : null,
-        files: files ? Object.values(files).filter(f => f != null).map(f => ({
-            id: f.id,
-            name: f.name,
-            description: f.description,
-            mimeType: f.mimeType,
-        })) : [],
-        questionBank: questionBank ? Object.values(questionBank).filter(q => q != null).map(q => ({
-            id: q.id,
-            prompt: q.prompt,
-            answer: q.answer,
-        })) : [],
-        dictionary: dictionary ? Object.values(dictionary).filter(d => d != null).map(d => ({
-            id: d.id,
-            phrase: d.phrase,
-            definition: d.definition,
-        })) : [],
-        sections: sections?.map(s => ({
-            id: s.id,
-            name: s.name,
-            description: s.description,
-        })) || [],
-        studentMemory: studentMemory || null,
-    }), [unit, files, questionBank, dictionary, sections, studentMemory]);
+    // Simple context data for chat API — sparse text for unit content to stay under API Gateway limits
+    const contextData = useMemo(() => {
+        // Only send the current section (if known) instead of all sections
+        const relevantSections = sectionId
+            ? sections?.filter(s => s.id === sectionId) || []
+            : (sections?.slice(0, 5) || []);
+
+        // Build lookup maps for the serializer to resolve IDs to content
+        const wordMap = dictionary
+            ? Object.fromEntries(Object.values(dictionary).filter(d => d != null).map(d => [d.id, d]))
+            : {};
+        const questionMap = questionBank
+            ? Object.fromEntries(Object.values(questionBank).filter(q => q != null).map(q => [q.id, q]))
+            : {};
+        const fileMap = files
+            ? Object.fromEntries(Object.values(files).filter(f => f != null).map(f => [f.id, f]))
+            : {};
+
+        // Parse grade data for in-progress block status
+        let gradeData = {};
+        if (grade?.data) {
+            try {
+                gradeData = typeof grade.data === 'string' ? JSON.parse(grade.data) : grade.data;
+            } catch { /* ignore parse errors */ }
+        }
+
+        return {
+            unit: unit ? {
+                id: unit.id,
+                name: unit.name,
+                description: unit.description,
+                // Sparse text with resolved word/question content and grade progress
+                content: serializeLexicalToSparseText(unit.data, {
+                    words: wordMap,
+                    questions: questionMap,
+                    files: fileMap,
+                    gradeData,
+                }),
+            } : null,
+            files: files ? Object.values(files).filter(f => f != null).map(f => ({
+                id: f.id,
+                name: f.name,
+                description: f.description,
+                mimeType: f.mimeType,
+            })) : [],
+            questionBank: questionBank ? Object.values(questionBank).filter(q => q != null).map(q => ({
+                id: q.id,
+                prompt: q.prompt,
+                answer: q.answer,
+            })) : [],
+            dictionary: dictionary ? Object.values(dictionary).filter(d => d != null).map(d => ({
+                id: d.id,
+                phrase: d.phrase,
+                definition: d.definition,
+            })) : [],
+            sections: relevantSections.map(s => ({
+                id: s.id,
+                name: s.name,
+                description: s.description,
+            })),
+            grade: grade ? {
+                id: grade.id,
+                complete: grade.complete,
+                percentComplete: grade.percentComplete,
+                accuracy: grade.accuracy,
+                attempt: grade.attempt,
+            } : null,
+            studentMemory: studentMemory || null,
+        };
+    }, [unit, files, questionBank, dictionary, sections, sectionId, grade, studentMemory]);
 
     // Memoize the fetch function to prevent recreation on every render
     const customFetch = useCallback(async (url, options) => {
@@ -591,37 +651,73 @@ const ChatSidebar = ({ onClose }) => {
         return tools;
     }, []);
 
-    // Simplified save functions
-    const saveDraft = useCallback(async (draftText, chat, currentMessages = []) => {
-        if (!chat?.id) return;
+    // Debounced save — coalesces rapid draft/message saves into a single write
+    const pendingSaveRef = useRef(null); // { chatId, fields: { draft?, messages? } }
+    const saveTimerRef = useRef(null);
+    const SAVE_DEBOUNCE_MS = 1500;
+
+    const flushSave = useCallback(async () => {
+        const pending = pendingSaveRef.current;
+        if (!pending) return;
+        pendingSaveRef.current = null;
 
         try {
             const client = getAmplifyClient();
+            // Fetch fresh _version to avoid conflicts
+            const { data: fresh } = await client.models.AssistantChat.get({ id: pending.chatId });
+            if (!fresh) {
+                console.warn('[ChatSidebar] Chat not found for save, skipping:', pending.chatId);
+                return;
+            }
             await client.models.AssistantChat.update({
-                id: chat.id,
-                draft: draftText,
-                messages: JSON.stringify(currentMessages) // messages field is AWSJSON type (string)
+                id: pending.chatId,
+                _version: fresh._version,
+                ...pending.fields,
             });
         } catch (error) {
-            console.error('[ChatSidebar] Error saving draft:', error);
+            console.error('[ChatSidebar] Error in debounced save:', error);
         }
     }, []);
 
-    const saveMessages = useCallback(async (msgs, chat, currentDraft) => {
-        if (!chat) return;
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+            // Flush any pending save on unmount
+            if (pendingSaveRef.current) flushSave();
+        };
+    }, [flushSave]);
 
-        try {
-            const clonedMessages = deepCloneMessages(msgs);
-            const client = getAmplifyClient();
-            await client.models.AssistantChat.update({
-                id: chat.id,
-                messages: JSON.stringify(clonedMessages), // messages field is AWSJSON type (string)
-                draft: currentDraft
-            });
-        } catch (error) {
-            console.error('[ChatSidebar] Error saving messages:', error);
+    const enqueueSave = useCallback((chatId, fields) => {
+        if (!chatId) return;
+        // Merge into pending save — later fields overwrite earlier ones
+        if (pendingSaveRef.current?.chatId === chatId) {
+            Object.assign(pendingSaveRef.current.fields, fields);
+        } else {
+            // Different chat or first save — flush old, start new
+            if (pendingSaveRef.current) flushSave();
+            pendingSaveRef.current = { chatId, fields: { ...fields } };
         }
-    }, [deepCloneMessages]);
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(flushSave, SAVE_DEBOUNCE_MS);
+    }, [flushSave]);
+
+    const saveDraft = useCallback((draftText, chat, currentMessages = []) => {
+        if (!chat?.id) return;
+        const fields = { draft: draftText };
+        if (currentMessages.length > 0) {
+            fields.messages = JSON.stringify(currentMessages);
+        }
+        enqueueSave(chat.id, fields);
+    }, [enqueueSave]);
+
+    const saveMessages = useCallback((msgs, chat, currentDraft) => {
+        if (!chat) return;
+        const clonedMessages = deepCloneMessages(msgs);
+        const fields = { messages: JSON.stringify(clonedMessages) };
+        if (currentDraft !== undefined) fields.draft = currentDraft;
+        enqueueSave(chat.id, fields);
+    }, [deepCloneMessages, enqueueSave]);
 
     const saveFileAssociations = useCallback(async (files, chat) => {
         if (!chat) return;
@@ -793,18 +889,14 @@ const ChatSidebar = ({ onClose }) => {
             sendMessage({ text: input });
             dispatch({ type: ACTIONS.SET_INPUT, payload: '' });
 
-            // Clear draft
+            // Clear draft (debounced)
             if (assistantChat?.draft) {
-                const client = getAmplifyClient();
-                client.models.AssistantChat.update({
-                    id: assistantChat.id,
-                    draft: ''
-                }).catch(err => console.error('[ChatSidebar] Error clearing draft:', err));
+                enqueueSave(assistantChat.id, { draft: '' });
             }
         } catch (error) {
             console.error('[ChatSidebar] Error sending message:', error);
         }
-    }, [input, sendMessage, assistantChat]);
+    }, [input, sendMessage, assistantChat, enqueueSave]);
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -823,60 +915,24 @@ const ChatSidebar = ({ onClose }) => {
     // Note: Section data is now provided by SectionContext
     // Removed redundant Section observer to reduce subscription overhead
 
-    // Subscribe to Document status changes
+    // Sync document statuses from FilesContext (avoids duplicate Document.observeQuery)
     useEffect(() => {
-        // Wait for authentication
-        if (authLoading || !user) {
-            console.log('[ChatSidebar] Document subscription: waiting for authentication', { authLoading, hasUser: !!user });
-            return;
-        }
+        if (!filesContextDocuments || Object.keys(filesContextDocuments).length === 0) return;
         
-        console.log('[ChatSidebar] Setting up Document subscription for user:', user.username);
-        const client = getAmplifyClient();
-        const subscription = client.models.Document.observeQuery().subscribe({
-            next: ({ items }) => {
-                // Filter out null items that can appear during subscription updates
-                const validItems = items.filter(item => item != null && item.id != null);
-                
-                const statusMap = {};
-                validItems.forEach(doc => {
-                    statusMap[doc.id] = {
-                        status: doc.status,
-                        pageCount: doc.pageCount,
-                        s3Key: doc.s3Key,
-                    };
-                });
-
-                // Only update if _version has changed
-                const hasChanges = items.some(doc => {
-                    const prevDoc = documentStatuses[doc.id];
-                    return !prevDoc || doc._version !== prevDoc._version;
-                });
-
-                if (hasChanges) {
-                    // Include _version for future comparisons
-                    items.forEach(doc => {
-                        statusMap[doc.id]._version = doc._version;
-                    });
-                    console.log('[ChatSidebar] Document statuses updated:', statusMap);
-                    dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
-                }
-            },
-            error: (error) => {
-                console.error('[ChatSidebar] Document subscription error:', error);
-                // Stop retrying on auth errors to prevent rate limiting
-                if (error?.message?.includes('No current user') || 
-                    error?.message?.includes('NoSignedUser') ||
-                    error?.message?.includes('401') ||
-                    error?.message?.includes('403')) {
-                    console.warn('[ChatSidebar] Auth error, stopping Document subscription retries');
-                    subscription.unsubscribe();
-                }
+        const statusMap = {};
+        Object.values(filesContextDocuments).forEach(doc => {
+            if (doc && doc.id) {
+                statusMap[doc.id] = {
+                    status: doc.status,
+                    pageCount: doc.pageCount,
+                    s3Key: doc.s3Key,
+                    _version: doc._version,
+                };
             }
         });
-
-        return () => subscription.unsubscribe();
-    }, [authLoading, user?.username]);
+        
+        dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
+    }, [filesContextDocuments]);
 
     // Update document processing status when document status changes
     const documentStatusesRef = useRef({});
@@ -1321,9 +1377,13 @@ const ChatSidebar = ({ onClose }) => {
                                             try {
                                                 // Mark current chat as archived
                                                 const client = getAmplifyClient();
+                                                // Flush pending debounced saves before archiving
+                                                await flushSave();
+                                                const { data: freshChat } = await client.models.AssistantChat.get({ id: assistantChat.id });
                                                 await client.models.AssistantChat.update({
                                                     id: assistantChat.id,
-                                                    archived: true
+                                                    archived: true,
+                                                    _version: freshChat?._version,
                                                 });
                                                 console.log('[ChatSidebar] Chat archived - ChatContext will create new chat');
 
@@ -1372,7 +1432,7 @@ const ChatSidebar = ({ onClose }) => {
                         <Box sx={{ p: 2 }}>
                             {isLoadingChat && chatHistories.length === 0 ? (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                                    <CircularProgress size={24} />
+                                    <Skeleton variant="rectangular" width="100%" height={60} sx={{ borderRadius: 1 }} />
                                 </Box>
                             ) : chatHistories.length === 0 ? (
                                 <Box
@@ -1441,10 +1501,14 @@ const ChatSidebar = ({ onClose }) => {
                                                                 onClick={async () => {
                                                                     if (assistantChat && input.trim()) {
                                                                         try {
+                                                                            // Flush + save draft with fresh _version before switching
+                                                                            await flushSave();
                                                                             const client = getAmplifyClient();
+                                                                            const { data: freshChat } = await client.models.AssistantChat.get({ id: assistantChat.id });
                                                                             await client.models.AssistantChat.update({
                                                                                 id: assistantChat.id,
-                                                                                draft: input
+                                                                                draft: input,
+                                                                                _version: freshChat?._version,
                                                                             });
                                                                         } catch (error) {
                                                                             console.error('[ChatSidebar] Error saving draft:', error);
@@ -1593,9 +1657,11 @@ const ChatSidebar = ({ onClose }) => {
                                                                                 if (history.assistantID) {
                                                                                     try {
                                                                                         const client = getAmplifyClient();
+                                                                                        const { data: freshHistory } = await client.models.AssistantChat.get({ id: history.id });
                                                                                         await client.models.AssistantChat.update({
                                                                                             id: history.id,
-                                                                                            archived: false
+                                                                                            archived: false,
+                                                                                            _version: freshHistory?._version,
                                                                                         });
                                                                                         console.log('[ChatSidebar] Unarchived chat:', history.id);
                                                                                     } catch (error) {
@@ -1650,6 +1716,8 @@ const ChatSidebar = ({ onClose }) => {
                                     <Box key={message.id || `message-${index}`} sx={{ width: '100%', mb: 1 }}>
                                         {/* Render text content in speech bubble */}
                                         {textContent && (
+                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, ...(message.role === 'user' ? { justifyContent: 'flex-end' } : {}) }}>
+                                            {message.role === 'assistant' && <BotAvatar size={24} />}
                                             <Box
                                                 className={message.role === 'user' ? 'user' : 'assistant'}
                                                 data-role={message.role}
@@ -1701,6 +1769,7 @@ const ChatSidebar = ({ onClose }) => {
                                                     </Box>
                                                 )}
                                             </Box>
+                                            </Box>
                                         )}
 
                                         {/* Render tool invocations at full width, outside speech bubbles */}
@@ -1743,7 +1812,7 @@ const ChatSidebar = ({ onClose }) => {
                                                                 {t('chatSidebar.searchResultsHeader')}
                                                             </Typography>
                                                             {executionState === 'executing' && (
-                                                                <CircularProgress size={16} />
+                                                                <Skeleton variant="circular" width={16} height={16} />
                                                             )}
                                                         </Box>
 
@@ -2297,7 +2366,7 @@ const ChatSidebar = ({ onClose }) => {
                                                     }}
                                                 >
                                                     {status.status === 'uploading' && (
-                                                        <CircularProgress size={10} />
+                                                        <Skeleton variant="circular" width={10} height={10} />
                                                     )}
                                                     {status.status === 'analyzed' && (
                                                         <CheckCircleIcon sx={{ fontSize: 12 }} />
@@ -2470,7 +2539,7 @@ const ChatSidebar = ({ onClose }) => {
                             }}
                         >
                             {isLoading ? (
-                                <CircularProgress size={20} color="inherit" />
+                                <Skeleton variant="circular" width={20} height={20} />
                             ) : (
                                 <SendIcon />
                             )}

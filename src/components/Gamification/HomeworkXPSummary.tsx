@@ -65,7 +65,7 @@ export function HomeworkXPSummary({
         sx={{ mt: 2, height: 10, borderRadius: 5 }}
       />
       <Typography variant="caption" color="text.secondary">
-        {levelInfo.xpForNextLevel - (cumulativeXP - levelInfo.xpRequired)} XP to
+        {(levelInfo.xpForNextLevel ?? 0) - (cumulativeXP - levelInfo.xpRequired)} XP to
         Level {levelInfo.level + 1}
       </Typography>
     </Card>

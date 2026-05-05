@@ -1,3 +1,5 @@
+/// <reference lib="webworker" />
+
 /**
  * Homework Supply Service Worker
  *
@@ -10,8 +12,8 @@
  * - PDF.js worker via CacheFirst
  */
 
-import { defaultCache } from '@serwist/next/worker';
-import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
+import { defaultCache } from "@serwist/next/worker";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import {
   CacheFirst,
   ExpirationPlugin,
@@ -19,7 +21,7 @@ import {
   NetworkFirst,
   StaleWhileRevalidate,
   Serwist,
-} from 'serwist';
+} from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -32,7 +34,7 @@ declare const self: ServiceWorkerGlobalScope;
 // ── Custom runtime caching rules ──────────────────────────────────────────────
 
 const fontCache = new CacheFirst({
-  cacheName: 'fonts-cache',
+  cacheName: "fonts-cache",
   plugins: [
     new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -40,7 +42,7 @@ const fontCache = new CacheFirst({
 });
 
 const imageCache = new CacheFirst({
-  cacheName: 'images-cache',
+  cacheName: "images-cache",
   plugins: [
     new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -48,7 +50,7 @@ const imageCache = new CacheFirst({
 });
 
 const s3MediaCache = new CacheFirst({
-  cacheName: 's3-media-v1',
+  cacheName: "s3-media-v1",
   plugins: [
     new ExpirationPlugin({ maxEntries: 300, maxAgeSeconds: 7 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -56,7 +58,7 @@ const s3MediaCache = new CacheFirst({
 });
 
 const apiCache = new NetworkFirst({
-  cacheName: 'api-cache',
+  cacheName: "api-cache",
   networkTimeoutSeconds: 10,
   plugins: [
     new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 24 * 60 * 60 }),
@@ -64,7 +66,7 @@ const apiCache = new NetworkFirst({
 });
 
 const pdfWorkerCache = new CacheFirst({
-  cacheName: 'pdf-worker-cache',
+  cacheName: "pdf-worker-cache",
   plugins: [
     new ExpirationPlugin({ maxEntries: 5, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -85,10 +87,10 @@ function stripS3QueryParams(url: URL): string {
 function isS3MediaRequest(url: URL): boolean {
   const hostname = url.hostname;
   return (
-    hostname.includes('.s3.') ||
-    hostname.includes('s3.amazonaws.com') ||
-    hostname.includes('.s3-') ||
-    hostname.endsWith('.amazonaws.com')
+    hostname.includes(".s3.") ||
+    hostname.includes("s3.amazonaws.com") ||
+    hostname.includes(".s3-") ||
+    hostname.endsWith(".amazonaws.com")
   );
 }
 
@@ -97,11 +99,11 @@ const customRuntimeCaching = [
   {
     matcher({ url }: { url: URL }) {
       return (
-        url.pathname.startsWith('/Cormorant/') ||
-        url.pathname.startsWith('/DM_Sans/') ||
-        url.pathname.startsWith('/Inter/') ||
-        url.pathname.startsWith('/Noto_Sans_JP/') ||
-        url.pathname.startsWith('/Oswald/') ||
+        url.pathname.startsWith("/Cormorant/") ||
+        url.pathname.startsWith("/DM_Sans/") ||
+        url.pathname.startsWith("/Inter/") ||
+        url.pathname.startsWith("/Noto_Sans_JP/") ||
+        url.pathname.startsWith("/Oswald/") ||
         /\.(woff2?|ttf|otf|eot)$/i.test(url.pathname)
       );
     },
@@ -110,7 +112,7 @@ const customRuntimeCaching = [
   // PDF.js worker - CacheFirst
   {
     matcher({ url }: { url: URL }) {
-      return url.pathname.includes('pdf.worker');
+      return url.pathname.includes("pdf.worker");
     },
     handler: pdfWorkerCache,
   },
@@ -127,9 +129,9 @@ const customRuntimeCaching = [
   {
     matcher({ url }: { url: URL }) {
       return (
-        url.pathname.startsWith('/api/') ||
-        url.hostname.includes('appsync-api') ||
-        url.hostname.includes('execute-api')
+        url.pathname.startsWith("/api/") ||
+        url.hostname.includes("appsync-api") ||
+        url.hostname.includes("execute-api")
       );
     },
     handler: apiCache,
@@ -140,8 +142,8 @@ const customRuntimeCaching = [
 
 // ── Background Sync for grade submissions ─────────────────────────────────────
 
-self.addEventListener('sync', (event: ExtendableEvent & { tag?: string }) => {
-  if (event.tag === 'grade-sync') {
+self.addEventListener("sync", (event: ExtendableEvent & { tag?: string }) => {
+  if (event.tag === "grade-sync") {
     event.waitUntil(processSyncQueue());
   }
 });
@@ -152,15 +154,15 @@ self.addEventListener('sync', (event: ExtendableEvent & { tag?: string }) => {
  */
 async function processSyncQueue(): Promise<void> {
   // Post message to any active client to trigger queue processing
-  const clients = await self.clients.matchAll({ type: 'window' });
+  const clients = await self.clients.matchAll({ type: "window" });
   for (const client of clients) {
-    client.postMessage({ type: 'PROCESS_SYNC_QUEUE' });
+    client.postMessage({ type: "PROCESS_SYNC_QUEUE" });
   }
 }
 
 // ── Custom fetch handler for S3 presigned URLs ───────────────────────────────
 
-self.addEventListener('fetch', (event: FetchEvent) => {
+self.addEventListener("fetch", (event: FetchEvent) => {
   const url = new URL(event.request.url);
 
   // For S3 media, normalise the cache key by stripping query params
@@ -169,21 +171,23 @@ self.addEventListener('fetch', (event: FetchEvent) => {
     event.respondWith(
       caches.match(cacheKey).then((cached) => {
         if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open('s3-media-v1').then((cache) => {
-              cache.put(cacheKey, clone);
+        return fetch(event.request)
+          .then((response) => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open("s3-media-v1").then((cache) => {
+                cache.put(cacheKey, clone);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // If both cache and network fail, return offline response
+            return new Response("Offline - media unavailable", {
+              status: 503,
+              headers: { "Content-Type": "text/plain" },
             });
-          }
-          return response;
-        }).catch(() => {
-          // If both cache and network fail, return offline response
-          return new Response('Offline - media unavailable', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
           });
-        });
       }),
     );
   }
@@ -200,9 +204,9 @@ const serwist = new Serwist({
   fallbacks: {
     entries: [
       {
-        url: '/offline',
+        url: "/offline",
         matcher({ request }) {
-          return request.destination === 'document';
+          return request.destination === "document";
         },
       },
     ],

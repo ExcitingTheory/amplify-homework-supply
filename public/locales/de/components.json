@@ -14,6 +14,20 @@
     "cancel": "Abbrechen",
     "submit": "Absenden"
   },
+  "authenticator": {
+    "confirmPasswordLabel": "Passwort bestätigen:",
+    "confirmPasswordPlaceholder": "Bitte bestätige dein Passwort",
+    "displayNameLabel": "Anzeigename:",
+    "displayNamePlaceholder": "Wähle einen Anzeigenamen",
+    "emailLabel": "E-Mail:",
+    "emailPlaceholder": "Gib deine E-Mail-Adresse ein:",
+    "nameLabel": "Name:",
+    "namePlaceholder": "Gib deinen Namen ein:",
+    "passwordLabel": "Passwort:",
+    "passwordPlaceholder": "Gib dein Passwort ein:",
+    "phoneLabel": "Telefonnummer:",
+    "phonePlaceholder": "Gib deine Telefonnummer ein"
+  },
   "chatSidebar": {
     "errorRenderingMessage": "Fehler beim Anzeigen der Nachricht",
     "chatInitFailure": "Die Chat-Initialisierung ist fehlgeschlagen. Bitte laden Sie die Seite neu.",

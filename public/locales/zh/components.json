@@ -9,12 +9,17 @@
   },
   "authenticator": {
     "confirmPasswordLabel": "确认密码：",
+    "confirmPasswordPlaceholder": "请确认您的密码",
+    "displayNameLabel": "显示名称：",
+    "displayNamePlaceholder": "选择一个显示名称",
     "emailLabel": "电子邮箱：",
     "emailPlaceholder": "输入您的邮箱：",
     "nameLabel": "姓名：",
     "namePlaceholder": "请输入您的姓名：",
     "passwordLabel": "密码：",
-    "passwordPlaceholder": "请输入您的密码："
+    "passwordPlaceholder": "请输入您的密码：",
+    "phoneLabel": "电话号码：",
+    "phonePlaceholder": "请输入您的电话号码"
   },
   "chatSidebar": {
     "activeChats": "活跃聊天",

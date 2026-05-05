@@ -19,9 +19,12 @@
 import React from 'react';
 import { Box, CircularProgress } from '@mui/material';
 
-const PageLoadingFallback = () => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <CircularProgress />
+const PageLoadingFallback = ({ name = 'page' }: { name?: string }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: 2 }}>
+    <CircularProgress size={44} thickness={4} />
+    <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
+      Loading {name}…
+    </Box>
   </Box>
 );
 
@@ -33,6 +36,7 @@ const UnitsPage = React.lazy(() => import('../../pages/units.jsx'));
 const SectionDetailPage = React.lazy(() => import('../../pages/section/[id].jsx').then(m => ({ default: m.SectionDetail })));
 const UnitDetailPage = React.lazy(() => import('../../pages/unit/[id].jsx'));
 const WorkbookPage = React.lazy(() => import('../../pages/workbook/[id].jsx'));
+const PeerReviewPage = React.lazy(() => import('../../pages/review/[id].jsx'));
 
 // Mock data imports
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
@@ -123,7 +127,7 @@ export const Index = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
       <IndexPage
         user={{
           username: 'student-alice-sub',
@@ -167,7 +171,7 @@ export const Profile = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Profile" />}>
       <ProfilePage />
     </React.Suspense>
   ),
@@ -201,7 +205,7 @@ export const Sections = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Sections" />}>
       <SectionsPage />
     </React.Suspense>
   ),
@@ -236,7 +240,7 @@ export const Units = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Units" />}>
       <UnitsPage />
     </React.Suspense>
   ),
@@ -285,7 +289,7 @@ export const SectionDetail = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Section Detail" />}>
       <SectionDetailPage
         user={{
           username: 'teacher-1',
@@ -334,7 +338,7 @@ export const SectionDetailStudent = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Section Detail" />}>
       <SectionDetailPage
         user={{
           username: 'student-alice-sub',
@@ -381,7 +385,7 @@ export const UnitDetail = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Unit Editor" />}>
       <UnitDetailPage />
     </React.Suspense>
   ),
@@ -421,7 +425,7 @@ export const Workbook = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Workbook" />}>
       <WorkbookPage />
     </React.Suspense>
   ),
@@ -456,7 +460,7 @@ export const IndexNoSections = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
       <IndexPage
         user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
         signOut={() => console.log('Sign out')}
@@ -490,7 +494,7 @@ export const UnitsEmptyState = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Units" />}>
       <UnitsPage />
     </React.Suspense>
   ),
@@ -521,7 +525,7 @@ export const SectionsEmptyState = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Sections" />}>
       <SectionsPage />
     </React.Suspense>
   ),
@@ -551,7 +555,7 @@ export const ProfilePasswordChange = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Profile" />}>
       <ProfilePage />
     </React.Suspense>
   ),
@@ -582,7 +586,7 @@ export const WorkbookTimedExercise = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Workbook" />}>
       <WorkbookPage />
     </React.Suspense>
   ),
@@ -617,7 +621,7 @@ export const IndexAssignments = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<PageLoadingFallback />}>
+    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
       <IndexPage
         user={{
           username: 'student-alice-sub',
@@ -632,6 +636,51 @@ export const IndexAssignments = {
     docs: {
       description: {
         story: 'Home page showing both pending and completed assignments with grade statistics.',
+      },
+    },
+  },
+};
+
+/**
+ * Peer Review Room
+ *
+ * Split-pane view with:
+ * - Read-only workbook (left) showing the student's homework
+ * - Real-time peer review chat (right)
+ * - AppBar with status chip, online count, and "End Review" button (owner only)
+ * - Feedback prompt shown after closing review
+ */
+export const PeerReview = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        userId: 'student-alice-sub',
+        attributes: {
+          sub: 'student-alice-sub',
+          email: 'alice@example.com',
+        },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => (
+    <React.Suspense fallback={<PageLoadingFallback name="Peer Review" />}>
+      <PeerReviewPage />
+    </React.Suspense>
+  ),
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: '/review/[id]',
+        query: { id: 'room-mock-001' },
+      },
+    },
+    docs: {
+      description: {
+        story: 'Peer review room with split-pane workbook + chat. Uses mocked Yjs provider for real-time state.',
       },
     },
   },

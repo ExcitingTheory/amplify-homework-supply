@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Box, IconButton, Typography, Paper, ButtonGroup, CircularProgress } from '@mui/material';
+import { Box, IconButton, Typography, Paper, ButtonGroup, Skeleton } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -435,10 +435,8 @@ export default function PdfViewerComponent({
                         }}
                         loading={
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4 }}>
-                                <CircularProgress />
-                                <Typography variant="body2" color="text.secondary">
-                                    Loading PDF...
-                                </Typography>
+                                <Skeleton variant="rectangular" width="80%" height={300} sx={{ borderRadius: 1 }} />
+                                <Skeleton variant="text" width={100} height={20} />
                             </Box>
                         }
                     >

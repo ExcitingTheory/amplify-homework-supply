@@ -26,6 +26,7 @@ export function NailedItCelebration({
   useEffect(() => {
     if (open) {
       // Dynamically import canvas-confetti to avoid SSR issues
+      // @ts-expect-error — canvas-confetti has no type declarations
       import('canvas-confetti')
         .then((mod) => {
           const confetti = mod.default || mod

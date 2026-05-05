@@ -1,0 +1,30 @@
+[    4681ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   11285ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_cjs_react-dom_development_07i0ttg.js:25055
+[   18151ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   18470ms] [INFO] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   19422ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   20173ms] [LOG] [Fast Refresh] done in 1772ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   20273ms] [LOG] [AuthContext] User not authenticated - no tokens available @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   20287ms] [LOG] [AuthContext] User not authenticated - no tokens available @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   21473ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   21540ms] [LOG] [ChatSidebar] Registered client-side tools: [search_content, create_section, create_unit, create_assignment, add_timer_to_unit, create_vocabulary_word, create_question, list_sections, list_units, get_unit_details, update_unit, delete_assignment, start_practice_drill] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22728ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22846ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22875ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22878ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22879ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22880ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22881ms] [LOG] [ChatContext] Waiting for auth... @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22893ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22894ms] [LOG] [SettingsContext] Waiting for auth... {authLoading: false, hasUser: false} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22896ms] [LOG] [chatTools] Vector store search function registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22897ms] [LOG] [chatTools] Practice drill callback registered: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22980ms] [LOG] [chatTools] Vector store search function registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22995ms] [LOG] [ChatSidebar] Registered vector store search, isReady: false @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23012ms] [LOG] [chatTools] Practice drill callback registered: true @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23014ms] [LOG] [TourContext] Initializing tour system with 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23015ms] [LOG] [chatTools] Tour tasks data registered: 9 tasks @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23029ms] [LOG] [TourContext] Exposing tour methods to window for testing @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23030ms] [LOG] [ChatContext] Waiting for auth... @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23031ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   23044ms] [LOG] [SettingsContext] Waiting for auth... {authLoading: false, hasUser: false} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233

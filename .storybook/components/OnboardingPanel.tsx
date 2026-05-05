@@ -146,6 +146,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const [spotlightSteps, setSpotlightSteps] = useState<SpotlightStep[]>([]);
   const [spotlightCurrentStep, setSpotlightCurrentStep] = useState(0);
   const [activeTask, setActiveTask] = useState<OnboardingTaskWithCriteria | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const iframeLoadCleanupRef = React.useRef<(() => void) | null>(null);
 
   // Wrap setMode to also sync to the emitter for task-completion matching
   const setMode = (newMode: OnboardingMode) => {
@@ -282,6 +284,36 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     console.debug('✅ API ready:', apiReady);
     console.debug('🌍 Window parent:', window.parent);
     
+    // Signal navigation start — disables Next in SpotlightOverlay
+    setIsNavigating(true);
+
+    // Clean up any previous iframe load listener
+    if (iframeLoadCleanupRef.current) {
+      iframeLoadCleanupRef.current();
+      iframeLoadCleanupRef.current = null;
+    }
+
+    // Listen for iframe load to clear the navigating state
+    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    if (iframe) {
+      const handleLoad = () => {
+        console.debug('✅ Iframe loaded after navigation');
+        setIsNavigating(false);
+      };
+      iframe.addEventListener('load', handleLoad, { once: true });
+      iframeLoadCleanupRef.current = () => iframe.removeEventListener('load', handleLoad);
+    }
+
+    // Fallback timeout in case load event doesn't fire
+    const fallbackTimeout = setTimeout(() => {
+      setIsNavigating(false);
+    }, 5000);
+    const prevCleanup = iframeLoadCleanupRef.current;
+    iframeLoadCleanupRef.current = () => {
+      clearTimeout(fallbackTimeout);
+      prevCleanup?.();
+    };
+
     // Only use API if it's ready
     if (api?.selectStory && apiReady) {
       // Use Storybook API if available and ready
@@ -308,6 +340,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       }
     } catch (error) {
       console.error('❌ Navigation failed:', error);
+      setIsNavigating(false);
     }
   };
 
@@ -418,6 +451,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     setSpotlightOpen(false);
     setSpotlightCurrentStep(0);
     setActiveTask(null);
+    setIsNavigating(false);
+    if (iframeLoadCleanupRef.current) {
+      iframeLoadCleanupRef.current();
+      iframeLoadCleanupRef.current = null;
+    }
   };
 
   /**
@@ -438,6 +476,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     setSpotlightOpen(false);
     setSpotlightCurrentStep(0);
     setActiveTask(null);
+    setIsNavigating(false);
+    if (iframeLoadCleanupRef.current) {
+      iframeLoadCleanupRef.current();
+      iframeLoadCleanupRef.current = null;
+    }
   };
 
   /**
@@ -447,6 +490,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     setSpotlightOpen(false);
     setSpotlightCurrentStep(0);
     setActiveTask(null);
+    setIsNavigating(false);
+    if (iframeLoadCleanupRef.current) {
+      iframeLoadCleanupRef.current();
+      iframeLoadCleanupRef.current = null;
+    }
   };
 
   const renderContent = () => {
@@ -810,6 +858,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         steps={spotlightSteps}
         currentStepIndex={spotlightCurrentStep}
         isOpen={spotlightOpen}
+        isNavigating={isNavigating}
         mode={mode}
         onNext={handleSpotlightNext}
         onSkip={handleSpotlightSkip}

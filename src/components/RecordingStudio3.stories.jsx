@@ -3,32 +3,32 @@
  * Demonstrates script-based dialogue recording with TTS and locked tracks
  */
 
-import React from 'react';
-import { expect } from 'storybook/test';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import RecordingStudio3 from './RecordingStudio3';
-import FilesContext from '../context/fileContext';
-import { DemoBanner } from '../../.storybook/components/DemoBanner';
+import React from "react";
+import { expect } from "storybook/test";
+import { within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import RecordingStudio3 from "./RecordingStudio3";
+import FilesContext from "../context/fileContext";
+import { DemoBanner } from "../../.storybook/components/DemoBanner";
 import {
   createWordPreset,
   createConversationPreset,
   createQuestionPreset,
-} from '../utils/recordingStudioPresets';
+} from "../utils/recordingStudioPresets";
 /**
  * Mock Data for RecordingStudio3 Stories
- * 
+ *
  * Available mock utilities:
  * - generateMockWaveform(length): Creates realistic waveform data arrays
  * - createMockAudioBlob(): Returns mock audio blob for testing
  * - mockFilesContext: Complete FilesContext mock with upload functionality
- * 
+ *
  * Available mock scripts:
  * - mockConversationScript: Basic coffee shop dialogue (no takes)
  * - mockWordScript: Japanese vocabulary with locked tracks
  * - mockQuestionScript: Quiz Q&A with locked tracks
  * - mockScriptWithTakes: Full recording session with multiple takes, both TTS and human
- * 
+ *
  * Each mock script includes:
  * - metadata (title, scene, date, version)
  * - speakers (with voice selections and descriptions)
@@ -43,19 +43,19 @@ const generateMockWaveform = (length = 100) => {
 
 // Mock audio blob
 const createMockAudioBlob = () => {
-  return new Blob(['mock audio data'], { type: 'audio/mpeg' });
+  return new Blob(["mock audio data"], { type: "audio/mpeg" });
 };
 
 // Mock FilesContext value
 const mockFilesContext = {
   session: {
-    identityId: 'us-east-1:mock-identity-123',
-    username: 'demo-user',
+    identityId: "us-east-1:mock-identity-123",
+    username: "demo-user",
   },
   files: [],
   audioFiles: {},
   uploadFile: async (file) => {
-    console.log('Mock upload:', file.name);
+    console.log("Mock upload:", file.name);
     return {
       path: `protected/${file.name}`,
       key: `protected/${file.name}`,
@@ -66,61 +66,61 @@ const mockFilesContext = {
 // Mock script data - Coffee Shop Conversation
 const mockConversationScript = {
   metadata: {
-    title: 'Coffee Shop Conversation',
-    scene: 'INT. COFFEE SHOP - MORNING',
-    date: '2026-01-04',
-    version: '1.0',
+    title: "Coffee Shop Conversation",
+    scene: "INT. COFFEE SHOP - MORNING",
+    date: "2026-01-04",
+    version: "1.0",
   },
   speakers: {
     alice: {
-      name: 'Alice',
-      voice: 'nova',
-      description: '30s, energetic, professional',
+      name: "Alice",
+      voice: "nova",
+      description: "30s, energetic, professional",
     },
     bob: {
-      name: 'Bob',
-      voice: 'onyx',
-      description: '40s, laid-back, friendly',
+      name: "Bob",
+      voice: "onyx",
+      description: "40s, laid-back, friendly",
     },
   },
   dialogue: [
     {
       id: 1,
-      speaker: 'alice',
-      text: 'Hello, how are you doing today?',
+      speaker: "alice",
+      text: "Hello, how are you doing today?",
       timing: { start: 0.0, end: 3.5 },
-      direction: 'entering, slightly out of breath',
-      emotion: 'cheerful',
+      direction: "entering, slightly out of breath",
+      emotion: "cheerful",
       takes: [],
       activeTakeIndex: null,
     },
     {
       id: 2,
-      speaker: 'bob',
+      speaker: "bob",
       text: "I'm doing well, thanks for asking.",
       timing: { start: 3.5, end: 6.2 },
-      direction: 'looks up from newspaper',
-      emotion: 'warm',
+      direction: "looks up from newspaper",
+      emotion: "warm",
       takes: [],
       activeTakeIndex: null,
     },
     {
       id: 3,
-      speaker: 'bob',
-      text: 'What brings you here?',
+      speaker: "bob",
+      text: "What brings you here?",
       timing: { start: 7.0, end: 8.5 },
-      direction: 'pauses, sets down newspaper',
-      emotion: 'curious',
+      direction: "pauses, sets down newspaper",
+      emotion: "curious",
       takes: [],
       activeTakeIndex: null,
     },
     {
       id: 4,
-      speaker: 'alice',
-      text: 'Just needed a break from work.',
+      speaker: "alice",
+      text: "Just needed a break from work.",
       timing: { start: 9.0, end: 12.0 },
-      direction: 'sighs, pulls out chair',
-      emotion: 'tired but relieved',
+      direction: "sighs, pulls out chair",
+      emotion: "tired but relieved",
       takes: [],
       activeTakeIndex: null,
     },
@@ -130,41 +130,41 @@ const mockConversationScript = {
 // Mock script for vocabulary (Word model)
 const mockWordScript = {
   metadata: {
-    title: 'Japanese Greetings - こんにちは',
-    scene: 'Vocabulary Practice',
-    date: '2026-01-04',
-    version: '1.0',
+    title: "Japanese Greetings - こんにちは",
+    scene: "Vocabulary Practice",
+    date: "2026-01-04",
+    version: "1.0",
   },
   speakers: {
     phrase_track: {
-      name: 'Phrase (こんにちは)',
-      voice: 'shimmer',
-      description: 'Japanese pronunciation',
+      name: "Phrase (こんにちは)",
+      voice: "shimmer",
+      description: "Japanese pronunciation",
     },
     definition_track: {
-      name: 'Definition',
-      voice: 'alloy',
-      description: 'English explanation',
+      name: "Definition",
+      voice: "alloy",
+      description: "English explanation",
     },
   },
   dialogue: [
     {
       id: 1,
-      speaker: 'phrase_track',
-      text: 'こんにちは',
+      speaker: "phrase_track",
+      text: "こんにちは",
       timing: { start: 0.0, end: 2.0 },
-      direction: 'clear pronunciation',
-      emotion: 'neutral',
+      direction: "clear pronunciation",
+      emotion: "neutral",
       takes: [],
       activeTakeIndex: null,
     },
     {
       id: 2,
-      speaker: 'definition_track',
-      text: 'Hello. Good afternoon.',
+      speaker: "definition_track",
+      text: "Hello. Good afternoon.",
       timing: { start: 2.5, end: 4.5 },
-      direction: 'clear enunciation',
-      emotion: 'neutral',
+      direction: "clear enunciation",
+      emotion: "neutral",
       takes: [],
       activeTakeIndex: null,
     },
@@ -174,41 +174,41 @@ const mockWordScript = {
 // Mock script for Question model
 const mockQuestionScript = {
   metadata: {
-    title: 'Geography Question - France',
-    scene: 'Quiz Practice',
-    date: '2026-01-04',
-    version: '1.0',
+    title: "Geography Question - France",
+    scene: "Quiz Practice",
+    date: "2026-01-04",
+    version: "1.0",
   },
   speakers: {
     prompt_track: {
-      name: 'Question Prompt',
-      voice: 'fable',
-      description: 'Quiz host voice',
+      name: "Question Prompt",
+      voice: "fable",
+      description: "Quiz host voice",
     },
     answer_track: {
-      name: 'Answer',
-      voice: 'nova',
-      description: 'Response voice',
+      name: "Answer",
+      voice: "nova",
+      description: "Response voice",
     },
   },
   dialogue: [
     {
       id: 1,
-      speaker: 'prompt_track',
-      text: 'What is the capital of France?',
+      speaker: "prompt_track",
+      text: "What is the capital of France?",
       timing: { start: 0.0, end: 2.5 },
-      direction: 'questioning tone',
-      emotion: 'inquisitive',
+      direction: "questioning tone",
+      emotion: "inquisitive",
       takes: [],
       activeTakeIndex: null,
     },
     {
       id: 2,
-      speaker: 'answer_track',
-      text: 'Paris',
+      speaker: "answer_track",
+      text: "Paris",
       timing: { start: 3.0, end: 4.0 },
-      direction: 'confident',
-      emotion: 'assured',
+      direction: "confident",
+      emotion: "assured",
       takes: [],
       activeTakeIndex: null,
     },
@@ -218,71 +218,71 @@ const mockQuestionScript = {
 // Mock script with existing takes
 const mockScriptWithTakes = {
   metadata: {
-    title: 'Recording Practice Session',
-    scene: 'INT. RECORDING BOOTH - DAY',
-    date: '2026-01-04',
-    version: '1.0',
+    title: "Recording Practice Session",
+    scene: "INT. RECORDING BOOTH - DAY",
+    date: "2026-01-04",
+    version: "1.0",
   },
   speakers: {
     narrator: {
-      name: 'Narrator',
-      voice: 'fable',
-      description: 'British, authoritative',
+      name: "Narrator",
+      voice: "fable",
+      description: "British, authoritative",
     },
     character: {
-      name: 'Character',
-      voice: 'nova',
-      description: 'Young, expressive',
+      name: "Character",
+      voice: "nova",
+      description: "Young, expressive",
     },
   },
   dialogue: [
     {
       id: 1,
-      speaker: 'narrator',
-      text: 'It was a dark and stormy night.',
+      speaker: "narrator",
+      text: "It was a dark and stormy night.",
       timing: { start: 0.0, end: 3.0 },
-      direction: 'dramatic pause',
-      emotion: 'mysterious',
+      direction: "dramatic pause",
+      emotion: "mysterious",
       takes: [
         {
           id: Date.now() - 5000,
-          type: 'tts',
+          type: "tts",
           audioBlob: null,
-          audioPath: 'protected/narrator-take1.mp3',
+          audioPath: "protected/narrator-take1.mp3",
           waveformData: generateMockWaveform(150),
           duration: 3.0,
           file: {
-            key: 'protected/narrator-take1.mp3',
-            level: 'protected',
-            identityId: 'us-east-1:mock-identity-123',
-            type: 'audio/mpeg',
+            key: "protected/narrator-take1.mp3",
+            level: "protected",
+            identityId: "us-east-1:mock-identity-123",
+            type: "audio/mpeg",
             size: 48000,
           },
           cinematicMetadata: {
-            scene: 'INT. RECORDING BOOTH - DAY',
-            direction: 'dramatic pause',
-            emotion: 'mysterious',
+            scene: "INT. RECORDING BOOTH - DAY",
+            direction: "dramatic pause",
+            emotion: "mysterious",
           },
           createdAt: new Date(Date.now() - 5000).toISOString(),
         },
         {
           id: Date.now() - 3000,
-          type: 'human',
+          type: "human",
           audioBlob: null,
-          audioPath: 'protected/narrator-take2.mp3',
+          audioPath: "protected/narrator-take2.mp3",
           waveformData: generateMockWaveform(150),
           duration: 2.8,
           file: {
-            key: 'protected/narrator-take2.mp3',
-            level: 'protected',
-            identityId: 'us-east-1:mock-identity-123',
-            type: 'audio/mpeg',
+            key: "protected/narrator-take2.mp3",
+            level: "protected",
+            identityId: "us-east-1:mock-identity-123",
+            type: "audio/mpeg",
             size: 44800,
           },
           cinematicMetadata: {
-            scene: 'INT. RECORDING BOOTH - DAY',
-            direction: 'dramatic pause',
-            emotion: 'mysterious',
+            scene: "INT. RECORDING BOOTH - DAY",
+            direction: "dramatic pause",
+            emotion: "mysterious",
           },
           createdAt: new Date(Date.now() - 3000).toISOString(),
         },
@@ -291,30 +291,30 @@ const mockScriptWithTakes = {
     },
     {
       id: 2,
-      speaker: 'character',
-      text: 'Did someone say something about a storm?',
+      speaker: "character",
+      text: "Did someone say something about a storm?",
       timing: { start: 3.5, end: 6.0 },
-      direction: 'looking out window',
-      emotion: 'concerned',
+      direction: "looking out window",
+      emotion: "concerned",
       takes: [
         {
           id: Date.now() - 2000,
-          type: 'tts',
+          type: "tts",
           audioBlob: null,
-          audioPath: 'protected/character-take1.mp3',
+          audioPath: "protected/character-take1.mp3",
           waveformData: generateMockWaveform(120),
           duration: 2.5,
           file: {
-            key: 'protected/character-take1.mp3',
-            level: 'protected',
-            identityId: 'us-east-1:mock-identity-123',
-            type: 'audio/mpeg',
+            key: "protected/character-take1.mp3",
+            level: "protected",
+            identityId: "us-east-1:mock-identity-123",
+            type: "audio/mpeg",
             size: 40000,
           },
           cinematicMetadata: {
-            scene: 'INT. RECORDING BOOTH - DAY',
-            direction: 'looking out window',
-            emotion: 'concerned',
+            scene: "INT. RECORDING BOOTH - DAY",
+            direction: "looking out window",
+            emotion: "concerned",
           },
           createdAt: new Date(Date.now() - 2000).toISOString(),
         },
@@ -323,11 +323,11 @@ const mockScriptWithTakes = {
     },
     {
       id: 3,
-      speaker: 'narrator',
-      text: 'The rain pounded against the windows.',
+      speaker: "narrator",
+      text: "The rain pounded against the windows.",
       timing: { start: 6.5, end: 9.0 },
-      direction: '',
-      emotion: 'ominous',
+      direction: "",
+      emotion: "ominous",
       takes: [],
       activeTakeIndex: null,
     },
@@ -335,10 +335,10 @@ const mockScriptWithTakes = {
 };
 
 export default {
-  title: '🎙️ Recording Audio/Recording Studio',
+  title: "🎙️ Recording Studio/Recording Studio",
   component: RecordingStudio3,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -369,12 +369,18 @@ Create professional dialogue and voice recordings for your lessons. Perfect for:
     (Story) => {
       return (
         <FilesContext.Provider value={mockFilesContext}>
-          <div style={{ height: 'calc(100vh', display: 'flex', flexDirection: 'column' }}>
+          <div
+            style={{
+              height: "calc(100vh",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <DemoBanner
               title="🎙️ Recording Studio"
               description="Create dialogue and voice recordings with text-to-speech or your own voice"
             />
-            <div style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ flex: 1, overflow: "auto" }}>
               <Story />
             </div>
           </div>
@@ -388,25 +394,34 @@ Create professional dialogue and voice recordings for your lessons. Perfect for:
 export const CoffeeShopDialogue = {
   args: {
     scriptData: mockConversationScript,
-    onScriptChange: (data) => console.log('Script changed:', data),
+    onScriptChange: (data) => console.log("Script changed:", data),
     lockedTracks: [],
-    gradeId: 'mock-grade-1',
-    nodeKey: 'conversation-1',
-    identityId: 'us-east-1:mock-identity-123',
+    gradeId: "mock-grade-1",
+    nodeKey: "conversation-1",
+    identityId: "us-east-1:mock-identity-123",
     readOnly: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for script to load - use heading role to avoid matching Lexical editor text
-    await waitFor(() => {
-      expect(canvas.getByRole('heading', { name: /Coffee Shop Conversation/i })).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByRole("heading", { name: /Coffee Shop Conversation/i }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify dialogue lines are visible
-    expect(canvas.getAllByText(/Hello, how are you doing today/i)[0]).toBeInTheDocument();
-    expect(canvas.getAllByText(/doing well, thanks for asking/i)[0]).toBeInTheDocument();
-    
+    expect(
+      canvas.getAllByText(/Hello, how are you doing today/i)[0],
+    ).toBeInTheDocument();
+    expect(
+      canvas.getAllByText(/doing well, thanks for asking/i)[0],
+    ).toBeInTheDocument();
+
     // Verify speakers are shown
     expect(canvas.getAllByText(/Alice/i)[0]).toBeInTheDocument();
     expect(canvas.getAllByText(/Bob/i)[0]).toBeInTheDocument();
@@ -442,28 +457,35 @@ A natural conversation between two people meeting at a coffee shop. Perfect for 
 export const JapaneseVocabularyWord = {
   args: {
     scriptData: mockWordScript,
-    onScriptChange: (data) => console.log('Script changed:', data),
-    lockedTracks: ['phrase_track', 'definition_track'], // Lock both tracks
-    gradeId: 'mock-grade-2',
-    nodeKey: 'word-konnichiwa',
-    identityId: 'us-east-1:mock-identity-123',
+    onScriptChange: (data) => console.log("Script changed:", data),
+    lockedTracks: ["phrase_track", "definition_track"], // Lock both tracks
+    gradeId: "mock-grade-2",
+    nodeKey: "word-konnichiwa",
+    identityId: "us-east-1:mock-identity-123",
     readOnly: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for locked tracks to render with lock icons
-    await waitFor(() => {
-      expect(canvas.getAllByText(/Japanese Greetings/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getAllByText(/Japanese Greetings/i)[0],
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify locked track indicators are visible
-    const lockIcons = canvas.getAllByText('🔒');
+    const lockIcons = canvas.getAllByText("🔒");
     expect(lockIcons.length).toBeGreaterThan(0);
-    
+
     // Verify dialogue lines are present
     expect(canvas.getAllByText(/こんにちは/)[0]).toBeInTheDocument();
-    expect(canvas.getAllByText(/Hello. Good afternoon/i)[0]).toBeInTheDocument();
+    expect(
+      canvas.getAllByText(/Hello. Good afternoon/i)[0],
+    ).toBeInTheDocument();
   },
   parameters: {
     docs: {
@@ -503,26 +525,31 @@ Record pronunciation and definition for a vocabulary word. Notice the 🔒 lock 
 export const QuizQuestionAudio = {
   args: {
     scriptData: mockQuestionScript,
-    onScriptChange: (data) => console.log('Script changed:', data),
-    lockedTracks: ['prompt_track', 'answer_track'], // Lock question/answer tracks
-    gradeId: 'mock-grade-3',
-    nodeKey: 'question-france-capital',
-    identityId: 'us-east-1:mock-identity-123',
+    onScriptChange: (data) => console.log("Script changed:", data),
+    lockedTracks: ["prompt_track", "answer_track"], // Lock question/answer tracks
+    gradeId: "mock-grade-3",
+    nodeKey: "question-france-capital",
+    identityId: "us-east-1:mock-identity-123",
     readOnly: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for question tracks to load
-    await waitFor(() => {
-      expect(canvas.getAllByText(/What is the capital of France/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getAllByText(/What is the capital of France/i)[0],
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify both question and answer tracks are visible
     expect(canvas.getAllByText(/Paris/)[0]).toBeInTheDocument();
-    
+
     // Verify locked state prevents deletion
-    const lockIcons = canvas.getAllByText('🔒');
+    const lockIcons = canvas.getAllByText("🔒");
     expect(lockIcons.length).toBeGreaterThanOrEqual(2);
   },
   parameters: {
@@ -559,34 +586,42 @@ Add voice recordings to quiz questions and answers. The question and answer trac
 export const ComparingMultipleTakes = {
   args: {
     scriptData: mockScriptWithTakes,
-    onScriptChange: (data) => console.log('Script changed:', data),
+    onScriptChange: (data) => console.log("Script changed:", data),
     lockedTracks: [],
-    gradeId: 'mock-grade-4',
-    nodeKey: 'conversation-takes',
-    identityId: 'us-east-1:mock-identity-123',
+    gradeId: "mock-grade-4",
+    nodeKey: "conversation-takes",
+    identityId: "us-east-1:mock-identity-123",
     readOnly: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for timeline cards to render, then click the first dialogue card
     // TimelineCard uses role="button" with aria-label="Speaker: text"
-    const firstCard = await waitFor(() => {
-      const card = canvas.getByRole('button', { name: /Narrator:.*It was a dark and stormy night/i });
-      expect(card).toBeInTheDocument();
-      return card;
-    }, { timeout: 5000 });
-    
+    const firstCard = await waitFor(
+      () => {
+        const card = canvas.getByRole("button", {
+          name: /Narrator:.*It was a dark and stormy night/i,
+        });
+        expect(card).toBeInTheDocument();
+        return card;
+      },
+      { timeout: 5000 },
+    );
+
     // Click the timeline card to select it and show takes panel
     await userEvent.click(firstCard);
-    
+
     // Verify multiple takes are visible (TTS and human) in the properties panel
-    await waitFor(() => {
-      const ttsLabels = canvas.getAllByText(/tts/i);
-      expect(ttsLabels.length).toBeGreaterThan(0);
-      const humanLabels = canvas.getAllByText(/human/i);
-      expect(humanLabels.length).toBeGreaterThan(0);
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        const ttsLabels = canvas.getAllByText(/tts/i);
+        expect(ttsLabels.length).toBeGreaterThan(0);
+        const humanLabels = canvas.getAllByText(/human/i);
+        expect(humanLabels.length).toBeGreaterThan(0);
+      },
+      { timeout: 5000 },
+    );
   },
   parameters: {
     docs: {
@@ -629,24 +664,29 @@ Record different versions and choose the best one. Each line can have multiple "
 export const PreviewMode = {
   args: {
     scriptData: mockScriptWithTakes,
-    onScriptChange: (data) => console.log('Script changed:', data),
+    onScriptChange: (data) => console.log("Script changed:", data),
     lockedTracks: [],
     gradeId: null,
     nodeKey: null,
-    identityId: 'us-east-1:mock-identity-123',
+    identityId: "us-east-1:mock-identity-123",
     readOnly: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for read-only mode to render
-    await waitFor(() => {
-      expect(canvas.getAllByText(/Recording Practice Session/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getAllByText(/Recording Practice Session/i)[0],
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify edit controls are disabled
-    const recordButtons = canvas.queryAllByRole('button', { name: /record/i });
-    recordButtons.forEach(button => {
+    const recordButtons = canvas.queryAllByRole("button", { name: /record/i });
+    recordButtons.forEach((button) => {
       expect(button).toBeDisabled();
     });
   },
@@ -686,19 +726,19 @@ export const StartFromScratch = {
   args: {
     scriptData: {
       metadata: {
-        title: 'New Recording',
-        scene: '',
-        date: '2026-01-04',
-        version: '1.0',
+        title: "New Recording",
+        scene: "",
+        date: "2026-01-04",
+        version: "1.0",
       },
       speakers: {},
       dialogue: [],
     },
-    onScriptChange: (data) => console.log('Script changed:', data),
+    onScriptChange: (data) => console.log("Script changed:", data),
     lockedTracks: [],
-    gradeId: 'mock-grade-5',
-    nodeKey: 'new-project',
-    identityId: 'us-east-1:mock-identity-123',
+    gradeId: "mock-grade-5",
+    nodeKey: "new-project",
+    identityId: "us-east-1:mock-identity-123",
     readOnly: false,
   },
   parameters: {
@@ -751,35 +791,40 @@ export const Interactive = () => {
 
   return (
     <div>
-      <div style={{ padding: 16, background: '#f5f5f5', borderBottom: '1px solid #ccc' }}>
+      <div
+        style={{
+          padding: 16,
+          background: "#f5f5f5",
+          borderBottom: "1px solid #ccc",
+        }}
+      >
         <label>
           <input
             type="checkbox"
-            checked={lockedTracks.includes('alice')}
+            checked={lockedTracks.includes("alice")}
             onChange={(e) => {
               if (e.target.checked) {
-                setLockedTracks([...lockedTracks, 'alice']);
+                setLockedTracks([...lockedTracks, "alice"]);
               } else {
-                setLockedTracks(lockedTracks.filter(t => t !== 'alice'));
+                setLockedTracks(lockedTracks.filter((t) => t !== "alice"));
               }
             }}
-          />
-          {' '}Lock Alice track
-        </label>
-        {' '}
+          />{" "}
+          Lock Alice track
+        </label>{" "}
         <label>
           <input
             type="checkbox"
-            checked={lockedTracks.includes('bob')}
+            checked={lockedTracks.includes("bob")}
             onChange={(e) => {
               if (e.target.checked) {
-                setLockedTracks([...lockedTracks, 'bob']);
+                setLockedTracks([...lockedTracks, "bob"]);
               } else {
-                setLockedTracks(lockedTracks.filter(t => t !== 'bob'));
+                setLockedTracks(lockedTracks.filter((t) => t !== "bob"));
               }
             }}
-          />
-          {' '}Lock Bob track
+          />{" "}
+          Lock Bob track
         </label>
       </div>
       <RecordingStudio3
@@ -828,39 +873,45 @@ Experiment with locking and unlocking tracks. This shows how protected content w
 export const WordPreset = {
   args: (() => {
     const preset = createWordPreset({
-      phrase: 'こんにちは',
-      pronunciation: 'konnichiwa',
-      definition: 'Hello. Good afternoon.',
+      phrase: "こんにちは",
+      pronunciation: "konnichiwa",
+      definition: "Hello. Good afternoon.",
     });
     return {
       scriptData: preset.scriptData,
       lockedTracks: preset.lockedTracks,
-      onScriptChange: (data) => console.log('Script changed:', data),
-      gradeId: 'mock-grade-word-preset',
-      nodeKey: 'word-preset-konnichiwa',
-      identityId: 'us-east-1:mock-identity-123',
+      onScriptChange: (data) => console.log("Script changed:", data),
+      gradeId: "mock-grade-word-preset",
+      nodeKey: "word-preset-konnichiwa",
+      identityId: "us-east-1:mock-identity-123",
       readOnly: false,
     };
   })(),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await waitFor(() => {
-      expect(canvas.getAllByText(/こんにちは/)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getAllByText(/こんにちは/)[0]).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Verify both tracks are rendered
     expect(canvas.getAllByText(/konnichiwa/i)[0]).toBeInTheDocument();
-    expect(canvas.getAllByText(/Hello. Good afternoon/i)[0]).toBeInTheDocument();
+    expect(
+      canvas.getAllByText(/Hello. Good afternoon/i)[0],
+    ).toBeInTheDocument();
 
     // Locked tracks should show lock icons
-    const lockIcons = canvas.getAllByText('🔒');
+    const lockIcons = canvas.getAllByText("🔒");
     expect(lockIcons.length).toBeGreaterThan(0);
   },
   parameters: {
     docs: {
       description: {
-        story: '**Generated from `createWordPreset` factory.** Validates that the factory produces the same script structure as the manual `JapaneseVocabularyWord` story above.',
+        story:
+          "**Generated from `createWordPreset` factory.** Validates that the factory produces the same script structure as the manual `JapaneseVocabularyWord` story above.",
       },
     },
   },
@@ -872,14 +923,14 @@ export const WordPreset = {
  */
 export const ConversationPreset = {
   args: (() => {
-    const preset = createConversationPreset('Coffee Shop');
+    const preset = createConversationPreset("Coffee Shop");
     return {
       scriptData: preset.scriptData,
       lockedTracks: preset.lockedTracks,
-      onScriptChange: (data) => console.log('Script changed:', data),
-      gradeId: 'mock-grade-conversation-preset',
-      nodeKey: 'conversation-preset',
-      identityId: 'us-east-1:mock-identity-123',
+      onScriptChange: (data) => console.log("Script changed:", data),
+      gradeId: "mock-grade-conversation-preset",
+      nodeKey: "conversation-preset",
+      identityId: "us-east-1:mock-identity-123",
       readOnly: false,
     };
   })(),
@@ -887,14 +938,18 @@ export const ConversationPreset = {
     const canvas = within(canvasElement);
 
     // Title from preset metadata
-    await waitFor(() => {
-      expect(canvas.getByText(/Coffee Shop/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Coffee Shop/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: '**Generated from `createConversationPreset` factory.** Starts with an empty dialogue and no speakers — build a conversation from scratch.',
+        story:
+          "**Generated from `createConversationPreset` factory.** Starts with an empty dialogue and no speakers — build a conversation from scratch.",
       },
     },
   },
@@ -907,41 +962,43 @@ export const ConversationPreset = {
 export const QuestionPreset = {
   args: (() => {
     const preset = createQuestionPreset({
-      prompt: 'What is the capital of France?',
-      correctAnswer: 'Paris',
+      prompt: "What is the capital of France?",
+      correctAnswer: "Paris",
     });
     return {
       scriptData: preset.scriptData,
       lockedTracks: preset.lockedTracks,
-      onScriptChange: (data) => console.log('Script changed:', data),
-      gradeId: 'mock-grade-question-preset',
-      nodeKey: 'question-preset-france',
-      identityId: 'us-east-1:mock-identity-123',
+      onScriptChange: (data) => console.log("Script changed:", data),
+      gradeId: "mock-grade-question-preset",
+      nodeKey: "question-preset-france",
+      identityId: "us-east-1:mock-identity-123",
       readOnly: false,
     };
   })(),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await waitFor(() => {
-      expect(canvas.getAllByText(/What is the capital of France/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(
+          canvas.getAllByText(/What is the capital of France/i)[0],
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     expect(canvas.getAllByText(/Paris/)[0]).toBeInTheDocument();
 
     // Both tracks locked
-    const lockIcons = canvas.getAllByText('🔒');
+    const lockIcons = canvas.getAllByText("🔒");
     expect(lockIcons.length).toBeGreaterThanOrEqual(2);
   },
   parameters: {
     docs: {
       description: {
-        story: '**Generated from `createQuestionPreset` factory.** Validates that the factory produces the same script structure as the manual `QuizQuestionAudio` story above.',
+        story:
+          "**Generated from `createQuestionPreset` factory.** Validates that the factory produces the same script structure as the manual `QuizQuestionAudio` story above.",
       },
     },
   },
 };
-
-
-
-

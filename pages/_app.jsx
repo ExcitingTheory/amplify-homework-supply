@@ -1,30 +1,47 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { CacheProvider } from '@emotion/react';
-import { appWithTranslation } from 'next-i18next';
-import nextI18NextConfig from '../next-i18next.config.js';
-import theme from '../src/theme';
-import createEmotionCache from '../src/createEmotionCache';
-import outputs from '../amplify_outputs.json';
+import * as React from "react";
+import PropTypes from "prop-types";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { CacheProvider } from "@emotion/react";
+import { appWithTranslation } from "next-i18next";
+import nextI18NextConfig from "../next-i18next.config.js";
+import theme from "../src/theme";
+import createEmotionCache from "../src/createEmotionCache";
+import outputs from "../amplify_outputs.json";
 
-import '../src/components/Editor3/theme.css';
-import '../src/components/Editor3/components/LanguageEditorTheme.css';
-import { Amplify } from 'aws-amplify';
-import { parseAmplifyConfig } from 'aws-amplify/utils';
-import { DebugPanelProvider } from '../src/components/DebugPanel';
-import { AuthProvider } from '../src/context/authContext';
-import { SettingsProvider } from '../src/context/settingsContext';
-import { TourProvider } from '../src/context/tourContext';
-import { ChatContextProvider } from '../src/context/chatContext';
-import { XPProviderWrapper } from '../src/context/xpProviderWrapper';
-import GlobalChatButton from '../src/components/GlobalChatButton';
-import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
-import OfflineBanner from '../src/components/OfflineBanner';
-import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
+import "../src/components/Editor3/theme.css";
+import "../src/components/Editor3/components/LanguageEditorTheme.css";
+import { Amplify } from "aws-amplify";
+import { parseAmplifyConfig } from "aws-amplify/utils";
+import { DebugPanelProvider } from "../src/components/DebugPanel";
+import AuthContext, { AuthProvider } from "../src/context/authContext";
+import { SettingsProvider } from "../src/context/settingsContext";
+import { TourProvider } from "../src/context/tourContext";
+import { ChatContextProvider } from "../src/context/chatContext";
+import { EasterEggLayer } from "../src/components/Gamification/EasterEggLayer";
+import GlobalChatButton from "../src/components/GlobalChatButton";
+import GlobalChatDrawer from "../src/components/GlobalChatDrawer";
+import OfflineBanner from "../src/components/OfflineBanner";
+import { useGlobalChatShortcut } from "../src/hooks/useGlobalChatShortcut";
+import AppSkeleton from "../src/components/AppSkeleton";
+
+/**
+ * Gates children behind auth session resolution.
+ *
+ * Data-dependent providers (Settings, Chat, etc.) are not mounted until
+ * the initial fetchAuthSession round-trip finishes.  This prevents a
+ * thundering-herd of concurrent API calls before the SDK's credential
+ * cache is warm.  The auth session resolves once (regardless of whether
+ * the user is signed in or not), then all children mount together and
+ * their effects fire with a populated credential cache.
+ */
+function AuthGate({ children }) {
+  const { isLoading } = React.useContext(AuthContext);
+  if (isLoading) return <AppSkeleton />;
+  return children;
+}
 
 // Configure Amplify Gen 2 with existing REST API resources
 const amplifyConfig = parseAmplifyConfig(outputs);
@@ -38,14 +55,13 @@ Amplify.configure({
       homeworkSupplyStreamApi: {
         endpoint: outputs.custom.homeworkSupplyStreamApi.endpoint,
         region: outputs.custom.homeworkSupplyStreamApi.region,
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
-
 
 // investigate:
 // remote console logging to capture errors in production
@@ -65,13 +81,13 @@ function MyApp(props) {
    * It is used to initialize the emotion cache and theme, and it wraps the application in the ThemeProvider.
    * It also wraps the application in the CacheProvider to allow for server-side rendering.
    * Wrapped with appWithTranslation for i18n support.
-   * 
+   *
    * @param {object} props
    * @param {React.ComponentType} props.Component
    * @param {object} props.emotionCache
    * @param {object} props.pageProps
    * @returns {JSX.Element}
-   * 
+   *
    * @see https://mui.com/styles/advanced/#server-side-rendering
    * @see https://mui.com/guides/server-rendering/#the-client-side
    * @see https://mui.com/guides/server-rendering/#the-cache-provider
@@ -83,11 +99,11 @@ function MyApp(props) {
    * @see https://mui.com/guides/server-rendering/#the-500-page
    * @see https://mui.com/guides/server-rendering/#the-terms-of-service-page
    * @see https://mui.com/guides/server-rendering/#the-privacy-policy-page
-   * 
+   *
    * TODO: Add a custom 404 page
    * TODO: Add a custom Terms of Service page
    * TODO: Add a generic error page
-   * 
+   *
    */
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const router = useRouter();
@@ -96,16 +112,20 @@ function MyApp(props) {
   useGlobalChatShortcut();
 
   // Hide chat button on Workbook and Unit pages
-  const hideChatButton = router.pathname.startsWith('/workbook/') || router.pathname.startsWith('/unit/');
+  const hideChatButton =
+    router.pathname.startsWith("/workbook/") ||
+    router.pathname.startsWith("/unit/");
 
   // Check for saved locale preference on mount and apply it
   React.useEffect(() => {
-    const savedLocale = localStorage.getItem('preferredLocale');
+    const savedLocale = localStorage.getItem("preferredLocale");
     const supportedLocales = nextI18NextConfig.i18n.locales;
-    
-    if (savedLocale && 
-        supportedLocales.includes(savedLocale) && 
-        router.locale !== savedLocale) {
+
+    if (
+      savedLocale &&
+      supportedLocales.includes(savedLocale) &&
+      router.locale !== savedLocale
+    ) {
       // Redirect to the same page with the saved locale preference
       router.push(router.pathname, router.asPath, { locale: savedLocale });
     }
@@ -121,9 +141,9 @@ function MyApp(props) {
         <CssBaseline />
         <DebugPanelProvider>
           <AuthProvider>
-            <SettingsProvider>
-              <ChatContextProvider>
-                <XPProviderWrapper>
+            <AuthGate>
+              <SettingsProvider>
+                <ChatContextProvider>
                   <TourProvider>
                     <Component {...pageProps} />
                     {/* Global Chat UI - available on all pages except Workbook and Unit */}
@@ -131,10 +151,12 @@ function MyApp(props) {
                     <GlobalChatDrawer />
                     {/* Offline status banner */}
                     <OfflineBanner />
+                    {/* App-wide Easter Egg detection */}
+                    <EasterEggLayer />
                   </TourProvider>
-                </XPProviderWrapper>
-              </ChatContextProvider>
-            </SettingsProvider>
+                </ChatContextProvider>
+              </SettingsProvider>
+            </AuthGate>
           </AuthProvider>
         </DebugPanelProvider>
       </ThemeProvider>

@@ -16,59 +16,59 @@
  * @module PracticeCollaborationProvider
  */
 
-import * as Y from 'yjs'
-import { YjsDocProvider } from './YjsProvider'
+import * as Y from "yjs";
+import { YjsDocProvider } from "./YjsProvider";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface PracticeUser {
-  username: string
-  displayName?: string
-  color?: string
+  username: string;
+  displayName?: string;
+  color?: string;
 }
 
 export interface PracticeCollaborationConfig {
-  sessionId: string
-  user: PracticeUser
-  wsUrl?: string
-  connect?: boolean
-  persistence?: boolean
-  onParticipantJoin?: (user: PracticeUser) => void
-  onParticipantLeave?: (user: PracticeUser) => void
+  sessionId: string;
+  user: PracticeUser;
+  wsUrl?: string;
+  connect?: boolean;
+  persistence?: boolean;
+  onParticipantJoin?: (user: PracticeUser) => void;
+  onParticipantLeave?: (user: PracticeUser) => void;
 }
 
 export interface BlockAnswer {
-  userAnswer: any
-  complete: boolean
-  accuracy: number
-  answeredBy: string // username of who answered
-  timestamp: string
+  userAnswer: any;
+  complete: boolean;
+  accuracy: number;
+  answeredBy: string; // username of who answered
+  timestamp: string;
 }
 
 export interface ParticipantProgress {
-  username: string
-  blocksCompleted: number
-  blocksAttempted: number
-  lastActiveAt: string
+  username: string;
+  blocksCompleted: number;
+  blocksAttempted: number;
+  lastActiveAt: string;
 }
 
 export interface GroupStats {
-  totalParticipants: number
-  averageAccuracy: number
-  blocksCompletedTotal: number
-  blockAccuracies: Record<string, number> // blockId → average accuracy across participants
-  lastUpdated: string
+  totalParticipants: number;
+  averageAccuracy: number;
+  blocksCompletedTotal: number;
+  blockAccuracies: Record<string, number>; // blockId → average accuracy across participants
+  lastUpdated: string;
 }
 
 export interface PracticeMessage {
-  id: string
-  author: string
-  displayName?: string
-  content: string
-  referencedBlockId?: string
-  createdAt: string
+  id: string;
+  author: string;
+  displayName?: string;
+  content: string;
+  referencedBlockId?: string;
+  createdAt: string;
 }
 
 // ============================================================================
@@ -76,39 +76,39 @@ export interface PracticeMessage {
 // ============================================================================
 
 export class PracticeCollaborationProvider extends YjsDocProvider {
-  private sessionId: string
-  private user: PracticeUser
-  private config: PracticeCollaborationConfig
+  private sessionId: string;
+  private user: PracticeUser;
+  private practiceConfig: PracticeCollaborationConfig;
 
   // Y.js structures
-  private answersMap: Y.Map<BlockAnswer[]>
-  private progressMap: Y.Map<ParticipantProgress>
-  private groupStatsMap: Y.Map<any>
-  private messagesArray: Y.Array<PracticeMessage>
+  private answersMap: Y.Map<BlockAnswer[]>;
+  private progressMap: Y.Map<ParticipantProgress>;
+  private groupStatsMap: Y.Map<any>;
+  private messagesArray: Y.Array<PracticeMessage>;
 
-  private activeParticipants: Map<number, PracticeUser> = new Map()
+  private activeParticipants: Map<number, PracticeUser> = new Map();
 
   constructor(config: PracticeCollaborationConfig) {
-    const docName = `practice-${config.sessionId}`
+    const docName = `practice-${config.sessionId}`;
 
     super({
       docName,
       wsUrl: config.wsUrl,
       connect: config.connect ?? true,
       persistence: config.persistence ?? true,
-    })
+    });
 
-    this.sessionId = config.sessionId
-    this.user = config.user
-    this.config = config
+    this.sessionId = config.sessionId;
+    this.user = config.user;
+    this.practiceConfig = config;
 
-    this.answersMap = this.getDoc().getMap<BlockAnswer[]>('answers')
-    this.progressMap = this.getDoc().getMap<ParticipantProgress>('progress')
-    this.groupStatsMap = this.getDoc().getMap<any>('groupStats')
-    this.messagesArray = this.getDoc().getArray<PracticeMessage>('messages')
+    this.answersMap = this.getDoc().getMap<BlockAnswer[]>("answers");
+    this.progressMap = this.getDoc().getMap<ParticipantProgress>("progress");
+    this.groupStatsMap = this.getDoc().getMap<any>("groupStats");
+    this.messagesArray = this.getDoc().getArray<PracticeMessage>("messages");
 
-    this.initializeAwareness()
-    this.setupAwarenessHandlers()
+    this.initializeAwareness();
+    this.setupAwarenessHandlers();
   }
 
   // ========================================================================
@@ -116,54 +116,57 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
   // ========================================================================
 
   private initializeAwareness(): void {
-    const awareness = this.getAwareness()
+    const awareness = this.getAwareness();
     awareness.setLocalState({
       user: this.user,
       activeBlockId: null,
       typing: false,
-    })
+    });
   }
 
   private setupAwarenessHandlers(): void {
-    const awareness = this.getAwareness()
+    const awareness = this.getAwareness();
 
-    awareness.on('change', ({ added, removed }: { added: number[]; removed: number[] }) => {
-      added.forEach((clientId) => {
-        if (clientId === awareness.clientID) return
-        const state = awareness.getStates().get(clientId)
-        const peerUser = state?.user as PracticeUser | undefined
-        if (peerUser) {
-          this.activeParticipants.set(clientId, peerUser)
-          this.config.onParticipantJoin?.(peerUser)
-        }
-      })
+    awareness.on(
+      "change",
+      ({ added, removed }: { added: number[]; removed: number[] }) => {
+        added.forEach((clientId) => {
+          if (clientId === awareness.clientID) return;
+          const state = awareness.getStates().get(clientId);
+          const peerUser = state?.user as PracticeUser | undefined;
+          if (peerUser) {
+            this.activeParticipants.set(clientId, peerUser);
+            this.practiceConfig.onParticipantJoin?.(peerUser);
+          }
+        });
 
-      removed.forEach((clientId) => {
-        const leaving = this.activeParticipants.get(clientId)
-        if (leaving) {
-          this.activeParticipants.delete(clientId)
-          this.config.onParticipantLeave?.(leaving)
-        }
-      })
-    })
+        removed.forEach((clientId) => {
+          const leaving = this.activeParticipants.get(clientId);
+          if (leaving) {
+            this.activeParticipants.delete(clientId);
+            this.practiceConfig.onParticipantLeave?.(leaving);
+          }
+        });
+      },
+    );
   }
 
   /**
    * Set which block the local user is currently working on.
    */
   setActiveBlock(blockId: string | null): void {
-    const awareness = this.getAwareness()
-    const currentState = awareness.getLocalState()
-    awareness.setLocalState({ ...currentState, activeBlockId: blockId })
+    const awareness = this.getAwareness();
+    const currentState = awareness.getLocalState();
+    awareness.setLocalState({ ...currentState, activeBlockId: blockId });
   }
 
   /**
    * Set the local user's typing state (for chat).
    */
   setTyping(typing: boolean): void {
-    const awareness = this.getAwareness()
-    const currentState = awareness.getLocalState()
-    awareness.setLocalState({ ...currentState, typing })
+    const awareness = this.getAwareness();
+    const currentState = awareness.getLocalState();
+    awareness.setLocalState({ ...currentState, typing });
   }
 
   // ========================================================================
@@ -174,37 +177,42 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
    * Submit an answer for a block. Appends to the block's answer array.
    * Each participant's answer is tracked separately.
    */
-  submitBlockAnswer(blockId: string, answer: Omit<BlockAnswer, 'answeredBy' | 'timestamp'>): void {
+  submitBlockAnswer(
+    blockId: string,
+    answer: Omit<BlockAnswer, "answeredBy" | "timestamp">,
+  ): void {
     const entry: BlockAnswer = {
       ...answer,
       answeredBy: this.user.username,
       timestamp: new Date().toISOString(),
-    }
+    };
 
-    const existing = this.answersMap.get(blockId) || []
+    const existing = this.answersMap.get(blockId) || [];
     // Replace previous answer from same user, or append
-    const filtered = existing.filter((a) => a.answeredBy !== this.user.username)
-    this.answersMap.set(blockId, [...filtered, entry])
+    const filtered = existing.filter(
+      (a) => a.answeredBy !== this.user.username,
+    );
+    this.answersMap.set(blockId, [...filtered, entry]);
 
     // Update own progress
-    this.updateOwnProgress()
+    this.updateOwnProgress();
     // Recalculate group stats
-    this.recalculateGroupStats()
+    this.recalculateGroupStats();
   }
 
   /**
    * Get all answers for a specific block.
    */
   getBlockAnswers(blockId: string): BlockAnswer[] {
-    return this.answersMap.get(blockId) || []
+    return this.answersMap.get(blockId) || [];
   }
 
   /**
    * Get the current user's answer for a block, if any.
    */
   getOwnAnswer(blockId: string): BlockAnswer | undefined {
-    const answers = this.answersMap.get(blockId) || []
-    return answers.find((a) => a.answeredBy === this.user.username)
+    const answers = this.answersMap.get(blockId) || [];
+    return answers.find((a) => a.answeredBy === this.user.username);
   }
 
   // ========================================================================
@@ -212,35 +220,37 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
   // ========================================================================
 
   private updateOwnProgress(): void {
-    let blocksCompleted = 0
-    let blocksAttempted = 0
+    let blocksCompleted = 0;
+    let blocksAttempted = 0;
 
     this.answersMap.forEach((answers) => {
-      const own = answers.find((a) => a.answeredBy === this.user.username)
+      const own = answers.find((a) => a.answeredBy === this.user.username);
       if (own) {
-        blocksAttempted++
-        if (own.complete) blocksCompleted++
+        blocksAttempted++;
+        if (own.complete) blocksCompleted++;
       }
-    })
+    });
 
     this.progressMap.set(this.user.username, {
       username: this.user.username,
       blocksCompleted,
       blocksAttempted,
       lastActiveAt: new Date().toISOString(),
-    })
+    });
   }
 
   /**
    * Get own progress.
    */
   getOwnProgress(): ParticipantProgress {
-    return this.progressMap.get(this.user.username) || {
-      username: this.user.username,
-      blocksCompleted: 0,
-      blocksAttempted: 0,
-      lastActiveAt: new Date().toISOString(),
-    }
+    return (
+      this.progressMap.get(this.user.username) || {
+        username: this.user.username,
+        blocksCompleted: 0,
+        blocksAttempted: 0,
+        lastActiveAt: new Date().toISOString(),
+      }
+    );
   }
 
   // ========================================================================
@@ -248,47 +258,51 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
   // ========================================================================
 
   private recalculateGroupStats(): void {
-    const participantAccuracies: Map<string, number[]> = new Map()
-    const blockAccuracies: Record<string, number[]> = {}
-    let totalCompleted = 0
+    const participantAccuracies: Map<string, number[]> = new Map();
+    const blockAccuracies: Record<string, number> = {};
+    let totalCompleted = 0;
 
     this.answersMap.forEach((answers, blockId) => {
-      const accuracies: number[] = []
+      const accuracies: number[] = [];
       for (const answer of answers) {
         if (answer.complete) {
-          totalCompleted++
-          accuracies.push(answer.accuracy)
+          totalCompleted++;
+          accuracies.push(answer.accuracy);
 
           // Collect per-participant
           if (!participantAccuracies.has(answer.answeredBy)) {
-            participantAccuracies.set(answer.answeredBy, [])
+            participantAccuracies.set(answer.answeredBy, []);
           }
-          participantAccuracies.get(answer.answeredBy)!.push(answer.accuracy)
+          participantAccuracies.get(answer.answeredBy)!.push(answer.accuracy);
         }
       }
       if (accuracies.length > 0) {
-        blockAccuracies[blockId] = accuracies.reduce((s, a) => s + a, 0) / accuracies.length
+        blockAccuracies[blockId] =
+          accuracies.reduce((s, a) => s + a, 0) / accuracies.length;
       }
-    })
+    });
 
     // Average accuracy across all participants
-    let overallSum = 0
-    let overallCount = 0
+    let overallSum = 0;
+    let overallCount = 0;
     participantAccuracies.forEach((accs) => {
-      const avg = accs.reduce((s, a) => s + a, 0) / accs.length
-      overallSum += avg
-      overallCount++
-    })
+      const avg = accs.reduce((s, a) => s + a, 0) / accs.length;
+      overallSum += avg;
+      overallCount++;
+    });
 
     const stats: GroupStats = {
       totalParticipants: participantAccuracies.size,
-      averageAccuracy: overallCount > 0 ? Math.round((overallSum / overallCount) * 100) / 100 : 0,
+      averageAccuracy:
+        overallCount > 0
+          ? Math.round((overallSum / overallCount) * 100) / 100
+          : 0,
       blocksCompletedTotal: totalCompleted,
       blockAccuracies: blockAccuracies as any,
       lastUpdated: new Date().toISOString(),
-    }
+    };
 
-    this.groupStatsMap.set('stats', stats)
+    this.groupStatsMap.set("stats", stats);
   }
 
   /**
@@ -296,13 +310,15 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
    * Shows average accuracy and completion counts without individual attribution.
    */
   getGroupStats(): GroupStats {
-    return this.groupStatsMap.get('stats') || {
-      totalParticipants: 0,
-      averageAccuracy: 0,
-      blocksCompletedTotal: 0,
-      blockAccuracies: {},
-      lastUpdated: new Date().toISOString(),
-    }
+    return (
+      this.groupStatsMap.get("stats") || {
+        totalParticipants: 0,
+        averageAccuracy: 0,
+        blocksCompletedTotal: 0,
+        blockAccuracies: {},
+        lastUpdated: new Date().toISOString(),
+      }
+    );
   }
 
   // ========================================================================
@@ -320,33 +336,45 @@ export class PracticeCollaborationProvider extends YjsDocProvider {
       content,
       referencedBlockId,
       createdAt: new Date().toISOString(),
-    }
-    this.messagesArray.push([message])
-    return message
+    };
+    this.messagesArray.push([message]);
+    return message;
   }
 
   /**
    * Get all messages.
    */
   getMessages(): PracticeMessage[] {
-    return Array.from(this.messagesArray)
+    return Array.from(this.messagesArray);
   }
 
   // ========================================================================
   // Accessors for hook observation
   // ========================================================================
 
-  getAnswersMap(): Y.Map<BlockAnswer[]> { return this.answersMap }
-  getProgressMap(): Y.Map<ParticipantProgress> { return this.progressMap }
-  getGroupStatsMap(): Y.Map<any> { return this.groupStatsMap }
-  getMessagesArray(): Y.Array<PracticeMessage> { return this.messagesArray }
-  getSessionId(): string { return this.sessionId }
-  getUser(): PracticeUser { return this.user }
+  getAnswersMap(): Y.Map<BlockAnswer[]> {
+    return this.answersMap;
+  }
+  getProgressMap(): Y.Map<ParticipantProgress> {
+    return this.progressMap;
+  }
+  getGroupStatsMap(): Y.Map<any> {
+    return this.groupStatsMap;
+  }
+  getMessagesArray(): Y.Array<PracticeMessage> {
+    return this.messagesArray;
+  }
+  getSessionId(): string {
+    return this.sessionId;
+  }
+  getUser(): PracticeUser {
+    return this.user;
+  }
 
   /**
    * Get active participants from awareness (excluding self).
    */
   getActiveParticipants(): PracticeUser[] {
-    return Array.from(this.activeParticipants.values())
+    return Array.from(this.activeParticipants.values());
   }
 }

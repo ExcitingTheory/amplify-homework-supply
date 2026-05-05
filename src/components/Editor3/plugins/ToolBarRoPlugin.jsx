@@ -20,6 +20,8 @@ import { useTranslation } from 'next-i18next';
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import MainToolbar from '../../MainToolbar';
+import { useToolbarScroll } from '../../../hooks/useToolbarScroll';
+import ToolbarScrollButton from '../../ToolbarScrollButton';
 
 import MuiAppBar from '@mui/material/AppBar';
 import { styled } from '@mui/material/styles';
@@ -38,8 +40,7 @@ export const IS_APPLE = CAN_USE_DOM && /Mac|iPod|iPhone|iPad/.test(navigator.pla
 
 import { $isAtNodeEnd } from '@lexical/selection';
 import UnitContext from '../../../context/unitContext';
-import { useXP } from '../../../context/xpContext';
-import { LevelBadge } from '../../Gamification/LevelBadge';
+import { useXP } from '../../../context/gamificationContext';
 import { StreakIndicator } from '../../Gamification/StreakIndicator';
 
 /**
@@ -201,7 +202,7 @@ export default function ToolBarRoPlugin({
         finishedQuestions,
         rubric,
     } = React.useContext(UnitContext);
-    const { level, xpLogs } = useXP();
+    const { xpLogs } = useXP();
     // Derive current streak from XP logs (latest streak entry)
     const currentStreak = React.useMemo(() => {
         const streakLogs = xpLogs.filter(l => l.reason === 'STREAK_3DAY' || l.reason === 'STREAK_7DAY');
@@ -210,6 +211,8 @@ export default function ToolBarRoPlugin({
 
     const name = unit?.name;
     const description = unit?.description;
+
+    const { toolbarRef, showLeftArrow, showRightArrow, scrollToolbar } = useToolbarScroll();
 
     const firstAppBarRef = React.useRef(null);
     const [firstAppBarHeight, setFirstAppBarHeight] = React.useState(0);
@@ -310,36 +313,62 @@ export default function ToolBarRoPlugin({
                             )}
                         </Box>
 
-                        <Stack 
-                            direction="row" 
-                            spacing={1}
-                            sx={{
-                                alignItems: 'center',
-                                flexShrink: 0,
-                                minWidth: 0,
-                                overflow: 'hidden',
-                            }}
-                        >
-                            <TimeLeft />
-                            <LevelBadge level={level} showProgress={false} size="small" />
-                            <StreakIndicator currentStreak={currentStreak} size="small" />
-                            <ConnectionStatus size={isScrolled ? "small" : "small"} showLabel={!isScrolled} />
-                            <Chip 
-                                label={
-                                    <Box component="span">
-                                        {`${finishedQuestions} of ${rubric?.length || 0}`}
-                                        <Box 
-                                            component="span" 
-                                            sx={{ display: { xs: 'none', sm: 'inline' }, ml: 0.5 }}
-                                        >
-                                            Questions Completed
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, minWidth: 0 }}>
+                            {showLeftArrow && (
+                                <ToolbarScrollButton
+                                    direction="left"
+                                    onClick={() => scrollToolbar('left')}
+                                    ariaLabel={t('toolBarRoPlugin.scrollLeft', 'Scroll left')}
+                                    height={isScrolled ? '1.5rem' : '2rem'}
+                                />
+                            )}
+                            <Stack 
+                                ref={toolbarRef}
+                                direction="row" 
+                                spacing={1}
+                                sx={{
+                                    alignItems: 'center',
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflowX: 'hidden',
+                                    scrollSnapType: 'x mandatory',
+                                    scrollbarWidth: 'none',
+                                    '&::-webkit-scrollbar': { display: 'none' },
+                                    msOverflowStyle: 'none',
+                                    '& > *': {
+                                        scrollSnapAlign: 'start',
+                                        flexShrink: 0,
+                                    },
+                                }}
+                            >
+                                <TimeLeft />
+                                <StreakIndicator currentStreak={currentStreak} size="small" />
+                                <ConnectionStatus size={isScrolled ? "small" : "small"} showLabel={!isScrolled} />
+                                <Chip 
+                                    label={
+                                        <Box component="span">
+                                            {`${finishedQuestions} of ${rubric?.length || 0}`}
+                                            <Box 
+                                                component="span" 
+                                                sx={{ display: { xs: 'none', sm: 'inline' }, ml: 0.5 }}
+                                            >
+                                                Questions Completed
+                                            </Box>
                                         </Box>
-                                    </Box>
-                                } 
-                                variant="outlined"
-                                size={isScrolled ? "small" : "medium"}
-                            />
-                        </Stack>
+                                    } 
+                                    variant="outlined"
+                                    size={isScrolled ? "small" : "medium"}
+                                />
+                            </Stack>
+                            {showRightArrow && (
+                                <ToolbarScrollButton
+                                    direction="right"
+                                    onClick={() => scrollToolbar('right')}
+                                    ariaLabel={t('toolBarRoPlugin.scrollRight', 'Scroll right')}
+                                    height={isScrolled ? '1.5rem' : '2rem'}
+                                />
+                            )}
+                        </Box>
 
                     </Box>
                 </MainToolbar>

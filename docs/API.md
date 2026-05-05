@@ -1,592 +1,266 @@
 # API Documentation
 
-This document provides comprehensive information about the Homework Supply application's API, data models, and backend services.
+Data models, backend services, and integration patterns for Homework Supply.
 
-## 🏗️ Architecture Overview
+## Architecture
 
-The application uses **AWS Amplify Gen 2** with the following backend services:
+**Stack**: Next.js + AWS Amplify Gen 2 (GraphQL/AppSync) + DynamoDB + S3 + Lambda + OpenAI
 
-- **GraphQL API**: Primary data interface (AWS AppSync)
-- **Authentication**: AWS Cognito User Pools + Identity Pools
-- **Database**: Amazon DynamoDB (via Data Client)
-- **Storage**: Amazon S3 for file uploads
-- **Functions**: AWS Lambda for custom logic
-- **Real-time**: GraphQL subscriptions for live updates
+- **GraphQL API**: AWS AppSync with real-time subscriptions
+- **Auth**: AWS Cognito (groups: Admins, Moderators, Instructors, Learners)
+- **Database**: DynamoDB via Amplify Data Client with optimistic locking (`_version`)
+- **Storage**: S3 organized by protection level (public/protected/private)
+- **Functions**: 16 Lambda functions for AI, gamification, sync, and more
+- **Real-time**: `observeQuery()` subscriptions with client-side filtering
+- **Collaboration**: Yjs CRDT over WebSocket (API Gateway) + y-indexeddb persistence
+- **i18n**: next-i18next with 6 languages (en, zh, es, fr, de, ja)
 
-## 📊 Data Models
+## Data Models (33 total)
 
-### Core Models
+Schema definition: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
 
-#### Section
+### Core Content
 
-Represents a class or group of students.
+| Model | Purpose |
+|-------|---------|
+| **Unit** | Learning modules with Lexical JSON content in `data` field |
+| **Assignment** | Units assigned to a Section with due dates |
+| **Grade** | Student submissions with `data` JSON (question responses) and `accuracy` |
+| **Section** | Student groups (classes) with join codes |
+| **Question** | Practice questions with audio, images, answers, embeddings |
+| **Word** | Vocabulary with phonetic, definition, audio files, embeddings |
+| **File** | S3 objects with metadata (audio/video/images/PDFs/documents) |
+| **Document** | PDF/document analysis results with extracted text |
+| **ParsedContent** | Extracted vocabulary and content from analyzed documents |
 
-```graphql
-type Section
-  @model
-  @auth(
-    rules: [
-      { allow: private, operations: [read] }
-      { allow: groups, groups: ["Admins", "Instructors"] }
-      {
-        allow: owner
-        ownerField: "owner"
-        operations: [create, update, delete, read]
-      }
-      { allow: public, operations: [read] }
-    ]
-  ) {
-  id: ID!
-  name: String
-  owner: String
-  description: String
-  code: String!
-  assignments: [Assignment] @hasMany(indexName: "bySection", fields: ["id"])
-}
-```
+### Join Tables (many-to-many)
 
-**Usage Example**:
+`UnitFile`, `UnitWord`, `QuestionUnit`, `UnitDocument`, `QuestionFile`, `WordFile`, `QuestionWord`, `DocumentWord`, `DocumentQuestion`, `AssistantChatFile`
 
-```javascript
-import { DataStore } from "aws-amplify";
-import { Section } from "../models";
+### AI & Chat
 
-// Create a new section
-const newSection = await DataStore.save(
-  new Section({
-    name: "Japanese 101 - Spring 2024",
-    code: "JPN101-SP24",
-    description: "Beginner Japanese language course",
-  }),
-);
+| Model | Purpose |
+|-------|---------|
+| **AssistantChat** | Chat conversations with system prompts and message history |
+| **AIFeedback** | User feedback on AI responses (thumbs up/down + comments) |
+| **AgentJob** | Async AI job tracking (status, progress, results) |
 
-// Query sections
-const sections = await DataStore.query(Section);
-```
+### Gamification
 
-#### Unit
+| Model | Purpose |
+|-------|---------|
+| **StudentProfile** | Aggregated student data: XP, level, badges, streaks, skill progress, unit memories, personal bests, leaderboard fields |
+| **StudentXPLog** | Immutable XP ledger (amount, reason, cohort) |
+| **StudentMemory** | Per-student AI memory (global markdown + per-unit concept tracking with weak/strong concepts, confusion pairs, accuracy) |
+| **EasterEgg** | Hidden discoverable content with trigger conditions |
+| **Skill** | Skill tree nodes with prerequisites and mastery levels |
+| **Guild** | Student guilds with members, posts, crest customization |
+| **GroupChallenge** | Collaborative challenges with XP targets and contributions |
+| **PracticeSession** | AI-generated drill sessions with coverage tracking |
 
-Learning modules containing educational content and questions.
+### Collaboration & Settings
 
-```graphql
-type Unit
-  @model
-  @auth(
-    rules: [
-      { allow: private, operations: [read] }
-      { allow: groups, groups: ["Admins", "Instructors"] }
-      { allow: public, operations: [read] }
-    ]
-  ) {
-  id: ID!
-  number: Float
-  name: String
-  description: String
-  data: AWSJSON
-  publish: Boolean
-  assignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
-  words: [Word] @manyToMany(relationName: "UnitWord")
-}
-```
+| Model | Purpose |
+|-------|---------|
+| **HomeworkRoom** | Peer review chat rooms with Y.js document sync |
+| **WorkbookComment** | Block-level comments on student workbooks |
+| **Settings** | Per-user preferences (editor theme, font size, locale, etc.) |
 
-**Data Structure**:
-The `data` field contains JSON with the unit content:
+## Auth Rules
 
-```json
-{
-  "questions": [
-    {
-      "id": "q1",
-      "type": "multiple_choice",
-      "prompt": "What is 'hello' in Japanese?",
-      "answers": ["こんにちは", "さよなら", "ありがとう"],
-      "correct": 0
-    }
-  ],
-  "media": {
-    "audio": ["unit1_intro.mp3"],
-    "images": ["hiragana_chart.jpg"]
-  }
-}
-```
+Most models use combinations of:
+- `allow.owner()` — user-created content
+- `allow.group('Admins')` — full access
+- `allow.group('Instructors')` — create/read content
+- `allow.authenticated().to(['read'])` — any logged-in user can read
 
-#### Assignment
-
-Units assigned to students with due dates and tracking.
-
-```graphql
-type Assignment
-  @model
-  @auth(
-    rules: [
-      { allow: private, operations: [read] }
-      {
-        allow: groups
-        groups: ["Instructors", "Admins"]
-        operations: [create, update, delete, read]
-      }
-      { allow: public, operations: [read] }
-    ]
-  ) {
-  id: ID!
-  due: AWSDateTime
-  learner: String
-  sectionID: ID @index(name: "bySection")
-  grades: [Grade] @hasMany(indexName: "byAssignment", fields: ["id"])
-  unitID: ID @index(name: "byUnit")
-}
-```
-
-#### Grade
-
-Student submissions and performance tracking.
-
-```graphql
-type Grade
-  @model
-  @auth(
-    rules: [
-      { allow: owner, ownerField: "owner", operations: [create, read] }
-      { allow: groups, groups: ["Admins"], operations: [read] }
-    ]
-  ) {
-  id: ID!
-  percentComplete: Float
-  accuracy: Float
-  complete: Boolean
-  owner: String
-  instructor: String
-  unitVersion: Int
-  data: AWSJSON
-  assignmentID: ID @index(name: "byAssignment")
-}
-```
-
-**Grade Data Structure**:
-
-```json
-{
-  "responses": [
-    {
-      "questionId": "q1",
-      "userAnswer": 0,
-      "correct": true,
-      "timeSpent": 15000,
-      "attempts": 1
-    }
-  ],
-  "media_submissions": [
-    {
-      "type": "audio",
-      "filename": "student_recording.wav",
-      "feedback": "Good pronunciation!"
-    }
-  ],
-  "ai_feedback": {
-    "overall_score": 85,
-    "suggestions": ["Practice pitch accent"]
-  }
-}
-```
-
-#### Word
-
-Japanese vocabulary entries with pronunciation and definitions.
-
-```graphql
-type Word
-  @model
-  @auth(
-    rules: [
-      { allow: private, operations: [read] }
-      { allow: groups, groups: ["Instructors", "Admins"] }
-      { allow: public, operations: [read] }
-    ]
-  ) {
-  id: ID!
-  phrase: String
-  phonetic: String
-  definition: String
-  audio: [String]
-  units: [Unit] @manyToMany(relationName: "UnitWord")
-}
-```
-
-## 🔐 Authentication & Authorization
+Dynamic group auth is used for Section-based access control via `readGroups`/`writeGroups` fields.
 
 ### User Groups
 
-1. **Admins**: Full system access
-2. **Instructors**: Can create/manage content and view all student data
-3. **Learners**: Can access assigned content and submit work
+| Group | Capabilities |
+|-------|-------------|
+| **Admins** | Full CRUD on all models |
+| **Moderators** | Content moderation, AI feedback review |
+| **Instructors** | Create/manage units, assignments, vocabulary, questions, sections |
+| **Learners** | Read assigned content, submit grades, participate in peer review |
 
-### Auth Rules Summary
-
-| Model      | Public Read | Private Read | Owner CRUD       | Group Access        |
-| ---------- | ----------- | ------------ | ---------------- | ------------------- |
-| Section    | ✅          | ✅           | ✅ (owner field) | Admins, Instructors |
-| Unit       | ✅          | ✅           | ❌               | Admins, Instructors |
-| Assignment | ✅          | ✅           | ❌               | Admins, Instructors |
-| Grade      | ❌          | ❌           | ✅ (owner field) | Admins (read only)  |
-| Word       | ✅          | ✅           | ❌               | Admins, Instructors |
-
-### Authentication Examples
+## Data Client Patterns (Gen 2)
 
 ```javascript
-import { Auth } from "aws-amplify";
+import { generateClient } from 'aws-amplify/data'
+const client = generateClient()
 
-// Get current user
-const getCurrentUser = async () => {
-  try {
-    const user = await Auth.currentAuthenticatedUser();
-    return user;
-  } catch (error) {
-    console.log("No authenticated user");
-    return null;
-  }
-};
+// Create
+await client.models.Unit.create({ name, description })
 
-// Check user groups
-const checkUserRole = async () => {
-  const user = await Auth.currentAuthenticatedUser();
-  const groups =
-    user.signInUserSession.accessToken.payload["cognito:groups"] || [];
+// Update with optimistic locking
+await client.models.Unit.update({
+  id: unit.id,
+  name: newName,
+  data: JSON.stringify(editorContent),
+  _version: unit._version,
+})
 
-  return {
-    isAdmin: groups.includes("Admins"),
-    isInstructor: groups.includes("Instructors"),
-    isLearner: groups.includes("Learners"),
-  };
-};
+// Delete
+await client.models.Unit.delete({ id: unit.id, _version: unit._version })
 
-// Sign out
-const signOut = async () => {
-  await Auth.signOut();
-};
+// Real-time subscription (one per model, client-side filtering)
+const sub = client.models.Grade.observeQuery().subscribe({
+  next: ({ items }) => {
+    const valid = items.filter(item => item \!= null)
+    setGrades(valid)
+  },
+})
+// Cleanup
+return () => sub.unsubscribe()
+
+// Many-to-many lazy loading
+const words = await unit.words.toArray()
 ```
 
-## 📁 File Storage
-
-### S3 Storage Structure
+## S3 Storage (Gen 2)
 
 ```
-files/
-├── public/           # Publicly accessible files
-│   ├── audio/
-│   ├── images/
-│   └── videos/
-├── protected/        # User-specific files
-│   └── {userId}/
-│       ├── submissions/
-│       └── recordings/
-└── private/          # Admin/instructor only
-    ├── master_audio/
-    └── answer_keys/
+public/           — Publicly readable (unit content, shared audio)
+protected/{userId}/ — User-specific (student recordings)
+private/{userId}/   — Owner-only (instructor materials)
 ```
-
-### File Upload Examples
 
 ```javascript
-import { Storage } from "aws-amplify";
+import { uploadData } from 'aws-amplify/storage'
 
-// Upload public file
-const uploadPublicFile = async (file, filename) => {
-  try {
-    const result = await Storage.put(filename, file, {
-      level: "public",
-      contentType: file.type,
-    });
-    return result.key;
-  } catch (error) {
-    console.error("Upload failed:", error);
-    throw error;
-  }
-};
-
-// Upload private file
-const uploadPrivateFile = async (file, filename) => {
-  const result = await Storage.put(filename, file, {
-    level: "private",
+const result = await uploadData({
+  key: `public/audio/${filename}`,
+  data: file,
+  options: {
     contentType: file.type,
-  });
-  return result.key;
-};
-
-// Get file URL
-const getFileUrl = async (key, level = "public") => {
-  try {
-    const url = await Storage.get(key, { level });
-    return url;
-  } catch (error) {
-    console.error("Failed to get file URL:", error);
-    return null;
-  }
-};
-
-// List files
-const listFiles = async (prefix = "", level = "public") => {
-  const files = await Storage.list(prefix, { level });
-  return files;
-};
+    onProgress: ({ transferredBytes, totalBytes }) => {
+      console.log(`${Math.round(transferredBytes / totalBytes * 100)}%`)
+    },
+  },
+}).result
 ```
 
-## 🔄 Real-time Subscriptions
+Use `getCachedUrl(filePath)` utility for cached S3 URL resolution.
 
-### GraphQL Subscriptions
+## Lambda Functions (16)
 
-```javascript
-import { DataStore } from "aws-amplify";
-import { Grade } from "../models";
+| Function | Purpose |
+|----------|---------|
+| **openai** | GPT-4 text generation, Whisper transcription, TTS audio generation, image analysis |
+| **chatStream** | Streaming chat via Vercel AI SDK |
+| **contentCompletionStream** | AI autocomplete for Lexical editor |
+| **suggestBlocksStream** | AI block suggestions (quiz, vocabulary, etc.) |
+| **assistant** | AI assistant operations |
+| **ai** | General AI utilities |
+| **gamification** | XP awards, badge checks, streak tracking, skill tree generation, student memory, guild challenges, campaign management |
+| **generatePracticeDrill** | AI-generated practice exercises from unit content |
+| **documentAnalysis** | PDF/DOCX/XLSX/PPTX/EPUB text extraction and vocabulary analysis |
+| **embeddings** | Vector embedding generation (text-embedding-3-small) |
+| **moderation** | Content safety screening |
+| **peerReviewAI** | AI feedback for peer review rooms |
+| **section** | Section management and join code operations |
+| **mediaConvert** | Audio/video transcoding |
+| **streakResetCron** | Scheduled streak reset (daily cron) |
+| **yjsSync** | Yjs document synchronization via WebSocket |
 
-// Subscribe to grade updates
-const subscribeToGrades = () => {
-  return DataStore.observe(Grade).subscribe((msg) => {
-    console.log("Grade update:", msg.model, msg.opType, msg.element);
+## Custom Mutations
 
-    switch (msg.opType) {
-      case "INSERT":
-        console.log("New grade submitted:", msg.element);
-        break;
-      case "UPDATE":
-        console.log("Grade updated:", msg.element);
-        break;
-      case "DELETE":
-        console.log("Grade deleted:", msg.element);
-        break;
-    }
-  });
-};
+Key mutations handled by the gamification Lambda:
 
-// Unsubscribe
-const subscription = subscribeToGrades();
-// Later...
-subscription.unsubscribe();
-```
+| Mutation | Purpose |
+|----------|---------|
+| `awardXP` | Award XP to a student |
+| `checkBadge` | Check and award badge eligibility |
+| `updateStudentUnitMemoryFromGrade` | Update per-unit learning analytics from grade data |
+| `rebuildStudentMemoryProfile` | Aggregate unit memories into student profile |
+| `checkPersonalBest` | Check and record personal best scores |
+| `contributeToChallenge` | Add XP to a group challenge |
+| `generateSkillTree` | AI-generate skill tree from unit content |
+| `bootstrapStudentGamification` | Initialize all gamification data for a new student |
 
-## ⚡ Lambda Functions
+## Pages & Routes
 
-### Available Functions
+| Route | Purpose |
+|-------|---------|
+| `/` | Student dashboard (assignments, XP, streaks, badges, campaigns) |
+| `/units` | Unit browser with practice drill launcher |
+| `/unit/[id]` | Unit editor (Lexical + dictionary + questions + files) |
+| `/workbook/[id]` | Student workbook (read-only unit + graded answer blocks) |
+| `/sections` | Section management for instructors |
+| `/section/[id]` | Section detail with assignment management |
+| `/settings` | User preferences, avatar customization, bot customizer |
+| `/profile` | Student profile (XP, badges, streaks, progress rings, nailed it wall) |
+| `/profile/[username]` | Public profile view |
+| `/leaderboard` | XP leaderboard with guild rankings |
+| `/guilds` | Guild browser and creation |
+| `/guild/[id]` | Guild detail with posts, members, challenges |
+| `/skills` | Skill tree visualization |
+| `/review/[id]` | Peer review room |
+| `/instructor/gamification` | Instructor gamification management panel |
+| `/instructor/grade/[id]` | Instructor grade review |
+| `/offline` | Offline fallback page |
 
-#### 1. OpenAI Integration (`openai`)
+## Key Features
 
-Handles AI-powered content generation and grading.
+### Lexical Editor
+Rich text editor with custom graded block types: `quiz`, `meaning-association`, `answer`, `custom-answer`. Content stored as JSON in `Unit.data`. Supports images, YouTube embeds, PDFs, audio playlists, tables, layouts, drag-and-drop, and AI autocomplete.
 
-**Endpoint**: `POST /openai`
+### Real-time Collaboration (Yjs)
+CRDT-based collaboration via WebSocket with providers for workbooks (`WorkbookCollaborationProvider`), peer review rooms (`PeerReviewRoomProvider`), and practice drills (`PracticeCollaborationProvider`). Presence indicators, tutor cursors, block history timeline, and comments.
 
-**Request**:
+### Gamification System
+XP ledger, level progression, engagement streaks with shields, badge shelf, progress rings, personal bests, nailed-it celebrations, content locking/unlocking, skill trees, group challenges (boss battles), guilds with posts and crests, campaigns with narrative briefings, easter eggs, and animated toast notifications.
 
-```json
-{
-  "action": "grade_audio",
-  "data": {
-    "audioUrl": "s3://bucket/student_recording.wav",
-    "expectedText": "こんにちは",
-    "language": "japanese"
-  }
-}
-```
+### AI Integration
+- **Chat**: Streaming chat with tool calls (Vercel AI SDK + `useChat` hook)
+- **Grading**: AI-assisted answer verification (definition, word, short answer, audio)
+- **Content**: AI autocomplete, block suggestions, practice drill generation
+- **Documents**: PDF/DOCX/XLSX/PPTX/EPUB text extraction with vocabulary analysis
+- **Embeddings**: Semantic search via text-embedding-3-small stored in DynamoDB
+- **Memory**: Per-student learning analytics with concept tracking and confusion pairs
 
-**Response**:
+### Practice Drills
+AI-generated exercises from unit vocabulary, questions, and documents. Students access via units list or chat command. Sessions use standard workbook graded blocks with diminishing XP returns.
 
-```json
-{
-  "score": 85,
-  "feedback": "Good pronunciation of greeting",
-  "suggestions": ["Work on pitch accent"]
-}
-```
+### Peer Review
+Chat rooms where students review each other's work. AI-assisted feedback prompts. Invitation system with join codes.
 
-#### 2. Editor Chat (`editorChat`)
+### Recording Studios
+- **RecordingStudio2**: Student audio input for answer blocks
+- **RecordingStudioEnhanced**: Enhanced student recording with waveform visualization
+- **RecordingStudio3**: Instructor tool for scripted multi-speaker dialogue recording with Fountain screenplay format, TTS generation, and timeline editing
 
-AI-powered content creation assistant for instructors.
+### Dark Mode
+CSS variables theme via MUI v7 `colorSchemes`. Toggle in MainToolbar persisted to Settings model.
 
-**Endpoint**: `POST /editorChat`
+### Internationalization
+6 languages (en, zh, es, fr, de, ja) with 12 namespaces. ARIA labels localized. Storybook translation mode for in-context editing.
 
-**Request**:
+## React Contexts (17)
 
-```json
-{
-  "prompt": "Create a beginner Japanese lesson about greetings",
-  "type": "lesson_plan",
-  "level": "N5"
-}
-```
-
-#### 3. Section Management (`manageSection`)
-
-Handles section-related operations and user management.
-
-### Lambda Function Usage
-
-```javascript
-import { API } from "aws-amplify";
-
-const callOpenAI = async (data) => {
-  try {
-    const result = await API.post("completions", "/openai", {
-      body: data,
-    });
-    return result;
-  } catch (error) {
-    console.error("Lambda function error:", error);
-    throw error;
-  }
-};
-```
-
-## 🔍 Common Queries
-
-### Frequently Used DataStore Queries
-
-```javascript
-import { DataStore, Predicates } from "aws-amplify";
-import { Unit, Assignment, Grade, Section } from "../models";
-
-// Get units by publish status
-const getPublishedUnits = async () => {
-  return await DataStore.query(Unit, (c) => c.publish.eq(true));
-};
-
-// Get assignments for a specific section
-const getAssignmentsBySection = async (sectionId) => {
-  return await DataStore.query(Assignment, (c) => c.sectionID.eq(sectionId));
-};
-
-// Get grades for current user
-const getUserGrades = async (userId) => {
-  return await DataStore.query(Grade, (c) => c.owner.eq(userId));
-};
-
-// Get assignments due in the next week
-const getUpcomingAssignments = async () => {
-  const nextWeek = new Date();
-  nextWeek.setDate(nextWeek.getDate() + 7);
-
-  return await DataStore.query(Assignment, (c) =>
-    c.due.le(nextWeek.toISOString()),
-  );
-};
-
-// Complex query with sorting
-const getRecentGrades = async (limit = 10) => {
-  const grades = await DataStore.query(Grade, Predicates.ALL, {
-    sort: (s) => s.createdAt(SortDirection.DESCENDING),
-    limit,
-  });
-  return grades;
-};
-```
-
-## 🐛 Error Handling
-
-### Common Error Patterns
-
-```javascript
-import { DataStore } from "aws-amplify";
-
-const safeDataStoreOperation = async (operation) => {
-  try {
-    return await operation();
-  } catch (error) {
-    if (error.message.includes("Network Error")) {
-      // Handle network issues
-      console.warn("Network error, retrying...");
-      // Implement retry logic
-    } else if (error.message.includes("Unauthorized")) {
-      // Handle auth issues
-      console.error("Authentication required");
-      // Redirect to login
-    } else {
-      // Handle other errors
-      console.error("DataStore operation failed:", error);
-      throw error;
-    }
-  }
-};
-
-// Usage
-const saveGrade = async (gradeData) => {
-  return safeDataStoreOperation(async () => {
-    return await DataStore.save(new Grade(gradeData));
-  });
-};
-```
-
-## 📊 Performance Tips
-
-### Optimization Strategies
-
-1. **Use Pagination**:
-
-```javascript
-const getPaginatedUnits = async (limit = 20, nextToken = null) => {
-  return await DataStore.query(Unit, Predicates.ALL, {
-    limit,
-    page: nextToken,
-  });
-};
-```
-
-2. **Selective Queries**:
-
-```javascript
-// Only fetch needed fields
-const getUnitTitles = async () => {
-  const units = await DataStore.query(Unit);
-  return units.map((unit) => ({ id: unit.id, name: unit.name }));
-};
-```
-
-3. **Cache Frequently Used Data**:
-
-```javascript
-let cachedWords = null;
-
-const getWords = async (forceRefresh = false) => {
-  if (!cachedWords || forceRefresh) {
-    cachedWords = await DataStore.query(Word);
-  }
-  return cachedWords;
-};
-```
-
-## 🔄 Data Synchronization
-
-### DataStore Sync Best Practices
-
-```javascript
-import { DataStore, syncExpression } from "aws-amplify";
-
-// Configure selective sync
-DataStore.configure({
-  syncExpressions: [
-    syncExpression(Grade, () => {
-      // Only sync current user's grades
-      return (g) => g.owner.eq(getCurrentUserId());
-    }),
-  ],
-});
-
-// Handle sync conflicts
-DataStore.observe().subscribe((msg) => {
-  if (msg.opType === "UPDATE" && msg.element._version) {
-    // Handle version conflicts
-    console.log("Sync conflict detected:", msg.element);
-  }
-});
-
-// Force sync
-const forceSyncData = async () => {
-  await DataStore.start();
-};
-```
+| Context | Purpose |
+|---------|---------|
+| `authContext` | Session, user groups, authentication state |
+| `unitContext` | Units, grades, rubric, editor content, workbook sync |
+| `sectionContext` | Class sections and assignments |
+| `dictionaryContext` | Vocabulary words and questions |
+| `fileContext` | File management and S3 operations |
+| `chatContext` | AI chat conversations |
+| `settingsContext` | User preferences and theme |
+| `gamificationContext` | XP, badges, challenges, guilds, profiles |
+| `xpContext` | XP tracking and toast notifications |
+| `campaignContext` | Campaign/narrative progression |
+| `skillTreeContext` | Skill tree data and progress |
+| `gutterContext` | Editor gutter comments |
+| `tabContext` | Tab/panel state management |
+| `tourContext` | Onboarding tour state |
+| `vectorStoreContext` | Embedding cache and semantic search |
 
 ---
 
-**For More Information**:
+**Schema Reference**: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
+**Copilot Instructions**: [`../.github/copilot-instructions.md`](../.github/copilot-instructions.md)
 
-- [AWS Amplify Gen 2 Data Docs](https://docs.amplify.aws/gen2/build-a-backend/data/)
-- [TypeScript Schema Reference](../amplify/data/resource.ts)
-- [Authentication Setup](../amplify/auth/)
-
-_Last Updated: November 30, 2024_
+_Last Updated: May 2026_

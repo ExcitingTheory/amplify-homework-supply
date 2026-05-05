@@ -1,24 +1,44 @@
-import React from 'react';
-import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
-import Editor, { Workbook } from './index';
-import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { clearMockData, initializeMockData, seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits, seedMockSections } from '../../../.storybook/__mocks__/aws-amplify-data';
-const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
-const { 
-  MOCK_JAPANESE_GRAMMAR_PDF, 
-  MOCK_VOCABULARY_LIST_PDF, 
-  MOCK_LESSON_PLAN_PDF 
-} = await import('../../../.storybook/__mocks__/mockDocuments');
+import React from "react";
+import {
+  within,
+  waitFor,
+  screen,
+  waitForElementToBeRemoved,
+} from "storybook/test";
+import Editor, { Workbook } from "./index";
+import CodeActionMenuPlugin from "./plugins/CodeActionMenuPlugin";
+import {
+  clearMockData,
+  initializeMockData,
+  seedMockUnit,
+  seedMockFiles,
+  seedMockWords,
+  seedMockQuestions,
+  seedMockQuestionUnits,
+  seedMockSections,
+} from "../../../.storybook/__mocks__/aws-amplify-data";
+import kitchenSinkEditorState from "./__fixtures__/kitchenSinkEditorState.json";
+const {
+  MOCK_AUDIO_BASE64,
+  mockWaveformData,
+  MOCK_IMAGE_URL_1,
+  MOCK_IMAGE_URL_2,
+} = await import("../../../.storybook/__mocks__/media");
+const {
+  MOCK_JAPANESE_GRAMMAR_PDF,
+  MOCK_VOCABULARY_LIST_PDF,
+  MOCK_LESSON_PLAN_PDF,
+} = await import("../../../.storybook/__mocks__/mockDocuments");
 
 // Mock unit ID for stories
-const MOCK_UNIT_ID = 'story-unit-id';
-const KITCHEN_SINK_ID = 'kitchen-sink-id';
+const MOCK_UNIT_ID = "story-unit-id";
+const KITCHEN_SINK_ID = "kitchen-sink-id";
 
 export default {
-  title: '📚 Creating Lessons/Editor',
+  title: "✏️ Lesson Editor/Editor",
   component: Editor,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -47,7 +67,7 @@ The editor tracks graded blocks (quiz, answer, custom-answer, meaning-associatio
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 const sampleEditorState = {
@@ -58,43 +78,43 @@ const sampleEditorState = {
           {
             detail: 0,
             format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Welcome to the Language Editor',
-            type: 'text',
+            mode: "normal",
+            style: "",
+            text: "Welcome to the Language Editor",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        type: 'heading',
+        type: "heading",
         version: 1,
-        tag: 'h1',
+        tag: "h1",
       },
       {
         children: [
           {
             detail: 0,
             format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This is a sample paragraph. You can edit, format, and add various types of content here.',
-            type: 'text',
+            mode: "normal",
+            style: "",
+            text: "This is a sample paragraph. You can edit, format, and add various types of content here.",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        type: 'paragraph',
+        type: "paragraph",
         version: 1,
       },
     ],
-    direction: 'ltr',
-    format: '',
+    direction: "ltr",
+    format: "",
     indent: 0,
-    type: 'root',
+    type: "root",
     version: 1,
   },
 };
@@ -103,200 +123,234 @@ export const EmptyEditorTextFormatting = {
   loaders: [
     async () => {
       clearMockData();
-      
+
       seedMockUnit({
-        id: 'empty-editor-text-formatting-id',
-        name: 'Empty Editor: Text Formatting',
-        description: 'A blank editor to start creating content',
+        id: "empty-editor-text-formatting-id",
+        name: "Empty Editor: Text Formatting",
+        description: "A blank editor to start creating content",
         data: null,
         _version: 1,
-        owner: 'mock-user-sub',
+        owner: "mock-user-sub",
       });
     },
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'empty-editor-text-formatting-id',
+    unitId: "empty-editor-text-formatting-id",
     initializeMockData: false,
   },
   play: async ({ canvas, userEvent }) => {
     // Wait for editor to load - get all textboxes and find the contenteditable editor
-    const textboxes = await canvas.findAllByRole('textbox');
-    const editorContent = textboxes.find(el => el.getAttribute('contenteditable') === 'true') || textboxes[0];
+    const textboxes = await canvas.findAllByRole("textbox");
+    const editorContent =
+      textboxes.find((el) => el.getAttribute("contenteditable") === "true") ||
+      textboxes[0];
     await userEvent.click(editorContent);
-    
+
     // Type heading 1 text
-    await userEvent.keyboard('Heading 1');
-    
+    await userEvent.keyboard("Heading 1");
+
     // Open Block Format dropdown and select H1
-    const blockFormatSelect = canvas.getByRole('combobox', { name: /block format/i });
+    const blockFormatSelect = canvas.getByRole("combobox", {
+      name: /block format/i,
+    });
     await userEvent.click(blockFormatSelect);
-    
+
     // Options render in portal, use screen to find them
-    const h1Option = await screen.findByRole('option', { name: /Heading 1/i });
+    const h1Option = await screen.findByRole("option", { name: /Heading 1/i });
     await userEvent.click(h1Option);
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("{Enter}");
+
     // Type heading 2 text
-    await userEvent.keyboard('Heading 2');
-    
+    await userEvent.keyboard("Heading 2");
+
     // Open Block Format dropdown and select H2
     await userEvent.click(blockFormatSelect);
-    const h2Option = await screen.findByRole('option', { name: /Heading 2/i });
+    const h2Option = await screen.findByRole("option", { name: /Heading 2/i });
     await userEvent.click(h2Option);
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("{Enter}");
+
     // Type heading 3 text
-    await userEvent.keyboard('Heading 3');
-    
+    await userEvent.keyboard("Heading 3");
+
     // Open Block Format dropdown and select H3
     await userEvent.click(blockFormatSelect);
-    const h3Option = await screen.findByRole('option', { name: /Heading 3/i });
+    const h3Option = await screen.findByRole("option", { name: /Heading 3/i });
     await userEvent.click(h3Option);
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Add a bulleted list
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     await userEvent.click(blockFormatSelect);
-    const bulletBtn = await screen.findByRole('option', { name: /Bulleted/i });
+    const bulletBtn = await screen.findByRole("option", { name: /Bulleted/i });
     await userEvent.click(bulletBtn);
-    await userEvent.keyboard('First list item{Enter}Second list item{Enter}');
+    await userEvent.keyboard("First list item{Enter}Second list item{Enter}");
     // Multiple Align buttons may be rendered, so we select the first one
-    const alignMenus = canvas.getAllByRole('button', { name: /Align/i });
+    const alignMenus = canvas.getAllByRole("button", { name: /Align/i });
     const alignMenu = alignMenus[0];
     await userEvent.click(alignMenu);
-    const indentBtn = await screen.findByRole('menuitem', { name: /Indent/i });
+    const indentBtn = await screen.findByRole("menuitem", { name: /Indent/i });
     await userEvent.click(indentBtn);
-    await userEvent.keyboard('Third list item{Enter}');
+    await userEvent.keyboard("Third list item{Enter}");
     await userEvent.click(alignMenu);
-    const outdentBtn = await screen.findByRole('menuitem', { name: /Outdent/i });
+    const outdentBtn = await screen.findByRole("menuitem", {
+      name: /Outdent/i,
+    });
     await userEvent.click(outdentBtn);
-    await userEvent.keyboard('Another Item{Enter}{Enter}{Enter}');
+    await userEvent.keyboard("Another Item{Enter}{Enter}{Enter}");
 
     // Add a numbered list
     await userEvent.click(blockFormatSelect);
-    const numberBtn = await screen.findByRole('option', { name: /Numbered/i });
+    const numberBtn = await screen.findByRole("option", { name: /Numbered/i });
     await userEvent.click(numberBtn);
-    await userEvent.keyboard('First numbered item{Enter}');
+    await userEvent.keyboard("First numbered item{Enter}");
     await userEvent.click(alignMenu);
-    const indentBtn2 = await screen.findByRole('menuitem', { name: /Indent/i });
+    const indentBtn2 = await screen.findByRole("menuitem", { name: /Indent/i });
     await userEvent.click(indentBtn2);
-    await userEvent.keyboard('Second numbered item{Enter}');
+    await userEvent.keyboard("Second numbered item{Enter}");
     await userEvent.click(alignMenu);
-    const indentBtn3 = await screen.findByRole('menuitem', { name: /Indent/i });
+    const indentBtn3 = await screen.findByRole("menuitem", { name: /Indent/i });
     await userEvent.click(indentBtn3);
-    await userEvent.keyboard('Third numbered item{Enter}{Enter}{Enter}');
+    await userEvent.keyboard("Third numbered item{Enter}{Enter}{Enter}");
 
     // Add a quote
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     await userEvent.click(blockFormatSelect);
-    const quoteBtn = await screen.findByRole('option', { name: /Quote/i });
+    const quoteBtn = await screen.findByRole("option", { name: /Quote/i });
     await userEvent.click(quoteBtn);
-    await userEvent.keyboard('This is an inspiring quote.{Enter}{Enter}');
+    await userEvent.keyboard("This is an inspiring quote.{Enter}{Enter}");
 
     // Add code block
     await userEvent.click(blockFormatSelect);
-    const codeBtn = await screen.findByRole('option', { name: /Code Block/i });
+    const codeBtn = await screen.findByRole("option", { name: /Code Block/i });
     await userEvent.click(codeBtn);
-    await userEvent.keyboard('function example() {{{Enter}  console.log("Hello");{Enter}}{Enter}');
+    await userEvent.keyboard(
+      'function example() {{{Enter}  console.log("Hello");{Enter}}{Enter}',
+    );
     // delete the two spaces at start of second line
-    await userEvent.keyboard('{Backspace}{Backspace}');
-    await userEvent.keyboard('{Enter}{Enter}{Enter}');
+    await userEvent.keyboard("{Backspace}{Backspace}");
+    await userEvent.keyboard("{Enter}{Enter}{Enter}");
     // Add a paragraph
-    await userEvent.keyboard('This is a sample paragraph added at the end.');
-    
+    await userEvent.keyboard("This is a sample paragraph added at the end.");
+
     // hit enter, click bold button, type bold text, click bold button again to toggle off
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     // Multiple Bold buttons may be rendered, so we select the first one
-    const boldButtons = canvas.getAllByRole('button', { name: /Bold/i });
+    const boldButtons = canvas.getAllByRole("button", { name: /Bold/i });
     const boldButton = boldButtons[0];
     await userEvent.click(boldButton);
-    await userEvent.keyboard('This text is bold.');
+    await userEvent.keyboard("This text is bold.");
     await userEvent.click(boldButton);
 
     // Italic text
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     // Multiple Italic buttons may be rendered, so we select the first one
-    const italicButtons = canvas.getAllByRole('button', { name: /Italic/i });
+    const italicButtons = canvas.getAllByRole("button", { name: /Italic/i });
     const italicButton = italicButtons[0];
     await userEvent.click(italicButton);
-    await userEvent.keyboard('This text is italic.');
+    await userEvent.keyboard("This text is italic.");
     await userEvent.click(italicButton);
 
     // Underlined text
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     // Multiple Underline buttons may be rendered, so we select the first one
-    const underlineButtons = canvas.getAllByRole('button', { name: /Underline/i });
+    const underlineButtons = canvas.getAllByRole("button", {
+      name: /Underline/i,
+    });
     const underlineButton = underlineButtons[0];
     await userEvent.click(underlineButton);
-    await userEvent.keyboard('This text is underlined.');
+    await userEvent.keyboard("This text is underlined.");
     await userEvent.click(underlineButton);
 
     // this is bold and italic text and underline
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     await userEvent.click(boldButton);
     await userEvent.click(italicButton);
     await userEvent.click(underlineButton);
-    await userEvent.keyboard('This text is bold, italic, and underlined.');
+    await userEvent.keyboard("This text is bold, italic, and underlined.");
     await userEvent.click(boldButton);
     await userEvent.click(italicButton);
     await userEvent.click(underlineButton);
 
     // Strikethrough text
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     // open Text Format dropdown
     // Multiple text format buttons may be rendered, so we select the first one
-    const textFormatSelects = canvas.getAllByRole('button', { name: /Formatting options for text styles/i });
+    const textFormatSelects = canvas.getAllByRole("button", {
+      name: /Formatting options for text styles/i,
+    });
     const textFormatSelect = textFormatSelects[0];
     await userEvent.click(textFormatSelect);
-    let strikethroughOption = await screen.findByRole('menuitem', { name: /Strikethrough/i });
+    let strikethroughOption = await screen.findByRole("menuitem", {
+      name: /Strikethrough/i,
+    });
     await userEvent.click(strikethroughOption);
-    await userEvent.keyboard('This text is strikethrough.');
+    await userEvent.keyboard("This text is strikethrough.");
     await userEvent.click(textFormatSelect);
-    strikethroughOption = await screen.findByRole('menuitem', { name: /Strikethrough/i });
+    strikethroughOption = await screen.findByRole("menuitem", {
+      name: /Strikethrough/i,
+    });
     await userEvent.click(strikethroughOption);
 
     // subscript text
-    await userEvent.keyboard('{Space}');
+    await userEvent.keyboard("{Space}");
     await userEvent.click(textFormatSelect);
-    let subscriptOption = await screen.findByRole('menuitem', { name: /Subscript/i });
+    let subscriptOption = await screen.findByRole("menuitem", {
+      name: /Subscript/i,
+    });
     await userEvent.click(subscriptOption);
-    await userEvent.keyboard('This text is subscript. ');
+    await userEvent.keyboard("This text is subscript. ");
     await userEvent.click(textFormatSelect);
-    subscriptOption = await screen.findByRole('menuitem', { name: /Subscript/i });
+    subscriptOption = await screen.findByRole("menuitem", {
+      name: /Subscript/i,
+    });
     await userEvent.click(subscriptOption);
-    
+
     // superscript text
-    await userEvent.keyboard('{Space}');
+    await userEvent.keyboard("{Space}");
     await userEvent.click(textFormatSelect);
-    let superscriptOption = await screen.findByRole('menuitem', { name: /Superscript/i });
+    let superscriptOption = await screen.findByRole("menuitem", {
+      name: /Superscript/i,
+    });
     await userEvent.click(superscriptOption);
-    await userEvent.keyboard(' This text is superscript.');
+    await userEvent.keyboard(" This text is superscript.");
     await userEvent.click(textFormatSelect);
-    superscriptOption = await screen.findByRole('menuitem', { name: /Superscript/i });
+    superscriptOption = await screen.findByRole("menuitem", {
+      name: /Superscript/i,
+    });
     await userEvent.click(superscriptOption);
 
     // left align
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
     await userEvent.click(alignMenu);
-    const leftAlignBtn = await screen.findByRole('menuitem', { name: /Align Left/i });
+    const leftAlignBtn = await screen.findByRole("menuitem", {
+      name: /Align Left/i,
+    });
     await userEvent.click(leftAlignBtn);
-    await userEvent.keyboard('This text is left-aligned.{Enter}{Enter}');
+    await userEvent.keyboard("This text is left-aligned.{Enter}{Enter}");
     // center align
     await userEvent.click(alignMenu);
-    const centerAlignBtn = await screen.findByRole('menuitem', { name: /Align Center/i });
+    const centerAlignBtn = await screen.findByRole("menuitem", {
+      name: /Align Center/i,
+    });
     await userEvent.click(centerAlignBtn);
-    await userEvent.keyboard('This text is center-aligned.{Enter}{Enter}');
+    await userEvent.keyboard("This text is center-aligned.{Enter}{Enter}");
     // right align
     await userEvent.click(alignMenu);
-    const rightAlignBtn = await screen.findByRole('menuitem', { name: /Align Right/i });
+    const rightAlignBtn = await screen.findByRole("menuitem", {
+      name: /Align Right/i,
+    });
     await userEvent.click(rightAlignBtn);
-    await userEvent.keyboard('This text is right-aligned.{Enter}{Enter}');
+    await userEvent.keyboard("This text is right-aligned.{Enter}{Enter}");
     // justify align
     await userEvent.click(alignMenu);
-    const justifyAlignBtn = await screen.findByRole('menuitem', { name: /Justify Align/i });
+    const justifyAlignBtn = await screen.findByRole("menuitem", {
+      name: /Justify Align/i,
+    });
     await userEvent.click(justifyAlignBtn);
-    await userEvent.keyboard('This text is justified. It will stretch across the full width of the container, creating even edges on both sides. This is particularly useful for formal documents or publications.{Enter}{Enter}');
+    await userEvent.keyboard(
+      "This text is justified. It will stretch across the full width of the container, creating even edges on both sides. This is particularly useful for formal documents or publications.{Enter}{Enter}",
+    );
   },
 };
 
@@ -304,36 +358,36 @@ export const EmptyEditorCustomBlocks = {
   loaders: [
     async () => {
       clearMockData();
-      
+
       seedMockUnit({
-        id: 'empty-editor-custom-blocksid',
-        name: 'Empty Editor: Custom Blocks',
-        description: 'A blank editor to start creating content',
+        id: "empty-editor-custom-blocksid",
+        name: "Empty Editor: Custom Blocks",
+        description: "A blank editor to start creating content",
         data: JSON.stringify(sampleEditorState),
         _version: 1,
-        owner: 'mock-user-sub',
+        owner: "mock-user-sub",
       });
-      
+
       // Seed sections for assignment dropdown
       seedMockSections([
         {
-          id: 'section-1',
-          name: 'Section 1',
-          description: 'Test section for assignments',
-          owner: 'student-alice-sub', // Must match mock user's sub
-          code: 'SEC1',
-          status: 'PUBLISHED',
+          id: "section-1",
+          name: "Section 1",
+          description: "Test section for assignments",
+          owner: "student-alice-sub", // Must match mock user's sub
+          code: "SEC1",
+          status: "PUBLISHED",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           _version: 1,
         },
         {
-          id: 'section-2',
-          name: 'Section 2',
-          description: 'Another test section',
-          owner: 'student-alice-sub', // Must match mock user's sub
-          code: 'SEC2',
-          status: 'PUBLISHED',
+          id: "section-2",
+          name: "Section 2",
+          description: "Another test section",
+          owner: "student-alice-sub", // Must match mock user's sub
+          code: "SEC2",
+          status: "PUBLISHED",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           _version: 1,
@@ -343,7 +397,7 @@ export const EmptyEditorCustomBlocks = {
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'empty-editor-custom-blocksid',
+    unitId: "empty-editor-custom-blocksid",
     initializeMockData: false,
     clearMockData: false, // Don't clear mock data since we're seeding it in the loader
     test: {
@@ -353,12 +407,16 @@ export const EmptyEditorCustomBlocks = {
   play: async ({ canvasElement, userEvent }) => {
     const canvas = within(canvasElement);
     // Wait for editor to load - get all textboxes and find the contenteditable editor
-    const textboxes = await canvas.findAllByRole('textbox');
-    const editorContent = textboxes.find(el => el.getAttribute('contenteditable') === 'true') || textboxes[0];
+    const textboxes = await canvas.findAllByRole("textbox");
+    const editorContent =
+      textboxes.find((el) => el.getAttribute("contenteditable") === "true") ||
+      textboxes[0];
     await userEvent.click(editorContent);
 
     // Make a link by typing out the URL (auto-link detection)
-    await userEvent.keyboard('{Enter}Check out https://example.com for more info.{Enter}{Enter}');
+    await userEvent.keyboard(
+      "{Enter}Check out https://example.com for more info.{Enter}{Enter}",
+    );
 
     // NOTE: Link editing and YouTube embed interactions are skipped in automated tests
     // because the FloatingLinkEditorPlugin uses createPortal(document.body) which is
@@ -366,126 +424,175 @@ export const EmptyEditorCustomBlocks = {
 
     // Insert Due Date
     // Multiple Insert Item Menu buttons may be rendered, so we select the first one
-    const insertMenus = canvas.getAllByRole('button', { name: /^Insert$/i });
+    const insertMenus = canvas.getAllByRole("button", { name: /^Insert$/i });
     const insertMenu = insertMenus[0];
     await userEvent.click(insertMenu);
-    const dueDateOption = await screen.findByRole('menuitem', { name: /Due Date/i });
+    const dueDateOption = await screen.findByRole("menuitem", {
+      name: /Due Date/i,
+    });
     await userEvent.click(dueDateOption);
     // Wait for sidebar to open with the assignment configuration form
-    const dueDateInput = await waitFor(() => canvas.getByLabelText(/Due Date/i, { selector: 'input[type="datetime-local"]' }), { timeout: 5000 });
-    await userEvent.type(dueDateInput, '2026-01-01T10:00');
+    const dueDateInput = await waitFor(
+      () =>
+        canvas.getByLabelText(/Due Date/i, {
+          selector: 'input[type="datetime-local"]',
+        }),
+      { timeout: 5000 },
+    );
+    await userEvent.type(dueDateInput, "2026-01-01T10:00");
     // MUI Select renders multiple elements with role="combobox", so we select the first one
-    const selectSections = await waitFor(() => canvas.getAllByRole('combobox', { name: /Section/i }), { timeout: 5000 });
+    const selectSections = await waitFor(
+      () => canvas.getAllByRole("combobox", { name: /Section/i }),
+      { timeout: 5000 },
+    );
     const selectSection = selectSections[0];
     await userEvent.click(selectSection);
     // Wait for sections to load and select first option
-    const firstSectionOption = await waitFor(() => screen.getByRole('option', { name: /Section 1/i }), { timeout: 5000 });
+    const firstSectionOption = await waitFor(
+      () => screen.getByRole("option", { name: /Section 1/i }),
+      { timeout: 5000 },
+    );
     await userEvent.click(firstSectionOption);
     // Confirm due date
-    const confirmDueDateBtn = await screen.findByRole('button', { name: /Add Due Date/i });
+    const confirmDueDateBtn = await screen.findByRole("button", {
+      name: /Add Due Date/i,
+    });
     await userEvent.click(confirmDueDateBtn);
-    
+
     // Insert Timer
     await userEvent.click(insertMenu);
-    const timerOption = await screen.findByRole('menuitem', { name: /Timer/i });
+    const timerOption = await screen.findByRole("menuitem", { name: /Timer/i });
     await userEvent.click(timerOption);
     // Set timer duration if dialog appears
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Insert Meaning Association
     await userEvent.click(insertMenu);
-    const meaningAssocOption = await screen.findByRole('menuitem', { name: /Meaning Association/i });
+    const meaningAssocOption = await screen.findByRole("menuitem", {
+      name: /Meaning Association/i,
+    });
     await userEvent.click(meaningAssocOption);
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Insert Short Answer: Vocabulary
     await userEvent.click(insertMenu);
-    const vocabAnswerOption = await screen.findByRole('menuitem', { name: /Short Answer.*Vocabulary/i });
+    const vocabAnswerOption = await screen.findByRole("menuitem", {
+      name: /Short Answer.*Vocabulary/i,
+    });
     await userEvent.click(vocabAnswerOption);
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Insert Short Answer: Custom
     await userEvent.click(insertMenu);
-    const customAnswerOption = await screen.findByRole('menuitem', { name: /Short Answer.*Custom/i });
+    const customAnswerOption = await screen.findByRole("menuitem", {
+      name: /Short Answer.*Custom/i,
+    });
     await userEvent.click(customAnswerOption);
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Insert Audio Playlist
     await userEvent.click(insertMenu);
-    const audioPlaylistOption = await screen.findByRole('menuitem', { name: /Audio Playlist/i });
+    const audioPlaylistOption = await screen.findByRole("menuitem", {
+      name: /Audio Playlist/i,
+    });
     await userEvent.click(audioPlaylistOption);
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard("{Enter}");
 
     // Insert Multiple Choice Quiz
     await userEvent.click(insertMenu);
-    const multipleChoiceOption = await screen.findByRole('menuitem', { name: /Multiple Choice Quiz/i });
+    const multipleChoiceOption = await screen.findByRole("menuitem", {
+      name: /Multiple Choice Quiz/i,
+    });
     await userEvent.click(multipleChoiceOption);
 
     // Quiz block is inserted — scope interactions to the quiz block via data-tour attribute
-    const quizBlock = await waitFor(() => {
-      const el = canvasElement.querySelector('[data-tour="quiz-block"]');
-      expect(el).not.toBeNull();
-      return el;
-    }, { timeout: 5000 });
+    const quizBlock = await waitFor(
+      () => {
+        const el = canvasElement.querySelector('[data-tour="quiz-block"]');
+        expect(el).not.toBeNull();
+        return el;
+      },
+      { timeout: 5000 },
+    );
     const quizScope = within(quizBlock);
     // Enter edit mode
-    const editBtn = quizScope.getByRole('button', { name: /^Edit$/i });
+    const editBtn = quizScope.getByRole("button", { name: /^Edit$/i });
     await userEvent.click(editBtn);
     // Add two answers by clicking the "Add Answer" placeholder
-    const addAnswerField = await waitFor(() => quizScope.getByPlaceholderText(/Add Answer/i), { timeout: 5000 });
+    const addAnswerField = await waitFor(
+      () => quizScope.getByPlaceholderText(/Add Answer/i),
+      { timeout: 5000 },
+    );
     await userEvent.click(addAnswerField);
     // Wait for first answer switch (MUI Switch uses role="switch") to render
-    await waitFor(() => {
-      expect(quizScope.getAllByRole('switch').length).toBeGreaterThanOrEqual(1);
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(quizScope.getAllByRole("switch").length).toBeGreaterThanOrEqual(
+          1,
+        );
+      },
+      { timeout: 5000 },
+    );
     // Re-query the "Add Answer" field after DOM update and add a second answer
     const addAnswerField2 = quizScope.getByPlaceholderText(/Add Answer/i);
     await userEvent.click(addAnswerField2);
-    await waitFor(() => {
-      expect(quizScope.getAllByRole('switch').length).toBeGreaterThanOrEqual(2);
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(quizScope.getAllByRole("switch").length).toBeGreaterThanOrEqual(
+          2,
+        );
+      },
+      { timeout: 5000 },
+    );
     // Toggle the first answer's correct switch
-    const switches = quizScope.getAllByRole('switch');
+    const switches = quizScope.getAllByRole("switch");
     await userEvent.click(switches[0]);
     // Save the quiz
-    const doneBtn = quizScope.getByRole('button', { name: /^Done$/i });
+    const doneBtn = quizScope.getByRole("button", { name: /^Done$/i });
     await userEvent.click(doneBtn);
 
     // Insert Layout (opens a modal — select layout and click Insert)
     await userEvent.click(insertMenu);
-    const layoutOption = await screen.findByRole('menuitem', { name: /Columns Layout/i });
+    const layoutOption = await screen.findByRole("menuitem", {
+      name: /Columns Layout/i,
+    });
     await userEvent.click(layoutOption);
     // Layout modal opens — click the Insert button to confirm default layout
-    const layoutInsertBtn = await screen.findByRole('button', { name: /^Insert$/i });
+    const layoutInsertBtn = await screen.findByRole("button", {
+      name: /^Insert$/i,
+    });
     await userEvent.click(layoutInsertBtn);
 
     // Insert Horizontal Rule
     await userEvent.click(insertMenu);
-    const horizontalRuleOption = await screen.findByRole('menuitem', { name: /Horizontal Rule/i });
+    const horizontalRuleOption = await screen.findByRole("menuitem", {
+      name: /Horizontal Rule/i,
+    });
     await userEvent.click(horizontalRuleOption);
 
     // Insert Table (opens a modal — fill dimensions and click Insert)
     await userEvent.click(insertMenu);
-    const tableOption = await screen.findByRole('menuitem', { name: /Table/i });
+    const tableOption = await screen.findByRole("menuitem", { name: /Table/i });
     await userEvent.click(tableOption);
     // Table modal opens — fill in rows and columns
     const rowsInput = await screen.findByLabelText(/Rows/i);
     await userEvent.clear(rowsInput);
-    await userEvent.type(rowsInput, '3');
+    await userEvent.type(rowsInput, "3");
     const columnsInput = await screen.findByLabelText(/Columns/i);
     await userEvent.clear(columnsInput);
-    await userEvent.type(columnsInput, '3');
-    const tableInsertBtn = await screen.findByRole('button', { name: /^Insert$/i });
+    await userEvent.type(columnsInput, "3");
+    const tableInsertBtn = await screen.findByRole("button", {
+      name: /^Insert$/i,
+    });
     await userEvent.click(tableInsertBtn);
 
     // Open the Files tab in the left sidebar
-    const filesTab = canvas.getAllByRole('tab', { name: /Files/i });
+    const filesTab = canvas.getAllByRole("tab", { name: /Files/i });
     await userEvent.click(filesTab[0]);
 
     // Open the Configuration tab to verify sidebar panels work
-    const configTab = canvas.getAllByRole('tab', { name: /Configuration/i });
+    const configTab = canvas.getAllByRole("tab", { name: /Configuration/i });
     await userEvent.click(configTab[0]);
-
   },
 };
 
@@ -493,1330 +600,105 @@ export const EditorWithContent = {
   loaders: [
     async () => {
       clearMockData();
-      
+
       seedMockUnit({
-        id: 'editor-with-content-id',
-        name: 'Sample Unit with Content',
-        description: 'This unit has some sample content',
+        id: "editor-with-content-id",
+        name: "Sample Unit with Content",
+        description: "This unit has some sample content",
         data: JSON.stringify(sampleEditorState),
         _version: 1,
-        owner: 'mock-user-sub',
+        owner: "mock-user-sub",
       });
     },
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'editor-with-content-id',
+    unitId: "editor-with-content-id",
     initializeMockData: false,
   },
 };
 
-const kitchenSinkEditorState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Kitchen Sink: All Editor Block Types',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h1',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This editor demonstrates all available block types. Below you will find examples of every supported element.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Headings',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Heading Level 3',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Heading Level 4',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h4',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Text Formatting',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This is ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'bold',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 2,
-            mode: 'normal',
-            style: '',
-            text: 'italic',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 8,
-            mode: 'normal',
-            style: '',
-            text: 'underline',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', and ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 4,
-            mode: 'normal',
-            style: '',
-            text: 'strikethrough',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ' text.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This paragraph contains a ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            children: [
-              {
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'link to example.com',
-                type: 'text',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            type: 'link',
-            version: 1,
-            rel: null,
-            target: null,
-            title: null,
-            url: 'https://example.com',
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ' and a ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 16,
-            mode: 'normal',
-            style: '',
-            text: 'code snippet',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: '.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Text can have ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: 'color: rgb(224, 49, 49);',
-            text: 'custom colors',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: 'background-color: rgb(255, 212, 0);',
-            text: 'background colors',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: 'font-size: 24px;',
-            text: 'different sizes',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ', and ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: 'font-family: Georgia;',
-            text: 'custom fonts',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: '.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Advanced formatting includes ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 32,
-            mode: 'normal',
-            style: '',
-            text: 'subscript',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ' and ',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 64,
-            mode: 'normal',
-            style: '',
-            text: 'superscript',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ' text.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Text Alignment',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This text is left-aligned (default).',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: 'left',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This text is center-aligned.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: 'center',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This text is right-aligned.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: 'right',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This text is justified. It will stretch across the full width of the container, creating even edges on both sides. This is particularly useful for formal documents or publications.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: 'justify',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Lists',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            children: [
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Numbered list item 1',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 1,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Numbered list item 2',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 2,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Numbered list item 3',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 3,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            type: 'list',
-            version: 1,
-            listType: 'number',
-            start: 1,
-            tag: 'ol',
-          },
-        ],
-        direction: null,
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            children: [
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Bullet list item A',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 1,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Bullet list item B',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 2,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            type: 'list',
-            version: 1,
-            listType: 'bullet',
-            start: 1,
-            tag: 'ul',
-          },
-        ],
-        direction: null,
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Quote Block',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This is a quote block. It can contain multiple lines of quoted text or important callouts.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'quote',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Code Block',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      // {
-      //   children: [
-      //     {
-      //       detail: 0,
-      //       format: 0,
-      //       mode: 'normal',
-      //       style: '',
-      //       text: 'function hello() {\n  console.log("Hello, World!");\n}',
-      //       type: 'text',
-      //       version: 1,
-      //     },
-      //   ],
-      //   direction: 'ltr',
-      //   format: '',
-      //   indent: 0,
-      //   type: 'code',
-      //   version: 1,
-      //   language: 'javascript',
-      // },
-      {
-        type: 'horizontalrule',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Custom Language Learning Blocks',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'YouTube Video Embed',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'youtube',
-        version: 1,
-        videoID: 'dQw4w9WgXcQ',
-        format: '',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Word Block',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'word-block',
-        version: 1,
-        wordID: 'word-1',
-        format: '',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Meaning Association Exercise',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'meaning-association',
-        version: 1,
-        wordIDs: ['word-1', 'word-2', 'word-3', 'word-4'],
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Short Answer: Vocabulary',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'answer',
-        version: 1,
-        wordIDs: ['word-5', 'word-6'],
-        requestDefinition: 'translation',
-        allowedInput: {
-          text: true,
-          audio: true,
-        },
-        promptMethod: ['phrase'],
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Short Answer: Custom',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'custom-answer',
-        version: 1,
-        data: {
-          prompt: 'Describe your learning experience',
-          wordIDs: ['word-1', 'word-2'],
-          questionIDs: ['question-custom-1'],
-        },
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Multiple Choice Quiz',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'quiz',
-        version: 1,
-        data: [
-          {
-            id: 'quiz-question-1',
-            answer: 'Paris',
-            correct: true,
-          },
-          {
-            id: 'quiz-question-2', 
-            answer: 'London',
-            correct: false,
-          },
-          {
-            id: 'quiz-question-3',
-            answer: 'Berlin', 
-            correct: false,
-          },
-          {
-            id: 'quiz-question-4',
-            answer: 'Madrid',
-            correct: false,
-          },
-        ],
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Audio Playlist',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'playlist',
-        version: 1,
-        fileIDs: ['audio-1', 'audio-2', 'audio-3'],
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Image Node',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'image',
-        version: 1,
-        src: MOCK_IMAGE_URL_1,
-        altText: 'Sample image - piano',
-        width: 400,
-        height: 300,
-        maxWidth: 500,
-        showCaption: false,
-        caption: {
-          editorState: {
-            root: {
-              children: [],
-              direction: null,
-              format: '',
-              indent: 0,
-              type: 'root',
-              version: 1,
-            },
-          },
-        },
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Layout Container',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'layout-container',
-        version: 1,
-        templateColumns: '1fr 1fr',
-        children: [
-          {
-            type: 'layout-item',
-            version: 1,
-            children: [
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Left column content',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'paragraph',
-                version: 1,
-              },
-            ],
-          },
-          {
-            type: 'layout-item',
-            version: 1,
-            children: [
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Right column content',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'paragraph',
-                version: 1,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Table',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h3',
-      },
-      {
-        type: 'table',
-        version: 1,
-        children: [
-          {
-            type: 'tablerow',
-            version: 1,
-            children: [
-              {
-                type: 'tablecell',
-                version: 1,
-                headerState: 1,
-                children: [
-                  {
-                    children: [
-                      {
-                        detail: 0,
-                        format: 1,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Header 1',
-                        type: 'text',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'paragraph',
-                    version: 1,
-                  },
-                ],
-              },
-              {
-                type: 'tablecell',
-                version: 1,
-                headerState: 1,
-                children: [
-                  {
-                    children: [
-                      {
-                        detail: 0,
-                        format: 1,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Header 2',
-                        type: 'text',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'paragraph',
-                    version: 1,
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            type: 'tablerow',
-            version: 1,
-            children: [
-              {
-                type: 'tablecell',
-                version: 1,
-                headerState: 0,
-                children: [
-                  {
-                    children: [
-                      {
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Cell 1',
-                        type: 'text',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'paragraph',
-                    version: 1,
-                  },
-                ],
-              },
-              {
-                type: 'tablecell',
-                version: 1,
-                headerState: 0,
-                children: [
-                  {
-                    children: [
-                      {
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Cell 2',
-                        type: 'text',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'paragraph',
-                    version: 1,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    direction: 'ltr',
-    format: '',
-    indent: 0,
-    type: 'root',
-    version: 1,
-  },
-};
-
-
 const mockFiles = [
   {
-    id: 'file-1',
-    name: 'sample-audio.mp3',
+    id: "file-1",
+    name: "sample-audio.mp3",
     path: MOCK_AUDIO_BASE64,
-    mimeType: 'audio/mpeg',
+    mimeType: "audio/mpeg",
     size: 2458000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'file-2',
-    name: 'vocabulary-image.jpeg',
+    id: "file-2",
+    name: "vocabulary-image.jpeg",
     path: MOCK_IMAGE_URL_2,
-    mimeType: 'image/jpeg',
+    mimeType: "image/jpeg",
     size: 125000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
   },
   {
-    id: 'file-3',
-    name: 'lesson-recording.mp3',
+    id: "file-3",
+    name: "lesson-recording.mp3",
     path: MOCK_AUDIO_BASE64,
-    mimeType: 'audio/mpeg',
+    mimeType: "audio/mpeg",
     size: 4856000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     waveformData: JSON.stringify(mockWaveformData.slice(50, 250)),
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'file-4',
-    name: 'diagram.jpeg',
+    id: "file-4",
+    name: "diagram.jpeg",
     path: MOCK_IMAGE_URL_1,
-    mimeType: 'image/jpeg',
+    mimeType: "image/jpeg",
     size: 340000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'file-5',
-    name: 'pronunciation-guide.mp3',
-    path:MOCK_AUDIO_BASE64,
-    mimeType: 'audio/mpeg',
+    id: "file-5",
+    name: "pronunciation-guide.mp3",
+    path: MOCK_AUDIO_BASE64,
+    mimeType: "audio/mpeg",
     size: 1234000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'file-6',
-    name: 'japanese-grammar-guide.pdf',
+    id: "file-6",
+    name: "japanese-grammar-guide.pdf",
     path: MOCK_JAPANESE_GRAMMAR_PDF,
-    mimeType: 'application/pdf',
+    mimeType: "application/pdf",
     size: 2458000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
   },
   {
-    id: 'file-7',
-    name: 'vocabulary-list-chapter-1.pdf',
+    id: "file-7",
+    name: "vocabulary-list-chapter-1.pdf",
     path: MOCK_VOCABULARY_LIST_PDF,
-    mimeType: 'application/pdf',
+    mimeType: "application/pdf",
     size: 458000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
   },
   {
-    id: 'file-8',
-    name: 'lesson-plan.pdf',
+    id: "file-8",
+    name: "lesson-plan.pdf",
     path: MOCK_LESSON_PLAN_PDF,
-    mimeType: 'application/pdf',
+    mimeType: "application/pdf",
     size: 1234000,
-    identityId: 'us-east-1:abc-123',
-    level: 'PROTECTED',
+    identityId: "us-east-1:abc-123",
+    level: "PROTECTED",
     createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
   },
 ];
@@ -1824,162 +706,173 @@ const mockFiles = [
 export const KitchenSink = {
   loaders: [
     async () => {
-
       clearMockData();
-      
+
       // Seed the kitchen sink lesson unit
 
       seedMockFiles(mockFiles);
-      
+
       // Create mock words for the word blocks
       seedMockWords([
         {
-          id: 'word-1',
-          phrase: '勉強',
-          definition: 'to study; studying',
-          pronunciation: 'べんきょう',
-          partOfSpeech: 'noun/verb',
-          context: 'education',
-          level: 'beginner',
+          id: "word-1",
+          phrase: "勉強",
+          definition: "to study; studying",
+          pronunciation: "べんきょう",
+          partOfSpeech: "noun/verb",
+          context: "education",
+          level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
           waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
         {
-          id: 'word-2',
-          phrase: '学校',
-          definition: 'school',
-          pronunciation: 'がっこう',
-          partOfSpeech: 'noun',
-          context: 'education',
-          level: 'beginner',
+          id: "word-2",
+          phrase: "学校",
+          definition: "school",
+          pronunciation: "がっこう",
+          partOfSpeech: "noun",
+          context: "education",
+          level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
           waveformData: JSON.stringify(mockWaveformData.slice(50, 200)),
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
         {
-          id: 'word-3',
-          phrase: '先生',
-          definition: 'teacher',
-          pronunciation: 'せんせい',
-          partOfSpeech: 'noun',
-          context: 'education',
-          level: 'beginner',
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          id: "word-3",
+          phrase: "先生",
+          definition: "teacher",
+          pronunciation: "せんせい",
+          partOfSpeech: "noun",
+          context: "education",
+          level: "beginner",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
         {
-          id: 'word-4',
-          phrase: '図書館',
-          definition: 'library',
-          pronunciation: 'としょかん',
-          partOfSpeech: 'noun',
-          context: 'education',
-          level: 'intermediate',
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          id: "word-4",
+          phrase: "図書館",
+          definition: "library",
+          pronunciation: "としょかん",
+          partOfSpeech: "noun",
+          context: "education",
+          level: "intermediate",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
         {
-          id: 'word-5',
-          phrase: 'bonjour',
-          definition: 'hello, good morning',
-          pronunciation: 'bon-ZHOOR',
-          partOfSpeech: 'interjection',
-          context: 'greetings',
-          level: 'beginner',
+          id: "word-5",
+          phrase: "bonjour",
+          definition: "hello, good morning",
+          pronunciation: "bon-ZHOOR",
+          partOfSpeech: "interjection",
+          context: "greetings",
+          level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
           waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
         {
-          id: 'word-6',
-          phrase: 'au revoir',
-          definition: 'goodbye',
-          pronunciation: 'oh ruh-VWAR',
-          partOfSpeech: 'interjection',
-          context: 'greetings',
-          level: 'beginner',
-          owner: 'mock-user-sub',
-          identityId: 'us-east-1:abc-123',
+          id: "word-6",
+          phrase: "au revoir",
+          definition: "goodbye",
+          pronunciation: "oh ruh-VWAR",
+          partOfSpeech: "interjection",
+          context: "greetings",
+          level: "beginner",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:abc-123",
         },
       ]);
-      
+
       // Seed mock questions for quiz and custom answer blocks
       seedMockQuestions([
         {
-          id: 'quiz-question-1',
-          prompt: 'What is the capital of France?',
-          answer: 'Paris',
-          hint: 'Known as the City of Light',
+          id: "quiz-question-1",
+          prompt: "What is the capital of France?",
+          answer: "Paris",
+          hint: "Known as the City of Light",
           audio: [MOCK_AUDIO_BASE64],
           audioWaveformData: JSON.stringify(mockWaveformData.slice(0, 100)),
           answerAudio: [MOCK_AUDIO_BASE64],
-          answerAudioWaveformData: JSON.stringify(mockWaveformData.slice(100, 200)),
-          owner: 'mock-user-sub',
+          answerAudioWaveformData: JSON.stringify(
+            mockWaveformData.slice(100, 200),
+          ),
+          owner: "mock-user-sub",
         },
         {
-          id: 'quiz-question-2',
-          prompt: 'What is the capital of France?', 
-          answer: 'London',
-          hint: 'This is incorrect - not the capital of France',
+          id: "quiz-question-2",
+          prompt: "What is the capital of France?",
+          answer: "London",
+          hint: "This is incorrect - not the capital of France",
           audio: [MOCK_AUDIO_BASE64],
           audioWaveformData: JSON.stringify(mockWaveformData.slice(50, 150)),
-          owner: 'mock-user-sub',
+          owner: "mock-user-sub",
         },
         {
-          id: 'quiz-question-3',
-          prompt: 'What is the capital of France?',
-          answer: 'Berlin', 
-          hint: 'This is incorrect - this is Germany\'s capital',
+          id: "quiz-question-3",
+          prompt: "What is the capital of France?",
+          answer: "Berlin",
+          hint: "This is incorrect - this is Germany's capital",
           audio: [MOCK_AUDIO_BASE64],
           audioWaveformData: JSON.stringify(mockWaveformData.slice(75, 175)),
-          owner: 'mock-user-sub',
+          owner: "mock-user-sub",
         },
         {
-          id: 'quiz-question-4',
-          prompt: 'What is the capital of France?',
-          answer: 'Madrid',
-          hint: 'This is incorrect - this is Spain\'s capital', 
+          id: "quiz-question-4",
+          prompt: "What is the capital of France?",
+          answer: "Madrid",
+          hint: "This is incorrect - this is Spain's capital",
           audio: [MOCK_AUDIO_BASE64],
           audioWaveformData: JSON.stringify(mockWaveformData.slice(125, 225)),
-          owner: 'mock-user-sub',
+          owner: "mock-user-sub",
         },
         {
-          id: 'question-custom-1',
-          prompt: 'Describe your learning experience with Japanese vocabulary',
-          answer: 'Sample answer about learning Japanese words and their meanings',
-          hint: 'Think about how studying vocabulary has helped you',
+          id: "question-custom-1",
+          prompt: "Describe your learning experience with Japanese vocabulary",
+          answer:
+            "Sample answer about learning Japanese words and their meanings",
+          hint: "Think about how studying vocabulary has helped you",
           audio: [MOCK_AUDIO_BASE64],
           audioWaveformData: JSON.stringify(mockWaveformData.slice(200, 300)),
           answerAudio: [MOCK_AUDIO_BASE64],
-          answerAudioWaveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
-          owner: 'mock-user-sub',
+          answerAudioWaveformData: JSON.stringify(
+            mockWaveformData.slice(300, 400),
+          ),
+          owner: "mock-user-sub",
         },
       ]);
-      
+
       // Create QuestionUnit relationships
       seedMockQuestionUnits([
-        { questionId: 'quiz-question-1', unitId: KITCHEN_SINK_ID },
-        { questionId: 'quiz-question-2', unitId: KITCHEN_SINK_ID },
-        { questionId: 'quiz-question-3', unitId: KITCHEN_SINK_ID },
-        { questionId: 'quiz-question-4', unitId: KITCHEN_SINK_ID },
-        { questionId: 'question-custom-1', unitId: KITCHEN_SINK_ID },
+        { questionId: "quiz-question-1", unitId: KITCHEN_SINK_ID },
+        { questionId: "quiz-question-2", unitId: KITCHEN_SINK_ID },
+        { questionId: "quiz-question-3", unitId: KITCHEN_SINK_ID },
+        { questionId: "quiz-question-4", unitId: KITCHEN_SINK_ID },
+        { questionId: "question-custom-1", unitId: KITCHEN_SINK_ID },
       ]);
-      
+
       // Seed the mock DataStore with kitchen sink data
       seedMockUnit({
         id: KITCHEN_SINK_ID,
-        name: 'Kitchen Sink - All Editor Blocks',
-        description: 'Comprehensive example showing all available editor block types',
+        name: "Kitchen Sink - All Editor Blocks",
+        description:
+          "Comprehensive example showing all available editor block types",
         data: JSON.stringify(kitchenSinkEditorState),
         _version: 1,
-        wordIDs: ['word-1', 'word-2', 'word-3', 'word-4', 'word-5', 'word-6'],
-        fileIDs: ['audio-1', 'audio-2', 'audio-3'],
-        questionIDs: ['quiz-question-1', 'quiz-question-2', 'quiz-question-3', 'quiz-question-4', 'question-custom-1'],
-        owner: 'mock-user-sub',
+        wordIDs: ["word-1", "word-2", "word-3", "word-4", "word-5", "word-6"],
+        fileIDs: ["audio-1", "audio-2", "audio-3"],
+        questionIDs: [
+          "quiz-question-1",
+          "quiz-question-2",
+          "quiz-question-3",
+          "quiz-question-4",
+          "question-custom-1",
+        ],
+        owner: "mock-user-sub",
       });
     },
   ],
@@ -1992,7 +885,7 @@ export const KitchenSink = {
 
 /**
  * Test all keyboard shortcuts (17 total)
- * 
+ *
  * Tests the following shortcuts:
  * - Text Formatting (5): Bold, Italic, Underline, Strikethrough, Clear
  * - Block Types (6): H1, H2, H3, Paragraph, Quote, Code Block
@@ -2003,130 +896,144 @@ export const KeyboardShortcutsTest = {
   loaders: [
     async () => {
       clearMockData();
-      
+
       seedMockUnit({
-        id: 'keyboard-shortcuts-test-id',
-        name: 'Keyboard Shortcuts Test',
-        description: 'Testing all keyboard shortcuts',
+        id: "keyboard-shortcuts-test-id",
+        name: "Keyboard Shortcuts Test",
+        description: "Testing all keyboard shortcuts",
         data: null,
         _version: 1,
-        owner: 'mock-user-sub',
+        owner: "mock-user-sub",
       });
     },
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'keyboard-shortcuts-test-id',
+    unitId: "keyboard-shortcuts-test-id",
     initializeMockData: false,
   },
   play: async ({ canvas, canvasElement }) => {
     // Note: Interactive tests disabled - @storybook/test not installed
     // TODO: Install @storybook/test and re-enable keyboard shortcut tests
     return;
-    
+
     // Wait for editor to load - get all textboxes and find the contenteditable editor
-    const textboxes = await canvas.findAllByRole('textbox');
-    const editorContent = textboxes.find(el => el.getAttribute('contenteditable') === 'true') || textboxes[0];
+    const textboxes = await canvas.findAllByRole("textbox");
+    const editorContent =
+      textboxes.find((el) => el.getAttribute("contenteditable") === "true") ||
+      textboxes[0];
     await userEvent.click(editorContent);
-    
+
     // ========== TEXT FORMATTING SHORTCUTS ==========
-    
+
     // Test Bold (Cmd+B / Ctrl+B)
-    await userEvent.keyboard('Bold text');
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    await userEvent.keyboard('{Meta>}b{/Meta}');
-    await userEvent.keyboard('{ArrowRight}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Bold text");
+    await userEvent.keyboard(
+      "{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}",
+    );
+    await userEvent.keyboard("{Meta>}b{/Meta}");
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Italic (Cmd+I / Ctrl+I)
-    await userEvent.keyboard('Italic text');
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    await userEvent.keyboard('{Meta>}i{/Meta}');
-    await userEvent.keyboard('{ArrowRight}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Italic text");
+    await userEvent.keyboard(
+      "{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}",
+    );
+    await userEvent.keyboard("{Meta>}i{/Meta}");
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Underline (Cmd+U / Ctrl+U)
-    await userEvent.keyboard('Underline text');
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    await userEvent.keyboard('{Meta>}u{/Meta}');
-    await userEvent.keyboard('{ArrowRight}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Underline text");
+    await userEvent.keyboard(
+      "{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}",
+    );
+    await userEvent.keyboard("{Meta>}u{/Meta}");
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Strikethrough (Cmd+Shift+S / Ctrl+Shift+S)
-    await userEvent.keyboard('Strikethrough text');
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    await userEvent.keyboard('{Meta>}{Shift>}s{/Shift}{/Meta}');
-    await userEvent.keyboard('{ArrowRight}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Strikethrough text");
+    await userEvent.keyboard(
+      "{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}",
+    );
+    await userEvent.keyboard("{Meta>}{Shift>}s{/Shift}{/Meta}");
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Clear Formatting (Cmd+Shift+0 / Ctrl+Shift+0)
-    await userEvent.keyboard('Text to clear');
-    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    await userEvent.keyboard('{Meta>}b{/Meta}'); // Make it bold first
-    await userEvent.keyboard('{Meta>}{Shift>}0{/Shift}{/Meta}'); // Clear formatting
-    await userEvent.keyboard('{ArrowRight}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Text to clear");
+    await userEvent.keyboard(
+      "{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}",
+    );
+    await userEvent.keyboard("{Meta>}b{/Meta}"); // Make it bold first
+    await userEvent.keyboard("{Meta>}{Shift>}0{/Shift}{/Meta}"); // Clear formatting
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{Enter}");
+
     // ========== BLOCK TYPE SHORTCUTS ==========
-    
+
     // Test Heading 1 (Cmd+Shift+1 / Ctrl+Shift+1)
-    await userEvent.keyboard('{Enter}Heading 1');
-    await userEvent.keyboard('{Meta>}{Shift>}1{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("{Enter}Heading 1");
+    await userEvent.keyboard("{Meta>}{Shift>}1{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Heading 2 (Cmd+Shift+2 / Ctrl+Shift+2)
-    await userEvent.keyboard('Heading 2');
-    await userEvent.keyboard('{Meta>}{Shift>}2{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Heading 2");
+    await userEvent.keyboard("{Meta>}{Shift>}2{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Heading 3 (Cmd+Shift+3 / Ctrl+Shift+3)
-    await userEvent.keyboard('Heading 3');
-    await userEvent.keyboard('{Meta>}{Shift>}3{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Heading 3");
+    await userEvent.keyboard("{Meta>}{Shift>}3{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Quote (Cmd+' / Ctrl+')
-    await userEvent.keyboard('This is a quote');
+    await userEvent.keyboard("This is a quote");
     await userEvent.keyboard("{Meta>}'{/Meta}");
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("{Enter}");
+
     // Test Code Block (Cmd+Shift+C / Ctrl+Shift+C)
-    await userEvent.keyboard('const code = true;');
-    await userEvent.keyboard('{Meta>}{Shift>}c{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}{Enter}');
-    
+    await userEvent.keyboard("const code = true;");
+    await userEvent.keyboard("{Meta>}{Shift>}c{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}{Enter}");
+
     // ========== LIST SHORTCUTS ==========
-    
+
     // Test Bullet List (Cmd+Shift+8 / Ctrl+Shift+8)
-    await userEvent.keyboard('Bullet item');
-    await userEvent.keyboard('{Meta>}{Shift>}8{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}Second bullet{Enter}{Enter}');
-    
+    await userEvent.keyboard("Bullet item");
+    await userEvent.keyboard("{Meta>}{Shift>}8{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}Second bullet{Enter}{Enter}");
+
     // Test Numbered List (Cmd+Shift+7 / Ctrl+Shift+7)
-    await userEvent.keyboard('Numbered item');
-    await userEvent.keyboard('{Meta>}{Shift>}7{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}Second number{Enter}{Enter}');
-    
+    await userEvent.keyboard("Numbered item");
+    await userEvent.keyboard("{Meta>}{Shift>}7{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}Second number{Enter}{Enter}");
+
     // ========== ALIGNMENT SHORTCUTS ==========
-    
+
     // Test Left Align (Cmd+Shift+L / Ctrl+Shift+L)
-    await userEvent.keyboard('Left aligned text');
-    await userEvent.keyboard('{Meta>}{Shift>}l{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Left aligned text");
+    await userEvent.keyboard("{Meta>}{Shift>}l{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Center Align (Cmd+Shift+E / Ctrl+Shift+E)
-    await userEvent.keyboard('Center aligned text');
-    await userEvent.keyboard('{Meta>}{Shift>}e{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Center aligned text");
+    await userEvent.keyboard("{Meta>}{Shift>}e{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Right Align (Cmd+Shift+R / Ctrl+Shift+R)
-    await userEvent.keyboard('Right aligned text');
-    await userEvent.keyboard('{Meta>}{Shift>}r{/Shift}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
+    await userEvent.keyboard("Right aligned text");
+    await userEvent.keyboard("{Meta>}{Shift>}r{/Shift}{/Meta}");
+    await userEvent.keyboard("{Enter}");
+
     // Test Justify Align (Cmd+Shift+J / Ctrl+Shift+J)
-    await userEvent.keyboard('Justified text that should stretch across the full width of the editor');
-    await userEvent.keyboard('{Meta>}{Shift>}j{/Shift}{/Meta}');
-    
+    await userEvent.keyboard(
+      "Justified text that should stretch across the full width of the editor",
+    );
+    await userEvent.keyboard("{Meta>}{Shift>}j{/Shift}{/Meta}");
+
     // Final verification: scroll to top to see all results
     editorContent.scrollTop = 0;
   },
@@ -2134,7 +1041,7 @@ export const KeyboardShortcutsTest = {
 
 /**
  * Keyboard Shortcuts Demo - Automated Playthrough
- * 
+ *
  * Comprehensive demonstration of all available keyboard shortcuts.
  * This story uses the keyboard-shortcuts-script to automatically showcase:
  * - Text formatting (Bold, Italic, Underline, Strikethrough)
@@ -2146,14 +1053,14 @@ export const KeyboardShortcutsTest = {
  * - Markdown shortcuts (#, -, >, etc.)
  * - Selection shortcuts
  * - Clear formatting
- * 
+ *
  * See docs/KEYBOARD_SHORTCUTS.md for complete reference.
  */
 export const KeyboardShortcutsDemo = {
   args: {},
   render: () => <Editor />,
   parameters: {
-    unitId: 'keyboard-shortcuts-demo-id',
+    unitId: "keyboard-shortcuts-demo-id",
     initializeMockData: false,
     test: {
       timeout: 120000,
@@ -2188,68 +1095,74 @@ This story runs through all available keyboard shortcuts automatically. Watch as
   },
   play: async ({ canvasElement }) => {
     // Import the keyboard shortcuts script
-    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
-    
+    const { createKeyboardShortcutsPlay } =
+      await import("../../../.storybook/code/keyboard-shortcuts-script.ts");
+
     // Create and execute the play function
-    const playFn = createKeyboardShortcutsPlay(['all']);
+    const playFn = createKeyboardShortcutsPlay(["all"]);
     await playFn({ canvasElement });
   },
 };
 
 /**
  * Keyboard Shortcuts - Text Formatting Only
- * 
+ *
  * Focused demo of text formatting shortcuts only.
  */
 export const KeyboardShortcutsTextFormatting = {
   args: {},
   render: () => <Editor />,
   parameters: {
-    unitId: 'keyboard-shortcuts-text-formatting-id',
+    unitId: "keyboard-shortcuts-text-formatting-id",
     initializeMockData: false,
   },
   play: async ({ canvasElement }) => {
-    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
-    const playFn = createKeyboardShortcutsPlay(['textFormatting', 'clearFormatting']);
+    const { createKeyboardShortcutsPlay } =
+      await import("../../../.storybook/code/keyboard-shortcuts-script.ts");
+    const playFn = createKeyboardShortcutsPlay([
+      "textFormatting",
+      "clearFormatting",
+    ]);
     await playFn({ canvasElement });
   },
 };
 
 /**
  * Keyboard Shortcuts - Block Types Only
- * 
+ *
  * Focused demo of block type shortcuts (headings, lists, quotes, code).
  */
 export const KeyboardShortcutsBlockTypes = {
   args: {},
   render: () => <Editor />,
   parameters: {
-    unitId: 'keyboard-shortcuts-block-types-id',
+    unitId: "keyboard-shortcuts-block-types-id",
     initializeMockData: false,
   },
   play: async ({ canvasElement }) => {
-    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
-    const playFn = createKeyboardShortcutsPlay(['blockTypes', 'markdown']);
+    const { createKeyboardShortcutsPlay } =
+      await import("../../../.storybook/code/keyboard-shortcuts-script.ts");
+    const playFn = createKeyboardShortcutsPlay(["blockTypes", "markdown"]);
     await playFn({ canvasElement });
   },
 };
 
 /**
  * Keyboard Shortcuts - Alignment Only
- * 
+ *
  * Focused demo of text alignment shortcuts.
  */
 export const KeyboardShortcutsAlignment = {
   args: {},
   render: () => <Editor />,
   parameters: {
-    unitId: 'keyboard-shortcuts-alignment-id',
+    unitId: "keyboard-shortcuts-alignment-id",
     initializeMockData: false,
   },
   play: async ({ canvasElement }) => {
-    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
-    const playFn = createKeyboardShortcutsPlay(['alignment']);
+    const { createKeyboardShortcutsPlay } =
+      await import("../../../.storybook/code/keyboard-shortcuts-script.ts");
+    const playFn = createKeyboardShortcutsPlay(["alignment"]);
     await playFn({ canvasElement });
   },
 };
-

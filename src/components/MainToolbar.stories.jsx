@@ -1,13 +1,13 @@
-import React from 'react';
-import { expect, within, waitFor, userEvent } from 'storybook/test';
-import { Box, Typography } from '@mui/material';
-import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from './MainToolbar';
+import React from "react";
+import { expect, within, waitFor, userEvent } from "storybook/test";
+import { Box, Typography } from "@mui/material";
+import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from "./MainToolbar";
 
 export default {
-  title: '📚 Creating Lessons/Main Toolbar',
+  title: "✏️ Lesson Editor/Toolbar",
   component: MainToolbar,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -26,7 +26,7 @@ Wrap page content with the MainToolbar component to add navigation.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export const FullToolbar = {
@@ -38,30 +38,40 @@ export const FullToolbar = {
         </Typography>
         <Typography variant="body1" paragraph>
           This is the content below the toolbar. The MainToolbar component wraps
-          the page content and provides consistent navigation across the application.
+          the page content and provides consistent navigation across the
+          application.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          The toolbar includes menus for user actions, settings, and help resources.
+          The toolbar includes menus for user actions, settings, and help
+          resources.
         </Typography>
       </Box>
     </MainToolbar>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for toolbar to render (DeferredStory decorator delays initial render)
-    const menuButton = await canvas.findByRole('button', { name: /menu/i }, { timeout: 10000 });
+    const menuButton = await canvas.findByRole(
+      "button",
+      { name: /menu/i },
+      { timeout: 10000 },
+    );
     expect(menuButton).toBeInTheDocument();
-    
+
     // Verify page content is visible
-    await waitFor(() => {
-      expect(canvas.getByText('Page Content')).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText("Page Content")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: 'Complete toolbar with page content, demonstrating typical usage in the application.',
+        story:
+          "Complete toolbar with page content, demonstrating typical usage in the application.",
       },
     },
   },
@@ -69,29 +79,43 @@ export const FullToolbar = {
 
 export const SettingsMenuOnly = {
   render: () => (
-    <Box sx={{ p: 4, bgcolor: '#1976d2', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Box
+      sx={{
+        p: 4,
+        bgcolor: "#1976d2",
+        minHeight: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <SettingsMenu />
     </Box>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for settings button and click it
-    const settingsButton = await canvas.findByRole('button', { name: /settings/i });
+    const settingsButton = await canvas.findByRole("button", {
+      name: /settings/i,
+    });
     expect(settingsButton).toBeInTheDocument();
-    
+
     await userEvent.click(settingsButton);
-    
+
     // Verify menu opens (using screen since menu renders in portal)
-    await waitFor(() => {
-      const menu = document.querySelector('[role="menu"]');
-      expect(menu).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const menu = document.querySelector('[role="menu"]');
+        expect(menu).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: 'Settings menu component displayed in isolation.',
+        story: "Settings menu component displayed in isolation.",
       },
     },
   },
@@ -99,29 +123,41 @@ export const SettingsMenuOnly = {
 
 export const HelpMenuOnly = {
   render: () => (
-    <Box sx={{ p: 4, bgcolor: '#1976d2', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Box
+      sx={{
+        p: 4,
+        bgcolor: "#1976d2",
+        minHeight: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <HelpMenu />
     </Box>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for help button and click it
-    const helpButton = await canvas.findByRole('button', { name: /help/i });
+    const helpButton = await canvas.findByRole("button", { name: /help/i });
     expect(helpButton).toBeInTheDocument();
-    
+
     await userEvent.click(helpButton);
-    
+
     // Verify menu opens
-    await waitFor(() => {
-      const menu = document.querySelector('[role="menu"]');
-      expect(menu).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const menu = document.querySelector('[role="menu"]');
+        expect(menu).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: 'Help menu component displayed in isolation.',
+        story: "Help menu component displayed in isolation.",
       },
     },
   },
@@ -129,29 +165,45 @@ export const HelpMenuOnly = {
 
 export const UserMenuOnly = {
   render: () => (
-    <Box sx={{ p: 4, bgcolor: '#1976d2', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Box
+      sx={{
+        p: 4,
+        bgcolor: "#1976d2",
+        minHeight: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <UserMenu />
     </Box>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for user menu button and click it (DeferredStory decorator delays initial render)
-    const userButton = await canvas.findByRole('button', { name: /profile/i }, { timeout: 10000 });
+    const userButton = await canvas.findByRole(
+      "button",
+      { name: /profile/i },
+      { timeout: 10000 },
+    );
     expect(userButton).toBeInTheDocument();
-    
+
     await userEvent.click(userButton);
-    
+
     // Verify menu opens
-    await waitFor(() => {
-      const menu = document.querySelector('[role="menu"]');
-      expect(menu).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const menu = document.querySelector('[role="menu"]');
+        expect(menu).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: 'User menu component displayed in isolation.',
+        story: "User menu component displayed in isolation.",
       },
     },
   },
@@ -165,8 +217,9 @@ export const JoinSectionDemo = {
           Join a Section
         </Typography>
         <Typography variant="body1" paragraph>
-          Click the person-add icon in the toolbar to open the Join Section dialog.
-          Use the demo code <strong>DEMO-2026</strong> to simulate joining a class.
+          Click the person-add icon in the toolbar to open the Join Section
+          dialog. Use the demo code <strong>DEMO-2026</strong> to simulate
+          joining a class.
         </Typography>
       </Box>
     </MainToolbar>
@@ -175,26 +228,37 @@ export const JoinSectionDemo = {
     const canvas = within(canvasElement);
 
     // Click the "Add to Section" button to open the dialog (DeferredStory decorator delays initial render)
-    const joinButton = await canvas.findByRole('button', { name: /add to section/i }, { timeout: 10000 });
+    const joinButton = await canvas.findByRole(
+      "button",
+      { name: /add to section/i },
+      { timeout: 10000 },
+    );
     await userEvent.click(joinButton);
 
     // Wait for the dialog to appear
-    await waitFor(() => {
-      const dialog = document.querySelector('[data-tour="join-section-dialog"]');
-      expect(dialog).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const dialog = document.querySelector(
+          '[data-tour="join-section-dialog"]',
+        );
+        expect(dialog).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     // Type the demo join code
-    const codeInput = document.querySelector('[data-tour="join-code-input"] input') || document.querySelector('#code');
+    const codeInput =
+      document.querySelector('[data-tour="join-code-input"] input') ||
+      document.querySelector("#code");
     expect(codeInput).toBeInTheDocument();
-    await userEvent.type(codeInput, 'DEMO-2026');
+    await userEvent.type(codeInput, "DEMO-2026");
   },
   parameters: {
     docs: {
       description: {
-        story: 'Demonstrates the Join Section dialog flow. Opens the dialog and fills in a demo code (`DEMO-2026`) that will succeed in Storybook.',
+        story:
+          "Demonstrates the Join Section dialog flow. Opens the dialog and fills in a demo code (`DEMO-2026`) that will succeed in Storybook.",
       },
     },
   },
 };
-

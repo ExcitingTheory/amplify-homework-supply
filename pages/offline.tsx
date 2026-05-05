@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Typography, Button, Container } from '@mui/material';
 import { WifiOff, Refresh } from '@mui/icons-material';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import nextI18nextConfig from '../next-i18next.config.js';
 
 /**
  * Offline fallback page shown by the service worker when a navigation
@@ -42,4 +44,12 @@ export default function OfflinePage() {
       </Box>
     </Container>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'], nextI18nextConfig)),
+    },
+  };
 }

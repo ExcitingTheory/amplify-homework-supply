@@ -1,0 +1,31 @@
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { BadgeCoinFlip } from './BadgeCoinFlip'
+
+const meta: Meta<typeof BadgeCoinFlip> = {
+  title: '🏆 Gamification/Badges & Celebrations/Badge Coin Flip',
+  component: BadgeCoinFlip,
+}
+export default meta
+
+type Story = StoryObj<typeof BadgeCoinFlip>
+
+export const Sharpshooter: Story = {
+  args: {
+    open: true,
+    badgeEmoji: '🎯',
+    badgeName: 'Sharpshooter',
+    badgeDescription: '3 perfect scores in a row',
+    onClose: () => {},
+  },
+}
+
+export const FirstSteps: Story = {
+  args: {
+    open: true,
+    badgeEmoji: '📝',
+    badgeName: 'First Steps',
+    badgeDescription: 'Submitted your first assignment',
+    onClose: () => {},
+  },
+}

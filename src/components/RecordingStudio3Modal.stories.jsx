@@ -3,18 +3,18 @@
  * Demonstrates the fullscreen modal wrapper with preset-aware save flows
  */
 
-import React, { useState } from 'react';
-import { expect, fn } from 'storybook/test';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import RecordingStudio3Modal from './RecordingStudio3Modal';
-import FilesContext from '../context/fileContext';
-import { DemoBanner } from '../../.storybook/components/DemoBanner';
+import React, { useState } from "react";
+import { expect, fn } from "storybook/test";
+import { within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import RecordingStudio3Modal from "./RecordingStudio3Modal";
+import FilesContext from "../context/fileContext";
+import { DemoBanner } from "../../.storybook/components/DemoBanner";
 import {
   createWordPreset,
   createConversationPreset,
   createQuestionPreset,
-} from '../utils/recordingStudioPresets';
+} from "../utils/recordingStudioPresets";
 
 // ─── Mock Helpers ───────────────────────────────────────────
 
@@ -24,45 +24,49 @@ const generateMockWaveform = (length = 100) => {
 
 const mockFilesContext = {
   session: {
-    identityId: 'us-east-1:mock-identity-123',
-    username: 'demo-user',
+    identityId: "us-east-1:mock-identity-123",
+    username: "demo-user",
   },
   files: [],
   uploadFile: async (file) => {
-    console.log('Mock upload:', file.name);
+    console.log("Mock upload:", file.name);
     return { path: `protected/${file.name}`, key: `protected/${file.name}` };
   },
 };
 
 // Preset instances for stories
 const wordPreset = createWordPreset({
-  phrase: 'こんにちは',
-  pronunciation: 'konnichiwa',
-  definition: 'Hello. Good afternoon.',
+  phrase: "こんにちは",
+  pronunciation: "konnichiwa",
+  definition: "Hello. Good afternoon.",
 });
 
-const conversationPreset = createConversationPreset('Coffee Shop');
+const conversationPreset = createConversationPreset("Coffee Shop");
 
 const questionPreset = createQuestionPreset({
-  prompt: 'What is the capital of France?',
-  correctAnswer: 'Paris',
+  prompt: "What is the capital of France?",
+  correctAnswer: "Paris",
 });
 
 // Script with existing takes (for confirmation preview testing)
 const wordPresetWithTakes = createWordPreset({
-  phrase: 'agua',
-  pronunciation: 'agua',
-  definition: 'water',
+  phrase: "agua",
+  pronunciation: "agua",
+  definition: "water",
 });
 wordPresetWithTakes.scriptData.dialogue[0].takes = [
   {
     id: Date.now() - 5000,
-    type: 'tts',
+    type: "tts",
     audioBlob: null,
-    audioPath: 'protected/agua-phrase-take1.mp3',
+    audioPath: "protected/agua-phrase-take1.mp3",
     waveformData: generateMockWaveform(100),
     duration: 1.5,
-    file: { key: 'protected/agua-phrase-take1.mp3', level: 'protected', type: 'audio/mpeg' },
+    file: {
+      key: "protected/agua-phrase-take1.mp3",
+      level: "protected",
+      type: "audio/mpeg",
+    },
     createdAt: new Date(Date.now() - 5000).toISOString(),
   },
 ];
@@ -70,27 +74,31 @@ wordPresetWithTakes.scriptData.dialogue[0].activeTakeIndex = 0;
 // definition_track has no take → triggers "missing audio" warning
 
 // Conversation with some recorded lines
-const conversationWithTakes = createConversationPreset('Recorded Session', [
-  { id: 'teacher', name: 'Teacher', voice: 'nova' },
-  { id: 'student', name: 'Student', voice: 'echo' },
+const conversationWithTakes = createConversationPreset("Recorded Session", [
+  { id: "teacher", name: "Teacher", voice: "nova" },
+  { id: "student", name: "Student", voice: "echo" },
 ]);
 conversationWithTakes.scriptData.dialogue = [
   {
     id: 1,
-    speaker: 'teacher',
-    text: 'Good morning, class!',
+    speaker: "teacher",
+    text: "Good morning, class!",
     timing: { start: 0, end: 2 },
-    direction: 'enthusiastic',
-    emotion: 'cheerful',
+    direction: "enthusiastic",
+    emotion: "cheerful",
     takes: [
       {
         id: Date.now() - 3000,
-        type: 'human',
+        type: "human",
         audioBlob: null,
-        audioPath: 'protected/teacher-greeting.mp3',
+        audioPath: "protected/teacher-greeting.mp3",
         waveformData: generateMockWaveform(120),
         duration: 2.0,
-        file: { key: 'protected/teacher-greeting.mp3', level: 'protected', type: 'audio/mpeg' },
+        file: {
+          key: "protected/teacher-greeting.mp3",
+          level: "protected",
+          type: "audio/mpeg",
+        },
         createdAt: new Date(Date.now() - 3000).toISOString(),
       },
     ],
@@ -98,11 +106,11 @@ conversationWithTakes.scriptData.dialogue = [
   },
   {
     id: 2,
-    speaker: 'student',
-    text: 'Good morning!',
+    speaker: "student",
+    text: "Good morning!",
     timing: { start: 2.5, end: 4 },
-    direction: '',
-    emotion: 'neutral',
+    direction: "",
+    emotion: "neutral",
     takes: [],
     activeTakeIndex: null,
   },
@@ -111,10 +119,10 @@ conversationWithTakes.scriptData.dialogue = [
 // ─── Story Config ───────────────────────────────────────────
 
 export default {
-  title: '🎙️ Recording Audio/Recording Studio Modal',
+  title: "🎙️ Recording Studio/Recording Studio Modal",
   component: RecordingStudio3Modal,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -150,11 +158,11 @@ Fullscreen modal wrapper for RecordingStudio3. Used in both **Dictionary** and *
   ],
   argTypes: {
     preset: {
-      control: { type: 'select' },
-      options: ['word', 'conversation', 'question'],
+      control: { type: "select" },
+      options: ["word", "conversation", "question"],
     },
-    open: { control: 'boolean' },
-    readOnly: { control: 'boolean' },
+    open: { control: "boolean" },
+    readOnly: { control: "boolean" },
   },
 };
 
@@ -166,26 +174,32 @@ export const WordPreset = {
     open: true,
     onClose: fn(),
     onSave: fn(async (payload) => {
-      console.log('Save payload (word):', payload);
+      console.log("Save payload (word):", payload);
     }),
-    title: 'Audio Studio — こんにちは',
-    preset: 'word',
+    title: "Audio Studio — こんにちは",
+    preset: "word",
     scriptData: wordPreset.scriptData,
     lockedTracks: wordPreset.lockedTracks,
-    identityId: { id: 'us-east-1:mock-identity-123' },
+    identityId: { id: "us-east-1:mock-identity-123" },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(document.body);
 
     // Modal should be open with title
-    await waitFor(() => {
-      expect(canvas.getByText(/Audio Studio/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Audio Studio/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // RS3 renders inside with word data
-    await waitFor(() => {
-      expect(canvas.getAllByText(/こんにちは/)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getAllByText(/こんにちは/)[0]).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Done button should be visible
     expect(canvas.getByText(/Done/i)).toBeInTheDocument();
@@ -198,19 +212,22 @@ export const ConversationPreset = {
     open: true,
     onClose: fn(),
     onSave: fn(async (payload) => {
-      console.log('Save payload (conversation):', payload);
+      console.log("Save payload (conversation):", payload);
     }),
-    title: 'Record Conversation — Coffee Shop',
-    preset: 'conversation',
+    title: "Record Conversation — Coffee Shop",
+    preset: "conversation",
     scriptData: conversationPreset.scriptData,
     lockedTracks: conversationPreset.lockedTracks,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(document.body);
 
-    await waitFor(() => {
-      expect(canvas.getByText(/Record Conversation/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Record Conversation/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Empty conversation starts with no dialogue lines
     expect(canvas.getByText(/Done/i)).toBeInTheDocument();
@@ -223,23 +240,31 @@ export const QuestionPreset = {
     open: true,
     onClose: fn(),
     onSave: fn(async (payload) => {
-      console.log('Save payload (question):', payload);
+      console.log("Save payload (question):", payload);
     }),
-    title: 'Audio Studio — Geography Quiz',
-    preset: 'question',
+    title: "Audio Studio — Geography Quiz",
+    preset: "question",
     scriptData: questionPreset.scriptData,
     lockedTracks: questionPreset.lockedTracks,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(document.body);
 
-    await waitFor(() => {
-      expect(canvas.getByText(/Audio Studio/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Audio Studio/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
-    await waitFor(() => {
-      expect(canvas.getAllByText(/What is the capital of France/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(
+          canvas.getAllByText(/What is the capital of France/i)[0],
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     expect(canvas.getAllByText(/Paris/)[0]).toBeInTheDocument();
   },
@@ -254,7 +279,7 @@ export const ConfirmationPreview = () => {
       open={open}
       onClose={() => setOpen(false)}
       onSave={async (payload) => {
-        console.log('Save confirmed:', payload);
+        console.log("Save confirmed:", payload);
         setOpen(false);
       }}
       title="Audio Studio — agua"
@@ -282,8 +307,8 @@ export const ReadOnly = {
     open: true,
     onClose: fn(),
     onSave: fn(),
-    title: 'Review Recording — agua',
-    preset: 'word',
+    title: "Review Recording — agua",
+    preset: "word",
     scriptData: wordPresetWithTakes.scriptData,
     lockedTracks: wordPresetWithTakes.lockedTracks,
     readOnly: true,
@@ -291,12 +316,15 @@ export const ReadOnly = {
   play: async ({ canvasElement }) => {
     const canvas = within(document.body);
 
-    await waitFor(() => {
-      expect(canvas.getByText(/Review Recording/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Review Recording/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Done button should be disabled in read-only mode
-    const doneButton = canvas.getByText(/Done/i).closest('button');
+    const doneButton = canvas.getByText(/Done/i).closest("button");
     expect(doneButton).toBeDisabled();
   },
 };
@@ -307,19 +335,22 @@ export const ConversationWithRecordedTakes = {
     open: true,
     onClose: fn(),
     onSave: fn(async (payload) => {
-      console.log('Conversation save:', payload);
+      console.log("Conversation save:", payload);
     }),
-    title: 'Record Conversation — Recorded Session',
-    preset: 'conversation',
+    title: "Record Conversation — Recorded Session",
+    preset: "conversation",
     scriptData: conversationWithTakes.scriptData,
     lockedTracks: [],
   },
   play: async ({ canvasElement }) => {
     const canvas = within(document.body);
 
-    await waitFor(() => {
-      expect(canvas.getAllByText(/Good morning/i)[0]).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getAllByText(/Good morning/i)[0]).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
   },
 };
 
@@ -329,8 +360,8 @@ export const Closed = {
     open: false,
     onClose: fn(),
     onSave: fn(),
-    title: 'Should Not Be Visible',
-    preset: 'word',
+    title: "Should Not Be Visible",
+    preset: "word",
     scriptData: wordPreset.scriptData,
     lockedTracks: wordPreset.lockedTracks,
   },
@@ -341,19 +372,30 @@ export const Interactive = () => {
   const [open, setOpen] = useState(false);
   const [lastPayload, setLastPayload] = useState(null);
 
-  const preset = createConversationPreset('Interactive Demo', [
-    { id: 'speaker_a', name: 'Speaker A', voice: 'nova' },
-    { id: 'speaker_b', name: 'Speaker B', voice: 'onyx' },
+  const preset = createConversationPreset("Interactive Demo", [
+    { id: "speaker_a", name: "Speaker A", voice: "nova" },
+    { id: "speaker_b", name: "Speaker B", voice: "onyx" },
   ]);
 
   return (
     <div style={{ padding: 24 }}>
-      <button onClick={() => setOpen(true)} style={{ fontSize: 16, padding: '8px 16px' }}>
+      <button
+        onClick={() => setOpen(true)}
+        style={{ fontSize: 16, padding: "8px 16px" }}
+      >
         Open Recording Studio Modal
       </button>
 
       {lastPayload && (
-        <pre style={{ marginTop: 16, background: '#f5f5f5', padding: 16, maxHeight: 300, overflow: 'auto' }}>
+        <pre
+          style={{
+            marginTop: 16,
+            background: "#f5f5f5",
+            padding: 16,
+            maxHeight: 300,
+            overflow: "auto",
+          }}
+        >
           {JSON.stringify(lastPayload, null, 2)}
         </pre>
       )}
@@ -376,7 +418,8 @@ export const Interactive = () => {
 Interactive.parameters = {
   docs: {
     description: {
-      story: 'Click the button to open the modal. Add speakers, write dialogue, record audio, then click Done → Confirm & Save to see the payload.',
+      story:
+        "Click the button to open the modal. Add speakers, write dialogue, record audio, then click Done → Confirm & Save to see the payload.",
     },
   },
 };

@@ -6,7 +6,6 @@
  */
 
 import { seedMockUnit, seedMockGrade, seedMockFiles, seedMockSettings } from './aws-amplify-data';
-import { Document, ParsedContent, Word, Unit } from '../../src/models';
 
 /**
  * Mock vocabulary data for testing

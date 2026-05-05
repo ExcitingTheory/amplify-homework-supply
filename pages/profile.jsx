@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 import { fetchUserAttributes } from 'aws-amplify/auth';
-import { CircularProgress, Box } from '@mui/material';
-import MyAuth from '../src/components/authenticator';
+import Box from '@mui/material/Box';
+import AppSkeleton from '../src/components/AppSkeleton';
+import MyAuth from '../src/components/AmplifyAuthenticator';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../next-i18next.config';
 
@@ -24,11 +25,7 @@ function ProfileRedirect() {
     redirect();
   }, [router]);
 
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <CircularProgress />
-    </Box>
-  );
+  return <AppSkeleton variant="redirect" />;
 }
 
 export default function WrappedPage() {

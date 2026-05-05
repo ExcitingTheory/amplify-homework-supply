@@ -23,7 +23,7 @@ import VerticalTabsRo from './components/VerticalTabsRo';
 import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import { AutocompleteProvider } from './context/SharedAutocompleteContext';
 import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper';
-import LanguageEditorTheme from './components/LanguageEditorTheme';
+import LanguageEditorTheme from './config/LanguageEditorTheme';
 
 import StoryProgressPlugin from './plugins/StoryProgressPlugin';
 // @ts-ignore - JSX file without proper module exports

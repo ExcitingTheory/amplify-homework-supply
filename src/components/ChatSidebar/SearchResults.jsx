@@ -7,7 +7,6 @@ import {
     Chip,
     Button,
     Tooltip,
-    CircularProgress,
     ButtonGroup,
     Link,
     Collapse,
@@ -670,7 +669,7 @@ export default function SearchResults({
                                             color={linkState === 'linked' ? 'success' : 'default'}
                                         >
                                             {linkState === 'loading' ? (
-                                                <CircularProgress size={16} />
+                                                <Skeleton variant="circular" width={16} height={16} />
                                             ) : (
                                                 <AddIcon fontSize="small" />
                                             )}

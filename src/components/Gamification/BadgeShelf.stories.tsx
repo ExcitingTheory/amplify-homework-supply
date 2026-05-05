@@ -4,7 +4,7 @@ import { BadgeShelf } from './BadgeShelf'
 import type { EarnedBadge } from './BadgeShelf'
 
 const meta: Meta<typeof BadgeShelf> = {
-  title: 'Gamification/BadgeShelf',
+  title: '🏆 Gamification/Badges & Celebrations/Badge Shelf',
   component: BadgeShelf,
 }
 export default meta
@@ -21,6 +21,16 @@ const allBadges: EarnedBadge[] = [
   { badgeType: 'DEEP_THINKER', awardedAt: '2025-03-10T12:00:00Z' },
   { badgeType: 'TOP_OF_CLASS', awardedAt: '2025-03-20T10:00:00Z' },
   { badgeType: 'PERFECTIONIST', awardedAt: '2025-04-01T15:00:00Z' },
+  // Avatar unlock badges
+  { badgeType: 'AVATAR_COLORS', awardedAt: '2025-04-05T10:00:00Z' },
+  { badgeType: 'AVATAR_DETAILED', awardedAt: '2025-04-10T10:00:00Z' },
+  { badgeType: 'AVATAR_ACCESSORIES', awardedAt: '2025-04-15T10:00:00Z' },
+  { badgeType: 'AVATAR_PORTRAIT', awardedAt: '2025-04-20T10:00:00Z' },
+  // Bot Whisperer badges
+  { badgeType: 'BOT_WHISPERER_I', awardedAt: '2025-02-05T10:00:00Z' },
+  { badgeType: 'BOT_WHISPERER_II', awardedAt: '2025-03-15T10:00:00Z' },
+  { badgeType: 'BOT_WHISPERER_III', awardedAt: '2025-04-08T10:00:00Z' },
+  { badgeType: 'BOT_WHISPERER_IV', awardedAt: '2025-04-25T10:00:00Z' },
 ]
 
 export const AllEarned: Story = {
@@ -81,5 +91,22 @@ export const EarnedOnlyEmpty: Story = {
   args: {
     earnedBadges: [],
     earnedOnly: true,
+  },
+}
+
+/** Mid-game student: some avatar unlocks earned, Bot Whisperer progression started. */
+export const AvatarProgression: Story = {
+  args: {
+    earnedBadges: [
+      { badgeType: 'FIRST_SUBMISSION', awardedAt: '2025-01-15T10:00:00Z' },
+      { badgeType: 'CONSISTENT', awardedAt: '2025-02-15T09:00:00Z' },
+      // Avatar: reached L3 (colors + detailed style unlocked)
+      { badgeType: 'AVATAR_COLORS', awardedAt: '2025-02-20T10:00:00Z' },
+      { badgeType: 'AVATAR_DETAILED', awardedAt: '2025-03-01T10:00:00Z' },
+      // Bot: Whisperer I + II earned so far
+      { badgeType: 'BOT_WHISPERER_I', awardedAt: '2025-02-05T10:00:00Z' },
+      { badgeType: 'BOT_WHISPERER_II', awardedAt: '2025-03-15T10:00:00Z' },
+    ],
+    columns: 4,
   },
 }

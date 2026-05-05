@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress, Button, Tooltip } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, Typography, Chip, Skeleton, Button, Tooltip } from '@mui/material';
 import { AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
 import { useTranslation } from 'next-i18next';
 
@@ -48,7 +48,7 @@ export default function BlockSuggestionMenu({
   if (isLoadingAI) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
-        <CircularProgress size={32} />
+        <Skeleton variant="circular" width={32} height={32} />
       </Box>
     );
   }
@@ -73,7 +73,7 @@ export default function BlockSuggestionMenu({
         <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600, flex: 1 }}>
           {useAI ? t('blockSuggestionMenu.aiTitle') : t('blockSuggestionMenu.suggestionsTitle')}
         </Typography>
-        {isLoadingAI && <CircularProgress size={16} />}
+        {isLoadingAI && <Skeleton variant="circular" width={16} height={16} />}
       </Box>
       
       <List disablePadding sx={{ flex: 1, overflow: 'auto' }}>

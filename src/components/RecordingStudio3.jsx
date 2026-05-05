@@ -36,8 +36,6 @@ import {
   Alert,
   List,
   ListItem,
-  ListItemText,
-  ListItemButton,
   Badge,
 } from '@mui/material';
 import {
@@ -62,9 +60,6 @@ import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 import getCachedUrl from '../utils/getCachedUrl';
 import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
-import StaticWaveform from './Editor3/components/StaticWaveform';
-import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
-import { RecordingStudio2 } from './RecordingStudio2';
 import ScreenplayEditor from './RecordingStudio3/ScreenplayEditor';
 import HorizontalTimeline from './RecordingStudio3/HorizontalTimeline';
 import { parseFountainToScriptData, scriptDataToFountain } from './RecordingStudio3/parseFountainToScriptData';
@@ -119,13 +114,11 @@ export default forwardRef(function RecordingStudio3({
 
   // UI state
   const [selectedDialogueId, setSelectedDialogueId] = useState(null);
-  const [recording, setRecording] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [recordingMode, setRecordingMode] = useState('overdub'); // 'overdub', 'punch-in', 'replace'
   const [ttsQueue, setTtsQueue] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [recordingAnalyser, setRecordingAnalyser] = useState(null);
 
   // Fountain screenplay text — bidirectional sync with scriptData
   const [fountainText, setFountainText] = useState(() =>
@@ -133,8 +126,6 @@ export default forwardRef(function RecordingStudio3({
   );
 
   // Refs
-  const mediaRecorderRef = useRef(null);
-  const audioContextRef = useRef(null);
   const playbackTimerRef = useRef(null);
 
   // Get selected dialogue line
@@ -298,67 +289,20 @@ export default forwardRef(function RecordingStudio3({
     }
   };
 
-  // Start recording
-  const handleStartRecording = async () => {
-    if (!selectedDialogue) {
-      alert(t('recordingStudio3.selectDialogueFirst'));
-      return;
-    }
-
+  // Handle recording from AudioWaveformPlayer
+  const handleAudioWaveformRecordingComplete = useCallback(async (file) => {
+    if (!selectedDialogue) return;
+    // file is { path: blobURL, waveformData } or a saved File record
+    const waveformData = file?.waveformData ? JSON.parse(file.waveformData) : null;
+    // Fetch the blob from the URL for handleRecordingComplete
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // Create AudioContext + AnalyserNode for MicLevelIndicator
-      const audioContext = new AudioContext();
-      audioContextRef.current = audioContext;
-      const source = audioContext.createMediaStreamSource(stream);
-      const analyser = audioContext.createAnalyser();
-      source.connect(analyser);
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0.8;
-      setRecordingAnalyser(analyser);
-
-      const recorder = new MediaRecorder(stream);
-      const chunks = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
-
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
-        await handleRecordingComplete(audioBlob, 'human');
-        stream.getTracks().forEach(track => track.stop());
-        setRecordingAnalyser(null);
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
-          audioContextRef.current = null;
-        }
-      };
-
-      recorder.start();
-      mediaRecorderRef.current = recorder;
-      setRecording(true);
+      const response = await fetch(file.path);
+      const audioBlob = await response.blob();
+      await handleRecordingComplete(audioBlob, 'human');
     } catch (error) {
-      console.error('Error starting recording:', error);
-      alert(t('recordingStudio3.micAccessFailed'));
+      console.error('Error processing AudioWaveformPlayer recording:', error);
     }
-  };
-
-  // Stop recording
-  const handleStopRecording = () => {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
-      setRecordingAnalyser(null);
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-    }
-  };
+  }, [selectedDialogue]);
 
   // Handle completed recording
   const handleRecordingComplete = async (audioBlob, type = 'human', cinematicMetadata = null) => {
@@ -816,16 +760,12 @@ export default forwardRef(function RecordingStudio3({
                   {/* Recording / TTS controls */}
                   <Stack spacing={1}>
                     {!readOnly && (
-                      <RecordingStudio2
-                        embedded
-                        onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, 'human')}
-                        item={{ phrase: selectedDialogue.text, definition: '', pronunciation: '' }}
+                      <AudioWaveformPlayer
+                        enableRecording
+                        onRecordingComplete={handleAudioWaveformRecordingComplete}
+                        height={60}
+                        width={400}
                       />
-                    )}
-
-                    {/* Mic level indicator during active recording */}
-                    {recording && recordingAnalyser && (
-                      <MicLevelIndicator analyser={recordingAnalyser} />
                     )}
 
                     <Button
@@ -848,9 +788,15 @@ export default forwardRef(function RecordingStudio3({
                       <List dense>
                         {selectedDialogue.takes.map((take, index) => {
                           const isActive = selectedDialogue.activeTakeIndex === index;
+                          const takeAudioUrl = take.audioPath
+                            ? null  // Will be resolved by AudioWaveformPlayer via file prop
+                            : take.audioBlob
+                              ? URL.createObjectURL(take.audioBlob)
+                              : null;
                           return (
                             <ListItem
                               key={take.id}
+                              sx={{ flexDirection: 'column', alignItems: 'stretch', py: 1 }}
                               secondaryAction={
                                 !readOnly && (
                                   <IconButton
@@ -863,17 +809,33 @@ export default forwardRef(function RecordingStudio3({
                                 )
                               }
                             >
-                              <IconButton
-                                size="small"
-                                onClick={() => handleSetActiveTake(selectedDialogue.id, index)}
-                                disabled={readOnly}
-                              >
-                                {isActive ? <StarIcon color="primary" /> : <StarBorderIcon />}
-                              </IconButton>
-                              <ListItemText
-                                primary={`Take ${index + 1} (${take.type})`}
-                                secondary={new Date(take.createdAt).toLocaleTimeString()}
-                              />
+                              <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleSetActiveTake(selectedDialogue.id, index)}
+                                  disabled={readOnly}
+                                >
+                                  {isActive ? <StarIcon color="primary" /> : <StarBorderIcon />}
+                                </IconButton>
+                                <Typography variant="caption" sx={{ minWidth: 90 }}>
+                                  {`Take ${index + 1} (${take.type})`}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {new Date(take.createdAt).toLocaleTimeString()}
+                                </Typography>
+                              </Stack>
+                              {(takeAudioUrl || take.file) && (
+                                <Box sx={{ mt: 0.5, pl: 5 }}>
+                                  <AudioWaveformPlayer
+                                    audioUrl={takeAudioUrl}
+                                    file={take.file}
+                                    waveformData={take.waveformData}
+                                    width={350}
+                                    height={50}
+                                    showDuration
+                                  />
+                                </Box>
+                              )}
                             </ListItem>
                           );
                         })}
@@ -973,11 +935,10 @@ export default forwardRef(function RecordingStudio3({
         scriptData={scriptData}
         selectedDialogueId={selectedDialogueId}
         onSelectDialogue={setSelectedDialogueId}
-        recording={recording}
         playing={playing}
         onPlay={() => setPlaying(true)}
-        onStop={() => { setPlaying(false); handleStopRecording(); }}
-        onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, 'human')}
+        onStop={() => setPlaying(false)}
+        onRecordingComplete={handleAudioWaveformRecordingComplete}
         readOnly={readOnly}
       />
     </Box>

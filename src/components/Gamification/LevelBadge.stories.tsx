@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { LevelBadge } from './LevelBadge'
 
 const meta: Meta<typeof LevelBadge> = {
-  title: 'Gamification/LevelBadge',
+  title: '🏆 Gamification/XP & Progression/Level Badge',
   component: LevelBadge,
 }
 export default meta

@@ -31,7 +31,7 @@ function formatDate(dateStr: string): string {
 }
 
 export function NailedItWall({ blocks }: NailedItWallProps) {
-  if (blocks.length === 0) {
+  if (!blocks || blocks.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
         No Nailed It moments yet — keep going!
@@ -42,7 +42,7 @@ export function NailedItWall({ blocks }: NailedItWallProps) {
   return (
     <Grid container spacing={2}>
       {blocks.map((block) => (
-        <Grid item xs={12} sm={6} key={block.id}>
+        <Grid size={{ xs: 12, sm: 6 }} key={block.id}>
           <Card
             sx={{ borderLeft: '4px solid', borderColor: 'success.main' }}
           >

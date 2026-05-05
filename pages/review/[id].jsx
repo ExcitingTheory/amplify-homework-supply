@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import nextI18nextConfig from '../../next-i18next.config'
 
-import MyAuth from '../../src/components/authenticator'
+import MyAuth from '../../src/components/AmplifyAuthenticator'
 import UnitContext, { UnitProvider } from '../../src/context/unitContext'
 import { FilesProvider } from '../../src/context/fileContext'
 import { DictionaryProvider } from '../../src/context/dictionaryContext'
@@ -14,7 +14,8 @@ import AppBar from '@mui/material/AppBar'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
-import CircularProgress from '@mui/material/CircularProgress'
+import Skeleton from '@mui/material/Skeleton'
+import AppSkeleton from '../../src/components/AppSkeleton'
 import MainToolbar from '../../src/components/MainToolbar'
 import { Workbook } from '../../src/components/Editor3'
 import { PeerReviewChat } from '../../src/components/PeerReview'
@@ -75,11 +76,7 @@ function PeerReviewContent() {
   )
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
-        <CircularProgress />
-      </Box>
-    )
+    return <AppSkeleton variant="detail" />
   }
 
   if (error) {
@@ -230,10 +227,8 @@ function PeerReviewContent() {
             <Workbook readOnly={!isOwner} />
           ) : (
             <Box sx={{ textAlign: 'center', mt: 4 }}>
-              <CircularProgress size={24} />
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Loading workbook...
-              </Typography>
+              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1, mb: 2 }} />
+              <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} />
             </Box>
           )}
         </Box>

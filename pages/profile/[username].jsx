@@ -14,17 +14,34 @@ import {
 } from 'aws-amplify/auth';
 
 import MainToolbar from '../../src/components/MainToolbar';
-import MyAuth from '../../src/components/authenticator';
+import MyAuth from '../../src/components/AmplifyAuthenticator';
 import { useChatPageContext } from '../../src/hooks/useChatPageContext';
 
 import { BadgeShelf } from '../../src/components/Gamification/BadgeShelf';
 import { NailedItWall } from '../../src/components/Gamification/NailedItWall';
 import { LevelBadge } from '../../src/components/Gamification/LevelBadge';
 import { StreakCalendar } from '../../src/components/Gamification/StreakCalendar';
-import { UserAvatar } from '../../src/components/UserAvatar';
+import { ProgressRings } from '../../src/components/Gamification/ProgressRings';
+import { StreakShield } from '../../src/components/Gamification/StreakShield';
+import { DiceBearAvatar } from '../../src/components/Gamification/DiceBearAvatar';
 import { AvatarEditor } from '../../src/components/AvatarEditor';
-import { useXP } from '../../src/context/xpContext';
+import { useXP } from '../../src/context/gamificationContext';
+import { GamificationProviderWrapper } from '../../src/context/gamificationProviderWrapper';
 import { getAmplifyClient } from '../../src/utils/amplifyClient';
+
+/**
+ * ProfileAvatar — Non-editable DiceBear avatar for viewing another user's profile.
+ * Uses their username as the seed for a deterministic avatar.
+ */
+function ProfileAvatar({ profileUsername }) {
+  return (
+    <DiceBearAvatar
+      seed={profileUsername || 'student'}
+      size={96}
+      style="simple"
+    />
+  );
+}
 
 function ProfilePage() {
   const { t } = useTranslation('pages');
@@ -36,7 +53,10 @@ function ProfilePage() {
   const [earnedBadges, setEarnedBadges] = React.useState([]);
   const [nailedItBlocks, setNailedItBlocks] = React.useState([]);
   const [currentStreak, setCurrentStreak] = React.useState(0);
+  const [freezesRemaining, setFreezesRemaining] = React.useState(0);
+  const [freezesUsed, setFreezesUsed] = React.useState(0);
   const [activeDays, setActiveDays] = React.useState(new Set());
+  const [progressModules, setProgressModules] = React.useState([]);
   const { level } = useXP();
 
   useChatPageContext({});
@@ -58,25 +78,38 @@ function ProfilePage() {
     fetchUser();
   }, []);
 
-  // Fetch gamification data for profileUsername
+  // Fetch gamification data for profileUsername from StudentProfile
   React.useEffect(() => {
     if (!profileUsername) return;
     const client = getAmplifyClient();
 
-    // Subscribe to Badge records
-    const badgeSub = client.models.Badge?.observeQuery?.({
-      filter: { owner: { eq: profileUsername } },
-    })?.subscribe?.({
-      next: ({ items }) => {
-        const valid = items.filter(i => i != null && i.id != null);
-        setEarnedBadges(valid.map(b => ({
+    // Fetch StudentProfile (contains badges, streak, progress)
+    client.models.StudentProfile?.list?.({
+      filter: { studentId: { eq: profileUsername } },
+    }).then(({ data }) => {
+      const profile = (data || []).filter(p => p != null)?.[0];
+      if (profile) {
+        // Badges
+        setEarnedBadges((profile.badges || []).map(b => ({
           badgeType: b.badgeType,
-          awardedAt: b.createdAt || b.awardedAt || new Date().toISOString(),
+          awardedAt: b.awardedAt || new Date().toISOString(),
           sourceId: b.sourceId || null,
+          count: 1,
         })));
-      },
-      error: (err) => console.error('[Profile] Badge subscription error:', err),
-    });
+        // Streak
+        setCurrentStreak(profile.currentStreak || 0);
+        setFreezesRemaining(profile.freezesRemaining || 0);
+        setFreezesUsed(profile.freezesUsed || 0);
+        // Progress modules
+        setProgressModules((profile.moduleProgress || []).map(p => ({
+          moduleId: p.moduleId,
+          moduleName: p.moduleId,
+          completionPercent: p.completionPercent || 0,
+          totalWorkbooks: p.totalWorkbooks || 0,
+          completedWorkbooks: p.completedWorkbooks || 0,
+        })));
+      }
+    }).catch(err => console.warn('[Profile] StudentProfile fetch error:', err));
 
     // Subscribe to NailedIt records
     const nailedItSub = client.models.NailedIt?.observeQuery?.({
@@ -95,14 +128,6 @@ function ProfilePage() {
       error: (err) => console.error('[Profile] NailedIt subscription error:', err),
     });
 
-    // Fetch streak data
-    client.models.StudentStreak?.list?.({
-      filter: { owner: { eq: profileUsername } },
-    }).then(({ data }) => {
-      const streak = data?.filter(s => s != null)?.[0];
-      if (streak) setCurrentStreak(streak.currentStreak || 0);
-    }).catch(err => console.warn('[Profile] Streak fetch error:', err));
-
     // Fetch XP logs for activity calendar
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -120,7 +145,6 @@ function ProfilePage() {
     }).catch(err => console.warn('[Profile] XP log fetch error:', err));
 
     return () => {
-      badgeSub?.unsubscribe?.();
       nailedItSub?.unsubscribe?.();
     };
   }, [profileUsername]);
@@ -147,10 +171,13 @@ function ProfilePage() {
       </AppBar>
       <Box
         sx={{
-          marginTop: '5rem',
-          marginBottom: '3rem',
+          position: 'fixed',
+          top: '5rem',
+          left: 0,
+          right: 0,
+          bottom: 0,
           padding: '1rem',
-          height: 'calc(100vh - 5rem)',
+          paddingBottom: '3rem',
           overflow: 'auto',
         }}
       >
@@ -168,11 +195,27 @@ function ProfilePage() {
           {currentUsername && currentUsername === profileUsername ? (
             <AvatarEditor />
           ) : (
-            <UserAvatar size={96} streak={currentStreak} />
+            <ProfileAvatar profileUsername={profileUsername} />
           )}
           <Typography variant="h5">{displayName}</Typography>
-          <LevelBadge level={level} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LevelBadge level={level} />
+            <StreakShield freezesRemaining={freezesRemaining} freezesUsed={freezesUsed} />
+          </Box>
         </Card>
+
+        {/* Progress Rings */}
+        {progressModules.length > 0 && (
+          <Card sx={{
+            padding: '2rem 1rem',
+            margin: '1rem auto',
+            height: 'fit-content',
+            maxWidth: '60rem',
+          }}>
+            <Typography variant="h5" gutterBottom>{t('profile.progress', 'Progress')}</Typography>
+            <ProgressRings modules={progressModules} />
+          </Card>
+        )}
 
         {/* Activity Calendar */}
         <Card sx={{
@@ -214,7 +257,9 @@ function ProfilePage() {
 export default function WrappedPage() {
   return (
     <MyAuth>
-      <ProfilePage />
+      <GamificationProviderWrapper>
+        <ProfilePage />
+      </GamificationProviderWrapper>
     </MyAuth>
   )
 }

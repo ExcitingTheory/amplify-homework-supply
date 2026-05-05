@@ -3,34 +3,34 @@
  * Demonstrates multi-column layouts in both editable and read-only modes
  */
 
-import React from 'react';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { expect } from 'storybook/test';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { ListNode, ListItemNode } from '@lexical/list';
-import { CodeNode, CodeHighlightNode } from '@lexical/code';
-import { AutoLinkNode, LinkNode } from '@lexical/link';
-import { Button } from '@mui/material';
+import React from "react";
+import { within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { expect } from "storybook/test";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { CodeNode, CodeHighlightNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { Button } from "@mui/material";
 
-import { LayoutPlugin, INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
-import { LayoutContainerNode } from '../components/LayoutContainerNode';
-import { LayoutItemNode } from '../components/LayoutItemNode';
-import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
+import { LayoutPlugin, INSERT_LAYOUT_COMMAND } from "./LayoutPlugin";
+import { LayoutContainerNode } from "../components/LayoutContainerNode";
+import { LayoutItemNode } from "../components/LayoutItemNode";
+import LanguageEditorTheme from "../config/LanguageEditorTheme";
+import { UnitProvider } from "../../../context/unitContext";
+import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
-  title: '🔌 Editor Plugins/Formatting/Layout',
+  title: "✏️ Lesson Editor/Formatting/Layout",
   component: LayoutPlugin,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     initializeMockData: false,
   },
 };
@@ -41,11 +41,11 @@ const onError = (error) => {
 
 function InsertLayoutButton() {
   const [editor] = useLexicalComposerContext();
-  
+
   const handleClick = () => {
-    editor.dispatchCommand(INSERT_LAYOUT_COMMAND, '1fr 1fr');
+    editor.dispatchCommand(INSERT_LAYOUT_COMMAND, "1fr 1fr");
   };
-  
+
   return (
     <Button variant="contained" onClick={handleClick} sx={{ mb: 2 }}>
       Insert 2-Column Layout
@@ -54,24 +54,35 @@ function InsertLayoutButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
-  const unitId = 'layout-demo-editable';
-  
+  const unitId = "layout-demo-editable";
+
   const initialConfig = {
-    namespace: 'LayoutPluginDemo',
+    namespace: "LayoutPluginDemo",
     theme: LanguageEditorTheme,
     onError,
     editable: true,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, LayoutContainerNode, LayoutItemNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      CodeHighlightNode,
+      AutoLinkNode,
+      LinkNode,
+      LayoutContainerNode,
+      LayoutItemNode,
+    ],
   };
 
   seedMockUnit({
     id: unitId,
-    name: 'Layout Plugin Demo',
-    description: 'Demo for Layout Plugin',
+    name: "Layout Plugin Demo",
+    description: "Demo for Layout Plugin",
     data: editorState || null,
     _version: 1,
-    owner: 'mock-user-sub',
+    owner: "mock-user-sub",
   });
 
   return (
@@ -87,19 +98,32 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
             border: 1px dashed #ccc;
           }
         `}</style>
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
           <h2>Layout Plugin - Editable Mode</h2>
           {showInsertButton && <InsertLayoutButton />}
-          <div style={{ 
-            border: '1px solid #ccc', 
-            borderRadius: '4px',
-            minHeight: '400px',
-            padding: '20px'
-          }}>
+          <div
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              minHeight: "400px",
+              padding: "20px",
+            }}
+          >
             <RichTextPlugin
-              contentEditable={<ContentEditable style={{ outline: 'none', minHeight: '350px' }} />}
+              contentEditable={
+                <ContentEditable
+                  style={{ outline: "none", minHeight: "350px" }}
+                />
+              }
               placeholder={
-                <div style={{ position: 'absolute', top: '20px', left: '20px', color: '#999' }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    left: "20px",
+                    color: "#999",
+                  }}
+                >
                   Enter text or create multi-column layouts...
                 </div>
               }
@@ -115,24 +139,35 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
-  const unitId = 'layout-demo-readonly';
-  
+  const unitId = "layout-demo-readonly";
+
   const initialConfig = {
-    namespace: 'LayoutPluginDemo',
+    namespace: "LayoutPluginDemo",
     theme: LanguageEditorTheme,
     onError,
     editable: false,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, LayoutContainerNode, LayoutItemNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      CodeHighlightNode,
+      AutoLinkNode,
+      LinkNode,
+      LayoutContainerNode,
+      LayoutItemNode,
+    ],
   };
 
   seedMockUnit({
     id: unitId,
-    name: 'Layout Plugin Demo (Read-Only)',
-    description: 'Demo for Layout Plugin',
+    name: "Layout Plugin Demo (Read-Only)",
+    description: "Demo for Layout Plugin",
     data: editorState || null,
     _version: 1,
-    owner: 'mock-user-sub',
+    owner: "mock-user-sub",
   });
 
   return (
@@ -147,17 +182,23 @@ const ReadOnlyTemplate = ({ editorState }) => {
             padding: 0.25rem;
           }
         `}</style>
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
           <h2>Layout Plugin - Read-Only Mode</h2>
-          <div style={{ 
-            border: '1px solid #ccc', 
-            borderRadius: '4px',
-            minHeight: '400px',
-            padding: '20px',
-            backgroundColor: '#f5f5f5'
-          }}>
+          <div
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              minHeight: "400px",
+              padding: "20px",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <RichTextPlugin
-              contentEditable={<ContentEditable style={{ outline: 'none', minHeight: '350px' }} />}
+              contentEditable={
+                <ContentEditable
+                  style={{ outline: "none", minHeight: "350px" }}
+                />
+              }
               placeholder={null}
               ErrorBoundary={LexicalErrorBoundary}
             />
@@ -177,27 +218,27 @@ const sampleLayoutState = {
           {
             detail: 0,
             format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Multi-Column Layout',
-            type: 'text',
+            mode: "normal",
+            style: "",
+            text: "Multi-Column Layout",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        type: 'heading',
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
-        type: 'layout-container',
+        type: "layout-container",
         version: 1,
-        templateColumns: '1fr 1fr',
+        templateColumns: "1fr 1fr",
         children: [
           {
-            type: 'layout-item',
+            type: "layout-item",
             version: 1,
             children: [
               {
@@ -205,23 +246,23 @@ const sampleLayoutState = {
                   {
                     detail: 0,
                     format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Left column content goes here. You can add any type of content in columns.',
-                    type: 'text',
+                    mode: "normal",
+                    style: "",
+                    text: "Left column content goes here. You can add any type of content in columns.",
+                    type: "text",
                     version: 1,
                   },
                 ],
-                direction: 'ltr',
-                format: '',
+                direction: "ltr",
+                format: "",
                 indent: 0,
-                type: 'paragraph',
+                type: "paragraph",
                 version: 1,
               },
             ],
           },
           {
-            type: 'layout-item',
+            type: "layout-item",
             version: 1,
             children: [
               {
@@ -229,17 +270,17 @@ const sampleLayoutState = {
                   {
                     detail: 0,
                     format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Right column content goes here. Layouts help organize content side-by-side.',
-                    type: 'text',
+                    mode: "normal",
+                    style: "",
+                    text: "Right column content goes here. Layouts help organize content side-by-side.",
+                    type: "text",
                     version: 1,
                   },
                 ],
-                direction: 'ltr',
-                format: '',
+                direction: "ltr",
+                format: "",
                 indent: 0,
-                type: 'paragraph',
+                type: "paragraph",
                 version: 1,
               },
             ],
@@ -247,10 +288,10 @@ const sampleLayoutState = {
         ],
       },
     ],
-    direction: 'ltr',
-    format: '',
+    direction: "ltr",
+    format: "",
     indent: 0,
-    type: 'root',
+    type: "root",
     version: 1,
   },
 };
@@ -259,12 +300,17 @@ export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for insert button
-    await waitFor(() => {
-      const insertButton = canvas.getByRole('button', { name: /insert.*layout|columns/i });
-      expect(insertButton).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const insertButton = canvas.getByRole("button", {
+          name: /insert.*layout|columns/i,
+        });
+        expect(insertButton).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   },
 };
 
@@ -272,15 +318,20 @@ export const EditableWithLayout = {
   render: () => <EditableTemplate editorState={sampleLayoutState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for layout columns to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify both columns are visible
     expect(canvas.getByText(/Right column content/i)).toBeInTheDocument();
-    expect(canvas.getByText(/organize content side-by-side/i)).toBeInTheDocument();
+    expect(
+      canvas.getByText(/organize content side-by-side/i),
+    ).toBeInTheDocument();
   },
 };
 
@@ -288,12 +339,15 @@ export const ReadOnlyWithLayout = {
   render: () => <ReadOnlyTemplate editorState={sampleLayoutState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Wait for layout in read-only mode
-    await waitFor(() => {
-      expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify columns display
     expect(canvas.getByText(/Right column content/i)).toBeInTheDocument();
   },

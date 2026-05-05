@@ -155,8 +155,8 @@ export default function AIContentCompletionPlugin() {
       
       // Call REST API with streaming support
       const restOperation = post({
-        apiName: 'completions',
-        path: '/complete',
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/content-completion',
         options: {
           body: {
             prompt,

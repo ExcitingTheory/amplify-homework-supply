@@ -4,20 +4,21 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.709.0",
     "@aws-sdk/client-cloudformation": "^3.709.0",
-    "@aws-sdk/client-s3": "^3.709.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.709.0",
     "@aws-sdk/client-lambda": "^3.709.0",
     "@aws-sdk/client-mediaconvert": "^3.709.0",
+    "@aws-sdk/client-s3": "^3.709.0",
     "@aws-sdk/client-ssm": "^3.709.0",
     "@aws-sdk/credential-providers": "^3.709.0",
     "aws-amplify": "^6.11.1",
+    "fast-xml-parser": "^4.3.6",
+    "html-to-text": "^9.0.5",
+    "jose": "^6.2.3",
+    "jszip": "^3.10.1",
     "mammoth": "^1.8.0",
     "openai": "^4.20.0",
     "pdfjs-dist": "^4.0.379",
-    "xlsx": "^0.18.5",
-    "jszip": "^3.10.1",
-    "fast-xml-parser": "^4.3.6",
-    "html-to-text": "^9.0.5"
+    "xlsx": "^0.18.5"
   }
 }

@@ -483,6 +483,13 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                                     setFeedback(prev => ({ ...prev, [key]: feedbackData }));
                                     // Broadcast to collaborators via Yjs
                                     workbook?.setFeedback?.(nodeKey, { text: feedbackData?.reason || '', timestamp: Date.now() });
+                                    // Log moderation flag if content was flagged during grading
+                                    if (feedbackData?.moderation?.flagged) {
+                                        console.warn('[AnswerComponent] Audio submission flagged by moderation', {
+                                            wordId,
+                                            categories: feedbackData.moderation.categories,
+                                        });
+                                    }
                                 }
                             }
                         } catch (err) {

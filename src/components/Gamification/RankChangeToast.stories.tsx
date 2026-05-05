@@ -1,0 +1,23 @@
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { RankChangeToast } from './RankChangeToast'
+
+const meta: Meta<typeof RankChangeToast> = {
+  title: '🏆 Gamification/XP & Progression/Rank Change Toast',
+  component: RankChangeToast,
+}
+export default meta
+
+type Story = StoryObj<typeof RankChangeToast>
+
+export const RankUp: Story = {
+  args: { open: true, positionsChanged: 3, newRank: 2, onClose: () => {} },
+}
+
+export const RankDown: Story = {
+  args: { open: true, positionsChanged: -1, newRank: 5, onClose: () => {} },
+}
+
+export const TopRank: Story = {
+  args: { open: true, positionsChanged: 1, newRank: 1, onClose: () => {} },
+}

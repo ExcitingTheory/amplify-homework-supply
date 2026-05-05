@@ -14,7 +14,7 @@ import {
   ListItemText,
   ListItemIcon,
   Typography,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import {
   CloudSync,
@@ -135,7 +135,7 @@ export default function SyncStatusIndicator() {
             disabled={!isOnline || syncing}
             sx={{ float: 'right' }}
           >
-            {syncing ? <CircularProgress size={20} /> : <Refresh />}
+            {syncing ? <Skeleton variant="circular" width={20} height={20} /> : <Refresh />}
           </IconButton>
         </DialogTitle>
         <DialogContent>
@@ -182,7 +182,7 @@ export default function SyncStatusIndicator() {
             onClick={handleManualSync}
             disabled={!isOnline || syncing}
             variant="contained"
-            startIcon={syncing ? <CircularProgress size={16} /> : <CloudSync />}
+            startIcon={syncing ? <Skeleton variant="circular" width={16} height={16} /> : <CloudSync />}
           >
             Sync now
           </Button>

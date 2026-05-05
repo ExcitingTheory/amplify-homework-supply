@@ -9,7 +9,7 @@ import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
+import Skeleton from '@mui/material/Skeleton'
 import Alert from '@mui/material/Alert'
 import InputIcon from '@mui/icons-material/Input'
 
@@ -71,7 +71,7 @@ export function JoinByCode({ onJoin }: JoinByCodeProps) {
         />
         <Button
           variant="outlined"
-          startIcon={joining ? <CircularProgress size={16} /> : <InputIcon />}
+          startIcon={joining ? <Skeleton variant="circular" width={16} height={16} /> : <InputIcon />}
           onClick={handleJoin}
           disabled={!code.trim() || joining}
         >

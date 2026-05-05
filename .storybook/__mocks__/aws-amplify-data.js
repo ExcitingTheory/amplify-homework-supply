@@ -29,6 +29,17 @@ const dataStores = {
   Settings: new Map(),
   PracticeSession: new Map(),
   StudentXPLog: new Map(),
+  // Gamification models
+  StudentProfile: new Map(),
+  GroupChallenge: new Map(),
+  Guild: new Map(),
+  Skill: new Map(),
+  EasterEgg: new Map(),
+  StudentUnitMemory: new Map(),
+  StudentMemory: new Map(),
+  HomeworkRoom: new Map(),
+  WorkbookComment: new Map(),
+  AgentJob: new Map(),
 };
 
 /**
@@ -55,6 +66,17 @@ const activeSubscriptions = {
   Settings: [],
   PracticeSession: [],
   StudentXPLog: [],
+  // Gamification models
+  StudentProfile: [],
+  GroupChallenge: [],
+  Guild: [],
+  Skill: [],
+  EasterEgg: [],
+  StudentUnitMemory: [],
+  StudentMemory: [],
+  HomeworkRoom: [],
+  WorkbookComment: [],
+  AgentJob: [],
 };
 
 /**
@@ -227,6 +249,19 @@ const createObservableQuery = (modelName, filter) => {
   return {
     subscribe: ({ next, error }) => {
       try {
+        if (!dataStores[modelName]) {
+          console.warn(`[Mock Data] ${modelName} not found in dataStores — returning empty set`);
+          const subscription = { next, error };
+          if (!activeSubscriptions[modelName]) {
+            activeSubscriptions[modelName] = [];
+          }
+          activeSubscriptions[modelName].push(subscription);
+          setTimeout(() => { next({ items: [], isSynced: true }); }, 10);
+          return { unsubscribe: () => {
+            const idx = activeSubscriptions[modelName].indexOf(subscription);
+            if (idx > -1) activeSubscriptions[modelName].splice(idx, 1);
+          }};
+        }
         let items = Array.from(dataStores[modelName].values());
         
         // Apply filter if provided
@@ -259,6 +294,9 @@ const createObservableQuery = (modelName, filter) => {
         
         // Store subscription so we can notify it when data changes
         const subscription = { next, error };
+        if (!activeSubscriptions[modelName]) {
+          activeSubscriptions[modelName] = [];
+        }
         activeSubscriptions[modelName].push(subscription);
         console.log(`[Mock Data] ${modelName} subscription added. Total subscriptions: ${activeSubscriptions[modelName].length}`);
         
@@ -572,6 +610,17 @@ const mockClient = {
     Settings: createMockModel('Settings'),
     PracticeSession: createMockModel('PracticeSession'),
     StudentXPLog: createMockModel('StudentXPLog'),
+    // Gamification models
+    StudentProfile: createMockModel('StudentProfile'),
+    GroupChallenge: createMockModel('GroupChallenge'),
+    Guild: createMockModel('Guild'),
+    Skill: createMockModel('Skill'),
+    EasterEgg: createMockModel('EasterEgg'),
+    StudentUnitMemory: createMockModel('StudentUnitMemory'),
+    StudentMemory: createMockModel('StudentMemory'),
+    HomeworkRoom: createMockModel('HomeworkRoom'),
+    WorkbookComment: createMockModel('WorkbookComment'),
+    AgentJob: createMockModel('AgentJob'),
   },
 
   // Mock mutations for custom server-side operations

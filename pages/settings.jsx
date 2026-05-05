@@ -19,13 +19,18 @@ import {
 import FormControl from '@mui/material/FormControl';
 import MainToolbar from '../src/components/MainToolbar'
 import StorageManagement from '../src/components/StorageManagement'
+import { CosmeticSelector } from '../src/components/Gamification/CosmeticSelector';
+import { BotCustomizer } from '../src/components/BotCustomizer';
+import { useXP, useBadges } from '../src/context/gamificationContext';
+import { GamificationProviderWrapper } from '../src/context/gamificationProviderWrapper';
+import { getAmplifyClient } from '../src/utils/amplifyClient';
 
-import MyAuth from '../src/components/authenticator';
+import MyAuth from '../src/components/AmplifyAuthenticator';
 import Snackbar from '@mui/material/Snackbar';
 import { useChatPageContext } from '../src/hooks/useChatPageContext';
 
 import Button from '@mui/material/Button';
-import { CircularProgress, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Select, InputLabel } from '@mui/material';
+import { Skeleton, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Select, InputLabel } from '@mui/material';
 import SettingsContext from '../src/context/settingsContext';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -51,6 +56,21 @@ function Settings() {
   const { settings, updateSettings } = React.useContext(SettingsContext) || {};
 
   useChatPageContext({});
+  const { level } = useXP();
+
+  // Compute Bot Whisperer tier from earned badges
+  const { badges: earnedBadges } = useBadges();
+  const botWhispererTier = React.useMemo(() => {
+    const bwBadges = earnedBadges.filter(b => b.badgeType?.startsWith('BOT_WHISPERER'));
+    let maxTier = 0;
+    for (const b of bwBadges) {
+      if (b.badgeType === 'BOT_WHISPERER_IV') maxTier = Math.max(maxTier, 4);
+      else if (b.badgeType === 'BOT_WHISPERER_III') maxTier = Math.max(maxTier, 3);
+      else if (b.badgeType === 'BOT_WHISPERER_II') maxTier = Math.max(maxTier, 2);
+      else if (b.badgeType === 'BOT_WHISPERER_I') maxTier = Math.max(maxTier, 1);
+    }
+    return maxTier;
+  }, [earnedBadges]);
 
   const availableLocales = [
     { code: 'en', name: 'English' },
@@ -291,7 +311,7 @@ function Settings() {
                   disabled={isWorking}
                   type="submit">
                   {isWorking &&
-                    <CircularProgress />
+                    <Skeleton variant="circular" width={24} height={24} />
                   }
                   &nbsp;{t('profile.updateProfile')}</Button>
               </div>
@@ -355,7 +375,7 @@ function Settings() {
                       disabled={isWorking}
                       type="submit">
                       {isWorking &&
-                        <CircularProgress />
+                        <Skeleton variant="circular" width={24} height={24} />
                       }
                       &nbsp;{t('profile.confirmEmail.button')}</Button>
                   </div>
@@ -431,7 +451,7 @@ function Settings() {
                 disabled={isWorking}
                 type="submit">
                 {isWorking &&
-                  <CircularProgress />
+                  <Skeleton variant="circular" width={24} height={24} />
                 }
                 &nbsp;{t('profile.changePassword.button')}</Button>
 
@@ -518,6 +538,34 @@ function Settings() {
           </Typography>
         </Card>
 
+        {/* Cosmetic Customization */}
+        <Card sx={{
+          padding: '2rem 1rem',
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
+        }}>
+          <Typography variant="h5" gutterBottom>Customization</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Unlock new avatar styles and editor themes as you level up.
+          </Typography>
+          <CosmeticSelector level={level?.level || 1} />
+        </Card>
+
+        {/* Bot Avatar Customization */}
+        <Card sx={{
+          padding: '2rem 1rem',
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
+        }}>
+          <Typography variant="h5" gutterBottom>AI Assistant Avatar</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Customize your AI tutor&apos;s appearance. Unlock more options with Bot Whisperer badges.
+          </Typography>
+          <BotCustomizer botWhispererTier={botWhispererTier} />
+        </Card>
+
         <Dialog
           open={clearDataStoreDialogOpen}
           onClose={() => setClearDataStoreDialogOpen(false)}
@@ -565,7 +613,9 @@ function Settings() {
 export default function WrappedPage() {
   return (
     <MyAuth>
-      <Settings />
+      <GamificationProviderWrapper>
+        <Settings />
+      </GamificationProviderWrapper>
     </MyAuth>
   )
 }

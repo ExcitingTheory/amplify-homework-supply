@@ -1,11 +1,13 @@
 import * as React from "react";
-import { useState, useRef, createContext } from "react";
+import { useState, useRef, useReducer, createContext } from "react";
 import { useRouter } from 'next/router';
-import { moderateContent, buildModerationFields } from '../utils/moderateContent';
+import yaml from 'js-yaml';
+import { moderateContent } from '../utils/moderateContent';
 import { getAmplifyClient } from '../utils/amplifyClient';
-import { awardXPAndCheck, updateUnitMemoryAndRebuild } from '../utils/gamificationActions';
+import { awardXPAndCheck, updateUnitMemoryAndRebuild, checkPersonalBest } from '../utils/gamificationActions';
 import AuthContext from '../context/authContext';
 import { useWorkbookCollaboration } from '../yjs/workbookHooks';
+import { unitReducer, initialState as unitInitialState, actionTypes } from './reducers/unitReducer';
 // Provider and Consumer are connected through their "parent" context
 const UnitContext = createContext({});
 
@@ -15,21 +17,11 @@ export const gradedBlockTypes = [
   'answer',
   'custom-answer',
 ]
-const UnitProvider = ({ children, id }) => {
+const UnitProvider = ({ children, id, sectionId }) => {
   // Get auth state from centralized context
   const { user, session: authSession, isLoading: authLoading } = React.useContext(AuthContext);
 
-  const [unit, setUnit] = useState({});
-  const [dictionary, setDictionary] = useState({});
-  const [questionBank, setQuestionBank] = useState({});
-  const [files, setFiles] = useState({});
-  const [rubric, setRubric] = useState([])
-  const [finishedQuestions, setFinishedQuestions] = useState(0)
-  const [showUnitComplete, setShowUnitComplete] = useState(false)
-  const [playlistUrls, setPlaylistUrls] = React.useState({})
-  const [username, setUsername] = React.useState(null);
-  const [permissionError, setPermissionError] = React.useState(null);
-  const [isSaving, setIsSaving] = React.useState(false);
+  const [state, dispatch] = useReducer(unitReducer, unitInitialState);
   const savingCountRef = useRef(0);
 
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
@@ -41,21 +33,18 @@ const UnitProvider = ({ children, id }) => {
   const workbookCollaborationRef = useRef(null); // Ref to access workbook collaboration from saveGrade
 
   // Memoize derived values to prevent recalculation on every render
-  const name = React.useMemo(() => unit?.name, [unit?.name]);
-  const description = React.useMemo(() => unit?.description, [unit?.description]);
-  const timeLimitSeconds = React.useMemo(() => unit?.timeLimitSeconds, [unit?.timeLimitSeconds]);
+  const name = React.useMemo(() => state.unit?.name, [state.unit?.name]);
+  const description = React.useMemo(() => state.unit?.description, [state.unit?.description]);
+  const timeLimitSeconds = React.useMemo(() => state.unit?.timeLimitSeconds, [state.unit?.timeLimitSeconds]);
 
   const router = useRouter();
-
-  const [grade, setGrade] = React.useState({});
-  const [recentGrades, setRecentGrades] = React.useState([]);
 
   // const [featuredImageUrl, setFeaturedImageUrl] = React.useState(null);
 
   // Memoize derived values to prevent recalculation on every render
-  const rubricLength = React.useMemo(() => rubric.length || 0, [rubric.length]);
-  const unitVersion = React.useMemo(() => unit?._version || 0, [unit?._version]);
-  const unitOwner = React.useMemo(() => unit?.owner || '', [unit?.owner]);
+  const rubricLength = React.useMemo(() => state.rubric.length || 0, [state.rubric.length]);
+  const unitVersion = React.useMemo(() => state.unit?._version || 0, [state.unit?._version]);
+  const unitOwner = React.useMemo(() => state.unit?.owner || '', [state.unit?.owner]);
 
   /**
    * Check if the current user has permission to EDIT the unit (strict check)
@@ -213,6 +202,7 @@ const UnitProvider = ({ children, id }) => {
     
     const { data: _grade, errors } = await client.models.Grade.create({
       unitID: id,
+      sectionID: sectionId || undefined,
       // use the unit owner as the instructor
       instructor: currentUnit?.owner || '',
       // Owner will be auto-populated by Amplify based on auth
@@ -227,13 +217,68 @@ const UnitProvider = ({ children, id }) => {
       throw new Error('Failed to create grade');
     }
 
-    setGrade(_grade);
+    dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
 
     // Award XP for submitting homework (first time only — dedup by gradeId)
-    awardXPAndCheck(currentUsername, 'HOMEWORK_SUBMITTED', _grade.id);
+    awardXPAndCheck(currentUsername, 'HOMEWORK_SUBMITTED', _grade.id, sectionId || undefined, id);
 
     return _grade;
-  }, [id, user]);
+  }, [id, sectionId, user]);
+
+  /**
+   * Calls GPT-4o-mini to produce an overall feedback summary for the completed grade.
+   * Sends assignment (unit name, description, rubric) and grade data as YAML.
+   * Stores result in Grade.feedback.
+   */
+  const summarizeGradeFeedback = React.useCallback(async (gradeData, gradeId) => {
+    const client = getAmplifyClient();
+
+    // Build assignment context as YAML
+    const assignmentYaml = yaml.dump({
+      name: name || '',
+      description: description || '',
+      rubric_blocks: state.rubric,
+    });
+
+    // Build grade data as YAML (per-block results)
+    const blocks = {};
+    if (gradeData) {
+      Object.entries(gradeData).forEach(([blockId, block]) => {
+        blocks[blockId] = {
+          complete: !!block?.complete,
+          accuracy: block?.accuracy ?? null,
+          ...(block?.userAnswer && { userAnswer: String(block.userAnswer).slice(0, 200) }),
+          ...(block?.feedback && { aiFeedback: String(block.feedback).slice(0, 200) }),
+        };
+      });
+    }
+    const gradeYaml = yaml.dump({ blocks });
+
+    const { data: feedbackJson, errors } = await client.queries.summarizeFeedback({
+      assignmentData: assignmentYaml,
+      gradeData: gradeYaml,
+    });
+
+    if (errors || !feedbackJson) {
+      console.error('[unitContext] summarizeFeedback query failed:', errors);
+      return;
+    }
+
+    // Parse and store in Grade.feedback
+    try {
+      const feedback = JSON.parse(feedbackJson);
+      await client.models.Grade.update({
+        id: gradeId,
+        feedback: JSON.stringify(feedback),
+      });
+    } catch (parseErr) {
+      // If the model didn't return valid JSON, store as plain overall text
+      await client.models.Grade.update({
+        id: gradeId,
+        feedback: JSON.stringify({ overall: feedbackJson }),
+      });
+    }
+  }, [name, description, state.rubric]);
 
   const saveGrade = React.useCallback(async (data) => {
 
@@ -255,7 +300,7 @@ const UnitProvider = ({ children, id }) => {
       unitAccuracy = verifyAccuracy(data)
     }
 
-    setFinishedQuestions(_finishedQuestions)
+    dispatch({ type: actionTypes.SET_FINISHED_QUESTIONS, payload: _finishedQuestions })
 
     // Sync block-level updates to Yjs for real-time collaboration with tutors
     if (data && workbookCollaborationRef.current?.provider) {
@@ -265,71 +310,70 @@ const UnitProvider = ({ children, id }) => {
     }
 
     try {
-      // Moderate student submission data
-      const moderationResult = await moderateContent(data);
-      const moderationFields = buildModerationFields(moderationResult);
-      
-      if (moderationResult.flagged) {
-        console.warn('[UnitContext] Student submission flagged by moderation, saving for instructor review', {
-          categories: moderationResult.categories,
-          username: user?.attributes?.sub
-        });
-      }
+      // Save grade first, then kick off moderation (backend persists to record)
+      let gradeId = state.grade?.id;
 
-      if (!grade) {
+      if (!state.grade) {
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
-        // Use the newly created grade for the update operation
         if (newGrade && newGrade.id) {
+          gradeId = newGrade.id;
           const client = getAmplifyClient();
           await client.models.Grade.update({
             id: newGrade.id,
             data: JSON.stringify(data),
             accuracy: unitAccuracy,
             complete: unitIsComplete,
-            moderationStatus: moderationFields.moderationStatus,
-            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
-            moderationCheckedAt: moderationFields.moderationCheckedAt,
           });
         }
-      } else if (grade && grade.id) {
-        // Only proceed if grade is a valid model instance
+      } else if (state.grade && state.grade.id) {
         const client = getAmplifyClient();
         await client.models.Grade.update({
-          id: grade.id,
+          id: state.grade.id,
           data: JSON.stringify(data),
           accuracy: unitAccuracy,
           complete: unitIsComplete,
-          moderationStatus: moderationFields.moderationStatus,
-          moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
-          moderationCheckedAt: moderationFields.moderationCheckedAt,
         });
       } else {
-        console.error("Invalid grade object:", grade)
-        // Create a new grade if the existing one is invalid
+        console.error("Invalid grade object:", state.grade)
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
         if (newGrade && newGrade.id) {
+          gradeId = newGrade.id;
           const client = getAmplifyClient();
           await client.models.Grade.update({
             id: newGrade.id,
             data: JSON.stringify(data),
             accuracy: unitAccuracy,
             complete: unitIsComplete,
-            moderationStatus: moderationFields.moderationStatus,
-            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
-            moderationCheckedAt: moderationFields.moderationCheckedAt,
           });
         }
       }
+
+      // Moderate async — backend fetches _version and writes to Grade.moderation
+      if (gradeId) {
+        moderateContent(data, { modelName: 'Grade', recordId: gradeId }).then(result => {
+          if (result.flagged) {
+            console.warn('[UnitContext] Student submission flagged by moderation, saving for instructor review', {
+              categories: result.categories,
+              username: user?.attributes?.sub
+            });
+          }
+        });
+      }
       if(unitIsComplete && !timeLimitSeconds) {
-        setShowUnitComplete(true)
+        dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true })
         // Award XP for completing all blocks
         const currentUsername = usernameRef.current || user?.attributes?.sub;
-        if (currentUsername && grade?.id) {
-          awardXPAndCheck(currentUsername, 'ALL_BLOCKS_COMPLETED', grade.id);
+        if (currentUsername && state.grade?.id) {
+          awardXPAndCheck(currentUsername, 'ALL_BLOCKS_COMPLETED', state.grade.id, sectionId || undefined, id);
           // Award perfect score if accuracy is 100%
           if (unitAccuracy >= 100) {
-            awardXPAndCheck(currentUsername, 'PERFECT_SCORE', grade.id);
+            awardXPAndCheck(currentUsername, 'PERFECT_SCORE', state.grade.id, sectionId || undefined, id);
           }
+
+          // Summarize feedback via GPT-4o-mini (fire-and-forget)
+          summarizeGradeFeedback(data, state.grade.id).catch((err) =>
+            console.error('[unitContext] summarizeGradeFeedback error:', err),
+          )
 
           // Update per-unit learning memory with block-level accuracy data
           const weakAreas = []
@@ -354,6 +398,19 @@ const UnitProvider = ({ children, id }) => {
           ).catch((err) =>
             console.error('[unitContext] updateUnitMemoryAndRebuild error:', err),
           )
+
+          // Check personal best (fire-and-forget, sets state for banner)
+          if (unitAccuracy != null) {
+            checkPersonalBest(currentUsername, id, unitAccuracy)
+              .then((result) => {
+                if (result?.isNewBest) {
+                  dispatch({ type: actionTypes.SET_PERSONAL_BEST_RESULT, payload: result })
+                }
+              })
+              .catch((err) =>
+                console.error('[unitContext] checkPersonalBest error:', err),
+              )
+          }
         }
       }
     } catch (error) {
@@ -378,7 +435,7 @@ const UnitProvider = ({ children, id }) => {
       // Re-throw to let calling code handle it
       throw error
     }
-  }, [rubricLength, grade, createGrade, timeLimitSeconds]);
+  }, [rubricLength, state.grade, createGrade, timeLimitSeconds]);
 
   React.useEffect(() => {
     // Wait for auth to be ready
@@ -400,109 +457,143 @@ const UnitProvider = ({ children, id }) => {
     }
 
     const client = getAmplifyClient();
+    const subscriptions = [];
+    let cancelled = false;
 
-    // Subscribe to grades for this unit and user
-    // Note: owner filter removed - Amplify Gen 2 automatically filters by owner for models with allow.owner()
-    // Adding owner manually caused "subscription filter uses same fieldName multiple time" error
-    // unitID filter is sufficient to identify grades for this unit (user filter is automatic)
-    const subscription = client.models.Grade.observeQuery({
-      filter: {
-        unitID: { eq: id }
+    function processGrades(validItems) {
+      // Filter client-side
+      const incompleteGrades = validItems.filter(grade => !grade.complete);
+      const completedGrades = validItems.filter(grade => grade.complete);
+      
+      // Handle current grade (most recent incomplete)
+      const currentGrade = incompleteGrades[0];
+      
+      // Parse grade.data from JSON string to object so all consumers get an object
+      if (currentGrade?.data && typeof currentGrade.data === 'string') {
+        try {
+          currentGrade.data = JSON.parse(currentGrade.data);
+        } catch (e) {
+          console.error('[UnitContext] Failed to parse grade.data:', e);
+          currentGrade.data = {};
+        }
       }
-    }).subscribe({
-      next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(item => item != null && item.id != null);
-        
-        // Filter client-side
-        const incompleteGrades = validItems.filter(grade => !grade.complete);
-        const completedGrades = validItems.filter(grade => grade.complete);
-        
-        // Handle current grade (most recent incomplete)
-        const currentGrade = incompleteGrades[0];
-        
-        // Parse grade.data from JSON string to object so all consumers get an object
-        if (currentGrade?.data && typeof currentGrade.data === 'string') {
-          try {
-            currentGrade.data = JSON.parse(currentGrade.data);
-          } catch (e) {
-            console.error('[UnitContext] Failed to parse grade.data:', e);
-            currentGrade.data = {};
+      
+      // If there are completed grades but no current incomplete grade,
+      // show the completion screen (persists across navigation)
+      const showComplete = !currentGrade && completedGrades.length > 0;
+      
+      // Calculate finished questions from the current grade data
+      let _finishedQuestions = 0;
+      if (currentGrade?.data) {
+        const gradeData = currentGrade.data;
+        Object.entries(gradeData).forEach(([key, value]) => {
+          if (value?.complete === true) {
+            _finishedQuestions++;
           }
-        }
-        
-        setGrade(currentGrade);
-        setUsername(username);
-        
-        // If there are completed grades but no current incomplete grade,
-        // show the completion screen (persists across navigation)
-        if (!currentGrade && completedGrades.length > 0) {
-          setShowUnitComplete(true);
-        }
-        
-        // Calculate finished questions from the current grade data
-        if (currentGrade?.data) {
-          let _finishedQuestions = 0;
-          const gradeData = currentGrade.data;
-          Object.entries(gradeData).forEach(([key, value]) => {
-            if (value?.complete === true) {
-              _finishedQuestions++;
-            }
-          });
-          setFinishedQuestions(_finishedQuestions);
-        } else {
-          setFinishedQuestions(0);
-        }
-        
-        // Handle recent grades (top 5 completed, sorted by accuracy then date)
-        const sortedCompletedGrades = completedGrades
-          .sort((a, b) => {
-            if (b.accuracy !== a.accuracy) {
-              return (b.accuracy || 0) - (a.accuracy || 0);
-            }
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          })
-          .slice(0, 5);
-        
-        setRecentGrades(sortedCompletedGrades);
-      },
-      error: (error) => {
-        console.error('[UnitContext] Grade subscription error:', error);
-        
-        // Extract error message from nested structure
-        // Error structure: { error: { errors: [{ message: '...' }] }, type: 'onUpdate' }
-        const errorMessage = error?.error?.errors?.[0]?.message || error?.message || '';
-        
-        // DuplicatedOperationError is transient — occurs during rapid mount/unmount cycles
-        if (errorMessage.includes('DuplicatedOperationError')) {
-          console.warn('[UnitContext] Grade subscription: transient DuplicatedOperationError (safe to ignore)');
-          return;
-        }
-        
-        // Handle subscription filter errors (AWS AppSync limit: max 5 values in `in` operator)
-        // Occurs when user belongs to >5 groups and Amplify tries to filter by all groups
-        if (errorMessage.includes('exceeds maximum value limit') || 
-            errorMessage.includes('operator `in`')) {
-          console.warn('[UnitContext] Subscription filter limit exceeded, using client-side filtering only');
-          console.warn('[UnitContext] This is an AWS AppSync limitation, not a code bug');
-          // Subscription will retry automatically - the error is logged but not fatal
-          // Client-side filtering in next() handler will still work
-          return;
-        }
-        
-        // Stop retrying on auth errors to prevent rate limiting
-        if (errorMessage.includes('No current user') || 
-            errorMessage.includes('NoSignedUser') ||
-            errorMessage.includes('401') ||
-            errorMessage.includes('403')) {
-          console.warn('[UnitContext] Auth error, stopping Grade subscription retries');
-          subscription.unsubscribe();
-        }
+        });
       }
-    });
+      
+      // Handle recent grades (top 5 completed, sorted by accuracy then date)
+      const sortedCompletedGrades = completedGrades
+        .sort((a, b) => {
+          if (b.accuracy !== a.accuracy) {
+            return (b.accuracy || 0) - (a.accuracy || 0);
+          }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
+        .slice(0, 5);
+      
+      dispatch({ type: actionTypes.GRADE_SUBSCRIPTION_UPDATE, payload: {
+        grade: currentGrade,
+        username,
+        showUnitComplete: showComplete,
+        finishedQuestions: _finishedQuestions,
+        recentGrades: sortedCompletedGrades,
+      } });
+    }
+
+    function handleGradeError(label, error) {
+      const errorMessage = error?.error?.errors?.[0]?.message || error?.message || '';
+      if (errorMessage.includes('DuplicatedOperationError')) {
+        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
+      }
+      if (errorMessage.includes('exceeds maximum value limit') || 
+          errorMessage.includes('operator `in`')) {
+        console.warn('[UnitContext] Subscription filter limit exceeded, using client-side filtering only');
+        return;
+      }
+      console.error(`[UnitContext] ${label} error:`, error);
+    }
+
+    async function fetchGrades() {
+      try {
+        const { data: items, errors } = await client.models.Grade.list({
+          filter: { unitID: { eq: id } }
+        });
+        if (cancelled) return;
+        if (errors?.length) console.error('[UnitContext] Grade list errors:', errors);
+
+        const validItems = (items || []).filter(item => item != null && item.id != null);
+        processGrades(validItems);
+
+        if (cancelled) return;
+
+        const createSub = client.models.Grade.onCreate({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const grade = response?.data || response;
+            if (!grade || !grade.id) return;
+            // Re-fetch all grades to get correct state
+            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
+              const valid = (data || []).filter(item => item != null && item.id != null);
+              processGrades(valid);
+            });
+          },
+          error: (error) => handleGradeError('Grade onCreate', error)
+        });
+        subscriptions.push(createSub);
+
+        const updateSub = client.models.Grade.onUpdate({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const grade = response?.data || response;
+            if (!grade || !grade.id) return;
+            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
+              const valid = (data || []).filter(item => item != null && item.id != null);
+              processGrades(valid);
+            });
+          },
+          error: (error) => handleGradeError('Grade onUpdate', error)
+        });
+        subscriptions.push(updateSub);
+
+        const deleteSub = client.models.Grade.onDelete({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const grade = response?.data || response;
+            if (!grade || !grade.id) return;
+            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
+              const valid = (data || []).filter(item => item != null && item.id != null);
+              processGrades(valid);
+            });
+          },
+          error: (error) => handleGradeError('Grade onDelete', error)
+        });
+        subscriptions.push(deleteSub);
+      } catch (error) {
+        console.error('[UnitContext] fetchGrades error:', error);
+      }
+    }
+
+    fetchGrades();
 
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
+      subscriptions.forEach(sub => sub.unsubscribe());
     };
 
   }, [id, user, authLoading]);
@@ -510,34 +601,86 @@ const UnitProvider = ({ children, id }) => {
   // ============================================================================
   // Practice Sessions subscription + CRUD
   // ============================================================================
-  const [practiceSessions, setPracticeSessions] = React.useState([]);
 
   React.useEffect(() => {
     if (authLoading || !user || !id) return;
 
     const client = getAmplifyClient();
-    const subscription = client.models.PracticeSession.observeQuery({
-      filter: { unitID: { eq: id } },
-    }).subscribe({
-      next: ({ items }) => {
-        const valid = (items || []).filter(s => s != null && s.id != null);
-        setPracticeSessions(valid);
-      },
-      error: (error) => {
-        const msg = error?.message || error?.error?.errors?.[0]?.message || String(error);
-        if (msg.includes('DuplicatedOperationError')) {
-          console.warn('[UnitContext] PracticeSession subscription: transient DuplicatedOperationError (safe to ignore)');
-          return;
-        }
-        console.error('[UnitContext] PracticeSession subscription error:', msg);
-        if (msg.includes('exceeds maximum value limit')) {
-          console.warn('[UnitContext] PracticeSession subscription filter limit — using client filtering');
-          return;
-        }
-      },
-    });
+    const subscriptions = [];
+    let cancelled = false;
 
-    return () => subscription.unsubscribe();
+    function handleError(label, error) {
+      const msg = error?.message || error?.error?.errors?.[0]?.message || String(error);
+      if (msg.includes('DuplicatedOperationError')) {
+        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
+      }
+      if (msg.includes('exceeds maximum value limit')) {
+        console.warn('[UnitContext] PracticeSession subscription filter limit — using client filtering');
+        return;
+      }
+      console.error(`[UnitContext] ${label} error:`, msg);
+    }
+
+    async function fetchPracticeSessions() {
+      try {
+        const { data: items, errors } = await client.models.PracticeSession.list({
+          filter: { unitID: { eq: id } }
+        });
+        if (cancelled) return;
+        if (errors?.length) console.error('[UnitContext] PracticeSession list errors:', errors);
+
+        const validItems = (items || []).filter(s => s != null && s.id != null);
+        dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: validItems });
+
+        if (cancelled) return;
+
+        const createSub = client.models.PracticeSession.onCreate({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const session = response?.data || response;
+            if (!session || !session.id) return;
+            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'create' });
+          },
+          error: (error) => handleError('PracticeSession onCreate', error)
+        });
+        subscriptions.push(createSub);
+
+        const updateSub = client.models.PracticeSession.onUpdate({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const session = response?.data || response;
+            if (!session || !session.id) return;
+            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'update' });
+          },
+          error: (error) => handleError('PracticeSession onUpdate', error)
+        });
+        subscriptions.push(updateSub);
+
+        const deleteSub = client.models.PracticeSession.onDelete({
+          filter: { unitID: { eq: id } }
+        }).subscribe({
+          next: (response) => {
+            const session = response?.data || response;
+            if (!session || !session.id) return;
+            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'delete' });
+          },
+          error: (error) => handleError('PracticeSession onDelete', error)
+        });
+        subscriptions.push(deleteSub);
+      } catch (error) {
+        console.error('[UnitContext] fetchPracticeSessions error:', error);
+      }
+    }
+
+    fetchPracticeSessions();
+
+    return () => {
+      cancelled = true;
+      subscriptions.forEach(sub => sub.unsubscribe());
+    };
   }, [id, user, authLoading]);
 
   const createPracticeSession = React.useCallback(async (data) => {
@@ -594,11 +737,13 @@ const UnitProvider = ({ children, id }) => {
             const _files = {};
             cachedFiles.forEach(f => { _files[f.id] = f; });
             unitRef.current = { ...cachedUnit, data: unitData, _version: cachedUnit.version };
-            setUnit(unitRef.current);
-            setDictionary(_dictionary);
-            setQuestionBank(_questionBank);
-            setFiles(_files);
-            setRubric(_rubric);
+            dispatch({ type: actionTypes.UNIT_LOADED, payload: {
+              unit: unitRef.current,
+              dictionary: _dictionary,
+              questionBank: _questionBank,
+              files: _files,
+              rubric: _rubric,
+            } });
             editorStateRef.current = unitData;
             versionRef.current = cachedUnit.version;
             console.log('[UnitContext] Loaded unit from offline cache');
@@ -618,164 +763,185 @@ const UnitProvider = ({ children, id }) => {
 
     console.log('[UnitContext] Fetching unit data for id:', id);
     const client = getAmplifyClient();
+    const subscriptions = [];
+    let cancelled = false;
 
-    const subscription = client.models.Unit.observeQuery({
-      filter: {
-        id: { eq: id }
+    // Helper to load a unit record and all its relations
+    async function loadUnit(unitRecord) {
+      if (!unitRecord) {
+        dispatch({ type: actionTypes.SET_UNIT, payload: {} });
+        dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
+        return;
       }
-    }).subscribe({
-      next: async ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(item => item != null && item.id != null);
-        const _newUnit = validItems[0]
-        
-        if (!_newUnit) {
-          setUnit({});
-          setPermissionError(null);
-          return;
-        }
 
-        // Permission checking is handled by individual pages (editor vs workbook)
-        // UnitContext loads data for both, pages decide whether to show error
-        // Clear any previous permission errors
-        setPermissionError(null);
+      // Permission checking is handled by individual pages (editor vs workbook)
+      dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
 
-        // Skip if same unit with no changes (compare _version)
-        if (versionRef.current === _newUnit?._version) {
-          return;
-        }
-
-        const _files = {}
-        const _dictionary = {}
-        const _questionBank = {}
-        const _playlistUrls = {}
-
-        // Load related words via join table
-        const { data: _unitWords } = await client.models.UnitWord.list({
-          filter: { unitID: { eq: id } }
-        });
-
-        // Load related files via join table
-        const { data: _unitFiles } = await client.models.UnitFile.list({
-          filter: { unitID: { eq: id } }
-        });
-
-        // Load related questions via join table
-        const { data: _unitQuestions } = await client.models.QuestionUnit.list({
-          filter: { unitID: { eq: id } }
-        });
-
-        // Fetch full Word objects
-        const _unitWordsWork = (_unitWords || []).filter(uw => uw != null).map(async uw => {
-          if (uw.wordID) {
-            const { data } = await client.models.Word.get({ id: uw.wordID });
-            return data;
-          }
-          return null;
-        });
-
-        // Fetch full File objects
-        const _unitFilesWork = (_unitFiles || []).filter(uf => uf != null).map(async uf => {
-          if (uf.fileID) {
-            const { data } = await client.models.File.get({ id: uf.fileID });
-            return data;
-          }
-          return null;
-        });
-
-        // Fetch full Question objects
-        const _unitQuestionsWork = (_unitQuestions || []).filter(uq => uq != null).map(async uq => {
-          if (uq.questionID) {
-            const { data } = await client.models.Question.get({ id: uq.questionID });
-            return data;
-          }
-          return null;
-        });
-
-        const _words = await Promise.allSettled(_unitWordsWork)
-        const _unitsFiles = await Promise.allSettled(_unitFilesWork)
-        const _questions = await Promise.allSettled(_unitQuestionsWork)
-
-        _words.forEach(w => {
-          if (w.status === 'fulfilled' && w.value) {
-            const _w = w.value
-            _dictionary[_w.id] = _w
-          }
-        })
-
-        _unitsFiles.forEach(f => {
-          if (f.status === 'fulfilled' && f.value) {
-            const _f = f.value
-            _files[_f.id] = _f
-          }
-        })
-
-        _questions.forEach(q => {
-          if (q.status === 'fulfilled' && q.value) {
-            const _q = q.value
-            _questionBank[_q.id] = _q
-          }
-        })
-
-        // Parse unit data (Gen2 stores JSON as string)
-        const unitData = typeof _newUnit?.data === 'string' 
-          ? JSON.parse(_newUnit.data) 
-          : _newUnit?.data;
-
-        const blocks = unitData?.root?.children || []
-        const _rubric = []
-
-        if (blocks.length > 0) {
-          blocks.forEach(block => {
-            if (gradedBlockTypes.includes(block['type'])) {
-              _rubric.push(block['key'])
-            }
-          })
-        }
-
-        // Update all state - _version check ensures data has changed
-        unitRef.current = _newUnit;
-        setUnit(_newUnit);
-        setDictionary(_dictionary);
-        setFiles(_files);
-        setPlaylistUrls(_playlistUrls);
-        setQuestionBank(_questionBank);
-        setRubric(_rubric);
-
-        editorStateRef.current = unitData;
-        versionRef.current = _newUnit?._version;
-      },
-      error: (error) => {
-        const msg = error?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
-        if (msg.includes('DuplicatedOperationError')) {
-          console.warn('[UnitContext] Unit subscription: transient DuplicatedOperationError (safe to ignore)');
-          return;
-        }
-        console.error('[UnitContext] Unit subscription error:', error);
-        // Stop retrying on auth errors to prevent rate limiting
-        if (error?.message?.includes('No current user') || 
-            error?.message?.includes('NoSignedUser') ||
-            error?.message?.includes('401') ||
-            error?.message?.includes('403')) {
-          console.warn('[UnitContext] Auth error, stopping Unit subscription retries');
-          subscription.unsubscribe();
-        }
+      // Skip if same unit with no changes (compare _version)
+      if (versionRef.current === unitRecord?._version) {
+        return;
       }
-    });
+
+      const _files = {}
+      const _dictionary = {}
+      const _questionBank = {}
+      const _playlistUrls = {}
+
+      // Load related words via join table
+      const { data: _unitWords } = await client.models.UnitWord.list({
+        filter: { unitID: { eq: id } }
+      });
+
+      // Load related files via join table
+      const { data: _unitFiles } = await client.models.UnitFile.list({
+        filter: { unitID: { eq: id } }
+      });
+
+      // Load related questions via join table
+      const { data: _unitQuestions } = await client.models.QuestionUnit.list({
+        filter: { unitID: { eq: id } }
+      });
+
+      // Fetch full Word objects
+      const _unitWordsWork = (_unitWords || []).filter(uw => uw != null).map(async uw => {
+        if (uw.wordID) {
+          const { data } = await client.models.Word.get({ id: uw.wordID });
+          return data;
+        }
+        return null;
+      });
+
+      // Fetch full File objects
+      const _unitFilesWork = (_unitFiles || []).filter(uf => uf != null).map(async uf => {
+        if (uf.fileID) {
+          const { data } = await client.models.File.get({ id: uf.fileID });
+          return data;
+        }
+        return null;
+      });
+
+      // Fetch full Question objects
+      const _unitQuestionsWork = (_unitQuestions || []).filter(uq => uq != null).map(async uq => {
+        if (uq.questionID) {
+          const { data } = await client.models.Question.get({ id: uq.questionID });
+          return data;
+        }
+        return null;
+      });
+
+      const _words = await Promise.allSettled(_unitWordsWork)
+      const _unitsFiles = await Promise.allSettled(_unitFilesWork)
+      const _questions = await Promise.allSettled(_unitQuestionsWork)
+
+      _words.forEach(w => {
+        if (w.status === 'fulfilled' && w.value) {
+          const _w = w.value
+          _dictionary[_w.id] = _w
+        }
+      })
+
+      _unitsFiles.forEach(f => {
+        if (f.status === 'fulfilled' && f.value) {
+          const _f = f.value
+          _files[_f.id] = _f
+        }
+      })
+
+      _questions.forEach(q => {
+        if (q.status === 'fulfilled' && q.value) {
+          const _q = q.value
+          _questionBank[_q.id] = _q
+        }
+      })
+
+      // Parse unit data (Gen2 stores JSON as string)
+      const unitData = typeof unitRecord?.data === 'string' 
+        ? JSON.parse(unitRecord.data) 
+        : unitRecord?.data;
+
+      const blocks = unitData?.root?.children || []
+      const _rubric = []
+
+      if (blocks.length > 0) {
+        blocks.forEach(block => {
+          if (gradedBlockTypes.includes(block['type'])) {
+            _rubric.push(block['key'])
+          }
+        })
+      }
+
+      if (cancelled) return;
+
+      // Update all state - _version check ensures data has changed
+      unitRef.current = unitRecord;
+      dispatch({ type: actionTypes.UNIT_LOADED, payload: {
+        unit: unitRecord,
+        dictionary: _dictionary,
+        files: _files,
+        playlistUrls: _playlistUrls,
+        questionBank: _questionBank,
+        rubric: _rubric,
+      } });
+
+      editorStateRef.current = unitData;
+      versionRef.current = unitRecord?._version;
+    }
+
+    function handleSubscriptionError(label, error) {
+      const msg = error?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+      if (msg.includes('DuplicatedOperationError')) {
+        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
+      }
+      console.error(`[UnitContext] ${label} error:`, error);
+    }
+
+    // Initial fetch: single get() instead of observeQuery() table scan
+    async function fetchUnit() {
+      try {
+        const { data: unitRecord, errors } = await client.models.Unit.get({ id });
+        if (cancelled) return;
+        if (errors?.length) {
+          console.error('[UnitContext] Unit.get errors:', errors);
+        }
+        await loadUnit(unitRecord);
+      } catch (error) {
+        console.error('[UnitContext] Unit.get error:', error);
+      }
+
+      if (cancelled) return;
+
+      // Subscribe to updates for this specific unit
+      const updateSub = client.models.Unit.onUpdate({
+        filter: { id: { eq: id } }
+      }).subscribe({
+        next: async (response) => {
+          const updatedUnit = response;
+          if (!updatedUnit || !updatedUnit.id) return;
+          console.log('[UnitContext] Unit updated via subscription, _version:', updatedUnit._version);
+          await loadUnit(updatedUnit);
+        },
+        error: (error) => handleSubscriptionError('Unit onUpdate', error)
+      });
+      subscriptions.push(updateSub);
+    }
+
+    fetchUnit();
     
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
+      subscriptions.forEach(sub => sub?.unsubscribe());
     };
   }, [id, user, authLoading]);
 
   // Helpers to track concurrent saves and show spinner only while at least one is in-flight
   const beginSaving = React.useCallback(() => {
     savingCountRef.current += 1;
-    setIsSaving(true);
+    dispatch({ type: actionTypes.SET_IS_SAVING, payload: true });
   }, []);
   const endSaving = React.useCallback(() => {
     savingCountRef.current = Math.max(0, savingCountRef.current - 1);
-    if (savingCountRef.current === 0) setIsSaving(false);
+    if (savingCountRef.current === 0) dispatch({ type: actionTypes.SET_IS_SAVING, payload: false });
   }, []);
 
   const saveEditorContent = React.useCallback(async (editorContent) => {
@@ -801,24 +967,11 @@ const UnitProvider = ({ children, id }) => {
 
     beginSaving();
     try {
-      // Moderate content before saving (runs async, doesn't block)
-      const moderationResult = await moderateContent(newContent);
-      const moderationFields = buildModerationFields(moderationResult);
-      
-      if (moderationResult.flagged) {
-        console.warn('[UnitContext] Content flagged by moderation, saving anyway for instructor review', {
-          categories: moderationResult.categories
-        });
-      }
-
       // Save with Gen2 client
       const client = getAmplifyClient();
       const { data: savedUnit, errors } = await client.models.Unit.update({
         id: currentUnit.id,
         data: newContent,
-        moderationStatus: moderationFields.moderationStatus,
-        moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
-        moderationCheckedAt: moderationFields.moderationCheckedAt,
         _version: currentUnit._version,
       });
       if (errors?.length) {
@@ -827,6 +980,15 @@ const UnitProvider = ({ children, id }) => {
         // Update ref with new _version to prevent stale version conflicts
         unitRef.current = { ...unitRef.current, _version: savedUnit._version };
       }
+
+      // Moderate async — backend fetches _version and writes to Unit.moderation
+      moderateContent(newContent, { modelName: 'Unit', recordId: currentUnit.id }).then(result => {
+        if (result.flagged) {
+          console.warn('[UnitContext] Content flagged by moderation, saved for instructor review', {
+            categories: result.categories
+          });
+        }
+      });
     } catch (errors) {
       console.error('[saveEditorContent] Save failed:', errors);
     } finally {
@@ -957,23 +1119,23 @@ const UnitProvider = ({ children, id }) => {
   const workbookEnabled = true; // Always enabled - uses mocks in Storybook
   
   const workbookCollaborationConfig = React.useMemo(() => {
-    if (!workbookEnabled || !grade?.id) return null;
+    if (!workbookEnabled || !state.grade?.id) return null;
     
     return {
-      gradeId: grade.id,
+      gradeId: state.grade.id,
       user: {
         username: user?.attributes?.sub || '',
         role: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? 'instructor' : 'student',
         displayName: user?.attributes?.name || user?.attributes?.email?.split('@')[0] || user?.attributes?.sub || 'Anonymous',
         color: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? '#f59e0b' : '#3b82f6',
       },
-      initialData: grade.data,
+      initialData: state.grade.data,
       wsUrl: process.env.NEXT_PUBLIC_YJS_WS_URL || 'ws://localhost:3001',
       onTutorJoin: (tutor) => {
         console.log(`[UnitContext] Tutor ${tutor.displayName} joined to help!`);
       },
       onSyncToGrade: async (data, feedback) => {
-        if (!grade) return;
+        if (!state.grade) return;
         
         try {
           const parsed = typeof data === 'string' ? JSON.parse(data) : data;
@@ -990,30 +1152,26 @@ const UnitProvider = ({ children, id }) => {
                 blocks.reduce((sum, b) => sum + (b.accuracy || 0), 0) / blocks.length
               )
             : 0;
-          
-          // Moderate student submission data
-          const moderationResult = await moderateContent(data);
-          const moderationFields = buildModerationFields(moderationResult);
-          
-          if (moderationResult.flagged) {
-            console.warn('[UnitContext] Workbook data flagged by moderation, saving for instructor review', {
-              categories: moderationResult.categories,
-              username: user?.attributes?.sub
-            });
-          }
 
           // Save to DataStore
           const client = getAmplifyClient();
           await client.models.Grade.update({
-            id: grade.id,
+            id: state.grade.id,
             data: typeof data === 'string' ? data : JSON.stringify(data),
-            feedback: feedback ? JSON.stringify(feedback) : grade.feedback,
+            feedback: feedback ? JSON.stringify(feedback) : state.grade.feedback,
             complete,
             percentComplete,
             accuracy,
-            moderationStatus: moderationFields.moderationStatus,
-            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
-            moderationCheckedAt: moderationFields.moderationCheckedAt,
+          });
+
+          // Moderate async — backend persists to Grade.moderation
+          moderateContent(data, { modelName: 'Grade', recordId: state.grade.id }).then(result => {
+            if (result.flagged) {
+              console.warn('[UnitContext] Workbook data flagged by moderation, saving for instructor review', {
+                categories: result.categories,
+                username: user?.attributes?.sub
+              });
+            }
           });
           
           console.log('[UnitContext] Synced workbook to Grade.data', {
@@ -1026,7 +1184,7 @@ const UnitProvider = ({ children, id }) => {
         }
       },
     };
-  }, [workbookEnabled, grade?.id, grade?.data, user?.attributes, authSession?.groups]);
+  }, [workbookEnabled, state.grade?.id, state.grade?.data, user?.attributes, authSession?.groups]);
   
   // Use the workbook collaboration hook
   const workbookCollaboration = useWorkbookCollaboration(workbookCollaborationConfig);
@@ -1053,16 +1211,21 @@ const UnitProvider = ({ children, id }) => {
     };
   }, [workbookCollaboration]);
 
+  // Stable dispatch-based setters for consumers
+  const setShowUnitComplete = React.useCallback((val) => dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: val }), []);
+  const setFinishedQuestions = React.useCallback((val) => dispatch({ type: actionTypes.SET_FINISHED_QUESTIONS, payload: val }), []);
+  const setPersonalBestResult = React.useCallback((val) => dispatch({ type: actionTypes.SET_PERSONAL_BEST_RESULT, payload: val }), []);
+
   const contextValue = React.useMemo(() => ({
-    unit,
+    unit: state.unit,
     name,
-    rubric,
-    grade,
-    recentGrades,
-    dictionary,
-    files,
-    questionBank,
-    playlistUrls,
+    rubric: state.rubric,
+    grade: state.grade,
+    recentGrades: state.recentGrades,
+    dictionary: state.dictionary,
+    files: state.files,
+    questionBank: state.questionBank,
+    playlistUrls: state.playlistUrls,
     description,
     editorStateRef,
     editorSelectionRef,
@@ -1070,9 +1233,11 @@ const UnitProvider = ({ children, id }) => {
     versionRef,
     unitRef,
     unitVersion,
-    finishedQuestions,
-    showUnitComplete,
-    permissionError,
+    finishedQuestions: state.finishedQuestions,
+    showUnitComplete: state.showUnitComplete,
+    personalBestResult: state.personalBestResult,
+    setPersonalBestResult,
+    permissionError: state.permissionError,
     handleBeforeUnload,
     setShowUnitComplete,
     setFinishedQuestions,
@@ -1091,29 +1256,33 @@ const UnitProvider = ({ children, id }) => {
     workbookStats,
     workbookEnabled,
     // Practice drill features
-    practiceSessions,
+    practiceSessions: state.practiceSessions,
     createPracticeSession,
     updatePracticeSession,
     // Save state
-    isSaving,
+    isSaving: state.isSaving,
     beginSaving,
     endSaving,
+    // Section context for chat
+    sectionId,
   }), [
-    unit,
+    state.unit,
     name,
-    rubric,
-    grade,
-    recentGrades,
-    dictionary,
-    files,
-    questionBank,
-    playlistUrls,
+    state.rubric,
+    state.grade,
+    state.recentGrades,
+    state.dictionary,
+    state.files,
+    state.questionBank,
+    state.playlistUrls,
     description,
-    finishedQuestions,
+    state.finishedQuestions,
     checkUnitEditPermission,
     checkUnitViewPermission,
-    showUnitComplete,
-    permissionError,
+    state.showUnitComplete,
+    state.personalBestResult,
+    setPersonalBestResult,
+    state.permissionError,
     session,
     handleBeforeUnload,
     saveName,
@@ -1126,12 +1295,13 @@ const UnitProvider = ({ children, id }) => {
     workbookCollaboration,
     workbookStats,
     workbookEnabled,
-    practiceSessions,
+    state.practiceSessions,
     createPracticeSession,
     updatePracticeSession,
-    isSaving,
+    state.isSaving,
     beginSaving,
     endSaving,
+    sectionId,
   ]);
 
   return (

@@ -2,6 +2,10 @@ import React from "react";
 import { fetchUserAttributes, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 
+// NOTE: The AuthGate component in _app.jsx gates data-dependent providers
+// behind auth resolution, so by the time other contexts mount and call
+// list()/subscribe(), the SDK's internal credential cache is already warm.
+
 const AuthContext = React.createContext({
   error: undefined,
   isLoading: true,
@@ -25,14 +29,25 @@ const AuthProvider = ({ children }) => {
             setTimeout(() => reject(new Error('Authentication timeout')), 15000)
           );
           
+          // Call fetchAuthSession FIRST to warm the credential provider cache.
+          // fetchUserAttributes() internally calls fetchAuthSession() again, but
+          // at that point the cache is populated so no additional IAM HTTP calls.
+          // AuthGate in _app.jsx ensures this completes before data contexts mount.
+          const sessionPromise = fetchAuthSession();
+          const session = await Promise.race([sessionPromise, timeoutPromise]);
+          const { identityId, tokens } = session || {};
+
+          if (!tokens) {
+            // No tokens = user not authenticated (expected on login page)
+            console.log('[AuthContext] User not authenticated - no tokens available');
+            setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+            return;
+          }
+
+          const { idToken, accessToken } = tokens;
+          
           const attributesPromise = fetchUserAttributes();
           const attributes = await Promise.race([attributesPromise, timeoutPromise]);
-          
-          const sessionPromise = fetchAuthSession();
-          const {
-            identityId,
-            tokens: { idToken, accessToken },
-          } = await Promise.race([sessionPromise, timeoutPromise]);
           
           // Extract user groups from token payload
           const groups = accessToken?.payload['cognito:groups'] || [];

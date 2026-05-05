@@ -4,7 +4,7 @@ import PracticeDrillDialog from './PracticeDrillDialog'
 import type { PracticeDrillDialogProps } from './PracticeDrillDialog'
 
 const meta: Meta<PracticeDrillDialogProps> = {
-  title: 'PracticeDrill/PracticeDrillDialog',
+  title: '🎯 Practice Drills/Dialog',
   component: PracticeDrillDialog,
   tags: ['autodocs'],
   argTypes: {

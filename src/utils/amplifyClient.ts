@@ -24,11 +24,15 @@ let client: ReturnType<typeof generateClient<Schema>> | null = null;
 /**
  * Get or create the Amplify Gen 2 GraphQL client
  * 
+ * Uses 'userPool' authMode to ensure all operations (including WebSocket
+ * subscriptions) use the cached Cognito JWT token instead of fetching
+ * IAM credentials from the Identity Pool on every call.
+ * 
  * @returns GraphQL client with typed models based on schema
  */
 export const getAmplifyClient = () => {
   if (!client) {
-    client = generateClient<Schema>();
+    client = generateClient<Schema>({ authMode: 'userPool' });
   }
   return client;
 };

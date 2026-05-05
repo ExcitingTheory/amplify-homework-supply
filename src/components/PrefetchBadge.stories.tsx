@@ -7,7 +7,7 @@ import PrefetchBadge from './PrefetchBadge';
  * "Save offline" → downloading progress → "Offline ready" → error/retry.
  */
 const meta: Meta<typeof PrefetchBadge> = {
-  title: '🔌 Offline/PrefetchBadge',
+  title: '🔌 Offline & Sync/Prefetch Badge',
   component: PrefetchBadge,
   parameters: {
     layout: 'centered',

@@ -56,6 +56,8 @@ export interface SpotlightOverlayProps {
   onClose?: () => void;
   /** Whether to show the overlay */
   isOpen: boolean;
+  /** Whether a page navigation is in progress (disables Next) */
+  isNavigating?: boolean;
   /** Mode: tutorial (show steps) or quiz (minimal guidance) */
   mode?: 'tutorial' | 'quiz';
 }
@@ -83,6 +85,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   onComplete,
   onClose,
   isOpen,
+  isNavigating = false,
   mode = 'tutorial',
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -96,6 +99,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const overlayRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const targetClickCleanupRef = useRef<(() => void) | null>(null);
+  const tooltipPositionedRef = useRef(false);
   const currentStep = steps[currentStepIndex];
 
   /** Measures the preview iframe and stores its rect + parent container in state */
@@ -118,6 +122,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   useEffect(() => {
     setDragOffset({ x: 0, y: 0 });
     dragCurrentRef.current = { x: 0, y: 0 };
+    tooltipPositionedRef.current = false;
     if (tooltipRef.current) {
       tooltipRef.current.style.transform = '';
     }
@@ -289,16 +294,26 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   /**
    * Calculate tooltip position based on target and preferred position.
    * Measures the actual tooltip element and tries multiple sides to avoid going off-screen.
+   * Only repositions once per step to prevent jumping when the user interacts with the iframe.
    */
-  const calculateTooltipPosition = () => {
+  const calculateTooltipPosition = (force = false) => {
+    // Skip recalculation if already positioned for this step (unless forced)
+    if (tooltipPositionedRef.current && !force) return;
+
     if (!targetRect) {
       // Center of screen
       setTooltipPosition({
         top: window.innerHeight / 2 - 100,
         left: window.innerWidth / 2 - 150,
       });
+      // Don't mark as positioned until we have a target (if one is expected)
+      if (!currentStep.targetSelector) {
+        tooltipPositionedRef.current = true;
+      }
       return;
     }
+
+    tooltipPositionedRef.current = true;
 
     const padding = 24; // Space between spotlight and tooltip
     const tooltipEl = tooltipRef.current;
@@ -371,7 +386,14 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     const handleUpdate = () => {
       updateIframeRect();
       updateTargetPosition();
-      calculateTooltipPosition();
+      // Don't recalculate tooltip position on scroll — only the spotlight hole tracks the element
+    };
+
+    const handleResize = () => {
+      updateIframeRect();
+      updateTargetPosition();
+      // Force reposition on resize since viewport changed
+      calculateTooltipPosition(true);
     };
 
     // Listen to iframe load event - fires when new story is loaded
@@ -427,12 +449,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     });
 
     // Update on resize and scroll
-    window.addEventListener('resize', handleUpdate);
+    window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleUpdate, true);
 
     if (iframe?.contentWindow) {
       iframe.contentWindow.addEventListener('scroll', handleUpdate, true);
-      iframe.contentWindow.addEventListener('resize', handleUpdate);
+      iframe.contentWindow.addEventListener('resize', handleResize);
     }
 
     return () => {
@@ -450,12 +472,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         iframe.removeEventListener('load', handleIframeLoad);
       }
       window.removeEventListener('message', handleMessage);
-      window.removeEventListener('resize', handleUpdate);
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleUpdate, true);
       
       if (iframe?.contentWindow) {
         iframe.contentWindow.removeEventListener('scroll', handleUpdate, true);
-        iframe.contentWindow.removeEventListener('resize', handleUpdate);
+        iframe.contentWindow.removeEventListener('resize', handleResize);
       }
     };
   }, [isOpen, currentStep, currentStepIndex]);
@@ -475,6 +497,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   };
 
   const isLastStep = currentStep.isLast || currentStepIndex === steps.length - 1;
+
+  // Disable Next while navigating or while a targeted element hasn't loaded yet
+  const isNextDisabled = isNavigating || (!!currentStep.targetSelector && !targetRect);
 
   return (
     <>
@@ -642,14 +667,16 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                 {currentStep.description}
               </Typography>
 
-              {/* Warning if target element not found */}
-              {currentStep.targetSelector && !targetRect && (
+              {/* Warning if target element not found or page is navigating */}
+              {(isNavigating || (currentStep.targetSelector && !targetRect)) && (
                 <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(255, 152, 0, 0.1)', borderRadius: 1, borderLeft: '3px solid #FF9800' }}>
                   <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    ⚠️ Target Element Not Found
+                    {isNavigating ? '⏳ Loading page...' : '⚠️ Target Element Not Found'}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}>
-                    The component we're looking for hasn't loaded yet. The spotlight will keep trying to find it. Follow the instructions below to complete this step.
+                    {isNavigating
+                      ? 'Navigating to the story. The Next button will be enabled once the page loads.'
+                      : 'The component we\'re looking for hasn\'t loaded yet. The spotlight will keep trying to find it. Follow the instructions below to complete this step.'}
                   </Typography>
                 </Box>
               )}
@@ -699,6 +726,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                   variant="contained"
                   size="small"
                   onClick={handleNext}
+                  disabled={isNextDisabled}
                   endIcon={isLastStep ? <CheckIcon /> : <ArrowForwardIcon />}
                   sx={{ 
                     textTransform: 'none',
@@ -707,9 +735,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                     '&:hover': {
                       backgroundColor: mode === 'tutorial' ? '#45a049' : '#1976D2',
                     },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                    },
                   }}
                 >
-                  {isLastStep ? 'Done' : 'Next'}
+                  {isNavigating ? 'Loading...' : isLastStep ? 'Done' : 'Next'}
                 </Button>
               </Stack>
             </CardContent>

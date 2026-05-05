@@ -1,12 +1,12 @@
-import React, { createContext } from "react";
+import React, { createContext, useReducer } from "react";
 import { getAmplifyClient } from '../utils/amplifyClient';
 import AuthContext from './authContext';
+import { settingsReducer, initialState, actionTypes } from './reducers/settingsReducer';
 
 const SettingsContext = createContext();
 
 const SettingsProvider = ({ children }) => {
-  const [settings, setSettings] = React.useState(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [state, dispatch] = useReducer(settingsReducer, initialState);
   
   // Get auth state from centralized context
   const authContext = React.useContext(AuthContext);
@@ -21,80 +21,98 @@ const SettingsProvider = ({ children }) => {
     
     console.log('[SettingsContext] Setting up Settings subscription for user:', user.attributes.sub);
     const client = getAmplifyClient();
+    const subscriptions = [];
+    let cancelled = false;
 
-    const subscription = client.models.Settings.observeQuery().subscribe({
-      next: async ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(item => item != null && item.id != null);
-        
+    function handleError(label, error) {
+      const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+      if (msg.includes('DuplicatedOperationError')) {
+        console.warn(`[SettingsContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
+      }
+      console.error(`[SettingsContext] ${label} error:`, error);
+    }
+
+    async function fetchSettings() {
+      try {
+        const { data: items, errors } = await client.models.Settings.list();
+        if (cancelled) return;
+        if (errors?.length) console.error('[SettingsContext] list errors:', errors);
+
+        const validItems = (items || []).filter(item => item != null && item.id != null);
         if (validItems.length > 0) {
-          setSettings(validItems[0]);
-          setIsLoading(false);
+          dispatch({ type: actionTypes.SETTINGS_LOADED, payload: validItems[0] });
         } else {
           // Create default settings if none exist
-          try {
-            const { data: newSettings } = await client.models.Settings.create({
-              autoAnalyzeDocuments: true,
-              documentAnalysisModel: 'gpt-4',
-              editorTheme: 'auto',
-              editorFontSize: 14,
-              defaultAIModel: 'gpt-4',
-              assistantVoice: 'shimmer',
-              emailNotifications: true,
-              webhookNotifications: false,
-              language: 'en',
-            });
-            setSettings(newSettings);
-          } catch (error) {
-            console.error('Error creating settings:', error);
-          } finally {
-            setIsLoading(false);
+          const { data: newSettings } = await client.models.Settings.create({
+            autoAnalyzeDocuments: true,
+            documentAnalysisModel: 'gpt-4',
+            editorTheme: 'auto',
+            editorFontSize: 14,
+            defaultAIModel: 'gpt-4',
+            assistantVoice: 'shimmer',
+            emailNotifications: true,
+            webhookNotifications: false,
+            language: 'en',
+          });
+          if (!cancelled) {
+            dispatch({ type: actionTypes.SETTINGS_LOADED, payload: newSettings });
           }
         }
-      },
-      error: (error) => {
-        const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
-        if (msg.includes('DuplicatedOperationError')) {
-          console.warn('[SettingsContext] Settings subscription: transient DuplicatedOperationError (safe to ignore)');
-          return;
-        }
-        console.error('[SettingsContext] Settings subscription error:', error);
-        // Stop retrying on auth errors to prevent rate limiting
-        if (error?.message?.includes('No current user') || 
-            error?.message?.includes('NoSignedUser') ||
-            error?.message?.includes('401') ||
-            error?.message?.includes('403')) {
-          console.warn('[SettingsContext] Auth error, stopping Settings subscription retries');
-          subscription.unsubscribe();
-        }
-        setIsLoading(false);
+
+        if (cancelled) return;
+
+        // Subscribe to updates
+        const updateSub = client.models.Settings.onUpdate().subscribe({
+          next: (response) => {
+            const updated = response?.data || response;
+            if (!updated || !updated.id) return;
+            dispatch({ type: actionTypes.SETTINGS_LOADED, payload: updated });
+          },
+          error: (error) => handleError('Settings onUpdate', error)
+        });
+        subscriptions.push(updateSub);
+      } catch (error) {
+        console.error('[SettingsContext] fetchSettings error:', error);
+        if (!cancelled) dispatch({ type: actionTypes.SET_LOADING, payload: false });
       }
-    });
+    }
+
+    fetchSettings();
     
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscriptions.forEach(sub => sub.unsubscribe());
+    };
   }, [authLoading, user]);
 
   const updateSettings = React.useCallback(async (updates) => {
-    if (!settings) return;
+    if (!state.settings) return;
     try {
       const client = getAmplifyClient();
-      const { data: updated } = await client.models.Settings.update({
-        id: settings.id,
+      const { data: updated, errors } = await client.models.Settings.update({
+        id: state.settings.id,
+        _version: state.settings._version,
         ...updates,
       });
-      setSettings(updated);
+      if (errors?.length) {
+        console.error('[SettingsContext] update errors:', errors);
+      }
+      if (updated) {
+        dispatch({ type: actionTypes.SET_SETTINGS, payload: updated });
+      }
       return updated;
     } catch (error) {
       console.error('Error updating settings:', error);
       throw error;
     }
-  }, [settings]);
+  }, [state.settings]);
 
   const contextValue = React.useMemo(() => ({
-    settings,
-    isLoading,
+    settings: state.settings,
+    isLoading: state.isLoading,
     updateSettings,
-  }), [settings, isLoading, updateSettings]);
+  }), [state.settings, state.isLoading, updateSettings]);
 
   return (
     <SettingsContext.Provider value={contextValue}>

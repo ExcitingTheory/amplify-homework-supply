@@ -11,7 +11,7 @@ import type { HistoryEntry } from '../../yjs/WorkbookCollaborationProvider'
 // =============================================================================
 
 const gutterMeta: Meta<typeof CommentGutterIcon> = {
-  title: 'Workbook/CommentGutterIcon',
+  title: '📓 Workbook/Comment Gutter Icon',
   component: CommentGutterIcon,
 }
 export default gutterMeta
@@ -47,7 +47,7 @@ export const AllResolved: GutterStory = {
 // =============================================================================
 
 const drawerMeta: Meta<typeof CommentThreadDrawer> = {
-  title: 'Workbook/CommentThreadDrawer',
+  title: '📓 Workbook/Comment Thread Drawer',
   component: CommentThreadDrawer,
 }
 
@@ -117,7 +117,7 @@ export const DrawerEmpty: StoryObj<typeof CommentThreadDrawer> = {
 // =============================================================================
 
 const historyMeta: Meta<typeof BlockHistoryTimeline> = {
-  title: 'Workbook/BlockHistoryTimeline',
+  title: '📓 Workbook/Block History Timeline',
   component: BlockHistoryTimeline,
 }
 

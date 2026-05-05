@@ -9,13 +9,17 @@
   },
   "authenticator": {
     "confirmPasswordLabel": "Confirm Password:",
+    "confirmPasswordPlaceholder": "Please confirm your Password",
+    "displayNameLabel": "Display Name:",
+    "displayNamePlaceholder": "Choose a display name",
     "emailLabel": "Email:",
     "emailPlaceholder": "Enter your Email:",
     "nameLabel": "Name:",
     "namePlaceholder": "Enter your Name:",
     "passwordLabel": "Password:",
     "passwordPlaceholder": "Enter your Password:",
-    "confirmPasswordPlaceholder": "Please confirm your Password"
+    "phoneLabel": "Phone Number:",
+    "phonePlaceholder": "Enter your phone number"
   },
   "chat": {
     "aiAssistant": "AI Assistant",

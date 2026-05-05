@@ -31,7 +31,7 @@ import { ONBOARDING_TASKS, getTasksForPersona } from '../../.storybook/code/onbo
 import { useCompleteTask, useTrackTask, useOnboardingStatus } from '../../.storybook/code/useOnboarding';
 
 const meta: Meta = {
-  title: 'Onboarding/Task Completion Examples',
+  title: '🏠 Getting Started/Onboarding/Task Completion Examples',
   tags: ['autodocs'],
 };
 

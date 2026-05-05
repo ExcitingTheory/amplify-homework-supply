@@ -9,7 +9,7 @@ const mockSettingsProvider = (avatarUrl?: string) => ({
 })
 
 const meta: Meta<typeof UserAvatar> = {
-  title: 'Components/UserAvatar',
+  title: '🧩 UI Components/User Avatar',
   component: UserAvatar,
   decorators: [
     (Story) => (

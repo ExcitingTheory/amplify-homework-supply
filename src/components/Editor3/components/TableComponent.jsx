@@ -2150,7 +2150,7 @@ export default function TableComponent({
         <button
           className={`${theme.tableAddColumns} ${showTableControls ? theme.tableAddColumnsVisible : ''}`}
           onClick={addColumns}
-          aria-label="Add column"
+          aria-label={t('table.addColumn', { ns: 'common' })}
         >{'\u200B'}</button>
       )}
       {isEditable && (
@@ -2158,7 +2158,7 @@ export default function TableComponent({
           className={`${theme.tableAddRows} ${showTableControls ? theme.tableAddRowsVisible : ''}`}
           onClick={addRows}
           ref={addRowsRef}
-          aria-label="Add row"
+          aria-label={t('table.addRow', { ns: 'common' })}
         >{'\u200B'}</button>
       )}
       {resizingID !== null && (

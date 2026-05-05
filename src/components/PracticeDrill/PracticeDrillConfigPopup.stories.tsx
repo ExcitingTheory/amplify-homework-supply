@@ -9,7 +9,7 @@ import PracticeDrillConfigPopup from './PracticeDrillConfigPopup'
 import type { PracticeDrillConfigPopupProps } from './PracticeDrillConfigPopup'
 
 const meta: Meta<typeof PracticeDrillConfigPopup> = {
-  title: 'PracticeDrill/ConfigPopup',
+  title: '🎯 Practice Drills/Config Popup',
   component: PracticeDrillConfigPopup,
   parameters: {
     layout: 'centered',

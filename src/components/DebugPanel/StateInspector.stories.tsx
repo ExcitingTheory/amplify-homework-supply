@@ -7,7 +7,7 @@ import { StateInspector } from './StateInspector';
 import { StateSnapshot } from '../../utils/debug/StateSnapshot';
 
 const meta: Meta<typeof StateInspector> = {
-  title: 'Components/DebugPanel/StateInspector',
+  title: '🛠️ Developer Tools/Debug Panel/State Inspector',
   component: StateInspector,
   tags: ['autodocs'],
 };

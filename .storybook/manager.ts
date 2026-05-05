@@ -1,10 +1,14 @@
 import { addons, type State } from 'storybook/manager-api';
+import { themes } from 'storybook/theming';
 
 // Import custom onboarding addon
 import './code/myOnboarding/manager';
 
 // Import translation-mode addon after onboarding to ensure proper loading order
 import './addons/translation-mode/manager';
+
+// Use dark theme when system prefers dark
+const prefersDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 addons.setConfig({
   // Set the default story for first-time users - shows welcome overview page
@@ -16,7 +20,7 @@ addons.setConfig({
   enableShortcuts: true,
   showToolbar: true,
   showRoots: false,
-  theme: undefined,
+  theme: prefersDark ? themes.dark : themes.light,
   selectedPanel: undefined,
   initialActive: 'sidebar',
   layoutCustomisations: {

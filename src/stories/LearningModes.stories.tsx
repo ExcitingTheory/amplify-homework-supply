@@ -9,7 +9,7 @@ import TutorialStep from '../../.storybook/components/TutorialStep';
 import QuizMode from '../../.storybook/components/QuizMode';
 
 const meta: Meta = {
-  title: 'Onboarding/Learning Modes',
+  title: '🏠 Getting Started/Onboarding/Learning Modes',
   tags: ['autodocs'],
   parameters: {
     docs: {

@@ -21,7 +21,13 @@ export enum XPReason {
   ON_TIME_SUBMISSION = 'ON_TIME_SUBMISSION',
   STREAK_3DAY = 'STREAK_3DAY',
   STREAK_7DAY = 'STREAK_7DAY',
+  STREAK_14DAY = 'STREAK_14DAY',
+  STREAK_30DAY = 'STREAK_30DAY',
   PERFECT_SCORE = 'PERFECT_SCORE',
+  COMEBACK = 'COMEBACK',
+  PERSONAL_BEST = 'PERSONAL_BEST',
+  EASTER_EGG = 'EASTER_EGG',
+  GUILD_CHALLENGE_BONUS = 'GUILD_CHALLENGE_BONUS',
 }
 
 export interface StudentXPLog {
@@ -55,7 +61,13 @@ const XP_AMOUNTS: Record<XPReason, number> = {
   [XPReason.ON_TIME_SUBMISSION]: 15,
   [XPReason.STREAK_3DAY]: 30,
   [XPReason.STREAK_7DAY]: 75,
+  [XPReason.STREAK_14DAY]: 150,
+  [XPReason.STREAK_30DAY]: 300,
   [XPReason.PERFECT_SCORE]: 100,
+  [XPReason.COMEBACK]: 50,
+  [XPReason.PERSONAL_BEST]: 25,
+  [XPReason.EASTER_EGG]: 30,
+  [XPReason.GUILD_CHALLENGE_BONUS]: 100,
 }
 
 const LEVEL_THRESHOLDS: { level: number; xpRequired: number; label: string }[] = [

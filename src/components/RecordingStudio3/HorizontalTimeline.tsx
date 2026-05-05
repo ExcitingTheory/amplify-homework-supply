@@ -20,8 +20,50 @@ import {
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@mui/icons-material';
-import { RecordingStudio2 } from '../RecordingStudio2';
+import AudioWaveformPlayer from '../Editor3/components/AudioWaveformPlayer';
 import TimelineCard from './TimelineCard';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface DialogueTiming {
+  start: number;
+  end: number;
+}
+
+interface DialogueLine {
+  id: string;
+  speaker: string;
+  text: string;
+  timing: DialogueTiming;
+  activeTakeIndex: number | null;
+  takes?: any[];
+  direction?: string;
+  emotion?: string;
+}
+
+interface Speaker {
+  name: string;
+  [key: string]: any;
+}
+
+interface ScriptData {
+  dialogue: DialogueLine[];
+  speakers: Record<string, Speaker>;
+}
+
+interface HorizontalTimelineProps {
+  scriptData: ScriptData;
+  selectedDialogueId: string | null;
+  onSelectDialogue: (id: string) => void;
+  recording?: boolean;
+  playing?: boolean;
+  onPlay: () => void;
+  onStop: () => void;
+  onRecordingComplete: (audioBlob: Blob, waveformData?: number[]) => void;
+  readOnly?: boolean;
+}
 
 /** Pixels per second at zoom level 1.0 */
 const BASE_PX_PER_SEC = 80;
@@ -30,27 +72,13 @@ const MAX_ZOOM = 4;
 
 /**
  * Format seconds as M:SS.
- * @param {number} s
- * @returns {string}
  */
-function formatTime(s) {
+function formatTime(s: number): string {
   const mins = Math.floor(s / 60);
   const secs = Math.floor(s % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-/**
- * @param {Object} props
- * @param {Object} props.scriptData - Full RS3 scriptData
- * @param {number|null} props.selectedDialogueId - Currently selected dialogue line id
- * @param {Function} props.onSelectDialogue - Called with dialogue id on card click
- * @param {boolean} props.recording - Whether RS3 is currently recording
- * @param {boolean} props.playing - Whether RS3 is currently playing
- * @param {Function} props.onPlay - Start playback
- * @param {Function} props.onStop - Stop playback / recording
- * @param {Function} props.onRecordingComplete - Called with (audioBlob, waveformData) when RS2 finishes recording
- * @param {boolean} props.readOnly - Disable controls
- */
 export default function HorizontalTimeline({
   scriptData,
   selectedDialogueId,
@@ -61,7 +89,7 @@ export default function HorizontalTimeline({
   onStop,
   onRecordingComplete,
   readOnly = false,
-}) {
+}: HorizontalTimelineProps) {
   const { t } = useTranslation('components');
   const containerRef = useRef(null);
   const [zoom, setZoom] = useState(1);
@@ -69,12 +97,12 @@ export default function HorizontalTimeline({
   const pxPerSec = BASE_PX_PER_SEC * zoom;
 
   // Selected dialogue line (for RS2 item prop)
-  const selectedDialogue = scriptData.dialogue.find((d) => d.id === selectedDialogueId) || null;
+  const selectedDialogue = scriptData.dialogue.find((d: DialogueLine) => d.id === selectedDialogueId) || null;
 
   // Compute total duration from the last dialogue line's end time + buffer
   const totalDuration = useMemo(() => {
     if (!scriptData.dialogue.length) return 10;
-    const maxEnd = Math.max(...scriptData.dialogue.map((d) => d.timing.end));
+    const maxEnd = Math.max(...scriptData.dialogue.map((d: DialogueLine) => d.timing.end));
     return maxEnd + 2; // 2s buffer at the end
   }, [scriptData.dialogue]);
 
@@ -102,7 +130,7 @@ export default function HorizontalTimeline({
 
   // Group dialogue lines by speaker
   const linesBySpeaker = useMemo(() => {
-    const map = {};
+    const map: Record<string, DialogueLine[]> = {};
     for (const key of speakerOrder) map[key] = [];
     for (const line of scriptData.dialogue) {
       if (!map[line.speaker]) map[line.speaker] = [];
@@ -112,7 +140,7 @@ export default function HorizontalTimeline({
   }, [scriptData.dialogue, speakerOrder]);
 
   // Zoom via Ctrl+scroll
-  const handleWheel = useCallback((e) => {
+  const handleWheel = useCallback((e: React.WheelEvent) => {
     if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
     setZoom((prev) => {
@@ -162,17 +190,15 @@ export default function HorizontalTimeline({
           {playing ? <StopIcon /> : <PlayIcon />}
         </IconButton>
 
-        {/* Embedded RecordingStudio2 for recording on the selected line */}
+        {/* Embedded AudioWaveformPlayer for recording on the selected line */}
         {!readOnly && selectedDialogueId && (
           <Box sx={{ flex: '0 0 auto' }}>
-            <RecordingStudio2
-              embedded
+            {/* @ts-expect-error — AudioWaveformPlayer accepts partial props for recording-only mode */}
+            <AudioWaveformPlayer
+              enableRecording
               onRecordingComplete={onRecordingComplete}
-              item={{
-                phrase: selectedDialogue?.text || '',
-                definition: '',
-                pronunciation: '',
-              }}
+              height={50}
+              width={250}
             />
           </Box>
         )}

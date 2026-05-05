@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StreakCalendar } from './StreakCalendar'
 
 const meta: Meta<typeof StreakCalendar> = {
-  title: 'Gamification/StreakCalendar',
+  title: '🏆 Gamification/Streaks/Streak Calendar',
   component: StreakCalendar,
 }
 export default meta

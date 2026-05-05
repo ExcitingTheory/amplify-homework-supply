@@ -52,7 +52,7 @@ function PresenceBarVisual({ users, max = 5 }: { users: MockUser[]; max?: number
 }
 
 const meta: Meta<typeof PresenceBarVisual> = {
-  title: 'Workbook/WorkbookPresenceBar',
+  title: '📓 Workbook/Presence Bar',
   component: PresenceBarVisual,
 }
 export default meta

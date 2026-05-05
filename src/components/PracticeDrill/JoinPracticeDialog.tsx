@@ -13,7 +13,7 @@ import {
   TextField,
   Button,
   Typography,
-  CircularProgress,
+  Skeleton,
   Alert,
 } from '@mui/material'
 import GroupsIcon from '@mui/icons-material/Groups'
@@ -191,7 +191,7 @@ export default function JoinPracticeDialog({
           variant="contained"
           onClick={handleJoin}
           disabled={roomCode.length < 4 || loading}
-          startIcon={loading ? <CircularProgress size={16} /> : <GroupsIcon />}
+          startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <GroupsIcon />}
         >
           {loading
             ? t('practiceDrill.join.joining', 'Joining...')

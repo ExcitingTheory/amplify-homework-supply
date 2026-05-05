@@ -3,62 +3,79 @@
  * Shows how to create questions that accept voice recordings and drawings as answers
  */
 
-import React from 'react';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { HeadingNode } from '@lexical/rich-text';
+import React from "react";
+import { within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { HeadingNode } from "@lexical/rich-text";
 
-import CustomAnswerPlugin, { CustomAnswerNode } from './CustomAnswerPlugin';
-import { seedMockUnit, seedMockQuestions } from '../../../../.storybook/__mocks__/aws-amplify-data';
+import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
+import {
+  seedMockUnit,
+  seedMockQuestions,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
-  title: '🔌 Editor Plugins/Content Blocks/Custom Answer (Audio & Drawing)',
+  title: "✏️ Lesson Editor/Content Blocks/Custom Answer (Audio & Drawing)",
   component: CustomAnswerPlugin,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     initializeMockData: false,
     docs: {
       description: {
-        component: 'Examples of custom questions that accept audio recordings and drawings as answers.',
+        component:
+          "Examples of custom questions that accept audio recordings and drawings as answers.",
       },
     },
   },
 };
 
 const editorConfig = {
-  namespace: 'AudioDrawingExample',
+  namespace: "AudioDrawingExample",
   theme: {
-    paragraph: 'editor-paragraph',
+    paragraph: "editor-paragraph",
     heading: {
-      h1: 'editor-heading-h1',
-      h2: 'editor-heading-h2',
-      h3: 'editor-heading-h3',
+      h1: "editor-heading-h1",
+      h2: "editor-heading-h2",
+      h3: "editor-heading-h3",
     },
   },
   onError: (error) => console.error(error),
   nodes: [HeadingNode, CustomAnswerNode],
 };
 
-const ReadOnlyTemplate = ({ editorState, questionIDs = [], questions = [] }) => {
+const ReadOnlyTemplate = ({
+  editorState,
+  questionIDs = [],
+  questions = [],
+}) => {
   const initialConfig = {
     ...editorConfig,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
-    editable: false
+    editable: false,
   };
 
   // Use the preview's default unit ID
   seedMockUnit({
-    id: 'mock-unit-id',
-    name: 'Audio Drawing Unit',
-    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    id: "mock-unit-id",
+    name: "Audio Drawing Unit",
+    data: {
+      root: {
+        children: [],
+        direction: "ltr",
+        format: "",
+        indent: 0,
+        type: "root",
+        version: 1,
+      },
+    },
     questionIDs: questionIDs,
     _version: 1,
-    owner: 'mock-user-sub',
+    owner: "mock-user-sub",
   });
 
   // Seed question bank data so CustomAnswerComponent can find them
@@ -68,37 +85,41 @@ const ReadOnlyTemplate = ({ editorState, questionIDs = [], questions = [] }) => 
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div style={{ 
-        padding: '2rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          padding: '2rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
+      <div
+        style={{
+          padding: "2rem",
+          maxWidth: "900px",
+          margin: "0 auto",
+          backgroundColor: "#f5f5f5",
+          minHeight: "100vh",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "8px",
+            padding: "2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
           <RichTextPlugin
             contentEditable={
-              <ContentEditable 
+              <ContentEditable
                 style={{
-                  minHeight: '400px',
-                  outline: 'none',
-                  padding: '1rem'
+                  minHeight: "400px",
+                  outline: "none",
+                  padding: "1rem",
                 }}
               />
             }
-          placeholder={null}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
-            <HistoryPlugin />
-            <CustomAnswerPlugin />
-          </div>
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <CustomAnswerPlugin />
         </div>
-      </LexicalComposer>
+      </div>
+    </LexicalComposer>
   );
 };
 
@@ -109,81 +130,81 @@ const audioQuestionState = {
       {
         children: [
           {
-            text: 'Pronunciation Practice',
-            type: 'text',
+            text: "Pronunciation Practice",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'Record yourself pronouncing the following words:',
-            type: 'text',
+            text: "Record yourself pronouncing the following words:",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['audio-q1', 'audio-q2'],
-        allowedInput: ['audio'],
-        promptMethod: ['text'],
+        ids: ["audio-q1", "audio-q2"],
+        allowedInput: ["audio"],
+        promptMethod: ["text"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
 
-// Drawing-only question example  
+// Drawing-only question example
 const drawingQuestionState = {
   root: {
     children: [
       {
         children: [
           {
-            text: 'Visual Learning Exercise',
-            type: 'text',
+            text: "Visual Learning Exercise",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'Draw a diagram showing the following concepts:',
-            type: 'text',
+            text: "Draw a diagram showing the following concepts:",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['drawing-q1', 'drawing-q2'],
-        allowedInput: ['writing'],
-        promptMethod: ['text'],
+        ids: ["drawing-q1", "drawing-q2"],
+        allowedInput: ["writing"],
+        promptMethod: ["text"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
@@ -195,38 +216,38 @@ const multiModalQuestionState = {
       {
         children: [
           {
-            text: 'Flexible Response Exercise',
-            type: 'text',
+            text: "Flexible Response Exercise",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'Answer using your preferred method (text, voice, or drawing):',
-            type: 'text',
+            text: "Answer using your preferred method (text, voice, or drawing):",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['multi-q1'],
-        allowedInput: ['text', 'audio', 'writing'],
-        promptMethod: ['text'],
+        ids: ["multi-q1"],
+        allowedInput: ["text", "audio", "writing"],
+        promptMethod: ["text"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
@@ -238,153 +259,218 @@ const languageQuestionState = {
       {
         children: [
           {
-            text: 'Japanese Pronunciation Practice',
-            type: 'text',
+            text: "Japanese Pronunciation Practice",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'Listen to the audio and repeat what you hear:',
-            type: 'text',
+            text: "Listen to the audio and repeat what you hear:",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['lang-audio-q1', 'lang-audio-q2'],
-        allowedInput: ['audio'],
-        promptMethod: ['audio'],
+        ids: ["lang-audio-q1", "lang-audio-q2"],
+        allowedInput: ["audio"],
+        promptMethod: ["audio"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
 
 export const AudioOnlyQuestion = {
-  render: () => <ReadOnlyTemplate 
-    editorState={audioQuestionState} 
-    questionIDs={['audio-q1', 'audio-q2']}
-    questions={[
-      { id: 'audio-q1', prompt: 'Say "Bonjour"', answer: 'bonjour', type: 'audio' },
-      { id: 'audio-q2', prompt: 'Say "Merci"', answer: 'merci', type: 'audio' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplate
+      editorState={audioQuestionState}
+      questionIDs={["audio-q1", "audio-q2"]}
+      questions={[
+        {
+          id: "audio-q1",
+          prompt: 'Say "Bonjour"',
+          answer: "bonjour",
+          type: "audio",
+        },
+        {
+          id: "audio-q2",
+          prompt: 'Say "Merci"',
+          answer: "merci",
+          type: "audio",
+        },
+      ]}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('storybook/test');
-    
+    const { expect } = await import("storybook/test");
+
     // Wait for audio question to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Record yourself/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Record yourself/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify audio recording interface elements are visible
-    const recordButtons = canvas.queryAllByRole('button', { name: /record|start recording/i });
+    const recordButtons = canvas.queryAllByRole("button", {
+      name: /record|start recording/i,
+    });
     expect(recordButtons.length).toBeGreaterThan(0);
   },
   parameters: {
     docs: {
       description: {
-        story: 'Questions that only accept audio recordings as answers. Students can record their voice, see a live waveform, and submit for AI-powered verification.',
+        story:
+          "Questions that only accept audio recordings as answers. Students can record their voice, see a live waveform, and submit for AI-powered verification.",
       },
     },
   },
 };
 
 export const DrawingOnlyQuestion = {
-  render: () => <ReadOnlyTemplate 
-    editorState={drawingQuestionState} 
-    questionIDs={['drawing-q1', 'drawing-q2']}
-    questions={[
-      { id: 'drawing-q1', prompt: 'Draw a house', answer: 'A house with roof, walls, door, and windows', type: 'drawing' },
-      { id: 'drawing-q2', prompt: 'Draw a tree', answer: 'A tree with trunk and branches', type: 'drawing' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplate
+      editorState={drawingQuestionState}
+      questionIDs={["drawing-q1", "drawing-q2"]}
+      questions={[
+        {
+          id: "drawing-q1",
+          prompt: "Draw a house",
+          answer: "A house with roof, walls, door, and windows",
+          type: "drawing",
+        },
+        {
+          id: "drawing-q2",
+          prompt: "Draw a tree",
+          answer: "A tree with trunk and branches",
+          type: "drawing",
+        },
+      ]}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('storybook/test');
-    
+    const { expect } = await import("storybook/test");
+
     // Wait for drawing question to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Draw a diagram/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Draw a diagram/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Wait for the writing input mode to be active (SketchPad loads via next/dynamic)
     // The SketchPad may show "Hover to start drawing" or remain in Suspense fallback
-    await waitFor(() => {
-      const hasSketchPad = canvasElement.querySelector('[class*="excalidraw"]') 
-        || canvasElement.textContent.match(/hover to start drawing/i)
-        || canvasElement.textContent.match(/loading/i);
-      expect(hasSketchPad).toBeTruthy();
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        const hasSketchPad =
+          canvasElement.querySelector('[class*="excalidraw"]') ||
+          canvasElement.textContent.match(/hover to start drawing/i) ||
+          canvasElement.textContent.match(/loading/i);
+        expect(hasSketchPad).toBeTruthy();
+      },
+      { timeout: 10000 },
+    );
   },
   parameters: {
     docs: {
       description: {
-        story: 'Questions that only accept drawings/sketches as answers. Uses Excalidraw for a full-featured drawing experience with AI-powered image verification.',
+        story:
+          "Questions that only accept drawings/sketches as answers. Uses Excalidraw for a full-featured drawing experience with AI-powered image verification.",
       },
     },
   },
 };
 
 export const MultiModalQuestion = {
-  render: () => <ReadOnlyTemplate 
-    editorState={multiModalQuestionState} 
-    questionIDs={['multi-q1']}
-    questions={[
-      { id: 'multi-q1', prompt: 'Explain photosynthesis', answer: 'The process by which plants convert light energy into chemical energy', type: 'multi' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplate
+      editorState={multiModalQuestionState}
+      questionIDs={["multi-q1"]}
+      questions={[
+        {
+          id: "multi-q1",
+          prompt: "Explain photosynthesis",
+          answer:
+            "The process by which plants convert light energy into chemical energy",
+          type: "multi",
+        },
+      ]}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('storybook/test');
-    
+    const { expect } = await import("storybook/test");
+
     // Wait for multi-modal question to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Answer using your preferred method/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByText(/Answer using your preferred method/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify multiple input options are available
-    const textInputs = canvas.queryAllByRole('textbox');
-    const recordButton = canvas.queryByRole('button', { name: /record/i });
+    const textInputs = canvas.queryAllByRole("textbox");
+    const recordButton = canvas.queryByRole("button", { name: /record/i });
     expect(textInputs.length > 0 || recordButton).toBeTruthy();
   },
   parameters: {
     docs: {
       description: {
-        story: 'Questions that accept multiple input types. Students can choose between text, audio, or drawing based on their preference or the nature of the question.',
+        story:
+          "Questions that accept multiple input types. Students can choose between text, audio, or drawing based on their preference or the nature of the question.",
       },
     },
   },
 };
 
 export const LanguagePronunciation = {
-  render: () => <ReadOnlyTemplate 
-    editorState={languageQuestionState} 
-    questionIDs={['lang-audio-q1', 'lang-audio-q2']}
-    questions={[
-      { id: 'lang-audio-q1', prompt: 'こんにちは', answer: 'konnichiwa', type: 'audio' },
-      { id: 'lang-audio-q2', prompt: 'ありがとう', answer: 'arigatou', type: 'audio' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplate
+      editorState={languageQuestionState}
+      questionIDs={["lang-audio-q1", "lang-audio-q2"]}
+      questions={[
+        {
+          id: "lang-audio-q1",
+          prompt: "こんにちは",
+          answer: "konnichiwa",
+          type: "audio",
+        },
+        {
+          id: "lang-audio-q2",
+          prompt: "ありがとう",
+          answer: "arigatou",
+          type: "audio",
+        },
+      ]}
+    />
+  ),
   parameters: {
     docs: {
       description: {
-        story: 'Language learning scenario where students listen to audio prompts and record their pronunciation. Perfect for vocabulary and speaking practice.',
+        story:
+          "Language learning scenario where students listen to audio prompts and record their pronunciation. Perfect for vocabulary and speaking practice.",
       },
     },
   },
@@ -392,48 +478,91 @@ export const LanguagePronunciation = {
 
 // Component showcase explaining features
 const FeatureShowcase = () => (
-  <div style={{
-    padding: '2rem',
-    maxWidth: '1200px',
-    margin: '0 auto',
-    fontFamily: 'system-ui, -apple-system, sans-serif'
-  }}>
+  <div
+    style={{
+      padding: "2rem",
+      maxWidth: "1200px",
+      margin: "0 auto",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+    }}
+  >
     <h1>Audio & Drawing Question Types</h1>
-    
-    <section style={{ marginBottom: '3rem' }}>
+
+    <section style={{ marginBottom: "3rem" }}>
       <h2>🎤 Audio Questions</h2>
-      <p>Audio questions allow students to record their voice as an answer with the following features:</p>
+      <p>
+        Audio questions allow students to record their voice as an answer with
+        the following features:
+      </p>
       <ul>
-        <li><strong>Live Waveform Visualization:</strong> Real-time frequency display while recording</li>
-        <li><strong>Static Waveform Preview:</strong> Beautiful amplitude visualization of the recorded audio</li>
-        <li><strong>Automatic Transcription:</strong> Uses Whisper API to convert speech to text</li>
-        <li><strong>AI Verification:</strong> GPT models verify pronunciation and content accuracy</li>
-        <li><strong>Waveform Storage:</strong> Waveform data saved with audio file for future playback</li>
+        <li>
+          <strong>Live Waveform Visualization:</strong> Real-time frequency
+          display while recording
+        </li>
+        <li>
+          <strong>Static Waveform Preview:</strong> Beautiful amplitude
+          visualization of the recorded audio
+        </li>
+        <li>
+          <strong>Automatic Transcription:</strong> Uses Whisper API to convert
+          speech to text
+        </li>
+        <li>
+          <strong>AI Verification:</strong> GPT models verify pronunciation and
+          content accuracy
+        </li>
+        <li>
+          <strong>Waveform Storage:</strong> Waveform data saved with audio file
+          for future playback
+        </li>
       </ul>
     </section>
 
-    <section style={{ marginBottom: '3rem' }}>
+    <section style={{ marginBottom: "3rem" }}>
       <h2>✏️ Drawing Questions</h2>
-      <p>Drawing questions provide a full sketching interface powered by Excalidraw:</p>
+      <p>
+        Drawing questions provide a full sketching interface powered by
+        Excalidraw:
+      </p>
       <ul>
-        <li><strong>Hover to Activate:</strong> Drawing interface appears on mouse hover</li>
-        <li><strong>Rich Drawing Tools:</strong> Pen, shapes, text, colors, and more</li>
-        <li><strong>Auto-save:</strong> Drawing saves automatically when mouse leaves canvas</li>
-        <li><strong>S3 Storage:</strong> All drawings upload to S3 with private access level</li>
-        <li><strong>GPT-4 Vision:</strong> AI analyzes drawings and provides detailed feedback</li>
-        <li><strong>Persistent Storage:</strong> Both PNG image and Excalidraw data saved</li>
+        <li>
+          <strong>Hover to Activate:</strong> Drawing interface appears on mouse
+          hover
+        </li>
+        <li>
+          <strong>Rich Drawing Tools:</strong> Pen, shapes, text, colors, and
+          more
+        </li>
+        <li>
+          <strong>Auto-save:</strong> Drawing saves automatically when mouse
+          leaves canvas
+        </li>
+        <li>
+          <strong>S3 Storage:</strong> All drawings upload to S3 with private
+          access level
+        </li>
+        <li>
+          <strong>GPT-4 Vision:</strong> AI analyzes drawings and provides
+          detailed feedback
+        </li>
+        <li>
+          <strong>Persistent Storage:</strong> Both PNG image and Excalidraw
+          data saved
+        </li>
       </ul>
     </section>
 
-    <section style={{ marginBottom: '3rem' }}>
+    <section style={{ marginBottom: "3rem" }}>
       <h2>⚙️ Configuration Options</h2>
-      <div style={{
-        backgroundColor: '#f5f5f5',
-        padding: '1.5rem',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '14px'
-      }}>
+      <div
+        style={{
+          backgroundColor: "#f5f5f5",
+          padding: "1.5rem",
+          borderRadius: "8px",
+          fontFamily: "monospace",
+          fontSize: "14px",
+        }}
+      >
         <pre>{`// Create a question with specific input types
 const node = $createCustomAnswerNode(
   [questionId],
@@ -456,14 +585,17 @@ const node = $createCustomAnswerNode(
 
     <section>
       <h2>📊 Recent Updates</h2>
-      <div style={{
-        backgroundColor: '#e8f5e9',
-        padding: '1rem',
-        borderRadius: '8px',
-        borderLeft: '4px solid #4caf50'
-      }}>
-        <strong>December 2024:</strong> Fixed RecordingStudio2 waveform generation
-        <ul style={{ marginTop: '0.5rem', marginBottom: 0 }}>
+      <div
+        style={{
+          backgroundColor: "#e8f5e9",
+          padding: "1rem",
+          borderRadius: "8px",
+          borderLeft: "4px solid #4caf50",
+        }}
+      >
+        <strong>December 2024:</strong> Fixed RecordingStudio2 waveform
+        generation
+        <ul style={{ marginTop: "0.5rem", marginBottom: 0 }}>
           <li>Waveforms now calculate automatically after recording stops</li>
           <li>Static waveform preview displays below recording controls</li>
           <li>Waveform data properly saved to File model for persistence</li>
@@ -478,7 +610,8 @@ export const FeatureDocumentation = {
   parameters: {
     docs: {
       description: {
-        story: 'Complete feature documentation and configuration guide for audio and drawing question types.',
+        story:
+          "Complete feature documentation and configuration guide for audio and drawing question types.",
       },
     },
   },
@@ -486,37 +619,36 @@ export const FeatureDocumentation = {
 
 // Mock grade data with completed audio and drawing answers
 const mockGradeWithAnswers = {
-  id: 'grade-123',
-  owner: 'student-user',
-  identityId: 'us-east-1:abc-123',
+  id: "grade-123",
+  owner: "student-user",
+  identityId: "us-east-1:abc-123",
   data: {
-    'audio-q1': {
+    "audio-q1": {
       complete: true,
-      userResponse: 'bonjour',
-      audioFile: 'user-input-audio/grade-123_audio-q1_1734989234567.mp3',
+      userResponse: "bonjour",
+      audioFile: "user-input-audio/grade-123_audio-q1_1734989234567.mp3",
       attempts: 1,
     },
-    'drawing-q1': {
+    "drawing-q1": {
       complete: true,
       drawingData: '{"elements": [], "appState": {}}',
-      imageBase64: '', // Placeholder - use actual image data in production
+      imageBase64: "", // Placeholder - use actual image data in production
       attempts: 1,
     },
   },
   feedback: {
-    'audio-q1': {
+    "audio-q1": {
       answer: true,
-      reason: 'Perfect pronunciation! Clear and accurate.',
-      transcription: 'bonjour',
+      reason: "Perfect pronunciation! Clear and accurate.",
+      transcription: "bonjour",
     },
-    'drawing-q1': {
+    "drawing-q1": {
       answer: true,
-      reason: 'Great drawing! All required elements are present: roof, walls, door, and windows.',
+      reason:
+        "Great drawing! All required elements are present: roof, walls, door, and windows.",
     },
   },
-  files: [
-    'user-input-audio/grade-123_audio-q1_1734989234567.mp3',
-  ],
+  files: ["user-input-audio/grade-123_audio-q1_1734989234567.mp3"],
   percentComplete: 100,
   accuracy: 1.0,
   complete: true,
@@ -529,38 +661,38 @@ const answeredAudioQuestionState = {
       {
         children: [
           {
-            text: 'Completed Audio Exercise',
-            type: 'text',
+            text: "Completed Audio Exercise",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'This shows how an answered audio question appears with waveform and feedback:',
-            type: 'text',
+            text: "This shows how an answered audio question appears with waveform and feedback:",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['audio-q1'],
-        allowedInput: ['audio'],
-        promptMethod: ['prompt-text'],
+        ids: ["audio-q1"],
+        allowedInput: ["audio"],
+        promptMethod: ["prompt-text"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
@@ -572,58 +704,72 @@ const answeredDrawingQuestionState = {
       {
         children: [
           {
-            text: 'Completed Drawing Exercise',
-            type: 'text',
+            text: "Completed Drawing Exercise",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'heading',
+        direction: "ltr",
+        type: "heading",
         version: 1,
-        tag: 'h2',
+        tag: "h2",
       },
       {
         children: [
           {
-            text: 'This shows how an answered drawing question appears with the submitted image and feedback:',
-            type: 'text',
+            text: "This shows how an answered drawing question appears with the submitted image and feedback:",
+            type: "text",
             version: 1,
           },
         ],
-        direction: 'ltr',
-        type: 'paragraph',
+        direction: "ltr",
+        type: "paragraph",
         version: 1,
       },
       {
-        type: 'custom-answer',
+        type: "custom-answer",
         version: 1,
-        ids: ['drawing-q1'],
-        allowedInput: ['writing'],
-        promptMethod: ['prompt-text'],
+        ids: ["drawing-q1"],
+        allowedInput: ["writing"],
+        promptMethod: ["prompt-text"],
       },
     ],
-    direction: 'ltr',
-    type: 'root',
+    direction: "ltr",
+    type: "root",
     version: 1,
   },
 };
 
 // Template with mock grade data
-const ReadOnlyTemplateWithGrade = ({ editorState, gradeData, questionIDs = [], questions = [] }) => {
+const ReadOnlyTemplateWithGrade = ({
+  editorState,
+  gradeData,
+  questionIDs = [],
+  questions = [],
+}) => {
   const initialConfig = {
     ...editorConfig,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
-    editable: false
+    editable: false,
   };
 
   // Use the preview's default unit ID
   seedMockUnit({
-    id: 'mock-unit-id',
-    name: 'Audio Drawing Unit',
-    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    id: "mock-unit-id",
+    name: "Audio Drawing Unit",
+    data: {
+      root: {
+        children: [],
+        direction: "ltr",
+        format: "",
+        indent: 0,
+        type: "root",
+        version: 1,
+      },
+    },
     questionIDs: questionIDs,
     _version: 1,
-    owner: 'mock-user-sub',
+    owner: "mock-user-sub",
   });
 
   // Seed question bank data
@@ -633,40 +779,46 @@ const ReadOnlyTemplateWithGrade = ({ editorState, gradeData, questionIDs = [], q
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div style={{ 
-        padding: '2rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          padding: '2rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{
-            marginBottom: '1.5rem',
-            padding: '1rem',
-            backgroundColor: '#e3f2fd',
-            borderRadius: '4px',
-            borderLeft: '4px solid #2196f3'
-          }}>
+      <div
+        style={{
+          padding: "2rem",
+          maxWidth: "900px",
+          margin: "0 auto",
+          backgroundColor: "#f5f5f5",
+          minHeight: "100vh",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "8px",
+            padding: "2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <div
+            style={{
+              marginBottom: "1.5rem",
+              padding: "1rem",
+              backgroundColor: "#e3f2fd",
+              borderRadius: "4px",
+              borderLeft: "4px solid #2196f3",
+            }}
+          >
             <strong>Grade Data Preview:</strong>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
-              <div>✓ Complete: {gradeData.complete ? 'Yes' : 'No'}</div>
+            <div style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
+              <div>✓ Complete: {gradeData.complete ? "Yes" : "No"}</div>
               <div>✓ Accuracy: {(gradeData.accuracy * 100).toFixed(0)}%</div>
               <div>✓ Files: {gradeData.files?.length || 0} uploaded</div>
             </div>
           </div>
           <RichTextPlugin
             contentEditable={
-              <ContentEditable 
+              <ContentEditable
                 style={{
-                  minHeight: '400px',
-                  outline: 'none',
-                  padding: '1rem'
+                  minHeight: "400px",
+                  outline: "none",
+                  padding: "1rem",
                 }}
               />
             }
@@ -682,64 +834,90 @@ const ReadOnlyTemplateWithGrade = ({ editorState, gradeData, questionIDs = [], q
 };
 
 export const AnsweredAudioQuestion = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={answeredAudioQuestionState} 
-    gradeData={mockGradeWithAnswers}
-    questionIDs={['audio-q1']}
-    questions={[
-      { id: 'audio-q1', prompt: 'Say "Bonjour"', answer: 'bonjour', type: 'audio' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplateWithGrade
+      editorState={answeredAudioQuestionState}
+      gradeData={mockGradeWithAnswers}
+      questionIDs={["audio-q1"]}
+      questions={[
+        {
+          id: "audio-q1",
+          prompt: 'Say "Bonjour"',
+          answer: "bonjour",
+          type: "audio",
+        },
+      ]}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('storybook/test');
-    
+    const { expect } = await import("storybook/test");
+
     // Wait for answered audio question to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Completed Audio Exercise/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByText(/Completed Audio Exercise/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify audio playback controls are visible
-    const playButton = canvas.queryByRole('button', { name: /play|listen/i });
+    const playButton = canvas.queryByRole("button", { name: /play|listen/i });
     // Audio playback may not render without actual audio data
     expect(canvas.getByText(/Completed Audio Exercise/i)).toBeInTheDocument();
   },
   parameters: {
     docs: {
       description: {
-        story: 'Shows a completed audio question with the submitted recording, waveform visualization, and AI feedback. The audio file is tracked in grade.files[] and can be played back.',
+        story:
+          "Shows a completed audio question with the submitted recording, waveform visualization, and AI feedback. The audio file is tracked in grade.files[] and can be played back.",
       },
     },
   },
 };
 
 export const AnsweredDrawingQuestion = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={answeredDrawingQuestionState} 
-    gradeData={mockGradeWithAnswers}
-    questionIDs={['drawing-q1']}
-    questions={[
-      { id: 'drawing-q1', prompt: 'Draw a house', answer: 'A house with roof, walls, door, and windows', type: 'drawing' },
-    ]}
-  />,
+  render: () => (
+    <ReadOnlyTemplateWithGrade
+      editorState={answeredDrawingQuestionState}
+      gradeData={mockGradeWithAnswers}
+      questionIDs={["drawing-q1"]}
+      questions={[
+        {
+          id: "drawing-q1",
+          prompt: "Draw a house",
+          answer: "A house with roof, walls, door, and windows",
+          type: "drawing",
+        },
+      ]}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('storybook/test');
-    
+    const { expect } = await import("storybook/test");
+
     // Wait for answered drawing question to render
-    await waitFor(() => {
-      expect(canvas.getByText(/Completed Drawing Exercise/i)).toBeInTheDocument();
-    }, { timeout: 5000 });
-    
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByText(/Completed Drawing Exercise/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
     // Verify drawing image is displayed
-    const drawingImage = canvas.queryByRole('img', { name: /drawing|sketch/i });
+    const drawingImage = canvas.queryByRole("img", { name: /drawing|sketch/i });
     // Image may not render without actual image data
     expect(canvas.getByText(/Completed Drawing Exercise/i)).toBeInTheDocument();
   },
   parameters: {
     docs: {
       description: {
-        story: 'Shows a completed drawing question with the submitted sketch as a PNG image and AI feedback. The drawing data is stored in grade.data and can be reviewed by instructors.',
+        story:
+          "Shows a completed drawing question with the submitted sketch as a PNG image and AI feedback. The drawing data is stored in grade.data and can be reviewed by instructors.",
       },
     },
   },

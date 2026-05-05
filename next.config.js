@@ -14,6 +14,9 @@ module.exports = withSerwist({
   reactStrictMode: true,
   transpilePackages: ['@mui/x-data-grid'],
   
+  // Disable dev indicators to suppress Turbopack isrManifest HMR warnings
+  devIndicators: false,
+  
   // Internationalization
   i18n,
   

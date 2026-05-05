@@ -19,7 +19,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import EditIcon from '@mui/icons-material/Edit';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import MainToolbar from '../src/components/MainToolbar'
-import MyAuth from "../src/components/authenticator";
+import MyAuth from "../src/components/AmplifyAuthenticator";
 import { useRouter } from 'next/router'
 import getCachedUrl from '../src/utils/getCachedUrl'
 import HistoryIcon from '@mui/icons-material/History';
@@ -30,9 +30,14 @@ import { FilesProvider } from "../src/context/fileContext";
 import { useChatPageContext } from "../src/hooks/useChatPageContext";
 import { BadgeShelf } from '../src/components/Gamification/BadgeShelf';
 import { NailedItWall } from '../src/components/Gamification/NailedItWall';
-import { LevelBadge } from '../src/components/Gamification/LevelBadge';
 import { StreakIndicator } from '../src/components/Gamification/StreakIndicator';
-import { useXP } from '../src/context/xpContext';
+import { StreakShield } from '../src/components/Gamification/StreakShield';
+import { ProgressRings } from '../src/components/Gamification/ProgressRings';
+import { CampaignBriefing } from '../src/components/Gamification/CampaignBriefing';
+import { BossBattleCard } from '../src/components/Gamification/BossBattleCard';
+import { useXP, useProgress, useCampaign, useBadges } from '../src/context/gamificationContext';
+import { GamificationProviderWrapper } from '../src/context/gamificationProviderWrapper';
+import Divider from '@mui/material/Divider';
 
 
 
@@ -118,30 +123,18 @@ function Index({ signOut, user }) {
   const [myGradeMap, setMyGradeMap] = React.useState([])
   const [myGrades, setMyGrades] = React.useState([])
   const [myAssignmentNeedsGrading, setMyAssignmentNeedsGrading] = React.useState([])
-  const { totalXP, level, xpLogs } = useXP();
-  const [earnedBadges, setEarnedBadges] = React.useState([]);
+  const { totalXP, xpLogs } = useXP();
+  const { modules: progressModules, streak } = useProgress();
+  const { campaign, activeChallenges } = useCampaign();
+  const { badges: earnedBadges } = useBadges();
   const [nailedItBlocks, setNailedItBlocks] = React.useState([]);
-  const [currentStreak, setCurrentStreak] = React.useState(0);
-
-  // Fetch current streak from StudentStreak model
-  useEffect(() => {
-    if (!user?.username) return;
-    const client = getAmplifyClient();
-    if (!client?.models?.StudentStreak) return;
-    client.models.StudentStreak.list({
-      filter: { studentId: { eq: user.username } },
-    }).then(({ data }) => {
-      const streak = data?.filter(s => s != null)?.[0];
-      if (streak) setCurrentStreak(streak.currentStreak || 0);
-    }).catch((err) => {
-      console.warn('[Index] Error fetching streak:', err);
-    });
-  }, [user?.username]);
 
   // Register page context with global chat
   useChatPageContext({
     sections: mySections,
   });
+
+  // Streak & progress data now come from useProgress() hook via GamificationProvider
 
   useEffect(() => {
     const myUserId = getUserId(user);
@@ -315,25 +308,11 @@ function Index({ signOut, user }) {
     };
   }, [user?.username])
 
-  // Fetch earned badges and nailed-it blocks for dashboard
+  // Fetch nailed-it blocks for dashboard
   useEffect(() => {
     const myUserId = getUserId(user);
     if (!myUserId) return;
     const client = getAmplifyClient();
-
-    const badgeSub = client.models.Badge?.observeQuery?.({
-      filter: { owner: { eq: myUserId } },
-    })?.subscribe?.({
-      next: ({ items }) => {
-        const valid = items.filter(i => i != null && i.id != null);
-        setEarnedBadges(valid.map(b => ({
-          badgeType: b.badgeType,
-          awardedAt: b.createdAt || b.awardedAt || new Date().toISOString(),
-          sourceId: b.sourceId || null,
-        })));
-      },
-      error: (err) => console.warn('[Index] Badge subscription error:', err),
-    });
 
     const nailedItSub = client.models.NailedIt?.observeQuery?.({
       filter: { owner: { eq: myUserId } },
@@ -352,7 +331,6 @@ function Index({ signOut, user }) {
     });
 
     return () => {
-      badgeSub?.unsubscribe?.();
       nailedItSub?.unsubscribe?.();
     };
   }, [user?.username]);
@@ -393,9 +371,81 @@ function Index({ signOut, user }) {
 
 
         >
-
-
-
+          {/* Gamification Dashboard */}
+          <Box sx={{ maxWidth: '80rem', margin: '0 auto 2rem', width: '100%', px: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+              <StreakIndicator currentStreak={streak?.currentStreak || 0} />
+              <StreakShield
+                freezesRemaining={streak?.freezesRemaining || 0}
+                freezesUsed={streak?.freezesUsed || 0}
+              />
+            </Box>
+            {progressModules?.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <ProgressRings modules={progressModules} />
+              </Box>
+            )}
+            {earnedBadges?.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <BadgeShelf earnedBadges={earnedBadges} />
+              </Box>
+            )}
+            {nailedItBlocks?.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <NailedItWall blocks={nailedItBlocks} />
+              </Box>
+            )}
+            {activeChallenges?.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                  Active Challenges
+                </Typography>
+                {activeChallenges.map((challenge) => (
+                  <Box key={challenge.id} sx={{ mb: 1 }}>
+                    <BossBattleCard
+                      title={challenge.title}
+                      totalHP={challenge.targetXP}
+                      totalDamage={challenge.currentXP || 0}
+                      deadline={challenge.deadline}
+                      active={challenge.active}
+                      bonusMultiplier={challenge.bonusMultiplier}
+                      phases={[]}
+                      contributors={(challenge.contributions || []).map((c) => ({
+                        userId: c.studentId,
+                        displayName: c.studentId,
+                        xpContributed: c.xpContributed,
+                      }))}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            )}
+            {campaign && (
+              <Box sx={{ mb: 2 }}>
+                <CampaignBriefing
+                  title={campaign.title}
+                  setting={campaign.setting}
+                  stakes={campaign.stakes}
+                  compact
+                />
+              </Box>
+            )}
+            {campaign?.bossBattle && (
+              <Box sx={{ mb: 2 }}>
+                <BossBattleCard
+                  title={campaign.bossBattle.title}
+                  narrative={campaign.bossBattle.narrative}
+                  phases={campaign.bossBattle.phases || []}
+                  totalHP={campaign.bossBattle.totalHP || 0}
+                  totalDamage={campaign.bossBattle.totalDamage || 0}
+                  deadline={campaign.bossBattle.deadline}
+                  active={campaign.bossBattle.active ?? true}
+                  bonusMultiplier={campaign.bossBattle.bonusMultiplier}
+                />
+              </Box>
+            )}
+            <Divider sx={{ my: 2 }} />
+          </Box>
 
 
           {(assignments?.length > 0 && myAssignmentNeedsGrading?.length > 0 && units) &&
@@ -1183,9 +1233,11 @@ function Index({ signOut, user }) {
 function WrappedPage({ signOut, user , ...args }) {
   return (
     <MyAuth>
-      <FilesProvider>
-        <Index signOut={signOut} user={user} {...args} />
-      </FilesProvider>
+      <GamificationProviderWrapper>
+        <FilesProvider>
+          <Index signOut={signOut} user={user} {...args} />
+        </FilesProvider>
+      </GamificationProviderWrapper>
     </MyAuth>
   )
 }

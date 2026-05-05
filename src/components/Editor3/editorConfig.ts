@@ -25,6 +25,7 @@ import { LayoutContainerNode } from './components/LayoutContainerNode';
 import { LayoutItemNode } from './components/LayoutItemNode';
 import { AnswerNode } from './plugins/AnswerPlugin';
 import { CustomAnswerNode } from './plugins/CustomAnswerPlugin';
+import { ArmorEditorNode } from './plugins/ArmorEditorPlugin';
 import { FileMetadataNode } from './nodes/FileMetadataNode';
 /**
  * All custom Lexical nodes used in the editor
@@ -58,6 +59,7 @@ export const EditorNodes: any[] = [
   LayoutItemNode,
   AnswerNode,
   CustomAnswerNode,
+  ArmorEditorNode,
   FileMetadataNode,
 ];
 

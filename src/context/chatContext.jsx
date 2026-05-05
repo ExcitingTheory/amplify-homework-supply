@@ -7,9 +7,10 @@
  * @see docs/GLOBAL_CHAT_INTEGRATION_PLAN.md
  */
 
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useReducer, useCallback, useMemo } from 'react';
 import { getAmplifyClient } from '../utils/amplifyClient';
 import AuthContext from './authContext';
+import { chatReducer, initialState, actionTypes } from './reducers/chatReducer';
 
 /**
  * Chat Context interface
@@ -75,33 +76,17 @@ export function ChatContextProvider({ children }) {
     // Lazy client initialization - must be inside component to ensure Amplify.configure() has run
     const client = useMemo(() => getAmplifyClient(), []);
     
-    // Chat session state
-    const [assistantChat, setAssistantChat] = useState(null);
-    const [chatHistories, setChatHistories] = useState([]);
-    const [isLoadingChat, setIsLoadingChat] = useState(false);
-    const [chatCreationError, setChatCreationError] = useState(null);
-    const [subscriptionReady, setSubscriptionReady] = useState(false);
+    // All chat state managed by reducer
+    const [state, dispatch] = useReducer(chatReducer, initialState);
     const chatVersionRef = useRef(null); // Track _version to detect changes and prevent rerenders
     const subscriptionInitializedRef = useRef(false);
+    // Use a ref to access current assistantChat inside subscription without causing re-subscribe
+    const assistantChatRef = useRef(state.assistantChat);
+    useEffect(() => {
+        assistantChatRef.current = state.assistantChat;
+    }, [state.assistantChat]);
     
-    // Global chat UI state
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    
-    // Page context - provided by current page via useChatPageContext hook
-    const [pageContext, setPageContext] = useState({
-        unit: null,
-        files: [],
-        dictionary: [],
-        questions: [],
-        sections: [],
-        editorRef: null,
-        vectorStoreSearch: null,
-    });
-    
-    // Chat messages state (will be synced with useChat hook)
-    const [messages, setMessages] = useState([]);
-    
-    // Observe AssistantChat - single consolidated subscription
+    // Observe AssistantChat - list() + individual subscriptions
     useEffect(() => {
         // Wait for auth to be ready
         if (authLoading || !user) {
@@ -109,117 +94,142 @@ export function ChatContextProvider({ children }) {
             return;
         }
         
-        console.log('[ChatContext] Setting up observeQuery for AssistantChat');
-        let isSubscribed = true;
-        let chatSubscription;
-        
-        const setupSubscription = () => {
-            if (!isSubscribed) return;
-            
-            // Observe AssistantChat sorted by createdAt DESC
-            chatSubscription = client.models.AssistantChat.observeQuery({
-                sortDirection: 'DESC',
-                sortField: 'createdAt'
-            }).subscribe({
-                next: ({ items, isSynced }) => {
-                    // Filter out null items that can appear during subscription updates
-                    const validItems = items.filter(item => item != null && item.id != null);
-                    
-                    console.log('[ChatContext] AssistantChat query update:', validItems.length, 'items', isSynced ? '(synced)' : '(not synced)');
-                    
-                    // Log updatedAt for debugging
-                    if (validItems.length > 0) {
-                        console.log('[ChatContext] First item details:', {
-                            id: validItems[0].id,
-                            updatedAt: validItems[0].updatedAt
-                        });
-                    }
-                    
-                    if (!isSynced) {
-                        console.log('[ChatContext] Waiting for AssistantChat sync...');
-                        return;
-                    }
-                    
-                    // Mark subscription as initialized only after first sync
-                    if (isSynced && !subscriptionInitializedRef.current) {
-                        subscriptionInitializedRef.current = true;
-                        setSubscriptionReady(true);
-                        console.log('[ChatContext] AssistantChat subscription initialized');
-                    }
-                    
-                    if (isSubscribed) {
-                        // Update chat histories list
-                        setChatHistories(validItems);
-                        console.log('[ChatContext] AssistantChat list updated:', validItems.length, 'chats');
-                        
-                        // Update current chat
-                        setAssistantChat(prevCurrent => {
-                            if (validItems.length > 0) {
-                                // Find the most recent non-archived chat
-                                const nonArchivedChats = validItems.filter(item => !item.archived);
-                                const mostRecentChat = nonArchivedChats[0]; // Already sorted by createdAt DESC
-                                
-                                if (!prevCurrent) {
-                                    // No current chat, set to most recent non-archived
-                                    if (mostRecentChat) {
-                                        chatVersionRef.current = mostRecentChat._version;
-                                        console.log('[ChatContext] Setting initial chat:', mostRecentChat.id);
-                                        return mostRecentChat;
-                                    }
-                                    // No non-archived chats available - will be handled by creation effect
-                                    console.log('[ChatContext] No non-archived chats available');
-                                    return null;
-                                }
-                                
-                                // If current chat is archived, switch to most recent non-archived or null
-                                if (prevCurrent.archived) {
-                                    if (mostRecentChat) {
-                                        chatVersionRef.current = mostRecentChat._version;
-                                        console.log('[ChatContext] Current chat archived, switching to:', mostRecentChat.id);
-                                        return mostRecentChat;
-                                    } else {
-                                        // All chats are archived - set to null, creation effect will make a new one
-                                        console.log('[ChatContext] All chats archived, clearing current chat - new one will be created');
-                                        chatVersionRef.current = null;
-                                        return null;
-                                    }
-                                }
-                                
-                                // Find updated version of current chat
-                                const updatedCurrent = items.find(item => item.id === prevCurrent.id);
-                                // Only update if _version has changed
-                                if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
-                                    chatVersionRef.current = updatedCurrent._version;
-                                    console.log('[ChatContext] Chat updated, new _version:', updatedCurrent._version);
-                                    return updatedCurrent;
-                                }
-                            } else {
-                                // No chats at all - clear current chat so creation effect triggers
-                                console.log('[ChatContext] No chats found, clearing current chat - new one will be created');
-                                chatVersionRef.current = null;
-                                return null;
-                            }
-                            return prevCurrent;
-                        });
-                    }
-                },
-                error: (error) => {
-                    const msg = error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
-                    if (msg.includes('DuplicatedOperationError')) {
-                        console.warn('[ChatContext] AssistantChat subscription: transient DuplicatedOperationError (safe to ignore)');
-                        return;
-                    }
-                    console.error('[ChatContext] AssistantChat subscription error:', error);
-                }
+        console.log('[ChatContext] Setting up AssistantChat subscriptions');
+
+        const subscriptions = [];
+        let cancelled = false;
+
+        function processChats(validItems) {
+            // Sort by createdAt descending (most recent first)
+            validItems.sort((a, b) => {
+                const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return bTime - aTime;
             });
-        };
-        
-        setupSubscription();
+
+            // Update chat histories list
+            dispatch({ type: actionTypes.SET_CHAT_HISTORIES, payload: validItems });
+            
+            // Read current chat from ref (not from closure) to avoid stale state
+            const prevCurrent = assistantChatRef.current;
+            let newChat = prevCurrent;
+            
+            if (validItems.length > 0) {
+                const nonArchivedChats = validItems.filter(item => !item.archived);
+                const mostRecentChat = nonArchivedChats[0];
+                
+                if (!prevCurrent) {
+                    if (mostRecentChat) {
+                        chatVersionRef.current = mostRecentChat._version;
+                        console.log('[ChatContext] Setting initial chat:', mostRecentChat.id);
+                        newChat = mostRecentChat;
+                    } else {
+                        newChat = null;
+                    }
+                } else if (prevCurrent.archived) {
+                    if (mostRecentChat) {
+                        chatVersionRef.current = mostRecentChat._version;
+                        console.log('[ChatContext] Current chat archived, switching to:', mostRecentChat.id);
+                        newChat = mostRecentChat;
+                    } else {
+                        chatVersionRef.current = null;
+                        newChat = null;
+                    }
+                } else {
+                    const updatedCurrent = validItems.find(item => item.id === prevCurrent.id);
+                    if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
+                        chatVersionRef.current = updatedCurrent._version;
+                        console.log('[ChatContext] Chat updated, new _version:', updatedCurrent._version);
+                        newChat = updatedCurrent;
+                    }
+                }
+            } else {
+                chatVersionRef.current = null;
+                newChat = null;
+            }
+            
+            if (newChat !== prevCurrent) {
+                dispatch({ type: actionTypes.SET_ASSISTANT_CHAT, payload: newChat });
+            }
+        }
+
+        function handleError(label, error) {
+            const msg = error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
+            if (msg.includes('DuplicatedOperationError')) {
+                console.warn(`[ChatContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+                return;
+            }
+            console.error(`[ChatContext] ${label} error:`, error);
+        }
+
+        async function fetchChats() {
+            try {
+                const { data: items, errors } = await client.models.AssistantChat.list();
+                if (cancelled) return;
+                if (errors?.length) console.error('[ChatContext] AssistantChat list errors:', errors);
+
+                const validItems = (items || []).filter(item => item != null && item.id != null);
+                
+                // Mark subscription as initialized after initial fetch
+                if (!subscriptionInitializedRef.current) {
+                    subscriptionInitializedRef.current = true;
+                    dispatch({ type: actionTypes.SET_SUBSCRIPTION_READY, payload: true });
+                    console.log('[ChatContext] AssistantChat initialized with', validItems.length, 'chats');
+                }
+                processChats(validItems);
+
+                if (cancelled) return;
+
+                const createSub = client.models.AssistantChat.onCreate().subscribe({
+                    next: (response) => {
+                        const chat = response?.data || response;
+                        if (!chat || !chat.id) return;
+                        // Re-fetch to get full list for processChats
+                        client.models.AssistantChat.list().then(({ data }) => {
+                            const valid = (data || []).filter(item => item != null && item.id != null);
+                            processChats(valid);
+                        });
+                    },
+                    error: (error) => handleError('AssistantChat onCreate', error)
+                });
+                subscriptions.push(createSub);
+
+                const updateSub = client.models.AssistantChat.onUpdate().subscribe({
+                    next: (response) => {
+                        const chat = response?.data || response;
+                        if (!chat || !chat.id) return;
+                        client.models.AssistantChat.list().then(({ data }) => {
+                            const valid = (data || []).filter(item => item != null && item.id != null);
+                            processChats(valid);
+                        });
+                    },
+                    error: (error) => handleError('AssistantChat onUpdate', error)
+                });
+                subscriptions.push(updateSub);
+
+                const deleteSub = client.models.AssistantChat.onDelete().subscribe({
+                    next: (response) => {
+                        const chat = response?.data || response;
+                        if (!chat || !chat.id) return;
+                        client.models.AssistantChat.list().then(({ data }) => {
+                            const valid = (data || []).filter(item => item != null && item.id != null);
+                            processChats(valid);
+                        });
+                    },
+                    error: (error) => handleError('AssistantChat onDelete', error)
+                });
+                subscriptions.push(deleteSub);
+            } catch (error) {
+                console.error('[ChatContext] fetchChats error:', error);
+            }
+        }
+
+        fetchChats();
         
         return () => {
-            console.log('[ChatContext] Cleaning up subscription');
-            isSubscribed = false;
-            if (chatSubscription) chatSubscription.unsubscribe();
+            console.log('[ChatContext] Cleaning up subscriptions');
+            cancelled = true;
+            subscriptions.forEach(sub => sub.unsubscribe());
         };
     }, [user, authLoading]);
     
@@ -238,29 +248,29 @@ export function ChatContextProvider({ children }) {
         }
         
         // Check if we have a non-archived chat
-        if (assistantChat?.id && !assistantChat.archived) {
+        if (state.assistantChat?.id && !state.assistantChat.archived) {
             console.log('[ChatContext] Chat exists and not archived, skipping creation');
             return;
         }
         
         // If there are existing non-archived chats, use them instead of creating
-        const nonArchivedChats = chatHistories.filter(chat => !chat.archived);
+        const nonArchivedChats = state.chatHistories.filter(chat => !chat.archived);
         if (nonArchivedChats.length > 0) {
             console.log('[ChatContext] Found', nonArchivedChats.length, 'non-archived chats, subscription will handle selection');
             return;
         }
         
         // If current chat is archived or doesn't exist, we need a new one
-        if (assistantChat?.archived) {
+        if (state.assistantChat?.archived) {
             console.log('[ChatContext] Current chat is archived, will create new chat');
-        } else if (!assistantChat?.id) {
+        } else if (!state.assistantChat?.id) {
             console.log('[ChatContext] No current chat available, will create one');
         }
         
         // Create new AssistantChat
         async function createChat() {
             console.log('[ChatContext] Creating AssistantChat with user:', user?.username);
-            setIsLoadingChat(true);
+            dispatch({ type: actionTypes.CHAT_CREATION_STARTED });
             
             try {
                 // Gen 2 API
@@ -279,60 +289,67 @@ export function ChatContextProvider({ children }) {
                 // Check for GraphQL errors
                 if (result.errors && result.errors.length > 0) {
                     console.error('[ChatContext] GraphQL errors creating chat:', result.errors);
-                    setChatCreationError(result.errors[0].message || 'Failed to create chat');
-                    setIsLoadingChat(false);
+                    dispatch({ type: actionTypes.CHAT_CREATION_FAILED, payload: result.errors[0].message || 'Failed to create chat' });
                     return;
                 }
                 
                 if (!result.data) {
                     console.error('[ChatContext] No data returned from create operation. Full result:', result);
-                    setChatCreationError('Failed to create chat - no data returned');
-                    setIsLoadingChat(false);
+                    dispatch({ type: actionTypes.CHAT_CREATION_FAILED, payload: 'Failed to create chat - no data returned' });
                     return;
                 }
                 
                 console.log('[ChatContext] Created AssistantChat:', result.data.id, 'at:', result.data.createdAt);
-                setIsLoadingChat(false);
+                dispatch({ type: actionTypes.CHAT_CREATION_SUCCEEDED });
             } catch (error) {
                 console.error('[ChatContext] Error creating chat:', error);
-                setChatCreationError(error.message || 'Failed to create chat');
-                setIsLoadingChat(false);
+                dispatch({ type: actionTypes.CHAT_CREATION_FAILED, payload: error.message || 'Failed to create chat' });
             }
         }
         
         createChat();
-    }, [subscriptionReady, assistantChat?.id, assistantChat?.archived, chatHistories.length, user, authLoading]);
+    }, [state.subscriptionReady, state.assistantChat?.id, state.assistantChat?.archived, state.chatHistories.length, user, authLoading]);
+    
+    // Stable dispatch-based setters for consumers
+    const setCurrentChat = useCallback((chat) => dispatch({ type: actionTypes.SET_ASSISTANT_CHAT, payload: chat }), []);
+    const setIsChatOpen = useCallback((open) => dispatch({ type: actionTypes.SET_CHAT_OPEN, payload: open }), []);
+    const setPageContext = useCallback((ctx) => dispatch({ type: actionTypes.SET_PAGE_CONTEXT, payload: ctx }), []);
+    const setMessages = useCallback((msgs) => dispatch({ type: actionTypes.SET_MESSAGES, payload: msgs }), []);
     
     // Memoize context value to prevent unnecessary re-renders
     const contextValue = useMemo(() => ({
         // Chat session
-        assistantChat,
-        chatHistories,
-        isLoadingChat,
-        chatCreationError,
-        setCurrentChat: setAssistantChat,
+        assistantChat: state.assistantChat,
+        chatHistories: state.chatHistories,
+        isLoadingChat: state.isLoadingChat,
+        chatCreationError: state.chatCreationError,
+        setCurrentChat,
         
         // Global chat UI
-        isChatOpen,
+        isChatOpen: state.isChatOpen,
         setIsChatOpen,
         
         // Page context
-        pageContext,
+        pageContext: state.pageContext,
         setPageContext,
         
         // Messages
-        messages,
+        messages: state.messages,
         setMessages,
     }), [
-        assistantChat?.id,
-        assistantChat?._version,
-        assistantChat?.archived,
-        chatHistories?.length,
-        isLoadingChat,
-        chatCreationError,
-        isChatOpen,
-        pageContext,
-        messages?.length,
+        state.assistantChat?.id,
+        state.assistantChat?._version,
+        state.assistantChat?.archived,
+        state.chatHistories?.length,
+        state.isLoadingChat,
+        state.chatCreationError,
+        state.isChatOpen,
+        state.pageContext,
+        state.messages?.length,
+        setCurrentChat,
+        setIsChatOpen,
+        setPageContext,
+        setMessages,
     ]);
     
     return (

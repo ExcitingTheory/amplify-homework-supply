@@ -9,10 +9,10 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
-import Avatar from '@mui/material/Avatar'
 import Popover from '@mui/material/Popover'
 import Stack from '@mui/material/Stack'
-import LockIcon from '@mui/icons-material/Lock'
+import { BadgeIcon } from './BadgeIcon'
+import { getBadgeConfig } from './badgeRegistry'
 
 export type BadgeType =
   | 'FIRST_SUBMISSION'
@@ -24,23 +24,56 @@ export type BadgeType =
   | 'DEEP_THINKER'
   | 'TOP_OF_CLASS'
   | 'PERFECTIONIST'
+  // Avatar unlock badges
+  | 'AVATAR_COLORS'
+  | 'AVATAR_DETAILED'
+  | 'AVATAR_ACCESSORIES'
+  | 'AVATAR_PORTRAIT'
+  // Bot Whisperer tiered badges
+  | 'BOT_WHISPERER_I'
+  | 'BOT_WHISPERER_II'
+  | 'BOT_WHISPERER_III'
+  | 'BOT_WHISPERER_IV'
+  // Storybook documentation promo badges
+  | 'DOCS_EXPLORER'
+  | 'INSTRUCTOR_ONBOARD'
+  | 'LEARNER_ONBOARD'
+  | 'TRANSLATOR_ONBOARD'
+  | 'A11Y_CHAMPION'
+  | 'DOCS_CHAMPION'
 
 interface BadgeDefinition {
-  emoji: string
   name: string
   description: string
 }
 
 const BADGE_DEFINITIONS: Record<BadgeType, BadgeDefinition> = {
-  FIRST_SUBMISSION: { emoji: '🎯', name: 'First Submission', description: 'Submitted your first homework' },
-  GOOD_EYE: { emoji: '👁️', name: 'Good Eye', description: 'Revised work after AI feedback' },
-  QUICK_DRAW: { emoji: '⚡', name: 'Quick Draw', description: 'Submitted before the due date' },
-  SHARPSHOOTER: { emoji: '🎯', name: 'Sharpshooter', description: 'Scored 90%+ on an assignment' },
-  CONSISTENT: { emoji: '📅', name: 'Consistent', description: 'Maintained a 7-day streak' },
-  TEAM_PLAYER: { emoji: '🤝', name: 'Team Player', description: 'Completed a peer review' },
-  DEEP_THINKER: { emoji: '🧠', name: 'Deep Thinker', description: 'Completed all blocks in a unit' },
-  TOP_OF_CLASS: { emoji: '🏆', name: 'Top of Class', description: 'Reached #1 on the leaderboard' },
-  PERFECTIONIST: { emoji: '💎', name: 'Perfectionist', description: 'Scored 100% on an assignment' },
+  FIRST_SUBMISSION: { name: 'First Submission', description: 'Submitted your first homework' },
+  GOOD_EYE: { name: 'Good Eye', description: 'Revised work after AI feedback' },
+  QUICK_DRAW: { name: 'Quick Draw', description: 'Submitted before the due date' },
+  SHARPSHOOTER: { name: 'Sharpshooter', description: 'Scored 90%+ on an assignment' },
+  CONSISTENT: { name: 'Consistent', description: 'Maintained a 7-day streak' },
+  TEAM_PLAYER: { name: 'Team Player', description: 'Completed a peer review' },
+  DEEP_THINKER: { name: 'Deep Thinker', description: 'Completed all blocks in a unit' },
+  TOP_OF_CLASS: { name: 'Top of Class', description: 'Reached #1 on the leaderboard' },
+  PERFECTIONIST: { name: 'Perfectionist', description: 'Scored 100% on an assignment' },
+  // Avatar unlock badges
+  AVATAR_COLORS: { name: 'Color Unlocked', description: 'Reached Level 2 — unlock avatar color picker' },
+  AVATAR_DETAILED: { name: 'New Look', description: 'Reached Level 3 — unlocked detailed avatar style' },
+  AVATAR_ACCESSORIES: { name: 'Accessorized', description: 'Reached Level 4 — unlock avatar accessories' },
+  AVATAR_PORTRAIT: { name: 'Portrait Mode', description: 'Reached Level 5 — unlocked portrait avatar style & full customizer' },
+  // Bot Whisperer tiered badges
+  BOT_WHISPERER_I: { name: 'Bot Whisperer I', description: 'Had your first real conversation with the AI tutor' },
+  BOT_WHISPERER_II: { name: 'Bot Whisperer II', description: 'Earned Deep Thinker — upgraded your bot\'s style' },
+  BOT_WHISPERER_III: { name: 'Bot Whisperer III', description: 'Used AI across 5 units — choose your bot\'s eyes & mouth' },
+  BOT_WHISPERER_IV: { name: 'Bot Whisperer IV', description: 'AI mastery achieved — full bot customization unlocked' },
+  // Storybook documentation promo badges
+  DOCS_EXPLORER: { name: 'Docs Explorer', description: 'Visited the Storybook documentation and started onboarding' },
+  INSTRUCTOR_ONBOARD: { name: 'Instructor Certified', description: 'Completed the instructor onboarding in Storybook' },
+  LEARNER_ONBOARD: { name: 'Learner Certified', description: 'Completed the learner onboarding in Storybook' },
+  TRANSLATOR_ONBOARD: { name: 'Translator Certified', description: 'Completed the translator onboarding in Storybook' },
+  A11Y_CHAMPION: { name: 'Accessibility Champion', description: 'Completed accessibility-related tasks in Storybook' },
+  DOCS_CHAMPION: { name: 'Documentation Champion', description: 'Completed all onboarding paths — instructor, learner, and translator' },
 }
 
 const ALL_BADGE_TYPES: BadgeType[] = Object.keys(BADGE_DEFINITIONS) as BadgeType[]
@@ -50,6 +83,8 @@ export interface EarnedBadge {
   awardedAt: string
   /** The unit or entity ID this badge was earned in. */
   sourceId?: string | null
+  /** Number of times this badge has been earned (from model count field). */
+  count?: number
 }
 
 export interface BadgeShelfProps {
@@ -64,9 +99,10 @@ export interface BadgeShelfProps {
 export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: BadgeShelfProps) {
   const earnedSet = new Set(earnedBadges.map(b => b.badgeType))
 
-  // Count how many times each badge was earned
+  // Count how many times each badge was earned — prefer model count field, fall back to array duplicates
   const earnedCounts = earnedBadges.reduce<Record<string, number>>((acc, b) => {
-    acc[b.badgeType] = (acc[b.badgeType] || 0) + 1
+    const badgeCount = b.count && b.count > 1 ? b.count : 1
+    acc[b.badgeType] = (acc[b.badgeType] || 0) + badgeCount
     return acc
   }, {})
 
@@ -115,23 +151,15 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
                 sx={{
                   position: 'relative',
                   cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': { transform: isEarned ? 'scale(1.1)' : 'none' },
                 }}
               >
-                <Avatar
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    fontSize: '1.5rem',
-                    bgcolor: isEarned ? 'action.selected' : 'action.disabledBackground',
-                    opacity: isEarned ? 1 : 0.5,
-                    border: isEarned ? '2px solid' : 'none',
-                    borderColor: 'primary.main',
-                  }}
-                >
-                  {isEarned ? def.emoji : <LockIcon sx={{ fontSize: '1.25rem', color: 'text.disabled' }} />}
-                </Avatar>
+                <BadgeIcon
+                  badgeType={type}
+                  size={56}
+                  earned={isEarned}
+                  animate={isEarned}
+                  drawIcon={isEarned}
+                />
                 {isEarned && count > 1 && (
                   <Typography
                     variant="caption"
@@ -173,7 +201,13 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
       >
         {activeDef && (
           <Stack spacing={0.5} alignItems="center">
-            <Typography sx={{ fontSize: '2rem', lineHeight: 1 }}>{activeDef.emoji}</Typography>
+            <BadgeIcon
+              badgeType={activeBadge!}
+              size={48}
+              earned={activeIsEarned}
+              animate={false}
+              drawIcon={false}
+            />
             <Typography variant="subtitle2" fontWeight={700}>{activeDef.name}</Typography>
             <Typography variant="caption" color="text.secondary" textAlign="center">
               {activeDef.description}

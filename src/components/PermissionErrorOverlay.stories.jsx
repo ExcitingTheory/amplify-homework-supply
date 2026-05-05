@@ -1,10 +1,10 @@
-import React from 'react';
-import PermissionErrorOverlay from './PermissionErrorOverlay';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '../../.storybook/i18next';
+import React from "react";
+import PermissionErrorOverlay from "./PermissionErrorOverlay";
+import { I18nextProvider } from "react-i18next";
+import i18n from "../../.storybook/i18next";
 
 export default {
-  title: 'Components/PermissionErrorOverlay',
+  title: "🧩 UI Components/Permission Error Overlay",
   component: PermissionErrorOverlay,
   decorators: [
     (Story) => (
@@ -16,7 +16,8 @@ export default {
   parameters: {
     docs: {
       description: {
-        component: 'A modal overlay that displays when a user tries to access content they don\'t have permission to view. Shows an error message and provides navigation options to go back or return home.',
+        component:
+          "A modal overlay that displays when a user tries to access content they don't have permission to view. Shows an error message and provides navigation options to go back or return home.",
       },
     },
   },
@@ -28,7 +29,7 @@ export default {
 export const UnitPermissionError = {
   args: {
     open: true,
-    resourceType: 'unit',
+    resourceType: "unit",
     message: null,
   },
 };
@@ -39,8 +40,9 @@ export const UnitPermissionError = {
 export const CustomMessage = {
   args: {
     open: true,
-    resourceType: 'unit',
-    message: 'You do not have permission to access this unit. Only the owner or instructors can view unpublished units.',
+    resourceType: "unit",
+    message:
+      "You do not have permission to access this unit. Only the owner or instructors can view unpublished units.",
   },
 };
 
@@ -50,8 +52,8 @@ export const CustomMessage = {
 export const SectionPermissionError = {
   args: {
     open: true,
-    resourceType: 'section',
-    message: 'You are not enrolled in this section.',
+    resourceType: "section",
+    message: "You are not enrolled in this section.",
   },
 };
 
@@ -61,8 +63,8 @@ export const SectionPermissionError = {
 export const AssignmentPermissionError = {
   args: {
     open: true,
-    resourceType: 'assignment',
-    message: 'This assignment is not available to you.',
+    resourceType: "assignment",
+    message: "This assignment is not available to you.",
   },
 };
 
@@ -72,7 +74,7 @@ export const AssignmentPermissionError = {
 export const ClosedState = {
   args: {
     open: false,
-    resourceType: 'unit',
+    resourceType: "unit",
     message: null,
   },
 };
@@ -85,16 +87,16 @@ export const Interactive = () => {
 
   return (
     <div>
-      <button 
+      <button
         onClick={() => setOpen(true)}
         style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-          backgroundColor: '#1976d2',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
+          padding: "10px 20px",
+          fontSize: "16px",
+          cursor: "pointer",
+          backgroundColor: "#1976d2",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
         }}
       >
         Trigger Permission Error

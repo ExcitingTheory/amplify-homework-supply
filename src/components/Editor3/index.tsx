@@ -38,7 +38,7 @@ import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import { AutocompleteProvider } from './context/SharedAutocompleteContext';
 import { SuggestionProvider } from './context/SuggestionContext';
 import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper';
-import LanguageEditorTheme from './components/LanguageEditorTheme';
+import LanguageEditorTheme from './config/LanguageEditorTheme';
 import Placeholder from './components/Placeholder';
 
 import UnitContext from '../../context/unitContext';
@@ -66,6 +66,7 @@ import PdfViewerPlugin from './plugins/PdfViewerPlugin';
 import { LayoutPlugin } from './plugins/LayoutPlugin';
 import AnswerPlugin from './plugins/AnswerPlugin';
 import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
+import ArmorEditorPlugin from './plugins/ArmorEditorPlugin';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
@@ -478,6 +479,7 @@ export default function Editor(): JSX.Element {
                 <LayoutPlugin />
                 <AnswerPlugin />
                 <CustomAnswerPlugin />
+                <ArmorEditorPlugin />
                 <BlockSuggestionPlugin useAI={true} />
                 <AIContentCompletionPlugin />
                 <LinkPlugin />
@@ -669,4 +671,6 @@ export default function Editor(): JSX.Element {
 
 // Re-export Workbook for convenience
 export { Workbook } from './Workbook';
+export { NarrativeReader } from './NarrativeReader';
+export type { NarrativeReaderProps } from './NarrativeReader';
 export { EditorNodes, ALL_TRANSFORMERS } from './editorConfig';

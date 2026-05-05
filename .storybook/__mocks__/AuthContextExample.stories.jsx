@@ -1,5 +1,5 @@
-import React from 'react';
-import AuthContext from '../authContext';
+import React from "react";
+import AuthContext from "./authContext";
 
 /**
  * Example component that consumes AuthContext
@@ -14,7 +14,7 @@ const AuthDisplay = () => {
 
   if (error) {
     return (
-      <div style={{ padding: 20, color: 'red' }}>
+      <div style={{ padding: 20, color: "red" }}>
         <h3>Authentication Error</h3>
         <p>{error.message}</p>
       </div>
@@ -31,29 +31,29 @@ const AuthDisplay = () => {
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: 'sans-serif' }}>
+    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
       <h2>Authentication Status</h2>
-      
+
       <h3>User Information</h3>
-      <table style={{ borderCollapse: 'collapse', marginBottom: 20 }}>
+      <table style={{ borderCollapse: "collapse", marginBottom: 20 }}>
         <tbody>
           <tr>
-            <td style={{ padding: 8, fontWeight: 'bold' }}>Sub:</td>
+            <td style={{ padding: 8, fontWeight: "bold" }}>Sub:</td>
             <td style={{ padding: 8 }}>{user.attributes?.sub}</td>
           </tr>
           <tr>
-            <td style={{ padding: 8, fontWeight: 'bold' }}>Email:</td>
+            <td style={{ padding: 8, fontWeight: "bold" }}>Email:</td>
             <td style={{ padding: 8 }}>{user.attributes?.email}</td>
           </tr>
           <tr>
-            <td style={{ padding: 8, fontWeight: 'bold' }}>Name:</td>
-            <td style={{ padding: 8 }}>{user.attributes?.name || 'N/A'}</td>
+            <td style={{ padding: 8, fontWeight: "bold" }}>Name:</td>
+            <td style={{ padding: 8 }}>{user.attributes?.name || "N/A"}</td>
           </tr>
-          {user.attributes?.['cognito:groups'] && (
+          {user.attributes?.["cognito:groups"] && (
             <tr>
-              <td style={{ padding: 8, fontWeight: 'bold' }}>Groups:</td>
+              <td style={{ padding: 8, fontWeight: "bold" }}>Groups:</td>
               <td style={{ padding: 8 }}>
-                {user.attributes['cognito:groups'].join(', ')}
+                {user.attributes["cognito:groups"].join(", ")}
               </td>
             </tr>
           )}
@@ -61,16 +61,16 @@ const AuthDisplay = () => {
       </table>
 
       <h3>Session Information</h3>
-      <table style={{ borderCollapse: 'collapse' }}>
+      <table style={{ borderCollapse: "collapse" }}>
         <tbody>
           <tr>
-            <td style={{ padding: 8, fontWeight: 'bold' }}>Identity ID:</td>
+            <td style={{ padding: 8, fontWeight: "bold" }}>Identity ID:</td>
             <td style={{ padding: 8 }}>{session?.identityId}</td>
           </tr>
           <tr>
-            <td style={{ padding: 8, fontWeight: 'bold' }}>ID Token:</td>
-            <td style={{ padding: 8, fontFamily: 'monospace', fontSize: 12 }}>
-              {session?.idToken?.toString?.() || 'N/A'}
+            <td style={{ padding: 8, fontWeight: "bold" }}>ID Token:</td>
+            <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>
+              {session?.idToken?.toString?.() || "N/A"}
             </td>
           </tr>
         </tbody>
@@ -83,12 +83,13 @@ const AuthDisplay = () => {
  * Demonstrates AuthContext mock in Storybook
  */
 export default {
-  title: 'Examples/AuthContext Mock',
+  title: "🛠️ Developer Tools/Auth Context Mock",
   component: AuthDisplay,
   parameters: {
     docs: {
       description: {
-        component: 'Demonstrates how the AuthContext mock works in Storybook. See `.storybook/__mocks__/AUTH_MOCK_GUIDE.md` for full documentation.',
+        component:
+          "Demonstrates how the AuthContext mock works in Storybook. See `.storybook/__mocks__/AUTH_MOCK_GUIDE.md` for full documentation.",
       },
     },
   },
@@ -109,10 +110,10 @@ export const InstructorUser = {
     mockAuth: {
       user: {
         attributes: {
-          sub: 'instructor-bob-sub',
-          email: 'bob@example.com',
-          name: 'Bob Instructor',
-          'cognito:groups': ['Instructors'],
+          sub: "instructor-bob-sub",
+          email: "bob@example.com",
+          name: "Bob Instructor",
+          "cognito:groups": ["Instructors"],
         },
       },
     },
@@ -128,10 +129,10 @@ export const AdminUser = {
     mockAuth: {
       user: {
         attributes: {
-          sub: 'admin-user-sub',
-          email: 'admin@example.com',
-          name: 'Admin User',
-          'cognito:groups': ['Admins', 'Instructors'],
+          sub: "admin-user-sub",
+          email: "admin@example.com",
+          name: "Admin User",
+          "cognito:groups": ["Admins", "Instructors"],
         },
       },
     },
@@ -157,7 +158,7 @@ export const LoadingState = {
 export const ErrorState = {
   parameters: {
     mockAuth: {
-      error: new Error('Failed to authenticate user'),
+      error: new Error("Failed to authenticate user"),
       isLoading: false,
     },
   },
@@ -186,10 +187,10 @@ export const ModeratorUser = {
     mockAuth: {
       user: {
         attributes: {
-          sub: 'moderator-user-sub',
-          email: 'moderator@example.com',
-          name: 'Moderator User',
-          'cognito:groups': ['Moderators'],
+          sub: "moderator-user-sub",
+          email: "moderator@example.com",
+          name: "Moderator User",
+          "cognito:groups": ["Moderators"],
         },
       },
     },

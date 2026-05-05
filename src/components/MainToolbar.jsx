@@ -61,10 +61,15 @@ import { Help, Settings } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
 import { useColorMode } from '../hooks/useColorMode';
 import { LevelBadge } from './Gamification/LevelBadge';
+import { DiceBearAvatar } from './Gamification/DiceBearAvatar';
+import { useAvatarConfig } from '../hooks/useAvatarConfig';
 import SyncStatusIndicator from './SyncStatusIndicator';
-import { useXP } from '../context/xpContext';
+import { useXP } from '../context/gamificationContext';
+import AuthContext from '../context/authContext';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import TuneIcon from '@mui/icons-material/Tune';
 import JoinPracticeDialog from './PracticeDrill/JoinPracticeDialog';
 import { JoinWorkbookDialog } from './Workbook';
 import { JoinPeerReviewDialog } from './PeerReview';
@@ -142,13 +147,13 @@ export function SettingsMenu() {
             size="small"
             sx={{ ml: 1 }}
           >
-            <ToggleButton value="light" aria-label="Light mode">
+            <ToggleButton value="light" aria-label={t('darkMode.light', { ns: 'common' })}>
               <LightModeIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton value="auto" aria-label="System mode">
+            <ToggleButton value="auto" aria-label={t('darkMode.system', { ns: 'common' })}>
               <SettingsBrightnessIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton value="dark" aria-label="Dark mode">
+            <ToggleButton value="dark" aria-label={t('darkMode.dark', { ns: 'common' })}>
               <DarkModeIcon fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
@@ -217,6 +222,9 @@ export function HelpMenu() {
 
 export function UserMenu() {
   const { t } = useTranslation(['common', 'auth']);
+  const { user } = React.useContext(AuthContext);
+  const { style: avatarStyle, overrides: avatarOverrides, seed: configSeed, isLoaded } = useAvatarConfig();
+  const avatarSeed = configSeed || user?.username || user?.attributes?.sub || '';
   const [anchorEl, setAnchorEl] = React.useState(null);
   // const [username, setUsername] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -244,7 +252,11 @@ export function UserMenu() {
          * @todo Replace this with the user's name.
          */}
         {/* <ProfileIcon />&nbsp;{username} */}
-        <ProfileIcon />
+        {avatarSeed && isLoaded ? (
+          <DiceBearAvatar seed={avatarSeed} size={28} style={avatarStyle} overrides={avatarOverrides} />
+        ) : (
+          <ProfileIcon />
+        )}
       </IconButton>
       <Menu
         id="user-menu"
@@ -278,7 +290,12 @@ export function UserMenu() {
 
 export default function MainToolbar({ children }) {
   const { t } = useTranslation(['common', 'components', 'editor.authoring']);
-  const { level } = useXP();
+  const { level, sectionLevel } = useXP();
+  const { session: authSession } = React.useContext(AuthContext);
+  const isInstructorOrAdmin = React.useMemo(() => {
+    const groups = authSession?.groups || [];
+    return groups.some(g => ['Admins', 'Moderators', 'Instructors'].includes(g));
+  }, [authSession?.groups]);
   const [state, setState] = React.useState({
     // top: false,
     left: false,
@@ -421,7 +438,7 @@ export default function MainToolbar({ children }) {
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />
-        <LevelBadge level={level} showProgress size="small" />
+        <LevelBadge level={router.query.sectionId ? sectionLevel : level} showProgress size="small" />
         <IconButton
           color="inherit"
           aria-label={t('mainToolbar.joinStudyGroup', { ns: 'common', defaultValue: 'Join Study Group' })}
@@ -567,6 +584,44 @@ export default function MainToolbar({ children }) {
                     <ListItemText primary={t('common:navigation.leaderboard', 'Leaderboard')} />
                   </ListItemButton>
                 </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component="a" href='/guilds'>
+                  <ListItemIcon
+                    sx={{
+                      color: 'text.primary',
+                    }}
+                    >
+                      <GroupsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t('common:navigation.guilds', 'Guilds')} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component="a" href='/skills'>
+                  <ListItemIcon
+                    sx={{
+                      color: 'text.primary',
+                    }}
+                    >
+                      <AccountTreeIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t('common:navigation.skills', 'Skill Tree')} />
+                  </ListItemButton>
+                </ListItem>
+                {isInstructorOrAdmin && (
+                  <ListItem disablePadding>
+                    <ListItemButton component="a" href='/gamification'>
+                    <ListItemIcon
+                      sx={{
+                        color: 'text.primary',
+                      }}
+                      >
+                        <TuneIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={t('common:navigation.gamification', 'Gamification')} />
+                    </ListItemButton>
+                  </ListItem>
+                )}
               </List>
               <Divider />
               <List

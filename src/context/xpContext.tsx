@@ -58,7 +58,13 @@ const REASON_LABELS: Record<string, string> = {
   [XPReason.ON_TIME_SUBMISSION]: 'On-time submission',
   [XPReason.STREAK_3DAY]: '3-day streak',
   [XPReason.STREAK_7DAY]: '7-day streak',
+  [XPReason.STREAK_14DAY]: '14-day streak',
+  [XPReason.STREAK_30DAY]: '30-day streak',
   [XPReason.PERFECT_SCORE]: 'Perfect score',
+  [XPReason.COMEBACK]: 'Comeback!',
+  [XPReason.PERSONAL_BEST]: 'New personal best!',
+  [XPReason.EASTER_EGG]: 'Secret discovered!',
+  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild challenge bonus',
 }
 
 // ============================================================================

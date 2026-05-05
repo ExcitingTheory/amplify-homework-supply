@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StreakIndicator } from './StreakIndicator'
 
 const meta: Meta<typeof StreakIndicator> = {
-  title: 'Gamification/StreakIndicator',
+  title: '🏆 Gamification/Streaks/Streak Indicator',
   component: StreakIndicator,
 }
 export default meta

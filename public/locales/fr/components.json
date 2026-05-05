@@ -14,6 +14,20 @@
     "cancel": "Annuler",
     "submit": "Soumettre"
   },
+  "authenticator": {
+    "confirmPasswordLabel": "Confirmer le mot de passe :",
+    "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+    "displayNameLabel": "Nom d'affichage :",
+    "displayNamePlaceholder": "Choisissez un nom d'affichage",
+    "emailLabel": "E-mail :",
+    "emailPlaceholder": "Entrez votre e-mail :",
+    "nameLabel": "Nom :",
+    "namePlaceholder": "Entrez votre nom :",
+    "passwordLabel": "Mot de passe :",
+    "passwordPlaceholder": "Entrez votre mot de passe :",
+    "phoneLabel": "Numéro de téléphone :",
+    "phonePlaceholder": "Entrez votre numéro de téléphone"
+  },
   "chatSidebar": {
     "errorRenderingMessage": "Erreur lors de l'affichage du message",
     "chatInitFailure": "L'initialisation du chat a échoué. Veuillez actualiser la page.",

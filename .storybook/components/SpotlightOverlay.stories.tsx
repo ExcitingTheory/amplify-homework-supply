@@ -4,7 +4,7 @@ import { Button, Box, Typography, Card, CardContent, Stack } from '@mui/material
 import SpotlightOverlay, { SpotlightStep } from './SpotlightOverlay';
 
 const meta: Meta<typeof SpotlightOverlay> = {
-  title: 'Onboarding/Spotlight Overlay',
+  title: '🏠 Getting Started/Onboarding/Spotlight Overlay',
   component: SpotlightOverlay,
   parameters: {
     layout: 'fullscreen',

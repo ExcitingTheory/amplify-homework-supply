@@ -42,16 +42,19 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Skeleton,
   Chip,
   Tooltip,
 } from '@mui/material';
 
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MainToolbar from '../../src/components/MainToolbar'
 import PrefetchBadge from '../../src/components/PrefetchBadge'
+import { InlineGradeCell, createEmptyHistoryState, createGradeCellRegistry, GradeCellRegistryContext } from '../../src/components/InlineGradeCell'
 
-import MyAuth from "../../src/components/authenticator";
+import MyAuth from "../../src/components/AmplifyAuthenticator";
 
 import CameraIcon from '@mui/icons-material/Camera';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -163,9 +166,8 @@ function SectionDetail({ user, signOut }) {
   const [ownerId, setOwnerId] = React.useState('');
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [inProgress, setInProgress] = React.useState(false);
-  const [curveEnabled, setCurveEnabled] = React.useState(false);
-  const [curveMethod, setCurveMethod] = React.useState('scale-to-top');
-  const [selectedCurveAssignments, setSelectedCurveAssignments] = React.useState(new Set());
+  const [curveSettings, setCurveSettings] = React.useState({}); // { [unitID]: { method: 'scale-to-top' | 'linear-adjustment' } }
+  const hasCurve = Object.keys(curveSettings).length > 0;
   const [showFutureAssignments, setShowFutureAssignments] = React.useState(false);
   const [showDraftAssignments, setShowDraftAssignments] = React.useState(false);
   const [clientNow, setClientNow] = React.useState(null);
@@ -173,6 +175,9 @@ function SectionDetail({ user, signOut }) {
   const [gradeOverrideOpen, setGradeOverrideOpen] = React.useState(false);
   const [overrideData, setOverrideData] = React.useState({ student: null, assignment: null, currentGrade: null });
   const [overrideScore, setOverrideScore] = React.useState('');
+  const [gradeOverrides, setGradeOverrides] = React.useState({}); // { [studentId]: { [unitID]: { score, updatedAt } } }
+  const gradebookHistoryRef = React.useRef(createEmptyHistoryState());
+  const gradeCellRegistryRef = React.useRef(createGradeCellRegistry());
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
   const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
@@ -453,17 +458,15 @@ function SectionDetail({ user, signOut }) {
           setSection(sectionData);
           
           // Load curve settings from section
-          if (sectionData.curveEnabled !== undefined) {
-            setCurveEnabled(sectionData.curveEnabled);
+          if (sectionData.curveSettings) {
+            setCurveSettings(typeof sectionData.curveSettings === 'string' ? JSON.parse(sectionData.curveSettings) : sectionData.curveSettings);
           }
-          if (sectionData.curveMethod) {
-            setCurveMethod(sectionData.curveMethod);
+          // Load grade overrides from section
+          if (sectionData.gradeOverrides) {
+            setGradeOverrides(typeof sectionData.gradeOverrides === 'string' ? JSON.parse(sectionData.gradeOverrides) : sectionData.gradeOverrides);
           }
           if (sectionData.leaderboardEnabled !== undefined) {
             setLeaderboardEnabledLocal(sectionData.leaderboardEnabled);
-          }
-          if (sectionData.curveAssignments) {
-            setSelectedCurveAssignments(new Set(sectionData.curveAssignments));
           }
         }
       },
@@ -694,7 +697,7 @@ function SectionDetail({ user, signOut }) {
     client.mutations?.rebuildLeaderboard?.({ cohortId: id })
       ?.catch?.((err) => console.warn('[SectionDetail] rebuildLeaderboard:', err))
 
-    const subscription = client.models.LeaderboardEntry.observeQuery({
+    const subscription = client.models.StudentProfile.observeQuery({
       filter: { cohortId: { eq: id } },
     }).subscribe({
       next: ({ items }) => {
@@ -702,7 +705,7 @@ function SectionDetail({ user, signOut }) {
         setLeaderboardEntries(valid.map(e => ({
           studentId: e.studentId,
           studentName: e.studentName || e.studentId,
-          avatarColor: e.avatarColor || '#6366f1',
+          avatarColor: '#6366f1',
           totalXP: e.totalXP || 0,
           level: e.level || 1,
           currentStreak: e.currentStreak || 0,
@@ -713,6 +716,7 @@ function SectionDetail({ user, signOut }) {
           console.warn('[SectionDetail] Leaderboard filter limit — using client filtering')
           return
         }
+        if (error?.message?.includes('DuplicatedOperationError')) return
         console.error('[SectionDetail] Leaderboard subscription error:', error)
       },
     })
@@ -752,11 +756,14 @@ function SectionDetail({ user, signOut }) {
   const totalAssignments = sectionAssignments.length;
   const visibleAssignmentsCount = visibleAssignments.length;
 
-  // Calculate curve data for each assignment
+  // Calculate curve data for each assignment (using per-assignment method from curveSettings)
   const calculateCurveData = () => {
     const curveData = {};
     
     visibleAssignments.forEach((assignment) => {
+      const setting = curveSettings[assignment.unitID];
+      if (!setting) return; // Not curved
+      
       const grades = [];
       Object.values(sectionStudents).forEach((student) => {
         const grade = gradeMap[student.id]?.[assignment.unitID]?.highest?.accuracy;
@@ -766,24 +773,22 @@ function SectionDetail({ user, signOut }) {
       });
       
       if (grades.length === 0) {
-        curveData[assignment.unitID] = { maxScore: 0, avgScore: 0, adjustment: 0 };
+        curveData[assignment.unitID] = { maxScore: 0, avgScore: 0, adjustment: 0, method: setting.method };
         return;
       }
       
       const maxScore = Math.max(...grades);
       const avgScore = grades.reduce((sum, g) => sum + g, 0) / grades.length;
       
-      // Different curve methods
+      // Per-assignment curve method
       let adjustment = 0;
-      if (curveMethod === 'scale-to-top') {
-        // Scale so highest score becomes 100%
+      if (setting.method === 'scale-to-top') {
         adjustment = maxScore > 0 ? 100 / maxScore : 1;
-      } else if (curveMethod === 'linear-adjustment') {
-        // Add points to make average 75%
+      } else if (setting.method === 'linear-adjustment') {
         adjustment = 75 - avgScore;
       }
       
-      curveData[assignment.unitID] = { maxScore, avgScore, adjustment };
+      curveData[assignment.unitID] = { maxScore, avgScore, adjustment, method: setting.method };
     });
     
     return curveData;
@@ -793,44 +798,54 @@ function SectionDetail({ user, signOut }) {
 
   // Apply curve to a grade
   const applyCurve = (grade, assignmentId) => {
-    if (!curveEnabled || !grade || isNaN(grade)) return grade;
+    if (!grade || isNaN(grade)) return grade;
     
-    // Only apply curve if this assignment is selected
-    if (!selectedCurveAssignments.has(assignmentId)) return grade;
-    
+    // Only apply curve if this assignment has a curve setting
     const curve = curveData[assignmentId];
     if (!curve) return grade;
     
-    if (curveMethod === 'scale-to-top') {
+    if (curve.method === 'scale-to-top') {
       return Math.min(100, Math.round(grade * curve.adjustment));
-    } else if (curveMethod === 'linear-adjustment') {
+    } else if (curve.method === 'linear-adjustment') {
       return Math.min(100, Math.max(0, Math.round(grade + curve.adjustment)));
     }
     
     return grade;
   };
 
-  // Toggle assignment curve selection
+  // Toggle assignment curve on/off (adds with default method or removes)
   const toggleCurveAssignment = (assignmentId) => {
-    setSelectedCurveAssignments(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(assignmentId)) {
-        newSet.delete(assignmentId);
+    setCurveSettings(prev => {
+      const next = { ...prev };
+      if (next[assignmentId]) {
+        delete next[assignmentId];
       } else {
-        newSet.add(assignmentId);
+        next[assignmentId] = { method: 'scale-to-top' };
       }
-      return newSet;
+      return next;
     });
   };
 
-  // Select all assignments for curve
+  // Change curve method for a specific assignment
+  const setCurveMethodForAssignment = (assignmentId, method) => {
+    setCurveSettings(prev => ({
+      ...prev,
+      [assignmentId]: { method },
+    }));
+  };
+
+  // Select all assignments for curve (with default method)
   const selectAllCurveAssignments = () => {
-    setSelectedCurveAssignments(new Set(visibleAssignments.map(a => a.unitID)));
+    const all = {};
+    visibleAssignments.forEach(a => {
+      all[a.unitID] = curveSettings[a.unitID] || { method: 'scale-to-top' };
+    });
+    setCurveSettings(all);
   };
 
   // Clear all curve selections
   const clearAllCurveAssignments = () => {
-    setSelectedCurveAssignments(new Set());
+    setCurveSettings({});
   };
 
   // Save curve settings to section when they change
@@ -841,9 +856,7 @@ function SectionDetail({ user, signOut }) {
       try {
         const { errors } = await client.models.Section.update({
           id: section.id,
-          curveEnabled,
-          curveMethod,
-          curveAssignments: Array.from(selectedCurveAssignments),
+          curveSettings: JSON.stringify(curveSettings),
         });
         
         if (errors) {
@@ -857,11 +870,74 @@ function SectionDetail({ user, signOut }) {
     // Debounce the save to avoid too many updates
     const timeoutId = setTimeout(saveCurveSettings, 500);
     return () => clearTimeout(timeoutId);
-  }, [curveEnabled, curveMethod, selectedCurveAssignments, section?.id, isOwner]);
+  }, [curveSettings, section?.id, isOwner]);
+
+  // Save gradeOverrides to section (debounced)
+  useEffect(() => {
+    if (!section?.id || !isOwner || Object.keys(gradeOverrides).length === 0) return;
+
+    const saveOverrides = async () => {
+      try {
+        const { errors } = await client.models.Section.update({
+          id: section.id,
+          gradeOverrides: JSON.stringify(gradeOverrides),
+        });
+        if (errors) {
+          console.error('Error saving grade overrides:', errors);
+        }
+      } catch (error) {
+        console.error('Error saving grade overrides:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(saveOverrides, 500);
+    return () => clearTimeout(timeoutId);
+  }, [gradeOverrides, section?.id, isOwner]);
+
+  // Inline grade override helpers (used by InlineGradeCell)
+  const handleInlineOverride = React.useCallback((studentId, unitId, score) => {
+    setGradeOverrides(prev => ({
+      ...prev,
+      [studentId]: {
+        ...(prev[studentId] || {}),
+        [unitId]: { score, updatedAt: new Date().toISOString() },
+      },
+    }));
+  }, []);
+
+  const handleInlineRemoveOverride = React.useCallback((studentId, unitId) => {
+    setGradeOverrides(prev => {
+      const next = { ...prev };
+      if (next[studentId]) {
+        const studentOverrides = { ...next[studentId] };
+        delete studentOverrides[unitId];
+        if (Object.keys(studentOverrides).length === 0) {
+          delete next[studentId];
+        } else {
+          next[studentId] = studentOverrides;
+        }
+      }
+      return next;
+    });
+  }, []);
 
   const handleGradeCellClick = (student, assignment, currentGrade) => {
     if (!isOwner) return; // Only instructors can override grades
     
+    // If there's a completed grade, navigate to the full review page
+    if (currentGrade?.id && currentGrade?.complete) {
+      router.push({
+        pathname: `/instructor/grade/${currentGrade.id}`,
+        query: {
+          unitId: assignment.unitID,
+          studentName: student.name,
+          sectionId: id,
+        },
+      });
+      return;
+    }
+
+    // Otherwise open the quick override dialog
     setOverrideData({ student, assignment, currentGrade });
     setOverrideScore(currentGrade?.accuracy?.toString() || '');
     setGradeOverrideOpen(true);
@@ -1246,31 +1322,6 @@ function SectionDetail({ user, signOut }) {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={curveEnabled}
-                      onChange={(e) => setCurveEnabled(e.target.checked)}
-                      color="primary"
-                      size="small"
-                    />
-                  }
-                  label={t('sectionDetail.applyCurve')}
-                />
-                
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <InputLabel>{t('sectionDetail.curveMethod')}</InputLabel>
-                  <Select
-                    value={curveMethod}
-                    onChange={(e) => setCurveMethod(e.target.value)}
-                    label={t('sectionDetail.curveMethod')}
-                    disabled={!curveEnabled}
-                  >
-                    <MenuItem value="scale-to-top">{t('sectionDetail.scaleToTopMethod')}</MenuItem>
-                    <MenuItem value="linear-adjustment">{t('sectionDetail.linearAdjustmentMethod')}</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControlLabel
-                  control={
-                    <Switch
                       checked={leaderboardEnabledLocal}
                       onChange={async (e) => {
                         const checked = e.target.checked;
@@ -1296,41 +1347,56 @@ function SectionDetail({ user, signOut }) {
             )}
           </Box>
         
-        {/* Curve Assignment Selection */}
-        {curveEnabled && isOwner && !viewAsStudent && (
+        {/* Curve Assignment Selection — per-assignment method */}
+        {isOwner && !viewAsStudent && (
           <Box sx={{ padding: '0 1rem 1rem 1rem' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
               <Typography variant="subtitle2" color="text.secondary">
-                {t('sectionDetail.selectAssignmentsToCurve')} ({selectedCurveAssignments.size}/{visibleAssignments.length})
+                {t('sectionDetail.selectAssignmentsToCurve')} ({Object.keys(curveSettings).length}/{visibleAssignments.length})
               </Typography>
               <Button 
                 size="small" 
                 onClick={selectAllCurveAssignments}
-                disabled={selectedCurveAssignments.size === visibleAssignments.length}
+                disabled={Object.keys(curveSettings).length === visibleAssignments.length}
               >
                 {t('sectionDetail.selectAll')}
               </Button>
               <Button 
                 size="small" 
                 onClick={clearAllCurveAssignments}
-                disabled={selectedCurveAssignments.size === 0}
+                disabled={Object.keys(curveSettings).length === 0}
               >
                 {t('sectionDetail.clearAll')}
               </Button>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
               {visibleAssignments.map((assignment) => {
                 const unitName = units[assignment.unitID]?.name || 'Unknown';
-                const isSelected = selectedCurveAssignments.has(assignment.unitID);
+                const isSelected = !!curveSettings[assignment.unitID];
                 return (
-                  <Chip
-                    key={assignment.id}
-                    label={unitName}
-                    onClick={() => toggleCurveAssignment(assignment.unitID)}
-                    color={isSelected ? 'primary' : 'default'}
-                    variant={isSelected ? 'filled' : 'outlined'}
-                    sx={{ cursor: 'pointer' }}
-                  />
+                  <Box key={assignment.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Chip
+                      label={unitName}
+                      onClick={() => toggleCurveAssignment(assignment.unitID)}
+                      color={isSelected ? 'primary' : 'default'}
+                      variant={isSelected ? 'filled' : 'outlined'}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                    {isSelected && (
+                      <FormControl size="small" sx={{ minWidth: 130 }}>
+                        <Select
+                          value={curveSettings[assignment.unitID]?.method || 'scale-to-top'}
+                          onChange={(e) => setCurveMethodForAssignment(assignment.unitID, e.target.value)}
+                          size="small"
+                          variant="standard"
+                          sx={{ fontSize: '0.75rem' }}
+                        >
+                          <MenuItem value="scale-to-top">{t('sectionDetail.scaleToTopMethod')}</MenuItem>
+                          <MenuItem value="linear-adjustment">{t('sectionDetail.linearAdjustmentMethod')}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    )}
+                  </Box>
                 );
               })}
             </Box>
@@ -1338,15 +1404,15 @@ function SectionDetail({ user, signOut }) {
         )}
         
         {/* Curve Debug Information - only show for selected assignments */}
-        {curveEnabled && isOwner && !viewAsStudent && selectedCurveAssignments.size > 0 && (
+        {isOwner && !viewAsStudent && hasCurve && (
           <Box sx={{ padding: '0 1rem 1rem 1rem' }}>
             <Typography variant="caption" color="text.secondary">
-              {t('sectionDetail.curveDebugInfo')} Method = {curveMethod} | 
-              {Array.from(selectedCurveAssignments).map((unitId) => {
+              {t('sectionDetail.curveDebugInfo')} 
+              {Object.entries(curveSettings).map(([unitId, setting]) => {
                 const data = curveData[unitId];
                 if (!data) return '';
                 const unitName = units[unitId]?.name || unitId;
-                if (curveMethod === 'scale-to-top') {
+                if (setting.method === 'scale-to-top') {
                   return ` ${unitName}: max=${data.maxScore.toFixed(1)}%, scale=${data.adjustment.toFixed(2)}x`;
                 } else {
                   return ` ${unitName}: avg=${data.avgScore.toFixed(1)}%, adjust=+${data.adjustment.toFixed(1)}%`;
@@ -1440,6 +1506,7 @@ function SectionDetail({ user, signOut }) {
         
         {/* Instructor View - Full Gradebook */}
         {isOwner && !viewAsStudent && (
+          <GradeCellRegistryContext.Provider value={gradeCellRegistryRef.current}>
           <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
           <Table
             aria-label={t('sectionDetail.assignments', { ns: 'pages' })}
@@ -1511,7 +1578,7 @@ function SectionDetail({ user, signOut }) {
                   ? Math.round((completedAssignments / visibleAssignments.length) * 100) 
                   : 0;
                 
-                const displayAverage = curveEnabled ? averageCurvedGrade : averageGrade;
+                const displayAverage = hasCurve ? averageCurvedGrade : averageGrade;
                 
                 return (
                   <TableRow
@@ -1545,7 +1612,7 @@ function SectionDetail({ user, signOut }) {
                     >
                       {student.name}
                     </TableCell>
-                    {visibleAssignments.map((assignment) => {
+                    {visibleAssignments.map((assignment, colIndex) => {
                       console.log('student.id', student.id)
                       console.log('assignment.unitID', assignment.unitID)
 
@@ -1566,7 +1633,7 @@ function SectionDetail({ user, signOut }) {
                         : '-';
       
                       // Debug logging for curve verification
-                      if (curveEnabled && rawHighest !== undefined && rawHighest !== null) {
+                      if (hasCurve && rawHighest !== undefined && rawHighest !== null) {
                         console.log(`[CURVE] Student: ${student.name}, Assignment: ${units[assignment.unitID]?.name}`);
                         console.log(`  Raw Highest: ${rawHighest}%, Curved: ${highest}%`);
                         console.log(`  Curve Data:`, curveData[assignment.unitID]);
@@ -1574,27 +1641,25 @@ function SectionDetail({ user, signOut }) {
 
                       const colGrade = `${highest}% (${average}%)`
                       const gradeRecord = gradeMap[student.id]?.[assignment.unitID]?.highest;
+                      const override = gradeOverrides[student.id]?.[assignment.unitID];
 
                       return (
                         <TableCell 
                           align="right" 
                           key={assignment.id}
                         >
-                          {isOwner ? (
-                            <Tooltip title={t('sectionDetail.editTooltip')} arrow>
-                              <span
-                                onClick={() => handleGradeCellClick(student, assignment, gradeRecord)}
-                                style={{
-                                  cursor: 'pointer',
-                                  display: 'inline-block',
-                                }}
-                              >
-                                {colGrade}
-                              </span>
-                            </Tooltip>
-                          ) : (
-                            colGrade
-                          )}
+                          <InlineGradeCell
+                            computedGrade={colGrade}
+                            rawHighest={rawHighest}
+                            overrideScore={override?.score}
+                            sharedHistory={gradebookHistoryRef.current}
+                            isOwner={isOwner}
+                            row={studentKey}
+                            col={colIndex}
+                            onOverride={(score) => handleInlineOverride(student.id, assignment.unitID, score)}
+                            onRemoveOverride={() => handleInlineRemoveOverride(student.id, assignment.unitID)}
+                            onGradeClick={() => handleGradeCellClick(student, assignment, gradeRecord)}
+                          />
                         </TableCell>
                       )
                     })}
@@ -1614,6 +1679,7 @@ function SectionDetail({ user, signOut }) {
             </TableBody>
           </Table>
         </TableContainer>
+        </GradeCellRegistryContext.Provider>
         )}
       </Box>
 
@@ -1662,7 +1728,12 @@ function SectionDetail({ user, signOut }) {
       )}
 
       {!sectionAssignments &&
-        <div>{t('sectionDetail.loading')}</div>
+        <Box sx={{ p: 3, maxWidth: '80rem', mx: 'auto' }}>
+          <Skeleton variant="text" width="30%" height={36} sx={{ mb: 2 }} />
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} variant="rectangular" height={80} sx={{ borderRadius: 1, mb: 2 }} />
+          ))}
+        </Box>
       }
       {sectionAssignments &&
         <Box
@@ -1698,7 +1769,7 @@ function SectionDetail({ user, signOut }) {
               const featuredImage = units[assignment.unitID]?.featuredImage
               const identityId = units[assignment.unitID]?.identityId
 
-              const workbookUrl = `/workbook/${assignment.unitID}`
+              const workbookUrl = `/workbook/${assignment.unitID}?sectionId=${id}`
               const unitUrl = `/unit/${assignment.unitID}`
 
               return (

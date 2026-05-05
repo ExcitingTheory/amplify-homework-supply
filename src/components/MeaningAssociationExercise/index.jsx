@@ -106,7 +106,7 @@ export const PlayAudioButton = ({ audioPaths, size = 'small' }) => {
       onClick={handlePlay}
       onMouseDown={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
-      aria-label="Play audio"
+      aria-label={t('common.playAudio', { ns: 'common' })}
       sx={{
         color: playing ? 'primary.main' : 'text.secondary',
         flexShrink: 0,

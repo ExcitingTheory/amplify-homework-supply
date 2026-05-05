@@ -8,7 +8,7 @@ import {
     Button,
     Box,
     Typography,
-    CircularProgress,
+    Skeleton,
     TextField,
     IconButton,
 } from '@mui/material';
@@ -156,11 +156,9 @@ export default function UnifiedGenerateModal({
                         justifyContent="center"
                         minHeight="200px"
                     >
-                        <CircularProgress size={60} sx={{ mb: 2 }} />
-                        <Typography variant="body1">{t('unifiedGenerateModal.generating', { type })}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                            {t('unifiedGenerateModal.takeMoments')}
-                        </Typography>
+                        <Skeleton variant="circular" width={60} height={60} sx={{ mb: 2 }} />
+                        <Skeleton variant="text" width={200} height={24} />
+                        <Skeleton variant="text" width={160} height={16} sx={{ mt: 1 }} />
                     </Box>
                 )}
 

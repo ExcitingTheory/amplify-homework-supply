@@ -7,7 +7,7 @@ import SyncStatusIndicator from './SyncStatusIndicator';
  * pending sync operations, and a dialog to inspect/retry.
  */
 const meta: Meta<typeof SyncStatusIndicator> = {
-  title: '🔌 Offline/SyncStatusIndicator',
+  title: '🔌 Offline & Sync/Sync Status Indicator',
   component: SyncStatusIndicator,
   parameters: {
     layout: 'centered',

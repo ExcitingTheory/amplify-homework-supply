@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Chip, CircularProgress, Tooltip } from '@mui/material';
+import { Chip, Skeleton, Tooltip } from '@mui/material';
 import {
   CloudDone,
   CloudDownload,
@@ -83,7 +83,7 @@ export default function PrefetchBadge({ unitId, client, username }: PrefetchBadg
     return (
       <Tooltip title={`Downloading for offline use... ${progress}%`}>
         <Chip
-          icon={<CircularProgress size={14} />}
+          icon={<Skeleton variant="circular" width={14} height={14} />}
           label={`${progress}%`}
           size="small"
           variant="outlined"

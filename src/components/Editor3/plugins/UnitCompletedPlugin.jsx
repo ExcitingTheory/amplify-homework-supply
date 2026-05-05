@@ -13,9 +13,10 @@ import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
 import UnitContext from '../../../context/unitContext';
-import { useXP } from '../../../context/xpContext';
+import { useXP } from '../../../context/gamificationContext';
 import { OpenPeerReviewButton } from '../../PeerReview/OpenPeerReviewButton';
 import { HomeworkXPSummary } from '../../Gamification/HomeworkXPSummary';
+import { PersonalBestBanner } from '../../Gamification/PersonalBestBanner';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import {
     Modal,
@@ -48,6 +49,8 @@ export default function UnitCompletedPlugin() {
         grade,
         showUnitComplete,
         setShowUnitComplete,
+        personalBestResult,
+        setPersonalBestResult,
         createGrade,
         recentGrades = [],
     } = useContext(UnitContext) || {};
@@ -144,6 +147,18 @@ export default function UnitCompletedPlugin() {
                 }}>
                     {t('unitCompletedPlugin.sectionHeading')}
                 </Typography>
+
+                {/* Personal Best Banner */}
+                {personalBestResult?.isNewBest && (
+                    <Box sx={{ mx: 2, mt: 1 }}>
+                        <PersonalBestBanner
+                            open={true}
+                            newScore={personalBestResult.bestScore}
+                            previousBest={personalBestResult.previousBest}
+                            onClose={() => setPersonalBestResult?.(null)}
+                        />
+                    </Box>
+                )}
 
                 <style global jsx>{`
 

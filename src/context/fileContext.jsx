@@ -1,7 +1,8 @@
-import React, { createContext } from "react";
+import React, { createContext, useReducer } from "react";
 import { list } from "aws-amplify/storage";
 import { getAmplifyClient } from '../utils/amplifyClient';
 import AuthContext from './authContext';
+import { fileReducer, initialState, actionTypes } from './reducers/fileReducer';
 
 import { Hub, Cache } from "aws-amplify/utils";
 
@@ -45,14 +46,7 @@ const FilesProvider = ({ children }) => {
   const authContext = React.useContext(AuthContext);
   const { user, session, isLoading: authLoading } = authContext || { user: undefined, session: undefined, isLoading: true };
 
-  const [audioFiles, setAudioFiles] = React.useState({})
-  // const [files, setFiles] = React.useState({})
-  const [myFiles, setMyFiles] = React.useState([])
-  const [myPlaylistFiles, setMyPlaylistFiles] = React.useState({})
-  const [myPlaylistUrls, setMyPlaylistUrls] = React.useState({})
-  const [myPdfs, setMyPdfs] = React.useState({})
-  const [documents, setDocuments] = React.useState({});
-  const [filesVersion, setFilesVersion] = React.useState(0);
+  const [state, dispatch] = useReducer(fileReducer, initialState);
   const filesFetchedRef = React.useRef(false);
   const subscriptionRef = React.useRef(null);
   const documentSubscriptionRef = React.useRef(null);
@@ -63,7 +57,6 @@ const FilesProvider = ({ children }) => {
       ? new CourseVectorStore() 
       : null
   ).current;
-  const [vectorStoreReady, setVectorStoreReady] = React.useState(false);
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
   
@@ -71,7 +64,7 @@ const FilesProvider = ({ children }) => {
   React.useEffect(() => {
     if (!vectorStore) {
       // SSR or vector store not available
-      setVectorStoreReady(false);
+      dispatch({ type: actionTypes.SET_VECTOR_STORE_READY, payload: false });
       return;
     }
     
@@ -81,14 +74,14 @@ const FilesProvider = ({ children }) => {
       vectorStore.loadFromIndexedDB().then(count => {
         if (count > 0) {
           console.log(`[FilesContext] Loaded ${count} cached embeddings from IndexedDB`);
-          setVectorStoreReady(true);
+          dispatch({ type: actionTypes.SET_VECTOR_STORE_READY, payload: true });
         } else {
           console.log('[FilesContext] No cached embeddings found in IndexedDB');
-          setVectorStoreReady(true);
+          dispatch({ type: actionTypes.SET_VECTOR_STORE_READY, payload: true });
         }
       }).catch(error => {
         console.error('[FilesContext] Failed to load from IndexedDB:', error);
-        setVectorStoreReady(true);
+        dispatch({ type: actionTypes.SET_VECTOR_STORE_READY, payload: true });
       });
     }
   }, [vectorStore]);
@@ -96,20 +89,20 @@ const FilesProvider = ({ children }) => {
   // Populate vector store from files and documents
   React.useEffect(() => {
     if (!vectorStore) return; // Guard for SSR
-    if (myFiles.length === 0) return;
+    if (state.myFiles.length === 0) return;
     
     const isInitialLoad = loadedVersions.current.size === 0;
     const processingDocuments = new Set();
     
     console.log(`[FilesContext] Vector store population triggered`, {
       isInitialLoad,
-      filesCount: myFiles.length,
+      filesCount: state.myFiles.length,
       currentVectorStoreSize: vectorStore.items.length,
-      documentsCount: Object.keys(documents).length
+      documentsCount: Object.keys(state.documents).length
     });
     
-    myFiles.forEach(async (file) => {
-      const docStatus = documents[file.documentID];
+    state.myFiles.forEach(async (file) => {
+      const docStatus = state.documents[file.documentID];
       const pageEmbeddings = docStatus?.pageEmbeddings;
       const embeddingsS3Key = docStatus?.embeddingsS3Key;
       const currentVersion = docStatus?._version || file._version;
@@ -238,7 +231,7 @@ const FilesProvider = ({ children }) => {
     });
     
     console.log(`[FilesContext] Vector store population complete - ${vectorStore.items.length} total embeddings`);
-  }, [myFiles, documents, vectorStore]);
+  }, [state.myFiles, state.documents, vectorStore]);
 
   // reload the current user attributes when the auth event is triggered
   // NOTE: This is now handled by the centralized AuthContext
@@ -273,9 +266,11 @@ const FilesProvider = ({ children }) => {
                 _pdfsFiltered[f.id] = f;
               }
             });
-            setMyFiles(cachedFiles);
-            setMyPlaylistFiles(_playlistFiltered);
-            setMyPdfs(_pdfsFiltered);
+            dispatch({ type: actionTypes.FILES_SUBSCRIPTION_UPDATE, payload: {
+              myFiles: cachedFiles,
+              myPlaylistFiles: _playlistFiltered,
+              myPdfs: _pdfsFiltered,
+            }});
             console.log('[FilesContext] Loaded', cachedFiles.length, 'files from offline cache');
           }
         } catch (err) {
@@ -292,7 +287,6 @@ const FilesProvider = ({ children }) => {
         console.log('[FilesContext] User authenticated:', user.attributes.sub);
         console.log('[FilesContext] Identity ID:', session.identityId);
         const myUserId = user.attributes.sub;
-        const { identityId } = session;
 
         if (!myUserId) {
           console.log('[FilesContext] No myUserId, returning');
@@ -301,82 +295,76 @@ const FilesProvider = ({ children }) => {
 
         // Mark as fetched before subscribing
         filesFetchedRef.current = true;
-        console.log('[FilesContext] About to subscribe to File model');
+        console.log('[FilesContext] About to set up File observeQuery');
 
         const client = getAmplifyClient();
 
-        // Query all files regardless of owner - we'll track by identityId for lookup
-        // Include parsedContent relationship for PDFs
-        subscriptionRef.current = client.models.File.observeQuery().subscribe({
-          next: ({ items, isSynced }) => {
-            console.log('[FilesContext] File observeQuery subscription triggered:');
-            console.log('  - items.length:', items?.length);
-            console.log('  - isSynced:', isSynced);
-            console.log('  - items:', items);
-            
-            // Filter out null items that can appear during subscription updates
-            const validItems = items.filter(item => item != null && item.id != null);
-            
-            const _playlistFiltered = {}
-            const _pdfsFiltered = {}
+        function processFiles(validItems) {
+          const _playlistFiltered = {}
+          const _pdfsFiltered = {}
 
-            validItems.forEach((item) => {
-              // Include all audio files in playlist, not just specific MIME types
-              if (item.mimeType && item.mimeType.startsWith('audio/')) {
-                _playlistFiltered[item.id] = item
-              }
-              if (item.mimeType === 'application/pdf') {
-                _pdfsFiltered[item.id] = item
-              }
-            })
-
-            // Only update if different to prevent rerenders
-            setMyPlaylistFiles(prev => {
-              if (Object.keys(prev).length !== Object.keys(_playlistFiltered).length) {
-                return _playlistFiltered;
-              }
-              const hasChanges = Object.keys(_playlistFiltered).some(
-                key => !prev[key] || prev[key]._version !== _playlistFiltered[key]._version
-              );
-              return hasChanges ? _playlistFiltered : prev;
-            });
-            
-            setMyPdfs(prev => {
-              if (Object.keys(prev).length !== Object.keys(_pdfsFiltered).length) {
-                return _pdfsFiltered;
-              }
-              const hasChanges = Object.keys(_pdfsFiltered).some(
-                key => !prev[key] || prev[key]._version !== _pdfsFiltered[key]._version
-              );
-              return hasChanges ? _pdfsFiltered : prev;
-            });
-            
-            setMyFiles(prev => {
-              if (prev.length !== validItems.length) {
-                console.log('[FilesContext] Files count changed:', prev.length, '→', validItems.length);
-                setFilesVersion(v => v + 1);
-                return validItems;
-              }
-              const hasChanges = validItems.some((item, i) => 
-                !prev[i] || prev[i].id !== item.id || prev[i]._version !== item._version
-              );
-              if (hasChanges) {
-                console.log('[FilesContext] Files have changes, updating state');
-                setFilesVersion(v => v + 1);
-                return validItems;
-              }
-              return prev;
-            });
-          },
-          error: (error) => {
-            const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
-            if (msg.includes('DuplicatedOperationError')) {
-              console.warn('[FilesContext] File subscription: transient DuplicatedOperationError (safe to ignore)');
-              return;
+          validItems.forEach((item) => {
+            if (item.mimeType && item.mimeType.startsWith('audio/')) {
+              _playlistFiltered[item.id] = item
             }
-            console.error('[FilesContext] File subscription error:', error);
+            if (item.mimeType === 'application/pdf') {
+              _pdfsFiltered[item.id] = item
+            }
+          })
+
+          dispatch({ type: actionTypes.SET_PLAYLIST_FILES, payload: _playlistFiltered });
+          dispatch({ type: actionTypes.SET_PDFS, payload: _pdfsFiltered });
+          dispatch({ type: actionTypes.SET_MY_FILES, payload: validItems });
+          dispatch({ type: actionTypes.INCREMENT_FILES_VERSION });
+        }
+
+        function handleError(label, error) {
+          const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+          if (msg.includes('DuplicatedOperationError')) {
+            console.warn(`[FilesContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+            return;
           }
+          console.error(`[FilesContext] ${label} error:`, error);
+        }
+
+        const { data: items, errors } = await client.models.File.list();
+        if (errors?.length) console.error('[FilesContext] File list errors:', errors);
+
+        const validItems = (items || []).filter(item => item != null && item.id != null);
+        console.log('[FilesContext] Initial files:', validItems.length);
+        processFiles(validItems);
+
+        const createSub = client.models.File.onCreate().subscribe({
+          next: (response) => {
+            const file = response?.data;
+            if (!file || !file.id) return;
+            dispatch({ type: actionTypes.SET_MY_FILES, payload: [file], meta: 'create' });
+            dispatch({ type: actionTypes.INCREMENT_FILES_VERSION });
+          },
+          error: (error) => handleError('File onCreate', error)
         });
+
+        const updateSub = client.models.File.onUpdate().subscribe({
+          next: (response) => {
+            const file = response?.data;
+            if (!file || !file.id) return;
+            dispatch({ type: actionTypes.SET_MY_FILES, payload: [file], meta: 'update' });
+            dispatch({ type: actionTypes.INCREMENT_FILES_VERSION });
+          },
+          error: (error) => handleError('File onUpdate', error)
+        });
+
+        const deleteSub = client.models.File.onDelete().subscribe({
+          next: (response) => {
+            const file = response?.data;
+            if (!file || !file.id) return;
+            dispatch({ type: actionTypes.SET_MY_FILES, payload: [file], meta: 'delete' });
+            dispatch({ type: actionTypes.INCREMENT_FILES_VERSION });
+          },
+          error: (error) => handleError('File onDelete', error)
+        });
+
+        subscriptionRef.current = { createSub, updateSub, deleteSub };
       } catch (error) {
         // Handle authentication errors gracefully
         if (error.name === 'UserUnAuthenticatedException' || error.message?.includes('authenticated')) {
@@ -389,7 +377,11 @@ const FilesProvider = ({ children }) => {
     fetchFiles()
     
     return () => {
-      subscriptionRef.current?.unsubscribe();
+      if (subscriptionRef.current) {
+        subscriptionRef.current.createSub?.unsubscribe();
+        subscriptionRef.current.updateSub?.unsubscribe();
+        subscriptionRef.current.deleteSub?.unsubscribe();
+      }
       filesFetchedRef.current = false;
     };
   }, [user, authLoading, session]);
@@ -397,71 +389,88 @@ const FilesProvider = ({ children }) => {
   // Subscribe to Document status changes
   React.useEffect(() => {
     const client = getAmplifyClient();
-    documentSubscriptionRef.current = client.models.Document.observeQuery().subscribe({
-      next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(item => item != null && item.id != null);
-        
-        const statusMap = {};
-        validItems.forEach(doc => {
-          // Parse pageEmbeddings if it's a string
-          const pageEmbeddings = typeof doc.pageEmbeddings === 'string' 
-            ? JSON.parse(doc.pageEmbeddings)
-            : doc.pageEmbeddings;
+    const subscriptions = [];
+    let cancelled = false;
 
-          statusMap[doc.id] = {
-            id: doc.id,
-            s3Key: doc.s3Key,
-            status: doc.status,
-            pageCount: doc.pageCount,
-            extractedText: doc.extractedText,
-            pageEmbeddings: pageEmbeddings,
-            embeddingsS3Key: doc.embeddingsS3Key,
-            metadata: doc.metadata,
-            updatedAt: doc.updatedAt, // Track updatedAt for cache invalidation
-          };
-        });
-      
-      // Only update if there are actual changes
-      setDocuments(prev => {
-        const prevKeys = Object.keys(prev);
-        const newKeys = Object.keys(statusMap);
-        
-        // Check if keys changed
-        if (prevKeys.length !== newKeys.length) {
-          console.log('[FilesContext] Document count changed:', prevKeys.length, '→', newKeys.length);
-          return statusMap;
-        }
-        
-        // Check if any values changed
-        const hasChanges = newKeys.some(key => {
-          const prevDoc = prev[key];
-          const newDoc = statusMap[key];
-          return !prevDoc || 
-                 prevDoc.status !== newDoc.status ||
-                 prevDoc._version !== newDoc._version ||
-                 prevDoc.pageCount !== newDoc.pageCount;
-        });
-        
-        if (hasChanges) {
-          console.log('[FilesContext] Document values changed');
-        }
-        
-        return hasChanges ? statusMap : prev;
-      });
-    },
-      error: (error) => {
-        const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
-        if (msg.includes('DuplicatedOperationError')) {
-          console.warn('[FilesContext] Document subscription: transient DuplicatedOperationError (safe to ignore)');
-          return;
-        }
-        console.error('[FilesContext] Document subscription error:', error);
+    function parseDoc(doc) {
+      const pageEmbeddings = typeof doc.pageEmbeddings === 'string' 
+        ? JSON.parse(doc.pageEmbeddings)
+        : doc.pageEmbeddings;
+
+      return {
+        id: doc.id,
+        s3Key: doc.s3Key,
+        status: doc.status,
+        pageCount: doc.pageCount,
+        extractedText: doc.extractedText,
+        pageEmbeddings: pageEmbeddings,
+        embeddingsS3Key: doc.embeddingsS3Key,
+        metadata: doc.metadata,
+        updatedAt: doc.updatedAt,
+      };
+    }
+
+    function handleError(label, error) {
+      const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+      if (msg.includes('DuplicatedOperationError')) {
+        console.warn(`[FilesContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
       }
-    });
+      console.error(`[FilesContext] ${label} error:`, error);
+    }
+
+    async function fetchDocuments() {
+      try {
+        const { data: items, errors } = await client.models.Document.list();
+        if (cancelled) return;
+        if (errors?.length) console.error('[FilesContext] Document list errors:', errors);
+
+        const validItems = (items || []).filter(item => item != null && item.id != null);
+        const docsMap = {};
+        validItems.forEach(doc => { docsMap[doc.id] = parseDoc(doc); });
+        dispatch({ type: actionTypes.SET_DOCUMENTS, payload: docsMap });
+
+        if (cancelled) return;
+
+        const createSub = client.models.Document.onCreate().subscribe({
+          next: (response) => {
+            const doc = response?.data;
+            if (!doc || !doc.id) return;
+            dispatch({ type: actionTypes.SET_DOCUMENTS, payload: { [doc.id]: parseDoc(doc) }, meta: 'create' });
+          },
+          error: (error) => handleError('Document onCreate', error)
+        });
+        subscriptions.push(createSub);
+
+        const updateSub = client.models.Document.onUpdate().subscribe({
+          next: (response) => {
+            const doc = response?.data;
+            if (!doc || !doc.id) return;
+            dispatch({ type: actionTypes.SET_DOCUMENTS, payload: { [doc.id]: parseDoc(doc) }, meta: 'update' });
+          },
+          error: (error) => handleError('Document onUpdate', error)
+        });
+        subscriptions.push(updateSub);
+
+        const deleteSub = client.models.Document.onDelete().subscribe({
+          next: (response) => {
+            const doc = response?.data;
+            if (!doc || !doc.id) return;
+            dispatch({ type: actionTypes.SET_DOCUMENTS, payload: { deleteId: doc.id }, meta: 'delete' });
+          },
+          error: (error) => handleError('Document onDelete', error)
+        });
+        subscriptions.push(deleteSub);
+      } catch (error) {
+        console.error('[FilesContext] fetchDocuments error:', error);
+      }
+    }
+
+    fetchDocuments();
 
     return () => {
-      documentSubscriptionRef.current?.unsubscribe();
+      cancelled = true;
+      subscriptions.forEach(sub => sub.unsubscribe());
     };
   }, []);
 
@@ -476,34 +485,34 @@ const FilesProvider = ({ children }) => {
         fileMap[item.key] = item
       })
 
-      setAudioFiles(fileMap);
+      dispatch({ type: actionTypes.SET_AUDIO_FILES, payload: fileMap });
     }
   }
 
   const contextValue = React.useMemo(() => ({
-    audioFiles,
+    audioFiles: state.audioFiles,
     refreshAudioFiles,
-    files: myFiles,
-    myFiles,
-    myPlaylistFiles,
-    myPlaylistUrls,
-    myPdfs,
-    documents,
+    files: state.myFiles,
+    myFiles: state.myFiles,
+    myPlaylistFiles: state.myPlaylistFiles,
+    myPlaylistUrls: state.myPlaylistUrls,
+    myPdfs: state.myPdfs,
+    documents: state.documents,
     session: session || { identityId: undefined, idToken: undefined }, // Provide safe default
-    filesVersion,
+    filesVersion: state.filesVersion,
     vectorStore, // Stable ref, doesn't cause re-renders
-    vectorStoreReady
+    vectorStoreReady: state.vectorStoreReady
   }), [
-    audioFiles,
-    myFiles,
-    myPlaylistFiles,
-    myPlaylistUrls,
-    myPdfs,
-    documents,
+    state.audioFiles,
+    state.myFiles,
+    state.myPlaylistFiles,
+    state.myPlaylistUrls,
+    state.myPdfs,
+    state.documents,
     session,
-    filesVersion,
+    state.filesVersion,
     // vectorStore is intentionally excluded - it's a ref and never changes
-    vectorStoreReady
+    state.vectorStoreReady
   ]);
 
   return (

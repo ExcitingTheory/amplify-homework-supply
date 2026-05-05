@@ -4,7 +4,7 @@ import PracticeDrillProgress from './PracticeDrillProgress'
 import type { PracticeDrillProgressProps } from './PracticeDrillProgress'
 
 const meta: Meta<PracticeDrillProgressProps> = {
-  title: 'PracticeDrill/PracticeDrillProgress',
+  title: '🎯 Practice Drills/Progress',
   component: PracticeDrillProgress,
   tags: ['autodocs'],
   argTypes: {

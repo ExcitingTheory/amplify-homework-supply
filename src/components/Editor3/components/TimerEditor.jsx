@@ -1,5 +1,6 @@
 'use strict';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { Box, IconButton } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -25,6 +26,7 @@ const SEGMENT_MAX = [99, 59, 59]; // HH, MM, SS
 const LABELS = ['HH', 'MM', 'SS'];
 
 export default function TimerEditor() {
+  const { t } = useTranslation('common');
   const { unit, beginSaving, endSaving } = React.useContext(UnitContext);
   const debounceRef = useRef(null);
   const editingRef = useRef(false);
@@ -261,7 +263,7 @@ export default function TimerEditor() {
         onChange={(e) => handleInputChange(0, e)}
         onFocus={() => { setActiveIdx(0); inputRefs[0].current?.select(); }}
         onKeyDown={(e) => handleKeyDown(0, e)}
-        aria-label="Hours"
+        aria-label={t('timer.hours', 'Hours')}
         style={segmentStyle}
       />
       <span style={colonStyle}>:</span>
@@ -273,7 +275,7 @@ export default function TimerEditor() {
         onChange={(e) => handleInputChange(1, e)}
         onFocus={() => { setActiveIdx(1); inputRefs[1].current?.select(); }}
         onKeyDown={(e) => handleKeyDown(1, e)}
-        aria-label="Minutes"
+        aria-label={t('timer.minutes', 'Minutes')}
         style={segmentStyle}
       />
       <span style={colonStyle}>:</span>
@@ -285,7 +287,7 @@ export default function TimerEditor() {
         onChange={(e) => handleInputChange(2, e)}
         onFocus={() => { setActiveIdx(2); inputRefs[2].current?.select(); }}
         onKeyDown={(e) => handleKeyDown(2, e)}
-        aria-label="Seconds"
+        aria-label={t('timer.seconds', 'Seconds')}
         style={segmentStyle}
       />
 
@@ -298,7 +300,7 @@ export default function TimerEditor() {
           onMouseLeave={stopLongPress}
           onTouchStart={() => startLongPress(handleArrowUp)}
           onTouchEnd={stopLongPress}
-          aria-label="Increase selected time segment"
+          aria-label={t('timer.increase', 'Increase selected time segment')}
           sx={{ p: 0, lineHeight: 1 }}
         >
           <KeyboardArrowUpIcon sx={{ fontSize: 18 }} />
@@ -310,7 +312,7 @@ export default function TimerEditor() {
           onMouseLeave={stopLongPress}
           onTouchStart={() => startLongPress(handleArrowDown)}
           onTouchEnd={stopLongPress}
-          aria-label="Decrease selected time segment"
+          aria-label={t('timer.decrease', 'Decrease selected time segment')}
           sx={{ p: 0, lineHeight: 1 }}
         >
           <KeyboardArrowDownIcon sx={{ fontSize: 18 }} />

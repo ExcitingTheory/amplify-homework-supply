@@ -75,6 +75,30 @@ describe('xpCalculation', () => {
     it('returns 100 for PERFECT_SCORE', () => {
       expect(getXPForAction(XPReason.PERFECT_SCORE)).toBe(100)
     })
+
+    it('returns 150 for STREAK_14DAY', () => {
+      expect(getXPForAction(XPReason.STREAK_14DAY)).toBe(150)
+    })
+
+    it('returns 300 for STREAK_30DAY', () => {
+      expect(getXPForAction(XPReason.STREAK_30DAY)).toBe(300)
+    })
+
+    it('returns 50 for COMEBACK', () => {
+      expect(getXPForAction(XPReason.COMEBACK)).toBe(50)
+    })
+
+    it('returns 25 for PERSONAL_BEST', () => {
+      expect(getXPForAction(XPReason.PERSONAL_BEST)).toBe(25)
+    })
+
+    it('returns 30 for EASTER_EGG', () => {
+      expect(getXPForAction(XPReason.EASTER_EGG)).toBe(30)
+    })
+
+    it('returns 100 for GUILD_CHALLENGE_BONUS', () => {
+      expect(getXPForAction(XPReason.GUILD_CHALLENGE_BONUS)).toBe(100)
+    })
   })
 
   describe('calculateLevel', () => {

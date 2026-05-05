@@ -8,7 +8,7 @@ import { useDebugPanel } from './useDebugPanel';
 import { Button, Box } from '@mui/material';
 
 const meta: Meta<typeof DebugPanel> = {
-  title: 'Components/DebugPanel',
+  title: '🛠️ Developer Tools/Debug Panel',
   component: DebugPanel,
   parameters: {
     layout: 'fullscreen',

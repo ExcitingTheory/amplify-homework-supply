@@ -1,4 +1,4 @@
-import { defineFunction } from '@aws-amplify/backend';
+import { defineFunction, secret } from '@aws-amplify/backend';
 
 /**
  * Gamification Lambda function resource
@@ -9,12 +9,16 @@ import { defineFunction } from '@aws-amplify/backend';
  * - updateStreak: Updates StudentStreak (called on Grade submit)
  * - rebuildLeaderboard: Rebuilds LeaderboardEntry rows for a cohort
  * - updateStudentMemory: Appends AI feedback to StudentMemory markdown
+ * - generateSkillTree: Extracts skills from unit content via GPT-4o
  *
  * Authorization: Called via custom mutations from authenticated users and triggers
  */
 
 export const gamificationHandler = defineFunction({
-  timeoutSeconds: 30,
-  memoryMB: 256,
+  timeoutSeconds: 60,
+  memoryMB: 512,
   resourceGroupName: 'data',
+  environment: {
+    OPENAI_API_KEY: secret('OPENAI_API_KEY'),
+  },
 });

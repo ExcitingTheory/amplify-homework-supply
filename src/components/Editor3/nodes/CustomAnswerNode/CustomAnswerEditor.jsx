@@ -15,7 +15,7 @@ import {
     DialogActions,
     Typography,
     Box,
-    CircularProgress,
+    Skeleton,
 } from '@mui/material';
 
 
@@ -785,7 +785,7 @@ export default React.memo(function CustomAnswerEditor({
                     {audioSrc &&
                     <>
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                    {t('customAnswerEditor.ttsPreview')}  {working && <CircularProgress />}
+                    {t('customAnswerEditor.ttsPreview')}  {working && <Skeleton variant="rectangular" width={24} height={24} sx={{ display: 'inline-block', borderRadius: 1, verticalAlign: 'middle' }} />}
                 </Typography>
 
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>

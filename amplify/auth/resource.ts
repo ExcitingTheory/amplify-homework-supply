@@ -20,14 +20,20 @@ export const auth = defineAuth({
     email: {
       verificationEmailSubject: 'Verify your email for Homework Supply',
     },
+    phone: true,
   },
   multifactor: {
     mode: 'OPTIONAL',
     totp: true,
+    sms: true,
   },
   groups: ['Learners', 'Instructors', 'Moderators', 'Admins'],
   userAttributes: {
     locale: {
+      mutable: true,
+      required: false,
+    },
+    preferredUsername: {
       mutable: true,
       required: false,
     },

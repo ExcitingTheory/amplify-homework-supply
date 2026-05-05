@@ -199,6 +199,8 @@ export const handler: Handler = async (event: any, context: any) => {
         return await handleVerifyImage(args);
       case 'verifyImageUrl':
         return await handleVerifyImageUrl(args);
+      case 'summarizeFeedback':
+        return await handleSummarizeFeedback(args);
 
       default:
         throw new Error(`Unknown operation: ${operationName}`);
@@ -663,19 +665,56 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
       model,
     });
     
-    // Verify
-    const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcriptionResponse.text}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
+    const transcript = transcriptionResponse.text;
+    
+    // Run verification and moderation in parallel on the transcript
+    const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcript}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
     const messages: any[] = [];
     if (systemMsg) messages.push({ role: 'system', content: systemMsg });
     messages.push({ role: 'user', content: verifyPrompt });
     
-    const verifyResponse = await openai.chat.completions.create({
-      model: chatModel,
-      messages,
-      temperature: 0.3,
-    });
+    const [verifyResponse, moderationResponse] = await Promise.all([
+      openai.chat.completions.create({
+        model: chatModel,
+        messages,
+        temperature: 0.3,
+      }),
+      // Piggyback moderation on the already-transcribed text — no extra Whisper call
+      transcript && transcript.trim().length > 0
+        ? openai.moderations.create({
+            model: 'omni-moderation-latest',
+            input: transcript,
+          }).catch((err: any) => {
+            console.warn('[Verify Audio URL] Moderation failed (non-blocking):', err?.message);
+            return null;
+          })
+        : Promise.resolve(null),
+    ]);
     
-    return verifyResponse.choices[0]?.message?.content || '';
+    // Build base verification result
+    const verifyContent = verifyResponse.choices[0]?.message?.content || '{}';
+    let result: any;
+    try {
+      result = JSON.parse(verifyContent);
+    } catch {
+      result = { correct: false, score: 0, feedback: verifyContent };
+    }
+    
+    // Attach moderation result if available
+    if (moderationResponse?.results?.[0]) {
+      const mod = moderationResponse.results[0];
+      result.moderation = {
+        flagged: mod.flagged,
+        categories: mod.categories,
+        categoryScores: mod.category_scores,
+        model: moderationResponse.model || 'omni-moderation-latest',
+      };
+    }
+    
+    // Include transcript for downstream consumers
+    result.transcript = transcript;
+    
+    return JSON.stringify(result);
   } catch (error) {
     console.error('[Verify Audio URL Error]:', error);
     throw error;
@@ -829,6 +868,45 @@ async function handleVerifyImageUrl(args: any): Promise<string> {
     return response.choices[0]?.message?.content || '';
   } catch (error) {
     console.error('[Verify Image URL Error]:', error);
+    throw error;
+  }
+}
+
+async function handleSummarizeFeedback(args: any): Promise<string> {
+  const { gradeData, assignmentData, model = 'gpt-4o-mini' } = args;
+  const openai = await getOpenAI();
+
+  try {
+    const systemMessage = `You are a skilled, encouraging tutor on an elearning platform.
+Your job is to summarize a student's performance on an assignment and provide constructive feedback.
+Be concise, warm, and specific. Highlight strengths first, then suggest improvements.
+Respond with JSON: { "overall": string, "strengths": string[], "improvements": string[] }`;
+
+    const userMessage = `Here is the assignment and grade data in YAML format:
+
+---
+# Assignment
+${assignmentData}
+
+---
+# Student Grade
+${gradeData}
+---
+
+Summarize the student's performance. Identify what they did well and where they can improve.`;
+
+    const response = await openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.4,
+    });
+
+    return response.choices[0]?.message?.content || '';
+  } catch (error) {
+    console.error('[Summarize Feedback Error]:', error);
     throw error;
   }
 }

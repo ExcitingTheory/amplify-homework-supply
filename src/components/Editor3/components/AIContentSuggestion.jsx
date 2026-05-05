@@ -9,7 +9,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 import { createPortal } from 'react-dom';
 
 /**
@@ -63,7 +63,7 @@ export default function AIContentSuggestion({
     >
       {isLoading ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CircularProgress size={12} sx={{ color: 'text.disabled' }} />
+          <Skeleton variant="circular" width={12} height={12} />
           <Typography 
             variant="caption" 
             sx={{ 

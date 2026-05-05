@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { useColorScheme } from '@mui/material/styles';
 import { useTranslation } from 'next-i18next';
 import { hexToRgb } from '../../../utils/hexToRgb';
@@ -212,7 +212,7 @@ export default function StaticWaveform({
                     opacity: 0.8,
                     zIndex: 1
                 }}>
-                    <CircularProgress size={30} />
+                    <Skeleton variant="rectangular" width="100%" height={30} sx={{ borderRadius: 1 }} />
                 </Box>
             )}
             <canvas 

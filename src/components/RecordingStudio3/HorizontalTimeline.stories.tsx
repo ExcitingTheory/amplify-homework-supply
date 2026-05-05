@@ -92,7 +92,7 @@ const emptyScript = {
 };
 
 export default {
-  title: '🎙️ Recording Audio/Horizontal Timeline',
+  title: '🎙️ Recording Studio/Horizontal Timeline',
   component: HorizontalTimeline,
   parameters: {
     layout: 'padded',

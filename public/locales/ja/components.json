@@ -14,6 +14,20 @@
     "cancel": "キャンセル",
     "submit": "提出"
   },
+  "authenticator": {
+    "confirmPasswordLabel": "パスワード確認：",
+    "confirmPasswordPlaceholder": "パスワードを確認してください",
+    "displayNameLabel": "表示名：",
+    "displayNamePlaceholder": "表示名を選んでください",
+    "emailLabel": "メール：",
+    "emailPlaceholder": "メールアドレスを入力してください：",
+    "nameLabel": "名前：",
+    "namePlaceholder": "名前を入力してください：",
+    "passwordLabel": "パスワード：",
+    "passwordPlaceholder": "パスワードを入力してください：",
+    "phoneLabel": "電話番号：",
+    "phonePlaceholder": "電話番号を入力してください"
+  },
   "chatSidebar": {
     "errorRenderingMessage": "メッセージの表示でエラーが発生しました",
     "chatInitFailure": "チャットの初期化に失敗しました。ページを更新してください。",

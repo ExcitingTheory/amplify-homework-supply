@@ -1,12 +1,12 @@
 import { useRouter } from 'next/router'
-import { Unit } from '../../src/models'
 import { Workbook } from '../../src/components/Editor3'
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../../next-i18next.config';
 
-import MyAuth from "../../src/components/authenticator";
+import MyAuth from "../../src/components/AmplifyAuthenticator";
+import AppSkeleton from '../../src/components/AppSkeleton';
 
 import { FilesProvider } from '../../src/context/fileContext'
 import { DictionaryProvider } from '../../src/context/dictionaryContext'
@@ -289,19 +289,15 @@ function WorkbookPage() {
   const { t } = useTranslation('pages');
   const router = useRouter()
   if (router.isFallback) {
-    return (
-      <div>
-        <h1>{t('workbook.loading')}</h1>
-      </div>
-    )
+    return <AppSkeleton variant="detail" />
   }
 
-  const { id } = router.query
+  const { id, sectionId } = router.query
 
   return (
     <FilesProvider>
       <DictionaryProvider>
-        <UnitProvider id={id}>
+        <UnitProvider id={id} sectionId={sectionId}>
           <TimerWrappedEditor />
         </UnitProvider>
       </DictionaryProvider>

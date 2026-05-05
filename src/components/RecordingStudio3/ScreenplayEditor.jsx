@@ -250,7 +250,7 @@ export default function ScreenplayEditor({
               aria-label={t('screenplayEditor.send', 'Send prompt')}
             >
               {isGenerating ? (
-                <CircularProgress size={20} />
+                <Skeleton variant="circular" width={20} height={20} />
               ) : (
                 <SendIcon />
               )}

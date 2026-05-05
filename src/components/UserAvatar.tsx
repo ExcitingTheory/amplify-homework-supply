@@ -10,10 +10,9 @@
 
 import React from 'react'
 import Avatar from '@mui/material/Avatar'
-import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import BoltIcon from '@mui/icons-material/Bolt'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
 import SettingsContext from '../context/settingsContext'
 import getCachedUrl from '../utils/getCachedUrl'
 
@@ -30,8 +29,13 @@ export function UserAvatar({ size = 40, src: srcOverride, streak = 0 }: UserAvat
   const { settings } = React.useContext(SettingsContext) || {}
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null)
 
+  // metadata may be a JSON string (from DynamoDB) or a parsed object
+  const rawMetadata = settings?.metadata
+  const metadata: Record<string, unknown> = typeof rawMetadata === 'string'
+    ? (() => { try { return JSON.parse(rawMetadata) } catch { return {} } })()
+    : (rawMetadata || {}) as Record<string, unknown>
   const rawUrl: string | null =
-    srcOverride ?? (settings?.metadata as Record<string, unknown>)?.avatarUrl as string ?? null
+    srcOverride ?? (metadata?.avatarUrl as string) ?? null
 
   React.useEffect(() => {
     if (!rawUrl) {
@@ -59,48 +63,46 @@ export function UserAvatar({ size = 40, src: srcOverride, streak = 0 }: UserAvat
   const badgeSize = Math.max(16, Math.round(size * 0.4))
 
   return (
-    <Badge
-      overlap="circular"
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      badgeContent={
+    <Box sx={{ position: 'relative', display: 'inline-flex', pb: `${badgeSize * 0.5}px` }}>
+      {avatar}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          right: -2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1px',
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1px',
+            justifyContent: 'center',
+            bgcolor: '#ff9800',
+            color: '#fff',
+            borderRadius: '50%',
+            width: badgeSize,
+            height: badgeSize,
+            border: '2px solid',
+            borderColor: 'background.paper',
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: '#ff9800',
-              color: '#fff',
-              borderRadius: '50%',
-              width: badgeSize,
-              height: badgeSize,
-              border: '2px solid',
-              borderColor: 'background.paper',
-            }}
-          >
-            <BoltIcon sx={{ fontSize: badgeSize * 0.7 }} />
-          </Box>
-          <Typography
-            sx={{
-              fontSize: badgeSize * 0.6,
-              fontWeight: 800,
-              lineHeight: 1,
-              color: 'text.primary',
-            }}
-          >
-            {streak}
-          </Typography>
+          <WhatshotIcon sx={{ fontSize: badgeSize * 0.7 }} />
         </Box>
-      }
-    >
-      {avatar}
-    </Badge>
+        <Typography
+          sx={{
+            fontSize: badgeSize * 0.6,
+            fontWeight: 800,
+            lineHeight: 1,
+            color: 'text.primary',
+          }}
+        >
+          {streak}
+        </Typography>
+      </Box>
+    </Box>
   )
 }
 

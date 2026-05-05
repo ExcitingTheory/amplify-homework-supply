@@ -8,7 +8,7 @@ import { CompletionGrid } from './CompletionGrid'
 // =============================================================================
 
 const leaderboardMeta: Meta<typeof LeaderboardTable> = {
-  title: 'Leaderboard/LeaderboardTable',
+  title: '📊 Instructor Tools/Leaderboard/Table',
   component: LeaderboardTable,
 }
 export default leaderboardMeta
@@ -41,7 +41,7 @@ export const Empty: LeaderboardStory = {
 // =============================================================================
 
 const completionMeta: Meta<typeof CompletionGrid> = {
-  title: 'Leaderboard/CompletionGrid',
+  title: '📊 Instructor Tools/Leaderboard/Completion Grid',
   component: CompletionGrid,
 }
 

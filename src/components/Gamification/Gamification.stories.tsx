@@ -11,7 +11,7 @@ import { NailedItWall } from './NailedItWall'
 // =============================================================================
 
 const badgeMeta: Meta<typeof NailedItBadge> = {
-  title: 'Gamification/NailedItBadge',
+  title: '🏆 Gamification/Badges & Celebrations/Nailed-It Badge',
   component: NailedItBadge,
 }
 export default badgeMeta
@@ -19,15 +19,12 @@ export default badgeMeta
 type BadgeStory = StoryObj<typeof NailedItBadge>
 
 export const Default: BadgeStory = {
-  args: {
-    reason: 'Exceptional analysis of photosynthesis!',
-  },
+  args: {},
 }
 
 export const CustomSize: BadgeStory = {
   args: {
-    reason: 'Perfect score on vocabulary quiz',
-    size: 64,
+    size: 'medium',
   },
 }
 
@@ -36,7 +33,7 @@ export const CustomSize: BadgeStory = {
 // =============================================================================
 
 const celebrationMeta: Meta<typeof NailedItCelebration> = {
-  title: 'Gamification/NailedItCelebration',
+  title: '🏆 Gamification/Badges & Celebrations/Nailed-It Celebration',
   component: NailedItCelebration,
 }
 
@@ -44,8 +41,7 @@ export const CelebrationOpen: StoryObj<typeof NailedItCelebration> = {
   render: () => (
     <NailedItCelebration
       open={true}
-      reason="You showed deep understanding of cell biology!"
-      xpAwarded={20}
+      nailedItReason="You showed deep understanding of cell biology!"
       onClose={() => {}}
     />
   ),
@@ -57,7 +53,7 @@ export const CelebrationOpen: StoryObj<typeof NailedItCelebration> = {
 // =============================================================================
 
 const xpToastMeta: Meta<typeof XPToast> = {
-  title: 'Gamification/XPToast',
+  title: '🏆 Gamification/XP & Progression/XP Toast',
   component: XPToast,
 }
 
@@ -78,20 +74,20 @@ export const XPToastOpen: StoryObj<typeof XPToast> = {
 // =============================================================================
 
 const xpSummaryMeta: Meta<typeof HomeworkXPSummary> = {
-  title: 'Gamification/HomeworkXPSummary',
+  title: '🏆 Gamification/XP & Progression/Homework XP Summary',
   component: HomeworkXPSummary,
 }
 
 export const XPSummaryStory: StoryObj<typeof HomeworkXPSummary> = {
   render: () => (
     <HomeworkXPSummary
-      xpEarned={[
-        { reason: 'Homework submitted', amount: 50 },
-        { reason: 'All blocks complete', amount: 100 },
-        { reason: 'On-time submission', amount: 15 },
+      lineItems={[
+        { label: 'Homework submitted', xp: 50 },
+        { label: 'All blocks complete', xp: 100 },
+        { label: 'On-time submission', xp: 15 },
       ]}
-      totalXP={1250}
-      level={{ level: 5, label: 'Scholar', xpRequired: 1000, xpForNextLevel: 2000, progress: 25 }}
+      totalXP={165}
+      cumulativeXP={1250}
     />
   ),
   parameters: { ...xpSummaryMeta },
@@ -102,17 +98,17 @@ export const XPSummaryStory: StoryObj<typeof HomeworkXPSummary> = {
 // =============================================================================
 
 const wallMeta: Meta<typeof NailedItWall> = {
-  title: 'Gamification/NailedItWall',
+  title: '🏆 Gamification/Badges & Celebrations/Nailed-It Wall',
   component: NailedItWall,
 }
 
 export const WallStory: StoryObj<typeof NailedItWall> = {
   render: () => (
     <NailedItWall
-      entries={[
-        { id: '1', studentName: 'Alice', reason: 'Perfect photosynthesis analysis', awardedAt: new Date().toISOString(), unitName: 'Biology 101' },
-        { id: '2', studentName: 'Bob', reason: 'Excellent vocabulary usage', awardedAt: new Date(Date.now() - 86400000).toISOString(), unitName: 'French Basics' },
-        { id: '3', studentName: 'Charlie', reason: 'Deep understanding of water cycle', awardedAt: new Date(Date.now() - 172800000).toISOString(), unitName: 'Earth Science' },
+      blocks={[
+        { id: '1', question: 'Explain the process of photosynthesis', nailedItReason: 'Perfect photosynthesis analysis', homeworkTitle: 'Biology 101', createdAt: new Date().toISOString() },
+        { id: '2', question: 'Describe French seasonal vocabulary', nailedItReason: 'Excellent vocabulary usage', homeworkTitle: 'French Basics', createdAt: new Date(Date.now() - 86400000).toISOString() },
+        { id: '3', question: 'How does the water cycle work?', nailedItReason: 'Deep understanding of water cycle', homeworkTitle: 'Earth Science', createdAt: new Date(Date.now() - 172800000).toISOString() },
       ]}
     />
   ),

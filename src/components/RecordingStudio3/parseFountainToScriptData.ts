@@ -13,8 +13,7 @@
  * with a 0.5s gap between lines.
  */
 
-// @ts-expect-error — fountain-js ships no type declarations
-import { Fountain } from 'fountain-js';
+import { Fountain } from "fountain-js";
 
 /** Words-per-minute estimate for timing calculation */
 const WORDS_PER_MINUTE = 150;
@@ -67,13 +66,13 @@ function extractNotes(raw: string): { text: string; notes: string } {
     notes.push(match[1].trim());
   }
 
-  const text = raw.replace(notePattern, '').replace(/\n/g, ' ').trim();
-  return { text, notes: notes.join(' ') };
+  const text = raw.replace(notePattern, "").replace(/\n/g, " ").trim();
+  return { text, notes: notes.join(" ") };
 }
 
 /** Strip parentheses wrapper from parenthetical text. */
 function stripParens(raw: string): string {
-  return raw.replace(/^\(/, '').replace(/\)$/, '').trim();
+  return raw.replace(/^\(/, "").replace(/\)$/, "").trim();
 }
 
 /** Estimate speech duration in seconds from word count. */
@@ -87,8 +86,8 @@ function estimateDuration(text: string): number {
 function toSpeakerKey(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_|_$/g, '');
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 // ── Token types returned by fountain-js ────────────────────────────
@@ -116,49 +115,49 @@ export function parseFountainToScriptData(
   const tokens: FountainToken[] = result.tokens || [];
 
   // ── Title page fields ──
-  let title = '';
-  let date = '';
+  let title = "";
+  let date = "";
   for (const t of tokens) {
-    if (t.is_title && t.type === 'title') title = t.text ?? '';
-    if (t.is_title && t.type === 'date') date = t.text ?? '';
+    if (t.is_title && t.type === "title") title = t.text ?? "";
+    if (t.is_title && t.type === "date") date = t.text ?? "";
   }
 
   // ── Walk tokens to extract dialogue ──
   const speakers: Record<string, Speaker> = {};
   const dialogue: DialogueLine[] = [];
-  let currentScene = '';
-  let currentCharacter = '';
-  let currentParenthetical = '';
+  let currentScene = "";
+  let currentCharacter = "";
+  let currentParenthetical = "";
   let dialogueId = 1;
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
 
-    if (token.type === 'scene_heading') {
-      currentScene = token.text ?? '';
+    if (token.type === "scene_heading") {
+      currentScene = token.text ?? "";
       continue;
     }
 
-    if (token.type === 'character') {
-      currentCharacter = (token.text ?? '').trim();
-      currentParenthetical = '';
+    if (token.type === "character") {
+      currentCharacter = (token.text ?? "").trim();
+      currentParenthetical = "";
       continue;
     }
 
-    if (token.type === 'parenthetical') {
-      currentParenthetical = stripParens(token.text ?? '');
+    if (token.type === "parenthetical") {
+      currentParenthetical = stripParens(token.text ?? "");
       continue;
     }
 
-    if (token.type === 'dialogue' && currentCharacter) {
-      const { text, notes } = extractNotes(token.text ?? '');
+    if (token.type === "dialogue" && currentCharacter) {
+      const { text, notes } = extractNotes(token.text ?? "");
       const speakerKey = toSpeakerKey(currentCharacter);
 
       // Register speaker if new
       if (!speakers[speakerKey]) {
         speakers[speakerKey] = {
           name: currentCharacter,
-          voice: existingVoices[speakerKey] || 'alloy',
+          voice: existingVoices[speakerKey] || "alloy",
           description: currentParenthetical,
         };
       }
@@ -177,7 +176,7 @@ export function parseFountainToScriptData(
       // Reset parenthetical after consuming it for this dialogue block
       // (next dialogue line under the same character inherits character
       //  but not parenthetical unless re-specified)
-      currentParenthetical = '';
+      currentParenthetical = "";
       continue;
     }
 
@@ -194,10 +193,10 @@ export function parseFountainToScriptData(
 
   return {
     metadata: {
-      title: title || 'Untitled Screenplay',
-      scene: currentScene || '',
-      date: date || new Date().toISOString().split('T')[0],
-      version: '1.0',
+      title: title || "Untitled Screenplay",
+      scene: currentScene || "",
+      date: date || new Date().toISOString().split("T")[0],
+      version: "1.0",
     },
     speakers,
     dialogue,
@@ -217,18 +216,19 @@ export function scriptDataToFountain(data: ScriptData): string {
   // Title page
   if (data.metadata.title) lines.push(`Title: ${data.metadata.title}`);
   if (data.metadata.date) lines.push(`Date: ${data.metadata.date}`);
-  lines.push(''); // blank line ends title page
+  lines.push(""); // blank line ends title page
 
   // Group dialogue by scene (we only track the last scene in metadata,
   // so emit it once at the top of the script body)
   if (data.metadata.scene) {
     lines.push(data.metadata.scene);
-    lines.push('');
+    lines.push("");
   }
 
   for (const line of data.dialogue) {
     const speaker = data.speakers[line.speaker];
-    const characterName = speaker?.name?.toUpperCase() || line.speaker.toUpperCase();
+    const characterName =
+      speaker?.name?.toUpperCase() || line.speaker.toUpperCase();
 
     lines.push(characterName);
 
@@ -241,8 +241,8 @@ export function scriptDataToFountain(data: ScriptData): string {
       dialogueText += `\n[[${line.direction}]]`;
     }
     lines.push(dialogueText);
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

@@ -58,11 +58,17 @@ function extractTextContent(data) {
 }
 
 /**
- * Moderate content using OpenAI Moderation API
+ * Moderate content using OpenAI Moderation API.
+ * When modelName + recordId are provided, the backend Lambda persists the
+ * moderation result directly to the record's `moderation` field (server-authoritative).
+ * 
  * @param {string|Object} content - Text or object containing text to moderate
+ * @param {Object} [options] - Optional context for server-side persist
+ * @param {string} [options.modelName] - Model to update ('Unit'|'Grade'|'Word'|'Question')
+ * @param {string} [options.recordId] - Record ID to update
  * @returns {Promise<Object>} - Moderation result
  */
-export async function moderateContent(content) {
+export async function moderateContent(content, options = {}) {
   try {
     // Extract text if content is an object
     const textToModerate = typeof content === 'string' 
@@ -74,16 +80,20 @@ export async function moderateContent(content) {
         flagged: false,
         categories: {},
         categoryScores: {},
-        model: 'text-moderation-latest',
+        model: 'omni-moderation-latest',
         error: null
       };
     }
     
-    // Call the moderation mutation
+    // Call the moderation mutation — backend persists to record if modelName/recordId provided
     const client = getAmplifyClient();
-    const response = await client.mutations.moderateContent({
-      content: textToModerate
-    });
+    const mutationArgs = { content: textToModerate };
+    if (options.modelName && options.recordId) {
+      mutationArgs.modelName = options.modelName;
+      mutationArgs.recordId = options.recordId;
+    }
+    
+    const response = await client.mutations.moderateContent(mutationArgs);
     
     const result = response?.data?.moderateContent ?? response?.data;
     return typeof result === 'string' ? JSON.parse(result) : result;
@@ -94,16 +104,16 @@ export async function moderateContent(content) {
       flagged: false,
       categories: {},
       categoryScores: {},
-      model: 'text-moderation-latest',
+      model: 'omni-moderation-latest',
       error: error.message
     };
   }
 }
 
 /**
- * Build moderation fields for DataStore save
- * @param {Object} moderationResult - Result from moderateContent()
- * @returns {Object} - Fields to update on the model
+ * @deprecated Use moderateContent with { modelName, recordId } options instead.
+ * Backend now handles persisting moderation fields directly.
+ * Kept for backward compatibility during migration.
  */
 export function buildModerationFields(moderationResult) {
   if (!moderationResult) return {};
@@ -122,33 +132,29 @@ export function buildModerationFields(moderationResult) {
 }
 
 /**
- * Moderate and save content in one operation
- * @param {Object} model - DataStore model class (Unit, Grade, Question, Word)
- * @param {Object} item - Item to save
+ * Moderate content and have the backend persist the result to the record.
+ * Replaces the old moderateAndSave which relied on frontend writes.
+ * 
+ * @param {string} modelName - 'Unit'|'Grade'|'Word'|'Question'
+ * @param {Object} item - Item with `id` field
  * @param {string|Object} content - Content to moderate
- * @returns {Promise<Object>} - Saved item with moderation fields
+ * @returns {Promise<Object>} - Moderation result from API
  */
-export async function moderateAndSave(model, item, content) {
-  // Run moderation
-  const moderationResult = await moderateContent(content);
-  
-  // Build moderation fields
-  const moderationFields = buildModerationFields(moderationResult);
-  
-  // Log if flagged
-  if (moderationResult.flagged) {
+export async function moderateAndSave(modelName, item, content) {
+  const result = await moderateContent(content, {
+    modelName,
+    recordId: item.id,
+  });
+
+  if (result.flagged) {
     console.warn('Content flagged by moderation:', {
-      categories: moderationResult.categories,
+      categories: result.categories,
       itemId: item.id,
-      modelName: model.name
+      modelName,
     });
   }
-  
-  // Return combined fields (caller should use with DataStore.save)
-  return {
-    ...item,
-    ...moderationFields
-  };
+
+  return result;
 }
 
 /**

@@ -12,7 +12,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
+import Skeleton from '@mui/material/Skeleton'
 import RateReviewIcon from '@mui/icons-material/RateReview'
 import { RoomInvite } from './RoomInvite'
 
@@ -112,7 +112,7 @@ export function OpenPeerReviewButton({
             variant="contained"
             onClick={handleCreate}
             disabled={creating}
-            startIcon={creating ? <CircularProgress size={16} /> : undefined}
+            startIcon={creating ? <Skeleton variant="circular" width={16} height={16} /> : undefined}
           >
             {creating ? 'Creating...' : 'Create Room'}
           </Button>

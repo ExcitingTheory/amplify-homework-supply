@@ -14,7 +14,7 @@ import {
   Button,
   Box,
   Typography,
-  CircularProgress,
+  Skeleton,
   Alert,
   Slide,
 } from '@mui/material'
@@ -23,13 +23,14 @@ import CloseIcon from '@mui/icons-material/Close'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useTranslation } from 'next-i18next'
 import PracticeDrillProgress from './PracticeDrillProgress'
-import PracticeDrillWorkbook from './PracticeDrillWorkbook'
+import DrillGradeAdapter from './DrillGradeAdapter'
 import CollaborativePresenceBar from './CollaborativePresenceBar'
+import { Workbook } from '../Editor3/Workbook'
 import { usePracticeDrill } from './usePracticeDrill'
 import { usePracticeCollaboration } from '../../yjs/practiceCollaborationHooks'
 import { previewXP } from '../../utils/practiceXPCalculator'
 import type { DrillConfig } from './PracticeDrillConfigPopup'
-import type { VerifyResult } from './DrillRecordButton'
+import type { DrillStats } from './DrillGradeAdapter'
 
 // ============================================================================
 // Transition
@@ -86,12 +87,15 @@ export default function PracticeDrillDialog({
     saving,
     error,
     generateDrill,
-    submitAnswer,
     completeDrill,
     reset,
   } = usePracticeDrill(unitName)
 
-  const [pronunciationResults, setPronunciationResults] = useState<Record<string, VerifyResult>>({})
+  const [drillStats, setDrillStats] = useState<DrillStats>({
+    blocksCompleted: 0,
+    accuracy: 0,
+    complete: false,
+  })
   const [roomCode, setRoomCode] = useState(joinRoomCode || '')
 
   const isCollaborative = config.collaborative === true || !!joinSessionId
@@ -140,7 +144,7 @@ export default function PracticeDrillDialog({
 
   const handleClose = useCallback(() => {
     reset()
-    setPronunciationResults({})
+    setDrillStats({ blocksCompleted: 0, accuracy: 0, complete: false })
     setRoomCode('')
     onClose()
   }, [reset, onClose])
@@ -149,27 +153,12 @@ export default function PracticeDrillDialog({
     await completeDrill()
   }, [completeDrill])
 
-  const handlePronunciationResult = useCallback((blockId: string, result: VerifyResult) => {
-    setPronunciationResults((prev) => ({
-      ...prev,
-      [blockId]: result,
-    }))
+  const handleStatsChange = useCallback((stats: DrillStats) => {
+    setDrillStats(stats)
   }, [])
 
-  // Wrap submitAnswer to also sync via Yjs in collaborative mode
-  const handleSubmitAnswer = useCallback(
-    (blockId: string, answer: { complete: boolean; accuracy: number; userAnswer?: string }) => {
-      submitAnswer(blockId, answer)
-      if (isCollaborative) {
-        collab.submitBlockAnswer(blockId, answer)
-        collab.setActiveBlock(blockId)
-      }
-    },
-    [submitAnswer, isCollaborative, collab],
-  )
-
-  const xpPreview = previewXP(sessionsCompletedToday, session.accuracy)
-  const allCompleted = session.blocksCompleted === session.blocks.length && session.blocks.length > 0
+  const xpPreview = previewXP(sessionsCompletedToday, drillStats.accuracy)
+  const allCompleted = drillStats.complete && session.blocks.length > 0
 
   return (
     <Dialog
@@ -206,7 +195,7 @@ export default function PracticeDrillDialog({
       {/* Progress header */}
       {session.blocks.length > 0 && (
         <PracticeDrillProgress
-          blocksCompleted={session.blocksCompleted}
+          blocksCompleted={drillStats.blocksCompleted}
           blockCount={session.blocks.length}
           xpEarned={session.complete ? session.xpAwarded : xpPreview.total}
           xpDiminished={sessionsCompletedToday > 0}
@@ -217,10 +206,8 @@ export default function PracticeDrillDialog({
         {/* Loading state */}
         {generating && (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8, gap: 2 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">
-              {t('practiceDrill.dialog.generating', 'Generating practice questions...')}
-            </Typography>
+            <Skeleton variant="circular" width={48} height={48} />
+            <Skeleton variant="text" width={240} height={24} />
           </Box>
         )}
 
@@ -246,29 +233,22 @@ export default function PracticeDrillDialog({
             </Typography>
             <Typography variant="body2">
               {t('practiceDrill.dialog.completeSummary', 'Accuracy: {{accuracy}}% — XP earned: +{{xp}}', {
-                accuracy: session.accuracy,
+                accuracy: drillStats.accuracy,
                 xp: session.xpAwarded,
               })}
             </Typography>
           </Alert>
         )}
 
-        {/* Workbook */}
+        {/* Workbook — renders via existing Lexical graded block plugins */}
         {!generating && session.blocks.length > 0 && (
-          <PracticeDrillWorkbook
-            blocks={session.blocks}
-            answers={session.answers}
+          <DrillGradeAdapter
             sessionId={session.id || ''}
-            onSubmitAnswer={handleSubmitAnswer}
-            onPronunciationResult={handlePronunciationResult}
-            collaborative={isCollaborative}
-            groupStats={isCollaborative ? collab.groupStats : undefined}
-            getBlockGroupAccuracy={
-              isCollaborative
-                ? (blockId: string) => collab.groupStats.blockAccuracies[blockId]
-                : undefined
-            }
-          />
+            blocks={session.blocks as import('./buildDrillEditorState').PracticeDrillBlock[]}
+            onGradeChange={(_data, stats) => handleStatsChange(stats)}
+          >
+            <Workbook />
+          </DrillGradeAdapter>
         )}
       </DialogContent>
 
@@ -283,7 +263,7 @@ export default function PracticeDrillDialog({
             variant="contained"
             onClick={handleComplete}
             disabled={saving}
-            startIcon={saving ? <CircularProgress size={16} /> : <CheckCircleIcon />}
+            startIcon={saving ? <Skeleton variant="circular" width={16} height={16} /> : <CheckCircleIcon />}
           >
             {t('practiceDrill.dialog.finish', 'Finish & Earn XP')}
           </Button>

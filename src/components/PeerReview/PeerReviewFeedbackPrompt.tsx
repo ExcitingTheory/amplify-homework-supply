@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'next-i18next'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -25,6 +26,7 @@ export function PeerReviewFeedbackPrompt({
   onSubmit,
   onClose,
 }: PeerReviewFeedbackPromptProps) {
+  const { t } = useTranslation('common')
   const [submitted, setSubmitted] = useState(false)
 
   const handleFeedback = (helpful: boolean) => {
@@ -61,7 +63,7 @@ export function PeerReviewFeedbackPrompt({
               size="small"
               onClick={() => handleFeedback(true)}
               sx={{ color: 'inherit' }}
-              aria-label="Peer review was helpful"
+              aria-label={t('peerReview.helpful', 'Peer review was helpful')}
             >
               <ThumbUpIcon fontSize="small" />
             </IconButton>
@@ -69,7 +71,7 @@ export function PeerReviewFeedbackPrompt({
               size="small"
               onClick={() => handleFeedback(false)}
               sx={{ color: 'inherit' }}
-              aria-label="Peer review was not helpful"
+              aria-label={t('peerReview.notHelpful', 'Peer review was not helpful')}
             >
               <ThumbDownIcon fontSize="small" />
             </IconButton>

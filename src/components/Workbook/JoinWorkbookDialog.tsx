@@ -13,7 +13,7 @@ import {
   TextField,
   Button,
   Typography,
-  CircularProgress,
+  Skeleton,
   Alert,
 } from '@mui/material'
 import EditNoteIcon from '@mui/icons-material/EditNote'
@@ -141,7 +141,7 @@ export default function JoinWorkbookDialog({
           variant="contained"
           onClick={handleJoin}
           disabled={!input || loading}
-          startIcon={loading ? <CircularProgress size={16} /> : <EditNoteIcon />}
+          startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <EditNoteIcon />}
         >
           {loading
             ? t('workbook.joinDialog.joining', 'Finding...')

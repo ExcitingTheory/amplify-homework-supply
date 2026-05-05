@@ -205,7 +205,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'editor',
         title: 'The Editor',
-        description: 'After creating a unit, you\'ll see the rich text editor. Type "/" for commands, or use the toolbar to format content.',
+        description: 'After creating a unit, you\'ll see the rich text editor. Use the toolbar to format content and insert blocks.',
         tooltipPosition: 'center',
         actions: [
           'Type your lesson content',
@@ -255,28 +255,38 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         tooltipPosition: 'center',
         actions: [
           'Open a unit in the Editor',
-          'Insert a quiz block',
-          'Add question and answers',
-          'Mark the correct choice',
+          'Click the "+ Insert" button in the toolbar',
+          'Select "Multiple Choice Quiz"',
+          'Configure your question and answers',
         ],
       },
       {
-        id: 'slash-command',
-        title: 'Type "/" for Commands',
-        description: 'The slash menu gives you quick access to all block types.',
-        targetSelector: '[data-tour="editor"], [class*="ContentEditable"]',
+        id: 'insert-button',
+        title: 'Insert Menu',
+        description: 'Click the "+ Insert" button to open the block insertion menu.',
+        targetSelector: '[aria-controls="insert-node-menu"], button[aria-label*="Insert"]',
+        tooltipPosition: 'bottom',
+        actions: [
+          'Click the "+ Insert" button in the toolbar',
+          'A dropdown menu will appear with block types',
+        ],
+      },
+      {
+        id: 'select-quiz',
+        title: 'Select Multiple Choice Quiz',
+        description: 'Choose "Multiple Choice Quiz" from the dropdown menu.',
+        targetSelector: '[aria-label*="Multiple Choice Quiz"], [title*="Multiple Choice Quiz"]',
         tooltipPosition: 'right',
         actions: [
-          'Click in the editor and type "/"',
-          'Browse available blocks',
-          'Select "Quiz" to insert a question',
+          'Click "Multiple Choice Quiz" in the menu',
+          'A new quiz block will be inserted into your unit',
         ],
       },
       {
         id: 'quiz-block',
         title: 'Quiz Block',
         description: 'This is where you configure your question.',
-        targetSelector: '[data-tour="quiz-block"], [class*="QuizNode"]',
+        targetSelector: '[class*="QuizNode"], [class*="quiz-node"], [class*="quiz-block"]',
         tooltipPosition: 'right',
         actions: [
           'Enter your question text',
@@ -284,20 +294,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           'Click the checkbox to mark the correct answer',
           'Add explanation text (optional)',
         ],
-      },
-      {
-        id: 'answer-choices',
-        title: 'Answer Choices',
-        description: 'Students select from these options.',
-        targetSelector: '[data-tour="quiz-answers"], [class*="answer"]',
-        tooltipPosition: 'left',
-      },
-      {
-        id: 'correct-answer',
-        title: 'Mark Correct Answer',
-        description: 'Click the checkbox next to the right answer.',
-        targetSelector: '[data-tour="correct-checkbox"], input[type="checkbox"]',
-        tooltipPosition: 'left',
       },
       {
         id: 'save',
@@ -317,7 +313,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'challenge',
         title: '🎯 Challenge: Add a Quiz',
-        description: 'Insert a quiz block with at least 2 answers.',
+        description: 'Use the "+ Insert" toolbar button to add a Multiple Choice Quiz block with at least 2 answer choices.',
         tooltipPosition: 'center',
       },
       {

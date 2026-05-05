@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
-import { Box, CircularProgress, Typography, Paper } from '@mui/material';
+import { Box, Skeleton, Typography, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
 import { useTranslation } from 'next-i18next';
 
@@ -131,7 +131,7 @@ export default function PdfThumbnail({
                         }}
                     >
                         <PdfIcon sx={{ fontSize: 32, color: 'grey.400', mb: 1 }} />
-                        <CircularProgress size={20} />
+                        <Skeleton variant="rectangular" width={40} height={6} sx={{ borderRadius: 1 }} />
                     </Paper>
                 }
             >

@@ -1,17 +1,26 @@
 /**
  * Agent Permissions System
- * 
+ *
  * Enforces non-destructive operation controls for autonomous AI agents.
  * Prevents accidental data loss, infrastructure changes, and security issues.
- * 
+ *
  * @module agent-permissions
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { minimatch } from 'minimatch';
+import * as fs from "fs/promises";
+import * as path from "path";
+import { minimatch } from "minimatch";
 
-export type Operation = 'read' | 'write' | 'delete' | 'rename' | 'terminal' | 'datastore.query' | 'datastore.save' | 'datastore.delete' | 'datastore.clear';
+export type Operation =
+  | "read"
+  | "write"
+  | "delete"
+  | "rename"
+  | "terminal"
+  | "datastore.query"
+  | "datastore.save"
+  | "datastore.delete"
+  | "datastore.clear";
 
 export interface PermissionCheckInput {
   operation: Operation;
@@ -33,10 +42,16 @@ export interface AgentPermissionsConfig {
   permissions: {
     fileOperations: Record<string, any>;
     terminalCommands: {
-      allowed: Record<string, { commands: string[]; blocked?: string[]; description?: string }>;
+      allowed: Record<
+        string,
+        { commands: string[]; blocked?: string[]; description?: string }
+      >;
       blocked: Record<string, string[]>;
     };
-    dataStoreOperations: Record<string, { allowed: boolean; requiresConfirmation?: boolean }>;
+    dataStoreOperations: Record<
+      string,
+      { allowed: boolean; requiresConfirmation?: boolean }
+    >;
     schemaChanges: Record<string, any>;
     configurationFiles: {
       readOnly: { paths: string[] };
@@ -44,12 +59,15 @@ export interface AgentPermissionsConfig {
     };
     agentSkills: {
       allowed: boolean;
-      skillPermissions: Record<string, {
-        canCreate: boolean;
-        canModify: boolean;
-        canDelete: boolean;
-        requiresConfirmation: boolean;
-      }>;
+      skillPermissions: Record<
+        string,
+        {
+          canCreate: boolean;
+          canModify: boolean;
+          canDelete: boolean;
+          requiresConfirmation: boolean;
+        }
+      >;
     };
   };
   safeModes?: {
@@ -81,16 +99,23 @@ export interface AgentPermissionsConfig {
 
 /**
  * Agent Permissions Manager
- * 
+ *
  * Loads and enforces permission rules for agent operations.
  */
 export class AgentPermissions {
-  private config: AgentPermissionsConfig;
+  private config!: AgentPermissionsConfig;
   private configPath: string;
-  private operationLog: Array<{ timestamp: Date; operation: Operation; path?: string; result: string }> = [];
+  private operationLog: Array<{
+    timestamp: Date;
+    operation: Operation;
+    path?: string;
+    result: string;
+  }> = [];
 
   constructor(configPath?: string) {
-    this.configPath = configPath || path.join(process.cwd(), '.github', 'agent-permissions.json');
+    this.configPath =
+      configPath ||
+      path.join(process.cwd(), ".github", "agent-permissions.json");
   }
 
   /**
@@ -98,26 +123,33 @@ export class AgentPermissions {
    */
   async load(): Promise<void> {
     try {
-      const configData = await fs.readFile(this.configPath, 'utf-8');
+      const configData = await fs.readFile(this.configPath, "utf-8");
       this.config = JSON.parse(configData);
     } catch (error) {
-      throw new Error(`Failed to load agent permissions config from ${this.configPath}: ${error.message}`);
+      throw new Error(
+        `Failed to load agent permissions config from ${this.configPath}: ${(error as Error).message}`,
+      );
     }
   }
 
   /**
    * Check if an operation is allowed
    */
-  async checkPermission(input: PermissionCheckInput): Promise<PermissionCheckResult> {
+  async checkPermission(
+    input: PermissionCheckInput,
+  ): Promise<PermissionCheckResult> {
     if (!this.config) {
       await this.load();
     }
 
     // Check safe modes first
-    if (this.config.safeModes?.readOnly?.enabled && input.operation !== 'read') {
+    if (
+      this.config.safeModes?.readOnly?.enabled &&
+      input.operation !== "read"
+    ) {
       return {
         allowed: false,
-        reason: 'Read-only mode is enabled. All write operations are blocked.'
+        reason: "Read-only mode is enabled. All write operations are blocked.",
       };
     }
 
@@ -125,41 +157,44 @@ export class AgentPermissions {
       return {
         allowed: true,
         requiresConfirmation: false,
-        reason: 'Dry-run mode: operation will be simulated only',
-        metadata: { dryRun: true }
+        reason: "Dry-run mode: operation will be simulated only",
+        metadata: { dryRun: true },
       };
     }
 
     // Check exemptions
     if (input.skill && this.config.exemptions?.skills?.includes(input.skill)) {
-      return { allowed: true, reason: 'Skill is exempt from permission checks' };
+      return {
+        allowed: true,
+        reason: "Skill is exempt from permission checks",
+      };
     }
 
     if (input.path && this.isPathExempt(input.path)) {
-      return { allowed: true, reason: 'Path is exempt from permission checks' };
+      return { allowed: true, reason: "Path is exempt from permission checks" };
     }
 
     // Route to specific permission checker
     switch (input.operation) {
-      case 'read':
+      case "read":
         return this.checkReadPermission(input.path!);
-      case 'write':
+      case "write":
         return this.checkWritePermission(input.path!, input.fileSize);
-      case 'delete':
+      case "delete":
         return this.checkDeletePermission(input.path!);
-      case 'rename':
+      case "rename":
         return this.checkRenamePermission(input.path!);
-      case 'terminal':
+      case "terminal":
         return this.checkTerminalPermission(input.command!);
-      case 'datastore.query':
-      case 'datastore.save':
-      case 'datastore.delete':
-      case 'datastore.clear':
+      case "datastore.query":
+      case "datastore.save":
+      case "datastore.delete":
+      case "datastore.clear":
         return this.checkDataStorePermission(input.operation);
       default:
         return {
           allowed: false,
-          reason: `Unknown operation: ${input.operation}`
+          reason: `Unknown operation: ${input.operation}`,
         };
     }
   }
@@ -171,14 +206,17 @@ export class AgentPermissions {
     const readConfig = this.config.permissions.fileOperations.read;
 
     if (!readConfig.allowed) {
-      return { allowed: false, reason: 'Read operations are disabled' };
+      return { allowed: false, reason: "Read operations are disabled" };
     }
 
     // Check excluded paths (sensitive files)
-    if (readConfig.excludePaths && this.matchesAnyPattern(filePath, readConfig.excludePaths)) {
+    if (
+      readConfig.excludePaths &&
+      this.matchesAnyPattern(filePath, readConfig.excludePaths)
+    ) {
       return {
         allowed: false,
-        reason: 'This file contains sensitive credentials or configuration'
+        reason: "This file contains sensitive credentials or configuration",
       };
     }
 
@@ -188,13 +226,18 @@ export class AgentPermissions {
   /**
    * Check write permission for a file path
    */
-  private checkWritePermission(filePath: string, fileSize?: number): PermissionCheckResult {
+  private checkWritePermission(
+    filePath: string,
+    fileSize?: number,
+  ): PermissionCheckResult {
     // Check configuration file protection
-    const readOnlyPaths = this.config.permissions.configurationFiles.readOnly.paths;
+    const readOnlyPaths =
+      this.config.permissions.configurationFiles.readOnly.paths;
     if (this.matchesAnyPattern(filePath, readOnlyPaths)) {
       return {
         allowed: false,
-        reason: 'This is a critical configuration file and cannot be modified by agents'
+        reason:
+          "This is a critical configuration file and cannot be modified by agents",
       };
     }
 
@@ -204,7 +247,7 @@ export class AgentPermissions {
       if (fileSize > maxSize) {
         return {
           allowed: false,
-          reason: `File size (${fileSize} bytes) exceeds maximum allowed (${maxSize} bytes)`
+          reason: `File size (${fileSize} bytes) exceeds maximum allowed (${maxSize} bytes)`,
         };
       }
     }
@@ -216,14 +259,14 @@ export class AgentPermissions {
         if (!config.allowed) {
           return {
             allowed: false,
-            reason: `Schema changes (${key}) are not allowed by agents`
+            reason: `Schema changes (${key}) are not allowed by agents`,
           };
         }
         if (config.requiresConfirmation) {
           return {
             allowed: true,
             requiresConfirmation: true,
-            reason: `Schema change (${key}) requires explicit confirmation`
+            reason: `Schema change (${key}) requires explicit confirmation`,
           };
         }
       }
@@ -231,37 +274,53 @@ export class AgentPermissions {
 
     // Check unrestricted write paths
     const writeConfig = this.config.permissions.fileOperations.write;
-    if (writeConfig.allowedPaths && this.matchesAnyPattern(filePath, writeConfig.allowedPaths)) {
+    if (
+      writeConfig.allowedPaths &&
+      this.matchesAnyPattern(filePath, writeConfig.allowedPaths)
+    ) {
       // Exclude any explicitly excluded paths
-      if (writeConfig.excludePaths && this.matchesAnyPattern(filePath, writeConfig.excludePaths)) {
+      if (
+        writeConfig.excludePaths &&
+        this.matchesAnyPattern(filePath, writeConfig.excludePaths)
+      ) {
         return {
           allowed: false,
-          reason: 'This path is excluded from automatic writes'
+          reason: "This path is excluded from automatic writes",
         };
       }
       return { allowed: true, requiresConfirmation: false };
     }
 
     // Check restricted write paths (requires confirmation)
-    const restrictedConfig = this.config.permissions.fileOperations.writeRestricted;
-    if (restrictedConfig.allowedPaths && this.matchesAnyPattern(filePath, restrictedConfig.allowedPaths)) {
-      if (restrictedConfig.excludePaths && this.matchesAnyPattern(filePath, restrictedConfig.excludePaths)) {
+    const restrictedConfig =
+      this.config.permissions.fileOperations.writeRestricted;
+    if (
+      restrictedConfig.allowedPaths &&
+      this.matchesAnyPattern(filePath, restrictedConfig.allowedPaths)
+    ) {
+      if (
+        restrictedConfig.excludePaths &&
+        this.matchesAnyPattern(filePath, restrictedConfig.excludePaths)
+      ) {
         return {
           allowed: false,
-          reason: 'This path is excluded from writes'
+          reason: "This path is excluded from writes",
         };
       }
       return {
         allowed: true,
-        requiresConfirmation: !this.config.safeModes?.confirmAll?.enabled ? true : false,
-        reason: 'Production code modification requires confirmation'
+        requiresConfirmation: !this.config.safeModes?.confirmAll?.enabled
+          ? true
+          : false,
+        reason: "Production code modification requires confirmation",
       };
     }
 
     // Default: deny writes to unlisted paths
     return {
       allowed: false,
-      reason: 'This path is not in the allowed write locations. Add it to agent-permissions.json if needed.'
+      reason:
+        "This path is not in the allowed write locations. Add it to agent-permissions.json if needed.",
     };
   }
 
@@ -274,21 +333,24 @@ export class AgentPermissions {
     if (!deleteConfig.allowed) {
       return {
         allowed: false,
-        reason: 'Delete operations are disabled by default'
+        reason: "Delete operations are disabled by default",
       };
     }
 
-    if (deleteConfig.allowedPaths && this.matchesAnyPattern(filePath, deleteConfig.allowedPaths)) {
+    if (
+      deleteConfig.allowedPaths &&
+      this.matchesAnyPattern(filePath, deleteConfig.allowedPaths)
+    ) {
       return {
         allowed: true,
         requiresConfirmation: deleteConfig.requiresConfirmation ?? true,
-        reason: 'File deletion requires explicit confirmation'
+        reason: "File deletion requires explicit confirmation",
       };
     }
 
     return {
       allowed: false,
-      reason: 'This file type cannot be deleted by agents'
+      reason: "This file type cannot be deleted by agents",
     };
   }
 
@@ -301,14 +363,14 @@ export class AgentPermissions {
     if (!renameConfig.allowed) {
       return {
         allowed: false,
-        reason: 'Rename operations are disabled'
+        reason: "Rename operations are disabled",
       };
     }
 
     return {
       allowed: true,
       requiresConfirmation: renameConfig.requiresConfirmation ?? true,
-      reason: 'File rename requires explicit confirmation'
+      reason: "File rename requires explicit confirmation",
     };
   }
 
@@ -322,12 +384,12 @@ export class AgentPermissions {
     for (const [category, commands] of Object.entries(commandConfig.blocked)) {
       // Skip non-array fields like "description"
       if (!Array.isArray(commands)) continue;
-      
+
       for (const blockedCmd of commands) {
         if (command.includes(blockedCmd)) {
           return {
             allowed: false,
-            reason: `Blocked command (${category}): ${blockedCmd}`
+            reason: `Blocked command (${category}): ${blockedCmd}`,
           };
         }
       }
@@ -341,7 +403,7 @@ export class AgentPermissions {
           if (command.includes(blockedCmd)) {
             return {
               allowed: false,
-              reason: `Blocked ${category} command: ${blockedCmd}`
+              reason: `Blocked ${category} command: ${blockedCmd}`,
             };
           }
         }
@@ -359,7 +421,7 @@ export class AgentPermissions {
 
     return {
       allowed: false,
-      reason: `Command not in allowed list. Check agent-permissions.json to add it.`
+      reason: `Command not in allowed list. Check agent-permissions.json to add it.`,
     };
   }
 
@@ -367,27 +429,29 @@ export class AgentPermissions {
    * Check DataStore operation permission
    */
   private checkDataStorePermission(operation: string): PermissionCheckResult {
-    const dsOperation = operation.replace('datastore.', '');
+    const dsOperation = operation.replace("datastore.", "");
     const dsConfig = this.config.permissions.dataStoreOperations[dsOperation];
 
     if (!dsConfig) {
       return {
         allowed: false,
-        reason: `Unknown DataStore operation: ${dsOperation}`
+        reason: `Unknown DataStore operation: ${dsOperation}`,
       };
     }
 
     if (!dsConfig.allowed) {
       return {
         allowed: false,
-        reason: `DataStore ${dsOperation} operations are not allowed by agents`
+        reason: `DataStore ${dsOperation} operations are not allowed by agents`,
       };
     }
 
     return {
       allowed: true,
       requiresConfirmation: dsConfig.requiresConfirmation ?? false,
-      reason: dsConfig.requiresConfirmation ? `DataStore ${dsOperation} requires confirmation` : undefined
+      reason: dsConfig.requiresConfirmation
+        ? `DataStore ${dsOperation} requires confirmation`
+        : undefined,
     };
   }
 
@@ -403,7 +467,9 @@ export class AgentPermissions {
    * Check if a path matches any of the given glob patterns
    */
   private matchesAnyPattern(filePath: string, patterns: string[]): boolean {
-    return patterns.some(pattern => minimatch(filePath, pattern, { dot: true }));
+    return patterns.some((pattern) =>
+      minimatch(filePath, pattern, { dot: true }),
+    );
   }
 
   /**
@@ -412,8 +478,8 @@ export class AgentPermissions {
   async logOperation(
     operation: Operation,
     filePath: string | undefined,
-    result: 'allowed' | 'denied' | 'confirmed',
-    metadata?: Record<string, any>
+    result: "allowed" | "denied" | "confirmed",
+    metadata?: Record<string, any>,
   ): Promise<void> {
     if (!this.config.logging?.enabled) {
       return;
@@ -424,7 +490,7 @@ export class AgentPermissions {
       operation,
       path: filePath,
       result,
-      ...metadata
+      ...metadata,
     };
 
     this.operationLog.push(logEntry);
@@ -433,18 +499,16 @@ export class AgentPermissions {
     try {
       const logPath = path.join(process.cwd(), this.config.logging.logPath);
       const logDir = path.dirname(logPath);
-      
+
       // Ensure log directory exists
       await fs.mkdir(logDir, { recursive: true });
-      
+
       // Append to log file
-      await fs.appendFile(
-        logPath,
-        JSON.stringify(logEntry) + '\n',
-        'utf-8'
-      );
+      await fs.appendFile(logPath, JSON.stringify(logEntry) + "\n", "utf-8");
     } catch (error) {
-      console.warn(`Failed to write operation log: ${error.message}`);
+      console.warn(
+        `Failed to write operation log: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -460,50 +524,55 @@ export class AgentPermissions {
    */
   async checkSkillPermission(
     skillName: string,
-    operation: 'create' | 'modify' | 'delete'
+    operation: "create" | "modify" | "delete",
   ): Promise<PermissionCheckResult> {
     if (!this.config.permissions.agentSkills.allowed) {
       return {
         allowed: false,
-        reason: 'Agent skills are disabled'
+        reason: "Agent skills are disabled",
       };
     }
 
-    const skillConfig = this.config.permissions.agentSkills.skillPermissions[skillName];
+    const skillConfig =
+      this.config.permissions.agentSkills.skillPermissions[skillName];
     if (!skillConfig) {
       return {
         allowed: true,
-        reason: 'No specific restrictions for this skill'
+        reason: "No specific restrictions for this skill",
       };
     }
 
-    const operationKey = `can${operation.charAt(0).toUpperCase() + operation.slice(1)}` as keyof typeof skillConfig;
+    const operationKey =
+      `can${operation.charAt(0).toUpperCase() + operation.slice(1)}` as keyof typeof skillConfig;
     const allowed = skillConfig[operationKey];
 
     if (!allowed) {
       return {
         allowed: false,
-        reason: `Skill ${skillName} is not allowed to ${operation}`
+        reason: `Skill ${skillName} is not allowed to ${operation}`,
       };
     }
 
     return {
       allowed: true,
-      requiresConfirmation: skillConfig.requiresConfirmation ?? false
+      requiresConfirmation: skillConfig.requiresConfirmation ?? false,
     };
   }
 
   /**
    * Enable or disable safe mode
    */
-  setSafeMode(mode: 'dryRun' | 'readOnly' | 'confirmAll', enabled: boolean): void {
+  setSafeMode(
+    mode: "dryRun" | "readOnly" | "confirmAll",
+    enabled: boolean,
+  ): void {
     if (!this.config.safeModes) {
       this.config.safeModes = {};
     }
     if (!this.config.safeModes[mode]) {
-      this.config.safeModes[mode] = { enabled: false, description: '' };
+      this.config.safeModes[mode] = { enabled: false };
     }
-    this.config.safeModes[mode].enabled = enabled;
+    this.config.safeModes[mode]!.enabled = enabled;
   }
 
   /**
@@ -522,7 +591,9 @@ let globalPermissions: AgentPermissions | null = null;
 /**
  * Get or create global permissions instance
  */
-export async function getPermissions(configPath?: string): Promise<AgentPermissions> {
+export async function getPermissions(
+  configPath?: string,
+): Promise<AgentPermissions> {
   if (!globalPermissions) {
     globalPermissions = new AgentPermissions(configPath);
     await globalPermissions.load();
@@ -533,7 +604,9 @@ export async function getPermissions(configPath?: string): Promise<AgentPermissi
 /**
  * Convenience function to check permission
  */
-export async function checkPermission(input: PermissionCheckInput): Promise<PermissionCheckResult> {
+export async function checkPermission(
+  input: PermissionCheckInput,
+): Promise<PermissionCheckResult> {
   const permissions = await getPermissions();
   return permissions.checkPermission(input);
 }
@@ -549,36 +622,44 @@ export async function executeWithPermissions<T>(
     skill?: string;
     fileSize?: number;
     confirmPrompt?: (reason: string) => Promise<boolean>;
-  }
+  },
 ): Promise<T> {
   const permissions = await getPermissions();
-  
+
   const result = await permissions.checkPermission({
     operation,
     path,
     skill: options?.skill,
-    fileSize: options?.fileSize
+    fileSize: options?.fileSize,
   });
 
   if (!result.allowed) {
-    await permissions.logOperation(operation, path, 'denied', { reason: result.reason });
+    await permissions.logOperation(operation, path, "denied", {
+      reason: result.reason,
+    });
     throw new Error(`Permission denied: ${result.reason}`);
   }
 
   if (result.requiresConfirmation) {
     if (!options?.confirmPrompt) {
-      throw new Error(`Confirmation required but no prompt function provided: ${result.reason}`);
+      throw new Error(
+        `Confirmation required but no prompt function provided: ${result.reason}`,
+      );
     }
 
-    const confirmed = await options.confirmPrompt(result.reason || 'Confirm this operation?');
+    const confirmed = await options.confirmPrompt(
+      result.reason || "Confirm this operation?",
+    );
     if (!confirmed) {
-      await permissions.logOperation(operation, path, 'denied', { reason: 'User declined confirmation' });
-      throw new Error('Operation cancelled by user');
+      await permissions.logOperation(operation, path, "denied", {
+        reason: "User declined confirmation",
+      });
+      throw new Error("Operation cancelled by user");
     }
 
-    await permissions.logOperation(operation, path, 'confirmed');
+    await permissions.logOperation(operation, path, "confirmed");
   } else {
-    await permissions.logOperation(operation, path, 'allowed');
+    await permissions.logOperation(operation, path, "allowed");
   }
 
   // Execute if dry-run is disabled

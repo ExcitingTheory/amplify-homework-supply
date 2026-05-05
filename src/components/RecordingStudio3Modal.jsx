@@ -59,7 +59,7 @@ import {
   MusicNote as AudioIcon,
   RecordVoiceOver as TtsIcon,
 } from '@mui/icons-material';
-import { LinearProgress, CircularProgress as CircularProgressIcon } from '@mui/material';
+import { LinearProgress, Skeleton } from '@mui/material';
 import RecordingStudio3 from './RecordingStudio3';
 
 // Slide-up transition for fullscreen dialog

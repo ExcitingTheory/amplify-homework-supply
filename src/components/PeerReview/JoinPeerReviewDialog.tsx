@@ -13,7 +13,7 @@ import {
   TextField,
   Button,
   Typography,
-  CircularProgress,
+  Skeleton,
   Alert,
 } from '@mui/material'
 import RateReviewIcon from '@mui/icons-material/RateReview'
@@ -138,7 +138,7 @@ export default function JoinPeerReviewDialog({
           variant="contained"
           onClick={handleJoin}
           disabled={!code || loading}
-          startIcon={loading ? <CircularProgress size={16} /> : <RateReviewIcon />}
+          startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <RateReviewIcon />}
         >
           {loading
             ? t('peerReview.joinDialog.joining', 'Joining...')

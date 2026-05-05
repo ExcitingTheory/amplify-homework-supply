@@ -14,7 +14,7 @@ import KeyboardShortcutTrainer from './KeyboardShortcutTrainer';
  * Used in the Help → Keyboard Shortcuts documentation page.
  */
 const meta = {
-  title: 'Help/Keyboard Shortcut Trainer',
+  title: '🏠 Getting Started/Keyboard Shortcuts',
   component: KeyboardShortcutTrainer,
   parameters: {
     layout: 'fullscreen',

@@ -7,6 +7,15 @@
     "assignmentHeader": "Assignment",
     "gradeHeader": "Grade"
   },
+  "guilds": {
+    "title": "Guilds",
+    "heading": "All Guilds",
+    "description": "Join a guild to compete with your team and climb the leaderboard together.",
+    "selectSection": "Select a Section",
+    "noSections": "No sections found",
+    "createGuild": "Start a New Guild",
+    "guildPosts": "Guild Posts"
+  },
   "index": {
     "title": "Homework Supply",
     "assignments": "Assignments",
@@ -22,6 +31,14 @@
     "noDescription": "No description",
     "viewSection": "View Section",
     "sections": "Sections"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "heading": "Overall Leaderboard",
+    "xpMode": "XP",
+    "completionMode": "Completion",
+    "guildsMode": "Guilds",
+    "empty": "No leaderboard data yet. Complete assignments to earn XP!"
   },
   "profile": {
     "title": "My Profile",
@@ -57,24 +74,6 @@
         "cancel": "Cancel",
         "confirm": "Clear Cache"
       }
-    }
-  },
-  "sections": {
-    "title": "Sections",
-    "createNew": "Create New",
-    "noSectionsYet": "No Sections Yet",
-    "createNewSection": "Create New Section",
-    "untitledSection": "Untitled Section",
-    "viewSection": "View Section",
-    "loading": "Loading...",
-    "joinCode": "Join Code",
-    "newSection": {
-      "title": "New Section",
-      "description": "Create a new Section by entering the following information",
-      "nameLabel": "Name",
-      "descriptionLabel": "Description",
-      "cancel": "Cancel",
-      "create": "Create"
     }
   },
   "sectionDetail": {
@@ -129,6 +128,27 @@
       "save": "Save Grade"
     }
   },
+  "sections": {
+    "title": "Sections",
+    "createNew": "Create New",
+    "noSectionsYet": "No Sections Yet",
+    "createNewSection": "Create New Section",
+    "untitledSection": "Untitled Section",
+    "viewSection": "View Section",
+    "loading": "Loading...",
+    "joinCode": "Join Code",
+    "newSection": {
+      "title": "New Section",
+      "description": "Create a new Section by entering the following information",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "cancel": "Cancel",
+      "create": "Create"
+    }
+  },
+  "unitDetail": {
+    "loading": "Loading…"
+  },
   "units": {
     "title": "Units",
     "createNew": "Create New",
@@ -140,9 +160,6 @@
     "editUnit": "Edit Unit",
     "myDrafts": "My Drafts",
     "archivedUnits": "Archived Units"
-  },
-  "unitDetail": {
-    "loading": "Loading…"
   },
   "workbook": {
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",

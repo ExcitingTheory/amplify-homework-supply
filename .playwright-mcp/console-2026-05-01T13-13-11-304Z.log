@@ -1,0 +1,263 @@
+[    2102ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    3022ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[    3139ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[    3239ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[    3458ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   22791ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/offline:0
+[   24410ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_cjs_react-dom_development_07i0ttg.js:25055
+[   26631ms] Error: ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/components/BotCustomizer.tsx:20:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at Object.getCompilationErrors (file:///Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file:///Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/server/lib/dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file:///Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/server/dev/next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file:///Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/server/dev/next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file:///Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/server/base-server.js:1745:26)
+[   26383ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   26548ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   34653ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   80027ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   80747ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   80913ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   82434ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   89267ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   95432ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   95471ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[   95565ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   95985ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[   98004ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[  115414ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1233
+[  116653ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952
+[  127784ms] [ERROR] ./src/components/BotCustomizer.tsx:20:1
+Module not found: Can't resolve '../BotAvatar'
+  18 | ...ort Chip from '@mui/material/Chip'
+  19 | ...ort LockIcon from '@mui/icons-mate...
+> 20 | ...ort { BotAvatar } from '../BotAvatar'
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  21 | ...ort type { AvatarStyleTier, Avatar...
+  22 | ...
+  23 | ...==================================...
+
+Import traces:
+  Browser:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+  SSR:
+    ./src/components/BotCustomizer.tsx
+    ./pages/settings.jsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0bc8q4g._.js:1952

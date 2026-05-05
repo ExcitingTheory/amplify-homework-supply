@@ -10,7 +10,7 @@ import OfflineBanner from './OfflineBanner';
  * browser events, so in Storybook we demonstrate with mock decorators.
  */
 const meta: Meta<typeof OfflineBanner> = {
-  title: '🔌 Offline/OfflineBanner',
+  title: '🔌 Offline & Sync/Offline Banner',
   component: OfflineBanner,
   parameters: {
     layout: 'fullscreen',

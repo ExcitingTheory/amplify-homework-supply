@@ -34,7 +34,7 @@ Date: 2026-04-17
 `;
 
 export default {
-  title: '🎙️ Recording Audio/Screenplay Editor',
+  title: '🎙️ Recording Studio/Screenplay Editor',
   component: ScreenplayEditor,
   parameters: {
     layout: 'fullscreen',

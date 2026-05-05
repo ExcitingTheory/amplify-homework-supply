@@ -16,7 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/router'
 import MainToolbar from '../src/components/MainToolbar'
 
-import MyAuth from "../src/components/authenticator";
+import MyAuth from "../src/components/AmplifyAuthenticator";
 import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
@@ -25,6 +25,9 @@ import getCachedUrl from '../src/utils/getCachedUrl'
 import { useChatPageContext } from '../src/hooks/useChatPageContext'
 import AuthContext from '../src/context/authContext'
 import { BadgeShelf } from '../src/components/Gamification/BadgeShelf'
+import { ContentLockCard } from '../src/components/Gamification/ContentLockCard'
+import { useContentLock, useXP, useBadges } from '../src/context/gamificationContext'
+import { GamificationProviderWrapper } from '../src/context/gamificationProviderWrapper';
 import { PracticeDrillConfigPopup, PracticeDrillDialog } from '../src/components/PracticeDrill'
 
 import { fetchAuthSession } from 'aws-amplify/auth'
@@ -94,8 +97,9 @@ function Units() {
 
     const [work, setIsWorking] = useState(false)
     const router = useRouter()
-    const [earnedBadges, setEarnedBadges] = useState([])
-
+    const { badges: earnedBadges } = useBadges()
+    const { isLocked, getLockStatus } = useContentLock()
+    const { totalXP } = useXP()
     // Practice drill state
     const [practiceConfigOpen, setPracticeConfigOpen] = useState(false)
     const [practiceDrillOpen, setPracticeDrillOpen] = useState(false)
@@ -118,25 +122,6 @@ function Units() {
         setDrillConfig(null)
         setPracticeUnit(null)
     }
-
-    // Fetch earned badges
-    useEffect(() => {
-        if (authLoading || !user) return;
-        const client = getAmplifyClient();
-        if (!client?.models?.StudentBadge) return;
-        const sub = client.models.StudentBadge.observeQuery().subscribe({
-            next: ({ items }) => {
-                const valid = (items || []).filter(b => b != null && b.id != null);
-                setEarnedBadges(valid.map(b => ({
-                    badgeType: b.badgeType,
-                    awardedAt: b.awardedAt || b.createdAt,
-                    sourceId: b.sourceId || null,
-                })));
-            },
-            error: (err) => console.warn('[Units] Badge subscription error:', err),
-        });
-        return () => sub.unsubscribe();
-    }, [authLoading, user]);
 
     // Group badges by sourceId (unit ID) for per-card display
     const badgesByUnit = React.useMemo(() => {
@@ -425,10 +410,22 @@ function Units() {
                             </Typography>
                             {
                                 publishedUnits.map(function (unit) {
-                                    return (
+                                    const lockStatus = getLockStatus(unit.id)
+                                    const unitLocked = isLocked(unit.id)
 
+                                    return (
+                                      <ContentLockCard
+                                        key={unit.id}
+                                        title={unit.name || t('units.untitledUnit')}
+                                        isLocked={unitLocked}
+                                        requiredXP={lockStatus?.requiredXP}
+                                        currentXP={totalXP}
+                                        requiredCompletion={lockStatus?.requiredCompletion}
+                                        currentCompletion={lockStatus?.currentCompletion}
+                                        requiredBadge={lockStatus?.requiredBadge}
+                                        requiredPriorUnitId={lockStatus?.requiredPriorUnitId}
+                                      >
                                         <Card
-                                            key={unit.id}
                                             elevation={2}
                                             sx={{
                                                 display: 'flex',
@@ -545,6 +542,7 @@ function Units() {
 
 
                                         </Card>
+                                      </ContentLockCard>
                                     )
                                 })
                             }
@@ -825,7 +823,9 @@ function Units() {
 function WrappedPage() {
     return (
         <MyAuth>
-            <Units />
+            <GamificationProviderWrapper>
+                <Units />
+            </GamificationProviderWrapper>
         </MyAuth>
     )
 }

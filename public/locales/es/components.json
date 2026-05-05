@@ -9,12 +9,17 @@
   },
   "authenticator": {
     "confirmPasswordLabel": "Confirmar contraseña:",
+    "confirmPasswordPlaceholder": "Confirma tu contraseña",
+    "displayNameLabel": "Nombre para mostrar:",
+    "displayNamePlaceholder": "Elige un nombre para mostrar",
     "emailLabel": "Correo electrónico:",
     "emailPlaceholder": "Ingresa tu correo electrónico:",
     "nameLabel": "Nombre:",
     "namePlaceholder": "Ingrese su nombre:",
     "passwordLabel": "Contraseña:",
-    "passwordPlaceholder": "Ingrese su contraseña:"
+    "passwordPlaceholder": "Ingrese su contraseña:",
+    "phoneLabel": "Número de teléfono:",
+    "phonePlaceholder": "Ingresa tu número de teléfono"
   },
   "chatSidebar": {
     "activeChats": "Chats Activos",
