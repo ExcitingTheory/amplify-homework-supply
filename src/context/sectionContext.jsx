@@ -173,6 +173,25 @@ const SectionProvider = ({ children, unitId }) => {
     }
   }, []);
 
+  // Optimistic version bump helpers — call before save to block subscription echo
+  const bumpSectionVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = sectionVersionMapRef.current[id] || currentVersion;
+    sectionVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { sectionVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { sectionVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
+  const bumpAssignmentVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = assignmentVersionMapRef.current[id] || currentVersion;
+    assignmentVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { assignmentVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { assignmentVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
   // Memoize context value to prevent unnecessary rerenders
   const contextValue = React.useMemo(
     () => ({
@@ -180,8 +199,10 @@ const SectionProvider = ({ children, unitId }) => {
       sectionMap: state.sectionMap,
       assignments: state.assignments,
       refetchSections,
+      bumpSectionVersion,
+      bumpAssignmentVersion,
     }),
-    [state.sections, state.sectionMap, state.assignments, refetchSections],
+    [state.sections, state.sectionMap, state.assignments, refetchSections, bumpSectionVersion, bumpAssignmentVersion],
   );
 
   return (

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f5f5f5"/>
+  <rect x="0" y="0" width="960" height="48" fill="#1976d2"/>
+  <text x="480" y="30" text-anchor="middle" font-family="sans-serif" font-size="16" fill="white">Homework Supply — Dashboard</text>
+  <rect x="20" y="68" width="200" height="452" fill="#fff" stroke="#e0e0e0"/>
+  <text x="120" y="100" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">Sidebar</text>
+  <rect x="240" y="68" width="700" height="452" fill="#fff" stroke="#e0e0e0"/>
+  <text x="590" y="270" text-anchor="middle" font-family="sans-serif" font-size="24" fill="#999">Screenshot Placeholder</text>
+  <text x="590" y="300" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#bbb">Replace with actual capture</text>
+</svg>

@@ -29,6 +29,8 @@ export interface UseYjsWordConfig {
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
   saveDebounceMs?: number;
+  /** Optional optimistic version bump — call before save to block subscription echo */
+  bumpVersion?: (id: string, currentVersion: number) => { confirm: (v: number) => void; rollback: () => void };
 }
 
 export interface UseYjsWordReturn {
@@ -59,7 +61,8 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
     wordId,
     enableWebSocket = true,
     enablePersistence = true,
-    saveDebounceMs = 3000
+    saveDebounceMs = 3000,
+    bumpVersion
   } = config;
 
   const client = getAmplifyClient();
@@ -156,20 +159,31 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
       const yjsSnapshot = Buffer.from(yjsUpdate).toString('base64');
       updates.yjsSnapshot = yjsSnapshot;
 
+      // Optimistic version bump to block subscription echo
+      const currentVersion = word?._version;
+      const versionCtrl = (bumpVersion && currentVersion != null)
+        ? bumpVersion(wordId, currentVersion)
+        : null;
+      if (currentVersion != null) {
+        updates._version = currentVersion;
+      }
+
       console.log(`[useYjsWord] Saving word ${wordId} to GraphQL`);
       
       const { data, errors } = await client.models.Word.update(updates);
       
       if (errors) {
         console.error(`[useYjsWord] GraphQL errors saving word ${wordId}:`, errors);
+        versionCtrl?.rollback();
       } else {
         setWord(data);
+        versionCtrl?.confirm(data._version);
         console.log(`[useYjsWord] Successfully saved word ${wordId}`);
       }
     } catch (err) {
       console.error(`[useYjsWord] Error saving word ${wordId}:`, err);
     }
-  }, [wordId, metadata, provider, client.models.Word]);
+  }, [wordId, metadata, provider, client.models.Word, word, bumpVersion]);
 
   // Subscribe to Yjs updates and debounce saves
   useEffect(() => {

@@ -126,6 +126,9 @@ export { GamificationToastLayer } from "./GamificationToastLayer";
 export { StreakCalendar } from "./StreakCalendar";
 export type { StreakCalendarProps } from "./StreakCalendar";
 
+export { SectionXPGauge } from "./SectionXPGauge";
+export type { SectionXPGaugeProps } from "./SectionXPGauge";
+
 export { CampaignBriefing } from "./CampaignBriefing";
 export type { CampaignBriefingProps } from "./CampaignBriefing";
 
@@ -207,9 +210,10 @@ export type { GuildEditorProps } from "./GuildEditor";
 export { PixelSpriteMascot, STAGE_LABELS } from "./PixelSpriteMascot";
 export type { PixelSpriteMascotProps } from "./PixelSpriteMascot";
 
-export { XPTunerDialog } from "./XPTunerDialog";
+export { XPTunerDialog, XPTunerInline } from "./XPTunerDialog";
 export type {
   XPTunerDialogProps,
+  XPTunerInlineProps,
   XPTunerConfig,
   XPMultipliers,
   XPMultiplierConfig,

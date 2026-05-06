@@ -208,6 +208,7 @@ function getTextWidth(text) {
 // =============================================================================
 
 function RubyTagEditor({ inPhrase, inPronunciation, word }) {
+    const { bumpWordVersion } = React.useContext(DictionaryContext);
     const [phrase, setPhrase] = React.useState(inPhrase);
     const [pronunciation, setPronunciation] = React.useState(inPronunciation);
     const [selectedPhrase, setSelectedPhrase] = React.useState('');
@@ -491,11 +492,23 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                     onClick={async () => {
                                         setLoading(true);
 
-                                        const client = getAmplifyClient();
-                                        await client.models.Word.update({
-                                            id: word.id,
-                                            rubyTags: rubyTagsString
-                                        });
+                                        const versionCtrl = bumpWordVersion(word.id, word._version);
+                                        try {
+                                            const client = getAmplifyClient();
+                                            const { data: saved, errors } = await client.models.Word.update({
+                                                id: word.id,
+                                                rubyTags: rubyTagsString,
+                                                _version: word._version,
+                                            });
+                                            if (errors?.length) {
+                                                versionCtrl.rollback();
+                                            } else if (saved) {
+                                                versionCtrl.confirm(saved._version);
+                                            }
+                                        } catch (error) {
+                                            versionCtrl.rollback();
+                                            console.error('Failed to save ruby tags:', error);
+                                        }
 
                                         setRubyTags([]);
                                         setSelectedPhrase('');
@@ -1353,6 +1366,7 @@ function WordsPlugin({
     setConfirmDialog,
     fullDictionary,
 }) {
+    const { bumpWordVersion } = React.useContext(DictionaryContext);
     const [editor] = useLexicalComposerContext();
 
     // Setup virtualizer for performance
@@ -1411,13 +1425,21 @@ function WordsPlugin({
             const word = Object.values(dictionary).find(w => w.id === wordId);
             if (!word) return;
 
+            const versionCtrl = bumpWordVersion(word.id, word._version);
             const client = getAmplifyClient();
-            await client.models.Word.update({
+            const { data: saved, errors } = await client.models.Word.update({
                 id: word.id,
-                ...updates
+                ...updates,
+                _version: word._version,
             });
+            if (errors?.length) {
+                versionCtrl.rollback();
+            } else if (saved) {
+                versionCtrl.confirm(saved._version);
+            }
         } catch (error) {
             console.error('Failed to update word:', error);
+            // Rollback handled by catch — version map will self-correct on next subscription emit
         }
     };
 

@@ -732,6 +732,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
 // Metadata Editor Component for editing file properties
 function MetadataEditor({ file, onUpdate, onClose }) {
     const { t } = useTranslation('editor.files');
+    const { bumpFileVersion } = React.useContext(FilesContext);
     const [editing, setEditing] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: file.name || '',
@@ -742,20 +743,30 @@ function MetadataEditor({ file, onUpdate, onClose }) {
     });
 
     const handleSave = async () => {
+        const versionCtrl = file._version != null
+            ? bumpFileVersion(file.id, file._version)
+            : null;
         try {
             const client = getAmplifyClient();
-            const { data: updatedFile } = await client.models.File.update({
+            const { data: updatedFile, errors } = await client.models.File.update({
                 id: file.id,
                 name: formData.name,
                 description: formData.description,
                 prompt: formData.prompt,
                 model: formData.model,
-                variant: formData.variant
+                variant: formData.variant,
+                ...(file._version != null && { _version: file._version }),
             });
+            if (errors?.length) {
+                versionCtrl?.rollback();
+            } else {
+                versionCtrl?.confirm(updatedFile?._version);
+            }
             onUpdate?.(updatedFile);
             setEditing(false);
         } catch (error) {
             console.error('Error updating file:', error);
+            versionCtrl?.rollback();
         }
     };
 
@@ -2219,13 +2230,15 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
     const [editedName, setEditedName] = React.useState(file.name);
     const [isSaving, setIsSaving] = React.useState(false);
     const { handleFileNameUpdate } = useFileManager();
+    const { bumpFileVersion } = React.useContext(FilesContext);
     const isEvenRow = index % 2 === 0;
     
     // Lazy Yjs: Only connect when editing
     const { metadata, updateMetadata, forceSave, isSynced } = useYjsFile({
         fileId: isEditing ? file.id : null,
         enableWebSocket: isEditing,
-        enablePersistence: false // No need for IndexedDB on quick edits
+        enablePersistence: false, // No need for IndexedDB on quick edits
+        bumpVersion: bumpFileVersion,
     });
 
     const handleSaveFileName = async () => {
@@ -3005,11 +3018,20 @@ export default function FileManager2() {
             // If new name doesn't have extension, append the original extension
             const finalName = newHasExtension ? newNameTrimmed : newNameTrimmed + extension;
 
+            const versionCtrl = fileToUpdate._version != null
+                ? bumpFileVersion(fileToUpdate.id, fileToUpdate._version)
+                : null;
             const client = getAmplifyClient();
-            await client.models.File.update({
+            const { data: saved, errors } = await client.models.File.update({
                 id: fileToUpdate.id,
-                name: finalName
+                name: finalName,
+                ...(fileToUpdate._version != null && { _version: fileToUpdate._version }),
             });
+            if (errors?.length) {
+                versionCtrl?.rollback();
+            } else {
+                versionCtrl?.confirm(saved?._version);
+            }
 
             console.log('File name updated successfully');
             setEditingFileId(null);
@@ -3077,7 +3099,7 @@ export default function FileManager2() {
     const [selectedDocument, setSelectedDocument] = React.useState(null);
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
-    const { files, documents, session } = React.useContext(FilesContext);
+    const { files, documents, session, bumpFileVersion } = React.useContext(FilesContext);
 
     // Debug: log files received
     React.useEffect(() => {

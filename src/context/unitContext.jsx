@@ -445,6 +445,17 @@ const UnitProvider = ({ children, id, sectionId }) => {
               console.error("[unitContext] summarizeGradeFeedback error:", err),
             );
 
+            // Evaluate skills linked to this unit (fire-and-forget)
+            client.mutations
+              .evaluateSkillsForUnit({
+                studentId: currentUsername,
+                unitId: id,
+                cohortId: sectionId || undefined,
+              })
+              .catch((err) =>
+                console.warn("[unitContext] Skill evaluation:", err),
+              );
+
             // Update per-unit learning memory with block-level accuracy data
             const weakAreas = [];
             const strongAreas = [];

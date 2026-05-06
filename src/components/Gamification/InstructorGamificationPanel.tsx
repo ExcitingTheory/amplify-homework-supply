@@ -54,12 +54,13 @@ import { ANTI_BADGE_REGISTRY, getAllAntiBadgeTypes, getAntiBadgeConfig } from '.
 import type { AntiBadgeConfig } from './antiBadgeRegistry'
 import { BadgeIcon } from './BadgeIcon'
 import { BADGE_REGISTRY, getAllBadgeTypes, getBadgeConfig } from './badgeRegistry'
-import { XPTunerDialog, XPTunerConfig } from './XPTunerDialog'
+import { XPTunerDialog, XPTunerConfig, XPTunerInline } from './XPTunerDialog'
 import type { XPMultiplierConfig } from './XPTunerDialog'
 import { AvatarUnlockEditor } from './AvatarUnlockEditor'
 import FaceIcon from '@mui/icons-material/Face'
 import TuneIcon from '@mui/icons-material/Tune'
 import LockIcon from '@mui/icons-material/Lock'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ReportProblemIcon from '@mui/icons-material/ReportProblem'
 import LinearScaleIcon from '@mui/icons-material/LinearScale'
 import Switch from '@mui/material/Switch'
@@ -203,6 +204,8 @@ export interface InstructorGamificationPanelProps {
   onUpdateUnitLock?: (unitId: string, requirements: UnitLockRequirement) => void
   /** Called when a unit's lock requirements are cleared */
   onClearUnitLock?: (unitId: string) => void
+  /** Copy gamification settings from another section */
+  onCopyFromSection?: (sourceSectionId: string) => void
 }
 
 // ============================================================================
@@ -249,6 +252,7 @@ export function InstructorGamificationPanel({
   unitLockRequirements = {},
   onUpdateUnitLock,
   onClearUnitLock,
+  onCopyFromSection,
 }: InstructorGamificationPanelProps) {
   // Local form state for inline creation
   const [newGuildName, setNewGuildName] = useState('')
@@ -259,7 +263,6 @@ export function InstructorGamificationPanel({
     }),
     []
   )
-  const [xpTunerOpen, setXpTunerOpen] = useState(false)
   const [campaignTitle, setCampaignTitle] = useState('')
   const [campaignSetting, setCampaignSetting] = useState('')
   const [campaignStakes, setCampaignStakes] = useState('')
@@ -304,6 +307,14 @@ export function InstructorGamificationPanel({
         />
       )}
 
+      {/* ---- Copy Settings From Section ---- */}
+      {onCopyFromSection && selectedSectionId && sections.length > 1 && (
+        <CopyFromSectionButton
+          sections={sections.filter((s) => s.id !== selectedSectionId)}
+          onCopy={onCopyFromSection}
+        />
+      )}
+
       {/* ---- XP Tuner ---- */}
       {(onSaveXPConfig || onSaveXPMultipliers) && (
         <Accordion defaultExpanded={false}>
@@ -325,22 +336,11 @@ export function InstructorGamificationPanel({
             })()}
           </AccordionSummary>
           <AccordionDetails>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Scale XP rewards, set daily/weekly caps, or disable XP for this section.
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<TuneIcon />}
-              onClick={() => setXpTunerOpen(true)}
-            >
-              Open XP Tuner
-            </Button>
-            <XPTunerDialog
-              open={xpTunerOpen}
-              onClose={() => setXpTunerOpen(false)}
+            <XPTunerInline
               config={xpConfig || xpMultipliers || {}}
               onSave={onSaveXPConfig || onSaveXPMultipliers!}
               sectionName={sections.find((s) => s.id === selectedSectionId)?.name}
+              unitCount={availableUnits.length}
             />
           </AccordionDetails>
         </Accordion>
@@ -1136,6 +1136,50 @@ function UnitLockRow({
         )}
       </CardContent>
     </Card>
+  )
+}
+
+/** Copy From Section button with section picker */
+function CopyFromSectionButton({ sections, onCopy }: { sections: SectionOption[]; onCopy: (sectionId: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [selectedSource, setSelectedSource] = useState<string | null>(null)
+
+  return (
+    <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<ContentCopyIcon />}
+        onClick={() => setOpen(!open)}
+      >
+        Copy From Section
+      </Button>
+      {open && (
+        <>
+          <Autocomplete
+            size="small"
+            options={sections}
+            getOptionLabel={(o) => o.name || o.id}
+            onChange={(_, v) => setSelectedSource(v?.id || null)}
+            renderInput={(params) => <TextField {...params} label="Source section" size="small" sx={{ minWidth: 200 }} />}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            disabled={!selectedSource}
+            onClick={() => {
+              if (selectedSource) {
+                onCopy(selectedSource)
+                setOpen(false)
+                setSelectedSource(null)
+              }
+            }}
+          >
+            Copy
+          </Button>
+        </>
+      )}
+    </Box>
   )
 }
 

@@ -10,12 +10,41 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
+import Tooltip from '@mui/material/Tooltip'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
+import AutoStoriesIcon from '@mui/icons-material/AutoStories'
+import TravelExploreIcon from '@mui/icons-material/TravelExplore'
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu'
+import Diversity3Icon from '@mui/icons-material/Diversity3'
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects'
+import SchoolIcon from '@mui/icons-material/School'
 import { DiceBearAvatar } from './DiceBearAvatar'
 import { AvatarGlowRing, isGlowActive } from './AvatarGlowRing'
 import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
 import type { GlowRingConfig } from './AvatarGlowRing'
 import type { LevelInfo } from '../../utils/xpCalculation'
+
+// ============================================================================
+// Level icon/color config (matches LevelBadge)
+// ============================================================================
+
+const LEVEL_COLORS: Record<number, string> = {
+  1: '#9e9e9e',   // Beginner - grey
+  2: '#4caf50',   // Explorer - green
+  3: '#2196f3',   // Practitioner - blue
+  4: '#9c27b0',   // Contributor - purple
+  5: '#ff9800',   // Expert - orange
+  6: '#f44336',   // Master - red
+}
+
+const LEVEL_ICONS: Record<number, React.ReactElement> = {
+  1: <AutoStoriesIcon sx={{ fontSize: '0.9rem' }} />,
+  2: <TravelExploreIcon sx={{ fontSize: '0.9rem' }} />,
+  3: <HistoryEduIcon sx={{ fontSize: '0.9rem' }} />,
+  4: <Diversity3Icon sx={{ fontSize: '0.9rem' }} />,
+  5: <EmojiObjectsIcon sx={{ fontSize: '0.9rem' }} />,
+  6: <SchoolIcon sx={{ fontSize: '0.9rem' }} />,
+}
 
 // ============================================================================
 // Types
@@ -208,26 +237,27 @@ export function AvatarDisplay({
 
       {/* Level indicator — 2 o'clock position */}
       {level && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '28%',
-            right: -18,
-            zIndex: 3,
-            bgcolor: 'background.paper',
-            borderRadius: '10px',
-            px: 0.5,
-            py: '1px',
-            boxShadow: 1,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{ fontWeight: 700, lineHeight: 1, fontSize: '0.65rem' }}
+        <Tooltip title={`Lv. ${level.level} · ${level.label}`} arrow>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '28%',
+              right: -18,
+              zIndex: 3,
+              bgcolor: 'background.paper',
+              borderRadius: '50%',
+              width: 22,
+              height: 22,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 1,
+              color: LEVEL_COLORS[level.level] || LEVEL_COLORS[1],
+            }}
           >
-            Lv.{level.level}
-          </Typography>
-        </Box>
+            {LEVEL_ICONS[level.level] || LEVEL_ICONS[1]}
+          </Box>
+        </Tooltip>
       )}
 
       {/* Avatar with border effect */}

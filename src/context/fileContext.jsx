@@ -552,6 +552,25 @@ const FilesProvider = ({ children }) => {
     }
   };
 
+  // Optimistic version bump helpers — call before save to block subscription echo
+  const bumpFileVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = fileVersionMapRef.current[id] || currentVersion;
+    fileVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { fileVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { fileVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
+  const bumpDocumentVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = documentVersionMapRef.current[id] || currentVersion;
+    documentVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { documentVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { documentVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
   const contextValue = React.useMemo(
     () => ({
       audioFiles: state.audioFiles,
@@ -566,6 +585,8 @@ const FilesProvider = ({ children }) => {
       filesVersion: state.filesVersion,
       vectorStore, // Stable ref, doesn't cause re-renders
       vectorStoreReady: state.vectorStoreReady,
+      bumpFileVersion,
+      bumpDocumentVersion,
     }),
     [
       state.audioFiles,
@@ -578,6 +599,8 @@ const FilesProvider = ({ children }) => {
       state.filesVersion,
       // vectorStore is intentionally excluded - it's a ref and never changes
       state.vectorStoreReady,
+      bumpFileVersion,
+      bumpDocumentVersion,
     ],
   );
 

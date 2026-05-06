@@ -424,7 +424,19 @@ const preview = {
       storySort: {
         order: [
           "🏠 Getting Started",
-          ["Welcome", "Onboarding", "Keyboard Shortcuts", "*"],
+          [
+            "Welcome",
+            "Introduction",
+            "Why Homework Supply",
+            "Quick Tour",
+            ["Instructor Workflow", "Student Workflow", "AI Assistant", "*"],
+            "Core Concepts",
+            "For Developers",
+            ["Architecture", "Dev Setup", "*"],
+            "Onboarding",
+            "Keyboard Shortcuts",
+            "*",
+          ],
           "✏️ Lesson Editor",
           [
             "Editor",
@@ -643,6 +655,8 @@ const preview = {
           ["Button", "Header", "Page", "*"],
           "📄 Pages",
           ["Application Pages", "Index", "*"],
+          "📖 Documentation",
+          ["*"],
           "*",
         ],
       },
@@ -658,7 +672,7 @@ const preview = {
       test: "todo",
     },
   },
-  tags: ["autodocs"],
+  tags: [],
   decorators: [
     // Deferred rendering — shows loading screen while heavy component trees mount
     (Story, context) => {

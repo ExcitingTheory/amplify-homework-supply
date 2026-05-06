@@ -345,6 +345,25 @@ const DictionaryProvider = ({ children }) => {
     [],
   );
 
+  // Optimistic version bump helpers — call before save to block subscription echo
+  const bumpWordVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = wordVersionMapRef.current[id] || currentVersion;
+    wordVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { wordVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { wordVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
+  const bumpQuestionVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = questionVersionMapRef.current[id] || currentVersion;
+    questionVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => { questionVersionMapRef.current[id] = actualVersion; },
+      rollback: () => { questionVersionMapRef.current[id] = previousVersion; },
+    };
+  }, []);
+
   const contextValue = React.useMemo(
     () => ({
       dictionary: state.words,
@@ -358,6 +377,8 @@ const DictionaryProvider = ({ children }) => {
       filterWords,
       searching: state.searching,
       setSearching,
+      bumpWordVersion,
+      bumpQuestionVersion,
     }),
     [
       state.words,
@@ -371,6 +392,8 @@ const DictionaryProvider = ({ children }) => {
       filterWords,
       state.searching,
       setSearching,
+      bumpWordVersion,
+      bumpQuestionVersion,
     ],
   );
 

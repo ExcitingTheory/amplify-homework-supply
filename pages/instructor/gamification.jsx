@@ -20,23 +20,21 @@ import { getAmplifyClient } from "../../src/utils/amplifyClient";
 import { generateCampaignNarrative } from "../../src/utils/gamificationActions";
 
 // ============================================================================
-// Map new trigger types to schema enum values
-// (Schema still uses old enum until migration: KEYWORD, UI_INTERACTION, TIME_BASED, SUBMISSION_QUALITY)
-// New form types: KEYWORD, SCHEDULE, SECRET_LINK, ACHIEVEMENT
+// Trigger type mapping (identity — schema now uses new enum directly)
 // ============================================================================
 
 const TRIGGER_TYPE_TO_SCHEMA = {
   KEYWORD: "KEYWORD",
-  SCHEDULE: "TIME_BASED",
-  SECRET_LINK: "UI_INTERACTION",
-  ACHIEVEMENT: "SUBMISSION_QUALITY",
+  SCHEDULE: "SCHEDULE",
+  SECRET_LINK: "SECRET_LINK",
+  ACHIEVEMENT: "ACHIEVEMENT",
 };
 
 const SCHEMA_TO_TRIGGER_TYPE = {
   KEYWORD: "KEYWORD",
-  TIME_BASED: "SCHEDULE",
-  UI_INTERACTION: "SECRET_LINK",
-  SUBMISSION_QUALITY: "ACHIEVEMENT",
+  SCHEDULE: "SCHEDULE",
+  SECRET_LINK: "SECRET_LINK",
+  ACHIEVEMENT: "ACHIEVEMENT",
 };
 
 // ============================================================================
@@ -631,6 +629,72 @@ function GamificationAdmin() {
     [client],
   );
 
+  // Copy gamification settings from another section
+  const handleCopyFromSection = React.useCallback(
+    async (sourceSectionId) => {
+      if (!selectedSectionId || !sourceSectionId) return;
+      try {
+        // 1. Copy Skills (reset progress, keep structure)
+        const { data: sourceSkills } = await client.models.Skill.list({
+          filter: { cohortId: { eq: sourceSectionId } },
+        });
+        for (const skill of sourceSkills || []) {
+          await client.models.Skill.create({
+            title: skill.title,
+            description: skill.description,
+            prerequisites: skill.prerequisites,
+            xpReward: skill.xpReward,
+            cohortId: selectedSectionId,
+            unitIds: skill.unitIds || [],
+            minimumAccuracy: skill.minimumAccuracy || 70,
+          });
+        }
+
+        // 2. Copy Easter Eggs (reset discoveries)
+        const { data: sourceEggs } = await client.models.EasterEgg.list({
+          filter: { cohortId: { eq: sourceSectionId } },
+        });
+        for (const egg of sourceEggs || []) {
+          await client.models.EasterEgg.create({
+            trigger: egg.trigger,
+            triggerValue: egg.triggerValue,
+            xpReward: egg.xpReward,
+            badgeId: egg.badgeId,
+            revealMessage: egg.revealMessage,
+            active: true,
+            cohortId: selectedSectionId,
+            discoveries: [],
+          });
+        }
+
+        // 3. Copy Group Challenges (reset currentXP and contributions)
+        const { data: sourceChallenges } =
+          await client.models.GroupChallenge.list({
+            filter: { cohortId: { eq: sourceSectionId } },
+          });
+        for (const challenge of sourceChallenges || []) {
+          await client.models.GroupChallenge.create({
+            title: challenge.title,
+            targetXP: challenge.targetXP,
+            currentXP: 0,
+            deadline: challenge.deadline,
+            active: true,
+            bonusMultiplier: challenge.bonusMultiplier,
+            setting: challenge.setting,
+            stakes: challenge.stakes,
+            systemPromptSeed: challenge.systemPromptSeed,
+            chapterOrder: challenge.chapterOrder,
+            cohortId: selectedSectionId,
+            contributions: [],
+          });
+        }
+      } catch (err) {
+        console.error("[GamificationAdmin] Copy settings failed:", err);
+      }
+    },
+    [client, selectedSectionId],
+  );
+
   return (
     <>
       <AppBar position="fixed" color="inherit">
@@ -687,6 +751,7 @@ function GamificationAdmin() {
           unitLockRequirements={unitLockRequirements}
           onUpdateUnitLock={handleUpdateUnitLock}
           onClearUnitLock={handleClearUnitLock}
+          onCopyFromSection={handleCopyFromSection}
         />
       </Box>
     </>

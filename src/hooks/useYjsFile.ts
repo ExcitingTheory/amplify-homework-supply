@@ -27,6 +27,8 @@ export interface UseYjsFileConfig {
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
   saveDebounceMs?: number;
+  /** Optional optimistic version bump — call before save to block subscription echo */
+  bumpVersion?: (id: string, currentVersion: number) => { confirm: (v: number) => void; rollback: () => void };
 }
 
 export interface UseYjsFileReturn {
@@ -57,7 +59,8 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
     fileId,
     enableWebSocket = true,
     enablePersistence = true,
-    saveDebounceMs = 3000 // Faster for file operations
+    saveDebounceMs = 3000,
+    bumpVersion
   } = config;
 
   const client = getAmplifyClient();
@@ -168,17 +171,32 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
         }
       });
 
+      // Optimistic version bump to block subscription echo
+      const currentVersion = file?._version;
+      const versionCtrl = (bumpVersion && currentVersion != null)
+        ? bumpVersion(fileId, currentVersion)
+        : null;
+      if (currentVersion != null) {
+        fileData._version = currentVersion;
+      }
+
       console.log(`[useYjsFile] Saving file ${fileId} to GraphQL`);
 
-      // Update file record - no _version needed!
-      await client.models.File.update(fileData);
+      const { data: saved, errors } = await client.models.File.update(fileData);
 
-      console.log(`[useYjsFile] Successfully saved file ${fileId}`);
+      if (errors?.length) {
+        console.error(`[useYjsFile] Errors saving file ${fileId}:`, errors);
+        versionCtrl?.rollback();
+      } else {
+        if (saved) setFile(saved);
+        versionCtrl?.confirm(saved?._version);
+        console.log(`[useYjsFile] Successfully saved file ${fileId}`);
+      }
     } catch (err: any) {
       console.error('[useYjsFile] Failed to save to GraphQL:', err);
       setError(err as Error);
     }
-  }, [provider, fileId, client]);
+  }, [provider, fileId, client, file, bumpVersion]);
 
   // Schedule debounced save on Y.Doc changes
   useEffect(() => {

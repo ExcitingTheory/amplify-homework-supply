@@ -28,6 +28,8 @@ export interface UseYjsQuestionConfig {
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
   saveDebounceMs?: number;
+  /** Optional optimistic version bump — call before save to block subscription echo */
+  bumpVersion?: (id: string, currentVersion: number) => { confirm: (v: number) => void; rollback: () => void };
 }
 
 export interface UseYjsQuestionReturn {
@@ -58,7 +60,8 @@ export function useYjsQuestion(config: UseYjsQuestionConfig): UseYjsQuestionRetu
     questionId,
     enableWebSocket = true,
     enablePersistence = true,
-    saveDebounceMs = 3000
+    saveDebounceMs = 3000,
+    bumpVersion
   } = config;
 
   const client = getAmplifyClient();
@@ -151,20 +154,31 @@ export function useYjsQuestion(config: UseYjsQuestionConfig): UseYjsQuestionRetu
       const yjsSnapshot = Buffer.from(yjsUpdate).toString('base64');
       updates.yjsSnapshot = yjsSnapshot;
 
+      // Optimistic version bump to block subscription echo
+      const currentVersion = question?._version;
+      const versionCtrl = (bumpVersion && currentVersion != null)
+        ? bumpVersion(questionId, currentVersion)
+        : null;
+      if (currentVersion != null) {
+        updates._version = currentVersion;
+      }
+
       console.log(`[useYjsQuestion] Saving question ${questionId} to GraphQL`);
       
       const { data, errors } = await client.models.Question.update(updates);
       
       if (errors) {
         console.error(`[useYjsQuestion] GraphQL errors saving question ${questionId}:`, errors);
+        versionCtrl?.rollback();
       } else {
         setQuestion(data);
+        versionCtrl?.confirm(data._version);
         console.log(`[useYjsQuestion] Successfully saved question ${questionId}`);
       }
     } catch (err) {
       console.error(`[useYjsQuestion] Error saving question ${questionId}:`, err);
     }
-  }, [questionId, metadata, provider, client.models.Question]);
+  }, [questionId, metadata, provider, client.models.Question, question, bumpVersion]);
 
   // Subscribe to Yjs updates and debounce saves
   useEffect(() => {

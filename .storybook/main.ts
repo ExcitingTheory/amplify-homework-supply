@@ -9,6 +9,8 @@ const config: StorybookConfig = {
   stories: [
     // Welcome page first so Storybook defaults to it on fresh visits
     "./components/Welcome.stories.tsx",
+    // Documentation pages (intro, quick tour, concepts)
+    "./docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     // "../src/**/*.mdx", // Temporarily disabled - vitest plugin excludes ../**/*.mdx causing no tests to run
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "./TranslationMode.stories.tsx",
@@ -218,6 +220,10 @@ const config: StorybookConfig = {
       "react-dom",
       "react/jsx-runtime",
     ];
+
+    // Enable lazy compilation for faster initial load
+    config.server = config.server || {};
+    config.server.warmup = { clientFiles: [] };
 
     // Exclude YJS folder from being processed to prevent loading real files
     if (!config.optimizeDeps) {

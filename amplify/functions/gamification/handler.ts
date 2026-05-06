@@ -41,7 +41,7 @@ const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
 // Easter egg queries/mutations
 const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
   listEasterEggs(filter: { active: { eq: true } }) {
-    items { id trigger triggerValue xpReward badgeId revealMessage active _version _lastChangedAt _deleted }
+    items { id trigger triggerValue xpReward badgeId revealMessage active cohortId discoveries _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -166,7 +166,7 @@ const LIST_UNIT_DOCUMENTS = `query ListUnitDocuments($unitID: String!) {
 
 const LIST_SKILLS_BY_COHORT = `query ListSkillsByCohort($cohortId: String!) {
   listSkillByCohort(cohortId: $cohortId) {
-    items { id title description prerequisites xpReward _version _lastChangedAt _deleted }
+    items { id title description prerequisites xpReward unitIds minimumAccuracy _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -217,6 +217,26 @@ const GET_EASTER_EGG = `query GetEasterEgg($id: ID!) {
 
 const UPDATE_EASTER_EGG = `mutation UpdateEasterEgg($input: UpdateEasterEggInput!) {
   updateEasterEgg(input: $input) { id discoveries _version _lastChangedAt _deleted }
+}`;
+
+// Grade queries for skill evaluation
+const LIST_GRADES_BY_OWNER = `query ListGradesByOwner($owner: String!, $filter: ModelGradeFilterInput) {
+  listGrades(filter: { owner: { eq: $owner } }) {
+    items { id owner unitID complete accuracy _version _lastChangedAt _deleted }
+  }
+}`;
+
+// Badge model queries
+const LIST_BADGES_BY_COHORT = `query ListBadgesByCohort($cohortId: String!) {
+  listBadgeByCohort(cohortId: $cohortId) {
+    items { id title description icon shape rarity category criteria cohortId autoEvaluate _version _lastChangedAt _deleted }
+  }
+}`;
+
+const LIST_ALL_BADGES = `query ListAllBadges {
+  listBadges(filter: { autoEvaluate: { eq: true } }) {
+    items { id title description icon shape rarity category criteria cohortId autoEvaluate _version _lastChangedAt _deleted }
+  }
 }`;
 
 // GroupChallenge update (for embedded contributions)
@@ -840,6 +860,8 @@ export const handler: Handler = async (event) => {
         return await handleGenerateSkillTree(gqlClient, args);
       case "advanceSkillProgress":
         return await handleAdvanceSkillProgress(gqlClient, args);
+      case "evaluateSkillsForUnit":
+        return await handleEvaluateSkillsForUnit(gqlClient, args);
       case "claimStorybookBadges":
         return await handleClaimStorybookBadges(gqlClient, args, identity);
       case "applyBattleStakes":
@@ -1068,6 +1090,26 @@ async function handleAwardXP(
     console.error("[gamification] Auto-checkBadges after awardXP failed:", err);
   }
 
+  // Check ACHIEVEMENT-type easter eggs after XP award
+  try {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const studentStats = {
+      totalXP: profile.totalXP || 0,
+      currentStreak: profile.currentStreak || 0,
+      level: profile.level || 1,
+      lastAccuracy: accuracy || 0,
+      unitsCompleted: profile.completedAssignments || 0,
+    };
+    await handleCheckEasterEggs(gqlClient, {
+      studentId,
+      submissionText: "",
+      triggerType: "ACHIEVEMENT",
+      studentStats,
+    });
+  } catch (err) {
+    console.warn("[gamification] ACHIEVEMENT easter egg check failed:", err);
+  }
+
   return { alreadyAwarded: false, xpAmount, totalXP };
 }
 
@@ -1207,6 +1249,47 @@ async function handleCheckBadges(
       existingByType.set(criteria.badgeType, newBadge);
       newBadges.push(criteria.badgeType);
     }
+  }
+
+  // ---- Check DB-based Badge model criteria (custom instructor badges) ----
+  try {
+    const dbBadges = await fetchAutoEvaluateBadges(gqlClient, cohortId);
+    for (const badge of dbBadges) {
+      if (existingByType.has(badge.id)) continue; // Already earned (by badge model ID)
+      const criteriaJson = typeof badge.criteria === "string" ? JSON.parse(badge.criteria) : badge.criteria;
+      if (!criteriaJson || criteriaJson.type === "manual") continue;
+
+      let earned = false;
+      if (criteriaJson.type === "xp_log_count") {
+        const count = xpLogs.filter((l: any) => l.reason === criteriaJson.reason).length;
+        earned = count >= (criteriaJson.threshold || 1);
+      } else if (criteriaJson.type === "stat_threshold") {
+        const metricValue = criteriaJson.metric === "totalXP" ? totalXP :
+          criteriaJson.metric === "currentStreak" ? (profile.currentStreak || 0) :
+          criteriaJson.metric === "level" ? (profile.level || 1) :
+          criteriaJson.metric === "completedAssignments" ? (profile.completedAssignments || 0) : 0;
+        const op = criteriaJson.operator || ">=";
+        const threshold = criteriaJson.value || 0;
+        earned = op === ">=" ? metricValue >= threshold :
+          op === ">" ? metricValue > threshold :
+          op === "==" ? metricValue === threshold : false;
+      }
+
+      if (earned) {
+        const newBadge = {
+          badgeType: badge.id, // Use Badge model ID as badgeType
+          sourceId: badge.id,
+          awardedAt: new Date().toISOString(),
+          cohortId: badge.cohortId || cohortId || null,
+          count: 1,
+        };
+        existingBadges.push(newBadge);
+        existingByType.set(badge.id, newBadge);
+        newBadges.push(badge.title || badge.id);
+      }
+    }
+  } catch (err) {
+    console.warn("[gamification] DB badge evaluation error:", err);
   }
 
   // ---- Check anti-badge criteria ----
@@ -2354,14 +2437,14 @@ async function handleRecomputeProgress(
 }
 
 // ============================================================================
-// checkEasterEggs — Scans submission text for keyword-based easter eggs
+// checkEasterEggs — Scans for easter eggs by trigger type
 // ============================================================================
 
 async function handleCheckEasterEggs(
   gqlClient: any,
-  args: { studentId: string; submissionText: string; triggerType?: string },
+  args: { studentId: string; submissionText: string; triggerType?: string; studentStats?: any },
 ) {
-  const { studentId, submissionText, triggerType } = args;
+  const { studentId, submissionText, triggerType, studentStats } = args;
   const filterType = triggerType || "KEYWORD";
 
   // Fetch active easter eggs
@@ -2397,14 +2480,22 @@ async function handleCheckEasterEggs(
 
     if (egg.trigger === "KEYWORD") {
       matched = textLower.includes((egg.triggerValue || "").toLowerCase());
-    } else if (egg.trigger === "TIME_BASED") {
-      const now = new Date();
-      const hourStr = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
-      const parts = (egg.triggerValue || "").split("-");
-      if (parts.length === 2) {
-        matched = hourStr >= parts[0] && hourStr <= parts[1];
+    } else if (egg.trigger === "SCHEDULE") {
+      // ISO JSON: {"start":"...","end":"..."}
+      try {
+        const { start, end } = JSON.parse(egg.triggerValue || "{}");
+        const now = new Date().toISOString();
+        matched = (!start || now >= start) && (!end || now <= end);
+      } catch {
+        matched = false;
+      }
+    } else if (egg.trigger === "ACHIEVEMENT") {
+      // Condition string: "accuracy>=95", "streak>=7", "xp>=1000"
+      if (studentStats) {
+        matched = evaluateAchievementCondition(egg.triggerValue || "", studentStats);
       }
     }
+    // SECRET_LINK — handled via discoverEasterEgg mutation directly, not checkEasterEggs
 
     if (matched) {
       // Embed discovery in EasterEgg.discoveries array
@@ -2450,6 +2541,55 @@ async function handleCheckEasterEggs(
   }
 
   return { discovered };
+}
+
+/**
+ * Evaluates an achievement condition string against student stats.
+ * Format: "metric>=value" or "metric>value" or "metric==value"
+ * Supported metrics: accuracy, streak, xp, level, units_completed
+ */
+function evaluateAchievementCondition(condition: string, stats: any): boolean {
+  const match = condition.match(/^(\w+)(>=|<=|>|<|==)(\d+)$/);
+  if (!match) return false;
+
+  const [, metric, operator, valueStr] = match;
+  const threshold = Number(valueStr);
+
+  let actual: number;
+  switch (metric) {
+    case "accuracy":
+      actual = stats.lastAccuracy || 0;
+      break;
+    case "streak":
+      actual = stats.currentStreak || 0;
+      break;
+    case "xp":
+      actual = stats.totalXP || 0;
+      break;
+    case "level":
+      actual = stats.level || 1;
+      break;
+    case "units_completed":
+      actual = stats.unitsCompleted || 0;
+      break;
+    default:
+      return false;
+  }
+
+  switch (operator) {
+    case ">=":
+      return actual >= threshold;
+    case "<=":
+      return actual <= threshold;
+    case ">":
+      return actual > threshold;
+    case "<":
+      return actual < threshold;
+    case "==":
+      return actual === threshold;
+    default:
+      return false;
+  }
 }
 
 // ============================================================================
@@ -2776,8 +2916,200 @@ async function handleAdvanceSkillProgress(
 }
 
 // ============================================================================
+// evaluateSkillsForUnit — Check if completing a unit masters any skills
+// ============================================================================
+
+async function handleEvaluateSkillsForUnit(
+  gqlClient: any,
+  args: { studentId: string; unitId: string; cohortId?: string },
+) {
+  const { studentId, unitId, cohortId } = args;
+
+  // Determine the effective cohortId(s) to check
+  const cohortIds = cohortId ? [cohortId, `unit-${unitId}`] : [`unit-${unitId}`];
+
+  // Fetch all skills from relevant cohorts
+  let allSkills: any[] = [];
+  for (const cid of cohortIds) {
+    try {
+      const { data: skillsResult } = await gqlClient.graphql({
+        query: LIST_SKILLS_BY_COHORT,
+        variables: { cohortId: cid },
+      });
+      const items = (skillsResult?.listSkillByCohort?.items || []).filter(
+        (s: any) => s != null,
+      );
+      allSkills.push(...items);
+    } catch (err) {
+      console.warn(`[gamification] Could not fetch skills for cohort ${cid}:`, err);
+    }
+  }
+
+  // Filter to skills that include this unitId in their unitIds array
+  const relevantSkills = allSkills.filter((skill: any) => {
+    const units = skill.unitIds || [];
+    return units.includes(unitId);
+  });
+
+  if (relevantSkills.length === 0) {
+    return { evaluated: 0, mastered: [], inProgress: [] };
+  }
+
+  // Fetch student's grades (all completed)
+  const { data: gradesResult } = await gqlClient.graphql({
+    query: LIST_GRADES_BY_OWNER,
+    variables: { owner: studentId },
+  });
+  const grades = (gradesResult?.listGrades?.items || []).filter(
+    (g: any) => g != null && g.complete,
+  );
+
+  // Build a map of unitID -> best accuracy
+  const unitAccuracyMap = new Map<string, number>();
+  for (const grade of grades) {
+    const current = unitAccuracyMap.get(grade.unitID) || 0;
+    const acc = grade.accuracy || 0;
+    if (acc > current) unitAccuracyMap.set(grade.unitID, acc);
+  }
+
+  // Get student profile for skill progress
+  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+  const allProgress: any[] = (() => {
+    try {
+      return profile.skillProgress ? JSON.parse(profile.skillProgress) : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  const mastered: string[] = [];
+  const inProgress: string[] = [];
+
+  for (const skill of relevantSkills) {
+    const requiredUnits: string[] = skill.unitIds || [];
+    const minAccuracy = skill.minimumAccuracy || 70;
+
+    // Check if all required units have been completed with sufficient accuracy
+    let completedCount = 0;
+    for (const reqUnit of requiredUnits) {
+      const bestAccuracy = unitAccuracyMap.get(reqUnit) || 0;
+      if (bestAccuracy >= minAccuracy) completedCount++;
+    }
+
+    const existingProgress = allProgress.find((p: any) => p.skillId === skill.id);
+    const currentStatus = existingProgress?.status || "LOCKED";
+
+    if (completedCount === requiredUnits.length) {
+      // All units mastered — advance to MASTERED
+      if (currentStatus !== "MASTERED") {
+        if (existingProgress) {
+          existingProgress.status = "MASTERED";
+        } else {
+          allProgress.push({ skillId: skill.id, status: "MASTERED" });
+        }
+        mastered.push(skill.id);
+
+        // Award XP for mastering a skill
+        if (skill.xpReward && skill.xpReward > 0) {
+          try {
+            await handleAwardXP(
+              gqlClient,
+              { studentId, reason: "ALL_BLOCKS_COMPLETED", referenceId: `skill-${skill.id}` },
+              null,
+            );
+          } catch (err) {
+            console.warn("[gamification] Skill mastery XP error:", err);
+          }
+        }
+      }
+    } else if (completedCount > 0) {
+      // Some units done — mark IN_PROGRESS
+      if (currentStatus === "LOCKED" || currentStatus === "AVAILABLE") {
+        if (existingProgress) {
+          existingProgress.status = "IN_PROGRESS";
+        } else {
+          allProgress.push({ skillId: skill.id, status: "IN_PROGRESS" });
+        }
+        inProgress.push(skill.id);
+      }
+    }
+  }
+
+  // Write updated skillProgress if anything changed
+  if (mastered.length > 0 || inProgress.length > 0) {
+    await gqlClient.graphql({
+      query: UPDATE_STUDENT_PROFILE,
+      variables: {
+        input: {
+          id: profile.id,
+          skillProgress: JSON.stringify(allProgress),
+          _version: profile._version,
+        },
+      },
+    });
+
+    // For mastered skills, unlock dependents
+    for (const skillId of mastered) {
+      try {
+        await handleAdvanceSkillProgress(gqlClient, {
+          studentId,
+          skillId,
+          newStatus: "MASTERED",
+        });
+      } catch (err) {
+        // May fail if already mastered — that's fine
+        console.warn("[gamification] Unlock dependents error:", err);
+      }
+    }
+  }
+
+  return { evaluated: relevantSkills.length, mastered, inProgress };
+}
+
+// ============================================================================
 // StudentProfile helpers — sync to aggregate model alongside legacy writes
 // ============================================================================
+
+/**
+ * Fetches Badge records from DB that have autoEvaluate=true.
+ * Includes both global badges (no cohortId) and section-specific badges.
+ */
+async function fetchAutoEvaluateBadges(gqlClient: any, cohortId?: string): Promise<any[]> {
+  const badges: any[] = [];
+
+  // Fetch all auto-evaluate badges
+  try {
+    const { data: allResult } = await gqlClient.graphql({
+      query: LIST_ALL_BADGES,
+    });
+    const items = (allResult?.listBadges?.items || []).filter((b: any) => b != null);
+    badges.push(...items);
+  } catch (err) {
+    console.warn("[gamification] fetchAutoEvaluateBadges error:", err);
+  }
+
+  // If cohortId provided, also fetch cohort-specific badges
+  if (cohortId) {
+    try {
+      const { data: cohortResult } = await gqlClient.graphql({
+        query: LIST_BADGES_BY_COHORT,
+        variables: { cohortId },
+      });
+      const items = (cohortResult?.listBadgeByCohort?.items || []).filter(
+        (b: any) => b != null && b.autoEvaluate,
+      );
+      // Deduplicate by ID
+      const existingIds = new Set(badges.map((b: any) => b.id));
+      for (const item of items) {
+        if (!existingIds.has(item.id)) badges.push(item);
+      }
+    } catch (err) {
+      console.warn("[gamification] fetchAutoEvaluateBadges cohort error:", err);
+    }
+  }
+
+  return badges;
+}
 
 async function getOrCreateStudentProfile(
   gqlClient: any,
@@ -3047,6 +3379,8 @@ async function handleGenerateSkillTree(
           prerequisites: JSON.stringify([]), // placeholder — updated in second pass
           xpReward: def.xpReward || 25,
           cohortId: effectiveCohortId,
+          unitIds: [unitID],
+          minimumAccuracy: 70,
         },
       },
     });

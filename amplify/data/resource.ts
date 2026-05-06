@@ -1261,15 +1261,16 @@ const schema = a
         _deleted: a.boolean(),
         trigger: a.enum([
           "KEYWORD",
-          "UI_INTERACTION",
-          "TIME_BASED",
-          "SUBMISSION_QUALITY",
+          "SCHEDULE",
+          "SECRET_LINK",
+          "ACHIEVEMENT",
         ]),
         triggerValue: a.string().required(),
         xpReward: a.integer().required(),
         badgeId: a.string(),
         revealMessage: a.string().required(),
         active: a.boolean().default(true),
+        cohortId: a.string(),
         // Embedded discoveries (absorbed from EasterEggDiscovery)
         discoveries: a.ref("EasterEggDiscoveryEntry").array(),
       })
@@ -1290,6 +1291,8 @@ const schema = a
         prerequisites: a.json(),
         xpReward: a.integer(),
         cohortId: a.string(),
+        unitIds: a.string().array(),
+        minimumAccuracy: a.integer().default(70),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1336,8 +1339,32 @@ const schema = a
         setting: a.string(),
         stakes: a.string(),
         systemPromptSeed: a.string(),
+        chapterOrder: a.integer(),
         // Embedded contributions (absorbed from GroupChallengeContribution)
         contributions: a.ref("ChallengeContribution").array(),
+      })
+      .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.group("Instructors"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    Badge: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        title: a.string().required(),
+        description: a.string(),
+        icon: a.string(),
+        shape: a.enum(["circle", "hexagon", "shield", "diamond"]),
+        rarity: a.enum(["common", "uncommon", "rare", "epic", "legendary"]),
+        category: a.string(),
+        criteria: a.json(),
+        cohortId: a.string(),
+        autoEvaluate: a.boolean().default(true),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1901,6 +1928,17 @@ const schema = a
         studentId: a.string().required(),
         skillId: a.string().required(),
         newStatus: a.string().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(gamificationHandler)),
+
+    evaluateSkillsForUnit: a
+      .mutation()
+      .arguments({
+        studentId: a.string().required(),
+        unitId: a.string().required(),
+        cohortId: a.string(),
       })
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
