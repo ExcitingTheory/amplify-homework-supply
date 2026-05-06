@@ -20,27 +20,28 @@ const GET_HOMEWORK_ROOM = `query GetHomeworkRoom($id: ID!) {
   getHomeworkRoom(id: $id) {
     id gradeId ownerId invitedUserIds status
     _version
+    _lastChangedAt
+    _deleted
   }
 }`
 
 const GET_GRADE = `query GetGrade($id: ID!) {
   getGrade(id: $id) {
-    id unitID data accuracy complete feedback owner _version
-  }
+    id unitID data accuracy complete feedback owner _version _lastChangedAt _deleted }
 }`
 
 const GET_UNIT = `query GetUnit($id: ID!) {
-  getUnit(id: $id) { id name description data _version }
+  getUnit(id: $id) { id name description data _version _lastChangedAt _deleted }
 }`
 
 const GET_STUDENT_MEMORY = `query GetStudentMemory($studentId: String!) {
   listStudentMemoryByStudentId(studentId: $studentId) {
-    items { id studentId memoryMarkdown _version }
+    items { id studentId memoryMarkdown _version _lastChangedAt _deleted }
   }
 }`
 
 const UPDATE_HOMEWORK_ROOM = `mutation UpdateHomeworkRoom($input: UpdateHomeworkRoomInput!) {
-  updateHomeworkRoom(input: $input) { id status aiReviewSummary _version }
+  updateHomeworkRoom(input: $input) { id status aiReviewSummary _version _lastChangedAt _deleted }
 }`
 
 // ============================================================================

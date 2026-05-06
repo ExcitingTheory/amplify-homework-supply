@@ -362,11 +362,13 @@ describe('InstructorGamificationPanel', () => {
   it('calls onAddSkill when add button clicked', () => {
     const onAddSkill = vi.fn()
     render(<InstructorGamificationPanel onAddSkill={onAddSkill} />)
+    // Expand Skill Tree accordion
     fireEvent.click(screen.getByText(/Skill Tree/))
-    const input = screen.getByLabelText('Skill title')
+    // Use placeholder to find the input (MUI label association can be tricky in collapsed accordions)
+    const input = screen.getByPlaceholderText('e.g. Variables & Types')
     fireEvent.change(input, { target: { value: 'Loops' } })
-    fireEvent.click(screen.getByText('Add'))
-    expect(onAddSkill).toHaveBeenCalledWith({ title: 'Loops' })
+    fireEvent.click(screen.getByRole('button', { name: /Add Skill/i }))
+    expect(onAddSkill).toHaveBeenCalledWith(expect.objectContaining({ title: 'Loops' }))
   })
 
   it('renders existing guilds', () => {

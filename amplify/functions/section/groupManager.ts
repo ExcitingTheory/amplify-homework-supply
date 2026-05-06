@@ -214,7 +214,7 @@ export class GroupManager {
       
       return response.Users || [];
     } catch (error: any) {
-      if (error.name === 'GroupNotFoundException') {
+      if (error.name === 'ResourceNotFoundException' || error.name === 'GroupNotFoundException') {
         console.log(`[GroupManager] Group not found: ${groupName}`);
         return [];
       }

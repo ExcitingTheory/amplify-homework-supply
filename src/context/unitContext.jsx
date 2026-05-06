@@ -1,30 +1,43 @@
 import * as React from "react";
 import { useState, useRef, useReducer, createContext } from "react";
-import { useRouter } from 'next/router';
-import yaml from 'js-yaml';
-import { moderateContent } from '../utils/moderateContent';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { awardXPAndCheck, updateUnitMemoryAndRebuild, checkPersonalBest } from '../utils/gamificationActions';
-import AuthContext from '../context/authContext';
-import { useWorkbookCollaboration } from '../yjs/workbookHooks';
-import { unitReducer, initialState as unitInitialState, actionTypes } from './reducers/unitReducer';
+import { useRouter } from "next/router";
+import yaml from "js-yaml";
+import { moderateContent } from "../utils/moderateContent";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import {
+  awardXPAndCheck,
+  updateUnitMemoryAndRebuild,
+  checkPersonalBest,
+} from "../utils/gamificationActions";
+import AuthContext from "../context/authContext";
+import { useWorkbookCollaboration } from "../yjs/workbookHooks";
+import {
+  unitReducer,
+  initialState as unitInitialState,
+  actionTypes,
+} from "./reducers/unitReducer";
 // Provider and Consumer are connected through their "parent" context
 const UnitContext = createContext({});
 
 export const gradedBlockTypes = [
-  'quiz',
-  'meaning-association',
-  'answer',
-  'custom-answer',
-]
+  "quiz",
+  "meaning-association",
+  "answer",
+  "custom-answer",
+];
 const UnitProvider = ({ children, id, sectionId }) => {
   // Get auth state from centralized context
-  const { user, session: authSession, isLoading: authLoading } = React.useContext(AuthContext);
+  const {
+    user,
+    session: authSession,
+    isLoading: authLoading,
+  } = React.useContext(AuthContext);
 
   const [state, dispatch] = useReducer(unitReducer, unitInitialState);
   const savingCountRef = useRef(0);
 
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
+  const practiceSessionVersionMapRef = useRef({});
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -34,17 +47,32 @@ const UnitProvider = ({ children, id, sectionId }) => {
 
   // Memoize derived values to prevent recalculation on every render
   const name = React.useMemo(() => state.unit?.name, [state.unit?.name]);
-  const description = React.useMemo(() => state.unit?.description, [state.unit?.description]);
-  const timeLimitSeconds = React.useMemo(() => state.unit?.timeLimitSeconds, [state.unit?.timeLimitSeconds]);
+  const description = React.useMemo(
+    () => state.unit?.description,
+    [state.unit?.description],
+  );
+  const timeLimitSeconds = React.useMemo(
+    () => state.unit?.timeLimitSeconds,
+    [state.unit?.timeLimitSeconds],
+  );
 
   const router = useRouter();
 
   // const [featuredImageUrl, setFeaturedImageUrl] = React.useState(null);
 
   // Memoize derived values to prevent recalculation on every render
-  const rubricLength = React.useMemo(() => state.rubric.length || 0, [state.rubric.length]);
-  const unitVersion = React.useMemo(() => state.unit?._version || 0, [state.unit?._version]);
-  const unitOwner = React.useMemo(() => state.unit?.owner || '', [state.unit?.owner]);
+  const rubricLength = React.useMemo(
+    () => state.rubric.length || 0,
+    [state.rubric.length],
+  );
+  const unitVersion = React.useMemo(
+    () => state.unit?._version || 0,
+    [state.unit?._version],
+  );
+  const unitOwner = React.useMemo(
+    () => state.unit?.owner || "",
+    [state.unit?.owner],
+  );
 
   /**
    * Check if the current user has permission to EDIT the unit (strict check)
@@ -53,47 +81,51 @@ const UnitProvider = ({ children, id, sectionId }) => {
    * - User is in Instructors, Moderators, or Admins group
    * - Unit status is PUBLISHED (public access for viewing)
    */
-  const checkUnitEditPermission = React.useCallback((unit, currentUser, userGroups) => {
-    if (!unit || !unit.id) {
-      return { hasAccess: false, reason: null }; // Unit not loaded yet
-    }
+  const checkUnitEditPermission = React.useCallback(
+    (unit, currentUser, userGroups) => {
+      if (!unit || !unit.id) {
+        return { hasAccess: false, reason: null }; // Unit not loaded yet
+      }
 
-    // If unit is published, anyone can view it (learners can read published units)
-    if (unit.status === 'PUBLISHED') {
-      return { hasAccess: true, reason: null };
-    }
+      // If unit is published, anyone can view it (learners can read published units)
+      if (unit.status === "PUBLISHED") {
+        return { hasAccess: true, reason: null };
+      }
 
-    // Check if user is authenticated
-    if (!currentUser) {
-      return { 
-        hasAccess: false, 
-        reason: 'You must be signed in to access this content.' 
+      // Check if user is authenticated
+      if (!currentUser) {
+        return {
+          hasAccess: false,
+          reason: "You must be signed in to access this content.",
+        };
+      }
+
+      const userId = currentUser?.attributes?.sub;
+      const groups = userGroups || [];
+
+      // Check if user is owner
+      if (unit.owner === userId) {
+        return { hasAccess: true, reason: null };
+      }
+
+      // Check if user is in privileged groups
+      const hasInstructorAccess = groups.some((group) =>
+        ["Instructors", "Moderators", "Admins"].includes(group),
+      );
+
+      if (hasInstructorAccess) {
+        return { hasAccess: true, reason: null };
+      }
+
+      // No access to edit
+      return {
+        hasAccess: false,
+        reason:
+          "You do not have permission to edit this unit. Only the owner or instructors can edit unpublished units.",
       };
-    }
-
-    const userId = currentUser?.attributes?.sub;
-    const groups = userGroups || [];
-
-    // Check if user is owner
-    if (unit.owner === userId) {
-      return { hasAccess: true, reason: null };
-    }
-
-    // Check if user is in privileged groups
-    const hasInstructorAccess = groups.some(group => 
-      ['Instructors', 'Moderators', 'Admins'].includes(group)
-    );
-
-    if (hasInstructorAccess) {
-      return { hasAccess: true, reason: null };
-    }
-
-    // No access to edit
-    return { 
-      hasAccess: false, 
-      reason: 'You do not have permission to edit this unit. Only the owner or instructors can edit unpublished units.' 
-    };
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Check if the current user has permission to VIEW the unit in workbook (permissive check)
@@ -103,46 +135,49 @@ const UnitProvider = ({ children, id, sectionId }) => {
    * - Unit is published (anyone can access)
    * - User is owner or instructor (can access any unit)
    */
-  const checkUnitViewPermission = React.useCallback((unit, currentUser, userGroups) => {
-    if (!unit || !unit.id) {
-      return { hasAccess: false, reason: null }; // Unit not loaded yet
-    }
+  const checkUnitViewPermission = React.useCallback(
+    (unit, currentUser, userGroups) => {
+      if (!unit || !unit.id) {
+        return { hasAccess: false, reason: null }; // Unit not loaded yet
+      }
 
-    // If unit is published, anyone can view it
-    if (unit.status === 'PUBLISHED') {
+      // If unit is published, anyone can view it
+      if (unit.status === "PUBLISHED") {
+        return { hasAccess: true, reason: null };
+      }
+
+      // Check if user is authenticated
+      if (!currentUser) {
+        return {
+          hasAccess: false,
+          reason: "You must be signed in to access this content.",
+        };
+      }
+
+      const userId = currentUser?.attributes?.sub;
+      const groups = userGroups || [];
+
+      // Check if user is owner
+      if (unit.owner === userId) {
+        return { hasAccess: true, reason: null };
+      }
+
+      // Check if user is in privileged groups (instructors can view all units)
+      const hasInstructorAccess = groups.some((group) =>
+        ["Instructors", "Moderators", "Admins"].includes(group),
+      );
+
+      if (hasInstructorAccess) {
+        return { hasAccess: true, reason: null };
+      }
+
+      // For workbook/viewing: Allow authenticated learners to access
+      // The backend (Grade creation, Assignment checks) will enforce actual access control
+      // This allows students to view units they have assignments for
       return { hasAccess: true, reason: null };
-    }
-
-    // Check if user is authenticated
-    if (!currentUser) {
-      return { 
-        hasAccess: false, 
-        reason: 'You must be signed in to access this content.' 
-      };
-    }
-
-    const userId = currentUser?.attributes?.sub;
-    const groups = userGroups || [];
-
-    // Check if user is owner
-    if (unit.owner === userId) {
-      return { hasAccess: true, reason: null };
-    }
-
-    // Check if user is in privileged groups (instructors can view all units)
-    const hasInstructorAccess = groups.some(group => 
-      ['Instructors', 'Moderators', 'Admins'].includes(group)
-    );
-
-    if (hasInstructorAccess) {
-      return { hasAccess: true, reason: null };
-    }
-
-    // For workbook/viewing: Allow authenticated learners to access
-    // The backend (Grade creation, Assignment checks) will enforce actual access control
-    // This allows students to view units they have assignments for
-    return { hasAccess: true, reason: null };
-  }, []);
+    },
+    [],
+  );
 
   // NOTE: Authentication is now handled by centralized AuthContext
   // Update usernameRef when user changes
@@ -154,288 +189,336 @@ const UnitProvider = ({ children, id, sectionId }) => {
     }
   }, [user]);
 
-
-
-
   const verifyAccuracy = React.useCallback((data) => {
-    let total = 0
-    let accuracy = 0
+    let total = 0;
+    let accuracy = 0;
     if (data) {
-      Object.entries(data).forEach(g => {
+      Object.entries(data).forEach((g) => {
         if (g[1]?.complete === true && g[1]?.accuracy) {
-          let _accuracy = parseInt(g[1]?.accuracy)
+          let _accuracy = parseInt(g[1]?.accuracy);
           if (_accuracy > 1) {
-            _accuracy = _accuracy / 100
+            _accuracy = _accuracy / 100;
           }
-          total++
-          accuracy += _accuracy
+          total++;
+          accuracy += _accuracy;
         }
         if (g[1]?.learn?.accuracy) {
-          total++
-          accuracy += parseInt(g[1]?.learn?.accuracy)
+          total++;
+          accuracy += parseInt(g[1]?.learn?.accuracy);
         }
         if (g[1]?.easy?.accuracy) {
-          total++
-          accuracy += parseInt(g[1]?.easy?.accuracy)
+          total++;
+          accuracy += parseInt(g[1]?.easy?.accuracy);
         }
         if (g[1]?.hard?.accuracy) {
-          total++
-          accuracy += parseInt(g[1]?.hard?.accuracy)
+          total++;
+          accuracy += parseInt(g[1]?.hard?.accuracy);
         }
-      })
+      });
     }
-    accuracy = accuracy / total
-    return accuracy * 100
+    accuracy = accuracy / total;
+    return accuracy * 100;
   }, []);
 
+  const createGrade = React.useCallback(
+    async (unitAccuracy, unitIsComplete) => {
+      // Ensure we have authentication before creating grade
+      // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
+      const currentUsername = usernameRef.current || user?.attributes?.sub;
+      if (!currentUsername) {
+        throw new Error("User not authenticated - cannot create grade");
+      }
 
-  const createGrade = React.useCallback(async (unitAccuracy, unitIsComplete) => {
-    // Ensure we have authentication before creating grade
-    // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
-    const currentUsername = usernameRef.current || user?.attributes?.sub;
-    if (!currentUsername) {
-      throw new Error("User not authenticated - cannot create grade");
-    }
+      const client = getAmplifyClient();
+      const currentUnit = unitRef.current;
 
-    const client = getAmplifyClient();
-    const currentUnit = unitRef.current;
-    
-    const { data: _grade, errors } = await client.models.Grade.create({
-      unitID: id,
-      sectionID: sectionId || undefined,
-      // use the unit owner as the instructor
-      instructor: currentUnit?.owner || '',
-      // Owner will be auto-populated by Amplify based on auth
-      unitVersion: currentUnit?._version || 1,
-      complete: unitIsComplete,
-      accuracy: unitAccuracy,
-      timerStarted: currentUnit?.timeLimitSeconds > 0 ? true : null,
-    });
+      const { data: _grade, errors } = await client.models.Grade.create({
+        unitID: id,
+        sectionID: sectionId || undefined,
+        // use the unit owner as the instructor
+        instructor: currentUnit?.owner || "",
+        // Owner will be auto-populated by Amplify based on auth
+        unitVersion: currentUnit?._version || 1,
+        complete: unitIsComplete,
+        accuracy: unitAccuracy,
+        timerStarted: currentUnit?.timeLimitSeconds > 0 ? true : null,
+      });
 
-    if (errors) {
-      console.error('[createGrade] Error creating grade:', errors);
-      throw new Error('Failed to create grade');
-    }
+      if (errors) {
+        console.error("[createGrade] Error creating grade:", errors);
+        throw new Error("Failed to create grade");
+      }
 
-    dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
+      dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
 
-    // Award XP for submitting homework (first time only — dedup by gradeId)
-    awardXPAndCheck(currentUsername, 'HOMEWORK_SUBMITTED', _grade.id, sectionId || undefined, id);
+      // Award XP for submitting homework (first time only — dedup by gradeId)
+      awardXPAndCheck(
+        currentUsername,
+        "HOMEWORK_SUBMITTED",
+        _grade.id,
+        sectionId || undefined,
+        id,
+      );
 
-    return _grade;
-  }, [id, sectionId, user]);
+      return _grade;
+    },
+    [id, sectionId, user],
+  );
 
   /**
    * Calls GPT-4o-mini to produce an overall feedback summary for the completed grade.
    * Sends assignment (unit name, description, rubric) and grade data as YAML.
    * Stores result in Grade.feedback.
    */
-  const summarizeGradeFeedback = React.useCallback(async (gradeData, gradeId) => {
-    const client = getAmplifyClient();
+  const summarizeGradeFeedback = React.useCallback(
+    async (gradeData, gradeId) => {
+      const client = getAmplifyClient();
 
-    // Build assignment context as YAML
-    const assignmentYaml = yaml.dump({
-      name: name || '',
-      description: description || '',
-      rubric_blocks: state.rubric,
-    });
-
-    // Build grade data as YAML (per-block results)
-    const blocks = {};
-    if (gradeData) {
-      Object.entries(gradeData).forEach(([blockId, block]) => {
-        blocks[blockId] = {
-          complete: !!block?.complete,
-          accuracy: block?.accuracy ?? null,
-          ...(block?.userAnswer && { userAnswer: String(block.userAnswer).slice(0, 200) }),
-          ...(block?.feedback && { aiFeedback: String(block.feedback).slice(0, 200) }),
-        };
+      // Build assignment context as YAML
+      const assignmentYaml = yaml.dump({
+        name: name || "",
+        description: description || "",
+        rubric_blocks: state.rubric,
       });
-    }
-    const gradeYaml = yaml.dump({ blocks });
 
-    const { data: feedbackJson, errors } = await client.queries.summarizeFeedback({
-      assignmentData: assignmentYaml,
-      gradeData: gradeYaml,
-    });
-
-    if (errors || !feedbackJson) {
-      console.error('[unitContext] summarizeFeedback query failed:', errors);
-      return;
-    }
-
-    // Parse and store in Grade.feedback
-    try {
-      const feedback = JSON.parse(feedbackJson);
-      await client.models.Grade.update({
-        id: gradeId,
-        feedback: JSON.stringify(feedback),
-      });
-    } catch (parseErr) {
-      // If the model didn't return valid JSON, store as plain overall text
-      await client.models.Grade.update({
-        id: gradeId,
-        feedback: JSON.stringify({ overall: feedbackJson }),
-      });
-    }
-  }, [name, description, state.rubric]);
-
-  const saveGrade = React.useCallback(async (data) => {
-
-    // let _grade = grade
-
-    // Count the total number of expected questions to later compare to the number expected in the unit
-    let _finishedQuestions = 0
-    if (data) {
-      Object.entries(data).forEach(g => {
-        if (g[1]?.complete === true) {
-          _finishedQuestions++
-        }
-      })
-    }
-    let unitIsComplete = false
-    let unitAccuracy = null
-    if (_finishedQuestions === rubricLength) {
-      unitIsComplete = true
-      unitAccuracy = verifyAccuracy(data)
-    }
-
-    dispatch({ type: actionTypes.SET_FINISHED_QUESTIONS, payload: _finishedQuestions })
-
-    // Sync block-level updates to Yjs for real-time collaboration with tutors
-    if (data && workbookCollaborationRef.current?.provider) {
-      Object.entries(data).forEach(([blockId, blockData]) => {
-        workbookCollaborationRef.current.updateBlock(blockId, blockData);
-      });
-    }
-
-    try {
-      // Save grade first, then kick off moderation (backend persists to record)
-      let gradeId = state.grade?.id;
-
-      if (!state.grade) {
-        const newGrade = await createGrade(unitAccuracy, unitIsComplete)
-        if (newGrade && newGrade.id) {
-          gradeId = newGrade.id;
-          const client = getAmplifyClient();
-          await client.models.Grade.update({
-            id: newGrade.id,
-            data: JSON.stringify(data),
-            accuracy: unitAccuracy,
-            complete: unitIsComplete,
-          });
-        }
-      } else if (state.grade && state.grade.id) {
-        const client = getAmplifyClient();
-        await client.models.Grade.update({
-          id: state.grade.id,
-          data: JSON.stringify(data),
-          accuracy: unitAccuracy,
-          complete: unitIsComplete,
+      // Build grade data as YAML (per-block results)
+      const blocks = {};
+      if (gradeData) {
+        Object.entries(gradeData).forEach(([blockId, block]) => {
+          blocks[blockId] = {
+            complete: !!block?.complete,
+            accuracy: block?.accuracy ?? null,
+            ...(block?.userAnswer && {
+              userAnswer: String(block.userAnswer).slice(0, 200),
+            }),
+            ...(block?.feedback && {
+              aiFeedback: String(block.feedback).slice(0, 200),
+            }),
+          };
         });
-      } else {
-        console.error("Invalid grade object:", state.grade)
-        const newGrade = await createGrade(unitAccuracy, unitIsComplete)
-        if (newGrade && newGrade.id) {
-          gradeId = newGrade.id;
-          const client = getAmplifyClient();
-          await client.models.Grade.update({
-            id: newGrade.id,
-            data: JSON.stringify(data),
-            accuracy: unitAccuracy,
-            complete: unitIsComplete,
-          });
-        }
+      }
+      const gradeYaml = yaml.dump({ blocks });
+
+      const { data: feedbackJson, errors } =
+        await client.queries.summarizeFeedback({
+          assignmentData: assignmentYaml,
+          gradeData: gradeYaml,
+        });
+
+      if (errors || !feedbackJson) {
+        console.error("[unitContext] summarizeFeedback query failed:", errors);
+        return;
       }
 
-      // Moderate async — backend fetches _version and writes to Grade.moderation
-      if (gradeId) {
-        moderateContent(data, { modelName: 'Grade', recordId: gradeId }).then(result => {
-          if (result.flagged) {
-            console.warn('[UnitContext] Student submission flagged by moderation, saving for instructor review', {
-              categories: result.categories,
-              username: user?.attributes?.sub
+      // Parse and store in Grade.feedback
+      try {
+        const feedback = JSON.parse(feedbackJson);
+        await client.models.Grade.update({
+          id: gradeId,
+          feedback: JSON.stringify(feedback),
+        });
+      } catch (parseErr) {
+        // If the model didn't return valid JSON, store as plain overall text
+        await client.models.Grade.update({
+          id: gradeId,
+          feedback: JSON.stringify({ overall: feedbackJson }),
+        });
+      }
+    },
+    [name, description, state.rubric],
+  );
+
+  const saveGrade = React.useCallback(
+    async (data) => {
+      // let _grade = grade
+
+      // Count the total number of expected questions to later compare to the number expected in the unit
+      let _finishedQuestions = 0;
+      if (data) {
+        Object.entries(data).forEach((g) => {
+          if (g[1]?.complete === true) {
+            _finishedQuestions++;
+          }
+        });
+      }
+      let unitIsComplete = false;
+      let unitAccuracy = null;
+      if (_finishedQuestions === rubricLength) {
+        unitIsComplete = true;
+        unitAccuracy = verifyAccuracy(data);
+      }
+
+      dispatch({
+        type: actionTypes.SET_FINISHED_QUESTIONS,
+        payload: _finishedQuestions,
+      });
+
+      // Sync block-level updates to Yjs for real-time collaboration with tutors
+      if (data && workbookCollaborationRef.current?.provider) {
+        Object.entries(data).forEach(([blockId, blockData]) => {
+          workbookCollaborationRef.current.updateBlock(blockId, blockData);
+        });
+      }
+
+      try {
+        // Save grade first, then kick off moderation (backend persists to record)
+        let gradeId = state.grade?.id;
+
+        if (!state.grade) {
+          const newGrade = await createGrade(unitAccuracy, unitIsComplete);
+          if (newGrade && newGrade.id) {
+            gradeId = newGrade.id;
+            const client = getAmplifyClient();
+            await client.models.Grade.update({
+              id: newGrade.id,
+              data: JSON.stringify(data),
+              accuracy: unitAccuracy,
+              complete: unitIsComplete,
             });
           }
-        });
-      }
-      if(unitIsComplete && !timeLimitSeconds) {
-        dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true })
-        // Award XP for completing all blocks
-        const currentUsername = usernameRef.current || user?.attributes?.sub;
-        if (currentUsername && state.grade?.id) {
-          awardXPAndCheck(currentUsername, 'ALL_BLOCKS_COMPLETED', state.grade.id, sectionId || undefined, id);
-          // Award perfect score if accuracy is 100%
-          if (unitAccuracy >= 100) {
-            awardXPAndCheck(currentUsername, 'PERFECT_SCORE', state.grade.id, sectionId || undefined, id);
+        } else if (state.grade && state.grade.id) {
+          const client = getAmplifyClient();
+          await client.models.Grade.update({
+            id: state.grade.id,
+            data: JSON.stringify(data),
+            accuracy: unitAccuracy,
+            complete: unitIsComplete,
+          });
+        } else {
+          console.error("Invalid grade object:", state.grade);
+          const newGrade = await createGrade(unitAccuracy, unitIsComplete);
+          if (newGrade && newGrade.id) {
+            gradeId = newGrade.id;
+            const client = getAmplifyClient();
+            await client.models.Grade.update({
+              id: newGrade.id,
+              data: JSON.stringify(data),
+              accuracy: unitAccuracy,
+              complete: unitIsComplete,
+            });
           }
+        }
 
-          // Summarize feedback via GPT-4o-mini (fire-and-forget)
-          summarizeGradeFeedback(data, state.grade.id).catch((err) =>
-            console.error('[unitContext] summarizeGradeFeedback error:', err),
-          )
-
-          // Update per-unit learning memory with block-level accuracy data
-          const weakAreas = []
-          const strongAreas = []
-          if (data) {
-            Object.entries(data).forEach(([blockKey, blockData]) => {
-              if (blockData?.complete && blockData?.accuracy != null) {
-                const acc = parseInt(blockData.accuracy)
-                const label = blockKey.slice(0, 60)
-                if (acc < 70) weakAreas.push(label)
-                else if (acc >= 90) strongAreas.push(label)
+        // Moderate async — backend fetches _version and writes to Grade.moderation
+        if (gradeId) {
+          moderateContent(data, { modelName: "Grade", recordId: gradeId }).then(
+            (result) => {
+              if (result.flagged) {
+                console.warn(
+                  "[UnitContext] Student submission flagged by moderation, saving for instructor review",
+                  {
+                    categories: result.categories,
+                    username: user?.attributes?.sub,
+                  },
+                );
               }
-            })
-          }
-          updateUnitMemoryAndRebuild(
-            currentUsername,
-            id,
-            unitAccuracy,
-            weakAreas,
-            strongAreas,
-            { sourceType: 'workbook' },
-          ).catch((err) =>
-            console.error('[unitContext] updateUnitMemoryAndRebuild error:', err),
-          )
+            },
+          );
+        }
+        if (unitIsComplete && !timeLimitSeconds) {
+          dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
+          // Award XP for completing all blocks
+          const currentUsername = usernameRef.current || user?.attributes?.sub;
+          if (currentUsername && state.grade?.id) {
+            awardXPAndCheck(
+              currentUsername,
+              "ALL_BLOCKS_COMPLETED",
+              state.grade.id,
+              sectionId || undefined,
+              id,
+              unitAccuracy,
+            );
+            // Award perfect score if accuracy is 100%
+            if (unitAccuracy >= 100) {
+              awardXPAndCheck(
+                currentUsername,
+                "PERFECT_SCORE",
+                state.grade.id,
+                sectionId || undefined,
+                id,
+                unitAccuracy,
+              );
+            }
 
-          // Check personal best (fire-and-forget, sets state for banner)
-          if (unitAccuracy != null) {
-            checkPersonalBest(currentUsername, id, unitAccuracy)
-              .then((result) => {
-                if (result?.isNewBest) {
-                  dispatch({ type: actionTypes.SET_PERSONAL_BEST_RESULT, payload: result })
+            // Summarize feedback via GPT-4o-mini (fire-and-forget)
+            summarizeGradeFeedback(data, state.grade.id).catch((err) =>
+              console.error("[unitContext] summarizeGradeFeedback error:", err),
+            );
+
+            // Update per-unit learning memory with block-level accuracy data
+            const weakAreas = [];
+            const strongAreas = [];
+            if (data) {
+              Object.entries(data).forEach(([blockKey, blockData]) => {
+                if (blockData?.complete && blockData?.accuracy != null) {
+                  const acc = parseInt(blockData.accuracy);
+                  const label = blockKey.slice(0, 60);
+                  if (acc < 70) weakAreas.push(label);
+                  else if (acc >= 90) strongAreas.push(label);
                 }
-              })
-              .catch((err) =>
-                console.error('[unitContext] checkPersonalBest error:', err),
-              )
+              });
+            }
+            updateUnitMemoryAndRebuild(
+              currentUsername,
+              id,
+              unitAccuracy,
+              weakAreas,
+              strongAreas,
+              { sourceType: "workbook" },
+            ).catch((err) =>
+              console.error(
+                "[unitContext] updateUnitMemoryAndRebuild error:",
+                err,
+              ),
+            );
+
+            // Check personal best (fire-and-forget, sets state for banner)
+            if (unitAccuracy != null) {
+              checkPersonalBest(currentUsername, id, unitAccuracy)
+                .then((result) => {
+                  if (result?.isNewBest) {
+                    dispatch({
+                      type: actionTypes.SET_PERSONAL_BEST_RESULT,
+                      payload: result,
+                    });
+                  }
+                })
+                .catch((err) =>
+                  console.error("[unitContext] checkPersonalBest error:", err),
+                );
+            }
           }
         }
-      }
-    } catch (error) {
-      console.error("Error saving grade:", error)
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-        cause: error.cause
-      })
-      
-      // If it's an authentication error, try to refresh auth
-      if (error.message?.includes("auth") || error.message?.includes("Auth")) {
-        console.log("Authentication error detected, attempting to fetch user...")
-        try {
-          await fetchCurrentUsername()
-        } catch (authError) {
-          console.error("Failed to refresh authentication:", authError)
+      } catch (error) {
+        console.error("Error saving grade:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          cause: error.cause,
+        });
+
+        // If it's an authentication error, try to refresh auth
+        if (
+          error.message?.includes("auth") ||
+          error.message?.includes("Auth")
+        ) {
+          console.log(
+            "Authentication error detected, attempting to fetch user...",
+          );
+          try {
+            await fetchCurrentUsername();
+          } catch (authError) {
+            console.error("Failed to refresh authentication:", authError);
+          }
         }
+
+        // Re-throw to let calling code handle it
+        throw error;
       }
-      
-      // Re-throw to let calling code handle it
-      throw error
-    }
-  }, [rubricLength, state.grade, createGrade, timeLimitSeconds]);
+    },
+    [rubricLength, state.grade, createGrade, timeLimitSeconds],
+  );
 
   React.useEffect(() => {
     // Wait for auth to be ready
@@ -449,39 +532,40 @@ const UnitProvider = ({ children, id, sectionId }) => {
     }
 
     const username = user.attributes.sub;
-    
+
     // Validate username
     if (!username) {
-      console.warn('[UnitContext] No username available, skipping Grade subscription');
+      console.warn(
+        "[UnitContext] No username available, skipping Grade subscription",
+      );
       return;
     }
 
     const client = getAmplifyClient();
-    const subscriptions = [];
     let cancelled = false;
 
     function processGrades(validItems) {
       // Filter client-side
-      const incompleteGrades = validItems.filter(grade => !grade.complete);
-      const completedGrades = validItems.filter(grade => grade.complete);
-      
+      const incompleteGrades = validItems.filter((grade) => !grade.complete);
+      const completedGrades = validItems.filter((grade) => grade.complete);
+
       // Handle current grade (most recent incomplete)
       const currentGrade = incompleteGrades[0];
-      
+
       // Parse grade.data from JSON string to object so all consumers get an object
-      if (currentGrade?.data && typeof currentGrade.data === 'string') {
+      if (currentGrade?.data && typeof currentGrade.data === "string") {
         try {
           currentGrade.data = JSON.parse(currentGrade.data);
         } catch (e) {
-          console.error('[UnitContext] Failed to parse grade.data:', e);
+          console.error("[UnitContext] Failed to parse grade.data:", e);
           currentGrade.data = {};
         }
       }
-      
+
       // If there are completed grades but no current incomplete grade,
       // show the completion screen (persists across navigation)
       const showComplete = !currentGrade && completedGrades.length > 0;
-      
+
       // Calculate finished questions from the current grade data
       let _finishedQuestions = 0;
       if (currentGrade?.data) {
@@ -492,110 +576,71 @@ const UnitProvider = ({ children, id, sectionId }) => {
           }
         });
       }
-      
+
       // Handle recent grades (top 5 completed, sorted by accuracy then date)
       const sortedCompletedGrades = completedGrades
         .sort((a, b) => {
           if (b.accuracy !== a.accuracy) {
             return (b.accuracy || 0) - (a.accuracy || 0);
           }
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         })
         .slice(0, 5);
-      
-      dispatch({ type: actionTypes.GRADE_SUBSCRIPTION_UPDATE, payload: {
-        grade: currentGrade,
-        username,
-        showUnitComplete: showComplete,
-        finishedQuestions: _finishedQuestions,
-        recentGrades: sortedCompletedGrades,
-      } });
+
+      dispatch({
+        type: actionTypes.GRADE_SUBSCRIPTION_UPDATE,
+        payload: {
+          grade: currentGrade,
+          username,
+          showUnitComplete: showComplete,
+          finishedQuestions: _finishedQuestions,
+          recentGrades: sortedCompletedGrades,
+        },
+      });
     }
 
     function handleGradeError(label, error) {
-      const errorMessage = error?.error?.errors?.[0]?.message || error?.message || '';
-      if (errorMessage.includes('DuplicatedOperationError')) {
-        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+      const errorMessage =
+        error?.error?.errors?.[0]?.message || error?.message || "";
+      if (errorMessage.includes("DuplicatedOperationError")) {
+        console.warn(
+          `[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`,
+        );
         return;
       }
-      if (errorMessage.includes('exceeds maximum value limit') || 
-          errorMessage.includes('operator `in`')) {
-        console.warn('[UnitContext] Subscription filter limit exceeded, using client-side filtering only');
+      if (
+        errorMessage.includes("exceeds maximum value limit") ||
+        errorMessage.includes("operator `in`")
+      ) {
+        console.warn(
+          "[UnitContext] Subscription filter limit exceeded, using client-side filtering only",
+        );
         return;
       }
       console.error(`[UnitContext] ${label} error:`, error);
     }
 
-    async function fetchGrades() {
-      try {
-        const { data: items, errors } = await client.models.Grade.list({
-          filter: { unitID: { eq: id } }
-        });
+    // Single observeQuery replaces list() + 3 manual subscriptions
+    // observeQuery handles create/update/delete internally with built-in dedup
+    const subscription = client.models.Grade.observeQuery({
+      filter: { unitID: { eq: id } },
+    }).subscribe({
+      next: ({ items }) => {
         if (cancelled) return;
-        if (errors?.length) console.error('[UnitContext] Grade list errors:', errors);
-
-        const validItems = (items || []).filter(item => item != null && item.id != null);
+        const validItems = (items || []).filter(
+          (item) => item != null && item.id != null,
+        );
         processGrades(validItems);
-
-        if (cancelled) return;
-
-        const createSub = client.models.Grade.onCreate({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const grade = response?.data || response;
-            if (!grade || !grade.id) return;
-            // Re-fetch all grades to get correct state
-            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
-              const valid = (data || []).filter(item => item != null && item.id != null);
-              processGrades(valid);
-            });
-          },
-          error: (error) => handleGradeError('Grade onCreate', error)
-        });
-        subscriptions.push(createSub);
-
-        const updateSub = client.models.Grade.onUpdate({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const grade = response?.data || response;
-            if (!grade || !grade.id) return;
-            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
-              const valid = (data || []).filter(item => item != null && item.id != null);
-              processGrades(valid);
-            });
-          },
-          error: (error) => handleGradeError('Grade onUpdate', error)
-        });
-        subscriptions.push(updateSub);
-
-        const deleteSub = client.models.Grade.onDelete({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const grade = response?.data || response;
-            if (!grade || !grade.id) return;
-            client.models.Grade.list({ filter: { unitID: { eq: id } } }).then(({ data }) => {
-              const valid = (data || []).filter(item => item != null && item.id != null);
-              processGrades(valid);
-            });
-          },
-          error: (error) => handleGradeError('Grade onDelete', error)
-        });
-        subscriptions.push(deleteSub);
-      } catch (error) {
-        console.error('[UnitContext] fetchGrades error:', error);
-      }
-    }
-
-    fetchGrades();
+      },
+      error: (error) => handleGradeError("Grade observeQuery", error),
+    });
 
     return () => {
       cancelled = true;
-      subscriptions.forEach(sub => sub.unsubscribe());
+      subscription.unsubscribe();
     };
-
   }, [id, user, authLoading]);
 
   // ============================================================================
@@ -606,162 +651,192 @@ const UnitProvider = ({ children, id, sectionId }) => {
     if (authLoading || !user || !id) return;
 
     const client = getAmplifyClient();
-    const subscriptions = [];
     let cancelled = false;
 
     function handleError(label, error) {
-      const msg = error?.message || error?.error?.errors?.[0]?.message || String(error);
-      if (msg.includes('DuplicatedOperationError')) {
-        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+      const msg =
+        error?.message || error?.error?.errors?.[0]?.message || String(error);
+      if (msg.includes("DuplicatedOperationError")) {
+        console.warn(
+          `[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`,
+        );
         return;
       }
-      if (msg.includes('exceeds maximum value limit')) {
-        console.warn('[UnitContext] PracticeSession subscription filter limit — using client filtering');
+      if (msg.includes("exceeds maximum value limit")) {
+        console.warn(
+          "[UnitContext] PracticeSession subscription filter limit — using client filtering",
+        );
         return;
       }
       console.error(`[UnitContext] ${label} error:`, msg);
     }
 
-    async function fetchPracticeSessions() {
-      try {
-        const { data: items, errors } = await client.models.PracticeSession.list({
-          filter: { unitID: { eq: id } }
-        });
+    // Single observeQuery replaces list() + 3 manual subscriptions
+    const subscription = client.models.PracticeSession.observeQuery({
+      filter: { unitID: { eq: id } },
+    }).subscribe({
+      next: ({ items }) => {
         if (cancelled) return;
-        if (errors?.length) console.error('[UnitContext] PracticeSession list errors:', errors);
+        const validItems = (items || []).filter(
+          (s) => s != null && s.id != null,
+        );
 
-        const validItems = (items || []).filter(s => s != null && s.id != null);
-        dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: validItems });
-
-        if (cancelled) return;
-
-        const createSub = client.models.PracticeSession.onCreate({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const session = response?.data || response;
-            if (!session || !session.id) return;
-            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'create' });
-          },
-          error: (error) => handleError('PracticeSession onCreate', error)
+        // Version map guard: skip if no item has a newer _version
+        const hasChanges = validItems.some((item) => {
+          const tracked = practiceSessionVersionMapRef.current[item.id];
+          return tracked == null || item._version > tracked;
         });
-        subscriptions.push(createSub);
 
-        const updateSub = client.models.PracticeSession.onUpdate({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const session = response?.data || response;
-            if (!session || !session.id) return;
-            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'update' });
-          },
-          error: (error) => handleError('PracticeSession onUpdate', error)
+        if (
+          !hasChanges &&
+          Object.keys(practiceSessionVersionMapRef.current).length > 0
+        ) {
+          return;
+        }
+
+        // Update version map
+        practiceSessionVersionMapRef.current = {};
+        validItems.forEach((item) => {
+          practiceSessionVersionMapRef.current[item.id] = item._version;
         });
-        subscriptions.push(updateSub);
 
-        const deleteSub = client.models.PracticeSession.onDelete({
-          filter: { unitID: { eq: id } }
-        }).subscribe({
-          next: (response) => {
-            const session = response?.data || response;
-            if (!session || !session.id) return;
-            dispatch({ type: actionTypes.SET_PRACTICE_SESSIONS, payload: [session], meta: 'delete' });
-          },
-          error: (error) => handleError('PracticeSession onDelete', error)
+        dispatch({
+          type: actionTypes.SET_PRACTICE_SESSIONS,
+          payload: validItems,
         });
-        subscriptions.push(deleteSub);
-      } catch (error) {
-        console.error('[UnitContext] fetchPracticeSessions error:', error);
-      }
-    }
-
-    fetchPracticeSessions();
+      },
+      error: (error) => handleError("PracticeSession observeQuery", error),
+    });
 
     return () => {
       cancelled = true;
-      subscriptions.forEach(sub => sub.unsubscribe());
+      subscription.unsubscribe();
     };
   }, [id, user, authLoading]);
 
-  const createPracticeSession = React.useCallback(async (data) => {
-    const client = getAmplifyClient();
-    const { data: record, errors } = await client.models.PracticeSession.create({
-      unitID: id,
-      ...data,
-    });
-    if (errors?.length) console.error('[UnitContext] createPracticeSession errors:', errors);
-    return record;
-  }, [id]);
+  const createPracticeSession = React.useCallback(
+    async (data) => {
+      const client = getAmplifyClient();
+      const { data: record, errors } =
+        await client.models.PracticeSession.create({
+          unitID: id,
+          ...data,
+        });
+      if (errors?.length)
+        console.error("[UnitContext] createPracticeSession errors:", errors);
+      return record;
+    },
+    [id],
+  );
 
-  const updatePracticeSession = React.useCallback(async (sessionId, updates) => {
-    const client = getAmplifyClient();
-    const { data: record, errors } = await client.models.PracticeSession.update({
-      id: sessionId,
-      ...updates,
-    });
-    if (errors?.length) console.error('[UnitContext] updatePracticeSession errors:', errors);
-    return record;
-  }, []);
+  const updatePracticeSession = React.useCallback(
+    async (sessionId, updates) => {
+      const client = getAmplifyClient();
+      const { data: record, errors } =
+        await client.models.PracticeSession.update({
+          id: sessionId,
+          ...updates,
+        });
+      if (errors?.length)
+        console.error("[UnitContext] updatePracticeSession errors:", errors);
+      return record;
+    },
+    [],
+  );
 
   React.useEffect(() => {
-    console.log('[UnitContext] useEffect triggered', { id, authLoading, hasUser: !!user, userSub: user?.attributes?.sub });
+    console.log("[UnitContext] useEffect triggered", {
+      id,
+      authLoading,
+      hasUser: !!user,
+      userSub: user?.attributes?.sub,
+    });
     // Wait for auth to be ready before fetching unit data
     if (authLoading || !user) {
-      console.log('[UnitContext] Waiting for auth...', { authLoading, hasUser: !!user });
+      console.log("[UnitContext] Waiting for auth...", {
+        authLoading,
+        hasUser: !!user,
+      });
       return;
     }
 
     if (!id) {
-      console.log('[UnitContext] No unit id provided');
+      console.log("[UnitContext] No unit id provided");
       return;
     }
 
     // ── Offline fallback: load from IndexedDB if offline ──────────────
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      console.log('[UnitContext] Offline — loading unit from IndexedDB cache');
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      console.log("[UnitContext] Offline — loading unit from IndexedDB cache");
       (async () => {
         try {
-          const { getCachedUnit, getCachedWordsForUnit, getCachedQuestionsForUnit, getCachedFilesForUnit, getCachedGrade } = await import('../offline/OfflineDataStore');
+          const {
+            getCachedUnit,
+            getCachedWordsForUnit,
+            getCachedQuestionsForUnit,
+            getCachedFilesForUnit,
+            getCachedGrade,
+          } = await import("../offline/OfflineDataStore");
           const cachedUnit = await getCachedUnit(id);
           if (cachedUnit) {
-            const unitData = typeof cachedUnit.data === 'string' ? JSON.parse(cachedUnit.data) : cachedUnit.data;
+            const unitData =
+              typeof cachedUnit.data === "string"
+                ? JSON.parse(cachedUnit.data)
+                : cachedUnit.data;
             const blocks = unitData?.root?.children || [];
-            const _rubric = blocks.filter(b => gradedBlockTypes.includes(b.type)).map(b => b.key);
+            const _rubric = blocks
+              .filter((b) => gradedBlockTypes.includes(b.type))
+              .map((b) => b.key);
             const cachedWords = await getCachedWordsForUnit(id);
             const cachedQuestions = await getCachedQuestionsForUnit(id);
             const cachedFiles = await getCachedFilesForUnit(id);
             const _dictionary = {};
-            cachedWords.forEach(w => { _dictionary[w.id] = w; });
+            cachedWords.forEach((w) => {
+              _dictionary[w.id] = w;
+            });
             const _questionBank = {};
-            cachedQuestions.forEach(q => { _questionBank[q.id] = q; });
+            cachedQuestions.forEach((q) => {
+              _questionBank[q.id] = q;
+            });
             const _files = {};
-            cachedFiles.forEach(f => { _files[f.id] = f; });
-            unitRef.current = { ...cachedUnit, data: unitData, _version: cachedUnit.version };
-            dispatch({ type: actionTypes.UNIT_LOADED, payload: {
-              unit: unitRef.current,
-              dictionary: _dictionary,
-              questionBank: _questionBank,
-              files: _files,
-              rubric: _rubric,
-            } });
+            cachedFiles.forEach((f) => {
+              _files[f.id] = f;
+            });
+            unitRef.current = {
+              ...cachedUnit,
+              data: unitData,
+              _version: cachedUnit.version,
+            };
+            dispatch({
+              type: actionTypes.UNIT_LOADED,
+              payload: {
+                unit: unitRef.current,
+                dictionary: _dictionary,
+                questionBank: _questionBank,
+                files: _files,
+                rubric: _rubric,
+              },
+            });
             editorStateRef.current = unitData;
             versionRef.current = cachedUnit.version;
-            console.log('[UnitContext] Loaded unit from offline cache');
+            console.log("[UnitContext] Loaded unit from offline cache");
           }
         } catch (err) {
-          console.warn('[UnitContext] Offline cache load failed:', err);
+          console.warn("[UnitContext] Offline cache load failed:", err);
         }
       })();
       // When we come back online, re-subscribe
       const handleOnline = () => {
-        console.log('[UnitContext] Back online — will re-run subscription effect');
+        console.log(
+          "[UnitContext] Back online — will re-run subscription effect",
+        );
       };
-      window.addEventListener('online', handleOnline, { once: true });
-      return () => window.removeEventListener('online', handleOnline);
+      window.addEventListener("online", handleOnline, { once: true });
+      return () => window.removeEventListener("online", handleOnline);
     }
     // ── End offline fallback ──────────────────────────────────────────
 
-    console.log('[UnitContext] Fetching unit data for id:', id);
+    console.log("[UnitContext] Fetching unit data for id:", id);
     const client = getAmplifyClient();
     const subscriptions = [];
     let cancelled = false;
@@ -777,120 +852,140 @@ const UnitProvider = ({ children, id, sectionId }) => {
       // Permission checking is handled by individual pages (editor vs workbook)
       dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
 
-      // Skip if same unit with no changes (compare _version)
-      if (versionRef.current === unitRecord?._version) {
+      // Skip if version is same or older than what we're tracking (includes optimistic bumps)
+      if (
+        unitRecord?._version != null &&
+        unitRecord._version <= versionRef.current
+      ) {
         return;
       }
 
-      const _files = {}
-      const _dictionary = {}
-      const _questionBank = {}
-      const _playlistUrls = {}
+      const _files = {};
+      const _dictionary = {};
+      const _questionBank = {};
+      const _playlistUrls = {};
 
       // Load related words via join table
       const { data: _unitWords } = await client.models.UnitWord.list({
-        filter: { unitID: { eq: id } }
+        filter: { unitID: { eq: id } },
       });
 
       // Load related files via join table
       const { data: _unitFiles } = await client.models.UnitFile.list({
-        filter: { unitID: { eq: id } }
+        filter: { unitID: { eq: id } },
       });
 
       // Load related questions via join table
       const { data: _unitQuestions } = await client.models.QuestionUnit.list({
-        filter: { unitID: { eq: id } }
+        filter: { unitID: { eq: id } },
       });
 
       // Fetch full Word objects
-      const _unitWordsWork = (_unitWords || []).filter(uw => uw != null).map(async uw => {
-        if (uw.wordID) {
-          const { data } = await client.models.Word.get({ id: uw.wordID });
-          return data;
-        }
-        return null;
-      });
+      const _unitWordsWork = (_unitWords || [])
+        .filter((uw) => uw != null)
+        .map(async (uw) => {
+          if (uw.wordID) {
+            const { data } = await client.models.Word.get({ id: uw.wordID });
+            return data;
+          }
+          return null;
+        });
 
       // Fetch full File objects
-      const _unitFilesWork = (_unitFiles || []).filter(uf => uf != null).map(async uf => {
-        if (uf.fileID) {
-          const { data } = await client.models.File.get({ id: uf.fileID });
-          return data;
-        }
-        return null;
-      });
+      const _unitFilesWork = (_unitFiles || [])
+        .filter((uf) => uf != null)
+        .map(async (uf) => {
+          if (uf.fileID) {
+            const { data } = await client.models.File.get({ id: uf.fileID });
+            return data;
+          }
+          return null;
+        });
 
       // Fetch full Question objects
-      const _unitQuestionsWork = (_unitQuestions || []).filter(uq => uq != null).map(async uq => {
-        if (uq.questionID) {
-          const { data } = await client.models.Question.get({ id: uq.questionID });
-          return data;
+      const _unitQuestionsWork = (_unitQuestions || [])
+        .filter((uq) => uq != null)
+        .map(async (uq) => {
+          if (uq.questionID) {
+            const { data } = await client.models.Question.get({
+              id: uq.questionID,
+            });
+            return data;
+          }
+          return null;
+        });
+
+      const _words = await Promise.allSettled(_unitWordsWork);
+      const _unitsFiles = await Promise.allSettled(_unitFilesWork);
+      const _questions = await Promise.allSettled(_unitQuestionsWork);
+
+      _words.forEach((w) => {
+        if (w.status === "fulfilled" && w.value) {
+          const _w = w.value;
+          _dictionary[_w.id] = _w;
         }
-        return null;
       });
 
-      const _words = await Promise.allSettled(_unitWordsWork)
-      const _unitsFiles = await Promise.allSettled(_unitFilesWork)
-      const _questions = await Promise.allSettled(_unitQuestionsWork)
-
-      _words.forEach(w => {
-        if (w.status === 'fulfilled' && w.value) {
-          const _w = w.value
-          _dictionary[_w.id] = _w
+      _unitsFiles.forEach((f) => {
+        if (f.status === "fulfilled" && f.value) {
+          const _f = f.value;
+          _files[_f.id] = _f;
         }
-      })
+      });
 
-      _unitsFiles.forEach(f => {
-        if (f.status === 'fulfilled' && f.value) {
-          const _f = f.value
-          _files[_f.id] = _f
+      _questions.forEach((q) => {
+        if (q.status === "fulfilled" && q.value) {
+          const _q = q.value;
+          _questionBank[_q.id] = _q;
         }
-      })
-
-      _questions.forEach(q => {
-        if (q.status === 'fulfilled' && q.value) {
-          const _q = q.value
-          _questionBank[_q.id] = _q
-        }
-      })
+      });
 
       // Parse unit data (Gen2 stores JSON as string)
-      const unitData = typeof unitRecord?.data === 'string' 
-        ? JSON.parse(unitRecord.data) 
-        : unitRecord?.data;
+      const unitData =
+        typeof unitRecord?.data === "string"
+          ? JSON.parse(unitRecord.data)
+          : unitRecord?.data;
 
-      const blocks = unitData?.root?.children || []
-      const _rubric = []
+      const blocks = unitData?.root?.children || [];
+      const _rubric = [];
 
       if (blocks.length > 0) {
-        blocks.forEach(block => {
-          if (gradedBlockTypes.includes(block['type'])) {
-            _rubric.push(block['key'])
+        blocks.forEach((block) => {
+          if (gradedBlockTypes.includes(block["type"])) {
+            _rubric.push(block["key"]);
           }
-        })
+        });
       }
 
       if (cancelled) return;
 
       // Update all state - _version check ensures data has changed
       unitRef.current = unitRecord;
-      dispatch({ type: actionTypes.UNIT_LOADED, payload: {
-        unit: unitRecord,
-        dictionary: _dictionary,
-        files: _files,
-        playlistUrls: _playlistUrls,
-        questionBank: _questionBank,
-        rubric: _rubric,
-      } });
+      dispatch({
+        type: actionTypes.UNIT_LOADED,
+        payload: {
+          unit: unitRecord,
+          dictionary: _dictionary,
+          files: _files,
+          playlistUrls: _playlistUrls,
+          questionBank: _questionBank,
+          rubric: _rubric,
+        },
+      });
 
       editorStateRef.current = unitData;
       versionRef.current = unitRecord?._version;
     }
 
     function handleSubscriptionError(label, error) {
-      const msg = error?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
-      if (msg.includes('DuplicatedOperationError')) {
-        console.warn(`[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+      const msg =
+        error?.message ||
+        error?.error?.errors?.[0]?.message ||
+        JSON.stringify(error);
+      if (msg.includes("DuplicatedOperationError")) {
+        console.warn(
+          `[UnitContext] ${label}: transient DuplicatedOperationError (safe to ignore)`,
+        );
         return;
       }
       console.error(`[UnitContext] ${label} error:`, error);
@@ -899,38 +994,43 @@ const UnitProvider = ({ children, id, sectionId }) => {
     // Initial fetch: single get() instead of observeQuery() table scan
     async function fetchUnit() {
       try {
-        const { data: unitRecord, errors } = await client.models.Unit.get({ id });
+        const { data: unitRecord, errors } = await client.models.Unit.get({
+          id,
+        });
         if (cancelled) return;
         if (errors?.length) {
-          console.error('[UnitContext] Unit.get errors:', errors);
+          console.error("[UnitContext] Unit.get errors:", errors);
         }
         await loadUnit(unitRecord);
       } catch (error) {
-        console.error('[UnitContext] Unit.get error:', error);
+        console.error("[UnitContext] Unit.get error:", error);
       }
 
       if (cancelled) return;
 
       // Subscribe to updates for this specific unit
       const updateSub = client.models.Unit.onUpdate({
-        filter: { id: { eq: id } }
+        filter: { id: { eq: id } },
       }).subscribe({
         next: async (response) => {
           const updatedUnit = response;
           if (!updatedUnit || !updatedUnit.id) return;
-          console.log('[UnitContext] Unit updated via subscription, _version:', updatedUnit._version);
+          console.log(
+            "[UnitContext] Unit updated via subscription, _version:",
+            updatedUnit._version,
+          );
           await loadUnit(updatedUnit);
         },
-        error: (error) => handleSubscriptionError('Unit onUpdate', error)
+        error: (error) => handleSubscriptionError("Unit onUpdate", error),
       });
       subscriptions.push(updateSub);
     }
 
     fetchUnit();
-    
+
     return () => {
       cancelled = true;
-      subscriptions.forEach(sub => sub?.unsubscribe());
+      subscriptions.forEach((sub) => sub?.unsubscribe());
     };
   }, [id, user, authLoading]);
 
@@ -941,60 +1041,87 @@ const UnitProvider = ({ children, id, sectionId }) => {
   }, []);
   const endSaving = React.useCallback(() => {
     savingCountRef.current = Math.max(0, savingCountRef.current - 1);
-    if (savingCountRef.current === 0) dispatch({ type: actionTypes.SET_IS_SAVING, payload: false });
+    if (savingCountRef.current === 0)
+      dispatch({ type: actionTypes.SET_IS_SAVING, payload: false });
   }, []);
 
-  const saveEditorContent = React.useCallback(async (editorContent) => {
-    const currentUnit = unitRef.current;
+  const saveEditorContent = React.useCallback(
+    async (editorContent) => {
+      const currentUnit = unitRef.current;
 
-    // Guard: Don't save if unit is not loaded or is invalid
-    if (!currentUnit || !currentUnit.id) {
-      console.warn('[saveEditorContent] Cannot save - unit not loaded yet');
-      return;
-    }
-
-    let _editorContent = editorContent ? editorContent : editorStateRef.current;
-
-    // Guard: Don't save null/undefined content — prevents storing "null" string in DB
-    if (_editorContent == null) {
-      console.warn('[saveEditorContent] Cannot save - no editor content available');
-      return;
-    }
-
-    const newContent = typeof _editorContent === 'string' 
-      ? _editorContent 
-      : JSON.stringify(_editorContent);
-
-    beginSaving();
-    try {
-      // Save with Gen2 client
-      const client = getAmplifyClient();
-      const { data: savedUnit, errors } = await client.models.Unit.update({
-        id: currentUnit.id,
-        data: newContent,
-        _version: currentUnit._version,
-      });
-      if (errors?.length) {
-        console.error('[saveEditorContent] Save returned errors:', errors);
-      } else if (savedUnit) {
-        // Update ref with new _version to prevent stale version conflicts
-        unitRef.current = { ...unitRef.current, _version: savedUnit._version };
+      // Guard: Don't save if unit is not loaded or is invalid
+      if (!currentUnit || !currentUnit.id) {
+        console.warn("[saveEditorContent] Cannot save - unit not loaded yet");
+        return;
       }
 
-      // Moderate async — backend fetches _version and writes to Unit.moderation
-      moderateContent(newContent, { modelName: 'Unit', recordId: currentUnit.id }).then(result => {
-        if (result.flagged) {
-          console.warn('[UnitContext] Content flagged by moderation, saved for instructor review', {
-            categories: result.categories
-          });
+      let _editorContent = editorContent
+        ? editorContent
+        : editorStateRef.current;
+
+      // Guard: Don't save null/undefined content — prevents storing "null" string in DB
+      if (_editorContent == null) {
+        console.warn(
+          "[saveEditorContent] Cannot save - no editor content available",
+        );
+        return;
+      }
+
+      const newContent =
+        typeof _editorContent === "string"
+          ? _editorContent
+          : JSON.stringify(_editorContent);
+
+      beginSaving();
+      // Optimistic version bump — blocks subscription echo from re-rendering
+      const predictedNextVersion = currentUnit._version + 1;
+      versionRef.current = predictedNextVersion;
+
+      try {
+        // Save with Gen2 client
+        const client = getAmplifyClient();
+        const { data: savedUnit, errors } = await client.models.Unit.update({
+          id: currentUnit.id,
+          data: newContent,
+          _version: currentUnit._version,
+        });
+        if (errors?.length) {
+          console.error("[saveEditorContent] Save returned errors:", errors);
+          // Rollback optimistic version on error
+          versionRef.current = currentUnit._version;
+        } else if (savedUnit) {
+          // Confirm with actual version from server
+          unitRef.current = {
+            ...unitRef.current,
+            _version: savedUnit._version,
+          };
+          versionRef.current = savedUnit._version;
         }
-      });
-    } catch (errors) {
-      console.error('[saveEditorContent] Save failed:', errors);
-    } finally {
-      endSaving();
-    }
-  }, [id, beginSaving, endSaving]);
+
+        // Moderate async — backend fetches _version and writes to Unit.moderation
+        moderateContent(newContent, {
+          modelName: "Unit",
+          recordId: currentUnit.id,
+        }).then((result) => {
+          if (result.flagged) {
+            console.warn(
+              "[UnitContext] Content flagged by moderation, saved for instructor review",
+              {
+                categories: result.categories,
+              },
+            );
+          }
+        });
+      } catch (errors) {
+        console.error("[saveEditorContent] Save failed:", errors);
+        // Rollback optimistic version on exception
+        versionRef.current = currentUnit._version;
+      } finally {
+        endSaving();
+      }
+    },
+    [id, beginSaving, endSaving],
+  );
 
   const handleDelete = React.useCallback(async () => {
     /**
@@ -1006,89 +1133,124 @@ const UnitProvider = ({ children, id, sectionId }) => {
     try {
       const client = getAmplifyClient();
       await client.models.Unit.delete({ id: currentUnit.id });
-      router.push(`/units`)
+      router.push(`/units`);
     } catch (errors) {
-      console.error(errors)
+      console.error(errors);
     }
   }, [router]);
 
-  const saveDescription = React.useCallback(async (description) => {
-    const currentUnit = unitRef.current;
-    beginSaving();
-    try {
-      const client = getAmplifyClient();
-      const { data: savedUnit, errors } = await client.models.Unit.update({
-        id: currentUnit.id,
-        description: description,
-        _version: currentUnit._version,
-      });
-      if (errors?.length) {
-        console.error('[saveDescription] Update returned errors:', errors);
-      } else if (savedUnit) {
-        unitRef.current = { ...unitRef.current, _version: savedUnit._version };
+  const saveDescription = React.useCallback(
+    async (description) => {
+      const currentUnit = unitRef.current;
+      beginSaving();
+      // Optimistic version bump
+      const predictedNextVersion = currentUnit._version + 1;
+      versionRef.current = predictedNextVersion;
+
+      try {
+        const client = getAmplifyClient();
+        const { data: savedUnit, errors } = await client.models.Unit.update({
+          id: currentUnit.id,
+          description: description,
+          _version: currentUnit._version,
+        });
+        if (errors?.length) {
+          console.error("[saveDescription] Update returned errors:", errors);
+          versionRef.current = currentUnit._version;
+        } else if (savedUnit) {
+          unitRef.current = {
+            ...unitRef.current,
+            _version: savedUnit._version,
+          };
+          versionRef.current = savedUnit._version;
+        }
+      } catch (errors) {
+        console.error(errors);
+        versionRef.current = currentUnit._version;
+      } finally {
+        endSaving();
       }
-    } catch (errors) {
-      console.error(errors)
-    } finally {
-      endSaving();
-    }
-  }, [beginSaving, endSaving]);
+    },
+    [beginSaving, endSaving],
+  );
 
-  const saveName = React.useCallback(async (name) => {
-    const currentUnit = unitRef.current;
-    beginSaving();
-    try {
-      const client = getAmplifyClient();
-      const { data: savedUnit, errors } = await client.models.Unit.update({
-        id: currentUnit.id,
-        name: name,
-        _version: currentUnit._version,
-      });
-      if (errors?.length) {
-        console.error('[saveName] Update returned errors:', errors);
-      } else if (savedUnit) {
-        unitRef.current = { ...unitRef.current, _version: savedUnit._version };
+  const saveName = React.useCallback(
+    async (name) => {
+      const currentUnit = unitRef.current;
+      beginSaving();
+      // Optimistic version bump
+      const predictedNextVersion = currentUnit._version + 1;
+      versionRef.current = predictedNextVersion;
+
+      try {
+        const client = getAmplifyClient();
+        const { data: savedUnit, errors } = await client.models.Unit.update({
+          id: currentUnit.id,
+          name: name,
+          _version: currentUnit._version,
+        });
+        if (errors?.length) {
+          console.error("[saveName] Update returned errors:", errors);
+          versionRef.current = currentUnit._version;
+        } else if (savedUnit) {
+          unitRef.current = {
+            ...unitRef.current,
+            _version: savedUnit._version,
+          };
+          versionRef.current = savedUnit._version;
+        }
+      } catch (errors) {
+        console.error(errors);
+        versionRef.current = currentUnit._version;
+      } finally {
+        endSaving();
       }
-    } catch (errors) {
-      console.error(errors)
-    } finally {
-      endSaving();
-    }
-  }, [beginSaving, endSaving]);
+    },
+    [beginSaving, endSaving],
+  );
 
-  const handleBeforeUnload = React.useCallback(async (event) => {
-    // If content is different then save it
-    const currentUnit = unitRef.current;
-    const content = JSON.stringify(editorStateRef.current)
-    const unitData = JSON.stringify(currentUnit?.data)
+  const handleBeforeUnload = React.useCallback(
+    async (event) => {
+      // If content is different then save it
+      const currentUnit = unitRef.current;
+      const content = JSON.stringify(editorStateRef.current);
+      const unitData = JSON.stringify(currentUnit?.data);
 
-    console.log('unitData', unitData)
-    if (content === unitData) {
+      console.log("unitData", unitData);
+      if (content === unitData) {
         event.returnValue = null;
-        console.log('content === unitData', content)
-        console.log('!!!+=======', unitData)
-    } else {
-        console.log('content !== unitContent', content)
-        console.log('!!!+=======', unitData)
+        console.log("content === unitData", content);
+        console.log("!!!+=======", unitData);
+      } else {
+        console.log("content !== unitContent", content);
+        console.log("!!!+=======", unitData);
         event.preventDefault();
-        await saveEditorContent()
-    }
-}, [saveEditorContent]);
+        await saveEditorContent();
+      }
+    },
+    [saveEditorContent],
+  );
 
   const handleStatusChange = React.useCallback(async (status) => {
     const currentUnit = unitRef.current;
     const currentName = currentUnit?.name;
     const currentDescription = currentUnit?.description;
 
-    if (status === 'PUBLISHED') {
+    if (status === "PUBLISHED") {
       // check if the unit has a name and description
       if (!currentName || !currentDescription) {
-        alert('Please add a name and description to your unit before publishing.');
+        alert(
+          "Please add a name and description to your unit before publishing.",
+        );
         return;
       }
     }
 
     beginSaving();
+    // Optimistic version bump
+    const predictedNextVersion = currentUnit._version + 1;
+    versionRef.current = predictedNextVersion;
+
     try {
       const client = getAmplifyClient();
       const { data: savedUnit, errors } = await client.models.Unit.update({
@@ -1097,97 +1259,135 @@ const UnitProvider = ({ children, id, sectionId }) => {
         _version: currentUnit._version,
       });
       if (errors?.length) {
-        console.error('[handleStatusChange] Update returned errors:', errors);
+        console.error("[handleStatusChange] Update returned errors:", errors);
+        versionRef.current = currentUnit._version;
       } else if (savedUnit) {
         unitRef.current = { ...unitRef.current, _version: savedUnit._version };
+        versionRef.current = savedUnit._version;
       }
     } catch (error) {
-      console.log('error', error);
+      console.log("error", error);
+      versionRef.current = currentUnit._version;
     } finally {
       endSaving();
     }
-
   }, []);
 
   // Create session object for backward compatibility with components expecting session.username
-  const session = React.useMemo(() => ({
-    username: user?.attributes?.sub,
-    error: authSession?.error,
-  }), [user?.attributes?.sub, authSession?.error]);
+  const session = React.useMemo(
+    () => ({
+      username: user?.attributes?.sub,
+      error: authSession?.error,
+    }),
+    [user?.attributes?.sub, authSession?.error],
+  );
 
-  // Initialize collaborative workbook when feature is enabled and grade exists  
+  // Initialize collaborative workbook when feature is enabled and grade exists
   const workbookEnabled = true; // Always enabled - uses mocks in Storybook
-  
+
   const workbookCollaborationConfig = React.useMemo(() => {
     if (!workbookEnabled || !state.grade?.id) return null;
-    
+
     return {
       gradeId: state.grade.id,
       user: {
-        username: user?.attributes?.sub || '',
-        role: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? 'instructor' : 'student',
-        displayName: user?.attributes?.name || user?.attributes?.email?.split('@')[0] || user?.attributes?.sub || 'Anonymous',
-        color: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? '#f59e0b' : '#3b82f6',
+        username: user?.attributes?.sub || "",
+        role:
+          authSession?.groups?.includes("Instructors") ||
+          authSession?.groups?.includes("Moderators") ||
+          authSession?.groups?.includes("Admins")
+            ? "instructor"
+            : "student",
+        displayName:
+          user?.attributes?.name ||
+          user?.attributes?.email?.split("@")[0] ||
+          user?.attributes?.sub ||
+          "Anonymous",
+        color:
+          authSession?.groups?.includes("Instructors") ||
+          authSession?.groups?.includes("Moderators") ||
+          authSession?.groups?.includes("Admins")
+            ? "#f59e0b"
+            : "#3b82f6",
       },
       initialData: state.grade.data,
-      wsUrl: process.env.NEXT_PUBLIC_YJS_WS_URL || 'ws://localhost:3001',
+      wsUrl: process.env.NEXT_PUBLIC_YJS_WS_URL || "ws://localhost:3001",
       onTutorJoin: (tutor) => {
         console.log(`[UnitContext] Tutor ${tutor.displayName} joined to help!`);
       },
       onSyncToGrade: async (data, feedback) => {
         if (!state.grade) return;
-        
+
         try {
-          const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+          const parsed = typeof data === "string" ? JSON.parse(data) : data;
           const blocks = Object.values(parsed);
-          
+
           // Calculate metrics from workbook data
           const completeBlocks = blocks.filter((b) => b.complete);
           const complete = blocks.length > 0 && blocks.every((b) => b.complete);
-          const percentComplete = blocks.length > 0 
-            ? Math.round((completeBlocks.length / blocks.length) * 100)
-            : 0;
-          const accuracy = blocks.length > 0
-            ? Math.round(
-                blocks.reduce((sum, b) => sum + (b.accuracy || 0), 0) / blocks.length
-              )
-            : 0;
+          const percentComplete =
+            blocks.length > 0
+              ? Math.round((completeBlocks.length / blocks.length) * 100)
+              : 0;
+          const accuracy =
+            blocks.length > 0
+              ? Math.round(
+                  blocks.reduce((sum, b) => sum + (b.accuracy || 0), 0) /
+                    blocks.length,
+                )
+              : 0;
 
           // Save to DataStore
           const client = getAmplifyClient();
           await client.models.Grade.update({
             id: state.grade.id,
-            data: typeof data === 'string' ? data : JSON.stringify(data),
-            feedback: feedback ? JSON.stringify(feedback) : state.grade.feedback,
+            data: typeof data === "string" ? data : JSON.stringify(data),
+            feedback: feedback
+              ? JSON.stringify(feedback)
+              : state.grade.feedback,
             complete,
             percentComplete,
             accuracy,
           });
 
           // Moderate async — backend persists to Grade.moderation
-          moderateContent(data, { modelName: 'Grade', recordId: state.grade.id }).then(result => {
+          moderateContent(data, {
+            modelName: "Grade",
+            recordId: state.grade.id,
+          }).then((result) => {
             if (result.flagged) {
-              console.warn('[UnitContext] Workbook data flagged by moderation, saving for instructor review', {
-                categories: result.categories,
-                username: user?.attributes?.sub
-              });
+              console.warn(
+                "[UnitContext] Workbook data flagged by moderation, saving for instructor review",
+                {
+                  categories: result.categories,
+                  username: user?.attributes?.sub,
+                },
+              );
             }
           });
-          
-          console.log('[UnitContext] Synced workbook to Grade.data', {
+
+          console.log("[UnitContext] Synced workbook to Grade.data", {
             complete,
             percentComplete,
             accuracy,
           });
         } catch (error) {
-          console.error('[UnitContext] Error syncing workbook:', error);
+          console.error("[UnitContext] Error syncing workbook:", error);
         }
       },
     };
-  }, [workbookEnabled, state.grade?.id, state.grade?.data, user?.attributes, authSession?.groups]);
-  
+  }, [
+    workbookEnabled,
+    state.grade?.id,
+    state.grade?.data,
+    user?.attributes,
+    authSession?.groups,
+  ]);
+
   // Use the workbook collaboration hook
-  const workbookCollaboration = useWorkbookCollaboration(workbookCollaborationConfig);
+  const workbookCollaboration = useWorkbookCollaboration(
+    workbookCollaborationConfig,
+  );
 
   // Keep ref in sync so saveGrade can access the provider without being in its dependency array
   React.useEffect(() => {
@@ -1207,109 +1407,122 @@ const UnitProvider = ({ children, id, sectionId }) => {
       completion,
       accuracy,
       totalBlocks: blocks.length,
-      completeBlocks: blocks.filter(b => b.complete).length,
+      completeBlocks: blocks.filter((b) => b.complete).length,
     };
   }, [workbookCollaboration]);
 
   // Stable dispatch-based setters for consumers
-  const setShowUnitComplete = React.useCallback((val) => dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: val }), []);
-  const setFinishedQuestions = React.useCallback((val) => dispatch({ type: actionTypes.SET_FINISHED_QUESTIONS, payload: val }), []);
-  const setPersonalBestResult = React.useCallback((val) => dispatch({ type: actionTypes.SET_PERSONAL_BEST_RESULT, payload: val }), []);
+  const setShowUnitComplete = React.useCallback(
+    (val) =>
+      dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: val }),
+    [],
+  );
+  const setFinishedQuestions = React.useCallback(
+    (val) =>
+      dispatch({ type: actionTypes.SET_FINISHED_QUESTIONS, payload: val }),
+    [],
+  );
+  const setPersonalBestResult = React.useCallback(
+    (val) =>
+      dispatch({ type: actionTypes.SET_PERSONAL_BEST_RESULT, payload: val }),
+    [],
+  );
 
-  const contextValue = React.useMemo(() => ({
-    unit: state.unit,
-    name,
-    rubric: state.rubric,
-    grade: state.grade,
-    recentGrades: state.recentGrades,
-    dictionary: state.dictionary,
-    files: state.files,
-    questionBank: state.questionBank,
-    playlistUrls: state.playlistUrls,
-    description,
-    editorStateRef,
-    editorSelectionRef,
-    editorRef,
-    versionRef,
-    unitRef,
-    unitVersion,
-    finishedQuestions: state.finishedQuestions,
-    showUnitComplete: state.showUnitComplete,
-    personalBestResult: state.personalBestResult,
-    setPersonalBestResult,
-    permissionError: state.permissionError,
-    handleBeforeUnload,
-    setShowUnitComplete,
-    setFinishedQuestions,
-    saveName,
-    saveDescription,
-    handleDelete,
-    handleStatusChange,
-    saveEditorContent,
-    saveGrade,
-    checkUnitEditPermission,
-    checkUnitViewPermission,
-    createGrade,
-    session,
-    // Workbook collaboration features
-    workbook: workbookCollaboration,
-    workbookStats,
-    workbookEnabled,
-    // Practice drill features
-    practiceSessions: state.practiceSessions,
-    createPracticeSession,
-    updatePracticeSession,
-    // Save state
-    isSaving: state.isSaving,
-    beginSaving,
-    endSaving,
-    // Section context for chat
-    sectionId,
-  }), [
-    state.unit,
-    name,
-    state.rubric,
-    state.grade,
-    state.recentGrades,
-    state.dictionary,
-    state.files,
-    state.questionBank,
-    state.playlistUrls,
-    description,
-    state.finishedQuestions,
-    checkUnitEditPermission,
-    checkUnitViewPermission,
-    state.showUnitComplete,
-    state.personalBestResult,
-    setPersonalBestResult,
-    state.permissionError,
-    session,
-    handleBeforeUnload,
-    saveName,
-    saveDescription,
-    handleDelete,
-    handleStatusChange,
-    saveEditorContent,
-    saveGrade,
-    createGrade,
-    workbookCollaboration,
-    workbookStats,
-    workbookEnabled,
-    state.practiceSessions,
-    createPracticeSession,
-    updatePracticeSession,
-    state.isSaving,
-    beginSaving,
-    endSaving,
-    sectionId,
-  ]);
+  const contextValue = React.useMemo(
+    () => ({
+      unit: state.unit,
+      name,
+      rubric: state.rubric,
+      grade: state.grade,
+      recentGrades: state.recentGrades,
+      dictionary: state.dictionary,
+      files: state.files,
+      questionBank: state.questionBank,
+      playlistUrls: state.playlistUrls,
+      description,
+      editorStateRef,
+      editorSelectionRef,
+      editorRef,
+      versionRef,
+      unitRef,
+      unitVersion,
+      finishedQuestions: state.finishedQuestions,
+      showUnitComplete: state.showUnitComplete,
+      personalBestResult: state.personalBestResult,
+      setPersonalBestResult,
+      permissionError: state.permissionError,
+      handleBeforeUnload,
+      setShowUnitComplete,
+      setFinishedQuestions,
+      saveName,
+      saveDescription,
+      handleDelete,
+      handleStatusChange,
+      saveEditorContent,
+      saveGrade,
+      checkUnitEditPermission,
+      checkUnitViewPermission,
+      createGrade,
+      session,
+      // Workbook collaboration features
+      workbook: workbookCollaboration,
+      workbookStats,
+      workbookEnabled,
+      // Practice drill features
+      practiceSessions: state.practiceSessions,
+      createPracticeSession,
+      updatePracticeSession,
+      // Save state
+      isSaving: state.isSaving,
+      beginSaving,
+      endSaving,
+      // Section context for chat
+      sectionId,
+    }),
+    [
+      state.unit,
+      name,
+      state.rubric,
+      state.grade,
+      state.recentGrades,
+      state.dictionary,
+      state.files,
+      state.questionBank,
+      state.playlistUrls,
+      description,
+      state.finishedQuestions,
+      checkUnitEditPermission,
+      checkUnitViewPermission,
+      state.showUnitComplete,
+      state.personalBestResult,
+      setPersonalBestResult,
+      state.permissionError,
+      session,
+      handleBeforeUnload,
+      saveName,
+      saveDescription,
+      handleDelete,
+      handleStatusChange,
+      saveEditorContent,
+      saveGrade,
+      createGrade,
+      workbookCollaboration,
+      workbookStats,
+      workbookEnabled,
+      state.practiceSessions,
+      createPracticeSession,
+      updatePracticeSession,
+      state.isSaving,
+      beginSaving,
+      endSaving,
+      sectionId,
+    ],
+  );
 
   return (
-    <UnitContext.Provider value={contextValue}>
-      {children}
-    </UnitContext.Provider>
+    <UnitContext.Provider value={contextValue}>{children}</UnitContext.Provider>
   );
-}
+};
 
 export { UnitProvider };
 

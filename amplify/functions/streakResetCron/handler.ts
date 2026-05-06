@@ -5,23 +5,23 @@
  * for any student whose lastActivityDate is before yesterday (UTC).
  */
 
-import type { Handler } from 'aws-lambda'
-import { Amplify } from 'aws-amplify'
-import { generateClient } from 'aws-amplify/data'
-import { fromEnv } from '@aws-sdk/credential-providers'
+import type { Handler } from "aws-lambda";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { fromEnv } from "@aws-sdk/credential-providers";
 
 const LIST_PROFILES = `query ListStudentProfiles($nextToken: String) {
   listStudentProfiles(limit: 100, nextToken: $nextToken) {
-    items { id studentId currentStreak longestStreak lastActivityDate _version }
+    items { id studentId currentStreak longestStreak lastActivityDate _version _lastChangedAt _deleted }
     nextToken
   }
-}`
+}`;
 
 const UPDATE_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
-  updateStudentProfile(input: $input) { id studentId currentStreak _version }
-}`
+  updateStudentProfile(input: $input) { id studentId currentStreak _version _lastChangedAt _deleted }
+}`;
 
-let client: any = null
+let client: any = null;
 
 function getClient() {
   if (!client) {
@@ -29,9 +29,9 @@ function getClient() {
       {
         API: {
           GraphQL: {
-            endpoint: process.env.API_ENDPOINT || '',
-            region: process.env.AWS_REGION || 'us-east-1',
-            defaultAuthMode: 'iam',
+            endpoint: process.env.API_ENDPOINT || "",
+            region: process.env.AWS_REGION || "us-east-1",
+            defaultAuthMode: "iam",
           },
         },
       },
@@ -44,42 +44,42 @@ function getClient() {
             clearCredentialsAndIdentityId: () => {},
           },
         },
-      }
-    )
-    client = generateClient({ authMode: 'iam' })
+      },
+    );
+    client = generateClient({ authMode: "iam" });
   }
-  return client
+  return client;
 }
 
 export const handler: Handler = async () => {
-  const gql = getClient()
+  const gql = getClient();
 
   // Yesterday at start of day UTC
-  const now = new Date()
-  const yesterday = new Date(now)
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1)
-  yesterday.setUTCHours(0, 0, 0, 0)
-  const yesterdayISO = yesterday.toISOString().split('T')[0] // YYYY-MM-DD
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  yesterday.setUTCHours(0, 0, 0, 0);
+  const yesterdayISO = yesterday.toISOString().split("T")[0]; // YYYY-MM-DD
 
-  let nextToken: string | null = null
-  let resetCount = 0
+  let nextToken: string | null = null;
+  let resetCount = 0;
 
   do {
     const result: any = await gql.graphql({
       query: LIST_PROFILES,
       variables: { nextToken },
-    })
+    });
 
-    const items = result?.data?.listStudentProfiles?.items || []
-    nextToken = result?.data?.listStudentProfiles?.nextToken || null
+    const items = result?.data?.listStudentProfiles?.items || [];
+    nextToken = result?.data?.listStudentProfiles?.nextToken || null;
 
     for (const profile of items) {
-      if (!profile || profile.currentStreak === 0) continue
+      if (!profile || profile.currentStreak === 0) continue;
 
       // Compare lastActivityDate (YYYY-MM-DD or ISO) to yesterday
       const lastDate = profile.lastActivityDate
-        ? profile.lastActivityDate.split('T')[0]
-        : null
+        ? profile.lastActivityDate.split("T")[0]
+        : null;
 
       if (!lastDate || lastDate < yesterdayISO) {
         try {
@@ -92,18 +92,18 @@ export const handler: Handler = async () => {
                 _version: profile._version,
               },
             },
-          })
-          resetCount++
+          });
+          resetCount++;
         } catch (err: any) {
           console.error(
             `[streakResetCron] Failed to reset streak for ${profile.studentId}:`,
-            err?.message || err
-          )
+            err?.message || err,
+          );
         }
       }
     }
-  } while (nextToken)
+  } while (nextToken);
 
-  console.log(`[streakResetCron] Reset ${resetCount} streaks`)
-  return { statusCode: 200, body: JSON.stringify({ resetCount }) }
-}
+  console.log(`[streakResetCron] Reset ${resetCount} streaks`);
+  return { statusCode: 200, body: JSON.stringify({ resetCount }) };
+};

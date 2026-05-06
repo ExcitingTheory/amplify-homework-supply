@@ -47,6 +47,20 @@ export interface BadgeEntry {
   awardedAt?: string | null
   cohortId?: string | null
   unitID?: string | null
+  isAnti?: boolean
+  count?: number
+}
+
+export interface ActiveDebuff {
+  badgeType: string
+  appliedAt: string
+  expiresAt: string
+  xpMultiplier?: number
+  temporaryTitle?: string
+  shameText?: string
+  avatarDowngrade?: string
+  hideFromLeaderboard?: boolean
+  extraDrills?: number
 }
 
 // ============================================================================
@@ -66,6 +80,8 @@ export interface GamificationContextValue {
   modules: ModuleProgress[]
   personalBests: PersonalBest[]
   badges: BadgeEntry[]
+  activeDebuffs: ActiveDebuff[]
+  hasActiveDebuff: (badgeType: string) => boolean
   streak: StreakInfo | null
   progressLoading: boolean
 
@@ -115,6 +131,8 @@ const GamificationContext = createContext<GamificationContextValue>({
   modules: [],
   personalBests: [],
   badges: [],
+  activeDebuffs: [],
+  hasActiveDebuff: () => false,
   streak: null,
   progressLoading: true,
 
@@ -301,6 +319,11 @@ export function GamificationProvider({
   const [currentToast, setCurrentToast] = useState<XPToastItem | null>(null)
   const knownXpIdsRef = useRef<Set<string>>(new Set())
   const xpInitialLoadRef = useRef(true)
+  const profileVersionRef = useRef(0)
+  const challengeVersionMapRef = useRef<Record<string, number>>({})
+  const guildVersionMapRef = useRef<Record<string, number>>({})
+  const skillVersionMapRef = useRef<Record<string, number>>({})
+  const xpLogVersionMapRef = useRef<Record<string, number>>({})
 
   // Stable setter for selectedSkillId
   const setSelectedSkillId = useCallback(
@@ -335,7 +358,6 @@ export function GamificationProvider({
       return
     }
     const filter = { studentId: { eq: studentId } }
-    const subs: any[] = []
 
     const processProfile = (data: any[]) => {
       const valid = (data || []).filter((i: any) => i != null && i.id != null)
@@ -347,11 +369,20 @@ export function GamificationProvider({
         return
       }
 
+      // Version guard: skip if same version
+      if (profile._version != null && profile._version <= profileVersionRef.current) {
+        return
+      }
+      profileVersionRef.current = profile._version || 0
+
       // Progress (was StudentProgress)
       dispatch({ type: actionTypes.SET_RAW_MODULES, payload: profile.moduleProgress || [] })
 
       // Badges (was StudentBadge)
       dispatch({ type: actionTypes.SET_RAW_BADGES, payload: profile.badges || [] })
+
+      // Active debuffs from anti-badges
+      dispatch({ type: actionTypes.SET_RAW_DEBUFFS, payload: profile.activeDebuffs || [] })
 
       // Personal bests (was StudentPersonalBest)
       dispatch({ type: actionTypes.SET_RAW_PERSONAL_BESTS, payload: (profile.personalBests || []).map((pb: any) => ({ ...pb, id: pb.unitID })) })
@@ -381,33 +412,18 @@ export function GamificationProvider({
       dispatch({ type: actionTypes.SET_RAW_LOCKS, payload: [] })
     }
 
-    // Initial fetch
-    client.models.StudentProfile.list({ filter }).then(({ data }: any) => {
-      processProfile(data)
-    }).catch((err: any) => {
-      console.error('[GamificationContext] StudentProfile list error:', err)
-      dispatch({ type: actionTypes.SET_PROGRESS_LOADING, payload: false })
-      dispatch({ type: actionTypes.SET_SKILL_PROGRESS_LOADING, payload: false })
-      dispatch({ type: actionTypes.SET_LOCKS_LOADING, payload: false })
+    // Single observeQuery replaces list() + onCreate + onUpdate
+    const subscription = client.models.StudentProfile.observeQuery({ filter }).subscribe({
+      next: ({ items }: any) => {
+        processProfile(items)
+      },
+      error: (err: any) => {
+        const msg = err?.message || err?.errors?.[0]?.message || String(err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] StudentProfile error:', err)
+      },
     })
 
-    // Real-time
-    subs.push(client.models.StudentProfile.onCreate({ filter }).subscribe({
-      next: () => { client.models.StudentProfile.list({ filter }).then(({ data }: any) => processProfile(data)) },
-      error: (err: any) => {
-        const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] StudentProfile error:', err)
-      },
-    }))
-    subs.push(client.models.StudentProfile.onUpdate({ filter }).subscribe({
-      next: () => { client.models.StudentProfile.list({ filter }).then(({ data }: any) => processProfile(data)) },
-      error: (err: any) => {
-        const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] StudentProfile error:', err)
-      },
-    }))
-
-    return () => subs.forEach((s) => s.unsubscribe())
+    return () => subscription.unsubscribe()
   }, [client, studentId])
 
   // ── GroupChallenge subscription (includes campaign + contributions) ──
@@ -418,38 +434,35 @@ export function GamificationProvider({
       return
     }
     const filter = { cohortId: { eq: cohortId } }
-    const subs: any[] = []
 
     const processData = (data: any[]) => {
-      const valid = (data || []).filter((i: any) => i != null)
+      const valid = (data || []).filter((i: any) => i != null && i.id != null)
+
+      // Version map guard
+      const hasChanges = valid.some((item: any) => {
+        const tracked = challengeVersionMapRef.current[item.id]
+        return tracked == null || item._version > tracked
+      })
+      if (!hasChanges && Object.keys(challengeVersionMapRef.current).length > 0) return
+
+      challengeVersionMapRef.current = {}
+      valid.forEach((item: any) => { challengeVersionMapRef.current[item.id] = item._version })
+
       dispatch({ type: actionTypes.SET_RAW_CHALLENGES, payload: valid })
       // Extract campaign info from challenges (setting/stakes/systemPromptSeed)
       const campaignChallenge = valid.find((c: any) => c.setting || c.stakes)
       dispatch({ type: actionTypes.SET_RAW_CAMPAIGNS, payload: campaignChallenge ? [campaignChallenge] : [] })
     }
 
-    client.models.GroupChallenge.list({ filter }).then(({ data }: any) => processData(data))
-      .catch(() => {
-        dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })
-        dispatch({ type: actionTypes.SET_CHALLENGES_LOADING, payload: false })
-      })
-
-    subs.push(client.models.GroupChallenge.onCreate({ filter }).subscribe({
-      next: () => { client.models.GroupChallenge.list({ filter }).then(({ data }: any) => processData(data)) },
+    const subscription = client.models.GroupChallenge.observeQuery({ filter }).subscribe({
+      next: ({ items }: any) => { processData(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
         if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] GroupChallenge error:', err)
       },
-    }))
-    subs.push(client.models.GroupChallenge.onUpdate({ filter }).subscribe({
-      next: () => { client.models.GroupChallenge.list({ filter }).then(({ data }: any) => processData(data)) },
-      error: (err: any) => {
-        const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] GroupChallenge error:', err)
-      },
-    }))
+    })
 
-    return () => subs.forEach((s) => s.unsubscribe())
+    return () => subscription.unsubscribe()
   }, [client, cohortId])
 
   // ── Guild subscription (includes members) ───────────────────────
@@ -460,11 +473,20 @@ export function GamificationProvider({
       return
     }
     const filter = cohortId ? { cohortId: { eq: cohortId } } : undefined
-    const listOpts = filter ? { filter } : undefined
-    const subs: any[] = []
 
     const processGuilds = (data: any[]) => {
-      const valid = (data || []).filter((i: any) => i != null)
+      const valid = (data || []).filter((i: any) => i != null && i.id != null)
+
+      // Version map guard
+      const hasChanges = valid.some((item: any) => {
+        const tracked = guildVersionMapRef.current[item.id]
+        return tracked == null || item._version > tracked
+      })
+      if (!hasChanges && Object.keys(guildVersionMapRef.current).length > 0) return
+
+      guildVersionMapRef.current = {}
+      valid.forEach((item: any) => { guildVersionMapRef.current[item.id] = item._version })
+
       dispatch({ type: actionTypes.SET_RAW_GUILDS, payload: valid })
       // Extract memberships from Guild.members arrays
       const allMemberships: any[] = []
@@ -476,29 +498,15 @@ export function GamificationProvider({
       dispatch({ type: actionTypes.SET_RAW_MEMBERSHIPS, payload: allMemberships })
     }
 
-    client.models.Guild.list(listOpts).then(({ data }: any) => processGuilds(data))
-      .catch((err: any) => {
-        console.error('[GamificationContext] Guild list error:', err)
-        dispatch({ type: actionTypes.SET_GUILDS_LOADING, payload: false })
-        dispatch({ type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false })
-      })
-
-    subs.push(client.models.Guild.onCreate(filter ? { filter } : undefined).subscribe({
-      next: () => { client.models.Guild.list(listOpts).then(({ data }: any) => processGuilds(data)) },
+    const subscription = client.models.Guild.observeQuery(filter ? { filter } : undefined).subscribe({
+      next: ({ items }: any) => { processGuilds(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
         if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Guild error:', err)
       },
-    }))
-    subs.push(client.models.Guild.onUpdate(filter ? { filter } : undefined).subscribe({
-      next: () => { client.models.Guild.list(listOpts).then(({ data }: any) => processGuilds(data)) },
-      error: (err: any) => {
-        const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Guild error:', err)
-      },
-    }))
+    })
 
-    return () => subs.forEach((s) => s.unsubscribe())
+    return () => subscription.unsubscribe()
   }, [client, cohortId])
 
   // ── Skill definitions subscription ─────────────────────────────
@@ -508,37 +516,30 @@ export function GamificationProvider({
       return
     }
     const filter = cohortId ? { cohortId: { eq: cohortId } } : undefined
-    const listOpts = filter ? { filter } : undefined
-    const subs: any[] = []
 
-    client.models.Skill.list(listOpts).then(({ data }: any) => {
-      dispatch({ type: actionTypes.SET_RAW_SKILLS, payload: (data || []).filter((i: any) => i != null) })
-    }).catch(() => dispatch({ type: actionTypes.SET_SKILLS_LOADING, payload: false }))
+    const subscription = client.models.Skill.observeQuery(filter ? { filter } : undefined).subscribe({
+      next: ({ items }: any) => {
+        const valid = (items || []).filter((i: any) => i != null && i.id != null)
 
-    subs.push(client.models.Skill.onCreate(filter ? { filter } : undefined).subscribe({
-      next: () => {
-        client.models.Skill.list(listOpts).then(({ data }: any) => {
-          dispatch({ type: actionTypes.SET_RAW_SKILLS, payload: (data || []).filter((i: any) => i != null) })
+        // Version map guard
+        const hasChanges = valid.some((item: any) => {
+          const tracked = skillVersionMapRef.current[item.id]
+          return tracked == null || item._version > tracked
         })
+        if (!hasChanges && Object.keys(skillVersionMapRef.current).length > 0) return
+
+        skillVersionMapRef.current = {}
+        valid.forEach((item: any) => { skillVersionMapRef.current[item.id] = item._version })
+
+        dispatch({ type: actionTypes.SET_RAW_SKILLS, payload: valid })
       },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
         if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Skill error:', err)
       },
-    }))
-    subs.push(client.models.Skill.onUpdate(filter ? { filter } : undefined).subscribe({
-      next: () => {
-        client.models.Skill.list(listOpts).then(({ data }: any) => {
-          dispatch({ type: actionTypes.SET_RAW_SKILLS, payload: (data || []).filter((i: any) => i != null) })
-        })
-      },
-      error: (err: any) => {
-        const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Skill error:', err)
-      },
-    }))
+    })
 
-    return () => subs.forEach((s) => s.unsubscribe())
+    return () => subscription.unsubscribe()
   }, [client, cohortId])
 
   // ── Linear Lock data (Sections, Assignments, Grades) ───────────
@@ -588,10 +589,20 @@ export function GamificationProvider({
       return
     }
     const filter = { studentId: { eq: studentId } }
-    const subs: any[] = []
 
     const processXPLogs = (data: any[]) => {
       const valid = (data || []).filter((i: any) => i != null && i.id != null)
+
+      // Version map guard
+      const hasChanges = valid.some((item: any) => {
+        const tracked = xpLogVersionMapRef.current[item.id]
+        return tracked == null || item._version > tracked
+      })
+      if (!hasChanges && Object.keys(xpLogVersionMapRef.current).length > 0) return
+
+      xpLogVersionMapRef.current = {}
+      valid.forEach((item: any) => { xpLogVersionMapRef.current[item.id] = item._version })
+
       dispatch({ type: actionTypes.SET_XP_LOGS, payload: valid })
 
       // Queue toasts for new entries (skip initial load)
@@ -613,26 +624,15 @@ export function GamificationProvider({
       xpInitialLoadRef.current = false
     }
 
-    // Initial fetch
-    client.models.StudentXPLog.list({ filter }).then(({ data }: any) => {
-      processXPLogs(data)
-    }).catch((err: any) => {
-      console.error('[GamificationContext] StudentXPLog list error:', err)
-      dispatch({ type: actionTypes.SET_XP_LOADING, payload: false })
-    })
-
-    // Real-time mutations
-    subs.push(client.models.StudentXPLog.onCreate({ filter }).subscribe({
-      next: () => {
-        client.models.StudentXPLog.list({ filter }).then(({ data }: any) => processXPLogs(data))
-      },
+    const subscription = client.models.StudentXPLog.observeQuery({ filter }).subscribe({
+      next: ({ items }: any) => { processXPLogs(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] XPLog onCreate error:', err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] XPLog error:', err)
       },
-    }))
+    })
 
-    return () => subs.forEach((s) => s.unsubscribe())
+    return () => subscription.unsubscribe()
   }, [client, studentId])
 
   // ── XP toast queue — show one at a time ─────────────────────────
@@ -689,8 +689,29 @@ export function GamificationProvider({
       awardedAt: b.awardedAt || null,
       cohortId: b.cohortId || null,
       unitID: b.unitID || null,
+      isAnti: b.isAnti || false,
+      count: b.count || 1,
     })),
     [state.rawBadges],
+  )
+
+  const activeDebuffs = useMemo<ActiveDebuff[]>(() => {
+    try {
+      const raw = typeof state.rawDebuffs === 'string'
+        ? JSON.parse(state.rawDebuffs || '[]')
+        : state.rawDebuffs || []
+      const now = Date.now()
+      return (raw as any[]).filter(
+        (d) => d && d.expiresAt && new Date(d.expiresAt).getTime() > now,
+      )
+    } catch {
+      return []
+    }
+  }, [state.rawDebuffs])
+
+  const hasActiveDebuff = useCallback(
+    (badgeType: string) => activeDebuffs.some((d) => d.badgeType === badgeType),
+    [activeDebuffs],
   )
 
   // ── Derived: Campaign ───────────────────────────────────────────
@@ -812,6 +833,7 @@ export function GamificationProvider({
         status,
         xpReward: skill.xpReward ?? undefined,
         prerequisites,
+        cohortId: skill.cohortId || undefined,
       }
     })
   }, [state.rawSkills, state.rawSkillProgress])
@@ -946,6 +968,8 @@ export function GamificationProvider({
       modules,
       personalBests,
       badges,
+      activeDebuffs,
+      hasActiveDebuff,
       streak: state.streak,
       progressLoading: state.progressLoading,
 
@@ -987,6 +1011,8 @@ export function GamificationProvider({
       modules,
       personalBests,
       badges,
+      activeDebuffs,
+      hasActiveDebuff,
       state.streak,
       state.progressLoading,
       campaign,

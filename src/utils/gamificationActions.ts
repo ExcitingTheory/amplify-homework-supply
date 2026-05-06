@@ -31,6 +31,7 @@ export async function awardXPAndCheck(
   referenceId?: string,
   cohortId?: string,
   unitID?: string,
+  accuracy?: number,
 ): Promise<AwardXPResult | null> {
   try {
     const client = getAmplifyClient();
@@ -43,6 +44,7 @@ export async function awardXPAndCheck(
         referenceId: referenceId ?? null,
         cohortId: cohortId ?? null,
         unitID: unitID ?? null,
+        accuracy: accuracy != null ? accuracy : null,
       },
     );
 
@@ -343,6 +345,73 @@ export async function advanceSkillProgress(
     return typeof data === "string" ? JSON.parse(data) : (data as any);
   } catch (err) {
     console.error("[gamificationActions] advanceSkillProgress error:", err);
+    return null;
+  }
+}
+
+// ============================================================================
+// Generate Campaign Narrative
+// ============================================================================
+
+export interface GenerateCampaignResult {
+  setting: string;
+  stakes: string;
+}
+
+/**
+ * Generate a campaign narrative (setting + rhetorical stakes) using AI.
+ * The stakes are fictional/in-world motivational tension, not real consequences.
+ *
+ * @param title - The campaign title/theme to generate narrative for
+ * @returns Object with `setting` and `stakes` strings, or null on error
+ */
+export async function generateCampaignNarrative(
+  title: string,
+): Promise<GenerateCampaignResult | null> {
+  try {
+    const client = getAmplifyClient();
+
+    const systemMessage = {
+      role: "system",
+      content: `You are a creative writing assistant for an educational gamification platform. 
+Given a campaign title, generate two short pieces of narrative text:
+
+1. "setting" — A vivid description of the fictional world or scenario (2-3 sentences). This frames the learning journey as an adventure.
+2. "stakes" — Rhetorical, in-world consequences if students don't succeed (2-3 sentences). These are NOT real consequences — they are motivating story tension. Think video game narrative stakes.
+
+Respond ONLY with valid JSON: {"setting": "...", "stakes": "..."}
+Do not include any other text or markdown formatting.`,
+    };
+
+    const userMessage = {
+      role: "user",
+      content: `Generate a campaign narrative for: "${title}"`,
+    };
+
+    const { data, errors } = await client.mutations.chat({
+      messages: JSON.stringify([systemMessage, userMessage]),
+      model: "gpt-4o-mini",
+    });
+
+    if (errors?.length) {
+      console.error(
+        "[gamificationActions] generateCampaignNarrative errors:",
+        errors,
+      );
+      return null;
+    }
+
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    if (parsed?.setting && parsed?.stakes) {
+      return { setting: parsed.setting, stakes: parsed.stakes };
+    }
+    return null;
+  } catch (err) {
+    console.error(
+      "[gamificationActions] generateCampaignNarrative error:",
+      err,
+    );
     return null;
   }
 }

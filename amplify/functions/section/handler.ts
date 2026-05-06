@@ -1,19 +1,22 @@
 /**
  * Section Management Handler for Gen 2
- * 
+ *
  * Handles class section management:
  * - createSectionGroup: Creates section record + Cognito groups
  * - addSelfToSection: Adds user to section + creates assignments
  * - listSectionStudents: Lists users in section's learner group
  */
 
-import type { Handler } from 'aws-lambda';
-import { type Schema } from '../../data/resource';
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/data';
-import { GroupManager } from './groupManager';
-import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
-import { fromEnv } from '@aws-sdk/credential-providers';
+import type { Handler } from "aws-lambda";
+import { type Schema } from "../../data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { GroupManager } from "./groupManager";
+import {
+  CloudFormationClient,
+  DescribeStacksCommand,
+} from "@aws-sdk/client-cloudformation";
+import { fromEnv } from "@aws-sdk/credential-providers";
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
@@ -24,37 +27,51 @@ let cachedUserPoolId: string | null = null;
  */
 async function getUserPoolId(): Promise<string> {
   if (cachedUserPoolId) return cachedUserPoolId;
-  
+
   // Try environment variable first (if set by other means)
   if (process.env.USER_POOL_ID) {
     cachedUserPoolId = process.env.USER_POOL_ID;
     return cachedUserPoolId;
   }
-  
+
   // Discover from CloudFormation - Amplify exports as amplify-{appName}-{branch}-{hash}-auth-userpool
-  const cfnClient = new CloudFormationClient({ region: process.env.AWS_REGION });
-  
+  const cfnClient = new CloudFormationClient({
+    region: process.env.AWS_REGION,
+  });
+
   try {
     // Get stack name from Lambda function ARN or environment
-    const stackName = process.env.AWS_LAMBDA_FUNCTION_NAME?.split('-').slice(0, -2).join('-');
-    
+    const stackName = process.env.AWS_LAMBDA_FUNCTION_NAME?.split("-")
+      .slice(0, -2)
+      .join("-");
+
     if (stackName) {
-      const response = await cfnClient.send(new DescribeStacksCommand({ StackName: stackName }));
+      const response = await cfnClient.send(
+        new DescribeStacksCommand({ StackName: stackName }),
+      );
       const stack = response.Stacks?.[0];
-      const userPoolOutput = stack?.Outputs?.find(o => o.OutputKey?.includes('UserPool') || o.OutputKey?.includes('userPool'));
-      
+      const userPoolOutput = stack?.Outputs?.find(
+        (o) =>
+          o.OutputKey?.includes("UserPool") ||
+          o.OutputKey?.includes("userPool"),
+      );
+
       if (userPoolOutput?.OutputValue) {
         cachedUserPoolId = userPoolOutput.OutputValue;
         return cachedUserPoolId;
       }
     }
   } catch (error) {
-    console.warn('[getUserPoolId] Failed to discover from CloudFormation:', error);
+    console.warn(
+      "[getUserPoolId] Failed to discover from CloudFormation:",
+      error,
+    );
   }
-  
-  throw new Error('USER_POOL_ID not found. Set as environment variable or ensure CloudFormation exports are available.');
-}
 
+  throw new Error(
+    "USER_POOL_ID not found. Set as environment variable or ensure CloudFormation exports are available.",
+  );
+}
 
 // In Gen 2, Lambda resolvers automatically get AppSync endpoint via env vars
 // Configure Amplify with the endpoint for data client operations
@@ -62,9 +79,9 @@ Amplify.configure(
   {
     API: {
       GraphQL: {
-        endpoint: process.env.API_ENDPOINT || '',
-        region: process.env.AWS_REGION || 'us-east-1',
-        defaultAuthMode: 'iam', // Lambda uses IAM auth to call AppSync
+        endpoint: process.env.API_ENDPOINT || "",
+        region: process.env.AWS_REGION || "us-east-1",
+        defaultAuthMode: "iam", // Lambda uses IAM auth to call AppSync
       },
     },
   },
@@ -77,20 +94,20 @@ Amplify.configure(
         clearCredentialsAndIdentityId: () => {},
       },
     },
-  }
+  },
 );
 
 // Raw GraphQL operations - .models API doesn't work in Lambda resolvers
-// Versioning fields (_version, _lastChangedAt, _deleted) are now explicitly in the schema
-// and can be queried/mutated via GraphQL
 const CREATE_SECTION = /* GraphQL */ `
   mutation CreateSection($input: CreateSectionInput!) {
     createSection(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       name
       code
       createdAt
-      _version
     }
   }
 `;
@@ -99,11 +116,13 @@ const GET_SECTION = /* GraphQL */ `
   query GetSection($id: ID!) {
     getSection(id: $id) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       name
       code
       readableGroups
       writableGroups
-      _version
     }
   }
 `;
@@ -112,9 +131,11 @@ const UPDATE_SECTION = /* GraphQL */ `
   mutation UpdateSection($input: UpdateSectionInput!) {
     updateSection(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       readableGroups
       writableGroups
-      _version
     }
   }
 `;
@@ -124,9 +145,11 @@ const LIST_SECTIONS_BY_CODE = /* GraphQL */ `
     listSections(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         name
         code
-        _version
       }
     }
   }
@@ -137,9 +160,11 @@ const LIST_ASSIGNMENTS = /* GraphQL */ `
     listAssignments(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         unitID
         sectionID
-        _version
       }
     }
   }
@@ -150,6 +175,8 @@ const CREATE_ASSIGNMENT = /* GraphQL */ `
     createAssignment(input: $input) {
       id
       _version
+      _lastChangedAt
+      _deleted
     }
   }
 `;
@@ -159,9 +186,11 @@ const GET_GRADE = /* GraphQL */ `
   query GetGrade($id: ID!) {
     getGrade(id: $id) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       sectionID
       owner
-      _version
     }
   }
 `;
@@ -170,9 +199,11 @@ const UPDATE_GRADE = /* GraphQL */ `
   mutation UpdateGrade($input: UpdateGradeInput!) {
     updateGrade(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       reviewRoomId
       peerReviewGroup
-      _version
     }
   }
 `;
@@ -181,6 +212,9 @@ const CREATE_HOMEWORK_ROOM = /* GraphQL */ `
   mutation CreateHomeworkRoom($input: CreateHomeworkRoomInput!) {
     createHomeworkRoom(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       code
       gradeId
       ownerId
@@ -188,7 +222,6 @@ const CREATE_HOMEWORK_ROOM = /* GraphQL */ `
       status
       peerGroup
       invitedUserIds
-      _version
     }
   }
 `;
@@ -198,6 +231,9 @@ const LIST_HOMEWORK_ROOMS_BY_CODE = /* GraphQL */ `
     listHomeworkRooms(filter: { code: { eq: $code } }) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         code
         gradeId
         ownerId
@@ -205,7 +241,6 @@ const LIST_HOMEWORK_ROOMS_BY_CODE = /* GraphQL */ `
         status
         peerGroup
         invitedUserIds
-        _version
       }
     }
   }
@@ -215,8 +250,10 @@ const UPDATE_HOMEWORK_ROOM = /* GraphQL */ `
   mutation UpdateHomeworkRoom($input: UpdateHomeworkRoomInput!) {
     updateHomeworkRoom(input: $input) {
       id
-      invitedUserIds
       _version
+      _lastChangedAt
+      _deleted
+      invitedUserIds
     }
   }
 `;
@@ -226,6 +263,9 @@ const LIST_GRADES_BY_SECTION = /* GraphQL */ `
     listGrades(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         sectionID
         owner
       }
@@ -239,269 +279,340 @@ let client: any = null;
 function getClient() {
   if (!client) {
     if (!process.env.API_ENDPOINT) {
-      throw new Error('API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.');
+      throw new Error(
+        "API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.",
+      );
     }
     // Create client - authMode is already set in Amplify.configure()
     // Use untyped client to avoid auto-generation of versioning fields
-    console.log('[Section] Initializing untyped GraphQL client');
+    console.log("[Section] Initializing untyped GraphQL client");
     client = generateClient();
   }
   return client;
 }
 
 export const handler: Handler = async (event: any, context: any) => {
-    // Extract operation name from AppSync event
-    const operationName = event.info?.fieldName || event.fieldName;
-    const args = event.arguments || {};
-    
-    if (!operationName) {
-        console.error('[Section Handler] No operation name found in event:', JSON.stringify(event, null, 2));
-        throw new Error('Unable to determine operation name from event');
+  // Extract operation name from AppSync event
+  const operationName = event.info?.fieldName || event.fieldName;
+  const args = event.arguments || {};
+
+  if (!operationName) {
+    console.error(
+      "[Section Handler] No operation name found in event:",
+      JSON.stringify(event, null, 2),
+    );
+    throw new Error("Unable to determine operation name from event");
+  }
+
+  // Extract userId from AppSync identity (Gen 2 pattern)
+  const userId = event.identity?.sub;
+  const username = event.identity?.username;
+  const claims = event.identity?.claims || {};
+
+  if (!userId) {
+    console.error(
+      "[Section Handler] No user identity found in event:",
+      JSON.stringify(event, null, 2),
+    );
+    throw new Error("Unauthorized: User ID not found in event context");
+  }
+
+  console.log(`[Section Handler] ${operationName}`, { userId, username, args });
+
+  try {
+    const userPoolId = await getUserPoolId();
+    const groupManager = new GroupManager(
+      userPoolId,
+      process.env.AWS_REGION || "us-east-1",
+    );
+
+    switch (operationName) {
+      case "createSectionGroup":
+        return await handleCreateSectionGroup(
+          args,
+          userId,
+          username || userId,
+          groupManager,
+        );
+      case "addSelfToSection":
+        return await handleAddSelfToSection(
+          args,
+          userId,
+          username || userId,
+          groupManager,
+        );
+      case "listSectionStudents":
+        return await handleListSectionStudents(args, userId, groupManager);
+      case "createPeerReviewRoom":
+        return await handleCreatePeerReviewRoom(
+          args,
+          userId,
+          username || userId,
+          groupManager,
+        );
+      case "joinPeerReview":
+        return await handleJoinPeerReview(
+          args,
+          userId,
+          username || userId,
+          groupManager,
+        );
+      default:
+        throw new Error(`Unknown operation: ${operationName}`);
     }
-
-    // Extract userId from AppSync identity (Gen 2 pattern)
-    const userId = event.identity?.sub;
-    const username = event.identity?.username;
-    const claims = event.identity?.claims || {};
-
-    if (!userId) {
-        console.error('[Section Handler] No user identity found in event:', JSON.stringify(event, null, 2));
-        throw new Error('Unauthorized: User ID not found in event context');
+  } catch (error) {
+    console.error(`[Section Handler Error] ${operationName}:`, error);
+    // Ensure we throw a proper Error instance, not an object
+    if (error instanceof Error) {
+      throw error;
     }
-
-    console.log(`[Section Handler] ${operationName}`, { userId, username, args });
-
-    try {
-        const userPoolId = await getUserPoolId();
-        const groupManager = new GroupManager(userPoolId, process.env.AWS_REGION || 'us-east-1');
-
-        switch (operationName) {
-            case 'createSectionGroup':
-                return await handleCreateSectionGroup(args, userId, username || userId, groupManager);
-            case 'addSelfToSection':
-                return await handleAddSelfToSection(args, userId, username || userId, groupManager);
-            case 'listSectionStudents':
-                return await handleListSectionStudents(args, userId, groupManager);
-            case 'createPeerReviewRoom':
-                return await handleCreatePeerReviewRoom(args, userId, username || userId, groupManager);
-            case 'joinPeerReview':
-                return await handleJoinPeerReview(args, userId, username || userId, groupManager);
-            default:
-                throw new Error(`Unknown operation: ${operationName}`);
-        }
-    } catch (error) {
-        console.error(`[Section Handler Error] ${operationName}:`, error);
-        // Ensure we throw a proper Error instance, not an object
-        if (error instanceof Error) {
-            throw error;
-        }
-        // Convert non-Error objects to Error instances
-        const errorMessage = typeof error === 'object' && error !== null 
-            ? JSON.stringify(error, null, 2) 
-            : String(error);
-        throw new Error(`Section handler error: ${errorMessage}`);
-    }
+    // Convert non-Error objects to Error instances
+    const errorMessage =
+      typeof error === "object" && error !== null
+        ? JSON.stringify(error, null, 2)
+        : String(error);
+    throw new Error(`Section handler error: ${errorMessage}`);
+  }
 };
 
 /**
  * Creates a new section with Cognito groups
  */
 async function handleCreateSectionGroup(
-    args: any, 
-    userId: string, 
-    username: string,
-    groupManager: GroupManager
+  args: any,
+  userId: string,
+  username: string,
+  groupManager: GroupManager,
 ): Promise<string> {
-    const { name, description } = args;
+  const { name, description } = args;
 
-    try {
-        // Generate unique 6-character code
-        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const client = getClient();
-        
-        // Pre-generate section ID for group names (we'll let DynamoDB auto-generate if needed)
-        // Actually, we need to use a UUID since we need to know the ID before creation for groups
-        const sectionId = crypto.randomUUID();
-        
-        // Pre-calculate group names to include in CREATE (avoids need for UPDATE with _version)
-        const readableGroups = [`section-${sectionId}-instructors`, `section-${sectionId}-learners`];
-        const writableGroups = [`section-${sectionId}-instructors`];
-        
-        // Create section using GraphQL mutation with groups included
-        // This avoids needing a separate UPDATE which would require _version
-        const { data, errors } = await client.graphql({
-            query: CREATE_SECTION,
-            variables: {
-                input: {
-                    id: sectionId, // Specify ID so it matches pre-calculated group names
-                    name,
-                    description: description || '',
-                    code,
-                    instructor: userId,
-                    status: 'PUBLISHED',
-                    readableGroups,
-                    writableGroups,
-                },
-            },
-        });
+  try {
+    // Generate unique 6-character code
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const client = getClient();
 
-        if (errors || !data?.createSection) {
-            console.error('[Create Section Error]:', { data, errors });
-            throw new Error(`Failed to create section: ${JSON.stringify(errors)}`);
-        }
+    // Pre-generate section ID for group names (we'll let DynamoDB auto-generate if needed)
+    // Actually, we need to use a UUID since we need to know the ID before creation for groups
+    const sectionId = crypto.randomUUID();
 
-        const section = data.createSection;
+    // Pre-calculate group names to include in CREATE (avoids need for UPDATE with _version)
+    const readableGroups = [
+      `section-${sectionId}-instructors`,
+      `section-${sectionId}-learners`,
+    ];
+    const writableGroups = [`section-${sectionId}-instructors`];
 
-        // Create Cognito groups for this section
-        console.log(`[Section] Creating Cognito groups for section ${sectionId}`);
-        try {
-            await groupManager.createInstructorGroup(sectionId, name);
-            await groupManager.createLearnerGroup(sectionId, name);
-            
-            // Add the creator as an instructor
-            await groupManager.addInstructor(username, sectionId);
-            console.log(`[Section] Groups created successfully, ${username} added as instructor`);
-        } catch (groupError) {
-            console.error(`[Section] Warning: Failed to create/manage groups:`, groupError);
-            // Log full error details
-            if (groupError instanceof Error) {
-                console.error(`[Section] Error message: ${groupError.message}`);
-                console.error(`[Section] Error stack: ${groupError.stack}`);
-            } else {
-                console.error(`[Section] Error object:`, JSON.stringify(groupError, null, 2));
-            }
-            // Don't fail section creation if groups fail - groups are for authorization only
-        }
+    // Create section using GraphQL mutation with groups included
+    // This avoids needing a separate UPDATE which would require _version
+    const { data, errors } = await client.graphql({
+      query: CREATE_SECTION,
+      variables: {
+        input: {
+          id: sectionId, // Specify ID so it matches pre-calculated group names
+          name,
+          description: description || "",
+          code,
+          instructor: userId,
+          status: "PUBLISHED",
+          readableGroups,
+          writableGroups,
+        },
+      },
+    });
 
-        return JSON.stringify({
-            sectionId,
-            name,
-            code,
-            createdAt: section.createdAt,
-            message: `Section "${name}" created with code ${code}. Instructor added to section.`,
-        });
-    } catch (error) {
-        console.error('[Create Section Error]:', error);
-        // Log detailed error information
-        if (error instanceof Error) {
-            console.error('[Create Section Error Details]:', {
-                message: error.message,
-                stack: error.stack,
-                name: error.name,
-            });
-        } else {
-            console.error('[Create Section Error Object]:', JSON.stringify(error, null, 2));
-        }
-        throw error;
+    if (errors || !data?.createSection) {
+      console.error("[Create Section Error]:", { data, errors });
+      throw new Error(`Failed to create section: ${JSON.stringify(errors)}`);
     }
+
+    const section = data.createSection;
+
+    // Create Cognito groups for this section
+    console.log(`[Section] Creating Cognito groups for section ${sectionId}`);
+    try {
+      await groupManager.createInstructorGroup(sectionId, name);
+      await groupManager.createLearnerGroup(sectionId, name);
+
+      // Add the creator as an instructor
+      await groupManager.addInstructor(username, sectionId);
+      console.log(
+        `[Section] Groups created successfully, ${username} added as instructor`,
+      );
+    } catch (groupError) {
+      console.error(
+        `[Section] Warning: Failed to create/manage groups:`,
+        groupError,
+      );
+      // Log full error details
+      if (groupError instanceof Error) {
+        console.error(`[Section] Error message: ${groupError.message}`);
+        console.error(`[Section] Error stack: ${groupError.stack}`);
+      } else {
+        console.error(
+          `[Section] Error object:`,
+          JSON.stringify(groupError, null, 2),
+        );
+      }
+      // Don't fail section creation if groups fail - groups are for authorization only
+    }
+
+    return JSON.stringify({
+      sectionId,
+      name,
+      code,
+      createdAt: section.createdAt,
+      message: `Section "${name}" created with code ${code}. Instructor added to section.`,
+    });
+  } catch (error) {
+    console.error("[Create Section Error]:", error);
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error("[Create Section Error Details]:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+    } else {
+      console.error(
+        "[Create Section Error Object]:",
+        JSON.stringify(error, null, 2),
+      );
+    }
+    throw error;
+  }
 }
 
 /**
  * Adds user to section and creates assignments for all units
  */
 async function handleAddSelfToSection(
-    args: any, 
-    userId: string,
-    username: string,
-    groupManager: GroupManager
+  args: any,
+  userId: string,
+  username: string,
+  groupManager: GroupManager,
 ): Promise<string> {
-    const { code } = args;
+  const { code } = args;
 
-    try {
-        // Look up Section by code using GraphQL
-        const client = getClient();
-        const { data: listData, errors: lookupErrors } = await client.graphql({
-            query: LIST_SECTIONS_BY_CODE,
-            variables: {
-                filter: { code: { eq: code } },
-            },
-        });
+  try {
+    // Look up Section by code using GraphQL
+    const client = getClient();
+    const { data: listData, errors: lookupErrors } = await client.graphql({
+      query: LIST_SECTIONS_BY_CODE,
+      variables: {
+        filter: { code: { eq: code } },
+      },
+    });
 
-        if (lookupErrors || !listData?.listSections?.items || listData.listSections.items.length === 0) {
-            console.error('[Section] Section not found with code:', code);
-            throw new Error(`No section found with code ${code}`);
-        }
-
-        const section = listData.listSections.items[0];
-        const sectionId = section.id;
-
-        // Add user to section learner group
-        await groupManager.addLearner(username, sectionId);
-        console.log(`[Section] Added ${username} to learner group for section ${sectionId}`);
-
-        // Get all assignments for this section to create student copies
-        const { data: assignmentsData } = await client.graphql({
-            query: LIST_ASSIGNMENTS,
-            variables: {
-                filter: { sectionID: { eq: sectionId } },
-            },
-        });
-
-        const sectionAssignments = assignmentsData?.listAssignments?.items || [];
-
-        // Create assignments for this student
-        // Must match GroupManager's naming pattern: section-{id}-{role}
-        const readableGroups = [`section-${sectionId}-learners`];
-        const writableGroups = [`section-${sectionId}-learners`];
-
-        // Filter out null items that can appear in subscription arrays
-        const validAssignments = sectionAssignments.filter((a: any) => a != null && a.id != null);
-
-        for (const assignment of validAssignments) {
-            await client.graphql({
-                query: CREATE_ASSIGNMENT,
-                variables: {
-                    input: {
-                        sectionID: sectionId,
-                        unitID: assignment.unitID,
-                        learner: userId,
-                        readableGroups,
-                        writableGroups,
-                        status: 'PUBLISHED',
-                    },
-                },
-            });
-        }
-
-        return JSON.stringify({
-            success: true,
-            sectionId,
-            sectionName: section.name,
-            assignmentsCreated: sectionAssignments?.length || 0,
-            message: `Successfully joined section "${section.name}"`,
-        });
-    } catch (error) {
-        console.error('[Add Self to Section Error]:', error);
-        throw error;
+    if (
+      lookupErrors ||
+      !listData?.listSections?.items ||
+      listData.listSections.items.length === 0
+    ) {
+      console.error("[Section] Section not found with code:", code);
+      throw new Error(`No section found with code ${code}`);
     }
+
+    const section = listData.listSections.items[0];
+    const sectionId = section.id;
+
+    // Add user to section learner group
+    await groupManager.addLearner(username, sectionId);
+    console.log(
+      `[Section] Added ${username} to learner group for section ${sectionId}`,
+    );
+
+    // Get all assignments for this section to create student copies
+    const { data: assignmentsData } = await client.graphql({
+      query: LIST_ASSIGNMENTS,
+      variables: {
+        filter: { sectionID: { eq: sectionId } },
+      },
+    });
+
+    const sectionAssignments = assignmentsData?.listAssignments?.items || [];
+
+    // Create assignments for this student
+    // Must match GroupManager's naming pattern: section-{id}-{role}
+    const readableGroups = [`section-${sectionId}-learners`];
+    const writableGroups = [`section-${sectionId}-learners`];
+
+    // Filter out null items that can appear in subscription arrays
+    const validAssignments = sectionAssignments.filter(
+      (a: any) => a != null && a.id != null,
+    );
+
+    for (const assignment of validAssignments) {
+      await client.graphql({
+        query: CREATE_ASSIGNMENT,
+        variables: {
+          input: {
+            sectionID: sectionId,
+            unitID: assignment.unitID,
+            learner: userId,
+            readableGroups,
+            writableGroups,
+            status: "PUBLISHED",
+          },
+        },
+      });
+    }
+
+    return JSON.stringify({
+      success: true,
+      sectionId,
+      sectionName: section.name,
+      assignmentsCreated: sectionAssignments?.length || 0,
+      message: `Successfully joined section "${section.name}"`,
+    });
+  } catch (error) {
+    console.error("[Add Self to Section Error]:", error);
+    throw error;
+  }
 }
 
 /**
  * Lists students in a section's learner group
  */
 async function handleListSectionStudents(
-    args: any,
-    userId: string,
-    groupManager: GroupManager
+  args: any,
+  userId: string,
+  groupManager: GroupManager,
 ): Promise<any[]> {
-    const { sectionCode } = args;
-    
-    try {
-        // Derive sectionId from code (temporary pattern)
-        const sectionId = `section-${sectionCode}`;
-        
-        // Get learners from Cognito group
-        const learners = await groupManager.listLearnersInSection(sectionId);
+  const { sectionCode } = args;
 
-        return learners.map((learner: any) => ({
-            id: learner.Username,
-            name: learner.Attributes?.find((a: any) => a.Name === 'name')?.Value || learner.Username,
-            email: learner.Attributes?.find((a: any) => a.Name === 'email')?.Value || '',
-        }));
-    } catch (error) {
-        console.error('[List Section Students Error]:', error);
-        throw error;
+  try {
+    // Look up section by code to get the actual UUID
+    const client = getClient();
+    const { data } = await client.graphql({
+      query: LIST_SECTIONS_BY_CODE,
+      variables: { filter: { code: { eq: sectionCode } } },
+    });
+
+    const section = data?.listSections?.items?.[0];
+    if (!section) {
+      console.warn(
+        `[listSectionStudents] No section found with code: ${sectionCode}`,
+      );
+      return [];
     }
+
+    const sectionId = section.id;
+
+    // Get learners from Cognito group
+    const learners = await groupManager.listLearnersInSection(sectionId);
+
+    return learners.map((learner: any) => ({
+      id: learner.Username,
+      name:
+        learner.Attributes?.find((a: any) => a.Name === "name")?.Value ||
+        learner.Username,
+      email:
+        learner.Attributes?.find((a: any) => a.Name === "email")?.Value || "",
+    }));
+  } catch (error) {
+    console.error("[List Section Students Error]:", error);
+    throw error;
+  }
 }
 
 // ========================================================================
@@ -518,110 +629,119 @@ async function handleListSectionStudents(
  * 5. Updates Grade with reviewRoomId and peerReviewGroup
  */
 async function handleCreatePeerReviewRoom(
-    args: any,
-    userId: string,
-    username: string,
-    groupManager: GroupManager,
+  args: any,
+  userId: string,
+  username: string,
+  groupManager: GroupManager,
 ): Promise<string> {
-    const { gradeId, invitedUserIds } = args;
-    const client = getClient();
+  const { gradeId, invitedUserIds } = args;
+  const client = getClient();
 
-    try {
-        // 1. Fetch grade and verify ownership
-        const { data: gradeData, errors: gradeErrors } = await client.graphql({
-            query: GET_GRADE,
-            variables: { id: gradeId },
-        });
+  try {
+    // 1. Fetch grade and verify ownership
+    const { data: gradeData, errors: gradeErrors } = await client.graphql({
+      query: GET_GRADE,
+      variables: { id: gradeId },
+    });
 
-        if (gradeErrors || !gradeData?.getGrade) {
-            throw new Error(`Grade ${gradeId} not found`);
-        }
-
-        const grade = gradeData.getGrade;
-        if (grade.owner !== userId && grade.owner !== username) {
-            throw new Error('Only the grade owner can create a peer review room');
-        }
-
-        const sectionId = grade.sectionID;
-
-        // 2. Generate room ID and join code
-        const roomId = crypto.randomUUID();
-        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const peerGroupName = `review-${roomId}-peers`;
-
-        // 3. Create Cognito group for peers
-        try {
-            await groupManager.createPeerReviewGroup(roomId);
-        } catch (groupError) {
-            console.error('[PeerReview] Failed to create Cognito group:', groupError);
-            // Continue — group auth is additive, room still works via invitedUserIds check
-        }
-
-        // 4. Validate invited users are in the same section and add to group
-        const validInvites: string[] = [];
-        if (invitedUserIds && invitedUserIds.length > 0 && sectionId) {
-            for (const invitedUserId of invitedUserIds) {
-                const isSameSection = await isUserInSection(client, invitedUserId, sectionId);
-                if (isSameSection) {
-                    validInvites.push(invitedUserId);
-                    try {
-                        await groupManager.addToPeerReviewGroup(invitedUserId, roomId);
-                    } catch (err) {
-                        console.warn(`[PeerReview] Failed to add ${invitedUserId} to group:`, err);
-                    }
-                } else {
-                    console.warn(`[PeerReview] Skipping ${invitedUserId} — not in section ${sectionId}`);
-                }
-            }
-        }
-
-        // 5. Create HomeworkRoom
-        const { data: roomData, errors: roomErrors } = await client.graphql({
-            query: CREATE_HOMEWORK_ROOM,
-            variables: {
-                input: {
-                    id: roomId,
-                    gradeId,
-                    ownerId: userId,
-                    sectionID: sectionId || null,
-                    status: 'OPEN',
-                    code,
-                    peerGroup: peerGroupName,
-                    invitedUserIds: validInvites,
-                },
-            },
-        });
-
-        if (roomErrors || !roomData?.createHomeworkRoom) {
-            console.error('[PeerReview] Failed to create room:', roomErrors);
-            throw new Error('Failed to create peer review room');
-        }
-
-        // 6. Update Grade with room reference
-        await client.graphql({
-            query: UPDATE_GRADE,
-            variables: {
-                input: {
-                    id: gradeId,
-                    reviewRoomId: roomId,
-                    peerReviewGroup: peerGroupName,
-                    _version: grade._version,
-                },
-            },
-        });
-
-        return JSON.stringify({
-            success: true,
-            roomId,
-            code,
-            invitedCount: validInvites.length,
-            skippedCount: (invitedUserIds?.length || 0) - validInvites.length,
-            message: `Peer review room created with code ${code}`,
-        });
-    } catch (error) {
-        console.error('[Create Peer Review Room Error]:', error);
-        throw error;
+    if (gradeErrors || !gradeData?.getGrade) {
+      throw new Error(`Grade ${gradeId} not found`);
     }
+
+    const grade = gradeData.getGrade;
+    if (grade.owner !== userId && grade.owner !== username) {
+      throw new Error("Only the grade owner can create a peer review room");
+    }
+
+    const sectionId = grade.sectionID;
+
+    // 2. Generate room ID and join code
+    const roomId = crypto.randomUUID();
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const peerGroupName = `review-${roomId}-peers`;
+
+    // 3. Create Cognito group for peers
+    try {
+      await groupManager.createPeerReviewGroup(roomId);
+    } catch (groupError) {
+      console.error("[PeerReview] Failed to create Cognito group:", groupError);
+      // Continue — group auth is additive, room still works via invitedUserIds check
+    }
+
+    // 4. Validate invited users are in the same section and add to group
+    const validInvites: string[] = [];
+    if (invitedUserIds && invitedUserIds.length > 0 && sectionId) {
+      for (const invitedUserId of invitedUserIds) {
+        const isSameSection = await isUserInSection(
+          client,
+          invitedUserId,
+          sectionId,
+        );
+        if (isSameSection) {
+          validInvites.push(invitedUserId);
+          try {
+            await groupManager.addToPeerReviewGroup(invitedUserId, roomId);
+          } catch (err) {
+            console.warn(
+              `[PeerReview] Failed to add ${invitedUserId} to group:`,
+              err,
+            );
+          }
+        } else {
+          console.warn(
+            `[PeerReview] Skipping ${invitedUserId} — not in section ${sectionId}`,
+          );
+        }
+      }
+    }
+
+    // 5. Create HomeworkRoom
+    const { data: roomData, errors: roomErrors } = await client.graphql({
+      query: CREATE_HOMEWORK_ROOM,
+      variables: {
+        input: {
+          id: roomId,
+          gradeId,
+          ownerId: userId,
+          sectionID: sectionId || null,
+          status: "OPEN",
+          code,
+          peerGroup: peerGroupName,
+          invitedUserIds: validInvites,
+        },
+      },
+    });
+
+    if (roomErrors || !roomData?.createHomeworkRoom) {
+      console.error("[PeerReview] Failed to create room:", roomErrors);
+      throw new Error("Failed to create peer review room");
+    }
+
+    // 6. Update Grade with room reference
+    await client.graphql({
+      query: UPDATE_GRADE,
+      variables: {
+        input: {
+          id: gradeId,
+          reviewRoomId: roomId,
+          peerReviewGroup: peerGroupName,
+          _version: grade._version,
+        },
+      },
+    });
+
+    return JSON.stringify({
+      success: true,
+      roomId,
+      code,
+      invitedCount: validInvites.length,
+      skippedCount: (invitedUserIds?.length || 0) - validInvites.length,
+      message: `Peer review room created with code ${code}`,
+    });
+  } catch (error) {
+    console.error("[Create Peer Review Room Error]:", error);
+    throw error;
+  }
 }
 
 /**
@@ -633,107 +753,126 @@ async function handleCreatePeerReviewRoom(
  * 4. Adds caller to invitedUserIds and Cognito group
  */
 async function handleJoinPeerReview(
-    args: any,
-    userId: string,
-    username: string,
-    groupManager: GroupManager,
+  args: any,
+  userId: string,
+  username: string,
+  groupManager: GroupManager,
 ): Promise<string> {
-    const { code } = args;
-    const client = getClient();
+  const { code } = args;
+  const client = getClient();
 
-    try {
-        // 1. Look up room by code
-        const { data: listData, errors: lookupErrors } = await client.graphql({
-            query: LIST_HOMEWORK_ROOMS_BY_CODE,
-            variables: { code },
-        });
+  try {
+    // 1. Look up room by code
+    const { data: listData, errors: lookupErrors } = await client.graphql({
+      query: LIST_HOMEWORK_ROOMS_BY_CODE,
+      variables: { code },
+    });
 
-        if (lookupErrors || !listData?.listHomeworkRooms?.items?.length) {
-            throw new Error(`No peer review room found with code ${code}`);
-        }
-
-        const room = listData.listHomeworkRooms.items[0];
-
-        // 2. Validate room is not closed
-        if (room.status === 'REVIEW_COMPLETE') {
-            throw new Error('This peer review session has ended');
-        }
-
-        // 3. Prevent self-join by owner
-        if (room.ownerId === userId || room.ownerId === username) {
-            throw new Error('You cannot join your own review room');
-        }
-
-        // 4. Check if already joined
-        const existingInvites: string[] = room.invitedUserIds || [];
-        if (existingInvites.includes(userId) || existingInvites.includes(username)) {
-            return JSON.stringify({
-                success: true,
-                roomId: room.id,
-                alreadyJoined: true,
-                message: 'You have already joined this review room',
-            });
-        }
-
-        // 5. Validate same section
-        if (room.sectionID) {
-            const isSameSection = await isUserInSection(client, userId, room.sectionID);
-            if (!isSameSection) {
-                throw new Error('You must be in the same class section to join this review');
-            }
-        }
-
-        // 6. Add to Cognito group
-        if (room.peerGroup) {
-            try {
-                await groupManager.addToPeerReviewGroup(username, room.id.replace('review-', '').replace('-peers', ''));
-            } catch (err) {
-                console.warn(`[PeerReview] Failed to add ${username} to Cognito group:`, err);
-            }
-        }
-
-        // 7. Update invitedUserIds on the room
-        const updatedInvites = [...existingInvites, userId];
-        await client.graphql({
-            query: UPDATE_HOMEWORK_ROOM,
-            variables: {
-                input: {
-                    id: room.id,
-                    invitedUserIds: updatedInvites,
-                    _version: room._version,
-                },
-            },
-        });
-
-        return JSON.stringify({
-            success: true,
-            roomId: room.id,
-            gradeId: room.gradeId,
-            message: `Successfully joined peer review room`,
-        });
-    } catch (error) {
-        console.error('[Join Peer Review Error]:', error);
-        throw error;
+    if (lookupErrors || !listData?.listHomeworkRooms?.items?.length) {
+      throw new Error(`No peer review room found with code ${code}`);
     }
+
+    const room = listData.listHomeworkRooms.items[0];
+
+    // 2. Validate room is not closed
+    if (room.status === "REVIEW_COMPLETE") {
+      throw new Error("This peer review session has ended");
+    }
+
+    // 3. Prevent self-join by owner
+    if (room.ownerId === userId || room.ownerId === username) {
+      throw new Error("You cannot join your own review room");
+    }
+
+    // 4. Check if already joined
+    const existingInvites: string[] = room.invitedUserIds || [];
+    if (
+      existingInvites.includes(userId) ||
+      existingInvites.includes(username)
+    ) {
+      return JSON.stringify({
+        success: true,
+        roomId: room.id,
+        alreadyJoined: true,
+        message: "You have already joined this review room",
+      });
+    }
+
+    // 5. Validate same section
+    if (room.sectionID) {
+      const isSameSection = await isUserInSection(
+        client,
+        userId,
+        room.sectionID,
+      );
+      if (!isSameSection) {
+        throw new Error(
+          "You must be in the same class section to join this review",
+        );
+      }
+    }
+
+    // 6. Add to Cognito group
+    if (room.peerGroup) {
+      try {
+        await groupManager.addToPeerReviewGroup(
+          username,
+          room.id.replace("review-", "").replace("-peers", ""),
+        );
+      } catch (err) {
+        console.warn(
+          `[PeerReview] Failed to add ${username} to Cognito group:`,
+          err,
+        );
+      }
+    }
+
+    // 7. Update invitedUserIds on the room
+    const updatedInvites = [...existingInvites, userId];
+    await client.graphql({
+      query: UPDATE_HOMEWORK_ROOM,
+      variables: {
+        input: {
+          id: room.id,
+          invitedUserIds: updatedInvites,
+          _version: room._version,
+        },
+      },
+    });
+
+    return JSON.stringify({
+      success: true,
+      roomId: room.id,
+      gradeId: room.gradeId,
+      message: `Successfully joined peer review room`,
+    });
+  } catch (error) {
+    console.error("[Join Peer Review Error]:", error);
+    throw error;
+  }
 }
 
 /**
  * Checks if a user has a Grade in the given section (same-section validation).
  */
-async function isUserInSection(client: any, userId: string, sectionID: string): Promise<boolean> {
-    try {
-        const { data } = await client.graphql({
-            query: LIST_GRADES_BY_SECTION,
-            variables: {
-                filter: {
-                    sectionID: { eq: sectionID },
-                    owner: { eq: userId },
-                },
-            },
-        });
-        return (data?.listGrades?.items?.length || 0) > 0;
-    } catch (error) {
-        console.warn(`[PeerReview] Section check failed for ${userId}:`, error);
-        return false;
-    }
+async function isUserInSection(
+  client: any,
+  userId: string,
+  sectionID: string,
+): Promise<boolean> {
+  try {
+    const { data } = await client.graphql({
+      query: LIST_GRADES_BY_SECTION,
+      variables: {
+        filter: {
+          sectionID: { eq: sectionID },
+          owner: { eq: userId },
+        },
+      },
+    });
+    return (data?.listGrades?.items?.length || 0) > 0;
+  } catch (error) {
+    console.warn(`[PeerReview] Section check failed for ${userId}:`, error);
+    return false;
+  }
 }

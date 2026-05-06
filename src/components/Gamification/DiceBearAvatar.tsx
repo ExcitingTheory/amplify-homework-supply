@@ -16,13 +16,19 @@ import { createAvatar } from '@dicebear/core'
 import * as avataaarsNeutral from '@dicebear/avataaars-neutral'
 import * as avataaars from '@dicebear/avataaars'
 import * as toonHead from '@dicebear/toon-head'
+import * as loreleiNeutral from '@dicebear/lorelei-neutral'
+import * as notionists from '@dicebear/notionists'
+import * as openPeeps from '@dicebear/open-peeps'
+import * as personas from '@dicebear/personas'
+import { AvatarGlowRing, isGlowActive } from './AvatarGlowRing'
+import type { GlowRingConfig } from './AvatarGlowRing'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 /** DiceBear style tier — unlocked progressively via XP */
-export type AvatarStyleTier = 'simple' | 'detailed' | 'toonhead'
+export type AvatarStyleTier = 'simple' | 'detailed' | 'toonhead' | 'lorelei' | 'notionists' | 'openpeeps' | 'personas'
 
 export interface AvatarOverrides {
   backgroundColor?: string[]
@@ -63,6 +69,8 @@ export interface DiceBearAvatarProps {
   locked?: boolean
   /** Optional customization overrides */
   overrides?: AvatarOverrides
+  /** Optional glow ring configuration (earned via AVATAR_GLOW badge) */
+  glowRing?: GlowRingConfig | null
 }
 
 // ============================================================================
@@ -70,9 +78,13 @@ export interface DiceBearAvatarProps {
 // ============================================================================
 
 const STYLE_CONFIG: Record<AvatarStyleTier, { displayName: string; description: string }> = {
-  simple:   { displayName: 'Avataaars Neutral', description: 'Clean neutral character avatars' },
-  detailed: { displayName: 'Avataaars', description: 'Full-featured character avatars' },
-  toonhead: { displayName: 'Toon Head', description: 'Animated-series character portraits' },
+  simple:     { displayName: 'Avataaars Neutral', description: 'Clean neutral character avatars' },
+  detailed:   { displayName: 'Avataaars', description: 'Full-featured character avatars' },
+  toonhead:   { displayName: 'Toon Head', description: 'Animated-series character portraits' },
+  lorelei:    { displayName: 'Lorelei', description: 'Soft pencil-sketch style portraits' },
+  notionists: { displayName: 'Notionists', description: 'Minimalist line-art characters' },
+  openpeeps:  { displayName: 'Open Peeps', description: 'Hand-drawn illustration people' },
+  personas:   { displayName: 'Personas', description: 'Colorful geometric character avatars' },
 }
 
 /** Maps style tier to its DiceBear collection module */
@@ -80,7 +92,46 @@ const STYLE_MAP: Record<AvatarStyleTier, Parameters<typeof createAvatar>[0]> = {
   simple: avataaarsNeutral,
   detailed: avataaars,
   toonhead: toonHead,
+  lorelei: loreleiNeutral,
+  notionists: notionists,
+  openpeeps: openPeeps,
+  personas: personas,
 }
+
+// ============================================================================
+// Avatar unlock configuration — instructor-customizable per section
+// ============================================================================
+
+/** A single level → style unlock mapping */
+export interface AvatarUnlockEntry {
+  /** Minimum level required to unlock this style */
+  minLevel: number
+  /** The DiceBear style tier unlocked at this level */
+  tier: AvatarStyleTier
+}
+
+/** Instructor-configurable avatar unlock schedule */
+export interface AvatarUnlockConfig {
+  /** Ordered list of level → style unlock mappings (highest level first) */
+  unlocks: AvatarUnlockEntry[]
+  /** Whether the glow ring powerup is enabled on level-up */
+  glowOnLevelUp?: boolean
+  /** Per-feature-set unlock levels (within each style) */
+  featureUnlockLevels?: FeatureUnlockLevels
+}
+
+/** Configurable level offsets at which feature sets become available (relative to style unlock level) */
+export interface FeatureUnlockLevels {
+  /** Levels after style unlock at which hair color, clothes color, hair/top, and clothing unlock. Default 2. */
+  hairAndClothing?: number
+  /** Levels after style unlock at which facial hair and accessories unlock. Default 3. */
+  accessories?: number
+}
+
+/** All available style tiers for the instructor to choose from */
+export const ALL_AVATAR_STYLES: AvatarStyleTier[] = [
+  'simple', 'detailed', 'toonhead', 'lorelei', 'notionists', 'openpeeps', 'personas',
+]
 
 // ============================================================================
 // Component
@@ -94,6 +145,7 @@ export function DiceBearAvatar({
   onClick,
   locked = false,
   overrides,
+  glowRing,
 }: DiceBearAvatarProps) {
   const dataUri = useMemo(
     () => {
@@ -127,46 +179,64 @@ export function DiceBearAvatar({
     />
   )
 
+  const showGlow = glowRing && isGlowActive(glowRing)
+
+  const wrapGlow = (node: React.ReactElement) =>
+    showGlow ? (
+      <AvatarGlowRing size={size} config={glowRing!}>
+        {node}
+      </AvatarGlowRing>
+    ) : node
+
   if (label) {
     return (
       <Tooltip title={locked ? `${label} (Locked)` : label}>
-        {avatar}
+        {wrapGlow(avatar)}
       </Tooltip>
     )
   }
 
-  return avatar
+  return wrapGlow(avatar)
 }
 
 // ============================================================================
 // Utility: get the style tier for a given level
 // ============================================================================
 
-const LEVEL_TIERS: Array<{ minLevel: number; tier: AvatarStyleTier }> = [
+/** Default level → style unlock schedule (used when no instructor config) */
+const DEFAULT_LEVEL_TIERS: AvatarUnlockEntry[] = [
   { minLevel: 3, tier: 'toonhead' },
   { minLevel: 2, tier: 'detailed' },
   { minLevel: 1, tier: 'simple' },
 ]
 
+/** @deprecated Use DEFAULT_LEVEL_TIERS instead */
+const LEVEL_TIERS = DEFAULT_LEVEL_TIERS
+
 /** Returns the highest style tier unlocked at a given level. */
-export function getUnlockedStyleTier(level: number): AvatarStyleTier {
-  for (const entry of LEVEL_TIERS) {
+export function getUnlockedStyleTier(level: number, config?: AvatarUnlockConfig | null): AvatarStyleTier {
+  const tiers = config?.unlocks?.length ? config.unlocks : DEFAULT_LEVEL_TIERS
+  // Ensure sorted descending by minLevel for correct lookup
+  const sorted = [...tiers].sort((a, b) => b.minLevel - a.minLevel)
+  for (const entry of sorted) {
     if (level >= entry.minLevel) return entry.tier
   }
-  return 'simple'
+  return sorted[sorted.length - 1]?.tier ?? 'simple'
 }
 
 /** Returns all unlocked style tiers at a given level. */
-export function getUnlockedStyles(level: number): AvatarStyleTier[] {
-  return LEVEL_TIERS.filter((entry) => level >= entry.minLevel).map((e) => e.tier)
+export function getUnlockedStyles(level: number, config?: AvatarUnlockConfig | null): AvatarStyleTier[] {
+  const tiers = config?.unlocks?.length ? config.unlocks : DEFAULT_LEVEL_TIERS
+  return tiers.filter((entry) => level >= entry.minLevel).map((e) => e.tier)
 }
 
 /** Returns all style tiers with their locked/unlocked status at a given level. */
-export function getStyleTierStatus(level: number): Array<{ tier: AvatarStyleTier; unlocked: boolean; displayName: string }> {
-  return LEVEL_TIERS.slice().reverse().map((entry) => ({
+export function getStyleTierStatus(level: number, config?: AvatarUnlockConfig | null): Array<{ tier: AvatarStyleTier; unlocked: boolean; displayName: string }> {
+  const tiers = config?.unlocks?.length ? config.unlocks : DEFAULT_LEVEL_TIERS
+  return [...tiers].sort((a, b) => a.minLevel - b.minLevel).map((entry) => ({
     tier: entry.tier,
     unlocked: level >= entry.minLevel,
-    displayName: STYLE_CONFIG[entry.tier].displayName,
+    displayName: STYLE_CONFIG[entry.tier]?.displayName ?? entry.tier,
   }))
 }
 

@@ -1,18 +1,18 @@
 /**
  * @fileoverview AIContentSuggestionNode - Inline AI suggestion decorator node.
- * 
+ *
  * Renders AI-generated text suggestions inline with the editor content as ghost text.
  * Does not get serialized to editor state - only displayed temporarily until accepted or dismissed.
- * 
+ *
  * @module AIContentSuggestionNode
  */
 
-import { DecoratorNode } from 'lexical';
-import * as React from 'react';
+import { DecoratorNode } from "lexical";
+import * as React from "react";
 
 export const AI_SUGGESTION_UUID = Math.random()
   .toString(36)
-  .replace(/[^a-z]+/g, '')
+  .replace(/[^a-z]+/g, "")
   .substr(0, 5);
 
 export class AIContentSuggestionNode extends DecoratorNode {
@@ -20,27 +20,34 @@ export class AIContentSuggestionNode extends DecoratorNode {
   __suggestion;
 
   static clone(node) {
-    return new AIContentSuggestionNode(node.__uuid, node.__suggestion, node.__key);
+    return new AIContentSuggestionNode(
+      node.__uuid,
+      node.__suggestion,
+      node.__key,
+    );
   }
 
   static getType() {
-    return 'ai-content-suggestion';
+    return "ai-content-suggestion";
   }
 
   static importJSON(serializedNode) {
-    // Never import from JSON - this node should not be persisted
-    return null;
+    // Transient node - create an empty instance that will be cleaned up
+    return new AIContentSuggestionNode("", "");
   }
 
   exportJSON() {
-    // Never export to JSON - this node should not be persisted
-    return null;
+    // Return valid JSON so serialization doesn't produce null/undefined types
+    return {
+      type: "ai-content-suggestion",
+      version: 1,
+    };
   }
 
   constructor(uuid, suggestion, key) {
     super(key);
     this.__uuid = uuid;
-    this.__suggestion = suggestion || '';
+    this.__suggestion = suggestion || "";
   }
 
   updateDOM(prevNode, dom, config) {
@@ -50,7 +57,7 @@ export class AIContentSuggestionNode extends DecoratorNode {
   }
 
   createDOM(config) {
-    return document.createElement('span');
+    return document.createElement("span");
   }
 
   decorate() {
@@ -86,15 +93,18 @@ export class AILoadingNode extends DecoratorNode {
   }
 
   static getType() {
-    return 'ai-loading';
+    return "ai-loading";
   }
 
   static importJSON(serializedNode) {
-    return null;
+    return new AILoadingNode("");
   }
 
   exportJSON() {
-    return null;
+    return {
+      type: "ai-loading",
+      version: 1,
+    };
   }
 
   constructor(uuid, key) {
@@ -111,7 +121,7 @@ export class AILoadingNode extends DecoratorNode {
   }
 
   createDOM(config) {
-    return document.createElement('span');
+    return document.createElement("span");
   }
 
   decorate() {
@@ -128,29 +138,31 @@ export function $createAILoadingNode(uuid) {
 
 function AILoadingComponent() {
   return (
-    <span 
-      style={{ 
-        color: 'var(--mui-palette-text-secondary, #666)',
+    <span
+      style={{
+        color: "var(--mui-palette-text-secondary, #666)",
         opacity: 0.7,
-        fontStyle: 'italic',
-        userSelect: 'none',
-        pointerEvents: 'none',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-      }} 
+        fontStyle: "italic",
+        userSelect: "none",
+        pointerEvents: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+      }}
       spellCheck="false"
       contentEditable={false}
     >
-      <span style={{
-        display: 'inline-block',
-        width: '8px',
-        height: '8px',
-        border: '2px solid var(--mui-palette-text-secondary, #666)',
-        borderTopColor: 'transparent',
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-      }} />
+      <span
+        style={{
+          display: "inline-block",
+          width: "8px",
+          height: "8px",
+          border: "2px solid var(--mui-palette-text-secondary, #666)",
+          borderTopColor: "transparent",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+        }}
+      />
       Generating...
       <style>{`
         @keyframes spin {
@@ -162,30 +174,35 @@ function AILoadingComponent() {
 }
 
 function AIContentSuggestionComponent({ suggestion }) {
-  console.log('AIContentSuggestionComponent rendering with suggestion:', suggestion);
-  
+  console.log(
+    "AIContentSuggestionComponent rendering with suggestion:",
+    suggestion,
+  );
+
   if (!suggestion) {
     return null;
   }
-  
+
   return (
-    <span 
-      style={{ 
-        color: 'var(--mui-palette-text-primary, #444)',
+    <span
+      style={{
+        color: "var(--mui-palette-text-primary, #444)",
         opacity: 0.9,
-        fontStyle: 'italic',
-        userSelect: 'none',
-        pointerEvents: 'none',
-      }} 
+        fontStyle: "italic",
+        userSelect: "none",
+        pointerEvents: "none",
+      }}
       spellCheck="false"
       contentEditable={false}
     >
       {suggestion}
-      <span style={{ 
-        fontSize: '10px', 
-        marginLeft: '8px',
-        opacity: 0.95,
-      }}>
+      <span
+        style={{
+          fontSize: "10px",
+          marginLeft: "8px",
+          opacity: 0.95,
+        }}
+      >
         (Tab to accept)
       </span>
     </span>

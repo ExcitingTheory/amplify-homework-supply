@@ -1,9 +1,12 @@
 /**
  * AvatarCustomizer — Progressive customization dialog for DiceBear avatars.
  * Unlocks features based on student level:
- *   L1: Avataaars Neutral — eyebrows, eyes, mouth
- *   L2: Avataaars (detailed) — clothing, hair, accessories, colors
- *   L3: Toon Head — full customization + style selector
+ *   L1: Background color, skin tone, basic face (eyebrows, eyes, mouth)
+ *   L2: + hair color, clothes color, hair/top, clothing
+ *   L3: + facial hair, accessories, full toon head features, style selector
+ *
+ * Color customization is ALWAYS available from L1. Detail features unlock
+ * progressively within each style.
  *
  * Options are limited to the documented DiceBear API for each style.
  *
@@ -25,7 +28,7 @@ import Tooltip from '@mui/material/Tooltip'
 import LockIcon from '@mui/icons-material/Lock'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { DiceBearAvatar, getUnlockedStyleTier, getUnlockedStyles, STYLE_CONFIG } from './DiceBearAvatar'
-import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
+import type { AvatarStyleTier, AvatarOverrides, AvatarUnlockConfig, FeatureUnlockLevels } from './DiceBearAvatar'
 
 // ============================================================================
 // Types
@@ -46,6 +49,8 @@ export interface AvatarCustomizerProps {
   overrides?: AvatarOverrides
   /** Called when overrides change — parent persists to Settings.metadata */
   onSave: (overrides: AvatarOverrides, style: AvatarStyleTier) => void
+  /** Full avatar unlock config (from section xpConfig) — used for relative feature unlock calculation */
+  avatarUnlockConfig?: AvatarUnlockConfig | null
 }
 
 // ============================================================================
@@ -350,9 +355,10 @@ export function AvatarCustomizer({
   selectedStyle,
   overrides = {},
   onSave,
+  avatarUnlockConfig,
 }: AvatarCustomizerProps) {
-  const highestTier = useMemo(() => getUnlockedStyleTier(level), [level])
-  const unlockedStyles = useMemo(() => getUnlockedStyles(level), [level])
+  const highestTier = useMemo(() => getUnlockedStyleTier(level, avatarUnlockConfig), [level, avatarUnlockConfig])
+  const unlockedStyles = useMemo(() => getUnlockedStyles(level, avatarUnlockConfig), [level, avatarUnlockConfig])
 
   const [style, setStyle] = useState<AvatarStyleTier>(selectedStyle || highestTier)
   const [draft, setDraft] = useState<AvatarOverrides>(overrides)
@@ -400,7 +406,21 @@ export function AvatarCustomizer({
     onClose()
   }, [draft, style, onSave, onClose])
 
-  const canCustomizeColors = level >= 2
+  // Progressive feature gates — relative to the selected style's unlock level
+  // e.g., if style unlocks at L3 and offset is 2, hair/clothing requires L5
+  const styleMinLevel = useMemo(() => {
+    const unlocks = avatarUnlockConfig?.unlocks
+    if (!unlocks?.length) return 1
+    const entry = unlocks.find((e) => e.tier === style)
+    return entry?.minLevel ?? 1
+  }, [avatarUnlockConfig, style])
+
+  const hairClothesOffset = avatarUnlockConfig?.featureUnlockLevels?.hairAndClothing ?? 2
+  const accessoriesOffset = avatarUnlockConfig?.featureUnlockLevels?.accessories ?? 3
+  const hairClothesLevel = styleMinLevel + hairClothesOffset
+  const accessoriesLevel = styleMinLevel + accessoriesOffset
+  const canCustomizeHairClothes = level >= hairClothesLevel
+  const canCustomizeAccessories = level >= accessoriesLevel
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -445,15 +465,24 @@ export function AvatarCustomizer({
             </Box>
           )}
 
-          {/* ── Simple (avataaars-neutral): eyebrows, eyes, mouth, background ── */}
+          {/* ── Simple (avataaars-neutral): colors always, face features always ── */}
           {style === 'simple' && (
             <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Colors</Typography>
               <ColorPalette
                 colors={BACKGROUND_COLORS}
                 selected={draft.backgroundColor?.[0]}
                 onSelect={(c) => handleColorSelect('backgroundColor', c)}
                 label="Background"
               />
+              <ColorPalette
+                colors={DETAILED_SKIN_COLORS}
+                selected={draft.skinColor?.[0]}
+                onSelect={(c) => handleColorSelect('skinColor', c)}
+                label="Skin Tone"
+              />
+
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Face</Typography>
               <OptionGrid
                 options={NEUTRAL_EYEBROWS}
                 selected={draft.eyebrows}
@@ -472,10 +501,16 @@ export function AvatarCustomizer({
                 onSelect={(id) => handleOptionSelect('mouth', id)}
                 label="Mouth"
               />
+              {!canCustomizeHairClothes && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <LockIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
+                  Reach Level {hairClothesLevel} to unlock hair, clothing, and more color options
+                </Typography>
+              )}
             </Stack>
           )}
 
-          {/* ── Detailed (avataaars): full options ── */}
+          {/* ── Detailed (avataaars): colors always, features gated progressively ── */}
           {style === 'detailed' && (
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Colors</Typography>
@@ -485,14 +520,14 @@ export function AvatarCustomizer({
                 onSelect={(c) => handleColorSelect('backgroundColor', c)}
                 label="Background"
               />
-              {canCustomizeColors && (
+              <ColorPalette
+                colors={DETAILED_SKIN_COLORS}
+                selected={draft.skinColor?.[0]}
+                onSelect={(c) => handleColorSelect('skinColor', c)}
+                label="Skin Tone"
+              />
+              {canCustomizeHairClothes && (
                 <>
-                  <ColorPalette
-                    colors={DETAILED_SKIN_COLORS}
-                    selected={draft.skinColor?.[0]}
-                    onSelect={(c) => handleColorSelect('skinColor', c)}
-                    label="Skin Tone"
-                  />
                   <ColorPalette
                     colors={DETAILED_HAIR_COLORS}
                     selected={draft.hairColor?.[0]}
@@ -507,25 +542,8 @@ export function AvatarCustomizer({
                   />
                 </>
               )}
-              {!canCustomizeColors && (
-                <Typography variant="body2" color="text.secondary">
-                  Reach Level 2 to unlock color customization
-                </Typography>
-              )}
 
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Features</Typography>
-              <OptionGrid
-                options={DETAILED_TOP}
-                selected={draft.top}
-                onSelect={(id) => handleOptionSelect('top', id)}
-                label="Hair / Top"
-              />
-              <OptionGrid
-                options={DETAILED_CLOTHING}
-                selected={draft.clothing}
-                onSelect={(id) => handleOptionSelect('clothing', id)}
-                label="Clothing"
-              />
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Face</Typography>
               <OptionGrid
                 options={NEUTRAL_EYEBROWS}
                 selected={draft.eyebrows}
@@ -544,22 +562,59 @@ export function AvatarCustomizer({
                 onSelect={(id) => handleOptionSelect('mouth', id)}
                 label="Mouth"
               />
-              <OptionGrid
-                options={DETAILED_FACIAL_HAIR}
-                selected={draft.facialHair}
-                onSelect={(id) => handleOptionSelect('facialHair', id)}
-                label="Facial Hair"
-              />
-              <OptionGrid
-                options={DETAILED_ACCESSORIES}
-                selected={draft.accessories}
-                onSelect={(id) => handleOptionSelect('accessories', id)}
-                label="Accessories"
-              />
+
+              {canCustomizeHairClothes && (
+                <>
+                  <Typography variant="subtitle2" sx={{ mt: 1 }}>Hair &amp; Clothing</Typography>
+                  <OptionGrid
+                    options={DETAILED_TOP}
+                    selected={draft.top}
+                    onSelect={(id) => handleOptionSelect('top', id)}
+                    label="Hair / Top"
+                  />
+                  <OptionGrid
+                    options={DETAILED_CLOTHING}
+                    selected={draft.clothing}
+                    onSelect={(id) => handleOptionSelect('clothing', id)}
+                    label="Clothing"
+                  />
+                </>
+              )}
+
+              {canCustomizeAccessories && (
+                <>
+                  <Typography variant="subtitle2" sx={{ mt: 1 }}>Accessories &amp; Extras</Typography>
+                  <OptionGrid
+                    options={DETAILED_FACIAL_HAIR}
+                    selected={draft.facialHair}
+                    onSelect={(id) => handleOptionSelect('facialHair', id)}
+                    label="Facial Hair"
+                  />
+                  <OptionGrid
+                    options={DETAILED_ACCESSORIES}
+                    selected={draft.accessories}
+                    onSelect={(id) => handleOptionSelect('accessories', id)}
+                    label="Accessories"
+                  />
+                </>
+              )}
+
+              {!canCustomizeHairClothes && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <LockIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
+                  Reach Level {hairClothesLevel} to unlock hair, clothing, and more colors
+                </Typography>
+              )}
+              {canCustomizeHairClothes && !canCustomizeAccessories && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <LockIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
+                  Reach Level {accessoriesLevel} to unlock facial hair and accessories
+                </Typography>
+              )}
             </Stack>
           )}
 
-          {/* ── Toon Head: full options ── */}
+          {/* ── Toon Head: colors always, detail features progressive ── */}
           {style === 'toonhead' && (
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Colors</Typography>
@@ -588,19 +643,7 @@ export function AvatarCustomizer({
                 label="Clothes Color"
               />
 
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Features</Typography>
-              <OptionGrid
-                options={TOONHEAD_HAIR}
-                selected={draft.hair}
-                onSelect={(id) => handleOptionSelect('hair', id)}
-                label="Hair"
-              />
-              <OptionGrid
-                options={TOONHEAD_REAR_HAIR}
-                selected={draft.rearHair}
-                onSelect={(id) => handleOptionSelect('rearHair', id)}
-                label="Rear Hair"
-              />
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Face</Typography>
               <OptionGrid
                 options={TOONHEAD_EYES}
                 selected={draft.eyes}
@@ -619,17 +662,33 @@ export function AvatarCustomizer({
                 onSelect={(id) => handleOptionSelect('mouth', id)}
                 label="Mouth"
               />
+
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Hair &amp; Clothing</Typography>
               <OptionGrid
-                options={TOONHEAD_BEARD}
-                selected={draft.beard}
-                onSelect={(id) => handleOptionSelect('beard', id)}
-                label="Beard"
+                options={TOONHEAD_HAIR}
+                selected={draft.hair}
+                onSelect={(id) => handleOptionSelect('hair', id)}
+                label="Hair"
+              />
+              <OptionGrid
+                options={TOONHEAD_REAR_HAIR}
+                selected={draft.rearHair}
+                onSelect={(id) => handleOptionSelect('rearHair', id)}
+                label="Rear Hair"
               />
               <OptionGrid
                 options={TOONHEAD_CLOTHES}
                 selected={draft.clothes}
                 onSelect={(id) => handleOptionSelect('clothes', id)}
                 label="Clothes"
+              />
+
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Extras</Typography>
+              <OptionGrid
+                options={TOONHEAD_BEARD}
+                selected={draft.beard}
+                onSelect={(id) => handleOptionSelect('beard', id)}
+                label="Beard"
               />
             </Stack>
           )}

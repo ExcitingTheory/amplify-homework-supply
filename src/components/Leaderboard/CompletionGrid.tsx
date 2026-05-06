@@ -54,6 +54,10 @@ export function CompletionGrid({
   students,
   currentStudentId,
 }: CompletionGridProps) {
+  if (!assignments || !students || assignments.length === 0 || students.length === 0) {
+    return null;
+  }
+
   return (
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">

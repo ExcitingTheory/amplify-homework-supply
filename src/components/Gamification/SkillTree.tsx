@@ -6,16 +6,22 @@
  * @module SkillTree
  */
 
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useState, memo } from 'react'
 import {
   ReactFlow,
   Background,
   Controls,
+  Handle,
   type Node,
   type Edge,
   type NodeMouseHandler,
+  type Connection,
+  type OnEdgesDelete,
   Position,
   MarkerType,
+  addEdge,
+  useEdgesState,
+  useNodesState,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import Box from '@mui/material/Box'
@@ -46,6 +52,10 @@ export interface SkillNodeData {
   status: SkillStatus
   xpReward?: number
   prerequisites?: string[]
+  /** Cohort scope — encodes unit link as `unit-{unitID}` */
+  cohortId?: string
+  /** Set by parent to indicate this node is currently selected */
+  selected?: boolean
 }
 
 export interface SkillTreeProps {
@@ -63,6 +73,14 @@ export interface SkillTreeProps {
   canGenerate?: boolean
   /** Called after skills are generated */
   onGenerated?: (result: { skillCount: number }) => void
+  /** Enable interactive editing (drag nodes, connect/disconnect edges) */
+  editable?: boolean
+  /** Called when prerequisite relationships change (edge added/removed) */
+  onPrerequisiteChange?: (skillId: string, prerequisites: string[]) => void
+  /** Currently selected skill ID — renders a highlight ring */
+  selectedSkillId?: string | null
+  /** Compact mode for embedding in dashboards (smaller nodes, no controls) */
+  compact?: boolean
 }
 
 // ============================================================================
@@ -94,56 +112,65 @@ const STATUS_ICONS: Record<SkillStatus, React.ReactNode> = {
 // Custom Node Component
 // ============================================================================
 
-function SkillNodeContent({ data }: { data: SkillNodeData }) {
+const SkillNodeContent = memo(function SkillNodeContent({ data }: { data: SkillNodeData }) {
   const status = data.status || 'LOCKED'
+  const isSelected = data.selected === true
 
   return (
-    <Box
-      sx={{
-        p: 1.5,
-        borderRadius: 2,
-        border: `2px solid ${STATUS_COLORS[status]}`,
-        bgcolor: STATUS_BG[status],
-        minWidth: 160,
-        maxWidth: 220,
-        textAlign: 'center',
-        cursor: status === 'LOCKED' ? 'not-allowed' : 'pointer',
-        opacity: status === 'LOCKED' ? 0.6 : 1,
-        transition: 'box-shadow 0.2s, transform 0.2s',
-        '&:hover': status !== 'LOCKED' ? {
-          boxShadow: 3,
-          transform: 'scale(1.03)',
-        } : {},
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.5 }}>
-        {STATUS_ICONS[status]}
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 600,
-            color: STATUS_COLORS[status],
-            lineHeight: 1.2,
-          }}
-        >
-          {data.title}
-        </Typography>
+    <>
+      <Handle type="target" position={Position.Top} style={{ visibility: 'hidden' }} />
+      <Box
+        sx={{
+          p: 1.5,
+          borderRadius: 2,
+          border: `2px solid ${STATUS_COLORS[status]}`,
+          bgcolor: STATUS_BG[status],
+          minWidth: 160,
+          maxWidth: 220,
+          textAlign: 'center',
+          cursor: status === 'LOCKED' ? 'not-allowed' : 'pointer',
+          opacity: status === 'LOCKED' ? 0.6 : 1,
+          transition: 'box-shadow 0.3s, transform 0.3s, outline 0.2s',
+          outline: isSelected ? `3px solid ${STATUS_COLORS[status]}` : 'none',
+          outlineOffset: 2,
+          boxShadow: isSelected ? `0 0 12px ${STATUS_COLORS[status]}40` : undefined,
+          transform: isSelected ? 'scale(1.05)' : undefined,
+          '&:hover': status !== 'LOCKED' ? {
+            boxShadow: isSelected ? `0 0 16px ${STATUS_COLORS[status]}60` : 3,
+            transform: isSelected ? 'scale(1.07)' : 'scale(1.03)',
+          } : {},
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.5 }}>
+          {STATUS_ICONS[status]}
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 600,
+              color: STATUS_COLORS[status],
+              lineHeight: 1.2,
+            }}
+          >
+            {data.title}
+          </Typography>
+        </Box>
+        {data.xpReward != null && data.xpReward > 0 && (
+          <Chip
+            label={`+${data.xpReward} XP`}
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: '0.7rem',
+              bgcolor: STATUS_COLORS[status],
+              color: 'white',
+            }}
+          />
+        )}
       </Box>
-      {data.xpReward != null && data.xpReward > 0 && (
-        <Chip
-          label={`+${data.xpReward} XP`}
-          size="small"
-          sx={{
-            height: 20,
-            fontSize: '0.7rem',
-            bgcolor: STATUS_COLORS[status],
-            color: 'white',
-          }}
-        />
-      )}
-    </Box>
+      <Handle type="source" position={Position.Bottom} style={{ visibility: 'hidden' }} />
+    </>
   )
-}
+})
 
 // ============================================================================
 // Layout Helpers
@@ -257,10 +284,70 @@ export function SkillTree({
   cohortId,
   canGenerate = false,
   onGenerated,
+  editable = false,
+  onPrerequisiteChange,
+  selectedSkillId,
+  compact = false,
 }: SkillTreeProps) {
-  const { nodes, edges } = useMemo(() => layoutSkills(skills), [skills])
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => layoutSkills(skills), [skills])
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [generating, setGenerating] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+
+  // Sync when skills prop changes
+  React.useEffect(() => {
+    const layout = layoutSkills(skills)
+    setNodes(layout.nodes.map((n) => ({
+      ...n,
+      data: { ...n.data, selected: n.id === selectedSkillId },
+    })))
+    setEdges(layout.edges)
+  }, [skills, selectedSkillId, setNodes, setEdges])
+
+  // Handle new edge connection (source is prerequisite of target)
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return
+      // Don't allow self-connections
+      if (connection.source === connection.target) return
+
+      // Add the edge visually
+      setEdges((eds) => addEdge({
+        ...connection,
+        animated: false,
+        style: { stroke: '#1976d2', strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#1976d2' },
+      }, eds))
+
+      // Notify parent: target skill now has source as a prerequisite
+      if (onPrerequisiteChange) {
+        const targetSkill = skills.find((s) => s.skillId === connection.target)
+        const currentPrereqs = targetSkill?.prerequisites || []
+        if (!currentPrereqs.includes(connection.source)) {
+          onPrerequisiteChange(connection.target, [...currentPrereqs, connection.source])
+        }
+      }
+    },
+    [skills, setEdges, onPrerequisiteChange],
+  )
+
+  // Handle edge deletion (remove prerequisite relationship)
+  const handleEdgesDelete: OnEdgesDelete = useCallback(
+    (deletedEdges) => {
+      if (!onPrerequisiteChange) return
+      for (const edge of deletedEdges) {
+        const targetSkill = skills.find((s) => s.skillId === edge.target)
+        if (targetSkill) {
+          const updatedPrereqs = (targetSkill.prerequisites || []).filter(
+            (prereqId) => prereqId !== edge.source,
+          )
+          onPrerequisiteChange(edge.target, updatedPrereqs)
+        }
+      }
+    },
+    [skills, onPrerequisiteChange],
+  )
 
   const handleGenerate = useCallback(async () => {
     if (!unitId) return
@@ -317,20 +404,39 @@ export function SkillTree({
 
   return (
     <Box sx={{ height, width: '100%', border: 1, borderColor: 'divider', borderRadius: 2, position: 'relative' }}>
+      {editable && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ position: 'absolute', top: 4, left: 8, zIndex: 10, bgcolor: 'background.paper', px: 0.5, borderRadius: 0.5 }}
+        >
+          Drag nodes to reposition • Draw edges to add prerequisites • Select + Backspace to remove
+        </Typography>
+      )}
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        onNodesChange={editable ? onNodesChange : undefined}
+        onEdgesChange={editable ? onEdgesChange : undefined}
+        onConnect={editable ? handleConnect : undefined}
+        onEdgesDelete={editable ? handleEdgesDelete : undefined}
         onNodeClick={handleNodeClick}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: compact ? 0.15 : 0.3 }}
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
+        nodesDraggable={editable}
+        nodesConnectable={editable}
+        elementsSelectable={editable}
+        deleteKeyCode={editable ? 'Backspace' : null}
+        panOnDrag={!compact}
+        zoomOnScroll={!compact}
+        zoomOnPinch={!compact}
+        zoomOnDoubleClick={!compact}
+        preventScrolling={!compact}
       >
         <Background />
-        <Controls showInteractive={false} />
+        {!compact && <Controls showInteractive={editable} />}
       </ReactFlow>
       {canGenerate && unitId && (
         <Tooltip title={generating ? 'Generating…' : 'Regenerate skill tree from unit content'}>

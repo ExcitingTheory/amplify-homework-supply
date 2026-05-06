@@ -100,6 +100,7 @@ const BadgeEntry = a.customType({
   cohortId: a.string(),
   unitID: a.string(),
   count: a.integer(),
+  isAnti: a.boolean(),
 });
 
 const ModuleProgressEntry = a.customType({
@@ -345,6 +346,9 @@ const schema = a
 
     Unit: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -399,6 +403,9 @@ const schema = a
 
     Assignment: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         dueDate: a.datetime(),
         status: PublishedStatus,
         // Foreign keys for relationships
@@ -430,6 +437,9 @@ const schema = a
 
     Grade: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Completion tracking
         percentComplete: a.float(),
         accuracy: a.float(),
@@ -463,6 +473,7 @@ const schema = a
       })
       .secondaryIndexes((index) => [
         index("practiceSessionID").name("byPracticeSession"),
+        index("sectionID").name("bySectionID"),
       ])
       .authorization((allow) => [
         // Student owns their grade
@@ -478,6 +489,9 @@ const schema = a
 
     Section: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         name: a.string(),
         description: a.string(),
         status: PublishedStatus,
@@ -507,6 +521,9 @@ const schema = a
         leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
         // Linear progression — lock units in due-date order until prior is completed
         linearLockEnabled: a.boolean(),
+        // XP tuner — per-section overrides for XP multipliers and caps
+        // { multipliers?: Record<XPReason, number>, dailyCap?: number, weeklyCap?: number, enabled?: boolean }
+        xpConfig: a.json(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -524,6 +541,9 @@ const schema = a
 
     Question: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -591,6 +611,9 @@ const schema = a
      * 4. Associate: Create join record (UnitFile, WordFile, etc.)
      */ File: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, controls Data model access
         owner: a.string().required(),
         identityId: a.string().required(), // Cognito Identity ID for protected/{identityId}/* paths
@@ -644,6 +667,9 @@ const schema = a
 
     Word: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -683,6 +709,9 @@ const schema = a
 
     UnitFile: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         unitID: a.id().required(),
         unit: a.belongsTo("Unit", ["unitID"]),
         fileID: a.id().required(),
@@ -692,6 +721,9 @@ const schema = a
 
     UnitWord: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         unitID: a.id().required(),
         unit: a.belongsTo("Unit", ["unitID"]),
         wordID: a.id().required(),
@@ -701,6 +733,9 @@ const schema = a
 
     QuestionUnit: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         questionID: a.id().required(),
         question: a.belongsTo("Question", ["questionID"]),
         unitID: a.id().required(),
@@ -710,6 +745,9 @@ const schema = a
 
     UnitDocument: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         unitID: a.id().required(),
         unit: a.belongsTo("Unit", ["unitID"]),
         documentID: a.id().required(),
@@ -719,6 +757,9 @@ const schema = a
 
     QuestionFile: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         questionID: a.id().required(),
         question: a.belongsTo("Question", ["questionID"]),
         fileID: a.id().required(),
@@ -728,6 +769,9 @@ const schema = a
 
     WordFile: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         wordID: a.id().required(),
         word: a.belongsTo("Word", ["wordID"]),
         fileID: a.id().required(),
@@ -737,6 +781,9 @@ const schema = a
 
     QuestionWord: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         questionID: a.id().required(),
         question: a.belongsTo("Question", ["questionID"]),
         wordID: a.id().required(),
@@ -746,6 +793,9 @@ const schema = a
 
     DocumentWord: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         documentID: a.id().required(),
         document: a.belongsTo("Document", ["documentID"]),
         wordID: a.id().required(),
@@ -755,6 +805,9 @@ const schema = a
 
     DocumentQuestion: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         documentID: a.id().required(),
         document: a.belongsTo("Document", ["documentID"]),
         questionID: a.id().required(),
@@ -764,6 +817,9 @@ const schema = a
 
     AssistantChatFile: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         chatID: a.id().required(),
         chat: a.belongsTo("AssistantChat", ["chatID"]),
         fileID: a.id().required(),
@@ -797,6 +853,9 @@ const schema = a
      * - Admins have full access
      */ Document: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, tracks document creator
         owner: a.string(),
         identityId: a.string(),
@@ -852,6 +911,9 @@ const schema = a
 
     ParsedContent: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -886,6 +948,9 @@ const schema = a
 
     AgentJob: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Job tracking
         type: a.string().required(), // pdf_analysis, exercise_generation, vocabulary_extraction
         status: a.string().required(), // queued, processing, completed, failed, cancelled
@@ -921,6 +986,9 @@ const schema = a
 
     AssistantChat: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         // Assistant configuration
@@ -947,6 +1015,9 @@ const schema = a
 
     Settings: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -979,6 +1050,9 @@ const schema = a
 
     AIFeedback: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         // Ownership
         owner: a.string(),
         identityId: a.string(),
@@ -1011,6 +1085,9 @@ const schema = a
 
     WorkbookComment: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         gradeId: a.id().required(),
         blockId: a.string().required(),
         threadId: a.string().required(),
@@ -1029,6 +1106,9 @@ const schema = a
 
     HomeworkRoom: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         gradeId: a.id().required(),
         ownerId: a.string().required(),
         sectionID: a.id(), // Section this room belongs to (for same-section validation)
@@ -1056,8 +1136,12 @@ const schema = a
 
     StudentXPLog: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         studentId: a.string().required(),
         xpAmount: a.integer().required(),
+        accuracy: a.float(),
         reason: a.enum([
           "HOMEWORK_SUBMITTED",
           "AI_FEEDBACK_REVISED",
@@ -1075,6 +1159,8 @@ const schema = a
           "PERSONAL_BEST",
           "EASTER_EGG",
           "GUILD_CHALLENGE_BONUS",
+          "PRACTICE_DRILL_COMPLETED",
+          "PRACTICE_DRILL_ACCURACY_BONUS",
         ]),
         referenceId: a.string(),
         cohortId: a.string(),
@@ -1093,6 +1179,9 @@ const schema = a
     // Aggregate student gamification profile (absorbs 7 models)
     StudentProfile: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         studentId: a.string().required(),
         cohortId: a.string(),
         studentName: a.string(),
@@ -1119,6 +1208,10 @@ const schema = a
         completedAssignments: a.integer(),
         nailedItCount: a.integer(),
         lastUpdated: a.datetime(),
+        // Cosmetic penalty (boss battle consequence)
+        cosmeticPenalty: a.json(),
+        // Active debuffs from anti-badges (JSON array with expiry timestamps)
+        activeDebuffs: a.json(),
       })
       .secondaryIndexes((index) => [
         index("studentId").name("byStudent"),
@@ -1132,6 +1225,9 @@ const schema = a
 
     StudentMemory: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         studentId: a.string().required(),
         unitID: a.string(), // null = global memory, set = per-unit memory
         memoryMarkdown: a.string(),
@@ -1160,6 +1256,9 @@ const schema = a
 
     EasterEgg: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         trigger: a.enum([
           "KEYWORD",
           "UI_INTERACTION",
@@ -1183,6 +1282,9 @@ const schema = a
 
     Skill: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         title: a.string().required(),
         description: a.string(),
         prerequisites: a.json(),
@@ -1199,6 +1301,9 @@ const schema = a
 
     Guild: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         name: a.string().required(),
         cohortId: a.string().required(),
         totalXP: a.integer().default(0),
@@ -1217,6 +1322,9 @@ const schema = a
 
     GroupChallenge: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         cohortId: a.string().required(),
         title: a.string().required(),
         targetXP: a.integer().required(),
@@ -1245,6 +1353,9 @@ const schema = a
 
     PracticeSession: a
       .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
         unitID: a.string().required(),
         drillType: PracticeDrillType,
         data: a.json(), // Same format as Grade.data — keyed by generated block IDs
@@ -1633,6 +1744,7 @@ const schema = a
         referenceId: a.string(),
         cohortId: a.string(),
         unitID: a.string(),
+        accuracy: a.float(),
       })
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])

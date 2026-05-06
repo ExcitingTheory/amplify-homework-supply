@@ -6,7 +6,7 @@
  * - moderateImage: Check image content via omni-moderation-latest (multi-modal)
  * - moderateAudio: Transcribe audio via Whisper then moderate the transcript
  * 
- * When modelName + recordId are provided, the Lambda fetches the record's _version
+ * When modelName + recordId are provided, the Lambda fetches the record's _version _lastChangedAt _deleted
  * and writes the moderation result directly to the record's `moderation` field.
  * This ensures moderation state is always server-authoritative (untrusted frontend
  * cannot skip or falsify moderation).
@@ -69,10 +69,10 @@ const SUPPORTED_MODELS = ['Unit', 'Grade', 'Word', 'Question'] as const;
 type SupportedModel = typeof SUPPORTED_MODELS[number];
 
 const GET_QUERIES: Record<SupportedModel, string> = {
-  Unit: /* GraphQL */ `query GetUnit($id: ID!) { getUnit(id: $id) { id _version } }`,
-  Grade: /* GraphQL */ `query GetGrade($id: ID!) { getGrade(id: $id) { id _version } }`,
-  Word: /* GraphQL */ `query GetWord($id: ID!) { getWord(id: $id) { id _version } }`,
-  Question: /* GraphQL */ `query GetQuestion($id: ID!) { getQuestion(id: $id) { id _version } }`,
+  Unit: /* GraphQL */ `query GetUnit($id: ID!) { getUnit(id: $id) { id _version _lastChangedAt _deleted } }`,
+  Grade: /* GraphQL */ `query GetGrade($id: ID!) { getGrade(id: $id) { id _version _lastChangedAt _deleted } }`,
+  Word: /* GraphQL */ `query GetWord($id: ID!) { getWord(id: $id) { id _version _lastChangedAt _deleted } }`,
+  Question: /* GraphQL */ `query GetQuestion($id: ID!) { getQuestion(id: $id) { id _version _lastChangedAt _deleted } }`,
 };
 
 const UPDATE_MUTATIONS: Record<SupportedModel, string> = {
@@ -93,7 +93,7 @@ async function persistModerationToRecord(
 ): Promise<void> {
   const client = getDataClient();
 
-  // Step 1: Get current _version
+  // Step 1: Get current _version _lastChangedAt _deleted
   const getQuery = GET_QUERIES[modelName];
   const { data: getData, errors: getErrors } = await client.graphql({
     query: getQuery,

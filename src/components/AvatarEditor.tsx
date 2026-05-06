@@ -36,7 +36,7 @@ export interface AvatarEditorProps {
 
 export function AvatarEditor({ seed, size = 128, level: levelProp, onSave }: AvatarEditorProps) {
   const { settings, updateSettings } = React.useContext(SettingsContext) || {}
-  const { style: currentStyle, overrides: savedOverrides, seed: configSeed, isLoaded } = useAvatarConfig()
+  const { style: currentStyle, overrides: savedOverrides, seed: configSeed, isLoaded, glowRing } = useAvatarConfig()
   const { level: xpLevel } = useXP()
   const numericLevel = levelProp ?? xpLevel?.level ?? 1
 
@@ -98,6 +98,7 @@ export function AvatarEditor({ seed, size = 128, level: levelProp, onSave }: Ava
           style={displayStyle}
           size={size}
           overrides={displayOverrides}
+          glowRing={glowRing}
           onClick={() => setCustomizerOpen(true)}
         />
       )}

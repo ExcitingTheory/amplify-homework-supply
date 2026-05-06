@@ -1,4 +1,6 @@
 /**
+ * @vitest-environment node
+ *
  * WebSocket Collaboration Integration Tests
  *
  * Tests the deployed API Gateway WebSocket API for real-time Yjs collaboration.

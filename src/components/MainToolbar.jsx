@@ -2,50 +2,50 @@
  * @module MainToolbar
  * @category Components
  * @description MainToolbar component
- * 
+ *
  * MainToolbar component for the app
  * @todo Add a dropdown for the user.
  * @todo Add a dropdown for the settings.
  * @todo Add a dropdown for the help.
  */
 
-import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import * as React from "react";
+import { useTranslation } from "next-i18next";
 // import AppBar from '@mui/material/AppBar';
 // import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
+import Toolbar from "@mui/material/Toolbar";
 // import Typography from '@mui/material/Typography';
 // import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import ProfileIcon from '@mui/icons-material/AccountCircle';
-import UserIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import SwipeableDrawer from '@mui/material/SwipeableDrawer';
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import MenuItem from '@mui/material/MenuItem';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import BatteryUnknownIcon from '@mui/icons-material/BatteryUnknown';
-import HomeIcon from '@mui/icons-material/Home';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import PeopleIcon from '@mui/icons-material/People';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import GroupsIcon from '@mui/icons-material/Groups';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
-import { signOut } from 'aws-amplify/auth';
-import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import Switch from '@mui/material/Switch';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import IconButton from "@mui/material/IconButton";
+import ProfileIcon from "@mui/icons-material/AccountCircle";
+import UserIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import MenuItem from "@mui/material/MenuItem";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import BatteryUnknownIcon from "@mui/icons-material/BatteryUnknown";
+import HomeIcon from "@mui/icons-material/Home";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import PeopleIcon from "@mui/icons-material/People";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import GroupsIcon from "@mui/icons-material/Groups";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import { signOut } from "aws-amplify/auth";
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
+import Switch from "@mui/material/Switch";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness";
 
 import {
   Dialog,
@@ -54,32 +54,32 @@ import {
   DialogContentText,
   TextField,
   DialogActions,
-  Menu
-} from '@mui/material';
-import { useRouter } from 'next/router';
-import { Help, Settings } from '@mui/icons-material';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { useColorMode } from '../hooks/useColorMode';
-import { LevelBadge } from './Gamification/LevelBadge';
-import { DiceBearAvatar } from './Gamification/DiceBearAvatar';
-import { useAvatarConfig } from '../hooks/useAvatarConfig';
-import SyncStatusIndicator from './SyncStatusIndicator';
-import { useXP } from '../context/gamificationContext';
-import AuthContext from '../context/authContext';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import RateReviewIcon from '@mui/icons-material/RateReview';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import TuneIcon from '@mui/icons-material/Tune';
-import JoinPracticeDialog from './PracticeDrill/JoinPracticeDialog';
-import { JoinWorkbookDialog } from './Workbook';
-import { JoinPeerReviewDialog } from './PeerReview';
+  Menu,
+} from "@mui/material";
+import { useRouter } from "next/router";
+import { Help, Settings } from "@mui/icons-material";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { useColorMode } from "../hooks/useColorMode";
+import { LevelBadge } from "./Gamification/LevelBadge";
+import { DiceBearAvatar } from "./Gamification/DiceBearAvatar";
+import { useAvatarConfig } from "../hooks/useAvatarConfig";
+import SyncStatusIndicator from "./SyncStatusIndicator";
+import { useXP } from "../context/gamificationContext";
+import AuthContext from "../context/authContext";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import RateReviewIcon from "@mui/icons-material/RateReview";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import TuneIcon from "@mui/icons-material/Tune";
+import JoinPracticeDialog from "./PracticeDrill/JoinPracticeDialog";
+import { JoinWorkbookDialog } from "./Workbook";
+import { JoinPeerReviewDialog } from "./PeerReview";
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
 
   const handleChange = (event) => {
     setChecked(event.target.checked);
-  }
+  };
 
   return (
     <MenuItem>
@@ -88,58 +88,64 @@ function ToggleMenuItem(props) {
         edge="end"
         onChange={handleChange}
         checked={checked}
-        inputProps={{ 'aria-labelledby': 'switch-list-label-wifi' }}
+        inputProps={{ "aria-labelledby": "switch-list-label-wifi" }}
       />
     </MenuItem>
-  )
+  );
 }
 
 export function SettingsMenu() {
-  const { t } = useTranslation(['components', 'common']);
+  const { t } = useTranslation(["components", "common"]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const router = useRouter()  
+  const router = useRouter();
   const { mode: colorMode, setColorMode } = useColorMode();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-  }
+  };
 
   const handleClose = () => {
     setAnchorEl(null);
-  }
+  };
 
   const handleSettings = () => {
     // router.push('/settings')
-    handleClose()
-  }
+    handleClose();
+  };
 
   return (
     <div>
       <Button
         id="settings-button"
         color="inherit"
-        aria-label={t('common.settings', { ns: 'common' })}
-        aria-controls={open ? 'settings-menu' : undefined}
+        aria-label={t("common.settings", { ns: "common" })}
+        aria-controls={open ? "settings-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
       >
         <Settings />
       </Button>
       <Menu
-
         id="settings-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          "aria-labelledby": "basic-button",
         }}
       >
-        <ToggleMenuItem label={t('mainToolbar.settings.disableNotifications', 'Disable notifications')} />
+        <ToggleMenuItem
+          label={t(
+            "mainToolbar.settings.disableNotifications",
+            "Disable notifications",
+          )}
+        />
         <MenuItem>
-          <ListItemText primary={t('mainToolbar.settings.colorMode', 'Color mode')} />
+          <ListItemText
+            primary={t("mainToolbar.settings.colorMode", "Color mode")}
+          />
           <ToggleButtonGroup
             value={colorMode}
             exclusive
@@ -147,84 +153,104 @@ export function SettingsMenu() {
             size="small"
             sx={{ ml: 1 }}
           >
-            <ToggleButton value="light" aria-label={t('darkMode.light', { ns: 'common' })}>
+            <ToggleButton
+              value="light"
+              aria-label={t("darkMode.light", { ns: "common" })}
+            >
               <LightModeIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton value="auto" aria-label={t('darkMode.system', { ns: 'common' })}>
+            <ToggleButton
+              value="auto"
+              aria-label={t("darkMode.system", { ns: "common" })}
+            >
               <SettingsBrightnessIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton value="dark" aria-label={t('darkMode.dark', { ns: 'common' })}>
+            <ToggleButton
+              value="dark"
+              aria-label={t("darkMode.dark", { ns: "common" })}
+            >
               <DarkModeIcon fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
         </MenuItem>
-        <ToggleMenuItem label={t('mainToolbar.settings.experimentalFeatures', 'Experimental features')} />
-        <ToggleMenuItem label={t('mainToolbar.settings.studentMode', 'Student mode')} />
+        <ToggleMenuItem
+          label={t(
+            "mainToolbar.settings.experimentalFeatures",
+            "Experimental features",
+          )}
+        />
+        <ToggleMenuItem
+          label={t("mainToolbar.settings.studentMode", "Student mode")}
+        />
 
         {/* <MenuItem onClick={handleSettings}>Change password</MenuItem> */}
       </Menu>
     </div>
-  )
+  );
 }
 
-
 export function HelpMenu() {
-  const { t } = useTranslation(['components', 'common']);
+  const { t } = useTranslation(["components", "common"]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const router = useRouter()
+  const router = useRouter();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-  }
+  };
 
   const handleClose = () => {
     setAnchorEl(null);
-  }
+  };
 
   const handleHelp = () => {
     // router.push('/help')
-    handleClose()
-  }
-
+    handleClose();
+  };
 
   return (
     <div>
       <Button
-
         id="help-button"
         color="inherit"
-        aria-label={t('common.help', { ns: 'common' })}
-        aria-controls={open ? 'help-menu' : undefined}
+        aria-label={t("common.help", { ns: "common" })}
+        aria-controls={open ? "help-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
         data-tour="help-menu"
       >
         <Help />
       </Button>
       <Menu
-
         id="help-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          "aria-labelledby": "basic-button",
         }}
       >
-        <MenuItem onClick={handleHelp}>{t('mainToolbar.help', 'Help')}</MenuItem>
+        <MenuItem onClick={handleHelp}>
+          {t("mainToolbar.help", "Help")}
+        </MenuItem>
       </Menu>
     </div>
-  )
+  );
 }
 
-
 export function UserMenu() {
-  const { t } = useTranslation(['common', 'auth']);
+  const { t } = useTranslation(["common", "auth"]);
   const { user } = React.useContext(AuthContext);
-  const { style: avatarStyle, overrides: avatarOverrides, seed: configSeed, isLoaded } = useAvatarConfig();
-  const avatarSeed = configSeed || user?.username || user?.attributes?.sub || '';
+  const {
+    style: avatarStyle,
+    overrides: avatarOverrides,
+    seed: configSeed,
+    isLoaded,
+    glowRing,
+  } = useAvatarConfig();
+  const avatarSeed =
+    configSeed || user?.username || user?.attributes?.sub || "";
   const [anchorEl, setAnchorEl] = React.useState(null);
   // const [username, setUsername] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -235,17 +261,17 @@ export function UserMenu() {
     setAnchorEl(null);
   };
 
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div>
       <IconButton
         id="user-button"
         color="inherit"
-        aria-label={t('navigation.profile', { ns: 'common' })}
-        aria-controls={open ? 'user-menu' : undefined}
+        aria-label={t("navigation.profile", { ns: "common" })}
+        aria-controls={open ? "user-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
       >
         {/**
@@ -253,7 +279,13 @@ export function UserMenu() {
          */}
         {/* <ProfileIcon />&nbsp;{username} */}
         {avatarSeed && isLoaded ? (
-          <DiceBearAvatar seed={avatarSeed} size={28} style={avatarStyle} overrides={avatarOverrides} />
+          <DiceBearAvatar
+            seed={avatarSeed}
+            size={28}
+            style={avatarStyle}
+            overrides={avatarOverrides}
+            glowRing={glowRing}
+          />
         ) : (
           <ProfileIcon />
         )}
@@ -264,22 +296,36 @@ export function UserMenu() {
         open={open}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          "aria-labelledby": "basic-button",
         }}
       >
         {/* Lazy render menu items only when open - prevents translation calls during initial render */}
         {open && (
           <>
-            <MenuItem onClick={() => {
-              router.push('/profile')
-            }}><UserIcon/>&nbsp;{t('common:navigation.profile')}</MenuItem>
-            <MenuItem onClick={() => {
-              router.push('/settings')
-            }}><SettingsBrightnessIcon/>&nbsp;{t('common:navigation.settings', 'Settings')}</MenuItem>
-            <MenuItem onClick={() => {
-              signOut();
-            }}>
-              <LogoutIcon/>&nbsp;{t('auth:sign_out')}</MenuItem>
+            <MenuItem
+              onClick={() => {
+                router.push("/profile");
+              }}
+            >
+              <UserIcon />
+              &nbsp;{t("common:navigation.profile")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                router.push("/settings");
+              }}
+            >
+              <SettingsBrightnessIcon />
+              &nbsp;{t("common:navigation.settings", "Settings")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                signOut();
+              }}
+            >
+              <LogoutIcon />
+              &nbsp;{t("auth:sign_out")}
+            </MenuItem>
           </>
         )}
       </Menu>
@@ -287,14 +333,15 @@ export function UserMenu() {
   );
 }
 
-
 export default function MainToolbar({ children }) {
-  const { t } = useTranslation(['common', 'components', 'editor.authoring']);
+  const { t } = useTranslation(["common", "components", "editor.authoring"]);
   const { level, sectionLevel } = useXP();
   const { session: authSession } = React.useContext(AuthContext);
   const isInstructorOrAdmin = React.useMemo(() => {
     const groups = authSession?.groups || [];
-    return groups.some(g => ['Admins', 'Moderators', 'Instructors'].includes(g));
+    return groups.some((g) =>
+      ["Admins", "Moderators", "Instructors"].includes(g),
+    );
   }, [authSession?.groups]);
   const [state, setState] = React.useState({
     // top: false,
@@ -305,10 +352,11 @@ export default function MainToolbar({ children }) {
 
   const router = useRouter();
 
-  const [work, setIsWorking] = React.useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
+  const [work, setIsWorking] = React.useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
 
-  const [openAddStudentToSection, setOpenAddStudentToSection] = React.useState(false);
+  const [openAddStudentToSection, setOpenAddStudentToSection] =
+    React.useState(false);
   const [openJoinStudyGroup, setOpenJoinStudyGroup] = React.useState(false);
   const [openJoinWorkbook, setOpenJoinWorkbook] = React.useState(false);
   const [openJoinPeerReview, setOpenJoinPeerReview] = React.useState(false);
@@ -318,130 +366,134 @@ export default function MainToolbar({ children }) {
   const handleSecretDebugActivation = React.useCallback(() => {
     const now = Date.now();
     clickTimestamps.current.push(now);
-    
+
     // Keep only clicks from the last 3 seconds
-    clickTimestamps.current = clickTimestamps.current.filter(time => now - time < 3000);
-    
+    clickTimestamps.current = clickTimestamps.current.filter(
+      (time) => now - time < 3000,
+    );
+
     // If 7 clicks within 3 seconds, enable debug mode
     if (clickTimestamps.current.length >= 7) {
-      localStorage.setItem('debug-mode-enabled', 'true');
+      localStorage.setItem("debug-mode-enabled", "true");
       clickTimestamps.current = [];
-      alert('🐛 Debug mode enabled! Refresh the page to activate the debug panel.\n\nUse Cmd/Ctrl + Shift + D to open the debug panel.');
+      alert(
+        "🐛 Debug mode enabled! Refresh the page to activate the debug panel.\n\nUse Cmd/Ctrl + Shift + D to open the debug panel.",
+      );
     }
   }, []);
 
-  const toggleDrawer = (anchor, open) =>
-    (event) => {
-      if (
-        event &&
-        event.type === 'keydown' &&
-        ((event).key === 'Tab' ||
-          (event).key === 'Shift')
-      ) {
-        return;
-      }
+  const toggleDrawer = (anchor, open) => (event) => {
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
 
-      setState({ ...state, [anchor]: open });
-    };
+    setState({ ...state, [anchor]: open });
+  };
 
   // create a mui popup modal for adding a user to a section by section code
 
   async function addStudentToSection(event) {
-    setIsWorking(true)
-    event.preventDefault()
-    console.log('addStudentToSection')
+    setIsWorking(true);
+    event.preventDefault();
+    console.log("addStudentToSection");
 
-    console.log('event', event)
+    console.log("event", event);
 
-    const form = new FormData(event.target)
-    let response
+    const form = new FormData(event.target);
+    let response;
 
-    console.log('form', form)
+    console.log("form", form);
 
     try {
       const createInput = {
-        code: form.get('code').toString(),
-      }
+        code: form.get("code").toString(),
+      };
 
-      console.log('addSelfToSection.createInput', createInput);
+      console.log("addSelfToSection.createInput", createInput);
       const client = getAmplifyClient();
 
       response = await client.mutations.addSelfToSection(createInput);
 
-      console.log('addSelfToSection.response', response)
-
+      console.log("addSelfToSection.response", response);
     } catch (errors) {
-      console.error(errors)
+      console.error(errors);
       //   throw new Error(errors[0].message)
     }
 
-
     // CognitoIdentityProviderClientConfig.setRefreshThreshold(100000);
     // AWSMobileClient.getInstance().getTokens();
-  
-    const {
-      username,
-      signInDetails
-    } = await getCurrentUser({bypassCache: true});
-  
-    const {
-      tokens: session
-    } = await fetchAuthSession({forceRefresh: true});
 
-    console.log('username', username)
-    console.log('signInDetails', signInDetails)
-    console.log('session', session)
-  
+    const { username, signInDetails } = await getCurrentUser({
+      bypassCache: true,
+    });
+
+    const { tokens: session } = await fetchAuthSession({ forceRefresh: true });
+
+    console.log("username", username);
+    console.log("signInDetails", signInDetails);
+    console.log("session", session);
+
     // Note: Gen2 doesn't use DataStore local cache, so clear is not needed
     // Gen2 client will automatically sync with backend
-  
-    setOpenAddStudentToSection(false)
-    setIsWorking(false)
+
+    setOpenAddStudentToSection(false);
+    setIsWorking(false);
 
     // If the path is sections then reload the page
-    if (router.pathname === '/sections' || router.pathname.includes('/section/') || router.pathname === '/') {
+    if (
+      router.pathname === "/sections" ||
+      router.pathname.includes("/section/") ||
+      router.pathname === "/"
+    ) {
       router.reload();
     }
   }
-
-
-  
-
 
   return (
     <>
       <Toolbar
         variant="dense"
-        sx={{ 
-          minHeight: '48px',
-          width: '100%',
-          maxWidth: '100%',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
+        sx={{
+          minHeight: "48px",
+          width: "100%",
+          maxWidth: "100%",
+          overflow: "hidden",
+          boxSizing: "border-box",
         }}
       >
         <IconButton
           edge="start"
           color="inherit"
-          aria-label={t('mainToolbar.menuAttribute', { ns: 'editor.authoring' })}
+          aria-label={t("mainToolbar.menuAttribute", {
+            ns: "editor.authoring",
+          })}
           onClick={(e) => {
             handleSecretDebugActivation();
-            toggleDrawer('left', true)(e);
+            toggleDrawer("left", true)(e);
           }}
         >
           <MenuIcon />
         </IconButton>
         {/* <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}> */}
-        {children &&
-          children
-        }
+        {children && children}
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />
-        <LevelBadge level={router.query.sectionId ? sectionLevel : level} showProgress size="small" />
+        <LevelBadge
+          level={router.query.sectionId ? sectionLevel : level}
+          showProgress
+          size="small"
+        />
         <IconButton
           color="inherit"
-          aria-label={t('mainToolbar.joinStudyGroup', { ns: 'common', defaultValue: 'Join Study Group' })}
+          aria-label={t("mainToolbar.joinStudyGroup", {
+            ns: "common",
+            defaultValue: "Join Study Group",
+          })}
           data-tour="join-study-group-button"
           onClick={() => setOpenJoinStudyGroup(true)}
         >
@@ -449,7 +501,7 @@ export default function MainToolbar({ children }) {
         </IconButton>
         <IconButton
           color="inherit"
-          aria-label={t('mainToolbar.addToSection.title', { ns: 'common' })}
+          aria-label={t("mainToolbar.addToSection.title", { ns: "common" })}
           data-tour="join-section-button"
           onClick={() => setOpenAddStudentToSection(true)}
         >
@@ -457,22 +509,19 @@ export default function MainToolbar({ children }) {
         </IconButton>
         {/**
          * @todo Add a button for the settings menu.
-         * 
+         *
          * @todo Add a button for the page's help menu?
          * A component for the help dialog. And a walkthrough for the page. Video, text, and images?
          */}
-         {/* <HelpMenu />
+        {/* <HelpMenu />
          <SettingsMenu /> */}
-         <UserMenu />
-         
-         
+        <UserMenu />
 
-         {/**
-          * Dropdown for the user.
-        */}
-
+        {/**
+         * Dropdown for the user.
+         */}
       </Toolbar>
-      {(['left']).map((anchor) => (
+      {["left"].map((anchor) => (
         <React.Fragment key={anchor}>
           {/* <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button> */}
           <SwipeableDrawer
@@ -481,8 +530,8 @@ export default function MainToolbar({ children }) {
             onClose={toggleDrawer(anchor, false)}
             onOpen={toggleDrawer(anchor, true)}
             sx={{
-              marginTop: '4rem',
-              zIndex: (theme) => theme.zIndex.drawer + 3
+              marginTop: "4rem",
+              zIndex: (theme) => theme.zIndex.drawer + 3,
             }}
             ModalProps={{
               keepMounted: true, // Better open performance on mobile.
@@ -490,44 +539,41 @@ export default function MainToolbar({ children }) {
             slotProps={{
               backdrop: {
                 sx: {
-                  backgroundColor: 'action.disabledBackground',
+                  backgroundColor: "action.disabledBackground",
                 },
               },
             }}
-            PaperProps={
-              {
-                sx: {
-                  backdropFilter: 'blur(7px)',
-                  backgroundColor: 'custom.glassNavbar',
-                }
-              }
-            }
+            PaperProps={{
+              sx: {
+                backdropFilter: "blur(7px)",
+                backgroundColor: "custom.glassNavbar",
+              },
+            }}
           >
             <Box
               sx={{
-                marginTop: '4rem',
-                width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
+                marginTop: "4rem",
+                width: anchor === "top" || anchor === "bottom" ? "auto" : 250,
+              }}
               role="presentation"
               onClick={toggleDrawer(anchor, false)}
               onKeyDown={toggleDrawer(anchor, false)}
-              
             >
               <List
                 sx={{
-                  color: 'text.primary',
+                  color: "text.primary",
                 }}
               >
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/'>
+                  <ListItemButton component="a" href="/">
                     <ListItemIcon
-                    
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <HomeIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.home')} />
+                    <ListItemText primary={t("common:navigation.home")} />
                   </ListItemButton>
                 </ListItem>
                 {/* <ListItem disablePadding>
@@ -539,16 +585,15 @@ export default function MainToolbar({ children }) {
                   </ListItemButton>
                 </ListItem> */}
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/sections'>
-                  <ListItemIcon
-                    
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                  <ListItemButton component="a" href="/sections">
+                    <ListItemIcon
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <PeopleIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.sections')} />
+                    <ListItemText primary={t("common:navigation.sections")} />
                   </ListItemButton>
                 </ListItem>
                 {/* <ListItem disablePadding>
@@ -560,65 +605,78 @@ export default function MainToolbar({ children }) {
                   </ListItemButton>
                 </ListItem> */}
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/units'>
-                  <ListItemIcon
-                    
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                  <ListItemButton component="a" href="/units">
+                    <ListItemIcon
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <MenuBookIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.units')} />
+                    <ListItemText primary={t("common:navigation.units")} />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/leaderboard'>
-                  <ListItemIcon
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                  <ListItemButton component="a" href="/leaderboard">
+                    <ListItemIcon
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <LeaderboardIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.leaderboard', 'Leaderboard')} />
+                    <ListItemText
+                      primary={t(
+                        "common:navigation.leaderboard",
+                        "Leaderboard",
+                      )}
+                    />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/guilds'>
-                  <ListItemIcon
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                  <ListItemButton component="a" href="/guilds">
+                    <ListItemIcon
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <GroupsIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.guilds', 'Guilds')} />
+                    <ListItemText
+                      primary={t("common:navigation.guilds", "Guilds")}
+                    />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                  <ListItemButton component="a" href='/skills'>
-                  <ListItemIcon
-                    sx={{
-                      color: 'text.primary',
-                    }}
+                  <ListItemButton component="a" href="/skills">
+                    <ListItemIcon
+                      sx={{
+                        color: "text.primary",
+                      }}
                     >
                       <AccountTreeIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t('common:navigation.skills', 'Skill Tree')} />
+                    <ListItemText
+                      primary={t("common:navigation.skills", "Skill Tree")}
+                    />
                   </ListItemButton>
                 </ListItem>
                 {isInstructorOrAdmin && (
                   <ListItem disablePadding>
-                    <ListItemButton component="a" href='/gamification'>
-                    <ListItemIcon
-                      sx={{
-                        color: 'text.primary',
-                      }}
+                    <ListItemButton component="a" href="/gamification">
+                      <ListItemIcon
+                        sx={{
+                          color: "text.primary",
+                        }}
                       >
                         <TuneIcon />
                       </ListItemIcon>
-                      <ListItemText primary={t('common:navigation.gamification', 'Gamification')} />
+                      <ListItemText
+                        primary={t(
+                          "common:navigation.gamification",
+                          "Gamification",
+                        )}
+                      />
                     </ListItemButton>
                   </ListItem>
                 )}
@@ -626,54 +684,72 @@ export default function MainToolbar({ children }) {
               <Divider />
               <List
                 sx={{
-                  color: 'text.primary',
+                  color: "text.primary",
                 }}
               >
                 <ListItem disablePadding>
                   <ListItemButton
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenJoinStudyGroup(true)
+                      e.stopPropagation();
+                      setOpenJoinStudyGroup(true);
                     }}
                   >
-                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                    <ListItemIcon sx={{ color: "text.primary" }}>
                       <GroupsIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t('common:navigation.joinStudyGroup', 'Join Study Group')}
-                      secondary={t('common:navigation.joinStudyGroupDesc', 'Enter a room code')}
+                      primary={t(
+                        "common:navigation.joinStudyGroup",
+                        "Join Study Group",
+                      )}
+                      secondary={t(
+                        "common:navigation.joinStudyGroupDesc",
+                        "Enter a room code",
+                      )}
                     />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenJoinWorkbook(true)
+                      e.stopPropagation();
+                      setOpenJoinWorkbook(true);
                     }}
                   >
-                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                    <ListItemIcon sx={{ color: "text.primary" }}>
                       <EditNoteIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t('common:navigation.joinWorkbook', 'Join Workbook Session')}
-                      secondary={t('common:navigation.joinWorkbookDesc', 'Enter a workbook link or ID')}
+                      primary={t(
+                        "common:navigation.joinWorkbook",
+                        "Join Workbook Session",
+                      )}
+                      secondary={t(
+                        "common:navigation.joinWorkbookDesc",
+                        "Enter a workbook link or ID",
+                      )}
                     />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenJoinPeerReview(true)
+                      e.stopPropagation();
+                      setOpenJoinPeerReview(true);
                     }}
                   >
-                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                    <ListItemIcon sx={{ color: "text.primary" }}>
                       <RateReviewIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t('common:navigation.joinPeerReview', 'Join Peer Review')}
-                      secondary={t('common:navigation.joinPeerReviewDesc', 'Enter a review room code')}
+                      primary={t(
+                        "common:navigation.joinPeerReview",
+                        "Join Peer Review",
+                      )}
+                      secondary={t(
+                        "common:navigation.joinPeerReviewDesc",
+                        "Enter a review room code",
+                      )}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -682,102 +758,108 @@ export default function MainToolbar({ children }) {
           </SwipeableDrawer>
 
           {/**
-         * Add a modal for adding a user to a section by section code
-         */}
+           * Add a modal for adding a user to a section by section code
+           */}
 
-<Dialog
-  open={openAddStudentToSection}
-  onClose={() => setOpenAddStudentToSection(false)}
-  data-tour="join-section-dialog"
-  aria-labelledby="form-dialog-title"
-                
-                slotProps={{
-                    backdrop: {
-                      sx: {
-                        //Your style here....
-                        backdropFilter: 'blur(1px)'
-                      },
-                    },}}
+          <Dialog
+            open={openAddStudentToSection}
+            onClose={() => setOpenAddStudentToSection(false)}
+            data-tour="join-section-dialog"
+            aria-labelledby="form-dialog-title"
+            slotProps={{
+              backdrop: {
+                sx: {
+                  //Your style here....
+                  backdropFilter: "blur(1px)",
+                },
+              },
+            }}
+          >
+            <form onSubmit={addStudentToSection}>
+              <DialogTitle id="form-dialog-title">
+                {t("mainToolbar.addToSection.title", "Add self to Section")}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  {t(
+                    "mainToolbar.addToSection.description",
+                    "Add yourself as a student to a section by entering the section code.",
+                  )}
+                </DialogContentText>
+                <br />
+
+                <TextField
+                  sx={{ width: "100%" }}
+                  required
+                  id="code"
+                  name="code"
+                  data-tour="join-code-input"
+                  label={t("mainToolbar.addToSection.codeLabel", "Code")}
+                  variant="outlined"
+                />
+                <br />
+                <br />
+
+                <br />
+                <br />
+              </DialogContent>
+              <DialogActions
+                sx={{
+                  padding: "2rem",
+                }}
+              >
+                <Button
+                  disabled={work}
+                  onClick={() => setOpenAddStudentToSection(false)}
+                  color="primary"
+                  variant="outlined"
                 >
-                        <form onSubmit={addStudentToSection}>
+                  {t("common:actions.cancel")}
+                </Button>
+                <Button disabled={work} type="submit" variant="contained">
+                  {t("mainToolbar.addToSection.add", "Add")}
+                </Button>
+              </DialogActions>
+            </form>
+          </Dialog>
 
-                        <DialogTitle id="form-dialog-title">{t('mainToolbar.addToSection.title', 'Add self to Section')}</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>
-                                {t('mainToolbar.addToSection.description', 'Add yourself as a student to a section by entering the section code.')}
-                        </DialogContentText>
-                        <br/>
+          {/* Join Study Group Dialog */}
+          <JoinPracticeDialog
+            open={openJoinStudyGroup}
+            onClose={() => setOpenJoinStudyGroup(false)}
+            onJoin={(sessionInfo) => {
+              setOpenJoinStudyGroup(false);
+              // Navigate to units page with join params
+              router.push({
+                pathname: "/units",
+                query: {
+                  joinSession: sessionInfo.sessionId,
+                  joinRoom: sessionInfo.roomCode,
+                  joinUnit: sessionInfo.unitID,
+                },
+              });
+            }}
+          />
 
+          {/* Join Workbook Session Dialog */}
+          <JoinWorkbookDialog
+            open={openJoinWorkbook}
+            onClose={() => setOpenJoinWorkbook(false)}
+            onJoin={({ unitId }) => {
+              setOpenJoinWorkbook(false);
+              router.push(`/workbook/${unitId}`);
+            }}
+          />
 
-                            <TextField
-                                sx={{ width: '100%' }}
-                                required
-                                id="code"
-                                name="code"
-                                data-tour="join-code-input"
-                                label={t('mainToolbar.addToSection.codeLabel', 'Code')}
-                                variant="outlined"
-                            /><br /><br />
-
-                            <br /><br />
-
-                        </DialogContent>
-                        <DialogActions
-                            sx={{
-                                padding: '2rem',                                
-                            }}
-                        >
-                            <Button disabled={work}
-                                onClick={() => setOpenAddStudentToSection(false)}
-                            color="primary" variant="outlined">
-                                {t('common:actions.cancel')}
-                        </Button>
-                            <Button disabled={work} type="submit" variant="contained">
-                                {t('mainToolbar.addToSection.add', 'Add')}
-                        </Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-
-                {/* Join Study Group Dialog */}
-                <JoinPracticeDialog
-                  open={openJoinStudyGroup}
-                  onClose={() => setOpenJoinStudyGroup(false)}
-                  onJoin={(sessionInfo) => {
-                    setOpenJoinStudyGroup(false)
-                    // Navigate to units page with join params
-                    router.push({
-                      pathname: '/units',
-                      query: {
-                        joinSession: sessionInfo.sessionId,
-                        joinRoom: sessionInfo.roomCode,
-                        joinUnit: sessionInfo.unitID,
-                      },
-                    })
-                  }}
-                />
-
-                {/* Join Workbook Session Dialog */}
-                <JoinWorkbookDialog
-                  open={openJoinWorkbook}
-                  onClose={() => setOpenJoinWorkbook(false)}
-                  onJoin={({ unitId }) => {
-                    setOpenJoinWorkbook(false)
-                    router.push(`/workbook/${unitId}`)
-                  }}
-                />
-
-                {/* Join Peer Review Dialog */}
-                <JoinPeerReviewDialog
-                  open={openJoinPeerReview}
-                  onClose={() => setOpenJoinPeerReview(false)}
-                  onJoin={({ roomId }) => {
-                    setOpenJoinPeerReview(false)
-                    router.push(`/review/${roomId}`)
-                  }}
-                />
-
-
+          {/* Join Peer Review Dialog */}
+          <JoinPeerReviewDialog
+            open={openJoinPeerReview}
+            onClose={() => setOpenJoinPeerReview(false)}
+            onJoin={({ roomId }) => {
+              setOpenJoinPeerReview(false);
+              router.push(`/review/${roomId}`);
+            }}
+          />
         </React.Fragment>
       ))}
     </>

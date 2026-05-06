@@ -17,18 +17,18 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 // ============================================================================
 
 const CREATE_XP_LOG = `mutation CreateStudentXPLog($input: CreateStudentXPLogInput!) {
-  createStudentXPLog(input: $input) { id studentId xpAmount reason referenceId cohortId unitID _version }
+  createStudentXPLog(input: $input) { id studentId xpAmount accuracy reason referenceId cohortId unitID _version _lastChangedAt _deleted }
 }`;
 
 const LIST_XP_LOGS_BY_STUDENT = `query ListXPLogsByStudent($studentId: String!) {
   listStudentXPLogByStudentId(studentId: $studentId) {
-    items { id studentId xpAmount reason referenceId cohortId unitID createdAt _version }
+    items { id studentId xpAmount accuracy reason referenceId cohortId unitID createdAt _version _lastChangedAt _deleted }
   }
 }`;
 
 const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
   listStudentXPLogByCohortId(cohortId: $cohortId) {
-    items { id studentId xpAmount reason referenceId cohortId unitID createdAt _version }
+    items { id studentId xpAmount accuracy reason referenceId cohortId unitID createdAt _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -41,51 +41,51 @@ const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
 // Easter egg queries/mutations
 const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
   listEasterEggs(filter: { active: { eq: true } }) {
-    items { id trigger triggerValue xpReward badgeId revealMessage active _version }
+    items { id trigger triggerValue xpReward badgeId revealMessage active _version _lastChangedAt _deleted }
   }
 }`;
 
 // Guild queries/mutations (GuildMembership model removed - members embedded in Guild.members)
 
 const GET_GUILD = `query GetGuild($id: ID!) {
-  getGuild(id: $id) { id name cohortId totalXP members _version }
+  getGuild(id: $id) { id name cohortId totalXP members _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_GUILD = `mutation UpdateGuild($input: UpdateGuildInput!) {
-  updateGuild(input: $input) { id name totalXP _version }
+  updateGuild(input: $input) { id name totalXP _version _lastChangedAt _deleted }
 }`;
 
 const LIST_GUILDS_BY_COHORT = `query ListGuildsByCohort($cohortId: String!) {
   listGuildByCohortId(cohortId: $cohortId) {
-    items { id name cohortId totalXP members _version }
+    items { id name cohortId totalXP members _version _lastChangedAt _deleted }
   }
 }`;
 
 // Group challenge queries/mutations
 const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListChallengesByCohort($cohortId: String!) {
   listGroupChallengeByCohortId(cohortId: $cohortId) {
-    items { id cohortId title targetXP currentXP deadline active bonusMultiplier contributions _version }
+    items { id cohortId title targetXP currentXP deadline active bonusMultiplier contributions _version _lastChangedAt _deleted }
   }
 }`;
 
 const UPDATE_CHALLENGE = `mutation UpdateChallenge($input: UpdateGroupChallengeInput!) {
-  updateGroupChallenge(input: $input) { id currentXP _version }
+  updateGroupChallenge(input: $input) { id currentXP _version _lastChangedAt _deleted }
 }`;
 
 // CREATE_CONTRIBUTION removed - contributions embedded in GroupChallenge.contributions
 
 const GET_STUDENT_MEMORY = `query GetStudentMemory($studentId: String!) {
   listStudentMemoryByStudentId(studentId: $studentId) {
-    items { id studentId memoryMarkdown structuredProfile lastUpdatedBy version _version }
+    items { id studentId memoryMarkdown structuredProfile lastUpdatedBy version _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_STUDENT_MEMORY = `mutation CreateStudentMemory($input: CreateStudentMemoryInput!) {
-  createStudentMemory(input: $input) { id studentId memoryMarkdown structuredProfile _version }
+  createStudentMemory(input: $input) { id studentId memoryMarkdown structuredProfile _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_STUDENT_MEMORY = `mutation UpdateStudentMemory($input: UpdateStudentMemoryInput!) {
-  updateStudentMemory(input: $input) { id studentId memoryMarkdown structuredProfile version _version }
+  updateStudentMemory(input: $input) { id studentId memoryMarkdown structuredProfile version _version _lastChangedAt _deleted }
 }`;
 
 // StudentMemory queries/mutations (unit memories use unitID filter)
@@ -93,8 +93,7 @@ const LIST_UNIT_MEMORY_BY_STUDENT = `query ListUnitMemoryByStudent($studentId: S
   listStudentMemoryByStudentId(studentId: $studentId) {
     items {
       id studentId unitID weakConcepts strongConcepts confusionPairs
-      accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version
-    }
+      accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -102,28 +101,25 @@ const LIST_UNIT_MEMORY_BY_UNIT = `query ListUnitMemoryByUnit($unitID: String!) {
   listStudentMemoryByUnitID(unitID: $unitID) {
     items {
       id studentId unitID weakConcepts strongConcepts
-      accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version
-    }
+      accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_UNIT_MEMORY = `mutation CreateStudentMemory($input: CreateStudentMemoryInput!) {
   createStudentMemory(input: $input) {
     id studentId unitID weakConcepts strongConcepts confusionPairs
-    accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version
-  }
+    accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_UNIT_MEMORY = `mutation UpdateStudentMemory($input: UpdateStudentMemoryInput!) {
   updateStudentMemory(input: $input) {
     id studentId unitID weakConcepts strongConcepts confusionPairs
-    accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version
-  }
+    accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
 }`;
 
 const LIST_XP_LOGS_FOR_COHORT = `query ListXPLogsByCohortId($cohortId: String!) {
   listStudentXPLogByCohortId(cohortId: $cohortId) {
-    items { id studentId xpAmount reason cohortId _version }
+    items { id studentId xpAmount reason cohortId _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -131,55 +127,55 @@ const LIST_XP_LOGS_FOR_COHORT = `query ListXPLogsByCohortId($cohortId: String!) 
 
 const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: String!) {
   listGradeBySectionID(sectionID: $sectionID) {
-    items { id owner sectionID complete accuracy _version }
+    items { id owner sectionID complete accuracy _version _lastChangedAt _deleted }
   }
 }`;
 
 const GET_SECTION = `query GetSection($id: ID!) {
-  getSection(id: $id) { id leaderboardEnabled _version }
+  getSection(id: $id) { id leaderboardEnabled xpConfig _version _lastChangedAt _deleted }
 }`;
 
 const GET_SETTINGS_BY_OWNER = `query GetSettings($owner: String!) {
   listSettings(filter: { owner: { eq: $owner } }) {
-    items { id owner leaderboardOptIn }
+    items { id owner leaderboardOptIn _version _lastChangedAt _deleted }
   }
 }`;
 
 // Skill tree generation queries/mutations
 const GET_UNIT = `query GetUnit($id: ID!) {
-  getUnit(id: $id) { id name description data }
+  getUnit(id: $id) { id name description data _version _lastChangedAt _deleted }
 }`;
 
 const LIST_UNIT_WORDS = `query ListUnitWords($unitID: String!) {
   listUnitWordByUnitID(unitID: $unitID) {
-    items { word { id word phonetic definition } }
+    items { word { id word phonetic definition _version _lastChangedAt _deleted } }
   }
 }`;
 
 const LIST_QUESTION_UNITS = `query ListQuestionUnits($unitID: String!) {
   listQuestionUnitByUnitID(unitID: $unitID) {
-    items { question { id question answer } }
+    items { question { id question answer _version _lastChangedAt _deleted } }
   }
 }`;
 
 const LIST_UNIT_DOCUMENTS = `query ListUnitDocuments($unitID: String!) {
   listUnitDocumentByUnitID(unitID: $unitID) {
-    items { document { id parsedContents { items { id objectivesJSON } } } }
+    items { document { id parsedContents { items { id objectivesJSON _version _lastChangedAt _deleted } } _version _lastChangedAt _deleted } }
   }
 }`;
 
 const LIST_SKILLS_BY_COHORT = `query ListSkillsByCohort($cohortId: String!) {
   listSkillByCohort(cohortId: $cohortId) {
-    items { id title description prerequisites xpReward _version }
+    items { id title description prerequisites xpReward _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_SKILL = `mutation CreateSkill($input: CreateSkillInput!) {
-  createSkill(input: $input) { id title description prerequisites xpReward cohortId _version }
+  createSkill(input: $input) { id title description prerequisites xpReward cohortId _version _lastChangedAt _deleted }
 }`;
 
 const DELETE_SKILL = `mutation DeleteSkill($input: DeleteSkillInput!) {
-  deleteSkill(input: $input) { id _version }
+  deleteSkill(input: $input) { id _version _lastChangedAt _deleted }
 }`;
 
 // StudentProfile aggregate queries/mutations
@@ -188,21 +184,19 @@ const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!) {
     items {
       id studentId cohortId studentName totalXP level
       currentStreak longestStreak lastActivityDate freezesRemaining freezesUsed
-      badges moduleProgress personalBests skillProgress unitMemories
-      completedAssignments nailedItCount lastUpdated _version
-    }
+      badges moduleProgress personalBests skillProgress unitMemories activeDebuffs
+      completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_STUDENT_PROFILE = `mutation CreateStudentProfile($input: CreateStudentProfileInput!) {
-  createStudentProfile(input: $input) { id studentId _version }
+  createStudentProfile(input: $input) { id studentId _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
   updateStudentProfile(input: $input) {
     id studentId totalXP level currentStreak longestStreak
-    badges moduleProgress personalBests skillProgress unitMemories _version
-  }
+    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty activeDebuffs freezesRemaining _version _lastChangedAt _deleted }
 }`;
 
 // StudentSkillProgress removed - skill progress now on StudentProfile.skillProgress
@@ -212,23 +206,22 @@ const LIST_PROFILES_BY_COHORT = `query ListProfilesByCohort($cohortId: String!) 
   listStudentProfileByCohortId(cohortId: $cohortId) {
     items {
       id studentId cohortId studentName totalXP level
-      currentStreak longestStreak completedAssignments nailedItCount lastUpdated _version
-    }
+      currentStreak longestStreak completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
   }
 }`;
 
 // EasterEgg update (for embedded discoveries)
 const GET_EASTER_EGG = `query GetEasterEgg($id: ID!) {
-  getEasterEgg(id: $id) { id trigger triggerValue xpReward badgeId revealMessage active discoveries _version }
+  getEasterEgg(id: $id) { id trigger triggerValue xpReward badgeId revealMessage active discoveries _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_EASTER_EGG = `mutation UpdateEasterEgg($input: UpdateEasterEggInput!) {
-  updateEasterEgg(input: $input) { id discoveries _version }
+  updateEasterEgg(input: $input) { id discoveries _version _lastChangedAt _deleted }
 }`;
 
 // GroupChallenge update (for embedded contributions)
 const UPDATE_CHALLENGE_WITH_CONTRIBUTIONS = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!) {
-  updateGroupChallenge(input: $input) { id currentXP contributions _version }
+  updateGroupChallenge(input: $input) { id currentXP contributions _version _lastChangedAt _deleted }
 }`;
 
 // ============================================================================
@@ -286,9 +279,52 @@ const LEVELS = [
   { level: 6, xpRequired: 2500, label: "Master" },
 ];
 
-function calculateLevel(totalXP: number): number {
+const LEVEL_DEFAULTS = { maxLevel: 6, xpPerLevel: 150, levelScaling: 1.6 };
+
+/**
+ * Generate level thresholds from a level config.
+ * Gap(N→N+1) = xpPerLevel × levelScaling^(N-1)
+ */
+function generateLevelThresholds(config?: {
+  maxLevel?: number;
+  xpPerLevel?: number;
+  levelScaling?: number;
+}): { level: number; xpRequired: number }[] {
+  const max = Math.min(
+    99,
+    Math.max(1, config?.maxLevel ?? LEVEL_DEFAULTS.maxLevel),
+  );
+  const base = Math.max(1, config?.xpPerLevel ?? LEVEL_DEFAULTS.xpPerLevel);
+  const scaling = Math.max(
+    1,
+    config?.levelScaling ?? LEVEL_DEFAULTS.levelScaling,
+  );
+
+  const thresholds: { level: number; xpRequired: number }[] = [];
+  let cumulative = 0;
+
+  for (let lvl = 1; lvl <= max; lvl++) {
+    thresholds.push({ level: lvl, xpRequired: Math.round(cumulative) });
+    if (lvl < max) {
+      cumulative += base * Math.pow(scaling, lvl - 1);
+    }
+  }
+  return thresholds;
+}
+
+function calculateLevel(
+  totalXP: number,
+  levelConfig?: {
+    maxLevel?: number;
+    xpPerLevel?: number;
+    levelScaling?: number;
+  },
+): number {
+  const thresholds = levelConfig
+    ? generateLevelThresholds(levelConfig)
+    : LEVELS;
   let level = 1;
-  for (const l of LEVELS) {
+  for (const l of thresholds) {
     if (totalXP >= l.xpRequired) level = l.level;
   }
   return level;
@@ -379,6 +415,356 @@ const BADGE_CRITERIA: BadgeCriteria[] = [
 ];
 
 // ============================================================================
+// Anti-Badge Criteria — badges of shame with debuffs
+// ============================================================================
+
+interface AntiBadgeCriteria {
+  badgeType: string;
+  check: (context: {
+    xpLogs: any[];
+    badges: any[];
+    totalXP: number;
+    profile: any;
+  }) => boolean;
+  debuff: {
+    xpMultiplier?: number;
+    xpMultiplierDurationHours?: number;
+    streakFreezesRemoved?: number;
+    avatarDowngrade?: string;
+    shameText?: string;
+    temporaryTitle?: string;
+    cosmeticDurationHours?: number;
+    extraDrills?: number;
+    hideFromLeaderboard?: boolean;
+    hideFromLeaderboardHours?: number;
+  };
+  redeemable: boolean;
+}
+
+const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
+  {
+    badgeType: "CONSISTENTLY_WRONG",
+    check: ({ xpLogs }) => {
+      // Same referenceId with 0 XP (failed attempts) 5+ times
+      const failMap = new Map<string, number>();
+      for (const l of xpLogs) {
+        if (l.xpAmount === 0 && l.referenceId) {
+          failMap.set(l.referenceId, (failMap.get(l.referenceId) || 0) + 1);
+        }
+      }
+      return Array.from(failMap.values()).some((c) => c >= 5);
+    },
+    debuff: {
+      extraDrills: 2,
+      temporaryTitle: "🔄 Consistently Wrong™",
+      cosmeticDurationHours: 24,
+      shameText:
+        "Wrong answers given with such confidence they almost became right.",
+    },
+    redeemable: true,
+  },
+  {
+    badgeType: "STREAK_BREAKER",
+    check: ({ profile }) => {
+      // Broke a 14+ day streak (longest > 14 but current is 0)
+      return (
+        (profile.longestStreak || 0) >= 14 && (profile.currentStreak || 0) === 0
+      );
+    },
+    debuff: {
+      streakFreezesRemoved: 2,
+      xpMultiplier: 0.7,
+      xpMultiplierDurationHours: 48,
+      temporaryTitle: "💔 Streak Breaker",
+      cosmeticDurationHours: 48,
+      shameText:
+        "14 days of dedication, shattered. Your streak didn't die — it was murdered.",
+    },
+    redeemable: true,
+  },
+  {
+    badgeType: "SPEED_RUN_SCHOLAR",
+    check: ({ xpLogs }) => {
+      // Any homework submitted within 30 seconds of session start (check for very fast submissions)
+      const submissions = xpLogs.filter(
+        (l: any) => l.reason === "HOMEWORK_SUBMITTED",
+      );
+      if (submissions.length < 3) return false;
+      // Check if 3+ submissions happened within 1 minute of each other (speed-running)
+      const sorted = submissions
+        .map((l: any) => new Date(l.createdAt).getTime())
+        .sort((a: number, b: number) => a - b);
+      for (let i = 0; i < sorted.length - 2; i++) {
+        if (sorted[i + 2] - sorted[i] < 60000) return true; // 3 in 1 minute
+      }
+      return false;
+    },
+    debuff: {
+      xpMultiplier: 0.5,
+      xpMultiplierDurationHours: 6,
+      temporaryTitle: "⚡ Speed Run Scholar",
+      cosmeticDurationHours: 12,
+      shameText: "Any% homework speedrun, no glitches (but also no reading).",
+    },
+    redeemable: true,
+  },
+  {
+    badgeType: "THE_GHOST",
+    check: ({ profile }) => {
+      // No activity for 7+ days (lastActivityDate is old)
+      if (!profile.lastActivityDate) return false;
+      const lastActive = new Date(profile.lastActivityDate).getTime();
+      const daysSince = (Date.now() - lastActive) / (1000 * 60 * 60 * 24);
+      return daysSince >= 7;
+    },
+    debuff: {
+      streakFreezesRemoved: 1,
+      temporaryTitle: "👻 The Ghost",
+      cosmeticDurationHours: 48,
+      shameText:
+        "They say if you whisper their username three times, they still won't log in.",
+    },
+    redeemable: true,
+  },
+  {
+    badgeType: "XP_ZERO_HERO",
+    check: ({ xpLogs }) => {
+      // Has 10+ sessions (logs on 10+ distinct days) but at least one day with 0 XP earned
+      const daySet = new Set(
+        xpLogs.map((l: any) => l.createdAt?.split("T")[0]),
+      );
+      if (daySet.size < 5) return false;
+      // Check if total XP across all logs is suspiciously low relative to sessions
+      const totalXP = xpLogs.reduce(
+        (s: number, l: any) => s + (l.xpAmount || 0),
+        0,
+      );
+      return totalXP === 0 && xpLogs.length > 0;
+    },
+    debuff: {
+      temporaryTitle: "🦸 Zero Hero",
+      cosmeticDurationHours: 72,
+      shameText:
+        "In a system designed to give you points for breathing near homework, you earned none. Respect.",
+    },
+    redeemable: true,
+  },
+  {
+    badgeType: "MINIMALLY_VIABLE_STUDENT",
+    check: ({ xpLogs, totalXP }) => {
+      // Consistently low accuracy — many submissions but low XP per submission
+      const submissions = xpLogs.filter(
+        (l: any) => l.reason === "HOMEWORK_SUBMITTED",
+      );
+      if (submissions.length < 5) return false;
+      const avgXP = totalXP / submissions.length;
+      // If average XP is less than half the base amount, they're barely passing
+      return avgXP < 5;
+    },
+    debuff: {
+      xpMultiplier: 0.85,
+      xpMultiplierDurationHours: 48,
+      temporaryTitle: "📉 MVP (Minimum Viable Participant)",
+      cosmeticDurationHours: 48,
+      shameText:
+        "You found the exact minimum effort threshold. Engineers call this optimization. Teachers call it something else.",
+    },
+    redeemable: true,
+  },
+];
+
+// ============================================================================
+// Redemption Condition Types & Evaluation
+// ============================================================================
+
+type RedemptionConditionType =
+  | "CONSECUTIVE_ON_TIME"
+  | "LOGIN_STREAK"
+  | "COMPLETE_ASSIGNMENT"
+  | "ACCURACY_ABOVE"
+  | "ACTIVITY_COUNT"
+  | "BUILD_STREAK"
+  | "SUBMIT_ANY"
+  | "EARN_XP"
+  | "COMPLETE_DRILLS"
+  | "WAIT_PERIOD"
+  | "SCORE_ON_TOPIC";
+
+interface RedemptionCondition {
+  type: RedemptionConditionType;
+  count?: number;
+  percent?: number;
+  hours?: number;
+  period?: "day" | "week";
+}
+
+/** Map badge types to their structured redemption conditions */
+const REDEMPTION_CONDITIONS: Record<string, RedemptionCondition> = {
+  FASHIONABLY_LATE: { type: "CONSECUTIVE_ON_TIME", count: 3 },
+  THE_GHOST: { type: "LOGIN_STREAK", count: 3 },
+  HOMEWORK_ATE_MY_DOG: { type: "COMPLETE_ASSIGNMENT" },
+  SPEED_RUN_SCHOLAR: { type: "SUBMIT_ANY" },
+  CONSISTENTLY_WRONG: { type: "ACCURACY_ABOVE", percent: 50 },
+  COPY_PASTE_CONNOISSEUR: { type: "SUBMIT_ANY" },
+  LEADERBOARD_LURKER: { type: "WAIT_PERIOD", hours: 24 },
+  PROCRASTINATION_PRODIGY: { type: "ACTIVITY_COUNT", count: 3, period: "day" },
+  SELECTIVE_AMNESIA: { type: "SUBMIT_ANY" },
+  SYLLABUS_SKEPTIC: { type: "SUBMIT_ANY" },
+  EXTRA_CREDIT_ADDICT: { type: "COMPLETE_ASSIGNMENT" },
+  AI_WHISPERER_GONE_WRONG: { type: "SUBMIT_ANY" },
+  STREAK_BREAKER: { type: "BUILD_STREAK", count: 7 },
+  THE_DRILL_DODGER: { type: "COMPLETE_DRILLS", count: 3 },
+  TAB_SURFER: { type: "COMPLETE_ASSIGNMENT" },
+  LOREM_IPSUM_LAUREATE: { type: "SUBMIT_ANY" },
+  XP_ZERO_HERO: { type: "EARN_XP", count: 1 },
+  DUNNING_KRUGER_AWARD: { type: "SCORE_ON_TOPIC", percent: 80 },
+  THE_TUTORIAL_SKIPPER: { type: "COMPLETE_ASSIGNMENT" },
+  INFINITE_LOOP_LEARNER: { type: "SUBMIT_ANY" },
+  MINIMALLY_VIABLE_STUDENT: { type: "ACCURACY_ABOVE", percent: 90 },
+  EMPTY_CANVAS_ARTIST: { type: "SUBMIT_ANY" },
+  BUG_REPORT_OR_EXCUSE: { type: "SUBMIT_ANY" },
+};
+
+/**
+ * Evaluate whether a redemption condition is met for a given anti-badge.
+ * Returns true if the badge should be automatically cleared.
+ */
+function evaluateRedemption(
+  badgeType: string,
+  context: {
+    xpLogs: any[];
+    profile: any;
+    badge: any; // The anti-badge entry (has appliedAt, count, etc.)
+  },
+): boolean {
+  const condition = REDEMPTION_CONDITIONS[badgeType];
+  if (!condition) return false;
+
+  const { xpLogs, profile, badge } = context;
+  const appliedAt = badge.awardedAt ? new Date(badge.awardedAt).getTime() : 0;
+
+  switch (condition.type) {
+    case "SUBMIT_ANY": {
+      // Any submission after the badge was awarded
+      return xpLogs.some(
+        (l: any) =>
+          l.reason === "HOMEWORK_SUBMITTED" &&
+          new Date(l.createdAt).getTime() > appliedAt,
+      );
+    }
+
+    case "CONSECUTIVE_ON_TIME": {
+      // N on-time submissions after badge award
+      const threshold = condition.count || 3;
+      const onTimeSubs = xpLogs.filter(
+        (l: any) =>
+          l.reason === "ON_TIME_SUBMISSION" &&
+          new Date(l.createdAt).getTime() > appliedAt,
+      );
+      return onTimeSubs.length >= threshold;
+    }
+
+    case "LOGIN_STREAK": {
+      // Current streak >= N (means they logged in N consecutive days)
+      const threshold = condition.count || 3;
+      return (profile.currentStreak || 0) >= threshold;
+    }
+
+    case "BUILD_STREAK": {
+      // Current streak >= N
+      const threshold = condition.count || 7;
+      return (profile.currentStreak || 0) >= threshold;
+    }
+
+    case "COMPLETE_ASSIGNMENT": {
+      // Any homework submission after badge was awarded (same as SUBMIT_ANY but for clarity)
+      return xpLogs.some(
+        (l: any) =>
+          l.reason === "HOMEWORK_SUBMITTED" &&
+          new Date(l.createdAt).getTime() > appliedAt,
+      );
+    }
+
+    case "ACCURACY_ABOVE": {
+      // Any submission with XP above threshold (high xp = high accuracy)
+      const threshold = condition.percent || 70;
+      // Check recent grades via XP logs — XP > 0 with high amount indicates accuracy
+      // We use the raw accuracy from logs if available, otherwise check xpAmount threshold
+      return xpLogs.some(
+        (l: any) =>
+          l.reason === "HOMEWORK_SUBMITTED" &&
+          new Date(l.createdAt).getTime() > appliedAt &&
+          (l.accuracy || 0) >= threshold,
+      );
+    }
+
+    case "SCORE_ON_TOPIC": {
+      // Same as ACCURACY_ABOVE but checks for same unitID as the badge
+      const threshold = condition.percent || 80;
+      const badgeUnitID = badge.unitID;
+      return xpLogs.some(
+        (l: any) =>
+          l.reason === "HOMEWORK_SUBMITTED" &&
+          new Date(l.createdAt).getTime() > appliedAt &&
+          (l.accuracy || 0) >= threshold &&
+          (!badgeUnitID || l.unitID === badgeUnitID),
+      );
+    }
+
+    case "ACTIVITY_COUNT": {
+      // N activities within the period (day/week) after badge award
+      const threshold = condition.count || 3;
+      const periodMs =
+        condition.period === "week"
+          ? 7 * 24 * 60 * 60 * 1000
+          : 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const windowStart = now - periodMs;
+      const recentActivities = xpLogs.filter(
+        (l: any) =>
+          new Date(l.createdAt).getTime() > Math.max(appliedAt, windowStart) &&
+          (l.xpAmount || 0) > 0,
+      );
+      return recentActivities.length >= threshold;
+    }
+
+    case "EARN_XP": {
+      // Earned at least N XP since badge was awarded
+      const threshold = condition.count || 1;
+      const earnedSince = xpLogs
+        .filter(
+          (l: any) =>
+            new Date(l.createdAt).getTime() > appliedAt &&
+            (l.xpAmount || 0) > 0,
+        )
+        .reduce((sum: number, l: any) => sum + (l.xpAmount || 0), 0);
+      return earnedSince >= threshold;
+    }
+
+    case "COMPLETE_DRILLS": {
+      // N practice drill completions after badge award
+      const threshold = condition.count || 3;
+      const drills = xpLogs.filter(
+        (l: any) =>
+          l.reason === "PRACTICE_DRILL_COMPLETED" &&
+          new Date(l.createdAt).getTime() > appliedAt,
+      );
+      return drills.length >= threshold;
+    }
+
+    case "WAIT_PERIOD": {
+      // Automatic: enough time has passed since badge award
+      const hours = condition.hours || 24;
+      const elapsed = Date.now() - appliedAt;
+      return elapsed >= hours * 60 * 60 * 1000;
+    }
+
+    default:
+      return false;
+  }
+}
+
+// ============================================================================
 // Configure Amplify (once)
 // ============================================================================
 
@@ -456,6 +842,8 @@ export const handler: Handler = async (event) => {
         return await handleAdvanceSkillProgress(gqlClient, args);
       case "claimStorybookBadges":
         return await handleClaimStorybookBadges(gqlClient, args, identity);
+      case "applyBattleStakes":
+        return await handleApplyBattleStakes(gqlClient, args);
       default:
         throw new Error(`Unknown operation: ${fieldName}`);
     }
@@ -477,12 +865,75 @@ async function handleAwardXP(
     referenceId?: string;
     cohortId?: string;
     unitID?: string;
+    accuracy?: number;
   },
   identity: any,
 ) {
-  const { studentId, reason, referenceId, cohortId, unitID } = args;
+  const { studentId, reason, referenceId, cohortId, unitID, accuracy } = args;
   let xpAmount = XP_AMOUNTS[reason];
   if (!xpAmount) throw new Error(`Invalid XP reason: ${reason}`);
+
+  // ---- Load section XP config (multipliers + caps + levels) ----
+  let xpConfig: {
+    multipliers?: Record<string, number>;
+    dailyCap?: number;
+    weeklyCap?: number;
+    enabled?: boolean;
+    levelConfig?: {
+      maxLevel?: number;
+      xpPerLevel?: number;
+      levelScaling?: number;
+    };
+  } = {};
+  if (cohortId) {
+    try {
+      const { data: sectionData } = await gqlClient.graphql({
+        query: GET_SECTION,
+        variables: { id: cohortId },
+      });
+      const rawConfig = sectionData?.getSection?.xpConfig;
+      if (rawConfig) {
+        xpConfig =
+          typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig;
+      }
+    } catch (err) {
+      console.warn("[gamification] Failed to load section xpConfig:", err);
+    }
+  }
+
+  // If XP is disabled for this section, return early
+  if (xpConfig.enabled === false) {
+    return { alreadyAwarded: false, xpAmount: 0, totalXP: 0, xpDisabled: true };
+  }
+
+  // Apply per-action multiplier from section config
+  if (xpConfig.multipliers && xpConfig.multipliers[reason] !== undefined) {
+    xpAmount = Math.round(xpAmount * xpConfig.multipliers[reason]);
+  }
+
+  // Apply active debuff XP multipliers from anti-badges
+  if (cohortId) {
+    try {
+      const profile = await getOrCreateStudentProfile(
+        gqlClient,
+        studentId,
+        cohortId,
+      );
+      const activeDebuffs = getActiveDebuffs(profile);
+      for (const debuff of activeDebuffs) {
+        if (debuff.xpMultiplier !== undefined && debuff.xpMultiplier < 1) {
+          xpAmount = Math.round(xpAmount * debuff.xpMultiplier);
+        }
+      }
+    } catch (err) {
+      console.warn("[gamification] Failed to check debuffs:", err);
+    }
+  }
+
+  // If multiplier reduced to 0, skip award
+  if (xpAmount <= 0) {
+    return { alreadyAwarded: false, xpAmount: 0, totalXP: 0, xpDisabled: true };
+  }
 
   // Fetch logs upfront — needed for both duplicate check and diminishing returns
   const { data: allLogsResult } = await gqlClient.graphql({
@@ -517,6 +968,51 @@ async function handleAwardXP(
     }
   }
 
+  // ---- Enforce daily/weekly XP caps ----
+  if (xpConfig.dailyCap && xpConfig.dailyCap > 0) {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const todayXP = allLogs
+      .filter(
+        (l: any) =>
+          l.createdAt?.startsWith(todayStr) &&
+          (!cohortId || l.cohortId === cohortId),
+      )
+      .reduce((s: number, l: any) => s + l.xpAmount, 0);
+    if (todayXP >= xpConfig.dailyCap) {
+      return {
+        alreadyAwarded: false,
+        xpAmount: 0,
+        totalXP: allLogs.reduce((s: number, l: any) => s + l.xpAmount, 0),
+        capReached: "daily",
+      };
+    }
+    // Clamp to remaining daily allowance
+    xpAmount = Math.min(xpAmount, xpConfig.dailyCap - todayXP);
+  }
+
+  if (xpConfig.weeklyCap && xpConfig.weeklyCap > 0) {
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay()); // Sunday
+    weekStart.setHours(0, 0, 0, 0);
+    const weekStartISO = weekStart.toISOString();
+    const weekXP = allLogs
+      .filter(
+        (l: any) =>
+          l.createdAt >= weekStartISO && (!cohortId || l.cohortId === cohortId),
+      )
+      .reduce((s: number, l: any) => s + l.xpAmount, 0);
+    if (weekXP >= xpConfig.weeklyCap) {
+      return {
+        alreadyAwarded: false,
+        xpAmount: 0,
+        totalXP: allLogs.reduce((s: number, l: any) => s + l.xpAmount, 0),
+        capReached: "weekly",
+      };
+    }
+    xpAmount = Math.min(xpAmount, xpConfig.weeklyCap - weekXP);
+  }
+
   // Create log entry
   await gqlClient.graphql({
     query: CREATE_XP_LOG,
@@ -525,6 +1021,7 @@ async function handleAwardXP(
         studentId,
         xpAmount,
         reason,
+        accuracy: accuracy != null ? accuracy : null,
         referenceId: referenceId || null,
         cohortId: cohortId || null,
         unitID: unitID || null,
@@ -548,7 +1045,7 @@ async function handleAwardXP(
       studentId,
       cohortId,
     );
-    const newLevel = calculateLevel(totalXP);
+    const newLevel = calculateLevel(totalXP, xpConfig.levelConfig);
     await gqlClient.graphql({
       query: UPDATE_STUDENT_PROFILE,
       variables: {
@@ -572,6 +1069,83 @@ async function handleAwardXP(
   }
 
   return { alreadyAwarded: false, xpAmount, totalXP };
+}
+
+// ============================================================================
+// Debuff Helpers — manage active debuff state on StudentProfile
+// ============================================================================
+
+interface ActiveDebuff {
+  badgeType: string;
+  appliedAt: string;
+  expiresAt: string;
+  xpMultiplier?: number;
+  temporaryTitle?: string;
+  shameText?: string;
+  avatarDowngrade?: string;
+  hideFromLeaderboard?: boolean;
+  extraDrills?: number;
+}
+
+/** Parse and filter active (non-expired) debuffs from the profile */
+function getActiveDebuffs(profile: any): ActiveDebuff[] {
+  try {
+    const raw =
+      typeof profile.activeDebuffs === "string"
+        ? JSON.parse(profile.activeDebuffs || "[]")
+        : profile.activeDebuffs || [];
+    const now = Date.now();
+    return raw.filter(
+      (d: ActiveDebuff) => new Date(d.expiresAt).getTime() > now,
+    );
+  } catch {
+    return [];
+  }
+}
+
+/** Add a new debuff from an anti-badge */
+function applyDebuff(
+  debuffs: ActiveDebuff[],
+  badgeType: string,
+  debuffConfig: AntiBadgeCriteria["debuff"],
+): void {
+  const durationHours = debuffConfig.cosmeticDurationHours || 24;
+  const now = new Date();
+  const expiresAt = new Date(
+    now.getTime() + durationHours * 60 * 60 * 1000,
+  ).toISOString();
+
+  debuffs.push({
+    badgeType,
+    appliedAt: now.toISOString(),
+    expiresAt,
+    xpMultiplier: debuffConfig.xpMultiplier,
+    temporaryTitle: debuffConfig.temporaryTitle,
+    shameText: debuffConfig.shameText,
+    avatarDowngrade: debuffConfig.avatarDowngrade,
+    hideFromLeaderboard: debuffConfig.hideFromLeaderboard,
+    extraDrills: debuffConfig.extraDrills,
+  });
+}
+
+/** Refresh an existing debuff's expiry (for repeated offenses) */
+function refreshDebuff(
+  debuffs: ActiveDebuff[],
+  badgeType: string,
+  debuffConfig: AntiBadgeCriteria["debuff"],
+): void {
+  const durationHours = debuffConfig.cosmeticDurationHours || 24;
+  const expiresAt = new Date(
+    Date.now() + durationHours * 60 * 60 * 1000,
+  ).toISOString();
+
+  const existing = debuffs.find((d) => d.badgeType === badgeType);
+  if (existing) {
+    existing.expiresAt = expiresAt;
+    existing.appliedAt = new Date().toISOString();
+  } else {
+    applyDebuff(debuffs, badgeType, debuffConfig);
+  }
 }
 
 // ============================================================================
@@ -635,17 +1209,107 @@ async function handleCheckBadges(
     }
   }
 
-  // Write updated badges array to StudentProfile
+  // ---- Check anti-badge criteria ----
+  const newAntiBadges: string[] = [];
+  const activeDebuffs: any[] = getActiveDebuffs(profile);
+
+  for (const criteria of ANTI_BADGE_CRITERIA) {
+    if (!criteria.check({ xpLogs, badges: existingBadges, totalXP, profile }))
+      continue;
+
+    const existing = existingByType.get(criteria.badgeType);
+    if (existing) {
+      // Anti-badge already earned — increment count, refresh debuff
+      existing.count = (existing.count || 1) + 1;
+      existing.awardedAt = new Date().toISOString();
+      if (cohortId) existing.cohortId = cohortId;
+      // Refresh debuff duration
+      refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+    } else {
+      // First time earning this anti-badge
+      const antiBadge = {
+        badgeType: criteria.badgeType,
+        awardedAt: new Date().toISOString(),
+        cohortId: cohortId || null,
+        unitID: unitID || null,
+        count: 1,
+        isAnti: true,
+      };
+      existingBadges.push(antiBadge);
+      existingByType.set(criteria.badgeType, antiBadge);
+      newAntiBadges.push(criteria.badgeType);
+      // Apply debuff
+      applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+    }
+  }
+
+  // ---- Auto-redeem anti-badges whose conditions are now met ----
+  const redeemedBadges: string[] = [];
+  const badgesToRemove: Set<string> = new Set();
+
+  for (const badge of existingBadges) {
+    if (!badge.isAnti) continue;
+    if (!REDEMPTION_CONDITIONS[badge.badgeType]) continue;
+
+    const isRedeemed = evaluateRedemption(badge.badgeType, {
+      xpLogs,
+      profile,
+      badge,
+    });
+
+    if (isRedeemed) {
+      badgesToRemove.add(badge.badgeType);
+      redeemedBadges.push(badge.badgeType);
+      // Also remove the associated debuff
+      const debuffIdx = activeDebuffs.findIndex(
+        (d) => d.badgeType === badge.badgeType,
+      );
+      if (debuffIdx >= 0) activeDebuffs.splice(debuffIdx, 1);
+    }
+  }
+
+  // Remove redeemed anti-badges from the badges array
+  if (badgesToRemove.size > 0) {
+    for (let i = existingBadges.length - 1; i >= 0; i--) {
+      if (badgesToRemove.has(existingBadges[i].badgeType)) {
+        existingBadges.splice(i, 1);
+      }
+    }
+    // Also remove from the map
+    for (const bt of badgesToRemove) {
+      existingByType.delete(bt);
+    }
+    console.log(
+      `[gamification] Auto-redeemed ${redeemedBadges.length} anti-badges:`,
+      redeemedBadges,
+    );
+  }
+
+  // Apply streak freeze removal from new anti-badge debuffs
+  let freezesPenalty = 0;
+  for (const ab of newAntiBadges) {
+    const criteria = ANTI_BADGE_CRITERIA.find((c) => c.badgeType === ab);
+    if (criteria?.debuff.streakFreezesRemoved) {
+      freezesPenalty += criteria.debuff.streakFreezesRemoved;
+    }
+  }
+
+  // Write updated badges + debuffs to StudentProfile
+  const updateInput: any = {
+    id: profile.id,
+    badges: JSON.stringify(existingBadges),
+    activeDebuffs: JSON.stringify(activeDebuffs),
+    _version: profile._version,
+  };
+  if (freezesPenalty > 0) {
+    const currentFreezes = profile.freezesRemaining || 0;
+    updateInput.freezesRemaining = Math.max(0, currentFreezes - freezesPenalty);
+  }
+
   try {
     await gqlClient.graphql({
       query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          badges: JSON.stringify(existingBadges),
-          _version: profile._version,
-        },
-      },
+      variables: { input: updateInput },
     });
   } catch (err) {
     console.error(
@@ -654,7 +1318,13 @@ async function handleCheckBadges(
     );
   }
 
-  return { newBadges, updatedBadges, totalBadges: existingBadges.length };
+  return {
+    newBadges,
+    updatedBadges,
+    newAntiBadges,
+    redeemedBadges,
+    totalBadges: existingBadges.length,
+  };
 }
 
 // ============================================================================
@@ -953,7 +1623,7 @@ async function handleUpdateStudentMemory(
 
 const LIST_ALL_GRADES = `query ListGrades($nextToken: String) {
   listGrades(limit: 1000, nextToken: $nextToken) {
-    items { id owner accuracy complete data _version }
+    items { id owner accuracy complete data _version _lastChangedAt _deleted }
     nextToken
   }
 }`;
@@ -2040,7 +2710,7 @@ async function handleAdvanceSkillProgress(
   if (newStatus === "MASTERED") {
     // Get the skill's cohort to find all skills in this tree
     const { data: skillResult } = await gqlClient.graphql({
-      query: `query GetSkill($id: ID!) { getSkill(id: $id) { id cohortId } }`,
+      query: `query GetSkill($id: ID!) { getSkill(id: $id) { id cohortId _version _lastChangedAt _deleted } }`,
       variables: { id: skillId },
     });
     const cohortId = skillResult?.getSkill?.cohortId;
@@ -2396,7 +3066,7 @@ async function handleGenerateSkillTree(
     if (prereqIds.length > 0) {
       await gqlClient.graphql({
         query: `mutation UpdateSkill($input: UpdateSkillInput!) {
-          updateSkill(input: $input) { id prerequisites _version }
+          updateSkill(input: $input) { id prerequisites _version _lastChangedAt _deleted }
         }`,
         variables: {
           input: {
@@ -2691,5 +3361,310 @@ async function handleClaimStorybookBadges(
       newBadges.length > 0
         ? `Awarded ${newBadges.length} new badge(s): ${newBadges.join(", ")}`
         : "All badges already claimed",
+  };
+}
+
+// ============================================================================
+// applyBattleStakes — Applies consequences to all cohort members on battle failure
+// ============================================================================
+
+interface BattleStakesInput {
+  loseLevel: boolean;
+  loseXP: boolean;
+  xpLossAmount: number;
+  loseStreakFreeze: boolean;
+  resetStreak: boolean;
+  loseBadge: boolean;
+  loseBadgeByRarity: boolean;
+  badgeRarityTarget: string; // 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+  streakMissXPPenalty: boolean;
+  streakMissXPPerDay: number;
+  loseCosmetics: boolean;
+  cosmeticPenaltyDays: number;
+}
+
+// Badge rarity classification based on badge type difficulty
+const BADGE_RARITY_MAP: Record<string, string> = {
+  FIRST_SUBMISSION: "common",
+  QUICK_DRAW: "common",
+  GOOD_EYE: "uncommon",
+  TEAM_PLAYER: "uncommon",
+  CONSISTENT: "uncommon",
+  SHARPSHOOTER: "rare",
+  DEEP_THINKER: "rare",
+  DRILL_MASTER: "rare",
+  COMEBACK_KID: "rare",
+  PERFECTIONIST: "epic",
+  TOP_OF_CLASS: "epic",
+  STREAK_14: "epic",
+  STREAK_30: "legendary",
+  EASTER_EGG_HUNTER: "legendary",
+};
+
+const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
+
+// Cosmetic scramble options (avatar color is NOT affected)
+const SCRAMBLE_BORDERS = [
+  "dashed",
+  "dotted",
+  "double",
+  "ridge",
+  "groove",
+  "none",
+];
+const SCRAMBLE_FLAIRS = [
+  "🐛 Bug Collector",
+  "🪨 Pet Rock Owner",
+  "🧦 Odd Sock Enthusiast",
+  "🥔 Couch Potato",
+  "🦆 Rubber Duck Debugger",
+  "🌵 Prickly Personality",
+  "🍄 Fungi Specialist",
+  "🪣 Bucket Head",
+];
+const SCRAMBLE_NAME_EFFECTS = [
+  "reversed",
+  "uppercase",
+  "alternating",
+  "leetspeak",
+];
+
+async function handleApplyBattleStakes(
+  gqlClient: any,
+  args: { challengeId: string; cohortId: string },
+) {
+  const { challengeId, cohortId } = args;
+
+  // Fetch the challenge to get stakes
+  const { data: challengeResult } = await gqlClient.graphql({
+    query: LIST_ACTIVE_CHALLENGES_BY_COHORT,
+    variables: { cohortId },
+  });
+  const challenges = challengeResult?.listGroupChallengeByCohortId?.items || [];
+  const challenge = challenges.find(
+    (c: any) => c.id === challengeId && !c._deleted,
+  );
+  if (!challenge) {
+    throw new Error(`Challenge ${challengeId} not found in cohort ${cohortId}`);
+  }
+
+  // Parse stakes JSON
+  let stakes: BattleStakesInput;
+  try {
+    stakes = JSON.parse(challenge.stakes || "{}");
+  } catch {
+    throw new Error("Invalid stakes JSON on challenge");
+  }
+
+  // Check that the challenge actually failed (deadline passed, target not met)
+  if (challenge.currentXP >= challenge.targetXP) {
+    return { applied: false, reason: "Challenge was completed successfully" };
+  }
+
+  // Fetch all student profiles in this cohort
+  const { data: profilesResult } = await gqlClient.graphql({
+    query: LIST_PROFILES_BY_COHORT,
+    variables: { cohortId },
+  });
+  const profiles =
+    profilesResult?.listStudentProfileByCohortId?.items?.filter(
+      (p: any) => p && !p._deleted,
+    ) || [];
+
+  if (profiles.length === 0) {
+    return { applied: false, reason: "No student profiles found in cohort" };
+  }
+
+  const results: Array<{ studentId: string; consequences: string[] }> = [];
+
+  for (const profile of profiles) {
+    const consequences: string[] = [];
+    const updates: Record<string, any> = {
+      id: profile.id,
+      _version: profile._version,
+    };
+
+    // Lose a streak freeze
+    if (stakes.loseStreakFreeze) {
+      const freezesRemaining = profile.freezesRemaining || 0;
+      if (freezesRemaining > 0) {
+        updates.freezesRemaining = freezesRemaining - 1;
+        updates.freezesUsed = (profile.freezesUsed || 0) + 1;
+        consequences.push("Lost a streak freeze");
+      } else {
+        consequences.push("No streak freeze to lose (skipped)");
+      }
+    }
+
+    // Lose XP points
+    if (stakes.loseXP && stakes.xpLossAmount > 0) {
+      const currentXP = profile.totalXP || 0;
+      const newXP = Math.max(0, currentXP - stakes.xpLossAmount);
+      updates.totalXP = newXP;
+      updates.level = calculateLevel(newXP);
+      consequences.push(`Lost ${currentXP - newXP} XP`);
+    }
+
+    // Missed streaks cost XP — penalize per day of missed streak
+    if (stakes.streakMissXPPenalty && stakes.streakMissXPPerDay > 0) {
+      const lastActivity = profile.lastActivityDate;
+      if (lastActivity) {
+        const lastDate = new Date(lastActivity);
+        const today = new Date();
+        const missedDays = Math.max(
+          0,
+          Math.floor(
+            (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
+          ) - 1,
+        );
+        if (missedDays > 0) {
+          const penalty = missedDays * stakes.streakMissXPPerDay;
+          const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
+          const newXP = Math.max(0, currentXP - penalty);
+          updates.totalXP = newXP;
+          updates.level = calculateLevel(newXP);
+          consequences.push(
+            `Lost ${currentXP - newXP} XP for ${missedDays} missed streak day(s)`,
+          );
+        } else {
+          consequences.push("No missed streak days (skipped)");
+        }
+      }
+    }
+
+    // Lose a level (independent of XP loss — forces level down by 1)
+    if (stakes.loseLevel) {
+      const currentLevel = updates.level ?? profile.level ?? 1;
+      if (currentLevel > 1) {
+        updates.level = currentLevel - 1;
+        // Also adjust XP to match the top of the new level (prevent immediate re-level)
+        const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
+        if (
+          currentXP >=
+          (LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0)
+        ) {
+          const nextLevelThreshold =
+            LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0;
+          updates.totalXP = Math.min(currentXP, nextLevelThreshold - 1);
+        }
+        consequences.push(`Dropped to level ${updates.level}`);
+      } else {
+        consequences.push("Already at level 1 (skipped)");
+      }
+    }
+
+    // Reset streak
+    if (stakes.resetStreak) {
+      updates.currentStreak = 0;
+      consequences.push("Streak reset to 0");
+    }
+
+    // Lose most recent badge
+    if (stakes.loseBadge) {
+      try {
+        const badges: any[] = JSON.parse(profile.badges || "[]");
+        if (badges.length > 0) {
+          badges.sort(
+            (a: any, b: any) =>
+              new Date(b.awardedAt).getTime() - new Date(a.awardedAt).getTime(),
+          );
+          const removed = badges.shift();
+          updates.badges = JSON.stringify(badges);
+          consequences.push(`Lost badge: ${removed.badgeType}`);
+        } else {
+          consequences.push("No badges to lose (skipped)");
+        }
+      } catch {
+        consequences.push("Failed to parse badges (skipped)");
+      }
+    }
+
+    // Lose a badge of a specific rarity
+    if (stakes.loseBadgeByRarity && stakes.badgeRarityTarget) {
+      try {
+        const badges: any[] = updates.badges
+          ? JSON.parse(updates.badges)
+          : JSON.parse(profile.badges || "[]");
+        const targetRarity = stakes.badgeRarityTarget;
+        // Find badges matching the target rarity
+        const matchingIdx = badges.findIndex(
+          (b: any) =>
+            (BADGE_RARITY_MAP[b.badgeType] || "common") === targetRarity,
+        );
+        if (matchingIdx >= 0) {
+          const removed = badges.splice(matchingIdx, 1)[0];
+          updates.badges = JSON.stringify(badges);
+          consequences.push(`Lost ${targetRarity} badge: ${removed.badgeType}`);
+        } else {
+          consequences.push(`No ${targetRarity} badge to lose (skipped)`);
+        }
+      } catch {
+        consequences.push(
+          "Failed to parse badges for rarity removal (skipped)",
+        );
+      }
+    }
+
+    // Scramble cosmetics — mess with name display, border, and flair (NOT avatar color)
+    if (stakes.loseCosmetics && stakes.cosmeticPenaltyDays > 0) {
+      const randomBorder =
+        SCRAMBLE_BORDERS[Math.floor(Math.random() * SCRAMBLE_BORDERS.length)];
+      const randomFlair =
+        SCRAMBLE_FLAIRS[Math.floor(Math.random() * SCRAMBLE_FLAIRS.length)];
+      const randomNameEffect =
+        SCRAMBLE_NAME_EFFECTS[
+          Math.floor(Math.random() * SCRAMBLE_NAME_EFFECTS.length)
+        ];
+      const penaltyExpiry = new Date();
+      penaltyExpiry.setDate(
+        penaltyExpiry.getDate() + stakes.cosmeticPenaltyDays,
+      );
+      const cosmeticPenalty = {
+        active: true,
+        expiresAt: penaltyExpiry.toISOString(),
+        reason: "boss_battle_failure",
+        challengeId,
+        // Scrambled settings (avatar color untouched)
+        border: randomBorder,
+        flair: randomFlair,
+        nameEffect: randomNameEffect,
+      };
+      updates.cosmeticPenalty = JSON.stringify(cosmeticPenalty);
+      consequences.push(
+        `Cosmetics scrambled — flair: "${randomFlair}", border: ${randomBorder}, name: ${randomNameEffect} for ${stakes.cosmeticPenaltyDays} day(s)`,
+      );
+    }
+
+    // Apply updates if there are any real changes
+    const hasUpdates = Object.keys(updates).length > 2; // more than just id + _version
+    if (hasUpdates) {
+      updates.lastUpdated = new Date().toISOString();
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: { input: updates },
+      });
+    }
+
+    results.push({ studentId: profile.studentId, consequences });
+  }
+
+  // Mark the challenge as inactive (battle resolved)
+  await gqlClient.graphql({
+    query: UPDATE_CHALLENGE,
+    variables: {
+      input: {
+        id: challengeId,
+        active: false,
+        _version: challenge._version,
+      },
+    },
+  });
+
+  return {
+    applied: true,
+    challengeId,
+    cohortId,
+    studentsAffected: results.length,
+    results,
   };
 }

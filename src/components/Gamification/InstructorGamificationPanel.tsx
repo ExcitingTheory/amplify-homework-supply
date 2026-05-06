@@ -1,10 +1,11 @@
 /**
  * InstructorGamificationPanel — Admin UI for managing gamification features:
- * - Skill tree editor (add/remove/reorder skills)
+ * - Section selector (scopes all data by cohortId)
+ * - Skill tree editor (multi-field with unit linking)
  * - Campaign editor (narrative setting, stakes, chapter text)
  * - Guild management (create/edit guilds, assign students)
  * - Easter egg CRUD (create/edit/delete triggers)
- * - Boss battle parameters
+ * - Boss battle CRUD (create with progress display)
  *
  * Each section is a collapsible accordion panel.
  *
@@ -30,19 +31,44 @@ import ListItemText from '@mui/material/ListItemText'
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import Divider from '@mui/material/Divider'
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
+import CircularProgress from '@mui/material/CircularProgress'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import GroupsIcon from '@mui/icons-material/Groups'
 import SearchIcon from '@mui/icons-material/Search'
 import SportsKabaddiIcon from '@mui/icons-material/SportsKabaddi'
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import { SectionSelector, SectionOption } from './SectionSelector'
+import { SkillForm, SkillFormData, UnitOption } from './SkillForm'
+import { SkillTree, SkillNodeData } from './SkillTree'
+import { BossBattleForm, BossBattleFormData } from './BossBattleForm'
+import { BossBattleProgress, Contributor } from './BossBattleProgress'
+import { EasterEggForm, EasterEggFormData, EasterEggTriggerType } from './EasterEggForm'
+import { BadgeEditor, BadgeOverride, CustomBadge } from './BadgeEditor'
+import { ANTI_BADGE_REGISTRY, getAllAntiBadgeTypes, getAntiBadgeConfig } from './antiBadgeRegistry'
+import type { AntiBadgeConfig } from './antiBadgeRegistry'
+import { BadgeIcon } from './BadgeIcon'
+import { BADGE_REGISTRY, getAllBadgeTypes, getBadgeConfig } from './badgeRegistry'
+import { XPTunerDialog, XPTunerConfig } from './XPTunerDialog'
+import type { XPMultiplierConfig } from './XPTunerDialog'
+import { AvatarUnlockEditor } from './AvatarUnlockEditor'
+import FaceIcon from '@mui/icons-material/Face'
+import TuneIcon from '@mui/icons-material/Tune'
+import LockIcon from '@mui/icons-material/Lock'
+import ReportProblemIcon from '@mui/icons-material/ReportProblem'
+import LinearScaleIcon from '@mui/icons-material/LinearScale'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Slider from '@mui/material/Slider'
 
 // ============================================================================
 // Types
@@ -54,6 +80,8 @@ export interface SkillEntry {
   description?: string
   xpReward?: number
   prerequisites?: string[]
+  unitIds?: string[]
+  minimumAccuracy?: number
 }
 
 export interface CampaignEntry {
@@ -61,6 +89,7 @@ export interface CampaignEntry {
   title: string
   setting?: string
   stakes?: string
+  narrative?: string
 }
 
 export interface GuildEntry {
@@ -71,23 +100,52 @@ export interface GuildEntry {
 
 export interface EasterEggEntry {
   id: string
-  type: 'CLICK' | 'KEYWORD' | 'TIME' | 'INTERACTION'
+  type: EasterEggTriggerType
   message: string
   xpReward: number
+  /** KEYWORD trigger value */
   keyword?: string
+  /** SCHEDULE: JSON with start/end ISO dates */
+  triggerValue?: string
+  /** SECRET_LINK: unit ID */
+  secretLinkUnitId?: string
+  /** ACHIEVEMENT: rule string like "accuracy>=95" */
+  achievementRule?: string
 }
 
 export interface BossEntry {
   id: string
   title: string
-  totalHP: number
-  phaseCount: number
+  targetXP: number
+  currentXP: number
   active: boolean
+  startDate?: string
+  deadline?: string
+  bonusMultiplier?: number
+  setting?: string
+  stakes?: string
+  contributors?: Contributor[]
+}
+
+/** Per-unit lock requirements (set by instructor) */
+export interface UnitLockRequirement {
+  /** Minimum XP needed to unlock (0 = no XP requirement) */
+  requiredXP?: number
+  /** Badge type that must be earned to unlock */
+  requiredBadgeId?: string
+  /** Module completion percentage needed (0–100, 0 = none) */
+  requiredModuleCompletion?: number
 }
 
 export interface InstructorGamificationPanelProps {
-  /** Existing sections (for guild creation) */
-  sections?: Array<{ id: string; name: string }>
+  /** Available sections for scoping */
+  sections?: SectionOption[]
+  /** Currently selected section ID */
+  selectedSectionId?: string | null
+  /** Section change handler */
+  onSectionChange?: (sectionId: string | null) => void
+  /** Available units for skill linking (from section assignments) */
+  availableUnits?: UnitOption[]
   /** Existing skills */
   skills?: SkillEntry[]
   /** Existing campaigns */
@@ -99,16 +157,52 @@ export interface InstructorGamificationPanelProps {
   /** Existing boss battles */
   bossBattles?: BossEntry[]
   /** Callbacks for CRUD operations */
-  onAddSkill?: (skill: Omit<SkillEntry, 'id'>) => void
+  onAddSkill?: (skill: SkillFormData) => void
   onDeleteSkill?: (skillId: string) => void
+  onSkillClick?: (skillId: string) => void
+  onPrerequisiteChange?: (skillId: string, prerequisites: string[]) => void
+  onGenerateSkillTree?: (unitId: string) => void
   onSaveCampaign?: (campaign: Omit<CampaignEntry, 'id'> & { id?: string }) => void
   onDeleteCampaign?: (campaignId: string) => void
+  /** Generate campaign narrative via AI from a title prompt */
+  onGenerateCampaign?: (title: string) => Promise<{ setting: string; stakes: string } | null>
   onCreateGuild?: (name: string, cohortId: string) => void
   onDeleteGuild?: (guildId: string) => void
-  onAddEasterEgg?: (egg: Omit<EasterEggEntry, 'id'>) => void
+  onAddEasterEgg?: (egg: EasterEggFormData) => void
   onDeleteEasterEgg?: (eggId: string) => void
-  onAddBoss?: (boss: Omit<BossEntry, 'id'>) => void
+  onAddBoss?: (boss: BossBattleFormData) => void
   onDeleteBoss?: (bossId: string) => void
+  onToggleBossActive?: (bossId: string, active: boolean) => void
+  /** Current badge overrides for hardcoded badges */
+  badgeOverrides?: BadgeOverride[]
+  /** Custom badges created by the instructor */
+  customBadges?: CustomBadge[]
+  /** Called when a hardcoded badge's criteria is changed */
+  onBadgeOverrideChange?: (override: BadgeOverride) => void
+  /** Called when a hardcoded badge's override is reset to defaults */
+  onBadgeOverrideReset?: (badgeType: string) => void
+  /** Called when a new custom badge is created */
+  onAddCustomBadge?: (badge: Omit<CustomBadge, 'id'>) => void
+  /** Called when a custom badge is deleted */
+  onDeleteCustomBadge?: (badgeId: string) => void
+  /** Current XP tuner config for the selected section */
+  xpConfig?: XPTunerConfig
+  /** Called when instructor saves new XP config */
+  onSaveXPConfig?: (config: XPTunerConfig) => void
+  /** @deprecated Use xpConfig instead */
+  xpMultipliers?: XPMultiplierConfig
+  /** @deprecated Use onSaveXPConfig instead */
+  onSaveXPMultipliers?: (config: XPMultiplierConfig) => void
+  /** Whether linear lock ordering is enabled for this section */
+  linearLockEnabled?: boolean
+  /** Toggle linear lock on/off */
+  onToggleLinearLock?: (enabled: boolean) => void
+  /** Per-unit lock requirements (keyed by unit ID) */
+  unitLockRequirements?: Record<string, UnitLockRequirement>
+  /** Called when a unit's lock requirements are updated */
+  onUpdateUnitLock?: (unitId: string, requirements: UnitLockRequirement) => void
+  /** Called when a unit's lock requirements are cleared */
+  onClearUnitLock?: (unitId: string) => void
 }
 
 // ============================================================================
@@ -117,6 +211,9 @@ export interface InstructorGamificationPanelProps {
 
 export function InstructorGamificationPanel({
   sections = [],
+  selectedSectionId,
+  onSectionChange,
+  availableUnits = [],
   skills = [],
   campaigns = [],
   guilds = [],
@@ -124,17 +221,36 @@ export function InstructorGamificationPanel({
   bossBattles = [],
   onAddSkill,
   onDeleteSkill,
+  onSkillClick,
+  onPrerequisiteChange,
+  onGenerateSkillTree,
   onSaveCampaign,
   onDeleteCampaign,
+  onGenerateCampaign,
   onCreateGuild,
   onDeleteGuild,
   onAddEasterEgg,
   onDeleteEasterEgg,
   onAddBoss,
   onDeleteBoss,
+  onToggleBossActive,
+  badgeOverrides = [],
+  customBadges = [],
+  onBadgeOverrideChange,
+  onBadgeOverrideReset,
+  onAddCustomBadge,
+  onDeleteCustomBadge,
+  xpConfig,
+  onSaveXPConfig,
+  xpMultipliers,
+  onSaveXPMultipliers,
+  linearLockEnabled,
+  onToggleLinearLock,
+  unitLockRequirements = {},
+  onUpdateUnitLock,
+  onClearUnitLock,
 }: InstructorGamificationPanelProps) {
   // Local form state for inline creation
-  const [newSkillTitle, setNewSkillTitle] = useState('')
   const [newGuildName, setNewGuildName] = useState('')
   const [selectedGuildSection, setSelectedGuildSection] = useState<{ id: string; name?: string; description?: string } | null>(null)
   const guildSectionFilter = React.useMemo(
@@ -143,12 +259,35 @@ export function InstructorGamificationPanel({
     }),
     []
   )
-  const [newEggMessage, setNewEggMessage] = useState('')
-  const [newEggType, setNewEggType] = useState<EasterEggEntry['type']>('CLICK')
-  const [newEggXP, setNewEggXP] = useState(50)
+  const [xpTunerOpen, setXpTunerOpen] = useState(false)
   const [campaignTitle, setCampaignTitle] = useState('')
   const [campaignSetting, setCampaignSetting] = useState('')
   const [campaignStakes, setCampaignStakes] = useState('')
+  const [campaignGenerating, setCampaignGenerating] = useState(false)
+  const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null)
+
+  // Build skill options for prerequisites (exclude self)
+  const skillOptions = React.useMemo(
+    () => skills.map((s) => ({ id: s.id, title: s.title })),
+    [skills]
+  )
+
+  // Build badge options from registry + custom badges for typeahead
+  const badgeOptions = React.useMemo(() => {
+    const opts: Array<{ id: string; label: string; group: string }> = []
+    getAllBadgeTypes().forEach((key) => {
+      const cfg = getBadgeConfig(key)
+      opts.push({ id: key, label: cfg.name || key, group: 'Badges' })
+    })
+    getAllAntiBadgeTypes().forEach((key) => {
+      const cfg = getAntiBadgeConfig(key)
+      if (cfg) opts.push({ id: key, label: cfg.name || key, group: 'Anti-Badges' })
+    })
+    customBadges.forEach((cb) => {
+      opts.push({ id: cb.id, label: cb.name || cb.id, group: 'Custom' })
+    })
+    return opts
+  }, [customBadges])
 
   return (
     <Box sx={{ maxWidth: 800 }}>
@@ -156,40 +295,148 @@ export function InstructorGamificationPanel({
         Gamification Admin
       </Typography>
 
+      {/* ---- Section Selector ---- */}
+      {onSectionChange && (
+        <SectionSelector
+          sections={sections}
+          selectedSectionId={selectedSectionId}
+          onSectionChange={onSectionChange}
+        />
+      )}
+
+      {/* ---- XP Tuner ---- */}
+      {(onSaveXPConfig || onSaveXPMultipliers) && (
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <TuneIcon sx={{ mr: 1 }} />
+            <Typography fontWeight={600}>XP Tuner</Typography>
+            {(xpConfig || xpMultipliers) && (() => {
+              const cfg = xpConfig || xpMultipliers || {}
+              const count = Object.keys(cfg).length
+              return count > 0 ? (
+                <Chip
+                  label={`${count} custom`}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+                />
+              ) : null
+            })()}
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Scale XP rewards, set daily/weekly caps, or disable XP for this section.
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<TuneIcon />}
+              onClick={() => setXpTunerOpen(true)}
+            >
+              Open XP Tuner
+            </Button>
+            <XPTunerDialog
+              open={xpTunerOpen}
+              onClose={() => setXpTunerOpen(false)}
+              config={xpConfig || xpMultipliers || {}}
+              onSave={onSaveXPConfig || onSaveXPMultipliers!}
+              sectionName={sections.find((s) => s.id === selectedSectionId)?.name}
+            />
+          </AccordionDetails>
+        </Accordion>
+      )}
+
       {/* ---- Skill Tree Editor ---- */}
+      {/* ---- Avatar Unlock Editor ---- */}
+      {onSaveXPConfig && (
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <FaceIcon sx={{ mr: 1 }} />
+            <Typography fontWeight={600}>Avatar Style Unlocks</Typography>
+            {xpConfig?.avatarUnlocks?.unlocks?.length ? (
+              <Chip
+                label={`${xpConfig.avatarUnlocks.unlocks.length} styles`}
+                size="small"
+                color="secondary"
+                variant="outlined"
+                sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+              />
+            ) : null}
+          </AccordionSummary>
+          <AccordionDetails>
+            <AvatarUnlockEditor
+              config={xpConfig?.avatarUnlocks}
+              sectionName={sections.find((s) => s.id === selectedSectionId)?.name}
+              onSave={(avatarUnlocks) => {
+                onSaveXPConfig({ ...xpConfig, avatarUnlocks })
+              }}
+            />
+          </AccordionDetails>
+        </Accordion>
+      )}
+
       <Accordion defaultExpanded={false}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <AccountTreeIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>Skill Tree ({skills.length} skills)</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-            <TextField
-              size="small"
-              label="Skill title"
-              value={newSkillTitle}
-              onChange={(e) => setNewSkillTitle(e.target.value)}
-              sx={{ flex: 1 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              disabled={!newSkillTitle.trim()}
-              onClick={() => {
-                onAddSkill?.({ title: newSkillTitle.trim() })
-                setNewSkillTitle('')
-              }}
-            >
-              Add
-            </Button>
-          </Stack>
+          <SkillForm
+            availableUnits={availableUnits}
+            availableSkills={skillOptions}
+            onSubmit={(data) => onAddSkill?.(data)}
+            onGenerateFromUnit={onGenerateSkillTree}
+          />
+          <Divider sx={{ my: 2 }} />
+
+          {/* Visual skill tree (React Flow DAG) */}
+          {skills.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                Visual Layout
+              </Typography>
+              <SkillTree
+                skills={skills.map((s) => ({
+                  skillId: s.id,
+                  title: s.title,
+                  description: s.description,
+                  status: 'AVAILABLE' as const,
+                  xpReward: s.xpReward,
+                  prerequisites: s.prerequisites,
+                }))}
+                onSkillClick={onSkillClick}
+                onPrerequisiteChange={onPrerequisiteChange}
+                editable={!!onPrerequisiteChange}
+                height={Math.max(300, skills.length * 60)}
+                cohortId={selectedSectionId || undefined}
+                canGenerate={!!onGenerateSkillTree}
+              />
+            </Box>
+          )}
+
+          {/* Flat list for editing/deleting */}
+          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+            All Skills
+          </Typography>
           <List dense>
             {skills.map((skill) => (
               <ListItem key={skill.id} divider>
                 <ListItemText
                   primary={skill.title}
-                  secondary={skill.description || `${skill.xpReward || 0} XP`}
+                  secondaryTypographyProps={{ component: 'div' }}
+                  secondary={
+                    <Stack direction="row" spacing={0.5} component="span" flexWrap="wrap">
+                      {skill.xpReward ? (
+                        <Chip label={`${skill.xpReward} XP`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      ) : null}
+                      {skill.unitIds && skill.unitIds.length > 0 && (
+                        <Chip label={`${skill.unitIds.length} units`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      )}
+                      {skill.minimumAccuracy != null && (
+                        <Chip label={`≥${skill.minimumAccuracy}%`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      )}
+                    </Stack>
+                  }
                 />
                 <ListItemSecondaryAction>
                   <IconButton edge="end" size="small" onClick={() => onDeleteSkill?.(skill.id)}>
@@ -220,57 +467,134 @@ export function InstructorGamificationPanel({
               label="Campaign title"
               value={campaignTitle}
               onChange={(e) => setCampaignTitle(e.target.value)}
+              placeholder="e.g. The Quest for Lost Vocabulary"
               fullWidth
             />
             <TextField
               size="small"
-              label="Setting"
+              label="Setting (narrative world)"
               value={campaignSetting}
               onChange={(e) => setCampaignSetting(e.target.value)}
+              placeholder="Describe the world students inhabit..."
               multiline
               rows={2}
               fullWidth
+              helperText="The fictional world or scenario that frames the learning journey"
             />
             <TextField
               size="small"
-              label="Stakes"
+              label="Stakes (rhetorical consequences)"
               value={campaignStakes}
               onChange={(e) => setCampaignStakes(e.target.value)}
+              placeholder="What happens if the quest fails..."
               multiline
               rows={2}
               fullWidth
+              helperText="In-world narrative tension — not real consequences, but motivating story stakes"
             />
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              disabled={!campaignTitle.trim()}
-              onClick={() => {
-                onSaveCampaign?.({
-                  title: campaignTitle.trim(),
-                  setting: campaignSetting.trim() || undefined,
-                  stakes: campaignStakes.trim() || undefined,
-                })
-                setCampaignTitle('')
-                setCampaignSetting('')
-                setCampaignStakes('')
-              }}
-            >
-              Save Campaign
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                disabled={!campaignTitle.trim()}
+                onClick={() => {
+                  onSaveCampaign?.({
+                    title: campaignTitle.trim(),
+                    setting: campaignSetting.trim() || undefined,
+                    stakes: campaignStakes.trim() || undefined,
+                  })
+                  setCampaignTitle('')
+                  setCampaignSetting('')
+                  setCampaignStakes('')
+                }}
+              >
+                Save Campaign
+              </Button>
+              {onGenerateCampaign && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={campaignGenerating ? <CircularProgress size={16} /> : <AutoFixHighIcon />}
+                  disabled={!campaignTitle.trim() || campaignGenerating}
+                  onClick={async () => {
+                    setCampaignGenerating(true)
+                    try {
+                      const result = await onGenerateCampaign(campaignTitle.trim())
+                      if (result) {
+                        setCampaignSetting(result.setting)
+                        setCampaignStakes(result.stakes)
+                      }
+                    } finally {
+                      setCampaignGenerating(false)
+                    }
+                  }}
+                >
+                  {campaignGenerating ? 'Generating…' : 'Generate with AI'}
+                </Button>
+              )}
+            </Stack>
           </Stack>
-          <List dense>
-            {campaigns.map((c) => (
-              <ListItem key={c.id} divider>
-                <ListItemText primary={c.title} secondary={c.setting?.slice(0, 60)} />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteCampaign?.(c.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+
+          {/* Narrative display for existing campaigns */}
+          {campaigns.map((c) => (
+            <Card key={c.id} variant="outlined" sx={{ mb: 1 }}>
+              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {c.title}
+                  </Typography>
+                  <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExpandedCampaignId(expandedCampaignId === c.id ? null : c.id)}
+                      aria-label={expandedCampaignId === c.id ? 'Collapse narrative' : 'Expand narrative'}
+                    >
+                      <ExpandMoreIcon
+                        fontSize="small"
+                        sx={{
+                          transform: expandedCampaignId === c.id ? 'rotate(180deg)' : 'none',
+                          transition: 'transform 0.2s',
+                        }}
+                      />
+                    </IconButton>
+                    <IconButton edge="end" size="small" onClick={() => onDeleteCampaign?.(c.id)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                </Stack>
+                {expandedCampaignId === c.id && (
+                  <Box sx={{ mt: 1.5 }}>
+                    {c.setting && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                          Setting
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.25, fontStyle: 'italic' }}>
+                          {c.setting}
+                        </Typography>
+                      </Box>
+                    )}
+                    {c.stakes && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                          Stakes
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.25, fontStyle: 'italic' }}>
+                          {c.stakes}
+                        </Typography>
+                      </Box>
+                    )}
+                    {!c.setting && !c.stakes && (
+                      <Typography variant="body2" color="text.secondary">
+                        No narrative generated yet. Edit or generate one above.
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </AccordionDetails>
       </Accordion>
 
@@ -355,64 +679,27 @@ export function InstructorGamificationPanel({
           <Typography fontWeight={600}>Easter Eggs ({easterEggs.length})</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack spacing={1} sx={{ mb: 2 }}>
-            <Stack direction="row" spacing={1}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Type</InputLabel>
-                <Select
-                  value={newEggType}
-                  label="Type"
-                  onChange={(e) => setNewEggType(e.target.value as EasterEggEntry['type'])}
-                >
-                  <MenuItem value="CLICK">Click</MenuItem>
-                  <MenuItem value="KEYWORD">Keyword</MenuItem>
-                  <MenuItem value="TIME">Time</MenuItem>
-                  <MenuItem value="INTERACTION">Interaction</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                size="small"
-                label="Message"
-                value={newEggMessage}
-                onChange={(e) => setNewEggMessage(e.target.value)}
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                size="small"
-                label="XP"
-                type="number"
-                value={newEggXP}
-                onChange={(e) => setNewEggXP(Number(e.target.value))}
-                sx={{ width: 80 }}
-              />
-            </Stack>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              disabled={!newEggMessage.trim()}
-              onClick={() => {
-                onAddEasterEgg?.({
-                  type: newEggType,
-                  message: newEggMessage.trim(),
-                  xpReward: newEggXP,
-                })
-                setNewEggMessage('')
-                setNewEggXP(50)
-              }}
-            >
-              Add Easter Egg
-            </Button>
-          </Stack>
+          <EasterEggForm
+            onSubmit={(data) => onAddEasterEgg?.(data)}
+            availableUnits={availableUnits}
+          />
+          <Divider sx={{ my: 2 }} />
           <List dense>
             {easterEggs.map((egg) => (
               <ListItem key={egg.id} divider>
                 <ListItemText
                   primary={egg.message}
+                  secondaryTypographyProps={{ component: 'div' }}
                   secondary={
-                    <Stack direction="row" spacing={0.5} component="span">
-                      <Chip label={egg.type} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                    <Stack direction="row" spacing={0.5} component="span" flexWrap="wrap">
+                      <Chip label={egg.type} size="small" color="secondary" sx={{ height: 18, fontSize: '0.65rem' }} />
                       <Chip label={`${egg.xpReward} XP`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      {egg.keyword && (
+                        <Chip label={`"${egg.keyword}"`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      )}
+                      {egg.achievementRule && (
+                        <Chip label={egg.achievementRule} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                      )}
                     </Stack>
                   }
                 />
@@ -427,6 +714,143 @@ export function InstructorGamificationPanel({
         </AccordionDetails>
       </Accordion>
 
+      {/* ---- Badge Customization ---- */}
+      <Accordion defaultExpanded={false}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <EmojiEventsIcon sx={{ mr: 1 }} />
+          <Typography fontWeight={600}>
+            Badges ({customBadges.length} custom, {badgeOverrides.length} modified)
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <BadgeEditor
+            overrides={badgeOverrides}
+            customBadges={customBadges}
+            onOverrideChange={onBadgeOverrideChange}
+            onOverrideReset={onBadgeOverrideReset}
+            onAddCustomBadge={onAddCustomBadge}
+            onDeleteCustomBadge={onDeleteCustomBadge}
+          />
+        </AccordionDetails>
+      </Accordion>
+
+      {/* ---- Anti-Badges ---- */}
+      <Accordion defaultExpanded={false}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <ReportProblemIcon sx={{ mr: 1, color: 'error.main' }} />
+          <Typography fontWeight={600}>
+            Anti-Badges
+            <Chip
+              label={`${getAllAntiBadgeTypes().length} badges`}
+              size="small"
+              color="error"
+              variant="outlined"
+              sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+            />
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Sardonic anti-badges are awarded automatically for dubious achievements.
+            Each comes with a temporary debuff — a whimsical penalty that makes earning them memorable.
+            Anti-badges appear on student profiles alongside regular badges.
+          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+              gap: 1.5,
+            }}
+          >
+            {getAllAntiBadgeTypes().map((badgeType) => {
+              const config = getAntiBadgeConfig(badgeType)
+              if (!config) return null
+              return (
+                <Card key={badgeType} variant="outlined" sx={{ borderColor: 'error.light' }}>
+                  <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                      <Box sx={{ flexShrink: 0 }}>
+                        <BadgeIcon config={config} size={44} earned animate={false} drawIcon={false} />
+                      </Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="subtitle2" fontWeight={700} noWrap>
+                          {config.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3, mb: 0.5 }}>
+                          {config.description}
+                        </Typography>
+                        {config.debuff.shameText && (
+                          <Typography variant="caption" fontStyle="italic" color="error" sx={{ display: 'block', lineHeight: 1.3, mb: 0.5, opacity: 0.8 }}>
+                            &ldquo;{config.debuff.shameText}&rdquo;
+                          </Typography>
+                        )}
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                          {config.debuff.xpMultiplier != null && (
+                            <Chip
+                              label={`XP ×${config.debuff.xpMultiplier}`}
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                          {config.debuff.temporaryTitle && (
+                            <Chip
+                              label={`"${config.debuff.temporaryTitle}"`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                          {config.debuff.streakFreezesRemoved != null && (
+                            <Chip
+                              label={`-${config.debuff.streakFreezesRemoved} freeze`}
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                          {config.debuff.hideFromLeaderboard && (
+                            <Chip
+                              label="Hidden from LB"
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                          {config.debuff.extraDrills != null && (
+                            <Chip
+                              label={`+${config.debuff.extraDrills} drills`}
+                              size="small"
+                              color="info"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                          {config.redeemable && (
+                            <Chip
+                              label={config.redemptionCondition
+                                ? `Auto: ${config.redemptionCondition.type.replace(/_/g, ' ').toLowerCase()}${config.redemptionCondition.count ? ` (${config.redemptionCondition.count})` : ''}${config.redemptionCondition.percent ? ` (${config.redemptionCondition.percent}%)` : ''}`
+                                : 'Redeemable'}
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '0.6rem' }}
+                            />
+                          )}
+                        </Stack>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
       {/* ---- Boss Battle Parameters ---- */}
       <Accordion defaultExpanded={false}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -434,29 +858,284 @@ export function InstructorGamificationPanel({
           <Typography fontWeight={600}>Boss Battles ({bossBattles.length})</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <List dense>
-            {bossBattles.map((boss) => (
-              <ListItem key={boss.id} divider>
-                <ListItemText
-                  primary={boss.title}
-                  secondary={`HP: ${boss.totalHP.toLocaleString()} | ${boss.phaseCount} phases | ${boss.active ? 'Active' : 'Inactive'}`}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteBoss?.(boss.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-            {bossBattles.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                No boss battles configured.
-              </Typography>
-            )}
-          </List>
+          <BossBattleForm onSubmit={(data) => onAddBoss?.(data)} />
+          {bossBattles.length > 0 && <Divider sx={{ my: 2 }} />}
+          {bossBattles.map((boss) => (
+            <BossBattleProgress
+              key={boss.id}
+              id={boss.id}
+              title={boss.title}
+              currentXP={boss.currentXP}
+              targetXP={boss.targetXP}
+              active={boss.active}
+              startDate={boss.startDate}
+              deadline={boss.deadline}
+              bonusMultiplier={boss.bonusMultiplier}
+              setting={boss.setting}
+              stakes={boss.stakes}
+              contributors={boss.contributors}
+              onToggleActive={onToggleBossActive}
+              onDelete={onDeleteBoss}
+            />
+          ))}
+          {bossBattles.length === 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+              No boss battles configured. Create one above.
+            </Typography>
+          )}
         </AccordionDetails>
       </Accordion>
+
+      {/* ---- Unit Progression & Lock Configuration ---- */}
+      {(onToggleLinearLock || onUpdateUnitLock) && (
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <LockIcon sx={{ mr: 1 }} />
+            <Typography fontWeight={600}>
+              Unit Progression
+              {linearLockEnabled && (
+                <Chip label="Linear" size="small" color="info" variant="outlined" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
+              )}
+              {Object.keys(unitLockRequirements).length > 0 && (
+                <Chip label={`${Object.keys(unitLockRequirements).length} gated`} size="small" color="warning" variant="outlined" sx={{ ml: 0.5, height: 18, fontSize: '0.6rem' }} />
+              )}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Control how students progress through units. Choose sequential (linear) ordering,
+              skill-tree-based ordering, or set per-unit requirements like XP gates and badge requirements.
+            </Typography>
+
+            {/* ---- Progression Mode ---- */}
+            {onToggleLinearLock && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                  Progression Mode
+                </Typography>
+                <Stack spacing={1}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={!!linearLockEnabled}
+                        onChange={(_, checked) => onToggleLinearLock(checked)}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <LinearScaleIcon fontSize="small" />
+                          <Typography variant="body2" fontWeight={600}>Linear Lock Order</Typography>
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                          Students must complete each unit in due-date order before the next becomes available.
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={skills.length > 0}
+                        disabled
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <AccountTreeIcon fontSize="small" />
+                          <Typography variant="body2" fontWeight={600}>Skill Tree Order</Typography>
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                          {skills.length > 0
+                            ? `${skills.length} skills configured — manage in the Skill Tree section above.`
+                            : 'Create skills in the Skill Tree section above to enable branching progression.'}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </Stack>
+                <Divider sx={{ mt: 2 }} />
+              </Box>
+            )}
+
+            {/* ---- Per-Unit Lock Requirements ---- */}
+            {onUpdateUnitLock && availableUnits.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                  Per-Unit Gate Requirements
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  Set XP, badge, or completion requirements that must be met before a student can access each unit.
+                  These work alongside linear/skill-tree ordering.
+                </Typography>
+                <Stack spacing={1.5}>
+                  {availableUnits.map((unit) => {
+                    const req = unitLockRequirements[unit.id] || {}
+                    const hasReq = (req.requiredXP && req.requiredXP > 0) ||
+                      req.requiredBadgeId ||
+                      (req.requiredModuleCompletion && req.requiredModuleCompletion > 0)
+                    return (
+                      <UnitLockRow
+                        key={unit.id}
+                        unitId={unit.id}
+                        unitName={unit.name || unit.id}
+                        requirement={req}
+                        onUpdate={(r) => onUpdateUnitLock(unit.id, r)}
+                        onClear={onClearUnitLock ? () => onClearUnitLock(unit.id) : undefined}
+                        hasReq={!!hasReq}
+                        badgeOptions={badgeOptions}
+                      />
+                    )
+                  })}
+                </Stack>
+              </Box>
+            )}
+            {onUpdateUnitLock && availableUnits.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+                No units assigned to this section. Assign units first to configure lock requirements.
+              </Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
     </Box>
+  )
+}
+
+// ============================================================================
+// Sub-component: UnitLockRow
+// ============================================================================
+
+function UnitLockRow({
+  unitId,
+  unitName,
+  requirement,
+  onUpdate,
+  onClear,
+  hasReq,
+  badgeOptions = [],
+}: {
+  unitId: string
+  unitName: string
+  requirement: UnitLockRequirement
+  onUpdate: (req: UnitLockRequirement) => void
+  onClear?: () => void
+  hasReq: boolean
+  badgeOptions?: Array<{ id: string; label: string; group: string }>
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        borderColor: hasReq ? 'warning.main' : 'divider',
+        borderWidth: hasReq ? 1.5 : 1,
+      }}
+    >
+      <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <LockIcon fontSize="small" color={hasReq ? 'warning' : 'disabled'} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle2" fontWeight={600} noWrap>
+              {unitName}
+            </Typography>
+            {hasReq && (
+              <Stack direction="row" spacing={0.5}>
+                {requirement.requiredXP ? (
+                  <Chip label={`${requirement.requiredXP} XP`} size="small" color="primary" sx={{ height: 18, fontSize: '0.6rem' }} />
+                ) : null}
+                {requirement.requiredBadgeId ? (
+                  <Chip label={badgeOptions?.find((b) => b.id === requirement.requiredBadgeId)?.label || requirement.requiredBadgeId} size="small" color="secondary" sx={{ height: 18, fontSize: '0.6rem' }} />
+                ) : null}
+                {requirement.requiredModuleCompletion ? (
+                  <Chip label={`${requirement.requiredModuleCompletion}% complete`} size="small" color="info" sx={{ height: 18, fontSize: '0.6rem' }} />
+                ) : null}
+              </Stack>
+            )}
+          </Box>
+          {hasReq && onClear && (
+            <IconButton size="small" onClick={onClear}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+          <IconButton size="small" onClick={() => setExpanded(!expanded)}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+        {expanded && (
+          <Box sx={{ mt: 1.5 }}>
+            <Divider sx={{ mb: 1.5 }} />
+            <Stack spacing={1.5}>
+              <Box>
+                <Typography variant="caption" fontWeight={600} color="text.secondary">
+                  Required XP: {requirement.requiredXP || 0}
+                </Typography>
+                <Slider
+                  size="small"
+                  value={requirement.requiredXP || 0}
+                  onChange={(_, val) => onUpdate({ ...requirement, requiredXP: val as number })}
+                  min={0}
+                  max={5000}
+                  step={50}
+                  valueLabelDisplay="auto"
+                  marks={[
+                    { value: 0, label: '0' },
+                    { value: 500, label: '500' },
+                    { value: 1000, label: '1K' },
+                    { value: 2500, label: '2.5K' },
+                    { value: 5000, label: '5K' },
+                  ]}
+                  sx={{ '& .MuiSlider-markLabel': { fontSize: '0.6rem' } }}
+                />
+              </Box>
+              <Autocomplete
+                size="small"
+                options={badgeOptions}
+                groupBy={(option) => option.group}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+                value={badgeOptions.find((b) => b.id === requirement.requiredBadgeId) || null}
+                onChange={(_, newValue) => {
+                  onUpdate({ ...requirement, requiredBadgeId: newValue?.id || undefined })
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Required Badge"
+                    placeholder="Search badges..."
+                    helperText="Badge that must be earned to unlock this unit"
+                  />
+                )}
+                fullWidth
+              />
+              <Box>
+                <Typography variant="caption" fontWeight={600} color="text.secondary">
+                  Required Module Completion: {requirement.requiredModuleCompletion || 0}%
+                </Typography>
+                <Slider
+                  size="small"
+                  value={requirement.requiredModuleCompletion || 0}
+                  onChange={(_, val) => onUpdate({ ...requirement, requiredModuleCompletion: val as number })}
+                  min={0}
+                  max={100}
+                  step={5}
+                  valueLabelDisplay="auto"
+                  valueLabelFormat={(v) => `${v}%`}
+                  marks={[
+                    { value: 0, label: '0%' },
+                    { value: 50, label: '50%' },
+                    { value: 100, label: '100%' },
+                  ]}
+                  sx={{ '& .MuiSlider-markLabel': { fontSize: '0.6rem' } }}
+                />
+              </Box>
+            </Stack>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

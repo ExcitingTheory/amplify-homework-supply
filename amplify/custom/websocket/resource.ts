@@ -1,13 +1,12 @@
-import { defineFunction } from '@aws-amplify/backend';
-import { Construct } from 'constructs';
-import { Stack, RemovalPolicy } from 'aws-cdk-lib';
-import { Table, AttributeType, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
-import { WebSocketApi, WebSocketStage } from 'aws-cdk-lib/aws-apigatewayv2';
-import { WebSocketLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { ITable } from 'aws-cdk-lib/aws-dynamodb';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
-
+import { defineFunction } from "@aws-amplify/backend";
+import { Construct } from "constructs";
+import { Stack, RemovalPolicy } from "aws-cdk-lib";
+import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
+import { WebSocketApi, WebSocketStage } from "aws-cdk-lib/aws-apigatewayv2";
+import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { ITable } from "aws-cdk-lib/aws-dynamodb";
+import { IFunction } from "aws-cdk-lib/aws-lambda";
 
 export interface WebSocketApiProps {
   unitTable: ITable;
@@ -15,16 +14,15 @@ export interface WebSocketApiProps {
   websocketLambda: IFunction;
 }
 
-
 export const websocketHandler = defineFunction({
   timeoutSeconds: 30,
   memoryMB: 256,
-  resourceGroupName: 'data',  // Keep in data stack with WebSocket construct
+  resourceGroupName: "data", // Keep in data stack with WebSocket construct
 });
 
 /**
  * WebSocket API for real-time Yjs collaboration
- * 
+ *
  * Creates:
  * - WebSocket API Gateway with $connect, $disconnect, $default routes
  * - DynamoDB table for connection tracking with UnitIdIndex GSI
@@ -42,23 +40,23 @@ export class WebSocketApiConstruct extends Construct {
 
     // DynamoDB table for WebSocket connections
     // Tracks which connections are editing which units
-    this.connectionsTable = new Table(this, 'WebSocketConnections', {
+    this.connectionsTable = new Table(this, "WebSocketConnections", {
       partitionKey: {
-        name: 'connectionId',
+        name: "connectionId",
         type: AttributeType.STRING,
       },
       // Let CDK auto-generate table name to avoid conflicts
       // tableName: 'WebSocketConnections',
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY, // Use RETAIN for production
-      timeToLiveAttribute: 'ttl', // Auto-cleanup stale connections
+      timeToLiveAttribute: "ttl", // Auto-cleanup stale connections
     });
 
     // GSI for querying all connections by unitId (for broadcasting)
     this.connectionsTable.addGlobalSecondaryIndex({
-      indexName: 'UnitIdIndex',
+      indexName: "UnitIdIndex",
       partitionKey: {
-        name: 'unitId',
+        name: "unitId",
         type: AttributeType.STRING,
       },
     });
@@ -73,45 +71,55 @@ export class WebSocketApiConstruct extends Construct {
     homeworkRoomTable.grantReadData(websocketLambda);
 
     // WebSocket API
-    this.api = new WebSocketApi(this, 'CollaborationWebSocketApi', {
-      apiName: 'homeworkSupplyCollaborationApi',
-      description: 'Real-time Yjs collaboration WebSocket API',
+    this.api = new WebSocketApi(this, "CollaborationWebSocketApi", {
+      apiName: "homeworkSupplyCollaborationApi",
+      description: "Real-time Yjs collaboration WebSocket API",
     });
 
     // WebSocket Lambda integration
-    const wsIntegration = new WebSocketLambdaIntegration(
-      'WebSocketIntegration',
-      websocketLambda
+    // WebSocket Lambda integrations - each route needs its own integration
+    // instance so CDK creates separate Lambda invoke permissions for each
+    const connectIntegration = new WebSocketLambdaIntegration(
+      "ConnectIntegration",
+      websocketLambda,
+    );
+    const disconnectIntegration = new WebSocketLambdaIntegration(
+      "DisconnectIntegration",
+      websocketLambda,
+    );
+    const defaultIntegration = new WebSocketLambdaIntegration(
+      "DefaultIntegration",
+      websocketLambda,
     );
 
     // WebSocket routes
-    this.api.addRoute('$connect', {
-      integration: wsIntegration,
+    this.api.addRoute("$connect", {
+      integration: connectIntegration,
     });
 
-    this.api.addRoute('$disconnect', {
-      integration: wsIntegration,
+    this.api.addRoute("$disconnect", {
+      integration: disconnectIntegration,
     });
 
-    this.api.addRoute('$default', {
-      integration: wsIntegration,
+    this.api.addRoute("$default", {
+      integration: defaultIntegration,
     });
 
     // Create production stage
-    this.stage = new WebSocketStage(this, 'ProdStage', {
+    this.stage = new WebSocketStage(this, "ProdStage", {
       webSocketApi: this.api,
-      stageName: 'live',
+      stageName: "live",
       autoDeploy: true,
     });
 
     // Grant Lambda permission to send messages back to connected clients
     websocketLambda.grantPrincipal?.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['execute-api:ManageConnections'],
+        actions: ["execute-api:ManageConnections"],
         resources: [
           `arn:aws:execute-api:${Stack.of(this).region}:${Stack.of(this).account}:${this.api.apiId}/${this.stage.stageName}/*`,
         ],
-      })
+      }),
     );
   }
 }

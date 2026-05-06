@@ -1113,7 +1113,8 @@ console.log(`✅ Created ${guilds.length} guilds with members and posts`);
 // ========================================================================
 console.log("\n🌳 Creating skill tree...");
 
-const skillsResponse = await Promise.all([
+// Create root skills first (no prerequisites)
+const rootSkillsResponse = await Promise.all([
   client.models.Skill.create({
     title: "Basic Vocabulary",
     description: "Master foundational vocabulary words",
@@ -1121,65 +1122,116 @@ const skillsResponse = await Promise.all([
     xpReward: 50,
     cohortId,
   }),
+]);
+
+const rootSkills = unwrap(rootSkillsResponse, "Skill");
+const vocabSkill = rootSkills[0];
+
+// Create mid-tier skills that depend on Basic Vocabulary
+const midSkillsResponse = await Promise.all([
   client.models.Skill.create({
     title: "Reading Comprehension",
     description: "Understand written passages and extract meaning",
-    prerequisites: JSON.stringify([]),
+    prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 75,
     cohortId,
   }),
   client.models.Skill.create({
     title: "Grammar Patterns",
     description: "Recognize and apply grammar rules",
-    prerequisites: JSON.stringify([]), // Will be updated with IDs after creation
+    prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 100,
     cohortId,
   }),
   client.models.Skill.create({
     title: "Listening & Speaking",
     description: "Audio comprehension and pronunciation",
-    prerequisites: JSON.stringify([]),
+    prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 100,
     cohortId,
   }),
+]);
+
+const midSkills = unwrap(midSkillsResponse, "Skill");
+const readingSkill = midSkills[0];
+const grammarSkill = midSkills[1];
+const listeningSkill = midSkills[2];
+
+// Create top-tier skills that depend on multiple mid-tier skills
+const topSkillsResponse = await Promise.all([
   client.models.Skill.create({
     title: "Advanced Composition",
     description: "Write complex answers and short essays",
-    prerequisites: JSON.stringify([]),
+    prerequisites: JSON.stringify([readingSkill.id, grammarSkill.id]),
     xpReward: 150,
+    cohortId,
+  }),
+  client.models.Skill.create({
+    title: "Oral Presentation",
+    description: "Deliver spoken presentations with proper grammar",
+    prerequisites: JSON.stringify([grammarSkill.id, listeningSkill.id]),
+    xpReward: 150,
+    cohortId,
+  }),
+  client.models.Skill.create({
+    title: "Critical Analysis",
+    description: "Analyze texts and construct arguments",
+    prerequisites: JSON.stringify([readingSkill.id]),
+    xpReward: 125,
     cohortId,
   }),
 ]);
 
-const skills = unwrap(skillsResponse, "Skill");
+const topSkills = unwrap(topSkillsResponse, "Skill");
+const compositionSkill = topSkills[0];
+const oralSkill = topSkills[1];
+const analysisSkill = topSkills[2];
 
-// Update prerequisites to create dependency chain
-await Promise.all([
-  client.models.Skill.update({
-    id: skills[2].id,
-    prerequisites: JSON.stringify([skills[0].id]),
-  }),
-  client.models.Skill.update({
-    id: skills[3].id,
-    prerequisites: JSON.stringify([skills[0].id]),
-  }),
-  client.models.Skill.update({
-    id: skills[4].id,
-    prerequisites: JSON.stringify([skills[1].id, skills[2].id]),
+// Create capstone skill that depends on top-tier
+const capstoneResponse = await Promise.all([
+  client.models.Skill.create({
+    title: "Language Mastery",
+    description: "Demonstrate full command of all language skills",
+    prerequisites: JSON.stringify([
+      compositionSkill.id,
+      oralSkill.id,
+      analysisSkill.id,
+    ]),
+    xpReward: 250,
+    cohortId,
   }),
 ]);
 
-console.log(`✅ Created ${skills.length} skills with prerequisites`);
+const capstoneSkills = unwrap(capstoneResponse, "Skill");
+
+// Combine all skills into a single array for downstream use
+const skills = [
+  vocabSkill,
+  readingSkill,
+  grammarSkill,
+  listeningSkill,
+  compositionSkill,
+  oralSkill,
+  analysisSkill,
+  capstoneSkills[0],
+];
+
+console.log(
+  `✅ Created ${skills.length} skills with connected DAG (root → mid-tier → top-tier → capstone)`,
+);
 
 // Student skill progress → embedded in StudentProfile.skillProgress
 await client.models.StudentProfile.update({
   id: student1Profile.id,
   skillProgress: [
-    { skillId: skills[0].id, status: "MASTERED" },
-    { skillId: skills[1].id, status: "MASTERED" },
-    { skillId: skills[2].id, status: "IN_PROGRESS" },
-    { skillId: skills[3].id, status: "AVAILABLE" },
-    { skillId: skills[4].id, status: "LOCKED" },
+    { skillId: skills[0].id, status: "MASTERED" }, // Basic Vocabulary
+    { skillId: skills[1].id, status: "MASTERED" }, // Reading Comprehension
+    { skillId: skills[2].id, status: "IN_PROGRESS" }, // Grammar Patterns
+    { skillId: skills[3].id, status: "AVAILABLE" }, // Listening & Speaking
+    { skillId: skills[4].id, status: "LOCKED" }, // Advanced Composition
+    { skillId: skills[5].id, status: "LOCKED" }, // Oral Presentation
+    { skillId: skills[6].id, status: "AVAILABLE" }, // Critical Analysis (prereq Reading done)
+    { skillId: skills[7].id, status: "LOCKED" }, // Language Mastery
   ] as any,
 });
 

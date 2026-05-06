@@ -1,23 +1,26 @@
 /**
  * OpenAI Lambda Handler for Gen 2
- * 
+ *
  * Routes to appropriate function based on GraphQL operation.
  * This handler is registered for multiple mutations/queries:
  * - chat, generateAudio, generateImage (mutations)
  * - verifyDefinition, verifyWord, verifyShortAnswer (queries)
  * - transcribe, verifyAudio, verifyAudioUrl, transcribeUrl (queries)
  * - processImage, processImageUrl, verifyImage, verifyImageUrl (queries)
- * 
+ *
  * Reference Gen 1: amplify/backend/function/openai/
  */
 
-import type { Handler } from 'aws-lambda';
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { type Schema } from '../../data/resource';
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/data';
-import { initializePhoenixTracing, addTraceAttributes } from '../shared/phoenix-tracer';
-import { fromEnv } from '@aws-sdk/credential-providers';
+import type { Handler } from "aws-lambda";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+import { type Schema } from "../../data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import {
+  initializePhoenixTracing,
+  addTraceAttributes,
+} from "../shared/phoenix-tracer";
+import { fromEnv } from "@aws-sdk/credential-providers";
 
 // Initialize Phoenix tracing at module load
 initializePhoenixTracing();
@@ -28,9 +31,9 @@ Amplify.configure(
   {
     API: {
       GraphQL: {
-        endpoint: process.env.API_ENDPOINT || '',
-        region: process.env.AWS_REGION || 'us-east-1',
-        defaultAuthMode: 'iam', // Lambda uses IAM auth
+        endpoint: process.env.API_ENDPOINT || "",
+        region: process.env.AWS_REGION || "us-east-1",
+        defaultAuthMode: "iam", // Lambda uses IAM auth
       },
     },
   },
@@ -43,7 +46,7 @@ Amplify.configure(
         clearCredentialsAndIdentityId: () => {},
       },
     },
-  }
+  },
 );
 
 const lambdaClient = new LambdaClient();
@@ -55,6 +58,9 @@ const GET_FILE = /* GraphQL */ `
   query GetFile($id: ID!) {
     getFile(id: $id) {
       id
+      _version
+      _lastChangedAt
+      _deleted
     }
   }
 `;
@@ -63,6 +69,9 @@ const CREATE_FILE = /* GraphQL */ `
   mutation CreateFile($input: CreateFileInput!) {
     createFile(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       name
       path
       mimeType
@@ -74,6 +83,9 @@ const UPDATE_FILE = /* GraphQL */ `
   mutation UpdateFile($input: UpdateFileInput!) {
     updateFile(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       path
       description
     }
@@ -83,8 +95,8 @@ const UPDATE_FILE = /* GraphQL */ `
 async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error('OPENAI_API_KEY environment variable not set');
-    const OpenAI = (await import('openai')).default;
+    if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
+    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
@@ -93,7 +105,7 @@ async function getOpenAI(): Promise<any> {
 function getDataClient() {
   if (!dataClient) {
     dataClient = generateClient<Schema>({
-      authMode: 'iam',
+      authMode: "iam",
     });
   }
   return dataClient;
@@ -108,15 +120,21 @@ function requireAuth(event: any) {
   const username = event.identity?.username;
   // For S3 protected/private access, we need the Cognito Identity Pool ID
   // This is different from the user pool sub - it's in the cognito:username claim or identity sourceIp context
-  const identityId = event.identity?.cognitoIdentityId || event.identity?.claims?.['cognito:username'] || userId;
-  
+  const identityId =
+    event.identity?.cognitoIdentityId ||
+    event.identity?.claims?.["cognito:username"] ||
+    userId;
+
   if (!userId) {
-    console.error('[OpenAI Handler] No user identity found in event:', JSON.stringify(event, null, 2));
-    throw new Error('Unauthorized: User authentication required');
+    console.error(
+      "[OpenAI Handler] No user identity found in event:",
+      JSON.stringify(event, null, 2),
+    );
+    throw new Error("Unauthorized: User authentication required");
   }
-  
-  console.log('[OpenAI Handler] Auth:', { userId, username, identityId });
-  
+
+  console.log("[OpenAI Handler] Auth:", { userId, username, identityId });
+
   return { userId, username: username || userId, identityId };
 }
 
@@ -124,25 +142,30 @@ export const handler: Handler = async (event: any, context: any) => {
   // Extract which operation is being called from the AppSync context
   // In Gen 2, AppSync passes fieldName via event.info.fieldName
   // For async self-invocations (e.g., generateImageFileAsync), the operation is in event.operation
-  const operationName = event.info?.fieldName || event.fieldName || event.operation;
-  
+  const operationName =
+    event.info?.fieldName || event.fieldName || event.operation;
+
   if (!operationName) {
-    console.error('[OpenAI Handler] No operation name found in event:', JSON.stringify(event, null, 2));
-    throw new Error('Unable to determine operation name from event');
+    console.error(
+      "[OpenAI Handler] No operation name found in event:",
+      JSON.stringify(event, null, 2),
+    );
+    throw new Error("Unable to determine operation name from event");
   }
-  
+
   console.log(`[OpenAI Handler] ${operationName}`, event.arguments);
 
   try {
     // Async self-invocations don't have user identity — they run as internal Lambda calls
-    const isAsyncSelfInvoke = operationName.endsWith('Async') && event.operation;
+    const isAsyncSelfInvoke =
+      operationName.endsWith("Async") && event.operation;
 
     if (isAsyncSelfInvoke) {
       // Internal async operations — args come directly from the event payload
       switch (operationName) {
-        case 'generateAudioFileAsync':
+        case "generateAudioFileAsync":
           return await handleGenerateAudioFileAsync(event);
-        case 'generateImageFileAsync':
+        case "generateImageFileAsync":
           return await handleGenerateImageFileAsync(event);
         default:
           throw new Error(`Unknown async operation: ${operationName}`);
@@ -156,50 +179,50 @@ export const handler: Handler = async (event: any, context: any) => {
 
     // Add trace attributes for this request
     addTraceAttributes({
-      'operation.name': operationName,
-      'lambda.requestId': context.requestId,
-      'user.id': userId,
-      'user.username': username,
+      "operation.name": operationName,
+      "lambda.requestId": context.requestId,
+      "user.id": userId,
+      "user.username": username,
     });
 
     switch (operationName) {
-      case 'chat':
+      case "chat":
         return await handleChat(args);
-      case 'generateAudio':
+      case "generateAudio":
         return await handleGenerateAudio(args);
-      case 'generateAudioFile':
+      case "generateAudioFile":
         return await handleGenerateAudioFile(args, userId, identityId);
-      case 'generateAudioFileAsync':
+      case "generateAudioFileAsync":
         return await handleGenerateAudioFileAsync(args);
-      case 'generateImage':
+      case "generateImage":
         return await handleGenerateImage(args);
-      case 'generateImageFile':
+      case "generateImageFile":
         return await handleGenerateImageFile(args, userId, identityId);
-      case 'generateImageFileAsync':
+      case "generateImageFileAsync":
         return await handleGenerateImageFileAsync(args);
-      case 'verifyDefinition':
+      case "verifyDefinition":
         return await handleVerifyDefinition(args);
-      case 'verifyWord':
+      case "verifyWord":
         return await handleVerifyWord(args);
-      case 'verifyShortAnswer':
+      case "verifyShortAnswer":
         return await handleVerifyShortAnswer(args);
-      case 'transcribe':
+      case "transcribe":
         return await handleTranscribe(args);
-      case 'verifyAudio':
+      case "verifyAudio":
         return await handleVerifyAudio(args);
-      case 'verifyAudioUrl':
+      case "verifyAudioUrl":
         return await handleVerifyAudioUrl(args);
-      case 'transcribeUrl':
+      case "transcribeUrl":
         return await handleTranscribeUrl(args);
-      case 'processImage':
+      case "processImage":
         return await handleProcessImage(args);
-      case 'processImageUrl':
+      case "processImageUrl":
         return await handleProcessImageUrl(args);
-      case 'verifyImage':
+      case "verifyImage":
         return await handleVerifyImage(args);
-      case 'verifyImageUrl':
+      case "verifyImageUrl":
         return await handleVerifyImageUrl(args);
-      case 'summarizeFeedback':
+      case "summarizeFeedback":
         return await handleSummarizeFeedback(args);
 
       default:
@@ -216,107 +239,116 @@ export const handler: Handler = async (event: any, context: any) => {
 // ============================================================================
 
 async function handleChat(args: any): Promise<string> {
-  const { messages, model = 'gpt-4o' } = args;
+  const { messages, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
-  
+
   try {
-    const parsedMessages = typeof messages === 'string' ? JSON.parse(messages) : messages;
+    const parsedMessages =
+      typeof messages === "string" ? JSON.parse(messages) : messages;
     const response = await openai.chat.completions.create({
       model,
       messages: parsedMessages,
       temperature: 0.7,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Chat Error]:', error);
+    console.error("[Chat Error]:", error);
     throw error;
   }
 }
 
 async function handleGenerateAudio(args: any): Promise<string> {
-  const { phrase, voice = 'alloy', model = 'tts-1' } = args;
+  const { phrase, voice = "alloy", model = "tts-1" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     const response = await openai.audio.speech.create({
       model,
       voice,
       input: phrase,
     });
-    
+
     // Convert response to base64 string
     const buffer = await response.arrayBuffer();
-    return Buffer.from(buffer).toString('base64');
+    return Buffer.from(buffer).toString("base64");
   } catch (error) {
-    console.error('[Generate Audio Error]:', error);
+    console.error("[Generate Audio Error]:", error);
     throw error;
   }
 }
 
-async function handleGenerateAudioFile(args: any, userId: string, identityId: string): Promise<any> {
-  const { phrase, voice = 'alloy', model = 'tts-1' } = args;
-  
+async function handleGenerateAudioFile(
+  args: any,
+  userId: string,
+  identityId: string,
+): Promise<any> {
+  const { phrase, voice = "alloy", model = "tts-1" } = args;
+
   try {
     const client = getDataClient();
-    
+
     const timestamp = Date.now();
     const fileName = `generated-audio-${timestamp}.mp3`;
     const s3Path = `public/audio/${timestamp}/${fileName}`;
-    
+
     // Create File record with pending status
-    const { data, errors } = await client.graphql({
+    const { data, errors } = (await client.graphql({
       query: CREATE_FILE,
       variables: {
         input: {
           name: fileName,
-          mimeType: 'audio/mpeg',
+          mimeType: "audio/mpeg",
           path: s3Path,
           owner: userId,
           identityId: identityId,
         },
       },
-    }) as any;
+    })) as any;
     const file = data?.createFile;
-    
+
     if (errors || !file) {
-      throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
+      throw new Error(
+        `Failed to create File record: ${JSON.stringify(errors)}`,
+      );
     }
-    
+
     const fileId = file.id;
-    
+
     // Invoke Lambda asynchronously to generate the actual audio
-    await lambdaClient.send(new InvokeCommand({
-      FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
-      InvocationType: 'Event', // Async invocation
-      Payload: JSON.stringify({
-        operation: 'generateAudioFileAsync',
-        fileId,
-        phrase,
-        voice,
-        model,
+    await lambdaClient.send(
+      new InvokeCommand({
+        FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+        InvocationType: "Event", // Async invocation
+        Payload: JSON.stringify({
+          operation: "generateAudioFileAsync",
+          fileId,
+          phrase,
+          voice,
+          model,
+        }),
       }),
-    }));
-    
+    );
+
     return {
       id: fileId,
       filename: fileName,
-      fileType: 'audio/mpeg',
+      fileType: "audio/mpeg",
       path: s3Path,
-      status: 'pending',
-      contentType: 'audio/mpeg',
+      status: "pending",
+      contentType: "audio/mpeg",
     };
   } catch (error) {
-    console.error('[Generate Audio File Error]:', error);
+    console.error("[Generate Audio File Error]:", error);
     throw error;
   }
 }
 
 async function handleGenerateAudioFileAsync(args: any): Promise<void> {
-  const { fileId, phrase, voice = 'alloy', model = 'tts-1' } = args;
+  const { fileId, phrase, voice = "alloy", model = "tts-1" } = args;
   const openai = await getOpenAI();
   const client = getDataClient();
-  
+
   try {
     // Generate audio
     const response = await openai.audio.speech.create({
@@ -324,163 +356,195 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
       voice,
       input: phrase,
     });
-    
+
     const buffer = await response.arrayBuffer();
-    const base64Audio = Buffer.from(buffer).toString('base64');
-    
+    const base64Audio = Buffer.from(buffer).toString("base64");
+
+    // Fetch current file version for optimistic locking
+    const { data: fileData } = (await client.graphql({
+      query: GET_FILE,
+      variables: { id: fileId },
+    })) as any;
+
     // Update File with completed data
     await client.graphql({
       query: UPDATE_FILE,
       variables: {
         input: {
           id: fileId,
-          description: 'Generated audio - completed',
+          description: "Generated audio - completed",
+          _version: fileData?.getFile?._version,
         },
       },
     });
-    
+
     console.log(`[Audio Generation Complete] ${fileId}`);
   } catch (error) {
-    console.error('[Generate Audio File Async Error]:', error);
+    console.error("[Generate Audio File Async Error]:", error);
     // Update File with error description
     try {
       const client = getDataClient();
+      const { data: errFileData } = (await client.graphql({
+        query: GET_FILE,
+        variables: { id: fileId },
+      })) as any;
       await client.graphql({
         query: UPDATE_FILE,
         variables: {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
+            _version: errFileData?.getFile?._version,
           },
         },
       });
     } catch (updateError) {
-      console.error('[Update File Status Error]:', updateError);
+      console.error("[Update File Status Error]:", updateError);
     }
     throw error;
   }
 }
 
 async function handleGenerateImage(args: any): Promise<string> {
-  const { phrase, model = 'dall-e-3' } = args;
+  const { phrase, model = "dall-e-3" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     const response = await openai.images.generate({
       model,
       prompt: phrase,
       n: 1,
-      size: '1024x1024',
+      size: "1024x1024",
     });
-    
-    return response.data[0]?.url || '';
+
+    return response.data[0]?.url || "";
   } catch (error) {
-    console.error('[Generate Image Error]:', error);
+    console.error("[Generate Image Error]:", error);
     throw error;
   }
 }
 
-async function handleGenerateImageFile(args: any, userId: string, identityId: string): Promise<any> {
-  const { phrase, model = 'dall-e-3' } = args;
-  
+async function handleGenerateImageFile(
+  args: any,
+  userId: string,
+  identityId: string,
+): Promise<any> {
+  const { phrase, model = "dall-e-3" } = args;
+
   try {
     const client = getDataClient();
-    
+
     const timestamp = Date.now();
     const fileName = `generated-image-${timestamp}.png`;
     const s3Path = `public/images/${timestamp}/${fileName}`;
-    
+
     // Create File record with pending status
-    const { data, errors } = await client.graphql({
+    const { data, errors } = (await client.graphql({
       query: CREATE_FILE,
       variables: {
         input: {
           name: fileName,
-          mimeType: 'image/png',
+          mimeType: "image/png",
           path: s3Path,
           owner: userId,
           identityId: identityId,
         },
       },
-    }) as any;
+    })) as any;
     const file = data?.createFile;
-    
+
     if (errors || !file) {
-      throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
+      throw new Error(
+        `Failed to create File record: ${JSON.stringify(errors)}`,
+      );
     }
-    
+
     const fileId = file.id;
-    
+
     // Invoke Lambda asynchronously to generate the actual image
-    await lambdaClient.send(new InvokeCommand({
-      FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
-      InvocationType: 'Event', // Async invocation
-      Payload: JSON.stringify({
-        operation: 'generateImageFileAsync',
-        fileId,
-        phrase,
-        model,
+    await lambdaClient.send(
+      new InvokeCommand({
+        FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+        InvocationType: "Event", // Async invocation
+        Payload: JSON.stringify({
+          operation: "generateImageFileAsync",
+          fileId,
+          phrase,
+          model,
+        }),
       }),
-    }));
-    
+    );
+
     return {
       id: fileId,
       filename: fileName,
-      fileType: 'image/png',
+      fileType: "image/png",
       path: s3Path,
-      status: 'pending',
+      status: "pending",
     };
   } catch (error) {
-    console.error('[Generate Image File Error]:', error);
+    console.error("[Generate Image File Error]:", error);
     throw error;
   }
 }
 
 async function handleGenerateImageFileAsync(args: any): Promise<void> {
-  const { fileId, phrase, model = 'dall-e-3' } = args;
+  const { fileId, phrase, model = "dall-e-3" } = args;
   const openai = await getOpenAI();
   const client = getDataClient();
-  
+
   try {
     // Generate image
     const response = await openai.images.generate({
       model,
       prompt: phrase,
       n: 1,
-      size: '1024x1024',
-      response_format: 'b64_json',
+      size: "1024x1024",
+      response_format: "b64_json",
     });
-    
-    const base64 = response.data[0]?.b64_json || '';
-    
+
+    const base64 = response.data[0]?.b64_json || "";
+
+    // Fetch current file version for optimistic locking
+    const { data: fileData } = (await client.graphql({
+      query: GET_FILE,
+      variables: { id: fileId },
+    })) as any;
+
     // Update File with completed data
     await client.graphql({
       query: UPDATE_FILE,
       variables: {
         input: {
           id: fileId,
-          description: 'Generated image - completed',
+          description: "Generated image - completed",
+          _version: fileData?.getFile?._version,
         },
       },
     });
-    
+
     console.log(`[Image Generation Complete] ${fileId}`);
   } catch (error) {
-    console.error('[Generate Image File Async Error]:', error);
+    console.error("[Generate Image File Async Error]:", error);
     // Update File with error description
     try {
       const client = getDataClient();
+      const { data: errFileData } = (await client.graphql({
+        query: GET_FILE,
+        variables: { id: fileId },
+      })) as any;
       await client.graphql({
         query: UPDATE_FILE,
         variables: {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
+            _version: errFileData?.getFile?._version,
           },
         },
       });
     } catch (updateError) {
-      console.error('[Update File Status Error]:', updateError);
+      console.error("[Update File Status Error]:", updateError);
     }
     throw error;
   }
@@ -495,184 +559,196 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
  * When content references are available, the AI can link feedback to specific
  * pages or sections in uploaded documents or unit materials.
  */
-function buildVerifySystemMessage(args: { studentMemory?: string; contentContext?: string }): string | null {
+function buildVerifySystemMessage(args: {
+  studentMemory?: string;
+  contentContext?: string;
+}): string | null {
   const { studentMemory, contentContext } = args;
   if (!studentMemory && !contentContext) return null;
 
-  let system = 'You are a skilled, encouraging tutor on an elearning platform.\n';
-  system += 'Provide specific, actionable feedback. Be concise and warm.\n';
+  let system =
+    "You are a skilled, encouraging tutor on an elearning platform.\n";
+  system += "Provide specific, actionable feedback. Be concise and warm.\n";
 
   if (studentMemory) {
-    system += '\n## Student Memory\n';
-    system += studentMemory + '\n';
-    system += 'Reference the student\'s history only when directly relevant (e.g., if they\'re repeating a known mistake).\n';
-    system += 'Acknowledge genuine improvement explicitly.\n';
+    system += "\n## Student Memory\n";
+    system += studentMemory + "\n";
+    system +=
+      "Reference the student's history only when directly relevant (e.g., if they're repeating a known mistake).\n";
+    system += "Acknowledge genuine improvement explicitly.\n";
   }
 
   if (contentContext) {
-    system += '\n## Available Course Content\n';
-    system += contentContext + '\n';
-    system += 'When relevant, reference specific pages, sections, or documents the student can review. ';
-    system += 'Use the format: "See [Document Title], page X" or "Review the section on [Topic] in [Document Title]".\n';
+    system += "\n## Available Course Content\n";
+    system += contentContext + "\n";
+    system +=
+      "When relevant, reference specific pages, sections, or documents the student can review. ";
+    system +=
+      'Use the format: "See [Document Title], page X" or "Review the section on [Topic] in [Document Title]".\n';
   }
 
   return system;
 }
 
 async function handleVerifyDefinition(args: any): Promise<string> {
-  const { phrase, expected, definition, model = 'gpt-4o' } = args;
+  const { phrase, expected, definition, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     const prompt = `Given a phrase: "${phrase}"\nExpected definition: "${expected}"\nUser provided definition: "${definition}"\n\nIs the user's definition accurate and helpful? Respond with JSON: { "accurate": boolean, "feedback": string, "score": 0-100 }`;
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
-    messages.push({ role: 'user', content: prompt });
-    
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
+    messages.push({ role: "user", content: prompt });
+
     const response = await openai.chat.completions.create({
       model,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Definition Error]:', error);
+    console.error("[Verify Definition Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyWord(args: any): Promise<string> {
-  const { word, expected, definition, model = 'gpt-4o' } = args;
+  const { word, expected, definition, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     const prompt = `Word: "${word}"\nExpected definition: "${expected}"\nUser provided definition: "${definition}"\n\nDoes the user understand this word? Respond with JSON: { "understands": boolean, "feedback": string, "score": 0-100 }`;
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
-    messages.push({ role: 'user', content: prompt });
-    
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
+    messages.push({ role: "user", content: prompt });
+
     const response = await openai.chat.completions.create({
       model,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Word Error]:', error);
+    console.error("[Verify Word Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyShortAnswer(args: any): Promise<string> {
-  const { expected, answer, prompt, model = 'gpt-4o' } = args;
+  const { expected, answer, prompt, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     const gradePrompt = `Question: "${prompt}"\nExpected answer: "${expected}"\nUser answer: "${answer}"\n\nGrade this answer. Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
-    messages.push({ role: 'user', content: gradePrompt });
-    
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
+    messages.push({ role: "user", content: gradePrompt });
+
     const response = await openai.chat.completions.create({
       model,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Short Answer Error]:', error);
+    console.error("[Verify Short Answer Error]:", error);
     throw error;
   }
 }
 
 async function handleTranscribe(args: any): Promise<string> {
-  const { audio, model = 'whisper-1' } = args;
+  const { audio, model = "whisper-1" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     // Convert base64 to buffer
-    const audioBuffer = Buffer.from(audio, 'base64');
-    
+    const audioBuffer = Buffer.from(audio, "base64");
+
     // Create file-like object for OpenAI API
-    const file = new File([audioBuffer], 'audio.mp3', { type: 'audio/mpeg' });
-    
+    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+
     const response = await openai.audio.transcriptions.create({
       file,
       model,
     });
-    
+
     return response.text;
   } catch (error) {
-    console.error('[Transcribe Error]:', error);
+    console.error("[Transcribe Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyAudio(args: any): Promise<string> {
-  const { expected, audio, model = 'whisper-1', chatModel = 'gpt-4o' } = args;
+  const { expected, audio, model = "whisper-1", chatModel = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     // Transcribe first
-    const audioBuffer = Buffer.from(audio, 'base64');
-    const file = new File([audioBuffer], 'audio.mp3', { type: 'audio/mpeg' });
-    
+    const audioBuffer = Buffer.from(audio, "base64");
+    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+
     const transcriptionResponse = await openai.audio.transcriptions.create({
       file,
       model,
     });
-    
+
     // Then verify
     const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcriptionResponse.text}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
-    messages.push({ role: 'user', content: verifyPrompt });
-    
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
+    messages.push({ role: "user", content: verifyPrompt });
+
     const response = await openai.chat.completions.create({
       model: chatModel,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Audio Error]:', error);
+    console.error("[Verify Audio Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyAudioUrl(args: any): Promise<string> {
-  const { expected, audioUrl, model = 'whisper-1', chatModel = 'gpt-4o' } = args;
+  const {
+    expected,
+    audioUrl,
+    model = "whisper-1",
+    chatModel = "gpt-4o",
+  } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     // Fetch audio from S3 URL
     const response = await fetch(audioUrl);
     const audioBuffer = await response.arrayBuffer();
-    const file = new File([audioBuffer], 'audio.mp3', { type: 'audio/mpeg' });
-    
+    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+
     // Transcribe
     const transcriptionResponse = await openai.audio.transcriptions.create({
       file,
       model,
     });
-    
+
     const transcript = transcriptionResponse.text;
-    
+
     // Run verification and moderation in parallel on the transcript
     const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcript}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
-    messages.push({ role: 'user', content: verifyPrompt });
-    
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
+    messages.push({ role: "user", content: verifyPrompt });
+
     const [verifyResponse, moderationResponse] = await Promise.all([
       openai.chat.completions.create({
         model: chatModel,
@@ -681,25 +757,30 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
       }),
       // Piggyback moderation on the already-transcribed text — no extra Whisper call
       transcript && transcript.trim().length > 0
-        ? openai.moderations.create({
-            model: 'omni-moderation-latest',
-            input: transcript,
-          }).catch((err: any) => {
-            console.warn('[Verify Audio URL] Moderation failed (non-blocking):', err?.message);
-            return null;
-          })
+        ? openai.moderations
+            .create({
+              model: "omni-moderation-latest",
+              input: transcript,
+            })
+            .catch((err: any) => {
+              console.warn(
+                "[Verify Audio URL] Moderation failed (non-blocking):",
+                err?.message,
+              );
+              return null;
+            })
         : Promise.resolve(null),
     ]);
-    
+
     // Build base verification result
-    const verifyContent = verifyResponse.choices[0]?.message?.content || '{}';
+    const verifyContent = verifyResponse.choices[0]?.message?.content || "{}";
     let result: any;
     try {
       result = JSON.parse(verifyContent);
     } catch {
       result = { correct: false, score: 0, feedback: verifyContent };
     }
-    
+
     // Attach moderation result if available
     if (moderationResponse?.results?.[0]) {
       const mod = moderationResponse.results[0];
@@ -707,57 +788,57 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
         flagged: mod.flagged,
         categories: mod.categories,
         categoryScores: mod.category_scores,
-        model: moderationResponse.model || 'omni-moderation-latest',
+        model: moderationResponse.model || "omni-moderation-latest",
       };
     }
-    
+
     // Include transcript for downstream consumers
     result.transcript = transcript;
-    
+
     return JSON.stringify(result);
   } catch (error) {
-    console.error('[Verify Audio URL Error]:', error);
+    console.error("[Verify Audio URL Error]:", error);
     throw error;
   }
 }
 
 async function handleTranscribeUrl(args: any): Promise<string> {
-  const { audioUrl, model = 'whisper-1' } = args;
+  const { audioUrl, model = "whisper-1" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     // Fetch audio from S3 URL
     const response = await fetch(audioUrl);
     const audioBuffer = await response.arrayBuffer();
-    const file = new File([audioBuffer], 'audio.mp3', { type: 'audio/mpeg' });
-    
+    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+
     // Transcribe
     const transcriptionResponse = await openai.audio.transcriptions.create({
       file,
       model,
     });
-    
+
     return transcriptionResponse.text;
   } catch (error) {
-    console.error('[Transcribe URL Error]:', error);
+    console.error("[Transcribe URL Error]:", error);
     throw error;
   }
 }
 
 async function handleProcessImage(args: any): Promise<string> {
-  const { image, model = 'gpt-4o' } = args;
+  const { image, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     const response = await openai.chat.completions.create({
       model,
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { type: 'text', text: 'Describe this image in detail.' },
+            { type: "text", text: "Describe this image in detail." },
             {
-              type: 'image_url',
+              type: "image_url",
               image_url: { url: `data:image/jpeg;base64,${image}` },
             },
           ],
@@ -765,28 +846,28 @@ async function handleProcessImage(args: any): Promise<string> {
       ],
       temperature: 0.7,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Process Image Error]:', error);
+    console.error("[Process Image Error]:", error);
     throw error;
   }
 }
 
 async function handleProcessImageUrl(args: any): Promise<string> {
-  const { imageUrl, model = 'gpt-4o' } = args;
+  const { imageUrl, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
-  
+
   try {
     const response = await openai.chat.completions.create({
       model,
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { type: 'text', text: 'Describe this image in detail.' },
+            { type: "text", text: "Describe this image in detail." },
             {
-              type: 'image_url',
+              type: "image_url",
               image_url: { url: imageUrl },
             },
           ],
@@ -794,86 +875,86 @@ async function handleProcessImageUrl(args: any): Promise<string> {
       ],
       temperature: 0.7,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Process Image URL Error]:', error);
+    console.error("[Process Image URL Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyImage(args: any): Promise<string> {
-  const { expected, image, model = 'gpt-4o' } = args;
+  const { expected, image, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
     messages.push({
-      role: 'user',
+      role: "user",
       content: [
         {
-          type: 'text',
+          type: "text",
           text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
         },
         {
-          type: 'image_url',
+          type: "image_url",
           image_url: { url: `data:image/jpeg;base64,${image}` },
         },
       ],
     });
-    
+
     const response = await openai.chat.completions.create({
       model,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Image Error]:', error);
+    console.error("[Verify Image Error]:", error);
     throw error;
   }
 }
 
 async function handleVerifyImageUrl(args: any): Promise<string> {
-  const { expected, imageUrl, model = 'gpt-4o' } = args;
+  const { expected, imageUrl, model = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
-  
+
   try {
     const messages: any[] = [];
-    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    if (systemMsg) messages.push({ role: "system", content: systemMsg });
     messages.push({
-      role: 'user',
+      role: "user",
       content: [
         {
-          type: 'text',
+          type: "text",
           text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
         },
         {
-          type: 'image_url',
+          type: "image_url",
           image_url: { url: imageUrl },
         },
       ],
     });
-    
+
     const response = await openai.chat.completions.create({
       model,
       messages,
       temperature: 0.3,
     });
-    
-    return response.choices[0]?.message?.content || '';
+
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Verify Image URL Error]:', error);
+    console.error("[Verify Image URL Error]:", error);
     throw error;
   }
 }
 
 async function handleSummarizeFeedback(args: any): Promise<string> {
-  const { gradeData, assignmentData, model = 'gpt-4o-mini' } = args;
+  const { gradeData, assignmentData, model = "gpt-4o-mini" } = args;
   const openai = await getOpenAI();
 
   try {
@@ -898,15 +979,15 @@ Summarize the student's performance. Identify what they did well and where they 
     const response = await openai.chat.completions.create({
       model,
       messages: [
-        { role: 'system', content: systemMessage },
-        { role: 'user', content: userMessage },
+        { role: "system", content: systemMessage },
+        { role: "user", content: userMessage },
       ],
       temperature: 0.4,
     });
 
-    return response.choices[0]?.message?.content || '';
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
-    console.error('[Summarize Feedback Error]:', error);
+    console.error("[Summarize Feedback Error]:", error);
     throw error;
   }
 }

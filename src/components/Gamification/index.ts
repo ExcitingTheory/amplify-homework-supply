@@ -1,112 +1,232 @@
-export { NailedItBadge } from './NailedItBadge'
-export type { NailedItBadgeProps } from './NailedItBadge'
+export { NailedItBadge } from "./NailedItBadge";
+export type { NailedItBadgeProps } from "./NailedItBadge";
 
-export { NailedItCelebration } from './NailedItCelebration'
-export type { NailedItCelebrationProps } from './NailedItCelebration'
+export { NailedItCelebration } from "./NailedItCelebration";
+export type { NailedItCelebrationProps } from "./NailedItCelebration";
 
-export { NailedItWall } from './NailedItWall'
-export type { NailedItWallProps, NailedItBlock } from './NailedItWall'
+export { NailedItWall } from "./NailedItWall";
+export type { NailedItWallProps, NailedItBlock } from "./NailedItWall";
 
-export { XPToast } from './XPToast'
-export type { XPToastProps } from './XPToast'
+export { XPToast } from "./XPToast";
+export type { XPToastProps } from "./XPToast";
 
-export { HomeworkXPSummary } from './HomeworkXPSummary'
-export type { HomeworkXPSummaryProps, XPLineItemData } from './HomeworkXPSummary'
+export { HomeworkXPSummary } from "./HomeworkXPSummary";
+export type {
+  HomeworkXPSummaryProps,
+  XPLineItemData,
+} from "./HomeworkXPSummary";
 
-export { LevelBadge } from './LevelBadge'
-export type { LevelBadgeProps } from './LevelBadge'
+export { LevelBadge } from "./LevelBadge";
+export type { LevelBadgeProps } from "./LevelBadge";
 
-export { StreakIndicator } from './StreakIndicator'
-export type { StreakIndicatorProps } from './StreakIndicator'
+export { StreakIndicator } from "./StreakIndicator";
+export type { StreakIndicatorProps } from "./StreakIndicator";
 
-export { BadgeShelf } from './BadgeShelf'
-export type { BadgeShelfProps, EarnedBadge, BadgeType } from './BadgeShelf'
+export { BadgeShelf } from "./BadgeShelf";
+export type { BadgeShelfProps, EarnedBadge, BadgeType } from "./BadgeShelf";
 
-export { ProgressRings } from './ProgressRings'
-export type { ProgressRingsProps, ModuleProgress } from './ProgressRings'
+export { ProgressRings } from "./ProgressRings";
+export type { ProgressRingsProps, ModuleProgress } from "./ProgressRings";
 
-export { PersonalBestBanner } from './PersonalBestBanner'
-export type { PersonalBestBannerProps } from './PersonalBestBanner'
+export { PersonalBestBanner } from "./PersonalBestBanner";
+export type { PersonalBestBannerProps } from "./PersonalBestBanner";
 
-export { StreakShield } from './StreakShield'
-export type { StreakShieldProps } from './StreakShield'
+export { StreakShield } from "./StreakShield";
+export type { StreakShieldProps } from "./StreakShield";
 
-export { ContentLockCard } from './ContentLockCard'
-export type { ContentLockCardProps } from './ContentLockCard'
+export { ContentLockCard } from "./ContentLockCard";
+export type { ContentLockCardProps } from "./ContentLockCard";
 
-export { EasterEggToast } from './EasterEggToast'
-export type { EasterEggToastProps } from './EasterEggToast'
+export { EasterEggToast } from "./EasterEggToast";
+export type { EasterEggToastProps } from "./EasterEggToast";
 
-export { AnimatedXPCounter } from './AnimatedXPCounter'
-export type { AnimatedXPCounterProps } from './AnimatedXPCounter'
+export { AnimatedXPCounter } from "./AnimatedXPCounter";
+export type { AnimatedXPCounterProps } from "./AnimatedXPCounter";
 
-export { RankChangeToast } from './RankChangeToast'
-export type { RankChangeToastProps } from './RankChangeToast'
+export { RankChangeToast } from "./RankChangeToast";
+export type { RankChangeToastProps } from "./RankChangeToast";
 
-export { BadgeCoinFlip } from './BadgeCoinFlip'
-export type { BadgeCoinFlipProps } from './BadgeCoinFlip'
+export { BadgeCoinFlip } from "./BadgeCoinFlip";
+export type { BadgeCoinFlipProps } from "./BadgeCoinFlip";
 
-export { BadgeIcon } from './BadgeIcon'
-export type { BadgeIconProps } from './BadgeIcon'
+export { BadgeIcon } from "./BadgeIcon";
+export type { BadgeIconProps } from "./BadgeIcon";
 
-export { getBadgeConfig, getAllBadgeTypes, getBadgesByCategory, getBadgesByRarity, BADGE_REGISTRY, RARITY_EFFECTS } from './badgeRegistry'
-export type { BadgeVisualConfig, BadgeShape, BadgeAnimationPreset, BadgeGradient } from './badgeRegistry'
+export {
+  AvatarGlowRing,
+  isGlowActive,
+  DEFAULT_GLOW_COLORS,
+  GLOW_COLOR_PRESETS,
+  GLOW_LEVEL_UP_DURATION_MS,
+} from "./AvatarGlowRing";
+export type { AvatarGlowRingProps, GlowRingConfig } from "./AvatarGlowRing";
 
-export { ContentUnlockAnimation } from './ContentUnlockAnimation'
-export type { ContentUnlockAnimationProps } from './ContentUnlockAnimation'
+export { AvatarUnlockEditor } from "./AvatarUnlockEditor";
+export type { AvatarUnlockEditorProps } from "./AvatarUnlockEditor";
 
-export { SkillTree } from './SkillTree'
-export type { SkillTreeProps, SkillNodeData, SkillStatus } from './SkillTree'
+export {
+  getBadgeConfig,
+  getAllBadgeTypes,
+  getBadgesByCategory,
+  getBadgesByRarity,
+  BADGE_REGISTRY,
+  RARITY_EFFECTS,
+} from "./badgeRegistry";
+export type {
+  BadgeVisualConfig,
+  BadgeShape,
+  BadgeAnimationPreset,
+  BadgeGradient,
+} from "./badgeRegistry";
 
-export { GuildCrest } from './GuildCrest'
-export type { GuildCrestProps } from './GuildCrest'
+export {
+  ANTI_BADGE_REGISTRY,
+  getAllAntiBadgeTypes,
+  getAntiBadgeConfig,
+  getRedeemableAntiBadges,
+  getAntiBadgesByRarity,
+} from "./antiBadgeRegistry";
+export type {
+  AntiBadgeConfig,
+  BadgeDebuff,
+  RedemptionCondition,
+  RedemptionConditionType,
+} from "./antiBadgeRegistry";
 
-export { GuildLeaderboard } from './GuildLeaderboard'
-export type { GuildLeaderboardProps, GuildLeaderboardEntry } from './GuildLeaderboard'
+export { RedemptionConditionForm } from "./RedemptionConditionForm";
+export type { RedemptionConditionFormProps } from "./RedemptionConditionForm";
 
-export { GuildJoinPanel } from './GuildJoinPanel'
-export type { GuildJoinPanelProps, GuildListEntry, GuildMemberEntry } from './GuildJoinPanel'
+export { ContentUnlockAnimation } from "./ContentUnlockAnimation";
+export type { ContentUnlockAnimationProps } from "./ContentUnlockAnimation";
 
-export { GroupChallengeCard } from './GroupChallengeCard'
-export type { GroupChallengeCardProps } from './GroupChallengeCard'
+export { SkillTree } from "./SkillTree";
+export type { SkillTreeProps, SkillNodeData, SkillStatus } from "./SkillTree";
 
-export { GamificationToastLayer } from './GamificationToastLayer'
+export { GuildCrest } from "./GuildCrest";
+export type { GuildCrestProps } from "./GuildCrest";
 
-export { StreakCalendar } from './StreakCalendar'
-export type { StreakCalendarProps } from './StreakCalendar'
+export { GuildLeaderboard } from "./GuildLeaderboard";
+export type {
+  GuildLeaderboardProps,
+  GuildLeaderboardEntry,
+} from "./GuildLeaderboard";
 
-export { CampaignBriefing } from './CampaignBriefing'
-export type { CampaignBriefingProps } from './CampaignBriefing'
+export { GuildJoinPanel } from "./GuildJoinPanel";
+export type {
+  GuildJoinPanelProps,
+  GuildListEntry,
+  GuildMemberEntry,
+} from "./GuildJoinPanel";
 
-export { DiceBearAvatar, getUnlockedStyleTier, getUnlockedStyles, getStyleTierStatus, STYLE_CONFIG } from './DiceBearAvatar'
-export type { DiceBearAvatarProps, AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
+export { GroupChallengeCard } from "./GroupChallengeCard";
+export type { GroupChallengeCardProps } from "./GroupChallengeCard";
 
-export { AvatarCustomizer } from './AvatarCustomizer'
-export type { AvatarCustomizerProps } from './AvatarCustomizer'
+export { GamificationToastLayer } from "./GamificationToastLayer";
 
-export { CosmeticSelector, DEFAULT_EDITOR_THEMES } from './CosmeticSelector'
-export type { EditorTheme, CosmeticSelectorProps } from './CosmeticSelector'
+export { StreakCalendar } from "./StreakCalendar";
+export type { StreakCalendarProps } from "./StreakCalendar";
 
-export { BossBattleCard } from './BossBattleCard'
-export type { BossBattleCardProps, BossPhase, BossContributor, BossPhaseStatus } from './BossBattleCard'
+export { CampaignBriefing } from "./CampaignBriefing";
+export type { CampaignBriefingProps } from "./CampaignBriefing";
 
-export { HiddenEasterEgg, useEasterEggKeyword, useEasterEggTime, useEasterEggRapidClick, useEasterEggTrigger } from './EasterEggTrigger'
-export type { HiddenEasterEggProps, EasterEggConfig, EasterEggTriggerResult, EasterEggTriggerType } from './EasterEggTrigger'
+export {
+  DiceBearAvatar,
+  getUnlockedStyleTier,
+  getUnlockedStyles,
+  getStyleTierStatus,
+  STYLE_CONFIG,
+} from "./DiceBearAvatar";
+export type {
+  DiceBearAvatarProps,
+  AvatarStyleTier,
+  AvatarOverrides,
+} from "./DiceBearAvatar";
 
-export { EasterEggLayer } from './EasterEggLayer'
+export { AvatarCustomizer } from "./AvatarCustomizer";
+export type { AvatarCustomizerProps } from "./AvatarCustomizer";
 
-export { InstructorGamificationPanel } from './InstructorGamificationPanel'
-export type { InstructorGamificationPanelProps, SkillEntry, CampaignEntry, GuildEntry, EasterEggEntry, BossEntry } from './InstructorGamificationPanel'
+export { AvatarDisplay } from "./AvatarDisplay";
+export type {
+  AvatarDisplayProps,
+  AvatarBadge,
+  AvatarBorderEffect,
+} from "./AvatarDisplay";
 
-export { ArmoriaShield } from './ArmoriaShield'
-export type { ArmoriaShieldProps } from './ArmoriaShield'
-export { ArmorEditor } from './ArmorEditor'
-export type { ArmorEditorProps, ArmorEditorConfig, ChargeConfig } from './ArmorEditor'
-export { LexicalPlainTextField } from './LexicalPlainTextField'
-export type { LexicalPlainTextFieldProps } from './LexicalPlainTextField'
+export { CosmeticSelector, DEFAULT_EDITOR_THEMES } from "./CosmeticSelector";
+export type { EditorTheme, CosmeticSelectorProps } from "./CosmeticSelector";
 
-export { GuildEditor } from './GuildEditor'
-export type { GuildEditorProps } from './GuildEditor'
+export { BossBattleCard } from "./BossBattleCard";
+export type {
+  BossBattleCardProps,
+  BossPhase,
+  BossContributor,
+  BossPhaseStatus,
+} from "./BossBattleCard";
 
-export { PixelSpriteMascot, STAGE_LABELS } from './PixelSpriteMascot'
-export type { PixelSpriteMascotProps } from './PixelSpriteMascot'
+export {
+  HiddenEasterEgg,
+  useEasterEggKeyword,
+  useEasterEggTime,
+  useEasterEggRapidClick,
+  useEasterEggTrigger,
+} from "./EasterEggTrigger";
+export type {
+  HiddenEasterEggProps,
+  EasterEggConfig,
+  EasterEggTriggerResult,
+  EasterEggTriggerType,
+} from "./EasterEggTrigger";
+
+export { EasterEggLayer } from "./EasterEggLayer";
+
+export { InstructorGamificationPanel } from "./InstructorGamificationPanel";
+export type {
+  InstructorGamificationPanelProps,
+  SkillEntry,
+  CampaignEntry,
+  GuildEntry,
+  EasterEggEntry,
+  BossEntry,
+  UnitLockRequirement,
+} from "./InstructorGamificationPanel";
+
+export { ArmoriaShield } from "./ArmoriaShield";
+export type { ArmoriaShieldProps } from "./ArmoriaShield";
+export { ArmorEditor } from "./ArmorEditor";
+export type {
+  ArmorEditorProps,
+  ArmorEditorConfig,
+  ChargeConfig,
+} from "./ArmorEditor";
+export { LexicalPlainTextField } from "./LexicalPlainTextField";
+export type { LexicalPlainTextFieldProps } from "./LexicalPlainTextField";
+
+export { GuildEditor } from "./GuildEditor";
+export type { GuildEditorProps } from "./GuildEditor";
+
+export { PixelSpriteMascot, STAGE_LABELS } from "./PixelSpriteMascot";
+export type { PixelSpriteMascotProps } from "./PixelSpriteMascot";
+
+export { XPTunerDialog } from "./XPTunerDialog";
+export type {
+  XPTunerDialogProps,
+  XPTunerConfig,
+  XPMultipliers,
+  XPMultiplierConfig,
+} from "./XPTunerDialog";
+
+export {
+  BadgeVisualPicker,
+  resolveIcon,
+  getIconCatalog,
+} from "./BadgeVisualPicker";
+export type { BadgeVisualPickerProps } from "./BadgeVisualPicker";
+
+export { BadgeEditor } from "./BadgeEditor";
+export type {
+  BadgeEditorProps,
+  BadgeOverride,
+  CustomBadge,
+  CustomBadgeVisual,
+  BadgeBuff,
+} from "./BadgeEditor";

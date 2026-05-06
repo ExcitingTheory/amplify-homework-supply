@@ -106,6 +106,9 @@ const GET_UNIT = /* GraphQL */ `
   query GetUnit($id: ID!) {
     getUnit(id: $id) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       name
       data
       language
@@ -118,9 +121,15 @@ const LIST_UNIT_WORDS = /* GraphQL */ `
     listUnitWords(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         wordId
         word {
           id
+          _version
+          _lastChangedAt
+          _deleted
           phrase
           definition
           phonetic
@@ -137,9 +146,15 @@ const LIST_QUESTION_UNITS = /* GraphQL */ `
     listQuestionUnits(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         questionId
         question {
           id
+          _version
+          _lastChangedAt
+          _deleted
           prompt
           answer
           choices
@@ -157,14 +172,23 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
     listUnitDocuments(filter: $filter) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         documentId
         document {
           id
+          _version
+          _lastChangedAt
+          _deleted
           filename
           extractedText
           parsedContent {
             items {
               id
+              _version
+              _lastChangedAt
+              _deleted
               vocabularyJSON
               questionsJSON
               summariesJSON

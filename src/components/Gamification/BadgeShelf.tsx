@@ -11,8 +11,12 @@ import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
 import Popover from '@mui/material/Popover'
 import Stack from '@mui/material/Stack'
+import Chip from '@mui/material/Chip'
+import Divider from '@mui/material/Divider'
 import { BadgeIcon } from './BadgeIcon'
 import { getBadgeConfig } from './badgeRegistry'
+import { getAntiBadgeConfig } from './antiBadgeRegistry'
+import type { AntiBadgeConfig } from './antiBadgeRegistry'
 
 export type BadgeType =
   | 'FIRST_SUBMISSION'
@@ -34,6 +38,8 @@ export type BadgeType =
   | 'BOT_WHISPERER_II'
   | 'BOT_WHISPERER_III'
   | 'BOT_WHISPERER_IV'
+  // Avatar powerup badges
+  | 'AVATAR_GLOW'
   // Storybook documentation promo badges
   | 'DOCS_EXPLORER'
   | 'INSTRUCTOR_ONBOARD'
@@ -67,6 +73,8 @@ const BADGE_DEFINITIONS: Record<BadgeType, BadgeDefinition> = {
   BOT_WHISPERER_II: { name: 'Bot Whisperer II', description: 'Earned Deep Thinker — upgraded your bot\'s style' },
   BOT_WHISPERER_III: { name: 'Bot Whisperer III', description: 'Used AI across 5 units — choose your bot\'s eyes & mouth' },
   BOT_WHISPERER_IV: { name: 'Bot Whisperer IV', description: 'AI mastery achieved — full bot customization unlocked' },
+  // Avatar powerup badges
+  AVATAR_GLOW: { name: 'Glow Ring', description: 'Level up! — rotating gradient ring around your avatar for 24 hours' },
   // Storybook documentation promo badges
   DOCS_EXPLORER: { name: 'Docs Explorer', description: 'Visited the Storybook documentation and started onboarding' },
   INSTRUCTOR_ONBOARD: { name: 'Instructor Certified', description: 'Completed the instructor onboarding in Storybook' },
@@ -79,12 +87,14 @@ const BADGE_DEFINITIONS: Record<BadgeType, BadgeDefinition> = {
 const ALL_BADGE_TYPES: BadgeType[] = Object.keys(BADGE_DEFINITIONS) as BadgeType[]
 
 export interface EarnedBadge {
-  badgeType: BadgeType
+  badgeType: BadgeType | string
   awardedAt: string
   /** The unit or entity ID this badge was earned in. */
   sourceId?: string | null
   /** Number of times this badge has been earned (from model count field). */
   count?: number
+  /** Whether this is an anti-badge (earned for dubious achievements). */
+  isAnti?: boolean
 }
 
 export interface BadgeShelfProps {
@@ -97,7 +107,11 @@ export interface BadgeShelfProps {
 }
 
 export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: BadgeShelfProps) {
-  const earnedSet = new Set(earnedBadges.map(b => b.badgeType))
+  // Split earned badges into regular and anti
+  const regularEarned = earnedBadges.filter(b => !b.isAnti)
+  const antiEarned = earnedBadges.filter(b => b.isAnti)
+
+  const earnedSet = new Set(regularEarned.map(b => b.badgeType))
 
   // Count how many times each badge was earned — prefer model count field, fall back to array duplicates
   const earnedCounts = earnedBadges.reduce<Record<string, number>>((acc, b) => {
@@ -112,21 +126,27 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
 
   // Popover state
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null)
-  const [activeBadge, setActiveBadge] = React.useState<BadgeType | null>(null)
+  const [activeBadge, setActiveBadge] = React.useState<string | null>(null)
+  const [activeIsAnti, setActiveIsAnti] = React.useState(false)
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>, type: BadgeType) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>, type: string, isAnti = false) => {
     setAnchorEl(event.currentTarget)
     setActiveBadge(type)
+    setActiveIsAnti(isAnti)
   }
 
   const handleClose = () => {
     setAnchorEl(null)
     setActiveBadge(null)
+    setActiveIsAnti(false)
   }
 
-  const activeDef = activeBadge ? BADGE_DEFINITIONS[activeBadge] : null
+  const activeDef = activeBadge && !activeIsAnti ? BADGE_DEFINITIONS[activeBadge as BadgeType] : null
+  const activeAntiConfig = activeBadge && activeIsAnti ? getAntiBadgeConfig(activeBadge) : null
   const activeEarned = activeBadge ? earnedBadges.find(b => b.badgeType === activeBadge) : null
-  const activeIsEarned = activeBadge ? earnedSet.has(activeBadge) : false
+  const activeIsEarned = activeBadge
+    ? (activeIsAnti ? antiEarned.some(b => b.badgeType === activeBadge) : earnedSet.has(activeBadge as BadgeType))
+    : false
   const activeCount = activeBadge ? (earnedCounts[activeBadge] || 0) : 0
 
   return (
@@ -190,6 +210,83 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
         })}
       </Box>
 
+      {/* Anti-badges section */}
+      {antiEarned.length > 0 && (
+        <>
+          <Divider sx={{ my: 2 }}>
+            <Chip
+              label="Anti-Badges"
+              size="small"
+              color="error"
+              variant="outlined"
+              sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+            />
+          </Divider>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${columns}, 1fr)`,
+              gap: 1.5,
+              justifyItems: 'center',
+            }}
+          >
+            {antiEarned.map((badge) => {
+              const config = getAntiBadgeConfig(badge.badgeType)
+              const count = earnedCounts[badge.badgeType] || 1
+              if (!config) return null
+
+              return (
+                <Tooltip key={badge.badgeType} title={config.name} arrow>
+                  <Box
+                    onClick={(e) => handleClick(e, badge.badgeType, true)}
+                    sx={{
+                      position: 'relative',
+                      cursor: 'pointer',
+                      border: '2px solid',
+                      borderColor: 'error.main',
+                      borderRadius: '50%',
+                      p: 0.25,
+                    }}
+                  >
+                    <BadgeIcon
+                      config={config}
+                      size={56}
+                      earned
+                      animate
+                      drawIcon
+                    />
+                    {count > 1 && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          position: 'absolute',
+                          bottom: -2,
+                          right: -2,
+                          fontSize: '0.625rem',
+                          fontWeight: 800,
+                          color: 'error.main',
+                          bgcolor: 'background.paper',
+                          borderRadius: '50%',
+                          width: 18,
+                          height: 18,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: 1,
+                          lineHeight: 1,
+                        }}
+                      >
+                        ×{count}
+                      </Typography>
+                    )}
+                  </Box>
+                </Tooltip>
+              )
+            })}
+          </Box>
+        </>
+      )}
+
       {/* Detail popover */}
       <Popover
         open={Boolean(anchorEl)}
@@ -197,9 +294,9 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-        slotProps={{ paper: { sx: { p: 2, maxWidth: 240, borderRadius: 2 } } }}
+        slotProps={{ paper: { sx: { p: 2, maxWidth: 260, borderRadius: 2 } } }}
       >
-        {activeDef && (
+        {activeDef && !activeIsAnti && (
           <Stack spacing={0.5} alignItems="center">
             <BadgeIcon
               badgeType={activeBadge!}
@@ -225,6 +322,60 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
             {!activeIsEarned && (
               <Typography variant="caption" color="text.disabled" fontStyle="italic">
                 Locked
+              </Typography>
+            )}
+          </Stack>
+        )}
+        {activeAntiConfig && activeIsAnti && (
+          <Stack spacing={0.5} alignItems="center">
+            <BadgeIcon
+              config={activeAntiConfig}
+              size={48}
+              earned
+              animate={false}
+              drawIcon={false}
+            />
+            <Typography variant="subtitle2" fontWeight={700} color="error.main">
+              {activeAntiConfig.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" textAlign="center">
+              {activeAntiConfig.description}
+            </Typography>
+            {activeAntiConfig.debuff.shameText && (
+              <Typography variant="caption" fontStyle="italic" color="error" textAlign="center" sx={{ opacity: 0.8 }}>
+                &ldquo;{activeAntiConfig.debuff.shameText}&rdquo;
+              </Typography>
+            )}
+            {activeAntiConfig.debuff.xpMultiplier != null && (
+              <Chip
+                label={`XP ×${activeAntiConfig.debuff.xpMultiplier} for ${activeAntiConfig.debuff.xpMultiplierDurationHours || 24}h`}
+                size="small"
+                color="error"
+                variant="outlined"
+                sx={{ fontSize: '0.65rem' }}
+              />
+            )}
+            {activeAntiConfig.debuff.temporaryTitle && (
+              <Chip
+                label={`Title: "${activeAntiConfig.debuff.temporaryTitle}"`}
+                size="small"
+                variant="outlined"
+                sx={{ fontSize: '0.65rem' }}
+              />
+            )}
+            {activeAntiConfig.redeemable && activeAntiConfig.redemptionHint && (
+              <Typography variant="caption" color="success.main" textAlign="center" sx={{ mt: 0.5 }}>
+                Redeemable: {activeAntiConfig.redemptionHint}
+              </Typography>
+            )}
+            {activeIsEarned && activeEarned && (
+              <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                Received {new Date(activeEarned.awardedAt).toLocaleDateString()}
+              </Typography>
+            )}
+            {activeCount > 1 && (
+              <Typography variant="caption" fontWeight={700} color="error.main">
+                Received {activeCount} times
               </Typography>
             )}
           </Stack>

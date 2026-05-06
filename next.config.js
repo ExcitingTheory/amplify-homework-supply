@@ -32,6 +32,12 @@ module.exports = withSerwist({
   // Use standalone output for smaller deployments
   output: 'standalone',
   
+  // Skip TypeScript type checking during build to avoid OOM
+  // Run `tsc --noEmit` separately in CI for type safety
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   // Optimize images
   images: {
     unoptimized: true, // Required for static export or SSR on Amplify

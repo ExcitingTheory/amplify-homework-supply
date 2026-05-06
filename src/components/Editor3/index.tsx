@@ -76,7 +76,7 @@ import YjsCollaborationPlugin from './plugins/CollaborationPlugin';
 import { useChatPageContext } from '../../hooks/useChatPageContext';
 
 import { useYjsUnit } from '../../hooks/useYjsUnit';
-import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH, DEBOUNCE_SAVE_DELAY_MS } from './editorConfig';
+import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH, DEBOUNCE_SAVE_DELAY_MS, sanitizeEditorStateJSON } from './editorConfig';
 import { Drawer, DrawerHeader } from './styledComponents';
 
 /**
@@ -354,7 +354,7 @@ export default function Editor(): JSX.Element {
     onError,
     // Set initial editor state from unit.data so CollaborationPlugin
     // can bootstrap the Y.Doc with content via shouldBootstrap=true
-    editorState: unit?.data || null,
+    editorState: sanitizeEditorStateJSON(unit?.data) || null,
   }), [unit?.id]); // Re-create only when unit changes (LexicalComposer reads this once on mount)
 
   // Create debounced save function with stable reference

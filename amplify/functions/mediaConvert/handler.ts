@@ -54,11 +54,13 @@ const GET_FILE = /* GraphQL */ `
   query GetFile($id: ID!) {
     getFile(id: $id) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       path
       mimeType
       identityId
       owner
-      _version
     }
   }
 `;
@@ -68,11 +70,13 @@ const LIST_FILES_BY_PATH = /* GraphQL */ `
     listFiles(filter: $filter, limit: 1) {
       items {
         id
+        _version
+        _lastChangedAt
+        _deleted
         path
         mimeType
         identityId
         owner
-        _version
       }
     }
   }
@@ -82,6 +86,9 @@ const UPDATE_FILE = /* GraphQL */ `
   mutation UpdateFile($input: UpdateFileInput!) {
     updateFile(input: $input) {
       id
+      _version
+      _lastChangedAt
+      _deleted
       hlsUrl
       transcodeStatus
       mediaConvertJobId
