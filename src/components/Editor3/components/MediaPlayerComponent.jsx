@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState, useRef } from 'react';
 
@@ -45,7 +45,7 @@ export default function MediaPlayerComponent({
     words,
     requestDefinition = false,
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [gridSelection, setGridSelection] = React.useState([]);
     const [index, setIndex] = useState(0);
     const [sources, setSources] = useState([]);

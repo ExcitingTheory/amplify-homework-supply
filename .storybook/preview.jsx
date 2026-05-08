@@ -102,6 +102,7 @@ import { mockChatAPI } from "./__mocks__/chat-api";
 
 // Import Next.js router mock
 import { RouterContext, createMockRouter } from "./__mocks__/next-router";
+import { setNavigationState } from "./__mocks__/next-navigation";
 
 // Import translation mode addon
 import { withTranslationMode } from "./addons/translation-mode";
@@ -370,7 +371,7 @@ const preview = {
     },
 
     nextjs: {
-      appDirectory: false,
+      appDirectory: true,
     },
 
     // Add viewport configuration for better responsive testing
@@ -776,6 +777,14 @@ const preview = {
       }
       routerParams = routerParams || {};
       const mockRouter = createMockRouter(routerParams);
+
+      // Configure next/navigation mock state from story parameters
+      const navParams = context?.parameters?.nextjs?.navigation || {};
+      setNavigationState({
+        pathname: navParams.pathname || routerParams.pathname || '/',
+        params: navParams.params || routerParams.query || {},
+        searchParams: navParams.searchParams || {},
+      });
 
       // Get auth configuration from story parameters
       const mockAuth = context?.parameters?.mockAuth || {};

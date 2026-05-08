@@ -832,13 +832,15 @@ describe("C. Lambda Handler Integration Tests", () => {
   });
 
   // ========================================================================
-  // C6. OpenAI Handler (Multiple Operations)
+  // C6. OpenAI Handler (Remaining Lambda Operations)
+  // NOTE: generateAudioFile/generateImageFile are now Server Actions.
+  //       See test/integration/server-actions.test.ts for SA1 tests.
   // ========================================================================
-  describe("C6. OpenAI Handler (Multiple Operations)", () => {
+  describe("C6. OpenAI Handler (Remaining Lambda Operations)", () => {
     afterEach(cleanup);
 
-    // Text-to-Speech
-    test("Generate audio from text (TTS)", async () => {
+    // Text-to-Speech (base64 return — legacy Lambda, not the File-creating Server Action)
+    test("Generate audio base64 from text (TTS)", async () => {
       await signInAs("instructor1");
 
       const { data, errors } = await client.mutations.generateAudio({
@@ -886,31 +888,6 @@ describe("C. Lambda Handler Integration Tests", () => {
       });
 
       expect(typeof data === "string" || errors !== undefined).toBe(true);
-    }, 30000);
-
-    // Image Generation (DALL-E)
-    test("Generate image from text (DALL-E)", async () => {
-      await signInAs("instructor1");
-
-      const { data, errors } = await client.mutations.generateImage({
-        phrase: "A serene Japanese garden with a pagoda",
-        model: "dall-e-3",
-      });
-
-      expect(typeof data === "string" || errors !== undefined).toBe(true);
-    }, 30000);
-
-    test("Generate image file", async () => {
-      await signInAs("instructor1");
-
-      const { data, errors } = await client.mutations.generateImageFile({
-        phrase: "Mount Fuji at sunrise",
-        model: "dall-e-3",
-      });
-
-      expect(
-        typeof data === "object" || typeof data === "string" || errors,
-      ).toBeDefined();
     }, 30000);
 
     // Answer Verification

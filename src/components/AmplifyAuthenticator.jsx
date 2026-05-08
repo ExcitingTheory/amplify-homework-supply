@@ -15,8 +15,8 @@ import React from 'react';
 import { Authenticator, ThemeProvider as AmplifyThemeProvider } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { useColorScheme } from '@mui/material/styles';
-import { useTranslation } from 'next-i18next';
-import { useRouter } from 'next/router';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Hub } from 'aws-amplify/utils';
 
 const amplifyAuthTheme = {
@@ -139,7 +139,7 @@ function getFormFields(t) {
 
 
 export default function MyAuth({ children }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const formFields = getFormFields(t);
     const router = useRouter();
     const { mode } = useColorScheme();

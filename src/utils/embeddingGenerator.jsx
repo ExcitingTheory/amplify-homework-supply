@@ -1,32 +1,33 @@
 /**
  * Embedding Generation Utilities
  * Handles generating embeddings for units, sections, words, and questions
- * 
+ *
  * CACHING:
  * - Query embeddings are cached in memory (100 entries LRU) + localStorage (24h TTL)
  * - Cache key: model_dimensions_normalized-text (case-insensitive, trimmed)
  * - Reduces OpenAI API costs for repeated searches
  * - Use clearEmbeddingCache() to manually clear cache
  * - Set skipCache: true in options to bypass cache
- * 
+ *
  * USAGE:
  * import { clearEmbeddingCache } from '@/utils/embeddingGenerator';
  * clearEmbeddingCache(); // Clear all cached query embeddings
  */
 
-import { getAmplifyClient } from './amplifyClient';
+import { getAmplifyClient } from "./amplifyClient";
+import { generateEmbedding as generateEmbeddingAction } from "../../app/actions/embeddings";
 // Note: Type import commented out for .js file
 // import type { Schema } from '../../amplify/data/resource';
-import { 
-  extractPlainText, 
-  extractForEmbedding, 
+import {
+  extractPlainText,
+  extractForEmbedding,
   extractMultiple,
-  extractWithSectionMarkers 
-} from './headlessEditorExtractor';
+  extractWithSectionMarkers,
+} from "./headlessEditorExtractor";
 
 // In-memory cache for query embeddings
 const embeddingCache = new Map();
-const CACHE_KEY_PREFIX = 'qemb_';
+const CACHE_KEY_PREFIX = "qemb_";
 const CACHE_MAX_SIZE = 100; // LRU cache size
 const CACHE_EXPIRY_MS = 1000 * 60 * 60 * 24; // 24 hours
 
@@ -43,24 +44,27 @@ function getCacheKey(text, model, dimensions) {
  */
 function getCachedEmbedding(text, model, dimensions) {
   const key = getCacheKey(text, model, dimensions);
-  
+
   // Check memory cache first
   if (embeddingCache.has(key)) {
     const cached = embeddingCache.get(key);
     if (Date.now() - cached.timestamp < CACHE_EXPIRY_MS) {
-      console.log('[Embedding Cache] Memory hit:', text.substring(0, 50));
+      console.log("[Embedding Cache] Memory hit:", text.substring(0, 50));
       return cached.embedding;
     }
     embeddingCache.delete(key);
   }
-  
+
   // Check localStorage
   try {
     const stored = localStorage.getItem(key);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Date.now() - parsed.timestamp < CACHE_EXPIRY_MS) {
-        console.log('[Embedding Cache] LocalStorage hit:', text.substring(0, 50));
+        console.log(
+          "[Embedding Cache] LocalStorage hit:",
+          text.substring(0, 50),
+        );
         // Populate memory cache
         embeddingCache.set(key, parsed);
         return parsed.embedding;
@@ -68,9 +72,9 @@ function getCachedEmbedding(text, model, dimensions) {
       localStorage.removeItem(key);
     }
   } catch (error) {
-    console.warn('[Embedding Cache] LocalStorage read error:', error);
+    console.warn("[Embedding Cache] LocalStorage read error:", error);
   }
-  
+
   return null;
 }
 
@@ -82,28 +86,33 @@ function setCachedEmbedding(text, model, dimensions, embedding) {
   const cached = {
     embedding,
     timestamp: Date.now(),
-    text: text.substring(0, 100) // Store truncated text for debugging
+    text: text.substring(0, 100), // Store truncated text for debugging
   };
-  
+
   // Memory cache with LRU eviction
   if (embeddingCache.size >= CACHE_MAX_SIZE) {
     const firstKey = embeddingCache.keys().next().value;
     embeddingCache.delete(firstKey);
   }
   embeddingCache.set(key, cached);
-  
+
   // LocalStorage cache
   try {
     localStorage.setItem(key, JSON.stringify(cached));
   } catch (error) {
     // Handle quota exceeded - clear old entries
-    if (error.name === 'QuotaExceededError') {
-      console.warn('[Embedding Cache] LocalStorage quota exceeded, clearing old entries');
+    if (error.name === "QuotaExceededError") {
+      console.warn(
+        "[Embedding Cache] LocalStorage quota exceeded, clearing old entries",
+      );
       clearExpiredCache();
       try {
         localStorage.setItem(key, JSON.stringify(cached));
       } catch (retryError) {
-        console.warn('[Embedding Cache] Failed to cache after cleanup:', retryError);
+        console.warn(
+          "[Embedding Cache] Failed to cache after cleanup:",
+          retryError,
+        );
       }
     }
   }
@@ -115,7 +124,7 @@ function setCachedEmbedding(text, model, dimensions, embedding) {
 function clearExpiredCache() {
   const now = Date.now();
   const keysToRemove = [];
-  
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith(CACHE_KEY_PREFIX)) {
@@ -129,9 +138,11 @@ function clearExpiredCache() {
       }
     }
   }
-  
-  keysToRemove.forEach(key => localStorage.removeItem(key));
-  console.log(`[Embedding Cache] Cleared ${keysToRemove.length} expired entries`);
+
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  console.log(
+    `[Embedding Cache] Cleared ${keysToRemove.length} expired entries`,
+  );
 }
 
 /**
@@ -146,8 +157,8 @@ export function clearEmbeddingCache() {
       keysToRemove.push(key);
     }
   }
-  keysToRemove.forEach(key => localStorage.removeItem(key));
-  console.log('[Embedding Cache] Cleared all cached embeddings');
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  console.log("[Embedding Cache] Cleared all cached embeddings");
 }
 
 /**
@@ -156,7 +167,7 @@ export function clearEmbeddingCache() {
 export function getEmbeddingCacheStats() {
   let localStorageCount = 0;
   let totalSize = 0;
-  
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith(CACHE_KEY_PREFIX)) {
@@ -169,13 +180,13 @@ export function getEmbeddingCacheStats() {
       }
     }
   }
-  
+
   return {
     memoryCount: embeddingCache.size,
     localStorageCount,
     totalSizeKB: (totalSize / 1024).toFixed(2),
     maxSize: CACHE_MAX_SIZE,
-    expiryHours: CACHE_EXPIRY_MS / (1000 * 60 * 60)
+    expiryHours: CACHE_EXPIRY_MS / (1000 * 60 * 60),
   };
 }
 
@@ -187,16 +198,16 @@ export function getEmbeddingCacheStats() {
  */
 export async function generateEmbedding(text, options = {}) {
   const {
-    model = 'text-embedding-3-small',
+    model = "text-embedding-3-small",
     dimensions = 512,
-    skipCache = false // Add option to bypass cache
+    skipCache = false, // Add option to bypass cache
   } = options;
-  
+
   if (!text || text.trim().length === 0) {
-    console.warn('Empty text provided for embedding generation');
+    console.warn("Empty text provided for embedding generation");
     return null;
   }
-  
+
   // Check cache first (unless skipCache is true)
   if (!skipCache) {
     const cached = getCachedEmbedding(text, model, dimensions);
@@ -204,24 +215,25 @@ export async function generateEmbedding(text, options = {}) {
       return cached;
     }
   }
-  
+
   try {
-    console.log('[Embedding] Generating new embedding for:', text.substring(0, 50));
-    const client = getAmplifyClient();
-    const response = await client.mutations.generateEmbedding({
-      text: text.trim(),
+    console.log(
+      "[Embedding] Generating new embedding for:",
+      text.substring(0, 50),
+    );
+    const result = await generateEmbeddingAction({
+      content: text.trim(),
       model,
-      dimensions
+      dimensions,
     });
-    
-    const embedding = response.data?.embedding;
-    
+    const embedding = result.embedding;
+
     // Cache the result
     setCachedEmbedding(text, model, dimensions, embedding);
-    
+
     return embedding;
   } catch (error) {
-    console.error('Error generating embedding:', error);
+    console.error("Error generating embedding:", error);
     throw error;
   }
 }
@@ -235,54 +247,54 @@ export async function generateEmbedding(text, options = {}) {
 export async function generateUnitEmbedding(unitId, options = {}) {
   const { force = false } = options;
   const amplifyClient = getAmplifyClient();
-  
+
   try {
     // Get unit
     const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
     if (!unit) {
       throw new Error(`Unit not found: ${unitId}`);
     }
-    
+
     // Skip if already has embedding and not forcing
     if (unit.embedding && !force) {
       console.log(`Unit ${unitId} already has embedding, skipping`);
       return { success: true, cached: true };
     }
-    
+
     // Get all sections for this unit
     const { data: sections } = await amplifyClient.models.Section.list({
-      filter: { unitID: { eq: unitId } }
+      filter: { unitID: { eq: unitId } },
     });
-    
+
     // Filter out null sections
-    const validSections = sections.filter(s => s != null && s.id != null);
-    
+    const validSections = sections.filter((s) => s != null && s.id != null);
+
     if (validSections.length === 0) {
       console.warn(`Unit ${unitId} has no valid sections`);
-      return { success: false, reason: 'no_sections' };
+      return { success: false, reason: "no_sections" };
     }
-    
+
     // Extract text from all sections
     const extracted = extractWithSectionMarkers(
-      validSections.map(s => ({
+      validSections.map((s) => ({
         id: s.id,
         title: s.title,
-        content: s.content
-      }))
+        content: s.content,
+      })),
     );
-    
+
     if (extracted.text.length === 0) {
       console.warn(`Unit ${unitId} has no extractable text`);
-      return { success: false, reason: 'no_text' };
+      return { success: false, reason: "no_text" };
     }
-    
+
     // Generate embedding
     const embedding = await generateEmbedding(extracted.text);
-    
+
     if (!embedding) {
-      throw new Error('Failed to generate embedding');
+      throw new Error("Failed to generate embedding");
     }
-    
+
     // Save to unit
     await amplifyClient.models.Unit.update({
       id: unit.id,
@@ -291,14 +303,16 @@ export async function generateUnitEmbedding(unitId, options = {}) {
       embeddingWordCount: extracted.totalWordCount,
       embeddingSectionCount: extracted.sections.length,
     });
-    
-    console.log(`Generated embedding for unit ${unitId}: ${extracted.totalWordCount} words, ${extracted.sections.length} sections`);
-    
+
+    console.log(
+      `Generated embedding for unit ${unitId}: ${extracted.totalWordCount} words, ${extracted.sections.length} sections`,
+    );
+
     return {
       success: true,
       wordCount: extracted.totalWordCount,
       sectionCount: extracted.sections.length,
-      cached: false
+      cached: false,
     };
   } catch (error) {
     console.error(`Error generating unit embedding for ${unitId}:`, error);
@@ -315,34 +329,36 @@ export async function generateUnitEmbedding(unitId, options = {}) {
 export async function generateSectionEmbedding(sectionId, options = {}) {
   const { force = false } = options;
   const amplifyClient = getAmplifyClient();
-  
+
   try {
-    const { data: section } = await amplifyClient.models.Section.get({ id: sectionId });
+    const { data: section } = await amplifyClient.models.Section.get({
+      id: sectionId,
+    });
     if (!section) {
       throw new Error(`Section not found: ${sectionId}`);
     }
-    
+
     // Skip if already has embedding and not forcing
     if (section.embedding && !force) {
       console.log(`Section ${sectionId} already has embedding, skipping`);
       return { success: true, cached: true };
     }
-    
+
     // Extract text
     const extracted = extractForEmbedding(section.content);
-    
+
     if (extracted.isEmpty) {
       console.warn(`Section ${sectionId} has no extractable text`);
-      return { success: false, reason: 'no_text' };
+      return { success: false, reason: "no_text" };
     }
-    
+
     // Generate embedding
     const embedding = await generateEmbedding(extracted.text);
-    
+
     if (!embedding) {
-      throw new Error('Failed to generate embedding');
+      throw new Error("Failed to generate embedding");
     }
-    
+
     // Save to section
     await amplifyClient.models.Section.update({
       id: section.id,
@@ -351,16 +367,21 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
       wordCount: extracted.wordCount,
       embeddingVersion: Date.now(),
     });
-    
-    console.log(`Generated embedding for section ${sectionId}: ${extracted.wordCount} words`);
-    
+
+    console.log(
+      `Generated embedding for section ${sectionId}: ${extracted.wordCount} words`,
+    );
+
     return {
       success: true,
       wordCount: extracted.wordCount,
-      cached: false
+      cached: false,
     };
   } catch (error) {
-    console.error(`Error generating section embedding for ${sectionId}:`, error);
+    console.error(
+      `Error generating section embedding for ${sectionId}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -374,32 +395,32 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
 export async function generateWordEmbedding(wordId, options = {}) {
   const { force = false } = options;
   const amplifyClient = getAmplifyClient();
-  
+
   try {
     const { data: word } = await amplifyClient.models.Word.get({ id: wordId });
     if (!word) {
       throw new Error(`Word not found: ${wordId}`);
     }
-    
+
     if (word.embedding && !force) {
       return { success: true, cached: true };
     }
-    
+
     // Combine term and definition for embedding
-    const text = `${word.phrase || ''} ${word.definition || ''}`.trim();
-    
+    const text = `${word.phrase || ""} ${word.definition || ""}`.trim();
+
     if (!text) {
-      return { success: false, reason: 'no_text' };
+      return { success: false, reason: "no_text" };
     }
-    
+
     const embedding = await generateEmbedding(text);
-    
+
     await amplifyClient.models.Word.update({
       id: word.id,
       embedding: JSON.stringify(embedding),
       embeddingVersion: Date.now(),
     });
-    
+
     return { success: true, cached: false };
   } catch (error) {
     console.error(`Error generating word embedding for ${wordId}:`, error);
@@ -416,35 +437,40 @@ export async function generateWordEmbedding(wordId, options = {}) {
 export async function generateQuestionEmbedding(questionId, options = {}) {
   const { force = false } = options;
   const amplifyClient = getAmplifyClient();
-  
+
   try {
-    const { data: question } = await amplifyClient.models.Question.get({ id: questionId });
+    const { data: question } = await amplifyClient.models.Question.get({
+      id: questionId,
+    });
     if (!question) {
       throw new Error(`Question not found: ${questionId}`);
     }
-    
+
     if (question.embedding && !force) {
       return { success: true, cached: true };
     }
-    
+
     // Combine prompt and answer for embedding
-    const text = `${question.prompt || ''} ${question.answer || ''}`.trim();
-    
+    const text = `${question.prompt || ""} ${question.answer || ""}`.trim();
+
     if (!text) {
-      return { success: false, reason: 'no_text' };
+      return { success: false, reason: "no_text" };
     }
-    
+
     const embedding = await generateEmbedding(text);
-    
+
     await amplifyClient.models.Question.update({
       id: question.id,
       embedding: JSON.stringify(embedding),
       embeddingVersion: Date.now(),
     });
-    
+
     return { success: true, cached: false };
   } catch (error) {
-    console.error(`Error generating question embedding for ${questionId}:`, error);
+    console.error(
+      `Error generating question embedding for ${questionId}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -458,28 +484,37 @@ export async function generateAllSectionEmbeddings(unitId) {
   const amplifyClient = getAmplifyClient();
   try {
     const { data: sections } = await amplifyClient.models.Section.list({
-      filter: { unitID: { eq: unitId } }
+      filter: { unitID: { eq: unitId } },
     });
-    
+
     // Filter out null items that can occur in subscription updates
-    const validSections = sections.filter(s => s != null && s.id != null);
-    
+    const validSections = sections.filter((s) => s != null && s.id != null);
+
     const results = await Promise.allSettled(
-      validSections.map(section => generateSectionEmbedding(section.id))
+      validSections.map((section) => generateSectionEmbedding(section.id)),
     );
-    
+
     const summary = {
       total: validSections.length,
-      success: results.filter(r => r.status === 'fulfilled' && r.value.success).length,
-      cached: results.filter(r => r.status === 'fulfilled' && r.value.cached).length,
-      failed: results.filter(r => r.status === 'rejected').length
+      success: results.filter(
+        (r) => r.status === "fulfilled" && r.value.success,
+      ).length,
+      cached: results.filter((r) => r.status === "fulfilled" && r.value.cached)
+        .length,
+      failed: results.filter((r) => r.status === "rejected").length,
     };
-    
-    console.log(`Section embedding generation complete for unit ${unitId}:`, summary);
-    
+
+    console.log(
+      `Section embedding generation complete for unit ${unitId}:`,
+      summary,
+    );
+
     return summary;
   } catch (error) {
-    console.error(`Error generating section embeddings for unit ${unitId}:`, error);
+    console.error(
+      `Error generating section embeddings for unit ${unitId}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -491,14 +526,17 @@ export async function generateAllSectionEmbeddings(unitId) {
  * @param {number} maxAge - Max age in milliseconds before regenerating
  * @returns {Promise<object>} Result with embedding status
  */
-export async function getOrGenerateUnitEmbedding(unitId, maxAge = 7 * 24 * 60 * 60 * 1000) {
+export async function getOrGenerateUnitEmbedding(
+  unitId,
+  maxAge = 7 * 24 * 60 * 60 * 1000,
+) {
   const amplifyClient = getAmplifyClient();
   try {
     const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
     if (!unit) {
       throw new Error(`Unit not found: ${unitId}`);
     }
-    
+
     // Check if embedding exists and is fresh
     if (unit.embedding && unit.embeddingVersion) {
       const age = Date.now() - unit.embeddingVersion;
@@ -507,23 +545,30 @@ export async function getOrGenerateUnitEmbedding(unitId, maxAge = 7 * 24 * 60 * 
           success: true,
           cached: true,
           age: age,
-          embedding: JSON.parse(unit.embedding)
+          embedding: JSON.parse(unit.embedding),
         };
       }
     }
-    
+
     // Generate new embedding
     const result = await generateUnitEmbedding(unitId, { force: true });
-    
+
     // Fetch updated unit to get embedding
-    const { data: updatedUnit } = await amplifyClient.models.Unit.get({ id: unitId });
-    
+    const { data: updatedUnit } = await amplifyClient.models.Unit.get({
+      id: unitId,
+    });
+
     return {
       ...result,
-      embedding: updatedUnit.embedding ? JSON.parse(updatedUnit.embedding) : null
+      embedding: updatedUnit.embedding
+        ? JSON.parse(updatedUnit.embedding)
+        : null,
     };
   } catch (error) {
-    console.error(`Error getting/generating unit embedding for ${unitId}:`, error);
+    console.error(
+      `Error getting/generating unit embedding for ${unitId}:`,
+      error,
+    );
     throw error;
   }
 }

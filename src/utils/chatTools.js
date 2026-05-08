@@ -4,6 +4,8 @@
  */
 
 import { getAmplifyClient } from './amplifyClient';
+import { generateEmbedding as generateEmbeddingAction, generateUnitEmbeddings as generateUnitEmbeddingsAction } from '../../app/actions/embeddings';
+import { createSection as createSectionAction } from '../../app/actions/section';
 import * as EmbeddingWorker from './embeddingWorkerManager';
 
 // Vector store instance - will be set from context
@@ -698,19 +700,14 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     console.log('[executeSearchContent] Using DataStore embedding search (fallback)');
     
     // Generate embedding for the query
-    console.log('[executeSearchContent] Calling generateEmbedding mutation...');
-    const client = getAmplifyClient();
-    const { data, errors } = await client.mutations.generateEmbedding({
+    console.log('[executeSearchContent] Calling generateEmbedding...');
+    const result = await generateEmbeddingAction({
       content: query,
       model: 'text-embedding-3-small',
       dimensions: 512
     });
+    const queryEmbedding = result.embedding;
 
-    if (errors || !data?.embedding) {
-      throw new Error('Failed to generate query embedding');
-    }
-
-    const queryEmbedding = data.embedding;
     console.log(`[executeSearchContent] Query embedding generated: ${queryEmbedding.length} dimensions`);
     
     const results = [];
@@ -830,46 +827,19 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
 
 export async function executeCreateSection({ name, description }) {
   try {
-    const client = getAmplifyClient();
-    
-    // Use the custom mutation that creates Cognito groups
-    const { data, errors } = await client.mutations.createSectionGroup({
-      name,
-      description: description || ''
-    });
+    const result = await createSectionAction(name, description || '');
 
-    // Detailed error logging for debugging
-    if (errors) {
-      console.error('[executeCreateSection] GraphQL errors:', JSON.stringify(errors, null, 2));
-      throw new Error(errors[0]?.message || 'GraphQL mutation failed');
-    }
-
-    if (!data) {
-      console.error('[executeCreateSection] Mutation returned null data');
-      throw new Error('Section creation failed - no data returned');
-    }
-
-    // Parse the JSON response from the Lambda
-    let result;
-    try {
-      result = JSON.parse(data);
-    } catch (parseError) {
-      console.error('[executeCreateSection] Failed to parse response:', data);
-      throw new Error('Invalid response format from section creation');
-    }
-
-    if (!result.sectionId) {
-      console.error('[executeCreateSection] Response missing sectionId:', result);
-      throw new Error('Section creation response missing required fields');
+    if (!result.success) {
+      throw new Error(result.error || 'Section creation failed');
     }
 
     return {
       success: true,
       section: {
         id: result.sectionId,
-        name: result.name,
+        name,
         code: result.code,
-        message: result.message
+        message: `Section "${name}" created successfully`
       }
     };
   } catch (error) {
@@ -1302,12 +1272,8 @@ export async function executePublishUnit({ unitId, generateEmbeddings = true }) 
     let embeddingResult = null;
     if (generateEmbeddings) {
       try {
-        // Use the generateEmbeddings mutation from the backend
-        const { data, errors } = await client.mutations.generateUnitEmbeddings({
-          unitId
-        });
-        
-        if (!errors && data) {
+        const result = await generateUnitEmbeddingsAction(unitId);
+        if (result.success) {
           embeddingResult = {
             success: true,
             message: 'Embeddings generated successfully'

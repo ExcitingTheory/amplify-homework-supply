@@ -12,7 +12,7 @@ import { Box, IconButton, Typography, Paper, ButtonGroup, Skeleton } from '@mui/
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
@@ -61,7 +61,7 @@ export default function PdfViewerComponent({
     filename,
     nodeKey 
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [editor] = useLexicalComposerContext();
     const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
     const containerRef = useRef(null);

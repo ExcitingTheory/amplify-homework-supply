@@ -13,12 +13,12 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import UnitContext from '../../../context/unitContext'
 
 export default function QuestionBlockRo(props) {
-  const { t } = useTranslation('workbook');
+  const t = useTranslations('workbook');
   const { nodeKey, data } = props
   const { grade, saveGrade } = React.useContext(UnitContext)
   console.log('QuestionBlockRo.grade', grade)

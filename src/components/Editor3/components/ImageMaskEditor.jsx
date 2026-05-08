@@ -16,7 +16,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 import ClearIcon from '@mui/icons-material/Clear';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * Image Mask Editor component for selecting areas of an image to regenerate
@@ -30,7 +30,7 @@ export default function ImageMaskEditor({
     width = 800,
     height = 600,
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);

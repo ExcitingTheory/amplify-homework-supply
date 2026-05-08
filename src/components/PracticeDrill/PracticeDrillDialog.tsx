@@ -21,7 +21,7 @@ import {
 import type { TransitionProps } from '@mui/material/transitions'
 import CloseIcon from '@mui/icons-material/Close'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import PracticeDrillProgress from './PracticeDrillProgress'
 import DrillGradeAdapter from './DrillGradeAdapter'
 import CollaborativePresenceBar from './CollaborativePresenceBar'
@@ -80,7 +80,7 @@ export default function PracticeDrillDialog({
   joinSessionId,
   joinRoomCode,
 }: PracticeDrillDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const {
     session,
     generating,

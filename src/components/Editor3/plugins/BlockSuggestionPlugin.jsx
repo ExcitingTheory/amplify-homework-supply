@@ -35,8 +35,7 @@ import { $isListNode } from '@lexical/list';
 import { $createTextNode, $createParagraphNode } from 'lexical';
 import { useCallback, useEffect, useState, useRef, useContext } from 'react';
 import * as React from 'react';
-import { post } from 'aws-amplify/api';
-import { fetchAuthSession } from 'aws-amplify/auth';
+
 
 import BlockSuggestionMenu from '../components/BlockSuggestionMenu';
 import { $isQuizNode, INSERT_QUIZ_COMMAND } from './QuizPlugin';
@@ -221,15 +220,6 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
     lastAIRequestTime.current = now;
     
     try {
-      // Get auth token
-      const { tokens } = await fetchAuthSession();
-      const idToken = tokens?.idToken?.toString();
-      if (!idToken) {
-        console.warn('[SuggestBlocks] No auth token available');
-        setIsLoadingAI(false);
-        return null;
-      }
-
       // Extract unit structure
       const structure = editor.getEditorState().read(() => {
         const root = $getRoot();
@@ -246,40 +236,40 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
       
       const lastBlock = structure[structure.length - 1];
       
-      // Call /suggest-blocks SSE endpoint with dictionary and question bank
+      // Call local /api/suggest-blocks Route Handler (no Lambda cold start)
       const dictArray = dictionary ? Object.values(dictionary) : [];
       const questionsArray = questionBank ? Object.values(questionBank) : [];
       
-      const restOperation = post({
-        apiName: 'homeworkSupplyStreamApi',
-        path: '/suggest-blocks',
-        options: {
-          body: {
-            unitStructure: structure,
-            currentContext: {
-              position: 'End of lesson',
-              lastBlockType: lastBlock?.type,
-              lastBlockContent: lastBlock?.content,
-            },
-            dictionary: dictArray.map(w => ({
-              id: w.id,
-              phrase: w.phrase || w.word,
-              definition: w.definition,
-              phonetic: w.phonetic,
-            })),
-            questionBank: questionsArray.map(q => ({
-              id: q.id,
-              question: q.question,
-              type: q.type,
-            })),
+      const response = await fetch('/api/suggest-blocks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unitStructure: structure,
+          currentContext: {
+            position: 'End of lesson',
+            lastBlockType: lastBlock?.type,
+            lastBlockContent: lastBlock?.content,
           },
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-          },
-        },
+          dictionary: dictArray.map(w => ({
+            id: w.id,
+            phrase: w.phrase || w.word,
+            definition: w.definition,
+            phonetic: w.phonetic,
+          })),
+          questionBank: questionsArray.map(q => ({
+            id: q.id,
+            question: q.question,
+            type: q.type,
+          })),
+        }),
+        signal: abortController.current.signal,
       });
       
-      const response = await restOperation.response;
+      if (!response.ok) {
+        console.error('[SuggestBlocks] Response error:', response.status);
+        setIsLoadingAI(false);
+        return null;
+      }
       
       // Parse SSE stream from toUIMessageStream format
       const reader = response.body.getReader();

@@ -7,7 +7,7 @@ import React from 'react'
 import { Box, LinearProgress, Typography, Tooltip, Chip } from '@mui/material'
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects'
 import BoltIcon from '@mui/icons-material/Bolt'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -37,7 +37,7 @@ export default function PracticeDrillProgress({
   xpDiminished = false,
   streakCount,
 }: PracticeDrillProgressProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const percent = blockCount > 0 ? Math.round((blocksCompleted / blockCount) * 100) : 0
 
   return (

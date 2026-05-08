@@ -18,7 +18,7 @@ import {
 import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { createPortal } from 'react-dom';
 
 const BUTTON_SIZE = 20;
@@ -39,7 +39,7 @@ function TableHoverActions({
 }): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
 
   // Top "+" button (add column)
   const [topButtonPos, setTopButtonPos] = useState<{

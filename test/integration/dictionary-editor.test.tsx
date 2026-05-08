@@ -53,11 +53,8 @@ vi.mock('../../src/utils/amplifyClient', () => ({
   })),
 }));
 
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { language: 'en' },
-  }),
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 vi.mock('../../src/context/tabContext', () => ({

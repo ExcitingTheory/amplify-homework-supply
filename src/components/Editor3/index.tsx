@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -136,7 +136,7 @@ function EditorRefPlugin(): null {
  * Main Editor component with collaborative editing support
  */
 export default function Editor(): JSX.Element {
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);
   const vectorStoreContext = useContext(VectorStoreContext);

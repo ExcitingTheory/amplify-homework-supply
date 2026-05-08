@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Box, Skeleton } from '@mui/material';
 import { useColorScheme } from '@mui/material/styles';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { hexToRgb } from '../../../utils/hexToRgb';
 import getCachedUrl from '../../../utils/getCachedUrl';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
@@ -42,7 +42,7 @@ export default function StaticWaveform({
     backgroundColor,
     showLoading = true
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const canvasRef = useRef(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

@@ -18,7 +18,7 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import WifiIcon from '@mui/icons-material/Wifi'
 import WifiOffIcon from '@mui/icons-material/WifiOff'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import type { PracticeUser, GroupStats, ParticipantProgress } from '../../yjs/PracticeCollaborationProvider'
 
 // ============================================================================
@@ -77,7 +77,7 @@ export default function CollaborativePresenceBar({
   roomCode,
   isConnected,
 }: CollaborativePresenceBarProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const [copied, setCopied] = React.useState(false)
 
   const allParticipants = [currentUser, ...participants]

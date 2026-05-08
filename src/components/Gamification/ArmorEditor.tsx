@@ -16,7 +16,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { CHARGES, CHARGE_VIEWBOX } from './armoriaCharges'
 import type { ChargeEntry } from './armoriaCharges'
 import { useArmorUndoRedo } from './useArmorUndoRedo'
@@ -545,7 +545,7 @@ export function ArmorEditor({
   onClose,
   autoSaveDelay = 1500,
 }: ArmorEditorProps) {
-  const { t } = useTranslation('common')
+  const t = useTranslations('common')
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(() => ({
     config: initialConfig ? { ...DEFAULT_CONFIG, ...initialConfig } : DEFAULT_CONFIG,

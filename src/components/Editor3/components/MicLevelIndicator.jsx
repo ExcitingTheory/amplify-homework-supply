@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box, Typography, Tooltip } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -27,7 +27,7 @@ export default function MicLevelIndicator({
   warningDelaySec = 3,
   width,
 }) {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
   const [level, setLevel] = useState(0); // 0-100
   const [status, setStatus] = useState('ok'); // 'ok' | 'low' | 'silent'
   const [showWarning, setShowWarning] = useState(false);

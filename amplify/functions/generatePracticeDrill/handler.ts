@@ -15,6 +15,7 @@ import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { type Schema } from '../../data/resource';
 import { fromEnv } from '@aws-sdk/credential-providers';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 // ============================================================================
 // Types
@@ -110,11 +111,32 @@ const GET_UNIT = /* GraphQL */ `
       _lastChangedAt
       _deleted
       name
-      data
+      identityId
+      contentVersion
       language
     }
   }
 `;
+
+const s3 = new S3Client({});
+const bucketName = process.env.STORAGE_BUCKET;
+
+/**
+ * Read published unit content from S3.
+ * Lambda IAM role has full bucket access — no path prefix restrictions.
+ */
+async function getUnitContentFromS3(identityId: string, unitId: string): Promise<string | null> {
+  if (!bucketName) return null;
+  try {
+    const response = await s3.send(new GetObjectCommand({
+      Bucket: bucketName,
+      Key: `protected/${identityId}/units/${unitId}/published.json`,
+    }));
+    return await response.Body?.transformToString() ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const LIST_UNIT_WORDS = /* GraphQL */ `
   query ListUnitWords($filter: ModelUnitWordFilterInput) {
@@ -288,15 +310,18 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
       }));
   }
 
-  // Extract text blocks from Lexical content
-  if (sourcesEnabled.text && unit.data) {
+  // Extract text blocks from Lexical content (read from S3)
+  if (sourcesEnabled.text && unit.identityId) {
     try {
-      const lexicalData = typeof unit.data === 'string' ? JSON.parse(unit.data) : unit.data;
-      const textBlocks = extractTextBlocks(lexicalData);
-      material.textBlocks = textBlocks.map((text: string, i: number) => ({
-        id: `text-block-${i}`,
-        text,
-      }));
+      const s3Content = await getUnitContentFromS3(unit.identityId, unitId);
+      if (s3Content) {
+        const lexicalData = typeof s3Content === 'string' ? JSON.parse(s3Content) : s3Content;
+        const textBlocks = extractTextBlocks(lexicalData);
+        material.textBlocks = textBlocks.map((text: string, i: number) => ({
+          id: `text-block-${i}`,
+          text,
+        }));
+      }
     } catch {
       // Skip text blocks if parsing fails
     }

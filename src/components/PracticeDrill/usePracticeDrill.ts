@@ -13,7 +13,8 @@ import {
   buildFeedbackData,
   buildFeedbackMarkdown,
 } from "./buildPracticeDrillFeedback";
-import { updateUnitMemoryAndRebuild } from "../../utils/gamificationActions";
+import { updateLearningMemory } from "../../../app/actions/gamification";
+import { generatePracticeDrill as generatePracticeDrillAction } from "../../../app/actions/drill";
 import type { DrillConfig } from "./PracticeDrillConfigPopup";
 
 // ============================================================================
@@ -116,21 +117,13 @@ export function usePracticeDrill(
       try {
         const client = getAmplifyClient();
 
-        // Call the Lambda mutation
-        const { data, errors } = await client.mutations.generatePracticeDrill({
+        const result = await generatePracticeDrillAction({
           unitId,
           drillType: config.drillType.toUpperCase(),
           count: config.count,
-          sourcesEnabled: JSON.stringify(config.sources),
+          sourcesEnabled: config.sources,
         });
 
-        if (errors && errors.length > 0) {
-          throw new Error(
-            errors[0]?.message || "Failed to generate practice drill",
-          );
-        }
-
-        const result = typeof data === "string" ? JSON.parse(data) : data;
         const blocks: PracticeDrillBlock[] = result.blocks || [];
 
         // Create PracticeSession record
@@ -308,7 +301,7 @@ export function usePracticeDrill(
 
       // Update per-unit learning memory and rebuild central profile (fire-and-forget)
       if (unitId) {
-        updateUnitMemoryAndRebuild(
+        updateLearningMemory(
           "", // studentId filled server-side via owner auth
           unitId,
           session.accuracy,
@@ -319,10 +312,7 @@ export function usePracticeDrill(
             sourceType: session.metadata?.drillType || "practice",
           },
         ).catch((err: any) =>
-          console.error(
-            "[usePracticeDrill] updateUnitMemoryAndRebuild error:",
-            err,
-          ),
+          console.error("[usePracticeDrill] updateLearningMemory error:", err),
         );
       }
 

@@ -32,7 +32,7 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -123,7 +123,7 @@ export default function AIFeedbackWidget({
   size = 'small',
   showLabels = false,
 }: AIFeedbackWidgetProps) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [feedbackType, setFeedbackType] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<Set<keyof typeof AiFeedbackReason>>(new Set());

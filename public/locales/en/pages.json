@@ -164,6 +164,8 @@
   "workbook": {
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
     "start": "Start",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
+    "reload": "Reload"
   }
 }

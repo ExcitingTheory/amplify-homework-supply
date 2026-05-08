@@ -7,7 +7,7 @@ import FileManager2 from './FileManager2';
 import { DictionaryEditor2 } from '../../DictionaryEditor2';
 import { QuestionEditor2 } from '../../QuestionEditor2';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
@@ -65,7 +65,7 @@ export default function TabsVerticalLeft({
   setValue,
   setDrawerWidth,
 }) {
-  const { t } = useTranslation('editor.authoring');
+  const t = useTranslations('editor.authoring');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);

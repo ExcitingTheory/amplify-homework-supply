@@ -15,7 +15,7 @@
 
 import React, { useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -86,7 +86,7 @@ export const LexicalMessageRenderer = React.memo(({
   className = '',
   onContentLoaded,
 }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   
   // Create editor config with error handling
   const config = useMemo(() => ({

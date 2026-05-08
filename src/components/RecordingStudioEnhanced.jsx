@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Box,
     Typography,
@@ -51,7 +51,7 @@ export default function RecordingStudioEnhanced({
     onRecordingComplete,
     metadata = {},
 }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     
     // Tracks state - each track can have multiple audio clips
     const [tracks, setTracks] = useState([

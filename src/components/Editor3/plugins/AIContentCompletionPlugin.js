@@ -29,7 +29,7 @@ import {
 import { $isHeadingNode } from '@lexical/rich-text';
 import { useCallback, useEffect, useState, useRef, useContext } from 'react';
 import * as React from 'react';
-import { post } from 'aws-amplify/api';
+
 
 import { 
   $createAIContentSuggestionNode, 
@@ -40,7 +40,7 @@ import {
 } from '../components/AIContentSuggestionNode';
 import UnitContext from '../../../context/unitContext';
 
-import { fetchAuthSession } from 'aws-amplify/auth';
+
 
 const DEBOUNCE_DELAY = 800; // ms - wait for user to stop typing
 const MIN_CONTENT_LENGTH = 50; // chars - minimum before suggesting
@@ -151,22 +151,23 @@ export default function AIContentCompletionPlugin() {
         ...context,
       };
 
-      console.log('Making API call to completions...');
+      console.log('Making API call to /api/content-completion...');
       
-      // Call REST API with streaming support
-      const restOperation = post({
-        apiName: 'homeworkSupplyStreamApi',
-        path: '/content-completion',
-        options: {
-          body: {
-            prompt,
-            context: contextData,
-          },
-        },
+      // Call local Route Handler (no Lambda cold start)
+      const response = await fetch('/api/content-completion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          context: contextData,
+        }),
       });
 
-      const { body } = await restOperation.response;
-      const reader = body.getReader();
+      if (!response.ok) {
+        throw new Error(`Content completion failed: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let completion = '';
 

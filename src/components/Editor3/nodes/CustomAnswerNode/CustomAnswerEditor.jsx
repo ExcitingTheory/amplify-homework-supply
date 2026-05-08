@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -55,6 +55,7 @@ import { PromptMethodSelector, AllowedInputSelector } from '../../components/Pro
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 import getCachedUrl from '../../../../utils/getCachedUrl';
+import { generateSpeech as generateSpeechAction } from '../../../../../app/actions/generate';
 import { Remove } from '@mui/icons-material';
 
 const filter = createFilterOptions();
@@ -123,7 +124,7 @@ export default React.memo(function CustomAnswerEditor({
     promptMethod,
     allowedInput,
 }) {
-    const { t } = useTranslation('editor.blocks');
+    const t = useTranslations('editor.blocks');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     const [gridSelection, setGridSelection] = React.useState([]);
@@ -382,25 +383,14 @@ export default React.memo(function CustomAnswerEditor({
         setWorking(true);
         setPreviewMessage(t('customAnswerEditor.generatingAudio'));
 
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession()
-        // send graphql mutation to create new audio file
-        const client = getAmplifyClient();
-
-        const fileGenerator = await client.mutations.generateAudioFile({
+        const { identityId } = await fetchAuthSession()
+        // Server Action for audio generation
+        const result = await generateSpeechAction({
             phrase: prompt,
             voice: 'shimmer',
             model: 'tts-1-hd',
         });
-
-        // set the presignedUrl from the response
-
-        console.log('fileGenerator', fileGenerator)
-
-        // The mutation returns { data: { path, identityId, ... }, errors }
-        const { path } = fileGenerator.data || {};
+        const path = result.path;
 
         if (path) {
             console.log('s3Key', path, identityId)

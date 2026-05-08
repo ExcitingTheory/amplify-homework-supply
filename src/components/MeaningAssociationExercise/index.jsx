@@ -13,7 +13,7 @@
 
 import * as React from 'react'
 import { useDrop } from 'react-dnd'
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import {
   Box,
@@ -418,7 +418,7 @@ const MeaningAssociationTabs = ({
   enabledModes = ['learn', 'easy', 'hard'],
 }) => {
 
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
   const { grade } = React.useContext(UnitContext);
   const gradeData = React.useMemo(() => {
     if (!grade?.data) return {};

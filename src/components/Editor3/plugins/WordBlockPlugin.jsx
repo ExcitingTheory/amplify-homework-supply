@@ -29,7 +29,7 @@ DecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
 import * as React from 'react';
 import { useEffect, useContext, useState, useRef, useCallback } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import DictionaryContext from '../../../context/dictionaryContext';
 import { 
@@ -59,7 +59,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
     nodeKey,
     wordID,
   }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
 
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];

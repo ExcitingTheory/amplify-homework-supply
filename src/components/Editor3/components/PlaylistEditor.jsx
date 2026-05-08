@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { DataGrid } from '@mui/x-data-grid';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import {
     Menu,
@@ -104,7 +104,7 @@ export default function PlaylistEditor({
     // setFileIDs,
     fileIDs,
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

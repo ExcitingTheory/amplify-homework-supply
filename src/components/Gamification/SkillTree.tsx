@@ -36,7 +36,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
-import { generateSkillTree } from '../../utils/gamificationActions'
+import { generateSkillTreeFromUnit } from '../../../app/actions/gamification'
 
 // ============================================================================
 // Types
@@ -354,7 +354,7 @@ export function SkillTree({
     setGenerating(true)
     setError(null)
     try {
-      const result = await generateSkillTree(unitId, cohortId)
+      const result = await generateSkillTreeFromUnit(unitId, cohortId)
       if (result?.generated) {
         onGenerated?.({ skillCount: result.skillCount ?? 0 })
       } else {

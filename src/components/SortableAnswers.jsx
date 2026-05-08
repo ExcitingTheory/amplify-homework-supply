@@ -6,7 +6,7 @@ import { Stack, FormControlLabel, IconButton, Switch } from '@mui/material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import ClearIcon from '@mui/icons-material/Clear';
 import TextField from '@mui/material/TextField';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -49,7 +49,7 @@ export default function SortableAnswers({
 }
 
 function Answer({ data, index, answers, onQuestionReorder, onQuestionChange, onCorrectChange, onQuestionDelete }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     console.log('Answer', data)
     const [{ isDragging }, drag] = useDrag({
         type: 'answer',

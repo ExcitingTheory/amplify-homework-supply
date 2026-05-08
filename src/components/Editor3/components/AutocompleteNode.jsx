@@ -3,7 +3,7 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { useContext } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import AutocompleteContext from '../context/SharedAutocompleteContext';
 
@@ -61,7 +61,7 @@ export function $createAutocompleteNode(uuid) {
 }
 
 function AutocompleteComponent() {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const {
         suggestion,
     } = useContext(AutocompleteContext)

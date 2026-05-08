@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   Box,
@@ -42,7 +42,7 @@ import { useSkillTree } from "../context/gamificationContext";
  * - Expandable section details
  */
 export default function InstructorDashboard({ sections = [] }) {
-  const { t } = useTranslation("components");
+  const t = useTranslations("components");
   const client = getAmplifyClient();
 
   const [sectionStats, setSectionStats] = useState({});

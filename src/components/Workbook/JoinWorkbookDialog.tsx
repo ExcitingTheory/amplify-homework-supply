@@ -17,7 +17,7 @@ import {
   Alert,
 } from '@mui/material'
 import EditNoteIcon from '@mui/icons-material/EditNote'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { getAmplifyClient } from '../../utils/amplifyClient'
 
 // ============================================================================
@@ -39,7 +39,7 @@ export default function JoinWorkbookDialog({
   onClose,
   onJoin,
 }: JoinWorkbookDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

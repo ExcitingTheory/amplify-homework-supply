@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -978,7 +978,7 @@ function WordRowComponent({
     page,
     nodeKey,
 }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [isDragging, setIsDragging] = React.useState(false);
     const [fileOperations, setFileOperations] = React.useState([]);
     const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
@@ -1482,7 +1482,7 @@ function WordsPlugin({
 // =============================================================================
 
 export function DictionaryEditor2() {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [open, setOpen] = React.useState(false);
     const [isHelpOpen, setHelpOpen] = React.useState(false);
     const [expandedItems, setExpandedItems] = React.useState(new Set());

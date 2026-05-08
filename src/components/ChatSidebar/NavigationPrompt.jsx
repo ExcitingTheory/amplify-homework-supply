@@ -15,8 +15,8 @@ import {
     Box,
     Typography,
 } from '@mui/material';
-import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import EditIcon from '@mui/icons-material/Edit';
 import SchoolIcon from '@mui/icons-material/School';
@@ -62,7 +62,7 @@ export function NavigationPrompt({
     message,
     onNavigate,
 }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const router = useRouter();
     
     const contextInfo = CONTEXT_TO_PAGE[requiredContext];

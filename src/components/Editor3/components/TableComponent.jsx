@@ -47,7 +47,7 @@ import {
 } from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { IS_APPLE } from '../utils/dom';
 import {CellContext} from '../plugins/TablePlugin';
 import {
@@ -331,7 +331,7 @@ function TableActionMenu({
   setSortingOptions,
   sortingOptions,
 }) {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
   const dropDownRef = useRef<null | HTMLDivElement>(null);
   const coords = cellCoordMap.get(cell.id);
   const [x, y] = coords || [0, 0];
@@ -592,7 +592,7 @@ function TableCell({
   setSortingOptions,
   sortingOptions,
 }) {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
   const [editor] = useLexicalComposerContext();
   const [showMenu, setShowMenu] = useState(false);
   const menuRootRef = useRef(null);

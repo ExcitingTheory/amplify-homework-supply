@@ -73,11 +73,8 @@ vi.mock('aws-amplify/auth', () => ({
   }),
 }));
 
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { language: 'en' },
-  }),
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 describe('Grade Tracking Integration Tests', () => {

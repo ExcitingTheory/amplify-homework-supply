@@ -1,6 +1,6 @@
 'use strict';
 import React, { use } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,7 +28,7 @@ import TimerEditor from './TimerEditor';
 
 
 export default function AssignmentConfiguration() {
-  const { t } = useTranslation('editor.authoring');
+  const t = useTranslations('editor.authoring');
 
   const {
     sections, sectionMap, assignments

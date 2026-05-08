@@ -165,19 +165,18 @@ describe('Yjs Collaboration – Multi-User', () => {
       ) {
         return false;
       }
-      // i18next namespace not yet loaded during fast Cypress navigation
+      // i18n namespace not yet loaded during fast Cypress navigation
       if (
         err.stack?.includes('TabsVerticalRight') ||
         err.message.includes('i18next') ||
         err.message.includes('useTranslation') ||
-        err.message.includes("Cannot read properties of undefined (reading 'forEach')") ||
-        err.stack?.includes('next-i18next')
+        err.message.includes('useTranslations') ||
+        err.message.includes("Cannot read properties of undefined (reading 'forEach')")
       ) {
         return false;
       }
-      // React hydration mismatch — SSR has translations but client doesn't yet,
-      // causing initial UI mismatch. This is a known next-i18next race condition
-      // in Cypress where i18next backend isn't configured for client-side loading.
+      // React hydration mismatch — SSR vs client rendering timing difference
+      // in Cypress where navigation is instant.
       if (
         err.message.includes('Hydration failed') ||
         err.message.includes('error while hydrating') ||

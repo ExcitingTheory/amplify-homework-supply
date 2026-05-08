@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { useEffect, useContext, useState } from 'react';
-import Head from 'next/head'
 import {
     Box,
     Toolbar,
@@ -16,7 +15,7 @@ import {
     Chip,
     Stack,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import MainToolbar from '../../MainToolbar';
@@ -196,7 +195,7 @@ export default function ToolBarRoPlugin({
     setTabValue,
     isScrolled = false,
 }) {
-    const { t } = useTranslation('workbook');
+    const t = useTranslations('workbook');
     const {
         unit,
         finishedQuestions,
@@ -277,9 +276,7 @@ export default function ToolBarRoPlugin({
                         boxSizing: 'border-box',
                     }}>
                         <Box sx={{ flexGrow: 1, minWidth: 0, overflow: 'hidden' }}>
-                            <Head>
-                                <title>{name}</title>
-                            </Head>
+                            <title>{name}</title>
                             <Typography
                                 variant={isScrolled ? "body1" : "h6"}
                                 component="div"

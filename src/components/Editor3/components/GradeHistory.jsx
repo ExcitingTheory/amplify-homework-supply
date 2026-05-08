@@ -9,13 +9,13 @@
 import React from 'react';
 import { Box, Typography, Divider, Chip, Stack } from '@mui/material';
 import UnitContext from '../../../context/unitContext';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 
 export default function GradeHistory() {
-  const { t } = useTranslation('workbook');
+  const t = useTranslations('workbook');
   const { unit, grade, recentGrades } = React.useContext(UnitContext);
 
   const hasGrades = recentGrades && recentGrades.length > 0;

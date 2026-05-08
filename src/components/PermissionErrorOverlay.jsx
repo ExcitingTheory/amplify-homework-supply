@@ -10,8 +10,8 @@ import {
   Alert,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
-import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 /**
  * PermissionErrorOverlay - A modal overlay displayed when a user tries to access
@@ -29,7 +29,7 @@ export default function PermissionErrorOverlay({
   message,
   onClose 
 }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const router = useRouter();
 
   const handleGoBack = () => {

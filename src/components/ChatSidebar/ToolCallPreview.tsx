@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   Paper,
@@ -78,7 +78,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
   onEdit,
   compact = false,
 }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [isEditing, setIsEditing] = useState(false);
   const [editedParams, setEditedParams] = useState(parameters);
   const [expanded, setExpanded] = useState(!compact);

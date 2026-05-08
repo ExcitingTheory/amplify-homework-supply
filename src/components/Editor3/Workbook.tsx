@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box } from '@mui/material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -50,7 +50,7 @@ import UnitContext from '../../context/unitContext';
  * Displays unit content with grading and progress tracking
  */
 export function Workbook(): JSX.Element {
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
   const drawerRef = React.useRef<HTMLDivElement>(null);

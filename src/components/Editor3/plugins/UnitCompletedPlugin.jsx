@@ -9,8 +9,8 @@
 
 import * as React from 'react';
 import { useContext, useState } from 'react';
-import { useTranslation } from 'next-i18next';
-import { useRouter } from 'next/router';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 import UnitContext from '../../../context/unitContext';
 import { useXP } from '../../../context/gamificationContext';
@@ -40,7 +40,7 @@ import ReplayIcon from '@mui/icons-material/Replay';
  * @returns {JSX.Element} Unit completion modal component
  */
 export default function UnitCompletedPlugin() {
-    const { t } = useTranslation('workbook');
+    const t = useTranslations('workbook');
     const router = useRouter();
 
     const {

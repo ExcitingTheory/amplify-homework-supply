@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WarningIcon from '@mui/icons-material/Warning';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * ModerationPanel Component
@@ -22,7 +22,7 @@ import { useTranslation } from 'next-i18next';
  * Shows flagged categories with scores and policy guidance.
  */
 export default function ModerationPanel({ item, title }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   if (!item || !item.moderationCheckedAt) {
     return null;
   }

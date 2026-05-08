@@ -27,7 +27,7 @@ import {
     Collapse,
     Tooltip,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Download as ImportIcon,
     CheckCircle as CheckCircleIcon,
@@ -480,7 +480,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     onImportComplete,
     searchTerm = '',
 }) => {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const { user, isLoading: authLoading } = (useContext(AuthContext) || { user: undefined, isLoading: true }) as { user: { username?: string; [key: string]: any } | undefined; isLoading: boolean };
     const [parsedContent, setParsedContent] = useState<any>(null);
     const [document, setDocument] = useState<any>(null);

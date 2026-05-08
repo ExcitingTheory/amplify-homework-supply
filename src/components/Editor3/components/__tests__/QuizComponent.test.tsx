@@ -11,14 +11,12 @@ import React from 'react';
 import QuestionBlockRo from '../QuizComponent';
 import UnitContext from '../../../../context/unitContext';
 
-// Mock next-i18next
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: any) => {
-      if (key === 'quizComponent.gradeDisplay') return `Score: ${params?.score ?? 0}%`;
-      return key;
-    },
-  }),
+// Mock next-intl
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, params?: any) => {
+    if (key === 'quizComponent.gradeDisplay') return `Score: ${params?.score ?? 0}%`;
+    return key;
+  },
 }));
 
 function renderQuiz({
@@ -143,8 +141,8 @@ describe('QuestionBlockRo (QuizComponent)', () => {
             attemptedAnswers: { 0: 'Paris' },
             correctAnswers: { 0: 'Paris' },
             percentComplete: 100,
-          },
-        },
+        };
+      };
       });
 
       const checkboxes = screen.getAllByRole('checkbox');
@@ -164,8 +162,8 @@ describe('QuestionBlockRo (QuizComponent)', () => {
             attemptedAnswers: { 0: 'Paris' },
             correctAnswers: { 0: 'Paris' },
             percentComplete: 100,
-          },
-        },
+        };
+      };
       });
 
       expect(screen.getByText('Score: 75%')).toBeDefined();
@@ -197,7 +195,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
         saveGrade,
         gradeData: {
           'quiz-1': { accuracy: 50, complete: false, attemptedAnswers: {}, correctAnswers: {}, percentComplete: 0 },
-        },
+      };
       });
       expect(screen.getByText('Score: 50%')).toBeDefined();
     });

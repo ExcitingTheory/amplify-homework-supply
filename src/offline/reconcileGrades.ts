@@ -7,8 +7,9 @@
  * the submission is flagged for instructor review.
  */
 
-import { getCachedGrade, cacheGrade } from './OfflineDataStore';
-import { syncGradeWithConflictResolution } from './conflictResolution';
+import { getCachedGrade, cacheGrade } from "./OfflineDataStore";
+import { syncGradeWithConflictResolution } from "./conflictResolution";
+import { gradeShortAnswer } from "../../app/actions/grading";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,8 +50,12 @@ export async function reconcileOfflineGrades(
       };
     };
     queries?: {
-      verifyShortAnswer?: (args: Record<string, string>) => Promise<{ score: number; feedback: string }>;
-      verifyDefinition?: (args: Record<string, string>) => Promise<{ score: number; feedback: string }>;
+      verifyShortAnswer?: (
+        args: Record<string, string>,
+      ) => Promise<{ score: number; feedback: string }>;
+      verifyDefinition?: (
+        args: Record<string, string>,
+      ) => Promise<{ score: number; feedback: string }>;
     };
   },
   gradeId: string,
@@ -80,19 +85,19 @@ export async function reconcileOfflineGrades(
     try {
       let serverResult: { score: number; feedback: string } | null = null;
 
-      // Use provided cloud grader, or fall back to client queries
+      // Use provided cloud grader, or fall back to Server Action
       if (cloudGrader) {
         serverResult = await cloudGrader({
           answer: block.userAnswer,
           prompt: block.prompt,
           expected: block.expectedAnswer,
-          type: 'shortAnswer',
+          type: "shortAnswer",
         });
-      } else if (client.queries?.verifyShortAnswer) {
-        serverResult = await client.queries.verifyShortAnswer({
+      } else {
+        serverResult = await gradeShortAnswer({
+          question: block.prompt || "",
           answer: block.userAnswer,
-          prompt: block.prompt,
-          expected: block.expectedAnswer,
+          expectedAnswer: block.expectedAnswer,
         });
       }
 
@@ -122,7 +127,9 @@ export async function reconcileOfflineGrades(
       }
     } catch {
       // Cloud grading failed for this block — keep offline score
-      console.warn(`[Reconciliation] Cloud re-grade failed for block ${blockId}`);
+      console.warn(
+        `[Reconciliation] Cloud re-grade failed for block ${blockId}`,
+      );
     }
   }
 

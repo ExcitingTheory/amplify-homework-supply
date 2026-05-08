@@ -74,10 +74,8 @@ import {
 } from 'lexical';
 import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
-import Head from 'next/head'
-import { useRouter } from 'next/router'
 import {
     Box,
     Button,
@@ -351,7 +349,7 @@ const LAYOUTS = [
 
 
 function LayoutModal({editor}) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -461,7 +459,7 @@ function LayoutModal({editor}) {
 }
 
 function DeleteModal() {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -558,7 +556,7 @@ const IFrame = ({
 
 
 const PreviewModal = () => {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const {
         name,
         unit,
@@ -627,7 +625,7 @@ const PreviewModal = () => {
 
 
 const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const {
         name,
         description,
@@ -673,9 +671,7 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
             overflow: 'hidden',
             pr: isScrolled ? 2 : 0,
         }}>
-            <Head>
-                <title>{name}</title>
-            </Head>
+            <title>{name}</title>
             <Box sx={{
                 flex: isScrolled ? '0 1 auto' : '1 0 auto',
                 maxWidth: isScrolled ? '50%' : '100%',
@@ -796,7 +792,7 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
 }
 
 const StatusSelect = () => {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const {
         unit,
         handleStatusChange
@@ -891,7 +887,7 @@ const TextAlignmentDropdown = ({
     disabled = false,
     isRTL,
 }) => {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1090,7 +1086,7 @@ const InsertNodeDropDown = ({
     setTabValue,
     setOpenTab,
 }) => {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1313,7 +1309,7 @@ function TextFormatDropDown({
     isSuperscript,
     clearFormatting,
 }) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1416,7 +1412,7 @@ function BlockFormatDropDown({
     rootType,
     disabled = false,
 }) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
 
     // const [open, setOpen] = useState(false);
     // const [anchorEl, setAnchorEl] = useState(null);
@@ -1680,7 +1676,7 @@ function BlockFormatDropDown({
 }
 
 function FontSizeInput({ editor, value, disabled = false }) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const [inputValue, setInputValue] = useState(() => {
         return value ? value.replace('px', '') : '16';
     });
@@ -1823,7 +1819,7 @@ function FontDropDown({
     style,
     disabled = false,
 }) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClose = () => {
@@ -1924,7 +1920,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
     setTabValue,
     isScrolled = false,
 }, ref) {
-    const { t } = useTranslation('editor.authoring');
+    const t = useTranslations('editor.authoring');
     const [editor] = useLexicalComposerContext();
     const [activeEditor, setActiveEditor] = useState(editor);
     const [blockType, setBlockType] =

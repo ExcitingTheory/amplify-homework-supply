@@ -34,6 +34,7 @@ import {
 import { MediaConvertConstruct } from "./custom/mediaConvert/resource";
 import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
+import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
 
 /**
@@ -115,6 +116,7 @@ export const backend = defineBackend({
   websocketHandler,
   gamificationHandler,
   peerReviewAIHandler,
+  generatePracticeDrillHandler,
   streakResetCronHandler,
 });
 
@@ -347,6 +349,19 @@ backend.mediaConvertHandler.addEnvironment(
 backend.mediaConvertHandler.addEnvironment(
   "MEDIACONVERT_ROLE_ARN",
   mediaConvert.mediaConvertRole.roleArn,
+);
+
+// generatePracticeDrill — S3 access for reading published unit content
+backend.generatePracticeDrillHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.generatePracticeDrillHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.storage.resources.bucket.grantRead(
+  backend.generatePracticeDrillHandler.resources.lambda,
 );
 
 // AppSync GraphQL access (to update File records)

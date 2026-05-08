@@ -44,11 +44,6 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  // Exclude Storybook files from production build
-  pageExtensions: process.env.NODE_ENV === 'production'
-    ? ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'tsx', 'ts', 'jsx', 'js'].filter(ext => !ext.includes('stories') && !ext.includes('mdx'))
-    : ['tsx', 'ts', 'jsx', 'js', 'mdx'],
-
   // Turbopack config
   turbopack: {},
 };

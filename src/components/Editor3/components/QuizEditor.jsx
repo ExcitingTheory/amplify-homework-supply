@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import ClearIcon from '@mui/icons-material/Clear';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Stack from '@mui/material/Stack';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 // import { GutterContext } from '../context/gutterContext';
 import SortableAnswers from '../../SortableAnswers';
 import UnitContext from '../../../context/unitContext';
@@ -38,7 +38,7 @@ const QuizEditor = ({
     nodeKey,
     data,
 }) => {
-    const { t } = useTranslation('editor.blocks');
+    const t = useTranslations('editor.blocks');
     const [editMode, setEditMode] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [grade, setGrade] = useState(0.0);

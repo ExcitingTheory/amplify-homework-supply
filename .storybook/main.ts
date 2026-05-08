@@ -76,6 +76,18 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/aws-amplify-api.js",
       ),
+      "aws-amplify/api/internals": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-api-internals.js",
+      ),
+      "aws-amplify/api/server": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-api-server.js",
+      ),
+      "aws-amplify/auth/server": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-auth-server.js",
+      ),
       "aws-amplify/utils": path.resolve(
         __dirname,
         "./__mocks__/aws-amplify-utils.js",
@@ -93,8 +105,20 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/amplifyClient.js",
       ),
+      // Mock next/navigation for App Router components
+      "next/navigation": path.resolve(
+        __dirname,
+        "./__mocks__/next-navigation.js",
+      ),
       // Mock i18next to integrate with Translation Mode
       "next-i18next": path.resolve(__dirname, "./__mocks__/next-i18next.js"),
+      "next-intl": path.resolve(__dirname, "./__mocks__/next-intl.js"),
+      "react-i18next": path.resolve(__dirname, "./__mocks__/react-i18next.js"),
+      i18next: path.resolve(__dirname, "./__mocks__/i18next.js"),
+      "i18next-resources-to-backend": path.resolve(
+        __dirname,
+        "./__mocks__/i18next-resources-to-backend.js",
+      ),
       // Mock AuthContext for Storybook
       "@/context/authContext": path.resolve(
         __dirname,

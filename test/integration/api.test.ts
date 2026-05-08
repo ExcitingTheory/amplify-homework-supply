@@ -408,15 +408,14 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       }
     });
 
-    test('Update unit content (data field JSON)', async () => {
+    test('Update unit contentVersion (content stored in S3)', async () => {
       await signInAs('instructor1');
 
-      // Create - AWSJSON fields require stringified JSON
-      const originalData = { content: 'original' };
+      // Create unit without data field (content now lives in S3)
       const { data: created, errors: createErrors } = await client.models.Unit.create({
         name: 'Update Test',
         status: 'DRAFT',
-        data: JSON.stringify(originalData),
+        contentVersion: 0,
       });
 
       expect(createErrors).toBeUndefined();
@@ -427,16 +426,14 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         throw new Error('Failed to create unit for update test');
       }
 
-      // Update data field - must stringify JSON for AWSJSON type
-      const updatedData = { content: 'updated', blocks: [{ type: 'paragraph' }] };
+      // Update contentVersion to signal new content in S3
       const { data: updated, errors } = await safeUpdate(client.models.Unit, {
         id: created.id,
-        data: JSON.stringify(updatedData),
+        contentVersion: 1,
       });
 
       expect(errors).toBeUndefined();
-      // Response comes back as string, parse to compare
-      expect(JSON.parse(updated?.data as string)).toEqual(updatedData);
+      expect(updated?.contentVersion).toEqual(1);
 
       // Cleanup
       await safeDelete(client.models.Unit, created.id);

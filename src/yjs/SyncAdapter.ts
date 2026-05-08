@@ -7,6 +7,7 @@
 
 import * as Y from "yjs";
 import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
+import { saveDraftContent, loadContent } from "../utils/unitContentStorage";
 
 /**
  * Helper: extract _version from a versioned model record.
@@ -80,12 +81,11 @@ export class SyncAdapter {
         return data?.data ? JSON.stringify(data.data) : null;
       }
       if (docName.startsWith("unit-")) {
+        // Unit content is stored in S3, not DynamoDB
         const { data } = await this.client.models.Unit.get({ id: docId });
-        return data?.data
-          ? typeof data.data === "string"
-            ? data.data
-            : JSON.stringify(data.data)
-          : null;
+        if (!data || !(data as any).identityId) return null;
+        const s3Content = await loadContent((data as any).identityId, docId, 'draft');
+        return s3Content;
       }
       return null;
     } catch (error) {
@@ -128,13 +128,13 @@ export class SyncAdapter {
   }
 
   /**
-   * Sync Unit document — persists Lexical editor content to Unit.data
+   * Sync Unit document — persists Lexical editor content to S3 + bumps contentVersion
    */
   async syncUnit(unitId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const editorContent = ydoc.getText("editorContent").toString();
 
-      // Fetch current _version for optimistic locking
+      // Fetch current unit for identityId and _version
       const { data: existing } = await this.client.models.Unit.get({
         id: unitId,
       });
@@ -143,14 +143,25 @@ export class SyncAdapter {
         return;
       }
 
+      const identityId = (existing as any).identityId;
+      if (!identityId) {
+        console.warn(`[SyncAdapter] Unit ${unitId} has no identityId, skipping sync`);
+        return;
+      }
+
+      // Write content to S3 (private — owner only)
+      await saveDraftContent(identityId, unitId, editorContent);
+
+      // Bump contentVersion in DynamoDB (lightweight metadata update)
+      const nextContentVersion = ((existing as any).contentVersion || 0) + 1;
       await this.client.models.Unit.update({
         id: unitId,
-        data: editorContent,
+        contentVersion: nextContentVersion,
         _version: getVersion(existing),
       } as any);
 
       console.log(
-        `[SyncAdapter] Synced Unit ${unitId} (${editorContent.length} chars)`,
+        `[SyncAdapter] Synced Unit ${unitId} to S3 (${editorContent.length} chars)`,
       );
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Unit:`, error);

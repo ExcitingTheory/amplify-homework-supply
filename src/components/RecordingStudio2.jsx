@@ -1,48 +1,49 @@
-'use strict';
-import React from 'react';
-import { useTranslation } from 'next-i18next';
-import FilesContext from '../context/fileContext';
-import DictionaryContext from '../context/dictionaryContext';
-import StopIcon from '@mui/icons-material/Stop';
-import PlayIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import RecordIcon from '@mui/icons-material/KeyboardVoice';
-import StaticWaveform from './Editor3/components/StaticWaveform';
-import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
-import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
-import { calculateWaveformData } from '../utils/calculateWaveformData';
+"use strict";
+import React from "react";
+import { useTranslations } from "next-intl";
+import FilesContext from "../context/fileContext";
+import DictionaryContext from "../context/dictionaryContext";
+import StopIcon from "@mui/icons-material/Stop";
+import PlayIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import RecordIcon from "@mui/icons-material/KeyboardVoice";
+import StaticWaveform from "./Editor3/components/StaticWaveform";
+import AudioWaveformPlayer from "./Editor3/components/AudioWaveformPlayer";
+import MicLevelIndicator from "./Editor3/components/MicLevelIndicator";
+import { calculateWaveformData } from "../utils/calculateWaveformData";
 // import { SvgConverter } from './Editor2';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Box, Typography, Card, CardContent } from "@mui/material";
 
 import { hexToRgb } from "../utils/hexToRgb";
 
-import getCachedUrl from '../utils/getCachedUrl';
-import UnitContext from '../context/unitContext';
-import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
+import getCachedUrl from "../utils/getCachedUrl";
+import UnitContext from "../context/unitContext";
+import { uploadStudentSubmission } from "../utils/userSubmissionStorage";
 
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
-import { getAmplifyClient } from '../utils/amplifyClient';
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { transcribeAudio } from "../../app/actions/grading";
 
 // Component to handle async audio URL loading
 function AudioRecordingCard({ file, index, identityId }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations("components");
   const [audioUrl, setAudioUrl] = React.useState(null);
-  
+
   React.useEffect(() => {
     if (file.path) {
       getCachedUrl(file.path)
-        .then(url => setAudioUrl(url))
-        .catch(err => console.error('Error loading audio URL:', err));
+        .then((url) => setAudioUrl(url))
+        .catch((err) => console.error("Error loading audio URL:", err));
     }
   }, [file.path, identityId]);
 
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         boxShadow: 3,
-        '&:hover': {
-          boxShadow: 6
-        }
+        "&:hover": {
+          boxShadow: 6,
+        },
       }}
     >
       <CardContent>
@@ -50,20 +51,30 @@ function AudioRecordingCard({ file, index, identityId }) {
           <AudioWaveformPlayer
             audioUrl={audioUrl}
             file={file}
-            waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
+            waveformData={
+              file.waveformData ? JSON.parse(file.waveformData) : undefined
+            }
             width={600}
             height={80}
-            title={file.name || t('components:recordingStudio2.recordingNumber', { number: index + 1 })}
+            title={
+              file.name ||
+              t("components:recordingStudio2.recordingNumber", {
+                number: index + 1,
+              })
+            }
             showDuration={true}
           />
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">
-              {file.name || t('components:recordingStudio2.recordingNumber', { number: index + 1 })}
+              {file.name ||
+                t("components:recordingStudio2.recordingNumber", {
+                  number: index + 1,
+                })}
             </Typography>
-            <StaticWaveform 
-              file={file} 
-              width={600} 
+            <StaticWaveform
+              file={file}
+              width={600}
               height={80}
               backgroundColor="transparent"
             />
@@ -77,7 +88,18 @@ function AudioRecordingCard({ file, index, identityId }) {
   );
 }
 
-export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperations, requestDefinition, feedback, isCorrect, onRecordingComplete, embedded}) {
+export function RecordingStudio2({
+  word,
+  item,
+  qk,
+  setFeedback,
+  setFileOperations,
+  requestDefinition,
+  feedback,
+  isCorrect,
+  onRecordingComplete,
+  embedded,
+}) {
   // TODO: add a way to delete the recording
   // TODO: add a way to list multiple recordings
   // TODO: add a way to update the word with the recording,
@@ -88,7 +110,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   // TODO: a hidden input that allows you to update the word phrase and pronunciation
   // if during the recording, you change the word, then it should update the word
 
-  const { t } = useTranslation('components');
+  const t = useTranslations("components");
   const [recording, setRecording] = React.useState(false);
   const [mediaRecorder, setMediaRecorder] = React.useState(null);
   const [audioBlob, setAudioBlob] = React.useState(null);
@@ -102,24 +124,23 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   // Track stream for cleanup
   const streamRef = React.useRef(null);
 
-
   const { audioFiles } = React.useContext(FilesContext);
 
-  const mainColor = typeof document !== 'undefined'
-    ? getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim() || '#556cd6'
-    : '#556cd6';
+  const mainColor =
+    typeof document !== "undefined"
+      ? getComputedStyle(document.documentElement)
+          .getPropertyValue("--mui-palette-primary-main")
+          .trim() || "#556cd6"
+      : "#556cd6";
 
-  console.log('FileManager.mainColor', mainColor);
+  console.log("FileManager.mainColor", mainColor);
 
   const rgbColor = hexToRgb(mainColor);
   const _r = rgbColor.r;
   const _g = rgbColor.g;
   const _b = rgbColor.b;
 
-
-
-
-  console.log('audioFiles', audioFiles);
+  console.log("audioFiles", audioFiles);
 
   // lookup pronunciation from input item
   const phrase = item?.phrase;
@@ -131,75 +152,75 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   const sourceRef = React.useRef(null);
   const analyserRef = React.useRef(null);
 
-  console.log('_word, phrase, definition, pronunciation', phrase, definition, pronunciation);
+  console.log(
+    "_word, phrase, definition, pronunciation",
+    phrase,
+    definition,
+    pronunciation,
+  );
 
-  const {
-    grade,
-    createGrade,
-    saveGrade,
-  } = React.useContext(UnitContext);
+  const { grade, createGrade, saveGrade } = React.useContext(UnitContext);
 
   const {
     session: { identityId },
   } = React.useContext(FilesContext);
 
-
-
-  const lookupWord = (phrase || '') + (pronunciation || '');
+  const lookupWord = (phrase || "") + (pronunciation || "");
   const audioFile = audioFiles?.[lookupWord] ?? null;
 
-  console.log('audioFile', audioFile);
+  console.log("audioFile", audioFile);
 
   React.useEffect(() => {
     let cancelled = false;
     async function uploadSignAndVerifyAudio() {
       if (!audioBlob) return;
       setError(null);
-      
+
       // Embedded mode: pass blob back to parent instead of uploading
       if (onRecordingComplete) {
         try {
           const waveform = await calculateWaveformData(audioBlob, 600);
           onRecordingComplete(audioBlob, waveform);
         } catch (err) {
-          setError('Error processing recording: ' + (err?.message || err));
+          setError("Error processing recording: " + (err?.message || err));
         }
         return;
       }
-      
+
       try {
         let gradeID = grade ? grade.id : null;
         if (!grade) {
           const _updatedGrade = await createGrade();
           gradeID = _updatedGrade.id;
         }
-        const nodeKey = qk || 'unknown';
+        const nodeKey = qk || "unknown";
         const waveformData = await calculateWaveformData(audioBlob, 600);
         const uploadResult = await uploadStudentSubmission({
           file: audioBlob,
           gradeId: gradeID,
           nodeKey,
-          fileType: 'mp3',
+          fileType: "mp3",
           metadata: {
             waveformData: JSON.stringify(waveformData),
-            phrase: phrase || '',
-            definition: definition || '',
+            phrase: phrase || "",
+            definition: definition || "",
           },
         });
         const client = getAmplifyClient();
         const { username: owner } = await getCurrentUser();
-        const { data: newFile, errors: fileErrors } = await client.models.File.create({
-          path: uploadResult.path,
-          owner,
-          identityId,
-          name: uploadResult.filename,
-          size: audioBlob.size,
-          mimeType: 'audio/mp3',
-          level: 'PRIVATE',
-          waveformData: JSON.stringify(waveformData),
-        });
+        const { data: newFile, errors: fileErrors } =
+          await client.models.File.create({
+            path: uploadResult.path,
+            owner,
+            identityId,
+            name: uploadResult.filename,
+            size: audioBlob.size,
+            mimeType: "audio/mp3",
+            level: "PRIVATE",
+            waveformData: JSON.stringify(waveformData),
+          });
         if ((fileErrors && fileErrors.length > 0) || !newFile) {
-          setError(fileErrors?.[0]?.message || 'Failed to create File record');
+          setError(fileErrors?.[0]?.message || "Failed to create File record");
           return;
         }
         if (grade && grade.id) {
@@ -211,26 +232,27 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           });
         }
         const url = await getCachedUrl(uploadResult.path);
-        const { data, errors } = await client.queries.verifyAudioUrl({
-          expected: requestDefinition ? definition : phrase,
-          audioUrl: url,
-          model: 'whisper-1',
-          chatModel: 'gpt-3.5-turbo',
-        });
-        if (errors && errors.length > 0) {
-          setError(errors[0]?.message || 'Audio verification failed');
+        let feedbackData;
+        try {
+          feedbackData = await transcribeAudio({
+            audioUrl: url,
+            expectedAnswer: requestDefinition ? definition : phrase,
+          });
+        } catch (err) {
+          setError(err?.message || "Audio transcription failed");
           return;
         }
         if (!cancelled) {
-          const feedbackData = JSON.parse(data) || {};
           setFeedback(feedbackData);
         }
       } catch (err) {
-        setError(err?.message || 'Audio upload/verification failed');
+        setError(err?.message || "Audio upload/verification failed");
       }
     }
     uploadSignAndVerifyAudio();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [audioBlob]);
 
   // let mediaRecorder = null;
@@ -242,15 +264,16 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     const audio = audioRef.current;
 
     if (!audio) {
-        return;
+      return;
     } else if (audio.srcObject) {
-        const tracks = audio.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        audio.srcObject = null;
+      const tracks = audio.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
+      audio.srcObject = null;
     }
 
     const audioContext = audioContextRef.current || new AudioContext();
-    const source = sourceRef.current || audioContext.createMediaElementSource(audio);
+    const source =
+      sourceRef.current || audioContext.createMediaElementSource(audio);
     const analyser = analyserRef.current || audioContext.createAnalyser();
 
     sourceRef.current = source;
@@ -265,7 +288,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
     const canvas = canvasRef.current;
     // const timeline = timelineRef.current;
-    const canvasCtx = canvas.getContext('2d');
+    const canvasCtx = canvas.getContext("2d");
     // const timelineCtx = timeline.getContext('2d');
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -273,36 +296,41 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
     // setDataArray(dataArray);
     const draw = () => {
-        requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
 
-        analyser.getByteFrequencyData(dataArray);
-        // TODO make this white or black depending on if its light or dark mode
-        canvasCtx.fillStyle = 'rgb(255, 255, 255)';
-        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+      analyser.getByteFrequencyData(dataArray);
+      // TODO make this white or black depending on if its light or dark mode
+      canvasCtx.fillStyle = "rgb(255, 255, 255)";
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const barWidth = (canvas.width / bufferLength) * 2.5;
-        let barHeight;
-        let x = 0;
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
 
-        // Find the maximum value in the dataArray
-        // Prevent division by zero when analyser returns silence (all zeros)
-        const max = Math.max(...dataArray) || 1;
+      // Find the maximum value in the dataArray
+      // Prevent division by zero when analyser returns silence (all zeros)
+      const max = Math.max(...dataArray) || 1;
 
-        // Reflect the canvas horizontally
-        canvasCtx.scale(-1, 1);
-        canvasCtx.translate(-canvas.width, 0);
+      // Reflect the canvas horizontally
+      canvasCtx.scale(-1, 1);
+      canvasCtx.translate(-canvas.width, 0);
 
-        for (let i = 0; i < bufferLength; i++) {
-            barHeight = (dataArray[i] / max) * canvas.height / 2;
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = ((dataArray[i] / max) * canvas.height) / 2;
 
-            canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
-            canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
+        canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
+        canvasCtx.fillRect(
+          canvas.width - (x + barWidth / 2),
+          canvas.height / 2 - barHeight / 2,
+          barWidth,
+          barHeight,
+        );
 
-            x += barWidth + 1;
-        }
+        x += barWidth + 1;
+      }
 
-        // Reset the canvas transformation
-        canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
+      // Reset the canvas transformation
+      canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
     };
 
     draw();
@@ -310,9 +338,6 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     audioRef.current.load();
     audioRef.current.play();
     setIsPlaying(true);
-
-
-
   };
 
   const handlePause = (e) => {
@@ -321,7 +346,6 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     audioRef.current.pause();
     setIsPlaying(false);
   };
-
 
   const handleEnded = () => {
     setIsPlaying(false);
@@ -345,14 +369,14 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       analyser.smoothingTimeConstant = 0.8;
       setRecordingAnalyser(analyser);
       const canvas = canvasRef.current;
-      const canvasCtx = canvas.getContext('2d');
+      const canvasCtx = canvas.getContext("2d");
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       let stopped = false;
-      mediaRecorderInstance.addEventListener('dataavailable', (event) => {
+      mediaRecorderInstance.addEventListener("dataavailable", (event) => {
         audioChunks.push(event.data);
       });
-      mediaRecorderInstance.addEventListener('stop', async () => {
+      mediaRecorderInstance.addEventListener("stop", async () => {
         if (stopped) return;
         stopped = true;
         try {
@@ -361,7 +385,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           const waveform = await calculateWaveformData(_audioBlob, 600);
           setWaveformData(waveform);
         } catch (error) {
-          setError('Error calculating waveform: ' + (error?.message || error));
+          setError("Error calculating waveform: " + (error?.message || error));
         }
         // Clean up audio context
         audioContext.close();
@@ -370,7 +394,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         if (!recording) return;
         requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
-        canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+        canvasCtx.fillStyle = "rgb(255, 255, 255)";
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = (canvas.width / bufferLength) * 2.5;
         let barHeight;
@@ -380,9 +404,14 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         canvasCtx.scale(-1, 1);
         canvasCtx.translate(-canvas.width, 0);
         for (let i = 0; i < bufferLength; i++) {
-          barHeight = (dataArray[i] / max) * canvas.height / 2;
+          barHeight = ((dataArray[i] / max) * canvas.height) / 2;
           canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
-          canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
+          canvasCtx.fillRect(
+            canvas.width - (x + barWidth / 2),
+            canvas.height / 2 - barHeight / 2,
+            barWidth,
+            barHeight,
+          );
           x += barWidth + 1;
         }
         canvasCtx.restore();
@@ -390,7 +419,9 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       draw();
       mediaRecorderInstance.start();
     } catch (err) {
-      setError('Microphone access or recording failed: ' + (err?.message || err));
+      setError(
+        "Microphone access or recording failed: " + (err?.message || err),
+      );
       setRecording(false);
       setMediaRecorder(null);
     }
@@ -401,10 +432,10 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     try {
       mediaRecorder.stop();
     } catch (err) {
-      setError('Failed to stop recording: ' + (err?.message || err));
+      setError("Failed to stop recording: " + (err?.message || err));
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setIsPlaying(false);
@@ -422,10 +453,12 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     // Cleanup on unmount
     return () => {
       if (mediaRecorder) {
-        try { mediaRecorder.stop(); } catch {}
+        try {
+          mediaRecorder.stop();
+        } catch {}
       }
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
     };
@@ -442,61 +475,65 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       <Box>
         {audioFile && (
           <>
-            <audio
-              controls={false}
-              ref={audioRef}
-              onEnded={handleEnded}
-            >
+            <audio controls={false} ref={audioRef} onEnded={handleEnded}>
               <source src={audioFile} />
             </audio>
-            {!isPlaying && <PlayIcon
-              color="primary"
-              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
-              onClick={handlePlay} />}
-            {isPlaying && <PauseIcon
-              color="primary"
-              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
-              onClick={handlePause} />}
+            {!isPlaying && (
+              <PlayIcon
+                color="primary"
+                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
+                onClick={handlePlay}
+              />
+            )}
+            {isPlaying && (
+              <PauseIcon
+                color="primary"
+                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
+                onClick={handlePause}
+              />
+            )}
           </>
         )}
         {!recording && (
           <RecordIcon
             color="primary"
             onClick={startRecording}
-            sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+            sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
           />
         )}
         {recording && (
           <StopIcon
             onClick={stopRecording}
             color="error"
-            sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+            sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
           />
         )}
         {audioBlob && (
           <>
-            <audio
-              controls={false}
-              ref={audioRef}
-              onEnded={handleEnded}
-            >
+            <audio controls={false} ref={audioRef} onEnded={handleEnded}>
               <source src={URL.createObjectURL(audioBlob)} />
             </audio>
-            {!isPlaying && <PlayIcon
-              color="primary"
-              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
-              onClick={handlePlay} />}
-            {isPlaying && <PauseIcon
-              color="primary"
-              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
-              onClick={handlePause} />}
+            {!isPlaying && (
+              <PlayIcon
+                color="primary"
+                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
+                onClick={handlePlay}
+              />
+            )}
+            {isPlaying && (
+              <PauseIcon
+                color="primary"
+                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
+                onClick={handlePause}
+              />
+            )}
           </>
         )}
       </Box>
       <canvas
         ref={canvasRef}
         id="waveform"
-        style={{ backgroundColor: 'white' }}
+        style={{ backgroundColor: "white" }}
       />
       {/* Mic level indicator during recording */}
       {recording && (
@@ -507,8 +544,10 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       {/* Display all existing audio recordings */}
       {!embedded && Object.keys(audioFiles).length > 0 && (
         <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>{t('components:recordingStudio2.existingRecordings')}</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {t("components:recordingStudio2.existingRecordings")}
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {Object.values(audioFiles).map((file, index) => (
               <AudioRecordingCard
                 key={file.id || index}
@@ -522,30 +561,23 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       )}
       {!embedded && audioFile && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.staticWaveformPreview')}</Typography>
-          <StaticWaveform
-            file={audioFile}
-            width={600}
-            height={80}
-          />
+          <Typography variant="caption" color="text.secondary">
+            {t("components:recordingStudio2.staticWaveformPreview")}
+          </Typography>
+          <StaticWaveform file={audioFile} width={600} height={80} />
         </Box>
       )}
       {!embedded && waveformData && audioBlob && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.recordedAudioWaveform')}</Typography>
-          <StaticWaveform
-            waveformData={waveformData}
-            width={600}
-            height={80}
-          />
+          <Typography variant="caption" color="text.secondary">
+            {t("components:recordingStudio2.recordedAudioWaveform")}
+          </Typography>
+          <StaticWaveform waveformData={waveformData} width={600} height={80} />
         </Box>
       )}
     </>
   );
 }
-
-
-
 
 // private renderLineWaveform(
 //   channelData: Array<Float32Array | number[]>,

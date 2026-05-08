@@ -7,13 +7,13 @@ import Button from '@mui/material/Button';
 import { Check } from '@mui/icons-material';
 import VideoSettingsIcon from '@mui/icons-material/VideoSettings';
 import InputIcon from '@mui/icons-material/Input';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 export const AllowedInputSelector = React.memo(({
     ids, defaultAllowedInputs = ['text'], allowedInput = [], setAllowedInput,
     // wordIDs,
 }) => {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_allowedInput, setAllowedInputLocal] = React.useState(
         allowedInput.length > 0 ? [allowedInput[0]] : defaultAllowedInputs
@@ -134,7 +134,7 @@ export const PromptMethodSelector = React.memo(({
     ids, defaultPromptMethods = ['text', 'audio', 'writing'], promptMethod = [], setPromptMethod,
     // wordIDs,
 }) => {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_promptMethods, setPromptMethods] = React.useState(promptMethod.length > 0 ? promptMethod : []);
     const open = Boolean(anchorEl);

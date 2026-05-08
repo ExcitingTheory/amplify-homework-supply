@@ -63,7 +63,7 @@ import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
 
 // i18n
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 // Import QuestionCard from QuestionsReview2
 import { QuestionCard } from './QuestionsReview2';
@@ -892,7 +892,7 @@ function QuestionsPlugin({
 // =============================================================================
 
 export function QuestionEditor2() {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [open, setOpen] = React.useState(false);
   const [isHelpOpen, setHelpOpen] = React.useState(false);
   const [expandedItems, setExpandedItems] = React.useState(new Set());

@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useReducer,
 } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   TextField,
@@ -33,7 +33,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import { awardXPAndCheck } from "../utils/gamificationActions";
+import { awardXP } from "../../app/actions/gamification";
 import ChatIcon from "@mui/icons-material/Chat";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
@@ -62,7 +62,6 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { fetchAuthSession } from "aws-amplify/auth";
-import { post } from "aws-amplify/api";
 import {
   uploadAndAnalyzePDF,
   cancelPDFAnalysis,
@@ -589,7 +588,7 @@ const ChatSidebar = ({ onClose }) => {
   const customFetch = useCallback(
     async (url, options) => {
       console.log(
-        "[ChatSidebar] Custom fetch with Amplify post client, ignoring AI SDK url:",
+        "[ChatSidebar] Custom fetch routing to local /api/chat route, ignoring AI SDK url:",
         url,
       );
 
@@ -647,14 +646,6 @@ const ChatSidebar = ({ onClose }) => {
       // ── End offline routing ─────────────────────────────────────────
 
       try {
-        // Get the current auth session to include the token
-        const { tokens } = await fetchAuthSession();
-        const idToken = tokens?.idToken?.toString();
-
-        if (!idToken) {
-          throw new Error("No authentication token available");
-        }
-
         // Parse the request body from AI SDK
         const requestBody = options.body ? JSON.parse(options.body) : {};
 
@@ -664,53 +655,26 @@ const ChatSidebar = ({ onClose }) => {
           context: contextData,
         };
 
-        console.log("[ChatSidebar] Sending request with context:", {
+        console.log("[ChatSidebar] Sending request to /api/chat:", {
           hasUnit: !!contextData.unit,
           filesCount: contextData.files?.length || 0,
           questionsCount: contextData.questionBank?.length || 0,
           wordsCount: contextData.dictionary?.length || 0,
         });
 
-        // Use Amplify's post with custom headers including auth token
-        const restOperation = post({
-          apiName: "homeworkSupplyStreamApi",
-          path: "/chat",
-          options: {
-            body: bodyWithContext,
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          },
+        // Call local Route Handler — no Lambda cold start, same-origin
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyWithContext),
         });
-
-        const response = await restOperation.response;
 
         console.log("[ChatSidebar] Response received:", {
-          status: response.statusCode,
-          headers: response.headers,
-          bodyType: typeof response.body,
-          hasBody: !!response.body,
+          ok: response.ok,
+          status: response.status,
         });
 
-        // Convert Amplify headers to Headers object
-        const webHeaders = new Headers({
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-        });
-
-        // Amplify response.body is already a ReadableStream - use it directly
-        const webResponse = new Response(response.body, {
-          status: response.statusCode,
-          headers: webHeaders,
-        });
-
-        console.log("[ChatSidebar] Created Web Response with streaming body:", {
-          ok: webResponse.ok,
-          status: webResponse.status,
-          bodyUsed: webResponse.bodyUsed,
-        });
-
-        return webResponse;
+        return response;
       } catch (error) {
         console.error("[ChatSidebar] Error in customFetch:", error);
         throw error;
@@ -918,7 +882,7 @@ const ChatSidebar = ({ onClose }) => {
   } = useNailedItDetection({
     onAwardXP: (xp, reason) => {
       if (!user?.username) return;
-      awardXPAndCheck(user.username, reason);
+      awardXP(user.username, reason);
     },
   });
 

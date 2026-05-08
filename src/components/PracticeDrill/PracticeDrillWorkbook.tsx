@@ -10,7 +10,7 @@
 import React, { useMemo, useContext, useCallback } from 'react'
 import { Box, Typography, Chip, Tooltip } from '@mui/material'
 import GroupsIcon from '@mui/icons-material/Groups'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -73,7 +73,7 @@ export default function PracticeDrillWorkbook({
   collaborative = false,
   groupStats,
 }: PracticeDrillWorkbookProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const { wordMapId: dictionary } = useContext(DictionaryContext)
 
   // Build Lexical editor state from drill blocks

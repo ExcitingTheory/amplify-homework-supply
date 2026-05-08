@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -26,7 +26,7 @@ export function PeerReviewFeedbackPrompt({
   onSubmit,
   onClose,
 }: PeerReviewFeedbackPromptProps) {
-  const { t } = useTranslation('common')
+  const t = useTranslations('common')
   const [submitted, setSubmitted] = useState(false)
 
   const handleFeedback = (helpful: boolean) => {

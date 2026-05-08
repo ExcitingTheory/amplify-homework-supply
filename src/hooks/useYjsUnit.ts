@@ -16,6 +16,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useYjsProvider } from '../yjs/hooks';
 import { getAmplifyClient } from '../utils/amplifyClient';
+import { saveDraftContent, saveYjsSnapshot, loadYjsSnapshot } from '../utils/unitContentStorage';
 import * as Y from 'yjs';
 
 export interface UseYjsUnitConfig {
@@ -87,24 +88,22 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
           throw new Error(`Unit ${unitId} not found`);
         }
 
-        // Parse JSON fields (Amplify Gen 2 stores as strings)
-        const parsedUnit = {
-          ...data,
-          data: data.data ? JSON.parse(data.data as string) : null
-        };
+        // Unit record — content is loaded from S3 separately
+        const parsedUnit = { ...data };
 
         setUnit(parsedUnit);
         nextVersionRef.current = ((data as any)._version || 0) + 1;
 
-        // Apply Yjs snapshot if exists
-        if ((data as any).yjsSnapshot && provider) {
+        // Load Yjs snapshot from S3
+        if ((data as any).identityId && provider) {
           try {
-            const yjsSnapshot = (data as any).yjsSnapshot as string;
-            const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-            Y.applyUpdate(provider.getDoc(), updateBytes);
-            console.log(`[useYjsUnit] Applied Yjs snapshot for unit ${unitId}`);
+            const yjsBytes = await loadYjsSnapshot((data as any).identityId, unitId as string);
+            if (yjsBytes) {
+              Y.applyUpdate(provider.getDoc(), yjsBytes);
+              console.log(`[useYjsUnit] Applied Yjs snapshot from S3 for unit ${unitId}`);
+            }
           } catch (err) {
-            console.warn('[useYjsUnit] Failed to apply snapshot:', err);
+            console.warn('[useYjsUnit] Failed to load snapshot from S3:', err);
           }
         }
 
@@ -123,8 +122,8 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
 
   // Debounced save to DataStore
   const saveToDataStore = useCallback(async () => {
-    if (!unitId || !provider) {
-      console.warn('[useYjsUnit] No unitId or provider available for save');
+    if (!unitId || !provider || !unit) {
+      console.warn('[useYjsUnit] No unitId, provider, or unit available for save');
       return;
     }
 
@@ -135,7 +134,6 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
       // Extract state
       const editorContent = ytext.toString();
       const yjsState = Y.encodeStateAsUpdate(provider.getDoc());
-      const yjsSnapshot = Buffer.from(yjsState).toString('base64');
       
       // Extract metadata
       const metadata: Record<string, any> = {};
@@ -143,19 +141,33 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
         metadata[key] = value;
       });
 
-      console.log(`[useYjsUnit] Saving unit ${unitId} to DataStore (version ${nextVersionRef.current})`);
+      const identityId = (unit as any).identityId;
+      if (!identityId) {
+        console.warn('[useYjsUnit] Unit has no identityId, cannot save to S3');
+        return;
+      }
 
-      // Save to Amplify (MUST stringify JSON fields for Gen 2)
+      console.log(`[useYjsUnit] Saving unit ${unitId} to S3 + DynamoDB (version ${nextVersionRef.current})`);
+
+      // Upload content + snapshot to S3 in parallel (private — owner only)
+      await Promise.all([
+        saveDraftContent(identityId, unitId, JSON.stringify({ content: editorContent })),
+        saveYjsSnapshot(identityId, unitId, yjsState),
+      ]);
+
+      // Bump contentVersion in DynamoDB (lightweight, no content payload)
+      const currentContentVersion = (unit as any).contentVersion || 0;
+      const nextContentVersion = currentContentVersion + 1;
       await client.models.Unit.update({
         id: unitId,
-        data: JSON.stringify({ content: editorContent }), // MUST stringify
-        yjsSnapshot: yjsSnapshot,
+        contentVersion: nextContentVersion,
         ...metadata,
         _version: nextVersionRef.current
       } as any);
 
       // Optimistically increment version
       nextVersionRef.current += 1;
+      setUnit((prev: any) => prev ? { ...prev, contentVersion: nextContentVersion } : prev);
 
       console.log(`[useYjsUnit] Successfully saved unit ${unitId}`);
     } catch (err: any) {
@@ -168,12 +180,14 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
           if (data) {
             nextVersionRef.current = ((data as any)._version || 0) + 1;
             
-            // Re-apply snapshot
-            if ((data as any).yjsSnapshot) {
-              const yjsSnapshot = (data as any).yjsSnapshot as string;
-              const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-              Y.applyUpdate(provider.getDoc(), updateBytes);
-              console.log('[useYjsUnit] Re-applied snapshot after version conflict');
+            // Re-apply snapshot from S3
+            const identityId = (data as any).identityId;
+            if (identityId) {
+              const yjsBytes = await loadYjsSnapshot(identityId, unitId as string);
+              if (yjsBytes) {
+                Y.applyUpdate(provider.getDoc(), yjsBytes);
+                console.log('[useYjsUnit] Re-applied snapshot from S3 after version conflict');
+              }
             }
           }
         } catch (reloadErr) {
@@ -187,7 +201,7 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
       
       throw err;
     }
-  }, [provider, unitId, client]);
+  }, [provider, unitId, unit, client]);
 
   // Schedule debounced save on Y.Doc changes
   useEffect(() => {

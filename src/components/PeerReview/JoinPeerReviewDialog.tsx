@@ -17,8 +17,8 @@ import {
   Alert,
 } from '@mui/material'
 import RateReviewIcon from '@mui/icons-material/RateReview'
-import { useTranslation } from 'next-i18next'
-import { getAmplifyClient } from '../../utils/amplifyClient'
+import { useTranslations } from 'next-intl'
+import { joinPeerReview as joinPeerReviewAction } from '../../../app/actions/section'
 
 // ============================================================================
 // Types
@@ -39,7 +39,7 @@ export default function JoinPeerReviewDialog({
   onClose,
   onJoin,
 }: JoinPeerReviewDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,20 +59,13 @@ export default function JoinPeerReviewDialog({
     setError(null)
 
     try {
-      const client = getAmplifyClient()
-      const { data, errors } = await client.mutations.joinPeerReview({ code })
+      const result = await joinPeerReviewAction(code)
 
-      if (errors?.length) {
-        throw new Error(errors[0]?.message || 'Failed to join peer review')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to join peer review')
       }
 
-      const result = typeof data === 'string' ? JSON.parse(data) : data
-
-      if (!result?.success) {
-        throw new Error(result?.error || result?.message || 'Failed to join peer review')
-      }
-
-      onJoin({ roomId: result.roomId, gradeId: result.gradeId })
+      onJoin({ roomId: result.roomId! })
       setCode('')
       setError(null)
     } catch (err: any) {

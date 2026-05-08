@@ -29,6 +29,7 @@ import {
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fetchAuthSession, signOut } from "aws-amplify/auth";
+import { uploadData } from "aws-amplify/storage";
 import {
   CognitoIdentityProviderClient,
   AdminUpdateUserAttributesCommand,
@@ -383,20 +384,24 @@ const unitsResponse = await Promise.all([
   client.models.Unit.create({
     name: "Japanese Greetings",
     description: "Basic Japanese greetings and introductions for beginners",
-    data: JSON.stringify(japaneseUnitContent), // Convert to string
+    contentVersion: 1,
+    publishedContentVersion: 1,
+    identityId: instructor1IdentityId,
     status: "PUBLISHED",
   }),
   client.models.Unit.create({
     name: "Photosynthesis",
     description:
       "Understanding how plants convert light energy into chemical energy",
-    data: JSON.stringify(biologyUnitContent), // Convert to string
+    contentVersion: 1,
+    publishedContentVersion: 1,
+    identityId: instructor1IdentityId,
     status: "PUBLISHED",
   }),
   client.models.Unit.create({
     name: "Advanced Japanese Verbs",
     description: "DRAFT - Conjugation patterns for common Japanese verbs",
-    data: null,
+    identityId: instructor1IdentityId,
     status: "DRAFT",
   }),
 ]);
@@ -405,6 +410,26 @@ const units = unwrap(unitsResponse, "Unit");
 console.log("\nCreated Units:");
 console.log(JSON.stringify(unitsResponse, null, 2));
 console.log(`✅ Created ${units.length} units`);
+
+// Upload unit content to S3 for published units
+const unitContentMap: Record<number, string> = {
+  0: JSON.stringify(japaneseUnitContent),
+  1: JSON.stringify(biologyUnitContent),
+};
+
+for (const [idx, content] of Object.entries(unitContentMap)) {
+  const unit = units[Number(idx)];
+  if (unit) {
+    const draftPath = `private/${instructor1IdentityId}/units/${unit.id}/draft.json`;
+    const publishedPath = `protected/${instructor1IdentityId}/units/${unit.id}/published.json`;
+    await Promise.all([
+      uploadData({ path: draftPath, data: content, options: { contentType: 'application/json' } }).result,
+      uploadData({ path: publishedPath, data: content, options: { contentType: 'application/json' } }).result,
+    ]);
+    console.log(`  📄 Uploaded content to S3 for unit: ${unit.name}`);
+  }
+}
+console.log(`✅ Uploaded unit content to S3`);
 
 // ========================================================================
 // SECTION 5: Create Join Tables (Unit-Word, Unit-Question)

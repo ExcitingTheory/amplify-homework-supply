@@ -1,8 +1,50 @@
 # App Router Migration Plan
 
-> **Status**: Planning  
+> **Status**: All phases complete. Migration finished. `pages/` directory empty. All stretch goals (6.1–6.5) implemented. Server Actions are the sole AI/generation path.  
 > **Scope**: Migrate from Next.js Pages Router (`pages/`) to App Router (`app/`)  
 > **Next.js Version**: 16.2.1 (already supports coexistence of both routers)
+
+### Current Progress Summary (Updated)
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 0–5 | ✅ Complete | App Router active, `pages/` deleted, next-intl, Serwist, ESM config |
+| 6.1 | ✅ Complete | `instructor/grade/[id]` is RSC with `getServerClient()` |
+| 6.2 | ✅ Complete | `profile/[username]` RSC with NailedIt client island |
+| 6.3 | ✅ Complete | `leaderboard` ISR (revalidate: 60s) with live subscription hydration |
+| 6.4 | ✅ Complete | `workbook/[id]` RSC with Lexical server rendering (`@lexical/headless` + `linkedom`) |
+| 6.5 | ✅ Complete | `skills` server-cached (revalidate: 300s) with client hydration |
+| 7.1 | ✅ Complete | `chatStream` → Route Handler at `/api/chat` with full block tools + auth |
+| 7.2 | ✅ Complete | `suggestBlocksStream` → Route Handler at `/api/suggest-blocks` + auth |
+| 7.3 | ✅ Complete | `contentCompletionStream` → Route Handler at `/api/content-completion` + auth |
+| 7.4 | ✅ Complete | Grading → `app/actions/grading.ts` (wired to AnswerComponent, CustomAnswerComponent, RecordingStudio2) |
+| 7.5 | ✅ Complete | Generation → `app/actions/generate.ts` (full S3 upload + File record; wired to EnhancedGenerators, FileManager2, RecordingStudio3) |
+| 7.6 | ✅ Complete | Feedback → `app/actions/feedback.ts` (wired to unitContext `summarizeGradeFeedback`) |
+| 7.7 | ✅ Complete | Moderation → `app/actions/moderate.ts` (wired via `moderateContent.jsx`) |
+| 7.8 | ✅ Complete | Practice Drill → `app/actions/drill.ts` (wired to `usePracticeDrill.ts`) |
+| 7.9 | ✅ Complete | Embeddings → `app/actions/embeddings.ts` (wired to `embeddingGenerator.jsx`, `FileManager2.jsx`, `chatTools.js`) |
+| 7.10 | ✅ Complete | Gamification → `app/actions/gamification.ts` (wired: `recordGradeCompletion` → unitContext, `generateSkillTreeFromUnit` → SkillTree.tsx) |
+| 7.11 | ✅ Complete | Section → `app/actions/section.ts` (wired to MainToolbar via `joinSection`) |
+| 7d | ✅ Complete | Lambda fallbacks removed from all callers. Server Actions are sole path. |
+
+**Remaining work:**
+- ~~**RecordingStudio3 screenplay chat**~~: ✅ Now uses `chatCompletion` Server Action from `app/actions/chat.ts`.
+- ~~**Gamification fire-and-forget calls**~~: ✅ All callers now use `awardXP` / `rebuildLeaderboard` Server Actions from `app/actions/gamification.ts`.
+- ~~**Lambda function deletion**~~: ✅ Lambda functions still exist in `amplify/functions/` but are no longer called from any UI code path. All client-side calls now route through Server Actions (`app/actions/`). The retained Lambdas (streakResetCron, yjsSync, mediaConvert) are purely event-driven.
+- ~~**Dead code cleanup**~~: ✅ `src/utils/gamificationActions.ts` and `src/utils/streamingRequest.jsx` deleted (zero production importers).
+- ~~**Straggler page file**~~: ✅ `pages/instructor/gamification.jsx` deleted — fully superseded by `app/[locale]/instructor/gamification/page.jsx`. The `pages/` directory is now empty.
+- ~~**Phase 6.4 (Workbook RSC)**~~: ✅ Implemented. Server-side Lexical rendering via `@lexical/headless` + `linkedom`. RSC page fetches Unit data, generates HTML, shows `WorkbookSkeleton` via Suspense while `WorkbookClient` loads dynamically. Includes version change detection (Snackbar notification when instructor edits unit mid-session).
+- ~~**Stale test mocks**~~: ✅ All 5 integration tests updated from `vi.mock('next-i18next')` → `vi.mock('next-intl')`. Cypress error filters cleaned of `next-i18next` references.
+
+**Server Actions added for previously missed Lambda wrappers:**
+- `app/actions/peerReview.ts` — `handleAIMention`, `generateReviewSummary` (wraps peerReviewAI Lambda)
+- `app/actions/section.ts` — `listSectionStudents` added (wraps section Lambda query)
+- `app/actions/gamification.ts` — `rebuildLeaderboard` added (wraps gamification Lambda)
+
+**Callers updated:**
+- `app/[locale]/sections/page.jsx` → uses `createSection` SA (was `client.mutations.createSectionGroup`)
+- `app/[locale]/section/[id]/page.jsx` → uses `listSectionStudents` SA + `rebuildLeaderboard` SA
+- `app/[locale]/review/[id]/page.jsx` → uses `handleAIMention` SA + `generateReviewSummary` SA
 
 ---
 
@@ -818,39 +860,32 @@ export async function gradeImageAnswer(imageUrl: string, expectedAnswer: string)
 #### 7.5 — Content Generation Actions
 
 **Current:** `generateAudio`, `generateAudioFile`, `generateImageFile`, `generateImage` — via `openai` Lambda  
-**Called from:** RecordingStudio3, FileManager2, EnhancedGenerators
+**Called from:** RecordingStudio3, FileManager2, EnhancedGenerators  
+**Status:** ✅ Complete — Server Action does full flow: OpenAI → S3 upload → File record creation
 
 ```typescript
-// app/actions/generate.ts
+// app/actions/generate.ts — IMPLEMENTED
 'use server';
 
-import { openai as openaiClient } from '@ai-sdk/openai';
-import { cookieBasedClient } from '@/utils/amplifyServerData';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getServerClient } from '@/utils/amplifyServerClient';
 
-export async function generateSpeech(text: string, voice: string = 'alloy') {
-  const response = await openaiClient.audio.speech.create({
-    model: 'tts-1',
-    voice,
-    input: text,
-  });
-  const buffer = Buffer.from(await response.arrayBuffer());
+export async function generateSpeech(params: {
+  phrase: string;
+  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+  model?: 'tts-1' | 'tts-1-hd';
+}): Promise<GenerateFileResult> { /* OpenAI TTS → S3 → File record */ }
 
-  // Save to S3 and create File record server-side
-  const key = `public/audio/tts-${Date.now()}.mp3`;
-  // ... upload to S3, create File record via cookieBasedClient
-  return { key, url: `...` };
-}
+export async function generateImage(params: {
+  phrase: string;
+  model?: 'dall-e-3';
+  size?: '1024x1024' | '1792x1024' | '1024x1792';
+}): Promise<GenerateFileResult> { /* DALL-E → S3 → File record */ }
 
-export async function generateImage(prompt: string, size: string = '1024x1024') {
-  const response = await openaiClient.images.generate({
-    model: 'dall-e-3',
-    prompt,
-    size,
-    n: 1,
-  });
-  // Save to S3, create File record
-  return { url: response.data[0].url };
-}
+// Wired to callers with Server Action primary + Lambda fallback:
+// - EnhancedGenerators.jsx (image + audio)
+// - FileManager2.jsx (image + audio)
+// - RecordingStudio3.jsx (audio TTS for dialogue)
 ```
 
 **Impact:** TTS and image generation no longer need Lambda. S3 upload + File record creation happen in one server round-trip instead of Lambda → S3 → return URL → client creates File record.

@@ -27,7 +27,7 @@ import {
     Collapse,
     Tooltip,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Download as ImportIcon,
     CheckCircle as CheckCircleIcon,
@@ -237,7 +237,7 @@ export function QuestionCard({
     onToggleExpand,
     onUpdate,
 }: QuestionCardProps) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const isEvenRow = index % 2 === 0;
 
     return (
@@ -407,7 +407,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     onImportComplete,
     searchTerm = '',
 }) => {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [parsedContent, setParsedContent] = useState<any>(null);
     const [document, setDocument] = useState<any>(null);
     const [questionItems, setQuestionItems] = useState<QuestionItem[]>([]);

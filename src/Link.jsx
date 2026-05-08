@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import NextLink from 'next/link';
 import MuiLink from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
@@ -53,10 +53,10 @@ const Link = React.forwardRef(function Link(props, ref) {
     ...other
   } = props;
 
-  const router = useRouter();
+  const currentPathname = usePathname();
   const pathname = typeof href === 'string' ? href : href.pathname;
   const className = clsx(classNameProps, {
-    [activeClassName]: router.pathname === pathname && activeClassName,
+    [activeClassName]: currentPathname === pathname && activeClassName,
   });
 
   const isExternal =

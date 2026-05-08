@@ -355,8 +355,9 @@ const schema = a
         number: a.float(),
         name: a.string(),
         description: a.string(),
-        // Editor content as Lexical JSON
-        data: a.json(),
+        // S3-backed content versioning (content stored in S3, not DynamoDB)
+        contentVersion: a.integer(),
+        publishedContentVersion: a.integer(),
         status: PublishedStatus,
         timeLimitSeconds: a.integer(),
         retryEnabled: a.boolean(),
@@ -381,8 +382,6 @@ const schema = a
         moderation: ModerationInfo,
         publishedAt: a.timestamp(),
         isDraft: a.boolean(),
-        // Yjs CRDT snapshot for conflict-free collaborative editing
-        yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
         // Content gating (absorbed from ContentLock model)
         requiredXP: a.integer(),
         requiredBadgeId: a.string(),
@@ -1264,6 +1263,8 @@ const schema = a
           "SCHEDULE",
           "SECRET_LINK",
           "ACHIEVEMENT",
+          "UI_INTERACTION",
+          "SUBMISSION_QUALITY",
         ]),
         triggerValue: a.string().required(),
         xpReward: a.integer().required(),

@@ -1,37 +1,22 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Collapse } from '@mui/material';
-import { fetchAuthSession } from 'aws-amplify/auth';
-import { getAmplifyClient } from '../../../utils/amplifyClient';
 import getCachedUrl from '../../../utils/getCachedUrl';
+import { generateSpeech, generateImage } from '../../../../app/actions/generate';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * Enhanced Image Generation with mask support for targeted regeneration
  */
 export function EnhancedImageGenerator({ open, onClose }) {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
     const [showMaskEditor, setShowMaskEditor] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
 
     const handleGenerate = async (prompt) => {
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession();
-
-        const client = getAmplifyClient();
-        const { data, errors } = await client.mutations.generateImageFile({
-            phrase: prompt,
-            model: 'dall-e-3',
-        });
-
-        if (errors || !data?.path) {
-            throw new Error('Failed to generate image');
-        }
-
-        const path = data.path;
+        const result = await generateImage({ phrase: prompt, model: 'dall-e-3' });
+        const path = result.path;
 
         const presignedUrl = await getCachedUrl(path);
 
@@ -69,33 +54,9 @@ export function EnhancedImageGenerator({ open, onClose }) {
     };
 
     const handleRegenerate = async (prompt, previousImage, maskData) => {
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession();
-
-        // If maskData is provided, we're doing targeted regeneration
-        // Otherwise, full regeneration
-        const variables = {
-            phrase: prompt,
-            model: 'dall-e-3',
-        };
-
-        if (maskData) {
-            // TODO: Extend GraphQL mutation to support mask parameter
-            // For now, this would require API enhancement
-            variables.mask = maskData.mask;
-            variables.originalImage = previousImage.path;
-        }
-
-        const client = getAmplifyClient();
-        const { data, errors } = await client.mutations.generateImageFile(variables);
-
-        if (errors || !data?.path) {
-            throw new Error('Failed to regenerate image');
-        }
-
-        const path = data.path;
+        // TODO: maskData support (DALL-E edit endpoint) not yet implemented
+        const result = await generateImage({ phrase: prompt, model: 'dall-e-3' });
+        const path = result.path;
 
         const presignedUrl = await getCachedUrl(path);
 
@@ -168,26 +129,12 @@ export function EnhancedImageGenerator({ open, onClose }) {
  * "Record Conversation" button.
  */
 export function EnhancedAudioGenerator({ open, onClose }) {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
 
     const handleGenerate = async (prompt) => {
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession();
+        const result = await generateSpeech({ phrase: prompt, voice: 'alloy', model: 'tts-1' });
+        const path = result.path;
 
-        const client = getAmplifyClient();
-        const { data, errors } = await client.mutations.generateAudioFile({
-            phrase: prompt,
-            voice: 'alloy',
-            model: 'tts-1',
-        });
-
-        if (errors || !data?.path) {
-            throw new Error('Failed to generate audio');
-        }
-
-        const path = data.path;
         const presignedUrl = await getCachedUrl(path);
 
         return {
@@ -228,7 +175,7 @@ export function EnhancedAudioGenerator({ open, onClose }) {
  * Button component for image generation that can be embedded in FileManager
  */
 export function ImageGeneratorButton({ open, onSuccess }) {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
     const [modalOpen, setModalOpen] = useState(false);
 
     // Auto-open when parent says open=true
@@ -239,22 +186,8 @@ export function ImageGeneratorButton({ open, onSuccess }) {
     }, [open]);
 
     const handleGenerate = async (prompt) => {
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession();
-
-        const client = getAmplifyClient();
-        const { data, errors } = await client.mutations.generateImageFile({
-            phrase: prompt,
-            model: 'dall-e-3',
-        });
-
-        if (errors || !data?.path) {
-            throw new Error('Failed to generate image');
-        }
-
-        const path = data.path;
+        const result = await generateImage({ phrase: prompt, model: 'dall-e-3' });
+        const path = result.path;
 
         const presignedUrl = await getCachedUrl(path);
 
@@ -312,23 +245,8 @@ export function AudioGeneratorButton({ open, onSuccess }) {
     }, [open]);
 
     const handleGenerate = async (prompt) => {
-        const {
-            identityId,
-            tokens: { idToken },
-        } = await fetchAuthSession();
-
-        const client = getAmplifyClient();
-        const { data, errors } = await client.mutations.generateAudioFile({
-            phrase: prompt,
-            voice: 'alloy',
-            model: 'tts-1',
-        });
-
-        if (errors || !data?.path) {
-            throw new Error('Failed to generate audio');
-        }
-
-        const path = data.path;
+        const result = await generateSpeech({ phrase: prompt, voice: 'alloy', model: 'tts-1' });
+        const path = result.path;
 
         const presignedUrl = await getCachedUrl(path);
 

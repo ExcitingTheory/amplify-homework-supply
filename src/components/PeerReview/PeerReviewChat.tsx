@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -112,7 +112,7 @@ export function PeerReviewChat({
   onTypingChange,
   onAIMention,
 }: PeerReviewChatProps) {
-  const { t } = useTranslation('common')
+  const t = useTranslations('common')
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)

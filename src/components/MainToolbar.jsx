@@ -10,7 +10,7 @@
  */
 
 import * as React from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 // import AppBar from '@mui/material/AppBar';
 // import Box from '@mui/material/Box';
 import Toolbar from "@mui/material/Toolbar";
@@ -56,9 +56,10 @@ import {
   DialogActions,
   Menu,
 } from "@mui/material";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Help, Settings } from "@mui/icons-material";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { joinSection } from "../../app/actions/section";
 import { useColorMode } from "../hooks/useColorMode";
 import { LevelBadge } from "./Gamification/LevelBadge";
 import { DiceBearAvatar } from "./Gamification/DiceBearAvatar";
@@ -95,7 +96,7 @@ function ToggleMenuItem(props) {
 }
 
 export function SettingsMenu() {
-  const { t } = useTranslation(["components", "common"]);
+  const t = useTranslations(["components", "common"]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
@@ -190,7 +191,7 @@ export function SettingsMenu() {
 }
 
 export function HelpMenu() {
-  const { t } = useTranslation(["components", "common"]);
+  const t = useTranslations(["components", "common"]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
@@ -240,7 +241,7 @@ export function HelpMenu() {
 }
 
 export function UserMenu() {
-  const { t } = useTranslation(["common", "auth"]);
+  const t = useTranslations(["common", "auth"]);
   const { user } = React.useContext(AuthContext);
   const {
     style: avatarStyle,
@@ -334,7 +335,7 @@ export function UserMenu() {
 }
 
 export default function MainToolbar({ children }) {
-  const { t } = useTranslation(["common", "components", "editor.authoring"]);
+  const t = useTranslations(["common", "components", "editor.authoring"]);
   const { level, sectionLevel } = useXP();
   const { session: authSession } = React.useContext(AuthContext);
   const isInstructorOrAdmin = React.useMemo(() => {
@@ -351,6 +352,8 @@ export default function MainToolbar({ children }) {
   });
 
   const router = useRouter();
+  const currentPathname = usePathname();
+  const currentSearchParams = useSearchParams();
 
   const [work, setIsWorking] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
@@ -414,11 +417,13 @@ export default function MainToolbar({ children }) {
       };
 
       console.log("addSelfToSection.createInput", createInput);
-      const client = getAmplifyClient();
 
-      response = await client.mutations.addSelfToSection(createInput);
-
-      console.log("addSelfToSection.response", response);
+      // Primary: Server Action (no Lambda cold start)
+      const response = await joinSection(createInput.code);
+      console.log("joinSection.response", response);
+      if (!response.success) {
+        throw new Error(response.error || "Server Action returned failure");
+      }
     } catch (errors) {
       console.error(errors);
       //   throw new Error(errors[0].message)
@@ -445,11 +450,11 @@ export default function MainToolbar({ children }) {
 
     // If the path is sections then reload the page
     if (
-      router.pathname === "/sections" ||
-      router.pathname.includes("/section/") ||
-      router.pathname === "/"
+      currentPathname === "/sections" ||
+      currentPathname.includes("/section/") ||
+      currentPathname === "/"
     ) {
-      router.reload();
+      window.location.reload();
     }
   }
 
@@ -484,7 +489,7 @@ export default function MainToolbar({ children }) {
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />
         <LevelBadge
-          level={router.query.sectionId ? sectionLevel : level}
+          level={currentSearchParams.get("sectionId") ? sectionLevel : level}
           showProgress
           size="small"
         />
@@ -830,14 +835,12 @@ export default function MainToolbar({ children }) {
             onJoin={(sessionInfo) => {
               setOpenJoinStudyGroup(false);
               // Navigate to units page with join params
-              router.push({
-                pathname: "/units",
-                query: {
-                  joinSession: sessionInfo.sessionId,
-                  joinRoom: sessionInfo.roomCode,
-                  joinUnit: sessionInfo.unitID,
-                },
+              const params = new URLSearchParams({
+                joinSession: sessionInfo.sessionId,
+                joinRoom: sessionInfo.roomCode,
+                joinUnit: sessionInfo.unitID,
               });
+              router.push(`/units?${params.toString()}`);
             }}
           />
 

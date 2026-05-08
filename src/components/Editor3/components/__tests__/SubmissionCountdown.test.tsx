@@ -10,18 +10,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import SubmissionCountdown from '../SubmissionCountdown';
 
-// Mock next-i18next
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, fallback?: string) => {
-      const translations: Record<string, string> = {
-        'autoSubmit.submittingInSeconds': `Submitting in {{countdown}} seconds`,
-        'autoSubmit.submitNow': 'Submit Now',
-        'autoSubmit.cancelSubmission': 'Cancel',
-      };
-      return translations[key] || fallback || key;
-    },
-  }),
+// Mock next-intl
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, fallback?: string) => {
+    const translations: Record<string, string> = {
+      'autoSubmit.submittingInSeconds': `Submitting in {{countdown}} seconds`,
+      'autoSubmit.submitNow': 'Submit Now',
+      'autoSubmit.cancelSubmission': 'Cancel',
+    };
+    return translations[key] || fallback || key;
+  },
 }));
 
 describe('SubmissionCountdown', () => {

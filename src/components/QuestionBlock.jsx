@@ -1,29 +1,29 @@
-'use strict';
+"use strict";
 
 /**
  * @fileoverview QuestionBlock.js - A React component for displaying a
  * question block.
- * 
+ *
  * This component is used by the Editor2 component to display a question block.
  */
-import React, { useState } from 'react';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import ClearIcon from '@mui/icons-material/Clear';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { withTranslation } from 'next-i18next';
+import React, { useState } from "react";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+import Switch from "@mui/material/Switch";
+import Card from "@mui/material/Card";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import ClearIcon from "@mui/icons-material/Clear";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { useTranslations } from "next-intl";
 
-import Stack from '@mui/material/Stack';
-import GutterContext from '../context/gutterContext';
-import UnitContext from '../context/unitContext';
+import Stack from "@mui/material/Stack";
+import GutterContext from "../context/gutterContext";
+import UnitContext from "../context/unitContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const reorder = (list, startIndex, endIndex) => {
@@ -34,19 +34,17 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-
 function DraggableAnswer({
   data,
   index,
   onQuestionChange,
   onCorrectChange,
   onQuestionDelete,
-  t
+  t,
 }) {
-
   return (
     <Draggable draggableId={`id-${index}`} index={index}>
-      {provided => (
+      {(provided) => (
         <Stack
           border="thin solid"
           borderColor="divider"
@@ -55,7 +53,6 @@ function DraggableAnswer({
           direction="row"
           spacing={2}
           maxWidth="40rem"
-
           alignItems="center"
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -63,9 +60,13 @@ function DraggableAnswer({
         >
           <DragIndicatorIcon />
           <TextField
-            label={t('components:questionBlock.answerLabel', { number: index + 1 })}
+            label={t("components:questionBlock.answerLabel", {
+              number: index + 1,
+            })}
             value={data.answer}
-            onChange={(event) => { onQuestionChange(event, index) }}
+            onChange={(event) => {
+              onQuestionChange(event, index);
+            }}
             fullWidth
             inputRef={(input) => {
               if (input != null && !input?.value) {
@@ -76,19 +77,25 @@ function DraggableAnswer({
           <FormControlLabel
             value={data.correct}
             control={<Switch color="primary" checked={data.correct} />}
-            label={data.correct ? t('components:questionBlock.correct') : t('components:questionBlock.incorrect')}
-            onChange={(event) => { onCorrectChange(event, index) }}
+            label={
+              data.correct
+                ? t("components:questionBlock.correct")
+                : t("components:questionBlock.incorrect")
+            }
+            onChange={(event) => {
+              onCorrectChange(event, index);
+            }}
             labelPlacement="bottom"
           />
           <IconButton
-            aria-label={t('actions.delete', { ns: 'common' })}
-            onClick={() => { onQuestionDelete(index) }}
+            aria-label={t("actions.delete", { ns: "common" })}
+            onClick={() => {
+              onQuestionDelete(index);
+            }}
           >
             <ClearIcon />
           </IconButton>
-
         </Stack>
-
       )}
     </Draggable>
   );
@@ -100,9 +107,8 @@ function SortableAnswers({
   onCorrectChange,
   onQuestionDelete,
   onQuestionReorder,
-  t
+  t,
 }) {
-
   function onDragEnd(result) {
     if (!result.destination) {
       return;
@@ -115,11 +121,10 @@ function SortableAnswers({
     const newAnswers = reorder(
       answers,
       result.source.index,
-      result.destination.index
+      result.destination.index,
     );
 
-    onQuestionReorder(newAnswers)
-
+    onQuestionReorder(newAnswers);
   }
 
   function list() {
@@ -133,13 +138,13 @@ function SortableAnswers({
         onQuestionDelete={onQuestionDelete}
         t={t}
       />
-    ))
+    ));
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="list">
-        {provided => (
+        {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {list()}
             {provided.placeholder}
@@ -149,7 +154,6 @@ function SortableAnswers({
     </DragDropContext>
   );
 }
-
 
 class QuestionBlock extends React.Component {
   constructor(props) {
@@ -161,7 +165,7 @@ class QuestionBlock extends React.Component {
       grades: [],
       grade: 0.0,
       attemptedAnswers: {},
-      verifiedAnswers: {}
+      verifiedAnswers: {},
     };
 
     this.ref = React.createRef();
@@ -171,15 +175,18 @@ class QuestionBlock extends React.Component {
         return;
       }
 
-      this.setState({
-        editMode: true,
-        questionValue: this._getValue(),
-      }, () => {
-        this._startEdit();
-      });
+      this.setState(
+        {
+          editMode: true,
+          questionValue: this._getValue(),
+        },
+        () => {
+          this._startEdit();
+        },
+      );
     };
 
-    this._onValueChange = evt => {
+    this._onValueChange = (evt) => {
       // console.log(evt)
       let value = evt.target.value;
       let invalid = false;
@@ -190,20 +197,19 @@ class QuestionBlock extends React.Component {
     };
 
     this._onCorrectChange = (evt, id) => {
-      let checked = evt.target.checked
+      let checked = evt.target.checked;
       let tmp = JSON.parse(JSON.stringify(this.state.questionValue));
-      tmp[id].correct = checked
+      tmp[id].correct = checked;
       // console.log(tmp)
       this.setState({
         questionValue: tmp,
       });
     };
 
-
     this._onQuestionChange = (evt, id) => {
       let value = evt.target.value;
       let tmp = JSON.parse(JSON.stringify(this.state.questionValue));
-      tmp[id].answer = value
+      tmp[id].answer = value;
 
       this.setState({
         questionValue: tmp,
@@ -213,62 +219,60 @@ class QuestionBlock extends React.Component {
     this._gradeAnswer = async (e, thisKey, thisAnswer, questionContent) => {
       e.preventDefault();
       e.stopPropagation();
-      const { correct: isCorrect } = thisAnswer
+      const { correct: isCorrect } = thisAnswer;
       const isChecked = e.target.checked;
 
-      let verifiedAnswers = this.state.verifiedAnswers
-      let attemptedAnswers = this.state.attemptedAnswers
-      let isLocked = this.state.isLocked
-      let grade = this.state.grade
-      let correct = {}
-      let grades = this.state.grades
+      let verifiedAnswers = this.state.verifiedAnswers;
+      let attemptedAnswers = this.state.attemptedAnswers;
+      let isLocked = this.state.isLocked;
+      let grade = this.state.grade;
+      let correct = {};
+      let grades = this.state.grades;
 
       if (!verifiedAnswers) {
-        verifiedAnswers = {}
+        verifiedAnswers = {};
       }
       if (!attemptedAnswers) {
-        attemptedAnswers = {}
+        attemptedAnswers = {};
       }
 
       questionContent.forEach((question, questionKey) => {
         if (question.correct === true) {
-          correct[questionKey] = question
+          correct[questionKey] = question;
         }
-      })
+      });
 
-      attemptedAnswers[thisKey] = thisAnswer
+      attemptedAnswers[thisKey] = thisAnswer;
       // console.log('attemptedAnswers', attemptedAnswers)
       // console.log('verifiedAnswers', verifiedAnswers)
 
       if (isCorrect === true && isChecked === true) {
-        verifiedAnswers[thisKey] = thisAnswer
+        verifiedAnswers[thisKey] = thisAnswer;
       } else if (isCorrect === true && isChecked === false) {
-        delete verifiedAnswers[thisKey]
-        delete attemptedAnswers[thisKey]
+        delete verifiedAnswers[thisKey];
+        delete attemptedAnswers[thisKey];
       } else if (isCorrect === false && isChecked === false) {
-        delete attemptedAnswers[thisKey]
+        delete attemptedAnswers[thisKey];
       }
-
-
 
       // console.log('verifiedAnswers', verifiedAnswers)
 
-      const correctArr = Object.entries(correct)
-      const verifiedArr = Object.entries(verifiedAnswers)
-      const attemptedArr = Object.entries(attemptedAnswers)
+      const correctArr = Object.entries(correct);
+      const verifiedArr = Object.entries(verifiedAnswers);
+      const attemptedArr = Object.entries(attemptedAnswers);
 
-      grade = Math.floor((verifiedArr.length / correctArr.length) * 100)
-      let thisExerciseComplete = false
+      grade = Math.floor((verifiedArr.length / correctArr.length) * 100);
+      let thisExerciseComplete = false;
 
       if (attemptedArr.length === correctArr.length) {
-        isLocked = true
-        // this.setState({isLocked}) 
+        isLocked = true;
+        // this.setState({isLocked})
         // await delay(3000)
       }
 
       if (verifiedArr.length === correctArr.length) {
-        isLocked = true
-        thisExerciseComplete = true
+        isLocked = true;
+        thisExerciseComplete = true;
 
         // console.log("Grade this thing")
         // console.log("reset everything")
@@ -283,19 +287,26 @@ class QuestionBlock extends React.Component {
       if (this.props.nodeKey && this.context.saveGrade) {
         try {
           const { grade: contextGrade, saveGrade } = this.context;
-          let savedGradeCopy = JSON.parse(JSON.stringify(contextGrade?.data || {}));
+          let savedGradeCopy = JSON.parse(
+            JSON.stringify(contextGrade?.data || {}),
+          );
 
           savedGradeCopy[this.props.nodeKey] = {
             accuracy: grade,
             attemptedAnswers,
             verifiedAnswers,
             complete: thisExerciseComplete,
-            percentComplete: Math.floor((attemptedArr.length / correctArr.length) * 100)
+            percentComplete: Math.floor(
+              (attemptedArr.length / correctArr.length) * 100,
+            ),
           };
 
           await saveGrade(savedGradeCopy);
         } catch (error) {
-          console.error("Failed to save grade progress for QuestionBlock:", error);
+          console.error(
+            "Failed to save grade progress for QuestionBlock:",
+            error,
+          );
           // Continue with local state update even if save fails
         }
       }
@@ -306,19 +317,18 @@ class QuestionBlock extends React.Component {
         isLocked: isLocked,
         correct: correct,
         grade: grade,
-        grades: grades
+        grades: grades,
         // checked: checked
       });
+    };
 
-    }
-
-    this._onQuestionReorder = answers => {
+    this._onQuestionReorder = (answers) => {
       this.setState({
         questionValue: answers,
       });
     };
 
-    this._onQuestionDelete = id => {
+    this._onQuestionDelete = (id) => {
       let tmp = JSON.parse(JSON.stringify(this.state.questionValue));
       tmp.splice(id, 1);
 
@@ -328,21 +338,20 @@ class QuestionBlock extends React.Component {
       });
     };
 
-
     this._onAddQuestion = (evt) => {
-      console.log(evt)
+      console.log(evt);
       evt.preventDefault();
       evt.stopPropagation();
-      console.log(this.state.questionValue)
-      console.log('add question')
+      console.log(this.state.questionValue);
+      console.log("add question");
       let tmp = JSON.parse(JSON.stringify(this.state.questionValue));
 
-      const nextId = (tmp.length + 1)
+      const nextId = tmp.length + 1;
       tmp.push({
         id: `id-${nextId}`,
         answer: "",
-        correct: false
-      })
+        correct: false,
+      });
 
       // var invalid = false;
       this.setState({
@@ -353,15 +362,17 @@ class QuestionBlock extends React.Component {
 
     this._save = () => {
       var entityKey = this.props.block.getEntityAt(0);
-      var newContentState = this.props.contentState.mergeEntityData(
-        entityKey,
-        { content: this.state.questionValue },
+      var newContentState = this.props.contentState.mergeEntityData(entityKey, {
+        content: this.state.questionValue,
+      });
+      this.setState(
+        {
+          invalidQuestion: false,
+          editMode: false,
+          questionValue: null,
+        },
+        this._finishEdit.bind(this, newContentState),
       );
-      this.setState({
-        invalidQuestion: false,
-        editMode: false,
-        questionValue: null,
-      }, this._finishEdit.bind(this, newContentState));
     };
     this._reset = (e) => {
       e.preventDefault();
@@ -371,8 +382,8 @@ class QuestionBlock extends React.Component {
         attemptedAnswers: {},
         verifiedAnswers: {},
         isLocked: false,
-        grade: 0.0
-      })
+        grade: 0.0,
+      });
     };
     this._remove = () => {
       // console.log('remove')
@@ -390,18 +401,17 @@ class QuestionBlock extends React.Component {
     };
   }
 
-
   static contextType = UnitContext;
 
   _getValue() {
     try {
       return this.props.contentState
         .getEntity(this.props.block.getEntityAt(0))
-        .getData()['content'];
+        .getData()["content"];
     } catch (error) {
       // console.log(error)
     }
-    return []
+    return [];
   }
 
   componentDidMount() {
@@ -413,7 +423,7 @@ class QuestionBlock extends React.Component {
           attemptedAnswers: inProgress.attemptedAnswers || {},
           verifiedAnswers: inProgress.verifiedAnswers || {},
           grade: inProgress.accuracy || 0,
-          isLocked: inProgress.complete || false
+          isLocked: inProgress.complete || false,
         });
       }
     }
@@ -422,17 +432,16 @@ class QuestionBlock extends React.Component {
   render() {
     const { gutterRefs } = this.context;
     const { t } = this.props;
-    const blockKey = this.props.block.getKey()
+    const blockKey = this.props.block.getKey();
 
-    console.log('blockKey', blockKey)
-    console.log('gutterRefs', gutterRefs)
+    console.log("blockKey", blockKey);
+    console.log("gutterRefs", gutterRefs);
     // const gutterRef = gutterRefs[blockKey]
-
 
     var questionContent = null;
     if (this.state.editMode) {
       if (this.state.invalidQuestion) {
-        questionContent = '';
+        questionContent = "";
       } else {
         questionContent = this.state.questionValue;
       }
@@ -440,99 +449,103 @@ class QuestionBlock extends React.Component {
       questionContent = this._getValue();
     }
 
-    var className = 'Editor-question';
+    var className = "Editor-question";
     if (this.state.editMode) {
-      className += ' Editor-activeQuestion';
+      className += " Editor-activeQuestion";
     }
 
     var editPanel = null;
     if (this.state.editMode) {
-      var buttonClass = 'Editor-saveButton';
+      var buttonClass = "Editor-saveButton";
       if (this.state.invalidQuestion) {
-        buttonClass += ' Editor-invalidButton';
+        buttonClass += " Editor-invalidButton";
       }
-
     }
 
     const checkboxes = questionContent.map((data, key) => {
       // console.log('const checkboxes = questionContent.map.data, key', data, key)
-      let attemptedAnswers = this.state.attemptedAnswers[key]
+      let attemptedAnswers = this.state.attemptedAnswers[key];
       if (!attemptedAnswers) {
-        attemptedAnswers = {}
+        attemptedAnswers = {};
       }
-      let checked = false
+      let checked = false;
       if (this.state.attemptedAnswers[key]) {
-        checked = true
+        checked = true;
       }
-      return (<FormControlLabel key={key} control={<Checkbox checked={checked} disabled={this.state.isLocked} onClick={(e) => { this._gradeAnswer(e, key, data, questionContent) }} />} label={data.answer} />)
+      return (
+        <FormControlLabel
+          key={key}
+          control={
+            <Checkbox
+              checked={checked}
+              disabled={this.state.isLocked}
+              onClick={(e) => {
+                this._gradeAnswer(e, key, data, questionContent);
+              }}
+            />
+          }
+          label={data.answer}
+        />
+      );
     });
 
     return (
-
-      <div className={className}
+      <div
+        className={className}
         contentEditable={false} // <== !!!
         readOnly // <== !!!>
       >
         <style global jsx>{`
-        figure[data-block=true] {
-          margin: 0;
-
-    }`}</style>
-        {!this.state.editMode &&
+          figure[data-block="true"] {
+            margin: 0;
+          }
+        `}</style>
+        {!this.state.editMode && (
           <div ref={this.ref}>
-            <Card elevation={2} sx={{marginBottom: '1rem' }}>
+            <Card elevation={2} sx={{ marginBottom: "1rem" }}>
               <Toolbar>
                 <Button
-                  size='small'
+                  size="small"
                   // variant='contained'
                   onClick={this._onClick}
                 >
-                  {t('components:questionBlock.edit')}
+                  {t("components:questionBlock.edit")}
                 </Button>
 
-              <Button
-                size='small'
-                onClick={this._reset}
-              >
-                {t('components:questionBlock.reset')}
-              </Button>
+                <Button size="small" onClick={this._reset}>
+                  {t("components:questionBlock.reset")}
+                </Button>
 
-              <Box>
-                {t('components:questionBlock.gradeDisplay', { score: this.state.grade })}
-              </Box>
+                <Box>
+                  {t("components:questionBlock.gradeDisplay", {
+                    score: this.state.grade,
+                  })}
+                </Box>
               </Toolbar>
             </Card>
 
-
-
-            <FormGroup>
-              {
-                checkboxes
-              }
-            </FormGroup>
+            <FormGroup>{checkboxes}</FormGroup>
           </div>
-        }
+        )}
 
-        {this.state.editMode &&
+        {this.state.editMode && (
           <>
-            <Card elevation={3} sx={{ flexGrow: 1, marginBottom: '1rem' }}>
+            <Card elevation={3} sx={{ flexGrow: 1, marginBottom: "1rem" }}>
               <Toolbar>
-
                 <Button
                   // className={buttonClass}
-                  size='small'
+                  size="small"
                   // variant='outlined'
                   disabled={this.state.invalidQuestion}
-                  onClick={this._save}>
-                  {this.state.invalidQuestion ? t('components:questionBlock.invalid') : t('components:questionBlock.done')}
-                </Button>
-                <Box sx={{ flexGrow: 1 }}>
-              </Box>
-                <Button 
-                  size='small'
-                  onClick={this._remove}
+                  onClick={this._save}
                 >
-                  {t('components:questionBlock.remove')}
+                  {this.state.invalidQuestion
+                    ? t("components:questionBlock.invalid")
+                    : t("components:questionBlock.done")}
+                </Button>
+                <Box sx={{ flexGrow: 1 }}></Box>
+                <Button size="small" onClick={this._remove}>
+                  {t("components:questionBlock.remove")}
                 </Button>
               </Toolbar>
             </Card>
@@ -559,16 +572,21 @@ class QuestionBlock extends React.Component {
               <DragIndicatorIcon />
               <TextField
                 // disabled
-                placeholder={t('components:questionBlock.addAnswerPlaceholder')}
+                placeholder={t("components:questionBlock.addAnswerPlaceholder")}
                 onClick={this._onAddQuestion}
                 fullWidth
               />
             </Stack>
           </>
-        }
+        )}
       </div>
     );
   }
 }
 
-export default withTranslation('components')(QuestionBlock);
+function QuestionBlockWithTranslation(props) {
+  const t = useTranslations("components");
+  return <QuestionBlock {...props} t={t} />;
+}
+
+export default QuestionBlockWithTranslation;

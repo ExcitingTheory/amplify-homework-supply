@@ -17,7 +17,7 @@ import {
   Alert,
 } from '@mui/material'
 import GroupsIcon from '@mui/icons-material/Groups'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { getAmplifyClient } from '../../utils/amplifyClient'
 
 // ============================================================================
@@ -49,7 +49,7 @@ export default function JoinPracticeDialog({
   onClose,
   onJoin,
 }: JoinPracticeDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const [roomCode, setRoomCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

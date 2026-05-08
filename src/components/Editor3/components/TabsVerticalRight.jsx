@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
@@ -73,7 +73,7 @@ export default function TabsVerticalRight({
   setValue,
   setDrawerWidth,
 }) {
-  const { t } = useTranslation('editor.authoring');
+  const t = useTranslations('editor.authoring');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);

@@ -28,7 +28,7 @@ import QuizIcon from '@mui/icons-material/Quiz'
 import TextSnippetIcon from '@mui/icons-material/TextSnippet'
 import DescriptionIcon from '@mui/icons-material/Description'
 import GroupsIcon from '@mui/icons-material/Groups'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -135,7 +135,7 @@ export default function PracticeDrillConfigPopup({
   initialDrillType,
   loading = false,
 }: PracticeDrillConfigPopupProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
 
   // Source counts map
   const sourceCounts: Record<keyof DrillSourceConfig, number> = useMemo(

@@ -16,6 +16,7 @@ import {
   getPrefetchStatus,
   type PrefetchStatus,
 } from './OfflineDataStore';
+import { loadContent } from '../utils/unitContentStorage';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -72,9 +73,16 @@ export async function prefetchAssignment(
     const { data: unit } = await client.models.Unit.get({ id: unitId });
     if (!unit) throw new Error(`Unit ${unitId} not found`);
 
+    // Load published content from S3 (learner always reads published)
+    let unitContent = '';
+    if ((unit as any).identityId) {
+      const s3Content = await loadContent((unit as any).identityId, unit.id, 'published');
+      unitContent = s3Content ?? '';
+    }
+
     await cacheUnit({
       id: unit.id,
-      data: typeof unit.data === 'string' ? unit.data : JSON.stringify(unit.data),
+      data: unitContent,
       name: unit.name ?? '',
       description: unit.description ?? '',
       version: unit._version ?? 0,

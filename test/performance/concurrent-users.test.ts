@@ -112,16 +112,8 @@ async function createTestUnit(instructorUsername: string) {
     name: `Performance Test Unit - ${Date.now()}`,
     description: 'Unit for concurrent testing',
     status: 'PUBLISHED',
-    data: JSON.stringify({
-      root: {
-        children: [
-          {
-            type: 'paragraph',
-            children: [{ type: 'text', text: 'Test content' }],
-          },
-        ],
-      },
-    }),
+    contentVersion: 1,
+    publishedContentVersion: 1,
   });
 
   if (errors || !unit) {

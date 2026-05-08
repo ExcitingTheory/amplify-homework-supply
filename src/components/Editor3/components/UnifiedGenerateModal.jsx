@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Dialog,
     DialogTitle,
@@ -33,7 +33,7 @@ export default function UnifiedGenerateModal({
     type = 'image', // 'image', 'audio', 'video'
     children, // Custom form inputs if needed
 }) {
-    const { t } = useTranslation('editor.ai');
+    const t = useTranslations('editor.ai');
     const [mode, setMode] = useState('input'); // 'input', 'generating', 'preview', 'confirming-cancel'
     const [prompt, setPrompt] = useState('');
     const [generatedContent, setGeneratedContent] = useState(null);

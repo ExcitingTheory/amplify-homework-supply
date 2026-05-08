@@ -1,20 +1,17 @@
 /**
- * @fileoverview Mock for next-i18next that integrates with Translation Mode
- * This mock ensures all t() calls in stories are captured for translation editing
+ * @fileoverview Legacy mock for next-i18next (migrated to next-intl)
+ * Kept for backward compatibility with any storybook addons still referencing it
  */
 
-import { useTranslationWithCapture } from '../addons/translation-mode/hooks/useTranslationWithCapture';
+// Simple passthrough mock - no longer depends on react-i18next
+export const useTranslation = (namespace) => ({
+  t: (key) => key,
+  i18n: { language: 'en', changeLanguage: () => Promise.resolve() },
+  ready: true,
+});
 
-// Re-export everything from react-i18next
-export * from 'react-i18next';
+export const Trans = ({ children }) => children;
 
-// Override useTranslation with our capture version
-export { useTranslationWithCapture as useTranslation };
-
-// Mock Trans component
-export { Trans } from 'react-i18next';
-
-// Mock other common exports
 export const appWithTranslation = (Component) => Component;
 export const serverSideTranslations = async (locale, namespaces) => ({
   _nextI18Next: {

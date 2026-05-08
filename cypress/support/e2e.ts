@@ -98,7 +98,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     err.stack?.includes('TabsVerticalRight') ||
     err.message.includes('i18next') ||
     err.message.includes('useTranslation') ||
-    err.stack?.includes('next-i18next')
+    err.message.includes('useTranslations')
   ) {
     console.warn('[Cypress] Suppressing i18n namespace loading race:', err.message);
     return false;

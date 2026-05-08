@@ -1,12 +1,16 @@
 /**
  * Content Moderation Utility
- * 
+ *
  * Provides automatic content moderation using OpenAI's Moderation API.
  * All user-generated content is flagged but NOT blocked - instructors
  * handle flagged content according to their school policies.
+ *
+ * Primary path: Server Action (app/actions/moderate.ts)
+ * Fallback: Lambda via GraphQL mutation
  */
 
-import { getAmplifyClient } from './amplifyClient';
+import { getAmplifyClient } from "./amplifyClient";
+import { moderateContent as moderateServerAction } from "../../app/actions/moderate";
 
 /**
  * Extract text content from various data structures for moderation
@@ -15,18 +19,18 @@ import { getAmplifyClient } from './amplifyClient';
  */
 function extractTextContent(data) {
   const texts = [];
-  
-  if (!data) return '';
-  
+
+  if (!data) return "";
+
   // Handle JSON string
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     try {
       data = JSON.parse(data);
     } catch (e) {
       return data; // Return as-is if not JSON
     }
   }
-  
+
   // Handle Lexical editor state
   if (data.root && data.root.children) {
     const extractFromNode = (node) => {
@@ -42,26 +46,26 @@ function extractTextContent(data) {
       if (node.phrase) texts.push(node.phrase);
       if (node.definition) texts.push(node.definition);
     };
-    
+
     data.root.children.forEach(extractFromNode);
   }
-  
+
   // Handle Grade data (question responses)
-  if (typeof data === 'object') {
-    Object.values(data).forEach(item => {
+  if (typeof data === "object") {
+    Object.values(data).forEach((item) => {
       if (item.userAnswer) texts.push(item.userAnswer);
       if (item.response) texts.push(item.response);
     });
   }
-  
-  return texts.join(' ').trim();
+
+  return texts.join(" ").trim();
 }
 
 /**
  * Moderate content using OpenAI Moderation API.
  * When modelName + recordId are provided, the backend Lambda persists the
  * moderation result directly to the record's `moderation` field (server-authoritative).
- * 
+ *
  * @param {string|Object} content - Text or object containing text to moderate
  * @param {Object} [options] - Optional context for server-side persist
  * @param {string} [options.modelName] - Model to update ('Unit'|'Grade'|'Word'|'Question')
@@ -71,41 +75,36 @@ function extractTextContent(data) {
 export async function moderateContent(content, options = {}) {
   try {
     // Extract text if content is an object
-    const textToModerate = typeof content === 'string' 
-      ? content 
-      : extractTextContent(content);
-    
-    if (!textToModerate || textToModerate.length === 0 || textToModerate === 'null' || textToModerate === 'undefined') {
+    const textToModerate =
+      typeof content === "string" ? content : extractTextContent(content);
+
+    if (
+      !textToModerate ||
+      textToModerate.length === 0 ||
+      textToModerate === "null" ||
+      textToModerate === "undefined"
+    ) {
       return {
         flagged: false,
         categories: {},
         categoryScores: {},
-        model: 'omni-moderation-latest',
-        error: null
+        model: "omni-moderation-latest",
+        error: null,
       };
     }
-    
-    // Call the moderation mutation — backend persists to record if modelName/recordId provided
-    const client = getAmplifyClient();
-    const mutationArgs = { content: textToModerate };
-    if (options.modelName && options.recordId) {
-      mutationArgs.modelName = options.modelName;
-      mutationArgs.recordId = options.recordId;
-    }
-    
-    const response = await client.mutations.moderateContent(mutationArgs);
-    
-    const result = response?.data?.moderateContent ?? response?.data;
-    return typeof result === 'string' ? JSON.parse(result) : result;
+
+    // Primary path: Server Action (no Lambda cold start)
+    const result = await moderateServerAction({ content: textToModerate });
+    return { ...result, error: null };
   } catch (error) {
-    console.error('Error moderating content:', error);
+    console.error("Error moderating content:", error);
     // Return non-flagged result on error - don't block saves
     return {
       flagged: false,
       categories: {},
       categoryScores: {},
-      model: 'omni-moderation-latest',
-      error: error.message
+      model: "omni-moderation-latest",
+      error: error.message,
     };
   }
 }
@@ -117,24 +116,24 @@ export async function moderateContent(content, options = {}) {
  */
 export function buildModerationFields(moderationResult) {
   if (!moderationResult) return {};
-  
+
   return {
-    moderationStatus: moderationResult.flagged ? 'flagged' : 'approved',
-    moderationFlags: moderationResult.flagged 
+    moderationStatus: moderationResult.flagged ? "flagged" : "approved",
+    moderationFlags: moderationResult.flagged
       ? JSON.stringify({
           categories: moderationResult.categories,
           categoryScores: moderationResult.categoryScores,
-          model: moderationResult.model
+          model: moderationResult.model,
         })
       : null,
-    moderationCheckedAt: new Date().toISOString()
+    moderationCheckedAt: new Date().toISOString(),
   };
 }
 
 /**
  * Moderate content and have the backend persist the result to the record.
  * Replaces the old moderateAndSave which relied on frontend writes.
- * 
+ *
  * @param {string} modelName - 'Unit'|'Grade'|'Word'|'Question'
  * @param {Object} item - Item with `id` field
  * @param {string|Object} content - Content to moderate
@@ -147,7 +146,7 @@ export async function moderateAndSave(modelName, item, content) {
   });
 
   if (result.flagged) {
-    console.warn('Content flagged by moderation:', {
+    console.warn("Content flagged by moderation:", {
       categories: result.categories,
       itemId: item.id,
       modelName,
@@ -164,26 +163,26 @@ export async function moderateAndSave(modelName, item, content) {
  */
 export function getModerationStatus(item) {
   if (!item.moderationCheckedAt) {
-    return 'Not checked';
+    return "Not checked";
   }
-  
-  if (item.moderationStatus === 'flagged') {
+
+  if (item.moderationStatus === "flagged") {
     try {
-      const flags = JSON.parse(item.moderationFlags || '{}');
+      const flags = JSON.parse(item.moderationFlags || "{}");
       const flaggedCategories = Object.entries(flags.categories || {})
         .filter(([_, value]) => value === true)
         .map(([key]) => key);
-      
+
       if (flaggedCategories.length > 0) {
-        return `Flagged: ${flaggedCategories.join(', ')}`;
+        return `Flagged: ${flaggedCategories.join(", ")}`;
       }
     } catch (e) {
-      console.error('Error parsing moderation flags:', e);
+      console.error("Error parsing moderation flags:", e);
     }
-    return 'Flagged for review';
+    return "Flagged for review";
   }
-  
-  return 'Approved';
+
+  return "Approved";
 }
 
 /**
@@ -192,5 +191,5 @@ export function getModerationStatus(item) {
  * @returns {boolean}
  */
 export function shouldShowModerationWarning(item) {
-  return item.moderationStatus === 'flagged';
+  return item.moderationStatus === "flagged";
 }

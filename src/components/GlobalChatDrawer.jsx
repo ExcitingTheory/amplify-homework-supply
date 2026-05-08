@@ -13,7 +13,7 @@ import {
     Box,
     useMediaQuery,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import ChatContext from '../context/chatContext';
 import ChatSidebar from './ChatSidebar';
 
@@ -27,7 +27,7 @@ import ChatSidebar from './ChatSidebar';
  * @returns {JSX.Element}
  */
 export function GlobalChatDrawer({ width = 450 }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     // noSsr: true ensures the initial client render matches SSR (both return false),
     // then re-renders with the actual value after mount — avoiding hydration mismatch.
     const isMobile = useMediaQuery('(max-width:599.95px)', { noSsr: true });

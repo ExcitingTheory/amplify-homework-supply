@@ -9,7 +9,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getRoot, $isElementNode } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
 import { List, ListItem, ListItemButton, ListItemText, Typography, Box } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * Extracts heading nodes from the editor state
@@ -49,7 +49,7 @@ function scrollToNode(editor, key) {
 }
 
 export default function TableOfContents() {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
   const [editor] = useLexicalComposerContext();
   const [headings, setHeadings] = useState([]);
 
