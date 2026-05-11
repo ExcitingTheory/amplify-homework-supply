@@ -11,6 +11,7 @@
 import type { Handler } from 'aws-lambda'
 import { Amplify } from 'aws-amplify'
 import { generateClient } from 'aws-amplify/data'
+import { createNotification } from '../shared/notificationUtils'
 
 // ============================================================================
 // GraphQL Queries
@@ -272,6 +273,25 @@ Please summarize this peer review session.`
       },
     },
   })
+
+  // Notify room owner that review is complete
+  if (room.ownerId) {
+    try {
+      await createNotification(gqlClient, {
+        recipientId: room.ownerId,
+        type: 'PEER_REVIEW_COMPLETE',
+        title: 'Peer Review Complete',
+        body: 'Your peer review session has been summarized. Check the results!',
+        linkPath: `/review/${roomId}`,
+        linkLabel: 'View Summary',
+        referenceId: roomId,
+        referenceType: 'HomeworkRoom',
+        senderName: 'System',
+      })
+    } catch (err) {
+      console.warn('[peerReviewAI] notification creation failed:', err)
+    }
+  }
 
   return { summary, roomId }
 }

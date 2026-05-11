@@ -58,7 +58,7 @@ function AudioRecordingCard({ file, index, identityId }) {
             height={80}
             title={
               file.name ||
-              t("components:recordingStudio2.recordingNumber", {
+              t("recordingStudio2.recordingNumber", {
                 number: index + 1,
               })
             }
@@ -68,7 +68,7 @@ function AudioRecordingCard({ file, index, identityId }) {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">
               {file.name ||
-                t("components:recordingStudio2.recordingNumber", {
+                t("recordingStudio2.recordingNumber", {
                   number: index + 1,
                 })}
             </Typography>
@@ -545,7 +545,7 @@ export function RecordingStudio2({
       {!embedded && Object.keys(audioFiles).length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {t("components:recordingStudio2.existingRecordings")}
+            {t("recordingStudio2.existingRecordings")}
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {Object.values(audioFiles).map((file, index) => (
@@ -562,7 +562,7 @@ export function RecordingStudio2({
       {!embedded && audioFile && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary">
-            {t("components:recordingStudio2.staticWaveformPreview")}
+            {t("recordingStudio2.staticWaveformPreview")}
           </Typography>
           <StaticWaveform file={audioFile} width={600} height={80} />
         </Box>
@@ -570,7 +570,7 @@ export function RecordingStudio2({
       {!embedded && waveformData && audioBlob && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary">
-            {t("components:recordingStudio2.recordedAudioWaveform")}
+            {t("recordingStudio2.recordedAudioWaveform")}
           </Typography>
           <StaticWaveform waveformData={waveformData} width={600} height={80} />
         </Box>

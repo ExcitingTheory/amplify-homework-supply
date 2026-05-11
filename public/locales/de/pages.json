@@ -92,7 +92,7 @@
     "emailHeader": "E-Mail",
     "actionsHeader": "Aktionen",
     "gradebook": "Notenbuch",
-    "showingAssignments": "(Zeige {{visible}} von {{total}} Aufgaben)",
+    "showingAssignments": "(Zeige {visible} von {total} Aufgaben)",
     "showFutureAssignments": "Zukunft anzeigen",
     "showDraftAssignments": "Entwürfe anzeigen",
     "applyCurve": "Kurve anwenden",

@@ -4,7 +4,11 @@ import { EasterEggToast } from './EasterEggToast';
 import { generateClient } from 'aws-amplify/data';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-const client = generateClient();
+let _client: ReturnType<typeof generateClient> | null = null;
+function getClient() {
+  if (!_client) _client = generateClient();
+  return _client;
+}
 
 /**
  * App-wide Easter Egg Layer — fetches active easter eggs from DB,
@@ -34,7 +38,7 @@ export function EasterEggLayer({ studentId: studentIdProp }: EasterEggLayerProps
   // Fetch active easter eggs (KEYWORD + SCHEDULE)
   useEffect(() => {
     if (!studentId) return;
-    (client as any).models?.EasterEgg?.list?.()
+    (getClient() as any).models?.EasterEgg?.list?.()
       .then(({ data }: any) => {
         const active = (data || []).filter(
           (e: any) => e != null && e.triggerValue,
@@ -114,7 +118,7 @@ export function EasterEggLayer({ studentId: studentIdProp }: EasterEggLayerProps
       setToast({ open: true, message, xpReward });
 
       try {
-        await (client as any).mutations?.discoverEasterEgg?.({ studentId, eggId });
+        await (getClient() as any).mutations?.discoverEasterEgg?.({ studentId, eggId });
       } catch (err) {
         console.error('[EasterEggLayer] discoverEasterEgg error:', err);
       }

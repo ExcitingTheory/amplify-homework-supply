@@ -28,6 +28,7 @@ import { LayoutContainerNode } from "./components/LayoutContainerNode";
 import { LayoutItemNode } from "./components/LayoutItemNode";
 import { AnswerNode } from "./plugins/AnswerPlugin";
 import { CustomAnswerNode } from "./plugins/CustomAnswerPlugin";
+import { CustomAINode } from "./plugins/CustomAIPlugin";
 import { ArmorEditorNode } from "./plugins/ArmorEditorPlugin";
 import { FileMetadataNode } from "./nodes/FileMetadataNode";
 /**
@@ -62,6 +63,7 @@ export const EditorNodes: any[] = [
   LayoutItemNode,
   AnswerNode,
   CustomAnswerNode,
+  CustomAINode,
   ArmorEditorNode,
   FileMetadataNode,
 ];

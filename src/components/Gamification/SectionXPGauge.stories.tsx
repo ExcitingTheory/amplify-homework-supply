@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { SectionXPGauge } from './SectionXPGauge'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 
 const meta: Meta<typeof SectionXPGauge> = {
   title: '🏆 Gamification/XP & Progression/Section XP Gauge',

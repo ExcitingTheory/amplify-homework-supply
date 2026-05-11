@@ -12,8 +12,14 @@
     "confirmPasswordPlaceholder": "Please confirm your Password",
     "displayNameLabel": "Display Name:",
     "displayNamePlaceholder": "Choose a display name",
+    "preferredNameLabel": "Preferred Name (optional):",
+    "preferredNamePlaceholder": "Name you'd like to go by in class",
     "emailLabel": "Email:",
     "emailPlaceholder": "Enter your Email:",
+    "firstNameLabel": "First Name:",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNameLabel": "Last Name:",
+    "lastNamePlaceholder": "Enter your last name",
     "nameLabel": "Name:",
     "namePlaceholder": "Enter your Name:",
     "passwordLabel": "Password:",
@@ -42,6 +48,7 @@
     "cancellingMessage": "Cancelling...",
     "chatHistory": "Chat history",
     "chatInitFailure": "Chat initialization failed. Please refresh the page.",
+    "close": "Close",
     "complete": "✓ Complete",
     "confirm": "Confirm",
     "confirmAndExecute": "Confirm & Execute",
@@ -426,6 +433,57 @@
       "cancel": "Cancel",
       "start": "Start Practice",
       "generating": "Generating..."
+    },
+    "join": {
+      "title": "Join Study Session",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "description": "Enter the room code shared by your instructor or classmate to join their study session.",
+      "codeLabel": "Room Code",
+      "cancel": "Cancel",
+      "joinButton": "Join Session",
+      "joining": "Joining...",
+      "noInvitations": "No pending session invitations"
+    }
+  },
+  "workbook": {
+    "joinDialog": {
+      "title": "Join Workbook Session",
+      "tabLink": "Enter Link",
+      "tabInvitations": "Invitations",
+      "description": "Paste a workbook link or enter a unit ID to join a collaborative editing session.",
+      "inputLabel": "Workbook link or unit ID",
+      "joinButton": "Join Workbook",
+      "joining": "Finding...",
+      "noInvitations": "No pending workbook invitations"
+    }
+  },
+  "peerReview": {
+    "joinDialog": {
+      "title": "Join Peer Review",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "description": "Enter the review room code shared by your classmate to join their peer review session.",
+      "codeLabel": "Review Room Code",
+      "joinButton": "Join Review",
+      "joining": "Joining...",
+      "noInvitations": "No pending review invitations"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "delete": "Delete",
+    "empty": "No notifications yet",
+    "emptyDescription": "You'll see notifications for assignments, grades, badges, and more here.",
+    "category": {
+      "all": "All",
+      "assignment": "Assignments",
+      "collaboration": "Collaboration",
+      "gamification": "Gamification",
+      "guild": "Guilds",
+      "chat": "Chat",
+      "system": "System"
     }
   }
 }

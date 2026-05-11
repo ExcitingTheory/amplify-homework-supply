@@ -11,6 +11,7 @@ import type { Handler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import { createNotification } from "../shared/notificationUtils";
 
 // ============================================================================
 // GraphQL Queries & Mutations
@@ -132,7 +133,7 @@ const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: String!)
 }`;
 
 const GET_SECTION = `query GetSection($id: ID!) {
-  getSection(id: $id) { id leaderboardEnabled xpConfig _version _lastChangedAt _deleted }
+  getSection(id: $id) { id leaderboardEnabled xpConfig badgesEnabled antiBadgesEnabled _version _lastChangedAt _deleted }
 }`;
 
 const GET_SETTINGS_BY_OWNER = `query GetSettings($owner: String!) {
@@ -254,6 +255,7 @@ const XP_AMOUNTS: Record<string, number> = {
   ALL_BLOCKS_COMPLETED: 75,
   PEER_REVIEW_GIVEN: 40,
   PEER_REVIEW_HOSTED: 30,
+  PEER_REVIEW_TOP_REVIEWER: 60,
   NAILED_IT: 20,
   ON_TIME_SUBMISSION: 15,
   STREAK_3DAY: 30,
@@ -431,6 +433,13 @@ const BADGE_CRITERIA: BadgeCriteria[] = [
     badgeType: "EASTER_EGG_HUNTER",
     check: ({ xpLogs }) =>
       xpLogs.filter((l: any) => l.reason === "EASTER_EGG").length >= 3,
+  },
+  {
+    // Awarded to students chosen as top reviewer 3+ times — the "go-to" peer reviewer.
+    badgeType: "PEER_REVIEW_CHAMPION",
+    check: ({ xpLogs }) =>
+      xpLogs.filter((l: any) => l.reason === "PEER_REVIEW_TOP_REVIEWER")
+        .length >= 3,
   },
 ];
 
@@ -1067,6 +1076,7 @@ async function handleAwardXP(
       studentId,
       cohortId,
     );
+    const oldLevel = profile.level || 1;
     const newLevel = calculateLevel(totalXP, xpConfig.levelConfig);
     await gqlClient.graphql({
       query: UPDATE_STUDENT_PROFILE,
@@ -1079,6 +1089,39 @@ async function handleAwardXP(
         },
       },
     });
+
+    // Notification: Level Up
+    if (newLevel > oldLevel) {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "LEVEL_UP",
+        title: `Level Up! You reached level ${newLevel}`,
+        body: `Congratulations! You've advanced from level ${oldLevel} to level ${newLevel}.`,
+        referenceId: `level-${newLevel}`,
+        referenceType: "StudentProfile",
+        senderName: "System",
+        metadata: { oldLevel, newLevel, totalXP },
+      });
+    }
+
+    // Notification: XP Milestones (100, 250, 500, 1000, 2500, 5000, 10000)
+    const xpMilestones = [100, 250, 500, 1000, 2500, 5000, 10000];
+    const oldXP = profile.totalXP || 0;
+    for (const milestone of xpMilestones) {
+      if (totalXP >= milestone && oldXP < milestone) {
+        await createNotification(gqlClient, {
+          recipientId: studentId,
+          type: "XP_MILESTONE",
+          title: `XP Milestone: ${milestone} XP reached!`,
+          body: `You've earned a total of ${milestone} XP. Keep up the great work!`,
+          referenceId: `xp-milestone-${milestone}`,
+          referenceType: "StudentProfile",
+          senderName: "System",
+          metadata: { milestone, totalXP },
+        });
+        break; // Only one milestone notification per award
+      }
+    }
   } catch (err) {
     console.error("[gamification] syncXPToProfile error:", err);
   }
@@ -1200,6 +1243,31 @@ async function handleCheckBadges(
 ) {
   const { studentId, cohortId, unitID } = args;
 
+  // Fetch section settings to check badge enable/disable flags
+  let sectionBadgesEnabled = true;
+  let sectionAntiBadgesEnabled = true;
+  if (cohortId) {
+    try {
+      const sectionResult = await gqlClient.graphql({
+        query: GET_SECTION,
+        variables: { id: cohortId },
+      });
+      const section = sectionResult?.data?.getSection;
+      if (section) {
+        // null/undefined means "not set" → default to enabled (true)
+        if (section.badgesEnabled === false) sectionBadgesEnabled = false;
+        if (section.antiBadgesEnabled === false) sectionAntiBadgesEnabled = false;
+      }
+    } catch (err) {
+      console.warn("[gamification] Failed to fetch section badge settings:", err);
+    }
+  }
+
+  // If all badges are disabled for this section, skip awarding entirely
+  if (!sectionBadgesEnabled) {
+    return { newBadges: [], updatedBadges: [], newAntiBadges: [], redeemedBadges: [] };
+  }
+
   // Fetch XP logs and existing badges from StudentProfile
   const [xpResult, profile] = await Promise.all([
     gqlClient.graphql({
@@ -1256,23 +1324,39 @@ async function handleCheckBadges(
     const dbBadges = await fetchAutoEvaluateBadges(gqlClient, cohortId);
     for (const badge of dbBadges) {
       if (existingByType.has(badge.id)) continue; // Already earned (by badge model ID)
-      const criteriaJson = typeof badge.criteria === "string" ? JSON.parse(badge.criteria) : badge.criteria;
+      const criteriaJson =
+        typeof badge.criteria === "string"
+          ? JSON.parse(badge.criteria)
+          : badge.criteria;
       if (!criteriaJson || criteriaJson.type === "manual") continue;
 
       let earned = false;
       if (criteriaJson.type === "xp_log_count") {
-        const count = xpLogs.filter((l: any) => l.reason === criteriaJson.reason).length;
+        const count = xpLogs.filter(
+          (l: any) => l.reason === criteriaJson.reason,
+        ).length;
         earned = count >= (criteriaJson.threshold || 1);
       } else if (criteriaJson.type === "stat_threshold") {
-        const metricValue = criteriaJson.metric === "totalXP" ? totalXP :
-          criteriaJson.metric === "currentStreak" ? (profile.currentStreak || 0) :
-          criteriaJson.metric === "level" ? (profile.level || 1) :
-          criteriaJson.metric === "completedAssignments" ? (profile.completedAssignments || 0) : 0;
+        const metricValue =
+          criteriaJson.metric === "totalXP"
+            ? totalXP
+            : criteriaJson.metric === "currentStreak"
+              ? profile.currentStreak || 0
+              : criteriaJson.metric === "level"
+                ? profile.level || 1
+                : criteriaJson.metric === "completedAssignments"
+                  ? profile.completedAssignments || 0
+                  : 0;
         const op = criteriaJson.operator || ">=";
         const threshold = criteriaJson.value || 0;
-        earned = op === ">=" ? metricValue >= threshold :
-          op === ">" ? metricValue > threshold :
-          op === "==" ? metricValue === threshold : false;
+        earned =
+          op === ">="
+            ? metricValue >= threshold
+            : op === ">"
+              ? metricValue > threshold
+              : op === "=="
+                ? metricValue === threshold
+                : false;
       }
 
       if (earned) {
@@ -1296,6 +1380,8 @@ async function handleCheckBadges(
   const newAntiBadges: string[] = [];
   const activeDebuffs: any[] = getActiveDebuffs(profile);
 
+  // Skip anti-badge loop entirely if disabled for this section
+  if (sectionAntiBadgesEnabled) {
   for (const criteria of ANTI_BADGE_CRITERIA) {
     if (!criteria.check({ xpLogs, badges: existingBadges, totalXP, profile }))
       continue;
@@ -1325,6 +1411,7 @@ async function handleCheckBadges(
       applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
     }
   }
+  } // end if (sectionAntiBadgesEnabled)
 
   // ---- Auto-redeem anti-badges whose conditions are now met ----
   const redeemedBadges: string[] = [];
@@ -1399,6 +1486,52 @@ async function handleCheckBadges(
       "[gamification] handleCheckBadges profile update error:",
       err,
     );
+  }
+
+  // Create notifications for badge changes
+  try {
+    for (const badgeType of newBadges) {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "BADGE_EARNED",
+        title: `Badge Earned: ${badgeType}`,
+        body: `You've earned the "${badgeType}" badge!`,
+        referenceId: badgeType,
+        referenceType: "Badge",
+        senderName: "System",
+        linkPath: "/profile",
+        linkLabel: "View Badges",
+        metadata: { badgeType },
+      });
+    }
+    for (const badgeType of newAntiBadges) {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "DEBUFF_APPLIED",
+        title: `Debuff Applied: ${badgeType}`,
+        body: `A debuff has been applied. Complete challenges to remove it!`,
+        referenceId: badgeType,
+        referenceType: "Badge",
+        senderName: "System",
+        linkPath: "/profile",
+        linkLabel: "View Status",
+        metadata: { badgeType },
+      });
+    }
+    for (const badgeType of redeemedBadges) {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "DEBUFF_EXPIRED",
+        title: `Debuff Removed: ${badgeType}`,
+        body: `Your "${badgeType}" debuff has been redeemed. Great job!`,
+        referenceId: badgeType,
+        referenceType: "Badge",
+        senderName: "System",
+        metadata: { badgeType },
+      });
+    }
+  } catch (err) {
+    console.warn("[gamification] Badge notification creation failed:", err);
   }
 
   return {
@@ -1525,6 +1658,22 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
       );
     } catch (err) {
       console.error("[gamification] streak milestone XP error:", err);
+    }
+
+    // Notification: Streak Milestone
+    try {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "STREAK_MILESTONE",
+        title: `${newStreak}-Day Streak! 🔥`,
+        body: `You've maintained a ${newStreak}-day study streak. Amazing dedication!`,
+        referenceId: `streak-${newStreak}`,
+        referenceType: "StudentProfile",
+        senderName: "System",
+        metadata: { streak: newStreak },
+      });
+    } catch (err) {
+      console.warn("[gamification] streak notification failed:", err);
     }
   }
 
@@ -2344,6 +2493,24 @@ async function handleCheckPersonalBest(
       console.error("[gamification] personal best XP error:", err);
     }
 
+    // Notification: Personal Best
+    try {
+      await createNotification(gqlClient, {
+        recipientId: studentId,
+        type: "PERSONAL_BEST",
+        title: `New Personal Best: ${score}%!`,
+        body: `You beat your previous score of ${existingPB.previousBest}%. Keep it up!`,
+        referenceId: `pb-${unitID}`,
+        referenceType: "Unit",
+        senderName: "System",
+        linkPath: `/unit/${unitID}`,
+        linkLabel: "View Unit",
+        metadata: { unitID, score, previousBest: existingPB.previousBest },
+      });
+    } catch (err) {
+      console.warn("[gamification] personal best notification failed:", err);
+    }
+
     return {
       isNewBest: true,
       firstAttempt: false,
@@ -2442,7 +2609,12 @@ async function handleRecomputeProgress(
 
 async function handleCheckEasterEggs(
   gqlClient: any,
-  args: { studentId: string; submissionText: string; triggerType?: string; studentStats?: any },
+  args: {
+    studentId: string;
+    submissionText: string;
+    triggerType?: string;
+    studentStats?: any;
+  },
 ) {
   const { studentId, submissionText, triggerType, studentStats } = args;
   const filterType = triggerType || "KEYWORD";
@@ -2492,7 +2664,10 @@ async function handleCheckEasterEggs(
     } else if (egg.trigger === "ACHIEVEMENT") {
       // Condition string: "accuracy>=95", "streak>=7", "xp>=1000"
       if (studentStats) {
-        matched = evaluateAchievementCondition(egg.triggerValue || "", studentStats);
+        matched = evaluateAchievementCondition(
+          egg.triggerValue || "",
+          studentStats,
+        );
       }
     }
     // SECRET_LINK — handled via discoverEasterEgg mutation directly, not checkEasterEggs
@@ -2926,7 +3101,9 @@ async function handleEvaluateSkillsForUnit(
   const { studentId, unitId, cohortId } = args;
 
   // Determine the effective cohortId(s) to check
-  const cohortIds = cohortId ? [cohortId, `unit-${unitId}`] : [`unit-${unitId}`];
+  const cohortIds = cohortId
+    ? [cohortId, `unit-${unitId}`]
+    : [`unit-${unitId}`];
 
   // Fetch all skills from relevant cohorts
   let allSkills: any[] = [];
@@ -2941,7 +3118,10 @@ async function handleEvaluateSkillsForUnit(
       );
       allSkills.push(...items);
     } catch (err) {
-      console.warn(`[gamification] Could not fetch skills for cohort ${cid}:`, err);
+      console.warn(
+        `[gamification] Could not fetch skills for cohort ${cid}:`,
+        err,
+      );
     }
   }
 
@@ -2996,7 +3176,9 @@ async function handleEvaluateSkillsForUnit(
       if (bestAccuracy >= minAccuracy) completedCount++;
     }
 
-    const existingProgress = allProgress.find((p: any) => p.skillId === skill.id);
+    const existingProgress = allProgress.find(
+      (p: any) => p.skillId === skill.id,
+    );
     const currentStatus = existingProgress?.status || "LOCKED";
 
     if (completedCount === requiredUnits.length) {
@@ -3014,7 +3196,11 @@ async function handleEvaluateSkillsForUnit(
           try {
             await handleAwardXP(
               gqlClient,
-              { studentId, reason: "ALL_BLOCKS_COMPLETED", referenceId: `skill-${skill.id}` },
+              {
+                studentId,
+                reason: "ALL_BLOCKS_COMPLETED",
+                referenceId: `skill-${skill.id}`,
+              },
               null,
             );
           } catch (err) {
@@ -3074,7 +3260,10 @@ async function handleEvaluateSkillsForUnit(
  * Fetches Badge records from DB that have autoEvaluate=true.
  * Includes both global badges (no cohortId) and section-specific badges.
  */
-async function fetchAutoEvaluateBadges(gqlClient: any, cohortId?: string): Promise<any[]> {
+async function fetchAutoEvaluateBadges(
+  gqlClient: any,
+  cohortId?: string,
+): Promise<any[]> {
   const badges: any[] = [];
 
   // Fetch all auto-evaluate badges
@@ -3082,7 +3271,9 @@ async function fetchAutoEvaluateBadges(gqlClient: any, cohortId?: string): Promi
     const { data: allResult } = await gqlClient.graphql({
       query: LIST_ALL_BADGES,
     });
-    const items = (allResult?.listBadges?.items || []).filter((b: any) => b != null);
+    const items = (allResult?.listBadges?.items || []).filter(
+      (b: any) => b != null,
+    );
     badges.push(...items);
   } catch (err) {
     console.warn("[gamification] fetchAutoEvaluateBadges error:", err);

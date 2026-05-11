@@ -206,6 +206,14 @@ export interface InstructorGamificationPanelProps {
   onClearUnitLock?: (unitId: string) => void
   /** Copy gamification settings from another section */
   onCopyFromSection?: (sourceSectionId: string) => void
+  /** Whether badge awarding is enabled for this section (default: true) */
+  badgesEnabled?: boolean
+  /** Toggle all badge awarding on/off for this section */
+  onToggleBadges?: (enabled: boolean) => void
+  /** Whether anti-badge awarding is enabled for this section (default: true) */
+  antiBadgesEnabled?: boolean
+  /** Toggle anti-badge awarding on/off for this section */
+  onToggleAntiBadges?: (enabled: boolean) => void
 }
 
 // ============================================================================
@@ -253,6 +261,10 @@ export function InstructorGamificationPanel({
   onUpdateUnitLock,
   onClearUnitLock,
   onCopyFromSection,
+  badgesEnabled,
+  onToggleBadges,
+  antiBadgesEnabled,
+  onToggleAntiBadges,
 }: InstructorGamificationPanelProps) {
   // Local form state for inline creation
   const [newGuildName, setNewGuildName] = useState('')
@@ -720,9 +732,33 @@ export function InstructorGamificationPanel({
           <EmojiEventsIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>
             Badges ({customBadges.length} custom, {badgeOverrides.length} modified)
+            {badgesEnabled === false && (
+              <Chip label="Disabled" size="small" color="warning" variant="outlined" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
+            )}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
+          {onToggleBadges && (
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={badgesEnabled !== false}
+                    onChange={(_, checked) => onToggleBadges(checked)}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>Badge Awarding</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      When disabled, no badges (regular or anti) will be awarded to students in this section.
+                    </Typography>
+                  </Box>
+                }
+              />
+              <Divider sx={{ mt: 1.5 }} />
+            </Box>
+          )}
           <BadgeEditor
             overrides={badgeOverrides}
             customBadges={customBadges}
@@ -740,6 +776,9 @@ export function InstructorGamificationPanel({
           <ReportProblemIcon sx={{ mr: 1, color: 'error.main' }} />
           <Typography fontWeight={600}>
             Anti-Badges
+            {antiBadgesEnabled === false && (
+              <Chip label="Disabled" size="small" color="warning" variant="outlined" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
+            )}
             <Chip
               label={`${getAllAntiBadgeTypes().length} badges`}
               size="small"
@@ -750,6 +789,28 @@ export function InstructorGamificationPanel({
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
+          {onToggleAntiBadges && (
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={antiBadgesEnabled !== false}
+                    onChange={(_, checked) => onToggleAntiBadges(checked)}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>Anti-Badge Awarding</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      When disabled, anti-badges (and their debuffs) will not be awarded in this section.
+                      Regular badges are unaffected by this toggle.
+                    </Typography>
+                  </Box>
+                }
+              />
+              <Divider sx={{ mt: 1.5 }} />
+            </Box>
+          )}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Sardonic anti-badges are awarded automatically for dubious achievements.
             Each comes with a temporary debuff — a whimsical penalty that makes earning them memorable.

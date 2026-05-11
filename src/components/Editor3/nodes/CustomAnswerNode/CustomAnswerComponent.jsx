@@ -59,6 +59,8 @@ export default function CustomAnswerComponent({
   promptMethod = [],
 }) {
   const t = useTranslations("workbook");
+  const tEditor = useTranslations("editor");
+  const tEditorAi = useTranslations("editor.ai");
   const [answers, setAnswers] = useState({});
   const [progress, setProgress] = useState(0);
   const [feedback, setFeedback] = useState({});
@@ -221,28 +223,26 @@ export default function CustomAnswerComponent({
           exclusive
           value={currentInputMethod}
           onChange={handleInputChange}
-          aria-label={t("promptMethodSelector.inputButton", {
-            ns: "editor.ai",
-          })}
+          aria-label={tEditorAi("promptMethodSelector.inputButton")}
         >
           <ToggleButton
             disabled={!allowedInputMethods.includes("text")}
             value="text"
-            aria-label={t("customAnswerComponent.text", { ns: "editor" })}
+            aria-label={tEditor("customAnswerComponent.text")}
           >
             {t("customAnswerComponent.text")}
           </ToggleButton>
           <ToggleButton
             disabled={!allowedInputMethods.includes("audio")}
             value="audio"
-            aria-label={t("customAnswerComponent.audio", { ns: "editor" })}
+            aria-label={tEditor("customAnswerComponent.audio")}
           >
             {t("customAnswerComponent.audio")}
           </ToggleButton>
           <ToggleButton
             disabled={!allowedInputMethods.includes("writing")}
             value="writing"
-            aria-label={t("customAnswerComponent.writing", { ns: "editor" })}
+            aria-label={tEditor("customAnswerComponent.writing")}
           >
             {t("customAnswerComponent.writing")}
           </ToggleButton>

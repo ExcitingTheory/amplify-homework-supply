@@ -243,6 +243,38 @@ const addRelationshipAccessors = (item, modelName) => {
 };
 
 /**
+ * Apply a subscription filter to an array of items.
+ * Supports { field: { eq: value } } syntax.
+ */
+const applySubscriptionFilter = (items, filter) => {
+  if (!filter?.filter) return items;
+  return items.filter(item => {
+    return Object.entries(filter.filter).every(([field, condition]) => {
+      if (condition.eq !== undefined) {
+        return item[field] === condition.eq;
+      }
+      return true;
+    });
+  });
+};
+
+/**
+ * Notify all observeQuery subscribers for a model, applying each
+ * subscriber's stored filter before delivering items.
+ */
+const notifyObserveQuerySubscribers = (modelName) => {
+  if (!activeSubscriptions[modelName] || activeSubscriptions[modelName].length === 0) return;
+  const allItems = Array.from(dataStores[modelName].values());
+  activeSubscriptions[modelName].forEach(subscription => {
+    const filtered = applySubscriptionFilter(allItems, subscription.filter);
+    const enhanced = filtered.map(item => addRelationshipAccessors(item, modelName));
+    setTimeout(() => {
+      subscription.next({ items: enhanced, isSynced: true });
+    }, 0);
+  });
+};
+
+/**
  * Create a mock observable query that immediately returns data
  */
 const createObservableQuery = (modelName, filter) => {
@@ -293,7 +325,7 @@ const createObservableQuery = (modelName, filter) => {
         const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
         
         // Store subscription so we can notify it when data changes
-        const subscription = { next, error };
+        const subscription = { next, error, filter };
         if (!activeSubscriptions[modelName]) {
           activeSubscriptions[modelName] = [];
         }
@@ -479,21 +511,8 @@ const createMockModel = (modelName) => ({
     notifyMutationSubscribers(modelName, 'onCreate', item);
     
     // Notify all observeQuery subscribers about the new item
-    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
-      const items = Array.from(dataStores[modelName].values());
-      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
-      activeSubscriptions[modelName].forEach(subscription => {
-        setTimeout(() => {
-          subscription.next({
-            items: enhancedItems,
-            isSynced: true,
-          });
-        }, 0);
-      });
-      console.log(`[Mock Data] ${modelName} created: ${id} - notified ${activeSubscriptions[modelName].length} subscribers`);
-    } else {
-      console.log(`[Mock Data] ${modelName} created: ${id} - no active subscribers`);
-    }
+    notifyObserveQuerySubscribers(modelName);
+    console.log(`[Mock Data] ${modelName} created: ${id} - notified ${(activeSubscriptions[modelName] || []).length} subscribers`);
     
     return {
       data: enhancedItem,
@@ -525,21 +544,8 @@ const createMockModel = (modelName) => ({
     notifyMutationSubscribers(modelName, 'onUpdate', updated);
     
     // Notify all observeQuery subscribers about the update
-    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
-      const items = Array.from(dataStores[modelName].values());
-      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
-      activeSubscriptions[modelName].forEach(subscription => {
-        setTimeout(() => {
-          subscription.next({
-            items: enhancedItems,
-            isSynced: true,
-          });
-        }, 0);
-      });
-      console.log(`[Mock Data] ${modelName} updated: ${input.id} - notified ${activeSubscriptions[modelName].length} subscribers`);
-    } else {
-      console.log(`[Mock Data] ${modelName} updated: ${input.id} - no active subscribers`);
-    }
+    notifyObserveQuerySubscribers(modelName);
+    console.log(`[Mock Data] ${modelName} updated: ${input.id} - notified ${(activeSubscriptions[modelName] || []).length} subscribers`);
     
     return {
       data: enhancedUpdated,
@@ -563,21 +569,8 @@ const createMockModel = (modelName) => ({
     notifyMutationSubscribers(modelName, 'onDelete', existing);
     
     // Notify all observeQuery subscribers about the deletion
-    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
-      const items = Array.from(dataStores[modelName].values());
-      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
-      activeSubscriptions[modelName].forEach(subscription => {
-        setTimeout(() => {
-          subscription.next({
-            items: enhancedItems,
-            isSynced: true,
-          });
-        }, 0);
-      });
-      console.log(`[Mock Data] ${modelName} deleted: ${id} - notified ${activeSubscriptions[modelName].length} subscribers`);
-    } else {
-      console.log(`[Mock Data] ${modelName} deleted: ${id} - no active subscribers`);
-    }
+    notifyObserveQuerySubscribers(modelName);
+    console.log(`[Mock Data] ${modelName} deleted: ${id} - notified ${(activeSubscriptions[modelName] || []).length} subscribers`);
     
     return {
       data: existing,
@@ -894,20 +887,8 @@ export const seedMockGrade = (gradeData) => {
     console.log('[Mock Data] Grade has data:', !!gradeData.data);
     console.log('[Mock Data] Total grades in store:', dataStores.Grade.size);
     
-    // Notify all Grade subscribers about the new data
-    if (activeSubscriptions.Grade.length > 0) {
-      const items = Array.from(dataStores.Grade.values());
-      const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Grade'));
-      activeSubscriptions.Grade.forEach(subscription => {
-        console.log('[Mock Data] Notifying subscriber with', items.length, 'grades');
-        setTimeout(() => {
-          subscription.next({
-            items: enhancedItems,
-            isSynced: true,
-          });
-        }, 0);
-      });
-    }
+    // Notify all Grade subscribers (filter-aware)
+    notifyObserveQuerySubscribers('Grade');
   }
 };
 
@@ -979,6 +960,52 @@ export const seedMockSettings = (settingsData) => {
     const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Settings'));
     activeSubscriptions.Settings.forEach(subscription => {
       console.log('[Mock Data] Notifying Settings subscriber with', items.length, 'settings');
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+
+export const seedMockStudentProfiles = (profilesArray) => {
+  console.log(`[Mock Data] seedMockStudentProfiles: Adding ${profilesArray.length} student profiles`);
+  profilesArray.forEach(profile => {
+    if (profile.id) {
+      dataStores.StudentProfile.set(profile.id, profile);
+    }
+  });
+
+  // Notify all StudentProfile subscribers about the new data
+  if (activeSubscriptions.StudentProfile.length > 0) {
+    const items = Array.from(dataStores.StudentProfile.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'StudentProfile'));
+    activeSubscriptions.StudentProfile.forEach(subscription => {
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+
+export const seedMockHomeworkRooms = (roomsArray) => {
+  console.log(`[Mock Data] seedMockHomeworkRooms: Adding ${roomsArray.length} homework rooms`);
+  roomsArray.forEach(room => {
+    if (room.id) {
+      dataStores.HomeworkRoom.set(room.id, room);
+    }
+  });
+
+  // Notify all HomeworkRoom subscribers about the new data
+  if (activeSubscriptions.HomeworkRoom.length > 0) {
+    const items = Array.from(dataStores.HomeworkRoom.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'HomeworkRoom'));
+    activeSubscriptions.HomeworkRoom.forEach(subscription => {
       setTimeout(() => {
         subscription.next({
           items: enhancedItems,

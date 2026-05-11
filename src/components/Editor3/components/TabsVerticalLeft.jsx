@@ -1,28 +1,28 @@
-import * as React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import FileManager2 from './FileManager2';
-import { DictionaryEditor2 } from '../../DictionaryEditor2';
-import { QuestionEditor2 } from '../../QuestionEditor2';
-import { AudioPlayerProvider } from '../context/AudioPlayerContext';
-import { useTranslations } from 'next-intl';
+import * as React from "react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import FileManager2 from "./FileManager2";
+import { DictionaryEditor2 } from "../../DictionaryEditor2";
+import { QuestionEditor2 } from "../../QuestionEditor2";
+import { AudioPlayerProvider } from "../context/AudioPlayerContext";
+import { useTranslations } from "next-intl";
 
-import ChatSidebar from '../../ChatSidebar';
-import TableOfContents from './TableOfContents';
+import ChatSidebar from "../../ChatSidebar";
+import TableOfContents from "./TableOfContents";
 
-import DictionaryIcon from '@mui/icons-material/LibraryBooks';
-import ChatIcon from '@mui/icons-material/Chat';
-import FolderIcon from '@mui/icons-material/Folder';
-import ConfigIcon from '@mui/icons-material/Settings';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
-import TocIcon from '@mui/icons-material/Toc';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import { QuestionMarkOutlined } from '@mui/icons-material';
+import DictionaryIcon from "@mui/icons-material/LibraryBooks";
+import ChatIcon from "@mui/icons-material/Chat";
+import FolderIcon from "@mui/icons-material/Folder";
+import ConfigIcon from "@mui/icons-material/Settings";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import TocIcon from "@mui/icons-material/Toc";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import { QuestionMarkOutlined } from "@mui/icons-material";
 
-import ConfigurationManager from './ConfigurationManager';
-import AssignmentConfiguration from './AssignmentConfiguration';
+import ConfigurationManager from "./ConfigurationManager";
+import AssignmentConfiguration from "./AssignmentConfiguration";
 
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;
@@ -34,18 +34,14 @@ function TabPanel(props) {
       id={`vertical-tabpanel-${index}`}
       aria-labelledby={`vertical-tab-${index}`}
       style={{
-        width: '100%',
+        width: "100%",
         minWidth: 0,
-        height: 'calc(100vh - var(--app-bar-height, 11rem))',
-        overflow: overflowY === 'hidden' ? 'hidden' : 'auto',
+        height: "calc(100vh - var(--app-bar-height, 11rem))",
+        overflow: overflowY === "hidden" ? "hidden" : "auto",
       }}
       {...other}
     >
-      {value === index && (
-        <div style={{ height: '100%' }}>
-          {children}
-        </div>
-      )}
+      {value === index && <div style={{ height: "100%" }}>{children}</div>}
     </div>
   );
 }
@@ -53,8 +49,8 @@ function TabPanel(props) {
 function a11yProps(index) {
   return {
     id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
-    'aria-label': index
+    "aria-controls": `vertical-tabpanel-${index}`,
+    "aria-label": index,
   };
 }
 
@@ -65,7 +61,7 @@ export default function TabsVerticalLeft({
   setValue,
   setDrawerWidth,
 }) {
-  const t = useTranslations('editor.authoring');
+  const t = useTranslations("editor.authoring");
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);
@@ -82,20 +78,18 @@ export default function TabsVerticalLeft({
     }
   };
 
-
-
   const handleMouseDown = (e) => {
     setIsResizing(true);
     startXRef.current = e.clientX;
     wasClosedRef.current = !open;
-    
+
     if (!open) {
       // Opening from closed state
       setOpen(true);
       startWidthRef.current = 350; // Default width
     } else {
       // Store the current width from the parent's drawer ref
-      const drawerElement = e.currentTarget.closest('.MuiDrawer-root');
+      const drawerElement = e.currentTarget.closest(".MuiDrawer-root");
       if (drawerElement) {
         startWidthRef.current = drawerElement.offsetWidth;
       }
@@ -107,30 +101,33 @@ export default function TabsVerticalLeft({
     setIsResizing(false);
   };
 
-  const handleMouseMove = React.useCallback((e) => {
-    if (!isResizing) return;
-    
-    // Calculate the change in X position
-    const deltaX = e.clientX - startXRef.current;
-    // Moving mouse right should increase drawer width
-    const newWidth = startWidthRef.current + deltaX;
-    
-    if (newWidth < 250) {
-      // Close the drawer if dragged below minimum
-      setOpen(false);
-      setIsResizing(false);
-    } else if (newWidth <= 800 && setDrawerWidth) {
-      setDrawerWidth(newWidth);
-    }
-  }, [isResizing, setDrawerWidth, setOpen]);
+  const handleMouseMove = React.useCallback(
+    (e) => {
+      if (!isResizing) return;
+
+      // Calculate the change in X position
+      const deltaX = e.clientX - startXRef.current;
+      // Moving mouse right should increase drawer width
+      const newWidth = startWidthRef.current + deltaX;
+
+      if (newWidth < 250) {
+        // Close the drawer if dragged below minimum
+        setOpen(false);
+        setIsResizing(false);
+      } else if (newWidth <= 800 && setDrawerWidth) {
+        setDrawerWidth(newWidth);
+      }
+    },
+    [isResizing, setDrawerWidth, setOpen],
+  );
 
   React.useEffect(() => {
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
     }
   }, [isResizing, handleMouseMove]);
@@ -138,88 +135,104 @@ export default function TabsVerticalLeft({
   return (
     <Box
       sx={{
-        flexGrow: 1, 
-        bgcolor: 'background.paper', 
-        display: 'flex',
-        flexDirection: 'row',
-        borderRight: '1px solid',
-        borderColor: 'divider',
-        position: 'relative',
-        overflow: 'hidden',
+        flexGrow: 1,
+        bgcolor: "background.paper",
+        display: "flex",
+        flexDirection: "row",
+        borderRight: "1px solid",
+        borderColor: "divider",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       <div
         onMouseDown={handleMouseDown}
         style={{
-          position: 'absolute',
+          position: "absolute",
           right: 0,
           top: 0,
           bottom: 0,
-          width: '5px',
-          cursor: 'ew-resize',
-          backgroundColor: isResizing ? '#1976d2' : 'transparent',
+          width: "5px",
+          cursor: "ew-resize",
+          backgroundColor: isResizing ? "#1976d2" : "transparent",
           zIndex: 1000,
-          transition: 'background-color 0.2s',
+          transition: "background-color 0.2s",
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
-        onMouseLeave={(e) => !isResizing && (e.currentTarget.style.backgroundColor = 'transparent')}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = "#1976d2")
+        }
+        onMouseLeave={(e) =>
+          !isResizing && (e.currentTarget.style.backgroundColor = "transparent")
+        }
       />
       <Tabs
         orientation="vertical"
         variant="scrollable"
         scrollButtons="auto"
         value={value}
-        aria-label={t('tabsVerticalLeft.tabs.configuration', { ns: 'editor.authoring' })}
+        aria-label={t("tabsVerticalLeft.tabs.configuration")}
         sx={{
-          minWidth: '2.5rem',
-          maxWidth: '2.5rem',
-          '& .MuiTab-root': {
-            minWidth: '2.5rem',
-            maxWidth: '2.5rem',
-            padding: '8px 4px',
+          minWidth: "2.5rem",
+          maxWidth: "2.5rem",
+          "& .MuiTab-root": {
+            minWidth: "2.5rem",
+            maxWidth: "2.5rem",
+            padding: "8px 4px",
             margin: 0,
           },
-          '& .MuiTabs-scroller': {
-            borderRight: '1px solid',
-            borderRightColor: 'divider',
+          "& .MuiTabs-scroller": {
+            borderRight: "1px solid",
+            borderRightColor: "divider",
             margin: 0,
           },
-          '& .MuiTabScrollButton-root': {
-            width: '2.5rem',
-            '&.Mui-disabled': {
+          "& .MuiTabScrollButton-root": {
+            width: "2.5rem",
+            "&.Mui-disabled": {
               opacity: 0.3,
             },
           },
         }}
       >
-
         <Tab
           onClick={() => handleTabClick(0)}
           data-tour="assignments-tab"
-          label={<AssignmentIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.assignments'))} />
+          label={<AssignmentIcon />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.assignments"))}
+        />
         <Tab
           onClick={() => handleTabClick(1)}
           data-tour="table-of-contents-tab"
-          label={<TocIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.tableOfContents'))} />
-        <Tab 
+          label={<TocIcon />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.tableOfContents"))}
+        />
+        <Tab
           onClick={() => handleTabClick(2)}
           data-tour="dictionary-tab"
-          label={<DictionaryIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.dictionary'))} />
+          label={<DictionaryIcon />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.dictionary"))}
+        />
         <Tab
           onClick={() => handleTabClick(3)}
           data-tour="questions-tab"
-          label={<QuestionMarkOutlined />} {...a11yProps(t('tabsVerticalLeft.tabs.questions'))} overflow="hidden" />
+          label={<QuestionMarkOutlined />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.questions"))}
+          overflow="hidden"
+        />
         <Tab
           onClick={() => handleTabClick(4)}
           data-tour="files-tab"
-          label={<FolderIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.files'))} />
+          label={<FolderIcon />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.files"))}
+        />
         {/* <Tab
           onClick={() => handleTabClick(5)}
           label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
         <Tab
           onClick={() => handleTabClick(6)}
           data-tour="configuration-tab"
-          label={<ConfigIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.configuration'))} />
+          label={<ConfigIcon />}
+          {...a11yProps(t("tabsVerticalLeft.tabs.configuration"))}
+        />
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
@@ -235,7 +248,7 @@ export default function TabsVerticalLeft({
       </TabPanel>
       <TabPanel value={value} index={3}>
         <QuestionEditor2 />
-      </TabPanel>  
+      </TabPanel>
       <TabPanel value={value} index={4}>
         <FileManager2 />
       </TabPanel>

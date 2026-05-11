@@ -213,7 +213,7 @@ export function PeerReviewChat({
             color="primary"
             onClick={handleSend}
             disabled={!input.trim()}
-            aria-label={t('actions.send', { ns: 'common' })}
+            aria-label={t('actions.send')}
           >
             <SendIcon />
           </IconButton>

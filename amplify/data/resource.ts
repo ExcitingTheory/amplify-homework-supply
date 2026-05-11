@@ -523,6 +523,9 @@ const schema = a
         // XP tuner — per-section overrides for XP multipliers and caps
         // { multipliers?: Record<XPReason, number>, dailyCap?: number, weeklyCap?: number, enabled?: boolean }
         xpConfig: a.json(),
+        // Badge toggles — per-section control over badge awarding
+        badgesEnabled: a.boolean(), // Instructor toggle — enable/disable all badge awarding for this section (default: true)
+        antiBadgesEnabled: a.boolean(), // Instructor toggle — enable/disable anti-badge awarding specifically (default: true)
       })
       .authorization((allow) => [
         allow.owner(),

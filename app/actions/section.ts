@@ -167,6 +167,9 @@ export async function joinPeerReview(
 export interface StudentInfo {
   id: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
+  preferredName?: string;
   email?: string;
 }
 

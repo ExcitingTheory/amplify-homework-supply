@@ -296,6 +296,43 @@ export const insert_layout = tool({
   }),
 });
 
+export const insert_custom_ai = tool({
+  description:
+    "Insert an AI-graded exercise block with custom grading criteria. Students submit answers (text/audio/image/drawing) and AI grades them using instructor-defined criteria. Use Question IDs from the provided question bank.",
+  parameters: z.object({
+    questionIDs: z
+      .array(z.string())
+      .describe(
+        "Question model IDs from the question bank for AI-graded exercises",
+      ),
+    criteria: z
+      .string()
+      .describe(
+        "Grading criteria for the AI to evaluate student responses against",
+      ),
+    allowedInput: z
+      .array(z.enum(["text", "audio", "image", "drawing"]))
+      .default(["text"])
+      .describe("Input modes available to students"),
+    reasoning: z
+      .string()
+      .describe("Brief pedagogical explanation for this exercise"),
+  }),
+  execute: async ({ questionIDs, criteria, allowedInput, reasoning }) => ({
+    success: true,
+    action: "insert_editor_block",
+    blockType: "custom-ai",
+    blockData: { questionIDs, criteria, allowedInput },
+    preview: {
+      questionCount: questionIDs.length,
+      questionIDs,
+      inputModes: allowedInput,
+    },
+    reasoning,
+    message: `AI-graded exercise with ${questionIDs.length} question(s) [${allowedInput.join(", ")}]`,
+  }),
+});
+
 /** All block insertion tools as a single object */
 export const blockTools = {
   insert_heading,
@@ -304,6 +341,7 @@ export const blockTools = {
   insert_quiz,
   insert_answer,
   insert_custom_answer,
+  insert_custom_ai,
   insert_meaning_association,
   insert_playlist,
   insert_image,

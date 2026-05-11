@@ -13,6 +13,10 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { GroupManager } from "./groupManager";
 import {
+  createNotification,
+  createNotificationsForRecipients,
+} from "../shared/notificationUtils";
+import {
   CloudFormationClient,
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
@@ -601,14 +605,32 @@ async function handleListSectionStudents(
     // Get learners from Cognito group
     const learners = await groupManager.listLearnersInSection(sectionId);
 
-    return learners.map((learner: any) => ({
-      id: learner.Username,
-      name:
-        learner.Attributes?.find((a: any) => a.Name === "name")?.Value ||
-        learner.Username,
-      email:
-        learner.Attributes?.find((a: any) => a.Name === "email")?.Value || "",
-    }));
+    return learners.map((learner: any) => {
+      const attrs = learner.Attributes || [];
+      const firstName =
+        attrs.find((a: any) => a.Name === "given_name")?.Value || "";
+      const lastName =
+        attrs.find((a: any) => a.Name === "family_name")?.Value || "";
+      const preferredName =
+        attrs.find((a: any) => a.Name === "preferred_username")?.Value || "";
+      const legacyName = attrs.find((a: any) => a.Name === "name")?.Value || "";
+      const email = attrs.find((a: any) => a.Name === "email")?.Value || "";
+
+      // Build display name: prefer first+last, fall back to legacy "name", then username
+      const name =
+        firstName && lastName
+          ? `${firstName} ${lastName}`
+          : legacyName || learner.Username;
+
+      return {
+        id: learner.Username,
+        name,
+        firstName,
+        lastName,
+        preferredName,
+        email,
+      };
+    });
   } catch (error) {
     console.error("[List Section Students Error]:", error);
     throw error;
@@ -729,6 +751,25 @@ async function handleCreatePeerReviewRoom(
         },
       },
     });
+
+    // 7. Create notifications for invited users
+    if (validInvites.length > 0) {
+      try {
+        await createNotificationsForRecipients(client, validInvites, {
+          type: "PEER_REVIEW_INVITE",
+          title: "Peer Review Invitation",
+          body: `${username} invited you to review their work. Code: ${code}`,
+          linkPath: `/review/${roomId}`,
+          linkLabel: "Join Review",
+          referenceId: roomId,
+          referenceType: "HomeworkRoom",
+          senderName: username,
+          metadata: { roomId, code, gradeId },
+        });
+      } catch (err) {
+        console.warn("[PeerReview] Notification creation failed:", err);
+      }
+    }
 
     return JSON.stringify({
       success: true,

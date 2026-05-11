@@ -6,6 +6,7 @@ import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { uploadData } from "aws-amplify/storage";
 import { listSectionStudents } from "../../../actions/section";
 import { rebuildLeaderboard } from "../../../actions/gamification";
+import { formatLastFirst, getInitials } from "@/utils/formatUserName";
 
 import {
   Button,
@@ -68,29 +69,22 @@ import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
 import { GuildLeaderboard } from "@/components/Gamification/GuildLeaderboard";
+import { OpenCollaborationRooms } from "@/components/PeerReview/OpenCollaborationRooms";
+import {
+  createPeerReviewRoom,
+  randomAssignPeerReview,
+  awardTopReviewerXP,
+} from "../../../actions/peerReview";
 import { useRouter, useParams } from "next/navigation";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
 function FeaturedImage({ style, s3Key, identityId }) {
   const [url, setUrl] = React.useState(null);
+  const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
-    const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
-
-    asyncFunc();
-  }, [s3Key]);
-
-  return <img src={url} style={style} />;
-}
-
-function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
-  const [url, setUrl] = React.useState(null);
-
-  React.useEffect(() => {
+    setLoaded(false);
     const asyncFunc = async () => {
       const _url = await getCachedUrl(s3Key);
       setUrl(_url);
@@ -100,22 +94,97 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
   }, [s3Key]);
 
   return (
-    <CardMedia
-      component="img"
-      sx={{
-        width: url ? 400 : 151,
-        transition: "width 0.3s ease-in-out",
-        alignSelf: "left",
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: 200,
+        overflow: "hidden",
       }}
-      image={url}
-      // alt="Live from space album cover"
-    />
+    >
+      {url && (
+        <img
+          src={url}
+          style={{
+            ...style,
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            opacity: loaded ? 1 : 0,
+            transition: "opacity 0.3s ease",
+          }}
+          onLoad={() => setLoaded(true)}
+        />
+      )}
+      {!loaded && (
+        <Skeleton
+          variant="rectangular"
+          animation="wave"
+          width="100%"
+          height="100%"
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            borderRadius: 0,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
+  const [url, setUrl] = React.useState(null);
+  const [loaded, setLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    setLoaded(false);
+    const asyncFunc = async () => {
+      const _url = await getCachedUrl(s3Key);
+      setUrl(_url);
+    };
+
+    asyncFunc();
+  }, [s3Key]);
+
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        width: 400,
+        alignSelf: "left",
+        flexShrink: 0,
+      }}
+    >
+      <img
+        src={url || undefined}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.3s ease",
+        }}
+        onLoad={() => setLoaded(true)}
+      />
+      {!loaded && (
+        <Skeleton
+          variant="rectangular"
+          animation="wave"
+          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        />
+      )}
+    </Box>
   );
 }
 
 function SectionDetail({ user, signOut }) {
   const client = getAmplifyClient();
   const t = useTranslations("pages");
+  const tCommon = useTranslations("common");
   /**
    * The SectionDetail page displays the section in a single page
    *
@@ -149,6 +218,7 @@ function SectionDetail({ user, signOut }) {
   const [myGrades, setMyGrades] = useState([]);
   const [gradeMap, setGradeMap] = useState({});
   const [myGradeMap, setMyGradeMap] = useState({});
+  const [allGradeMap, setAllGradeMap] = useState({});
   const [grades, setGrades] = useState([]);
   const [sectionAssignments, setSectionAssignments] = useState([]);
   const [work, setIsWorking] = useState(false);
@@ -176,10 +246,15 @@ function SectionDetail({ user, signOut }) {
   const [gradeOverrides, setGradeOverrides] = React.useState({}); // { [studentId]: { [unitID]: { score, updatedAt } } }
   const gradebookHistoryRef = React.useRef(createEmptyHistoryState());
   const gradeCellRegistryRef = React.useRef(createGradeCellRegistry());
+  const curveSettingsLoadedRef = React.useRef(false); // true after first server load
+  const gradeOverridesLoadedRef = React.useRef(false); // true after first server load
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
   const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
   const [sectionGuilds, setSectionGuilds] = React.useState([]);
+  const [openRooms, setOpenRooms] = React.useState([]);
+  // Student sort: "natural" (original order), "first" (first name A-Z), "last" (last name A-Z)
+  const [studentSort, setStudentSort] = React.useState("natural");
 
   const { id } = useParams();
 
@@ -470,20 +545,34 @@ function SectionDetail({ user, signOut }) {
                 if (item?.unitID)
                   map[item.unitID] = { method: item.method || "scale-to-top" };
               });
-              setCurveSettings(map);
+              setCurveSettings((prev) => {
+                if (JSON.stringify(prev) === JSON.stringify(map)) return prev;
+                return map;
+              });
             } else if (typeof raw === "object" && raw !== null) {
-              // Already in map format (shouldn't happen with new schema, but defensive)
-              setCurveSettings(raw);
+              setCurveSettings((prev) => {
+                if (JSON.stringify(prev) === JSON.stringify(raw)) return prev;
+                return raw;
+              });
             }
           }
+          // Mark curve settings as server-loaded (skip first auto-save)
+          if (!curveSettingsLoadedRef.current)
+            curveSettingsLoadedRef.current = true;
           // Load grade overrides from section
           if (sectionData.gradeOverrides) {
-            setGradeOverrides(
+            const parsed =
               typeof sectionData.gradeOverrides === "string"
                 ? JSON.parse(sectionData.gradeOverrides)
-                : sectionData.gradeOverrides,
-            );
+                : sectionData.gradeOverrides;
+            setGradeOverrides((prev) => {
+              if (JSON.stringify(prev) === JSON.stringify(parsed)) return prev;
+              return parsed;
+            });
           }
+          // Mark grade overrides as server-loaded (skip first auto-save)
+          if (!gradeOverridesLoadedRef.current)
+            gradeOverridesLoadedRef.current = true;
           if (sectionData.leaderboardEnabled !== undefined) {
             setLeaderboardEnabledLocal(sectionData.leaderboardEnabled);
           }
@@ -498,33 +587,26 @@ function SectionDetail({ user, signOut }) {
   }, [id]);
 
   // Get MY grades (learner view only - shows their personal progress)
+  // AND all grades (for gradebook + completion grid)
+  // Single unfiltered subscription — client-side filtering
   useEffect(() => {
     if (!currentUser?.username) return;
-    if (!section?.owner) return; // Wait for section to load
-    if (currentUser.username === section.owner) return; // Skip for section owner/instructor
 
-    const subscription = client.models.Grade.observeQuery({
-      filter: {
-        and: [
-          { complete: { eq: true } },
-          { owner: { eq: currentUser.username } },
-        ],
-      },
-    }).subscribe({
-      next: ({ items: grades }) => {
-        setMyGrades(grades);
+    const subscription = client.models.Grade.observeQuery().subscribe({
+      next: ({ items: allItems }) => {
+        // Filter out null items
+        const validGrades = allItems.filter(
+          (grade) => grade != null && grade.id != null,
+        );
 
-        console.log("fetchMyGrades (learner)", grades);
-
-        // grades by assignment
-        // look for the last grade for each assignment
-        // look for the highest grade for each assignment
-        // limit the grades by the assignment duedae and updated date
+        // --- My grades (learner view) ---
+        const myCompleted = validGrades.filter(
+          (g) => g.owner === currentUser.username && g.complete,
+        );
+        setMyGrades(myCompleted);
 
         const gradesByUnit = {};
-
-        grades.forEach((grade) => {
-          console.log("fetchMyGrades.grade", grade);
+        myCompleted.forEach((grade) => {
           if (!gradesByUnit[grade.unitID]) {
             gradesByUnit[grade.unitID] = {
               last: grade,
@@ -534,64 +616,32 @@ function SectionDetail({ user, signOut }) {
               count: 0,
             };
           }
-
           if (grade.updatedAt > gradesByUnit[grade.unitID].last.updatedAt) {
             gradesByUnit[grade.unitID].last = grade;
           }
-
           if (grade.accuracy > gradesByUnit[grade.unitID].highest.accuracy) {
             gradesByUnit[grade.unitID].highest = grade;
           }
-
           gradesByUnit[grade.unitID].sum += grade.accuracy;
           gradesByUnit[grade.unitID].count += 1;
-
           if (gradesByUnit[grade.unitID].count > 0) {
             gradesByUnit[grade.unitID].average =
               gradesByUnit[grade.unitID].sum / gradesByUnit[grade.unitID].count;
           }
         });
-
-        console.log("gradesByUnit", gradesByUnit);
-
         setMyGradeMap(gradesByUnit);
-      },
-      error: (err) => console.error("My grades subscription error:", err),
-    });
 
-    return function cleanup() {
-      subscription.unsubscribe();
-    };
-  }, [currentUser?.username, section?.owner]);
-
-  useEffect(() => {
-    if (units == {}) return;
-    // if (!isOwner || !isTeacher) return
-
-    const subscription = client.models.Grade.observeQuery({
-      filter: {
-        complete: { eq: true },
-      },
-    }).subscribe({
-      next: ({ items: grades }) => {
-        // Filter out null items and grades without accuracy before processing
-        grades = grades.filter(
-          (grade) =>
-            grade != null && grade.id != null && grade.accuracy != null,
+        // --- All grades (gradebook + completion grid) ---
+        // Gradebook uses only completed grades with accuracy
+        const completedGrades = validGrades.filter(
+          (g) => g.complete && g.accuracy != null,
         );
 
-        // grades by user and assignment
-        // look for the last grade for each assignment
-        // look for the highest grade for each assignment
-        // limit the grades by the assignment duedae and updated date
-
         const gradesByUserUnit = {};
-
-        grades.forEach((grade) => {
+        completedGrades.forEach((grade) => {
           if (!gradesByUserUnit[grade.owner]) {
             gradesByUserUnit[grade.owner] = {};
           }
-
           if (!gradesByUserUnit[grade.owner][grade.unitID]) {
             gradesByUserUnit[grade.owner][grade.unitID] = {
               highest: grade,
@@ -600,21 +650,17 @@ function SectionDetail({ user, signOut }) {
               count: 0,
             };
           }
-
           if (grade.updatedAt > units[grade.unitID]?.dueDate) {
             return;
           }
-
           if (
             grade.accuracy >
             gradesByUserUnit[grade.owner][grade.unitID].highest.accuracy
           ) {
             gradesByUserUnit[grade.owner][grade.unitID].highest = grade;
           }
-
           gradesByUserUnit[grade.owner][grade.unitID].sum += grade.accuracy;
           gradesByUserUnit[grade.owner][grade.unitID].count += 1;
-
           if (gradesByUserUnit[grade.owner][grade.unitID].count > 0) {
             gradesByUserUnit[grade.owner][grade.unitID].average =
               gradesByUserUnit[grade.owner][grade.unitID].sum /
@@ -622,18 +668,34 @@ function SectionDetail({ user, signOut }) {
           }
         });
 
-        console.log("gradesByUserUnit", gradesByUserUnit);
-
-        setGrades(grades);
+        setGrades(completedGrades);
         setGradeMap(gradesByUserUnit);
+
+        // --- All grades map (includes incomplete — for completion grid) ---
+        const allGradesByUserUnit = {};
+        validGrades.forEach((grade) => {
+          if (!allGradesByUserUnit[grade.owner]) {
+            allGradesByUserUnit[grade.owner] = {};
+          }
+          if (!allGradesByUserUnit[grade.owner][grade.unitID]) {
+            allGradesByUserUnit[grade.owner][grade.unitID] = {
+              hasComplete: false,
+              hasAny: true,
+            };
+          }
+          if (grade.complete) {
+            allGradesByUserUnit[grade.owner][grade.unitID].hasComplete = true;
+          }
+        });
+        setAllGradeMap(allGradesByUserUnit);
       },
-      error: (err) => console.error("All grades subscription error:", err),
+      error: (err) => console.error("Grades subscription error:", err),
     });
 
     return function cleanup() {
       subscription.unsubscribe();
     };
-  }, [units]);
+  }, [currentUser?.username, units]);
 
   useEffect(() => {
     if (!id) return;
@@ -651,13 +713,7 @@ function SectionDetail({ user, signOut }) {
     return function cleanup() {
       subscription.unsubscribe();
     };
-  }, [
-    id,
-    JSON.stringify(myGradeMap),
-    JSON.stringify(gradeMap),
-    JSON.stringify(myGrades),
-    JSON.stringify(grades),
-  ]);
+  }, [id]);
 
   // get all students in this section if the user owns the section
   useEffect(() => {
@@ -681,6 +737,9 @@ function SectionDetail({ user, signOut }) {
             id: currentUserAttributes?.sub,
             email: currentUserAttributes?.email, // TODO: Determine if email is something we want to expose?
             name: currentUserAttributes?.name || currentUserAttributes?.sub,
+            firstName: currentUserAttributes?.given_name || "",
+            lastName: currentUserAttributes?.family_name || "",
+            preferredName: currentUserAttributes?.preferred_username || "",
           },
         ]);
         return;
@@ -776,6 +835,44 @@ function SectionDetail({ user, signOut }) {
         }
         if (error?.message?.includes("DuplicatedOperationError")) return;
         console.error("[SectionDetail] Guild subscription error:", error);
+      },
+    });
+    return () => subscription.unsubscribe();
+  }, [id]);
+
+  // Fetch open collaboration rooms for this section
+  useEffect(() => {
+    if (!id) return;
+    const client = getAmplifyClient();
+    const subscription = client.models.HomeworkRoom.observeQuery({
+      filter: { sectionID: { eq: id } },
+    }).subscribe({
+      next: ({ items }) => {
+        const valid = items.filter(
+          (item) =>
+            item != null &&
+            item.id != null &&
+            (item.status === "OPEN" || item.status === "IN_REVIEW"),
+        );
+        setOpenRooms(
+          valid.map((r) => ({
+            id: r.id,
+            gradeId: r.gradeId,
+            ownerId: r.ownerId,
+            code: r.code,
+            status: r.status,
+            invitedUserIds: r.invitedUserIds ?? [],
+            createdAt: r.createdAt,
+          })),
+        );
+      },
+      error: (error) => {
+        if (error?.message?.includes("exceeds maximum value limit")) return;
+        if (error?.message?.includes("DuplicatedOperationError")) return;
+        console.error(
+          "[SectionDetail] HomeworkRoom subscription error:",
+          error,
+        );
       },
     });
     return () => subscription.unsubscribe();
@@ -926,6 +1023,8 @@ function SectionDetail({ user, signOut }) {
   // Save curve settings to section when they change
   useEffect(() => {
     if (!section?.id || !isOwner) return;
+    // Skip saving until server data has been loaded at least once
+    if (!curveSettingsLoadedRef.current) return;
 
     const saveCurveSettings = async () => {
       try {
@@ -959,6 +1058,8 @@ function SectionDetail({ user, signOut }) {
   useEffect(() => {
     if (!section?.id || !isOwner || Object.keys(gradeOverrides).length === 0)
       return;
+    // Skip saving until server data has been loaded at least once
+    if (!gradeOverridesLoadedRef.current) return;
 
     const saveOverrides = async () => {
       try {
@@ -1013,7 +1114,7 @@ function SectionDetail({ user, signOut }) {
     if (currentGrade?.id && currentGrade?.complete) {
       const params = new URLSearchParams({
         unitId: assignment.unitID,
-        studentName: student.name,
+        studentName: formatLastFirst(student),
         sectionId: id,
       });
       router.push(`/instructor/grade/${currentGrade.id}?${params.toString()}`);
@@ -1084,6 +1185,46 @@ function SectionDetail({ user, signOut }) {
     }
   };
 
+  // Sort students based on the selected sort mode
+  const sortStudents = React.useCallback(
+    (students) => {
+      if (studentSort === "natural") return students;
+      return [...students].sort((a, b) => {
+        if (studentSort === "first") {
+          const firstA = (
+            a.preferredName ||
+            a.firstName ||
+            a.name ||
+            a.email ||
+            a.id ||
+            ""
+          ).trim();
+          const firstB = (
+            b.preferredName ||
+            b.firstName ||
+            b.name ||
+            b.email ||
+            b.id ||
+            ""
+          ).trim();
+          return firstA.localeCompare(firstB);
+        }
+        // "last" — sort by last name, then first/preferred name
+        const lastA = (a.lastName || "").trim();
+        const lastB = (b.lastName || "").trim();
+        const firstA = (a.preferredName || a.firstName || "").trim();
+        const firstB = (b.preferredName || b.firstName || "").trim();
+        return lastA.localeCompare(lastB) || firstA.localeCompare(firstB);
+      });
+    },
+    [studentSort],
+  );
+
+  const sortedStudents = React.useMemo(
+    () => sortStudents(Object.values(sectionStudents)),
+    [sectionStudents, sortStudents],
+  );
+
   return (
     <>
       <AppBar
@@ -1099,23 +1240,59 @@ function SectionDetail({ user, signOut }) {
         </MainToolbar>
       </AppBar>
 
-      <Card
-        data-tour="section-card"
-        elevation={2}
-        sx={{
-          width: "90vw",
-          margin: "5rem auto",
-          maxWidth: "80rem",
-          borderRadius: 2,
-          borderLeft: "4px solid",
-          borderLeftColor: "primary.main",
-          transition: "all 0.3s ease-in-out",
-          "&:hover": {
-            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-          },
-        }}
-      >
-        {/* {section?.featuredImage &&
+      {/* Show skeleton while section data is loading */}
+      {!section && (
+        <Card
+          elevation={2}
+          sx={{
+            width: "90vw",
+            margin: "5rem auto",
+            maxWidth: "80rem",
+            borderRadius: 2,
+            borderLeft: "4px solid",
+            borderLeftColor: "primary.main",
+            p: 3,
+          }}
+        >
+          <Skeleton
+            variant="rectangular"
+            height={200}
+            sx={{ borderRadius: 1, mb: 2 }}
+          />
+          <Skeleton variant="text" width="40%" height={48} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="25%" height={32} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="60%" height={20} sx={{ mb: 3 }} />
+          <Skeleton
+            variant="rectangular"
+            height={120}
+            sx={{ borderRadius: 1, mb: 2 }}
+          />
+          <Skeleton
+            variant="rectangular"
+            height={200}
+            sx={{ borderRadius: 1 }}
+          />
+        </Card>
+      )}
+
+      {section && (
+        <Card
+          data-tour="section-card"
+          elevation={2}
+          sx={{
+            width: "90vw",
+            margin: "5rem auto",
+            maxWidth: "80rem",
+            borderRadius: 2,
+            borderLeft: "4px solid",
+            borderLeftColor: "primary.main",
+            transition: "all 0.3s ease-in-out",
+            "&:hover": {
+              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            },
+          }}
+        >
+          {/* {section?.featuredImage &&
           <CardMediaComponent
           s3Key={section?.featuredImage}
           owner={section?.owner}
@@ -1134,186 +1311,187 @@ function SectionDetail({ user, signOut }) {
           }}
           > */}
 
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            // padding: '1rem',
-            // border: '1px solid black',
-            // backgroundColor: 'rgb(255, 255, 255, 0.1)',
-          }}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={(e) => {
-            console.log("onDragLeaveListItem");
-            e.preventDefault();
-            e.stopPropagation();
-            setIsDragging(false);
-          }}
-        >
-          {(isDragging || inProgress) && (
-            <div
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onDragLeave={(e) => {
-                console.log("onDragLeave");
-                e.preventDefault();
-                e.stopPropagation();
-                setIsDragging(false);
-              }}
-              style={{
-                color: "inherit",
-                fontSize: "2rem",
-                fontWeight: "bold",
-                textAlign: "center",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                zIndex: 100,
-                backgroundColor:
-                  "var(--mui-palette-action-disabledBackground, rgba(0,0,0,0.12))",
-                backdropFilter: "blur(3px)",
-                verticalAlign: "middle",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                wrap: "wrap",
-              }}
-            >
-              {inProgress && t("sectionDetail.uploadingImage")}
-              {isDragging && t("sectionDetail.uploadImagePrompt")}
-            </div>
-          )}
-
-          {
-            section?.featuredImage && (
-              <FeaturedImage
-                s3Key={section.featuredImage}
-                identityId={section?.identityId}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              // padding: '1rem',
+              // border: '1px solid black',
+              // backgroundColor: 'rgb(255, 255, 255, 0.1)',
+            }}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragLeave={(e) => {
+              console.log("onDragLeaveListItem");
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+          >
+            {(isDragging || inProgress) && (
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragLeave={(e) => {
+                  console.log("onDragLeave");
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(false);
+                }}
                 style={{
-                  objectFit: "cover",
+                  color: "inherit",
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
                   width: "100%",
                   height: "100%",
-                  maxHeight: "50vh",
-
+                  zIndex: 100,
+                  backgroundColor:
+                    "var(--mui-palette-action-disabledBackground, rgba(0,0,0,0.12))",
+                  backdropFilter: "blur(3px)",
+                  verticalAlign: "middle",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  color: "inherit",
-                  backgroundColor: "transparent",
-                }}
-              />
-            )
-
-            // </Box>
-          }
-          {!section?.featuredImage && (
-            <Box
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "1rem",
-                // height: '100%',
-                // width: '100%',
-                border: "1px dashed currentColor",
-                opacity: 0.5,
-              }}
-            >
-              <Typography
-                variant="body1"
-                // component="h3"
-                sx={{
-                  flexGrow: 1,
-                  textWrap: "wrap",
+                  wrap: "wrap",
                 }}
               >
-                <CameraIcon
-                  sx={{
-                    fontSize: "2rem",
-                    margin: "1rem auto",
-                    display: "block",
+                {inProgress && t("sectionDetail.uploadingImage")}
+                {isDragging && t("sectionDetail.uploadImagePrompt")}
+              </div>
+            )}
+
+            {
+              section?.featuredImage && (
+                <FeaturedImage
+                  s3Key={section.featuredImage}
+                  identityId={section?.identityId}
+                  style={{
+                    objectFit: "cover",
+                    width: "100%",
+                    height: "100%",
+                    maxHeight: "50vh",
+
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "inherit",
+                    backgroundColor: "transparent",
                   }}
                 />
-                <br />
-                <Typography>
-                  {t("sectionDetail.noFeaturedImage")}.
-                  {t("sectionDetail.dragAndDropPrompt")}
-                </Typography>
-              </Typography>
-            </Box>
-          )}
-        </div>
+              )
 
-        <CardContent>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-              marginBottom: "1rem",
-            }}
-          >
-            <Box>
-              <Typography gutterBottom variant="h3" component="div">
-                {section?.name}
-              </Typography>
-
-              <Typography gutterBottom variant="h5" component="div">
-                {t("sectionDetail.joinCode")}{" "}
-                <Box
-                  component="code"
-                  data-tour="join-code"
+              // </Box>
+            }
+            {!section?.featuredImage && (
+              <Box
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "1rem",
+                  // height: '100%',
+                  // width: '100%',
+                  border: "1px dashed currentColor",
+                  opacity: 0.5,
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  // component="h3"
                   sx={{
-                    fontFamily: "monospace",
-                    fontWeight: 600,
-                    backgroundColor: "action.hover",
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 1,
+                    flexGrow: 1,
+                    textWrap: "wrap",
                   }}
                 >
-                  {section?.code}
-                </Box>
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary">
-                {section?.description}
-              </Typography>
-            </Box>
-            {isOwner && (
-              <Tooltip
-                title={
-                  viewAsStudent
-                    ? t("sectionDetail.switchToInstructorView")
-                    : t("sectionDetail.previewStudentView")
-                }
-              >
-                <Button
-                  variant={viewAsStudent ? "contained" : "outlined"}
-                  size="small"
-                  startIcon={<VisibilityIcon />}
-                  onClick={() => setViewAsStudent(!viewAsStudent)}
-                  sx={{ minWidth: 180 }}
-                >
-                  {viewAsStudent
-                    ? t("sectionDetail.studentView")
-                    : t("sectionDetail.instructorView")}
-                </Button>
-              </Tooltip>
+                  <CameraIcon
+                    sx={{
+                      fontSize: "2rem",
+                      margin: "1rem auto",
+                      display: "block",
+                    }}
+                  />
+                  <br />
+                  <Typography>
+                    {t("sectionDetail.noFeaturedImage")}.
+                    {t("sectionDetail.dragAndDropPrompt")}
+                  </Typography>
+                </Typography>
+              </Box>
             )}
-          </Box>
-        </CardContent>
-        {/* <CardActions>
+          </div>
+
+          <CardContent>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                marginBottom: "1rem",
+              }}
+            >
+              <Box>
+                <Typography gutterBottom variant="h3" component="div">
+                  {section?.name}
+                </Typography>
+
+                <Typography gutterBottom variant="h5" component="div">
+                  {t("sectionDetail.joinCode")}{" "}
+                  <Box
+                    component="code"
+                    data-tour="join-code"
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                      backgroundColor: "action.hover",
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1,
+                    }}
+                  >
+                    {section?.code}
+                  </Box>
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {section?.description}
+                </Typography>
+              </Box>
+              {isOwner && (
+                <Tooltip
+                  title={
+                    viewAsStudent
+                      ? t("sectionDetail.switchToInstructorView")
+                      : t("sectionDetail.previewStudentView")
+                  }
+                >
+                  <Button
+                    variant={viewAsStudent ? "contained" : "outlined"}
+                    size="small"
+                    startIcon={<VisibilityIcon />}
+                    onClick={() => setViewAsStudent(!viewAsStudent)}
+                    sx={{ minWidth: 180 }}
+                  >
+                    {viewAsStudent
+                      ? t("sectionDetail.studentView")
+                      : t("sectionDetail.instructorView")}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
+          </CardContent>
+          {/* <CardActions>
         <Button size="small">Share</Button>
         <Button size="small">Learn More</Button>
       </CardActions> */}
-      </Card>
+        </Card>
+      )}
 
       {Object.keys(sectionStudents).length > 0 &&
         (isOwner || isTeacher) &&
@@ -1327,19 +1505,39 @@ function SectionDetail({ user, signOut }) {
               margin: "0 auto",
             }}
           >
-            <Typography
-              variant="h5"
-              component="div"
-              sx={{ flexGrow: 1, padding: "1rem" }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "1rem",
+              }}
             >
-              {t("sectionDetail.students")}
-            </Typography>
+              <Typography
+                id="nav-section-students"
+                variant="h5"
+                component="div"
+                sx={{ flexGrow: 1 }}
+              >
+                {t("sectionDetail.students")}
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel id="student-sort-label">Sort by</InputLabel>
+                <Select
+                  labelId="student-sort-label"
+                  value={studentSort}
+                  label="Sort by"
+                  onChange={(e) => setStudentSort(e.target.value)}
+                >
+                  <MenuItem value="natural">Original</MenuItem>
+                  <MenuItem value="first">First Name</MenuItem>
+                  <MenuItem value="last">Last Name</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
             <TableContainer component={Paper}>
-              <Table
-                aria-label={t("sectionDetail.students", { ns: "pages" })}
-                size="small"
-              >
+              <Table aria-label={t("sectionDetail.students")} size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell>{t("sectionDetail.studentHeader")}</TableCell>
@@ -1352,7 +1550,7 @@ function SectionDetail({ user, signOut }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.values(sectionStudents).map((student, studentKey) => {
+                  {sortedStudents.map((student, studentKey) => {
                     return (
                       <TableRow
                         key={student.id}
@@ -1365,13 +1563,13 @@ function SectionDetail({ user, signOut }) {
                         }}
                       >
                         <TableCell component="th" scope="row" key={studentKey}>
-                          {student.name}
+                          {formatLastFirst(student)}
                         </TableCell>
                         <TableCell align="right">{student.email}</TableCell>
                         <TableCell align="right">
                           <IconButton
                             edge="end"
-                            aria-label={t("actions.delete", { ns: "common" })}
+                            aria-label={tCommon("actions.delete")}
                             onClick={() => handleDelete(student)}
                           >
                             <DeleteIcon />
@@ -1404,13 +1602,20 @@ function SectionDetail({ user, signOut }) {
             gap: 2,
           }}
         >
-          <Typography variant="h5" component="div">
-            {t("sectionDetail.gradebook")}
+          <Box>
+            <Typography
+              id="nav-section-gradebook"
+              variant="h5"
+              component="div"
+              sx={{ lineHeight: 1.2 }}
+            >
+              {t("sectionDetail.gradebook")}
+            </Typography>
             {visibleAssignmentsCount < totalAssignments && isOwner && (
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ ml: 1 }}
+                component="div"
               >
                 {t("sectionDetail.showingAssignments", {
                   visible: visibleAssignmentsCount,
@@ -1418,7 +1623,7 @@ function SectionDetail({ user, signOut }) {
                 })}
               </Typography>
             )}
-          </Typography>
+          </Box>
 
           {/* Instructor-only controls */}
           {isOwner && !viewAsStudent && (
@@ -1490,85 +1695,36 @@ function SectionDetail({ user, signOut }) {
           )}
         </Box>
 
-        {/* Curve Assignment Selection — per-assignment method */}
+        {/* Curve controls — select/clear all */}
         {isOwner && !viewAsStudent && (
-          <Box sx={{ padding: "0 1rem 1rem 1rem" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                {t("sectionDetail.selectAssignmentsToCurve")} (
-                {Object.keys(curveSettings).length}/{visibleAssignments.length})
-              </Typography>
-              <Button
-                size="small"
-                onClick={selectAllCurveAssignments}
-                disabled={
-                  Object.keys(curveSettings).length ===
-                  visibleAssignments.length
-                }
-              >
-                {t("sectionDetail.selectAll")}
-              </Button>
-              <Button
-                size="small"
-                onClick={clearAllCurveAssignments}
-                disabled={Object.keys(curveSettings).length === 0}
-              >
-                {t("sectionDetail.clearAll")}
-              </Button>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
+          <Box
+            sx={{
+              padding: "0 1rem 0.5rem 1rem",
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Typography variant="subtitle2" color="text.secondary">
+              {t("sectionDetail.selectAssignmentsToCurve")} (
+              {Object.keys(curveSettings).length}/{visibleAssignments.length})
+            </Typography>
+            <Button
+              size="small"
+              onClick={selectAllCurveAssignments}
+              disabled={
+                Object.keys(curveSettings).length === visibleAssignments.length
+              }
             >
-              {visibleAssignments.map((assignment) => {
-                const unitName = units[assignment.unitID]?.name || "Unknown";
-                const isSelected = !!curveSettings[assignment.unitID];
-                return (
-                  <Box
-                    key={assignment.id}
-                    sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                  >
-                    <Chip
-                      label={unitName}
-                      onClick={() => toggleCurveAssignment(assignment.unitID)}
-                      color={isSelected ? "primary" : "default"}
-                      variant={isSelected ? "filled" : "outlined"}
-                      sx={{ cursor: "pointer" }}
-                    />
-                    {isSelected && (
-                      <FormControl size="small" sx={{ minWidth: 130 }}>
-                        <Select
-                          value={
-                            curveSettings[assignment.unitID]?.method ||
-                            "scale-to-top"
-                          }
-                          onChange={(e) =>
-                            setCurveMethodForAssignment(
-                              assignment.unitID,
-                              e.target.value,
-                            )
-                          }
-                          size="small"
-                          variant="standard"
-                          sx={{ fontSize: "0.75rem" }}
-                        >
-                          <MenuItem value="scale-to-top">
-                            {t("sectionDetail.scaleToTopMethod")}
-                          </MenuItem>
-                          <MenuItem value="linear-adjustment">
-                            {t("sectionDetail.linearAdjustmentMethod")}
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    )}
-                  </Box>
-                );
-              })}
-            </Box>
+              {t("sectionDetail.selectAll")}
+            </Button>
+            <Button
+              size="small"
+              onClick={clearAllCurveAssignments}
+              disabled={Object.keys(curveSettings).length === 0}
+            >
+              {t("sectionDetail.clearAll")}
+            </Button>
           </Box>
         )}
 
@@ -1598,7 +1754,7 @@ function SectionDetail({ user, signOut }) {
         {(!isOwner || viewAsStudent) && (
           <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
             <Table
-              aria-label={t("sectionDetail.gradebook", { ns: "pages" })}
+              aria-label={t("sectionDetail.gradebook")}
               size="small"
               sx={{ minWidth: 400 }}
             >
@@ -1740,7 +1896,7 @@ function SectionDetail({ user, signOut }) {
           >
             <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
               <Table
-                aria-label={t("sectionDetail.assignments", { ns: "pages" })}
+                aria-label={t("sectionDetail.assignments")}
                 size="small"
                 sx={{ minWidth: 650, tableLayout: "auto" }}
               >
@@ -1768,9 +1924,23 @@ function SectionDetail({ user, signOut }) {
                         clientNow &&
                         assignment.dueDate &&
                         new Date(assignment.dueDate) > clientNow;
+                      const curveMethod =
+                        curveSettings[assignment.unitID]?.method || "";
 
                       return (
-                        <TableCell align="right" key={assignment.id}>
+                        <TableCell
+                          align="right"
+                          key={assignment.id}
+                          sx={
+                            curveMethod
+                              ? {
+                                  backgroundColor: "primary.50",
+                                  borderBottom: "2px solid",
+                                  borderBottomColor: "primary.main",
+                                }
+                              : undefined
+                          }
+                        >
                           <Box
                             sx={{
                               display: "flex",
@@ -1796,6 +1966,43 @@ function SectionDetail({ user, signOut }) {
                                 />
                               )}
                             </Box>
+                            <FormControl size="small" sx={{ minWidth: 100 }}>
+                              <Select
+                                value={curveMethod}
+                                displayEmpty
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === "") {
+                                    // Remove from curve
+                                    setCurveSettings((prev) => {
+                                      const next = { ...prev };
+                                      delete next[assignment.unitID];
+                                      return next;
+                                    });
+                                  } else {
+                                    setCurveMethodForAssignment(
+                                      assignment.unitID,
+                                      val,
+                                    );
+                                  }
+                                }}
+                                size="small"
+                                variant="standard"
+                                sx={{ fontSize: "0.7rem" }}
+                              >
+                                <MenuItem value="">
+                                  <em>
+                                    {t("sectionDetail.noCurve", "No Curve")}
+                                  </em>
+                                </MenuItem>
+                                <MenuItem value="scale-to-top">
+                                  {t("sectionDetail.scaleToTopMethod")}
+                                </MenuItem>
+                                <MenuItem value="linear-adjustment">
+                                  {t("sectionDetail.linearAdjustmentMethod")}
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
                           </Box>
                         </TableCell>
                       );
@@ -1812,7 +2019,7 @@ function SectionDetail({ user, signOut }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.values(sectionStudents).map((student, studentKey) => {
+                  {sortedStudents.map((student, studentKey) => {
                     // Calculate totals for this student
                     let totalGrade = 0;
                     let totalCurvedGrade = 0;
@@ -1916,7 +2123,7 @@ function SectionDetail({ user, signOut }) {
                             borderRightColor: "divider",
                           }}
                         >
-                          {student.name}
+                          {formatLastFirst(student)}
                         </TableCell>
                         {visibleAssignments.map((assignment, colIndex) => {
                           console.log("student.id", student.id);
@@ -1977,7 +2184,8 @@ function SectionDetail({ user, signOut }) {
                             );
                           }
 
-                          const colGrade = `${highest}% (${average}%)`;
+                          const colGrade =
+                            highest !== "-" ? `${highest}%` : "—";
                           const gradeRecord =
                             gradeMap[student.id]?.[assignment.unitID]?.highest;
                           const override =
@@ -2046,7 +2254,7 @@ function SectionDetail({ user, signOut }) {
       {/* Completion Grid — shows assignment completion status per student */}
       {sectionAssignments && Object.keys(sectionStudents).length > 0 && (
         <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
+          <Typography id="nav-section-completion" variant="h6" sx={{ mb: 1 }}>
             {t("sectionDetail.completionGrid", "Completion Overview")}
           </Typography>
           <CompletionGrid
@@ -2054,14 +2262,14 @@ function SectionDetail({ user, signOut }) {
               id: a.id || a.unitID,
               title: units[a.unitID]?.name || a.unitID,
             }))}
-            students={Object.values(sectionStudents).map((student) => ({
+            students={sortedStudents.map((student) => ({
               studentId: student.id,
-              studentName: student.name || student.email || student.id,
+              studentName: formatLastFirst(student),
               assignments: sectionAssignments.reduce((acc, assignment) => {
-                const grade = gradeMap[student.id]?.[assignment.unitID];
-                if (grade?.highest?.accuracy !== undefined) {
+                const allGrade = allGradeMap[student.id]?.[assignment.unitID];
+                if (allGrade?.hasComplete) {
                   acc[assignment.id || assignment.unitID] = "completed";
-                } else if (grade) {
+                } else if (allGrade?.hasAny) {
                   acc[assignment.id || assignment.unitID] = "in_progress";
                 } else {
                   acc[assignment.id || assignment.unitID] = "not_started";
@@ -2074,16 +2282,25 @@ function SectionDetail({ user, signOut }) {
         </Box>
       )}
 
-      {/* Leaderboard — XP-based ranking per section (shows when data is available) */}
-      {leaderboardEntries.length > 0 && (
+      {/* Leaderboard — XP-based ranking per section (shows when enabled) */}
+      {leaderboardEnabledLocal && (
         <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
+          <Typography id="nav-section-leaderboard" variant="h6" sx={{ mb: 1 }}>
             {t("sectionDetail.leaderboard", "Leaderboard")}
           </Typography>
-          <LeaderboardTable
-            entries={leaderboardEntries}
-            currentStudentId={currentUser?.username || ""}
-          />
+          {leaderboardEntries.length > 0 ? (
+            <LeaderboardTable
+              entries={leaderboardEntries}
+              currentStudentId={currentUser?.username || ""}
+            />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {t(
+                "sectionDetail.noLeaderboardEntries",
+                "No leaderboard data yet. Students will appear here as they earn XP.",
+              )}
+            </Typography>
+          )}
         </Box>
       )}
 
@@ -2096,6 +2313,39 @@ function SectionDetail({ user, signOut }) {
           <GuildLeaderboard guilds={sectionGuilds} />
         </Box>
       )}
+
+      {/* Open Collaboration Rooms */}
+      <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
+        <OpenCollaborationRooms
+          rooms={openRooms}
+          grades={grades}
+          units={units}
+          sectionStudents={sectionStudents || {}}
+          sectionId={id}
+          isInstructor={isOwner}
+          onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
+          onAssignPeerReview={async (gradeId, ownerId, reviewerIds) => {
+            const result = await createPeerReviewRoom(
+              gradeId,
+              reviewerIds,
+              id,
+              ownerId,
+            );
+            if (!result.success)
+              throw new Error(result.error || "Failed to create room");
+          }}
+          onRandomAssign={async (unitId) => {
+            const result = await randomAssignPeerReview(id, unitId);
+            if (!result.success)
+              throw new Error(result.error || "Failed to random assign");
+          }}
+          onAwardTopReviewer={async (unitId) => {
+            const result = await awardTopReviewerXP(id, unitId);
+            if (!result.success)
+              throw new Error(result.error || "Failed to award XP");
+          }}
+        />
+      </Box>
 
       {!sectionAssignments && (
         <Box sx={{ p: 3, maxWidth: "80rem", mx: "auto" }}>
@@ -2121,6 +2371,7 @@ function SectionDetail({ user, signOut }) {
           }}
         >
           <Typography
+            id="nav-section-assignments"
             variant="h5"
             component="div"
             sx={{ flexGrow: 1, padding: "1rem", margin: "1rem auto" }}
@@ -2259,7 +2510,10 @@ function SectionDetail({ user, signOut }) {
             {overrideData.student && overrideData.assignment && (
               <>
                 {t("sectionDetail.overrideGrade.student")}{" "}
-                <strong>{overrideData.student.name}</strong>
+                <strong>
+                  {overrideData.student &&
+                    formatLastFirst(overrideData.student)}
+                </strong>
                 <br />
                 {t("sectionDetail.overrideGrade.assignment")}{" "}
                 <strong>{units[overrideData.assignment.unitID]?.name}</strong>

@@ -16,6 +16,7 @@ import { parseAmplifyConfig } from 'aws-amplify/utils';
 import { DebugPanelProvider } from '../src/components/DebugPanel';
 import AuthContext, { AuthProvider } from '../src/context/authContext';
 import { SettingsProvider } from '../src/context/settingsContext';
+import { NotificationProvider } from '../src/context/notificationContext';
 import { TourProvider } from '../src/context/tourContext';
 import { ChatContextProvider } from '../src/context/chatContext';
 import { EasterEggLayer } from '../src/components/Gamification/EasterEggLayer';
@@ -69,6 +70,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <AuthProvider>
             <AuthGate>
               <SettingsProvider>
+                <NotificationProvider>
                 <ChatContextProvider>
                   <TourProvider>
                     {children}
@@ -78,6 +80,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                     <EasterEggLayer />
                   </TourProvider>
                 </ChatContextProvider>
+                </NotificationProvider>
               </SettingsProvider>
             </AuthGate>
           </AuthProvider>

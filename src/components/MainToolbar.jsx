@@ -38,6 +38,9 @@ import PeopleIcon from "@mui/icons-material/People";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { signOut } from "aws-amplify/auth";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import Switch from "@mui/material/Switch";
@@ -74,6 +77,9 @@ import TuneIcon from "@mui/icons-material/Tune";
 import JoinPracticeDialog from "./PracticeDrill/JoinPracticeDialog";
 import { JoinWorkbookDialog } from "./Workbook";
 import { JoinPeerReviewDialog } from "./PeerReview";
+import NotificationBadge from "./NotificationBadge";
+import { useUnseenCount } from "../context/notificationContext";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -96,7 +102,7 @@ function ToggleMenuItem(props) {
 }
 
 export function SettingsMenu() {
-  const t = useTranslations(["components", "common"]);
+  const t = useTranslations("common");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
@@ -120,7 +126,7 @@ export function SettingsMenu() {
       <Button
         id="settings-button"
         color="inherit"
-        aria-label={t("common.settings", { ns: "common" })}
+        aria-label={t("common.settings")}
         aria-controls={open ? "settings-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
@@ -154,22 +160,13 @@ export function SettingsMenu() {
             size="small"
             sx={{ ml: 1 }}
           >
-            <ToggleButton
-              value="light"
-              aria-label={t("darkMode.light", { ns: "common" })}
-            >
+            <ToggleButton value="light" aria-label={t("darkMode.light")}>
               <LightModeIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton
-              value="auto"
-              aria-label={t("darkMode.system", { ns: "common" })}
-            >
+            <ToggleButton value="auto" aria-label={t("darkMode.system")}>
               <SettingsBrightnessIcon fontSize="small" />
             </ToggleButton>
-            <ToggleButton
-              value="dark"
-              aria-label={t("darkMode.dark", { ns: "common" })}
-            >
+            <ToggleButton value="dark" aria-label={t("darkMode.dark")}>
               <DarkModeIcon fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
@@ -191,7 +188,7 @@ export function SettingsMenu() {
 }
 
 export function HelpMenu() {
-  const t = useTranslations(["components", "common"]);
+  const t = useTranslations("common");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
@@ -214,7 +211,7 @@ export function HelpMenu() {
       <Button
         id="help-button"
         color="inherit"
-        aria-label={t("common.help", { ns: "common" })}
+        aria-label={t("common.help")}
         aria-controls={open ? "help-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
@@ -241,7 +238,8 @@ export function HelpMenu() {
 }
 
 export function UserMenu() {
-  const t = useTranslations(["common", "auth"]);
+  const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
   const { user } = React.useContext(AuthContext);
   const {
     style: avatarStyle,
@@ -269,7 +267,7 @@ export function UserMenu() {
       <IconButton
         id="user-button"
         color="inherit"
-        aria-label={t("navigation.profile", { ns: "common" })}
+        aria-label={tCommon("navigation.profile")}
         aria-controls={open ? "user-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
@@ -309,7 +307,18 @@ export function UserMenu() {
               }}
             >
               <UserIcon />
-              &nbsp;{t("common:navigation.profile")}
+              &nbsp;{tCommon("navigation.profile")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                router.push("/profile/notifications");
+                handleClose();
+              }}
+            >
+              <NotificationBadge>
+                <NotificationsIcon />
+              </NotificationBadge>
+              &nbsp;{tCommon("navigation.notifications", "Notifications")}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -317,7 +326,7 @@ export function UserMenu() {
               }}
             >
               <SettingsBrightnessIcon />
-              &nbsp;{t("common:navigation.settings", "Settings")}
+              &nbsp;{tCommon("navigation.settings")}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -325,7 +334,7 @@ export function UserMenu() {
               }}
             >
               <LogoutIcon />
-              &nbsp;{t("auth:sign_out")}
+              &nbsp;{tAuth("sign_out")}
             </MenuItem>
           </>
         )}
@@ -335,7 +344,9 @@ export function UserMenu() {
 }
 
 export default function MainToolbar({ children }) {
-  const t = useTranslations(["common", "components", "editor.authoring"]);
+  const tCommon = useTranslations("common");
+  const tComponents = useTranslations("components");
+  const tEditorAuth = useTranslations("editor.authoring");
   const { level, sectionLevel } = useXP();
   const { session: authSession } = React.useContext(AuthContext);
   const isInstructorOrAdmin = React.useMemo(() => {
@@ -363,6 +374,85 @@ export default function MainToolbar({ children }) {
   const [openJoinStudyGroup, setOpenJoinStudyGroup] = React.useState(false);
   const [openJoinWorkbook, setOpenJoinWorkbook] = React.useState(false);
   const [openJoinPeerReview, setOpenJoinPeerReview] = React.useState(false);
+
+  // Expandable nav state
+  const [sectionsExpanded, setSectionsExpanded] = React.useState(false);
+  const [unitsExpanded, setUnitsExpanded] = React.useState(false);
+  const [navSections, setNavSections] = React.useState([]);
+  const [navUnits, setNavUnits] = React.useState([]);
+  const [navDataLoaded, setNavDataLoaded] = React.useState(false);
+
+  // Detect current detail pages
+  const currentSectionId = React.useMemo(() => {
+    const match = currentPathname?.match(/\/section\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [currentPathname]);
+
+  const currentUnitId = React.useMemo(() => {
+    const match = currentPathname?.match(/\/unit\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [currentPathname]);
+
+  // Auto-expand when on detail pages
+  React.useEffect(() => {
+    if (currentSectionId) setSectionsExpanded(true);
+    if (currentUnitId) setUnitsExpanded(true);
+  }, [currentSectionId, currentUnitId]);
+
+  // Fetch nav data lazily: when drawer opens or on detail pages
+  React.useEffect(() => {
+    const shouldFetch = state.left || currentSectionId || currentUnitId;
+    if (!shouldFetch || navDataLoaded) return;
+
+    const client = getAmplifyClient();
+
+    async function fetchNavData() {
+      try {
+        const [sectionsResult, unitsResult] = await Promise.all([
+          client.models.Section.list(),
+          client.models.Unit.list(),
+        ]);
+        setNavSections(
+          (sectionsResult.data || []).filter((s) => s != null && s.id != null),
+        );
+        setNavUnits(
+          (unitsResult.data || []).filter((u) => u != null && u.id != null),
+        );
+        setNavDataLoaded(true);
+      } catch (err) {
+        console.error("[MainToolbar] Error fetching nav data:", err);
+      }
+    }
+
+    fetchNavData();
+  }, [state.left, currentSectionId, currentUnitId, navDataLoaded]);
+
+  // Section detail headings for scroll navigation
+  const sectionHeadings = React.useMemo(
+    () => [
+      {
+        id: "nav-section-students",
+        label: tComponents("sectionDetail.students"),
+      },
+      {
+        id: "nav-section-gradebook",
+        label: tComponents("sectionDetail.gradebook"),
+      },
+      {
+        id: "nav-section-completion",
+        label: tComponents("sectionDetail.completionGrid"),
+      },
+      {
+        id: "nav-section-leaderboard",
+        label: tComponents("sectionDetail.leaderboard"),
+      },
+      {
+        id: "nav-section-assignments",
+        label: tComponents("sectionDetail.assignments"),
+      },
+    ],
+    [tComponents],
+  );
 
   // Secret debug mode activation: Click menu icon 7 times within 3 seconds
   const clickTimestamps = React.useRef([]);
@@ -473,9 +563,7 @@ export default function MainToolbar({ children }) {
         <IconButton
           edge="start"
           color="inherit"
-          aria-label={t("mainToolbar.menuAttribute", {
-            ns: "editor.authoring",
-          })}
+          aria-label={tEditorAuth("mainToolbar.menuAttribute")}
           onClick={(e) => {
             handleSecretDebugActivation();
             toggleDrawer("left", true)(e);
@@ -495,22 +583,32 @@ export default function MainToolbar({ children }) {
         />
         <IconButton
           color="inherit"
-          aria-label={t("mainToolbar.joinStudyGroup", {
-            ns: "common",
-            defaultValue: "Join Study Group",
-          })}
+          aria-label={tCommon("mainToolbar.joinStudyGroup")}
           data-tour="join-study-group-button"
           onClick={() => setOpenJoinStudyGroup(true)}
         >
-          <GroupsIcon />
+          <NotificationBadge category="COLLABORATION">
+            <GroupsIcon />
+          </NotificationBadge>
         </IconButton>
         <IconButton
           color="inherit"
-          aria-label={t("mainToolbar.addToSection.title", { ns: "common" })}
+          aria-label={tCommon("mainToolbar.addToSection.title")}
           data-tour="join-section-button"
           onClick={() => setOpenAddStudentToSection(true)}
         >
-          <PersonAddIcon />
+          <NotificationBadge category="ASSIGNMENT">
+            <PersonAddIcon />
+          </NotificationBadge>
+        </IconButton>
+        <IconButton
+          color="inherit"
+          aria-label="Notifications"
+          onClick={() => router.push("/profile/notifications")}
+        >
+          <NotificationBadge>
+            <NotificationsIcon />
+          </NotificationBadge>
         </IconButton>
         {/**
          * @todo Add a button for the settings menu.
@@ -578,7 +676,7 @@ export default function MainToolbar({ children }) {
                     >
                       <HomeIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("common:navigation.home")} />
+                    <ListItemText primary={tCommon("navigation.home")} />
                   </ListItemButton>
                 </ListItem>
                 {/* <ListItem disablePadding>
@@ -589,38 +687,169 @@ export default function MainToolbar({ children }) {
                     <ListItemText primary='About Us' />
                   </ListItemButton>
                 </ListItem> */}
-                <ListItem disablePadding>
-                  <ListItemButton component="a" href="/sections">
-                    <ListItemIcon
-                      sx={{
-                        color: "text.primary",
+                {/* Sections — expandable nav with sub-items */}
+                <ListItem
+                  disablePadding
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSectionsExpanded(!sectionsExpanded);
                       }}
+                      sx={{ color: "text.primary" }}
+                      aria-label={
+                        sectionsExpanded
+                          ? "collapse sections"
+                          : "expand sections"
+                      }
                     >
-                      <PeopleIcon />
+                      {sectionsExpanded ? <ExpandLess /> : <ExpandMore />}
+                    </IconButton>
+                  }
+                >
+                  <ListItemButton component="a" href="/sections">
+                    <ListItemIcon sx={{ color: "text.primary" }}>
+                      <NotificationBadge category="ASSIGNMENT">
+                        <PeopleIcon />
+                      </NotificationBadge>
                     </ListItemIcon>
-                    <ListItemText primary={t("common:navigation.sections")} />
+                    <ListItemText primary={tCommon("navigation.sections")} />
                   </ListItemButton>
                 </ListItem>
-                {/* <ListItem disablePadding>
-                  <ListItemButton component="a" href='/assignments'>
-                    <ListItemIcon>
-                      <GradingIcon />
-                    </ListItemIcon>
-                    <ListItemText primary='Assignments' />
-                  </ListItemButton>
-                </ListItem> */}
-                <ListItem disablePadding>
-                  <ListItemButton component="a" href="/units">
-                    <ListItemIcon
-                      sx={{
-                        color: "text.primary",
+                <Collapse
+                  in={sectionsExpanded}
+                  timeout="auto"
+                  unmountOnExit
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <List component="div" disablePadding>
+                    {navSections.map((section) => {
+                      const isCurrent = section.id === currentSectionId;
+                      return (
+                        <React.Fragment key={section.id}>
+                          <ListItem disablePadding>
+                            <ListItemButton
+                              component="a"
+                              href={`/section/${section.id}`}
+                              selected={isCurrent}
+                              sx={{ pl: 4 }}
+                              onClick={(e) => {
+                                if (isCurrent) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }
+                              }}
+                            >
+                              <ListItemText
+                                primary={section.name}
+                                secondary={
+                                  !isCurrent ? section.description : undefined
+                                }
+                                primaryTypographyProps={{
+                                  variant: "body2",
+                                  fontWeight: isCurrent ? 600 : 400,
+                                  noWrap: true,
+                                }}
+                                secondaryTypographyProps={{
+                                  variant: "caption",
+                                  noWrap: true,
+                                }}
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                          {isCurrent &&
+                            sectionHeadings.map((heading) => (
+                              <ListItem key={heading.id} disablePadding>
+                                <ListItemButton
+                                  sx={{ pl: 6 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    document
+                                      .getElementById(heading.id)
+                                      ?.scrollIntoView({ behavior: "smooth" });
+                                    setState({ ...state, left: false });
+                                  }}
+                                >
+                                  <ListItemText
+                                    primary={heading.label}
+                                    primaryTypographyProps={{
+                                      variant: "caption",
+                                    }}
+                                  />
+                                </ListItemButton>
+                              </ListItem>
+                            ))}
+                        </React.Fragment>
+                      );
+                    })}
+                  </List>
+                </Collapse>
+
+                {/* Units — expandable nav with sub-items */}
+                <ListItem
+                  disablePadding
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUnitsExpanded(!unitsExpanded);
                       }}
+                      sx={{ color: "text.primary" }}
+                      aria-label={
+                        unitsExpanded ? "collapse units" : "expand units"
+                      }
                     >
+                      {unitsExpanded ? <ExpandLess /> : <ExpandMore />}
+                    </IconButton>
+                  }
+                >
+                  <ListItemButton component="a" href="/units">
+                    <ListItemIcon sx={{ color: "text.primary" }}>
                       <MenuBookIcon />
                     </ListItemIcon>
-                    <ListItemText primary={t("common:navigation.units")} />
+                    <ListItemText primary={tCommon("navigation.units")} />
                   </ListItemButton>
                 </ListItem>
+                <Collapse
+                  in={unitsExpanded}
+                  timeout="auto"
+                  unmountOnExit
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <List component="div" disablePadding>
+                    {navUnits.map((unit) => {
+                      const isCurrent = unit.id === currentUnitId;
+                      return (
+                        <ListItem key={unit.id} disablePadding>
+                          <ListItemButton
+                            component="a"
+                            href={`/unit/${unit.id}`}
+                            selected={isCurrent}
+                            sx={{ pl: 4 }}
+                          >
+                            <ListItemText
+                              primary={unit.name}
+                              secondary={unit.description}
+                              primaryTypographyProps={{
+                                variant: "body2",
+                                fontWeight: isCurrent ? 600 : 400,
+                                noWrap: true,
+                              }}
+                              secondaryTypographyProps={{
+                                variant: "caption",
+                                noWrap: true,
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                </Collapse>
                 <ListItem disablePadding>
                   <ListItemButton component="a" href="/leaderboard">
                     <ListItemIcon
@@ -628,14 +857,11 @@ export default function MainToolbar({ children }) {
                         color: "text.primary",
                       }}
                     >
-                      <LeaderboardIcon />
+                      <NotificationBadge category="GAMIFICATION">
+                        <LeaderboardIcon />
+                      </NotificationBadge>
                     </ListItemIcon>
-                    <ListItemText
-                      primary={t(
-                        "common:navigation.leaderboard",
-                        "Leaderboard",
-                      )}
-                    />
+                    <ListItemText primary={tCommon("navigation.leaderboard")} />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
@@ -645,11 +871,11 @@ export default function MainToolbar({ children }) {
                         color: "text.primary",
                       }}
                     >
-                      <GroupsIcon />
+                      <NotificationBadge category="GUILD">
+                        <GroupsIcon />
+                      </NotificationBadge>
                     </ListItemIcon>
-                    <ListItemText
-                      primary={t("common:navigation.guilds", "Guilds")}
-                    />
+                    <ListItemText primary={tCommon("navigation.guilds")} />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
@@ -661,9 +887,7 @@ export default function MainToolbar({ children }) {
                     >
                       <AccountTreeIcon />
                     </ListItemIcon>
-                    <ListItemText
-                      primary={t("common:navigation.skills", "Skill Tree")}
-                    />
+                    <ListItemText primary={tCommon("navigation.skills")} />
                   </ListItemButton>
                 </ListItem>
                 {isInstructorOrAdmin && (
@@ -677,10 +901,7 @@ export default function MainToolbar({ children }) {
                         <TuneIcon />
                       </ListItemIcon>
                       <ListItemText
-                        primary={t(
-                          "common:navigation.gamification",
-                          "Gamification",
-                        )}
+                        primary={tCommon("navigation.gamification")}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -703,14 +924,8 @@ export default function MainToolbar({ children }) {
                       <GroupsIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t(
-                        "common:navigation.joinStudyGroup",
-                        "Join Study Group",
-                      )}
-                      secondary={t(
-                        "common:navigation.joinStudyGroupDesc",
-                        "Enter a room code",
-                      )}
+                      primary={tCommon("navigation.joinStudyGroup")}
+                      secondary={tCommon("navigation.joinStudyGroupDesc")}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -725,14 +940,8 @@ export default function MainToolbar({ children }) {
                       <EditNoteIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t(
-                        "common:navigation.joinWorkbook",
-                        "Join Workbook Session",
-                      )}
-                      secondary={t(
-                        "common:navigation.joinWorkbookDesc",
-                        "Enter a workbook link or ID",
-                      )}
+                      primary={tCommon("navigation.joinWorkbook")}
+                      secondary={tCommon("navigation.joinWorkbookDesc")}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -747,14 +956,8 @@ export default function MainToolbar({ children }) {
                       <RateReviewIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={t(
-                        "common:navigation.joinPeerReview",
-                        "Join Peer Review",
-                      )}
-                      secondary={t(
-                        "common:navigation.joinPeerReviewDesc",
-                        "Enter a review room code",
-                      )}
+                      primary={tCommon("navigation.joinPeerReview")}
+                      secondary={tCommon("navigation.joinPeerReviewDesc")}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -782,14 +985,11 @@ export default function MainToolbar({ children }) {
           >
             <form onSubmit={addStudentToSection}>
               <DialogTitle id="form-dialog-title">
-                {t("mainToolbar.addToSection.title", "Add self to Section")}
+                {tCommon("mainToolbar.addToSection.title")}
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  {t(
-                    "mainToolbar.addToSection.description",
-                    "Add yourself as a student to a section by entering the section code.",
-                  )}
+                  {tCommon("mainToolbar.addToSection.description")}
                 </DialogContentText>
                 <br />
 
@@ -799,7 +999,7 @@ export default function MainToolbar({ children }) {
                   id="code"
                   name="code"
                   data-tour="join-code-input"
-                  label={t("mainToolbar.addToSection.codeLabel", "Code")}
+                  label={tCommon("mainToolbar.addToSection.codeLabel")}
                   variant="outlined"
                 />
                 <br />
@@ -819,10 +1019,10 @@ export default function MainToolbar({ children }) {
                   color="primary"
                   variant="outlined"
                 >
-                  {t("common:actions.cancel")}
+                  {tCommon("actions.cancel")}
                 </Button>
                 <Button disabled={work} type="submit" variant="contained">
-                  {t("mainToolbar.addToSection.add", "Add")}
+                  {tCommon("mainToolbar.addToSection.add")}
                 </Button>
               </DialogActions>
             </form>

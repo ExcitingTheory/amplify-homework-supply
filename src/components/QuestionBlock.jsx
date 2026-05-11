@@ -42,6 +42,7 @@ function DraggableAnswer({
   onQuestionDelete,
   t,
 }) {
+  const tCommon = useTranslations("common");
   return (
     <Draggable draggableId={`id-${index}`} index={index}>
       {(provided) => (
@@ -60,7 +61,7 @@ function DraggableAnswer({
         >
           <DragIndicatorIcon />
           <TextField
-            label={t("components:questionBlock.answerLabel", {
+            label={t("questionBlock.answerLabel", {
               number: index + 1,
             })}
             value={data.answer}
@@ -79,8 +80,8 @@ function DraggableAnswer({
             control={<Switch color="primary" checked={data.correct} />}
             label={
               data.correct
-                ? t("components:questionBlock.correct")
-                : t("components:questionBlock.incorrect")
+                ? t("questionBlock.correct")
+                : t("questionBlock.incorrect")
             }
             onChange={(event) => {
               onCorrectChange(event, index);
@@ -88,7 +89,7 @@ function DraggableAnswer({
             labelPlacement="bottom"
           />
           <IconButton
-            aria-label={t("actions.delete", { ns: "common" })}
+            aria-label={tCommon("actions.delete")}
             onClick={() => {
               onQuestionDelete(index);
             }}
@@ -509,15 +510,15 @@ class QuestionBlock extends React.Component {
                   // variant='contained'
                   onClick={this._onClick}
                 >
-                  {t("components:questionBlock.edit")}
+                  {t("questionBlock.edit")}
                 </Button>
 
                 <Button size="small" onClick={this._reset}>
-                  {t("components:questionBlock.reset")}
+                  {t("questionBlock.reset")}
                 </Button>
 
                 <Box>
-                  {t("components:questionBlock.gradeDisplay", {
+                  {t("questionBlock.gradeDisplay", {
                     score: this.state.grade,
                   })}
                 </Box>
@@ -540,12 +541,12 @@ class QuestionBlock extends React.Component {
                   onClick={this._save}
                 >
                   {this.state.invalidQuestion
-                    ? t("components:questionBlock.invalid")
-                    : t("components:questionBlock.done")}
+                    ? t("questionBlock.invalid")
+                    : t("questionBlock.done")}
                 </Button>
                 <Box sx={{ flexGrow: 1 }}></Box>
                 <Button size="small" onClick={this._remove}>
-                  {t("components:questionBlock.remove")}
+                  {t("questionBlock.remove")}
                 </Button>
               </Toolbar>
             </Card>
@@ -572,7 +573,7 @@ class QuestionBlock extends React.Component {
               <DragIndicatorIcon />
               <TextField
                 // disabled
-                placeholder={t("components:questionBlock.addAnswerPlaceholder")}
+                placeholder={t("questionBlock.addAnswerPlaceholder")}
                 onClick={this._onAddQuestion}
                 fullWidth
               />

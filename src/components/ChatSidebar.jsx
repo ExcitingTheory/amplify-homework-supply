@@ -93,7 +93,9 @@ import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from "../components/Editor3/plugin
 import { BotAvatar } from "./BotAvatar";
 
 const ChatSidebar = ({ onClose }) => {
-  const { t, ready } = useTranslation("components");
+  const t = useTranslations("components");
+  const tCommon = useTranslations("common");
+  const ready = true; // next-intl translations are always ready when provider is mounted
 
   // Utility function to deep clone messages to prevent frozen object errors
   // The AI SDK mutates message objects during streaming, so they must be mutable
@@ -3319,7 +3321,7 @@ const ChatSidebar = ({ onClose }) => {
             <Button
               type="submit"
               variant="contained"
-              aria-label={t("actions.send", { ns: "common" })}
+              aria-label={tCommon("actions.send")}
               disabled={isLoading || !assistantChat?.id || !user}
               data-testid="chat-send"
               sx={{

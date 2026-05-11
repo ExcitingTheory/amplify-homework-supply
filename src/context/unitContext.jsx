@@ -30,6 +30,7 @@ export const gradedBlockTypes = [
   "meaning-association",
   "answer",
   "custom-answer",
+  "custom-ai",
 ];
 const UnitProvider = ({ children, id, sectionId }) => {
   // Get auth state from centralized context
@@ -871,12 +872,19 @@ const UnitProvider = ({ children, id, sectionId }) => {
 
       // Detect contentVersion change — fetch content from S3
       const prevContentVersion = unitRef.current?.contentVersion || 0;
-      if (unitRecord.identityId && (unitRecord.contentVersion || 0) > prevContentVersion) {
+      if (
+        unitRecord.identityId &&
+        (unitRecord.contentVersion || 0) > prevContentVersion
+      ) {
         const isInstructor =
           authSession?.groups?.includes("Instructors") ||
           authSession?.groups?.includes("Admins");
         const variant = isInstructor ? "draft" : "published";
-        const s3Content = await loadContent(unitRecord.identityId, unitRecord.id, variant);
+        const s3Content = await loadContent(
+          unitRecord.identityId,
+          unitRecord.id,
+          variant,
+        );
         if (s3Content) {
           unitRecord = { ...unitRecord, data: s3Content };
         }
@@ -1101,7 +1109,11 @@ const UnitProvider = ({ children, id, sectionId }) => {
 
       try {
         // 1. Upload content to S3 (private — owner only)
-        await saveDraftContent(currentUnit.identityId, currentUnit.id, newContent);
+        await saveDraftContent(
+          currentUnit.identityId,
+          currentUnit.id,
+          newContent,
+        );
 
         // 2. Bump contentVersion in DynamoDB (no content payload)
         const nextContentVersion = (currentUnit.contentVersion || 0) + 1;
@@ -1295,7 +1307,11 @@ const UnitProvider = ({ children, id, sectionId }) => {
         // On publish: copy draft to published + create history snapshot
         if (status === "PUBLISHED") {
           const currentVersion = currentUnit.contentVersion || 1;
-          await publishContent(currentUnit.identityId, currentUnit.id, currentVersion);
+          await publishContent(
+            currentUnit.identityId,
+            currentUnit.id,
+            currentVersion,
+          );
 
           // Update publishedContentVersion + publishedAt in DynamoDB
           const { data: publishedUnit } = await client.models.Unit.update({
@@ -1305,7 +1321,10 @@ const UnitProvider = ({ children, id, sectionId }) => {
             _version: savedUnit._version,
           });
           if (publishedUnit) {
-            unitRef.current = { ...unitRef.current, _version: publishedUnit._version };
+            unitRef.current = {
+              ...unitRef.current,
+              _version: publishedUnit._version,
+            };
             versionRef.current = publishedUnit._version;
           }
         }

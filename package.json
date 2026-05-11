@@ -171,6 +171,7 @@
     "@opentelemetry/sdk-trace-base": "^1.29.0",
     "@opentelemetry/sdk-trace-node": "^1.29.0",
     "@opentelemetry/semantic-conventions": "^1.29.0",
+    "@playwright/test": "^1.59.1",
     "@storybook/addon-a11y": "~10.2.13",
     "@storybook/addon-docs": "~10.2.13",
     "@storybook/addon-links": "~10.2.13",

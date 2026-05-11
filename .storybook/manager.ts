@@ -4,8 +4,8 @@ import { themes } from 'storybook/theming';
 // Import custom onboarding addon
 import './code/myOnboarding/manager';
 
-// Import translation-mode addon after onboarding to ensure proper loading order
-import './addons/translation-mode/manager';
+// translation-mode addon is loaded via preset.js in main.ts addons array (managerEntries)
+// Do NOT import it here — that causes double-registration
 
 // Use dark theme when system prefers dark
 const prefersDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;

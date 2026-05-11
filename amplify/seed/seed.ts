@@ -86,32 +86,48 @@ if (!password) {
 
 const TEST_USERS: Record<
   string,
-  { username: string; group: string; phone: string }
+  {
+    username: string;
+    group: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+  }
 > = {
   admin: {
     username: "admin@example.com",
     group: "Admins",
     phone: "+15550000001",
+    firstName: "Admin",
+    lastName: "User",
   },
   instructor1: {
     username: "instructor1@example.com",
     group: "Instructors",
     phone: "+15550000002",
+    firstName: "Maria",
+    lastName: "Garcia",
   },
   instructor2: {
     username: "instructor2@example.com",
     group: "Instructors",
     phone: "+15550000003",
+    firstName: "James",
+    lastName: "Wilson",
   },
   student1: {
     username: "student1@example.com",
     group: "Learners",
     phone: "+15550000004",
+    firstName: "Emma",
+    lastName: "Johnson",
   },
   student2: {
     username: "student2@example.com",
     group: "Learners",
     phone: "+15550000005",
+    firstName: "Liam",
+    lastName: "Chen",
   },
 };
 
@@ -156,6 +172,8 @@ for (const [key, userData] of Object.entries(TEST_USERS)) {
       userAttributes: {
         locale: "en",
         phoneNumber: userData.phone,
+        givenName: userData.firstName,
+        familyName: userData.lastName,
         // Don't set email here - Cognito auto-sets it from username when email login is enabled
       },
     });
@@ -380,6 +398,38 @@ const biologyUnitContent = {
   },
 };
 
+// AI-graded biology exercise content (uses custom-ai block)
+const biologyAIExerciseContent = {
+  root: {
+    children: [
+      {
+        type: "heading",
+        tag: "h1",
+        children: [{ type: "text", text: "AI-Graded Biology Exercise" }],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            type: "text",
+            text: "Answer the following questions about photosynthesis. Your responses will be graded by AI based on scientific accuracy.",
+          },
+        ],
+      },
+      {
+        type: "custom-ai",
+        version: 1,
+        ids: [] as string[], // Will be populated with actual question IDs after creation
+        inputMode: "text",
+        criteria:
+          "Grade based on scientific accuracy and completeness. Award full marks for correctly identifying the reactants, products, and location of photosynthesis. Partial credit for incomplete but correct answers.",
+        allowedInput: ["text", "audio"],
+        format: "",
+      },
+    ],
+  },
+};
+
 const unitsResponse = await Promise.all([
   client.models.Unit.create({
     name: "Japanese Greetings",
@@ -404,6 +454,15 @@ const unitsResponse = await Promise.all([
     identityId: instructor1IdentityId,
     status: "DRAFT",
   }),
+  client.models.Unit.create({
+    name: "AI Biology Exercise",
+    description:
+      "AI-graded exercise on photosynthesis concepts using text and audio input",
+    contentVersion: 1,
+    publishedContentVersion: 1,
+    identityId: instructor1IdentityId,
+    status: "PUBLISHED",
+  }),
 ]);
 
 const units = unwrap(unitsResponse, "Unit");
@@ -412,9 +471,19 @@ console.log(JSON.stringify(unitsResponse, null, 2));
 console.log(`✅ Created ${units.length} units`);
 
 // Upload unit content to S3 for published units
+// Populate the custom-ai block's question IDs with actual created question IDs
+const aiExerciseContent = structuredClone(biologyAIExerciseContent);
+const customAIBlock = aiExerciseContent.root.children.find(
+  (c: any) => c.type === "custom-ai",
+);
+if (customAIBlock) {
+  customAIBlock.ids = [questions[1].id, questions[2].id]; // photosynthesis questions
+}
+
 const unitContentMap: Record<number, string> = {
   0: JSON.stringify(japaneseUnitContent),
   1: JSON.stringify(biologyUnitContent),
+  3: JSON.stringify(aiExerciseContent),
 };
 
 for (const [idx, content] of Object.entries(unitContentMap)) {
@@ -423,8 +492,16 @@ for (const [idx, content] of Object.entries(unitContentMap)) {
     const draftPath = `private/${instructor1IdentityId}/units/${unit.id}/draft.json`;
     const publishedPath = `protected/${instructor1IdentityId}/units/${unit.id}/published.json`;
     await Promise.all([
-      uploadData({ path: draftPath, data: content, options: { contentType: 'application/json' } }).result,
-      uploadData({ path: publishedPath, data: content, options: { contentType: 'application/json' } }).result,
+      uploadData({
+        path: draftPath,
+        data: content,
+        options: { contentType: "application/json" },
+      }).result,
+      uploadData({
+        path: publishedPath,
+        data: content,
+        options: { contentType: "application/json" },
+      }).result,
     ]);
     console.log(`  📄 Uploaded content to S3 for unit: ${unit.name}`);
   }
@@ -477,6 +554,15 @@ await Promise.all([
   client.models.QuestionUnit.create({
     questionID: questions[2].id,
     unitID: units[1].id,
+  }),
+  // Associate biology questions with the AI Biology Exercise unit
+  client.models.QuestionUnit.create({
+    questionID: questions[1].id,
+    unitID: units[3].id,
+  }),
+  client.models.QuestionUnit.create({
+    questionID: questions[2].id,
+    unitID: units[3].id,
   }),
 ]);
 
@@ -973,7 +1059,7 @@ console.log(
 const student1ProfileResponse = await client.models.StudentProfile.create({
   studentId: student1OwnerSub,
   cohortId,
-  studentName: "Student One",
+  studentName: "Johnson, Emma",
   totalXP: 520,
   level: 5,
   // Streak (was StudentStreak)
@@ -1050,7 +1136,7 @@ await Promise.all([
   client.models.StudentProfile.create({
     studentId: "seed-student-3",
     cohortId,
-    studentName: "Alex Martinez",
+    studentName: "Martinez, Alex",
     totalXP: 350,
     level: 4,
     currentStreak: 3,
@@ -1062,7 +1148,7 @@ await Promise.all([
   client.models.StudentProfile.create({
     studentId: "seed-student-4",
     cohortId,
-    studentName: "Jordan Lee",
+    studentName: "Lee, Jordan",
     totalXP: 440,
     level: 4,
     currentStreak: 7,
@@ -1074,7 +1160,7 @@ await Promise.all([
   client.models.StudentProfile.create({
     studentId: "seed-student-5",
     cohortId,
-    studentName: "Sam Rivera",
+    studentName: "Rivera, Sam",
     totalXP: 95,
     level: 1,
     currentStreak: 1,
@@ -1248,6 +1334,7 @@ console.log(
 // Student skill progress → embedded in StudentProfile.skillProgress
 await client.models.StudentProfile.update({
   id: student1Profile.id,
+  _version: student1Profile._version,
   skillProgress: [
     { skillId: skills[0].id, status: "MASTERED" }, // Basic Vocabulary
     { skillId: skills[1].id, status: "MASTERED" }, // Reading Comprehension
@@ -1269,6 +1356,7 @@ console.log("\n🔒 Setting content lock fields on units...");
 
 await client.models.Unit.update({
   id: units[2].id, // Advanced Japanese Verbs (DRAFT unit)
+  _version: units[2]._version,
   requiredXP: 300,
   requiredModuleCompletion: 0.75,
 });
@@ -1436,6 +1524,7 @@ console.log("✅ Signed back in as instructor1");
 if (practiceSessions[0]?.id) {
   await client.models.PracticeSession.update({
     id: practiceSessions[0].id,
+    _version: practiceSessions[0]._version,
     insightStudentId: student1OwnerSub,
     weakAreas: ["pronunciation-accuracy"],
     strongAreas: ["vocabulary-recall", "definition-matching"],
@@ -1676,7 +1765,7 @@ await Promise.all([
   client.models.StudentProfile.create({
     studentId: student2OwnerSub,
     cohortId,
-    studentName: "Student Two",
+    studentName: "Chen, Liam",
     totalXP: 50,
     level: 1,
     currentStreak: 0,
@@ -1705,6 +1794,7 @@ const { data: guild2 } = await client.models.Guild.get({ id: guilds[1].id });
 if (guild2) {
   await client.models.Guild.update({
     id: guilds[1].id,
+    _version: guild2._version,
     members: [
       ...((guild2.members as any[]) || []),
       { studentId: student2OwnerSub, role: "MEMBER", joinedAt: daysAgo(6) },

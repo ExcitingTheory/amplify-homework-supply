@@ -92,7 +92,7 @@
     "emailHeader": "メール",
     "actionsHeader": "操作",
     "gradebook": "成績表",
-    "showingAssignments": "({{total}}件中{{visible}}件の課題を表示)",
+    "showingAssignments": "({total}件中{visible}件の課題を表示)",
     "showFutureAssignments": "今後の課題を表示",
     "showDraftAssignments": "下書きを表示します",
     "applyCurve": "カーブを適用",

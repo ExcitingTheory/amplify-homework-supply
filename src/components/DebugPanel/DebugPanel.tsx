@@ -226,7 +226,7 @@ export function DebugPanel({
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Debug Panel
         </Typography>
-        <IconButton edge="end" onClick={onClose} aria-label={t('actions.close', { ns: 'common' })}>
+        <IconButton edge="end" onClick={onClose} aria-label={t('actions.close')}>
           <CloseIcon />
         </IconButton>
       </Toolbar>

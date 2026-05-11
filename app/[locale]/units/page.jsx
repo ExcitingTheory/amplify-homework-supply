@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { useTranslations } from "next-intl";
@@ -10,6 +10,7 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Skeleton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MainToolbar from "@/components/MainToolbar";
@@ -40,9 +41,11 @@ import { useRouter } from "next/navigation";
 
 function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
   const [url, setUrl] = React.useState(null);
+  const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
     if (!s3Key) return;
+    setLoaded(false);
 
     const fetchUrl = async () => {
       const _url = await getCachedUrl(s3Key);
@@ -53,15 +56,33 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
   }, [s3Key]);
 
   return (
-    <CardMedia
-      component="img"
+    <Box
       sx={{
-        width: url ? 400 : 151,
+        position: "relative",
+        width: 400,
         alignSelf: "left",
+        flexShrink: 0,
       }}
-      image={url}
-      // alt="Live from space album cover"
-    />
+    >
+      <img
+        src={url || undefined}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+          visibility: loaded ? "visible" : "hidden",
+        }}
+        onLoad={() => setLoaded(true)}
+      />
+      {!loaded && (
+        <Skeleton
+          variant="rectangular"
+          animation="wave"
+          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        />
+      )}
+    </Box>
   );
 }
 

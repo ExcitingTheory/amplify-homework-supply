@@ -36,6 +36,7 @@ import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
+import { notificationCronHandler } from "./functions/notificationCron/resource";
 
 /**
  * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
@@ -118,6 +119,7 @@ export const backend = defineBackend({
   peerReviewAIHandler,
   generatePracticeDrillHandler,
   streakResetCronHandler,
+  notificationCronHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -633,4 +635,31 @@ const streakResetCronAppSyncPolicy = new Policy(
 );
 backend.streakResetCronHandler.resources.lambda.role?.attachInlinePolicy(
   streakResetCronAppSyncPolicy,
+);
+
+// ==========================================================================
+// Notification Cron Handler — IAM + env config
+// ==========================================================================
+
+backend.notificationCronHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+const notificationCronAppSyncPolicy = new Policy(
+  backend.notificationCronHandler.resources.lambda.stack,
+  "NotificationCronAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.notificationCronHandler.resources.lambda.role?.attachInlinePolicy(
+  notificationCronAppSyncPolicy,
 );

@@ -236,7 +236,7 @@ export function Workbook(): JSX.Element {
                       <TutorCursorOverlay />
                       <ContentEditable
                         data-lexical-editor="true"
-                        aria-label={t('navigation.workbook', { ns: 'common' })}
+                        aria-label={t('navigation.workbook')}
                         style={{
                           width: '100%',
                           maxWidth: '100%',

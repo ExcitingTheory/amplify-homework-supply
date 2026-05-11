@@ -297,6 +297,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
    * Only repositions once per step to prevent jumping when the user interacts with the iframe.
    */
   const calculateTooltipPosition = (force = false) => {
+    // Guard against undefined currentStep (can happen during step transitions)
+    if (!currentStep) return;
+
     // Skip recalculation if already positioned for this step (unless forced)
     if (tooltipPositionedRef.current && !force) return;
 

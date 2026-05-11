@@ -11,6 +11,8 @@ export const useTranslation = (namespace) => ({
 
 export const Trans = ({ children }) => children;
 
+export const I18nextProvider = ({ children }) => children;
+
 export const initReactI18next = {
   type: '3rdParty',
   init: () => {},

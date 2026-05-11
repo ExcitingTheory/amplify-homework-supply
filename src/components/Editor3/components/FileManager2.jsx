@@ -728,6 +728,7 @@ function InlineEditorField({
 // =============================================================================
 
 function FileNameField({ value, fileId, onSave, searchTerm }) {
+  const t = useTranslations("editor.files");
   const [localValue, setLocalValue] = React.useState(value);
   const editableRef = React.useRef(null);
 
@@ -812,7 +813,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
       ref={editableRef}
       contentEditable
       suppressContentEditableWarning
-      aria-label={t("fileMetadataComponent.filename", { ns: "editor.files" })}
+      aria-label={t("fileMetadataComponent.filename")}
       onInput={handleInput}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -1442,6 +1443,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
   const t = useTranslations("editor.files");
+  const tEditorAi = useTranslations("editor.ai");
 
   const [newDescription, setNewDescription] = React.useState("");
   const [presignedUrl, setPresignedUrl] = React.useState("");
@@ -1520,7 +1522,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
           />
           <Button
             variant="outlined"
-            aria-label={t("unifiedGenerateModal.generate", { ns: "editor.ai" })}
+            aria-label={tEditorAi("unifiedGenerateModal.generate")}
             onClick={async () => {
               setIsOpen(true);
               setWorking(true);
@@ -1675,6 +1677,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 }
 
 function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
+  const tEditorAi = useTranslations("editor.ai");
   const [newDescription, setNewDescription] = React.useState("");
 
   return (
@@ -1716,7 +1719,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
         />
         <Button
           variant="outlined"
-          aria-label={t("unifiedGenerateModal.generate", { ns: "editor.ai" })}
+          aria-label={tEditorAi("unifiedGenerateModal.generate")}
           onClick={() => {
             // send graphql mutation to create new image file
             // close form
@@ -1736,6 +1739,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
 
 function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
   const t = useTranslations("editor.files");
+  const tEditorAi = useTranslations("editor.ai");
   const [newDescription, setNewDescription] = React.useState("");
   const [audioSrc, setAudioSrc] = React.useState("");
   const [presignedUrl, setPresignedUrl] = React.useState("");
@@ -1913,7 +1917,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
           />
           <Button
             variant="outlined"
-            aria-label={t("unifiedGenerateModal.generate", { ns: "editor.ai" })}
+            aria-label={tEditorAi("unifiedGenerateModal.generate")}
             onClick={async () => {
               setIsOpen(true);
               setWorking(true);

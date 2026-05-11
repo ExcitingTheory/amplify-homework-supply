@@ -31,6 +31,10 @@ const config: StorybookConfig = {
   ],
 
   async viteFinal(config) {
+    // Disable Vite's publicDir to suppress "Assets in public directory cannot be imported
+    // from JavaScript" warnings. Storybook's staticDirs already serves public files.
+    config.publicDir = false;
+
     // Vite plugin to intercept CollaborationPlugin wrapper imports before pre-bundling
     const collabMockPath = path.resolve(
       __dirname,
@@ -59,7 +63,39 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       "@storybook-components": path.resolve(__dirname, "./components"),
       "@storybook-mocks": path.resolve(__dirname, "./__mocks__"),
+      // General @/ → src/ alias matching Next.js tsconfig paths
+      "@/": path.resolve(__dirname, "../src") + "/",
       // Mock AWS Amplify modules for Storybook
+      // IMPORTANT: More specific sub-paths MUST come before shorter paths
+      // to prevent esbuild from prefix-matching the shorter alias first
+      "@aws-amplify/ui-react/styles.css": path.resolve(
+        __dirname,
+        "./__mocks__/empty.js",
+      ),
+      "@aws-amplify/ui-react": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-ui-react.js",
+      ),
+      "@aws-amplify/adapter-nextjs/data": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-adapter-nextjs.js",
+      ),
+      "@aws-amplify/adapter-nextjs": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-adapter-nextjs.js",
+      ),
+      "aws-amplify/api/internals": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-api-internals.js",
+      ),
+      "aws-amplify/api/server": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-api-server.js",
+      ),
+      "aws-amplify/auth/server": path.resolve(
+        __dirname,
+        "./__mocks__/aws-amplify-auth-server.js",
+      ),
       "aws-amplify/data": path.resolve(
         __dirname,
         "./__mocks__/aws-amplify-data.js",
@@ -75,18 +111,6 @@ const config: StorybookConfig = {
       "aws-amplify/api": path.resolve(
         __dirname,
         "./__mocks__/aws-amplify-api.js",
-      ),
-      "aws-amplify/api/internals": path.resolve(
-        __dirname,
-        "./__mocks__/aws-amplify-api-internals.js",
-      ),
-      "aws-amplify/api/server": path.resolve(
-        __dirname,
-        "./__mocks__/aws-amplify-api-server.js",
-      ),
-      "aws-amplify/auth/server": path.resolve(
-        __dirname,
-        "./__mocks__/aws-amplify-auth-server.js",
       ),
       "aws-amplify/utils": path.resolve(
         __dirname,
@@ -110,6 +134,8 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/next-navigation.js",
       ),
+      // Mock next/server for server-only imports (used by @aws-amplify/adapter-nextjs)
+      "next/server": path.resolve(__dirname, "./__mocks__/next-server.js"),
       // Mock i18next to integrate with Translation Mode
       "next-i18next": path.resolve(__dirname, "./__mocks__/next-i18next.js"),
       "next-intl": path.resolve(__dirname, "./__mocks__/next-intl.js"),
@@ -232,6 +258,31 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/vectorStoreDB.js",
       ),
+      // Mock server actions (marked "use server") that cannot run in Storybook
+      [path.resolve(__dirname, "../app/actions/section")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/section.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      "../../../actions/section": path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/gamification")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/gamification.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      "../../../actions/gamification": path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
     };
 
     // Deduplicate React to prevent multiple instances
@@ -259,6 +310,10 @@ const config: StorybookConfig = {
       "y-websocket",
       "y-indexeddb",
       "y-protocols",
+      "i18next",
+      "i18next-resources-to-backend",
+      "react-i18next",
+      "@aws-amplify/adapter-nextjs",
     );
 
     // Pre-bundle heavy dependencies so they don't block story loading
@@ -306,6 +361,13 @@ const config: StorybookConfig = {
         ...config.build?.rollupOptions,
         onwarn(warning, warn) {
           if (warning.code === "MODULE_LEVEL_DIRECTIVE") return;
+          // Locale JSON files live in public/ for Next.js serving but are
+          // legitimately imported in Storybook mocks for translation support.
+          if (
+            typeof warning.message === "string" &&
+            warning.message.includes("public directory cannot be imported")
+          )
+            return;
           warn(warning);
         },
       },

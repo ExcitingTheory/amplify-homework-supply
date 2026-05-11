@@ -309,11 +309,6 @@ Component development uses Storybook with mocked AWS services:
 2. Don't modify component to match assumed data format
 3. Verify actual data structure before changing parsing logic
 
-## Next.js /api Routes - DO NOT USE
-
-- Amplify Gen 2 uses Lambda functions for backend logic under `amplify/functions/`. Do not create new Next.js `/api` routes.
-- Use Amplify Data Client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
-
 ## Gen 2 Versioning Pattern
 
 **All models have versioning fields** (`_version`, `_lastChangedAt`, `_deleted`) for optimistic locking:

@@ -92,7 +92,7 @@
     "emailHeader": "电子邮件",
     "actionsHeader": "操作",
     "gradebook": "成绩册",
-    "showingAssignments": "(显示 {{visible}} / {{total}} 项作业)",
+    "showingAssignments": "(显示 {visible} / {total} 项作业)",
     "showFutureAssignments": "显示未来",
     "showDraftAssignments": "显示草稿",
     "applyCurve": "应用曲线",

@@ -1,11 +1,20 @@
 /**
  * Quick Tour - Instructor Workflow
- * Animated screenshot walkthrough showing how instructors create and assign content.
+ * Live interactive demo using actual page components with play() interactions.
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Typography, Container, Alert } from '@mui/material';
-import { AnimatedDemo, DemoStep } from '../components/AnimatedDemo';
+import { within, waitFor, userEvent } from 'storybook/test';
+import { Box } from '@mui/material';
+import { setMockUser } from '@storybook-mocks/aws-amplify-auth';
+import { seedIndexPageData } from '@storybook-mocks/index-page-examples';
+import { FilesProvider } from '../../src/context/fileContext';
+
+// App Router pages — all marked 'use client', safe for Storybook.
+// Server action imports are aliased to mocks in .storybook/main.ts.
+import UnitsPage from '../../app/[locale]/units/page.jsx';
+import UnitDetailPage from '../../app/[locale]/unit/[id]/page.jsx';
+import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
 
 const meta: Meta = {
   title: '🏠 Getting Started/Quick Tour/Instructor Workflow',
@@ -13,110 +22,157 @@ const meta: Meta = {
   parameters: {
     layout: 'fullscreen',
     docs: { disable: true },
+    // Page components manage their own providers
+    disableUnitContext: true,
+    disableSectionContext: true,
+    disableDictionaryContext: true,
+    nextjs: {
+      appDirectory: true,
+    },
   },
 };
 export default meta;
 type Story = StoryObj;
 
 /**
- * Steps showing the instructor content creation flow.
- * Screenshots should be placed in public/docs/tour/ and referenced here.
- * Replace placeholder paths with actual Playwright/Chromatic captures.
+ * Step 1 — Browse your Units library.
  */
-const instructorSteps: DemoStep[] = [
-  {
-    screenshot: '/docs/tour/instructor-01-dashboard.png',
-    cursorTarget: [15, 35],
-    click: true,
-    caption: 'Step 1: From the dashboard, click "Create Unit" to start a new lesson',
-    annotation: 'Create Unit',
-    annotationOffset: [-50, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/instructor-02-editor.png',
-    cursorTarget: [50, 30],
-    click: true,
-    caption: 'Step 2: The rich editor opens — add text, headings, and media blocks',
-    annotation: 'Lexical Editor',
-    annotationOffset: [-50, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/instructor-03-quiz-block.png',
-    cursorTarget: [50, 60],
-    click: true,
-    caption: 'Step 3: Insert a Quiz block — students will answer these for a grade',
-    annotation: 'Quiz Block',
-    annotationOffset: [-40, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/instructor-04-ai-chat.png',
-    cursorTarget: [85, 40],
-    click: true,
-    caption: 'Step 4: Open AI Chat to generate additional questions and content',
-    annotation: 'AI Assistant',
-    annotationOffset: [-50, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/instructor-05-assign.png',
-    cursorTarget: [50, 50],
-    click: true,
-    caption: 'Step 5: Assign the unit to a Section with a due date',
-    annotation: 'Create Assignment',
-    annotationOffset: [-60, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/instructor-06-grades.png',
-    cursorTarget: [50, 45],
-    caption: 'Step 6: Monitor student progress and grades in real-time',
-    duration: 3000,
-  },
-];
-
-export const InstructorWorkflow: Story = {
+export const Step1_UnitsLibrary: Story = {
+  name: '1. Units Library',
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: ['Instructors'],
+      });
+      seedIndexPageData('instructor');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
   render: () => (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 6 }}>
-      <Container maxWidth="md">
-        <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}>
-          Instructor Workflow
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Create a lesson and assign it to students in 6 steps
-        </Typography>
-
-        <Alert severity="info" sx={{ mb: 4 }}>
-          This demo uses screenshots from the live application. The animated cursor shows where
-          you would click to perform each action.
-        </Alert>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <AnimatedDemo
-            steps={instructorSteps}
-            width="100%"
-            autoPlay={true}
-            loop={true}
-            speed={1}
-          />
-        </Box>
-
-        {/* Summary after demo */}
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Key Takeaways
-          </Typography>
-          <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
-            <li><Typography>Units are the core content container — think of them as interactive documents</Typography></li>
-            <li><Typography>The editor supports multiple graded block types (Quiz, Answer, Meaning Association, Custom Answer)</Typography></li>
-            <li><Typography>AI can generate content, questions, and vocabulary from a simple prompt</Typography></li>
-            <li><Typography>Sections are classes — assign units to them with optional due dates</Typography></li>
-            <li><Typography>Grades update in real-time as students complete work</Typography></li>
-          </Box>
-        </Box>
-      </Container>
+    <Box>
+      <UnitsPage />
     </Box>
   ),
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+    },
+    nextjs: {
+      navigation: { pathname: '/units' },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('View the units library', async () => {
+      await waitFor(() => {
+        const matches = canvas.getAllByText(/Japanese/i);
+        if (matches.length === 0) throw new Error('No Japanese text found');
+      }, { timeout: 8000 });
+    });
+    await step('Instructor sees published and draft units', async () => {
+      await new Promise(r => setTimeout(r, 1500));
+    });
+  },
+};
+
+/**
+ * Step 2 — Open the Lexical editor to create/edit content.
+ */
+export const Step2_UnitEditor: Story = {
+  name: '2. Unit Editor',
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: ['Instructors'],
+      });
+      seedIndexPageData('instructor');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => (
+    <Box>
+      <UnitDetailPage />
+    </Box>
+  ),
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/unit/unit-japanese-1',
+        segments: [['id', 'unit-japanese-1']],
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Wait for editor to load', async () => {
+      await waitFor(() => {
+        const matches = canvas.getAllByText(/Japanese/i);
+        if (matches.length === 0) throw new Error('No Japanese text found');
+      }, { timeout: 8000 });
+    });
+    await step('Explore the editor toolbar', async () => {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const boldBtn = canvas.queryByTitle(/bold/i) || canvas.queryByLabelText(/bold/i);
+        if (boldBtn) await userEvent.click(boldBtn);
+      } catch { /* Toolbar might not be present in mock */ }
+    });
+  },
+};
+
+/**
+ * Step 3 — View a Section with student roster and grades.
+ */
+export const Step3_SectionGrades: Story = {
+  name: '3. Section & Grades',
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: ['Instructors'],
+      });
+      seedIndexPageData('instructor');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => (
+    <Box>
+      <SectionDetailPage />
+    </Box>
+  ),
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/section/section-jpn-101',
+        segments: [['id', 'section-jpn-101']],
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('View class roster and assignments', async () => {
+      await waitFor(() => {
+        canvas.getByText(/Japanese/i);
+      }, { timeout: 8000 });
+    });
+    await step('Review student grades', async () => {
+      await new Promise(r => setTimeout(r, 2000));
+    });
+  },
 };

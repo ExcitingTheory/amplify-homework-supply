@@ -15,10 +15,14 @@ import {
   Typography,
   Skeleton,
   Alert,
+  Tabs,
+  Tab,
+  Box,
 } from '@mui/material'
 import GroupsIcon from '@mui/icons-material/Groups'
 import { useTranslations } from 'next-intl'
 import { getAmplifyClient } from '../../utils/amplifyClient'
+import NotificationInvitations from '../Notifications/NotificationInvitations'
 
 // ============================================================================
 // Types
@@ -53,6 +57,7 @@ export default function JoinPracticeDialog({
   const [roomCode, setRoomCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState(0)
 
   const handleRoomCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // Uppercase, strip non-alphanumeric, limit to 8 chars
@@ -151,35 +156,63 @@ export default function JoinPracticeDialog({
       </DialogTitle>
 
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('practiceDrill.join.description', 'Enter the room code shared by your study group to join their practice session.')}
-        </Typography>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Tab label={t('practiceDrill.join.tabCode', 'Enter Code')} />
+          <Tab label={t('practiceDrill.join.tabInvitations', 'Invitations')} />
+        </Tabs>
 
-        <TextField
-          autoFocus
-          fullWidth
-          label={t('practiceDrill.join.codeLabel', 'Room Code')}
-          value={roomCode}
-          onChange={handleRoomCodeChange}
-          onKeyDown={handleKeyDown}
-          placeholder="ABC123"
-          disabled={loading}
-          inputProps={{
-            maxLength: 8,
-            style: {
-              textAlign: 'center',
-              fontSize: '1.5rem',
-              letterSpacing: '0.3em',
-              fontFamily: 'monospace',
-            },
-          }}
-          sx={{ mb: 1 }}
-        />
+        {tab === 0 && (
+          <Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {t('practiceDrill.join.description', 'Enter the room code shared by your study group to join their practice session.')}
+            </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {error}
-          </Alert>
+            <TextField
+              autoFocus
+              fullWidth
+              label={t('practiceDrill.join.codeLabel', 'Room Code')}
+              value={roomCode}
+              onChange={handleRoomCodeChange}
+              onKeyDown={handleKeyDown}
+              placeholder="ABC123"
+              disabled={loading}
+              inputProps={{
+                maxLength: 8,
+                style: {
+                  textAlign: 'center',
+                  fontSize: '1.5rem',
+                  letterSpacing: '0.3em',
+                  fontFamily: 'monospace',
+                },
+              }}
+              sx={{ mb: 1 }}
+            />
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {error}
+              </Alert>
+            )}
+          </Box>
+        )}
+
+        {tab === 1 && (
+          <NotificationInvitations
+            types={['PRACTICE_SESSION_INVITE']}
+            onJoin={(notification) => {
+              const meta = notification.metadata
+                ? (typeof notification.metadata === 'string'
+                  ? JSON.parse(notification.metadata)
+                  : notification.metadata)
+                : {}
+              if (meta.roomCode) {
+                setRoomCode(meta.roomCode)
+                setTab(0)
+              }
+            }}
+            joinLabel={t('practiceDrill.join.joinButton', 'Join Session')}
+            emptyMessage={t('practiceDrill.join.noInvitations', 'No pending practice invitations')}
+          />
         )}
       </DialogContent>
 

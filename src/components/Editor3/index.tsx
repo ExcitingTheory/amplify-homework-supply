@@ -66,6 +66,7 @@ import PdfViewerPlugin from './plugins/PdfViewerPlugin';
 import { LayoutPlugin } from './plugins/LayoutPlugin';
 import AnswerPlugin from './plugins/AnswerPlugin';
 import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
+import CustomAIPlugin from './plugins/CustomAIPlugin';
 import ArmorEditorPlugin from './plugins/ArmorEditorPlugin';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
@@ -479,6 +480,7 @@ export default function Editor(): JSX.Element {
                 <LayoutPlugin />
                 <AnswerPlugin />
                 <CustomAnswerPlugin />
+                <CustomAIPlugin />
                 <ArmorEditorPlugin />
                 <BlockSuggestionPlugin useAI={true} />
                 <AIContentCompletionPlugin />
@@ -604,7 +606,7 @@ export default function Editor(): JSX.Element {
                               className="editor"
                               data-tour="editor"
                               data-lexical-editor="true"
-                              aria-label={t('actions.edit', { ns: 'common' })}
+                              aria-label={t('actions.edit')}
                               style={{
                                 maxWidth: '100%',
                                 outline: 'none',

@@ -1,11 +1,16 @@
 /**
  * Quick Tour - AI Assistant
- * Animated screenshot walkthrough showing how the AI chat works.
+ * Live interactive demo using the ChatSidebar component with play() interactions.
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Typography, Container, Alert } from '@mui/material';
-import { AnimatedDemo, DemoStep } from '../components/AnimatedDemo';
+import { within, waitFor, userEvent } from 'storybook/test';
+import { Box, Typography, Paper } from '@mui/material';
+import ChatSidebar from '../../src/components/ChatSidebar';
+import { TabProvider } from '../../src/context/tabContext';
+import { DemoBanner } from '../components/DemoBanner';
+import { seedMockAssistantChats, seedMockWords, seedMockQuestions } from '@storybook-mocks/aws-amplify-data';
+import { allChatData } from '@storybook-mocks/chatDataLoader';
 
 const meta: Meta = {
   title: '🏠 Getting Started/Quick Tour/AI Assistant',
@@ -18,90 +23,204 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const aiSteps: DemoStep[] = [
-  {
-    screenshot: '/docs/tour/ai-01-open-chat.png',
-    cursorTarget: [92, 50],
-    click: true,
-    caption: 'Step 1: Click the chat icon to open the AI Assistant sidebar',
-    annotation: 'Open Chat',
-    annotationOffset: [-45, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/ai-02-ask-question.png',
-    cursorTarget: [80, 85],
-    click: true,
-    caption: 'Step 2: Type a request — "Generate 5 quiz questions about photosynthesis"',
-    annotation: 'Send Message',
-    annotationOffset: [-50, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/ai-03-streaming.png',
-    cursorTarget: [80, 50],
-    caption: 'Step 3: Watch the AI stream its response with content suggestions',
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/ai-04-tool-call.png',
-    cursorTarget: [80, 60],
-    caption: 'Step 4: The AI can search your content library and reference existing materials',
-    annotation: 'Tool: search_content',
-    annotationOffset: [-70, -45],
-    duration: 3000,
-  },
-  {
-    screenshot: '/docs/tour/ai-05-insert.png',
-    cursorTarget: [80, 70],
-    click: true,
-    caption: 'Step 5: Click "Insert" to add AI-generated blocks directly into your lesson',
-    annotation: 'Insert into Editor',
-    annotationOffset: [-65, -45],
-    duration: 3000,
-  },
-];
-
-export const AIAssistant: Story = {
+/**
+ * Step 1 — Start a new conversation with the AI
+ */
+export const Step1_StartChat: Story = {
+  name: '1. Start a Conversation',
+  decorators: [
+    (Story: React.FC) => {
+      seedMockAssistantChats([{
+        id: 'tour-chat-1',
+        model: 'gpt-4',
+        threadInstructions: 'You are a helpful teaching assistant.',
+        draft: '',
+        archived: false,
+        owner: 'mock-user-sub',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        _version: 1,
+        messages: [],
+      }]);
+      return (
+        <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ p: 2, bgcolor: 'secondary.dark', color: 'secondary.contrastText' }}>
+            <Typography variant="subtitle2">
+              Quick Tour — Step 1: Type a question and the AI responds with streaming text.
+              Watch the interaction panel to see each step play out.
+            </Typography>
+          </Paper>
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative', minHeight: 0 }}>
+            <Story />
+          </div>
+        </div>
+      );
+    },
+  ],
   render: () => (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 6 }}>
-      <Container maxWidth="md">
-        <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}>
-          AI Assistant
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Generate content, get suggestions, and insert blocks with chat
-        </Typography>
-
-        <Alert severity="info" sx={{ mb: 4 }}>
-          The AI assistant is context-aware — it knows about your current unit,
-          files, and vocabulary to give relevant suggestions.
-        </Alert>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <AnimatedDemo
-            steps={aiSteps}
-            width="100%"
-            autoPlay={true}
-            loop={true}
-            speed={1}
-          />
-        </Box>
-
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            What the AI can do
-          </Typography>
-          <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
-            <li><Typography><strong>Generate content</strong> — quizzes, vocabulary lists, lesson outlines, fill-in-the-blank exercises</Typography></li>
-            <li><Typography><strong>Search your library</strong> — finds relevant units, files, and vocabulary using semantic search</Typography></li>
-            <li><Typography><strong>Insert blocks</strong> — places generated content directly into the editor as formatted blocks</Typography></li>
-            <li><Typography><strong>Transcribe audio</strong> — converts uploaded recordings to text via Whisper</Typography></li>
-            <li><Typography><strong>Analyze PDFs</strong> — extracts text, vocabulary, and generates questions from documents</Typography></li>
-            <li><Typography><strong>Generate audio</strong> — creates text-to-speech audio for pronunciation guides</Typography></li>
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
   ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Find the chat input', async () => {
+      await waitFor(() => {
+        canvas.getByPlaceholderText(/ask me anything/i);
+      }, { timeout: 5000 });
+    });
+
+    await step('Type a message to the AI assistant', async () => {
+      const chatInput = canvas.getByPlaceholderText(/ask me anything/i);
+      await userEvent.type(chatInput, 'Help me create a lesson about Japanese greetings', { delay: 40 });
+      await new Promise(r => setTimeout(r, 500));
+    });
+
+    await step('Send the message', async () => {
+      const sendButton = canvas.getByRole('button', { name: /send/i });
+      await userEvent.click(sendButton);
+      await new Promise(r => setTimeout(r, 1500));
+    });
+  },
+};
+
+/**
+ * Step 2 — Chat with tool calls and content search
+ */
+export const Step2_ToolCalls: Story = {
+  name: '2. AI Tool Calls',
+  decorators: [
+    (Story: React.FC) => {
+      // Seed with a conversation that has tool call results
+      if (allChatData?.toolCallSearch) {
+        seedMockAssistantChats([allChatData.toolCallSearch]);
+      } else {
+        seedMockAssistantChats([{
+          id: 'tour-chat-tools',
+          model: 'gpt-4',
+          threadInstructions: 'You are a helpful teaching assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+          messages: [],
+        }]);
+      }
+      seedMockWords([]);
+      seedMockQuestions([]);
+      return (
+        <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ p: 2, bgcolor: 'secondary.dark', color: 'secondary.contrastText' }}>
+            <Typography variant="subtitle2">
+              Quick Tour — Step 2: The AI can search your content library, generate questions,
+              and insert blocks directly into the editor.
+            </Typography>
+          </Paper>
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative', minHeight: 0 }}>
+            <Story />
+          </div>
+        </div>
+      );
+    },
+  ],
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Chat loads with tool call history', async () => {
+      await waitFor(() => {
+        canvas.getByPlaceholderText(/ask me anything/i);
+      }, { timeout: 5000 });
+      await new Promise(r => setTimeout(r, 1000));
+    });
+
+    await step('AI uses tools to search and generate content', async () => {
+      const chatInput = canvas.getByPlaceholderText(/ask me anything/i);
+      await userEvent.type(chatInput, 'Search my vocabulary for greetings', { delay: 40 });
+      await new Promise(r => setTimeout(r, 500));
+    });
+
+    await step('Send search request', async () => {
+      const sendButton = canvas.getByRole('button', { name: /send/i });
+      await userEvent.click(sendButton);
+      await new Promise(r => setTimeout(r, 2000));
+    });
+  },
+};
+
+/**
+ * Step 3 — Quiz Generation demo
+ */
+export const Step3_GenerateContent: Story = {
+  name: '3. Generate Content',
+  decorators: [
+    (Story: React.FC) => {
+      if (allChatData?.quizGenerator) {
+        seedMockAssistantChats([allChatData.quizGenerator]);
+      } else {
+        seedMockAssistantChats([{
+          id: 'tour-chat-quiz',
+          model: 'gpt-4',
+          threadInstructions: 'You are a helpful teaching assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+          messages: [],
+        }]);
+      }
+      return (
+        <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ p: 2, bgcolor: 'secondary.dark', color: 'secondary.contrastText' }}>
+            <Typography variant="subtitle2">
+              Quick Tour — Step 3: Ask the AI to generate quiz questions, vocabulary,
+              or full lesson outlines. Generated content can be inserted directly into the editor.
+            </Typography>
+          </Paper>
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative', minHeight: 0 }}>
+            <Story />
+          </div>
+        </div>
+      );
+    },
+  ],
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Open chat for content generation', async () => {
+      await waitFor(() => {
+        canvas.getByPlaceholderText(/ask me anything/i);
+      }, { timeout: 5000 });
+    });
+
+    await step('Ask AI to generate quiz questions', async () => {
+      const chatInput = canvas.getByPlaceholderText(/ask me anything/i);
+      await userEvent.type(
+        chatInput,
+        'Generate 3 multiple choice questions about Japanese greetings',
+        { delay: 35 },
+      );
+      await new Promise(r => setTimeout(r, 500));
+    });
+
+    await step('Send and watch the AI stream its response', async () => {
+      const sendButton = canvas.getByRole('button', { name: /send/i });
+      await userEvent.click(sendButton);
+      await new Promise(r => setTimeout(r, 2000));
+    });
+  },
 };
