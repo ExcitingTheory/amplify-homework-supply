@@ -122,7 +122,16 @@ export function sanitizeEditorStateJSON(
   try {
     const parsed = JSON.parse(jsonString);
     if (!parsed?.root) return jsonString; // Not a Lexical state format, pass through
-    sanitizeNodeChildren(parsed.root);
+
+    // Ensure root node has required Lexical fields
+    const root = parsed.root;
+    if (!root.type) root.type = "root";
+    if (root.version == null) root.version = 1;
+    if (!("direction" in root)) root.direction = null;
+    if (!("format" in root)) root.format = "";
+    if (!("indent" in root)) root.indent = 0;
+
+    sanitizeNodeChildren(root);
     return JSON.stringify(parsed);
   } catch {
     console.warn("[Editor] Failed to sanitize editor state JSON, using null");

@@ -3,14 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import SectionContext, { SectionProvider } from "@/context/sectionContext";
-import { createSection } from "../../actions/section";
+import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
 import PeopleIcon from "@mui/icons-material/People";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import {
   Button,
   Box,
-  AppBar,
   Card,
   Typography,
   TextField,
@@ -26,19 +28,34 @@ import {
   Snackbar,
   Alert,
   Skeleton,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 
-import MainToolbar from "@/components/MainToolbar";
+import AppShell from "@/components/AppShell";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import AppSkeleton from "@/components/AppSkeleton";
 import getCachedUrl from "@/utils/getCachedUrl";
+import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import InstructorDashboard from "@/components/InstructorDashboard";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 
-function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
+function CardMediaComponent({
+  s3Key,
+  identityId,
+  fileId,
+  level = "protected",
+}) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
@@ -48,7 +65,18 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
       setUrl(_url);
     };
     asyncFunc();
-  }, [s3Key]);
+
+    if (fileId && identityId) {
+      getResponsiveImageUrls(fileId, identityId)
+        .then((result) => {
+          if (result) {
+            setSrcSet(result.srcSet);
+            setSizes(result.sizes);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [s3Key, fileId, identityId]);
 
   return (
     <Box
@@ -61,6 +89,8 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
     >
       <img
         src={url || undefined}
+        srcSet={srcSet || undefined}
+        sizes={sizes || undefined}
         style={{
           width: "100%",
           height: "100%",
@@ -128,6 +158,9 @@ function Sections({ user }) {
   const { sections, refetchSections } = React.useContext(SectionContext);
   const [work, setIsWorking] = useState(false);
   const [open, setOpen] = React.useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [menuSectionId, setMenuSectionId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -189,6 +222,59 @@ function Sections({ user }) {
     setOpen(false);
   };
 
+  const handleMenuOpen = (event, sectionId) => {
+    setMenuAnchorEl(event.currentTarget);
+    setMenuSectionId(sectionId);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setMenuSectionId(null);
+  };
+
+  async function handleArchiveToggle(section) {
+    handleMenuClose();
+    setIsWorking(true);
+    try {
+      const client = getAmplifyClient();
+      const newStatus =
+        section.status === "ARCHIVED" ? "PUBLISHED" : "ARCHIVED";
+      await client.models.Section.update({
+        id: section.id,
+        status: newStatus,
+      });
+      setSnackbar({
+        open: true,
+        message:
+          newStatus === "ARCHIVED"
+            ? t("sections.archivedSuccess")
+            : t("sections.unarchivedSuccess"),
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("[Section Archive] Error:", error);
+      setSnackbar({
+        open: true,
+        message: t("sections.archiveError"),
+        severity: "error",
+      });
+    } finally {
+      setIsWorking(false);
+    }
+  }
+
+  const visibleSections = React.useMemo(() => {
+    if (!sections) return [];
+    const valid = sections.filter((s) => s != null && s.id != null);
+    if (showArchived) return valid;
+    return valid.filter((s) => s.status !== "ARCHIVED");
+  }, [sections, showArchived]);
+
+  const archivedCount = React.useMemo(() => {
+    if (!sections) return 0;
+    return sections.filter((s) => s != null && s.status === "ARCHIVED").length;
+  }, [sections]);
+
   async function handleCreate(event) {
     setIsWorking(true);
     event.preventDefault();
@@ -201,14 +287,17 @@ function Sections({ user }) {
 
       console.log("createInput", { name, description });
 
-      const result = await createSection(name, description);
+      const client = getAmplifyClient();
+      const { data, errors } = await client.mutations.createSectionGroup({
+        name: name.trim(),
+        description: description.trim() || null,
+      });
 
-      console.log("createSection result:", result);
-
-      if (!result.success) {
-        throw new Error(result.error || "Failed to create section");
+      if (errors?.length) {
+        throw new Error(errors[0]?.message || "Failed to create section");
       }
 
+      const result = typeof data === "string" ? JSON.parse(data) : data;
       console.log("Section created:", result);
 
       // Refetch sections to get the newly created section
@@ -242,18 +331,6 @@ function Sections({ user }) {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }} />
-        </MainToolbar>
-      </AppBar>
       <Box
         data-tour="sections-page"
         style={{
@@ -357,16 +434,31 @@ function Sections({ user }) {
             >
               {t("sections.title")}&nbsp;
             </Typography>
-            <Button
-              data-tour="create-section-button"
-              variant="outlined"
-              color="primary"
-              disabled={work}
-              onClick={handleClickOpen}
-            >
-              <AddIcon />
-              &nbsp;{t("sections.createNew")}
-            </Button>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {archivedCount > 0 && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showArchived}
+                      onChange={(e) => setShowArchived(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label={t("sections.showArchived", { count: archivedCount })}
+                  sx={{ mr: 1 }}
+                />
+              )}
+              <Button
+                data-tour="create-section-button"
+                variant="outlined"
+                color="primary"
+                disabled={work}
+                onClick={handleClickOpen}
+              >
+                <AddIcon />
+                &nbsp;{t("sections.createNew")}
+              </Button>
+            </Box>
           </div>
 
           {/* Instructor Dashboard with aggregate stats and leaderboards */}
@@ -431,129 +523,183 @@ function Sections({ user }) {
             </Card>
           )}
           {sections &&
-            sections
-              .filter((section) => section != null && section.id != null) // Filter out null/undefined sections and sections without ID
-              .map(function (section) {
-                console.log("!!!section", section);
-                return (
-                  <Card
-                    key={section.id}
-                    data-tour="section-card"
-                    elevation={2}
+            visibleSections.map(function (section) {
+              console.log("!!!section", section);
+              return (
+                <Card
+                  key={section.id}
+                  data-tour="section-card"
+                  elevation={2}
+                  sx={{
+                    display: "flex",
+                    margin: "1rem auto",
+                    width: "90vw",
+                    maxWidth: "80rem",
+                    borderRadius: 2,
+                    borderLeft: "4px solid",
+                    borderLeftColor: "text.primary",
+                    transition: "all 0.3s ease-in-out",
+                    "&:hover": {
+                      elevation: 6,
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                    },
+                  }}
+                >
+                  <Box
                     sx={{
                       display: "flex",
-                      margin: "1rem auto",
-                      width: "90vw",
-                      maxWidth: "80rem",
-                      borderRadius: 2,
-                      borderLeft: "4px solid",
-                      borderLeftColor: "text.primary",
-                      transition: "all 0.3s ease-in-out",
-                      "&:hover": {
-                        elevation: 6,
-                        transform: "translateY(-2px)",
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                      },
+                      flexDirection: "column",
+                      flexGrow: "1",
+                      p: 0.5,
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        flexGrow: "1",
-                        p: 0.5,
-                      }}
-                    >
-                      <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
+                    <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <Typography
                           component="div"
                           variant="h5"
                           sx={{ fontWeight: 600, mb: 0.5 }}
                         >
                           {section?.name || t("sections.untitledSection")}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          color="text.secondary"
-                          component="div"
-                          sx={{ lineHeight: 1.6 }}
-                        >
-                          {section?.description || ""}
-                        </Typography>
-                        {section?.code && (
-                          <Box
-                            sx={{
-                              mt: 1.5,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ fontWeight: 500 }}
-                            >
-                              {t("sections.joinCode")}:
-                            </Typography>
+                          {section.status === "ARCHIVED" && (
                             <Chip
-                              data-tour="join-code"
-                              label={section.code}
+                              label={t("sections.archived")}
                               size="small"
-                              sx={{
-                                fontFamily: "monospace",
-                                fontSize: "0.875rem",
-                                fontWeight: 600,
-                                backgroundColor: "action.selected",
-                                border: "1px solid",
-                                borderColor: "divider",
-                              }}
+                              color="default"
+                              sx={{ ml: 1, verticalAlign: "middle" }}
                             />
-                          </Box>
+                          )}
+                        </Typography>
+                        {(isInstructor || section.owner === userId) && (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, section.id)}
+                            disabled={work}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
                         )}
-                      </CardContent>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          pl: 2,
-                          pb: 1.5,
-                        }}
+                      </Box>
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        component="div"
+                        sx={{ lineHeight: 1.6 }}
                       >
-                        <Button
-                          variant="outlined"
-                          href={`/section/${section.id}`}
-                          disabled={work}
-                          startIcon={<PeopleIcon />}
+                        {section?.description || ""}
+                      </Typography>
+                      {section?.code && (
+                        <Box
                           sx={{
-                            textTransform: "none",
-                            fontWeight: 600,
-                            px: 3,
-                            py: 1,
-                            borderRadius: 2,
-                            boxShadow: 2,
-                            color: "text.primary",
-                            borderColor: "text.primary",
-                            "&:hover": {
-                              boxShadow: 4,
-                              borderColor: "text.primary",
-                              backgroundColor: "action.hover",
-                            },
+                            mt: 1.5,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
                           }}
                         >
-                          {t("sections.viewSection")}
-                        </Button>
-                      </Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 500 }}
+                          >
+                            {t("sections.joinCode")}:
+                          </Typography>
+                          <Chip
+                            data-tour="join-code"
+                            label={section.code}
+                            size="small"
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: "0.875rem",
+                              fontWeight: 600,
+                              backgroundColor: "action.selected",
+                              border: "1px solid",
+                              borderColor: "divider",
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        pl: 2,
+                        pb: 1.5,
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        href={`/section/${section.id}`}
+                        disabled={work}
+                        startIcon={<PeopleIcon />}
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 600,
+                          px: 3,
+                          py: 1,
+                          borderRadius: 2,
+                          boxShadow: 2,
+                          color: "text.primary",
+                          borderColor: "text.primary",
+                          "&:hover": {
+                            boxShadow: 4,
+                            borderColor: "text.primary",
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                      >
+                        {t("sections.viewSection")}
+                      </Button>
                     </Box>
-                    {section?.featuredImage && (
-                      <CardMediaComponent
-                        s3Key={section?.featuredImage}
-                        identityId={section?.identityId}
-                      />
+                  </Box>
+                  {section?.featuredImage && (
+                    <CardMediaComponent
+                      s3Key={section?.featuredImage}
+                      identityId={section?.identityId}
+                    />
+                  )}
+                </Card>
+              );
+            })}
+
+          {/* Section actions menu */}
+          <Menu
+            anchorEl={menuAnchorEl}
+            open={Boolean(menuAnchorEl)}
+            onClose={handleMenuClose}
+          >
+            {(() => {
+              const menuSection = sections?.find(
+                (s) => s?.id === menuSectionId,
+              );
+              if (!menuSection) return null;
+              const isArchived = menuSection.status === "ARCHIVED";
+              return (
+                <MenuItem onClick={() => handleArchiveToggle(menuSection)}>
+                  <ListItemIcon>
+                    {isArchived ? (
+                      <UnarchiveIcon fontSize="small" />
+                    ) : (
+                      <ArchiveIcon fontSize="small" />
                     )}
-                  </Card>
-                );
-              })}
+                  </ListItemIcon>
+                  <ListItemText>
+                    {isArchived
+                      ? t("sections.unarchive")
+                      : t("sections.archive")}
+                  </ListItemText>
+                </MenuItem>
+              );
+            })()}
+          </Menu>
         </Box>
       </Box>
 
@@ -582,6 +728,7 @@ function WrappedPage() {
     <MyAuth>
       <SectionProvider>
         <Sections />
+        <CollaborativeChatWrapper />
       </SectionProvider>
     </MyAuth>
   );

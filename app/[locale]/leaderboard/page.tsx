@@ -5,7 +5,6 @@ import MainToolbar from "@/components/MainToolbar";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { LiveLeaderboard } from "./LiveLeaderboard";
-import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
 
 // ISR: revalidate every 60 seconds
 export const revalidate = 60;
@@ -43,15 +42,6 @@ export default async function LeaderboardPage() {
   return (
     <MyAuth>
       <GamificationProviderWrapper>
-        <AppBar position="static" sx={{ transition: "all 0.3s ease" }}>
-          <MainToolbar>
-            <Box sx={{ flexGrow: 1, margin: "0.5rem 1rem", transition: "all 0.3s ease" }}>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                {t("leaderboard.title", "Leaderboard")}
-              </Typography>
-            </Box>
-          </MainToolbar>
-        </AppBar>
         <LiveLeaderboard initialEntries={initialEntries} />
       </GamificationProviderWrapper>
     </MyAuth>

@@ -1,10 +1,10 @@
 {
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "Delete {{count}} selected file(s)?",
-      "deleteSelected": "Delete Selected ({{count}})",
+      "deleteConfirmMessage": "Delete {count} selected file(s)?",
+      "deleteSelected": "Delete Selected ({count})",
       "deselectAll": "Deselect All",
-      "reAnalyzeSelected": "Re-analyze Selected ({{count}})"
+      "reAnalyzeSelected": "Re-analyze Selected ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "Description:",
@@ -63,7 +63,8 @@
       "actionsTooltip": "Actions",
       "searchPlaceholder": "Search files...",
       "selectAllTooltip": "Select All",
-      "uploadTooltip": "Upload Files"
+      "uploadTooltip": "Upload Files",
+      "recordConversation": "Record Conversation"
     },
     "dragDrop": {
       "dropFilesHere": "Drop files here to upload",
@@ -75,10 +76,10 @@
     "cancel": "Cancel",
     "collapse": "Collapse",
     "concepts": "Concepts",
-    "conceptsCount": "Concepts ({{count}})",
+    "conceptsCount": "Concepts ({count})",
     "confirm": "Confirm",
     "created": "Created:",
-    "deleteConfirmation": "Delete file: \"{{fileName}}\"?",
+    "deleteConfirmation": "Delete file: \"{fileName}\"?",
     "deleteFile": "Delete File",
     "expand": "Expand",
     "fileInfo": "File Info",
@@ -86,22 +87,22 @@
     "noMetadataAvailable": "No metadata available for this file.",
     "noParsedContentAvailable": "No parsed content available for this file.",
     "objectives": "Objectives",
-    "objectivesCount": "Objectives ({{count}})",
+    "objectivesCount": "Objectives ({count})",
     "parsedContent": "Parsed Content",
     "path": "Path:",
     "protectionLevel": "Protection Level:",
     "questions": "Questions",
-    "questionsCount": "Questions ({{count}})",
+    "questionsCount": "Questions ({count})",
     "rawMetadata": "Raw Metadata",
     "searchPlaceholder": "Search file content...",
     "summaries": "Summaries",
-    "summariesCount": "Summaries ({{count}})",
+    "summariesCount": "Summaries ({count})",
     "type": "Type:",
     "unknown": "Unknown",
     "unknownSize": "Unknown size",
     "unset": "UNSET",
     "vocabulary": "Vocabulary",
-    "vocabularyCount": "Vocabulary ({{count}})"
+    "vocabularyCount": "Vocabulary ({count})"
   },
   "documentUploader": {
     "browseFiles": "Browse Files",
@@ -109,7 +110,7 @@
     "errorMessages": {
       "noSupportedFiles": "No supported documents found. Please upload PDF, Word, Text, or Excel files.",
       "skippedFiles": "Some files were skipped (unsupported type)",
-      "uploadFailed": "Failed to upload {{fileName}}: {{error}}"
+      "uploadFailed": "Failed to upload {fileName}: {error}"
     },
     "extractionTypes": {
       "dictionary": "dictionary",
@@ -119,9 +120,9 @@
     },
     "howItWorks": {
       "step1": "1. Upload your documents (PDF, Word, Text, or Excel files)",
-      "step2": "2. AI will analyze the content and extract {{extractionType}}",
+      "step2": "2. AI will analyze the content and extract {extractionType}",
       "step3": "3. Review and approve suggestions in the \"Suggestions\" tab",
-      "step4": "4. Import selected items to your {{target}}",
+      "step4": "4. Import selected items to your {target}",
       "title": "How it works:"
     },
     "recentUploads": "Recent Uploads",
@@ -131,14 +132,14 @@
       "processing": "Processing..."
     },
     "supportedFormats": "Supported: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
-    "title": "Upload Documents for {{extractionType}} Extraction",
-    "uploadingProgress": "Uploading... {{progress}}%"
+    "title": "Upload Documents for {extractionType} Extraction",
+    "uploadingProgress": "Uploading... {progress}%"
   },
   "fileManager": {
     "close": "Close",
     "create": "Create",
     "draftChanges": "Draft changes",
-    "errorRendering": "Error rendering FileManager: {{message}}",
+    "errorRendering": "Error rendering FileManager: {message}",
     "revert": "Revert",
     "save": "Save",
     "textToImagePreview": "Text to Image Preview",

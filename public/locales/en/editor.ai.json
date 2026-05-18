@@ -4,9 +4,9 @@
     "discard": "Discard",
     "discardChanges": "Discard changes?",
     "generate": "Generate",
-    "generating": "Generating {{type}}...",
+    "generating": "Generating {type}...",
     "keepEditing": "Keep Editing",
-    "lostWarning": "Your generated {{type}} will be lost if you cancel now.",
+    "lostWarning": "Your generated {type} will be lost if you cancel now.",
     "preview": "Preview",
     "saveClose": "Save & Close",
     "takeMoments": "This may take a few moments"

@@ -20,7 +20,6 @@ export const auth = defineAuth({
     email: {
       verificationEmailSubject: "Verify your email for Homework Supply",
     },
-    phone: true,
   },
   multifactor: {
     mode: "OPTIONAL",

@@ -66,6 +66,7 @@ vi.mock('../plugins/PdfViewerPlugin', () => ({ default: () => null }))
 vi.mock('../plugins/ImagesPlugin', () => ({ default: () => null }))
 vi.mock('../plugins/AnswerPlugin', () => ({ default: () => null }))
 vi.mock('../plugins/CustomAnswerPlugin', () => ({ default: () => null }))
+vi.mock('../plugins/ArmorEditorPlugin', () => ({ default: () => null }))
 
 vi.mock('../context/AudioPlayerContext', () => ({
   AudioPlayerProvider: ({ children }: any) => <>{children}</>,

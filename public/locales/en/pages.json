@@ -30,7 +30,8 @@
     "untitledSection": "Untitled Section",
     "noDescription": "No description",
     "viewSection": "View Section",
-    "sections": "Sections"
+    "sections": "Sections",
+    "learningPathway": "Learning Pathway"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -40,10 +41,36 @@
     "guildsMode": "Guilds",
     "empty": "No leaderboard data yet. Complete assignments to earn XP!"
   },
+  "settings": {
+    "title": "Settings",
+    "heading": "Settings",
+    "description": "Manage your account settings and preferences",
+    "privacy": {
+      "heading": "Privacy",
+      "leaderboardOptIn": "Show my name on leaderboards",
+      "leaderboardOptInHint": "When off, your name appears as \"Anonymous Student\" on leaderboards."
+    },
+    "customization": {
+      "heading": "Customization",
+      "description": "Unlock new avatar styles and editor themes as you level up."
+    },
+    "botCustomizer": {
+      "heading": "AI Assistant Avatar",
+      "description": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges."
+    },
+    "profileInfo": {
+      "heading": "Profile Information",
+      "description": "Update your display name and email address"
+    }
+  },
   "profile": {
     "title": "My Profile",
-    "heading": "My Profile",
+    "heading": "Profile",
     "description": "View and update your profile information",
+    "progress": "Progress",
+    "activity": "Activity",
+    "badges": "Badges",
+    "nailedItWall": "Nailed It Wall",
     "userId": "User Id",
     "identityId": "Identity Id",
     "cancel": "Cancel",
@@ -111,6 +138,7 @@
     "editTooltip": "Edit",
     "assignments": "Assignments",
     "viewWorkbook": "View Workbook",
+    "completionGrid": "Completion Overview",
     "deleteSection": "Delete Section",
     "deleteSectionConfirm": "Are you sure you want to delete this section?",
     "loading": "Loading...",
@@ -126,7 +154,9 @@
       "saveFailed": "Failed to save grade. Please try again.",
       "cancel": "Cancel",
       "save": "Save Grade"
-    }
+    },
+    "leaderboard": "Leaderboard",
+    "noLeaderboardEntries": "No leaderboard data yet. Students will appear here as they earn XP."
   },
   "sections": {
     "title": "Sections",
@@ -137,6 +167,13 @@
     "viewSection": "View Section",
     "loading": "Loading...",
     "joinCode": "Join Code",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "archived": "Archived",
+    "showArchived": "Show Archived ({count})",
+    "archivedSuccess": "Section archived successfully",
+    "unarchivedSuccess": "Section unarchived successfully",
+    "archiveError": "Failed to update section. Please try again.",
     "newSection": {
       "title": "New Section",
       "description": "Create a new Section by entering the following information",
@@ -158,6 +195,7 @@
     "untitledUnit": "Untitled Unit",
     "viewWorkbook": "View Workbook",
     "editUnit": "Edit Unit",
+    "practice": "Practice",
     "myDrafts": "My Drafts",
     "archivedUnits": "Archived Units"
   },

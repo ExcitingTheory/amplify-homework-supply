@@ -32,8 +32,8 @@ vi.mock('../../../../utils/amplifyClient', () => ({
     queries: {
       verifyDefinition: vi.fn().mockResolvedValue({ data: '{"answer": true, "reason": "Correct"}' }),
       verifyAudioUrl: vi.fn().mockResolvedValue({ data: '{"answer": true}' }),
-  };
-  },
+    },
+  }),
 }));
 
 vi.mock('../../../../utils/getCachedUrl', () => ({
@@ -44,7 +44,7 @@ vi.mock('../../../../hooks/useVerifyContext', () => ({
   useVerifyContext: () => ({
     studentMemory: '',
     contentContext: '',
-  },
+  }),
 }));
 
 vi.mock('next/dynamic', () => ({
@@ -220,8 +220,8 @@ describe('AnswerComponent', () => {
             correctCount: 2,
             answeredCount: 2,
             feedback: { 0: { answer: true }, 1: { answer: true } },
-        };
-      };
+          },
+        },
       });
       // Component should render without errors with pre-existing data
       expect(screen.getByText(/define the following word/i)).toBeDefined();

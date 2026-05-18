@@ -2465,8 +2465,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
       <div ref={ref}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
+            position: "sticky",
+            top: "48px",
             left: 0,
             right: 0,
             zIndex: (theme) => theme.zIndex.drawer + 2,
@@ -2476,25 +2476,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
             flexDirection: "column",
           }}
         >
-          <AppBar
-            ref={firstAppBarRef}
-            position="static"
-            color="default"
-            sx={{
-              overflowX: "visible",
-              overflowY: "visible",
-              boxShadow: "none",
-              backgroundColor: "transparent",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "auto",
-            }}
-          >
-            <MainToolbar>
-              {isScrolled && <UnitTitleDescriptionEditor isScrolled />}
-            </MainToolbar>
-            {!isScrolled && <UnitTitleDescriptionEditor />}
-          </AppBar>
+          <UnitTitleDescriptionEditor />
           <AppBar
             ref={secondAppBarRef}
             position="static"

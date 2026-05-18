@@ -10,49 +10,50 @@
  * 5. Returns blocks with embedded audio + pronunciation metadata
  */
 
-import type { Handler } from 'aws-lambda';
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/data';
-import { type Schema } from '../../data/resource';
-import { fromEnv } from '@aws-sdk/credential-providers';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import type { Handler } from "aws-lambda";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { type Schema } from "../../data/resource";
+import { fromEnv } from "@aws-sdk/credential-providers";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import OpenAI from "openai";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface SourcesEnabled {
-  vocabulary: boolean
-  questions: boolean
-  text: boolean
-  documents: boolean
+  vocabulary: boolean;
+  questions: boolean;
+  text: boolean;
+  documents: boolean;
 }
 
 interface PracticeDrillBlock {
-  type: 'quiz' | 'answer' | 'meaning-association' | 'custom-answer'
-  instruction: string
-  documentRef?: { filename: string; page: number | string }
-  choices?: { choice: string; correct: boolean }[]
-  expectedAnswer?: string
-  pairs?: { term: string; definition: string }[]
-  hint?: string
-  sourceBlockId?: string
-  sourceItemId: string
-  sourceType: 'vocabulary' | 'question' | 'text' | 'document'
+  type: "quiz" | "answer" | "meaning-association" | "custom-answer";
+  instruction: string;
+  documentRef?: { filename: string; page: number | string };
+  choices?: { choice: string; correct: boolean }[];
+  expectedAnswer?: string;
+  pairs?: { term: string; definition: string }[];
+  hint?: string;
+  sourceBlockId?: string;
+  sourceItemId: string;
+  sourceType: "vocabulary" | "question" | "text" | "document";
   audio?: {
-    instruction?: string
-    expectedAnswer?: string
-    choices?: Record<string, string>
-    pairs?: Record<string, string>
-    hint?: string
-  }
+    instruction?: string;
+    expectedAnswer?: string;
+    choices?: Record<string, string>;
+    pairs?: Record<string, string>;
+    hint?: string;
+  };
   pronunciation?: {
-    enabled: boolean
-    targetText: string
-    targetLanguage?: string
-    audioKey?: string
-    maxAttempts?: number
-  }
+    enabled: boolean;
+    targetText: string;
+    targetLanguage?: string;
+    audioKey?: string;
+    maxAttempts?: number;
+  };
 }
 
 // ============================================================================
@@ -63,9 +64,9 @@ Amplify.configure(
   {
     API: {
       GraphQL: {
-        endpoint: process.env.API_ENDPOINT || '',
-        region: process.env.AWS_REGION || 'us-east-1',
-        defaultAuthMode: 'iam',
+        endpoint: process.env.API_ENDPOINT || "",
+        region: process.env.AWS_REGION || "us-east-1",
+        defaultAuthMode: "iam",
       },
     },
   },
@@ -78,7 +79,7 @@ Amplify.configure(
         clearCredentialsAndIdentityId: () => {},
       },
     },
-  }
+  },
 );
 
 let openaiInstance: any = null;
@@ -86,7 +87,6 @@ let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
 async function getOpenAI() {
   if (!openaiInstance) {
-    const { default: OpenAI } = await import('openai');
     openaiInstance = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
   return openaiInstance;
@@ -94,7 +94,7 @@ async function getOpenAI() {
 
 function getDataClient() {
   if (!dataClient) {
-    dataClient = generateClient<Schema>({ authMode: 'iam' });
+    dataClient = generateClient<Schema>({ authMode: "iam" });
   }
   return dataClient;
 }
@@ -125,14 +125,19 @@ const bucketName = process.env.STORAGE_BUCKET;
  * Read published unit content from S3.
  * Lambda IAM role has full bucket access — no path prefix restrictions.
  */
-async function getUnitContentFromS3(identityId: string, unitId: string): Promise<string | null> {
+async function getUnitContentFromS3(
+  identityId: string,
+  unitId: string,
+): Promise<string | null> {
   if (!bucketName) return null;
   try {
-    const response = await s3.send(new GetObjectCommand({
-      Bucket: bucketName,
-      Key: `protected/${identityId}/units/${unitId}/published.json`,
-    }));
-    return await response.Body?.transformToString() ?? null;
+    const response = await s3.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: `protected/${identityId}/units/${unitId}/published.json`,
+      }),
+    );
+    return (await response.Body?.transformToString()) ?? null;
   } catch {
     return null;
   }
@@ -229,21 +234,21 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
 // ============================================================================
 
 const VOICE_MAP: Record<string, string> = {
-  ja: 'nova',
-  jp: 'nova',
-  es: 'shimmer',
-  fr: 'shimmer',
-  it: 'shimmer',
-  pt: 'shimmer',
-  de: 'alloy',
-  ko: 'nova',
-  zh: 'nova',
-}
+  ja: "nova",
+  jp: "nova",
+  es: "shimmer",
+  fr: "shimmer",
+  it: "shimmer",
+  pt: "shimmer",
+  de: "alloy",
+  ko: "nova",
+  zh: "nova",
+};
 
 function selectVoice(language?: string): string {
-  if (!language) return 'alloy'
-  const lang = language.toLowerCase().slice(0, 2)
-  return VOICE_MAP[lang] || 'alloy'
+  if (!language) return "alloy";
+  const lang = language.toLowerCase().slice(0, 2);
+  return VOICE_MAP[lang] || "alloy";
 }
 
 // ============================================================================
@@ -251,43 +256,64 @@ function selectVoice(language?: string): string {
 // ============================================================================
 
 interface SourceMaterial {
-  vocabulary: { id: string; phrase: string; definition: string; phonetic?: string; language?: string }[]
-  questions: { id: string; prompt: string; answer: string; choices?: string; type?: string }[]
-  textBlocks: { id: string; text: string }[]
-  documents: { id: string; filename: string; concepts: any[]; vocabulary: any[]; summaries: any[] }[]
-  language?: string
+  vocabulary: {
+    id: string;
+    phrase: string;
+    definition: string;
+    phonetic?: string;
+    language?: string;
+  }[];
+  questions: {
+    id: string;
+    prompt: string;
+    answer: string;
+    choices?: string;
+    type?: string;
+  }[];
+  textBlocks: { id: string; text: string }[];
+  documents: {
+    id: string;
+    filename: string;
+    concepts: any[];
+    vocabulary: any[];
+    summaries: any[];
+  }[];
+  language?: string;
 }
 
-async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnabled): Promise<SourceMaterial> {
+async function fetchSourceMaterial(
+  unitId: string,
+  sourcesEnabled: SourcesEnabled,
+): Promise<SourceMaterial> {
   const client = getDataClient();
   const material: SourceMaterial = {
     vocabulary: [],
     questions: [],
     textBlocks: [],
     documents: [],
-  }
+  };
 
   // Fetch unit
-  const { data: unitData } = await client.graphql({
+  const { data: unitData } = (await client.graphql({
     query: GET_UNIT,
     variables: { id: unitId },
-  }) as any;
+  })) as any;
   const unit = unitData?.getUnit;
   if (!unit) throw new Error(`Unit ${unitId} not found`);
   material.language = unit.language;
 
   // Fetch vocabulary words
   if (sourcesEnabled.vocabulary) {
-    const { data: wordsData } = await client.graphql({
+    const { data: wordsData } = (await client.graphql({
       query: LIST_UNIT_WORDS,
       variables: { filter: { unitId: { eq: unitId } } },
-    }) as any;
+    })) as any;
     material.vocabulary = (wordsData?.listUnitWords?.items || [])
       .filter((uw: any) => uw?.word)
       .map((uw: any) => ({
         id: uw.word.id,
         phrase: uw.word.phrase,
-        definition: uw.word.definition || '',
+        definition: uw.word.definition || "",
         phonetic: uw.word.phonetic,
         language: uw.word.language,
       }));
@@ -295,16 +321,16 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
 
   // Fetch questions
   if (sourcesEnabled.questions) {
-    const { data: questionsData } = await client.graphql({
+    const { data: questionsData } = (await client.graphql({
       query: LIST_QUESTION_UNITS,
       variables: { filter: { unitId: { eq: unitId } } },
-    }) as any;
+    })) as any;
     material.questions = (questionsData?.listQuestionUnits?.items || [])
       .filter((qu: any) => qu?.question)
       .map((qu: any) => ({
         id: qu.question.id,
         prompt: qu.question.prompt,
-        answer: qu.question.answer || '',
+        answer: qu.question.answer || "",
         choices: qu.question.choices,
         type: qu.question.type,
       }));
@@ -315,7 +341,8 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
     try {
       const s3Content = await getUnitContentFromS3(unit.identityId, unitId);
       if (s3Content) {
-        const lexicalData = typeof s3Content === 'string' ? JSON.parse(s3Content) : s3Content;
+        const lexicalData =
+          typeof s3Content === "string" ? JSON.parse(s3Content) : s3Content;
         const textBlocks = extractTextBlocks(lexicalData);
         material.textBlocks = textBlocks.map((text: string, i: number) => ({
           id: `text-block-${i}`,
@@ -329,10 +356,10 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
 
   // Fetch documents with parsed content
   if (sourcesEnabled.documents) {
-    const { data: docsData } = await client.graphql({
+    const { data: docsData } = (await client.graphql({
       query: LIST_UNIT_DOCUMENTS,
       variables: { filter: { unitId: { eq: unitId } } },
-    }) as any;
+    })) as any;
     material.documents = (docsData?.listUnitDocuments?.items || [])
       .filter((ud: any) => ud?.document)
       .map((ud: any) => {
@@ -340,10 +367,16 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
         const parsedItems = doc.parsedContent?.items || [];
         return {
           id: doc.id,
-          filename: doc.filename || 'document',
-          concepts: parsedItems.flatMap((p: any) => safeParseJSON(p.conceptsJSON, [])),
-          vocabulary: parsedItems.flatMap((p: any) => safeParseJSON(p.vocabularyJSON, [])),
-          summaries: parsedItems.flatMap((p: any) => safeParseJSON(p.summariesJSON, [])),
+          filename: doc.filename || "document",
+          concepts: parsedItems.flatMap((p: any) =>
+            safeParseJSON(p.conceptsJSON, []),
+          ),
+          vocabulary: parsedItems.flatMap((p: any) =>
+            safeParseJSON(p.vocabularyJSON, []),
+          ),
+          summaries: parsedItems.flatMap((p: any) =>
+            safeParseJSON(p.summariesJSON, []),
+          ),
         };
       });
   }
@@ -354,7 +387,7 @@ async function fetchSourceMaterial(unitId: string, sourcesEnabled: SourcesEnable
 function extractTextBlocks(lexicalData: any): string[] {
   const texts: string[] = [];
   function walk(node: any) {
-    if (node.type === 'text' && node.text) {
+    if (node.type === "text" && node.text) {
       texts.push(node.text);
     }
     if (node.children) {
@@ -368,7 +401,7 @@ function extractTextBlocks(lexicalData: any): string[] {
 function safeParseJSON(str: string | null | undefined, fallback: any): any {
   if (!str) return fallback;
   try {
-    return typeof str === 'string' ? JSON.parse(str) : str;
+    return typeof str === "string" ? JSON.parse(str) : str;
   } catch {
     return fallback;
   }
@@ -378,70 +411,111 @@ function safeParseJSON(str: string | null | undefined, fallback: any): any {
 // GPT-4 question generation
 // ============================================================================
 
-function buildGenerationPrompt(material: SourceMaterial, drillType: string, count: number): string {
+function buildGenerationPrompt(
+  material: SourceMaterial,
+  drillType: string,
+  count: number,
+): string {
   const parts: string[] = [];
 
   parts.push(`You are generating ${count} practice questions for a student.`);
-  parts.push('The source material is provided below.\n');
-  parts.push('RULES:');
-  parts.push('1. Every question MUST test the same concept/meaning as the source.');
-  parts.push('2. REPHRASE questions using synonyms and different sentence structures.');
-  parts.push('3. For vocabulary drills, use the SAME target word but change the definition phrasing.');
-  parts.push('4. For multiple-choice, generate plausible wrong answers from OTHER vocabulary/concepts in this unit.');
-  parts.push('5. When a question derives from a document, include { filename, page } from the source.');
-  parts.push('6. Never change the factual answer — only change how the question is asked.');
-  parts.push('7. For vocabulary words, set pronunciation.enabled = true with the word as targetText.');
-  parts.push('8. Vary block types: quiz (multiple-choice), answer (short-answer), meaning-association (matching), custom-answer (free-response).\n');
+  parts.push("The source material is provided below.\n");
+  parts.push("RULES:");
+  parts.push(
+    "1. Every question MUST test the same concept/meaning as the source.",
+  );
+  parts.push(
+    "2. REPHRASE questions using synonyms and different sentence structures.",
+  );
+  parts.push(
+    "3. For vocabulary drills, use the SAME target word but change the definition phrasing.",
+  );
+  parts.push(
+    "4. For multiple-choice, generate plausible wrong answers from OTHER vocabulary/concepts in this unit.",
+  );
+  parts.push(
+    "5. When a question derives from a document, include { filename, page } from the source.",
+  );
+  parts.push(
+    "6. Never change the factual answer — only change how the question is asked.",
+  );
+  parts.push(
+    "7. For vocabulary words, set pronunciation.enabled = true with the word as targetText.",
+  );
+  parts.push(
+    "8. Vary block types: quiz (multiple-choice), answer (short-answer), meaning-association (matching), custom-answer (free-response).\n",
+  );
 
-  if (drillType === 'VOCABULARY' || drillType === 'vocabulary') {
-    parts.push('FOCUS: Generate primarily vocabulary-based drills (definitions, matching, fill-in-blank).\n');
-  } else if (drillType === 'COMPREHENSION' || drillType === 'comprehension') {
-    parts.push('FOCUS: Generate primarily comprehension questions from documents and text content.\n');
+  if (drillType === "VOCABULARY" || drillType === "vocabulary") {
+    parts.push(
+      "FOCUS: Generate primarily vocabulary-based drills (definitions, matching, fill-in-blank).\n",
+    );
+  } else if (drillType === "COMPREHENSION" || drillType === "comprehension") {
+    parts.push(
+      "FOCUS: Generate primarily comprehension questions from documents and text content.\n",
+    );
   }
 
   // Source material
   if (material.vocabulary.length > 0) {
-    parts.push('=== VOCABULARY ===');
+    parts.push("=== VOCABULARY ===");
     for (const w of material.vocabulary) {
-      parts.push(`- ${w.phrase}: ${w.definition}${w.phonetic ? ` (${w.phonetic})` : ''}${w.language ? ` [${w.language}]` : ''}`);
+      parts.push(
+        `- ${w.phrase}: ${w.definition}${w.phonetic ? ` (${w.phonetic})` : ""}${w.language ? ` [${w.language}]` : ""}`,
+      );
     }
-    parts.push('');
+    parts.push("");
   }
 
   if (material.questions.length > 0) {
-    parts.push('=== QUESTION BANK ===');
+    parts.push("=== QUESTION BANK ===");
     for (const q of material.questions) {
-      parts.push(`- Q: ${q.prompt} | A: ${q.answer}${q.type ? ` | Type: ${q.type}` : ''}`);
+      parts.push(
+        `- Q: ${q.prompt} | A: ${q.answer}${q.type ? ` | Type: ${q.type}` : ""}`,
+      );
     }
-    parts.push('');
+    parts.push("");
   }
 
   if (material.textBlocks.length > 0) {
-    parts.push('=== TEXT CONTENT ===');
+    parts.push("=== TEXT CONTENT ===");
     for (const tb of material.textBlocks.slice(0, 20)) {
       parts.push(`- ${tb.text}`);
     }
-    parts.push('');
+    parts.push("");
   }
 
   if (material.documents.length > 0) {
-    parts.push('=== DOCUMENTS ===');
+    parts.push("=== DOCUMENTS ===");
     for (const doc of material.documents) {
       parts.push(`File: ${doc.filename}`);
-      if (doc.concepts.length > 0) parts.push(`  Concepts: ${JSON.stringify(doc.concepts.slice(0, 10))}`);
-      if (doc.vocabulary.length > 0) parts.push(`  Vocabulary: ${JSON.stringify(doc.vocabulary.slice(0, 10))}`);
-      if (doc.summaries.length > 0) parts.push(`  Summaries: ${JSON.stringify(doc.summaries.slice(0, 5))}`);
+      if (doc.concepts.length > 0)
+        parts.push(`  Concepts: ${JSON.stringify(doc.concepts.slice(0, 10))}`);
+      if (doc.vocabulary.length > 0)
+        parts.push(
+          `  Vocabulary: ${JSON.stringify(doc.vocabulary.slice(0, 10))}`,
+        );
+      if (doc.summaries.length > 0)
+        parts.push(`  Summaries: ${JSON.stringify(doc.summaries.slice(0, 5))}`);
     }
-    parts.push('');
+    parts.push("");
   }
 
-  parts.push(`Generate exactly ${count} practice blocks as a JSON array of objects.`);
-  parts.push('Each object must have: type, instruction, sourceItemId, sourceType');
-  parts.push('Optional fields: choices (for quiz), expectedAnswer (for answer/custom-answer), pairs (for meaning-association), hint, documentRef, pronunciation');
-  parts.push('For pronunciation: { enabled: true, targetText: "<word>", targetLanguage: "<iso-code>" }');
-  parts.push('\nRespond with ONLY the JSON array, no markdown formatting.');
+  parts.push(
+    `Generate exactly ${count} practice blocks as a JSON array of objects.`,
+  );
+  parts.push(
+    "Each object must have: type, instruction, sourceItemId, sourceType",
+  );
+  parts.push(
+    "Optional fields: choices (for quiz), expectedAnswer (for answer/custom-answer), pairs (for meaning-association), hint, documentRef, pronunciation",
+  );
+  parts.push(
+    'For pronunciation: { enabled: true, targetText: "<word>", targetLanguage: "<iso-code>" }',
+  );
+  parts.push("\nRespond with ONLY the JSON array, no markdown formatting.");
 
-  return parts.join('\n');
+  return parts.join("\n");
 }
 
 async function generateBlocks(
@@ -453,35 +527,41 @@ async function generateBlocks(
   const prompt = buildGenerationPrompt(material, drillType, count);
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: "gpt-4o",
     messages: [
       {
-        role: 'system',
-        content: 'You are a practice drill generator for an educational platform. Output valid JSON only.',
+        role: "system",
+        content:
+          "You are a practice drill generator for an educational platform. Output valid JSON only.",
       },
-      { role: 'user', content: prompt },
+      { role: "user", content: prompt },
     ],
     temperature: 0.7,
     max_tokens: 4096,
-    response_format: { type: 'json_object' },
+    response_format: { type: "json_object" },
   });
 
-  const content = response.choices[0]?.message?.content || '[]';
+  const content = response.choices[0]?.message?.content || "[]";
   let parsed: any;
   try {
     parsed = JSON.parse(content);
   } catch {
-    console.error('[generatePracticeDrill] Failed to parse GPT response:', content);
-    throw new Error('Failed to parse AI-generated practice blocks');
+    console.error(
+      "[generatePracticeDrill] Failed to parse GPT response:",
+      content,
+    );
+    throw new Error("Failed to parse AI-generated practice blocks");
   }
 
   // Handle both { blocks: [...] } and [...] formats
-  const blocks: PracticeDrillBlock[] = Array.isArray(parsed) ? parsed : (parsed.blocks || parsed.items || []);
+  const blocks: PracticeDrillBlock[] = Array.isArray(parsed)
+    ? parsed
+    : parsed.blocks || parsed.items || [];
 
   // Validate and normalize each block
   return blocks.slice(0, count).map((block: any, i: number) => ({
-    type: block.type || 'quiz',
-    instruction: block.instruction || block.question || '',
+    type: block.type || "quiz",
+    instruction: block.instruction || block.question || "",
     documentRef: block.documentRef,
     choices: block.choices,
     expectedAnswer: block.expectedAnswer || block.answer,
@@ -489,7 +569,7 @@ async function generateBlocks(
     hint: block.hint,
     sourceBlockId: block.sourceBlockId,
     sourceItemId: block.sourceItemId || `generated-${i}`,
-    sourceType: block.sourceType || 'text',
+    sourceType: block.sourceType || "text",
     pronunciation: block.pronunciation,
   }));
 }
@@ -531,17 +611,17 @@ async function attachAudioToBlocks(
     const results = await Promise.allSettled(
       batch.map(async (text) => {
         const response = await openai.audio.speech.create({
-          model: 'tts-1',
+          model: "tts-1",
           voice,
           input: text,
         });
         const buffer = await response.arrayBuffer();
-        return { text, base64: Buffer.from(buffer).toString('base64') };
+        return { text, base64: Buffer.from(buffer).toString("base64") };
       }),
     );
 
     for (const result of results) {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         audioMap.set(result.value.text, result.value.base64);
       }
     }
@@ -553,14 +633,18 @@ async function attachAudioToBlocks(
   for (const [, base64] of audioMap) {
     totalSize += base64.length * 0.75; // approximate decoded size
   }
-  console.log(`[generatePracticeDrill] Total TTS audio size: ${Math.round(totalSize / 1024)}KB for ${audioMap.size} strings`);
+  console.log(
+    `[generatePracticeDrill] Total TTS audio size: ${Math.round(totalSize / 1024)}KB for ${audioMap.size} strings`,
+  );
 
   // Attach audio to each block
   return blocks.map((block) => ({
     ...block,
     audio: {
       instruction: audioMap.get(block.instruction),
-      expectedAnswer: block.expectedAnswer ? audioMap.get(block.expectedAnswer) : undefined,
+      expectedAnswer: block.expectedAnswer
+        ? audioMap.get(block.expectedAnswer)
+        : undefined,
       hint: block.hint ? audioMap.get(block.hint) : undefined,
       choices: block.choices
         ? Object.fromEntries(
@@ -573,8 +657,10 @@ async function attachAudioToBlocks(
         ? Object.fromEntries(
             block.pairs.flatMap((p) => {
               const entries: [string, string][] = [];
-              if (audioMap.has(p.term)) entries.push([p.term, audioMap.get(p.term)!]);
-              if (audioMap.has(p.definition)) entries.push([p.definition, audioMap.get(p.definition)!]);
+              if (audioMap.has(p.term))
+                entries.push([p.term, audioMap.get(p.term)!]);
+              if (audioMap.has(p.definition))
+                entries.push([p.definition, audioMap.get(p.definition)!]);
               return entries;
             }),
           )
@@ -590,7 +676,7 @@ async function attachAudioToBlocks(
 function requireAuth(event: any) {
   const userId = event.identity?.sub;
   const username = event.identity?.username;
-  if (!userId) throw new Error('Unauthorized: User authentication required');
+  if (!userId) throw new Error("Unauthorized: User authentication required");
   return { userId, username: username || userId };
 }
 
@@ -598,21 +684,30 @@ export const handler: Handler = async (event: any) => {
   const operationName = event.info?.fieldName || event.fieldName;
   console.log(`[generatePracticeDrill] ${operationName}`, event.arguments);
 
-  if (operationName !== 'generatePracticeDrill') {
+  if (operationName !== "generatePracticeDrill") {
     throw new Error(`Unknown operation: ${operationName}`);
   }
 
   const { userId, username } = requireAuth(event);
-  const { unitId, drillType, count, sourcesEnabled: sourcesEnabledRaw } = event.arguments || {};
+  const {
+    unitId,
+    drillType,
+    count,
+    sourcesEnabled: sourcesEnabledRaw,
+  } = event.arguments || {};
 
   if (!unitId || !drillType || !count) {
-    throw new Error('Missing required arguments: unitId, drillType, count');
+    throw new Error("Missing required arguments: unitId, drillType, count");
   }
 
   const sourcesEnabled: SourcesEnabled =
-    typeof sourcesEnabledRaw === 'string' ? JSON.parse(sourcesEnabledRaw) : sourcesEnabledRaw;
+    typeof sourcesEnabledRaw === "string"
+      ? JSON.parse(sourcesEnabledRaw)
+      : sourcesEnabledRaw;
 
-  console.log(`[generatePracticeDrill] User: ${username}, Unit: ${unitId}, Type: ${drillType}, Count: ${count}`);
+  console.log(
+    `[generatePracticeDrill] User: ${username}, Unit: ${unitId}, Type: ${drillType}, Count: ${count}`,
+  );
   console.log(`[generatePracticeDrill] Sources:`, sourcesEnabled);
 
   // 1. Fetch all source material
@@ -624,13 +719,15 @@ export const handler: Handler = async (event: any) => {
     material.documents.length;
 
   if (totalItems === 0) {
-    throw new Error('No source material found for this unit. Enable at least one content source.');
+    throw new Error(
+      "No source material found for this unit. Enable at least one content source.",
+    );
   }
 
   console.log(
     `[generatePracticeDrill] Source material: ${material.vocabulary.length} vocab, ` +
-    `${material.questions.length} questions, ${material.textBlocks.length} text blocks, ` +
-    `${material.documents.length} documents`,
+      `${material.questions.length} questions, ${material.textBlocks.length} text blocks, ` +
+      `${material.documents.length} documents`,
   );
 
   // 2. Generate practice blocks via GPT-4

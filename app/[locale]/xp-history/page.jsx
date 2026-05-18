@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -81,18 +81,9 @@ function XPHistoryContent() {
 
   return (
     <>
-      <AppBar position="fixed" color="inherit">
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }}>
-            <Typography variant="h6" component="div">
-              XP History
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
       <Box
         sx={{
-          marginTop: "5rem",
+          marginTop: "1rem",
           padding: "1rem",
           maxWidth: "60rem",
           margin: "5rem auto 3rem",

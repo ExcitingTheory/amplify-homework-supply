@@ -83,20 +83,11 @@ describe('Save', () => {
       });
     });
 
-    it('disables button while saving', async () => {
-      let resolvePromise: (v: any) => void;
-      saveEditorContent.mockReturnValue(
-        new Promise((resolve) => { resolvePromise = resolve; })
-      );
+    it('disables button while saving', () => {
+      renderSave({ isSaving: true });
 
-      renderSave();
-      fireEvent.click(screen.getByTitle(/Save now/));
-
-      // Button should be disabled while saving
+      // Button should be disabled when context isSaving is true
       expect(screen.getByTitle(/Save now/)).toBeDisabled();
-
-      // Resolve the save
-      resolvePromise!(true);
     });
   });
 

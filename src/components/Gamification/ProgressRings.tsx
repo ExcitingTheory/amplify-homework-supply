@@ -1,3 +1,4 @@
+"use client";
 /**
  * ProgressRings — Circular progress indicators showing per-module completion.
  *
@@ -12,6 +13,7 @@ import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
 import StarIcon from '@mui/icons-material/Star'
+import Link from 'next/link'
 
 export interface ModuleProgress {
   moduleId: string
@@ -35,7 +37,7 @@ function getMilestoneStars(percent: number): number {
 function ProgressRing({ module }: { module: ModuleProgress }) {
   const stars = getMilestoneStars(module.completionPercent)
 
-  return (
+  const content = (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
         {/* Background ring */}
@@ -94,6 +96,15 @@ function ProgressRing({ module }: { module: ModuleProgress }) {
       )}
     </Box>
   )
+
+  return (
+    <Link
+      href={`/unit/${module.moduleId}`}
+      style={{ textDecoration: 'none', color: 'inherit' }}
+    >
+      {content}
+    </Link>
+  )
 }
 
 export function ProgressRings({ modules }: ProgressRingsProps) {
@@ -106,7 +117,7 @@ export function ProgressRings({ modules }: ProgressRingsProps) {
   }
 
   return (
-    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2 }}>
+    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
       {modules.map((mod) => (
         <ProgressRing key={mod.moduleId} module={mod} />
       ))}

@@ -1,9 +1,10 @@
-import React, { useContext, useMemo } from 'react';
-import AuthContext from './authContext';
-import SectionContext from './sectionContext';
-import { GamificationProvider } from './gamificationContext';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { GamificationToastLayer } from '../components/Gamification/GamificationToastLayer';
+"use client";
+import React, { useContext, useMemo } from "react";
+import AuthContext from "./authContext";
+import SectionContext from "./sectionContext";
+import { GamificationProvider } from "./gamificationContext";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { GamificationToastLayer } from "../components/Gamification/GamificationToastLayer";
 
 /**
  * Bridges AuthContext → GamificationProvider by extracting the current user's
@@ -13,10 +14,13 @@ import { GamificationToastLayer } from '../components/Gamification/GamificationT
  * to avoid duplicate subscriptions (zero extra API calls).
  * Renders children directly when no user is logged in.
  */
-export function GamificationProviderWrapper({ children, cohortId: cohortIdProp }) {
+export function GamificationProviderWrapper({
+  children,
+  cohortId: cohortIdProp,
+}) {
   const { user, session } = useContext(AuthContext);
   const client = useMemo(() => getAmplifyClient(), []);
-  const studentId = user?.username || user?.attributes?.sub || '';
+  const studentId = user?.username || user?.attributes?.sub || "";
 
   // Consume from SectionContext if a SectionProvider exists above us.
   // At app-level there is no SectionProvider, so we get defaults (empty arrays).

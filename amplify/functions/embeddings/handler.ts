@@ -13,6 +13,7 @@ import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import OpenAI from "openai";
 
 // Configure Amplify at module level (before creating client)
 // Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
@@ -54,7 +55,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;

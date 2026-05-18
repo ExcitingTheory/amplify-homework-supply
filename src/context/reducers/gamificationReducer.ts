@@ -67,6 +67,12 @@ export interface GuildInfo {
   totalXP: number;
   description?: string;
   memberCount: number;
+  posts?: Array<{
+    authorId: string;
+    title: string;
+    data?: string;
+    createdAt?: string;
+  }>;
 }
 
 export interface GuildMember {

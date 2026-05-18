@@ -5,7 +5,7 @@
 
 import { getAmplifyClient } from './amplifyClient';
 import { generateEmbedding as generateEmbeddingAction, generateUnitEmbeddings as generateUnitEmbeddingsAction } from '../../app/actions/embeddings';
-import { createSection as createSectionAction } from '../../app/actions/section';
+import { createSection as createSectionAction, copyGamificationSettings as copySettingsAction } from '../../app/actions/section';
 import * as EmbeddingWorker from './embeddingWorkerManager';
 
 // Vector store instance - will be set from context
@@ -825,9 +825,9 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
   }
 }
 
-export async function executeCreateSection({ name, description }) {
+export async function executeCreateSection({ name, description, copySettingsFromSectionId }) {
   try {
-    const result = await createSectionAction(name, description || '');
+    const result = await createSectionAction(name, description || '', copySettingsFromSectionId);
 
     if (!result.success) {
       throw new Error(result.error || 'Section creation failed');
@@ -839,11 +839,31 @@ export async function executeCreateSection({ name, description }) {
         id: result.sectionId,
         name,
         code: result.code,
-        message: `Section "${name}" created successfully`
+        message: copySettingsFromSectionId
+          ? `Section "${name}" created with gamification settings copied from another section`
+          : `Section "${name}" created successfully`
       }
     };
   } catch (error) {
     console.error('[executeCreateSection] Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeCopyGamificationSettings({ sourceSectionId, targetSectionId }) {
+  try {
+    const result = await copySettingsAction(sourceSectionId, targetSectionId);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to copy settings');
+    }
+
+    return {
+      success: true,
+      message: `Gamification settings copied from section ${sourceSectionId} to ${targetSectionId}`
+    };
+  } catch (error) {
+    console.error('[executeCopyGamificationSettings] Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -1561,6 +1581,7 @@ export async function executeTool(toolName, args) {
     stop_tour: executeStopTour,
     search_content: executeSearchContent,
     create_section: executeCreateSection,
+    copy_gamification_settings: executeCopyGamificationSettings,
     create_unit: executeCreateUnit,
     create_assignment: executeCreateAssignment,
     add_timer_to_unit: executeAddTimerToUnit,

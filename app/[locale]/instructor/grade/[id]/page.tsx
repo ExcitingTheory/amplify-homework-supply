@@ -1,4 +1,8 @@
 import { getServerClient } from '@/utils/amplifyServerClient';
+import { runWithAmplifyServerContext } from '@/utils/amplifyServerUtils';
+import { fetchAuthSession } from 'aws-amplify/auth/server';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { GradeActions } from './GradeActions';
 import { Alert, Box } from '@mui/material';
 
@@ -20,6 +24,19 @@ interface Props {
 export default async function InstructorGradePage({ params, searchParams }: Props) {
   const { id: gradeId } = await params;
   const { unitId: queryUnitId, studentName: queryStudentName } = await searchParams;
+
+  // Server-side auth check — redirect to login if not authenticated
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+    if (!session?.tokens?.idToken) {
+      redirect(`/?returnUrl=/instructor/grade/${gradeId}`);
+    }
+  } catch {
+    redirect(`/?returnUrl=/instructor/grade/${gradeId}`);
+  }
 
   try {
     const client = getServerClient();

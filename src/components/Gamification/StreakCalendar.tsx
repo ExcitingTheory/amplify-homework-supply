@@ -1,3 +1,4 @@
+"use client";
 /**
  * StreakCalendar — Displays a compact monthly calendar grid showing activity days.
  *

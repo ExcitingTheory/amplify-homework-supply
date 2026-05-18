@@ -34,7 +34,7 @@ export function useAvatarConfig(): AvatarConfig {
   const ctx = useContext(SettingsContext);
   const settings = ctx?.settings;
   const isLoaded = ctx ? !ctx.isLoading : false;
-  const { level } = useXP();
+  const { level, avatarUnlockConfig } = useXP();
   const numericLevel = level?.level ?? 1;
 
   // metadata can be a parsed object or a JSON string depending on Amplify's response
@@ -54,12 +54,14 @@ export function useAvatarConfig(): AvatarConfig {
         : ((rawMetadata || {}) as Record<string, unknown>);
 
     const savedStyle = (metadata.avatarStyle as AvatarStyleTier) || undefined;
-    const style = savedStyle || getUnlockedStyleTier(numericLevel);
+    const style =
+      savedStyle ||
+      getUnlockedStyleTier(numericLevel, avatarUnlockConfig ?? undefined);
     const overrides = (metadata.avatarOverrides as AvatarOverrides) || {};
     const glowRing = (metadata.glowRing as GlowRingConfig) || null;
 
     return { style, overrides, isLoaded, seed, glowRing };
-  }, [rawMetadata, isLoaded, numericLevel, seed]);
+  }, [rawMetadata, isLoaded, numericLevel, seed, avatarUnlockConfig]);
 }
 
 export default useAvatarConfig;

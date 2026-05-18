@@ -1,25 +1,14 @@
 /**
- * Peer Review Room – Multi-User E2E (Playwright)
+ * Peer Review Room – Multi-User E2E
  *
- * Tests the peer review workflow with two student sessions:
- * 1. Student 1 completes a workbook → [data-tour="results"] appears
- * 2. Student 1 opens for peer review → creates room → gets room code
- * 3. Student 2 joins via "Join Peer Review" in nav drawer → enters code
- * 4. Both see the review page with split pane: Workbook (left) + Chat (right)
- * 5. Chat test: student 1 sends message → student 2 sees it (and vice versa)
+ * Tests real-time chat between two students in a peer review room:
+ * 1. Instructor sets up content + section + assignment
+ * 2. Student 1 completes workbook → results appear → creates peer review room
+ * 3. Student 2 joins the room via code
+ * 4. Both exchange chat messages and see each other's messages in real time
  *
- * Routes: /units, /unit/{id}, /workbook/{id}, /review/{roomId}
- * Key selectors:
- *   [data-tour="results"]                              — UnitCompletedPlugin.jsx:119
- *   "Open for Peer Review" button (text match)         — results/review panel
- *   "Create Room" button (text match)                  — peer review dialog
- *   [aria-labelledby="join-peer-review-dialog-title"]  — JoinPeerReviewDialog.tsx
- *   button "Join Review"                               — JoinPeerReviewDialog.tsx
- *   [placeholder="Type a message… (use @AI for AI help)"] — PeerReviewChat input
- *   button[aria-label] (send button with translated aria)
- *
- * NOTE: The review page (/review/{roomId}) has ZERO data-tour attributes.
- * All selectors are DOM-structure based.
+ * This is the strongest multi-user test — it verifies real-time message
+ * propagation between two different browser sessions via WebSocket.
  */
 
 import { test, expect } from "@playwright/test";
@@ -41,7 +30,7 @@ import {
   type UserSession,
 } from "./helpers";
 
-test.describe("Peer Review Room – Simultaneous Students", () => {
+test.describe("Peer Review Room", () => {
   let instructorSession: UserSession;
   let student1Session: UserSession;
   let student2Session: UserSession;
@@ -52,24 +41,21 @@ test.describe("Peer Review Room – Simultaneous Students", () => {
     if (instructorSession) await closeSession(instructorSession);
   });
 
-  test("student1 creates peer review room, student2 joins, both chat", async ({
+  test("two students exchange messages in peer review chat", async ({
     browser,
   }) => {
-    const baseURL = test.info().project.use.baseURL || "http://localhost:3000";
-    const sectionName = `PW Peer Review ${Date.now()}`;
+    const baseURL = test.info().project.use.baseURL || "https://localhost:3000";
+    const sectionName = `Peer Review ${Date.now()}`;
 
-    // --- All three users log in simultaneously ---
+    // All three users log in simultaneously
     [instructorSession, student1Session, student2Session] = await Promise.all([
       createUserSession(browser, INSTRUCTOR, baseURL, "/units"),
       createUserSession(browser, STUDENT_1, baseURL, "/sections"),
       createUserSession(browser, STUDENT_2, baseURL, "/sections"),
     ]);
 
-    // --- Instructor: create unit → quiz → publish → section → assign ---
-    const unitId = await createUnit(
-      instructorSession.page,
-      "PW Peer Review Unit",
-    );
+    // Instructor: create unit → quiz → publish → section → assign
+    const unitId = await createUnit(instructorSession.page, "Peer Review Unit");
     await addQuizBlock(instructorSession.page);
     await publishUnit(instructorSession.page);
     await saveUnit(instructorSession.page);
@@ -80,129 +66,76 @@ test.describe("Peer Review Room – Simultaneous Students", () => {
     );
     await assignUnitToSection(instructorSession.page, unitId, sectionName);
 
-    // --- Both students join section ---
+    // Both students join section
     await Promise.all([
       joinSection(student1Session.page, joinCode),
       joinSection(student2Session.page, joinCode),
     ]);
 
-    // --- Student 1: complete workbook to trigger results ---
+    // Student 1: complete workbook to trigger results
     await openWorkbook(student1Session.page, unitId);
 
-    // Answer the quiz to complete the workbook
+    // Answer quiz to complete the workbook
     const quizAnswer = student1Session.page.locator(
       '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
     );
-    if (
-      await quizAnswer
-        .first()
-        .isVisible({ timeout: 10_000 })
-        .catch(() => false)
-    ) {
-      await quizAnswer.first().check({ force: true });
-      await student1Session.page.waitForTimeout(3000);
-    }
+    await expect(quizAnswer.first()).toBeVisible({ timeout: 10_000 });
+    await quizAnswer.first().check({ force: true });
 
-    // Wait for results to appear
+    // Wait for results to appear (workbook completion triggers results view)
     const resultsEl = student1Session.page.locator('[data-tour="results"]');
-    if (await resultsEl.isVisible({ timeout: 15_000 }).catch(() => false)) {
-      // Click "Open for Peer Review" button (text match — no data-tour)
-      const openReviewButton = student1Session.page.getByRole("button", {
-        name: /open for peer review|peer review/i,
-      });
-      if (
-        await openReviewButton
-          .first()
-          .isVisible({ timeout: 5_000 })
-          .catch(() => false)
-      ) {
-        await openReviewButton.first().click();
-        await student1Session.page.waitForTimeout(2000);
+    await expect(resultsEl).toBeVisible({ timeout: 15_000 });
 
-        // Click "Create Room" button in the peer review dialog
-        const createRoomButton = student1Session.page.getByRole("button", {
-          name: /create room/i,
-        });
-        if (
-          await createRoomButton
-            .isVisible({ timeout: 5_000 })
-            .catch(() => false)
-        ) {
-          await createRoomButton.click();
-          await student1Session.page.waitForTimeout(5000);
+    // Click "Open for Peer Review" button
+    const openReviewButton = student1Session.page.getByRole("button", {
+      name: /open for peer review|peer review/i,
+    });
+    await expect(openReviewButton.first()).toBeVisible({ timeout: 5_000 });
+    await openReviewButton.first().click();
 
-          // Student 1 should be on /review/{roomId} now
-          if (student1Session.page.url().includes("/review/")) {
-            // Extract room ID/code from the URL or visible UI
-            const reviewUrl = student1Session.page.url();
-            const reviewMatch = reviewUrl.match(/\/review\/([a-f0-9-]+)/);
-            const roomId = reviewMatch?.[1] || "";
+    // Click "Create Room" button in the peer review dialog
+    const createRoomButton = student1Session.page.getByRole("button", {
+      name: /create room/i,
+    });
+    await expect(createRoomButton).toBeVisible({ timeout: 5_000 });
+    await createRoomButton.click();
 
-            if (roomId) {
-              // --- Student 2: join the peer review via room code ---
-              await joinPeerReview(student2Session.page, roomId);
+    // Student 1 should navigate to /review/{roomId}
+    await student1Session.page.waitForURL("**/review/**", { timeout: 15_000 });
+    const reviewUrl = student1Session.page.url();
+    const reviewMatch = reviewUrl.match(/\/review\/([a-f0-9-]+)/);
+    expect(reviewMatch).not.toBeNull();
+    const roomId = reviewMatch![1];
 
-              // --- Both should be on the review page ---
-              await student1Session.page.waitForTimeout(3000);
-              await student2Session.page.waitForTimeout(3000);
+    // Student 2: join the peer review room
+    await joinPeerReview(student2Session.page, roomId);
 
-              // Verify chat input is visible on both pages
-              const chatSelector =
-                'input[placeholder*="Type a message"], textarea[placeholder*="Type a message"]';
+    // Both should now be on the review page — verify chat input is visible
+    const chatSelector =
+      'input[placeholder*="Type a message"], textarea[placeholder*="Type a message"]';
 
-              const student1Chat = student1Session.page.locator(chatSelector);
-              const student2Chat = student2Session.page.locator(chatSelector);
+    const student1Chat = student1Session.page.locator(chatSelector).first();
+    const student2Chat = student2Session.page.locator(chatSelector).first();
 
-              if (
-                (await student1Chat
-                  .first()
-                  .isVisible({ timeout: 10_000 })
-                  .catch(() => false)) &&
-                (await student2Chat
-                  .first()
-                  .isVisible({ timeout: 10_000 })
-                  .catch(() => false))
-              ) {
-                // Student 1 sends a message
-                await student1Chat.first().fill("Hello from Student 1!");
-                // Find and click send button (aria-label with translated text)
-                const send1 = student1Session.page
-                  .getByRole("button")
-                  .filter({
-                    has: student1Session.page.locator(
-                      '[aria-label*="send"], [aria-label*="Send"]',
-                    ),
-                  })
-                  .first();
-                if (
-                  await send1.isVisible({ timeout: 3_000 }).catch(() => false)
-                ) {
-                  await send1.click();
-                } else {
-                  // Fallback: press Enter to send
-                  await student1Chat.first().press("Enter");
-                }
-                await student1Session.page.waitForTimeout(3000);
+    await expect(student1Chat).toBeVisible({ timeout: 10_000 });
+    await expect(student2Chat).toBeVisible({ timeout: 10_000 });
 
-                // Verify Student 2 sees the message
-                await expect(
-                  student2Session.page.getByText("Hello from Student 1!"),
-                ).toBeVisible({ timeout: 15_000 });
+    // Student 1 sends a message
+    await student1Chat.fill("Hello from Student 1!");
+    await student1Chat.press("Enter");
 
-                // Student 2 replies
-                await student2Chat.first().fill("Reply from Student 2!");
-                await student2Chat.first().press("Enter");
-                await student2Session.page.waitForTimeout(3000);
+    // Student 2 should see the message (real-time propagation via WebSocket)
+    await expect(
+      student2Session.page.getByText("Hello from Student 1!"),
+    ).toBeVisible({ timeout: 15_000 });
 
-                // Verify Student 1 sees the reply
-                await expect(
-                  student1Session.page.getByText("Reply from Student 2!"),
-                ).toBeVisible({ timeout: 15_000 });
-              }
-            }
-          }
-        }
-      }
-    }
+    // Student 2 replies
+    await student2Chat.fill("Reply from Student 2!");
+    await student2Chat.press("Enter");
+
+    // Student 1 should see the reply
+    await expect(
+      student1Session.page.getByText("Reply from Student 2!"),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

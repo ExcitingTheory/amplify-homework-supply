@@ -1,17 +1,13 @@
 /**
- * Grading Workflow – Multi-User E2E (Playwright)
+ * Grading Workflow – Multi-User E2E
  *
- * Tests the grading lifecycle with two simultaneous browser sessions:
- * 1. Instructor creates unit + section + assignment
+ * Tests that a student's quiz answer creates a visible grade for the instructor:
+ * 1. Instructor creates content + section + assignment
  * 2. Student joins → opens workbook → answers quiz
- * 3. Instructor views section detail gradebook → sees grade
+ * 3. Instructor's section gradebook shows the student's grade entry
  *
- * Routes: /units, /unit/{id}, /sections, /section/{id}, /workbook/{id}
- * Key selectors:
- *   [data-tour="quiz-answers"] input[type="checkbox"]  — QuizComponent.jsx:145
- *   [data-tour="quiz-block"]                           — QuizComponent.jsx:174
- *   [data-tour="results"]                              — UnitCompletedPlugin.jsx:119
- *   table (gradebook in section detail)                — section/[id]/page.jsx:1739
+ * This tests real data propagation: student interaction creates a Grade record
+ * that the instructor can see.
  */
 
 import { test, expect } from "@playwright/test";
@@ -32,7 +28,7 @@ import {
   type UserSession,
 } from "./helpers";
 
-test.describe("Grading Workflow – Simultaneous Users", () => {
+test.describe("Grading Workflow", () => {
   let instructorSession: UserSession;
   let studentSession: UserSession;
 
@@ -41,23 +37,20 @@ test.describe("Grading Workflow – Simultaneous Users", () => {
     if (instructorSession) await closeSession(instructorSession);
   });
 
-  test("student answers quiz, instructor sees grade in section gradebook", async ({
+  test("student answers quiz, instructor sees grade in gradebook", async ({
     browser,
   }) => {
-    const baseURL = test.info().project.use.baseURL || "http://localhost:3000";
-    const sectionName = `PW Grading ${Date.now()}`;
+    const baseURL = test.info().project.use.baseURL || "https://localhost:3000";
+    const sectionName = `Grading ${Date.now()}`;
 
-    // --- Both users log in simultaneously ---
+    // Both users log in simultaneously
     [instructorSession, studentSession] = await Promise.all([
       createUserSession(browser, INSTRUCTOR, baseURL, "/units"),
       createUserSession(browser, STUDENT_1, baseURL, "/sections"),
     ]);
 
-    // --- Instructor: create unit → quiz → publish → section → assign ---
-    const unitId = await createUnit(
-      instructorSession.page,
-      "PW Grading Test Unit",
-    );
+    // Instructor: create unit → quiz → publish → section → assign
+    const unitId = await createUnit(instructorSession.page, "Grading Unit");
     await addQuizBlock(instructorSession.page);
     await publishUnit(instructorSession.page);
     await saveUnit(instructorSession.page);
@@ -68,10 +61,23 @@ test.describe("Grading Workflow – Simultaneous Users", () => {
     );
     await assignUnitToSection(instructorSession.page, unitId, sectionName);
 
-    // --- Student: join section ---
+    // Student: join section
     await joinSection(studentSession.page, joinCode);
 
-    // --- Instructor: navigate to section detail and watch gradebook ---
+    // Student: open workbook and answer quiz
+    await openWorkbook(studentSession.page, unitId);
+
+    // Find and check a quiz answer
+    const quizAnswer = studentSession.page.locator(
+      '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
+    );
+    await expect(quizAnswer.first()).toBeVisible({ timeout: 10_000 });
+    await quizAnswer.first().check({ force: true });
+
+    // Wait for grade to be recorded (mutation + subscription propagation)
+    await studentSession.page.waitForTimeout(5000);
+
+    // Instructor: navigate to section detail to see gradebook
     await goToSections(instructorSession.page);
     await instructorSession.page
       .locator('[data-tour="section-card"]')
@@ -81,34 +87,15 @@ test.describe("Grading Workflow – Simultaneous Users", () => {
     await instructorSession.page.waitForURL("**/section/**", {
       timeout: 10_000,
     });
-    await expect(instructorSession.page.locator("table").first()).toBeVisible({
-      timeout: 10_000,
-    });
 
-    // --- Student: open workbook and answer quiz ---
-    await openWorkbook(studentSession.page, unitId);
+    // Verify gradebook table is visible
+    const gradebookTable = instructorSession.page.locator("table").first();
+    await expect(gradebookTable).toBeVisible({ timeout: 15_000 });
 
-    // Answer quiz — click first checkbox answer
-    const quizAnswer = studentSession.page.locator(
-      '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
-    );
-    if (
-      await quizAnswer
-        .first()
-        .isVisible({ timeout: 10_000 })
-        .catch(() => false)
-    ) {
-      await quizAnswer.first().check({ force: true });
-      await studentSession.page.waitForTimeout(3000);
-    }
-
-    // --- Instructor: refresh section detail to see the grade ---
-    await instructorSession.page.reload({ timeout: 15_000 });
-    await instructorSession.page.waitForTimeout(5000);
-
-    // Verify gradebook table is still visible (it should now have grade data)
-    await expect(instructorSession.page.locator("table").first()).toBeVisible({
-      timeout: 15_000,
-    });
+    // Verify the student's username appears in the gradebook
+    // (confirms the grade record propagated from student to instructor's view)
+    await expect(
+      gradebookTable.getByText(STUDENT_1.username.split("@")[0]).first(),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

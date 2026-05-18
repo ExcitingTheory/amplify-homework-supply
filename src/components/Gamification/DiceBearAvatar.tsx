@@ -1,3 +1,4 @@
+"use client";
 /**
  * DiceBearAvatar — Generates and displays a DiceBear SVG avatar
  * from a seed string. Supports multiple style sets that unlock
@@ -149,13 +150,15 @@ export function DiceBearAvatar({
 }: DiceBearAvatarProps) {
   const dataUri = useMemo(
     () => {
+      const styleModule = STYLE_MAP[style] || STYLE_MAP.simple
+      if (!styleModule?.meta) return ''
       const options: Record<string, unknown> = { seed, size }
       if (overrides) {
         Object.entries(overrides).forEach(([key, value]) => {
           if (value !== undefined) options[key] = value
         })
       }
-      const avatar = createAvatar(STYLE_MAP[style], options)
+      const avatar = createAvatar(styleModule, options)
       return avatar.toDataUri()
     },
     [seed, style, size, overrides],

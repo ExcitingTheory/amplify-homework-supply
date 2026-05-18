@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+"use client";
+import { useState, useEffect, useCallback } from "react";
 
 export interface NetworkStatus {
   /** Whether the browser reports an active network connection */
@@ -29,11 +30,11 @@ export function useNetworkStatus(): NetworkStatus {
     // Sync with actual browser state after hydration
     setStatus({ isOnline: navigator.onLine, lastChanged: Date.now() });
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [handleOnline, handleOffline]);
 

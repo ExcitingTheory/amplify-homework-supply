@@ -2,7 +2,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import Typography from "@mui/material/Typography";
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import TextField from "@mui/material/TextField";
@@ -15,7 +14,6 @@ import {
 } from "aws-amplify/auth";
 
 import FormControl from "@mui/material/FormControl";
-import MainToolbar from "@/components/MainToolbar";
 import StorageManagement from "@/components/StorageManagement";
 import { CosmeticSelector } from "@/components/Gamification/CosmeticSelector";
 import { BotCustomizer } from "@/components/BotCustomizer";
@@ -229,25 +227,9 @@ function Settings() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }}>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {t("settings.title", "Settings")}
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
       <Box
         sx={{
-          marginTop: "5rem",
+          marginTop: "1rem",
           marginBottom: "3rem",
           padding: "1rem",
           height: "calc(100vh - 5rem)",
@@ -262,8 +244,8 @@ function Settings() {
             maxWidth: "60rem",
           }}
         >
-          <h1>{t("profile.heading")}</h1>
-          <p>{t("profile.description")}</p>
+          <h1>{t("settings.profileInfo.heading")}</h1>
+          <p>{t("settings.profileInfo.description")}</p>
 
           <form onSubmit={updateUser}>
             <FormControl fullWidth>
@@ -547,7 +529,7 @@ function Settings() {
           }}
         >
           <Typography variant="h5" gutterBottom>
-            {t("profile.privacy", "Privacy")}
+            {t("settings.privacy.heading")}
           </Typography>
           <FormControlLabel
             control={
@@ -560,16 +542,10 @@ function Settings() {
                 }}
               />
             }
-            label={t(
-              "profile.privacy.leaderboardOptIn",
-              "Show my name on leaderboards",
-            )}
+            label={t("settings.privacy.leaderboardOptIn")}
           />
           <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
-            {t(
-              "profile.privacy.leaderboardOptInHint",
-              'When off, your name appears as "Anonymous Student" on leaderboards.',
-            )}
+            {t("settings.privacy.leaderboardOptInHint")}
           </Typography>
         </Card>
 
@@ -583,10 +559,10 @@ function Settings() {
           }}
         >
           <Typography variant="h5" gutterBottom>
-            Customization
+            {t("settings.customization.heading")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Unlock new avatar styles and editor themes as you level up.
+            {t("settings.customization.description")}
           </Typography>
           <CosmeticSelector level={level?.level || 1} />
         </Card>
@@ -601,11 +577,10 @@ function Settings() {
           }}
         >
           <Typography variant="h5" gutterBottom>
-            AI Assistant Avatar
+            {t("settings.botCustomizer.heading")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Customize your AI tutor&apos;s appearance. Unlock more options with
-            Bot Whisperer badges.
+            {t("settings.botCustomizer.description")}
           </Typography>
           <BotCustomizer botWhispererTier={botWhispererTier} />
         </Card>

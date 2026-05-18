@@ -36,7 +36,9 @@ import {
   AdminDeleteUserCommand,
   AdminSetUserPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Schema } from "../data/resource";
 
 // Load amplify_outputs.json from the workspace
@@ -345,23 +347,42 @@ console.log("\n📖 Creating curriculum units...");
 // Sample Lexical editor JSON structure
 const japaneseUnitContent = {
   root: {
+    type: "root",
+    version: 1,
+    direction: null,
+    format: "",
+    indent: 0,
     children: [
       {
         type: "heading",
+        version: 1,
         tag: "h1",
-        children: [{ type: "text", text: "Japanese Greetings - Unit 1" }],
+        direction: null,
+        format: "",
+        indent: 0,
+        children: [{ type: "text", text: "Japanese Greetings - Unit 1", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
       },
       {
         type: "paragraph",
+        version: 1,
+        direction: null,
+        format: "",
+        indent: 0,
         children: [
           {
             type: "text",
             text: "Learn basic Japanese greetings for daily conversation.",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
           },
         ],
       },
       {
         type: "quiz",
+        version: 1,
         id: "quiz-1",
         question: "What does こんにちは mean?",
         answer: "Hello (daytime)",
@@ -373,23 +394,42 @@ const japaneseUnitContent = {
 
 const biologyUnitContent = {
   root: {
+    type: "root",
+    version: 1,
+    direction: null,
+    format: "",
+    indent: 0,
     children: [
       {
         type: "heading",
+        version: 1,
         tag: "h1",
-        children: [{ type: "text", text: "Photosynthesis - Biology Unit" }],
+        direction: null,
+        format: "",
+        indent: 0,
+        children: [{ type: "text", text: "Photosynthesis - Biology Unit", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
       },
       {
         type: "paragraph",
+        version: 1,
+        direction: null,
+        format: "",
+        indent: 0,
         children: [
           {
             type: "text",
             text: "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
           },
         ],
       },
       {
         type: "answer",
+        version: 1,
         id: "answer-1",
         prompt: "Explain the equation for photosynthesis",
         expectedAnswer: "6CO2 + 6H2O + light energy → C6H12O6 + 6O2",
@@ -401,18 +441,36 @@ const biologyUnitContent = {
 // AI-graded biology exercise content (uses custom-ai block)
 const biologyAIExerciseContent = {
   root: {
+    type: "root",
+    version: 1,
+    direction: null,
+    format: "",
+    indent: 0,
     children: [
       {
         type: "heading",
+        version: 1,
         tag: "h1",
-        children: [{ type: "text", text: "AI-Graded Biology Exercise" }],
+        direction: null,
+        format: "",
+        indent: 0,
+        children: [{ type: "text", text: "AI-Graded Biology Exercise", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
       },
       {
         type: "paragraph",
+        version: 1,
+        direction: null,
+        format: "",
+        indent: 0,
         children: [
           {
             type: "text",
             text: "Answer the following questions about photosynthesis. Your responses will be graded by AI based on scientific accuracy.",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
           },
         ],
       },
@@ -744,67 +802,271 @@ console.log(`✅ Created ${grades.length} grade submissions`);
 
 // ========================================================================
 // ========================================================================
-// SECTION 9: Create Sample Files
+// SECTION 9: Create Sample Files (all supported document types + images)
 // ========================================================================
-console.log("\n📁 Creating file metadata records...");
+console.log("\n📁 Creating file records and uploading to S3...");
+console.log(
+  "  (EventBridge will auto-trigger imageProcess, documentThumbnail, and documentAnalysis)",
+);
 
-const filesResponse = await Promise.all([
-  client.models.File.create({
-    name: "sample-audio.mp3",
-    description: "Sample audio pronunciation",
-    mimeType: "audio/mpeg",
-    level: "PUBLIC",
-    path: "public/audio/sample-audio.mp3",
-    size: 52480,
-    duration: 3500, // 3.5 seconds
+// Path to the mocks directory containing sample files
+const seedDir = dirname(fileURLToPath(import.meta.url));
+const mocksDir = resolve(seedDir, "../../mocks");
+
+/**
+ * Helper: Create a File record and upload the actual file to S3.
+ * The S3 upload triggers EventBridge rules which invoke the processing Lambdas.
+ */
+async function seedFileWithUpload(opts: {
+  name: string;
+  localPath: string;
+  mimeType: string;
+  description: string;
+  level?: "PUBLIC" | "PRIVATE" | "PROTECTED";
+  duration?: number;
+}) {
+  const {
+    name,
+    localPath,
+    mimeType,
+    description,
+    level = "PROTECTED" as const,
+    duration,
+  } = opts;
+  const s3Path = `protected/${instructor1IdentityId}/files/${name}`;
+
+  // Create File record FIRST (so Lambda can find it when EventBridge triggers)
+  const { data: fileRecord, errors } = await client.models.File.create({
+    name,
+    description,
+    mimeType,
+    level,
+    path: s3Path,
+    size: 0, // Will be updated after upload
+    duration,
     owner: instructor1OwnerSub,
     identityId: instructor1IdentityId,
-  }),
-  client.models.File.create({
+  });
+
+  if (errors || !fileRecord) {
+    console.error(`  ✗ Failed to create File record for ${name}:`, errors);
+    return null;
+  }
+
+  // Upload actual file to S3 (triggers EventBridge → processing Lambdas)
+  try {
+    const fileBuffer = await readFile(resolve(mocksDir, localPath));
+    await uploadData({
+      path: s3Path,
+      data: fileBuffer,
+      options: { contentType: mimeType },
+    }).result;
+
+    // Update size now that we know it
+    await client.models.File.update({
+      id: fileRecord.id,
+      size: fileBuffer.length,
+    });
+
+    console.log(`  ✓ ${name} (${mimeType}) → ${s3Path}`);
+  } catch (uploadErr: any) {
+    console.warn(
+      `  ⚠ Upload failed for ${name}: ${uploadErr.message} (File record created without S3 file)`,
+    );
+  }
+
+  return fileRecord;
+}
+
+// Upload one of every supported document type
+const seedFiles = await Promise.all([
+  // === Images (triggers imageProcess Lambda → WebP variants) ===
+  seedFileWithUpload({
     name: "chloroplast-diagram.jpg",
-    description: "Labeled diagram of chloroplast structure",
+    localPath: "abstract-10055158_640.jpg",
     mimeType: "image/jpeg",
-    level: "PUBLIC",
-    path: "public/images/chloroplast-diagram.jpg",
-    size: 245760,
-    owner: instructor1OwnerSub,
-    identityId: instructor1IdentityId,
+    description: "Labeled diagram of chloroplast structure",
   }),
-  client.models.File.create({
-    name: "student-recording.mp3",
-    description: "Student pronunciation practice",
-    mimeType: "audio/mpeg",
-    level: "PROTECTED",
-    path: "protected/us-east-1:student1-identity-id/recordings/recording-1.mp3",
-    size: 87040,
-    duration: 5200,
-    owner: instructor1OwnerSub,
-    identityId: instructor1IdentityId,
+  seedFileWithUpload({
+    name: "animals-photo.jpg",
+    localPath: "animals-10008941_1280.jpg",
+    mimeType: "image/jpeg",
+    description: "Animals in nature - biology reference photo",
+  }),
+  seedFileWithUpload({
+    name: "pattern-texture.png",
+    localPath: "pattern-9842070_640.png",
+    mimeType: "image/png",
+    description: "Pattern texture for visual examples",
+  }),
+
+  // === PDF (triggers imageProcess Lambda → thumbnail from page 1) ===
+  seedFileWithUpload({
+    name: "japanese-grammar-guide.pdf",
+    localPath: "japanese-grammar-guide.pdf",
+    mimeType: "application/pdf",
+    description: "Complete Japanese grammar reference guide",
+  }),
+  seedFileWithUpload({
+    name: "science-lesson-water-cycle.pdf",
+    localPath: "science-lesson-water-cycle.pdf",
+    mimeType: "application/pdf",
+    description: "Earth science lesson on the water cycle",
+  }),
+
+  // === Word Documents (triggers documentThumbnail Lambda via LibreOffice) ===
+  seedFileWithUpload({
+    name: "biology-cell-structure.docx",
+    localPath: "biology-cell-structure.docx",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    description: "Biology lesson on cell structure and organelles",
+  }),
+  seedFileWithUpload({
+    name: "science-lesson-water-cycle.docx",
+    localPath: "science-lesson-water-cycle.docx",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    description: "Water cycle lesson with diagrams",
+  }),
+
+  // === Plain Text (triggers documentThumbnail + documentAnalysis) ===
+  seedFileWithUpload({
+    name: "french-seasons-vocabulary.txt",
+    localPath: "french-seasons-vocabulary.txt",
+    mimeType: "text/plain",
+    description: "French vocabulary list for seasons and weather",
+  }),
+  seedFileWithUpload({
+    name: "spanish-ar-verbs.txt",
+    localPath: "spanish-ar-verbs.txt",
+    mimeType: "text/plain",
+    description: "Spanish AR verb conjugation reference",
+  }),
+  seedFileWithUpload({
+    name: "philosophy-presocratics.txt",
+    localPath: "philosophy-presocratics.txt",
+    mimeType: "text/plain",
+    description: "Study notes on Pre-Socratic philosophers",
+  }),
+
+  // === Markdown (triggers documentThumbnail + documentAnalysis) ===
+  seedFileWithUpload({
+    name: "japanese-grammar-guide.md",
+    localPath: "japanese-grammar-guide.md",
+    mimeType: "text/markdown",
+    description: "Japanese grammar guide in markdown format",
+  }),
+  seedFileWithUpload({
+    name: "biology-cell-structure.md",
+    localPath: "biology-cell-structure.md",
+    mimeType: "text/markdown",
+    description: "Biology cell structure notes in markdown",
+  }),
+
+  // === CSV (triggers documentThumbnail + documentAnalysis) ===
+  seedFileWithUpload({
+    name: "biology-vocabulary-list.csv",
+    localPath: "biology-vocabulary-list.csv",
+    mimeType: "text/csv",
+    description: "Biology vocabulary terms with definitions",
+  }),
+  seedFileWithUpload({
+    name: "spanish-verbs-vocabulary.csv",
+    localPath: "spanish-verbs-vocabulary.csv",
+    mimeType: "text/csv",
+    description: "Spanish verb vocabulary spreadsheet",
+  }),
+
+  // === RTF (triggers documentThumbnail via LibreOffice) ===
+  seedFileWithUpload({
+    name: "philosophy-presocratics.rtf",
+    localPath: "philosophy-presocratics.rtf",
+    mimeType: "application/rtf",
+    description: "Pre-Socratic philosophers study guide (Rich Text)",
+  }),
+
+  // === EPUB (triggers documentThumbnail + documentAnalysis) ===
+  seedFileWithUpload({
+    name: "water-cycle-guide.epub",
+    localPath: "water-cycle-guide.epub",
+    mimeType: "application/epub+zip",
+    description: "Water Cycle student eBook guide",
+  }),
+
+  // === GIFT format (triggers documentThumbnail + documentAnalysis — edu LMS) ===
+  seedFileWithUpload({
+    name: "spanish-quiz.gift",
+    localPath: "spanish-quiz.gift",
+    mimeType: "text/x-gift",
+    description: "Moodle GIFT format quiz - Spanish AR verb conjugation",
+  }),
+
+  // === QTI format (triggers documentThumbnail + documentAnalysis — edu LMS) ===
+  seedFileWithUpload({
+    name: "biology-cell-quiz.qti",
+    localPath: "biology-cell-quiz.qti",
+    mimeType: "application/x-qti+xml",
+    description: "QTI assessment - Biology cell structure quiz",
+  }),
+
+  // === IMS Common Cartridge (triggers documentThumbnail + documentAnalysis — edu LMS) ===
+  seedFileWithUpload({
+    name: "japanese-grammar-course.imscc",
+    localPath: "japanese-grammar-course.imscc",
+    mimeType: "application/x-imscc+zip",
+    description: "IMS Common Cartridge - Japanese grammar course package",
+  }),
+
+  // === SCORM package (triggers documentThumbnail + documentAnalysis — edu LMS) ===
+  seedFileWithUpload({
+    name: "biology-photosynthesis-scorm.zip",
+    localPath: "biology-photosynthesis-scorm.zip",
+    mimeType: "application/zip",
+    description:
+      "SCORM 1.2 package - Biology photosynthesis interactive lesson",
   }),
 ]);
 
-const files = filesResponse
-  .map((r) => r.data)
-  .filter((f) => f !== null && f !== undefined);
-console.log(`✅ Created ${files.length} file metadata records`);
+const files = seedFiles.filter((f) => f !== null && f !== undefined);
+console.log(`✅ Created ${files.length} file records with S3 uploads`);
 
-// Associate files with units (only if files were created)
-if (files.length >= 2) {
-  await Promise.all([
-    client.models.UnitFile.create({
-      unitID: units[0].id,
-      fileID: files[0]!.id,
-    }),
+// Associate some files with units
+const imageFiles = files.filter((f) => f!.mimeType?.startsWith("image/"));
+const docFiles = files.filter(
+  (f) =>
+    !f!.mimeType?.startsWith("image/") && !f!.mimeType?.startsWith("audio/"),
+);
+
+const unitFileAssociations = [];
+// Link images to biology unit
+if (imageFiles[0] && units[1]) {
+  unitFileAssociations.push(
     client.models.UnitFile.create({
       unitID: units[1].id,
-      fileID: files[1]!.id,
+      fileID: imageFiles[0]!.id,
     }),
-  ]);
+  );
+}
+// Link Japanese grammar docs to Japanese unit
+const jpnFile = files.find((f) => f!.name?.includes("japanese"));
+if (jpnFile && units[0]) {
+  unitFileAssociations.push(
+    client.models.UnitFile.create({ unitID: units[0].id, fileID: jpnFile!.id }),
+  );
+}
+// Link biology docs to biology unit
+const bioFile = files.find((f) => f!.name?.includes("biology-cell"));
+if (bioFile && units[1]) {
+  unitFileAssociations.push(
+    client.models.UnitFile.create({ unitID: units[1].id, fileID: bioFile!.id }),
+  );
+}
 
-  console.log("✅ Created unit-file relationships");
-} else {
+if (unitFileAssociations.length > 0) {
+  await Promise.all(unitFileAssociations);
   console.log(
-    "⚠️ Skipping unit-file relationships (insufficient files created)",
+    `✅ Created ${unitFileAssociations.length} unit-file relationships`,
   );
 }
 // SECTION 10: Create Sample Documents for Analysis
@@ -1805,6 +2067,73 @@ if (guild2) {
 console.log("✅ Created minimal student2 gamification data");
 
 // ========================================================================
+// SECTION: Admin creates global PlatformSettings
+// ========================================================================
+console.log("\n🔐 Signing in as admin to create global PlatformSettings...");
+
+await signOut();
+await signInUser({
+  username: TEST_USERS.admin.username,
+  password: password,
+  signInFlow: "Password",
+});
+
+const adminSession = await fetchAuthSession();
+console.log(`✅ Authenticated as admin (sub: ${adminSession.userSub})`);
+
+// Create the singleton PlatformSettings record with sensible defaults
+const gsResponse = await client.models.PlatformSettings.create({
+  xpMultipliers: JSON.stringify({
+    HOMEWORK_SUBMITTED: 1.0,
+    ALL_BLOCKS_COMPLETED: 1.5,
+    NAILED_IT: 2.0,
+    STREAK_BONUS: 1.0,
+    PRACTICE_SESSION: 1.0,
+  }),
+  dailyCap: 500,
+  weeklyCap: 2000,
+  levelThresholds: [
+    { level: 1, xpRequired: 0, title: "Beginner" },
+    { level: 2, xpRequired: 150, title: "Explorer" },
+    { level: 3, xpRequired: 400, title: "Apprentice" },
+    { level: 4, xpRequired: 800, title: "Scholar" },
+    { level: 5, xpRequired: 1500, title: "Expert" },
+    { level: 6, xpRequired: 3000, title: "Master" },
+    { level: 7, xpRequired: 5000, title: "Grandmaster" },
+  ],
+  badgesEnabled: true,
+  antiBadgesEnabled: false,
+  streakFreezesAllowed: 2,
+  leaderboardEnabled: true,
+  leaderboardAnonymous: false,
+  avatarUnlockConfig: JSON.stringify({
+    unlocks: [
+      { minLevel: 1, tier: "thumbs" },
+      { minLevel: 2, tier: "initials" },
+      { minLevel: 3, tier: "lorelei" },
+      { minLevel: 4, tier: "notionists" },
+      { minLevel: 5, tier: "openPeeps" },
+      { minLevel: 6, tier: "adventurer" },
+      { minLevel: 7, tier: "personas" },
+    ],
+    glowOnLevelUp: true,
+  }),
+  autoAnalyzeDocuments: true,
+  documentAnalysisModel: "gpt-4o",
+});
+
+if (!gsResponse.data) {
+  console.error(
+    "  ✗ PlatformSettings creation failed:",
+    JSON.stringify(gsResponse.errors, null, 2),
+  );
+} else {
+  console.log(`✅ Created global PlatformSettings (id: ${gsResponse.data.id})`);
+}
+
+await signOut();
+
+// ========================================================================
 // SUMMARY
 // ========================================================================
 console.log("\n✨ Seed data generation complete!");
@@ -1834,6 +2163,7 @@ console.log("   • 1 instructor insight");
 console.log("   • 1 homework room + 3 workbook comments");
 console.log("   • 1 AI chat session + 2 feedback records");
 console.log("   • 1 student memory + 1 unit memory");
+console.log("   • 1 global PlatformSettings (admin-owned)");
 console.log("\n🔐 Test Users Created:");
 console.log("   Admin: admin@example.com");
 console.log("   Instructors: instructor1@example.com, instructor2@example.com");
@@ -1844,6 +2174,88 @@ console.log("   2. Start development: npm run dev");
 console.log("   3. Sign in with any test user to begin testing");
 console.log("   4. student1 has rich data (badges, streaks, XP, guild leader)");
 console.log("   5. student2 has minimal data (test empty/sparse UI states)\n");
+
+// ========================================================================
+// EXPORT: Write seed IDs to a fixture file for integration tests
+// ========================================================================
+console.log("\n📝 Writing seed data IDs to test fixture...");
+
+const seedFixture = {
+  generatedAt: new Date().toISOString(),
+  users: {
+    admin: {
+      username: TEST_USERS.admin.username,
+      sub: adminSession.userSub,
+      group: TEST_USERS.admin.group,
+    },
+    instructor1: {
+      username: TEST_USERS.instructor1.username,
+      sub: instructor1OwnerSub,
+      identityId: instructor1IdentityId,
+      group: TEST_USERS.instructor1.group,
+    },
+    instructor2: {
+      username: TEST_USERS.instructor2.username,
+      group: TEST_USERS.instructor2.group,
+    },
+    student1: {
+      username: TEST_USERS.student1.username,
+      sub: student1OwnerSub,
+      identityId: student1IdentityId,
+      group: TEST_USERS.student1.group,
+    },
+    student2: {
+      username: TEST_USERS.student2.username,
+      group: TEST_USERS.student2.group,
+    },
+  },
+  words: words.map((w) => ({
+    id: w.id,
+    phrase: w.phrase,
+    pronunciation: w.pronunciation,
+    definition: w.definition,
+  })),
+  questions: questions.map((q) => ({
+    id: q.id,
+    prompt: q.prompt,
+    answer: q.answer,
+  })),
+  units: units.map((u) => ({ id: u.id, name: u.name, status: u.status })),
+  sections: sections.map((s) => ({ id: s.id, name: s.name, code: s.code })),
+  assignments: assignments.map((a) => ({
+    id: a.id,
+    sectionID: a.sectionID,
+    unitID: a.unitID,
+  })),
+  grades: grades.map((g) => ({
+    id: g.id,
+    unitID: g.unitID,
+    sectionID: g.sectionID,
+    complete: g.complete,
+  })),
+  files: files.map((f) => ({
+    id: f!.id,
+    name: f!.name,
+    path: f!.path,
+    mimeType: f!.mimeType,
+  })),
+  documents: documents.map((d) => ({
+    id: d!.id,
+    filename: d!.filename,
+    s3Key: d!.s3Key,
+    status: d!.status,
+  })),
+  guilds: guilds.map((g) => ({ id: g.id, name: g.name })),
+  homeworkRoom: homeworkRoom
+    ? { id: homeworkRoom.id, code: homeworkRoom.code }
+    : null,
+  platformSettings: gsResponse.data ? { id: gsResponse.data.id } : null,
+};
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const fixturePath = resolve(__dirname, "../../test/integration/seed-data.json");
+await writeFile(fixturePath, JSON.stringify(seedFixture, null, 2));
+console.log(`✅ Seed fixture written to: ${fixturePath}`);
 
 // Sign out
 console.log("\n🔓 Signing out...");

@@ -15,14 +15,14 @@
     "generateTTS": "Generate TTS",
     "importFailed": "Failed to import JSON file",
     "importJSON": "Import JSON",
-    "lineNumber": "Line #{{number}} - {{speaker}}",
+    "lineNumber": "Line #{number} - {speaker}",
     "lockedTrack": "Locked track",
     "micAccessFailed": "Failed to access microphone",
     "name": "Name",
     "noMissingAudio": "No missing audio to generate",
     "noTextToGenerate": "No text to generate",
     "play": "Play",
-    "processing": "Processing {{count}} lines...",
+    "processing": "Processing {count} lines...",
     "record": "Record",
     "recordingSaveFailed": "Failed to save recording",
     "save": "Save",
@@ -32,7 +32,7 @@
     "speakerNotFound": "Speaker not found",
     "speakers": "Speakers",
     "stop": "Stop",
-    "takeNumber": "Take {{number}} ({{type}})",
+    "takeNumber": "Take {number} ({type})",
     "takes": "Takes",
     "text": "Text",
     "timeline": "Timeline",
@@ -73,28 +73,28 @@
   "sketchPad": {
     "cancelSubmission": "Cancel Submission",
     "hoverToStartDrawing": "Hover to start drawing",
-    "submittingInSeconds": "Submitting drawing for grading in {{countdown}} seconds..."
+    "submittingInSeconds": "Submitting drawing for grading in {countdown} seconds..."
   },
   "autoSubmit": {
     "cancelSubmission": "Cancel",
-    "submittingInSeconds": "Submitting answer in {{countdown}} seconds..."
+    "submittingInSeconds": "Submitting answer in {countdown} seconds..."
   },
   "unitEmbedding": {
     "allSectionsComplete": "All sections complete!",
     "cached": "Cached",
-    "completedCount": "{{completed}}/{{total}} completed",
+    "completedCount": "{completed}/{total} completed",
     "generateEmbeddings": "Generate Embeddings",
     "generating": "Generating...",
     "publishSuccess": "Unit published with embeddings generated!",
     "publishUnit": "Publish Unit",
     "publishing": "Publishing...",
-    "wordsEmbedded": "{{count}} words embedded"
+    "wordsEmbedded": "{count} words embedded"
   },
   "autoEmbedPlugin": {
     "dismiss": "Dismiss",
     "embed": "Embed",
-    "embedOption": "Embed {{contentName}}",
-    "embedTitle": "Embed {{contentName}}",
+    "embedOption": "Embed {contentName}",
+    "embedTitle": "Embed {contentName}",
     "youtubeVideo": "Youtube Video"
   },
   "unitEmbeddingComponents": {
@@ -107,7 +107,7 @@
     "successConfirmation": "Embeddings generated successfully"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "Embedding generated: {{count}} words processed"
+    "embeddingGenerated": "Embedding generated: {count} words processed"
   },
   "imagesPlugin": {
     "altText": "Alt Text",
@@ -137,7 +137,7 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio not available",
     "loadingAudio": "Loading audio...",
-    "wordNotFound": "Word not found: {{wordID}}"
+    "wordNotFound": "Word not found: {wordID}"
   },
   "vocabularyReview": {
     "alertMessage": "Review vocabulary before continuing",
@@ -178,7 +178,7 @@
     "titleHeader": "Title"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "Loading PDF: {{filename}}",
+    "loadingPdf": "Loading PDF: {filename}",
     "noPdfToDisplay": "No PDF to display"
   },
   "metadataEditor": {
@@ -212,11 +212,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "Apply Mask & Regenerate",
-    "brushSize": "Brush Size: {{size}}",
+    "brushSize": "Brush Size: {size}",
     "cancel": "Cancel",
     "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
     "save": "Save",
-    "zoomInfo": "Zoom: {{level}}% | Hold Shift to pan"
+    "zoomInfo": "Zoom: {level}% | Hold Shift to pan"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "Cancel",

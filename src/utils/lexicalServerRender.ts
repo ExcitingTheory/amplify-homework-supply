@@ -23,7 +23,7 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 
 // Import custom nodes (only the node class definitions, no React components)
 import { YouTubeNode } from "@/components/Editor3/plugins/YouTubePlugin";
-import { WordBlockNode } from "@/components/Editor3/plugins/WordBlockPlugin";
+import { WordBlockNode } from "@/components/Editor3/nodes/WordBlockNode";
 import { MeaningAssociationNode } from "@/components/Editor3/plugins/MeaningAssociationPlugin";
 import { QuizNode } from "@/components/Editor3/plugins/QuizPlugin";
 import { PlaylistNode } from "@/components/Editor3/plugins/PlaylistPlugin";

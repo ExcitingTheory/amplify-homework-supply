@@ -67,6 +67,7 @@ export function detectMimeType(file) {
     imscc: "application/x-imscc+zip",
     epub: "application/epub+zip",
     gift: "text/x-gift",
+    qti: "application/x-qti+xml",
     odt: "application/vnd.oasis.opendocument.text",
     ods: "application/vnd.oasis.opendocument.spreadsheet",
     odp: "application/vnd.oasis.opendocument.presentation",
@@ -111,6 +112,56 @@ async function triggerEmbeddingGeneration(fileID) {
     }
   } catch (error) {
     console.error("[Embedding] Error starting generation:", error);
+    throw error;
+  }
+}
+
+/**
+ * Trigger image/thumbnail processing for a file via the processFileImage mutation.
+ * The Lambda generates WebP thumbnails and size variants, then updates File.thumbnail.
+ * @param {string} fileID - The ID of the file to process
+ */
+async function triggerImageProcessing(fileID) {
+  try {
+    const client = getAmplifyClient();
+    const { data, errors } = await client.mutations.processFileImage({
+      fileID,
+    });
+
+    if (errors?.length) {
+      console.warn("[ImageProcess] Mutation errors:", errors);
+    } else {
+      console.log("[ImageProcess] Processing started for file:", fileID, data);
+    }
+  } catch (error) {
+    console.error("[ImageProcess] Error triggering processing:", error);
+    throw error;
+  }
+}
+
+/**
+ * Internal helper: Trigger document thumbnail generation via Lambda (LibreOffice pipeline).
+ * Converts office documents to a first-page WebP thumbnail.
+ * @param {string} fileID - The ID of the file to process
+ */
+async function triggerDocumentThumbnail(fileID) {
+  try {
+    const client = getAmplifyClient();
+    const { data, errors } = await client.mutations.processDocumentThumbnail({
+      fileID,
+    });
+
+    if (errors?.length) {
+      console.warn("[DocumentThumbnail] Mutation errors:", errors);
+    } else {
+      console.log(
+        "[DocumentThumbnail] Processing started for file:",
+        fileID,
+        data,
+      );
+    }
+  } catch (error) {
+    console.error("[DocumentThumbnail] Error triggering processing:", error);
     throw error;
   }
 }
@@ -283,6 +334,11 @@ export async function uploadFile(
     },
   );
 
+  // Image/thumbnail processing is handled automatically via EventBridge.
+  // S3 Object Created events route to imageProcess (images/PDFs) and
+  // documentThumbnail (office docs) Lambdas based on file extension.
+  // No explicit mutation call needed here — avoids duplicate processing.
+
   // add metadata to fileModel different for image/audio/pdf
 
   // If unitId provided, link document to unit using many-to-many relationship
@@ -431,16 +487,8 @@ export async function uploadAndAnalyzePDF(
     onProgress,
   );
 
-  // Auto-analyze if requested
-  let analysisResult = null;
-  if (autoAnalyze && documentModel) {
-    try {
-      analysisResult = await analyzePDF(fileModel.id);
-    } catch (error) {
-      console.error("Auto-analysis failed:", error);
-      // Don't throw - file is uploaded successfully
-    }
-  }
+  // Document analysis is now auto-triggered via EventBridge on S3 upload.
+  // The analyzeDocument mutation remains available as a manual retry via analyzePDF().
 
-  return { fileModel, documentModel, analysisResult };
+  return { fileModel, documentModel, analysisResult: null };
 }

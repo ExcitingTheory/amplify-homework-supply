@@ -39,7 +39,7 @@ export async function joinSection(code: string): Promise<JoinSectionResult> {
 
   try {
     const { data, errors } = await (client as any).mutations.addSelfToSection({
-      sectionCode: code.trim(),
+      code: code.trim(),
     });
 
     if (errors?.length) {
@@ -73,10 +73,12 @@ export interface CreateSectionResult {
 /**
  * Create a new section with a generated join code.
  * Instructor-only operation — creates the Cognito group and section record.
+ * Optionally copies gamification settings from another section.
  */
 export async function createSection(
   name: string,
   description?: string,
+  copySettingsFromSectionId?: string,
 ): Promise<CreateSectionResult> {
   if (!name || name.trim().length === 0) {
     return { success: false, error: "Section name is required" };
@@ -99,9 +101,27 @@ export async function createSection(
     }
 
     const result = typeof data === "string" ? JSON.parse(data) : data;
+    const sectionId = result?.id || result?.sectionId;
+
+    // Copy gamification settings from source section if specified
+    if (copySettingsFromSectionId && sectionId) {
+      try {
+        await (client as any).mutations.copyGamificationSettings({
+          sourceSectionId: copySettingsFromSectionId,
+          targetSectionId: sectionId,
+        });
+      } catch (copyErr: any) {
+        console.warn(
+          "[section action] Failed to copy gamification settings:",
+          copyErr?.message,
+        );
+        // Don't fail section creation if settings copy fails
+      }
+    }
+
     return {
       success: true,
-      sectionId: result?.id || result?.sectionId,
+      sectionId,
       code: result?.code,
     };
   } catch (err: any) {
@@ -110,6 +130,47 @@ export async function createSection(
       success: false,
       error: err?.message || "Failed to create section",
     };
+  }
+}
+
+// ============================================================================
+// Copy Gamification Settings Between Sections
+// ============================================================================
+
+export interface CopySettingsResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Copy gamification settings (leveling curve, XP multipliers, badge configs)
+ * from one section to another. Overwrites existing settings on the target.
+ */
+export async function copyGamificationSettings(
+  sourceSectionId: string,
+  targetSectionId: string,
+): Promise<CopySettingsResult> {
+  if (!sourceSectionId || !targetSectionId) {
+    return { success: false, error: "Both source and target section IDs are required" };
+  }
+
+  const client = getServerClient();
+
+  try {
+    const { data, errors } = await (client as any).mutations.copyGamificationSettings({
+      sourceSectionId,
+      targetSectionId,
+    });
+
+    if (errors?.length) {
+      const errorMsg = errors[0]?.message || "Failed to copy settings";
+      return { success: false, error: errorMsg };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("[section action] copyGamificationSettings error:", err);
+    return { success: false, error: err?.message || "Failed to copy settings" };
   }
 }
 

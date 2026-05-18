@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -24,43 +24,37 @@ import {
   SmartToy,
   CheckCircle,
 } from '@mui/icons-material';
+import {
+  storageManagementReducer,
+  initialStorageManagementState,
+} from './storageManagementReducer';
 
 /**
  * Storage management panel for the Settings page.
  * Shows offline storage usage, cached assignments, and AI model controls.
  */
 export default function StorageManagement() {
-  const [storageBudget, setStorageBudget] = useState({ used: 0, quota: 0, percentUsed: 0 });
-  const [models, setModels] = useState<Array<{
-    id: string;
-    name: string;
-    sizeBytes: number;
-    backend: string;
-    ready: boolean;
-  }>>([]);
-  const [prefetchStatuses, setPrefetchStatuses] = useState<Array<{
-    unitId: string;
-    status: string;
-    progress: number;
-    lastUpdated: number;
-  }>>([]);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [state, dispatch] = useReducer(storageManagementReducer, initialStorageManagementState);
+  const { storageBudget, models, prefetchStatuses, downloadStatus, downloadProgress } = state;
+  const downloading = downloadStatus === 'downloading';
 
   const refresh = useCallback(async () => {
     try {
       const { getStorageBudget, getAvailableModels } = await import('../offline/ModelManager');
       const { getAllPrefetchStatuses } = await import('../offline/OfflineDataStore');
 
-      const [budget, modelList, statuses] = await Promise.all([
+      const results = await Promise.allSettled([
         getStorageBudget(),
         getAvailableModels(),
         getAllPrefetchStatuses(),
       ]);
 
-      setStorageBudget(budget);
-      setModels(modelList);
-      setPrefetchStatuses(statuses);
+      dispatch({
+        type: 'SET_DATA',
+        storageBudget: results[0].status === 'fulfilled' ? results[0].value : undefined,
+        models: results[1].status === 'fulfilled' ? results[1].value : undefined,
+        prefetchStatuses: results[2].status === 'fulfilled' ? results[2].value : undefined,
+      });
     } catch {
       // Modules not loaded
     }
@@ -71,16 +65,15 @@ export default function StorageManagement() {
   }, [refresh]);
 
   const handleDownloadModel = useCallback(async () => {
-    setDownloading(true);
-    setDownloadProgress(0);
+    dispatch({ type: 'DOWNLOAD_START' });
     try {
       const { downloadWebLLMModel } = await import('../offline/ModelManager');
-      await downloadWebLLMModel((p) => setDownloadProgress(p));
+      await downloadWebLLMModel((p: number) => dispatch({ type: 'DOWNLOAD_PROGRESS', progress: p }));
+      dispatch({ type: 'DOWNLOAD_COMPLETE' });
       await refresh();
     } catch (err) {
       console.error('Model download failed:', err);
-    } finally {
-      setDownloading(false);
+      dispatch({ type: 'DOWNLOAD_ERROR' });
     }
   }, [refresh]);
 

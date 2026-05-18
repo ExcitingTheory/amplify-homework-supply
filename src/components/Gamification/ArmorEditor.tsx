@@ -545,7 +545,7 @@ export function ArmorEditor({
   onClose,
   autoSaveDelay = 1500,
 }: ArmorEditorProps) {
-  const t = useTranslations('common')
+  const t = useTranslations('components')
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(() => ({
     config: initialConfig ? { ...DEFAULT_CONFIG, ...initialConfig } : DEFAULT_CONFIG,

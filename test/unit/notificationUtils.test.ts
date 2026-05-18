@@ -12,16 +12,20 @@ function createMockGqlClient(responses: Record<string, any> = {}) {
         return Promise.resolve(
           responses.create ?? {
             data: {
-              createNotification: { id: "n1", recipientId: "u1", type: "BADGE_EARNED" },
+              createNotification: {
+                id: "n1",
+                recipientId: "u1",
+                type: "BADGE_EARNED",
+              },
             },
           },
         );
       }
-      if (query.includes("ListNotificationsByRecipient")) {
+      if (query.includes("ListNotificationByRecipientId")) {
         return Promise.resolve(
           responses.list ?? {
             data: {
-              listNotificationsByRecipient: { items: [], nextToken: null },
+              listNotificationByRecipientId: { items: [], nextToken: null },
             },
           },
         );
@@ -99,7 +103,7 @@ describe("notificationUtils (Lambda shared)", () => {
       const client = createMockGqlClient({
         list: {
           data: {
-            listNotificationsByRecipient: { items: [], nextToken: null },
+            listNotificationByRecipientId: { items: [], nextToken: null },
           },
         },
       });
@@ -120,9 +124,14 @@ describe("notificationUtils (Lambda shared)", () => {
       const client = createMockGqlClient({
         list: {
           data: {
-            listNotificationsByRecipient: {
+            listNotificationByRecipientId: {
               items: [
-                { id: "existing", recipientId: "user-1", type: "ASSIGNMENT_DUE_SOON", referenceId: "assign-1" },
+                {
+                  id: "existing",
+                  recipientId: "user-1",
+                  type: "ASSIGNMENT_DUE_SOON",
+                  referenceId: "assign-1",
+                },
               ],
               nextToken: null,
             },
@@ -162,10 +171,14 @@ describe("notificationUtils (Lambda shared)", () => {
       const client = createMockGqlClient();
       const recipientIds = ["u1", "u2", "u3"];
 
-      const result = await createNotificationsForRecipients(client, recipientIds, {
-        type: "SYSTEM_ANNOUNCEMENT",
-        title: "Welcome!",
-      });
+      const result = await createNotificationsForRecipients(
+        client,
+        recipientIds,
+        {
+          type: "SYSTEM_ANNOUNCEMENT",
+          title: "Welcome!",
+        },
+      );
 
       expect(result).toEqual({ created: 3, failed: 0 });
       expect(client.graphql).toHaveBeenCalledTimes(3);
@@ -189,13 +202,19 @@ describe("notificationUtils (Lambda shared)", () => {
       client.graphql.mockImplementation(() => {
         callCount++;
         if (callCount === 2) return Promise.reject(new Error("fail"));
-        return Promise.resolve({ data: { createNotification: { id: `n${callCount}` } } });
+        return Promise.resolve({
+          data: { createNotification: { id: `n${callCount}` } },
+        });
       });
 
-      const result = await createNotificationsForRecipients(client, ["u1", "u2", "u3"], {
-        type: "BADGE_EARNED",
-        title: "Badge!",
-      });
+      const result = await createNotificationsForRecipients(
+        client,
+        ["u1", "u2", "u3"],
+        {
+          type: "BADGE_EARNED",
+          title: "Badge!",
+        },
+      );
 
       // createNotification catches internally, so all resolve (no failures at this level)
       // The function wraps createNotification which catches, so all are "fulfilled"

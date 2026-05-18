@@ -29,7 +29,6 @@ async function getOpenAI(): Promise<any> {
       "[SuggestBlocks] OpenAI API key loaded:",
       apiKey.substring(0, 7) + "..." + apiKey.substring(apiKey.length - 4),
     );
-    const { createOpenAI } = await import("@ai-sdk/openai");
     openaiInstance = createOpenAI({ apiKey });
   }
   return openaiInstance;
@@ -47,6 +46,8 @@ export const handler = awslambda.streamifyResponse(
     responseStream: awslambda.HttpResponseStream,
     _context: any,
   ) => {
+    // Prevent Lambda from waiting for empty event loop (OpenAI SDK keep-alive connections)
+    _context.callbackWaitsForEmptyEventLoop = false;
     let streamStarted = false;
     try {
       const body = event.body ? JSON.parse(event.body) : {};

@@ -141,8 +141,8 @@ describe('QuestionBlockRo (QuizComponent)', () => {
             attemptedAnswers: { 0: 'Paris' },
             correctAnswers: { 0: 'Paris' },
             percentComplete: 100,
-        };
-      };
+          },
+        },
       });
 
       const checkboxes = screen.getAllByRole('checkbox');
@@ -162,8 +162,8 @@ describe('QuestionBlockRo (QuizComponent)', () => {
             attemptedAnswers: { 0: 'Paris' },
             correctAnswers: { 0: 'Paris' },
             percentComplete: 100,
-        };
-      };
+          },
+        },
       });
 
       expect(screen.getByText('Score: 75%')).toBeDefined();
@@ -195,7 +195,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
         saveGrade,
         gradeData: {
           'quiz-1': { accuracy: 50, complete: false, attemptedAnswers: {}, correctAnswers: {}, percentComplete: 0 },
-      };
+        },
       });
       expect(screen.getByText('Score: 50%')).toBeDefined();
     });

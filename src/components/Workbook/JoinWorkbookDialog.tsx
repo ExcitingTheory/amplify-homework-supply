@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview JoinWorkbookDialog — Dialog for instructors to join a student's
  * workbook session by entering the student's Grade ID or workbook link.

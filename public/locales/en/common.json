@@ -62,6 +62,7 @@
     }
   },
   "navigation": {
+    "drafts": "Drafts",
     "gamification": "Gamification",
     "grades": "Grades",
     "guilds": "Guilds",
@@ -73,7 +74,9 @@
     "joinWorkbook": "Join Workbook Session",
     "joinWorkbookDesc": "Enter a workbook link or ID",
     "leaderboard": "Leaderboard",
+    "notifications": "Notifications",
     "profile": "Profile",
+    "published": "Published",
     "sections": "Sections",
     "settings": "Settings",
     "skills": "Skill Tree",
@@ -81,7 +84,7 @@
     "workbook": "Workbook"
   },
   "quizComponent": {
-    "grade": "Grade: {{grade}}"
+    "grade": "Grade: {grade}"
   },
   "status": {
     "complete": "Complete",
@@ -100,5 +103,12 @@
     "created": "Created",
     "due": "Due",
     "updated": "Updated"
+  },
+  "timer": {
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "increase": "Increase selected time segment",
+    "decrease": "Decrease selected time segment"
   }
 }

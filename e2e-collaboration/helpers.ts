@@ -113,6 +113,9 @@ export async function loginOnPage(
 
   // Wait for auth to complete — #user-button in MainToolbar confirms login
   await page.waitForSelector("#user-button", { timeout: 30_000 });
+
+  // Brief wait to ensure Amplify has flushed tokens to storage
+  await page.waitForTimeout(500);
 }
 
 // ---------------------------------------------------------------------------
@@ -125,6 +128,10 @@ export async function loginOnPage(
 export async function goToUnits(page: Page): Promise<void> {
   await page.goto("/units");
   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+  // Wait for React hydration to complete before interacting
+  await page
+    .waitForLoadState("networkidle", { timeout: 10_000 })
+    .catch(() => {});
 }
 
 /**
@@ -135,6 +142,10 @@ export async function goToSections(page: Page): Promise<void> {
   await page.waitForSelector('[data-tour="sections-page"]', {
     timeout: 15_000,
   });
+  // Wait for React hydration to complete before interacting
+  await page
+    .waitForLoadState("networkidle", { timeout: 10_000 })
+    .catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -174,10 +185,7 @@ export async function createUnit(page: Page, name?: string): Promise<string> {
     if (await titleEl.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await titleEl.click();
       await page.waitForTimeout(500);
-      const nameInput = page
-        .locator("input")
-        .filter({ has: page.locator(":visible") })
-        .first();
+      const nameInput = page.locator("input:visible").first();
       await nameInput.clear();
       await nameInput.fill(name);
       await nameInput.blur();
@@ -227,11 +235,14 @@ export async function saveUnit(page: Page): Promise<void> {
 export async function addQuizBlock(page: Page): Promise<void> {
   // Open the Insert dropdown menu
   await page.locator('button[aria-controls="insert-node-menu"]').click();
-  await page.waitForSelector("#insert-node-menu", { timeout: 5_000 });
+  // MUI Menu renders as a Portal with role="menu" (no id attribute)
+  await page
+    .locator('ul[role="menu"]')
+    .waitFor({ state: "visible", timeout: 5_000 });
 
   // Click the Multiple Choice Quiz menu item (match by text since label is translated)
   const quizItem = page
-    .locator("#insert-node-menu li")
+    .locator('ul[role="menu"] li')
     .filter({ hasText: /quiz|multiple choice/i });
   await quizItem.click();
   await page.waitForTimeout(1000);
@@ -264,24 +275,33 @@ export async function createSection(
 
   await page.locator('[data-tour="create-section-button"]').click();
   await page.waitForSelector('[data-tour="section-form"]', { timeout: 10_000 });
+  // Brief pause to ensure dialog event handlers are attached after hydration
+  await page.waitForTimeout(500);
 
   // Fill the section form
   await page
     .locator('[data-tour="section-form"] input[name="name"]')
     .fill(name);
-  if (description) {
-    await page
-      .locator('[data-tour="section-form"] textarea[name="description"]')
-      .fill(description);
-  }
+  await page
+    .locator('[data-tour="section-form"] textarea[name="description"]')
+    .fill(description || "Playwright test section");
 
   // Submit the form
-  await page
+  const createBtn = page
     .locator('[data-tour="section-form"]')
-    .getByRole("button", { name: /create/i })
-    .click();
+    .getByRole("button", { name: /create/i });
+  await createBtn.click();
 
-  // Wait for section to appear
+  // If the dialog is still open after 5s, retry (hydration timing)
+  const dialogStillOpen = await page
+    .locator('[data-tour="section-form"]')
+    .isVisible({ timeout: 5_000 })
+    .catch(() => false);
+  if (dialogStillOpen) {
+    await createBtn.click();
+  }
+
+  // Wait for section to appear (mutation + subscription delivery)
   await expect(page.getByText(name)).toBeVisible({ timeout: 30_000 });
 
   // Extract join code from the section card's join-code chip
@@ -342,7 +362,7 @@ export async function joinSection(page: Page, joinCode: string): Promise<void> {
  * - [data-tour="assignment-settings"]     — AssignmentConfiguration.jsx:227
  * - [data-tour="due-date-picker"] input   — AssignmentConfiguration.jsx:246
  * - [data-tour="unit-selector"]           — AssignmentConfiguration.jsx:263
- * - [data-tour="create-assignment-button"] — SectionAssigner.jsx:211
+ * Note: Assignment auto-saves when both due date and section are set (no submit button).
  */
 export async function assignUnitToSection(
   page: Page,
@@ -369,15 +389,21 @@ export async function assignUnitToSection(
   await page
     .locator('[role="option"]')
     .filter({ hasText: sectionName })
+    .first()
     .scrollIntoViewIfNeeded();
   await page
     .locator('[role="option"]')
     .filter({ hasText: sectionName })
+    .first()
     .click();
-  await page.waitForTimeout(500);
 
-  await page.locator('[data-tour="create-assignment-button"]').click();
-  await page.waitForTimeout(3000);
+  // Assignment auto-saves via useEffect when both due date and section are set.
+  // Wait for the assignment to appear in the list below the form.
+  await page
+    .locator('[data-tour="assignment-settings"]')
+    .locator("li")
+    .filter({ hasText: sectionName })
+    .waitFor({ timeout: 15_000 });
 }
 
 // ---------------------------------------------------------------------------

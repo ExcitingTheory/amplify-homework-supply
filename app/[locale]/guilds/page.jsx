@@ -18,6 +18,7 @@ import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapp
 import AuthContext from "@/context/authContext";
 import SectionContext from "@/context/sectionContext";
 import { SectionProvider } from "@/context/sectionContext";
+import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { getCurrentUser } from "aws-amplify/auth";
 import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
@@ -81,33 +82,6 @@ function GuildsPage() {
 
   return (
     <>
-      <AppBar
-        position="static"
-        color="inherit"
-        sx={{ transition: "all 0.3s ease" }}
-      >
-        <MainToolbar>
-          <Box
-            sx={{
-              flexGrow: 1,
-              margin: isScrolled ? "0.25rem 1rem" : "1rem",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <Typography
-              variant={isScrolled ? "body1" : "h6"}
-              component="div"
-              sx={{
-                flexGrow: 1,
-                transition: "all 0.3s ease",
-                fontWeight: isScrolled ? 500 : 400,
-              }}
-            >
-              {t("guilds.title", "Guilds")}
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
       <Box
         sx={{
           padding: "1rem",
@@ -190,6 +164,7 @@ export default function WrappedPage() {
         <GamificationProviderWrapper>
           <GuildsPage />
         </GamificationProviderWrapper>
+        <CollaborativeChatWrapper roomType="guild" />
       </SectionProvider>
     </MyAuth>
   );

@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview Authenticator - AWS Amplify authentication component wrapper
  *

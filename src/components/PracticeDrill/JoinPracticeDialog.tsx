@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview JoinPracticeDialog — Small dialog for joining a collaborative
  * practice session by room code. Shows a text field, join button, and

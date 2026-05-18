@@ -1,6 +1,4 @@
-import { createServerRunner } from "@aws-amplify/adapter-nextjs";
-import outputs from "@/../amplify_outputs.json";
+import { runWithAmplifyServerContext } from "./amplifyServerChunked";
 
-export const { runWithAmplifyServerContext } = createServerRunner({
-  config: outputs,
-});
+// Re-export from the chunked implementation
+export { runWithAmplifyServerContext };

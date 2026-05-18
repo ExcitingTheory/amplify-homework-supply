@@ -127,8 +127,12 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
           }
         });
 
-        const results = await Promise.all(urlPromises);
-        const urlMap = Object.fromEntries(results);
+        const results = await Promise.allSettled(urlPromises);
+        const urlMap = Object.fromEntries(
+          results
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value)
+        );
         setUrls(urlMap);
 
         console.log('[useStudentSubmissions] Fetched URLs:', urlMap);

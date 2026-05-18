@@ -114,7 +114,9 @@ const DictionaryProvider = ({ children }) => {
         }
       },
     );
-    const _filteredWords = await Promise.all(_processingQueue);
+    const _filteredWords = (await Promise.allSettled(_processingQueue))
+      .filter((r) => r.status === "fulfilled")
+      .map((r) => r.value);
 
     if (Object.keys(_filteredWords).length === 0) {
       dispatch({ type: actionTypes.FILTER_COMPLETE, payload: state.words });
@@ -350,8 +352,12 @@ const DictionaryProvider = ({ children }) => {
     const previousVersion = wordVersionMapRef.current[id] || currentVersion;
     wordVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { wordVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { wordVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        wordVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        wordVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 
@@ -359,8 +365,12 @@ const DictionaryProvider = ({ children }) => {
     const previousVersion = questionVersionMapRef.current[id] || currentVersion;
     questionVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { questionVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { questionVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        questionVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        questionVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 

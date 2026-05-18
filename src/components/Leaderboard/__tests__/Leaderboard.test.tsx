@@ -85,7 +85,7 @@ describe('CompletionGrid', () => {
         currentStudentId="s1"
       />,
     )
-    expect(screen.getByText('Maria Garcia (You)')).toBeDefined()
+    expect(screen.getByText('Maria Garcia')).toBeDefined()
     expect(screen.getByText('James Kim')).toBeDefined()
   })
 
@@ -110,9 +110,9 @@ describe('CompletionGrid', () => {
         currentStudentId="s1"
       />,
     )
-    const allCells = screen.getAllByText('✅')
-    expect(allCells.length).toBe(3) // 2 for Maria + 1 for James
-    expect(screen.getByText('⏳')).toBeDefined()
-    expect(screen.getAllByText('⬜').length).toBe(2) // James hw2 + hw3
+    const completedChips = screen.getAllByText('Completed')
+    expect(completedChips.length).toBe(3) // 2 for Maria + 1 for James
+    expect(screen.getByText('In Progress')).toBeDefined()
+    expect(screen.getAllByText('Not Started').length).toBe(2) // James hw2 + hw3
   })
 })

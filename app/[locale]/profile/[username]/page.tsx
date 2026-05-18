@@ -1,15 +1,13 @@
 import { getServerClient } from "@/utils/amplifyServerClient";
-import { Box, Card, Typography, AppBar } from "@mui/material";
+import { Box, Card, Typography } from "@mui/material";
 import { getTranslations } from "next-intl/server";
-import MainToolbar from "@/components/MainToolbar";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { StreakCalendar } from "@/components/Gamification/StreakCalendar";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { StreakShield } from "@/components/Gamification/StreakShield";
-import { DiceBearAvatar } from "@/components/Gamification/DiceBearAvatar";
-import { NailedItSection, AvatarSection } from "./ProfileClientSections";
+import { NailedItSection, AvatarSection, UnlockRoadmap } from "./ProfileClientSections";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -30,7 +28,7 @@ export default async function ProfilePage({ params }: Props) {
   let displayName = routeUsername;
 
   try {
-    const client = getServerClient();
+    const client = getServerClient() as any;
 
     // Fetch the StudentProfile for this user
     const { data: profiles } = await client.models.StudentProfile.list({
@@ -56,10 +54,30 @@ export default async function ProfilePage({ params }: Props) {
       // Progress modules
       progressModules = (profile.moduleProgress || []).map((p: any) => ({
         moduleId: p.moduleId,
-        moduleName: p.moduleId,
+        moduleName: p.moduleId, // placeholder — resolved below
         completionPercent: p.completionPercent || 0,
         totalWorkbooks: p.totalWorkbooks || 0,
         completedWorkbooks: p.completedWorkbooks || 0,
+      }));
+    }
+
+    // Resolve unit names for progress modules
+    if (progressModules.length > 0) {
+      const unitIds = progressModules.map((m: any) => m.moduleId);
+      const unitResults = await Promise.all(
+        unitIds.map((id: string) =>
+          client.models.Unit.get({ id }).catch(() => ({ data: null }))
+        )
+      );
+      const nameMap: Record<string, string> = {};
+      unitResults.forEach((res: any) => {
+        if (res?.data?.id && res.data.name) {
+          nameMap[res.data.id] = res.data.name;
+        }
+      });
+      progressModules = progressModules.map((m: any) => ({
+        ...m,
+        moduleName: nameMap[m.moduleId] || m.moduleId,
       }));
     }
 
@@ -86,105 +104,97 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <MyAuth>
-      <GamificationProviderWrapper>
-        <AppBar
-          position="fixed"
-          color="default"
-          sx={{
-            backgroundColor: "custom.glassNavbar",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <MainToolbar>
-            <Box sx={{ flexGrow: 1, margin: "1rem" }}>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                {t("profile.title")}
-              </Typography>
-            </Box>
-          </MainToolbar>
-        </AppBar>
+      <GamificationProviderWrapper cohortId={undefined as any}>
         <Box
           sx={{
-            position: "fixed",
-            top: "5rem",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: "1rem",
-            paddingBottom: "3rem",
-            overflow: "auto",
+            marginTop: "1rem",
+            px: 2,
+            pb: 3,
+            maxWidth: "60rem",
+            mx: "auto",
+            boxSizing: "border-box",
           }}
         >
-          {/* Profile Avatar, Level & Streak */}
-          <Card
+          {/* Top row: Avatar + Activity side by side */}
+          <Box
             sx={{
-              padding: "2rem 1rem",
-              margin: "1rem auto",
-              height: "fit-content",
-              maxWidth: "60rem",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
               gap: 2,
+              mb: 2,
             }}
           >
-            <DiceBearAvatar seed={routeUsername || "student"} size={96} style="simple" />
-            <Typography variant="h5">{displayName}</Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <AvatarSection isOwnProfile={isOwnProfile} profileUsername={routeUsername} />
-              <StreakShield
-                freezesRemaining={freezesRemaining}
-                freezesUsed={freezesUsed}
-              />
-            </Box>
-          </Card>
+            {/* Avatar Card (square) */}
+            <Card
+              sx={{
+                padding: "2rem 1rem",
+                aspectRatio: "1",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+              }}
+            >
+              <AvatarSection isOwnProfile={isOwnProfile} profileUsername={routeUsername} streak={currentStreak} />
+              <Typography variant="h5">{displayName}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <StreakShield
+                  freezesRemaining={freezesRemaining}
+                  freezesUsed={freezesUsed}
+                />
+              </Box>
+            </Card>
+
+            {/* Activity Calendar Card (square) */}
+            <Card
+              sx={{
+                padding: "2rem 1rem",
+                aspectRatio: "1",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                {t("profile.activity" as any)}
+              </Typography>
+              <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <StreakCalendar activeDays={new Set(activeDays)} />
+              </Box>
+            </Card>
+          </Box>
 
           {/* Progress Rings */}
           {progressModules.length > 0 && (
             <Card
               sx={{
                 padding: "2rem 1rem",
-                margin: "1rem auto",
-                height: "fit-content",
-                maxWidth: "60rem",
+                mb: 2,
               }}
             >
               <Typography variant="h5" gutterBottom>
-                {t("profile.progress", "Progress")}
+                {t("profile.progress" as any)}
               </Typography>
               <ProgressRings modules={progressModules} />
             </Card>
           )}
 
-          {/* Activity Calendar */}
-          <Card
-            sx={{
-              padding: "2rem 1rem",
-              margin: "1rem auto",
-              height: "fit-content",
-              maxWidth: "60rem",
-            }}
-          >
-            <Typography variant="h5" gutterBottom>
-              {t("profile.activity", "Activity")}
-            </Typography>
-            <StreakCalendar activeDays={new Set(activeDays)} />
-          </Card>
-
           {/* Badges */}
           <Card
             sx={{
               padding: "2rem 1rem",
-              margin: "1rem auto",
-              height: "fit-content",
-              maxWidth: "60rem",
+              mb: 2,
             }}
           >
             <Typography variant="h5" gutterBottom>
-              {t("profile.badges", "Badges")}
+              {t("profile.badges" as any)}
             </Typography>
             <BadgeShelf earnedBadges={earnedBadges} columns={3} earnedOnly />
           </Card>
+
+          {/* Unlock Roadmap (live lock state — client component) */}
+          <UnlockRoadmap />
 
           {/* Nailed It Wall (live subscription — client component) */}
           <NailedItSection profileUsername={routeUsername} />

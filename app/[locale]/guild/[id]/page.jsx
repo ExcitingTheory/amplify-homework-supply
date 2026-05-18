@@ -1,6 +1,5 @@
-'use client';
+"use client";
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -12,7 +11,6 @@ import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import GroupIcon from "@mui/icons-material/Group";
 import AppSkeleton from "@/components/AppSkeleton";
-import MainToolbar from "@/components/MainToolbar";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import { GuildJoinPanel } from "@/components/Gamification/GuildJoinPanel";
 import { GuildEditor } from "@/components/Gamification/GuildEditor";
@@ -22,7 +20,6 @@ import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapp
 import { GuildPostFeed } from "@/components/Gamification/GuildPostFeed";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
-import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
 import { useRouter, useParams } from "next/navigation";
 
@@ -52,7 +49,6 @@ function GuildPage() {
   const { myGuild, myMembership, guildLeaderboard, guildMembers, isLoading } =
     useGuild();
   const { level } = useXP();
-  const isScrolled = useScrolledAppBar();
 
   // Get the current user's studentId from the membership or session
   const studentId = myMembership?.studentId || "";
@@ -373,27 +369,6 @@ function GuildPage() {
 
     return (
       <>
-        <AppBar
-          position="static"
-          color="inherit"
-          sx={{ transition: "all 0.3s ease" }}
-        >
-          <MainToolbar>
-            <Box
-              sx={{ flexGrow: 1, margin: "1rem", transition: "all 0.3s ease" }}
-            >
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                {instructorGuild.name}
-              </Typography>
-              <Chip
-                label="Instructor View"
-                size="small"
-                color="info"
-                variant="outlined"
-              />
-            </Box>
-          </MainToolbar>
-        </AppBar>
         <Box sx={{ padding: "1.5rem", maxWidth: "48rem", margin: "0 auto" }}>
           {instructorGuild.description && (
             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
@@ -470,21 +445,6 @@ function GuildPage() {
   if (!myGuild) {
     return (
       <>
-        <AppBar
-          position="static"
-          color="inherit"
-          sx={{ transition: "all 0.3s ease" }}
-        >
-          <MainToolbar>
-            <Box
-              sx={{ flexGrow: 1, margin: "1rem", transition: "all 0.3s ease" }}
-            >
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Guilds
-              </Typography>
-            </Box>
-          </MainToolbar>
-        </AppBar>
         <Box sx={{ padding: "1.5rem", maxWidth: "48rem", margin: "0 auto" }}>
           <GuildJoinPanel
             availableGuilds={availableGuilds}
@@ -504,34 +464,6 @@ function GuildPage() {
   // ── In a guild — show guild detail page ─────────────────────────────────
   return (
     <>
-      <AppBar
-        position="static"
-        color="inherit"
-        sx={{ transition: "all 0.3s ease" }}
-      >
-        <MainToolbar>
-          <Box
-            sx={{
-              flexGrow: 1,
-              margin: isScrolled ? "0.25rem 1rem" : "1rem",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <Typography
-              variant={isScrolled ? "body1" : "h6"}
-              component="div"
-              sx={{
-                flexGrow: 1,
-                transition: "all 0.3s ease",
-                fontWeight: isScrolled ? 500 : 400,
-              }}
-            >
-              {myGuild.name}
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
-
       {/* Spacer for GuildEditor's fixed ToolBarPlugin AppBar */}
       {isLeader && (
         <Box

@@ -13,21 +13,24 @@ import { UnitProvider } from "@/context/unitContext";
 import UnitContext from "@/context/unitContext";
 import AuthContext from "@/context/authContext";
 import { SectionProvider } from "@/context/sectionContext";
+import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 import { useParams } from "next/navigation";
 
 function UnitPageContent() {
   const { unit, checkUnitEditPermission } = React.useContext(UnitContext);
   const { user, session } = React.useContext(AuthContext);
 
-  // Don't render the editor until unit data is loaded — prevents
-  // saveEditorContent firing before editorStateRef is populated
-  if (!unit?.id) return null;
-
   // Check edit permissions for the unit editor
+  // Must be called unconditionally (rules of hooks)
   const permissionCheck = React.useMemo(() => {
+    if (!unit?.id) return { hasAccess: false, reason: null };
     const userGroups = session?.groups || [];
     return checkUnitEditPermission(unit, user, userGroups);
   }, [unit, user, session?.groups, checkUnitEditPermission]);
+
+  // Don't render the editor until unit data is loaded — prevents
+  // saveEditorContent firing before editorStateRef is populated
+  if (!unit?.id) return null;
 
   return (
     <>
@@ -59,6 +62,7 @@ function UnitPage() {
           <UnitProvider id={id}>
             <UnitPageContent />
           </UnitProvider>
+          <CollaborativeChatWrapper />
         </SectionProvider>
       </DictionaryProvider>
     </FilesProvider>

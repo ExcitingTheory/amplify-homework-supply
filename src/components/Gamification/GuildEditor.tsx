@@ -45,6 +45,8 @@ import LanguageEditorTheme from '../Editor3/config/LanguageEditorTheme'
 import Placeholder from '../Editor3/components/Placeholder'
 import CodeHighlightPlugin from '../Editor3/plugins/CodeHighlightPlugin'
 import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
+import type { FloatingToolbarConfig } from '../Editor3/plugins/FloatingToolbarPlugin'
+import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
 import LinkPlugin from '../Editor3/plugins/LinkPlugin'
 import AutoLinkPlugin from '../Editor3/plugins/AutoLinkPlugin'
 import YouTubePlugin from '../Editor3/plugins/YouTubePlugin'
@@ -58,6 +60,14 @@ import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
 import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
 import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
 import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
+
+const GUILD_DESCRIPTION_TOOLBAR_CONFIG: FloatingToolbarConfig = {
+  textFormats: ['bold', 'italic', 'underline', 'strikethrough', 'code'],
+  showLink: true,
+  advancedFormats: ['fontColor', 'backgroundColor'],
+  insertBlocks: ['meaningAssociation', 'wordBlock', 'answerVocabulary', 'answerCustom', 'quiz', 'playlist', 'horizontalRule'],
+  layouts: ['1fr 1fr', '1fr 3fr', '1fr 1fr 1fr', '1fr 2fr 1fr', '1fr 1fr 1fr 1fr'],
+}
 
 import ArmorEditor, { renderShieldSvg } from './ArmorEditor'
 import type { ArmorEditorConfig } from './ArmorEditor'
@@ -185,10 +195,10 @@ function GuildDescriptionEditor({ value, onChange }: GuildDescriptionEditorProps
                   border: '1px solid',
                   borderColor: 'divider',
                   borderRadius: 1,
-                  overflow: 'hidden',
                 }}
               >
-                <FloatingToolbarPlugin />
+                <FloatingToolbarPlugin config={GUILD_DESCRIPTION_TOOLBAR_CONFIG} />
+                <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable

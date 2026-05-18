@@ -356,7 +356,7 @@ describe('InstructorGamificationPanel', () => {
     )
     // Expand Skill Tree accordion
     fireEvent.click(screen.getByText(/Skill Tree/))
-    expect(screen.getByText('Variables')).toBeDefined()
+    expect(screen.getAllByText('Variables').length).toBeGreaterThanOrEqual(1)
   })
 
   it('calls onAddSkill when add button clicked', () => {
@@ -435,10 +435,10 @@ describe('AvatarCustomizer', () => {
     expect(screen.getByText('Background')).toBeDefined()
   })
 
-  it('renders detailed customization at level 2', () => {
+  it('renders detailed customization at level 5 (all features unlocked)', () => {
     const onSave = vi.fn()
     render(
-      <AvatarCustomizer open={true} onClose={() => {}} level={2} seed="test" selectedStyle="detailed" onSave={onSave} />,
+      <AvatarCustomizer open={true} onClose={() => {}} level={5} seed="test" selectedStyle="detailed" onSave={onSave} />,
     )
     expect(screen.getByText('Hair / Top')).toBeDefined()
     expect(screen.getByText('Clothing')).toBeDefined()
@@ -468,7 +468,7 @@ describe('AvatarCustomizer', () => {
       <AvatarCustomizer open={true} onClose={onClose} level={2} seed="test" onSave={onSave} />,
     )
     fireEvent.click(screen.getByText('Save'))
-    expect(onSave).toHaveBeenCalledWith({}, 'detailed')
+    expect(onSave).toHaveBeenCalledWith({}, 'detailed', null)
     expect(onClose).toHaveBeenCalled()
   })
 })

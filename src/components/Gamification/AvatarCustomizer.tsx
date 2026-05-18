@@ -27,8 +27,12 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import LockIcon from '@mui/icons-material/Lock'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import { DiceBearAvatar, getUnlockedStyleTier, getUnlockedStyles, STYLE_CONFIG } from './DiceBearAvatar'
 import type { AvatarStyleTier, AvatarOverrides, AvatarUnlockConfig, FeatureUnlockLevels } from './DiceBearAvatar'
+import { GLOW_COLOR_PRESETS, DEFAULT_GLOW_COLORS } from './AvatarGlowRing'
+import type { GlowRingConfig } from './AvatarGlowRing'
 
 // ============================================================================
 // Types
@@ -48,9 +52,11 @@ export interface AvatarCustomizerProps {
   /** Current overrides (persisted in settings) */
   overrides?: AvatarOverrides
   /** Called when overrides change — parent persists to Settings.metadata */
-  onSave: (overrides: AvatarOverrides, style: AvatarStyleTier) => void
+  onSave: (overrides: AvatarOverrides, style: AvatarStyleTier, glowRing?: GlowRingConfig | null) => void
   /** Full avatar unlock config (from section xpConfig) — used for relative feature unlock calculation */
   avatarUnlockConfig?: AvatarUnlockConfig | null
+  /** Current glow ring config */
+  glowRing?: GlowRingConfig | null
 }
 
 // ============================================================================
@@ -356,20 +362,23 @@ export function AvatarCustomizer({
   overrides = {},
   onSave,
   avatarUnlockConfig,
+  glowRing,
 }: AvatarCustomizerProps) {
   const highestTier = useMemo(() => getUnlockedStyleTier(level, avatarUnlockConfig), [level, avatarUnlockConfig])
   const unlockedStyles = useMemo(() => getUnlockedStyles(level, avatarUnlockConfig), [level, avatarUnlockConfig])
 
   const [style, setStyle] = useState<AvatarStyleTier>(selectedStyle || highestTier)
   const [draft, setDraft] = useState<AvatarOverrides>(overrides)
+  const [glowDraft, setGlowDraft] = useState<GlowRingConfig | null>(glowRing ?? null)
 
   // Reset draft when dialog opens with new overrides
   React.useEffect(() => {
     if (open) {
       setDraft(overrides)
       setStyle(selectedStyle || highestTier)
+      setGlowDraft(glowRing ?? null)
     }
-  }, [open, overrides, selectedStyle, highestTier])
+  }, [open, overrides, selectedStyle, highestTier, glowRing])
 
   const handleColorSelect = useCallback((field: keyof AvatarOverrides, color: string) => {
     setDraft((prev) => ({ ...prev, [field]: [color] }))
@@ -402,9 +411,9 @@ export function AvatarCustomizer({
   }, [])
 
   const handleSave = useCallback(() => {
-    onSave(draft, style)
+    onSave(draft, style, glowDraft)
     onClose()
-  }, [draft, style, onSave, onClose])
+  }, [draft, style, glowDraft, onSave, onClose])
 
   // Progressive feature gates — relative to the selected style's unlock level
   // e.g., if style unlocks at L3 and offset is 2, hair/clothing requires L5
@@ -436,7 +445,7 @@ export function AvatarCustomizer({
         <Stack spacing={3} sx={{ mt: 1 }}>
           {/* Live preview */}
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <DiceBearAvatar seed={seed} style={style} size={96} overrides={draft} />
+            <DiceBearAvatar seed={seed} style={style} size={96} overrides={draft} glowRing={glowDraft} />
           </Box>
 
           {/* Style selector — show when multiple styles unlocked */}
@@ -692,6 +701,121 @@ export function AvatarCustomizer({
               />
             </Stack>
           )}
+
+          {/* ── Gradient Ring Editor ── */}
+          <Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={glowDraft?.active ?? false}
+                  onChange={(_, checked) => {
+                    if (checked) {
+                      setGlowDraft({
+                        colors: glowDraft?.colors ?? [...DEFAULT_GLOW_COLORS],
+                        speed: glowDraft?.speed ?? 4,
+                        thickness: glowDraft?.thickness ?? 3,
+                        active: true,
+                        expiresAt: null,
+                      })
+                    } else {
+                      setGlowDraft(glowDraft ? { ...glowDraft, active: false } : null)
+                    }
+                  }}
+                />
+              }
+              label={<Typography variant="subtitle2">Gradient Ring</Typography>}
+            />
+            {glowDraft?.active && (
+              <Stack spacing={1.5} sx={{ mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Choose a preset or pick custom colors
+                </Typography>
+                <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                  {Object.entries(GLOW_COLOR_PRESETS).map(([name, colors]) => {
+                    const isSelected = glowDraft.colors.join(',') === colors.join(',')
+                    return (
+                      <Chip
+                        key={name}
+                        label={name.charAt(0).toUpperCase() + name.slice(1)}
+                        size="small"
+                        variant={isSelected ? 'filled' : 'outlined'}
+                        color={isSelected ? 'primary' : 'default'}
+                        onClick={() => setGlowDraft({ ...glowDraft, colors: [...colors] })}
+                        avatar={
+                          <Box
+                            sx={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: '50%',
+                              background: `conic-gradient(${colors.slice(0, 4).join(', ')})`,
+                            }}
+                          />
+                        }
+                      />
+                    )
+                  })}
+                </Stack>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Custom color stops
+                  </Typography>
+                  <Stack direction="row" gap={0.5} sx={{ mt: 0.5, flexWrap: 'wrap' }}>
+                    {glowDraft.colors.map((color, i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          position: 'relative',
+                          width: 32,
+                          height: 32,
+                        }}
+                      >
+                        <Box
+                          component="input"
+                          type="color"
+                          value={color}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newColors = [...glowDraft.colors]
+                            newColors[i] = e.target.value
+                            setGlowDraft({ ...glowDraft, colors: newColors })
+                          }}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            border: '2px solid',
+                            borderColor: 'divider',
+                            borderRadius: '50%',
+                            cursor: 'pointer',
+                            padding: 0,
+                            appearance: 'none',
+                            '&::-webkit-color-swatch-wrapper': { padding: 0 },
+                            '&::-webkit-color-swatch': { borderRadius: '50%', border: 'none' },
+                          }}
+                        />
+                      </Box>
+                    ))}
+                    {glowDraft.colors.length < 8 && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setGlowDraft({ ...glowDraft, colors: [...glowDraft.colors, '#ffffff'] })}
+                        sx={{ width: 32, height: 32 }}
+                      >
+                        +
+                      </IconButton>
+                    )}
+                    {glowDraft.colors.length > 2 && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setGlowDraft({ ...glowDraft, colors: glowDraft.colors.slice(0, -1) })}
+                        sx={{ width: 32, height: 32 }}
+                      >
+                        −
+                      </IconButton>
+                    )}
+                  </Stack>
+                </Box>
+              </Stack>
+            )}
+          </Box>
         </Stack>
       </DialogContent>
       <DialogActions>

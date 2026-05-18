@@ -7,7 +7,6 @@ import {
   Button,
   Box,
   Typography,
-  AppBar,
   Card,
   CardContent,
   CardMedia,
@@ -18,9 +17,9 @@ import {
 import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
-import MainToolbar from "@/components/MainToolbar";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import getCachedUrl from "@/utils/getCachedUrl";
+import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import HistoryIcon from "@mui/icons-material/History";
 import AverageIcon from "@mui/icons-material/Timeline";
 import HighIcon from "@mui/icons-material/ArrowUpward";
@@ -63,11 +62,14 @@ function getColor(grade = 0) {
 function CardMediaComponent({
   s3Key,
   identityId,
+  fileId,
   level = "protected",
   filter = null,
   grade = null,
 }) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
@@ -78,7 +80,18 @@ function CardMediaComponent({
     };
 
     asyncFunc();
-  }, [s3Key]);
+
+    if (fileId && identityId) {
+      getResponsiveImageUrls(fileId, identityId)
+        .then((result) => {
+          if (result) {
+            setSrcSet(result.srcSet);
+            setSizes(result.sizes);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [s3Key, fileId, identityId]);
 
   return (
     <Box
@@ -91,6 +104,8 @@ function CardMediaComponent({
     >
       <img
         src={url || undefined}
+        srcSet={srcSet || undefined}
+        sizes={sizes || undefined}
         style={{
           width: "100%",
           height: "100%",
@@ -394,22 +409,6 @@ function Index({ signOut, user }) {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }}>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {t("index.title")}
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
       <Box
         style={{
           padding: "2rem 1rem",

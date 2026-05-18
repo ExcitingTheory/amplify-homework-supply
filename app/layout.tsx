@@ -22,7 +22,12 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning>
-      <body>{children}</body>
+      <head>
+        <style>{`*, *::before, *::after { box-sizing: border-box; } body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }`}</style>
+      </head>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }

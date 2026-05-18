@@ -261,3 +261,74 @@ export function getLevelThresholds(levelConfig?: LevelConfig) {
     ? generateLevelThresholds(levelConfig)
     : [...LEVEL_THRESHOLDS];
 }
+
+/**
+ * Get LevelInfo using explicit thresholds from DB (PlatformSettings.levelThresholds).
+ * Falls back to default behaviour when thresholds are null/empty.
+ */
+export function getLevelInfoWithThresholds(
+  totalXP: number,
+  dbThresholds?: { level: number; xpRequired: number; title?: string }[] | null,
+): LevelInfo {
+  if (!dbThresholds || dbThresholds.length === 0) {
+    return getLevelInfo(totalXP);
+  }
+  const sorted = [...dbThresholds].sort((a, b) => a.level - b.level);
+  // Map DB format to internal format
+  const thresholds = sorted.map((t) => ({
+    level: t.level,
+    xpRequired: t.xpRequired,
+    label: t.title || `Level ${t.level}`,
+  }));
+
+  let level = 1;
+  for (const threshold of thresholds) {
+    if (totalXP >= threshold.xpRequired) {
+      level = threshold.level;
+    } else {
+      break;
+    }
+  }
+
+  const currentThreshold =
+    thresholds.find((t) => t.level === level) || thresholds[0];
+  const nextThreshold = thresholds.find((t) => t.level === level + 1);
+
+  let progress = 100;
+  if (nextThreshold) {
+    const xpIntoLevel = totalXP - currentThreshold.xpRequired;
+    const xpNeeded = nextThreshold.xpRequired - currentThreshold.xpRequired;
+    progress =
+      xpNeeded > 0
+        ? Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100))
+        : 100;
+  }
+
+  return {
+    level,
+    label: currentThreshold.label,
+    xpRequired: currentThreshold.xpRequired,
+    xpForNextLevel: nextThreshold?.xpRequired ?? null,
+    progress,
+  };
+}
+
+/**
+ * Calculate total XP with multipliers applied per reason.
+ * Used for section-scoped XP when PlatformSettings.xpMultipliers is configured.
+ */
+export function calculateMultipliedXP(
+  logs: { xpAmount: number; reason?: string }[],
+  multipliers?: Record<string, number> | null,
+): number {
+  if (!multipliers || Object.keys(multipliers).length === 0) {
+    return calculateTotalXP(logs as StudentXPLog[]);
+  }
+  return logs.reduce((sum, log) => {
+    const mult =
+      log.reason && multipliers[log.reason] !== undefined
+        ? multipliers[log.reason]
+        : 1;
+    return sum + Math.round(log.xpAmount * mult);
+  }, 0);
+}

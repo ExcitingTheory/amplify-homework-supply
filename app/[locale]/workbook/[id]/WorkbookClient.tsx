@@ -18,7 +18,6 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import AppBar from "@mui/material/AppBar";
 
 import { Workbook } from "@/components/Editor3";
 import { SecretLinkIcon } from "@/components/Gamification/SecretLinkIcon";
@@ -28,7 +27,8 @@ import { DictionaryProvider } from "@/context/dictionaryContext";
 import { UnitProvider } from "@/context/unitContext";
 import UnitContext from "@/context/unitContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
-import MainToolbar from "@/components/MainToolbar";
+import { SectionProvider } from "@/context/sectionContext";
+import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
 /**
  * TimerWrappedEditor — Inner content that handles the timer gate and renders workbook.
@@ -62,19 +62,6 @@ function TimerWrappedEditor() {
     <>
       {needsTimer && !timerStarted && (
         <>
-          <AppBar
-            position="fixed"
-            color="default"
-            sx={{
-              backgroundColor: "custom.glassNavbar",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <MainToolbar>
-              <Box sx={{ flexGrow: 1, margin: "1rem" }} />
-            </MainToolbar>
-          </AppBar>
-
           {recentGrades.length === 0 && (
             <Card
               elevation={5}
@@ -240,13 +227,16 @@ export default function WorkbookClient() {
 
   return (
     <MyAuth>
-      <FilesProvider>
-        <DictionaryProvider>
-          <UnitProvider id={id} sectionId={sectionId}>
-            <TimerWrappedEditor />
-          </UnitProvider>
-        </DictionaryProvider>
-      </FilesProvider>
+      <SectionProvider unitId={id}>
+        <FilesProvider>
+          <DictionaryProvider>
+            <UnitProvider id={id} sectionId={sectionId}>
+              <TimerWrappedEditor />
+            </UnitProvider>
+          </DictionaryProvider>
+        </FilesProvider>
+        <CollaborativeChatWrapper />
+      </SectionProvider>
     </MyAuth>
   );
 }

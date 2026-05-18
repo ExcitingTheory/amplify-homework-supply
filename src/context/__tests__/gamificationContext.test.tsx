@@ -23,7 +23,11 @@ import {
 // Helpers
 // ============================================================================
 
-/** Creates a mock client with observeQuery for each model */
+/** Creates a mock client with observeQuery for each model.
+ * The context subscribes to: StudentProfile, GroupChallenge, Guild, Skill, StudentXPLog, Grade.
+ * Legacy model names (StudentProgress, StudentStreak, StudentPersonalBest, etc.) are auto-mapped
+ * into a StudentProfile item so tests using old-style data still work.
+ */
 function createMockClient(data: Record<string, any[]> = {}) {
   const subscriptions: Record<string, any> = {}
 
@@ -35,21 +39,46 @@ function createMockClient(data: Record<string, any[]> = {}) {
         return { unsubscribe: vi.fn() }
       },
     }),
+    list: () => Promise.resolve({ data: data[modelName] || [] }),
   })
+
+  // Auto-build StudentProfile from legacy separate model data if not explicitly provided
+  if (!data.StudentProfile) {
+    const profile: any = { id: 'profile-1', studentId: 's1', _version: 1 }
+    if (data.StudentProgress) profile.moduleProgress = data.StudentProgress
+    if (data.StudentPersonalBest) profile.personalBests = data.StudentPersonalBest
+    if (data.StudentStreak && data.StudentStreak.length > 0) {
+      const s = data.StudentStreak[0]
+      profile.currentStreak = s.currentStreak
+      profile.longestStreak = s.longestStreak
+      profile.lastActivityDate = s.lastActivityDate
+      profile.freezesRemaining = s.freezesRemaining
+      profile.freezesUsed = s.freezesUsed
+    }
+    if (data.StudentSkillProgress) profile.skillProgress = data.StudentSkillProgress
+    // Only include profile if any legacy data was provided
+    const hasLegacy = data.StudentProgress || data.StudentPersonalBest || data.StudentStreak || data.StudentSkillProgress
+    if (hasLegacy) data.StudentProfile = [profile]
+  }
+
+  // Auto-embed GuildMembership into Guild.members if provided separately
+  if (data.GuildMembership && data.Guild) {
+    data.Guild = data.Guild.map((g: any) => ({
+      ...g,
+      members: (data.GuildMembership || []).filter((m: any) => m.guildId === g.id),
+    }))
+  }
 
   return {
     models: {
       StudentXPLog: createModel('StudentXPLog'),
-      StudentProgress: createModel('StudentProgress'),
-      StudentPersonalBest: createModel('StudentPersonalBest'),
-      StudentStreak: createModel('StudentStreak'),
-      Campaign: createModel('Campaign'),
+      StudentProfile: createModel('StudentProfile'),
       GroupChallenge: createModel('GroupChallenge'),
       Guild: createModel('Guild'),
-      GuildMembership: createModel('GuildMembership'),
       Skill: createModel('Skill'),
-      StudentSkillProgress: createModel('StudentSkillProgress'),
-      ContentLock: createModel('ContentLock'),
+      Grade: createModel('Grade'),
+      Unit: createModel('Unit'),
+      PlatformSettings: createModel('PlatformSettings'),
     },
     _subscriptions: subscriptions,
   }
@@ -273,11 +302,8 @@ describe('GamificationProvider', () => {
   describe('Campaign domain', () => {
     it('parses campaign data', () => {
       const client = createMockClient({
-        Campaign: [
-          { id: 'c1', cohortId: 'section-1', title: 'Science Quest' },
-        ],
         GroupChallenge: [
-          { id: 'ch1', cohortId: 'section-1', title: 'Weekly Sprint', targetXP: 1000, currentXP: 600, active: true, bonusMultiplier: 1.5 },
+          { id: 'ch1', cohortId: 'section-1', title: 'Science Quest', targetXP: 1000, currentXP: 600, active: true, bonusMultiplier: 1.5, setting: 'forest' },
           { id: 'ch2', cohortId: 'section-1', title: 'Past Challenge', targetXP: 500, currentXP: 500, active: false, bonusMultiplier: 1.5 },
         ],
       })
@@ -410,13 +436,13 @@ describe('GamificationProvider', () => {
 
   // ==== ContentLock ====
   describe('ContentLock domain', () => {
-    it('evaluates XP-based locks', () => {
+    it('evaluates XP-based locks from Unit model fields', () => {
       const client = createMockClient({
         StudentXPLog: [
           { id: 'xp1', studentId: 's1', xpAmount: 100, reason: 'HOMEWORK_SUBMITTED' },
         ],
-        ContentLock: [
-          { id: 'cl1', contentId: 'unit-1', requiredXP: 500 },
+        Unit: [
+          { id: 'unit-1', name: 'Locked Unit', status: 'PUBLISHED', requiredXP: 500, _version: 1 },
         ],
       })
 
@@ -435,8 +461,8 @@ describe('GamificationProvider', () => {
         StudentXPLog: [
           { id: 'xp1', studentId: 's1', xpAmount: 600, reason: 'HOMEWORK_SUBMITTED' },
         ],
-        ContentLock: [
-          { id: 'cl1', contentId: 'unit-1', requiredXP: 500 },
+        Unit: [
+          { id: 'unit-1', name: 'Locked Unit', status: 'PUBLISHED', requiredXP: 500, _version: 1 },
         ],
       })
 
@@ -446,6 +472,24 @@ describe('GamificationProvider', () => {
         </GamificationProvider>,
       )
 
+      expect(screen.getByTestId('is-locked-unit1').textContent).toBe('false')
+    })
+
+    it('ignores units without lock requirements', () => {
+      const client = createMockClient({
+        Unit: [
+          { id: 'unit-1', name: 'Normal Unit', status: 'PUBLISHED', _version: 1 },
+          { id: 'unit-2', name: 'Also Normal', status: 'PUBLISHED', requiredXP: 0, _version: 1 },
+        ],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <ContentLockConsumer />
+        </GamificationProvider>,
+      )
+
+      expect(screen.getByTestId('lock-count').textContent).toBe('0')
       expect(screen.getByTestId('is-locked-unit1').textContent).toBe('false')
     })
   })
@@ -510,7 +554,8 @@ describe('GamificationProvider', () => {
           GuildMembership: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           Skill: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           StudentSkillProgress: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
-          ContentLock: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
+          Unit: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
+          PlatformSettings: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
         },
       }
 
@@ -550,7 +595,8 @@ describe('GamificationProvider', () => {
           GuildMembership: makeModel(),
           Skill: makeModel(),
           StudentSkillProgress: makeModel(),
-          ContentLock: makeModel(),
+          Unit: makeModel(),
+          PlatformSettings: makeModel(),
         },
       }
 
@@ -566,6 +612,167 @@ describe('GamificationProvider', () => {
       for (const fn of unsubFns) {
         expect(fn).toHaveBeenCalled()
       }
+    })
+  })
+  // ==== Global PlatformSettings ====
+  describe('Global PlatformSettings', () => {
+    function SettingsConsumer() {
+      const { totalXP, level, avatarUnlockConfig } = useXP()
+      return (
+        <div>
+          <div data-testid="total-xp">{totalXP}</div>
+          <div data-testid="level">{level.level}</div>
+          <div data-testid="level-label">{level.label}</div>
+          <div data-testid="avatar-config">{JSON.stringify(avatarUnlockConfig)}</div>
+        </div>
+      )
+    }
+
+    it('applies XP multipliers from global settings', () => {
+      const client = createMockClient({
+        StudentXPLog: [
+          { id: 'xp1', studentId: 's1', xpAmount: 100, reason: 'HOMEWORK_SUBMITTED' },
+          { id: 'xp2', studentId: 's1', xpAmount: 50, reason: 'NAILED_IT' },
+        ],
+        PlatformSettings: [
+          {
+            id: 'gs-1',
+            xpMultipliers: JSON.stringify({ HOMEWORK_SUBMITTED: 2.0, NAILED_IT: 1.5 }),
+          },
+        ],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      // 100 * 2.0 + 50 * 1.5 = 275
+      expect(screen.getByTestId('total-xp').textContent).toBe('275')
+    })
+
+    it('uses custom level thresholds from global settings', () => {
+      const client = createMockClient({
+        StudentXPLog: [
+          { id: 'xp1', studentId: 's1', xpAmount: 50, reason: 'HOMEWORK_SUBMITTED' },
+        ],
+        PlatformSettings: [
+          {
+            id: 'gs-1',
+            levelThresholds: JSON.stringify([
+              { level: 1, xpRequired: 0, title: 'Novice' },
+              { level: 2, xpRequired: 25, title: 'Apprentice' },
+              { level: 3, xpRequired: 100, title: 'Expert' },
+            ]),
+          },
+        ],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      // 50 XP → Level 2 (Apprentice) per custom thresholds (need 100 for level 3)
+      expect(screen.getByTestId('level').textContent).toBe('2')
+      expect(screen.getByTestId('level-label').textContent).toBe('Apprentice')
+    })
+
+    it('exposes avatarUnlockConfig from global settings', () => {
+      const avatarConfig = {
+        unlocks: [
+          { minLevel: 1, tier: 'thumbs' },
+          { minLevel: 3, tier: 'lorelei' },
+          { minLevel: 5, tier: 'personas' },
+        ],
+      }
+
+      const client = createMockClient({
+        StudentXPLog: [],
+        PlatformSettings: [
+          {
+            id: 'gs-1',
+            avatarUnlockConfig: JSON.stringify(avatarConfig),
+          },
+        ],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      const parsed = JSON.parse(screen.getByTestId('avatar-config').textContent || 'null')
+      expect(parsed).toEqual(avatarConfig)
+    })
+
+    it('returns null avatarUnlockConfig when no settings exist', () => {
+      const client = createMockClient({
+        StudentXPLog: [],
+        PlatformSettings: [],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      expect(screen.getByTestId('avatar-config').textContent).toBe('null')
+    })
+
+    it('falls back to default behavior without settings', () => {
+      const client = createMockClient({
+        StudentXPLog: [
+          { id: 'xp1', studentId: 's1', xpAmount: 200, reason: 'HOMEWORK_SUBMITTED' },
+        ],
+        PlatformSettings: [],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      // No multipliers → plain sum: 200 XP
+      expect(screen.getByTestId('total-xp').textContent).toBe('200')
+      // Default thresholds: 200 XP → Level 2 (Explorer)
+      expect(screen.getByTestId('level').textContent).toBe('2')
+      expect(screen.getByTestId('level-label').textContent).toBe('Explorer')
+    })
+
+    it('combines multipliers and custom thresholds', () => {
+      const client = createMockClient({
+        StudentXPLog: [
+          { id: 'xp1', studentId: 's1', xpAmount: 100, reason: 'HOMEWORK_SUBMITTED' },
+        ],
+        PlatformSettings: [
+          {
+            id: 'gs-1',
+            xpMultipliers: JSON.stringify({ HOMEWORK_SUBMITTED: 3.0 }),
+            levelThresholds: JSON.stringify([
+              { level: 1, xpRequired: 0, title: 'Bronze' },
+              { level: 2, xpRequired: 200, title: 'Silver' },
+              { level: 3, xpRequired: 500, title: 'Gold' },
+            ]),
+          },
+        ],
+      })
+
+      render(
+        <GamificationProvider client={client} studentId="s1">
+          <SettingsConsumer />
+        </GamificationProvider>,
+      )
+
+      // 100 * 3.0 = 300 XP → Level 2 (Silver) per custom thresholds
+      expect(screen.getByTestId('total-xp').textContent).toBe('300')
+      expect(screen.getByTestId('level').textContent).toBe('2')
+      expect(screen.getByTestId('level-label').textContent).toBe('Silver')
     })
   })
 })

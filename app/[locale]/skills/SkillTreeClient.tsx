@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslations } from "next-intl";
-import { AppBar, Box, Container, Typography } from "@mui/material";
-import MainToolbar from "@/components/MainToolbar";
+import { Box, Container, Typography } from "@mui/material";
 import AppSkeleton from "@/components/AppSkeleton";
 import { SkillTree } from "@/components/Gamification/SkillTree";
 import { SkillDetailPanel } from "@/components/Gamification/SkillDetailPanel";
@@ -29,7 +28,7 @@ export function SkillTreeClient({
 }: {
   initialSkills: InitialSkill[];
 }) {
-  const t = useTranslations("pages");
+  const t = useTranslations("components");
   const { skillNodes, isLoading, selectedSkillId, setSelectedSkillId } =
     useSkillTree();
   const { session } = React.useContext(UnitContext);
@@ -130,27 +129,10 @@ export function SkillTreeClient({
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }}>
-            <Typography variant="h6" component="div">
-              {t("skills.title", "Learning Pathway")}
-            </Typography>
-          </Box>
-        </MainToolbar>
-      </AppBar>
-
       <Container
         maxWidth={false}
         disableGutters
-        sx={{ mt: "64px", height: "calc(100vh - 64px)" }}
+        sx={{ height: "calc(100vh - 48px)" }}
       >
         {isLoading && displaySkills.length === 0 ? (
           <AppSkeleton variant="page" />
@@ -165,7 +147,7 @@ export function SkillTreeClient({
           >
             <Typography variant="h6" color="text.secondary">
               {t(
-                "skills.empty",
+                "skillTree.empty",
                 "No skills available yet. Your instructor will set up the learning pathway.",
               )}
             </Typography>

@@ -1,6 +1,6 @@
 {
   "answerComponent": {
-    "audioNotAvailable": "{{text}} (audio not available)",
+    "audioNotAvailable": "{text} (audio not available)",
     "audioNotAvailableParens": "(audio not available)",
     "errorMessages": {
       "noAnswer": "Please provide an answer",
@@ -35,7 +35,7 @@
     "sectionHeading": "Next Steps"
   },
   "quizComponent": {
-    "gradeDisplay": "Grade: {{score}}%"
+    "gradeDisplay": "Grade: {score}%"
   },
   "meaningAssociationExercise": {
     "layoutDirection": "row"

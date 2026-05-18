@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">
+  <assessment ident="biology-cell-quiz" title="Biology: Cell Structure Quiz">
+    <section ident="section1" title="Cell Organelles">
+      
+      <item ident="q1" title="Mitochondria Function">
+        <presentation>
+          <material>
+            <mattext texttype="text/plain">What is the primary function of mitochondria?</mattext>
+          </material>
+          <response_lid ident="response1" rcardinality="Single">
+            <render_choice>
+              <response_label ident="A"><material><mattext>Protein synthesis</mattext></material></response_label>
+              <response_label ident="B"><material><mattext>Cellular respiration / ATP production</mattext></material></response_label>
+              <response_label ident="C"><material><mattext>Photosynthesis</mattext></material></response_label>
+              <response_label ident="D"><material><mattext>DNA replication</mattext></material></response_label>
+            </render_choice>
+          </response_lid>
+        </presentation>
+        <resprocessing>
+          <respcondition>
+            <conditionvar><varequal respident="response1">B</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">100</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+      <item ident="q2" title="Ribosome Location">
+        <presentation>
+          <material>
+            <mattext texttype="text/plain">Where are ribosomes commonly found in a eukaryotic cell?</mattext>
+          </material>
+          <response_lid ident="response2" rcardinality="Single">
+            <render_choice>
+              <response_label ident="A"><material><mattext>Inside the nucleus</mattext></material></response_label>
+              <response_label ident="B"><material><mattext>On the smooth endoplasmic reticulum</mattext></material></response_label>
+              <response_label ident="C"><material><mattext>On the rough endoplasmic reticulum and free in cytoplasm</mattext></material></response_label>
+              <response_label ident="D"><material><mattext>Inside the mitochondria only</mattext></material></response_label>
+            </render_choice>
+          </response_lid>
+        </presentation>
+        <resprocessing>
+          <respcondition>
+            <conditionvar><varequal respident="response2">C</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">100</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+      <item ident="q3" title="Cell Membrane">
+        <presentation>
+          <material>
+            <mattext texttype="text/plain">The cell membrane is primarily composed of:</mattext>
+          </material>
+          <response_lid ident="response3" rcardinality="Single">
+            <render_choice>
+              <response_label ident="A"><material><mattext>Cellulose fibers</mattext></material></response_label>
+              <response_label ident="B"><material><mattext>Phospholipid bilayer with proteins</mattext></material></response_label>
+              <response_label ident="C"><material><mattext>Carbohydrate chains</mattext></material></response_label>
+              <response_label ident="D"><material><mattext>Nucleic acids</mattext></material></response_label>
+            </render_choice>
+          </response_lid>
+        </presentation>
+        <resprocessing>
+          <respcondition>
+            <conditionvar><varequal respident="response3">B</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">100</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+    </section>
+  </assessment>
+</questestinterop>

@@ -50,6 +50,7 @@ export default defineConfig({
             ".next",
             "out",
             "build",
+            "test/integration/**",
             "test/performance/**",
             "test/storybook/**",
           ],
@@ -80,6 +81,31 @@ export default defineConfig({
             "@lexical/markdown",
             "lexical",
           ],
+        },
+      }),
+      // Integration test project (requires running backend)
+      defineProject({
+        plugins: [
+          react({
+            include: /\.[jt]sx?$/,
+          }),
+        ],
+        test: {
+          name: "integration",
+          globals: true,
+          environment: "happy-dom",
+          setupFiles: ["./test/setup.ts"],
+          testTimeout: 60000,
+          hookTimeout: 60000,
+          include: [
+            "test/integration/**/*.test.ts",
+            "test/integration/**/*.test.tsx",
+          ],
+        },
+        resolve: {
+          alias: {
+            "@": path.resolve(__dirname, "./src"),
+          },
         },
       }),
       // Storybook component test project

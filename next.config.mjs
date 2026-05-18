@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import withSerwistInit from '@serwist/next';
 
@@ -14,6 +15,24 @@ const withSerwist = withSerwistInit({
   swUrl: '/sw.js',
 });
 
+// Derive WebSocket URL from amplify_outputs.json at build time
+function getWebSocketUrl() {
+  // Explicit env var takes priority (local dev override)
+  if (process.env.NEXT_PUBLIC_YJS_WS_URL) {
+    return process.env.NEXT_PUBLIC_YJS_WS_URL;
+  }
+  try {
+    const outputs = JSON.parse(readFileSync('./amplify_outputs.json', 'utf-8'));
+    const wsConfig = outputs?.custom?.WEBSOCKET_API;
+    if (wsConfig?.apiId && wsConfig?.stageName && wsConfig?.region) {
+      return `wss://${wsConfig.apiId}.execute-api.${wsConfig.region}.amazonaws.com/${wsConfig.stageName}`;
+    }
+  } catch {
+    // amplify_outputs.json not available (CI, first build, etc.)
+  }
+  return 'ws://localhost:3001';
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -24,7 +43,7 @@ const nextConfig = {
 
   // Environment variables exposed to the browser
   env: {
-    NEXT_PUBLIC_YJS_WS_URL: process.env.NEXT_PUBLIC_YJS_WS_URL || 'ws://localhost:3001',
+    NEXT_PUBLIC_YJS_WS_URL: getWebSocketUrl(),
     NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION: process.env.NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION || 'true',
   },
 

@@ -156,13 +156,33 @@ export async function POST(req: Request) {
       // Client-side tool — creates section via DataStore on client
       create_section: tool({
         description:
-          "Create a new class section (group of students) with a name and optional description",
+          "Create a new class section (group of students) with a name and optional description. Can optionally copy gamification settings (leveling curve, XP multipliers, badges) from an existing section.",
         parameters: z.object({
           name: z.string().describe("Name of the section"),
           description: z
             .string()
             .optional()
             .describe("Optional description of the section"),
+          copySettingsFromSectionId: z
+            .string()
+            .optional()
+            .describe(
+              "Optional section ID to copy gamification settings from (leveling curve, XP multipliers, badge configs)",
+            ),
+        }),
+        // No execute — client-side only
+      }),
+
+      copy_gamification_settings: tool({
+        description:
+          "Copy gamification settings (leveling curve, XP multipliers, badge configs) from one section to another. Use when a teacher wants to reuse their gamification configuration across sections.",
+        parameters: z.object({
+          sourceSectionId: z
+            .string()
+            .describe("The section ID to copy settings FROM"),
+          targetSectionId: z
+            .string()
+            .describe("The section ID to copy settings TO"),
         }),
         // No execute — client-side only
       }),

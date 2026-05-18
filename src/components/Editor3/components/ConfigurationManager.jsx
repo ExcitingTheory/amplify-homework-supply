@@ -11,6 +11,7 @@ import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadData } from "aws-amplify/storage";
 import UnitContext from "../../../context/unitContext";
 import SettingsContext from "../../../context/settingsContext";
+import { usePlatformSettings } from "../../../context/gamificationContext";
 import CameraIcon from "@mui/icons-material/Camera";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import FilesContext from "../../../context/fileContext";
@@ -66,6 +67,8 @@ export default function ConfigurationManager() {
   const settings = settingsContext?.settings || null;
   const loadingSettings = settingsContext?.isLoading || false;
   const updateSettings = settingsContext?.updateSettings;
+  // Global platform override for auto-analyze
+  const { autoAnalyzeDocuments: globalAutoAnalyze } = usePlatformSettings();
 
   const handleSettingChange = async (field, value) => {
     if (!updateSettings) return;
@@ -258,7 +261,7 @@ export default function ConfigurationManager() {
               onChange={(e) =>
                 handleSettingChange("autoAnalyzeDocuments", e.target.checked)
               }
-              disabled={loadingSettings}
+              disabled={loadingSettings || !globalAutoAnalyze}
             />
           }
           label={t("configurationManager.autoAnalyzeLabel")}

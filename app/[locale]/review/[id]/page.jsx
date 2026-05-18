@@ -8,13 +8,11 @@ import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
 
 import Box from "@mui/material/Box";
-import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
 import AppSkeleton from "@/components/AppSkeleton";
-import MainToolbar from "@/components/MainToolbar";
 import { Workbook } from "@/components/Editor3";
 import { PeerReviewChat } from "@/components/PeerReview";
 import { PeerReviewFeedbackPrompt } from "@/components/PeerReview/PeerReviewFeedbackPrompt";
@@ -157,56 +155,52 @@ function PeerReviewContent() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
+      <Box
         sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          px: 2,
+          py: 1,
+          borderBottom: 1,
+          borderColor: "divider",
         }}
       >
-        <MainToolbar>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 1, flexGrow: 1 }}
+        <Typography variant="h6" noWrap>
+          {t("Peer Review")}
+        </Typography>
+        <Chip
+          label={isClosed ? "Completed" : "In Progress"}
+          size="small"
+          color={isClosed ? "default" : "success"}
+          variant="outlined"
+        />
+        {peerReview.peers.length > 0 && (
+          <Chip
+            label={`${peerReview.peers.length + 1} online`}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+        )}
+        {isOwner && !isClosed && (
+          <Button
+            variant="contained"
+            color="warning"
+            size="small"
+            disabled={closing}
+            onClick={handleCloseReview}
           >
-            <Typography variant="h6" noWrap>
-              {t("Peer Review")}
-            </Typography>
-            <Chip
-              label={isClosed ? "Completed" : "In Progress"}
-              size="small"
-              color={isClosed ? "default" : "success"}
-              variant="outlined"
-            />
-            {peerReview.peers.length > 0 && (
-              <Chip
-                label={`${peerReview.peers.length + 1} online`}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
-            )}
-            {isOwner && !isClosed && (
-              <Button
-                variant="contained"
-                color="warning"
-                size="small"
-                disabled={closing}
-                onClick={handleCloseReview}
-              >
-                {closing ? "Closing..." : "End Review"}
-              </Button>
-            )}
-          </Box>
-        </MainToolbar>
-      </AppBar>
+            {closing ? "Closing..." : "End Review"}
+          </Button>
+        )}
+      </Box>
 
       {/* Split pane: workbook (left) + chat (right) */}
       <Box
         sx={{
           display: "flex",
-          mt: "64px", // AppBar height
-          height: "calc(100vh - 64px)",
+          height: "calc(100vh - 96px)",
         }}
       >
         {/* Workbook — read-only for peers, editable for owner */}

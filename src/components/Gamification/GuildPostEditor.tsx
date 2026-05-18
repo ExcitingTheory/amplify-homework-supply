@@ -46,6 +46,8 @@ import LanguageEditorTheme from '../Editor3/config/LanguageEditorTheme'
 import Placeholder from '../Editor3/components/Placeholder'
 
 import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
+import type { FloatingToolbarConfig } from '../Editor3/plugins/FloatingToolbarPlugin'
+import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
 import CodeHighlightPlugin from '../Editor3/plugins/CodeHighlightPlugin'
 import LinkPlugin from '../Editor3/plugins/LinkPlugin'
 import AutoLinkPlugin from '../Editor3/plugins/AutoLinkPlugin'
@@ -61,6 +63,14 @@ import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
 import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
 
 import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
+
+const GUILD_POST_TOOLBAR_CONFIG: FloatingToolbarConfig = {
+  textFormats: ['bold', 'italic', 'underline', 'strikethrough', 'code'],
+  showLink: true,
+  advancedFormats: ['fontColor', 'backgroundColor'],
+  insertBlocks: ['meaningAssociation', 'wordBlock', 'answerVocabulary', 'answerCustom', 'quiz', 'playlist', 'horizontalRule'],
+  layouts: ['1fr 1fr', '1fr 3fr', '1fr 1fr 1fr', '1fr 2fr 1fr', '1fr 1fr 1fr 1fr'],
+}
 
 // ============================================================================
 // Types
@@ -179,10 +189,10 @@ export function GuildPostEditor({
                     borderColor: 'divider',
                     borderRadius: 1,
                     mt: 1,
-                    overflow: 'hidden',
                   }}
                 >
-                  <FloatingToolbarPlugin />
+                  <FloatingToolbarPlugin config={GUILD_POST_TOOLBAR_CONFIG} />
+                  <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
                   <RichTextPlugin
                     contentEditable={
                       <ContentEditable

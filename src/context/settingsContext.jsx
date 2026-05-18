@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useReducer, useRef } from "react";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";

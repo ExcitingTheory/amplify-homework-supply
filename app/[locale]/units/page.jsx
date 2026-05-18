@@ -6,14 +6,13 @@ import {
   Button,
   Box,
   Typography,
-  AppBar,
   Card,
   CardContent,
   CardMedia,
   Skeleton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import MainToolbar from "@/components/MainToolbar";
+import AppShell from "@/components/AppShell";
 
 import MyAuth from "@/components/AmplifyAuthenticator";
 import IconEdit from "@mui/icons-material/Edit";
@@ -21,6 +20,7 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 
 import getCachedUrl from "@/utils/getCachedUrl";
+import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import AuthContext from "@/context/authContext";
 import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
@@ -39,8 +39,15 @@ import {
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
 
-function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
+function CardMediaComponent({
+  s3Key,
+  identityId,
+  fileId,
+  level = "protected",
+}) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
@@ -53,7 +60,19 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
     };
 
     fetchUrl();
-  }, [s3Key]);
+
+    // Load responsive variants if fileId is available
+    if (fileId && identityId) {
+      getResponsiveImageUrls(fileId, identityId)
+        .then((result) => {
+          if (result) {
+            setSrcSet(result.srcSet);
+            setSizes(result.sizes);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [s3Key, fileId, identityId]);
 
   return (
     <Box
@@ -66,6 +85,8 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
     >
       <img
         src={url || undefined}
+        srcSet={srcSet || undefined}
+        sizes={sizes || undefined}
         style={{
           width: "100%",
           height: "100%",
@@ -119,6 +140,7 @@ function Units() {
   const [draftUnits, setDraftUnits] = useState([]);
   const [publishedUnits, setPublishedUnits] = useState([]);
   const [archivedUnits, setArchivedUnits] = useState([]);
+  const [unitsLoaded, setUnitsLoaded] = useState(false);
 
   const [work, setIsWorking] = useState(false);
   const router = useRouter();
@@ -232,6 +254,7 @@ function Units() {
           "units",
         );
         updateUnitsState(validItems);
+        setUnitsLoaded(true);
       },
       error: (error) => console.error("[Units] observeQuery error:", error),
     });
@@ -271,24 +294,13 @@ function Units() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }} />
-        </MainToolbar>
-      </AppBar>
       <Box
         data-tour="units-page"
-        style={{
-          // padding: '2rem 1rem',
-          marginTop: "3rem",
-        }}
+        style={
+          {
+            // padding: '2rem 1rem',
+          }
+        }
       >
         <div
           style={{
@@ -332,7 +344,50 @@ function Units() {
             margin: "1rem auto",
           }}
         >
-          {publishedUnits.length == 0 && (
+          {!unitsLoaded && (
+            // Loading skeleton placeholders to prevent layout shift
+            <>
+              {[1, 2, 3].map((i) => (
+                <Card
+                  key={i}
+                  elevation={2}
+                  sx={{
+                    display: "flex",
+                    margin: "1rem auto",
+                    width: "90vw",
+                    maxWidth: "80rem",
+                    borderRadius: 2,
+                    borderLeft: "4px solid",
+                    borderLeftColor: "action.disabled",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: "1",
+                      p: 2,
+                    }}
+                  >
+                    <Skeleton
+                      variant="text"
+                      width="60%"
+                      height={32}
+                      sx={{ mb: 1 }}
+                    />
+                    <Skeleton variant="text" width="90%" height={20} />
+                    <Skeleton variant="text" width="40%" height={20} />
+                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                      <Skeleton variant="rounded" width={140} height={36} />
+                      <Skeleton variant="rounded" width={100} height={36} />
+                      <Skeleton variant="rounded" width={80} height={36} />
+                    </Box>
+                  </Box>
+                </Card>
+              ))}
+            </>
+          )}
+          {unitsLoaded && publishedUnits.length == 0 && (
             //embed url to create a new section
             <Card
               elevation={3}
@@ -408,6 +463,7 @@ function Units() {
                 return (
                   <ContentLockCard
                     key={unit.id}
+                    id={`unit-${unit.id}`}
                     title={unit.name || t("units.untitledUnit")}
                     isLocked={unitLocked}
                     requiredXP={lockStatus?.requiredXP}
@@ -583,6 +639,7 @@ function Units() {
                 return (
                   <Card
                     key={unit.id}
+                    id={`unit-${unit.id}`}
                     elevation={2}
                     sx={{
                       display: "flex",
@@ -723,6 +780,7 @@ function Units() {
                 return (
                   <Card
                     key={unit.id}
+                    id={`unit-${unit.id}`}
                     elevation={2}
                     sx={{
                       display: "flex",

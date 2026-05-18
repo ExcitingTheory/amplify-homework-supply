@@ -1,3 +1,4 @@
+"use client";
 /**
  * NotificationContext — Real-time notification feed for the current user.
  *
@@ -134,9 +135,10 @@ function NotificationProvider({ children }) {
 
     const client = getAmplifyClient();
 
-    const subscription = client.models.Notification.observeQuery({
-      filter: { recipientId: { eq: recipientId } },
-    }).subscribe({
+    // Do NOT filter by recipientId — Amplify Gen 2 auto-filters by owner
+    // (ownerDefinedIn("recipientId")). Adding a manual filter causes
+    // "subscription filter uses same fieldName multiple time" error.
+    const subscription = client.models.Notification.observeQuery().subscribe({
       next: ({ items }) => {
         const validItems = (items || []).filter(
           (item) => item != null && item.id != null,
@@ -255,7 +257,7 @@ function NotificationProvider({ children }) {
     try {
       const client = getAmplifyClient();
       const unseen = state.notifications.filter((n) => !n.seen);
-      await Promise.all(
+      const results = await Promise.allSettled(
         unseen.map((n) =>
           client.models.Notification.update({
             id: n.id,
@@ -264,6 +266,10 @@ function NotificationProvider({ children }) {
           }),
         ),
       );
+      const failures = results.filter((r) => r.status === 'rejected');
+      if (failures.length > 0) {
+        console.warn(`[NotificationContext] ${failures.length} notification(s) failed to mark seen`);
+      }
     } catch (err) {
       console.error("[NotificationContext] Error marking all seen:", err);
     }

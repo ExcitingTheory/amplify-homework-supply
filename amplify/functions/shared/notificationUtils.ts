@@ -9,8 +9,8 @@ const CREATE_NOTIFICATION = `mutation CreateNotification($input: CreateNotificat
   }
 }`;
 
-const LIST_NOTIFICATIONS_BY_RECIPIENT = `query ListNotificationsByRecipient($recipientId: String!, $limit: Int, $nextToken: String) {
-  listNotificationsByRecipient(recipientId: $recipientId, limit: $limit, nextToken: $nextToken) {
+const LIST_NOTIFICATIONS_BY_RECIPIENT = `query ListNotificationByRecipientId($recipientId: String!, $limit: Int, $nextToken: String) {
+  listNotificationByRecipientId(recipientId: $recipientId, limit: $limit, nextToken: $nextToken) {
     items { id recipientId type referenceId _version }
     nextToken
   }
@@ -88,7 +88,10 @@ export async function createNotification(
       },
     });
   } catch (err) {
-    console.warn(`[notification] Failed to create ${input.type} for ${input.recipientId}:`, err);
+    console.warn(
+      `[notification] Failed to create ${input.type} for ${input.recipientId}:`,
+      err,
+    );
   }
 }
 
@@ -111,7 +114,7 @@ export async function createNotificationIfNotExists(
       query: LIST_NOTIFICATIONS_BY_RECIPIENT,
       variables: { recipientId: input.recipientId, limit: 100 },
     });
-    const items = data?.listNotificationsByRecipient?.items || [];
+    const items = data?.listNotificationByRecipientId?.items || [];
     const exists = items.some(
       (n: any) => n.type === input.type && n.referenceId === input.referenceId,
     );

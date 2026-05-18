@@ -6,6 +6,8 @@ import { moderationHandler } from "../functions/moderation/resource";
 import { documentAnalysisHandler } from "../functions/documentAnalysis/resource";
 
 import { mediaConvertHandler } from "../functions/mediaConvert/resource";
+import { imageProcessHandler } from "../functions/imageProcess/resource";
+import { documentThumbnailHandler } from "../functions/documentThumbnail/resource";
 import { gamificationHandler } from "../functions/gamification/resource";
 import { peerReviewAIHandler } from "../functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "../functions/generatePracticeDrill/resource";
@@ -67,6 +69,47 @@ const PracticeDrillType = a.enum([
   "REVIEW",
 ]);
 
+const NotificationType = a.enum([
+  "ASSIGNMENT_NEW",
+  "ASSIGNMENT_DUE_SOON",
+  "ASSIGNMENT_DUE_NOW",
+  "GRADE_RECEIVED",
+  "PEER_REVIEW_COMPLETE",
+  "PEER_REVIEW_INVITE",
+  "PRACTICE_SESSION_INVITE",
+  "WORKBOOK_SESSION_INVITE",
+  "HOMEWORK_ROOM_OPENED",
+  "XP_MILESTONE",
+  "LEVEL_UP",
+  "BADGE_EARNED",
+  "BADGE_LOST",
+  "DEBUFF_APPLIED",
+  "DEBUFF_EXPIRED",
+  "STREAK_MILESTONE",
+  "STREAK_AT_RISK",
+  "PERSONAL_BEST",
+  "CHALLENGE_STARTED",
+  "CHALLENGE_ENDING_SOON",
+  "CHALLENGE_COMPLETED",
+  "GUILD_POST_NEW",
+  "GUILD_MEMBER_JOINED",
+  "GUILD_METADATA_UPDATED",
+  "GUILD_INVITE",
+  "CHAT_MENTION",
+  "CHAT_NEW_MESSAGE",
+  "SYSTEM_ANNOUNCEMENT",
+  "SYSTEM_MAINTENANCE",
+]);
+
+const NotificationCategory = a.enum([
+  "ASSIGNMENT",
+  "COLLABORATION",
+  "GAMIFICATION",
+  "GUILD",
+  "CHAT",
+  "SYSTEM",
+]);
+
 // Consolidated types for DRY principles
 const EmbeddingInfo = a.customType({
   embedding: a.json(), // Array of PageEmbedding objects
@@ -91,6 +134,20 @@ const Choice = a.customType({
 // ============================================================================
 // PHASE 1: TYPED CUSTOM TYPES (replace a.json() usage)
 // ============================================================================
+
+// --- Gamification settings custom types ---
+const LevelThreshold = a.customType({
+  level: a.integer().required(),
+  xpRequired: a.integer().required(),
+  title: a.string(), // Optional custom title for this level (e.g., "Apprentice", "Master")
+});
+
+const BadgeConfig = a.customType({
+  badgeType: a.string().required(),
+  enabled: a.boolean().required(),
+  // Override criteria thresholds per section
+  thresholdOverride: a.integer(),
+});
 
 // --- Gamification aggregates ---
 const BadgeEntry = a.customType({
@@ -316,6 +373,8 @@ const schema = a
     // ========================================================================
     // REGISTERED CUSTOM TYPES (defined above, referenced via a.ref())
     // ========================================================================
+    LevelThreshold,
+    BadgeConfig,
     BadgeEntry,
     ModuleProgressEntry,
     PersonalBestEntry,
@@ -518,6 +577,8 @@ const schema = a
         gradeOverrides: a.json(), // { [studentId]: { [unitID]: { score: number, updatedAt: string } } }
         // Leaderboard
         leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
+        leaderboardRebuiltAt: a.datetime(), // Timestamp of last successful leaderboard rebuild (debounce)
+        leaderboardUpdateInProgressAt: a.datetime(), // Lock timestamp — prevents concurrent rebuilds; ignored after staleness threshold
         // Linear progression — lock units in due-date order until prior is completed
         linearLockEnabled: a.boolean(),
         // XP tuner — per-section overrides for XP multipliers and caps
@@ -1050,6 +1111,35 @@ const schema = a
         allow.authenticated(),
       ]),
 
+    Notification: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        recipientId: a.string().required(),
+        type: NotificationType,
+        category: NotificationCategory,
+        title: a.string().required(),
+        body: a.string(),
+        linkPath: a.string(),
+        linkLabel: a.string(),
+        referenceId: a.string(),
+        referenceType: a.string(),
+        senderName: a.string(),
+        seen: a.boolean().default(false),
+        interacted: a.boolean().default(false),
+        expiresAt: a.datetime(),
+        metadata: a.json(),
+      })
+      .secondaryIndexes((index) => [
+        index("recipientId").name("byRecipient"),
+        index("type").name("byType"),
+      ])
+      .authorization((allow) => [
+        allow.ownerDefinedIn("recipientId"),
+        allow.group("Admins"),
+      ]),
+
     AIFeedback: a
       .model({
         _version: a.integer(),
@@ -1210,6 +1300,12 @@ const schema = a
         completedAssignments: a.integer(),
         nailedItCount: a.integer(),
         lastUpdated: a.datetime(),
+        // Rollup counters — maintained by XP stream handler, eliminates log scans
+        reasonCounts: a.json(), // { "PERFECT_SCORE": 5, "NAILED_IT": 12, ... }
+        totalSubmissions: a.integer().default(0),
+        maxFailedAttemptsOnSingleRef: a.integer().default(0),
+        recentSubmissionTimestamps: a.json(), // last 5 HOMEWORK_SUBMITTED timestamps
+        activeDaysCount: a.integer().default(0),
         // Cosmetic penalty (boss battle consequence)
         cosmeticPenalty: a.json(),
         // Active debuffs from anti-badges (JSON array with expiry timestamps)
@@ -1218,6 +1314,92 @@ const schema = a
       .secondaryIndexes((index) => [
         index("studentId").name("byStudent"),
         index("cohortId").name("byCohort"),
+      ])
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    // Global platform settings — admin-only singleton for all platform-wide configuration
+    PlatformSettings: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        // === Gamification ===
+        // Leveling curve — ordered thresholds defining XP needed per level
+        levelThresholds: a.ref("LevelThreshold").array(),
+        // XP multipliers per reason (overrides global defaults)
+        xpMultipliers: a.json(), // { "PERFECT_SCORE": 1.5, "NAILED_IT": 2.0, ... }
+        // XP caps
+        dailyCap: a.integer(),
+        weeklyCap: a.integer(),
+        // Badge toggles — which badge/anti-badge types are active
+        badgeConfigs: a.ref("BadgeConfig").array(),
+        badgesEnabled: a.boolean().default(true),
+        antiBadgesEnabled: a.boolean().default(true),
+        // Streak settings
+        streakFreezesAllowed: a.integer().default(3),
+        // Leaderboard
+        leaderboardEnabled: a.boolean().default(true),
+        leaderboardAnonymous: a.boolean().default(false),
+        // Custom badge definitions (admin-created badges)
+        customBadges: a.json(), // Array of { id, title, description, icon, criteria }
+        // Avatar unlock schedule — JSON: { unlocks: [{minLevel, tier}], glowOnLevelUp?, featureUnlockLevels? }
+        avatarUnlockConfig: a.json(),
+        // === AI & Document Analysis ===
+        autoAnalyzeDocuments: a.boolean().default(true),
+        documentAnalysisModel: a.string(), // e.g. "gpt-4", "gpt-4o"
+        defaultAIModel: a.string(), // default model for chat/assistant
+        // === Ownership ===
+        owner: a.string(),
+      })
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    // Per-student, per-section progress — enables different XP/level/badges per section
+    SectionProgress: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        studentId: a.string().required(),
+        sectionId: a.string().required(),
+        studentName: a.string(),
+        // XP & Level (scoped to this section, computed using section's leveling curve)
+        totalXP: a.integer().default(0),
+        level: a.integer().default(1),
+        // Streak (scoped to this section)
+        currentStreak: a.integer().default(0),
+        longestStreak: a.integer().default(0),
+        lastActivityDate: a.date(),
+        freezesRemaining: a.integer().default(0),
+        freezesUsed: a.integer().default(0),
+        // Badges earned in this section
+        badges: a.ref("BadgeEntry").array(),
+        // Active debuffs from anti-badges
+        activeDebuffs: a.json(),
+        // Leaderboard position fields
+        completedAssignments: a.integer().default(0),
+        nailedItCount: a.integer().default(0),
+        lastUpdated: a.datetime(),
+        // Rollup counters — maintained by stream handler (same as StudentProfile)
+        reasonCounts: a.json(),
+        totalSubmissions: a.integer().default(0),
+        maxFailedAttemptsOnSingleRef: a.integer().default(0),
+        recentSubmissionTimestamps: a.json(),
+        activeDaysCount: a.integer().default(0),
+        // Module progress within this section
+        moduleProgress: a.ref("ModuleProgressEntry").array(),
+        owner: a.string(),
+      })
+      .secondaryIndexes((index) => [
+        index("studentId").name("byStudent"),
+        index("sectionId").name("bySection"),
       ])
       .authorization((allow) => [
         allow.owner(),
@@ -1790,6 +1972,15 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(gamificationHandler)),
 
+    checkBadgesBatch: a
+      .mutation()
+      .arguments({
+        entries: a.json().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(gamificationHandler)),
+
     updateStreak: a
       .mutation()
       .arguments({
@@ -1979,12 +2170,34 @@ const schema = a
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(peerReviewAIHandler)),
+
+    // Image Processing Mutations
+    processFileImage: a
+      .mutation()
+      .arguments({
+        fileID: a.id().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(imageProcessHandler)),
+
+    // Document Thumbnail Mutations
+    processDocumentThumbnail: a
+      .mutation()
+      .arguments({
+        fileID: a.id().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(documentThumbnailHandler)),
   })
   .authorization((allow) => [
     allow.resource(openaiHandler),
     allow.resource(documentAnalysisHandler),
     allow.resource(embeddingsHandler),
     allow.resource(mediaConvertHandler),
+    allow.resource(imageProcessHandler),
+    allow.resource(documentThumbnailHandler),
     allow.resource(gamificationHandler),
     allow.resource(moderationHandler),
   ]);

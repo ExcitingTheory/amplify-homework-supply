@@ -1,4 +1,5 @@
 import { defineBackend } from "@aws-amplify/backend";
+import * as cdk from "aws-cdk-lib";
 import { Stack, Aspects, IAspect } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
 import { CfnResolver, CfnDataSource } from "aws-cdk-lib/aws-appsync";
@@ -27,6 +28,8 @@ import { embeddingsHandler } from "./functions/embeddings/resource";
 
 import { moderationHandler } from "./functions/moderation/resource";
 import { mediaConvertHandler } from "./functions/mediaConvert/resource";
+import { imageProcessHandler } from "./functions/imageProcess/resource";
+import { documentThumbnailHandler } from "./functions/documentThumbnail/resource";
 import {
   websocketHandler,
   WebSocketApiConstruct,
@@ -37,6 +40,9 @@ import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
 import { notificationCronHandler } from "./functions/notificationCron/resource";
+import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 /**
  * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
@@ -114,12 +120,15 @@ export const backend = defineBackend({
   embeddingsHandler,
   moderationHandler,
   mediaConvertHandler,
+  imageProcessHandler,
+  documentThumbnailHandler,
   websocketHandler,
   gamificationHandler,
   peerReviewAIHandler,
   generatePracticeDrillHandler,
   streakResetCronHandler,
   notificationCronHandler,
+  leaderboardStreamHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -366,6 +375,197 @@ backend.storage.resources.bucket.grantRead(
   backend.generatePracticeDrillHandler.resources.lambda,
 );
 
+// ---------------------------------------------------------------------------
+// Image Processing — EventBridge rule for image/document uploads
+// ---------------------------------------------------------------------------
+
+new events.Rule(dataStack, "S3ImageUploadRule", {
+  description:
+    "Routes S3 image/PDF uploads to imageProcess handler via EventBridge",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".jpg"),
+          events.Match.suffix(".jpeg"),
+          events.Match.suffix(".png"),
+          events.Match.suffix(".gif"),
+          events.Match.suffix(".webp"),
+          events.Match.suffix(".avif"),
+          events.Match.suffix(".tiff"),
+          events.Match.suffix(".bmp"),
+          events.Match.suffix(".pdf"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(backend.imageProcessHandler.resources.lambda),
+  ],
+});
+
+// Environment variables for imageProcess
+backend.imageProcessHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.imageProcessHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+
+// S3 read/write access for downloading source files and uploading processed variants
+backend.storage.resources.bucket.grantReadWrite(
+  backend.imageProcessHandler.resources.lambda,
+);
+
+// AppSync GraphQL access (to query/update File records)
+const imageProcessAppSyncPolicy = new Policy(
+  backend.imageProcessHandler.resources.lambda.stack,
+  "ImageProcessAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.imageProcessHandler.resources.lambda.role?.attachInlinePolicy(
+  imageProcessAppSyncPolicy,
+);
+
+// ---------------------------------------------------------------------------
+// Document Thumbnail Lambda (LibreOffice layer for office documents)
+// ---------------------------------------------------------------------------
+
+// EventBridge rule for document uploads (office docs + edu formats — for thumbnail generation)
+new events.Rule(dataStack, "S3DocumentUploadRule", {
+  description:
+    "Routes S3 office/edu document uploads to documentThumbnail handler via EventBridge",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".doc"),
+          events.Match.suffix(".docx"),
+          events.Match.suffix(".xls"),
+          events.Match.suffix(".xlsx"),
+          events.Match.suffix(".ppt"),
+          events.Match.suffix(".pptx"),
+          events.Match.suffix(".odt"),
+          events.Match.suffix(".ods"),
+          events.Match.suffix(".odp"),
+          events.Match.suffix(".rtf"),
+          events.Match.suffix(".epub"),
+          events.Match.suffix(".txt"),
+          events.Match.suffix(".md"),
+          events.Match.suffix(".csv"),
+          events.Match.suffix(".imscc"),
+          events.Match.suffix(".qti"),
+          events.Match.suffix(".gift"),
+          events.Match.suffix(".zip"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(
+      backend.documentThumbnailHandler.resources.lambda,
+    ),
+  ],
+});
+
+// EventBridge rule for document analysis (auto-analyze on upload)
+new events.Rule(dataStack, "S3DocumentAnalysisRule", {
+  description:
+    "Routes S3 document/edu uploads to documentAnalysis handler for auto-analysis",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".pdf"),
+          events.Match.suffix(".doc"),
+          events.Match.suffix(".docx"),
+          events.Match.suffix(".xls"),
+          events.Match.suffix(".xlsx"),
+          events.Match.suffix(".ppt"),
+          events.Match.suffix(".pptx"),
+          events.Match.suffix(".odt"),
+          events.Match.suffix(".ods"),
+          events.Match.suffix(".odp"),
+          events.Match.suffix(".txt"),
+          events.Match.suffix(".md"),
+          events.Match.suffix(".csv"),
+          events.Match.suffix(".epub"),
+          events.Match.suffix(".rtf"),
+          events.Match.suffix(".imscc"),
+          events.Match.suffix(".qti"),
+          events.Match.suffix(".gift"),
+          events.Match.suffix(".zip"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(
+      backend.documentAnalysisHandler.resources.lambda,
+    ),
+  ],
+});
+
+// Environment variables for documentThumbnail
+backend.documentThumbnailHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.documentThumbnailHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+
+// S3 read/write access
+backend.storage.resources.bucket.grantReadWrite(
+  backend.documentThumbnailHandler.resources.lambda,
+);
+
+// AppSync GraphQL access (to query/update File records)
+const documentThumbnailAppSyncPolicy = new Policy(
+  backend.documentThumbnailHandler.resources.lambda.stack,
+  "DocumentThumbnailAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.documentThumbnailHandler.resources.lambda.role?.attachInlinePolicy(
+  documentThumbnailAppSyncPolicy,
+);
+
 // AppSync GraphQL access (to update File records)
 const mediaConvertAppSyncPolicy = new Policy(
   backend.mediaConvertHandler.resources.lambda.stack,
@@ -582,6 +782,56 @@ const gamificationAppSyncPolicy = new Policy(
 backend.gamificationHandler.resources.lambda.role?.attachInlinePolicy(
   gamificationAppSyncPolicy,
 );
+
+// ==========================================================================
+// Leaderboard Stream Handler — DynamoDB Stream on StudentXPLog
+// ==========================================================================
+
+backend.leaderboardStreamHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+const leaderboardStreamAppSyncPolicy = new Policy(
+  backend.leaderboardStreamHandler.resources.lambda.stack,
+  "LeaderboardStreamAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.leaderboardStreamHandler.resources.lambda.role?.attachInlinePolicy(
+  leaderboardStreamAppSyncPolicy,
+);
+
+// Connect DynamoDB Stream from StudentXPLog table to the leaderboard stream handler
+const studentXPLogTable = backend.data.resources.tables["StudentXPLog"];
+const leaderboardStreamLambda =
+  backend.leaderboardStreamHandler.resources.lambda;
+
+leaderboardStreamLambda.addEventSource(
+  new DynamoEventSource(studentXPLogTable, {
+    startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+    batchSize: 25,
+    maxBatchingWindow: cdk.Duration.seconds(10), // Wait up to 10s to batch records
+    retryAttempts: 3,
+    bisectBatchOnError: true,
+    filters: [
+      lambda.FilterCriteria.filter({
+        eventName: lambda.FilterRule.isEqual("INSERT"),
+      }),
+    ],
+  }),
+);
+
+// Grant the stream handler read access to the StudentXPLog table stream
+studentXPLogTable.grantStreamRead(leaderboardStreamLambda);
 
 // ==========================================================================
 // Peer Review AI Handler — IAM + env config

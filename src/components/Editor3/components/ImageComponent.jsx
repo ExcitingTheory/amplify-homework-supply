@@ -37,6 +37,7 @@ import Placeholder from "./Placeholder";
 import { $isImageNode } from "./ImageNode";
 
 import getCachedUrl from "../../../utils/getCachedUrl";
+import { getResponsiveImageUrls } from "../../../utils/getResponsiveImageUrls";
 
 function useSuspenseImage(src) {
   new Promise(async (resolve) => {
@@ -53,6 +54,8 @@ function LazyImage({
   className,
   imageRef,
   src,
+  srcSet,
+  sizes,
   width,
   height,
   maxWidth,
@@ -62,6 +65,8 @@ function LazyImage({
     <img
       className={className || undefined}
       src={src}
+      srcSet={srcSet || undefined}
+      sizes={sizes || undefined}
       alt={altText}
       ref={imageRef}
       style={{
@@ -81,6 +86,7 @@ const ImageComponent = React.memo(function ImageComponent({
   path,
   altText,
   identityId,
+  fileId,
   nodeKey,
   width,
   height,
@@ -96,6 +102,8 @@ const ImageComponent = React.memo(function ImageComponent({
   const [isSelected, setSelected, clearSelection] =
     useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState(false);
+  const [srcSet, setSrcSet] = useState(null);
+  const [sizes, setSizes] = useState(null);
   //   const { isCollabActive } = useCollaborationContext();
   const [editor] = useLexicalComposerContext();
   const activeEditorRef = useRef(null);
@@ -287,6 +295,20 @@ const ImageComponent = React.memo(function ImageComponent({
     fetchImage();
   }, [path]);
 
+  // Load responsive srcSet variants when fileId is available
+  React.useEffect(() => {
+    if (!fileId || !identityId) return;
+
+    getResponsiveImageUrls(fileId, identityId)
+      .then((result) => {
+        if (result) {
+          setSrcSet(result.srcSet);
+          setSizes(result.sizes);
+        }
+      })
+      .catch(() => {});
+  }, [fileId, identityId]);
+
   const draggable = false; // Disabled to allow DraggableBlockPlugin to handle block dragging
   const isFocused = isSelected || isResizing;
   return (
@@ -304,6 +326,8 @@ const ImageComponent = React.memo(function ImageComponent({
           <LazyImage
             className={isFocused ? "focused draggable" : null}
             src={src}
+            srcSet={srcSet}
+            sizes={sizes}
             altText={altText}
             imageRef={imageRef}
             width={width}

@@ -63,6 +63,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
+import { usePlatformSettings } from "../../../context/gamificationContext";
 
 import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { generateEmbedding as generateEmbeddingAction } from "../../../../app/actions/embeddings";
@@ -125,8 +126,10 @@ import UnitContext from "../../../context/unitContext";
 import { FileManagerProvider, useFileManager } from "./FileManagerContext";
 import { useTabContext } from "../../../context/tabContext";
 import getCachedUrl from "../../../utils/getCachedUrl";
+import { getResponsiveImageUrls } from "../../../utils/getResponsiveImageUrls";
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import StaticWaveform from "./StaticWaveform";
+import FileThumbnail from "./FileThumbnail";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -333,16 +336,21 @@ export class CourseVectorStore {
         );
         try {
           // Calculate similarities in the worker
-          const similarities = await Promise.all(
+          const similarityResults = await Promise.allSettled(
             itemsWithEmbeddings.map((item) =>
               EmbeddingWorker.cosineSimilarity(queryVector, item.vector),
             ),
           );
 
-          vectorResults = itemsWithEmbeddings.map((item, i) => ({
-            ...item,
-            similarity: similarities[i],
-          }));
+          vectorResults = itemsWithEmbeddings
+            .map((item, i) => ({
+              ...item,
+              similarity:
+                similarityResults[i].status === "fulfilled"
+                  ? similarityResults[i].value
+                  : 0,
+            }))
+            .filter((item) => item.similarity > 0);
         } catch (error) {
           console.error(
             "[VectorStore.search] Worker error, falling back to main thread:",
@@ -2200,6 +2208,8 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
   const t = useTranslations("editor.files");
   const { setConfirmDialog } = useFileManager();
   const [imageUrl, setImageUrl] = React.useState(null);
+  const [imageSrcSet, setImageSrcSet] = React.useState(null);
+  const [imageSizes, setImageSizes] = React.useState(null);
   const [audioUrl, setAudioUrl] = React.useState(null);
   const [videoUrl, setVideoUrl] = React.useState(null);
   const audioContainerRef = React.useRef(null);
@@ -2230,6 +2240,18 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             file.identityId,
           );
           setImageUrl(url);
+
+          // Load responsive srcSet variants
+          if (file.id && file.identityId) {
+            getResponsiveImageUrls(file.id, file.identityId)
+              .then((result) => {
+                if (result) {
+                  setImageSrcSet(result.srcSet);
+                  setImageSizes(result.sizes);
+                }
+              })
+              .catch(() => {});
+          }
         } else if (file.mimeType?.startsWith("audio/")) {
           const url = await getCachedUrl(
             file.path,
@@ -2261,6 +2283,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             altText: file.name,
             path: file.path,
             identityId: file.identityId,
+            fileId: file.id,
           });
         }
         break;
@@ -2424,6 +2447,8 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             <Box
               component="img"
               src={imageUrl}
+              srcSet={imageSrcSet || undefined}
+              sizes={imageSizes || undefined}
               alt={file.name}
               sx={{
                 maxWidth: "100%",
@@ -2817,72 +2842,13 @@ const FileRowComponent = React.memo(
             onClick={(e) => e.stopPropagation()}
           />
         </Box>
-        {/* File Icon */}
-        <Box
-          sx={{
-            flexShrink: 0,
-            width: "24px",
-            height: "24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {fileType === "images" && (
-            <ImageIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-          {fileType === "audio" && (
-            <AudioFileIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-          {fileType === "documents" && (
-            <PictureAsPdfIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-          {fileType === "video" && (
-            <ArticleIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-          {fileType === "scripts" && (
-            <TheaterComedyIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-          {fileType === "other" && (
-            <DescriptionIcon
-              sx={{
-                fontSize: "20px",
-                color: isSelected ? "primary.main" : "inherit",
-                transition: "color 0.2s",
-              }}
-            />
-          )}
-        </Box>
+        {/* File Thumbnail / Icon */}
+        <FileThumbnail
+          file={file}
+          fileType={fileType}
+          size={32}
+          isSelected={isSelected}
+        />
 
         {/* File Name */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -2914,6 +2880,7 @@ const FileRowComponent = React.memo(
     // Custom comparison - only re-render if these specific props change
     return (
       prevProps.file.id === nextProps.file.id &&
+      prevProps.file.thumbnail === nextProps.file.thumbnail &&
       prevProps.fileType === nextProps.fileType &&
       prevProps.index === nextProps.index &&
       prevProps.isSelected === nextProps.isSelected &&
@@ -4097,6 +4064,8 @@ export default function FileManager2() {
   // Get settings from context instead of local subscription
   const settingsContext = React.useContext(SettingsContext);
   const settings = settingsContext?.settings || null;
+  // Global platform override for auto-analyze
+  const { autoAnalyzeDocuments: globalAutoAnalyze } = usePlatformSettings();
 
   // Periodic cleanup of old sessionStorage drafts (run every 5 minutes)
   React.useEffect(() => {
@@ -4271,6 +4240,7 @@ export default function FileManager2() {
             // If analyzable document and auto-analyze is enabled, trigger both analysis and embeddings in parallel
             if (
               isAnalyzableDocument(file.type) &&
+              globalAutoAnalyze &&
               settings?.autoAnalyzeDocuments &&
               result.documentModel
             ) {
@@ -4282,22 +4252,26 @@ export default function FileManager2() {
               );
 
               // Run both in parallel - don't await
-              Promise.all([
+              Promise.allSettled([
                 analyzePDF(result.fileModel.id),
                 generateEmbeddings(result.fileModel.id),
-              ])
-                .then(([analysisResult, embeddingsResult]) => {
+              ]).then((results) => {
+                const analysisResult =
+                  results[0].status === "fulfilled" ? results[0].value : null;
+                const embeddingsResult =
+                  results[1].status === "fulfilled" ? results[1].value : null;
+                if (analysisResult)
                   console.log("Auto-analysis completed:", analysisResult);
+                if (embeddingsResult)
                   console.log(
                     "Embeddings generation completed:",
                     embeddingsResult,
                   );
-                })
-                .catch((error) => {
-                  // If already being processed, this is expected - just log as info
+                if (results[0].status === "rejected") {
+                  const error = results[0].reason;
                   if (
-                    error.message?.includes("currently being processed") ||
-                    error.message?.includes("already been analyzed")
+                    error?.message?.includes("currently being processed") ||
+                    error?.message?.includes("already been analyzed")
                   ) {
                     console.log(
                       "Document processing already in progress or completed:",
@@ -4306,7 +4280,8 @@ export default function FileManager2() {
                   } else {
                     console.error("Auto-processing failed:", error);
                   }
-                });
+                }
+              });
             }
           } catch (error) {
             console.error("Error uploading file:", error);

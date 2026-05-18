@@ -12,6 +12,7 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { createNotification } from "../shared/notificationUtils";
+import OpenAI from "openai";
 
 // ============================================================================
 // GraphQL Queries & Mutations
@@ -126,14 +127,18 @@ const LIST_XP_LOGS_FOR_COHORT = `query ListXPLogsByCohortId($cohortId: String!) 
 
 // Leaderboard now on StudentProfile - no separate model
 
-const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: String!) {
+const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: ID!) {
   listGradeBySectionID(sectionID: $sectionID) {
     items { id owner sectionID complete accuracy _version _lastChangedAt _deleted }
   }
 }`;
 
 const GET_SECTION = `query GetSection($id: ID!) {
-  getSection(id: $id) { id leaderboardEnabled xpConfig badgesEnabled antiBadgesEnabled _version _lastChangedAt _deleted }
+  getSection(id: $id) { id leaderboardEnabled leaderboardRebuiltAt leaderboardUpdateInProgressAt xpConfig badgesEnabled antiBadgesEnabled _version _lastChangedAt _deleted }
+}`;
+
+const UPDATE_SECTION_LEADERBOARD_TIMESTAMP = `mutation UpdateSection($input: UpdateSectionInput!) {
+  updateSection(input: $input) { id leaderboardRebuiltAt _version }
 }`;
 
 const GET_SETTINGS_BY_OWNER = `query GetSettings($owner: String!) {
@@ -362,84 +367,96 @@ interface BadgeCriteria {
     xpLogs: any[];
     badges: any[];
     totalXP: number;
+    reasonCounts: Record<string, number>;
   }) => boolean;
+}
+
+// Helper: get reason count from rollup map, fallback to log scan
+function rc(
+  reasonCounts: Record<string, number>,
+  xpLogs: any[],
+  reason: string,
+): number {
+  if (Object.keys(reasonCounts).length > 0) {
+    return reasonCounts[reason] || 0;
+  }
+  return xpLogs.filter((l: any) => l.reason === reason).length;
 }
 
 const BADGE_CRITERIA: BadgeCriteria[] = [
   {
     badgeType: "FIRST_SUBMISSION",
-    check: ({ xpLogs }) =>
-      xpLogs.some((l: any) => l.reason === "HOMEWORK_SUBMITTED"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "HOMEWORK_SUBMITTED") >= 1,
   },
   {
     badgeType: "GOOD_EYE",
-    check: ({ xpLogs }) =>
-      xpLogs.some((l: any) => l.reason === "AI_FEEDBACK_REVISED"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "AI_FEEDBACK_REVISED") >= 1,
   },
   {
     badgeType: "QUICK_DRAW",
-    check: ({ xpLogs }) =>
-      xpLogs.some((l: any) => l.reason === "ON_TIME_SUBMISSION"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "ON_TIME_SUBMISSION") >= 1,
   },
   {
     badgeType: "SHARPSHOOTER",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "PERFECT_SCORE").length >= 3,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "PERFECT_SCORE") >= 3,
   },
   {
     badgeType: "CONSISTENT",
-    check: ({ xpLogs }) => xpLogs.some((l: any) => l.reason === "STREAK_7DAY"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "STREAK_7DAY") >= 1,
   },
   {
     badgeType: "TEAM_PLAYER",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "PEER_REVIEW_GIVEN").length >= 3,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "PEER_REVIEW_GIVEN") >= 3,
   },
   {
     badgeType: "DEEP_THINKER",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "AI_FEEDBACK_REVISED").length >= 5,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "AI_FEEDBACK_REVISED") >= 5,
   },
   {
     badgeType: "TOP_OF_CLASS",
-    check: ({ xpLogs, totalXP }) =>
-      // Approximation: awarded if student is high XP (500+). Full check requires leaderboard query.
-      totalXP >= 500,
+    check: ({ totalXP }) => totalXP >= 500,
   },
   {
     badgeType: "PERFECTIONIST",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "PERFECT_SCORE").length >= 5,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "PERFECT_SCORE") >= 5,
   },
   {
     badgeType: "DRILL_MASTER",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "PRACTICE_DRILL_COMPLETED")
-        .length >= 10,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "PRACTICE_DRILL_COMPLETED") >= 10,
   },
   {
     badgeType: "COMEBACK_KID",
-    check: ({ xpLogs }) => xpLogs.some((l: any) => l.reason === "COMEBACK"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "COMEBACK") >= 1,
   },
   {
     badgeType: "STREAK_14",
-    check: ({ xpLogs }) => xpLogs.some((l: any) => l.reason === "STREAK_14DAY"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "STREAK_14DAY") >= 1,
   },
   {
     badgeType: "STREAK_30",
-    check: ({ xpLogs }) => xpLogs.some((l: any) => l.reason === "STREAK_30DAY"),
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "STREAK_30DAY") >= 1,
   },
   {
     badgeType: "EASTER_EGG_HUNTER",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "EASTER_EGG").length >= 3,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "EASTER_EGG") >= 3,
   },
   {
-    // Awarded to students chosen as top reviewer 3+ times — the "go-to" peer reviewer.
     badgeType: "PEER_REVIEW_CHAMPION",
-    check: ({ xpLogs }) =>
-      xpLogs.filter((l: any) => l.reason === "PEER_REVIEW_TOP_REVIEWER")
-        .length >= 3,
+    check: ({ xpLogs, reasonCounts }) =>
+      rc(reasonCounts, xpLogs, "PEER_REVIEW_TOP_REVIEWER") >= 3,
   },
 ];
 
@@ -454,6 +471,7 @@ interface AntiBadgeCriteria {
     badges: any[];
     totalXP: number;
     profile: any;
+    reasonCounts?: Record<string, number>;
   }) => boolean;
   debuff: {
     xpMultiplier?: number;
@@ -473,8 +491,12 @@ interface AntiBadgeCriteria {
 const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   {
     badgeType: "CONSISTENTLY_WRONG",
-    check: ({ xpLogs }) => {
-      // Same referenceId with 0 XP (failed attempts) 5+ times
+    check: ({ xpLogs, profile }) => {
+      // Use rollup: maxFailedAttemptsOnSingleRef tracks max 0-XP logs on any ref
+      if (profile.maxFailedAttemptsOnSingleRef != null) {
+        return profile.maxFailedAttemptsOnSingleRef >= 5;
+      }
+      // Fallback: scan logs
       const failMap = new Map<string, number>();
       for (const l of xpLogs) {
         if (l.xpAmount === 0 && l.referenceId) {
@@ -495,7 +517,6 @@ const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   {
     badgeType: "STREAK_BREAKER",
     check: ({ profile }) => {
-      // Broke a 14+ day streak (longest > 14 but current is 0)
       return (
         (profile.longestStreak || 0) >= 14 && (profile.currentStreak || 0) === 0
       );
@@ -513,18 +534,29 @@ const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   },
   {
     badgeType: "SPEED_RUN_SCHOLAR",
-    check: ({ xpLogs }) => {
-      // Any homework submitted within 30 seconds of session start (check for very fast submissions)
-      const submissions = xpLogs.filter(
-        (l: any) => l.reason === "HOMEWORK_SUBMITTED",
-      );
-      if (submissions.length < 3) return false;
-      // Check if 3+ submissions happened within 1 minute of each other (speed-running)
-      const sorted = submissions
-        .map((l: any) => new Date(l.createdAt).getTime())
-        .sort((a: number, b: number) => a - b);
-      for (let i = 0; i < sorted.length - 2; i++) {
-        if (sorted[i + 2] - sorted[i] < 60000) return true; // 3 in 1 minute
+    check: ({ xpLogs, profile }) => {
+      // Use rollup: recentSubmissionTimestamps (last 5 HOMEWORK_SUBMITTED timestamps)
+      const timestamps: string[] = profile.recentSubmissionTimestamps || [];
+      if (timestamps.length >= 3) {
+        const sorted = timestamps
+          .map((t: string) => new Date(t).getTime())
+          .sort((a: number, b: number) => a - b);
+        for (let i = 0; i < sorted.length - 2; i++) {
+          if (sorted[i + 2] - sorted[i] < 60000) return true;
+        }
+      }
+      // Fallback if no rollup data
+      if (timestamps.length === 0 && xpLogs.length > 0) {
+        const submissions = xpLogs.filter(
+          (l: any) => l.reason === "HOMEWORK_SUBMITTED",
+        );
+        if (submissions.length < 3) return false;
+        const sorted = submissions
+          .map((l: any) => new Date(l.createdAt).getTime())
+          .sort((a: number, b: number) => a - b);
+        for (let i = 0; i < sorted.length - 2; i++) {
+          if (sorted[i + 2] - sorted[i] < 60000) return true;
+        }
       }
       return false;
     },
@@ -540,7 +572,6 @@ const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   {
     badgeType: "THE_GHOST",
     check: ({ profile }) => {
-      // No activity for 7+ days (lastActivityDate is old)
       if (!profile.lastActivityDate) return false;
       const lastActive = new Date(profile.lastActivityDate).getTime();
       const daysSince = (Date.now() - lastActive) / (1000 * 60 * 60 * 24);
@@ -557,18 +588,21 @@ const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   },
   {
     badgeType: "XP_ZERO_HERO",
-    check: ({ xpLogs }) => {
-      // Has 10+ sessions (logs on 10+ distinct days) but at least one day with 0 XP earned
+    check: ({ xpLogs, totalXP, profile }) => {
+      // Use rollup: activeDaysCount >= 5 and totalXP === 0
+      if (profile.activeDaysCount != null) {
+        return profile.activeDaysCount >= 5 && totalXP === 0;
+      }
+      // Fallback
       const daySet = new Set(
         xpLogs.map((l: any) => l.createdAt?.split("T")[0]),
       );
       if (daySet.size < 5) return false;
-      // Check if total XP across all logs is suspiciously low relative to sessions
-      const totalXP = xpLogs.reduce(
+      const sumXP = xpLogs.reduce(
         (s: number, l: any) => s + (l.xpAmount || 0),
         0,
       );
-      return totalXP === 0 && xpLogs.length > 0;
+      return sumXP === 0 && xpLogs.length > 0;
     },
     debuff: {
       temporaryTitle: "🦸 Zero Hero",
@@ -580,14 +614,14 @@ const ANTI_BADGE_CRITERIA: AntiBadgeCriteria[] = [
   },
   {
     badgeType: "MINIMALLY_VIABLE_STUDENT",
-    check: ({ xpLogs, totalXP }) => {
-      // Consistently low accuracy — many submissions but low XP per submission
-      const submissions = xpLogs.filter(
-        (l: any) => l.reason === "HOMEWORK_SUBMITTED",
-      );
-      if (submissions.length < 5) return false;
-      const avgXP = totalXP / submissions.length;
-      // If average XP is less than half the base amount, they're barely passing
+    check: ({ xpLogs, totalXP, profile }) => {
+      // Use rollup: totalSubmissions + totalXP gives avg without scanning
+      const submissions =
+        profile.totalSubmissions != null
+          ? profile.totalSubmissions
+          : xpLogs.filter((l: any) => l.reason === "HOMEWORK_SUBMITTED").length;
+      if (submissions < 5) return false;
+      const avgXP = totalXP / submissions;
       return avgXP < 5;
     },
     debuff: {
@@ -828,6 +862,101 @@ function getClient() {
 }
 
 // ============================================================================
+// Leaderboard Rebuild Debounce
+// ============================================================================
+
+const LEADERBOARD_REBUILD_DEBOUNCE_MS = 30_000; // 30 seconds — skip if rebuilt recently
+const LEADERBOARD_LOCK_STALE_MS = 60_000; // 60 seconds — ignore lock if older (Lambda crashed/timed out)
+
+/**
+ * Conditionally rebuilds the leaderboard for a cohort (section).
+ *
+ * Guard logic:
+ * 1. Skip if Section.leaderboardRebuiltAt is within the debounce window (30s).
+ * 2. Skip if Section.leaderboardUpdateInProgressAt is recent (another Lambda is working).
+ *    — BUT ignore the lock if it's stale (>60s), meaning the prior Lambda likely failed.
+ * 3. Acquire lock (stamp leaderboardUpdateInProgressAt) before rebuilding.
+ * 4. On success: stamp leaderboardRebuiltAt and clear leaderboardUpdateInProgressAt.
+ * 5. On failure: clear leaderboardUpdateInProgressAt so another invocation can retry.
+ */
+async function maybeRebuildLeaderboard(
+  gqlClient: any,
+  cohortId: string,
+): Promise<void> {
+  try {
+    const { data } = await gqlClient.graphql({
+      query: GET_SECTION,
+      variables: { id: cohortId },
+    });
+    const section = data?.getSection;
+    if (!section) return;
+
+    const now = Date.now();
+
+    // Check debounce — skip if rebuilt recently
+    const lastRebuilt = section.leaderboardRebuiltAt
+      ? new Date(section.leaderboardRebuiltAt).getTime()
+      : 0;
+    if (now - lastRebuilt < LEADERBOARD_REBUILD_DEBOUNCE_MS) {
+      return;
+    }
+
+    // Check lock — skip if another Lambda is actively rebuilding (unless stale)
+    const lockTime = section.leaderboardUpdateInProgressAt
+      ? new Date(section.leaderboardUpdateInProgressAt).getTime()
+      : 0;
+    if (lockTime > 0 && now - lockTime < LEADERBOARD_LOCK_STALE_MS) {
+      return; // Another Lambda is working on it
+    }
+
+    // Acquire lock
+    await gqlClient.graphql({
+      query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
+      variables: {
+        input: {
+          id: cohortId,
+          leaderboardUpdateInProgressAt: new Date(now).toISOString(),
+        },
+      },
+    });
+
+    // Perform rebuild
+    await handleRebuildLeaderboard(gqlClient, { cohortId });
+
+    // Success — stamp completion time and clear lock
+    await gqlClient.graphql({
+      query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
+      variables: {
+        input: {
+          id: cohortId,
+          leaderboardRebuiltAt: new Date().toISOString(),
+          leaderboardUpdateInProgressAt: null,
+        },
+      },
+    });
+  } catch (err) {
+    // Clear lock on failure so another invocation can retry
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
+        variables: {
+          input: {
+            id: cohortId,
+            leaderboardUpdateInProgressAt: null,
+          },
+        },
+      });
+    } catch {
+      // Best-effort cleanup — lock will become stale and be ignored after 60s
+    }
+    console.warn(
+      `[gamification] maybeRebuildLeaderboard(${cohortId}) failed:`,
+      err,
+    );
+  }
+}
+
+// ============================================================================
 // Handler
 // ============================================================================
 
@@ -841,10 +970,29 @@ export const handler: Handler = async (event) => {
         return await handleAwardXP(gqlClient, args, identity);
       case "checkBadges":
         return await handleCheckBadges(gqlClient, args);
+      case "checkBadgesBatch": {
+        // entries: Array<{ studentId, cohortId?, unitID?, totalXP?, level?, profileId?, profileVersion?, badges? }>
+        // Pre-fetched data from the stream handler reduces lookups
+        const entries =
+          typeof args.entries === "string"
+            ? JSON.parse(args.entries)
+            : args.entries;
+        const results = await Promise.allSettled(
+          entries.map((entry: any) =>
+            handleCheckBadges(gqlClient, entry, entry),
+          ),
+        );
+        return results.map((r, i) => ({
+          studentId: entries[i].studentId,
+          status: r.status,
+          value: r.status === "fulfilled" ? r.value : null,
+          error: r.status === "rejected" ? String(r.reason) : null,
+        }));
+      }
       case "updateStreak":
         return await handleUpdateStreak(gqlClient, args);
       case "rebuildLeaderboard":
-        return await handleRebuildLeaderboard(gqlClient, args);
+        return await maybeRebuildLeaderboard(gqlClient, args.cohortId);
       case "upsertStudentMemory":
         return await handleUpdateStudentMemory(gqlClient, args);
       case "bootstrapStudentMemory":
@@ -1044,7 +1192,12 @@ async function handleAwardXP(
     xpAmount = Math.min(xpAmount, xpConfig.weeklyCap - weekXP);
   }
 
-  // Create log entry
+  // Create log entry — this triggers the DynamoDB Stream which handles:
+  // - Profile totalXP/level rollup (incremental += xpAmount)
+  // - Level-up & XP milestone notifications
+  // - Badge checks
+  // - Easter egg checks
+  // - Leaderboard rebuild (debounced per cohort)
   await gqlClient.graphql({
     query: CREATE_XP_LOG,
     variables: {
@@ -1060,98 +1213,10 @@ async function handleAwardXP(
     },
   });
 
-  // Calculate new total (re-fetch to include the newly created log)
-  const { data: updatedLogsResult } = await gqlClient.graphql({
-    query: LIST_XP_LOGS_BY_STUDENT,
-    variables: { studentId },
-  });
-  const totalXP = (
-    updatedLogsResult?.listStudentXPLogByStudentId?.items || []
-  ).reduce((sum: number, l: any) => sum + l.xpAmount, 0);
-
-  // Sync totalXP + level to StudentProfile
-  try {
-    const profile = await getOrCreateStudentProfile(
-      gqlClient,
-      studentId,
-      cohortId,
-    );
-    const oldLevel = profile.level || 1;
-    const newLevel = calculateLevel(totalXP, xpConfig.levelConfig);
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          totalXP,
-          level: newLevel,
-          _version: profile._version,
-        },
-      },
-    });
-
-    // Notification: Level Up
-    if (newLevel > oldLevel) {
-      await createNotification(gqlClient, {
-        recipientId: studentId,
-        type: "LEVEL_UP",
-        title: `Level Up! You reached level ${newLevel}`,
-        body: `Congratulations! You've advanced from level ${oldLevel} to level ${newLevel}.`,
-        referenceId: `level-${newLevel}`,
-        referenceType: "StudentProfile",
-        senderName: "System",
-        metadata: { oldLevel, newLevel, totalXP },
-      });
-    }
-
-    // Notification: XP Milestones (100, 250, 500, 1000, 2500, 5000, 10000)
-    const xpMilestones = [100, 250, 500, 1000, 2500, 5000, 10000];
-    const oldXP = profile.totalXP || 0;
-    for (const milestone of xpMilestones) {
-      if (totalXP >= milestone && oldXP < milestone) {
-        await createNotification(gqlClient, {
-          recipientId: studentId,
-          type: "XP_MILESTONE",
-          title: `XP Milestone: ${milestone} XP reached!`,
-          body: `You've earned a total of ${milestone} XP. Keep up the great work!`,
-          referenceId: `xp-milestone-${milestone}`,
-          referenceType: "StudentProfile",
-          senderName: "System",
-          metadata: { milestone, totalXP },
-        });
-        break; // Only one milestone notification per award
-      }
-    }
-  } catch (err) {
-    console.error("[gamification] syncXPToProfile error:", err);
-  }
-
-  // Auto-check badges after awarding XP
-  try {
-    await handleCheckBadges(gqlClient, { studentId, cohortId, unitID });
-  } catch (err) {
-    console.error("[gamification] Auto-checkBadges after awardXP failed:", err);
-  }
-
-  // Check ACHIEVEMENT-type easter eggs after XP award
-  try {
-    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-    const studentStats = {
-      totalXP: profile.totalXP || 0,
-      currentStreak: profile.currentStreak || 0,
-      level: profile.level || 1,
-      lastAccuracy: accuracy || 0,
-      unitsCompleted: profile.completedAssignments || 0,
-    };
-    await handleCheckEasterEggs(gqlClient, {
-      studentId,
-      submissionText: "",
-      triggerType: "ACHIEVEMENT",
-      studentStats,
-    });
-  } catch (err) {
-    console.warn("[gamification] ACHIEVEMENT easter egg check failed:", err);
-  }
+  // Return optimistic totalXP (current + delta) so the client can update immediately.
+  // The stream will reconcile the actual value on StudentProfile asynchronously.
+  const currentTotal = allLogs.reduce((s: number, l: any) => s + l.xpAmount, 0);
+  const totalXP = currentTotal + xpAmount;
 
   return { alreadyAwarded: false, xpAmount, totalXP };
 }
@@ -1237,16 +1302,44 @@ function refreshDebuff(
 // checkBadges — Evaluates badge criteria and awards new badges
 // ============================================================================
 
+interface PreFetchedBadgeData {
+  totalXP?: number;
+  level?: number;
+  profileId?: string;
+  profileVersion?: number;
+  badges?: string;
+  currentStreak?: number;
+  longestStreak?: number;
+  lastActivityDate?: string;
+  nailedItCount?: number;
+  completedAssignments?: number;
+  // Rollup fields — when present, eliminates XP log scans entirely
+  reasonCounts?: string | Record<string, number>;
+  totalSubmissions?: number;
+  maxFailedAttemptsOnSingleRef?: number;
+  recentSubmissionTimestamps?: string | string[];
+  activeDaysCount?: number;
+  // Section settings — when present, skips Section query
+  sectionBadgesEnabled?: boolean;
+  sectionAntiBadgesEnabled?: boolean;
+}
+
 async function handleCheckBadges(
   gqlClient: any,
   args: { studentId: string; cohortId?: string; unitID?: string },
+  preFetched?: PreFetchedBadgeData,
 ) {
   const { studentId, cohortId, unitID } = args;
 
   // Fetch section settings to check badge enable/disable flags
   let sectionBadgesEnabled = true;
   let sectionAntiBadgesEnabled = true;
-  if (cohortId) {
+
+  // Use pre-fetched settings from stream if available (avoids Section query)
+  if (preFetched?.sectionBadgesEnabled !== undefined) {
+    sectionBadgesEnabled = preFetched.sectionBadgesEnabled;
+    sectionAntiBadgesEnabled = preFetched.sectionAntiBadgesEnabled ?? true;
+  } else if (cohortId) {
     try {
       const sectionResult = await gqlClient.graphql({
         query: GET_SECTION,
@@ -1256,28 +1349,114 @@ async function handleCheckBadges(
       if (section) {
         // null/undefined means "not set" → default to enabled (true)
         if (section.badgesEnabled === false) sectionBadgesEnabled = false;
-        if (section.antiBadgesEnabled === false) sectionAntiBadgesEnabled = false;
+        if (section.antiBadgesEnabled === false)
+          sectionAntiBadgesEnabled = false;
       }
     } catch (err) {
-      console.warn("[gamification] Failed to fetch section badge settings:", err);
+      console.warn(
+        "[gamification] Failed to fetch section badge settings:",
+        err,
+      );
     }
   }
 
   // If all badges are disabled for this section, skip awarding entirely
   if (!sectionBadgesEnabled) {
-    return { newBadges: [], updatedBadges: [], newAntiBadges: [], redeemedBadges: [] };
+    return {
+      newBadges: [],
+      updatedBadges: [],
+      newAntiBadges: [],
+      redeemedBadges: [],
+    };
   }
 
-  // Fetch XP logs and existing badges from StudentProfile
-  const [xpResult, profile] = await Promise.all([
-    gqlClient.graphql({
-      query: LIST_XP_LOGS_BY_STUDENT,
-      variables: { studentId },
-    }),
-    getOrCreateStudentProfile(gqlClient, studentId, cohortId),
-  ]);
+  // Parse rollup data if available (from stream pre-fetch)
+  const hasRollupData = preFetched?.reasonCounts != null;
+  const reasonCounts: Record<string, number> = (() => {
+    if (!preFetched?.reasonCounts) return {};
+    try {
+      return typeof preFetched.reasonCounts === "string"
+        ? JSON.parse(preFetched.reasonCounts)
+        : preFetched.reasonCounts;
+    } catch {
+      return {};
+    }
+  })();
+  const recentTimestamps: string[] = (() => {
+    if (!preFetched?.recentSubmissionTimestamps) return [];
+    try {
+      return typeof preFetched.recentSubmissionTimestamps === "string"
+        ? JSON.parse(preFetched.recentSubmissionTimestamps)
+        : preFetched.recentSubmissionTimestamps;
+    } catch {
+      return [];
+    }
+  })();
 
-  const xpLogs = xpResult?.data?.listStudentXPLogByStudentId?.items || [];
+  // Fetch XP logs ONLY if we don't have rollup data (legacy/direct calls)
+  // When rollup data is present, badge criteria use O(1) counter lookups instead
+  let xpLogs: any[] = [];
+  let profile: any;
+
+  if (hasRollupData && preFetched?.profileId) {
+    // Fast path: use pre-fetched profile + rollup counters, no log scan needed
+    profile = {
+      id: preFetched.profileId,
+      totalXP: preFetched.totalXP || 0,
+      level: preFetched.level || 1,
+      currentStreak: preFetched.currentStreak || 0,
+      longestStreak: preFetched.longestStreak || 0,
+      lastActivityDate: preFetched.lastActivityDate || null,
+      nailedItCount: preFetched.nailedItCount || 0,
+      completedAssignments: preFetched.completedAssignments || 0,
+      badges: preFetched.badges || "[]",
+      _version: preFetched.profileVersion,
+      // Rollup fields on profile object for anti-badge checks
+      reasonCounts,
+      totalSubmissions: preFetched.totalSubmissions || 0,
+      maxFailedAttemptsOnSingleRef:
+        preFetched.maxFailedAttemptsOnSingleRef || 0,
+      recentSubmissionTimestamps: recentTimestamps,
+      activeDaysCount: preFetched.activeDaysCount || 0,
+    };
+  } else {
+    // Fallback: fetch logs + profile (legacy path for direct checkBadges calls)
+    const [xpSettled, profileSettled] = await Promise.allSettled([
+      gqlClient.graphql({
+        query: LIST_XP_LOGS_BY_STUDENT,
+        variables: { studentId },
+      }),
+      preFetched?.profileId
+        ? Promise.resolve({
+            id: preFetched.profileId,
+            totalXP: preFetched.totalXP || 0,
+            level: preFetched.level || 1,
+            currentStreak: preFetched.currentStreak || 0,
+            longestStreak: preFetched.longestStreak || 0,
+            lastActivityDate: preFetched.lastActivityDate || null,
+            nailedItCount: preFetched.nailedItCount || 0,
+            completedAssignments: preFetched.completedAssignments || 0,
+            badges: preFetched.badges || "[]",
+            _version: preFetched.profileVersion,
+          })
+        : getOrCreateStudentProfile(gqlClient, studentId, cohortId),
+    ]);
+    const xpResult = xpSettled.status === "fulfilled" ? xpSettled.value : null;
+    const fetchedProfile =
+      profileSettled.status === "fulfilled" ? profileSettled.value : null;
+    if (xpSettled.status === "rejected") {
+      console.warn("[gamification] Failed to fetch XP logs:", xpSettled.reason);
+    }
+    if (profileSettled.status === "rejected") {
+      console.warn(
+        "[gamification] Failed to fetch/create profile:",
+        profileSettled.reason,
+      );
+    }
+    xpLogs = xpResult?.data?.listStudentXPLogByStudentId?.items || [];
+    profile = fetchedProfile;
+  }
+
   const existingBadges: any[] = (() => {
     try {
       return JSON.parse(profile.badges || "[]");
@@ -1288,13 +1467,18 @@ async function handleCheckBadges(
   const existingByType = new Map<string, any>(
     existingBadges.map((b: any) => [b.badgeType, b]),
   );
-  const totalXP = xpLogs.reduce((s: number, l: any) => s + l.xpAmount, 0);
+  const totalXP =
+    preFetched?.totalXP ??
+    xpLogs.reduce((s: number, l: any) => s + l.xpAmount, 0);
 
   const newBadges: string[] = [];
   const updatedBadges: string[] = [];
 
   for (const criteria of BADGE_CRITERIA) {
-    if (!criteria.check({ xpLogs, badges: existingBadges, totalXP })) continue;
+    if (
+      !criteria.check({ xpLogs, badges: existingBadges, totalXP, reasonCounts })
+    )
+      continue;
 
     const existing = existingByType.get(criteria.badgeType);
     if (existing) {
@@ -1332,9 +1516,8 @@ async function handleCheckBadges(
 
       let earned = false;
       if (criteriaJson.type === "xp_log_count") {
-        const count = xpLogs.filter(
-          (l: any) => l.reason === criteriaJson.reason,
-        ).length;
+        // Use rollup reasonCounts if available, fallback to log scan
+        const count = rc(reasonCounts, xpLogs, criteriaJson.reason);
         earned = count >= (criteriaJson.threshold || 1);
       } else if (criteriaJson.type === "stat_threshold") {
         const metricValue =
@@ -1382,35 +1565,43 @@ async function handleCheckBadges(
 
   // Skip anti-badge loop entirely if disabled for this section
   if (sectionAntiBadgesEnabled) {
-  for (const criteria of ANTI_BADGE_CRITERIA) {
-    if (!criteria.check({ xpLogs, badges: existingBadges, totalXP, profile }))
-      continue;
+    for (const criteria of ANTI_BADGE_CRITERIA) {
+      if (
+        !criteria.check({
+          xpLogs,
+          badges: existingBadges,
+          totalXP,
+          profile,
+          reasonCounts,
+        })
+      )
+        continue;
 
-    const existing = existingByType.get(criteria.badgeType);
-    if (existing) {
-      // Anti-badge already earned — increment count, refresh debuff
-      existing.count = (existing.count || 1) + 1;
-      existing.awardedAt = new Date().toISOString();
-      if (cohortId) existing.cohortId = cohortId;
-      // Refresh debuff duration
-      refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
-    } else {
-      // First time earning this anti-badge
-      const antiBadge = {
-        badgeType: criteria.badgeType,
-        awardedAt: new Date().toISOString(),
-        cohortId: cohortId || null,
-        unitID: unitID || null,
-        count: 1,
-        isAnti: true,
-      };
-      existingBadges.push(antiBadge);
-      existingByType.set(criteria.badgeType, antiBadge);
-      newAntiBadges.push(criteria.badgeType);
-      // Apply debuff
-      applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+      const existing = existingByType.get(criteria.badgeType);
+      if (existing) {
+        // Anti-badge already earned — increment count, refresh debuff
+        existing.count = (existing.count || 1) + 1;
+        existing.awardedAt = new Date().toISOString();
+        if (cohortId) existing.cohortId = cohortId;
+        // Refresh debuff duration
+        refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+      } else {
+        // First time earning this anti-badge
+        const antiBadge = {
+          badgeType: criteria.badgeType,
+          awardedAt: new Date().toISOString(),
+          cohortId: cohortId || null,
+          unitID: unitID || null,
+          count: 1,
+          isAnti: true,
+        };
+        existingBadges.push(antiBadge);
+        existingByType.set(criteria.badgeType, antiBadge);
+        newAntiBadges.push(criteria.badgeType);
+        // Apply debuff
+        applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+      }
     }
-  }
   } // end if (sectionAntiBadgesEnabled)
 
   // ---- Auto-redeem anti-badges whose conditions are now met ----
@@ -3420,7 +3611,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;

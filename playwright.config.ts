@@ -25,12 +25,13 @@ export default defineConfig({
     timeout: 15_000,
   },
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:3000",
+    baseURL: process.env.BASE_URL || "https://localhost:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
+    ignoreHTTPSErrors: true,
   },
   projects: [
     {

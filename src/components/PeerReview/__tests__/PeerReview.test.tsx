@@ -101,7 +101,7 @@ describe('PeerReviewChat', () => {
 
     const input = screen.getByPlaceholderText(/Type a message/)
     fireEvent.change(input, { target: { value: 'Hello!' } })
-    fireEvent.click(screen.getByLabelText('Send message'))
+    fireEvent.click(screen.getByLabelText('actions.send'))
 
     expect(onSendMessage).toHaveBeenCalledWith('Hello!')
   })
@@ -121,7 +121,7 @@ describe('PeerReviewChat', () => {
     const onSendMessage = vi.fn()
     render(<PeerReviewChat {...baseProps} onSendMessage={onSendMessage} />)
 
-    fireEvent.click(screen.getByLabelText('Send message'))
+    fireEvent.click(screen.getByLabelText('actions.send'))
     expect(onSendMessage).not.toHaveBeenCalled()
   })
 

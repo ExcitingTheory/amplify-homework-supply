@@ -1,4 +1,4 @@
-import { uploadData, downloadData } from 'aws-amplify/storage';
+import { uploadData, downloadData } from "aws-amplify/storage";
 
 /** S3 key helpers — require identityId (from Unit.identityId) */
 function draftKey(identityId: string, unitId: string): string {
@@ -10,7 +10,11 @@ function publishedKey(identityId: string, unitId: string): string {
 function yjsSnapshotKey(identityId: string, unitId: string): string {
   return `private/${identityId}/units/${unitId}/yjs-snapshot.bin`;
 }
-function historyKey(identityId: string, unitId: string, version: number): string {
+function historyKey(
+  identityId: string,
+  unitId: string,
+  version: number,
+): string {
   return `private/${identityId}/units/${unitId}/history/v${version}.json`;
 }
 
@@ -26,7 +30,7 @@ export async function saveDraftContent(
   await uploadData({
     path: draftKey(identityId, unitId),
     data: content,
-    options: { contentType: 'application/json' },
+    options: { contentType: "application/json" },
   }).result;
 }
 
@@ -42,7 +46,7 @@ export async function saveYjsSnapshot(
   await uploadData({
     path: yjsSnapshotKey(identityId, unitId),
     data: new Blob([new Uint8Array(snapshot)]),
-    options: { contentType: 'application/octet-stream' },
+    options: { contentType: "application/octet-stream" },
   }).result;
 }
 
@@ -55,7 +59,9 @@ export async function loadYjsSnapshot(
   unitId: string,
 ): Promise<Uint8Array | null> {
   try {
-    const result = await downloadData({ path: yjsSnapshotKey(identityId, unitId) }).result;
+    const result = await downloadData({
+      path: yjsSnapshotKey(identityId, unitId),
+    }).result;
     const blob = await result.body.blob();
     const buffer = await blob.arrayBuffer();
     return new Uint8Array(buffer);
@@ -74,22 +80,30 @@ export async function publishContent(
   contentVersion: number,
 ): Promise<void> {
   // Read current draft (owner reads from private/)
-  const draftResult = await downloadData({ path: draftKey(identityId, unitId) }).result;
+  const draftResult = await downloadData({ path: draftKey(identityId, unitId) })
+    .result;
   const draftContent = await draftResult.body.text();
 
   // Write to protected/ (published) and private/ (history) in parallel
-  await Promise.all([
+  const publishResults = await Promise.allSettled([
     uploadData({
       path: publishedKey(identityId, unitId),
       data: draftContent,
-      options: { contentType: 'application/json' },
+      options: { contentType: "application/json" },
     }).result,
     uploadData({
       path: historyKey(identityId, unitId, contentVersion),
       data: draftContent,
-      options: { contentType: 'application/json' },
+      options: { contentType: "application/json" },
     }).result,
   ]);
+  const publishFailures = publishResults.filter((r) => r.status === "rejected");
+  if (publishFailures.length > 0) {
+    console.error(
+      "[unitContentStorage] Publish partially failed:",
+      publishFailures.map((f) => (f as PromiseRejectedResult).reason),
+    );
+  }
 }
 
 /**
@@ -99,11 +113,12 @@ export async function publishContent(
 export async function loadContent(
   identityId: string,
   unitId: string,
-  variant: 'draft' | 'published',
+  variant: "draft" | "published",
 ): Promise<string | null> {
-  const path = variant === 'draft'
-    ? draftKey(identityId, unitId)
-    : publishedKey(identityId, unitId);
+  const path =
+    variant === "draft"
+      ? draftKey(identityId, unitId)
+      : publishedKey(identityId, unitId);
   try {
     const result = await downloadData({ path }).result;
     return await result.body.text();

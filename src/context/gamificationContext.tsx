@@ -1,3 +1,4 @@
+"use client";
 /**
  * GamificationContext — Unified context for all gamification state:
  * XP, Progress, Campaign, Guild, SkillTree, and ContentLock.
@@ -10,8 +11,9 @@
 
 import React, { createContext, useContext, useEffect, useReducer, useCallback, useMemo, useState, useRef } from 'react'
 import type { SkillNodeData, SkillStatus } from '../components/Gamification/SkillTree'
+import type { AvatarUnlockConfig } from '../components/Gamification/DiceBearAvatar'
 import { XPToast } from '../components/Gamification/XPToast'
-import { calculateTotalXP, getLevelInfo, XPReason } from '../utils/xpCalculation'
+import { calculateMultipliedXP, getLevelInfoWithThresholds, XPReason } from '../utils/xpCalculation'
 import type { StudentXPLog, LevelInfo } from '../utils/xpCalculation'
 import {
   gamificationReducer,
@@ -110,6 +112,11 @@ export interface GamificationContextValue {
   getLockStatus: (contentId: string) => LockStatus | undefined
   contentLockLoading: boolean
 
+  // Global settings (from PlatformSettings singleton)
+  avatarUnlockConfig: AvatarUnlockConfig | null
+  platformSettings: any | null
+  autoAnalyzeDocuments: boolean
+
   // Overall
   isLoading: boolean
 }
@@ -160,6 +167,11 @@ const GamificationContext = createContext<GamificationContextValue>({
   isLocked: () => false,
   getLockStatus: () => undefined,
   contentLockLoading: true,
+
+  // Global settings
+  avatarUnlockConfig: null,
+  platformSettings: null,
+  autoAnalyzeDocuments: true,
 
   // Overall
   isLoading: true,
@@ -248,6 +260,17 @@ export function useXP() {
     sectionLevel: ctx.sectionLevel,
     xpLogs: ctx.xpLogs,
     isLoading: ctx.xpLoading,
+    avatarUnlockConfig: ctx.avatarUnlockConfig,
+  }
+}
+
+/** Access global platform settings (admin-configured singleton) */
+export function usePlatformSettings() {
+  const ctx = useContext(GamificationContext)
+  return {
+    platformSettings: ctx.platformSettings,
+    autoAnalyzeDocuments: ctx.autoAnalyzeDocuments,
+    avatarUnlockConfig: ctx.avatarUnlockConfig,
   }
 }
 
@@ -324,6 +347,7 @@ export function GamificationProvider({
   const guildVersionMapRef = useRef<Record<string, number>>({})
   const skillVersionMapRef = useRef<Record<string, number>>({})
   const xpLogVersionMapRef = useRef<Record<string, number>>({})
+  const unitLockVersionMapRef = useRef<Record<string, number>>({})
 
   // Stable setter for selectedSkillId
   const setSelectedSkillId = useCallback(
@@ -407,9 +431,8 @@ export function GamificationProvider({
         payload: (profile.skillProgress || []).map((sp: any) => ({ ...sp, id: sp.skillId })),
       })
 
-      // Content lock: now computed from Unit fields, not a separate model
-      // Dispatch empty locks — lock logic now derived from units in the lockMap useMemo
-      dispatch({ type: actionTypes.SET_RAW_LOCKS, payload: [] })
+      // Content locks are derived from Unit model fields (requiredXP, requiredBadgeId,
+      // requiredModuleCompletion) — see Unit subscription below. Not stored on profile.
     }
 
     // Single observeQuery replaces list() + onCreate + onUpdate
@@ -542,6 +565,83 @@ export function GamificationProvider({
     return () => subscription.unsubscribe()
   }, [client, cohortId])
 
+  // ── Unit subscription (content lock fields) ─────────────────────
+  // Reads requiredXP, requiredBadgeId, requiredModuleCompletion from
+  // published units to derive content locks. This is the source of truth
+  // for XP/badge/completion gates — NOT StudentProfile.contentLocks.
+  useEffect(() => {
+    if (!client?.models?.Unit) {
+      dispatch({ type: actionTypes.SET_LOCKS_LOADING, payload: false })
+      return
+    }
+
+    const subscription = client.models.Unit.observeQuery({
+      filter: { status: { eq: 'PUBLISHED' } },
+    }).subscribe({
+      next: ({ items }: any) => {
+        const valid = (items || []).filter((u: any) => u != null && u.id != null)
+
+        // Version map guard
+        const hasChanges = valid.some((item: any) => {
+          const tracked = unitLockVersionMapRef.current[item.id]
+          return tracked == null || item._version > tracked
+        })
+        if (!hasChanges && Object.keys(unitLockVersionMapRef.current).length > 0) return
+
+        unitLockVersionMapRef.current = {}
+        valid.forEach((item: any) => { unitLockVersionMapRef.current[item.id] = item._version })
+
+        // Extract units that have at least one lock requirement set
+        const lockData = valid
+          .filter((u: any) =>
+            (u.requiredXP != null && u.requiredXP > 0) ||
+            u.requiredBadgeId ||
+            (u.requiredModuleCompletion != null && u.requiredModuleCompletion > 0),
+          )
+          .map((u: any) => ({
+            contentId: u.id,
+            requiredXP: u.requiredXP || undefined,
+            requiredBadgeId: u.requiredBadgeId || undefined,
+            requiredModuleCompletion: u.requiredModuleCompletion || undefined,
+          }))
+
+        dispatch({ type: actionTypes.SET_RAW_LOCKS, payload: lockData })
+      },
+      error: (err: any) => {
+        const msg = err?.message || err?.errors?.[0]?.message || String(err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Unit lock error:', err)
+        dispatch({ type: actionTypes.SET_LOCKS_LOADING, payload: false })
+      },
+    })
+
+    return () => subscription.unsubscribe()
+  }, [client])
+
+  // ── PlatformSettings subscription (global singleton) ────────
+  // One record for the whole platform: XP multipliers, level thresholds,
+  // avatar unlock config, badge toggles, caps, AI settings. Admin-only write.
+  const [globalSettings, setGlobalSettings] = useState<any>(null)
+
+  useEffect(() => {
+    if (!client?.models?.PlatformSettings) return
+
+    const subscription = client.models.PlatformSettings.observeQuery().subscribe({
+      next: ({ items }: any) => {
+        const valid = (items || []).filter((item: any) => item != null && item.id != null)
+        // Take the first (and only) record
+        setGlobalSettings(valid[0] || null)
+      },
+      error: (err: any) => {
+        const msg = err?.message || err?.errors?.[0]?.message || err?.error?.errors?.[0]?.message || String(err)
+        if (!msg.includes('DuplicatedOperationError')) {
+          console.warn('[GamificationContext] PlatformSettings error:', msg)
+        }
+      },
+    })
+
+    return () => subscription.unsubscribe()
+  }, [client])
+
   // ── Linear Lock data (Sections, Assignments, Grades) ───────────
   // Sections and Assignments are accepted from parent contexts via props —
   // zero additional API calls for those models.
@@ -646,16 +746,58 @@ export function GamificationProvider({
   const handleToastClose = useCallback(() => setCurrentToast(null), [])
 
   // ── Derived: XP ─────────────────────────────────────────────────
-  const computedTotalXP = useMemo(() => calculateTotalXP(state.xpLogs), [state.xpLogs])
-  const level = useMemo(() => getLevelInfo(computedTotalXP), [computedTotalXP])
+  // Parse multipliers and level thresholds from global settings
+  const xpMultipliers = useMemo<Record<string, number> | null>(() => {
+    if (!globalSettings?.xpMultipliers) return null
+    try {
+      return typeof globalSettings.xpMultipliers === 'string'
+        ? JSON.parse(globalSettings.xpMultipliers)
+        : globalSettings.xpMultipliers
+    } catch { return null }
+  }, [globalSettings?.xpMultipliers])
+
+  const dbLevelThresholds = useMemo<{ level: number; xpRequired: number; title?: string }[] | null>(() => {
+    if (!globalSettings?.levelThresholds) return null
+    try {
+      const parsed = typeof globalSettings.levelThresholds === 'string'
+        ? JSON.parse(globalSettings.levelThresholds)
+        : globalSettings.levelThresholds
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : null
+    } catch { return null }
+  }, [globalSettings?.levelThresholds])
+
+  // Total XP applies multipliers globally (all logs)
+  const computedTotalXP = useMemo(
+    () => calculateMultipliedXP(state.xpLogs, xpMultipliers),
+    [state.xpLogs, xpMultipliers],
+  )
+  // Level uses DB thresholds when configured, otherwise hardcoded defaults
+  const level = useMemo(
+    () => getLevelInfoWithThresholds(computedTotalXP, dbLevelThresholds),
+    [computedTotalXP, dbLevelThresholds],
+  )
 
   // Section-scoped XP: only XP logs matching the current cohortId
   const computedSectionXP = useMemo(() => {
     if (!cohortId) return 0
     const sectionLogs = state.xpLogs.filter((log: any) => log.cohortId === cohortId)
-    return calculateTotalXP(sectionLogs)
-  }, [state.xpLogs, cohortId])
-  const sectionLevel = useMemo(() => getLevelInfo(computedSectionXP), [computedSectionXP])
+    return calculateMultipliedXP(sectionLogs, xpMultipliers)
+  }, [state.xpLogs, cohortId, xpMultipliers])
+  const sectionLevel = useMemo(
+    () => getLevelInfoWithThresholds(computedSectionXP, dbLevelThresholds),
+    [computedSectionXP, dbLevelThresholds],
+  )
+
+  // Avatar unlock config from global settings
+  const avatarUnlockConfig = useMemo<AvatarUnlockConfig | null>(() => {
+    if (!globalSettings?.avatarUnlockConfig) return null
+    try {
+      const parsed = typeof globalSettings.avatarUnlockConfig === 'string'
+        ? JSON.parse(globalSettings.avatarUnlockConfig)
+        : globalSettings.avatarUnlockConfig
+      return parsed?.unlocks?.length ? parsed : null
+    } catch { return null }
+  }, [globalSettings?.avatarUnlockConfig])
 
   // ── Derived: Progress ───────────────────────────────────────────
   const modules = useMemo<ModuleProgress[]>(
@@ -784,6 +926,7 @@ export function GamificationProvider({
           totalXP: g.totalXP || 0,
           description: g.description,
           memberCount: memberCountMap.get(g.id) || 0,
+          posts: g.posts || [],
         }))
         .sort((a: GuildInfo, b: GuildInfo) => b.totalXP - a.totalXP),
     [state.rawGuilds, memberCountMap],
@@ -998,6 +1141,11 @@ export function GamificationProvider({
       getLockStatus,
       contentLockLoading: state.locksLoading,
 
+      // Global settings
+      avatarUnlockConfig,
+      platformSettings: globalSettings,
+      autoAnalyzeDocuments: globalSettings?.autoAnalyzeDocuments !== false,
+
       // Overall
       isLoading,
     }),
@@ -1032,6 +1180,8 @@ export function GamificationProvider({
       isLockedFn,
       getLockStatus,
       state.locksLoading,
+      avatarUnlockConfig,
+      globalSettings,
       isLoading,
     ],
   )

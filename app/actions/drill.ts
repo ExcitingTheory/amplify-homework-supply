@@ -58,12 +58,17 @@ export async function generatePracticeDrill(params: {
     });
     if (unitWords?.length) {
       const wordIds = unitWords.map((uw: any) => uw.wordId).filter(Boolean);
-      const words = await Promise.all(
+      const wordResults = await Promise.allSettled(
         wordIds.slice(0, 30).map(async (id: string) => {
           const { data } = await client.models.Word.get({ id });
           return data;
         }),
       );
+      const words = wordResults
+        .filter(
+          (r): r is PromiseFulfilledResult<any> => r.status === "fulfilled",
+        )
+        .map((r) => r.value);
       const validWords = words.filter(Boolean);
       if (validWords.length) {
         sources.push(
@@ -88,12 +93,17 @@ export async function generatePracticeDrill(params: {
       const questionIds = unitQuestions
         .map((uq: any) => uq.questionId)
         .filter(Boolean);
-      const questions = await Promise.all(
+      const questionResults = await Promise.allSettled(
         questionIds.slice(0, 20).map(async (id: string) => {
           const { data } = await client.models.Question.get({ id });
           return data;
         }),
       );
+      const questions = questionResults
+        .filter(
+          (r): r is PromiseFulfilledResult<any> => r.status === "fulfilled",
+        )
+        .map((r) => r.value);
       const validQuestions = questions.filter(Boolean);
       if (validQuestions.length) {
         sources.push(

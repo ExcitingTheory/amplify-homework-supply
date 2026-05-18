@@ -43,7 +43,14 @@ export class YjsDocProvider {
   constructor(config: YjsProviderConfig) {
     this.docName = config.docName;
     this.ydoc = new Y.Doc();
-    this.config = { ...this.defaultConfig, ...config };
+    // Filter out undefined values so they don't override defaults
+    const definedConfig = Object.fromEntries(
+      Object.entries(config).filter(([, v]) => v !== undefined),
+    );
+    this.config = {
+      ...this.defaultConfig,
+      ...definedConfig,
+    } as Required<YjsProviderConfig>;
 
     // Create standalone awareness (always available, even without WebSocket)
     this.awareness = new Awareness(this.ydoc);

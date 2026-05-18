@@ -1,0 +1,308 @@
+{
+  "generatedAt": "2026-05-18T03:22:32.358Z",
+  "users": {
+    "admin": {
+      "username": "admin@example.com",
+      "sub": "c4786448-f0f1-709e-5c7a-00cdcaf6e011",
+      "group": "Admins"
+    },
+    "instructor1": {
+      "username": "instructor1@example.com",
+      "sub": "14285438-f021-7026-109b-bcdc784cda3e",
+      "identityId": "us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79",
+      "group": "Instructors"
+    },
+    "instructor2": {
+      "username": "instructor2@example.com",
+      "group": "Instructors"
+    },
+    "student1": {
+      "username": "student1@example.com",
+      "sub": "74d854d8-7051-70b1-12b0-bbf33b112291",
+      "identityId": "us-east-1:b0eadde9-f0b7-ca97-7f43-91723c608443",
+      "group": "Learners"
+    },
+    "student2": {
+      "username": "student2@example.com",
+      "group": "Learners"
+    }
+  },
+  "words": [
+    {
+      "id": "922b590a-57a9-46a9-93bf-673327b8d817",
+      "phrase": "こんにちは",
+      "pronunciation": "konnichiwa",
+      "definition": "Hello (daytime greeting)"
+    },
+    {
+      "id": "d6679011-392f-4c39-9597-4957719b9394",
+      "phrase": "ありがとう",
+      "pronunciation": "arigatou",
+      "definition": "Thank you"
+    },
+    {
+      "id": "b3824f02-e71a-4e23-a253-62485b0b205c",
+      "phrase": "さようなら",
+      "pronunciation": "sayounara",
+      "definition": "Goodbye"
+    },
+    {
+      "id": "05de94a0-0d96-4534-8edd-d69fcdef056e",
+      "phrase": "photosynthesis",
+      "pronunciation": "foh-toh-SIN-thuh-sis",
+      "definition": "The process by which plants use sunlight to convert carbon dioxide and water into glucose and oxygen"
+    },
+    {
+      "id": "a1ec2c8f-8afe-4929-9a18-86e58e864dd7",
+      "phrase": "chloroplast",
+      "pronunciation": "KLOR-uh-plast",
+      "definition": "Organelle in plant cells where photosynthesis occurs"
+    }
+  ],
+  "questions": [
+    {
+      "id": "fdb49c35-e0d2-4163-85fe-3157f4273f2f",
+      "prompt": "What is the Japanese word for \"hello\"?",
+      "answer": "こんにちは (konnichiwa)"
+    },
+    {
+      "id": "64715024-b5d1-4e7b-9930-500286a8f441",
+      "prompt": "What is the main product of photosynthesis?",
+      "answer": "Glucose (sugar) and oxygen"
+    },
+    {
+      "id": "b2e97120-7d44-4535-902e-912373d71a8e",
+      "prompt": "In which organelle does photosynthesis occur?",
+      "answer": "Chloroplast"
+    }
+  ],
+  "units": [
+    {
+      "id": "88b8ba5f-42dd-4b85-9879-f78ab18bb9ce",
+      "name": "Japanese Greetings",
+      "status": "PUBLISHED"
+    },
+    {
+      "id": "c181d8ad-b4cb-44f6-8d70-f80c8ac664a2",
+      "name": "Photosynthesis",
+      "status": "PUBLISHED"
+    },
+    {
+      "id": "e22e4e57-2498-4a7e-a0fc-81fce44af81a",
+      "name": "Advanced Japanese Verbs",
+      "status": "DRAFT"
+    },
+    {
+      "id": "d2f3def8-0a0e-405e-a79e-ef6c7ba312d9",
+      "name": "AI Biology Exercise",
+      "status": "PUBLISHED"
+    }
+  ],
+  "sections": [
+    {
+      "id": "a9281fa8-8891-4445-aa5f-fe4a6abea148",
+      "name": "Japanese 101 - Period 1",
+      "code": "JPN101-P1"
+    },
+    {
+      "id": "4813c1ae-435b-40e7-81cd-4e6ac0c970ad",
+      "name": "Biology 101 - Period 3",
+      "code": "BIO101-P3"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "366fb755-f001-45e9-a461-711e537d8510",
+      "sectionID": "a9281fa8-8891-4445-aa5f-fe4a6abea148",
+      "unitID": "88b8ba5f-42dd-4b85-9879-f78ab18bb9ce"
+    },
+    {
+      "id": "3a3054d0-fd42-42b8-a9bb-09e3dff80d6f",
+      "sectionID": "a9281fa8-8891-4445-aa5f-fe4a6abea148",
+      "unitID": "88b8ba5f-42dd-4b85-9879-f78ab18bb9ce"
+    },
+    {
+      "id": "e66e75eb-a70d-476b-9fe1-be5f6ad0f9c7",
+      "sectionID": "4813c1ae-435b-40e7-81cd-4e6ac0c970ad",
+      "unitID": "c181d8ad-b4cb-44f6-8d70-f80c8ac664a2"
+    },
+    {
+      "id": "76723d7d-610e-499f-8b81-22ed07969a9c",
+      "sectionID": "4813c1ae-435b-40e7-81cd-4e6ac0c970ad",
+      "unitID": "c181d8ad-b4cb-44f6-8d70-f80c8ac664a2"
+    }
+  ],
+  "grades": [
+    {
+      "id": "61029de4-cabd-4cda-9505-e6e94c30cbff",
+      "unitID": "88b8ba5f-42dd-4b85-9879-f78ab18bb9ce",
+      "sectionID": "a9281fa8-8891-4445-aa5f-fe4a6abea148",
+      "complete": true
+    },
+    {
+      "id": "dbef63c7-e025-4213-9514-98910ff8afed",
+      "unitID": "c181d8ad-b4cb-44f6-8d70-f80c8ac664a2",
+      "sectionID": "4813c1ae-435b-40e7-81cd-4e6ac0c970ad",
+      "complete": false
+    },
+    {
+      "id": "4908908a-ed2f-4ecb-a426-3c6888af41d3",
+      "unitID": "88b8ba5f-42dd-4b85-9879-f78ab18bb9ce",
+      "sectionID": "a9281fa8-8891-4445-aa5f-fe4a6abea148",
+      "complete": false
+    }
+  ],
+  "files": [
+    {
+      "id": "55dd09b7-1f62-47c1-80a4-c592e6d43fcd",
+      "name": "chloroplast-diagram.jpg",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/chloroplast-diagram.jpg",
+      "mimeType": "image/jpeg"
+    },
+    {
+      "id": "ec961340-493c-4f86-9fd8-fea92fc73d6b",
+      "name": "animals-photo.jpg",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/animals-photo.jpg",
+      "mimeType": "image/jpeg"
+    },
+    {
+      "id": "335194b4-2726-4e3c-ba06-5a8501664ff0",
+      "name": "pattern-texture.png",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/pattern-texture.png",
+      "mimeType": "image/png"
+    },
+    {
+      "id": "0607979d-16d0-4ce4-b8bb-b4a91d5155cd",
+      "name": "japanese-grammar-guide.pdf",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/japanese-grammar-guide.pdf",
+      "mimeType": "application/pdf"
+    },
+    {
+      "id": "5c86e39c-76c5-471b-bb08-bf1d493dc5a2",
+      "name": "science-lesson-water-cycle.pdf",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/science-lesson-water-cycle.pdf",
+      "mimeType": "application/pdf"
+    },
+    {
+      "id": "a8667238-23a5-4d42-91d8-46569d7c3de6",
+      "name": "biology-cell-structure.docx",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/biology-cell-structure.docx",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "id": "ab802f73-f0d2-4182-b894-c1d59b586304",
+      "name": "science-lesson-water-cycle.docx",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/science-lesson-water-cycle.docx",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "id": "e19a5469-2ce9-4b55-9c59-a80081781af1",
+      "name": "french-seasons-vocabulary.txt",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/french-seasons-vocabulary.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "ab5f768e-a8ad-480b-bf35-4e3d8993a8e2",
+      "name": "spanish-ar-verbs.txt",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/spanish-ar-verbs.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "e9e11796-5840-4b68-8fab-893483405c88",
+      "name": "philosophy-presocratics.txt",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/philosophy-presocratics.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "238d5784-0c92-4420-8a65-d6bbcdf81cf6",
+      "name": "japanese-grammar-guide.md",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/japanese-grammar-guide.md",
+      "mimeType": "text/markdown"
+    },
+    {
+      "id": "57b1d12b-8282-47fe-981d-cc4a03610610",
+      "name": "biology-cell-structure.md",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/biology-cell-structure.md",
+      "mimeType": "text/markdown"
+    },
+    {
+      "id": "fea5ee90-b683-4d64-bbca-652f5d8fd764",
+      "name": "biology-vocabulary-list.csv",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/biology-vocabulary-list.csv",
+      "mimeType": "text/csv"
+    },
+    {
+      "id": "58ff64bb-f74a-4b76-8a64-c30b14bf7e5e",
+      "name": "spanish-verbs-vocabulary.csv",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/spanish-verbs-vocabulary.csv",
+      "mimeType": "text/csv"
+    },
+    {
+      "id": "c7c7348b-55d1-4f18-82bb-75f9f363c91c",
+      "name": "philosophy-presocratics.rtf",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/philosophy-presocratics.rtf",
+      "mimeType": "application/rtf"
+    },
+    {
+      "id": "74a1275b-fe81-4a40-b76c-e8203404a4e6",
+      "name": "water-cycle-guide.epub",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/water-cycle-guide.epub",
+      "mimeType": "application/epub+zip"
+    },
+    {
+      "id": "11ddd006-83cc-4402-bbca-d23e3892bf45",
+      "name": "spanish-quiz.gift",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/spanish-quiz.gift",
+      "mimeType": "text/x-gift"
+    },
+    {
+      "id": "d948ad47-12a8-49da-84d1-48a550ae019c",
+      "name": "biology-cell-quiz.qti",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/biology-cell-quiz.qti",
+      "mimeType": "application/x-qti+xml"
+    },
+    {
+      "id": "f9c7449d-4029-4d88-a0fa-6c65e5c31d5d",
+      "name": "japanese-grammar-course.imscc",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/japanese-grammar-course.imscc",
+      "mimeType": "application/x-imscc+zip"
+    },
+    {
+      "id": "41b12bf7-fbe1-4eed-b79d-2f6bdd41c3df",
+      "name": "biology-photosynthesis-scorm.zip",
+      "path": "protected/us-east-1:b0eadde9-f036-c1b5-6cf9-529e20053e79/files/biology-photosynthesis-scorm.zip",
+      "mimeType": "application/zip"
+    }
+  ],
+  "documents": [
+    {
+      "id": "dbf18736-186e-4322-b8f6-a2b0bd81db46",
+      "filename": "photosynthesis-notes.pdf",
+      "s3Key": "public/documents/photosynthesis-notes.pdf",
+      "status": "completed"
+    },
+    {
+      "id": "18a2a9e3-a1e6-4e4a-a2a6-ef3884c0a985",
+      "filename": "japanese-grammar.pdf",
+      "s3Key": "public/documents/japanese-grammar.pdf",
+      "status": "uploaded"
+    }
+  ],
+  "guilds": [
+    {
+      "id": "c46f53e0-bd33-4b5c-91dd-c25af0248110",
+      "name": "Dragon Scholars"
+    },
+    {
+      "id": "e5337df9-59c8-4c99-a232-eb9f03f1e277",
+      "name": "Phoenix Writers"
+    }
+  ],
+  "homeworkRoom": {
+    "id": "470ef19d-5de2-45eb-a604-407a57c6c082",
+    "code": "REVIEW1"
+  },
+  "platformSettings": {
+    "id": "f4fef092-fd76-44ee-af19-c855bf6bd255"
+  }
+}

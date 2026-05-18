@@ -1,3 +1,4 @@
+"use client";
 import React, { useReducer, useRef } from "react";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";
@@ -178,17 +179,26 @@ const SectionProvider = ({ children, unitId }) => {
     const previousVersion = sectionVersionMapRef.current[id] || currentVersion;
     sectionVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { sectionVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { sectionVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        sectionVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        sectionVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 
   const bumpAssignmentVersion = React.useCallback((id, currentVersion) => {
-    const previousVersion = assignmentVersionMapRef.current[id] || currentVersion;
+    const previousVersion =
+      assignmentVersionMapRef.current[id] || currentVersion;
     assignmentVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { assignmentVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { assignmentVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        assignmentVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        assignmentVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 
@@ -202,7 +212,14 @@ const SectionProvider = ({ children, unitId }) => {
       bumpSectionVersion,
       bumpAssignmentVersion,
     }),
-    [state.sections, state.sectionMap, state.assignments, refetchSections, bumpSectionVersion, bumpAssignmentVersion],
+    [
+      state.sections,
+      state.sectionMap,
+      state.assignments,
+      refetchSections,
+      bumpSectionVersion,
+      bumpAssignmentVersion,
+    ],
   );
 
   return (

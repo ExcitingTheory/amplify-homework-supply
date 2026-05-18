@@ -5,13 +5,11 @@ import { getAmplifyClient } from "@/utils/amplifyClient";
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { uploadData } from "aws-amplify/storage";
 import { listSectionStudents } from "../../../actions/section";
-import { rebuildLeaderboard } from "../../../actions/gamification";
 import { formatLastFirst, getInitials } from "@/utils/formatUserName";
 
 import {
   Button,
   Box,
-  AppBar,
   Card,
   Typography,
   CardMedia,
@@ -50,7 +48,7 @@ import {
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import MainToolbar from "@/components/MainToolbar";
+import AppShell from "@/components/AppShell";
 import PrefetchBadge from "@/components/PrefetchBadge";
 import {
   InlineGradeCell,
@@ -64,6 +62,7 @@ import MyAuth from "@/components/AmplifyAuthenticator";
 import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import getCachedUrl from "@/utils/getCachedUrl";
+import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import FilesContext from "@/context/fileContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
@@ -135,8 +134,15 @@ function FeaturedImage({ style, s3Key, identityId }) {
   );
 }
 
-function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
+function CardMediaComponent({
+  s3Key,
+  identityId,
+  fileId,
+  level = "protected",
+}) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
@@ -147,7 +153,18 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
     };
 
     asyncFunc();
-  }, [s3Key]);
+
+    if (fileId && identityId) {
+      getResponsiveImageUrls(fileId, identityId)
+        .then((result) => {
+          if (result) {
+            setSrcSet(result.srcSet);
+            setSizes(result.sizes);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [s3Key, fileId, identityId]);
 
   return (
     <Box
@@ -160,6 +177,8 @@ function CardMediaComponent({ s3Key, identityId, level = "protected" }) {
     >
       <img
         src={url || undefined}
+        srcSet={srcSet || undefined}
+        sizes={sizes || undefined}
         style={{
           width: "100%",
           height: "100%",
@@ -773,9 +792,6 @@ function SectionDetail({ user, signOut }) {
     if (!id) return;
     const client = getAmplifyClient();
 
-    // Trigger a leaderboard rebuild on page load (fire-and-forget)
-    rebuildLeaderboard(id);
-
     const subscription = client.models.StudentProfile.observeQuery({
       filter: { cohortId: { eq: id } },
     }).subscribe({
@@ -1227,19 +1243,6 @@ function SectionDetail({ user, signOut }) {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        color="default"
-        sx={{
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <MainToolbar>
-          <Box sx={{ flexGrow: 1, margin: "1rem" }} />
-        </MainToolbar>
-      </AppBar>
-
       {/* Show skeleton while section data is loading */}
       {!section && (
         <Card

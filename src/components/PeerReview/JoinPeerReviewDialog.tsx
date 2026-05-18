@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview JoinPeerReviewDialog — Dialog for joining a peer review room
  * by entering a review room code. Calls the joinPeerReview mutation and

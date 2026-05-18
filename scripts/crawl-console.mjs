@@ -1,23 +1,71 @@
 import { chromium } from 'playwright';
+import { readFileSync, existsSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_URL = 'http://localhost:3000';
 const EMAIL = 'colinbarrettfox@gmail.com';
 const PASSWORD = 'Colinpass1!';
 
-const PAGES = [
+// Static pages (no dynamic IDs needed)
+const STATIC_PAGES = [
   '/',
   '/sections',
   '/units',
   '/profile',
+  '/profile/notifications',
   '/settings',
   '/leaderboard',
   '/guilds',
   '/skills',
-  '/instructor/gamification',
+  '/admin/settings',
+  '/xp-history',
+  '/privacy',
   '/offline',
 ];
 
+// Build dynamic pages from seed fixture (if available)
+function getDynamicPages() {
+  const fixturePath = resolve(__dirname, '../test/integration/seed-data.json');
+  if (!existsSync(fixturePath)) {
+    console.warn('⚠️  No seed-data.json found — skipping dynamic routes. Run seed first.');
+    return [];
+  }
+
+  const data = JSON.parse(readFileSync(fixturePath, 'utf8'));
+  const pages = [];
+
+  // /unit/[id] — first published unit
+  const publishedUnit = data.units?.find(u => u.status === 'PUBLISHED');
+  if (publishedUnit) pages.push(`/unit/${publishedUnit.id}`);
+
+  // /section/[id] — first section
+  if (data.sections?.[0]) pages.push(`/section/${data.sections[0].id}`);
+
+  // /workbook/[id] — first completed grade
+  const completedGrade = data.grades?.find(g => g.complete);
+  if (completedGrade) pages.push(`/workbook/${completedGrade.id}`);
+
+  // /guild/[id] — first guild
+  if (data.guilds?.[0]) pages.push(`/guild/${data.guilds[0].id}`);
+
+  // /review/[id] — homework room
+  if (data.homeworkRoom) pages.push(`/review/${data.homeworkRoom.id}`);
+
+  // /instructor/grade/[id] — first grade
+  if (data.grades?.[0]) pages.push(`/instructor/grade/${data.grades[0].id}`);
+
+  // /profile/[username] — student1
+  if (data.users?.student1?.username) pages.push(`/profile/${data.users.student1.username}`);
+
+  return pages;
+}
+
+const PAGES = [...STATIC_PAGES, ...getDynamicPages()];
+
 async function main() {
+  console.log(`Crawling ${PAGES.length} pages (${STATIC_PAGES.length} static + ${PAGES.length - STATIC_PAGES.length} dynamic)\n`);
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
