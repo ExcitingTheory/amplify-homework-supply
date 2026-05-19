@@ -41,7 +41,8 @@ import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
 import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH } from './editorConfig';
-import { Drawer, DrawerHeader } from './styledComponents';
+import { Drawer } from './styledComponents';
+import { useAppShell } from '../AppShellContext';
 import { TutorPresenceBanner, WorkbookProgress, TutorCursorOverlay, WorkbookPresenceBar, AIFeedbackSnackbar } from '../Workbook';
 import UnitContext from '../../context/unitContext';
 
@@ -51,6 +52,7 @@ import UnitContext from '../../context/unitContext';
  */
 export function Workbook(): JSX.Element {
   const t = useTranslations('common');
+  const { appBarHeight = 48 } = useAppShell();
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
   const drawerRef = React.useRef<HTMLDivElement>(null);
@@ -159,7 +161,6 @@ export function Workbook(): JSX.Element {
               sx={{
                 display: 'flex',
                 overflow: 'hidden',
-                height: '100vh',
               }}
             >
               <ToolBarRoPlugin
@@ -171,20 +172,17 @@ export function Workbook(): JSX.Element {
               <Drawer
                 ref={drawerRef}
                 drawerwidth={currentDrawerWidth}
-                sx={{
-                  height: '100%',
-                  flexShrink: 0,
-                  position: 'relative',
-                }}
+                sx={{ height: '100%' }}
                 variant="permanent"
                 open={openTab}
               >
-                <DrawerHeader
-                  style={{
+                <Box
+                  sx={{
                     minHeight: 'var(--app-bar-height, 11rem)',
+                    flexShrink: 0,
+                    transition: 'min-height 0.3s ease',
                   }}
                 />
-
                 <VerticalTabsRo
                   setOpen={setOpenTab}
                   open={openTab}
@@ -202,14 +200,18 @@ export function Workbook(): JSX.Element {
                   margin: 0,
                   padding: 0,
                   boxSizing: 'border-box',
-                  transition: (theme) =>
-                    theme.transitions.create('margin', {
-                      easing: theme.transitions.easing.sharp,
-                      duration: theme.transitions.duration.leavingScreen,
-                    }),
-                  marginLeft: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100vh',
                 }}
               >
+                <Box
+                  sx={{
+                    minHeight: 'var(--app-bar-height, 11rem)',
+                    flexShrink: 0,
+                    transition: 'min-height 0.3s ease',
+                  }}
+                />
                 <RichTextPlugin
                   contentEditable={
                     <div
@@ -220,9 +222,8 @@ export function Workbook(): JSX.Element {
                       style={{
                         margin: '0',
                         padding: '0',
-                        paddingTop: 'var(--app-bar-height, 11rem)',
                         paddingLeft: '1.5rem',
-                        height: '100vh',
+                        flexGrow: 1,
                         overflowY: 'auto',
                         width: '100%',
                         boxSizing: 'border-box',
@@ -241,7 +242,7 @@ export function Workbook(): JSX.Element {
                           width: '100%',
                           maxWidth: '100%',
                           boxSizing: 'border-box',
-                          minHeight: '100vh',
+                          minHeight: '100%',
                           padding: '1rem 2rem 1rem 0.5rem',
                         }}
                       />

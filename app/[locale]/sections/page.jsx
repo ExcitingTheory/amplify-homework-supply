@@ -161,11 +161,22 @@ function Sections({ user }) {
   const [showArchived, setShowArchived] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuSectionId, setMenuSectionId] = useState(null);
+  const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "error",
   });
+
+  // Mark sections as loaded once data arrives from subscription
+  React.useEffect(() => {
+    if (sections && sections.length > 0) {
+      setSectionsLoaded(true);
+    }
+    // Also mark loaded after a brief timeout to handle genuinely empty state
+    const timer = setTimeout(() => setSectionsLoaded(true), 2000);
+    return () => clearTimeout(timer);
+  }, [sections]);
 
   // Register page context with global chat
   useChatPageContext({
@@ -466,9 +477,11 @@ function Sections({ user }) {
             <InstructorDashboard sections={ownedSections} />
           )}
 
-          {!sections && <AppSkeleton variant="cards" />}
+          {!sectionsLoaded && sections.length === 0 && (
+            <AppSkeleton variant="sections" />
+          )}
 
-          {sections.length == 0 && (
+          {sectionsLoaded && sections.length === 0 && (
             //embed url to create a new section
             <Card
               elevation={3}

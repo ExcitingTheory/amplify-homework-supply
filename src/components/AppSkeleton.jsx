@@ -1,39 +1,24 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
+import React from "react";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 
 /**
  * Full-page skeleton used while the app is loading (auth resolving, data fetching, etc.)
- * Mimics the typical page layout: AppBar with nav items + content cards.
+ * Mimics the typical page layout without an AppBar (AppShell provides that globally).
  *
  * @param {object} props
- * @param {'page'|'cards'|'detail'|'redirect'} [props.variant='page'] - Layout variant
+ * @param {'page'|'cards'|'detail'|'redirect'|'profile'|'sections'} [props.variant='page'] - Layout variant
  */
-export default function AppSkeleton({ variant = 'page' }) {
+export default function AppSkeleton({ variant = "page" }) {
+  const isFullWidth = variant === "detail";
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Skeleton AppBar */}
-      <AppBar position="fixed" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar>
-          {/* Menu icon */}
-          <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-          {/* Title */}
-          <Skeleton variant="text" width={160} height={32} sx={{ flexGrow: 1 }} />
-          {/* Nav items */}
-          <Skeleton variant="circular" width={36} height={36} sx={{ ml: 1 }} />
-          <Skeleton variant="circular" width={36} height={36} sx={{ ml: 1 }} />
-        </Toolbar>
-      </AppBar>
-
-      {/* Content area */}
-      <Box sx={{ mt: '80px', p: { xs: 2, sm: 3 }, maxWidth: '80rem', mx: 'auto' }}>
-        {variant === 'redirect' && <RedirectSkeleton />}
-        {variant === 'cards' && <CardsSkeleton />}
-        {variant === 'detail' && <DetailSkeleton />}
-        {variant === 'page' && <PageSkeleton />}
-      </Box>
+    <Box sx={{ p: { xs: 2, sm: 3 }, ...(!isFullWidth && { maxWidth: "60rem", mx: "auto" }) }}>
+      {variant === "redirect" && <RedirectSkeleton />}
+      {variant === "cards" && <CardsSkeleton />}
+      {variant === "sections" && <SectionsSkeleton />}
+      {variant === "detail" && <DetailSkeleton />}
+      {variant === "profile" && <ProfileSkeleton />}
+      {variant === "page" && <PageSkeleton />}
     </Box>
   );
 }
@@ -46,7 +31,11 @@ function PageSkeleton() {
       <Skeleton variant="text" width="70%" height={24} sx={{ mb: 3 }} />
       {[0, 1, 2].map((i) => (
         <Box key={i} sx={{ mb: 3 }}>
-          <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1, mb: 1 }} />
+          <Skeleton
+            variant="rectangular"
+            height={120}
+            sx={{ borderRadius: 1, mb: 1 }}
+          />
           <Skeleton variant="text" width="60%" height={20} />
           <Skeleton variant="text" width="40%" height={20} />
         </Box>
@@ -55,14 +44,83 @@ function PageSkeleton() {
   );
 }
 
-/** Card list skeleton: grid of card placeholders */
+/** Sections skeleton: vertical list of bordered cards matching sections page */
+function SectionsSkeleton() {
+  return (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Skeleton variant="text" width="30%" height={48} />
+        <Skeleton
+          variant="rectangular"
+          width={140}
+          height={36}
+          sx={{ borderRadius: 1 }}
+        />
+      </Box>
+      {[0, 1, 2, 3].map((i) => (
+        <Box
+          key={i}
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            p: 2.5,
+            mb: 2,
+            borderLeft: 4,
+          }}
+        >
+          <Skeleton variant="text" width="50%" height={28} sx={{ mb: 0.5 }} />
+          <Skeleton variant="text" width="35%" height={20} sx={{ mb: 1 }} />
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Skeleton variant="text" width={80} height={20} />
+            <Skeleton
+              variant="rectangular"
+              width={80}
+              height={24}
+              sx={{ borderRadius: 0.5 }}
+            />
+          </Box>
+          <Skeleton
+            variant="rectangular"
+            width={120}
+            height={32}
+            sx={{ borderRadius: 1, mt: 1.5 }}
+          />
+        </Box>
+      ))}
+    </>
+  );
+}
+
+/** Card list skeleton: grid of card placeholders (for units page) */
 function CardsSkeleton() {
   return (
     <>
       <Skeleton variant="text" width="30%" height={40} sx={{ mb: 3 }} />
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
+          gap: 2,
+        }}
+      >
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <Box key={i} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+          <Box
+            key={i}
+            sx={{
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 1,
+              overflow: "hidden",
+            }}
+          >
             <Skeleton variant="rectangular" height={140} />
             <Box sx={{ p: 2 }}>
               <Skeleton variant="text" width="80%" height={24} sx={{ mb: 1 }} />
@@ -75,28 +133,168 @@ function CardsSkeleton() {
   );
 }
 
-/** Detail page skeleton: header + rich content blocks */
-function DetailSkeleton() {
+/** Profile page skeleton: avatar card + activity + progress rings */
+function ProfileSkeleton() {
   return (
     <>
-      <Skeleton variant="text" width="50%" height={44} sx={{ mb: 1 }} />
-      <Skeleton variant="text" width="30%" height={24} sx={{ mb: 3 }} />
-      <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1, mb: 3 }} />
-      {[0, 1].map((i) => (
-        <Box key={i} sx={{ mb: 2 }}>
-          <Skeleton variant="text" width="90%" height={20} />
-          <Skeleton variant="text" width="75%" height={20} />
-          <Skeleton variant="text" width="80%" height={20} />
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        {/* Avatar card */}
+        <Box
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Skeleton
+            variant="circular"
+            width={100}
+            height={100}
+            sx={{ mb: 2 }}
+          />
+          <Skeleton
+            variant="rectangular"
+            width={140}
+            height={32}
+            sx={{ borderRadius: 1, mb: 1 }}
+          />
+          <Skeleton
+            variant="rectangular"
+            width={80}
+            height={28}
+            sx={{ borderRadius: 2, mb: 1 }}
+          />
+          <Skeleton variant="text" width={120} height={24} />
         </Box>
-      ))}
+        {/* Activity card */}
+        <Box
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Skeleton variant="text" width="40%" height={28} sx={{ mb: 2 }} />
+          {/* Calendar grid mimicking activity heatmap */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(13, 1fr)",
+              gap: 0.5,
+              flexGrow: 1,
+            }}
+          >
+            {Array.from({ length: 91 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                sx={{ width: "100%", aspectRatio: "1", borderRadius: 0.5 }}
+              />
+            ))}
+          </Box>
+        </Box>
+      </Box>
+      {/* Progress */}
+      <Box
+        sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3, mb: 3 }}
+      >
+        <Skeleton variant="text" width="25%" height={28} sx={{ mb: 2 }} />
+        <Box sx={{ display: "flex", gap: 3 }}>
+          <Skeleton variant="circular" width={80} height={80} />
+          <Skeleton variant="circular" width={80} height={80} />
+        </Box>
+      </Box>
+      {/* Badges */}
+      <Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}>
+        <Skeleton variant="text" width="20%" height={28} sx={{ mb: 2 }} />
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Skeleton variant="circular" width={48} height={48} />
+          <Skeleton variant="circular" width={48} height={48} />
+          <Skeleton variant="circular" width={48} height={48} />
+          <Skeleton variant="circular" width={48} height={48} />
+        </Box>
+      </Box>
     </>
+  );
+}
+
+/** Detail/editor skeleton: title + description, toolbar, side tabs + canvas */
+function DetailSkeleton() {
+  return (
+    <Box sx={{ mx: -2 }}>
+      {/* Title + description area */}
+      <Box sx={{ px: 2, pt: 1, mb: 1 }}>
+        <Skeleton variant="text" width="45%" height={36} sx={{ mb: 0.5 }} />
+        <Skeleton variant="text" width="65%" height={22} />
+      </Box>
+      {/* Toolbar row */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
+        {[0, 1].map((i) => (
+          <Skeleton key={`g${i}`} variant="rounded" width={28} height={28} sx={{ borderRadius: 0.5 }} />
+        ))}
+        <Skeleton variant="rounded" width={60} height={28} sx={{ borderRadius: 0.5 }} />
+        <Skeleton variant="rounded" width={24} height={28} sx={{ borderRadius: 0.5 }} />
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={`f${i}`} variant="rounded" width={28} height={28} sx={{ borderRadius: 0.5 }} />
+        ))}
+        <Box sx={{ flexGrow: 1 }} />
+        <Skeleton variant="rounded" width={100} height={32} sx={{ borderRadius: 1 }} />
+        <Skeleton variant="rounded" width={28} height={28} sx={{ borderRadius: 0.5 }} />
+      </Box>
+      {/* Editor body: left tabs + canvas + right tabs */}
+      <Box sx={{ display: 'flex', height: 'calc(100vh - 200px)' }}>
+        {/* Left tab strip */}
+        <Box sx={{ width: 40, borderRight: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, pt: 2 }}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} variant="rounded" width={24} height={24} sx={{ borderRadius: 0.5 }} />
+          ))}
+        </Box>
+        {/* Canvas area */}
+        <Box sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Skeleton variant="text" width="70%" height={28} />
+          <Skeleton variant="text" width="90%" height={20} />
+          <Skeleton variant="text" width="80%" height={20} />
+          <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 1, mt: 1 }} />
+          <Skeleton variant="text" width="60%" height={20} />
+          <Skeleton variant="text" width="85%" height={20} />
+        </Box>
+        {/* Right tab strip */}
+        <Box sx={{ width: 40, borderLeft: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, pt: 2 }}>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} variant="rounded" width={24} height={24} sx={{ borderRadius: 0.5 }} />
+          ))}
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
 /** Redirect skeleton: centered loading indicator */
 function RedirectSkeleton() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh",
+      }}
+    >
       <Skeleton variant="circular" width={64} height={64} sx={{ mb: 2 }} />
       <Skeleton variant="text" width={200} height={24} />
     </Box>

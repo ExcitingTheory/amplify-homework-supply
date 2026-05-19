@@ -1087,10 +1087,10 @@ export default function MainToolbar({ children }) {
               <Box
                 sx={{
                   position: "fixed",
-                  top: "48px",
+                  top: `${appShell.appBarHeight || 48}px`,
                   left: 0,
                   width: appShell.drawerWidth,
-                  height: "calc(100% - 48px)",
+                  height: `calc(100% - ${appShell.appBarHeight || 48}px)`,
                   overflowY: "auto",
                   backdropFilter: "blur(7px)",
                   backgroundColor: "custom.glassNavbar",

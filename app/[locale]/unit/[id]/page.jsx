@@ -30,7 +30,7 @@ function UnitPageContent() {
 
   // Don't render the editor until unit data is loaded — prevents
   // saveEditorContent firing before editorStateRef is populated
-  if (!unit?.id) return null;
+  if (!unit?.id) return <AppSkeleton variant="detail" />;
 
   return (
     <>

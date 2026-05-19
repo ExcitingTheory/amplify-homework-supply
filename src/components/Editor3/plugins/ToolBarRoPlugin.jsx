@@ -8,12 +8,14 @@
 
 import * as React from "react";
 import { useEffect, useContext, useState } from "react";
+import { createPortal } from "react-dom";
 import { Box, Toolbar, Typography, Chip, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import { useToolbarScroll } from "../../../hooks/useToolbarScroll";
 import ToolbarScrollButton from "../../ToolbarScrollButton";
+import { useAppShell } from "../../AppShellContext";
 
 import TimerIcon from "@mui/icons-material/Timer";
 import { ConnectionStatus } from "../../Workbook";
@@ -158,6 +160,7 @@ export default function ToolBarRoPlugin({
 }) {
   const t = useTranslations("workbook");
   const { unit, finishedQuestions, rubric } = React.useContext(UnitContext);
+  const { toolbarPortalRef, appBarHeight } = useAppShell();
   const { xpLogs } = useXP();
   // Derive current streak from XP logs (latest streak entry)
   const currentStreak = React.useMemo(() => {
@@ -176,31 +179,15 @@ export default function ToolBarRoPlugin({
   const firstAppBarRef = React.useRef(null);
   const [firstAppBarHeight, setFirstAppBarHeight] = React.useState(0);
 
-  // Update CSS variable when app bar height changes
+  // Sync --app-bar-height CSS variable from AppShell's measured height
   React.useEffect(() => {
-    const updateHeight = () => {
-      if (firstAppBarRef.current) {
-        const height = firstAppBarRef.current.offsetHeight;
-        setFirstAppBarHeight(height);
-        // Update CSS custom property - no second AppBar needed
-        document.documentElement.style.setProperty(
-          "--app-bar-height",
-          `${height}px`,
-        );
-      }
-    };
-
-    updateHeight();
-
-    const resizeObserver = new ResizeObserver(updateHeight);
-    if (firstAppBarRef.current) {
-      resizeObserver.observe(firstAppBarRef.current);
+    if (appBarHeight > 0) {
+      document.documentElement.style.setProperty(
+        "--app-bar-height",
+        `${appBarHeight}px`,
+      );
     }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [isScrolled]);
+  }, [appBarHeight]);
 
   return (
     <>
@@ -209,18 +196,17 @@ export default function ToolBarRoPlugin({
           min-width: 1rem;
         }
       `}</style>
+      {toolbarPortalRef?.current && createPortal(
       <Box
         ref={firstAppBarRef}
         sx={{
-          position: "sticky",
-          top: "48px",
+          flexShrink: 0,
           overflowX: "hidden",
           overflowY: "visible",
           boxShadow: "none",
           zIndex: (theme) => theme.zIndex.drawer + 2,
           transition: "all 0.3s ease",
           width: "100%",
-          maxWidth: "100vw",
           backgroundColor: "custom.glassNavbar",
           backdropFilter: "blur(7px)",
           borderBottom: 1,
@@ -345,7 +331,9 @@ export default function ToolBarRoPlugin({
             )}
           </Box>
         </Box>
-      </Box>
+      </Box>,
+      toolbarPortalRef.current
+      )}
     </>
   );
 }

@@ -14,7 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import MainToolbar from "./MainToolbar";
 import { AppShellContext, DRAWER_WIDTH } from "./AppShellContext";
 
-export { AppShellContext, useAppShell } from "./AppShellContext";
+export { AppShellContext, useAppShell, useSecondaryToolbar } from "./AppShellContext";
 
 /** Direct matchMedia hook - avoids MUI useMediaQuery hydration issues */
 function useMatchMedia(query) {
@@ -54,6 +54,23 @@ export default function AppShell({ children, toolbarChildren }) {
     }
     return false;
   });
+  const [toolbarContent, setToolbarContent] = React.useState(null);
+  const appBarRef = React.useRef(null);
+  const toolbarPortalRef = React.useRef(null);
+  const [appBarHeight, setAppBarHeight] = React.useState(48);
+
+  // Measure actual AppBar height (changes when secondary toolbar is present)
+  React.useEffect(() => {
+    if (!appBarRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+        if (height > 0) setAppBarHeight(height);
+      }
+    });
+    observer.observe(appBarRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Sync drawer state when breakpoint changes
   React.useEffect(() => {
@@ -70,13 +87,18 @@ export default function AppShell({ children, toolbarChildren }) {
       setDrawerOpen,
       isDesktop,
       drawerWidth: DRAWER_WIDTH,
+      toolbarContent,
+      setToolbarContent,
+      appBarHeight,
+      toolbarPortalRef,
     }),
-    [drawerOpen, isDesktop],
+    [drawerOpen, isDesktop, toolbarContent, appBarHeight],
   );
 
   return (
     <AppShellContext.Provider value={contextValue}>
       <AppBar
+        ref={appBarRef}
         position="fixed"
         color="default"
         sx={{
@@ -86,12 +108,14 @@ export default function AppShell({ children, toolbarChildren }) {
         }}
       >
         <MainToolbar>{toolbarChildren}</MainToolbar>
+        {toolbarContent}
+        <div ref={toolbarPortalRef} />
       </AppBar>
 
       <Box
         sx={{
           display: "flex",
-          marginTop: "48px",
+          marginTop: `${appBarHeight}px`,
         }}
       >
         <Box

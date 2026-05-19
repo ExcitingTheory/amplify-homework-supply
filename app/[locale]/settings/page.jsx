@@ -232,7 +232,9 @@ function Settings() {
           marginTop: "1rem",
           marginBottom: "3rem",
           padding: "1rem",
-          height: "calc(100vh - 5rem)",
+          maxWidth: "60rem",
+          marginLeft: "auto",
+          marginRight: "auto",
           overflow: "auto",
         }}
       >

@@ -76,11 +76,19 @@ export const Drawer = styled(MuiDrawer, {
   boxSizing: 'border-box',
   ...(open && {
     ...openedMixin(theme, drawerwidth),
-    '& .MuiDrawer-paper': openedMixin(theme, drawerwidth),
+    '& .MuiDrawer-paper': {
+      ...openedMixin(theme, drawerwidth),
+      position: 'relative',
+      border: 'none',
+    },
   }),
   ...(!open && {
     whiteSpace: 'nowrap',
     ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme),
+    '& .MuiDrawer-paper': {
+      ...closedMixin(theme),
+      position: 'relative',
+      border: 'none',
+    },
   }),
 }));

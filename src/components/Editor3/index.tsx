@@ -79,6 +79,7 @@ import { useChatPageContext } from '../../hooks/useChatPageContext';
 import { useYjsUnit } from '../../hooks/useYjsUnit';
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH, DEBOUNCE_SAVE_DELAY_MS, sanitizeEditorStateJSON } from './editorConfig';
 import { Drawer, DrawerHeader } from './styledComponents';
+import { useAppShell } from '../AppShellContext';
 
 /**
  * Custom OnChange Plugin following Lexical best practices
@@ -141,6 +142,7 @@ export default function Editor(): JSX.Element {
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);
   const vectorStoreContext = useContext(VectorStoreContext);
+  const { appBarHeight = 48 } = useAppShell();
   const direction = typeof document !== 'undefined' ? (document.documentElement.dir || 'ltr') : 'ltr';
 
   // Register page context with global chat
@@ -526,11 +528,7 @@ export default function Editor(): JSX.Element {
                     ref={drawerRefLeft}
                     drawerwidth={currentDrawerWidthLeft}
                     anchor="left"
-                    sx={{
-                      height: '100%',
-                      flexShrink: 0,
-                      position: 'relative',
-                    }}
+                    sx={{ height: '100%' }}
                     variant="permanent"
                     open={openTabVerticalLeft}
                   >
@@ -559,6 +557,7 @@ export default function Editor(): JSX.Element {
                     component="main"
                     sx={{
                       flexGrow: 1,
+                      minWidth: 0,
                       padding: 0,
                       width: `calc(100% - ${openTabVerticalLeft ? actualDrawerWidthLeft : 40}px - ${
                         openTabVerticalRight ? actualDrawerWidthRight : 40
@@ -610,7 +609,7 @@ export default function Editor(): JSX.Element {
                               style={{
                                 maxWidth: '100%',
                                 outline: 'none',
-                                minHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+                                minHeight: '100%',
                                 padding: '1rem 2rem 1rem 0.5rem',
                               }}
                             />
@@ -633,11 +632,7 @@ export default function Editor(): JSX.Element {
                     ref={drawerRefRight}
                     drawerwidth={currentDrawerWidthRight}
                     anchor="right"
-                    sx={{
-                      height: '100%',
-                      flexShrink: 0,
-                      position: 'relative',
-                    }}
+                    sx={{ height: '100%' }}
                     variant="permanent"
                     open={openTabVerticalRight}
                   >
@@ -645,12 +640,11 @@ export default function Editor(): JSX.Element {
                       style={{
                         minHeight: 'var(--app-bar-height, 11rem)',
                         flexShrink: 0,
-                        justifyContent: 'flex-start',
                         transition: 'min-height 0.3s ease',
                       }}
                     >
                       <IconButton onClick={handleDrawerRightClose}>
-                        {direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                        {direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                       </IconButton>
                     </DrawerHeader>
                     <TabsVerticalRight

@@ -74,6 +74,7 @@ import {
 } from "lexical";
 import { useCallback, useEffect, useState, useContext, useRef } from "react";
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 
 import {
@@ -167,6 +168,7 @@ import { INSERT_LAYOUT_COMMAND } from "../plugins/LayoutPlugin";
 
 import MuiAppBar from "@mui/material/AppBar";
 import { styled } from "@mui/material/styles";
+import { useAppShell } from "../../AppShellContext";
 
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "./MeaningAssociationPlugin";
 
@@ -1857,6 +1859,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
   ref,
 ) {
   const t = useTranslations("editor.authoring");
+  const { toolbarPortalRef, appBarHeight } = useAppShell();
   const [editor] = useLexicalComposerContext();
   const [activeEditor, setActiveEditor] = useState(editor);
   const [blockType, setBlockType] = useState("paragraph");
@@ -1932,17 +1935,22 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
     setFirstAppBarHeight(firstHeight);
     const total = firstHeight + secondHeight;
     setTotalAppBarHeight(total);
-    // Update CSS custom property for vertical tabs positioning
-    document.documentElement.style.setProperty(
-      "--app-bar-height",
-      `${total}px`,
-    );
   }, []);
+
+  // Sync --app-bar-height CSS variable from AppShell's measured height
+  useEffect(() => {
+    if (appBarHeight > 0) {
+      document.documentElement.style.setProperty(
+        "--app-bar-height",
+        `${appBarHeight}px`,
+      );
+    }
+  }, [appBarHeight]);
 
   // Calculate total height from both AppBars (use getBoundingClientRect for sub-pixel accuracy)
   const calculateTotalHeight = useCallback(() => {
     const firstHeight =
-      firstAppBarRef.current?.getBoundingClientRect().height || 120;
+      firstAppBarRef.current?.getBoundingClientRect().height || 0;
     const secondHeight =
       secondAppBarRef.current?.getBoundingClientRect().height || 56;
     updateAppBarHeight(firstHeight, secondHeight);
@@ -2462,16 +2470,10 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
           background-color: var(--mui-palette-action-selected, #e0e0e0);
         }
       `}</style>
-      <div ref={ref}>
+      <div ref={ref} style={{ display: 'none' }} />
+      {toolbarPortalRef?.current && createPortal(
         <Box
           sx={{
-            position: "sticky",
-            top: "48px",
-            left: 0,
-            right: 0,
-            zIndex: (theme) => theme.zIndex.drawer + 2,
-            backgroundColor: "custom.glassNavbar",
-            backdropFilter: "blur(7px)",
             display: "flex",
             flexDirection: "column",
           }}
@@ -2983,7 +2985,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
         //     )}
         //     <Divider />
         */}
-      </div>
+        </Box>,
+        toolbarPortalRef.current
+      )}
     </>
   );
 });
