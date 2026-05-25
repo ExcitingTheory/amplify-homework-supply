@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import React from "react";
 import { Box } from "@mui/material";
 import NotificationCard from "./NotificationCard";
@@ -134,17 +134,17 @@ export const CollaborationInvite: Story = {
   },
 };
 
-export const GuildPost: Story = {
-  name: "Guild Category",
+export const SquadPost: Story = {
+  name: "Squad Category",
   args: {
     notification: {
       ...baseNotification,
       id: "n6",
-      type: "GUILD_POST_NEW",
-      category: "GUILD",
+      type: "SQUAD_POST_NEW",
+      category: "SQUAD",
       title: "New post in Science Explorers",
-      body: "Bob posted in your guild.",
-      linkPath: "/guilds/guild-1",
+      body: "Bob posted in your squad.",
+      linkPath: "/squads/squad-1",
       linkLabel: "View Post",
       senderName: "Bob",
       seen: true,
@@ -165,7 +165,7 @@ export const SystemAnnouncement: Story = {
       type: "SYSTEM_ANNOUNCEMENT",
       category: "SYSTEM",
       title: "New features available!",
-      body: "Check out the new practice drill modes and guild challenges.",
+      body: "Check out the new practice drill modes and squad challenges.",
       linkPath: undefined,
       linkLabel: undefined,
       senderName: "System",
@@ -201,7 +201,7 @@ export const AllCategories: Story = {
         { category: "ASSIGNMENT", type: "ASSIGNMENT_DUE_SOON", title: "Assignment due tomorrow" },
         { category: "COLLABORATION", type: "PEER_REVIEW_INVITE", title: "Peer review invitation" },
         { category: "GAMIFICATION", type: "BADGE_EARNED", title: "New badge earned!" },
-        { category: "GUILD", type: "GUILD_POST_NEW", title: "New guild post" },
+        { category: "SQUAD", type: "SQUAD_POST_NEW", title: "New squad post" },
         { category: "CHAT", type: "CHAT_MENTION", title: "You were mentioned" },
         { category: "SYSTEM", type: "SYSTEM_MAINTENANCE", title: "Scheduled maintenance" },
       ].map((n, i) => (

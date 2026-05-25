@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { XPTunerDialog } from './XPTunerDialog'
 import { XPReason } from '../../utils/xpCalculation'
 import { fn } from 'storybook/test'

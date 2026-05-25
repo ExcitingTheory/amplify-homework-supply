@@ -101,13 +101,12 @@ export function useYjsQuestion(config: UseYjsQuestionConfig): UseYjsQuestionRetu
 
         // Apply Yjs snapshot if exists
         if ((data as any).yjsSnapshot && provider) {
-          try {
-            const yjsSnapshot = (data as any).yjsSnapshot as string;
-            const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-            Y.applyUpdate(provider.getDoc(), updateBytes);
+          const yjsSnapshot = (data as any).yjsSnapshot as string;
+          const updateBytes = Buffer.from(yjsSnapshot, 'base64');
+          if (provider.applyUpdate(updateBytes)) {
             console.log(`[useYjsQuestion] Applied Yjs snapshot for question ${questionId}`);
-          } catch (err) {
-            console.warn(`[useYjsQuestion] Failed to apply snapshot for question ${questionId}:`, err);
+          } else {
+            console.warn(`[useYjsQuestion] Snapshot for question ${questionId} was corrupt — skipped`);
           }
         }
 
@@ -171,8 +170,8 @@ export function useYjsQuestion(config: UseYjsQuestionConfig): UseYjsQuestionRetu
         console.error(`[useYjsQuestion] GraphQL errors saving question ${questionId}:`, errors);
         versionCtrl?.rollback();
       } else {
-        setQuestion(data);
-        versionCtrl?.confirm(data._version);
+        if (data) setQuestion(data);
+        if (data?._version != null) versionCtrl?.confirm(data._version);
         console.log(`[useYjsQuestion] Successfully saved question ${questionId}`);
       }
     } catch (err) {

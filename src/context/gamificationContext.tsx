@@ -1,7 +1,7 @@
 "use client";
 /**
  * GamificationContext — Unified context for all gamification state:
- * XP, Progress, Campaign, Guild, SkillTree, and ContentLock.
+ * XP, Progress, Campaign, Squad, SkillTree, and ContentLock.
  *
  * Consolidates 6 separate contexts into one provider with a single
  * useReducer + domain-specific useMemo selectors.
@@ -26,8 +26,8 @@ import type {
   StreakInfo,
   CampaignInfo,
   GroupChallengeInfo,
-  GuildInfo,
-  GuildMember,
+  SquadInfo,
+  SquadMember,
   LockStatus,
 } from './reducers/gamificationReducer'
 
@@ -38,8 +38,8 @@ export type {
   StreakInfo,
   CampaignInfo,
   GroupChallengeInfo,
-  GuildInfo,
-  GuildMember,
+  SquadInfo,
+  SquadMember,
   LockStatus,
 }
 
@@ -93,12 +93,12 @@ export interface GamificationContextValue {
   completedChallenges: GroupChallengeInfo[]
   campaignLoading: boolean
 
-  // Guild
-  myGuild: GuildInfo | null
-  myMembership: GuildMember | null
-  guildLeaderboard: GuildInfo[]
-  guildMembers: GuildMember[]
-  guildLoading: boolean
+  // Squad
+  mySquad: SquadInfo | null
+  myMembership: SquadMember | null
+  squadLeaderboard: SquadInfo[]
+  squadMembers: SquadMember[]
+  squadLoading: boolean
 
   // SkillTree
   skillNodes: SkillNodeData[]
@@ -149,12 +149,12 @@ const GamificationContext = createContext<GamificationContextValue>({
   completedChallenges: [],
   campaignLoading: true,
 
-  // Guild
-  myGuild: null,
+  // Squad
+  mySquad: null,
   myMembership: null,
-  guildLeaderboard: [],
-  guildMembers: [],
-  guildLoading: true,
+  squadLeaderboard: [],
+  squadMembers: [],
+  squadLoading: true,
 
   // SkillTree
   skillNodes: [],
@@ -216,15 +216,15 @@ export function useCampaign() {
   }
 }
 
-/** Drop-in replacement for the old useGuild() hook */
-export function useGuild() {
+/** Drop-in replacement for the old useSquad() hook */
+export function useSquad() {
   const ctx = useContext(GamificationContext)
   return {
-    myGuild: ctx.myGuild,
+    mySquad: ctx.mySquad,
     myMembership: ctx.myMembership,
-    guildLeaderboard: ctx.guildLeaderboard,
-    guildMembers: ctx.guildMembers,
-    isLoading: ctx.guildLoading,
+    squadLeaderboard: ctx.squadLeaderboard,
+    squadMembers: ctx.squadMembers,
+    isLoading: ctx.squadLoading,
   }
 }
 
@@ -294,7 +294,7 @@ const REASON_LABELS: Record<string, string> = {
   [XPReason.COMEBACK]: 'Comeback!',
   [XPReason.PERSONAL_BEST]: 'New personal best!',
   [XPReason.EASTER_EGG]: 'Secret discovered!',
-  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild challenge bonus',
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad challenge bonus',
 }
 
 interface XPToastItem {
@@ -344,7 +344,7 @@ export function GamificationProvider({
   const xpInitialLoadRef = useRef(true)
   const profileVersionRef = useRef(0)
   const challengeVersionMapRef = useRef<Record<string, number>>({})
-  const guildVersionMapRef = useRef<Record<string, number>>({})
+  const squadVersionMapRef = useRef<Record<string, number>>({})
   const skillVersionMapRef = useRef<Record<string, number>>({})
   const xpLogVersionMapRef = useRef<Record<string, number>>({})
   const unitLockVersionMapRef = useRef<Record<string, number>>({})
@@ -363,7 +363,7 @@ export function GamificationProvider({
       dispatch({ type: actionTypes.SET_PROGRESS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CHALLENGES_LOADING, payload: false })
-      dispatch({ type: actionTypes.SET_GUILDS_LOADING, payload: false })
+      dispatch({ type: actionTypes.SET_SQUADS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_SKILLS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_SKILL_PROGRESS_LOADING, payload: false })
@@ -393,8 +393,8 @@ export function GamificationProvider({
         return
       }
 
-      // Version guard: skip if same version
-      if (profile._version != null && profile._version <= profileVersionRef.current) {
+      // Version guard: only rerender if incoming version is greater than expected
+      if (profile._version != null && !(profile._version > profileVersionRef.current)) {
         return
       }
       profileVersionRef.current = profile._version || 0
@@ -488,44 +488,44 @@ export function GamificationProvider({
     return () => subscription.unsubscribe()
   }, [client, cohortId])
 
-  // ── Guild subscription (includes members) ───────────────────────
+  // ── Squad subscription (includes members) ───────────────────────
   useEffect(() => {
-    if (!client?.models?.Guild) {
-      dispatch({ type: actionTypes.SET_GUILDS_LOADING, payload: false })
+    if (!client?.models?.Squad) {
+      dispatch({ type: actionTypes.SET_SQUADS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false })
       return
     }
     const filter = cohortId ? { cohortId: { eq: cohortId } } : undefined
 
-    const processGuilds = (data: any[]) => {
+    const processSquads = (data: any[]) => {
       const valid = (data || []).filter((i: any) => i != null && i.id != null)
 
       // Version map guard
       const hasChanges = valid.some((item: any) => {
-        const tracked = guildVersionMapRef.current[item.id]
+        const tracked = squadVersionMapRef.current[item.id]
         return tracked == null || item._version > tracked
       })
-      if (!hasChanges && Object.keys(guildVersionMapRef.current).length > 0) return
+      if (!hasChanges && Object.keys(squadVersionMapRef.current).length > 0) return
 
-      guildVersionMapRef.current = {}
-      valid.forEach((item: any) => { guildVersionMapRef.current[item.id] = item._version })
+      squadVersionMapRef.current = {}
+      valid.forEach((item: any) => { squadVersionMapRef.current[item.id] = item._version })
 
-      dispatch({ type: actionTypes.SET_RAW_GUILDS, payload: valid })
-      // Extract memberships from Guild.members arrays
+      dispatch({ type: actionTypes.SET_RAW_SQUADS, payload: valid })
+      // Extract memberships from Squad.members arrays
       const allMemberships: any[] = []
-      for (const guild of valid) {
-        for (const member of (guild.members || [])) {
-          allMemberships.push({ ...member, id: `${guild.id}-${member.studentId}`, guildId: guild.id })
+      for (const squad of valid) {
+        for (const member of (squad.members || [])) {
+          allMemberships.push({ ...member, id: `${squad.id}-${member.studentId}`, squadId: squad.id })
         }
       }
       dispatch({ type: actionTypes.SET_RAW_MEMBERSHIPS, payload: allMemberships })
     }
 
-    const subscription = client.models.Guild.observeQuery(filter ? { filter } : undefined).subscribe({
-      next: ({ items }: any) => { processGuilds(items) },
+    const subscription = client.models.Squad.observeQuery(filter ? { filter } : undefined).subscribe({
+      next: ({ items }: any) => { processSquads(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Guild error:', err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Squad error:', err)
       },
     })
 
@@ -895,13 +895,13 @@ export function GamificationProvider({
     return { activeChallenges: active, completedChallenges: completed }
   }, [state.rawChallenges])
 
-  // ── Derived: Guild ──────────────────────────────────────────────
-  const myMembership = useMemo<GuildMember | null>(() => {
+  // ── Derived: Squad ──────────────────────────────────────────────
+  const myMembership = useMemo<SquadMember | null>(() => {
     const found = state.rawMemberships.find((m: any) => m.studentId === studentId)
     if (!found) return null
     return {
       id: found.id,
-      guildId: found.guildId,
+      squadId: found.squadId,
       studentId: found.studentId,
       role: found.role || 'MEMBER',
       joinedAt: found.joinedAt,
@@ -911,14 +911,14 @@ export function GamificationProvider({
   const memberCountMap = useMemo(() => {
     const counts = new Map<string, number>()
     state.rawMemberships.forEach((m: any) => {
-      counts.set(m.guildId, (counts.get(m.guildId) || 0) + 1)
+      counts.set(m.squadId, (counts.get(m.squadId) || 0) + 1)
     })
     return counts
   }, [state.rawMemberships])
 
-  const guildLeaderboard = useMemo<GuildInfo[]>(
+  const squadLeaderboard = useMemo<SquadInfo[]>(
     () =>
-      state.rawGuilds
+      state.rawSquads
         .map((g: any) => ({
           id: g.id,
           name: g.name,
@@ -926,24 +926,33 @@ export function GamificationProvider({
           totalXP: g.totalXP || 0,
           description: g.description,
           memberCount: memberCountMap.get(g.id) || 0,
+          members: (g.members || []).map((m: any) => ({
+            studentId: m.studentId,
+            role: m.role,
+            avatarStyle: m.avatarStyle,
+            avatarOverrides: typeof m.avatarOverrides === 'string'
+              ? JSON.parse(m.avatarOverrides)
+              : m.avatarOverrides,
+            avatarSeed: m.avatarSeed || m.studentId,
+          })),
           posts: g.posts || [],
         }))
-        .sort((a: GuildInfo, b: GuildInfo) => b.totalXP - a.totalXP),
-    [state.rawGuilds, memberCountMap],
+        .sort((a: SquadInfo, b: SquadInfo) => b.totalXP - a.totalXP),
+    [state.rawSquads, memberCountMap],
   )
 
-  const myGuild = useMemo<GuildInfo | null>(() => {
+  const mySquad = useMemo<SquadInfo | null>(() => {
     if (!myMembership) return null
-    return guildLeaderboard.find((g) => g.id === myMembership.guildId) || null
-  }, [myMembership, guildLeaderboard])
+    return squadLeaderboard.find((g) => g.id === myMembership.squadId) || null
+  }, [myMembership, squadLeaderboard])
 
-  const guildMembers = useMemo<GuildMember[]>(() => {
+  const squadMembers = useMemo<SquadMember[]>(() => {
     if (!myMembership) return []
     return state.rawMemberships
-      .filter((m: any) => m.guildId === myMembership.guildId)
+      .filter((m: any) => m.squadId === myMembership.squadId)
       .map((m: any) => ({
         id: m.id,
-        guildId: m.guildId,
+        squadId: m.squadId,
         studentId: m.studentId,
         role: m.role || 'MEMBER',
         joinedAt: m.joinedAt,
@@ -1086,13 +1095,13 @@ export function GamificationProvider({
 
   // ── Loading flags ───────────────────────────────────────────────
   const campaignLoading = state.campaignsLoading || state.challengesLoading
-  const guildLoading = state.guildsLoading || state.membershipsLoading
+  const squadLoading = state.squadsLoading || state.membershipsLoading
   const skillTreeLoading = state.skillsLoading || state.skillProgressLoading
   const isLoading =
     state.xpLoading ||
     state.progressLoading ||
     campaignLoading ||
-    guildLoading ||
+    squadLoading ||
     skillTreeLoading ||
     state.locksLoading
 
@@ -1122,12 +1131,12 @@ export function GamificationProvider({
       completedChallenges,
       campaignLoading,
 
-      // Guild
-      myGuild,
+      // Squad
+      mySquad,
       myMembership,
-      guildLeaderboard,
-      guildMembers,
-      guildLoading,
+      squadLeaderboard,
+      squadMembers,
+      squadLoading,
 
       // SkillTree
       skillNodes,
@@ -1167,11 +1176,11 @@ export function GamificationProvider({
       activeChallenges,
       completedChallenges,
       campaignLoading,
-      myGuild,
+      mySquad,
       myMembership,
-      guildLeaderboard,
-      guildMembers,
-      guildLoading,
+      squadLeaderboard,
+      squadMembers,
+      squadLoading,
       skillNodes,
       skillTreeLoading,
       state.selectedSkillId,

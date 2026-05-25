@@ -449,7 +449,8 @@ const FilesProvider = ({ children }) => {
       }
       filesFetchedRef.current = false;
     };
-  }, [user, authLoading, session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, session?.identityId]);
 
   // Subscribe to Document status changes
   React.useEffect(() => {
@@ -557,8 +558,12 @@ const FilesProvider = ({ children }) => {
     const previousVersion = fileVersionMapRef.current[id] || currentVersion;
     fileVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { fileVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { fileVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        fileVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        fileVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 
@@ -566,8 +571,12 @@ const FilesProvider = ({ children }) => {
     const previousVersion = documentVersionMapRef.current[id] || currentVersion;
     documentVersionMapRef.current[id] = currentVersion + 1;
     return {
-      confirm: (actualVersion) => { documentVersionMapRef.current[id] = actualVersion; },
-      rollback: () => { documentVersionMapRef.current[id] = previousVersion; },
+      confirm: (actualVersion) => {
+        documentVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        documentVersionMapRef.current[id] = previousVersion;
+      },
     };
   }, []);
 

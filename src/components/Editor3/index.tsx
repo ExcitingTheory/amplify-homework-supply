@@ -669,4 +669,5 @@ export default function Editor(): JSX.Element {
 export { Workbook } from './Workbook';
 export { NarrativeReader } from './NarrativeReader';
 export type { NarrativeReaderProps } from './NarrativeReader';
+export { WorkbookSSRSkeleton } from './WorkbookSSRSkeleton';
 export { EditorNodes, ALL_TRANSFORMERS } from './editorConfig';

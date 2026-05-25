@@ -22,7 +22,7 @@ const CATEGORIES = [
   "ASSIGNMENT",
   "COLLABORATION",
   "GAMIFICATION",
-  "GUILD",
+  "SQUAD",
   "CHAT",
   "SYSTEM",
 ];

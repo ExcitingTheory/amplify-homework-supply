@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CommentThreadDrawer } from './CommentThreadDrawer'
 import { CommentGutterIcon } from './CommentGutterIcon'
 import { BlockHistoryTimeline } from './BlockHistoryTimeline'

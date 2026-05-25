@@ -2,7 +2,7 @@
  * ChatPanel — Main container for collaborative peer chat.
  *
  * Renders a topic sidebar + active thread view. Connects to the
- * ChatCollaborationProvider based on the current section/guild context.
+ * ChatCollaborationProvider based on the current section/squad context.
  */
 
 import React, { useState, useMemo } from 'react'
@@ -29,9 +29,9 @@ import { MemberInfo } from '../../utils/chatMentions'
 // ============================================================================
 
 export interface ChatPanelProps {
-  /** 'section' or 'guild' */
-  roomType: 'section' | 'guild'
-  /** Section or guild ID */
+  /** 'section' or 'squad' */
+  roomType: 'section' | 'squad'
+  /** Section or squad ID */
   roomId: string
   /** Current user info */
   user: ChatUser
@@ -85,7 +85,7 @@ export function ChatPanel({
   const { onlineUsers, typingUsers } = useChatPresence(provider, activeTopicId)
 
   // Default scope for new topics
-  const defaultScope = scope || (roomType === 'guild' ? 'guild' : 'section') as TopicScope
+  const defaultScope = scope || (roomType === 'squad' ? 'squad' : 'section') as TopicScope
 
   const activeTopic = useMemo(
     () => topics.find((t) => t.id === activeTopicId) || null,

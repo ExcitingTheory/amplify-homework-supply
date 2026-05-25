@@ -14,7 +14,11 @@ import { useTheme } from "@mui/material/styles";
 import MainToolbar from "./MainToolbar";
 import { AppShellContext, DRAWER_WIDTH } from "./AppShellContext";
 
-export { AppShellContext, useAppShell, useSecondaryToolbar } from "./AppShellContext";
+export {
+  AppShellContext,
+  useAppShell,
+  useSecondaryToolbar,
+} from "./AppShellContext";
 
 /** Direct matchMedia hook - avoids MUI useMediaQuery hydration issues */
 function useMatchMedia(query) {
@@ -64,7 +68,8 @@ export default function AppShell({ children, toolbarChildren }) {
     if (!appBarRef.current) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+        const height =
+          entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
         if (height > 0) setAppBarHeight(height);
       }
     });

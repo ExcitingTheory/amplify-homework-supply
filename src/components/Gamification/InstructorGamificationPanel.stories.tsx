@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { fn } from 'storybook/test'
 import { InstructorGamificationPanel } from './InstructorGamificationPanel'
@@ -25,8 +25,8 @@ const meta: Meta<typeof InstructorGamificationPanel> = {
     onGenerateSkillTree: fn(),
     onSaveCampaign: fn(),
     onDeleteCampaign: fn(),
-    onCreateGuild: fn(),
-    onDeleteGuild: fn(),
+    onCreateSquad: fn(),
+    onDeleteSquad: fn(),
     onAddEasterEgg: fn(),
     onDeleteEasterEgg: fn(),
     onAddBoss: fn(),
@@ -62,7 +62,7 @@ export const WithData: Story = {
     campaigns: [
       { id: 'c1', title: 'Operation Syntax Storm', setting: 'A world where code is law.' },
     ],
-    guilds: [
+    squads: [
       { id: 'g1', name: 'Code Warriors', memberCount: 5 },
       { id: 'g2', name: 'Bug Busters', memberCount: 4 },
     ],
@@ -144,7 +144,7 @@ export const AccordionInteraction: Story = {
       { id: 's1', title: 'Variables & Types', xpReward: 100 },
     ],
     campaigns: [],
-    guilds: [],
+    squads: [],
     easterEggs: [],
     bossBattles: [],
   },
@@ -161,7 +161,7 @@ export const AccordionInteraction: Story = {
     await expect(canvas.getByText(/XP Tuner/)).toBeInTheDocument()
     await expect(canvas.getByText(/Skill Tree \(/)).toBeInTheDocument()
     await expect(canvas.getByText(/Campaign \(/)).toBeInTheDocument()
-    await expect(canvas.getByText(/Guilds \(/)).toBeInTheDocument()
+    await expect(canvas.getByText(/Squads \(/)).toBeInTheDocument()
     await expect(canvas.getByText(/Easter Eggs \(/)).toBeInTheDocument()
     await expect(canvas.getByText(/Boss Battles \(/)).toBeInTheDocument()
 

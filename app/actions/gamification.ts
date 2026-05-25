@@ -96,12 +96,15 @@ export async function awardXP(
     return null;
   }
 
-  // Fire-and-forget: badges, streak, guild XP
+  // Fire-and-forget: badges, streak, squad XP
   Promise.allSettled([
-    (client as any).mutations.checkBadges({ studentId }),
+    (client as any).mutations.checkBadges({
+      studentId,
+      cohortId: cohortId ?? null,
+    }),
     (client as any).mutations.updateStreak({ studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
-      ? (client as any).mutations.updateGuildXP?.({
+      ? (client as any).mutations.updateSquadXP?.({
           studentId,
           xpAmount: xpResult.xpAmount,
         })
@@ -113,7 +116,7 @@ export async function awardXP(
 
 /**
  * Record a grade completion — batches XP award, badge check, streak update,
- * guild XP update, personal best check, and easter egg scan into a single
+ * squad XP update, personal best check, and easter egg scan into a single
  * server round-trip.
  *
  * Replaces 4-5 sequential client-side calls.
@@ -147,11 +150,14 @@ export async function recordGradeCompletion(
   }
 
   // 2. Check badges + update streak (parallel, fire-and-forget on server)
-  const [badgeResult, streakResult, guildResult] = await Promise.allSettled([
-    (client as any).mutations.checkBadges({ studentId }),
+  const [badgeResult, streakResult, squadResult] = await Promise.allSettled([
+    (client as any).mutations.checkBadges({
+      studentId,
+      cohortId: cohortId ?? null,
+    }),
     (client as any).mutations.updateStreak({ studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
-      ? (client as any).mutations.updateGuildXP?.({
+      ? (client as any).mutations.updateSquadXP?.({
           studentId,
           xpAmount: xpResult.xpAmount,
         })
@@ -377,7 +383,10 @@ Do not include any other text or markdown formatting.`;
     }
     return null;
   } catch (err) {
-    console.error("[gamification action] generateCampaignNarrative error:", err);
+    console.error(
+      "[gamification action] generateCampaignNarrative error:",
+      err,
+    );
     return null;
   }
 }
@@ -399,5 +408,113 @@ export async function rebuildLeaderboard(cohortId: string): Promise<void> {
     await (client as any).mutations.rebuildLeaderboard({ cohortId });
   } catch (err) {
     console.warn("[gamification action] rebuildLeaderboard error:", err);
+  }
+}
+
+// ============================================================================
+// Challenge Recap Generation
+// ============================================================================
+
+export interface SquadPerformance {
+  squadId: string;
+  squadName: string;
+  xpContributed: number;
+  memberCount: number;
+}
+
+export interface ChallengeRecapResult {
+  squadId: string;
+  squadName: string;
+  recap: string;
+  rivalSquadId: string;
+  rivalSquadName: string;
+  performance: string;
+}
+
+/**
+ * Generate per-squad recaps for a completed challenge.
+ *
+ * Each recap is an amusing AI-generated narrative summary that pits squads
+ * against each other (never individuals). The "rival" for each squad is the
+ * closest-XP squad at challenge end.
+ *
+ * Returns an array of recap objects ready to be stored on Squad.recaps.
+ */
+export async function generateChallengeRecaps(params: {
+  challengeId: string;
+  challengeTitle: string;
+  setting?: string;
+  outcome?: string;
+  squads: SquadPerformance[];
+}): Promise<ChallengeRecapResult[]> {
+  const { challengeId, challengeTitle, setting, outcome, squads } = params;
+
+  if (squads.length === 0) return [];
+
+  // Sort squads by XP for ranking
+  const sorted = [...squads].sort((a, b) => b.xpContributed - a.xpContributed);
+
+  const systemPrompt = `You are a witty narrator for an educational gamification platform.
+You write short, entertaining recap summaries after group challenges (boss battles).
+
+RULES:
+- Write from a third-person narrator perspective
+- Pit SQUADS against each other, never name individual students
+- Keep each recap to 2-3 sentences
+- Be playful and dramatic — like a sports commentator
+- Reference the setting/world if provided
+- The "rival" squad should be called out by name
+- Winners get triumphant recaps; losers get comedic consolation
+- Never be mean-spirited — always encouraging underneath the banter
+
+Respond ONLY with valid JSON array: [{"squadId": "...", "recap": "...", "performance": "top|middle|bottom"}]`;
+
+  const squadSummary = sorted
+    .map(
+      (s, i) =>
+        `#${i + 1} ${s.squadName} (${s.xpContributed} XP, ${s.memberCount} members)`,
+    )
+    .join("\n");
+
+  const userPrompt = `Challenge: "${challengeTitle}"
+${setting ? `Setting: ${setting}` : ""}
+${outcome ? `Outcome: ${outcome}` : ""}
+
+Final standings:
+${squadSummary}
+
+Generate a personalized recap for EACH squad. Each squad's "rival" is the squad closest to them in XP (above or below).`;
+
+  try {
+    const text = await chatCompletion({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      model: "gpt-4o-mini",
+    });
+
+    if (!text) return [];
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed)) return [];
+
+    // Enrich with rival info
+    return parsed.map((item: any) => {
+      const squad = sorted.find((s) => s.squadId === item.squadId);
+      const idx = sorted.findIndex((s) => s.squadId === item.squadId);
+      // Rival = closest squad (prefer above, then below)
+      const rival = idx > 0 ? sorted[idx - 1] : sorted[idx + 1];
+      return {
+        squadId: item.squadId,
+        squadName: squad?.squadName || item.squadId,
+        recap: item.recap || "",
+        rivalSquadId: rival?.squadId || "",
+        rivalSquadName: rival?.squadName || "",
+        performance: item.performance || "middle",
+      };
+    });
+  } catch (err) {
+    console.error("[gamification action] generateChallengeRecaps error:", err);
+    return [];
   }
 }

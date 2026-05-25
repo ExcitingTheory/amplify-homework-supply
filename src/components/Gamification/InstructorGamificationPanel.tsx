@@ -3,7 +3,7 @@
  * - Section selector (scopes all data by cohortId)
  * - Skill tree editor (multi-field with unit linking)
  * - Campaign editor (narrative setting, stakes, chapter text)
- * - Guild management (create/edit guilds, assign students)
+ * - Squad management (create/edit squads, assign students)
  * - Easter egg CRUD (create/edit/delete triggers)
  * - Boss battle CRUD (create with progress display)
  *
@@ -48,7 +48,7 @@ import { SkillForm, SkillFormData, UnitOption } from './SkillForm'
 import { SkillTree, SkillNodeData } from './SkillTree'
 import { BossBattleForm, BossBattleFormData } from './BossBattleForm'
 import { BossBattleProgress, Contributor } from './BossBattleProgress'
-import { EasterEggForm, EasterEggFormData, EasterEggTriggerType } from './EasterEggForm'
+import { EasterEggForm, EasterEggFormData, EasterEggTriggerType, BadgeOption } from './EasterEggForm'
 import { BadgeEditor, BadgeOverride, CustomBadge } from './BadgeEditor'
 import { ANTI_BADGE_REGISTRY, getAllAntiBadgeTypes, getAntiBadgeConfig } from './antiBadgeRegistry'
 import type { AntiBadgeConfig } from './antiBadgeRegistry'
@@ -93,7 +93,7 @@ export interface CampaignEntry {
   narrative?: string
 }
 
-export interface GuildEntry {
+export interface SquadEntry {
   id: string
   name: string
   memberCount: number
@@ -125,6 +125,7 @@ export interface BossEntry {
   bonusMultiplier?: number
   setting?: string
   stakes?: string
+  featuredImage?: string
   contributors?: Contributor[]
 }
 
@@ -147,12 +148,14 @@ export interface InstructorGamificationPanelProps {
   onSectionChange?: (sectionId: string | null) => void
   /** Available units for skill linking (from section assignments) */
   availableUnits?: UnitOption[]
+  /** Available badges for easter egg rewards */
+  availableBadges?: BadgeOption[]
   /** Existing skills */
   skills?: SkillEntry[]
   /** Existing campaigns */
   campaigns?: CampaignEntry[]
-  /** Existing guilds */
-  guilds?: GuildEntry[]
+  /** Existing squads */
+  squads?: SquadEntry[]
   /** Existing easter eggs */
   easterEggs?: EasterEggEntry[]
   /** Existing boss battles */
@@ -167,11 +170,12 @@ export interface InstructorGamificationPanelProps {
   onDeleteCampaign?: (campaignId: string) => void
   /** Generate campaign narrative via AI from a title prompt */
   onGenerateCampaign?: (title: string) => Promise<{ setting: string; stakes: string } | null>
-  onCreateGuild?: (name: string, cohortId: string) => void
-  onDeleteGuild?: (guildId: string) => void
+  onCreateSquad?: (name: string, cohortId: string) => void
+  onDeleteSquad?: (squadId: string) => void
   onAddEasterEgg?: (egg: EasterEggFormData) => void
   onDeleteEasterEgg?: (eggId: string) => void
   onAddBoss?: (boss: BossBattleFormData) => void
+  onEditBoss?: (bossId: string, boss: BossBattleFormData) => void
   onDeleteBoss?: (bossId: string) => void
   onToggleBossActive?: (bossId: string, active: boolean) => void
   /** Current badge overrides for hardcoded badges */
@@ -225,9 +229,10 @@ export function InstructorGamificationPanel({
   selectedSectionId,
   onSectionChange,
   availableUnits = [],
+  availableBadges = [],
   skills = [],
   campaigns = [],
-  guilds = [],
+  squads = [],
   easterEggs = [],
   bossBattles = [],
   onAddSkill,
@@ -238,11 +243,12 @@ export function InstructorGamificationPanel({
   onSaveCampaign,
   onDeleteCampaign,
   onGenerateCampaign,
-  onCreateGuild,
-  onDeleteGuild,
+  onCreateSquad,
+  onDeleteSquad,
   onAddEasterEgg,
   onDeleteEasterEgg,
   onAddBoss,
+  onEditBoss,
   onDeleteBoss,
   onToggleBossActive,
   badgeOverrides = [],
@@ -267,9 +273,10 @@ export function InstructorGamificationPanel({
   onToggleAntiBadges,
 }: InstructorGamificationPanelProps) {
   // Local form state for inline creation
-  const [newGuildName, setNewGuildName] = useState('')
-  const [selectedGuildSection, setSelectedGuildSection] = useState<{ id: string; name?: string; description?: string } | null>(null)
-  const guildSectionFilter = React.useMemo(
+  const [newSquadName, setNewSquadName] = useState('')
+  const [selectedSquadSection, setSelectedSquadSection] = useState<{ id: string; name?: string; description?: string } | null>(null)
+  const [editingBossId, setEditingBossId] = useState<string | null>(null)
+  const squadSectionFilter = React.useMemo(
     () => createFilterOptions<{ id: string; name?: string; description?: string }>({
       stringify: (option) => `${option.name || ''} ${option.description || ''}`,
     }),
@@ -610,19 +617,19 @@ export function InstructorGamificationPanel({
         </AccordionDetails>
       </Accordion>
 
-      {/* ---- Guild Management ---- */}
+      {/* ---- Squad Management ---- */}
       <Accordion defaultExpanded={false}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <GroupsIcon sx={{ mr: 1 }} />
-          <Typography fontWeight={600}>Guilds ({guilds.length})</Typography>
+          <Typography fontWeight={600}>Squads ({squads.length})</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
             <Autocomplete
               options={sections}
-              value={selectedGuildSection}
-              onChange={(_, value) => setSelectedGuildSection(value)}
-              filterOptions={guildSectionFilter}
+              value={selectedSquadSection}
+              onChange={(_, value) => setSelectedSquadSection(value)}
+              filterOptions={squadSectionFilter}
               getOptionLabel={(option) => option.name || ''}
               renderOption={(props, option) => (
                 <li {...props} key={option.id}>
@@ -645,39 +652,39 @@ export function InstructorGamificationPanel({
             />
             <TextField
               size="small"
-              label="Guild name"
-              value={newGuildName}
-              onChange={(e) => setNewGuildName(e.target.value)}
+              label="Squad name"
+              value={newSquadName}
+              onChange={(e) => setNewSquadName(e.target.value)}
               sx={{ flex: 1 }}
             />
             <Button
               variant="contained"
               size="small"
               startIcon={<AddIcon />}
-              disabled={!newGuildName.trim() || !selectedGuildSection}
+              disabled={!newSquadName.trim() || !selectedSquadSection}
               onClick={() => {
-                onCreateGuild?.(newGuildName.trim(), selectedGuildSection!.id)
-                setNewGuildName('')
-                setSelectedGuildSection(null)
+                onCreateSquad?.(newSquadName.trim(), selectedSquadSection!.id)
+                setNewSquadName('')
+                setSelectedSquadSection(null)
               }}
             >
               Create
             </Button>
           </Stack>
           <List dense>
-            {guilds.map((g) => (
+            {squads.map((g) => (
               <ListItem key={g.id} divider>
                 <ListItemText primary={g.name} secondary={`${g.memberCount} members`} />
                 <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteGuild?.(g.id)}>
+                  <IconButton edge="end" size="small" onClick={() => onDeleteSquad?.(g.id)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
             ))}
-            {guilds.length === 0 && (
+            {squads.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                No guilds yet.
+                No squads yet.
               </Typography>
             )}
           </List>
@@ -694,6 +701,7 @@ export function InstructorGamificationPanel({
           <EasterEggForm
             onSubmit={(data) => onAddEasterEgg?.(data)}
             availableUnits={availableUnits}
+            availableBadges={availableBadges}
           />
           <Divider sx={{ my: 2 }} />
           <List dense>
@@ -919,7 +927,36 @@ export function InstructorGamificationPanel({
           <Typography fontWeight={600}>Boss Battles ({bossBattles.length})</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <BossBattleForm onSubmit={(data) => onAddBoss?.(data)} />
+          {editingBossId ? (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Editing: {bossBattles.find(b => b.id === editingBossId)?.title}</Typography>
+              <BossBattleForm
+                initialValues={(() => {
+                  const boss = bossBattles.find(b => b.id === editingBossId)
+                  if (!boss) return undefined
+                  return {
+                    title: boss.title,
+                    targetXP: boss.targetXP,
+                    startDate: boss.startDate,
+                    deadline: boss.deadline,
+                    bonusMultiplier: boss.bonusMultiplier,
+                    setting: boss.setting,
+                    stakes: boss.stakes,
+                    featuredImage: boss.featuredImage,
+                  }
+                })()}
+                onSubmit={(data) => {
+                  onEditBoss?.(editingBossId, data)
+                  setEditingBossId(null)
+                }}
+              />
+              <Button size="small" onClick={() => setEditingBossId(null)} sx={{ mt: 1 }}>
+                Cancel Edit
+              </Button>
+            </Box>
+          ) : (
+            <BossBattleForm onSubmit={(data) => onAddBoss?.(data)} />
+          )}
           {bossBattles.length > 0 && <Divider sx={{ my: 2 }} />}
           {bossBattles.map((boss) => (
             <BossBattleProgress
@@ -937,6 +974,7 @@ export function InstructorGamificationPanel({
               contributors={boss.contributors}
               onToggleActive={onToggleBossActive}
               onDelete={onDeleteBoss}
+              onEdit={onEditBoss ? (id) => setEditingBossId(id) : undefined}
             />
           ))}
           {bossBattles.length === 0 && (

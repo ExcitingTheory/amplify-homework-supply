@@ -456,6 +456,17 @@
       "joinButton": "Join Workbook",
       "joining": "Finding...",
       "noInvitations": "No pending workbook invitations"
+    },
+    "invite": {
+      "shareTooltip": "Invite others to this workbook",
+      "title": "Share Workbook",
+      "description": "Anyone with this link who is enrolled in the same section can join and work together in real-time.",
+      "copy": "Copy link",
+      "copied": "Copied!",
+      "copyLink": "Copy Link",
+      "currentlyOnline": "Currently online",
+      "noOthers": "No one else is here yet",
+      "idle": "idle"
     }
   },
   "peerReview": {
@@ -481,7 +492,7 @@
       "assignment": "Assignments",
       "collaboration": "Collaboration",
       "gamification": "Gamification",
-      "guild": "Guilds",
+      "squad": "Squads",
       "chat": "Chat",
       "system": "System"
     }
@@ -508,7 +519,7 @@
     "yOffset": "Y offset"
   },
   "skillTree": {
-    "title": "Learning Pathway",
-    "empty": "No skills available yet. Your instructor will set up the learning pathway."
+    "title": "Skill Tree",
+    "empty": "No skills available yet. Your instructor will set up the skill tree."
   }
 }

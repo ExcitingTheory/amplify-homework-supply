@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { fn } from 'storybook/test'
 import { DiceBearAvatar } from './DiceBearAvatar'
 import { AvatarGlowRing, DEFAULT_GLOW_COLORS, GLOW_COLOR_PRESETS } from './AvatarGlowRing'

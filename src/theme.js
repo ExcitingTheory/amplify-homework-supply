@@ -4,6 +4,15 @@ import { red } from '@mui/material/colors';
 // Create a theme instance with CSS variables and light/dark color schemes.
 const theme = createTheme({
   cssVariables: { colorSchemeSelector: 'data-mui-color-scheme' },
+  components: {
+    MuiAccordionSummary: {
+      defaultProps: {
+        slotProps: {
+          content: { component: 'div' },
+        },
+      },
+    },
+  },
   colorSchemes: {
     light: {
       palette: {

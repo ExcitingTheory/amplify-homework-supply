@@ -32,6 +32,8 @@ export interface LeaderboardEntry {
   avatarStyle?: AvatarStyleTier
   /** DiceBear overrides from the student's saved config. */
   avatarOverrides?: AvatarOverrides
+  /** Seed string for DiceBear generation. Falls back to studentId. */
+  avatarSeed?: string
   /** Whether this entry's avatar config has been resolved (true = render avatar, false/undefined = show placeholder). */
   avatarLoaded?: boolean
 }
@@ -51,7 +53,7 @@ function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
   }
   return (
     <DiceBearAvatar
-      seed={entry.studentId}
+      seed={entry.avatarSeed || entry.studentId}
       size={24}
       style={entry.avatarStyle || 'simple'}
       overrides={entry.avatarOverrides}

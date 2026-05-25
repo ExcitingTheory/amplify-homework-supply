@@ -159,4 +159,138 @@ describe("gamification handler — checkBadges", () => {
     expect(result.newBadges).toContain("CONSISTENT");
     expect(result.newBadges).toContain("FIRST_SUBMISSION");
   });
+
+  it("should skip badges disabled via section gamificationConfig", async () => {
+    setupMocks({
+      xpLogs: [
+        { id: "xp1", xpAmount: 50, reason: "HOMEWORK_SUBMITTED" },
+        { id: "xp2", xpAmount: 50, reason: "PERFECT_SCORE" },
+        { id: "xp3", xpAmount: 50, reason: "PERFECT_SCORE" },
+        { id: "xp4", xpAmount: 50, reason: "PERFECT_SCORE" },
+      ],
+      profile: {
+        id: "p1",
+        studentId: "s1",
+        totalXP: 200,
+        level: 1,
+        currentStreak: 0,
+        longestStreak: 0,
+        badges: "[]",
+        _version: 1,
+      },
+      badges: [],
+    });
+
+    // Override the mock to also handle PlatformSettings and Section queries
+    const originalMock = mockGraphql.getMockImplementation();
+    mockGraphql.mockImplementation(({ query, variables }: any) => {
+      if (query?.includes("listPlatformSettings")) {
+        return Promise.resolve({
+          data: {
+            listPlatformSettings: {
+              items: [
+                {
+                  id: "settings-1",
+                  badgesEnabled: true,
+                  antiBadgesEnabled: true,
+                  badgeConfigs: JSON.stringify([
+                    { badgeType: "SHARPSHOOTER", enabled: false },
+                  ]),
+                  customBadges: null,
+                  streakFreezesAllowed: 3,
+                },
+              ],
+            },
+          },
+        });
+      }
+      if (query?.includes("getSection")) {
+        return Promise.resolve({
+          data: {
+            getSection: {
+              id: "section-1",
+              badgesEnabled: true,
+              antiBadgesEnabled: true,
+              gamificationConfig: null,
+            },
+          },
+        });
+      }
+      // Fallback to original handler
+      return originalMock!({ query, variables });
+    });
+
+    const { handler } = await import("../gamification/handler");
+    const result = await handler(
+      {
+        fieldName: "checkBadges",
+        arguments: { studentId: "s1", cohortId: "section-1" },
+      },
+      {} as any,
+      vi.fn(),
+    );
+
+    // FIRST_SUBMISSION should be awarded (enabled by default)
+    expect(result.newBadges).toContain("FIRST_SUBMISSION");
+    // SHARPSHOOTER should NOT be awarded (disabled in global badgeConfigs)
+    expect(result.newBadges).not.toContain("SHARPSHOOTER");
+  });
+
+  it("should return empty when section disables all badges", async () => {
+    setupMocks({
+      xpLogs: [{ id: "xp1", xpAmount: 50, reason: "HOMEWORK_SUBMITTED" }],
+      profile: {
+        id: "p1",
+        studentId: "s1",
+        totalXP: 50,
+        level: 1,
+        currentStreak: 0,
+        longestStreak: 0,
+        badges: "[]",
+        _version: 1,
+      },
+      badges: [],
+    });
+
+    const originalMock = mockGraphql.getMockImplementation();
+    mockGraphql.mockImplementation(({ query, variables }: any) => {
+      if (query?.includes("listPlatformSettings")) {
+        return Promise.resolve({
+          data: {
+            listPlatformSettings: {
+              items: [
+                { id: "s1", badgesEnabled: true, antiBadgesEnabled: true },
+              ],
+            },
+          },
+        });
+      }
+      if (query?.includes("getSection")) {
+        return Promise.resolve({
+          data: {
+            getSection: {
+              id: "section-1",
+              badgesEnabled: false,
+              antiBadgesEnabled: false,
+              gamificationConfig: null,
+            },
+          },
+        });
+      }
+      return originalMock!({ query, variables });
+    });
+
+    const { handler } = await import("../gamification/handler");
+    const result = await handler(
+      {
+        fieldName: "checkBadges",
+        arguments: { studentId: "s1", cohortId: "section-1" },
+      },
+      {} as any,
+      vi.fn(),
+    );
+
+    expect(result.newBadges).toEqual([]);
+    expect(result.newAntiBadges).toEqual([]);
+  });
 });

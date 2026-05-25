@@ -1,5 +1,6 @@
+// This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/nextjs-vite";
-import path from "path";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,18 +18,27 @@ const config: StorybookConfig = {
     "./components/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
-    "@chromatic-com/storybook",
-    "@storybook/addon-a11y",
-    "@storybook/addon-docs",
-    "@storybook/addon-vitest",
+    getAbsolutePath("@chromatic-com/storybook"),
+    getAbsolutePath("@storybook/addon-a11y"),
+    getAbsolutePath("@storybook/addon-docs"),
+    getAbsolutePath("@storybook/addon-vitest"),
     path.resolve(__dirname, "addons/translation-mode/preset.js"),
   ],
-  framework: "@storybook/nextjs-vite",
+  framework: getAbsolutePath("@storybook/nextjs-vite"),
   staticDirs: [
     { from: "../public", to: "/" },
     { from: "../mocks", to: "/story-mocks" },
     { from: "../translation-cache", to: "/translation-cache" },
   ],
+
+  // Force production mode for manager bundler so React 19's jsx-runtime
+  // resolves to the production build (matching Storybook's bundled React).
+  // Without this, the dev jsx-runtime is bundled and crashes because
+  // Storybook's React globals don't expose dev-only internals.
+  env: (config) => ({
+    ...config,
+    NODE_ENV: "production",
+  }),
 
   async viteFinal(config) {
     // Disable Vite's publicDir to suppress "Assets in public directory cannot be imported
@@ -390,3 +400,7 @@ const config: StorybookConfig = {
   },
 };
 export default config;
+
+function getAbsolutePath(value: string): any {
+  return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
+}

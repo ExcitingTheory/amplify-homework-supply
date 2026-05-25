@@ -21,6 +21,7 @@ import { getServerClient } from "@/utils/amplifyServerClient";
 export interface JoinSectionResult {
   success: boolean;
   sectionName?: string;
+  sectionId?: string;
   error?: string;
 }
 
@@ -52,6 +53,7 @@ export async function joinSection(code: string): Promise<JoinSectionResult> {
     return {
       success: true,
       sectionName: result?.sectionName || result?.name || undefined,
+      sectionId: result?.sectionId || result?.id || undefined,
     };
   } catch (err: any) {
     console.error("[section action] joinSection error:", err);
@@ -151,13 +153,18 @@ export async function copyGamificationSettings(
   targetSectionId: string,
 ): Promise<CopySettingsResult> {
   if (!sourceSectionId || !targetSectionId) {
-    return { success: false, error: "Both source and target section IDs are required" };
+    return {
+      success: false,
+      error: "Both source and target section IDs are required",
+    };
   }
 
   const client = getServerClient();
 
   try {
-    const { data, errors } = await (client as any).mutations.copyGamificationSettings({
+    const { data, errors } = await (
+      client as any
+    ).mutations.copyGamificationSettings({
       sourceSectionId,
       targetSectionId,
     });

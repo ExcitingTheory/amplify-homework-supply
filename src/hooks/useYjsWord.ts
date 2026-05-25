@@ -102,13 +102,12 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
 
         // Apply Yjs snapshot if exists
         if ((data as any).yjsSnapshot && provider) {
-          try {
-            const yjsSnapshot = (data as any).yjsSnapshot as string;
-            const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-            Y.applyUpdate(provider.getDoc(), updateBytes);
+          const yjsSnapshot = (data as any).yjsSnapshot as string;
+          const updateBytes = Buffer.from(yjsSnapshot, 'base64');
+          if (provider.applyUpdate(updateBytes)) {
             console.log(`[useYjsWord] Applied Yjs snapshot for word ${wordId}`);
-          } catch (err) {
-            console.warn(`[useYjsWord] Failed to apply snapshot for word ${wordId}:`, err);
+          } else {
+            console.warn(`[useYjsWord] Snapshot for word ${wordId} was corrupt — skipped`);
           }
         }
 
@@ -176,8 +175,8 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
         console.error(`[useYjsWord] GraphQL errors saving word ${wordId}:`, errors);
         versionCtrl?.rollback();
       } else {
-        setWord(data);
-        versionCtrl?.confirm(data._version);
+        if (data) setWord(data);
+        if (data?._version != null) versionCtrl?.confirm(data._version);
         console.log(`[useYjsWord] Successfully saved word ${wordId}`);
       }
     } catch (err) {

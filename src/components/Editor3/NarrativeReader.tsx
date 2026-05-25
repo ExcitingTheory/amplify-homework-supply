@@ -29,6 +29,7 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical'
 
 import { AudioPlayerProvider } from './context/AudioPlayerContext'
 import { AutocompleteProvider } from './context/SharedAutocompleteContext'
@@ -62,6 +63,23 @@ function NarrativeStatePlugin({ contentJson }: NarrativeStatePluginProps) {
 
   useEffect(() => {
     if (hasLoaded.current || !contentJson) return
+
+    // Plain text that isn't JSON (e.g. AI-generated text responses)
+    // Insert as a plain paragraph so it still renders visibly
+    if (typeof contentJson === 'string') {
+      const trimmed = contentJson.trimStart()
+      if (trimmed.length > 0 && trimmed[0] !== '{' && trimmed[0] !== '[') {
+        editor.update(() => {
+          const root = $getRoot()
+          root.clear()
+          const paragraph = $createParagraphNode()
+          paragraph.append($createTextNode(contentJson))
+          root.append(paragraph)
+        })
+        hasLoaded.current = true
+        return
+      }
+    }
 
     try {
       const parsed = typeof contentJson === 'string'

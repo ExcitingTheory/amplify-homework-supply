@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { useTranslations } from "next-intl";
 
@@ -33,6 +33,7 @@ import { StreakShield } from "@/components/Gamification/StreakShield";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { CampaignBriefing } from "@/components/Gamification/CampaignBriefing";
 import { BossBattleCard } from "@/components/Gamification/BossBattleCard";
+import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
 import { SkillTree } from "@/components/Gamification/SkillTree";
 import {
   useXP,
@@ -44,6 +45,7 @@ import {
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import Divider from "@mui/material/Divider";
 import { useRouter, useParams } from "next/navigation";
+import { PrefetchButton } from "@/components/PrefetchButton";
 
 function getColor(grade = 0) {
   let gradeColor = "";
@@ -143,8 +145,6 @@ function Index({ signOut, user }) {
    * Section id is passed in as a query parameter.
    * For Student users, it displays a list of grades organized by section like a gradebook, but only for their own grades.
    */
-  console.log("[Index] Component render, user:", user);
-  const [grades, setGrades] = useState([]);
   const [sections, setSections] = useState([]);
   const [mySections, setMySections] = useState([]);
   const [work, setIsWorking] = useState(false);
@@ -154,16 +154,19 @@ function Index({ signOut, user }) {
   const router = useRouter();
   // const { id } = useParams();
 
-  const [myGradeMap, setMyGradeMap] = React.useState([]);
+  const [myGradeMap, setMyGradeMap] = React.useState({});
   const [myGrades, setMyGrades] = React.useState([]);
   const [myAssignmentNeedsGrading, setMyAssignmentNeedsGrading] =
     React.useState([]);
   const { totalXP, xpLogs } = useXP();
   const { modules: progressModules, streak } = useProgress();
-  const { campaign, activeChallenges } = useCampaign();
+  const { campaign, activeChallenges, completedChallenges } = useCampaign();
   const { badges: earnedBadges } = useBadges();
   const { skillNodes } = useSkillTree();
   const [nailedItBlocks, setNailedItBlocks] = React.useState([]);
+  const gradeCountRef = useRef(0);
+  const assignmentCountRef = useRef(0);
+  const sectionCountRef = useRef(0);
 
   // Register page context with global chat
   useChatPageContext({
@@ -179,60 +182,28 @@ function Index({ signOut, user }) {
 
     const subscription = client.models.Grade.observeQuery().subscribe({
       next: ({ items }) => {
-        console.log(
-          "[Index] Grade subscription update:",
-          items.length,
-          "grades",
-        );
-
         // Filter out null items before processing
         items = items.filter((item) => item != null && item.id != null);
+
+        // Skip if count unchanged (dedup initial echo)
+        if (items.length === gradeCountRef.current && gradeCountRef.current > 0) return;
+        gradeCountRef.current = items.length;
 
         // Process my grades (complete only)
         const myCompletedGrades = items.filter(
           (g) => g.complete === true && g.owner === myUserId,
         );
         setMyGrades(myCompletedGrades);
-        console.log("fetchMyGrades", myCompletedGrades);
 
-        // grades by assignment
-        // look for the last grade for each assignment
-        // look for the highest grade for each assignment
-        const gradesByUnit = {};
-
-        myCompletedGrades.forEach((grade) => {
-          if (!gradesByUnit[grade.unitID]) {
-            gradesByUnit[grade.unitID] = {
-              last: grade,
-              highest: grade,
-              sum: 0,
-              count: 0,
-              accuracy: 0,
-            };
+        // Build grade map keyed by unitID for display
+        const gradeMap = {};
+        for (const g of myCompletedGrades) {
+          if (g.unitID) {
+            if (!gradeMap[g.unitID]) gradeMap[g.unitID] = [];
+            gradeMap[g.unitID].push(g);
           }
-
-          if (grade.updatedAt > gradesByUnit[grade.unitID].last.updatedAt) {
-            gradesByUnit[grade.unitID].last = grade;
-          }
-
-          if (grade.accuracy > gradesByUnit[grade.unitID].highest.accuracy) {
-            gradesByUnit[grade.unitID].highest = grade;
-          }
-
-          gradesByUnit[grade.unitID].sum += grade.accuracy;
-          gradesByUnit[grade.unitID].count += 1;
-
-          if (gradesByUnit[grade.unitID].count > 0) {
-            gradesByUnit[grade.unitID].average =
-              gradesByUnit[grade.unitID].sum / gradesByUnit[grade.unitID].count;
-          } else {
-            gradesByUnit[grade.unitID].average = 0;
-          }
-        });
-
-        console.log("gradesByUnit", gradesByUnit);
-        setMyGradeMap(gradesByUnit);
-        setGrades(items);
+        }
+        setMyGradeMap(gradeMap);
       },
       error: (error) => {
         console.error("[Index] Grade subscription error:", error);
@@ -252,30 +223,16 @@ function Index({ signOut, user }) {
 
     const subscription = client.models.Assignment.observeQuery().subscribe({
       next: ({ items }) => {
-        console.log(
-          "[Index] Assignment subscription update:",
-          items.length,
-          "assignments",
-        );
-
         // Filter out null items before processing
         items = items.filter((item) => item != null && item.id != null);
 
+        // Skip if count unchanged (dedup initial echo)
+        if (items.length === assignmentCountRef.current && assignmentCountRef.current > 0) return;
+        assignmentCountRef.current = items.length;
+
         const myAssignments = items.filter((a) => a.owner === myUserId);
         const othersAssignments = items.filter((a) => a.owner !== myUserId);
-        console.log("assignmentData", othersAssignments);
 
-        const needsGrading = [];
-        othersAssignments.forEach((assignment) => {
-          const gradesForAssignment = myGradeMap[assignment?.unitID];
-          console.log("gradesForAssignment", gradesForAssignment);
-          if (!gradesForAssignment?.last?.accuracy) {
-            needsGrading.push(assignment);
-          }
-        });
-
-        console.log("needsGrading", needsGrading);
-        setMyAssignmentNeedsGrading(needsGrading);
         setMyAssignment(myAssignments);
         setAssignment(othersAssignments);
       },
@@ -287,15 +244,14 @@ function Index({ signOut, user }) {
     return function cleanup() {
       subscription.unsubscribe();
     };
-  }, [user?.username, units, JSON.stringify(myGradeMap)]);
+  }, [user?.username]);
 
   // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
     const myUserId = getUserId(user);
-    console.log("[Index] Section useEffect triggered, myUserId:", myUserId);
     if (!myUserId) return;
+    const myGroups = user?.groups || []; // Cognito groups the user belongs to
     const client = getAmplifyClient();
-    const myGroups = user.groups || []; // Cognito groups the user belongs to
 
     const subscription = client.models.Section.observeQuery().subscribe({
       next: ({ items }) => {
@@ -303,22 +259,10 @@ function Index({ signOut, user }) {
         const validItems = items.filter(
           (item) => item != null && item.id != null,
         );
-        console.log(
-          "[Index] Section subscription update:",
-          validItems.length,
-          "sections",
-        );
-        console.log(
-          "[Index] Fetching sections for user:",
-          myUserId,
-          "groups:",
-          myGroups,
-        );
-        console.log(
-          "[Index] Received sections:",
-          validItems.length,
-          validItems,
-        );
+
+        // Skip if count unchanged (dedup initial echo)
+        if (validItems.length === sectionCountRef.current && sectionCountRef.current > 0) return;
+        sectionCountRef.current = validItems.length;
 
         // Sections I own (I'm the instructor)
         const mySections = validItems.filter((s) => s.owner === myUserId);
@@ -328,12 +272,6 @@ function Index({ signOut, user }) {
             s.owner !== myUserId && s.learner && myGroups.includes(s.learner),
         );
 
-        console.log(
-          "[Index] mySections:",
-          mySections.length,
-          "othersSections (where I am in learner group):",
-          othersSections.length,
-        );
         setMySections(mySections);
         setSections(othersSections);
       },
@@ -350,16 +288,12 @@ function Index({ signOut, user }) {
   useEffect(() => {
     const myUserId = getUserId(user);
     if (!myUserId) {
-      console.log("[Index] Unit useEffect: waiting for user authentication");
       return;
     }
-
-    console.log("[Index] Setting up Unit subscription for user:", myUserId);
     const client = getAmplifyClient();
 
     const subscription = client.models.Unit.observeQuery().subscribe({
       next: ({ items }) => {
-        console.log("[Index] Unit subscription update:", items.length, "units");
         const unitsById = {};
         items.forEach(function (unit) {
           unitsById[unit.id] = unit;
@@ -405,32 +339,40 @@ function Index({ signOut, user }) {
     };
   }, [user?.username]);
 
-  console.log("Grades.grades", grades);
+  // Build campaign timeline chapters from active + completed challenges
+  const campaignChapters = React.useMemo(() => {
+    const all = [...(activeChallenges || []), ...(completedChallenges || [])];
+    if (all.length === 0) return [];
+    return all.map((c, i) => ({
+      id: c.id,
+      title: c.title || `Challenge ${i + 1}`,
+      setting: c.setting,
+      stakes: c.stakes,
+      targetXP: c.targetXP || 0,
+      currentXP: c.currentXP || 0,
+      active: c.active ?? false,
+      chapterOrder: c.chapterOrder ?? i,
+    }));
+  }, [activeChallenges, completedChallenges]);
+
+  // Prefetch workbook routes for visible assignments (first 3)
+  useEffect(() => {
+    if (!myAssignments?.length) return;
+    const toPrefetch = myAssignments.slice(0, 3);
+    toPrefetch.forEach((assignment) => {
+      if (assignment.unitID) {
+        router.prefetch(`/workbook/${assignment.unitID}`);
+      }
+    });
+  }, [myAssignments, router]);
 
   return (
     <>
-      <Box
-        style={{
-          padding: "2rem 1rem",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flexGrow: 1,
-            margin: "1rem auto",
-          }}
-        >
-          {/* Gamification Dashboard */}
-          <Box
-            sx={{
-              maxWidth: "80rem",
-              margin: "0 auto 2rem",
-              width: "100%",
-              px: 2,
-            }}
-          >
+      <Box sx={{ width: "100%", maxWidth: "80rem", mx: "auto", px: 2 }}>
+        {/* ── Gamification Dashboard ─────────────────────────────── */}
+        <Box sx={{ py: 3 }}>
+          {/* Streak & Progress */}
+          {streak && (
             <Box
               sx={{
                 display: "flex",
@@ -440,241 +382,98 @@ function Index({ signOut, user }) {
                 flexWrap: "wrap",
               }}
             >
-              <StreakIndicator currentStreak={streak?.currentStreak || 0} />
-              <StreakShield
-                freezesRemaining={streak?.freezesRemaining || 0}
-                freezesUsed={streak?.freezesUsed || 0}
+              <StreakIndicator
+                current={streak.current}
+                longest={streak.longest}
+              />
+              {streak.freezesAvailable > 0 && (
+                <StreakShield freezesAvailable={streak.freezesAvailable} />
+              )}
+            </Box>
+          )}
+
+          {progressModules?.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <ProgressRings modules={progressModules} />
+            </Box>
+          )}
+
+          {/* Campaign Narrative */}
+          {campaign && (
+            <Box sx={{ mb: 3 }}>
+              <CampaignBriefing
+                title={campaign.title}
+                setting={campaign.setting}
+                stakes={campaign.stakes}
               />
             </Box>
-            {progressModules?.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <ProgressRings modules={progressModules} />
-              </Box>
-            )}
-            {earnedBadges?.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <BadgeShelf earnedBadges={earnedBadges} />
-              </Box>
-            )}
-            {nailedItBlocks?.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <NailedItWall blocks={nailedItBlocks} />
-              </Box>
-            )}
-            {activeChallenges?.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                  Active Challenges
-                </Typography>
-                {activeChallenges.map((challenge) => (
-                  <Box key={challenge.id} sx={{ mb: 1 }}>
-                    <BossBattleCard
-                      title={challenge.title}
-                      totalHP={challenge.targetXP}
-                      totalDamage={challenge.currentXP || 0}
-                      deadline={challenge.deadline}
-                      active={challenge.active}
-                      bonusMultiplier={challenge.bonusMultiplier}
-                      phases={[]}
-                      contributors={(challenge.contributions || []).map(
-                        (c) => ({
-                          userId: c.studentId,
-                          displayName: c.studentId,
-                          xpContributed: c.xpContributed,
-                        }),
-                      )}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            )}
-            {campaign && (
-              <Box sx={{ mb: 2 }}>
-                <CampaignBriefing
-                  title={campaign.title}
-                  setting={campaign.setting}
-                  stakes={campaign.stakes}
-                  compact
-                />
-              </Box>
-            )}
-            {campaign?.bossBattle && (
-              <Box sx={{ mb: 2 }}>
-                <BossBattleCard
-                  title={campaign.bossBattle.title}
-                  narrative={campaign.bossBattle.narrative}
-                  phases={campaign.bossBattle.phases || []}
-                  totalHP={campaign.bossBattle.totalHP || 0}
-                  totalDamage={campaign.bossBattle.totalDamage || 0}
-                  deadline={campaign.bossBattle.deadline}
-                  active={campaign.bossBattle.active ?? true}
-                  bonusMultiplier={campaign.bossBattle.bonusMultiplier}
-                />
-              </Box>
-            )}
-            {skillNodes?.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                  {t("index.learningPathway", "Learning Pathway")}
-                </Typography>
-                <SkillTree
-                  skills={skillNodes}
-                  onSkillClick={(skillId) => router.push(`/skills`)}
-                  height={280}
-                  compact
-                />
-              </Box>
-            )}
-            <Divider sx={{ my: 2 }} />
-          </Box>
+          )}
 
-          {assignments?.length > 0 &&
-            myAssignmentNeedsGrading?.length > 0 &&
-            units && (
-              <Box
-                style={{
-                  padding: "1rem",
-                  marginBottom: "3rem",
-                  margin: "1rem auto",
-                  maxWidth: "80rem",
-                }}
-              >
-                <Typography
-                  variant="h3"
-                  component="div"
-                  sx={{
-                    flexGrow: 1,
-                    padding: "1rem",
-                    margin: "1rem auto",
-                  }}
-                >
-                  {t("index.assignments")}
-                </Typography>
+          {/* Campaign Timeline (chapter progression) */}
+          {campaignChapters.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <CampaignTimeline chapters={campaignChapters} />
+            </Box>
+          )}
 
-                {assignments?.map(function (assignment, index) {
-                  console.log("(assignments && units).assignment", assignment);
-                  console.log("(assignments && units).units", units);
-                  // get local time from UTC
-                  // get timezone from client browser
-                  const timeZone =
-                    Intl.DateTimeFormat().resolvedOptions().timeZone;
-                  // get timezone from user profile TBD
-                  // Convert time
-                  const localTime = new Date(assignment.dueDate).toLocaleString(
-                    undefined,
-                    {
-                      timeZone,
-                    },
-                  );
+          {/* Active Boss Battles */}
+          {activeChallenges?.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              {activeChallenges.map((challenge) => (
+                <Box key={challenge.id} sx={{ mb: 2 }}>
+                  <BossBattleCard
+                    title={challenge.title}
+                    narrative={challenge.setting}
+                    totalHP={challenge.targetXP || 0}
+                    totalDamage={challenge.currentXP || 0}
+                    deadline={challenge.deadline}
+                    active={challenge.active}
+                    bonusMultiplier={challenge.bonusMultiplier}
+                    phases={[]}
+                    contributors={(challenge.contributions || []).map((c) => ({
+                      userId: c.studentId,
+                      displayName: c.studentId,
+                      xpContributed: c.xpContributed,
+                    }))}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
 
-                  const itemPrimary = `${localTime} - ${units[assignment.unitID]?.name}`;
-                  const itemSecondary = units[assignment.unitID]?.description;
-                  const featuredImage = units[assignment.unitID]?.featuredImage;
-                  const identityId = units[assignment.unitID]?.identityId;
+          {/* Skill Tree — full width */}
+          {skillNodes?.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+                {t("index.learningPathway", "Learning Pathway")}
+              </Typography>
+              <SkillTree
+                skills={skillNodes}
+                onSkillClick={(skillId) => router.push("/skills")}
+                height={450}
+              />
+            </Box>
+          )}
 
-                  const workbookUrl = `/workbook/${assignment.unitID}`;
-                  const unitUrl = `/unit/${assignment.unitID}`;
+          {/* Badges */}
+          {earnedBadges?.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <BadgeShelf earnedBadges={earnedBadges} columns={4} earnedOnly />
+            </Box>
+          )}
 
-                  const gradesForUnit = myGradeMap[assignment?.unitID];
+          {/* Nailed It Wall */}
+          {nailedItBlocks?.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <NailedItWall blocks={nailedItBlocks} />
+            </Box>
+          )}
 
-                  console.log("gradesForUnit", gradesForUnit);
+          <Divider sx={{ my: 3 }} />
+        </Box>
 
-                  if (gradesForUnit?.last?.accuracy) return null;
-
-                  return (
-                    <Card
-                      key={index}
-                      elevation={2}
-                      sx={{
-                        display: "flex",
-                        margin: "1rem auto",
-                        width: "90vw",
-                        maxWidth: "80rem",
-                        borderRadius: 2,
-                        borderLeft: "4px solid",
-                        borderLeftColor: "primary.main",
-                        transition: "all 0.3s ease-in-out",
-                        "&:hover": {
-                          elevation: 6,
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          flexGrow: "1",
-                          p: 0.5,
-                        }}
-                      >
-                        <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                          <Typography
-                            component="div"
-                            variant="h5"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            {itemPrimary}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            color="text.secondary"
-                            component="div"
-                            sx={{ lineHeight: 1.6 }}
-                          >
-                            {itemSecondary}
-                          </Typography>
-                        </CardContent>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 2,
-                            pb: 1.5,
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            href={workbookUrl}
-                            disabled={work}
-                            startIcon={<EditNoteIcon />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              borderRadius: 2,
-                              boxShadow: 2,
-                              "&:hover": {
-                                boxShadow: 4,
-                              },
-                            }}
-                          >
-                            {t("index.viewWorkbook")}
-                          </Button>
-                        </Box>
-                      </Box>
-                      {/* <CardMedia
-                                component="img"
-                                sx={{ width: 151 }}
-                                image="/static/images/cards/live-from-space.jpg"
-                                alt="Live from space album cover"
-                              /> */}
-                      {featuredImage && (
-                        <CardMediaComponent
-                          s3Key={featuredImage}
-                          identityId={identityId}
-                        />
-                      )}
-                    </Card>
-                  );
-                })}
-              </Box>
-            )}
-
+        {/* ── Assignments & Sections ────────────────────────────── */}
+        <Box>
           {assignments?.length > 0 &&
             units &&
             Object.values(myGradeMap).length > 0 && (
@@ -700,8 +499,6 @@ function Index({ signOut, user }) {
                 </Typography>
 
                 {assignments?.map(function (assignment, index) {
-                  console.log("(assignments && units).assignment", assignment);
-                  console.log("(assignments && units).units", units);
                   // get local time from UTC
                   // get timezone from client browser
                   const timeZone =
@@ -724,191 +521,24 @@ function Index({ signOut, user }) {
 
                   const gradesForUnit = myGradeMap[assignment?.unitID];
 
-                  console.log("gradesForUnit", gradesForUnit);
-
-                  if (!gradesForUnit?.last?.accuracy) return null;
-
-                  // let boxShadow = '0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)'
-
-                  // if(Math.round(gradesForUnit?.average) > 80){
-                  //   boxShadow = '0px 3px 3px -2px rgba(46, 125, 3,0.7), 0px 3px 4px 0px rgba(46, 125, 3,0.7), 0px 1px 8px 0px rgba(46, 125, 3,0.7)'
-                  // } else if(Math.round(gradesForUnit?.average) > 60){
-                  //   boxShadow = '0px 3px 3px -2px rgba(237, 108, 2,0.7), 0px 3px 4px 0px rgba(237, 108, 2,0.7), 0px 1px 8px 0px rgba(237, 108, 2,0.7)'
-                  // } else if(Math.round(gradesForUnit?.average) > 50){
-                  //   boxShadow = '0px 3px 3px -2px rgba(255,23,68,0.7), 0px 3px 4px 0px rgba(255,23,68,0.7), 0px 1px 8px 0px rgba(255,23,68,0.7)'
-                  // }
-
-                  // Determine border color based on grade
-                  const getBorderColor = (accuracy) => {
-                    if (accuracy >= 90) return "success.main";
-                    if (accuracy >= 80) return "info.main";
-                    if (accuracy >= 70) return "warning.main";
-                    return "error.main";
-                  };
-
                   return (
-                    <>
-                      <Card
-                        data-tour="grade-card"
-                        key={index}
-                        elevation={2}
-                        sx={{
-                          display: "flex",
-                          margin: "1rem auto",
-                          width: "90vw",
-                          maxWidth: "80rem",
-                          borderRadius: 2,
-                          borderLeft: "4px solid",
-                          borderLeftColor: getBorderColor(
-                            gradesForUnit?.highest?.accuracy || 0,
-                          ),
-                          transition: "all 0.3s ease-in-out",
-                          "&:hover": {
-                            elevation: 6,
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            flexGrow: "1",
-                            p: 0.5,
-                          }}
-                        >
-                          <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                            <Typography
-                              component="div"
-                              variant="h5"
-                              sx={{ fontWeight: 600, mb: 0.5 }}
-                            >
-                              {itemPrimary}
-                            </Typography>
-                            <Typography
-                              variant="body1"
-                              color="text.secondary"
-                              component="div"
-                              sx={{ lineHeight: 1.6 }}
-                            >
-                              {itemSecondary}
-                            </Typography>
-                          </CardContent>
-                          {gradesForUnit?.last?.accuracy && (
-                            <>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  flexWrap: "wrap",
-                                  gap: 1,
-                                  pl: 2,
-                                  pb: 1,
-                                }}
-                              >
-                                <Chip
-                                  icon={<HighIcon />}
-                                  color={getColor(
-                                    gradesForUnit?.highest?.accuracy,
-                                  )}
-                                  label={`Highest ${Math.round(gradesForUnit?.highest?.accuracy) || 0}%`}
-                                  sx={{ fontWeight: 600 }}
-                                />
-                                <Chip
-                                  icon={<StarIcon />}
-                                  variant="outlined"
-                                  color="primary"
-                                  label={`Level ${gradesForUnit?.count || 0}`}
-                                  sx={{ fontWeight: 600 }}
-                                />
-
-                                {/* <Badge
-                                  // anchorOrigin={{
-                                  //   vertical: 'bottom',
-                                  //   horizontal: 'left',
-                                  // }}
-                                  // color="inherit"
-                                  style={{
-                                    margin: '0 1rem 0 0',
-                                  }}
-                                  badgeContent={`${gradesForUnit?.count || 0}`}>
-                                  <StarIcon />
-                                </Badge> */}
-                              </Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  flexWrap: "wrap",
-                                  gap: 1,
-                                  pl: 2,
-                                  pb: 1,
-                                }}
-                              >
-                                <Chip
-                                  icon={<HistoryIcon />}
-                                  color={getColor(
-                                    gradesForUnit?.last?.accuracy,
-                                  )}
-                                  label={`Last ${Math.round(gradesForUnit?.last?.accuracy) || 0}%`}
-                                  sx={{ fontWeight: 600 }}
-                                />
-                                <Chip
-                                  icon={<AverageIcon />}
-                                  color={getColor(gradesForUnit?.average)}
-                                  label={`Average ${Math.round(gradesForUnit?.average) || 0}%`}
-                                  sx={{ fontWeight: 600 }}
-                                />
-                              </Box>
-                            </>
+                    <Card key={assignment.id || index} sx={{ mb: 1, mx: 1 }}>
+                      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: 1, "&:last-child": { pb: 1 } }}>
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Typography variant="body1">{itemPrimary}</Typography>
+                          {itemSecondary && (
+                            <Typography variant="body2" color="text.secondary">{itemSecondary}</Typography>
                           )}
-
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              pl: 2,
-                              pb: 1.5,
-                            }}
-                          >
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              href={workbookUrl}
-                              disabled={work}
-                              startIcon={<EditNoteIcon />}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                px: 3,
-                                py: 1,
-                                borderRadius: 2,
-                                boxShadow: 2,
-                                "&:hover": {
-                                  boxShadow: 4,
-                                },
-                              }}
-                            >
-                              {t("index.viewWorkbook")}
-                            </Button>
-                          </Box>
                         </Box>
-                        {/* <CardMedia
-                                component="img"
-                                sx={{ width: 151 }}
-                                image="/static/images/cards/live-from-space.jpg"
-                                alt="Live from space album cover"
-                              /> */}
-                        {featuredImage && (
-                          <CardMediaComponent
-                            s3Key={featuredImage}
-                            identityId={identityId}
-                            filter={"grayscale(1)"}
-                          />
-                        )}
-                      </Card>
-                    </>
+                        <PrefetchButton
+                          href={workbookUrl}
+                          size="small"
+                          variant="outlined"
+                        >
+                          Review
+                        </PrefetchButton>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </Box>
@@ -1009,7 +639,7 @@ function Index({ signOut, user }) {
                             pb: 1.5,
                           }}
                         >
-                          <Button
+                          <PrefetchButton
                             variant="outlined"
                             href={workbookUrl}
                             disabled={work}
@@ -1032,9 +662,9 @@ function Index({ signOut, user }) {
                             }}
                           >
                             {t("index.viewWorkbook")}
-                          </Button>
+                          </PrefetchButton>
 
-                          <Button
+                          <PrefetchButton
                             variant="outlined"
                             href={unitUrl}
                             disabled={work}
@@ -1122,7 +752,7 @@ function Index({ signOut, user }) {
                       width: "100%",
                     }}
                   >
-                    <Button
+                    <PrefetchButton
                       variant="outlined"
                       color="primary"
                       href="sections"
@@ -1136,9 +766,9 @@ function Index({ signOut, user }) {
                       }}
                     >
                       {t("index.joinSection")}
-                    </Button>
+                    </PrefetchButton>
 
-                    <Button
+                    <PrefetchButton
                       variant="outlined"
                       color="primary"
                       href="sections"
@@ -1152,7 +782,7 @@ function Index({ signOut, user }) {
                       }}
                     >
                       {t("index.createNewSection")}
-                    </Button>
+                    </PrefetchButton>
                   </Box>
                 </CardContent>
               </Box>
@@ -1233,7 +863,7 @@ function Index({ signOut, user }) {
                           pb: 1.5,
                         }}
                       >
-                        <Button
+                        <PrefetchButton
                           variant="outlined"
                           href={`section/${section.id}`}
                           disabled={work}
@@ -1255,7 +885,7 @@ function Index({ signOut, user }) {
                           }}
                         >
                           {t("index.viewSection")}
-                        </Button>
+                        </PrefetchButton>
                       </Box>
                     </Box>
                     {/* <CardMedia
@@ -1351,7 +981,7 @@ function Index({ signOut, user }) {
                           pb: 1.5,
                         }}
                       >
-                        <Button
+                        <PrefetchButton
                           variant="outlined"
                           href={`section/${section.id}`}
                           disabled={work}
@@ -1373,7 +1003,7 @@ function Index({ signOut, user }) {
                           }}
                         >
                           {t("index.viewSection")}
-                        </Button>
+                        </PrefetchButton>
                       </Box>
                     </Box>
                     {/* <CardMedia

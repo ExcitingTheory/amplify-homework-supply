@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ArmoriaShield } from './ArmoriaShield'
 
 const meta: Meta<typeof ArmoriaShield> = {
@@ -15,8 +15,8 @@ type Story = StoryObj<typeof ArmoriaShield>
 
 export const FallbackInitials: Story = {
   args: {
-    guildId: 'guild-abc-123',
-    guildName: 'Phoenix Squad',
+    squadId: 'squad-abc-123',
+    squadName: 'Phoenix Squad',
     crestSvg: null,
     armoriaUnlocked: false,
     size: 96,
@@ -25,8 +25,8 @@ export const FallbackInitials: Story = {
 
 export const UnlockedNoDesign: Story = {
   args: {
-    guildId: 'guild-abc-123',
-    guildName: 'Phoenix Squad',
+    squadId: 'squad-abc-123',
+    squadName: 'Phoenix Squad',
     crestSvg: null,
     armoriaUnlocked: true,
     size: 96,
@@ -41,8 +41,8 @@ const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"
 
 export const CustomCrest: Story = {
   args: {
-    guildId: 'guild-abc-123',
-    guildName: 'Phoenix Squad',
+    squadId: 'squad-abc-123',
+    squadName: 'Phoenix Squad',
     crestSvg: sampleSvg,
     armoriaUnlocked: true,
     size: 96,
@@ -52,8 +52,8 @@ export const CustomCrest: Story = {
 
 export const LargeSize: Story = {
   args: {
-    guildId: 'guild-xyz-789',
-    guildName: 'Dragon Knights',
+    squadId: 'squad-xyz-789',
+    squadName: 'Dragon Knights',
     crestSvg: sampleSvg,
     armoriaUnlocked: true,
     size: 160,

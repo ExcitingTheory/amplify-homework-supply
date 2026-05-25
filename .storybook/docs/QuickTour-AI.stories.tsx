@@ -3,7 +3,7 @@
  * Live interactive demo using the ChatSidebar component with play() interactions.
  */
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { within, waitFor, userEvent } from 'storybook/test';
 import { Box, Typography, Paper } from '@mui/material';
 import ChatSidebar from '../../src/components/ChatSidebar';

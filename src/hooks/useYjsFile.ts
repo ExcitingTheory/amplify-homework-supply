@@ -97,13 +97,12 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
 
         // Apply Yjs snapshot if exists
         if ((data as any).yjsSnapshot && provider) {
-          try {
-            const yjsSnapshot = (data as any).yjsSnapshot as string;
-            const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-            Y.applyUpdate(provider.getDoc(), updateBytes);
+          const yjsSnapshot = (data as any).yjsSnapshot as string;
+          const updateBytes = Buffer.from(yjsSnapshot, 'base64');
+          if (provider.applyUpdate(updateBytes)) {
             console.log(`[useYjsFile] Applied Yjs snapshot for file ${fileId}`);
-          } catch (err) {
-            console.warn('[useYjsFile] Failed to apply snapshot:', err);
+          } else {
+            console.warn('[useYjsFile] Snapshot was corrupt — skipped');
           }
         } else if (provider) {
           // Initialize Yjs metadata from existing file data
@@ -189,7 +188,7 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
         versionCtrl?.rollback();
       } else {
         if (saved) setFile(saved);
-        versionCtrl?.confirm(saved?._version);
+        if (saved?._version != null) versionCtrl?.confirm(saved._version);
         console.log(`[useYjsFile] Successfully saved file ${fileId}`);
       }
     } catch (err: any) {

@@ -114,6 +114,9 @@ import DocsPageWithPanel from "./components/DocsPageWithPanel";
 // Import i18n for Storybook
 import i18n from "./i18next";
 
+// Import setLocale from the next-intl mock to sync language switching
+import { setLocale } from "./__mocks__/next-intl";
+
 /**
  * Synchronizes MUI's internal color scheme mode with the Storybook toolbar selection.
  * Must be rendered inside ThemeProvider. Prevents child components'
@@ -330,6 +333,7 @@ const preview = {
       },
     },
   },
+
   parameters: {
     // Disable onboarding addon
     onboarding: {
@@ -376,8 +380,7 @@ const preview = {
 
     // Add viewport configuration for better responsive testing
     viewport: {
-      defaultViewport: "responsive",
-      viewports: {
+      options: {
         mobile: {
           name: "Mobile",
           styles: { width: "375px", height: "667px" },
@@ -393,7 +396,7 @@ const preview = {
           styles: { width: "1280px", height: "800px" },
           type: "desktop",
         },
-      },
+      }
     },
 
     // Configure layout settings
@@ -578,14 +581,14 @@ const preview = {
               "Armoria Shield",
               "*",
             ],
-            "Guilds & Teams",
+            "Squads & Teams",
             [
-              "Guild Crest",
-              "Guild Editor",
-              "Guild Join Panel",
-              "Guild Leaderboard",
-              "Guild Post Editor",
-              "Guild Post Feed",
+              "Squad Crest",
+              "Squad Editor",
+              "Squad Join Panel",
+              "Squad Leaderboard",
+              "Squad Post Editor",
+              "Squad Post Feed",
               "Group Challenge Card",
               "Boss Battle Card",
               "Campaign Briefing",
@@ -664,7 +667,7 @@ const preview = {
     },
 
     // Background managed by CSS variables via colorScheme toolbar — no hardcoded backgrounds
-    backgrounds: { disable: true },
+    backgrounds: { disabled: true },
 
     a11y: {
       // 'todo' - show a11y violations in the test UI only
@@ -673,7 +676,9 @@ const preview = {
       test: "todo",
     },
   },
+
   tags: [],
+
   decorators: [
     // Deferred rendering — shows loading screen while heavy component trees mount
     (Story, context) => {
@@ -744,8 +749,11 @@ const preview = {
       const [globals] = useGlobals();
       const language = globals?.translationLanguage || "en";
 
-      // Update i18n language when global changes
+      // Update both i18n instances when global changes
       React.useEffect(() => {
+        // Sync the next-intl mock (used by components via useTranslations)
+        setLocale(language);
+        // Sync the i18next instance (used by translation-mode addon)
         if (i18n.language !== language) {
           i18n.changeLanguage(language);
         }
@@ -781,7 +789,7 @@ const preview = {
       // Configure next/navigation mock state from story parameters
       const navParams = context?.parameters?.nextjs?.navigation || {};
       setNavigationState({
-        pathname: navParams.pathname || routerParams.pathname || '/',
+        pathname: navParams.pathname || routerParams.pathname || "/",
         params: navParams.params || routerParams.query || {},
         searchParams: navParams.searchParams || {},
       });
@@ -921,6 +929,7 @@ const preview = {
       );
     },
   ],
+
   loaders: [
     async ({ parameters }) => {
       // Clear previous mock data before each story (unless explicitly disabled)
@@ -946,6 +955,13 @@ const preview = {
       return null; // Return null instead of empty object to avoid extra div
     },
   ],
+
+  initialGlobals: {
+    viewport: {
+      value: "responsive",
+      isRotated: false
+    }
+  }
 };
 
 export default preview;

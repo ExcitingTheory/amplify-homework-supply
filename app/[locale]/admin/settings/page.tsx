@@ -7,7 +7,7 @@ import { InstructorGamificationPanel } from "@/components/Gamification/Instructo
 import {
   useSkillTree,
   useCampaign,
-  useGuild,
+  useSquad,
 } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import SectionContext from "@/context/sectionContext";
@@ -75,7 +75,7 @@ function GamificationAdmin() {
   // --- Data from existing gamification context hooks ---
   const { skillNodes } = useSkillTree();
   const { campaign, activeChallenges, completedChallenges } = useCampaign();
-  const { guildLeaderboard } = useGuild();
+  const { squadLeaderboard } = useSquad();
 
   // --- Local state for models not in the gamification context ---
   const [easterEggs, setEasterEggs] = React.useState([]);
@@ -88,6 +88,7 @@ function GamificationAdmin() {
   const [linearLockEnabled, setLinearLockEnabled] = React.useState(false);
   const [unitLockRequirements, setUnitLockRequirements] = React.useState({});
   const [availableUnits, setAvailableUnits] = React.useState([]);
+  const [availableBadges, setAvailableBadges] = React.useState([]);
 
   // Load all units for the availableUnits list
   React.useEffect(() => {
@@ -124,6 +125,25 @@ function GamificationAdmin() {
     });
     return () => sub.unsubscribe();
   }, [client]);
+
+  // Load available badges for the selected section
+  React.useEffect(() => {
+    if (!client?.models?.Badge) return;
+    const sub = client.models.Badge.observeQuery().subscribe({
+      next: ({ items }) => {
+        const valid = items.filter((b) => b != null && !b._deleted);
+        const filtered = selectedSectionId
+          ? valid.filter((b) => !b.cohortId || b.cohortId === selectedSectionId)
+          : valid;
+        setAvailableBadges(
+          filtered.map((b) => ({ id: b.id, title: b.title || b.id })),
+        );
+      },
+      error: (err) =>
+        console.warn("[GamificationAdmin] Badge subscription error:", err),
+    });
+    return () => sub.unsubscribe();
+  }, [client, selectedSectionId]);
 
   // Load xpConfig from global PlatformSettings (singleton)
   React.useEffect(() => {
@@ -205,13 +225,14 @@ function GamificationAdmin() {
               egg.trigger === "KEYWORD" ? egg.triggerValue || "" : undefined,
             triggerValue: egg.triggerValue || "",
             achievementRule:
-              egg.trigger === "SUBMISSION_QUALITY"
+              egg.trigger === "ACHIEVEMENT"
                 ? egg.triggerValue || ""
                 : undefined,
             secretLinkUnitId:
-              egg.trigger === "UI_INTERACTION"
+              egg.trigger === "SECRET_LINK"
                 ? egg.triggerValue || ""
                 : undefined,
+            badgeId: egg.badgeId || undefined,
             _version: egg._version,
           })),
         );
@@ -243,6 +264,7 @@ function GamificationAdmin() {
             bonusMultiplier: boss.bonusMultiplier || 1.5,
             setting: boss.setting || undefined,
             stakes: boss.stakes || undefined,
+            featuredImage: boss.featuredImage || undefined,
             contributors: boss.contributions || [],
             _version: boss._version,
           })),
@@ -295,14 +317,14 @@ function GamificationAdmin() {
     ];
   }, [campaign]);
 
-  const guilds = React.useMemo(
+  const squads = React.useMemo(
     () =>
-      guildLeaderboard.map((g) => ({
+      squadLeaderboard.map((g) => ({
         id: g.id,
         name: g.name || "",
         memberCount: g.memberCount,
       })),
-    [guildLeaderboard],
+    [squadLeaderboard],
   );
 
   // --- CRUD Callbacks ---
@@ -359,45 +381,18 @@ function GamificationAdmin() {
 
   const handleSaveCampaign = React.useCallback(
     async (campaignData) => {
-      try {
-        if (campaignData.id) {
-          const { data } = await client.models.Campaign.get({
-            id: campaignData.id,
-          });
-          await client.models.Campaign.update({
-            id: campaignData.id,
-            title: campaignData.title,
-            setting: campaignData.setting || "",
-            stakes: campaignData.stakes || "",
-            _version: data?._version,
-          });
-        } else {
-          await client.models.Campaign.create({
-            title: campaignData.title,
-            setting: campaignData.setting || "",
-            stakes: campaignData.stakes || "",
-          });
-        }
-      } catch (err) {
-        console.error("[GamificationAdmin] Failed to save Campaign:", err);
-      }
+      // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
+      console.warn("[GamificationAdmin] handleSaveCampaign called but Campaign model no longer exists. Use GroupChallenge instead.");
     },
-    [client],
+    [],
   );
 
   const handleDeleteCampaign = React.useCallback(
     async (campaignId) => {
-      try {
-        const { data } = await client.models.Campaign.get({ id: campaignId });
-        await client.models.Campaign.delete({
-          id: campaignId,
-          _version: data?._version,
-        });
-      } catch (err) {
-        console.error("[GamificationAdmin] Failed to delete Campaign:", err);
-      }
+      // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
+      console.warn("[GamificationAdmin] handleDeleteCampaign called but Campaign model no longer exists. Use GroupChallenge instead.");
     },
-    [client],
+    [],
   );
 
   const handleGenerateCampaign = React.useCallback(async (title) => {
@@ -435,31 +430,31 @@ function GamificationAdmin() {
     setCustomBadges((prev) => prev.filter((b) => b.id !== badgeId));
   }, []);
 
-  const handleCreateGuild = React.useCallback(
+  const handleCreateSquad = React.useCallback(
     async (name, cohortId) => {
       try {
-        await client.models.Guild.create({
+        await client.models.Squad.create({
           name,
           cohortId,
           totalXP: 0,
         });
       } catch (err) {
-        console.error("[GamificationAdmin] Failed to create Guild:", err);
+        console.error("[GamificationAdmin] Failed to create Squad:", err);
       }
     },
     [client],
   );
 
-  const handleDeleteGuild = React.useCallback(
-    async (guildId) => {
+  const handleDeleteSquad = React.useCallback(
+    async (squadId) => {
       try {
-        const { data } = await client.models.Guild.get({ id: guildId });
-        await client.models.Guild.delete({
-          id: guildId,
+        const { data } = await client.models.Squad.get({ id: squadId });
+        await client.models.Squad.delete({
+          id: squadId,
           _version: data?._version,
         });
       } catch (err) {
-        console.error("[GamificationAdmin] Failed to delete Guild:", err);
+        console.error("[GamificationAdmin] Failed to delete Squad:", err);
       }
     },
     [client],
@@ -495,6 +490,7 @@ function GamificationAdmin() {
           revealMessage: egg.message,
           active: true,
           cohortId: selectedSectionId || undefined,
+          badgeId: egg.badgeId || undefined,
         });
       } catch (err) {
         console.error("[GamificationAdmin] Failed to create EasterEgg:", err);
@@ -559,6 +555,32 @@ function GamificationAdmin() {
       }
     },
     [client, selectedSectionId],
+  );
+
+  const handleEditBoss = React.useCallback(
+    async (bossId, bossData) => {
+      try {
+        const existing = bossBattles.find((b) => b.id === bossId);
+        await client.models.GroupChallenge.update({
+          id: bossId,
+          title: bossData.title,
+          targetXP: bossData.targetXP,
+          bonusMultiplier: bossData.bonusMultiplier || 1.5,
+          startDate: bossData.startDate || undefined,
+          deadline: bossData.deadline || undefined,
+          setting: bossData.setting || "",
+          stakes: bossData.stakes || "",
+          featuredImage: bossData.featuredImage || undefined,
+          _version: existing?._version,
+        });
+      } catch (err) {
+        console.error(
+          "[GamificationAdmin] Failed to update GroupChallenge:",
+          err,
+        );
+      }
+    },
+    [client, bossBattles],
   );
 
   const handleToggleBossActive = React.useCallback(
@@ -763,9 +785,10 @@ function GamificationAdmin() {
           selectedSectionId={selectedSectionId}
           onSectionChange={handleSectionChange}
           availableUnits={availableUnits}
+          availableBadges={availableBadges}
           skills={skills}
           campaigns={campaigns}
-          guilds={guilds}
+          squads={squads}
           easterEggs={easterEggs}
           bossBattles={bossBattles}
           onAddSkill={handleAddSkill}
@@ -774,11 +797,12 @@ function GamificationAdmin() {
           onSaveCampaign={handleSaveCampaign}
           onDeleteCampaign={handleDeleteCampaign}
           onGenerateCampaign={handleGenerateCampaign}
-          onCreateGuild={handleCreateGuild}
-          onDeleteGuild={handleDeleteGuild}
+          onCreateSquad={handleCreateSquad}
+          onDeleteSquad={handleDeleteSquad}
           onAddEasterEgg={handleAddEasterEgg}
           onDeleteEasterEgg={handleDeleteEasterEgg}
           onAddBoss={handleAddBoss}
+          onEditBoss={handleEditBoss}
           onDeleteBoss={handleDeleteBoss}
           onToggleBossActive={handleToggleBossActive}
           badgeOverrides={badgeOverrides}

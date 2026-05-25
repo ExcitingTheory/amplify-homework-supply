@@ -1,14 +1,17 @@
-'use client';
+"use cache";
 
-import React from 'react';
-import { Box, Typography, Button, Container } from '@mui/material';
-import { WifiOff, Refresh } from '@mui/icons-material';
+import { cacheLife } from "next/cache";
+import { Box, Typography, Container } from '@mui/material';
+import { WifiOff } from '@mui/icons-material';
+import { RefreshButton } from './RefreshButton';
 
 /**
  * Offline fallback page shown by the service worker when a navigation
  * request fails and no cached page is available.
+ * Fully cached — static content that never changes between deployments.
  */
-export default function OfflinePage() {
+export default async function OfflinePage() {
+  cacheLife("max");
   return (
     <Container maxWidth="sm">
       <Box
@@ -34,13 +37,7 @@ export default function OfflinePage() {
           Try navigating to an assignment you&apos;ve previously opened — those
           are cached for offline use.
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<Refresh />}
-          onClick={() => window.location.reload()}
-        >
-          Try again
-        </Button>
+        <RefreshButton />
       </Box>
     </Container>
   );

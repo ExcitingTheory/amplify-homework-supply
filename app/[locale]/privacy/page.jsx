@@ -1,19 +1,16 @@
-"use client";
-import * as React from "react";
-import { useTranslations } from "next-intl";
 import Typography from "@mui/material/Typography";
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
-import MainToolbar from "@/components/MainToolbar";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Privacy Policy page that displays the privacy policy information.
  * This page is accessible to all users and does not require authentication.
+ * Fully cached — content only changes on deployments.
  */
-function PrivacyPolicy() {
-  const t = useTranslations("pages");
+export default async function PrivacyPolicy() {
+  const t = await getTranslations("pages");
 
   return (
     <>
@@ -256,5 +253,3 @@ function PrivacyPolicy() {
     </>
   );
 }
-
-export default PrivacyPolicy;

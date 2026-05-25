@@ -269,7 +269,7 @@ Please summarize this peer review session.`
         id: roomId,
         status: 'REVIEW_COMPLETE',
         aiReviewSummary: summary,
-        _version: room._version,
+        _version: room._version ?? 1,
       },
     },
   })

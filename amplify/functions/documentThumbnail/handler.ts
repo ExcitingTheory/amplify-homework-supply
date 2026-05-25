@@ -531,7 +531,7 @@ async function handleProcessDocumentThumbnail(args: any): Promise<string> {
         input: {
           id: file.id,
           thumbnail: thumbnailPath,
-          _version: file._version,
+          _version: file._version ?? 1,
         },
       },
     });
@@ -599,7 +599,7 @@ async function handleS3Event(event: any): Promise<void> {
           input: {
             id: file.id,
             thumbnail: thumbnailPath,
-            _version: file._version,
+            _version: file._version ?? 1,
           },
         },
       });

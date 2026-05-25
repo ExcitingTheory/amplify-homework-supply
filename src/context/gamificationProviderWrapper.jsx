@@ -28,7 +28,7 @@ export function GamificationProviderWrapper({
   const { sections, assignments } = useContext(SectionContext) || {};
 
   // Derive cohortId from section-based Cognito groups, or use explicit prop
-  // (e.g. guild/[id] page reads cohortId from the guild record itself)
+  // (e.g. squad/[id] page reads cohortId from the squad record itself)
   const cohortId = useMemo(() => {
     if (cohortIdProp) return cohortIdProp;
     const groups = session?.groups || [];
@@ -39,7 +39,7 @@ export function GamificationProviderWrapper({
     return undefined;
   }, [session?.groups, cohortIdProp]);
 
-  // Always render Provider so child hooks (useGuild, useXP, etc.) never read
+  // Always render Provider so child hooks (useSquad, useXP, etc.) never read
   // the static default context. Subscriptions inside the Provider bail early
   // and set loading=false when studentId is empty.
   return (

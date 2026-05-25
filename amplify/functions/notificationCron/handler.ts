@@ -53,8 +53,8 @@ const LIST_CHALLENGES = `query ListGroupChallenges($limit: Int, $nextToken: Stri
   }
 }`;
 
-const LIST_GUILDS = `query ListGuilds($limit: Int, $nextToken: String) {
-  listGuilds(limit: $limit, nextToken: $nextToken) {
+const LIST_SQUADS = `query ListSquads($limit: Int, $nextToken: String) {
+  listSquads(limit: $limit, nextToken: $nextToken) {
     items {
       id cohortId members { studentId }
     }
@@ -224,19 +224,19 @@ export const handler: Handler = async () => {
       return deadlineDate > now && deadlineDate <= in24h;
     });
 
-    // Fetch all guilds once to look up members by cohortId
-    const allGuilds = endingSoon.length
-      ? await paginateQuery<any>(client, LIST_GUILDS)
+    // Fetch all squads once to look up members by cohortId
+    const allSquads = endingSoon.length
+      ? await paginateQuery<any>(client, LIST_SQUADS)
       : [];
 
     for (const challenge of endingSoon) {
-      // Find guilds in the same cohort and collect their members
-      const cohortGuilds = allGuilds.filter(
+      // Find squads in the same cohort and collect their members
+      const cohortSquads = allSquads.filter(
         (g) => g.cohortId === challenge.cohortId,
       );
       const memberIds = new Set<string>();
-      for (const guild of cohortGuilds) {
-        for (const member of guild.members || []) {
+      for (const squad of cohortSquads) {
+        for (const member of squad.members || []) {
           if (member?.studentId) memberIds.add(member.studentId);
         }
       }
@@ -246,7 +246,7 @@ export const handler: Handler = async () => {
           recipientId: studentId,
           type: "CHALLENGE_ENDING_SOON",
           title: `Challenge Ending Soon: ${challenge.title}`,
-          body: `Your guild challenge ends within 24 hours. Make your final contributions!`,
+          body: `Your squad challenge ends within 24 hours. Make your final contributions!`,
           linkPath: `/challenges/${challenge.id}`,
           linkLabel: "View Challenge",
           referenceId: challenge.id,

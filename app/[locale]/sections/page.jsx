@@ -40,6 +40,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 
 import AppShell from "@/components/AppShell";
+import { useAppShell } from "@/components/AppShellContext";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import AppSkeleton from "@/components/AppSkeleton";
 import getCachedUrl from "@/utils/getCachedUrl";
@@ -155,6 +156,7 @@ function Sections({ user }) {
    *
    */
   const t = useTranslations("pages");
+  const { drawerOpen, drawerWidth, isDesktop } = useAppShell();
   const { sections, refetchSections } = React.useContext(SectionContext);
   const [work, setIsWorking] = useState(false);
   const [open, setOpen] = React.useState(false);
@@ -198,32 +200,9 @@ function Sections({ user }) {
         section.id != null &&
         (section.owner === userId || section.instructor === userId),
     );
-    // Filter for console.log to prevent "Cannot read properties of null" errors
-    const validOwned = owned.filter((s) => s != null && s.id != null);
-    console.log(
-      "[sections.jsx] userId:",
-      userId,
-      "ownedSections:",
-      validOwned.length,
-      validOwned.map((s) => ({
-        name: s.name,
-        owner: s.owner,
-        instructor: s.instructor,
-      })),
-    );
     return owned;
   }, [sections, userId]);
   const canViewInstructorDashboard = isInstructor || ownedSections.length > 0;
-
-  console.log(
-    "[sections.jsx] canViewInstructorDashboard:",
-    canViewInstructorDashboard,
-    "isInstructor:",
-    isInstructor,
-    "ownedSections.length:",
-    ownedSections.length,
-  );
-  console.log("sections", sections);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -296,8 +275,6 @@ function Sections({ user }) {
       const name = form.get("name").toString();
       const description = form.get("description").toString();
 
-      console.log("createInput", { name, description });
-
       const client = getAmplifyClient();
       const { data, errors } = await client.mutations.createSectionGroup({
         name: name.trim(),
@@ -309,7 +286,6 @@ function Sections({ user }) {
       }
 
       const result = typeof data === "string" ? JSON.parse(data) : data;
-      console.log("Section created:", result);
 
       // Refetch sections to get the newly created section
       // (subscriptions may not always deliver immediately)
@@ -537,7 +513,6 @@ function Sections({ user }) {
           )}
           {sections &&
             visibleSections.map(function (section) {
-              console.log("!!!section", section);
               return (
                 <Card
                   key={section.id}
@@ -546,7 +521,10 @@ function Sections({ user }) {
                   sx={{
                     display: "flex",
                     margin: "1rem auto",
-                    width: "90vw",
+                    width:
+                      isDesktop && drawerOpen
+                        ? `calc(90vw - ${drawerWidth}px)`
+                        : "90vw",
                     maxWidth: "80rem",
                     borderRadius: 2,
                     borderLeft: "4px solid",

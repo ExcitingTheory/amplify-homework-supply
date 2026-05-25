@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 // App Router pages — all marked 'use client', safe for Storybook.
 // Server action imports are aliased to mocks in .storybook/main.ts.

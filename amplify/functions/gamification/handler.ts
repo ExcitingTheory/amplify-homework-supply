@@ -12,6 +12,13 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { createNotification } from "../shared/notificationUtils";
+import {
+  getEffectiveConfig,
+  isBadgeEnabled,
+  getBadgeThresholdOverride,
+  clearAllCaches,
+  type EffectiveGamificationConfig,
+} from "../shared/gamificationConfigCache";
 import OpenAI from "openai";
 
 // ============================================================================
@@ -35,10 +42,10 @@ const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
 }`;
 
 // NOTE: StudentBadge, StudentStreak, StudentPersonalBest, StudentProgress,
-// LeaderboardEntry, StudentSkillProgress, EasterEggDiscovery, GuildMembership,
-// GuildPost, Campaign, GroupChallengeContribution, ContentLock, InstructorInsight
+// LeaderboardEntry, StudentSkillProgress, EasterEggDiscovery, SquadMembership,
+// SquadPost, Campaign, GroupChallengeContribution, ContentLock, InstructorInsight
 // models have been REMOVED. All their data now lives on StudentProfile or embedded
-// in their parent aggregate models (EasterEgg.discoveries, Guild.members, etc.).
+// in their parent aggregate models (EasterEgg.discoveries, Squad.members, etc.).
 
 // Easter egg queries/mutations
 const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
@@ -47,18 +54,18 @@ const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
   }
 }`;
 
-// Guild queries/mutations (GuildMembership model removed - members embedded in Guild.members)
+// Squad queries/mutations (SquadMembership model removed - members embedded in Squad.members)
 
-const GET_GUILD = `query GetGuild($id: ID!) {
-  getGuild(id: $id) { id name cohortId totalXP members _version _lastChangedAt _deleted }
+const GET_SQUAD = `query GetSquad($id: ID!) {
+  getSquad(id: $id) { id name cohortId totalXP members _version _lastChangedAt _deleted }
 }`;
 
-const UPDATE_GUILD = `mutation UpdateGuild($input: UpdateGuildInput!) {
-  updateGuild(input: $input) { id name totalXP _version _lastChangedAt _deleted }
+const UPDATE_SQUAD = `mutation UpdateSquad($input: UpdateSquadInput!) {
+  updateSquad(input: $input) { id name totalXP members _version _lastChangedAt _deleted }
 }`;
 
-const LIST_GUILDS_BY_COHORT = `query ListGuildsByCohort($cohortId: String!) {
-  listGuildByCohortId(cohortId: $cohortId) {
+const LIST_SQUADS_BY_COHORT = `query ListSquadsByCohort($cohortId: String!) {
+  listSquadByCohortId(cohortId: $cohortId) {
     items { id name cohortId totalXP members _version _lastChangedAt _deleted }
   }
 }`;
@@ -66,7 +73,7 @@ const LIST_GUILDS_BY_COHORT = `query ListGuildsByCohort($cohortId: String!) {
 // Group challenge queries/mutations
 const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListChallengesByCohort($cohortId: String!) {
   listGroupChallengeByCohortId(cohortId: $cohortId) {
-    items { id cohortId title targetXP currentXP deadline active bonusMultiplier contributions _version _lastChangedAt _deleted }
+    items { id cohortId title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId contributions _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -143,7 +150,7 @@ const UPDATE_SECTION_LEADERBOARD_TIMESTAMP = `mutation UpdateSection($input: Upd
 
 const GET_SETTINGS_BY_OWNER = `query GetSettings($owner: String!) {
   listSettings(filter: { owner: { eq: $owner } }) {
-    items { id owner leaderboardOptIn _version _lastChangedAt _deleted }
+    items { id owner leaderboardOptIn metadata _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -190,7 +197,7 @@ const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!) {
     items {
       id studentId cohortId studentName totalXP level
       currentStreak longestStreak lastActivityDate freezesRemaining freezesUsed
-      badges moduleProgress personalBests skillProgress unitMemories activeDebuffs
+      badges moduleProgress personalBests skillProgress unitMemories activeDebuffs cosmeticRewards
       completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
   }
 }`;
@@ -202,7 +209,7 @@ const CREATE_STUDENT_PROFILE = `mutation CreateStudentProfile($input: CreateStud
 const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
   updateStudentProfile(input: $input) {
     id studentId totalXP level currentStreak longestStreak
-    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty activeDebuffs freezesRemaining _version _lastChangedAt _deleted }
+    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty cosmeticRewards activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed _version _lastChangedAt _deleted }
 }`;
 
 // StudentSkillProgress removed - skill progress now on StudentProfile.skillProgress
@@ -271,7 +278,7 @@ const XP_AMOUNTS: Record<string, number> = {
   COMEBACK: 50,
   PERSONAL_BEST: 25,
   EASTER_EGG: 30,
-  GUILD_CHALLENGE_BONUS: 100,
+  SQUAD_CHALLENGE_BONUS: 100,
   PRACTICE_DRILL_COMPLETED: 30,
   PRACTICE_DRILL_ACCURACY_BONUS: 15,
 };
@@ -883,6 +890,7 @@ async function maybeRebuildLeaderboard(
   gqlClient: any,
   cohortId: string,
 ): Promise<void> {
+  let sectionVersion = 1;
   try {
     const { data } = await gqlClient.graphql({
       query: GET_SECTION,
@@ -890,6 +898,7 @@ async function maybeRebuildLeaderboard(
     });
     const section = data?.getSection;
     if (!section) return;
+    sectionVersion = section._version ?? 1;
 
     const now = Date.now();
 
@@ -916,6 +925,7 @@ async function maybeRebuildLeaderboard(
         input: {
           id: cohortId,
           leaderboardUpdateInProgressAt: new Date(now).toISOString(),
+          _version: sectionVersion,
         },
       },
     });
@@ -931,6 +941,7 @@ async function maybeRebuildLeaderboard(
           id: cohortId,
           leaderboardRebuiltAt: new Date().toISOString(),
           leaderboardUpdateInProgressAt: null,
+          _version: sectionVersion + 1,
         },
       },
     });
@@ -943,6 +954,7 @@ async function maybeRebuildLeaderboard(
           input: {
             id: cohortId,
             leaderboardUpdateInProgressAt: null,
+            _version: sectionVersion + 1,
           },
         },
       });
@@ -1009,8 +1021,8 @@ export const handler: Handler = async (event) => {
         return await handleCheckEasterEggs(gqlClient, args);
       case "discoverEasterEgg":
         return await handleDiscoverEasterEgg(gqlClient, args);
-      case "updateGuildXP":
-        return await handleUpdateGuildXP(gqlClient, args);
+      case "updateSquadXP":
+        return await handleUpdateSquadXP(gqlClient, args);
       case "contributeToChallenge":
         return await handleContributeToChallenge(gqlClient, args);
       case "generateSkillTree":
@@ -1045,11 +1057,20 @@ async function handleAwardXP(
     cohortId?: string;
     unitID?: string;
     accuracy?: number;
+    overrideAmount?: number;
   },
   identity: any,
 ) {
-  const { studentId, reason, referenceId, cohortId, unitID, accuracy } = args;
-  let xpAmount = XP_AMOUNTS[reason];
+  const {
+    studentId,
+    reason,
+    referenceId,
+    cohortId,
+    unitID,
+    accuracy,
+    overrideAmount,
+  } = args;
+  let xpAmount = overrideAmount ?? XP_AMOUNTS[reason];
   if (!xpAmount) throw new Error(`Invalid XP reason: ${reason}`);
 
   // ---- Load section XP config (multipliers + caps + levels) ----
@@ -1331,37 +1352,11 @@ async function handleCheckBadges(
 ) {
   const { studentId, cohortId, unitID } = args;
 
-  // Fetch section settings to check badge enable/disable flags
-  let sectionBadgesEnabled = true;
-  let sectionAntiBadgesEnabled = true;
-
-  // Use pre-fetched settings from stream if available (avoids Section query)
-  if (preFetched?.sectionBadgesEnabled !== undefined) {
-    sectionBadgesEnabled = preFetched.sectionBadgesEnabled;
-    sectionAntiBadgesEnabled = preFetched.sectionAntiBadgesEnabled ?? true;
-  } else if (cohortId) {
-    try {
-      const sectionResult = await gqlClient.graphql({
-        query: GET_SECTION,
-        variables: { id: cohortId },
-      });
-      const section = sectionResult?.data?.getSection;
-      if (section) {
-        // null/undefined means "not set" → default to enabled (true)
-        if (section.badgesEnabled === false) sectionBadgesEnabled = false;
-        if (section.antiBadgesEnabled === false)
-          sectionAntiBadgesEnabled = false;
-      }
-    } catch (err) {
-      console.warn(
-        "[gamification] Failed to fetch section badge settings:",
-        err,
-      );
-    }
-  }
+  // Get effective gamification config (cached, merges global + section)
+  const effectiveConfig = await getEffectiveConfig(gqlClient, cohortId);
 
   // If all badges are disabled for this section, skip awarding entirely
-  if (!sectionBadgesEnabled) {
+  if (!effectiveConfig.badgesEnabled) {
     return {
       newBadges: [],
       updatedBadges: [],
@@ -1410,7 +1405,7 @@ async function handleCheckBadges(
       nailedItCount: preFetched.nailedItCount || 0,
       completedAssignments: preFetched.completedAssignments || 0,
       badges: preFetched.badges || "[]",
-      _version: preFetched.profileVersion,
+      _version: preFetched.profileVersion ?? 1,
       // Rollup fields on profile object for anti-badge checks
       reasonCounts,
       totalSubmissions: preFetched.totalSubmissions || 0,
@@ -1437,7 +1432,7 @@ async function handleCheckBadges(
             nailedItCount: preFetched.nailedItCount || 0,
             completedAssignments: preFetched.completedAssignments || 0,
             badges: preFetched.badges || "[]",
-            _version: preFetched.profileVersion,
+            _version: preFetched.profileVersion ?? 1,
           })
         : getOrCreateStudentProfile(gqlClient, studentId, cohortId),
     ]);
@@ -1475,6 +1470,9 @@ async function handleCheckBadges(
   const updatedBadges: string[] = [];
 
   for (const criteria of BADGE_CRITERIA) {
+    // Skip badges disabled via merged config (global + section)
+    if (!isBadgeEnabled(effectiveConfig, criteria.badgeType)) continue;
+
     if (
       !criteria.check({ xpLogs, badges: existingBadges, totalXP, reasonCounts })
     )
@@ -1504,8 +1502,22 @@ async function handleCheckBadges(
   }
 
   // ---- Check DB-based Badge model criteria (custom instructor badges) ----
+  // Also evaluate custom badges from effective config (global + section merged)
   try {
     const dbBadges = await fetchAutoEvaluateBadges(gqlClient, cohortId);
+    // Add any custom badges from effective config that aren't already in DB
+    const dbBadgeIds = new Set(dbBadges.map((b: any) => b.id));
+    for (const configBadge of effectiveConfig.customBadges) {
+      if (configBadge.autoEvaluate && !dbBadgeIds.has(configBadge.id)) {
+        dbBadges.push({
+          id: configBadge.id,
+          title: configBadge.title,
+          criteria: configBadge.criteria,
+          cohortId: cohortId || null,
+          autoEvaluate: true,
+        });
+      }
+    }
     for (const badge of dbBadges) {
       if (existingByType.has(badge.id)) continue; // Already earned (by badge model ID)
       const criteriaJson =
@@ -1564,7 +1576,7 @@ async function handleCheckBadges(
   const activeDebuffs: any[] = getActiveDebuffs(profile);
 
   // Skip anti-badge loop entirely if disabled for this section
-  if (sectionAntiBadgesEnabled) {
+  if (effectiveConfig.antiBadgesEnabled) {
     for (const criteria of ANTI_BADGE_CRITERIA) {
       if (
         !criteria.check({
@@ -1660,7 +1672,7 @@ async function handleCheckBadges(
     id: profile.id,
     badges: JSON.stringify(existingBadges),
     activeDebuffs: JSON.stringify(activeDebuffs),
-    _version: profile._version,
+    _version: profile._version ?? 1,
   };
   if (freezesPenalty > 0) {
     const currentFreezes = profile.freezesRemaining || 0;
@@ -1762,7 +1774,7 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
           lastActivityDate: today,
           freezesRemaining: 0,
           freezesUsed: 0,
-          _version: profile._version,
+          _version: profile._version ?? 1,
         },
       },
     });
@@ -1830,7 +1842,7 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
         lastActivityDate: today,
         freezesRemaining,
         freezesUsed,
-        _version: profile._version,
+        _version: profile._version ?? 1,
       },
     },
   });
@@ -1941,6 +1953,38 @@ async function handleRebuildLeaderboard(
 
   let updated = 0;
 
+  // Batch-fetch avatar config from Settings for all students
+  const avatarByStudent = new Map<
+    string,
+    { avatarStyle?: string; avatarOverrides?: any; avatarSeed?: string }
+  >();
+  for (const studentId of studentIds) {
+    try {
+      const { data: settingsResult } = await gqlClient.graphql({
+        query: GET_SETTINGS_BY_OWNER,
+        variables: { owner: studentId },
+      });
+      const settings = settingsResult?.listSettings?.items?.[0];
+      if (settings?.metadata) {
+        const meta =
+          typeof settings.metadata === "string"
+            ? JSON.parse(settings.metadata)
+            : settings.metadata;
+        avatarByStudent.set(studentId, {
+          avatarStyle: meta.avatarStyle || undefined,
+          avatarOverrides: meta.avatarOverrides || undefined,
+          avatarSeed: meta.avatarSeed || studentId,
+        });
+      }
+    } catch (err) {
+      // Non-fatal: avatar just won't be populated for this student
+      console.warn(
+        `[gamification] rebuildLeaderboard: failed to fetch settings for ${studentId}`,
+        err,
+      );
+    }
+  }
+
   for (const studentId of studentIds) {
     // Get XP total for this cohort only
     const xpLogs = xpLogsByStudent.get(studentId) || [];
@@ -1963,6 +2007,7 @@ async function handleRebuildLeaderboard(
         studentId,
         cohortId,
       );
+      const avatarConfig = avatarByStudent.get(studentId);
       await gqlClient.graphql({
         query: UPDATE_STUDENT_PROFILE,
         variables: {
@@ -1973,7 +2018,16 @@ async function handleRebuildLeaderboard(
             completedAssignments,
             nailedItCount,
             lastUpdated: new Date().toISOString(),
-            _version: profile._version,
+            ...(avatarConfig?.avatarStyle && {
+              avatarStyle: avatarConfig.avatarStyle,
+            }),
+            ...(avatarConfig?.avatarOverrides && {
+              avatarOverrides: JSON.stringify(avatarConfig.avatarOverrides),
+            }),
+            ...(avatarConfig?.avatarSeed && {
+              avatarSeed: avatarConfig.avatarSeed,
+            }),
+            _version: profile._version ?? 1,
           },
         },
       });
@@ -1984,6 +2038,54 @@ async function handleRebuildLeaderboard(
         err,
       );
     }
+  }
+
+  // Sync avatar data onto Squad.members for denormalized display
+  try {
+    const { data: squadsResult } = await gqlClient.graphql({
+      query: LIST_SQUADS_BY_COHORT,
+      variables: { cohortId },
+    });
+    const squads = (squadsResult?.listSquadByCohortId?.items || []).filter(
+      (g: any) => g != null,
+    );
+
+    for (const squad of squads) {
+      const members = squad.members || [];
+      let membersChanged = false;
+      const updatedMembers = members.map((m: any) => {
+        if (!m?.studentId) return m;
+        const avatar = avatarByStudent.get(m.studentId);
+        if (!avatar) return m;
+        membersChanged = true;
+        return {
+          ...m,
+          avatarStyle: avatar.avatarStyle || m.avatarStyle,
+          avatarOverrides: avatar.avatarOverrides
+            ? JSON.stringify(avatar.avatarOverrides)
+            : m.avatarOverrides,
+          avatarSeed: avatar.avatarSeed || m.avatarSeed || m.studentId,
+        };
+      });
+
+      if (membersChanged) {
+        await gqlClient.graphql({
+          query: UPDATE_SQUAD,
+          variables: {
+            input: {
+              id: squad.id,
+              members: updatedMembers,
+              _version: squad._version ?? 1,
+            },
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.warn(
+      "[gamification] rebuildLeaderboard: squad avatar sync error:",
+      err,
+    );
   }
 
   return { updated, total: studentIds.length };
@@ -2019,7 +2121,7 @@ async function handleUpdateStudentMemory(
           memoryMarkdown: updatedMarkdown,
           lastUpdatedBy: source,
           version: (existing.version || 0) + 1,
-          _version: existing._version,
+          _version: existing._version ?? 1,
         },
       },
     });
@@ -2345,7 +2447,7 @@ async function handleUpdateStudentUnitMemory(
           averageAccuracy: newAvgAcc,
           reviewPriority,
           lastPracticedAt: timestamp,
-          _version: existing._version,
+          _version: existing._version ?? 1,
         },
       },
     });
@@ -2576,7 +2678,7 @@ async function handleRebuildStudentMemoryProfile(
           structuredProfile: JSON.stringify(structuredProfile),
           lastUpdatedBy: "profile-rebuild",
           version: (existingMem.version || 0) + 1,
-          _version: existingMem._version,
+          _version: existingMem._version ?? 1,
         },
       },
     });
@@ -2638,7 +2740,7 @@ async function handleCheckPersonalBest(
         input: {
           id: profile.id,
           personalBests: JSON.stringify(personalBests),
-          _version: profile._version,
+          _version: profile._version ?? 1,
         },
       },
     });
@@ -2663,7 +2765,7 @@ async function handleCheckPersonalBest(
         input: {
           id: profile.id,
           personalBests: JSON.stringify(personalBests),
-          _version: profile._version,
+          _version: profile._version ?? 1,
         },
       },
     });
@@ -2786,7 +2888,7 @@ async function handleRecomputeProgress(
       input: {
         id: profile.id,
         moduleProgress: JSON.stringify(moduleProgress),
-        _version: profile._version,
+        _version: profile._version ?? 1,
       },
     },
   });
@@ -2877,7 +2979,7 @@ async function handleCheckEasterEggs(
             input: {
               id: egg.id,
               discoveries: existingDiscoveries,
-              _version: egg._version,
+              _version: egg._version ?? 1,
             },
           },
         });
@@ -2959,7 +3061,7 @@ function evaluateAchievementCondition(condition: string, stats: any): boolean {
 }
 
 // ============================================================================
-// discoverEasterEgg — Direct discovery for UI_INTERACTION or manual triggers
+// discoverEasterEgg — Direct discovery  for manual triggers
 // ============================================================================
 
 async function handleDiscoverEasterEgg(
@@ -2990,7 +3092,11 @@ async function handleDiscoverEasterEgg(
   await gqlClient.graphql({
     query: UPDATE_EASTER_EGG,
     variables: {
-      input: { id: eggRecord.id, discoveries, _version: eggRecord._version },
+      input: {
+        id: eggRecord.id,
+        discoveries,
+        _version: eggRecord._version ?? 1,
+      },
     },
   });
 
@@ -3014,63 +3120,63 @@ async function handleDiscoverEasterEgg(
 }
 
 // ============================================================================
-// updateGuildXP — Recalculates a guild's total XP from member XP logs
+// updateSquadXP — Recalculates a squad's total XP from member XP logs
 // ============================================================================
 
-async function handleUpdateGuildXP(
+async function handleUpdateSquadXP(
   gqlClient: any,
   args: { studentId: string; xpAmount: number },
 ) {
   const { studentId, xpAmount } = args;
 
-  // Find guild(s) this student belongs to via StudentProfile.cohortId + Guild.members
+  // Find squad(s) this student belongs to via StudentProfile.cohortId + Squad.members
   const profile = await getOrCreateStudentProfile(gqlClient, studentId);
   const cohortId = profile.cohortId;
   if (!cohortId) {
     return { updated: false, reason: "Student has no cohort" };
   }
 
-  const { data: guildsResult } = await gqlClient.graphql({
-    query: LIST_GUILDS_BY_COHORT,
+  const { data: squadsResult } = await gqlClient.graphql({
+    query: LIST_SQUADS_BY_COHORT,
     variables: { cohortId },
   });
-  const allGuilds = (guildsResult?.listGuildByCohortId?.items || []).filter(
+  const allSquads = (squadsResult?.listSquadByCohortId?.items || []).filter(
     (g: any) => g != null,
   );
 
-  // Find guilds where this student is a member
-  const memberGuilds = allGuilds.filter((guild: any) => {
-    const members = guild.members || [];
+  // Find squads where this student is a member
+  const memberSquads = allSquads.filter((squad: any) => {
+    const members = squad.members || [];
     return members.some((m: any) => m?.studentId === studentId);
   });
 
-  if (memberGuilds.length === 0) {
-    return { updated: false, reason: "Student has no guild memberships" };
+  if (memberSquads.length === 0) {
+    return { updated: false, reason: "Student has no squad memberships" };
   }
 
-  const updatedGuilds: string[] = [];
+  const updatedSquads: string[] = [];
 
-  for (const guild of memberGuilds) {
-    const newTotal = (guild.totalXP || 0) + xpAmount;
+  for (const squad of memberSquads) {
+    const newTotal = (squad.totalXP || 0) + xpAmount;
 
     await gqlClient.graphql({
-      query: UPDATE_GUILD,
+      query: UPDATE_SQUAD,
       variables: {
         input: {
-          id: guild.id,
+          id: squad.id,
           totalXP: newTotal,
-          _version: guild._version,
+          _version: squad._version ?? 1,
         },
       },
     });
 
-    updatedGuilds.push(guild.id);
+    updatedSquads.push(squad.id);
 
-    // Check active group challenges for this guild's cohort
+    // Check active group challenges for this squad's cohort
     try {
       await handleContributeToChallenge(gqlClient, {
         studentId,
-        cohortId: guild.cohortId,
+        cohortId: squad.cohortId,
         xpContributed: xpAmount,
       });
     } catch (err) {
@@ -3078,7 +3184,7 @@ async function handleUpdateGuildXP(
     }
   }
 
-  return { updated: true, guilds: updatedGuilds };
+  return { updated: true, squads: updatedSquads };
 }
 
 // ============================================================================
@@ -3133,25 +3239,82 @@ async function handleContributeToChallenge(
           currentXP: newTotal,
           active: goalReached ? false : true,
           contributions: updatedContributions,
-          _version: challenge._version,
+          _version: challenge._version ?? 1,
         },
       },
     });
 
-    // If goal reached, award bonus to the contributing student
+    // If goal reached, award bonus to ALL contributors (not just the triggering student)
     if (goalReached) {
-      try {
-        await handleAwardXP(
-          gqlClient,
-          {
-            studentId,
-            reason: "GUILD_CHALLENGE_BONUS",
-            referenceId: `challenge-${challenge.id}`,
-          },
-          null,
-        );
-      } catch (err) {
-        console.error("[gamification] challenge bonus XP error:", err);
+      // Determine reward XP: use rewardXP if set, otherwise fall back to SQUAD_CHALLENGE_BONUS constant
+      const baseRewardXP =
+        challenge.rewardXP || XP_AMOUNTS["SQUAD_CHALLENGE_BONUS"];
+      // Apply bonusMultiplier (stored on the challenge, defaults to 1.5)
+      const multiplier = challenge.bonusMultiplier || 1.5;
+      const finalRewardXP = Math.round(baseRewardXP * multiplier);
+
+      // Collect unique contributor IDs from the full contribution history
+      const contributorIds = new Set<string>(
+        updatedContributions
+          .map((c: any) => c.studentId)
+          .filter((id: string) => !!id),
+      );
+
+      for (const contributorId of contributorIds) {
+        try {
+          // Award XP
+          await handleAwardXP(
+            gqlClient,
+            {
+              studentId: contributorId,
+              reason: "SQUAD_CHALLENGE_BONUS",
+              referenceId: `challenge-${challenge.id}`,
+              cohortId,
+              overrideAmount: finalRewardXP,
+            },
+            null,
+          );
+
+          // Grant cosmetic reward if configured
+          if (challenge.rewardCosmetic) {
+            try {
+              await grantCosmeticReward(
+                gqlClient,
+                contributorId,
+                challenge.rewardCosmetic,
+                challenge.id,
+              );
+            } catch (cosErr) {
+              console.error(
+                `[gamification] cosmetic reward error for ${contributorId}:`,
+                cosErr,
+              );
+            }
+          }
+
+          // Grant badge reward if configured
+          if (challenge.rewardBadge) {
+            try {
+              await grantChallengeBadge(
+                gqlClient,
+                contributorId,
+                challenge.rewardBadge,
+                challenge.id,
+                cohortId,
+              );
+            } catch (badgeErr) {
+              console.error(
+                `[gamification] badge reward error for ${contributorId}:`,
+                badgeErr,
+              );
+            }
+          }
+        } catch (err) {
+          console.error(
+            `[gamification] challenge bonus XP error for ${contributorId}:`,
+            err,
+          );
+        }
       }
     }
 
@@ -3273,7 +3436,7 @@ async function handleAdvanceSkillProgress(
       input: {
         id: profile.id,
         skillProgress: JSON.stringify(allProgress),
-        _version: profile._version,
+        _version: profile._version ?? 1,
       },
     },
   });
@@ -3420,7 +3583,7 @@ async function handleEvaluateSkillsForUnit(
         input: {
           id: profile.id,
           skillProgress: JSON.stringify(allProgress),
-          _version: profile._version,
+          _version: profile._version ?? 1,
         },
       },
     });
@@ -3542,6 +3705,129 @@ function upsertInArray<T extends Record<string, any>>(
 // syncPersonalBestsToProfile and syncModuleProgressToProfile REMOVED
 // — handleCheckPersonalBest and handleRecomputeProgress now write directly to StudentProfile
 
+// ============================================================================
+// grantCosmeticReward — Parses reward string and appends to profile
+// ============================================================================
+
+/**
+ * Parses a rewardCosmetic string (format: "type:value" or "type:value:durationHours")
+ * and appends it to the student's cosmeticRewards array.
+ *
+ * Supported types: ring, title, border, flair, style, theme
+ */
+async function grantCosmeticReward(
+  gqlClient: any,
+  studentId: string,
+  rewardCosmetic: string,
+  sourceId: string,
+): Promise<void> {
+  const parts = rewardCosmetic.split(":");
+  if (parts.length < 2) {
+    console.warn(
+      `[gamification] Invalid rewardCosmetic format: ${rewardCosmetic}`,
+    );
+    return;
+  }
+
+  const type = parts[0]; // ring, title, border, flair, style, theme
+  const value = parts.slice(1, parts.length > 2 ? -1 : undefined).join(":");
+  const durationStr = parts.length > 2 ? parts[parts.length - 1] : null;
+
+  // Parse duration: number = hours, "permanent" or absent = null (permanent)
+  let durationHours: number | null = null;
+  let expiresAt: string | null = null;
+  if (durationStr && durationStr !== "permanent") {
+    const parsed = parseInt(durationStr, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      durationHours = parsed;
+      expiresAt = new Date(Date.now() + parsed * 60 * 60 * 1000).toISOString();
+    }
+  }
+
+  const now = new Date().toISOString();
+  const newReward = {
+    type,
+    value,
+    durationHours,
+    awardedAt: now,
+    expiresAt,
+    sourceId,
+    label: `${type}: ${value}`,
+  };
+
+  // Fetch current profile
+  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+  if (!profile) return;
+
+  // Avoid duplicate grants from same source
+  const existing = (profile.cosmeticRewards || []) as any[];
+  const alreadyGranted = existing.some(
+    (r: any) => r.sourceId === sourceId && r.type === type && r.value === value,
+  );
+  if (alreadyGranted) return;
+
+  const updatedRewards = [...existing, newReward];
+
+  await gqlClient.graphql({
+    query: UPDATE_STUDENT_PROFILE,
+    variables: {
+      input: {
+        id: profile.id,
+        cosmeticRewards: updatedRewards,
+        _version: profile._version ?? 1,
+      },
+    },
+  });
+}
+
+// ============================================================================
+// grantChallengeBadge — Awards a custom badge from a challenge victory
+// ============================================================================
+
+/**
+ * Appends a badge entry to the student's profile badges array.
+ * Deduplicates by sourceId + badgeType to prevent double-grants.
+ */
+async function grantChallengeBadge(
+  gqlClient: any,
+  studentId: string,
+  badgeType: string,
+  challengeId: string,
+  cohortId: string,
+): Promise<void> {
+  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+  if (!profile) return;
+
+  const existingBadges = (profile.badges || []) as any[];
+
+  // Check for duplicate — same badge from same challenge
+  const alreadyGranted = existingBadges.some(
+    (b: any) =>
+      b.badgeType === badgeType && b.sourceId === `challenge-${challengeId}`,
+  );
+  if (alreadyGranted) return;
+
+  const newBadge = {
+    badgeType,
+    sourceId: `challenge-${challengeId}`,
+    awardedAt: new Date().toISOString(),
+    cohortId,
+  };
+
+  const updatedBadges = [...existingBadges, newBadge];
+
+  await gqlClient.graphql({
+    query: UPDATE_STUDENT_PROFILE,
+    variables: {
+      input: {
+        id: profile.id,
+        badges: updatedBadges,
+        _version: profile._version ?? 1,
+      },
+    },
+  });
+}
+
 async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
   const { data: memResult } = await gqlClient.graphql({
     query: LIST_UNIT_MEMORY_BY_STUDENT,
@@ -3564,7 +3850,7 @@ async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
       input: {
         id: profile.id,
         unitMemories: unitMemoriesForProfile,
-        _version: profile._version,
+        _version: profile._version ?? 1,
       },
     },
   });
@@ -3739,7 +4025,7 @@ async function handleGenerateSkillTree(
     for (const skill of existing) {
       await gqlClient.graphql({
         query: DELETE_SKILL,
-        variables: { input: { id: skill.id, _version: skill._version } },
+        variables: { input: { id: skill.id, _version: skill._version ?? 1 } },
       });
     }
   } catch (err) {
@@ -3787,7 +4073,7 @@ async function handleGenerateSkillTree(
           input: {
             id: skill.id,
             prerequisites: JSON.stringify(prereqIds),
-            _version: skill._version,
+            _version: skill._version ?? 1,
           },
         },
       });
@@ -4063,7 +4349,7 @@ async function handleClaimStorybookBadges(
       input: {
         id: profile.id,
         badges: JSON.stringify(existingBadges),
-        _version: profile._version,
+        _version: profile._version ?? 1,
       },
     },
   });
@@ -4196,7 +4482,7 @@ async function handleApplyBattleStakes(
     const consequences: string[] = [];
     const updates: Record<string, any> = {
       id: profile.id,
-      _version: profile._version,
+      _version: profile._version ?? 1,
     };
 
     // Lose a streak freeze
@@ -4370,7 +4656,7 @@ async function handleApplyBattleStakes(
       input: {
         id: challengeId,
         active: false,
-        _version: challenge._version,
+        _version: challenge._version ?? 1,
       },
     },
   });

@@ -8,9 +8,18 @@
 import * as Y from "yjs";
 import { WebSocketServer, WebSocket } from "ws";
 import * as http from "http";
+import * as https from "https";
 import { IncomingMessage } from "http";
 import * as url from "url";
-import { attachKaiBotObserver, KaiBotConfig } from "./kaiBotObserver";
+import * as encoding from "lib0/encoding";
+import * as decoding from "lib0/decoding";
+import * as syncProtocol from "y-protocols/sync";
+import * as awarenessProtocol from "y-protocols/awareness";
+import { attachBotObserver, BotConfig, DualBotConfig } from "./botObserver";
+
+// y-protocols message types
+const messageSync = 0;
+const messageAwareness = 1;
 
 // Room management
 interface YjsRoom {
@@ -34,7 +43,8 @@ export interface YjsServerConfig {
     state: Uint8Array,
   ) => Promise<void>;
   maxRoomAge?: number; // milliseconds before cleaning up inactive rooms
-  kaiBotConfig?: KaiBotConfig; // Optional AI bot configuration for chat rooms
+  botConfig?: BotConfig | DualBotConfig; // Optional AI bot configuration for chat rooms
+  tlsOptions?: { key: Buffer; cert: Buffer }; // TLS certs for wss:// in local dev
 }
 
 const DEFAULT_CONFIG: YjsServerConfig = {
@@ -44,18 +54,21 @@ const DEFAULT_CONFIG: YjsServerConfig = {
 
 export class YjsWebSocketServer {
   private wss: WebSocketServer | null = null;
-  private server: http.Server | null = null;
+  private server: http.Server | https.Server | null = null;
   private rooms: Map<string, YjsRoom> = new Map();
   private config: Required<YjsServerConfig>;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private botCleanups: Map<string, () => void> = new Map();
+  // Track clients that have sent corrupt data to avoid infinite reset loops
+  private corruptClients: Map<string, number> = new Map();
 
   constructor(config: YjsServerConfig = {}) {
     this.config = {
       port: DEFAULT_CONFIG.port,
       persistCallback: DEFAULT_CONFIG.persistCallback,
       maxRoomAge: DEFAULT_CONFIG.maxRoomAge,
-      kaiBotConfig: undefined,
+      botConfig: undefined,
+      tlsOptions: undefined,
       ...config,
     } as Required<YjsServerConfig>;
   }
@@ -66,7 +79,9 @@ export class YjsWebSocketServer {
   start(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.server = http.createServer();
+        this.server = this.config.tlsOptions
+          ? https.createServer(this.config.tlsOptions)
+          : http.createServer();
         this.wss = new WebSocketServer({ server: this.server });
 
         // Handle new connections
@@ -160,12 +175,27 @@ export class YjsWebSocketServer {
       this.rooms.set(roomName, room);
       console.log(`[YjsServer] Created new room "${roomName}"`);
 
-      // Attach Kai bot observer for chat rooms
-      if (this.config.kaiBotConfig && roomName.startsWith("chat-")) {
-        const cleanup = attachKaiBotObserver(
-          room.ydoc,
-          this.config.kaiBotConfig,
-        );
+      // Attach bot observers based on room type:
+      // - "chat-*" rooms get Kai only (student collaborative chat)
+      // - "instructor-chat-*" rooms get Sage only (instructor-only space)
+      if (this.config.botConfig && roomName.startsWith("instructor-chat-")) {
+        const dualConfig =
+          "sage" in this.config.botConfig ? this.config.botConfig : undefined;
+        if (dualConfig?.sage) {
+          const cleanup = attachBotObserver(room.ydoc, {
+            kai: dualConfig.sage,
+          });
+          this.botCleanups.set(roomName, cleanup);
+          console.log(
+            `[YjsServer] Attached Sage bot observer for "${roomName}"`,
+          );
+        }
+      } else if (this.config.botConfig && roomName.startsWith("chat-")) {
+        const kaiOnly: BotConfig =
+          "kai" in this.config.botConfig
+            ? this.config.botConfig.kai
+            : this.config.botConfig;
+        const cleanup = attachBotObserver(room.ydoc, kaiOnly);
         this.botCleanups.set(roomName, cleanup);
         console.log(`[YjsServer] Attached Kai bot observer for "${roomName}"`);
       }
@@ -201,64 +231,181 @@ export class YjsWebSocketServer {
 
   /**
    * Send initial sync state to client (Sync Step 1)
+   * Uses y-protocols encoding format that y-websocket client expects.
    */
   private _sendSyncStep1(ws: YjsWebSocket, room: YjsRoom): void {
-    const state = Y.encodeStateAsUpdate(room.ydoc);
-    const message = Buffer.concat([Buffer.from([0]), state]); // 0 = sync message type
     try {
-      ws.send(message);
+      const encoder = encoding.createEncoder();
+      encoding.writeVarUint(encoder, messageSync);
+      syncProtocol.writeSyncStep1(encoder, room.ydoc);
+      ws.send(encoding.toUint8Array(encoder));
     } catch (error) {
-      console.error(
-        `[YjsServer] Error sending sync to client ${ws.clientId}:`,
-        error,
-      );
+      const errorMsg = (error as Error)?.message || String(error);
+      const isCorruptState =
+        errorMsg.includes("is not a function") ||
+        errorMsg.includes("Unexpected end of") ||
+        errorMsg.includes("readAnyLookupTable") ||
+        errorMsg.includes("contentRefs");
+
+      if (isCorruptState) {
+        // Room's own doc is corrupt — reset it and send empty state
+        console.warn(
+          `[YjsServer] Corrupt room doc "${room.docName}" during sync — resetting to empty`,
+        );
+        room.ydoc.destroy();
+        room.ydoc = new Y.Doc();
+        // Send the now-empty state
+        try {
+          const encoder = encoding.createEncoder();
+          encoding.writeVarUint(encoder, messageSync);
+          syncProtocol.writeSyncStep1(encoder, room.ydoc);
+          ws.send(encoding.toUint8Array(encoder));
+        } catch {
+          console.error(
+            `[YjsServer] Failed to send fresh sync to client ${ws.clientId}`,
+          );
+        }
+      } else {
+        console.error(
+          `[YjsServer] Error sending sync to client ${ws.clientId}:`,
+          error,
+        );
+      }
     }
   }
 
   /**
-   * Handle incoming message from client
+   * Handle incoming message from client using y-protocols format
    */
   private _handleMessage(ws: YjsWebSocket, data: Buffer, room: YjsRoom): void {
     try {
-      const messageType = data[0];
+      const decoder = decoding.createDecoder(new Uint8Array(data));
+      const messageType = decoding.readVarUint(decoder);
 
-      if (messageType === 0) {
-        // Sync step 2 - client sends state
-        const stateVector = data.slice(1);
-        const update = Y.encodeStateAsUpdate(room.ydoc, stateVector);
-        if (update.length > 0) {
-          const message = Buffer.concat([Buffer.from([0]), update]);
-          ws.send(message);
+      if (messageType === messageSync) {
+        // Sync message: prepare response encoder
+        const encoder = encoding.createEncoder();
+        encoding.writeVarUint(encoder, messageSync);
+        const syncMessageType = syncProtocol.readSyncMessage(
+          decoder,
+          encoder,
+          room.ydoc,
+          ws, // transactionOrigin
+        );
+
+        // If encoder has content beyond the message type prefix, send response
+        if (encoding.length(encoder) > 1) {
+          ws.send(encoding.toUint8Array(encoder));
         }
-      } else if (messageType === 1) {
-        // Update message - apply and broadcast
-        const update = data.slice(1);
-        Y.applyUpdate(room.ydoc, update);
-        room.lastUpdate = Date.now();
 
-        // Broadcast to other clients
-        this._broadcastUpdate(room, update, ws);
-
-        // Persist periodically (debounced)
-        this._schedulePersist(room);
+        // If this was a step2 or update, the doc was modified — broadcast & persist
+        if (syncMessageType === syncProtocol.messageYjsSyncStep2 || syncMessageType === syncProtocol.messageYjsUpdate) {
+          room.lastUpdate = Date.now();
+          // Broadcast the original message to other clients
+          this._broadcastRaw(room, new Uint8Array(data), ws);
+          this._schedulePersist(room);
+        }
+      } else if (messageType === messageAwareness) {
+        // Awareness message — broadcast to all other clients
+        this._broadcastRaw(room, new Uint8Array(data), ws);
       } else {
         console.warn(`[YjsServer] Unknown message type: ${messageType}`);
       }
     } catch (error) {
       console.error(`[YjsServer] Error handling message:`, error);
+
+      // If the error is a decoding failure (corrupt Yjs data from client),
+      // close only the offending client with code 4000 so it clears its
+      // IndexedDB cache.
+      const errorMsg = (error as Error)?.message || String(error);
+      const isCorruptData =
+        errorMsg.includes("is not a function") ||
+        errorMsg.includes("Unexpected end of") ||
+        errorMsg.includes("readAnyLookupTable") ||
+        errorMsg.includes("contentRefs");
+
+      if (isCorruptData) {
+        const corruptCount = (this.corruptClients.get(ws.clientId) || 0) + 1;
+        this.corruptClients.set(ws.clientId, corruptCount);
+
+        if (corruptCount <= 3) {
+          console.warn(
+            `[YjsServer] Corrupt update from client ${ws.clientId} in room "${room.docName}" — closing client to trigger cache clear (attempt ${corruptCount})`,
+          );
+          try {
+            ws.close(4000, "Corrupt data — clear local cache");
+          } catch {
+            // Client may already be disconnected
+          }
+        } else {
+          console.warn(
+            `[YjsServer] Client ${ws.clientId} persistently sending corrupt data — dropping silently`,
+          );
+        }
+      }
     }
   }
 
   /**
-   * Broadcast update to all clients except sender
+   * Reset a room's Y.Doc to recover from corrupt state.
+   * Disconnects all clients so they reconnect with fresh state.
    */
-  private _broadcastUpdate(
+  private _resetRoom(room: YjsRoom): void {
+    // Create a fresh document
+    const freshDoc = new Y.Doc();
+    room.ydoc.destroy();
+    room.ydoc = freshDoc;
+    room.lastUpdate = Date.now();
+
+    // Re-attach bot observer if applicable
+    const existingCleanup = this.botCleanups.get(room.docName);
+    if (existingCleanup) {
+      existingCleanup();
+      this.botCleanups.delete(room.docName);
+
+      if (
+        this.config.botConfig &&
+        room.docName.startsWith("instructor-chat-")
+      ) {
+        const dualConfig =
+          "sage" in this.config.botConfig ? this.config.botConfig : undefined;
+        if (dualConfig?.sage) {
+          const cleanup = attachBotObserver(freshDoc, { kai: dualConfig.sage });
+          this.botCleanups.set(room.docName, cleanup);
+        }
+      } else if (this.config.botConfig && room.docName.startsWith("chat-")) {
+        const kaiOnly: BotConfig =
+          "kai" in this.config.botConfig
+            ? this.config.botConfig.kai
+            : this.config.botConfig;
+        const cleanup = attachBotObserver(freshDoc, kaiOnly);
+        this.botCleanups.set(room.docName, cleanup);
+      }
+    }
+
+    // Close all clients so they reconnect and get fresh state
+    room.clients.forEach((client) => {
+      try {
+        client.close(4000, "Room reset due to corrupt state");
+      } catch {
+        // Client may already be disconnected
+      }
+    });
+    room.clients.clear();
+
+    console.log(
+      `[YjsServer] Room "${room.docName}" reset — clients will reconnect with fresh state`,
+    );
+  }
+
+  /**
+   * Broadcast a raw message to all clients in the room except sender
+   */
+  private _broadcastRaw(
     room: YjsRoom,
-    update: Uint8Array,
+    message: Uint8Array,
     sender: YjsWebSocket,
   ): void {
-    const message = Buffer.concat([Buffer.from([1]), update]); // 1 = update type
-
     room.clients.forEach((client: YjsWebSocket) => {
       if (client !== sender && client.readyState === 1) {
         // WebSocket.OPEN

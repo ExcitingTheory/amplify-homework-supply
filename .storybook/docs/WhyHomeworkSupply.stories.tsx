@@ -2,7 +2,7 @@
  * Why Homework Supply - Value proposition and pain points solved
  */
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   Box,
   Typography,
@@ -53,7 +53,7 @@ const painPoints = [
   },
   {
     problem: 'Students lack motivation',
-    solution: 'XP, streaks, badges, guilds, leaderboards, and skill trees',
+    solution: 'XP, streaks, badges, squads, leaderboards, and skill trees',
   },
   {
     problem: 'Audio/pronunciation practice is hard to manage',
@@ -65,7 +65,7 @@ const comparisons = [
   { feature: 'AI Content Generation', us: true, lms: false, docs: false },
   { feature: 'Real-time Collaboration', us: true, lms: false, docs: true },
   { feature: 'Auto-graded Interactive Blocks', us: true, lms: true, docs: false },
-  { feature: 'Gamification (XP/Badges/Guilds)', us: true, lms: false, docs: false },
+  { feature: 'Gamification (XP/Badges/Squads)', us: true, lms: false, docs: false },
   { feature: 'Audio Recording + Transcription', us: true, lms: false, docs: false },
   { feature: 'PDF Analysis + Vocab Extraction', us: true, lms: false, docs: false },
   { feature: 'Offline Support', us: true, lms: true, docs: true },

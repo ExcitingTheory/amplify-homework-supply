@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getAmplifyClient } from '@/utils/amplifyClient';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -19,8 +19,11 @@ import {
   TextField,
   Alert,
   Snackbar,
+  Tooltip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MainToolbar from '@/components/MainToolbar';
 import { GradedWorkbookViewer } from '@/components/GradedWorkbookViewer';
 
@@ -51,7 +54,41 @@ export function GradeActions({ unit, grades: initialGrades, studentName, moderat
   const router = useRouter();
   const searchParams = useSearchParams();
   const sectionId = searchParams.get('sectionId');
+  const gradeIds = searchParams.get('gradeIds')?.split(',') || [];
+  const currentIndex = parseInt(searchParams.get('currentIndex') || '0', 10);
   const client = getAmplifyClient();
+
+  const hasPrev = gradeIds.length > 0 && currentIndex > 0;
+  const hasNext = gradeIds.length > 0 && currentIndex < gradeIds.length - 1;
+
+  const navigateToGrade = useCallback((index: number) => {
+    if (index < 0 || index >= gradeIds.length) return;
+    const targetGradeId = gradeIds[index];
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('currentIndex', String(index));
+    router.replace(`/instructor/grade/${targetGradeId}?${params.toString()}`);
+  }, [gradeIds, searchParams, router]);
+
+  const handlePrev = useCallback(() => navigateToGrade(currentIndex - 1), [navigateToGrade, currentIndex]);
+  const handleNext = useCallback(() => navigateToGrade(currentIndex + 1), [navigateToGrade, currentIndex]);
+
+  // Keyboard shortcuts for navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (overrideOpen) return;
+      if (e.key === 'ArrowLeft' && hasPrev) {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === 'ArrowRight' && hasNext) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasPrev, hasNext, handlePrev, handleNext]);
+
 
   const [grades, setGrades] = useState(initialGrades);
   const [moderation, setModeration] = useState(initialModeration);
@@ -153,9 +190,32 @@ export function GradeActions({ unit, grades: initialGrades, studentName, moderat
           <IconButton edge="start" onClick={handleBack} sx={{ mr: 1 }}>
             <ArrowBackIcon />
           </IconButton>
+          {gradeIds.length > 1 && (
+            <Tooltip title="Previous student (←)">
+              <span>
+                <IconButton onClick={handlePrev} disabled={!hasPrev} size="small">
+                  <NavigateBeforeIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Grade Review — {studentName}
+            {gradeIds.length > 1 && (
+              <Typography component="span" variant="body2" sx={{ ml: 1, opacity: 0.7 }}>
+                ({currentIndex + 1} of {gradeIds.length})
+              </Typography>
+            )}
           </Typography>
+          {gradeIds.length > 1 && (
+            <Tooltip title="Next student (→)">
+              <span>
+                <IconButton onClick={handleNext} disabled={!hasNext} size="small" sx={{ mr: 1 }}>
+                  <NavigateNextIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           <Button
             variant="outlined"
             color="primary"

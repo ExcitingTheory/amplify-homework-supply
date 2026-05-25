@@ -205,7 +205,7 @@ async function persistModerationToRecord(
     variables: {
       input: {
         id: recordId,
-        _version: currentVersion,
+        _version: currentVersion ?? 1,
         moderation: moderationField,
       },
     },

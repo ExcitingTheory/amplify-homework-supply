@@ -6,9 +6,6 @@ import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { LiveLeaderboard } from "./LiveLeaderboard";
 
-// ISR: revalidate every 60 seconds
-export const revalidate = 60;
-
 export default async function LeaderboardPage() {
   const t = await getTranslations("pages");
 
@@ -17,7 +14,9 @@ export default async function LeaderboardPage() {
   try {
     const client = getServerClient();
 
-    const { data: profiles } = await client.models.StudentProfile.list();
+    const { data: profiles } = await client.models.StudentProfile.list({
+      limit: 100,
+    });
 
     const byStudent = new Map<string, any>();
     for (const entry of (profiles || []).filter((p: any) => p != null)) {

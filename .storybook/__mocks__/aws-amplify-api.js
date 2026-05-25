@@ -8,7 +8,7 @@ import {
   mockContentCompletion, 
   mockSuggestBlocks,
   mockChat,
-} from '../../mocks/responses/index.js';
+} from '../../test/mocks/responses/index.js';
 
 /**
  * Mock REST API post() function with streaming support

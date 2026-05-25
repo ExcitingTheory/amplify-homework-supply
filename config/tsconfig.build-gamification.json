@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "src/components/Gamification/**/*.ts",
+    "src/components/Gamification/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/__tests__/**"
+  ]
+}

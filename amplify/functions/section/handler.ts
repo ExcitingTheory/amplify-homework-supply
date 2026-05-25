@@ -747,7 +747,7 @@ async function handleCreatePeerReviewRoom(
           id: gradeId,
           reviewRoomId: roomId,
           peerReviewGroup: peerGroupName,
-          _version: grade._version,
+          _version: grade._version ?? 1,
         },
       },
     });
@@ -876,7 +876,7 @@ async function handleJoinPeerReview(
         input: {
           id: room.id,
           invitedUserIds: updatedInvites,
-          _version: room._version,
+          _version: room._version ?? 1,
         },
       },
     });

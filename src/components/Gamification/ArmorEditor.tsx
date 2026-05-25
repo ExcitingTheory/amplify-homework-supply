@@ -1,5 +1,5 @@
 /**
- * ArmorEditor — Modal UI for designing a guild coat of arms.
+ * ArmorEditor — Modal UI for designing a squad coat of arms.
  *
  * Features:
  *   - 4 shield shapes (Classic, Rounded, Pointed, Diamond)
@@ -9,7 +9,7 @@
  *   - Randomize button for instant inspiration
  *   - Live SVG preview
  *   - Full undo/redo stack with Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z
- *   - Guild name & description as Lexical plain text editors
+ *   - Squad name & description as Lexical plain text editors
  *   - Autosave on change (debounced)
  *
  * @module ArmorEditor
@@ -175,8 +175,8 @@ function getCharges(config: ArmorEditorConfig): ChargeConfig[] {
 
 export interface ArmorEditorProps {
   open: boolean
-  guildName: string
-  guildDescription?: string
+  squadName: string
+  squadDescription?: string
   initialConfig?: ArmorEditorConfig | null
   onSave: (config: ArmorEditorConfig, svg: string, name: string, description: string) => void
   onClose: () => void
@@ -538,8 +538,8 @@ const DEFAULT_CONFIG: ArmorEditorConfig = {
 
 export function ArmorEditor({
   open,
-  guildName,
-  guildDescription = '',
+  squadName,
+  squadDescription = '',
   initialConfig,
   onSave,
   onClose,
@@ -549,9 +549,9 @@ export function ArmorEditor({
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(() => ({
     config: initialConfig ? { ...DEFAULT_CONFIG, ...initialConfig } : DEFAULT_CONFIG,
-    name: guildName,
-    description: guildDescription,
-  }), [initialConfig, guildName, guildDescription])
+    name: squadName,
+    description: squadDescription,
+  }), [initialConfig, squadName, squadDescription])
 
   const {
     snapshot,
@@ -704,7 +704,7 @@ export function ArmorEditor({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>Design Coat of Arms — {name || guildName}</span>
+        <span>Design Coat of Arms — {name || squadName}</span>
         <Stack direction="row" spacing={0.5}>
           <Tooltip title="Undo (Ctrl+Z)">
             <span>

@@ -1,14 +1,13 @@
 "use client";
 
 /**
- * WorkbookClient — Full interactive workbook loaded via next/dynamic.
+ * WorkbookClient — Full interactive workbook with SSR HTML skeleton.
  *
- * This is the existing workbook page logic extracted into a client component
- * that receives the unit ID and renders the full interactive experience
- * (UnitProvider, grading, timer, chat, etc.).
+ * Receives pre-rendered HTML from the server component and displays it
+ * immediately while the full interactive Lexical editor loads.
+ * Once Lexical is ready, it replaces the static HTML seamlessly.
  *
- * The RSC page passes the serialized editor state for the LexicalComposer
- * initialConfig, eliminating the need for the initial fetch waterfall.
+ * Pattern from: https://github.com/2wheeh/lexical-nextjs-ssr
  */
 
 import React, { useState, useContext, useMemo } from "react";
@@ -20,6 +19,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
 import { Workbook } from "@/components/Editor3";
+import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
 import { SecretLinkIcon } from "@/components/Gamification/SecretLinkIcon";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import { FilesProvider } from "@/context/fileContext";
@@ -30,10 +30,14 @@ import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { SectionProvider } from "@/context/sectionContext";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
+interface WorkbookClientProps {
+  ssrHtml?: string;
+}
+
 /**
  * TimerWrappedEditor — Inner content that handles the timer gate and renders workbook.
  */
-function TimerWrappedEditor() {
+function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
   const t = useTranslations("pages");
   const {
     unit,
@@ -210,8 +214,15 @@ function TimerWrappedEditor() {
 
       {(!needsTimer || (needsTimer && timerStarted)) && (
         <Box data-tour="workbook-content">
-          <Workbook />
-          <SecretLinkIcon unitId={unit?.id || ""} />
+          {unit ? (
+            <>
+              <Workbook />
+              <SecretLinkIcon unitId={unit?.id || ""} />
+            </>
+          ) : (
+            // Show SSR HTML while the interactive editor loads
+            <WorkbookSSRSkeleton html={ssrHtml || ""} />
+          )}
         </Box>
       )}
     </>
@@ -222,16 +233,16 @@ function TimerWrappedEditor() {
  * WorkbookClient — Exported default for dynamic import.
  * Wraps the full workbook with auth + providers.
  */
-export default function WorkbookClient() {
-  const { id, sectionId } = useParams() as { id: string; sectionId?: string };
+export default function WorkbookClient({ ssrHtml }: WorkbookClientProps) {
+  const { id } = useParams() as { id: string };
 
   return (
     <MyAuth>
       <SectionProvider unitId={id}>
         <FilesProvider>
           <DictionaryProvider>
-            <UnitProvider id={id} sectionId={sectionId}>
-              <TimerWrappedEditor />
+            <UnitProvider id={id}>
+              <TimerWrappedEditor ssrHtml={ssrHtml} />
             </UnitProvider>
           </DictionaryProvider>
         </FilesProvider>

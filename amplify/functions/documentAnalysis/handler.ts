@@ -505,7 +505,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
         input: {
           id: document.id,
           status: "extracting",
-          _version: document._version,
+          _version: document._version ?? 1,
         },
       },
     })) as any;
@@ -549,8 +549,9 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           sourceFormat,
           status: "analyzing",
           _version:
-            extractingUpdate?.data?.updateDocument?._version ||
-            document._version,
+            extractingUpdate?.data?.updateDocument?._version ??
+            document._version ??
+            1,
         },
       },
     })) as any;
@@ -640,8 +641,9 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           id: document.id,
           status: "completed",
           _version:
-            analyzingUpdate?.data?.updateDocument?._version ||
-            document._version,
+            analyzingUpdate?.data?.updateDocument?._version ??
+            document._version ??
+            1,
         },
       },
     });
@@ -677,7 +679,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
             input: {
               id: file.documentID,
               status: "failed",
-              _version: docData?.getDocument?._version,
+              _version: docData?.getDocument?._version ?? 1,
             },
           },
         });
@@ -815,7 +817,7 @@ async function handleCancelDocumentAnalysis(args: any): Promise<any> {
         input: {
           id: document.id,
           status: "cancelled",
-          _version: document._version,
+          _version: document._version ?? 1,
         },
       },
     });

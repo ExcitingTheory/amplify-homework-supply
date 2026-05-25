@@ -1081,8 +1081,6 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
     file.mimeType === "text/plain" ||
     file.mimeType === "text/markdown";
 
-  console.log("ExpandedFileContent render", { file, parsedContent });
-
   return (
     <Box sx={{ p: 2 }}>
       {/* Audio/Image Metadata */}
@@ -1769,8 +1767,6 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
           .getPropertyValue("--mui-palette-primary-main")
           .trim() || "#556cd6"
       : "#556cd6";
-
-  console.log("FileManager.mainColor", mainColor);
 
   const rgbColor = hexToRgb(mainColor);
   const _r = rgbColor.r;
@@ -3293,7 +3289,6 @@ function SelectedFileDetailsPanel({
 }
 
 export default function FileManager2() {
-  console.log("[FileManager2] Component render started");
   const t = useTranslations("editor.files");
   const [editor] = useLexicalComposerContext();
   const [search, setSearch] = React.useState("");

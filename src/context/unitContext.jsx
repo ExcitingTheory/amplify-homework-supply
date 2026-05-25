@@ -32,7 +32,7 @@ export const gradedBlockTypes = [
   "custom-answer",
   "custom-ai",
 ];
-const UnitProvider = ({ children, id, sectionId }) => {
+const UnitProvider = ({ children, id }) => {
   // Get auth state from centralized context
   const {
     user,
@@ -41,10 +41,12 @@ const UnitProvider = ({ children, id, sectionId }) => {
   } = React.useContext(AuthContext);
 
   const [state, dispatch] = useReducer(unitReducer, unitInitialState);
+  const [sectionId, setSectionId] = React.useState(undefined);
   const savingCountRef = useRef(0);
 
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
   const practiceSessionVersionMapRef = useRef({});
+  const gradeVersionMapRef = useRef({});
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -195,6 +197,42 @@ const UnitProvider = ({ children, id, sectionId }) => {
       usernameRef.current = null;
     }
   }, [user]);
+
+  // Derive sectionId from Assignment record (server-authoritative, not URL)
+  React.useEffect(() => {
+    if (!id || authLoading || !user) return;
+
+    let cancelled = false;
+    const client = getAmplifyClient();
+
+    async function lookupAssignment() {
+      try {
+        const { data: assignments } = await client.models.Assignment.list({
+          filter: { unitID: { eq: id } },
+        });
+        if (cancelled) return;
+        // Use the first assignment that matches this unit for the current user
+        const assignment = (assignments || []).find(
+          (a) => a != null && a.sectionID,
+        );
+        if (assignment?.sectionID) {
+          setSectionId(assignment.sectionID);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn(
+            "[UnitContext] Failed to look up Assignment for sectionId:",
+            err,
+          );
+        }
+      }
+    }
+
+    lookupAssignment();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, user, authLoading]);
 
   const verifyAccuracy = React.useCallback((data) => {
     let total = 0;
@@ -642,6 +680,23 @@ const UnitProvider = ({ children, id, sectionId }) => {
         const validItems = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+
+        // Version map guard: skip dispatch if no item has a newer _version
+        const hasChanges = validItems.some((item) => {
+          const tracked = gradeVersionMapRef.current[item.id];
+          return tracked == null || item._version > tracked;
+        });
+
+        if (!hasChanges && Object.keys(gradeVersionMapRef.current).length > 0) {
+          return;
+        }
+
+        // Update version map
+        gradeVersionMapRef.current = {};
+        validItems.forEach((item) => {
+          gradeVersionMapRef.current[item.id] = item._version;
+        });
+
         processGrades(validItems);
       },
       error: (error) => handleGradeError("Grade observeQuery", error),
@@ -862,10 +917,10 @@ const UnitProvider = ({ children, id, sectionId }) => {
       // Permission checking is handled by individual pages (editor vs workbook)
       dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
 
-      // Skip if version is same or older than what we're tracking (includes optimistic bumps)
+      // Only process if incoming version is greater than what we're tracking
       if (
         unitRecord?._version != null &&
-        unitRecord._version <= versionRef.current
+        !(unitRecord._version > versionRef.current)
       ) {
         return;
       }

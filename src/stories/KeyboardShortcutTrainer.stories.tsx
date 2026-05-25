@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import KeyboardShortcutTrainer from './KeyboardShortcutTrainer';
 
 /**
@@ -71,9 +71,10 @@ export const Default: Story = {};
  * Mobile responsive view
  */
 export const Mobile: Story = {
-  parameters: {
+  globals: {
     viewport: {
-      defaultViewport: 'mobile1',
-    },
+      value: 'mobile1',
+      isRotated: false
+    }
   },
 };

@@ -89,7 +89,7 @@ export const handler: Handler = async () => {
               input: {
                 id: profile.id,
                 currentStreak: 0,
-                _version: profile._version,
+                _version: profile._version ?? 1,
               },
             },
           });

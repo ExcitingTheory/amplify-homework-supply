@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { JoinByCode } from './JoinByCode'
 import { RoomInvite } from './RoomInvite'
 import { PeerReviewInvitations } from './PeerReviewInvitations'

@@ -121,7 +121,7 @@ describe("gamification schema ↔ handler consistency", () => {
     "recomputeProgress",
     "checkEasterEggs",
     "discoverEasterEgg",
-    "updateGuildXP",
+    "updateSquadXP",
     "contributeToChallenge",
     "generateSkillTree",
     "advanceSkillProgress",

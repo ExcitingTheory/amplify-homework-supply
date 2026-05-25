@@ -2,7 +2,7 @@
  * Client-side notification creation helpers.
  *
  * These functions create Notification records directly from the frontend
- * for events that don't go through a Lambda (guild posts, collaboration invites, etc.).
+ * for events that don't go through a Lambda (squad posts, collaboration invites, etc.).
  * Auth rules enforce that only the recipientId owner or Admins can write.
  */
 
@@ -41,13 +41,13 @@ const TYPE_TO_CATEGORY: Record<string, string> = {
   STREAK_MILESTONE: "GAMIFICATION",
   STREAK_AT_RISK: "GAMIFICATION",
   PERSONAL_BEST: "GAMIFICATION",
-  CHALLENGE_STARTED: "GUILD",
-  CHALLENGE_ENDING_SOON: "GUILD",
-  CHALLENGE_COMPLETED: "GUILD",
-  GUILD_POST_NEW: "GUILD",
-  GUILD_MEMBER_JOINED: "GUILD",
-  GUILD_METADATA_UPDATED: "GUILD",
-  GUILD_INVITE: "GUILD",
+  CHALLENGE_STARTED: "SQUAD",
+  CHALLENGE_ENDING_SOON: "SQUAD",
+  CHALLENGE_COMPLETED: "SQUAD",
+  SQUAD_POST_NEW: "SQUAD",
+  SQUAD_MEMBER_JOINED: "SQUAD",
+  SQUAD_METADATA_UPDATED: "SQUAD",
+  SQUAD_INVITE: "SQUAD",
   CHAT_MENTION: "CHAT",
   CHAT_NEW_MESSAGE: "CHAT",
   SYSTEM_ANNOUNCEMENT: "SYSTEM",
@@ -102,27 +102,27 @@ export async function sendNotificationToMany(
  * Pre-built notification senders for common events.
  */
 export const notifications = {
-  guildPostNew: (recipientIds: string[], senderName: string, guildId: string, guildName: string) =>
+  squadPostNew: (recipientIds: string[], senderName: string, squadId: string, squadName: string) =>
     sendNotificationToMany(recipientIds, {
-      type: "GUILD_POST_NEW",
-      title: `New post in ${guildName}`,
-      body: `${senderName} posted in your guild.`,
-      linkPath: `/guilds/${guildId}`,
+      type: "SQUAD_POST_NEW",
+      title: `New post in ${squadName}`,
+      body: `${senderName} posted in your squad.`,
+      linkPath: `/squads/${squadId}`,
       linkLabel: "View Post",
-      referenceId: guildId,
-      referenceType: "Guild",
+      referenceId: squadId,
+      referenceType: "Squad",
       senderName,
     }),
 
-  guildMemberJoined: (recipientIds: string[], memberName: string, guildId: string, guildName: string) =>
+  squadMemberJoined: (recipientIds: string[], memberName: string, squadId: string, squadName: string) =>
     sendNotificationToMany(recipientIds, {
-      type: "GUILD_MEMBER_JOINED",
-      title: `${memberName} joined ${guildName}`,
-      body: `A new member has joined your guild.`,
-      linkPath: `/guilds/${guildId}`,
-      linkLabel: "View Guild",
-      referenceId: guildId,
-      referenceType: "Guild",
+      type: "SQUAD_MEMBER_JOINED",
+      title: `${memberName} joined ${squadName}`,
+      body: `A new member has joined your squad.`,
+      linkPath: `/squads/${squadId}`,
+      linkLabel: "View Squad",
+      referenceId: squadId,
+      referenceType: "Squad",
       senderName: memberName,
     }),
 
@@ -152,24 +152,24 @@ export const notifications = {
       senderName,
     }),
 
-  challengeStarted: (recipientIds: string[], challengeName: string, challengeId: string, guildId: string) =>
+  challengeStarted: (recipientIds: string[], challengeName: string, challengeId: string, squadId: string) =>
     sendNotificationToMany(recipientIds, {
       type: "CHALLENGE_STARTED",
       title: `Challenge Started: ${challengeName}`,
-      body: "A new guild challenge has begun! Contribute XP to help your guild win.",
-      linkPath: `/guilds/${guildId}`,
+      body: "A new squad challenge has begun! Contribute XP to help your squad win.",
+      linkPath: `/squads/${squadId}`,
       linkLabel: "View Challenge",
       referenceId: challengeId,
       referenceType: "GroupChallenge",
       senderName: "System",
     }),
 
-  challengeCompleted: (recipientIds: string[], challengeName: string, challengeId: string, guildId: string) =>
+  challengeCompleted: (recipientIds: string[], challengeName: string, challengeId: string, squadId: string) =>
     sendNotificationToMany(recipientIds, {
       type: "CHALLENGE_COMPLETED",
       title: `Challenge Complete: ${challengeName}`,
-      body: "Your guild challenge has been completed! Check the results.",
-      linkPath: `/guilds/${guildId}`,
+      body: "Your squad challenge has been completed! Check the results.",
+      linkPath: `/squads/${squadId}`,
       linkLabel: "View Results",
       referenceId: challengeId,
       referenceType: "GroupChallenge",

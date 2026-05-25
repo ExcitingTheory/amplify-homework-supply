@@ -61,13 +61,14 @@ import MyAuth from "@/components/AmplifyAuthenticator";
 
 import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import FilesContext from "@/context/fileContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
-import { GuildLeaderboard } from "@/components/Gamification/GuildLeaderboard";
+import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
 import { OpenCollaborationRooms } from "@/components/PeerReview/OpenCollaborationRooms";
 import {
   createPeerReviewRoom,
@@ -75,6 +76,7 @@ import {
   awardTopReviewerXP,
 } from "../../../actions/peerReview";
 import { useRouter, useParams } from "next/navigation";
+import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -267,10 +269,19 @@ function SectionDetail({ user, signOut }) {
   const gradeCellRegistryRef = React.useRef(createGradeCellRegistry());
   const curveSettingsLoadedRef = React.useRef(false); // true after first server load
   const gradeOverridesLoadedRef = React.useRef(false); // true after first server load
+  // Grade review drawer state
+  const [gradeDrawerOpen, setGradeDrawerOpen] = React.useState(false);
+  const [gradeDrawerData, setGradeDrawerData] = React.useState({
+    gradeId: null,
+    unitId: null,
+    studentName: "",
+    gradeIds: [],
+    currentIndex: 0,
+  });
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
   const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
-  const [sectionGuilds, setSectionGuilds] = React.useState([]);
+  const [sectionSquads, setSectionSquads] = React.useState([]);
   const [openRooms, setOpenRooms] = React.useState([]);
   // Student sort: "natural" (original order), "first" (first name A-Z), "last" (last name A-Z)
   const [studentSort, setStudentSort] = React.useState("natural");
@@ -451,8 +462,6 @@ function SectionDetail({ user, signOut }) {
 
     setIsDragging(false);
   };
-
-  console.log("section", section);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -723,7 +732,6 @@ function SectionDetail({ user, signOut }) {
       filter: { sectionID: { eq: id } },
     }).subscribe({
       next: ({ items }) => {
-        console.log("_sectionAssignments", items);
         setSectionAssignments(items);
       },
       error: (err) => console.error("Assignments subscription error:", err),
@@ -822,16 +830,16 @@ function SectionDetail({ user, signOut }) {
     return () => subscription.unsubscribe();
   }, [id]);
 
-  // Fetch guilds for this section (by cohortId)
+  // Fetch squads for this section (by cohortId)
   useEffect(() => {
     if (!id) return;
     const client = getAmplifyClient();
-    const subscription = client.models.Guild.observeQuery({
+    const subscription = client.models.Squad.observeQuery({
       filter: { cohortId: { eq: id } },
     }).subscribe({
       next: ({ items }) => {
         const valid = items.filter((item) => item != null && item.id != null);
-        setSectionGuilds(
+        setSectionSquads(
           valid
             .map((g) => ({
               id: g.id,
@@ -845,12 +853,12 @@ function SectionDetail({ user, signOut }) {
       error: (error) => {
         if (error?.message?.includes("exceeds maximum value limit")) {
           console.warn(
-            "[SectionDetail] Guild filter limit — using client filtering",
+            "[SectionDetail] Squad filter limit — using client filtering",
           );
           return;
         }
         if (error?.message?.includes("DuplicatedOperationError")) return;
-        console.error("[SectionDetail] Guild subscription error:", error);
+        console.error("[SectionDetail] Squad subscription error:", error);
       },
     });
     return () => subscription.unsubscribe();
@@ -893,14 +901,6 @@ function SectionDetail({ user, signOut }) {
     });
     return () => subscription.unsubscribe();
   }, [id]);
-
-  console.log("section students", sectionStudents);
-  console.log("section", section);
-  console.log("sectionAssignments", sectionAssignments);
-  console.log("grades", grades);
-  console.log("myGrades", myGrades);
-  console.log("gradeMap", gradeMap);
-  console.log("myGradeMap", myGradeMap);
 
   // Filter assignments based on visibility settings
   const visibleAssignments = React.useMemo(() => {
@@ -1126,14 +1126,23 @@ function SectionDetail({ user, signOut }) {
   const handleGradeCellClick = (student, assignment, currentGrade) => {
     if (!isOwner) return; // Only instructors can override grades
 
-    // If there's a completed grade, navigate to the full review page
+    // If there's a completed grade, open the grade review drawer
     if (currentGrade?.id && currentGrade?.complete) {
-      const params = new URLSearchParams({
+      // Build ordered grade IDs for same assignment across all sorted students
+      const gradeIds = sortedStudents
+        .map((s) => gradeMap[s.id]?.[assignment.unitID]?.highest)
+        .filter((g) => g?.id && g?.complete)
+        .map((g) => g.id);
+      const currentIndex = gradeIds.indexOf(currentGrade.id);
+
+      setGradeDrawerData({
+        gradeId: currentGrade.id,
         unitId: assignment.unitID,
         studentName: formatLastFirst(student),
-        sectionId: id,
+        gradeIds,
+        currentIndex: Math.max(0, currentIndex),
       });
-      router.push(`/instructor/grade/${currentGrade.id}?${params.toString()}`);
+      setGradeDrawerOpen(true);
       return;
     }
 
@@ -1406,7 +1415,7 @@ function SectionDetail({ user, signOut }) {
               >
                 <Typography
                   variant="body1"
-                  // component="h3"
+                  component="div"
                   sx={{
                     flexGrow: 1,
                     textWrap: "wrap",
@@ -1420,10 +1429,10 @@ function SectionDetail({ user, signOut }) {
                     }}
                   />
                   <br />
-                  <Typography>
+                  <span>
                     {t("sectionDetail.noFeaturedImage")}.
                     {t("sectionDetail.dragAndDropPrompt")}
-                  </Typography>
+                  </span>
                 </Typography>
               </Box>
             )}
@@ -1827,7 +1836,31 @@ function SectionDetail({ user, signOut }) {
                           <PrefetchBadge unitId={assignment.unitID} />
                         </Box>
                       </TableCell>
-                      <TableCell align="right">{grade}</TableCell>
+                      <TableCell align="right">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            gap: 0.5,
+                          }}
+                        >
+                          {grade}
+                          {canHaveGrades && (
+                            <Tooltip title="Open Workbook">
+                              <IconButton
+                                size="small"
+                                component="a"
+                                href={`/workbook/${assignment.unitID}`}
+                                onClick={(e) => e.stopPropagation()}
+                                sx={{ p: 0.25 }}
+                              >
+                                <MenuBookIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Box>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -2307,13 +2340,13 @@ function SectionDetail({ user, signOut }) {
         </Box>
       )}
 
-      {/* Guilds — show guilds belonging to this section */}
-      {isOwner && sectionGuilds.length > 0 && (
+      {/* Squads — show squads belonging to this section */}
+      {isOwner && sectionSquads.length > 0 && (
         <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
           <Typography variant="h6" sx={{ mb: 1 }}>
-            {t("sectionDetail.guilds", "Guilds")}
+            {t("sectionDetail.squads", "Squads")}
           </Typography>
-          <GuildLeaderboard guilds={sectionGuilds} />
+          <SquadLeaderboard squads={sectionSquads} />
         </Box>
       )}
 
@@ -2398,8 +2431,7 @@ function SectionDetail({ user, signOut }) {
             const featuredImage = units[assignment.unitID]?.featuredImage;
             const identityId = units[assignment.unitID]?.identityId;
 
-            const workbookUrl = `/workbook/${assignment.unitID}?sectionId=${id}`;
-            const unitUrl = `/unit/${assignment.unitID}`;
+            const workbookUrl = `/workbook/${assignment.unitID}`;
 
             return (
               <React.Fragment key={assignment.id || assignment.unitID}>
@@ -2558,6 +2590,35 @@ function SectionDetail({ user, signOut }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Grade Review Drawer */}
+      <GradeReviewDrawer
+        open={gradeDrawerOpen}
+        onClose={() => setGradeDrawerOpen(false)}
+        gradeId={gradeDrawerData.gradeId}
+        unitId={gradeDrawerData.unitId}
+        studentName={gradeDrawerData.studentName}
+        gradeIds={gradeDrawerData.gradeIds}
+        currentIndex={gradeDrawerData.currentIndex}
+        onNavigate={(index) => {
+          const nextGradeId = gradeDrawerData.gradeIds[index];
+          if (!nextGradeId) return;
+          // Find the student name for the navigated grade
+          const studentForGrade = sortedStudents.find(
+            (s) =>
+              gradeMap[s.id]?.[gradeDrawerData.unitId]?.highest?.id ===
+              nextGradeId,
+          );
+          setGradeDrawerData((prev) => ({
+            ...prev,
+            gradeId: nextGradeId,
+            currentIndex: index,
+            studentName: studentForGrade
+              ? formatLastFirst(studentForGrade)
+              : prev.studentName,
+          }));
+        }}
+      />
     </>
   );
 }

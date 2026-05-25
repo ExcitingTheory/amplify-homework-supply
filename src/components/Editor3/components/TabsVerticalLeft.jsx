@@ -1,6 +1,7 @@
 import * as React from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import FileManager2 from "./FileManager2";
@@ -193,46 +194,70 @@ export default function TabsVerticalLeft({
           },
         }}
       >
-        <Tab
-          onClick={() => handleTabClick(0)}
-          data-tour="assignments-tab"
-          label={<AssignmentIcon />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.assignments"))}
-        />
-        <Tab
-          onClick={() => handleTabClick(1)}
-          data-tour="table-of-contents-tab"
-          label={<TocIcon />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.tableOfContents"))}
-        />
-        <Tab
-          onClick={() => handleTabClick(2)}
-          data-tour="dictionary-tab"
-          label={<DictionaryIcon />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.dictionary"))}
-        />
-        <Tab
-          onClick={() => handleTabClick(3)}
-          data-tour="questions-tab"
-          label={<QuestionMarkOutlined />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.questions"))}
-          overflow="hidden"
-        />
-        <Tab
-          onClick={() => handleTabClick(4)}
-          data-tour="files-tab"
-          label={<FolderIcon />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.files"))}
-        />
+        <Tooltip
+          title={t("tabsVerticalLeft.tabs.assignments")}
+          placement="right"
+        >
+          <Tab
+            onClick={() => handleTabClick(0)}
+            data-tour="assignments-tab"
+            label={<AssignmentIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.assignments"))}
+          />
+        </Tooltip>
+        <Tooltip
+          title={t("tabsVerticalLeft.tabs.tableOfContents")}
+          placement="right"
+        >
+          <Tab
+            onClick={() => handleTabClick(1)}
+            data-tour="table-of-contents-tab"
+            label={<TocIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.tableOfContents"))}
+          />
+        </Tooltip>
+        <Tooltip
+          title={t("tabsVerticalLeft.tabs.dictionary")}
+          placement="right"
+        >
+          <Tab
+            onClick={() => handleTabClick(2)}
+            data-tour="dictionary-tab"
+            label={<DictionaryIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.dictionary"))}
+          />
+        </Tooltip>
+        <Tooltip title={t("tabsVerticalLeft.tabs.questions")} placement="right">
+          <Tab
+            onClick={() => handleTabClick(3)}
+            data-tour="questions-tab"
+            label={<QuestionMarkOutlined />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.questions"))}
+            overflow="hidden"
+          />
+        </Tooltip>
+        <Tooltip title={t("tabsVerticalLeft.tabs.files")} placement="right">
+          <Tab
+            onClick={() => handleTabClick(4)}
+            data-tour="files-tab"
+            label={<FolderIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.files"))}
+          />
+        </Tooltip>
         {/* <Tab
           onClick={() => handleTabClick(5)}
           label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
-        <Tab
-          onClick={() => handleTabClick(6)}
-          data-tour="configuration-tab"
-          label={<ConfigIcon />}
-          {...a11yProps(t("tabsVerticalLeft.tabs.configuration"))}
-        />
+        <Tooltip
+          title={t("tabsVerticalLeft.tabs.configuration")}
+          placement="right"
+        >
+          <Tab
+            onClick={() => handleTabClick(6)}
+            data-tour="configuration-tab"
+            label={<ConfigIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.configuration"))}
+          />
+        </Tooltip>
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}

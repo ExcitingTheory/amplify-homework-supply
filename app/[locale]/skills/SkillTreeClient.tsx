@@ -148,7 +148,7 @@ export function SkillTreeClient({
             <Typography variant="h6" color="text.secondary">
               {t(
                 "skillTree.empty",
-                "No skills available yet. Your instructor will set up the learning pathway.",
+                "No skills available yet. Your instructor will set up the skill tree.",
               )}
             </Typography>
           </Box>

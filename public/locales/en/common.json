@@ -65,7 +65,7 @@
     "drafts": "Drafts",
     "gamification": "Gamification",
     "grades": "Grades",
-    "guilds": "Guilds",
+    "squads": "Squads",
     "home": "Home",
     "joinPeerReview": "Join Peer Review",
     "joinPeerReviewDesc": "Enter a review room code",
@@ -110,5 +110,9 @@
     "seconds": "Seconds",
     "increase": "Increase selected time segment",
     "decrease": "Decrease selected time segment"
+  },
+  "peerReview": {
+    "helpful": "Peer review was helpful",
+    "notHelpful": "Peer review was not helpful"
   }
 }

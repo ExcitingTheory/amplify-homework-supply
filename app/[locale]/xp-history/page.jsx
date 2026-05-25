@@ -31,7 +31,7 @@ const XP_REASON_LABELS = {
   COMEBACK: "Comeback",
   PERSONAL_BEST: "Personal Best",
   EASTER_EGG: "Easter Egg Found",
-  GUILD_CHALLENGE_BONUS: "Guild Challenge Bonus",
+  SQUAD_CHALLENGE_BONUS: "Squad Challenge Bonus",
   PRACTICE_DRILL_COMPLETED: "Practice Drill",
   PRACTICE_DRILL_ACCURACY_BONUS: "Drill Accuracy Bonus",
 };

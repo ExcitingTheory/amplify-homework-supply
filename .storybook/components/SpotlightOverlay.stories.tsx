@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Button, Box, Typography, Card, CardContent, Stack } from '@mui/material';
 import SpotlightOverlay, { SpotlightStep } from './SpotlightOverlay';
 

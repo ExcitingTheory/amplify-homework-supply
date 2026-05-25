@@ -54,7 +54,7 @@ Schema definition: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
 | **StudentMemory** | Per-student AI memory (global markdown + per-unit concept tracking with weak/strong concepts, confusion pairs, accuracy) |
 | **EasterEgg** | Hidden discoverable content with trigger conditions |
 | **Skill** | Skill tree nodes with prerequisites and mastery levels |
-| **Guild** | Student guilds with members, posts, crest customization |
+| **Squad** | Student squads with members, posts, crest customization |
 | **GroupChallenge** | Collaborative challenges with XP targets and contributions |
 | **PracticeSession** | AI-generated drill sessions with coverage tracking |
 
@@ -154,7 +154,7 @@ Use `getCachedUrl(filePath)` utility for cached S3 URL resolution.
 | **suggestBlocksStream** | AI block suggestions (quiz, vocabulary, etc.) |
 | **assistant** | AI assistant operations |
 | **ai** | General AI utilities |
-| **gamification** | XP awards, badge checks, streak tracking, skill tree generation, student memory, guild challenges, campaign management |
+| **gamification** | XP awards, badge checks, streak tracking, skill tree generation, student memory, squad challenges, campaign management |
 | **generatePracticeDrill** | AI-generated practice exercises from unit content |
 | **documentAnalysis** | PDF/DOCX/XLSX/PPTX/EPUB text extraction and vocabulary analysis |
 | **embeddings** | Vector embedding generation (text-embedding-3-small) |
@@ -193,9 +193,9 @@ Key mutations handled by the gamification Lambda:
 | `/settings` | User preferences, avatar customization, bot customizer |
 | `/profile` | Student profile (XP, badges, streaks, progress rings, nailed it wall) |
 | `/profile/[username]` | Public profile view |
-| `/leaderboard` | XP leaderboard with guild rankings |
-| `/guilds` | Guild browser and creation |
-| `/guild/[id]` | Guild detail with posts, members, challenges |
+| `/leaderboard` | XP leaderboard with squad rankings |
+| `/squads` | Squad browser and creation |
+| `/squad/[id]` | Squad detail with posts, members, challenges |
 | `/skills` | Skill tree visualization |
 | `/review/[id]` | Peer review room |
 | `/instructor/gamification` | Instructor gamification management panel |
@@ -211,7 +211,7 @@ Rich text editor with custom graded block types: `quiz`, `meaning-association`, 
 CRDT-based collaboration via WebSocket with providers for workbooks (`WorkbookCollaborationProvider`), peer review rooms (`PeerReviewRoomProvider`), and practice drills (`PracticeCollaborationProvider`). Presence indicators, tutor cursors, block history timeline, and comments.
 
 ### Gamification System
-XP ledger, level progression, engagement streaks with shields, badge shelf, progress rings, personal bests, nailed-it celebrations, content locking/unlocking, skill trees, group challenges (boss battles), guilds with posts and crests, campaigns with narrative briefings, easter eggs, and animated toast notifications.
+XP ledger, level progression, engagement streaks with shields, badge shelf, progress rings, personal bests, nailed-it celebrations, content locking/unlocking, skill trees, group challenges (boss battles), squads with posts and crests, campaigns with narrative briefings, easter eggs, and animated toast notifications.
 
 ### AI Integration
 - **Chat**: Streaming chat with tool calls (Vercel AI SDK + `useChat` hook)
@@ -249,7 +249,7 @@ CSS variables theme via MUI v7 `colorSchemes`. Toggle in MainToolbar persisted t
 | `fileContext` | File management and S3 operations |
 | `chatContext` | AI chat conversations |
 | `settingsContext` | User preferences and theme |
-| `gamificationContext` | XP, badges, challenges, guilds, profiles |
+| `gamificationContext` | XP, badges, challenges, squads, profiles |
 | `xpContext` | XP tracking and toast notifications |
 | `campaignContext` | Campaign/narrative progression |
 | `skillTreeContext` | Skill tree data and progress |

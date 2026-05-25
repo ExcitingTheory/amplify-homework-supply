@@ -26,7 +26,7 @@ import AuthContext from "./authContext";
 // ============================================================================
 
 /**
- * @typedef {'ASSIGNMENT' | 'COLLABORATION' | 'GAMIFICATION' | 'GUILD' | 'CHAT' | 'SYSTEM'} NotificationCategory
+ * @typedef {'ASSIGNMENT' | 'COLLABORATION' | 'GAMIFICATION' | 'SQUAD' | 'CHAT' | 'SYSTEM'} NotificationCategory
  */
 
 /**

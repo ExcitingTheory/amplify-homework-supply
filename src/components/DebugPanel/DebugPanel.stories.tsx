@@ -2,7 +2,7 @@
  * DebugPanel Storybook Stories
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { DebugPanel } from './DebugPanel';
 import { useDebugPanel } from './useDebugPanel';
 import { Button, Box } from '@mui/material';

@@ -32,7 +32,7 @@ const dataStores = {
   // Gamification models
   StudentProfile: new Map(),
   GroupChallenge: new Map(),
-  Guild: new Map(),
+  Squad: new Map(),
   Skill: new Map(),
   EasterEgg: new Map(),
   StudentUnitMemory: new Map(),
@@ -69,7 +69,7 @@ const activeSubscriptions = {
   // Gamification models
   StudentProfile: [],
   GroupChallenge: [],
-  Guild: [],
+  Squad: [],
   Skill: [],
   EasterEgg: [],
   StudentUnitMemory: [],
@@ -606,7 +606,7 @@ const mockClient = {
     // Gamification models
     StudentProfile: createMockModel('StudentProfile'),
     GroupChallenge: createMockModel('GroupChallenge'),
-    Guild: createMockModel('Guild'),
+    Squad: createMockModel('Squad'),
     Skill: createMockModel('Skill'),
     EasterEgg: createMockModel('EasterEgg'),
     StudentUnitMemory: createMockModel('StudentUnitMemory'),

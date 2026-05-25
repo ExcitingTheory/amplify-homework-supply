@@ -46,11 +46,8 @@ export default function YjsCollaborationPlugin({
 }: YjsCollaborationPluginProps) {
   // Offline mode - no collaboration
   if (!provider) {
-    console.log('[YjsCollaborationPlugin] No provider - offline mode');
     return null;
   }
-
-  console.log('[YjsCollaborationPlugin] Initializing collaboration for', username);
 
   // Create a provider factory for CollaborationPlugin
   const providerFactory = React.useCallback(

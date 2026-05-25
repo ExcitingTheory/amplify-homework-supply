@@ -13,18 +13,18 @@ interface Props {
   params: Promise<{ username: string }>;
 }
 
-export default async function ProfilePage({ params }: Props) {
-  const { username: routeUsername } = await params;
-  const t = await getTranslations("pages");
+/**
+ * Profile data fetch. Uses auth cookies so cannot be cached with "use cache".
+ * Revalidation handled by Next.js route-level caching and revalidateTag.
+ */
+async function getCachedProfileData(routeUsername: string) {
 
-  let profileData: any = null;
   let earnedBadges: any[] = [];
   let activeDays: string[] = [];
   let progressModules: any[] = [];
   let currentStreak = 0;
   let freezesRemaining = 0;
   let freezesUsed = 0;
-  let isOwnProfile = false;
   let displayName = routeUsername;
 
   try {
@@ -37,7 +37,6 @@ export default async function ProfilePage({ params }: Props) {
 
     const profile = (profiles || []).filter((p: any) => p != null)?.[0];
     if (profile) {
-      profileData = profile;
       displayName = profile.studentName || routeUsername;
       currentStreak = profile.currentStreak || 0;
       freezesRemaining = profile.freezesRemaining || 0;
@@ -54,7 +53,7 @@ export default async function ProfilePage({ params }: Props) {
       // Progress modules
       progressModules = (profile.moduleProgress || []).map((p: any) => ({
         moduleId: p.moduleId,
-        moduleName: p.moduleId, // placeholder — resolved below
+        moduleName: p.moduleId,
         completionPercent: p.completionPercent || 0,
         totalWorkbooks: p.totalWorkbooks || 0,
         completedWorkbooks: p.completedWorkbooks || 0,
@@ -101,6 +100,25 @@ export default async function ProfilePage({ params }: Props) {
   } catch (err) {
     console.error("[Profile RSC] Data fetch error:", err);
   }
+
+  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName };
+}
+
+export default async function ProfilePage({ params }: Props) {
+  const { username: routeUsername } = await params;
+  const t = await getTranslations("pages");
+
+  const {
+    earnedBadges,
+    activeDays,
+    progressModules,
+    currentStreak,
+    freezesRemaining,
+    freezesUsed,
+    displayName,
+  } = await getCachedProfileData(routeUsername);
+
+  const isOwnProfile = false;
 
   return (
     <MyAuth>

@@ -2,7 +2,7 @@
  * Storybook stories for ComponentTreeView component
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ComponentTreeView } from './ComponentTreeView';
 import { ComponentMetadata } from '../../utils/debug/ComponentTreeStore';
 

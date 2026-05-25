@@ -15,6 +15,7 @@ import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
+import { CfnApp } from "aws-cdk-lib/aws-pinpoint";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
@@ -913,3 +914,21 @@ const notificationCronAppSyncPolicy = new Policy(
 backend.notificationCronHandler.resources.lambda.role?.attachInlinePolicy(
   notificationCronAppSyncPolicy,
 );
+
+// ==========================================================================
+// Pinpoint Analytics — page views, engagement, custom events
+// ==========================================================================
+
+const analyticsStack = backend.createStack("analytics");
+const pinpointApp = new CfnApp(analyticsStack, "PinpointApp", {
+  name: "homework-supply-analytics",
+});
+
+backend.addOutput({
+  custom: {
+    Pinpoint: {
+      appId: pinpointApp.ref,
+      region: analyticsStack.region,
+    },
+  },
+});

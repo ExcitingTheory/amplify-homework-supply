@@ -1,0 +1,112 @@
+{
+  "sectionGamificationConfig": {
+    "easterEggsEnabled": true,
+    "groupChallengesEnabled": true,
+    "squadsEnabled": true,
+    "skillTreesEnabled": true,
+    "streaksEnabled": true,
+    "collaborativePracticeEnabled": true,
+    "streakFreezesAllowed": 3,
+    "badgeConfigs": [
+      { "badgeType": "PERFECT_SCORE", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "STREAK_7", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "STREAK_30", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "FIRST_SUBMISSION", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "SPEED_DEMON", "enabled": true, "thresholdOverride": 60 },
+      { "badgeType": "NIGHT_OWL", "enabled": false, "thresholdOverride": null },
+      { "badgeType": "EARLY_BIRD", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "COMPLETIONIST", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "HELPING_HAND", "enabled": true, "thresholdOverride": null },
+      { "badgeType": "COMEBACK_KID", "enabled": false, "thresholdOverride": null }
+    ],
+    "customBadges": [
+      {
+        "id": "custom-sakura-master",
+        "title": "Sakura Master",
+        "description": "Achieved excellence in Japanese culture lessons",
+        "icon": "🌸",
+        "shape": "hexagon",
+        "rarity": "rare",
+        "category": "Cultural",
+        "isAnti": false
+      },
+      {
+        "id": "custom-dragon-slayer",
+        "title": "Dragon Slayer",
+        "description": "Defeated the Algorithm Dragon boss battle",
+        "icon": "🐉",
+        "shape": "shield",
+        "rarity": "legendary",
+        "category": "Campaign",
+        "isAnti": false
+      }
+    ]
+  },
+  "easterEggs": [
+    {
+      "id": "ee-1",
+      "triggerType": "KEYWORD",
+      "triggerValue": "konami",
+      "xpReward": 100,
+      "revealMessage": "You found the secret code! 🎮",
+      "active": true
+    },
+    {
+      "id": "ee-2",
+      "triggerType": "ACHIEVEMENT",
+      "triggerValue": "accuracy>=95",
+      "xpReward": 200,
+      "badgeId": "b-perfectionist",
+      "revealMessage": "Amazing accuracy! You're a perfectionist!",
+      "active": true
+    }
+  ],
+  "groupChallenges": [
+    {
+      "id": "gc-1",
+      "title": "The Algorithm Dragon",
+      "targetXP": 2000,
+      "currentXP": 1350,
+      "deadline": "2026-06-01T23:59:00Z",
+      "startDate": "2026-05-01T00:00:00Z",
+      "bonusMultiplier": 2.0,
+      "setting": "In a world where bugs roam free, a brave team must band together to defeat the Algorithm Dragon.",
+      "stakes": "If the dragon wins, everyone loses a streak freeze!",
+      "systemPromptSeed": "You are a narrator for an epic coding quest.",
+      "active": true
+    },
+    {
+      "id": "gc-2",
+      "title": "Sprint to Victory",
+      "targetXP": 1000,
+      "currentXP": 1200,
+      "bonusMultiplier": 1.5,
+      "active": false
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk-1",
+      "title": "Async Programming Mastery",
+      "description": "Master all asynchronous programming concepts",
+      "unitIds": ["u3", "u4"],
+      "minimumAccuracy": 80,
+      "xpReward": 200,
+      "prerequisites": ["sk-0"]
+    },
+    {
+      "id": "sk-2",
+      "title": "Data Structures Expert",
+      "unitIds": ["u5", "u6"],
+      "minimumAccuracy": 70,
+      "xpReward": 150,
+      "prerequisites": []
+    }
+  ],
+  "campaignChapters": [
+    { "id": "ch1", "title": "The Gathering", "order": 1, "completed": true, "xpRequired": 200 },
+    { "id": "ch2", "title": "Into the Bug Forest", "order": 2, "completed": true, "xpRequired": 500 },
+    { "id": "ch3", "title": "The Dragon's Lair", "order": 3, "completed": false, "xpRequired": 1000 },
+    { "id": "ch4", "title": "Final Battle", "order": 4, "completed": false, "xpRequired": 2000 }
+  ]
+}

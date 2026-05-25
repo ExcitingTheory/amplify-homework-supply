@@ -92,7 +92,7 @@ const BASE_XP: Record<XPReason, number> = {
   [XPReason.COMEBACK]: 50,
   [XPReason.PERSONAL_BEST]: 25,
   [XPReason.EASTER_EGG]: 30,
-  [XPReason.GUILD_CHALLENGE_BONUS]: 100,
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 100,
   [XPReason.PRACTICE_DRILL_COMPLETED]: 30,
   [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: 15,
 }
@@ -114,7 +114,7 @@ const REASON_LABELS: Record<XPReason, string> = {
   [XPReason.COMEBACK]: 'Comeback',
   [XPReason.PERSONAL_BEST]: 'Personal Best',
   [XPReason.EASTER_EGG]: 'Easter Egg',
-  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild Challenge Bonus',
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad Challenge Bonus',
   [XPReason.PRACTICE_DRILL_COMPLETED]: 'Practice Drill Completed',
   [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: 'Practice Drill Accuracy Bonus',
 }
@@ -158,7 +158,7 @@ const CATEGORIES: CategoryGroup[] = [
     reasons: [
       XPReason.PEER_REVIEW_GIVEN,
       XPReason.PEER_REVIEW_HOSTED,
-      XPReason.GUILD_CHALLENGE_BONUS,
+      XPReason.SQUAD_CHALLENGE_BONUS,
       XPReason.EASTER_EGG,
     ],
   },

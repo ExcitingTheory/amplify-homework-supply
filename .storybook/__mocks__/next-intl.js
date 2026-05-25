@@ -1,23 +1,56 @@
 /**
- * @fileoverview Mock for next-intl that loads real English translations.
- * Uses Vite's import.meta.glob to eagerly load all en/*.json locale files
+ * @fileoverview Mock for next-intl that loads real translations for all locales.
+ * Uses Vite's import.meta.glob to eagerly load all locale JSON files
  * so that useTranslations(namespace) returns actual translated strings.
+ * Supports dynamic locale switching via the Storybook toolbar.
  */
 
-// Eagerly load all English locale JSON files at build time
-const localeModules = import.meta.glob('../../public/locales/en/*.json', { eager: true });
+import { useSyncExternalStore } from 'react';
 
-// Build a lookup: namespace → flat translations object
-// e.g. "pages" → { "index.title": "Homework Supply", ... }
-const translations = {};
-for (const [filePath, mod] of Object.entries(localeModules)) {
-  // Extract namespace from path: "../../public/locales/en/pages.json" → "pages"
-  const match = filePath.match(/\/([^/]+)\.json$/);
+// Eagerly load ALL locale JSON files at build time
+const allLocaleModules = import.meta.glob('../../public/locales/**/*.json', { eager: true });
+
+// Build a lookup: locale → namespace → translations object
+// e.g. { "en": { "pages": { "index.title": "Homework Supply" } }, "es": { ... } }
+const allTranslations = {};
+for (const [filePath, mod] of Object.entries(allLocaleModules)) {
+  // Extract locale and namespace from path: "../../public/locales/es/pages.json" → ["es", "pages"]
+  const match = filePath.match(/\/locales\/([^/]+)\/([^/]+)\.json$/);
   if (!match) continue;
-  const ns = match[1];
+  const [, locale, ns] = match;
   // Skip .meta.json and .missing.json files
   if (ns.endsWith('.meta') || ns.endsWith('.missing')) continue;
-  translations[ns] = mod.default || mod;
+  if (!allTranslations[locale]) allTranslations[locale] = {};
+  allTranslations[locale][ns] = mod.default || mod;
+}
+
+// --- Reactive locale store ---
+let currentLocale = 'en';
+const listeners = new Set();
+
+function subscribe(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+  return currentLocale;
+}
+
+/** Change the active locale. Call from Storybook decorators to switch language. */
+export function setLocale(locale) {
+  if (locale === currentLocale) return;
+  if (!allTranslations[locale]) {
+    console.warn(`[next-intl mock] Locale "${locale}" not found. Available: ${Object.keys(allTranslations).join(', ')}`);
+    return;
+  }
+  currentLocale = locale;
+  listeners.forEach(fn => fn());
+}
+
+// Helper to get translations for the current locale (with English fallback)
+function getTranslations() {
+  return allTranslations[currentLocale] || allTranslations['en'] || {};
 }
 
 /**
@@ -45,8 +78,15 @@ function interpolate(str, params) {
 }
 
 export const useTranslations = (namespace) => {
+  // Subscribe to locale changes so components re-render when language switches
+  const locale = useSyncExternalStore(subscribe, getSnapshot);
+
   // Support array of namespaces: useTranslations(["common", "components", "editor.authoring"])
   const namespaces = Array.isArray(namespace) ? namespace : [namespace];
+
+  // Get translations for current locale, with English as fallback
+  const localeData = allTranslations[locale] || {};
+  const fallbackData = allTranslations['en'] || {};
 
   const t = (key, paramsOrDefault) => {
     let targetNs = namespaces[0]; // default to first namespace
@@ -78,8 +118,13 @@ export const useTranslations = (namespace) => {
       resolveKey = resolveKey.slice(colonIdx + 1);
     }
 
-    const nsData = translations[targetNs] || {};
-    const value = resolve(nsData, resolveKey);
+    // Try current locale first, then fall back to English
+    const nsData = localeData[targetNs] || {};
+    let value = resolve(nsData, resolveKey);
+    if (value === undefined) {
+      const fallbackNsData = fallbackData[targetNs] || {};
+      value = resolve(fallbackNsData, resolveKey);
+    }
 
     if (value === undefined) {
       // Use default value if provided
@@ -102,20 +147,37 @@ export const useTranslations = (namespace) => {
       targetNs = resolveKey.slice(0, colonIdx);
       resolveKey = resolveKey.slice(colonIdx + 1);
     }
-    return resolve(translations[targetNs] || {}, resolveKey);
+    const nsData = localeData[targetNs] || {};
+    let value = resolve(nsData, resolveKey);
+    if (value === undefined) {
+      const fallbackNsData = fallbackData[targetNs] || {};
+      value = resolve(fallbackNsData, resolveKey);
+    }
+    return value;
   };
   return t;
 };
 
-export const useLocale = () => 'en';
+export const useLocale = () => {
+  return useSyncExternalStore(subscribe, getSnapshot);
+};
 
 export const useMessages = () => {
-  // Return all loaded translations merged
+  const locale = useSyncExternalStore(subscribe, getSnapshot);
+  const localeData = allTranslations[locale] || allTranslations['en'] || {};
+  // Return all loaded translations for current locale
   const all = {};
-  for (const [ns, data] of Object.entries(translations)) {
+  for (const [ns, data] of Object.entries(localeData)) {
     all[ns] = data;
   }
   return all;
 };
 
-export const NextIntlClientProvider = ({ children }) => children;
+export const NextIntlClientProvider = ({ children, locale, messages }) => {
+  // If a locale is passed as prop, update the store
+  if (locale && locale !== currentLocale && allTranslations[locale]) {
+    // Use queueMicrotask to avoid updating during render
+    queueMicrotask(() => setLocale(locale));
+  }
+  return children;
+};

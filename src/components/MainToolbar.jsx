@@ -437,7 +437,7 @@ export default function MainToolbar({ children }) {
   // Fetch nav data lazily: when drawer opens or on detail pages
   React.useEffect(() => {
     const shouldFetch = isDrawerOpen || currentSectionId || currentUnitId;
-    if (!shouldFetch || navDataLoaded) return;
+    if (!shouldFetch || navDataLoaded || !authSession) return;
 
     const client = getAmplifyClient();
 
@@ -480,7 +480,13 @@ export default function MainToolbar({ children }) {
     }
 
     fetchNavData();
-  }, [isDrawerOpen, currentSectionId, currentUnitId, navDataLoaded]);
+  }, [
+    isDrawerOpen,
+    currentSectionId,
+    currentUnitId,
+    navDataLoaded,
+    authSession,
+  ]);
 
   // Section detail headings for scroll navigation
   const sectionHeadings = React.useMemo(
@@ -553,7 +559,7 @@ export default function MainToolbar({ children }) {
     console.log("event", event);
 
     const form = new FormData(event.target);
-    let response;
+    let joinedSectionId = null;
 
     console.log("form", form);
 
@@ -570,6 +576,7 @@ export default function MainToolbar({ children }) {
       if (!response.success) {
         throw new Error(response.error || "Server Action returned failure");
       }
+      joinedSectionId = response.sectionId;
     } catch (errors) {
       console.error(errors);
       //   throw new Error(errors[0].message)
@@ -594,8 +601,10 @@ export default function MainToolbar({ children }) {
     setOpenAddStudentToSection(false);
     setIsWorking(false);
 
-    // If the path is sections then reload the page
-    if (
+    // Navigate directly to the joined section if we have its ID
+    if (joinedSectionId) {
+      router.push(`/section/${joinedSectionId}`);
+    } else if (
       currentPathname === "/sections" ||
       currentPathname.includes("/section/") ||
       currentPathname === "/"
@@ -918,13 +927,13 @@ export default function MainToolbar({ children }) {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton component="a" href="/guilds">
+          <ListItemButton component="a" href="/squads">
             <ListItemIcon sx={{ color: "text.primary" }}>
-              <NotificationBadge category="GUILD">
+              <NotificationBadge category="SQUAD">
                 <GroupsIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.guilds")} />
+            <ListItemText primary={tCommon("navigation.squads")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>

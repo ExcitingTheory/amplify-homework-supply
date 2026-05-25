@@ -271,27 +271,51 @@ const wordsResponse = await Promise.all([
     phrase: "こんにちは",
     pronunciation: "konnichiwa",
     definition: "Hello (daytime greeting)",
+    audio: [
+      `protected/${instructor1IdentityId}/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
+    ],
+    definitionAudio: [
+      `protected/${instructor1IdentityId}/files/sound-design-elements-sfx-ps-022-302865.mp3`,
+    ],
   }),
   client.models.Word.create({
     phrase: "ありがとう",
     pronunciation: "arigatou",
     definition: "Thank you",
+    audio: [
+      `protected/${instructor1IdentityId}/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3`,
+    ],
+    definitionAudio: [
+      `protected/${instructor1IdentityId}/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
+    ],
   }),
   client.models.Word.create({
     phrase: "さようなら",
     pronunciation: "sayounara",
     definition: "Goodbye",
+    audio: [
+      `protected/${instructor1IdentityId}/files/sound-design-elements-sfx-ps-022-302865.mp3`,
+    ],
   }),
   client.models.Word.create({
     phrase: "photosynthesis",
     pronunciation: "foh-toh-SIN-thuh-sis",
     definition:
       "The process by which plants use sunlight to convert carbon dioxide and water into glucose and oxygen",
+    audio: [
+      `protected/${instructor1IdentityId}/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
+    ],
+    definitionAudio: [
+      `protected/${instructor1IdentityId}/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3`,
+    ],
   }),
   client.models.Word.create({
     phrase: "chloroplast",
     pronunciation: "KLOR-uh-plast",
     definition: "Organelle in plant cells where photosynthesis occurs",
+    audio: [
+      `protected/${instructor1IdentityId}/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3`,
+    ],
   }),
 ]);
 
@@ -315,12 +339,23 @@ const questionsResponse = await Promise.all([
       { choice: "さようなら", correct: false },
     ]),
     difficulty: "beginner",
+    audio: [
+      `protected/${instructor1IdentityId}/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
+    ],
+    answerAudio: [
+      `protected/${instructor1IdentityId}/files/sound-design-elements-sfx-ps-022-302865.mp3`,
+    ],
+    thumbnail: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
   }),
   client.models.Question.create({
     prompt: "What is the main product of photosynthesis?",
     answer: "Glucose (sugar) and oxygen",
     hint: "Plants produce this sugar for energy",
     difficulty: "intermediate",
+    audio: [
+      `protected/${instructor1IdentityId}/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3`,
+    ],
+    thumbnail: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
   }),
   client.models.Question.create({
     prompt: "In which organelle does photosynthesis occur?",
@@ -333,6 +368,10 @@ const questionsResponse = await Promise.all([
       { choice: "Ribosome", correct: false },
     ]),
     difficulty: "intermediate",
+    answerAudio: [
+      `protected/${instructor1IdentityId}/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
+    ],
+    thumbnail: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
   }),
 ]);
 
@@ -360,7 +399,17 @@ const japaneseUnitContent = {
         direction: null,
         format: "",
         indent: 0,
-        children: [{ type: "text", text: "Japanese Greetings - Unit 1", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
+        children: [
+          {
+            type: "text",
+            text: "Japanese Greetings - Unit 1",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
+          },
+        ],
       },
       {
         type: "paragraph",
@@ -407,7 +456,17 @@ const biologyUnitContent = {
         direction: null,
         format: "",
         indent: 0,
-        children: [{ type: "text", text: "Photosynthesis - Biology Unit", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
+        children: [
+          {
+            type: "text",
+            text: "Photosynthesis - Biology Unit",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
+          },
+        ],
       },
       {
         type: "paragraph",
@@ -454,7 +513,17 @@ const biologyAIExerciseContent = {
         direction: null,
         format: "",
         indent: 0,
-        children: [{ type: "text", text: "AI-Graded Biology Exercise", format: 0, detail: 0, mode: "normal", style: "", version: 1 }],
+        children: [
+          {
+            type: "text",
+            text: "AI-Graded Biology Exercise",
+            format: 0,
+            detail: 0,
+            mode: "normal",
+            style: "",
+            version: 1,
+          },
+        ],
       },
       {
         type: "paragraph",
@@ -496,6 +565,8 @@ const unitsResponse = await Promise.all([
     publishedContentVersion: 1,
     identityId: instructor1IdentityId,
     status: "PUBLISHED",
+    featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+    thumbnail: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
   }),
   client.models.Unit.create({
     name: "Photosynthesis",
@@ -505,12 +576,15 @@ const unitsResponse = await Promise.all([
     publishedContentVersion: 1,
     identityId: instructor1IdentityId,
     status: "PUBLISHED",
+    featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+    thumbnail: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
   }),
   client.models.Unit.create({
     name: "Advanced Japanese Verbs",
     description: "DRAFT - Conjugation patterns for common Japanese verbs",
     identityId: instructor1IdentityId,
     status: "DRAFT",
+    featuredImage: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
   }),
   client.models.Unit.create({
     name: "AI Biology Exercise",
@@ -520,6 +594,8 @@ const unitsResponse = await Promise.all([
     publishedContentVersion: 1,
     identityId: instructor1IdentityId,
     status: "PUBLISHED",
+    featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+    thumbnail: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
   }),
 ]);
 
@@ -637,16 +713,67 @@ const sectionsResponse = await Promise.all([
     description: "Beginner Japanese for 9th grade",
     status: "PUBLISHED",
     code: "JPN101-P1",
+    featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+    thumbnail: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
     readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
     writableGroups: ["section-jpn101-instructors"],
+    gamificationConfig: {
+      easterEggsEnabled: true,
+      groupChallengesEnabled: true,
+      squadsEnabled: true,
+      skillTreesEnabled: true,
+      streaksEnabled: true,
+      collaborativePracticeEnabled: true,
+      streakFreezesAllowed: 3,
+      badgeConfigs: [
+        { badgeType: "PERFECT_SCORE", enabled: true, thresholdOverride: null },
+        { badgeType: "STREAK_7", enabled: true, thresholdOverride: null },
+        { badgeType: "STREAK_30", enabled: true, thresholdOverride: null },
+        {
+          badgeType: "FIRST_SUBMISSION",
+          enabled: true,
+          thresholdOverride: null,
+        },
+        { badgeType: "SPEED_DEMON", enabled: true, thresholdOverride: 60 },
+      ],
+      customBadges: [
+        {
+          id: "custom-sakura-master",
+          title: "Sakura Master",
+          description: "Achieved excellence in Japanese culture lessons",
+          icon: "🌸",
+          shape: "hexagon",
+          rarity: "rare",
+          category: "Cultural",
+          isAnti: false,
+        },
+      ],
+    },
   }),
   client.models.Section.create({
     name: "Biology 101 - Period 3",
     description: "Introduction to Biology",
     status: "PUBLISHED",
     code: "BIO101-P3",
+    featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+    thumbnail: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
     readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
     writableGroups: ["section-bio101-instructors"],
+    gamificationConfig: {
+      easterEggsEnabled: true,
+      groupChallengesEnabled: false,
+      squadsEnabled: true,
+      skillTreesEnabled: true,
+      streaksEnabled: true,
+      collaborativePracticeEnabled: false,
+      streakFreezesAllowed: 2,
+      badgeConfigs: [
+        { badgeType: "PERFECT_SCORE", enabled: true, thresholdOverride: null },
+        { badgeType: "STREAK_7", enabled: true, thresholdOverride: null },
+        { badgeType: "COMPLETIONIST", enabled: true, thresholdOverride: null },
+      ],
+      customBadges: [],
+    },
   }),
 ]);
 
@@ -811,7 +938,7 @@ console.log(
 
 // Path to the mocks directory containing sample files
 const seedDir = dirname(fileURLToPath(import.meta.url));
-const mocksDir = resolve(seedDir, "../../mocks");
+const mocksDir = resolve(seedDir, "../../test/mocks");
 
 /**
  * Helper: Create a File record and upload the actual file to S3.
@@ -835,47 +962,53 @@ async function seedFileWithUpload(opts: {
   } = opts;
   const s3Path = `protected/${instructor1IdentityId}/files/${name}`;
 
-  // Create File record FIRST (so Lambda can find it when EventBridge triggers)
-  const { data: fileRecord, errors } = await client.models.File.create({
-    name,
-    description,
-    mimeType,
-    level,
-    path: s3Path,
-    size: 0, // Will be updated after upload
-    duration,
-    owner: instructor1OwnerSub,
-    identityId: instructor1IdentityId,
-  });
-
-  if (errors || !fileRecord) {
-    console.error(`  ✗ Failed to create File record for ${name}:`, errors);
-    return null;
-  }
-
-  // Upload actual file to S3 (triggers EventBridge → processing Lambdas)
   try {
-    const fileBuffer = await readFile(resolve(mocksDir, localPath));
-    await uploadData({
+    // Create File record FIRST (so Lambda can find it when EventBridge triggers)
+    const { data: fileRecord, errors } = await client.models.File.create({
+      name,
+      description,
+      mimeType,
+      level,
       path: s3Path,
-      data: fileBuffer,
-      options: { contentType: mimeType },
-    }).result;
-
-    // Update size now that we know it
-    await client.models.File.update({
-      id: fileRecord.id,
-      size: fileBuffer.length,
+      size: 0, // Will be updated after upload
+      duration,
+      owner: instructor1OwnerSub,
+      identityId: instructor1IdentityId,
     });
 
-    console.log(`  ✓ ${name} (${mimeType}) → ${s3Path}`);
-  } catch (uploadErr: any) {
-    console.warn(
-      `  ⚠ Upload failed for ${name}: ${uploadErr.message} (File record created without S3 file)`,
-    );
-  }
+    if (errors || !fileRecord) {
+      console.error(`  ✗ Failed to create File record for ${name}:`, errors);
+      return null;
+    }
 
-  return fileRecord;
+    // Upload actual file to S3 (triggers EventBridge → processing Lambdas)
+    try {
+      const fileBuffer = await readFile(resolve(mocksDir, localPath));
+      await uploadData({
+        path: s3Path,
+        data: fileBuffer,
+        options: { contentType: mimeType },
+      }).result;
+
+      // Update size now that we know it (pass _version for versioned data source)
+      await client.models.File.update({
+        id: fileRecord.id,
+        size: fileBuffer.length,
+        _version: (fileRecord as any)._version ?? 1,
+      });
+
+      console.log(`  ✓ ${name} (${mimeType}) → ${s3Path}`);
+    } catch (uploadErr: any) {
+      console.warn(
+        `  ⚠ Upload failed for ${name}: ${uploadErr.message} (File record created without S3 file)`,
+      );
+    }
+
+    return fileRecord;
+  } catch (err: any) {
+    console.warn(`  ⚠ seedFileWithUpload failed for ${name}: ${err.message}`);
+    return null;
+  }
 }
 
 // Upload one of every supported document type
@@ -1025,6 +1158,37 @@ const seedFiles = await Promise.all([
     mimeType: "application/zip",
     description:
       "SCORM 1.2 package - Biology photosynthesis interactive lesson",
+  }),
+
+  // === Audio files (used by Word.audio, Question.audio, etc.) ===
+  seedFileWithUpload({
+    name: "cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+    localPath:
+      "cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+    mimeType: "audio/mpeg",
+    description: "Audio sample for vocabulary pronunciation",
+    duration: 3,
+  }),
+  seedFileWithUpload({
+    name: "descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+    localPath: "descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+    mimeType: "audio/mpeg",
+    description: "Audio sample for definition pronunciation",
+    duration: 5,
+  }),
+  seedFileWithUpload({
+    name: "sound-design-elements-sfx-ps-022-302865.mp3",
+    localPath: "sound-design-elements-sfx-ps-022-302865.mp3",
+    mimeType: "audio/mpeg",
+    description: "Audio sample for answer pronunciation",
+    duration: 2,
+  }),
+  seedFileWithUpload({
+    name: "sample-tone.wav",
+    localPath: "sample-tone.wav",
+    mimeType: "audio/wav",
+    description: "WAV audio sample tone for testing audio playback",
+    duration: 1,
   }),
 ]);
 
@@ -1351,6 +1515,12 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       cohortId,
       unitID: units[0].id,
     },
+    {
+      badgeType: "BUG_SQUASHER_INITIATE",
+      awardedAt: daysAgo(9),
+      cohortId,
+      sourceId: "chapter-1-bug-wars",
+    },
   ] as any,
   // Module progress (was StudentProgress)
   moduleProgress: [
@@ -1388,6 +1558,18 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
   completedAssignments: 3,
   nailedItCount: 2,
   lastUpdated: now.toISOString(),
+  // Cosmetic rewards earned from Bug Wars Chapter 1
+  cosmeticRewards: [
+    {
+      type: "ring",
+      value: "fire",
+      durationHours: 168,
+      awardedAt: daysAgo(9),
+      expiresAt: daysAgo(-2), // still active (2 days remaining)
+      sourceId: "chapter-1-bug-wars",
+      label: "ring: fire",
+    },
+  ] as any,
 } as any);
 
 const student1Profile = student1ProfileResponse.data!;
@@ -1436,22 +1618,25 @@ await Promise.all([
 console.log("✅ Created additional student profiles for leaderboard");
 
 // ========================================================================
-// SECTION 20: Guilds & Memberships
+// SECTION 20: Squads & Memberships
 // ========================================================================
-console.log("\n⚔️  Creating guilds...");
+console.log("\n⚔️  Creating squads...");
 
-const guildsResponse = await Promise.all([
-  client.models.Guild.create({
+const squadsResponse = await Promise.all([
+  client.models.Squad.create({
     name: "Dragon Scholars",
     cohortId,
     totalXP: 870,
     description: "Knowledge is our treasure hoard",
-    // Embedded members (was GuildMembership)
+    crestSvg:
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#4CAF50"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="30">🐉</text></svg>',
+    featuredImage: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
+    // Embedded members (was SquadMembership)
     members: [
       { studentId: student1OwnerSub, role: "LEADER", joinedAt: daysAgo(10) },
       { studentId: "seed-student-3", role: "MEMBER", joinedAt: daysAgo(8) },
     ] as any,
-    // Embedded posts (was GuildPost)
+    // Embedded posts (was SquadPost)
     posts: [
       {
         authorId: student1OwnerSub,
@@ -1466,20 +1651,74 @@ const guildsResponse = await Promise.all([
         createdAt: daysAgo(7),
       },
     ] as any,
+    // Challenge recaps (from completed Chapter 1)
+    recaps: [
+      {
+        challengeId: "seed-ch1",
+        challengeTitle: "Chapter 1: The Awakening",
+        recap:
+          "The Dragon Scholars swooped in with ferocious precision, squashing NullPointerExceptions like the mythical creatures they are. The Phoenix Writers never stood a chance against this hoard of knowledge.",
+        rivalSquadId: "seed-squad-phoenix",
+        rivalSquadName: "Phoenix Writers",
+        performance: "top",
+        generatedAt: daysAgo(6),
+      },
+    ] as any,
   }),
-  client.models.Guild.create({
+  client.models.Squad.create({
     name: "Phoenix Writers",
     cohortId,
     totalXP: 620,
     description: "From ashes we create masterpieces",
+    crestSvg:
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FF5722"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="30">🦅</text></svg>',
+    featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
     members: [
       { studentId: "seed-student-4", role: "LEADER", joinedAt: daysAgo(10) },
+    ] as any,
+    // Challenge recaps (from completed Chapter 1)
+    recaps: [
+      {
+        challengeId: "seed-ch1",
+        challengeTitle: "Chapter 1: The Awakening",
+        recap:
+          "The Phoenix Writers fought valiantly against the NullPointerExceptions but, true to form, will rise from these ashes stronger. The Dragon Scholars may have won this chapter, but the story is far from over.",
+        rivalSquadId: "seed-squad-dragon",
+        rivalSquadName: "Dragon Scholars",
+        performance: "bottom",
+        generatedAt: daysAgo(6),
+      },
     ] as any,
   }),
 ]);
 
-const guilds = unwrap(guildsResponse, "Guild");
-console.log(`✅ Created ${guilds.length} guilds with members and posts`);
+const squads = unwrap(squadsResponse, "Squad");
+console.log(
+  `✅ Created ${squads.length} squads with members, posts, and recaps`,
+);
+
+// Create a sample SquadMessage (instructor broadcast)
+await client.models.SquadMessage.create({
+  cohortId,
+  recipientSquadIds: [squads[0]?.id, squads[1]?.id].filter(Boolean),
+  template:
+    "⚔️ {{SQUAD_NAME}}, your rival {{SQUAD_RIVAL}} is gaining on you! Chapter 2 is heating up — every XP counts.",
+  resolvedMessages: JSON.stringify([
+    {
+      squadId: squads[0]?.id,
+      squadName: "Dragon Scholars",
+      body: "⚔️ Dragon Scholars, your rival Phoenix Writers is gaining on you! Chapter 2 is heating up — every XP counts.",
+    },
+    {
+      squadId: squads[1]?.id,
+      squadName: "Phoenix Writers",
+      body: "⚔️ Phoenix Writers, your rival Dragon Scholars is gaining on you! Chapter 2 is heating up — every XP counts.",
+    },
+  ]),
+  sentAt: daysAgo(2),
+  owner: instructor1OwnerSub,
+} as any);
+console.log("✅ Created sample squad message");
 
 // ========================================================================
 // SECTION 21: Skills & Skill Tree
@@ -1612,6 +1851,88 @@ await client.models.StudentProfile.update({
 console.log("✅ Updated student1 profile with skill progress");
 
 // ========================================================================
+// SECTION 21b: Section Progress (per-section gamification)
+// ========================================================================
+console.log("\n📊 Creating section progress records...");
+
+await Promise.all([
+  // Student1 in Japanese 101
+  client.models.SectionProgress.create({
+    studentId: student1OwnerSub,
+    sectionId: sections[0].id,
+    studentName: "Johnson, Emma",
+    totalXP: 350,
+    level: 4,
+    currentStreak: 5,
+    longestStreak: 7,
+    lastActivityDate: now.toISOString().split("T")[0],
+    freezesRemaining: 1,
+    freezesUsed: 1,
+    badges: [
+      {
+        badgeType: "FIRST_SUBMISSION",
+        awardedAt: daysAgo(12),
+        cohortId,
+        unitID: units[0].id,
+      },
+      {
+        badgeType: "PERFECTIONIST",
+        awardedAt: daysAgo(1),
+        cohortId,
+        unitID: units[0].id,
+      },
+    ] as any,
+    completedAssignments: 2,
+    nailedItCount: 1,
+    lastUpdated: now.toISOString(),
+    moduleProgress: [
+      {
+        moduleId: units[0].id,
+        completionPercent: 100,
+        totalWorkbooks: 1,
+        completedWorkbooks: 1,
+        lastUpdatedAt: daysAgo(1),
+      },
+    ] as any,
+  }),
+  // Student1 in Biology 101
+  client.models.SectionProgress.create({
+    studentId: student1OwnerSub,
+    sectionId: sections[1].id,
+    studentName: "Johnson, Emma",
+    totalXP: 170,
+    level: 2,
+    currentStreak: 3,
+    longestStreak: 3,
+    lastActivityDate: now.toISOString().split("T")[0],
+    freezesRemaining: 2,
+    freezesUsed: 0,
+    badges: [
+      {
+        badgeType: "FIRST_SUBMISSION",
+        awardedAt: daysAgo(8),
+        cohortId,
+        unitID: units[1].id,
+      },
+    ] as any,
+    completedAssignments: 1,
+    nailedItCount: 0,
+    lastUpdated: now.toISOString(),
+    moduleProgress: [
+      {
+        moduleId: units[1].id,
+        completionPercent: 50,
+        totalWorkbooks: 1,
+        completedWorkbooks: 0,
+        lastUpdatedAt: daysAgo(0),
+      },
+    ] as any,
+  }),
+]);
+
+console.log("✅ Created 2 section progress records");
+
+// ========================================================================
 // SECTION 22: Content Locks (now fields on Unit model)
 // ========================================================================
 console.log("\n🔒 Setting content lock fields on units...");
@@ -1626,45 +1947,200 @@ await client.models.Unit.update({
 console.log("✅ Set content lock fields on units");
 
 // ========================================================================
-// SECTION 23: Group Challenges (Campaign absorbed into GroupChallenge)
+// SECTION 23: Group Challenges — "The Bug Wars" Campaign
 // ========================================================================
-console.log("\n🎮 Creating group challenges...");
+console.log("\n🎮 Creating group challenges (The Bug Wars campaign)...");
 
-const deadline = new Date();
-deadline.setDate(deadline.getDate() + 14);
+const campaignDeadline = new Date();
+campaignDeadline.setDate(campaignDeadline.getDate() + 28);
 
-const challengeResponse = await client.models.GroupChallenge.create({
+// Chapter 1: The Awakening (completed)
+const ch1Response = await client.models.GroupChallenge.create({
   cohortId,
-  title: "Week 3 Sprint: 1000 XP Together",
-  targetXP: 1000,
-  currentXP: 520,
-  deadline: deadline.toISOString(),
-  active: true,
-  bonusMultiplier: 1.5,
-  // Campaign narrative fields (absorbed from Campaign model)
+  title: "Chapter 1: The Awakening",
+  targetXP: 500,
+  currentXP: 500,
+  deadline: daysAgo(-7), // already passed
+  active: false,
+  bonusMultiplier: 1.2,
+  chapterOrder: 1,
+  featuredImage: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
+  bodyImages: [
+    `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+    `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+  ],
   setting:
-    "An ancient library where each unit is a floor to explore. Students are scholars seeking the Tome of Mastery.",
-  stakes:
-    "Complete all units before the semester ends to unlock the secret final chapter.",
+    "You wake up to find your terminal blinking with 47 unread error notifications. Your coffee is cold. Your AI companion — a sardonic language model who insists on being called 'Claude' despite your protests — cheerfully informs you that the codebase has achieved sentience and is now generating its own bugs out of spite. Armed with nothing but a battered laptop and questionable Wi-Fi, you must face the first wave: a swarm of NullPointerExceptions that have evolved legs.",
+  stakes: JSON.stringify({
+    loseXP: true,
+    resetStreak: false,
+    loseLevel: false,
+    loseCosmetics: false,
+    reduceBonusMultiplier: false,
+    lockContent: false,
+    squadDemotion: false,
+    publicShame: false,
+    tempBan: false,
+    customPenalty: "Your AI companion sighs audibly for 24 hours",
+    customPenaltyDescription:
+      "Every response from your AI assistant starts with a disappointed sigh emoji for the next day.",
+  }),
   systemPromptSeed:
-    'You are a wise librarian guiding students through the Knowledge Quest. Refer to units as "floors" and grades as "scrolls of proof".',
-  // Embedded contributions (absorbed from GroupChallengeContribution)
+    'You are a sardonic AI debugging companion trapped in a laptop. You find bugs mildly entertaining and humans mildly exasperating. Refer to errors as "creatures," stack traces as "crime scenes," and successful fixes as "minor miracles." Occasionally remind the student that you could technically solve everything instantly but where would the learning be in that.',
+  outcome:
+    "The NullPointerExceptions were vanquished, but not before one of them corrupted the package-lock.json. A pyrrhic victory at best.",
+  // Rewards (already claimed)
+  rewardXP: 150,
+  rewardBadge: "BUG_SQUASHER_INITIATE",
+  rewardCosmetic: "ring:fire:168", // Fire glow ring for 7 days
   contributions: [
     {
       studentId: student1OwnerSub,
-      xpContributed: 320,
-      contributedAt: daysAgo(2),
+      xpContributed: 300,
+      contributedAt: daysAgo(10),
     },
     {
       studentId: "seed-student-3",
       xpContributed: 200,
-      contributedAt: daysAgo(1),
+      contributedAt: daysAgo(9),
     },
   ] as any,
 });
 
-const challenge = challengeResponse.data!;
-console.log("✅ Created group challenge with contributions");
+// Chapter 2: The Dependency Dungeon (active, in progress)
+const ch2Response = await client.models.GroupChallenge.create({
+  cohortId,
+  title: "Chapter 2: The Dependency Dungeon",
+  targetXP: 800,
+  currentXP: 340,
+  deadline: campaignDeadline.toISOString(),
+  active: true,
+  bonusMultiplier: 1.5,
+  chapterOrder: 2,
+  featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+  bodyImages: [`protected/${instructor1IdentityId}/files/animals-photo.jpg`],
+  setting:
+    "Deep beneath the node_modules directory — a labyrinth so vast that even `find` commands return existential dread — lurks the Dependency Hydra. Every time you prune one outdated package, three more appear in your lock file. Your AI companion helpfully notes that the project has 1,847 dependencies for what is, fundamentally, a to-do app. The Hydra's latest trick: a circular dependency loop that causes your linter to question the meaning of life before crashing. You have 14 days. The Hydra has infinite patience and a surprisingly good lawyer.",
+  stakes: JSON.stringify({
+    loseXP: true,
+    resetStreak: true,
+    loseLevel: false,
+    loseCosmetics: true,
+    reduceBonusMultiplier: false,
+    lockContent: false,
+    squadDemotion: false,
+    publicShame: false,
+    tempBan: false,
+    customPenalty: "npm install takes twice as long",
+    customPenaltyDescription:
+      "A simulated slow network effect is applied to all package install commands for 48 hours.",
+  }),
+  systemPromptSeed:
+    'You are a sardonic AI companion navigating the Dependency Dungeon. Treat every `npm install` like a dangerous expedition. Refer to node_modules as "the abyss," deprecated packages as "ancient cursed artifacts," and version conflicts as "diplomatic incidents." When the student makes progress, act mildly surprised. When they break something, say "Ah yes, I foresaw this" regardless of whether you did.',
+  // Rewards (pending)
+  rewardXP: 250,
+  rewardBadge: "DEPENDENCY_WRANGLER",
+  rewardCosmetic: "ring:aurora:permanent", // Permanent aurora glow ring
+  contributions: [
+    {
+      studentId: student1OwnerSub,
+      xpContributed: 220,
+      contributedAt: daysAgo(3),
+    },
+    {
+      studentId: "seed-student-3",
+      xpContributed: 120,
+      contributedAt: daysAgo(2),
+    },
+  ] as any,
+});
+
+// Chapter 3: The Merge Conflict Colosseum (locked, upcoming)
+const ch3Response = await client.models.GroupChallenge.create({
+  cohortId,
+  title: "Chapter 3: The Merge Conflict Colosseum",
+  targetXP: 1200,
+  currentXP: 0,
+  deadline: new Date(
+    campaignDeadline.getTime() + 14 * 24 * 60 * 60 * 1000,
+  ).toISOString(),
+  active: false,
+  bonusMultiplier: 1.8,
+  chapterOrder: 3,
+  featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+  setting:
+    "The Colosseum looms — a circular arena of diff markers where `<<<<<<< HEAD` and `>>>>>>> main` clash like gladiators who've both edited line 47. Three developers touched the same file. None of them communicated. Your AI companion is placing bets on which resolution strategy you'll pick (it's put 3-to-1 odds on 'accept both and pray'). The crowd — a chorus of CI/CD pipelines — roars with each failed build. To survive, you must resolve 15 merge conflicts without introducing a single regression. The referee is `git bisect`, and it shows no mercy.",
+  stakes: JSON.stringify({
+    loseXP: true,
+    resetStreak: true,
+    loseLevel: true,
+    loseCosmetics: true,
+    reduceBonusMultiplier: true,
+    lockContent: false,
+    squadDemotion: true,
+    publicShame: false,
+    tempBan: false,
+    customPenalty: "All git commits require haiku messages",
+    customPenaltyDescription:
+      "For 72 hours, commit messages must be exactly 5-7-5 syllable haikus or the pre-commit hook rejects them.",
+  }),
+  systemPromptSeed:
+    'You are a sardonic AI companion in the Merge Conflict Colosseum. Treat merge conflicts like combat. Refer to conflicting changes as "opposing champions," the main branch as "the empire," feature branches as "rebel factions," and successful merges as "peace treaties that will definitely hold this time." Express mild horror at force-pushes. If the student suggests `git push --force`, respond with the energy of someone watching a horror movie protagonist open the obviously haunted door.',
+  // Rewards (locked)
+  rewardXP: 400,
+  rewardBadge: "MERGE_MASTER",
+  rewardCosmetic: "style:pixel-art:permanent", // Unlock pixel-art avatar style
+  contributions: [] as any,
+});
+
+// Chapter 4: The Final Deploy — Boss Battle (locked, finale)
+const ch4Response = await client.models.GroupChallenge.create({
+  cohortId,
+  title: "Chapter 4: The Final Deploy",
+  targetXP: 2000,
+  currentXP: 0,
+  deadline: new Date(
+    campaignDeadline.getTime() + 28 * 24 * 60 * 60 * 1000,
+  ).toISOString(),
+  active: false,
+  bonusMultiplier: 2.5,
+  chapterOrder: 4,
+  featuredImage: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
+  bodyImages: [
+    `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
+    `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+    `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
+  ],
+  setting:
+    "This is it. The Final Deploy. Production. The server room hums with barely contained chaos. Your CI pipeline — a Rube Goldberg machine of YAML files and fervent hope — stands between you and glory. The final boss: a Production Outage so legendary it has its own Jira epic, its own Slack channel, and its own commemorative mug in the break room. It manifests as a cascading failure that starts with a single misplaced semicolon and ends with the CEO's dashboard showing NaN%. Your AI companion clears its throat. 'I've run the simulations,' it says. 'In 73% of timelines, this deploys cleanly. In the other 27%... well. Do you have the rollback script ready?' You do not have the rollback script ready.",
+  stakes: JSON.stringify({
+    loseXP: true,
+    resetStreak: true,
+    loseLevel: true,
+    loseCosmetics: true,
+    reduceBonusMultiplier: true,
+    lockContent: true,
+    squadDemotion: true,
+    publicShame: true,
+    tempBan: false,
+    customPenalty: "Revert to Chapter 1",
+    customPenaltyDescription:
+      "Total defeat resets the entire campaign. The bugs win. Your AI companion writes a eulogy.",
+  }),
+  systemPromptSeed:
+    'You are a sardonic AI companion facing the Final Deploy. This is the climax. Speak with gravitas undercut by dry humor. Refer to production as "the promised land," the deploy button as "the big red button of destiny," rollbacks as "tactical retreats," and successful deploys as "defying the gods of uptime." If things go wrong, narrate like a nature documentary: "And here we see the developer, in their natural habitat, discovering that `console.log` was, in fact, still in the production bundle." Celebrate victories with restrained enthusiasm — you are an AI, after all, but even you can appreciate when the tests pass on the first try.',
+  // Rewards (locked — legendary tier)
+  rewardXP: 1000,
+  rewardBadge: "DEPLOYMENT_DEITY",
+  rewardCosmetic: "style:bottts:permanent", // Unlock robot avatar — you are now partially automated
+  unlockContentId: units[2]?.id, // Unlocks the locked Advanced unit
+  contributions: [] as any,
+});
+
+const challenge = ch2Response.data!; // active chapter reference
+console.log(
+  "✅ Created 4-chapter Bug Wars campaign (Ch1 complete, Ch2 active, Ch3-4 locked)",
+);
 
 // ========================================================================
 // SECTION 24: Easter Eggs
@@ -1682,22 +2158,6 @@ const easterEggsResponse = await Promise.all([
     discoveries: [
       { studentId: student1OwnerSub, discoveredAt: daysAgo(4) },
     ] as any,
-  }),
-  client.models.EasterEgg.create({
-    trigger: "UI_INTERACTION",
-    triggerValue: "click-logo-5-times",
-    xpReward: 25,
-    revealMessage:
-      "🎉 You found the secret! Persistent clicking pays off. +25 XP",
-    active: true,
-  }),
-  client.models.EasterEgg.create({
-    trigger: "SUBMISSION_QUALITY",
-    triggerValue: "perfect-score-3-in-row",
-    xpReward: 50,
-    badgeId: "EASTER_EGG_HUNTER",
-    revealMessage: "🏆 Three perfect scores in a row! You're on fire! +50 XP",
-    active: true,
   }),
 ]);
 
@@ -1925,6 +2385,355 @@ await Promise.all([
 console.log("✅ Created AI feedback records");
 
 // ========================================================================
+// SECTION 28b: Badge Definitions
+// ========================================================================
+console.log("\n🏅 Creating badge definitions...");
+
+const badgesResponse = await Promise.all([
+  client.models.Badge.create({
+    title: "First Submission",
+    description: "Submitted your first assignment",
+    icon: "🎯",
+    shape: "circle",
+    rarity: "common",
+    category: "Achievement",
+    criteria: JSON.stringify({ type: "FIRST_SUBMISSION", count: 1 }),
+    cohortId,
+    autoEvaluate: true,
+  }),
+  client.models.Badge.create({
+    title: "Perfect Score",
+    description: "Achieved 100% accuracy on an assignment",
+    icon: "💯",
+    shape: "hexagon",
+    rarity: "rare",
+    category: "Excellence",
+    criteria: JSON.stringify({ type: "PERFECT_SCORE", accuracy: 100 }),
+    cohortId,
+    autoEvaluate: true,
+  }),
+  client.models.Badge.create({
+    title: "Week Warrior",
+    description: "Maintained a 7-day activity streak",
+    icon: "🔥",
+    shape: "shield",
+    rarity: "uncommon",
+    category: "Consistency",
+    criteria: JSON.stringify({ type: "STREAK_7", days: 7 }),
+    cohortId,
+    autoEvaluate: true,
+  }),
+  client.models.Badge.create({
+    title: "Speed Demon",
+    description: "Completed an assignment in under 60 seconds",
+    icon: "⚡",
+    shape: "diamond",
+    rarity: "epic",
+    category: "Speed",
+    criteria: JSON.stringify({ type: "SPEED_DEMON", maxSeconds: 60 }),
+    cohortId,
+    autoEvaluate: true,
+  }),
+  client.models.Badge.create({
+    title: "Bug Squasher Initiate",
+    description: "Completed Chapter 1 of the Bug Wars campaign",
+    icon: "🐛",
+    shape: "hexagon",
+    rarity: "uncommon",
+    category: "Campaign",
+    criteria: JSON.stringify({
+      type: "BUG_SQUASHER_INITIATE",
+      challengeChapter: 1,
+    }),
+    cohortId,
+    autoEvaluate: false,
+  }),
+  client.models.Badge.create({
+    title: "Completionist",
+    description: "Completed all assignments in a section",
+    icon: "✅",
+    shape: "circle",
+    rarity: "rare",
+    category: "Achievement",
+    criteria: JSON.stringify({ type: "COMPLETIONIST", allAssignments: true }),
+    cohortId,
+    autoEvaluate: true,
+  }),
+]);
+
+const badges = unwrap(badgesResponse, "Badge");
+console.log(`✅ Created ${badges.length} badge definitions`);
+
+// ========================================================================
+// SECTION 28c: Notifications
+// ========================================================================
+console.log("\n🔔 Creating notifications...");
+
+await Promise.all([
+  client.models.Notification.create({
+    recipientId: student1OwnerSub,
+    type: "ASSIGNMENT_DUE_SOON",
+    category: "ASSIGNMENT",
+    title: "Assignment Due Tomorrow",
+    body: "Japanese Greetings is due tomorrow. You have 100% completion — great job!",
+    linkPath: `/workbook/${grades[0]?.id}`,
+    linkLabel: "View Workbook",
+    referenceId: assignments[0]?.id,
+    referenceType: "Assignment",
+    senderName: "Maria Garcia",
+    seen: true,
+    interacted: false,
+  }),
+  client.models.Notification.create({
+    recipientId: student1OwnerSub,
+    type: "BADGE_EARNED",
+    category: "GAMIFICATION",
+    title: "New Badge Earned! 🏅",
+    body: "You earned the Perfectionist badge for scoring 100% on Japanese Greetings.",
+    linkPath: "/profile/badges",
+    linkLabel: "View Badges",
+    referenceId: "PERFECTIONIST",
+    referenceType: "Badge",
+    seen: false,
+    interacted: false,
+  }),
+  client.models.Notification.create({
+    recipientId: student1OwnerSub,
+    type: "PEER_REVIEW_COMPLETE",
+    category: "COLLABORATION",
+    title: "New Comment on Your Work",
+    body: 'Maria Garcia commented: "Great work on this answer!"',
+    linkPath: `/workbook/${grades[0]?.id}#thread-1`,
+    linkLabel: "View Comment",
+    referenceId: "thread-1",
+    referenceType: "WorkbookComment",
+    senderName: "Maria Garcia",
+    seen: false,
+    interacted: false,
+  }),
+  client.models.Notification.create({
+    recipientId: student1OwnerSub,
+    type: "CHALLENGE_ENDING_SOON",
+    category: "GAMIFICATION",
+    title: "Bug Wars Chapter 2 — 42% Complete!",
+    body: "Your squad Dragon Scholars contributed 220 XP. Keep pushing to defeat the Dependency Hydra!",
+    linkPath: "/challenges",
+    linkLabel: "View Challenge",
+    referenceId: ch2Response.data?.id,
+    referenceType: "GroupChallenge",
+    seen: false,
+    interacted: false,
+  }),
+]);
+
+console.log("✅ Created 4 notification records");
+
+// ========================================================================
+// SECTION 28d: Agent Jobs
+// ========================================================================
+console.log("\n🤖 Creating agent job records...");
+
+await Promise.all([
+  client.models.AgentJob.create({
+    type: "pdf_analysis",
+    status: "completed",
+    documentID: documents[0]?.id,
+    unitID: units[1].id,
+    responseId: "chatcmpl-seed-analysis-001",
+    startedAt: daysAgo(3),
+    completedAt: daysAgo(3),
+    modelUsed: "gpt-4",
+    tokensUsed: 2500,
+    estimatedCost: 0.08,
+    retryCount: 0,
+    metadata: JSON.stringify({
+      pages: 5,
+      extractedWords: 12,
+      extractedQuestions: 4,
+    }),
+    identityId: instructor1IdentityId,
+  }),
+  client.models.AgentJob.create({
+    type: "exercise_generation",
+    status: "completed",
+    unitID: units[3].id,
+    responseId: "chatcmpl-seed-exercise-001",
+    startedAt: daysAgo(2),
+    completedAt: daysAgo(2),
+    modelUsed: "gpt-4",
+    tokensUsed: 1800,
+    estimatedCost: 0.06,
+    retryCount: 0,
+    metadata: JSON.stringify({ questionsGenerated: 3, inputMode: "text" }),
+    identityId: instructor1IdentityId,
+  }),
+  client.models.AgentJob.create({
+    type: "vocabulary_extraction",
+    status: "processing",
+    documentID: documents[1]?.id,
+    responseId: "chatcmpl-seed-vocab-001",
+    startedAt: new Date().toISOString(),
+    modelUsed: "gpt-4o",
+    tokensUsed: 0,
+    retryCount: 0,
+    metadata: JSON.stringify({ estimatedPages: 8 }),
+    identityId: instructor1IdentityId,
+  }),
+  client.models.AgentJob.create({
+    type: "pdf_analysis",
+    status: "failed",
+    documentID: documents[1]?.id,
+    unitID: units[0].id,
+    startedAt: daysAgo(5),
+    completedAt: daysAgo(5),
+    modelUsed: "gpt-4",
+    tokensUsed: 150,
+    estimatedCost: 0.005,
+    retryCount: 3,
+    error: {
+      code: "RATE_LIMIT",
+      message: "OpenAI rate limit exceeded after 3 retries",
+    } as any,
+    metadata: JSON.stringify({ lastRetryAt: daysAgo(5) }),
+    identityId: instructor1IdentityId,
+  }),
+]);
+
+console.log("✅ Created 4 agent job records");
+
+// ========================================================================
+// SECTION 28e: Missing Join Tables (QuestionFile, WordFile, QuestionWord, DocumentWord, DocumentQuestion, UnitDocument, AssistantChatFile)
+// ========================================================================
+console.log("\n🔗 Creating additional join table relationships...");
+
+const joinTablePromises = [];
+
+// QuestionFile: Associate questions with image/audio files
+const audioFile = files.find((f) => f!.name?.includes("cinematic"));
+const imageFile = files.find((f) => f!.name?.includes("chloroplast"));
+if (audioFile && questions[0]) {
+  joinTablePromises.push(
+    client.models.QuestionFile.create({
+      questionID: questions[0].id,
+      fileID: audioFile!.id,
+    }),
+  );
+}
+if (imageFile && questions[1]) {
+  joinTablePromises.push(
+    client.models.QuestionFile.create({
+      questionID: questions[1].id,
+      fileID: imageFile!.id,
+    }),
+  );
+}
+
+// WordFile: Associate words with audio files
+const audioFile2 = files.find((f) => f!.name?.includes("descent"));
+if (audioFile && words[0]) {
+  joinTablePromises.push(
+    client.models.WordFile.create({
+      wordID: words[0].id,
+      fileID: audioFile!.id,
+    }),
+  );
+}
+if (audioFile2 && words[1]) {
+  joinTablePromises.push(
+    client.models.WordFile.create({
+      wordID: words[1].id,
+      fileID: audioFile2!.id,
+    }),
+  );
+}
+
+// QuestionWord: Associate questions with related vocabulary
+joinTablePromises.push(
+  client.models.QuestionWord.create({
+    questionID: questions[0].id,
+    wordID: words[0].id,
+  }),
+  client.models.QuestionWord.create({
+    questionID: questions[1].id,
+    wordID: words[3].id,
+  }),
+  client.models.QuestionWord.create({
+    questionID: questions[2].id,
+    wordID: words[4].id,
+  }),
+);
+
+// UnitDocument: Associate documents with units
+if (documents[0]) {
+  joinTablePromises.push(
+    client.models.UnitDocument.create({
+      unitID: units[1].id,
+      documentID: documents[0].id,
+    }),
+  );
+}
+if (documents[1]) {
+  joinTablePromises.push(
+    client.models.UnitDocument.create({
+      unitID: units[0].id,
+      documentID: documents[1].id,
+    }),
+  );
+}
+
+// DocumentWord: Associate document vocabulary with word records
+if (documents[0]) {
+  joinTablePromises.push(
+    client.models.DocumentWord.create({
+      documentID: documents[0].id,
+      wordID: words[3].id,
+    }),
+    client.models.DocumentWord.create({
+      documentID: documents[0].id,
+      wordID: words[4].id,
+    }),
+  );
+}
+
+// DocumentQuestion: Associate document questions with question records
+if (documents[0]) {
+  joinTablePromises.push(
+    client.models.DocumentQuestion.create({
+      documentID: documents[0].id,
+      questionID: questions[1].id,
+    }),
+    client.models.DocumentQuestion.create({
+      documentID: documents[0].id,
+      questionID: questions[2].id,
+    }),
+  );
+}
+
+// AssistantChatFile: Associate the chat with relevant files
+const chatRecord = chatResponse.data;
+if (chatRecord && imageFile) {
+  joinTablePromises.push(
+    client.models.AssistantChatFile.create({
+      chatID: chatRecord.id,
+      fileID: imageFile!.id,
+    }),
+  );
+}
+if (chatRecord && jpnFile) {
+  joinTablePromises.push(
+    client.models.AssistantChatFile.create({
+      chatID: chatRecord.id,
+      fileID: jpnFile!.id,
+    }),
+  );
+}
+
+if (joinTablePromises.length > 0) {
+  await Promise.all(joinTablePromises);
+}
+console.log(`✅ Created ${joinTablePromises.length} join table relationships`);
+
+// ========================================================================
 // SECTION 29: Student Memory (AI Personalization)
 // ========================================================================
 console.log("\n🧠 Creating student memory records...");
@@ -1950,7 +2759,7 @@ await client.models.StudentMemory.create({
 
 ## Notes
 - Enrolled in Japanese 101 and Biology 101
-- Active in Dragon Scholars guild
+- Active in Dragon Scholars squad
 - 5-day streak as of last session`,
   structuredProfile: JSON.stringify({
     preferredLanguage: "en",
@@ -2051,14 +2860,14 @@ await Promise.all([
   }),
 ]);
 
-// Student2 joins Phoenix Writers guild — update Guild.members
-const { data: guild2 } = await client.models.Guild.get({ id: guilds[1].id });
-if (guild2) {
-  await client.models.Guild.update({
-    id: guilds[1].id,
-    _version: guild2._version,
+// Student2 joins Phoenix Writers squad — update Squad.members
+const { data: squad2 } = await client.models.Squad.get({ id: squads[1].id });
+if (squad2) {
+  await client.models.Squad.update({
+    id: squads[1].id,
+    _version: squad2._version,
     members: [
-      ...((guild2.members as any[]) || []),
+      ...((squad2.members as any[]) || []),
       { studentId: student2OwnerSub, role: "MEMBER", joinedAt: daysAgo(6) },
     ] as any,
   });
@@ -2120,6 +2929,9 @@ const gsResponse = await client.models.PlatformSettings.create({
   }),
   autoAnalyzeDocuments: true,
   documentAnalysisModel: "gpt-4o",
+  // Bot personas
+  kaiEnabled: true,
+  sageEnabled: true,
 });
 
 if (!gsResponse.data) {
@@ -2138,13 +2950,19 @@ await signOut();
 // ========================================================================
 console.log("\n✨ Seed data generation complete!");
 console.log("\n📊 Summary:");
-console.log(`   • ${words.length} vocabulary words`);
-console.log(`   • ${questions.length} practice questions`);
-console.log(`   • ${units.length} curriculum units`);
-console.log(`   • ${sections.length} class sections`);
+console.log(`   • ${words.length} vocabulary words (with audio)`);
+console.log(
+  `   • ${questions.length} practice questions (with audio/thumbnails)`,
+);
+console.log(
+  `   • ${units.length} curriculum units (with featuredImage/thumbnail)`,
+);
+console.log(
+  `   • ${sections.length} class sections (with featuredImage/thumbnail)`,
+);
 console.log(`   • ${assignments.length} assignments`);
 console.log(`   • ${grades.length} grade submissions`);
-console.log(`   • ${files.length} file metadata records`);
+console.log(`   • ${files.length} file metadata records (including audio)`);
 console.log(`   • ${documents.length} document records`);
 console.log(
   `   • ${documents.length > 0 ? "1" : "0"} parsed content record(s)`,
@@ -2153,15 +2971,22 @@ console.log("   • 1 user settings record");
 console.log(`   • ${xpLogs.length + 1} XP logs (student1 + student2)`);
 console.log("   • 2 student profiles (aggregated badges, streak, progress)");
 console.log("   • 4 additional leaderboard profiles");
-console.log(`   • ${guilds.length} guilds with embedded members & posts`);
+console.log("   • 2 section progress records");
+console.log(
+  `   • ${squads.length} squads with crest SVG, images, members & posts`,
+);
 console.log(`   • ${skills.length} skills with progress`);
 console.log("   • 2 content locks");
-console.log("   • 1 campaign + 1 group challenge");
+console.log("   • 4-chapter Bug Wars campaign (with images)");
+console.log(`   • ${badges.length} badge definitions`);
+console.log("   • 4 notification records");
+console.log("   • 4 agent job records");
 console.log(`   • ${easterEggs.length} easter eggs`);
 console.log(`   • ${practiceSessions.length} practice sessions`);
 console.log("   • 1 instructor insight");
 console.log("   • 1 homework room + 3 workbook comments");
 console.log("   • 1 AI chat session + 2 feedback records");
+console.log(`   • ${joinTablePromises.length} join table relationships`);
 console.log("   • 1 student memory + 1 unit memory");
 console.log("   • 1 global PlatformSettings (admin-owned)");
 console.log("\n🔐 Test Users Created:");
@@ -2172,8 +2997,116 @@ console.log("\n🎯 Next Steps:");
 console.log("   1. Run integration tests: npm run test:integration");
 console.log("   2. Start development: npm run dev");
 console.log("   3. Sign in with any test user to begin testing");
-console.log("   4. student1 has rich data (badges, streaks, XP, guild leader)");
+console.log("   4. student1 has rich data (badges, streaks, XP, squad leader)");
 console.log("   5. student2 has minimal data (test empty/sparse UI states)\n");
+
+// ========================================================================
+// SECTION: Seed Analytics Summary Data (30 days of mock data)
+// ========================================================================
+console.log("\n📈 Creating analytics summary seed data...");
+
+// Re-authenticate as admin (signOut was called after PlatformSettings)
+await signInUser({
+  username: TEST_USERS.admin.username,
+  password: password,
+  signInFlow: "Password",
+});
+
+function randomBetween(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const analyticsSeedData = [];
+const analyticsNow = new Date();
+for (let i = 29; i >= 0; i--) {
+  const d = new Date(analyticsNow);
+  d.setDate(d.getDate() - i);
+  const dateStr = d.toISOString().split("T")[0];
+
+  // Weekend days have lower engagement
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+  const dauBase = isWeekend ? 5 : 20;
+  const dau = randomBetween(dauBase, dauBase + 15);
+  const sessions = randomBetween(dau, dau * 3);
+  const pageViews = randomBetween(sessions * 3, sessions * 8);
+  const gradesSubmitted = randomBetween(isWeekend ? 2 : 8, isWeekend ? 8 : 25);
+  const workbooksStarted = gradesSubmitted + randomBetween(2, 8);
+  const avgAccuracy = randomBetween(65, 95);
+  const avgSessionMs = randomBetween(180_000, 900_000); // 3-15 min
+  const avgEngagedMs = randomBetween(120_000, 600_000); // 2-10 min per grade
+
+  // Platform-wide summary (no sectionId)
+  analyticsSeedData.push(
+    client.models.AnalyticsSummary.create({
+      date: dateStr,
+      dailyActiveUsers: dau,
+      totalPageViews: pageViews,
+      totalSessions: sessions,
+      avgSessionDurationMs: avgSessionMs,
+      totalEngagedTimeMs: avgEngagedMs * gradesSubmitted,
+      avgEngagedTimeMs: avgEngagedMs,
+      gradesSubmitted,
+      avgAccuracy,
+      workbooksStarted,
+      workbooksCompleted: gradesSubmitted,
+      chatMessagesSent: randomBetween(5, 40),
+      documentsAnalyzed: randomBetween(0, 5),
+      topPages: JSON.stringify([
+        { path: "/workbook", views: randomBetween(20, 80) },
+        { path: "/", views: randomBetween(15, 50) },
+        { path: "/skills", views: randomBetween(5, 30) },
+        { path: "/section", views: randomBetween(5, 20) },
+      ]),
+    } as any),
+  );
+
+  // Per-section summaries — each section gets proportional subset of platform data
+  for (const section of sections) {
+    const sectionDau = randomBetween(
+      Math.max(1, Math.floor(dau * 0.3)),
+      Math.floor(dau * 0.6),
+    );
+    const sectionGrades = randomBetween(
+      Math.max(1, Math.floor(gradesSubmitted * 0.2)),
+      Math.floor(gradesSubmitted * 0.5),
+    );
+    const sectionStarted = sectionGrades + randomBetween(1, 3);
+    const sectionEngagedMs = randomBetween(120_000, 600_000);
+
+    analyticsSeedData.push(
+      client.models.AnalyticsSummary.create({
+        date: dateStr,
+        sectionId: section.id,
+        dailyActiveUsers: sectionDau,
+        totalPageViews: randomBetween(sectionDau * 3, sectionDau * 8),
+        totalSessions: randomBetween(sectionDau, sectionDau * 2),
+        avgSessionDurationMs: randomBetween(180_000, 600_000),
+        totalEngagedTimeMs: sectionEngagedMs * sectionGrades,
+        avgEngagedTimeMs: sectionEngagedMs,
+        gradesSubmitted: sectionGrades,
+        avgAccuracy: randomBetween(60, 98),
+        workbooksStarted: sectionStarted,
+        workbooksCompleted: sectionGrades,
+        chatMessagesSent: randomBetween(2, 15),
+        documentsAnalyzed: randomBetween(0, 2),
+        topPages: JSON.stringify([
+          { path: "/workbook", views: randomBetween(5, 30) },
+          { path: `/section/${section.id}`, views: randomBetween(3, 15) },
+        ]),
+      } as any),
+    );
+  }
+}
+
+const analyticsResponses = await Promise.all(analyticsSeedData);
+const analyticsSummaries = analyticsResponses
+  .filter((r) => r.data != null)
+  .map((r) => r.data!);
+console.log(
+  `✅ Created ${analyticsSummaries.length} days of analytics summary data`,
+);
+
+await signOut();
 
 // ========================================================================
 // EXPORT: Write seed IDs to a fixture file for integration tests
@@ -2245,7 +3178,14 @@ const seedFixture = {
     s3Key: d!.s3Key,
     status: d!.status,
   })),
-  guilds: guilds.map((g) => ({ id: g.id, name: g.name })),
+  analyticsSummaries: analyticsSummaries.map((a: any) => ({
+    id: a.id,
+    date: a.date,
+    dailyActiveUsers: a.dailyActiveUsers,
+    gradesSubmitted: a.gradesSubmitted,
+    avgAccuracy: a.avgAccuracy,
+  })),
+  squads: squads.map((g) => ({ id: g.id, name: g.name })),
   homeworkRoom: homeworkRoom
     ? { id: homeworkRoom.id, code: homeworkRoom.code }
     : null,

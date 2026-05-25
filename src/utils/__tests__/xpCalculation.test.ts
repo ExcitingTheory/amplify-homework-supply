@@ -96,8 +96,8 @@ describe('xpCalculation', () => {
       expect(getXPForAction(XPReason.EASTER_EGG)).toBe(30)
     })
 
-    it('returns 100 for GUILD_CHALLENGE_BONUS', () => {
-      expect(getXPForAction(XPReason.GUILD_CHALLENGE_BONUS)).toBe(100)
+    it('returns 100 for SQUAD_CHALLENGE_BONUS', () => {
+      expect(getXPForAction(XPReason.SQUAD_CHALLENGE_BONUS)).toBe(100)
     })
   })
 

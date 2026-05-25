@@ -1,4 +1,12 @@
 import { defineFunction } from "@aws-amplify/backend";
+import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
+import { LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
+import { Duration } from "aws-cdk-lib";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Document Thumbnail Lambda function resource
@@ -13,16 +21,41 @@ import { defineFunction } from "@aws-amplify/backend";
  * Output: protected/{identityId}/{fileId}/thumbnail.webp
  *
  * LibreOffice layer: shelfio/libreoffice-lambda-layer (public ARN)
- * Requires arm64 runtime for layer compatibility.
+ *
+ * Uses the provider overload of defineFunction for full CDK bundling control,
+ * which allows externalizing sharp and installing its Linux-native binaries.
  */
-export const documentThumbnailHandler = defineFunction({
-  name: "documentThumbnail",
-  timeoutSeconds: 300, // LibreOffice conversion can be slow for large docs
-  memoryMB: 1536, // LibreOffice needs memory for rendering
-  resourceGroupName: "data",
-  runtime: 20, // Node.js 20 (matches layer compatibility)
-  layers: {
-    libreoffice:
+export const documentThumbnailHandler = defineFunction(
+  (scope) => {
+    const libreofficeLayer = LayerVersion.fromLayerVersionArn(
+      scope,
+      "libreoffice-layer",
       "arn:aws:lambda:us-east-1:764866452798:layer:libreoffice-brotli:1",
+    );
+
+    return new NodejsFunction(scope, "documentThumbnail-lambda", {
+      entry: join(__dirname, "handler.ts"),
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(300),
+      memorySize: 1536,
+      layers: [libreofficeLayer],
+      bundling: {
+        format: OutputFormat.ESM,
+        banner:
+          'import { createRequire } from "module"; const require = createRequire(import.meta.url);',
+        minify: true,
+        sourceMap: true,
+        externalModules: ["sharp", "libreoffice"],
+        loader: { ".node": "file" },
+        commandHooks: {
+          beforeBundling: () => [],
+          beforeInstall: () => [],
+          afterBundling: (_inputDir: string, outputDir: string) => [
+            `cd "${outputDir}" && echo '{"type":"module"}' > package.json && npm install --cpu=x64 --os=linux --libc=glibc sharp`,
+          ],
+        },
+      },
+    });
   },
-});
+  { resourceGroupName: "data" },
+);

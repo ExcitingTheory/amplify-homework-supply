@@ -3,7 +3,7 @@
  * First page new users see explaining the platform at a high level.
  */
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   Box,
   Typography,
@@ -84,7 +84,7 @@ export const Introduction: Story = {
             <PillarCard
               icon={<GroupsIcon sx={{ fontSize: 48 }} />}
               title="Collaborative"
-              description="Real-time workbooks with tutor cursors, peer review, guilds, and class sections. Students see instructor guidance live."
+              description="Real-time workbooks with tutor cursors, peer review, squads, and class sections. Students see instructor guidance live."
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -115,7 +115,7 @@ export const Introduction: Story = {
               <Typography><strong>AI</strong> assists both roles — generating content for instructors and providing feedback to students</Typography>
             </li>
             <li>
-              <Typography><strong>Gamification</strong> keeps students engaged with XP, badges, streaks, guilds, and leaderboards</Typography>
+              <Typography><strong>Gamification</strong> keeps students engaged with XP, badges, streaks, squads, and leaderboards</Typography>
             </li>
           </Box>
         </Paper>

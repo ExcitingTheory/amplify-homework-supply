@@ -1,6 +1,6 @@
 /**
  * @fileoverview ArmorEditorPlugin - Lexical DecoratorNode for embedding
- * the guild Armor Editor (coat of arms designer) as an interactive block.
+ * the squad Armor Editor (coat of arms designer) as an interactive block.
  *
  * Pattern follows existing custom blocks (QuizPlugin, AnswerPlugin, etc.):
  *   - DecoratorNode stores the ArmorEditorConfig as JSON data

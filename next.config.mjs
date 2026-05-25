@@ -38,6 +38,12 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@mui/x-data-grid'],
 
+  // React Compiler: automatic memoization of all components
+  reactCompiler: true,
+
+  // Cache Components: enables PPR with "use cache" directive
+  cacheComponents: true,
+
   // Disable dev indicators to suppress Turbopack isrManifest HMR warnings
   devIndicators: false,
 
@@ -65,6 +71,11 @@ const nextConfig = {
 
   // Turbopack config
   turbopack: {},
+
+  // Persist Turbopack compiler artifacts on disk for faster dev restarts
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
+  },
 };
 
 export default withSerwist(withNextIntl(nextConfig));

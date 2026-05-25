@@ -1,0 +1,222 @@
+---
+name: console-crawl-audit
+description: Crawls all application routes as all user roles (admin, instructor, learner), collecting console errors, subscription storms, resubscribes, extra dispatches, and rerender issues. Also verifies local server logs for backend errors. Use when checking overall app health, after deploying changes, debugging subscription issues, or verifying no regressions across roles. DO NOT USE SHELL SANDBOX FOR THIS SKILL — it requires direct access to local logs and environment variables.
+---
+
+# Console Crawl Audit
+
+Full-application health check that crawls every route as every user role, then cross-references runtime console output with backend logs.
+
+## When to Use
+
+- After deploying schema changes or context refactors
+- To verify subscription health across all roles
+- Before merging large PRs
+- When asked to "recrawl", "check all routes", or "verify console errors"
+- After fixing subscription storms or rerender loops
+- Periodic health checks
+
+## Prerequisites
+
+Before running this skill, ensure:
+
+1. **Sandbox is running**: `npm run sandbox:with-logs`
+2. **`.env.test` exists** with valid credentials (see `.env.test.example`)
+3. **Seed data deployed** (optional, for dynamic routes): `test/integration/seed-data.json`
+   4 . **Collab server running** `npm run dev:collab:with-logs`
+
+## Execution Phases
+
+### Phase 1: Pre-flight Checks (1 minute)
+
+Verify environment readiness:
+
+```bash
+# Confirm .env.test exists
+cat .env.test
+
+# Confirm dev server responding
+curl -ks https://localhost:3000 | head -5
+
+# Confirm sandbox running (check for recent log activity)
+tail -5 test/logs/sandbox.log
+```
+
+If any check fails, report the issue and stop.
+
+### Phase 2: Run Crawl Script (5-15 minutes)
+
+Execute the crawler across all roles:
+
+```bash
+npm run crawl:with-logs
+```
+
+This runs `scripts/crawl-console.mjs` which:
+
+- Logs in as each role (admin, instructor, learner)
+- Navigates to all static + dynamic routes
+- Collects console messages (errors, warnings, info)
+- Detects subscription storms (same message repeated ≥5x)
+- Detects resubscribe patterns (observeQuery/unsubscribe churn)
+- Detects extra dispatches (SUBSCRIPTION_UPDATE floods)
+- Detects rerender issues (Maximum update depth, too many re-renders)
+
+**Output**: Console summary + `test/results/crawl.log`
+
+### Phase 3: Analyze Crawl Results (2-3 minutes)
+
+Parse the crawl output for categorized issues:
+
+| Category                | Detection Pattern                          | Severity |
+| ----------------------- | ------------------------------------------ | -------- |
+| **Console Errors**      | `[ERROR]` or `[PAGEERROR]` in output       | HIGH     |
+| **Subscription Storms** | `[STORM] "message" xN` where N≥5           | HIGH     |
+| **Rerender Loops**      | `[RERENDER]` — Maximum update depth        | CRITICAL |
+| **Resubscribes**        | `[RESUBSCRIBE]` — observeQuery churn       | MEDIUM   |
+| **Extra Dispatches**    | Repeated SUBSCRIPTION_UPDATE/SET_LOGS      | MEDIUM   |
+| **Navigation Errors**   | `[NAVIGATION-ERROR]` — page failed to load | HIGH     |
+
+Report findings grouped by role and page.
+
+### Phase 4: Verify Backend Logs (2-3 minutes)
+
+Check `test/logs/sandbox.log` for backend issues that correlate with frontend errors:
+
+```bash
+# Check for recent errors in sandbox logs
+grep -i "error\|exception\|failed\|timeout" test/logs/sandbox.log | tail -30
+
+# Check for DynamoDB throttling
+grep -i "throttl\|capacity\|ProvisionedThroughputExceededException" test/logs/sandbox.log | tail -10
+
+# Check for auth failures
+grep -i "unauthorized\|forbidden\|token.*expir" test/logs/sandbox.log | tail -10
+
+# Check for subscription-related backend issues
+grep -i "subscription\|websocket\|connection" test/logs/sandbox.log | tail -10
+```
+
+### Phase 5: Verify Collaboration Logs (1-2 minutes)
+
+If `test/logs/collab.log` exists, check for collaboration server issues:
+
+```bash
+# Check collab server health
+if [ -f test/logs/collab.log ]; then
+  echo "=== Collab Log Errors ==="
+  grep -i "error\|exception\|crash\|ECONNREFUSED" test/logs/collab.log | tail -20
+
+  echo "=== Collab Sync Issues ==="
+  grep -i "sync.*fail\|document.*not.*found\|awareness" test/logs/collab.log | tail -10
+
+  echo "=== Collab Connection Issues ==="
+  grep -i "disconnect\|timeout\|reconnect" test/logs/collab.log | tail -10
+else
+  echo "No test/logs/collab.log found — collab server may not be running"
+fi
+```
+
+### Phase 6: Summary Report (1 minute)
+
+Produce a structured summary:
+
+```
+═══════════════════════════════════════════════════════════
+  CONSOLE CRAWL AUDIT RESULTS — {date}
+═══════════════════════════════════════════════════════════
+
+CRAWL RESULTS:
+  Admin:      {N} pages — {errors} errors, {storms} storms
+  Instructor: {N} pages — {errors} errors, {storms} storms
+  Learner:    {N} pages — {errors} errors, {storms} storms
+
+CRITICAL ISSUES:
+  - [page] [role] description of issue
+
+BACKEND (test/logs/sandbox.log):
+  - {N} errors, {N} throttles, {N} auth failures
+
+COLLABORATION (test/logs/collab.log):
+  - {status: healthy | issues found | not running}
+
+VERDICT: {PASS | ISSUES FOUND | CRITICAL FAILURES}
+═══════════════════════════════════════════════════════════
+```
+
+## Issue Categories & Fix Guidance
+
+### Subscription Storms
+
+Repeated identical console messages (≥5x in 5 seconds on one page).
+
+**Common causes**:
+
+- Missing `_version` deduplication in subscription callback
+- Context provider re-mounting and resubscribing
+- Client-side filter function creating new references each render
+
+**Fix pattern**: Add `versionRef` dedup (see `amplify-gen2-subscriptions` memory note)
+
+### Resubscribe Churn
+
+Multiple `observeQuery` / `unsubscribe` messages on a single page.
+
+**Common causes**:
+
+- useEffect dependency array including objects that change identity
+- Context not memoizing subscription setup
+- StrictMode double-mount (expected in dev, but shouldn't cause errors)
+
+**Fix pattern**: Stabilize useEffect deps, use `useRef` for subscription tracking
+
+### Extra Dispatches
+
+Flood of `SUBSCRIPTION_UPDATE` or `SET_LOGS` actions.
+
+**Common causes**:
+
+- Subscription not deduplicating by `_version`
+- Reducer not short-circuiting when state hasn't changed
+- Missing `React.memo` on expensive child consumers
+
+### Rerender Loops
+
+`Maximum update depth exceeded` or `too many re-renders`.
+
+**Common causes**:
+
+- setState called unconditionally in useEffect
+- Derived state computed in render that triggers another render
+- Circular context dependencies
+
+**Fix pattern**: Move to `useMemo` / `useCallback`, add guards before setState
+
+## Quick Run (Copy-Paste)
+
+```bash
+# One-liner: crawl + check logs
+npm run crawl:with-logs && echo "--- SANDBOX ERRORS ---" && grep -ic "error" test/logs/sandbox.log && echo "--- COLLAB ERRORS ---" && (grep -ic "error" test/logs/collab.log 2>/dev/null || echo "no collab.log")
+```
+
+## Environment Variables
+
+From `.env.test`:
+
+| Variable                    | Description                        | Default                   |
+| --------------------------- | ---------------------------------- | ------------------------- |
+| `TEST_USER_PASSWORD`        | Shared password for all test users | `TestPassword123!`        |
+| `CRAWL_ADMIN_USERNAME`      | Admin user email                   | `admin@example.com`       |
+| `CRAWL_INSTRUCTOR_USERNAME` | Instructor user email              | `instructor1@example.com` |
+| `CRAWL_LEARNER_USERNAME`    | Learner user email                 | `student1@example.com`    |
+| `CRAWL_BASE_URL`            | Dev server URL                     | `https://localhost:3000`  |
+
+## Files Referenced
+
+- `scripts/crawl-console.mjs` — The crawler script (Playwright-based)
+- `.env.test` — Credentials (not committed)
+- `.env.test.example` — Template for credentials
+- `test/logs/sandbox.log` — Amplify sandbox backend logs (from `npm run sandbox:with-logs`)
+- `test/logs/collab.log` — Collaboration server logs (from `npm run dev:collab:with-logs`)
+- `test/results/crawl.log` — Output from `npm run crawl:with-logs`
+- `test/integration/seed-data.json` — Fixture for dynamic route IDs

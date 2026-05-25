@@ -3,9 +3,6 @@ import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { SkillTreeClient } from "./SkillTreeClient";
 
-// Server-cached: revalidate every 5 minutes (skill definitions change rarely)
-export const revalidate = 300;
-
 export default async function SkillsPage() {
   let initialSkills: any[] = [];
 

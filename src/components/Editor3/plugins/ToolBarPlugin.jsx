@@ -2470,308 +2470,308 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
           background-color: var(--mui-palette-action-selected, #e0e0e0);
         }
       `}</style>
-      <div ref={ref} style={{ display: 'none' }} />
-      {toolbarPortalRef?.current && createPortal(
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <UnitTitleDescriptionEditor />
-          <AppBar
-            ref={secondAppBarRef}
-            position="static"
-            color="default"
-            data-tour="editor-toolbar"
+      <div ref={ref} style={{ display: "none" }} />
+      {toolbarPortalRef?.current &&
+        createPortal(
+          <Box
             sx={{
-              overflowX: "visible",
-              boxShadow: "none",
-              backgroundColor: "transparent",
-              paddingTop: "0.25rem",
-              borderBottom: 1,
-              borderColor: "divider",
-              paddingBottom: "0.25rem",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            {/* Left scroll arrow */}
-            {showLeftArrow && (
-              <Button
-                color="inherit"
-                onClick={() => scrollToolbar("left")}
-                sx={{
-                  position: "absolute",
-                  left: 0,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  zIndex: 10,
-                  minWidth: "2.5rem",
-                  height: "2rem",
-                  padding: "0.2rem",
-                  borderRadius: 0,
-                  backgroundColor: "background.paper",
-                  border: 1,
-                  borderColor: "divider",
-                  boxShadow: 2,
-                  "&:hover": {
-                    backgroundColor: "action.hover",
-                    boxShadow: 3,
-                  },
-                }}
-                title={t("toolBarPlugin.scrollToolbarLeft")}
-                aria-label={t("toolBarPlugin.scrollToolbarLeft")}
-              >
-                <KeyboardArrowLeftIcon />
-              </Button>
-            )}
-
-            <Toolbar
-              ref={toolbarRef}
-              className="editor-toolbar"
-              variant="dense"
-              disableGutters={true}
-              onScroll={checkToolbarOverflow}
+            <UnitTitleDescriptionEditor />
+            <AppBar
+              ref={secondAppBarRef}
+              position="static"
+              color="default"
+              data-tour="editor-toolbar"
               sx={{
-                margin: "auto",
-                width: "100%",
-                maxWidth: "100%",
-                paddingLeft: "3rem",
-                paddingRight: "3rem",
+                overflowX: "visible",
+                boxShadow: "none",
+                backgroundColor: "transparent",
                 paddingTop: "0.25rem",
+                borderBottom: 1,
+                borderColor: "divider",
                 paddingBottom: "0.25rem",
-                minHeight: "2.5rem",
-                overflowX: "auto",
-                overflowY: "visible",
-                scrollbarWidth: "none", // Firefox
-                "&::-webkit-scrollbar": {
-                  display: "none", // Chrome, Safari
-                },
-                msOverflowStyle: "none", // IE/Edge
               }}
             >
-              <Button
-                color="inherit"
-                disabled={!canUndo || !isEditable}
-                onClick={() => {
-                  activeEditor.dispatchCommand(UNDO_COMMAND, undefined);
-                }}
-                title={
-                  IS_APPLE
-                    ? t("toolBarPlugin.undo") + " (⌘Z)"
-                    : t("toolBarPlugin.undo") + " (Ctrl+Z)"
-                }
-              >
-                <UndoIcon />
-              </Button>
-              <Button
-                color="inherit"
-                disabled={!canRedo || !isEditable}
-                onClick={() => {
-                  activeEditor.dispatchCommand(REDO_COMMAND, undefined);
-                }}
-                title={
-                  IS_APPLE
-                    ? t("toolBarPlugin.redo") + " (⌘Y)"
-                    : t("toolBarPlugin.redo") + " (Ctrl+Y)"
-                }
-              >
-                <RedoIcon />
-              </Button>
+              {/* Left scroll arrow */}
+              {showLeftArrow && (
+                <Button
+                  color="inherit"
+                  onClick={() => scrollToolbar("left")}
+                  sx={{
+                    position: "absolute",
+                    left: 0,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    zIndex: 10,
+                    minWidth: "2.5rem",
+                    height: "2rem",
+                    padding: "0.2rem",
+                    borderRadius: 0,
+                    backgroundColor: "background.paper",
+                    border: 1,
+                    borderColor: "divider",
+                    boxShadow: 2,
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      boxShadow: 3,
+                    },
+                  }}
+                  title={t("toolBarPlugin.scrollToolbarLeft")}
+                  aria-label={t("toolBarPlugin.scrollToolbarLeft")}
+                >
+                  <KeyboardArrowLeftIcon />
+                </Button>
+              )}
 
-              <Save />
-
-              <BlockFormatDropDown
-                disabled={!isEditable}
-                blockType={blockType}
-                rootType={rootType}
-                editor={activeEditor}
-              />
-
-              <FontDropDown
-                disabled={!isEditable}
-                style={"font-family"}
-                value={fontFamily}
-                editor={activeEditor}
-              />
-
-              <FontSizeInput
-                disabled={!isEditable}
-                value={fontSize}
-                editor={activeEditor}
-              />
-              <Divider />
-              <Button
-                disabled={!isEditable}
-                color="inherit"
-                onClick={() => {
-                  activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
-                }}
-                className={isBold ? "active" : ""}
-                title={
-                  IS_APPLE
-                    ? t("toolBarPlugin.bold") + " (⌘B)"
-                    : t("toolBarPlugin.bold") + " (Ctrl+B)"
-                }
-                type="button"
-                aria-label={
-                  t("toolBarPlugin.formatBold") +
-                  ` ${IS_APPLE ? "⌘B" : "Ctrl+B"}`
-                }
-              >
-                <FormatBoldIcon />
-              </Button>
-              <Button
-                disabled={!isEditable}
-                color="inherit"
-                onClick={() => {
-                  activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
-                }}
-                className={isItalic ? "active" : ""}
-                title={
-                  IS_APPLE
-                    ? t("toolBarPlugin.italic") + " (⌘I)"
-                    : t("toolBarPlugin.italic") + " (Ctrl+I)"
-                }
-                type="button"
-                aria-label={
-                  t("toolBarPlugin.formatItalic") +
-                  ` ${IS_APPLE ? "⌘I" : "Ctrl+I"}`
-                }
-              >
-                <FormatItalicIcon />
-              </Button>
-              <Button
-                disabled={!isEditable}
-                color="inherit"
-                onClick={() => {
-                  activeEditor.dispatchCommand(
-                    FORMAT_TEXT_COMMAND,
-                    "underline",
-                  );
-                }}
-                className={isUnderline ? "active" : ""}
-                title={
-                  IS_APPLE
-                    ? t("toolBarPlugin.underline") + " (⌘U)"
-                    : t("toolBarPlugin.underline") + " (Ctrl+U)"
-                }
-                type="button"
-                aria-label={
-                  t("toolBarPlugin.formatUnderline") +
-                  ` ${IS_APPLE ? "⌘U" : "Ctrl+U"}`
-                }
-              >
-                <FormatUnderlinedIcon />
-              </Button>
-
-              <DropdownColorPicker
-                disabled={!isEditable}
-                buttonAriaLabel={t("toolBarPlugin.formattingTextColor")}
-                color={fontColor}
-                onChange={onFontColorSelect}
-                title={t("toolBarPlugin.textColor")}
-                editor={activeEditor}
-              />
-              <DropdownColorPicker
-                disabled={!isEditable}
-                buttonAriaLabel={t("toolBarPlugin.formattingBackgroundColor")}
-                color={bgColor}
-                onChange={onBgColorSelect}
-                title={t("toolBarPlugin.backgroundColor")}
-                isBackgroundColor={true}
-                editor={activeEditor}
-              />
-
-              <TextFormatDropDown
-                activeEditor={activeEditor}
-                isStrikethrough={isStrikethrough}
-                isSubscript={isSubscript}
-                isSuperscript={isSuperscript}
-                isCode={isCode}
-                disabled={!isEditable}
-                clearFormatting={clearFormatting}
-              />
-
-              <TextAlignmentDropdown
-                disabled={!isEditable}
-                activeEditor={activeEditor}
-                isRTL={isRTL}
-              />
-
-              <Divider
-                sx={{ margin: "0.25rem" }}
-                orientation="vertical"
-                variant="middle"
-                flexItem
-              />
-
-              <Button
-                disabled={!isEditable}
-                color="inherit"
-                onClick={insertLink}
-                className={isLink ? "active" : ""}
-                aria-label={t("toolBarPlugin.insertLink")}
-                title={t("toolBarPlugin.insertLink")}
-              >
-                <AddLinkIcon />
-              </Button>
-
-              <InsertNodeDropDown
-                disabled={!isEditable}
-                editor={editor}
-                blockType={blockType}
-                setOpenTab={setOpen}
-                setTabValue={setTabValue}
-              />
-
-              <Divider
-                sx={{ margin: "0.25rem" }}
-                orientation="vertical"
-                variant="middle"
-                flexItem
-              />
-
-              <PreviewModal />
-
-              <StatusSelect />
-
-              <DeleteModal />
-            </Toolbar>
-
-            {/* Right scroll arrow */}
-            {showRightArrow && (
-              <Button
-                color="inherit"
-                onClick={() => scrollToolbar("right")}
+              <Toolbar
+                ref={toolbarRef}
+                className="editor-toolbar"
+                variant="dense"
+                disableGutters={true}
+                onScroll={checkToolbarOverflow}
                 sx={{
-                  position: "absolute",
-                  right: 0,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  zIndex: 10,
-                  minWidth: "2.5rem",
-                  height: "2rem",
-                  padding: "0.2rem",
-                  borderRadius: 0,
-                  backgroundColor: "background.paper",
-                  border: 1,
-                  borderColor: "divider",
-                  boxShadow: 2,
-                  "&:hover": {
-                    backgroundColor: "action.hover",
-                    boxShadow: 3,
+                  margin: "auto",
+                  width: "100%",
+                  maxWidth: "100%",
+                  paddingLeft: "3rem",
+                  paddingRight: "3rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
+                  minHeight: "2.5rem",
+                  overflowX: "auto",
+                  overflowY: "visible",
+                  scrollbarWidth: "none", // Firefox
+                  "&::-webkit-scrollbar": {
+                    display: "none", // Chrome, Safari
                   },
+                  msOverflowStyle: "none", // IE/Edge
                 }}
-                title={t("toolBarPlugin.scrollToolbarRight")}
-                aria-label={t("toolBarPlugin.scrollToolbarRight")}
               >
-                <KeyboardArrowRightIcon />
-              </Button>
-            )}
-          </AppBar>
-        </Box>
+                <Button
+                  color="inherit"
+                  disabled={!canUndo || !isEditable}
+                  onClick={() => {
+                    activeEditor.dispatchCommand(UNDO_COMMAND, undefined);
+                  }}
+                  title={
+                    IS_APPLE
+                      ? t("toolBarPlugin.undo") + " (⌘Z)"
+                      : t("toolBarPlugin.undo") + " (Ctrl+Z)"
+                  }
+                >
+                  <UndoIcon />
+                </Button>
+                <Button
+                  color="inherit"
+                  disabled={!canRedo || !isEditable}
+                  onClick={() => {
+                    activeEditor.dispatchCommand(REDO_COMMAND, undefined);
+                  }}
+                  title={
+                    IS_APPLE
+                      ? t("toolBarPlugin.redo") + " (⌘Y)"
+                      : t("toolBarPlugin.redo") + " (Ctrl+Y)"
+                  }
+                >
+                  <RedoIcon />
+                </Button>
 
-        {/*
+                <Save />
+
+                <BlockFormatDropDown
+                  disabled={!isEditable}
+                  blockType={blockType}
+                  rootType={rootType}
+                  editor={activeEditor}
+                />
+
+                <FontDropDown
+                  disabled={!isEditable}
+                  style={"font-family"}
+                  value={fontFamily}
+                  editor={activeEditor}
+                />
+
+                <FontSizeInput
+                  disabled={!isEditable}
+                  value={fontSize}
+                  editor={activeEditor}
+                />
+                <Divider />
+                <Button
+                  disabled={!isEditable}
+                  color="inherit"
+                  onClick={() => {
+                    activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+                  }}
+                  className={isBold ? "active" : ""}
+                  title={
+                    IS_APPLE
+                      ? t("toolBarPlugin.bold") + " (⌘B)"
+                      : t("toolBarPlugin.bold") + " (Ctrl+B)"
+                  }
+                  type="button"
+                  aria-label={
+                    t("toolBarPlugin.formatBold") +
+                    ` ${IS_APPLE ? "⌘B" : "Ctrl+B"}`
+                  }
+                >
+                  <FormatBoldIcon />
+                </Button>
+                <Button
+                  disabled={!isEditable}
+                  color="inherit"
+                  onClick={() => {
+                    activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+                  }}
+                  className={isItalic ? "active" : ""}
+                  title={
+                    IS_APPLE
+                      ? t("toolBarPlugin.italic") + " (⌘I)"
+                      : t("toolBarPlugin.italic") + " (Ctrl+I)"
+                  }
+                  type="button"
+                  aria-label={
+                    t("toolBarPlugin.formatItalic") +
+                    ` ${IS_APPLE ? "⌘I" : "Ctrl+I"}`
+                  }
+                >
+                  <FormatItalicIcon />
+                </Button>
+                <Button
+                  disabled={!isEditable}
+                  color="inherit"
+                  onClick={() => {
+                    activeEditor.dispatchCommand(
+                      FORMAT_TEXT_COMMAND,
+                      "underline",
+                    );
+                  }}
+                  className={isUnderline ? "active" : ""}
+                  title={
+                    IS_APPLE
+                      ? t("toolBarPlugin.underline") + " (⌘U)"
+                      : t("toolBarPlugin.underline") + " (Ctrl+U)"
+                  }
+                  type="button"
+                  aria-label={
+                    t("toolBarPlugin.formatUnderline") +
+                    ` ${IS_APPLE ? "⌘U" : "Ctrl+U"}`
+                  }
+                >
+                  <FormatUnderlinedIcon />
+                </Button>
+
+                <DropdownColorPicker
+                  disabled={!isEditable}
+                  buttonAriaLabel={t("toolBarPlugin.formattingTextColor")}
+                  color={fontColor}
+                  onChange={onFontColorSelect}
+                  title={t("toolBarPlugin.textColor")}
+                  editor={activeEditor}
+                />
+                <DropdownColorPicker
+                  disabled={!isEditable}
+                  buttonAriaLabel={t("toolBarPlugin.formattingBackgroundColor")}
+                  color={bgColor}
+                  onChange={onBgColorSelect}
+                  title={t("toolBarPlugin.backgroundColor")}
+                  isBackgroundColor={true}
+                  editor={activeEditor}
+                />
+
+                <TextFormatDropDown
+                  activeEditor={activeEditor}
+                  isStrikethrough={isStrikethrough}
+                  isSubscript={isSubscript}
+                  isSuperscript={isSuperscript}
+                  isCode={isCode}
+                  disabled={!isEditable}
+                  clearFormatting={clearFormatting}
+                />
+
+                <TextAlignmentDropdown
+                  disabled={!isEditable}
+                  activeEditor={activeEditor}
+                  isRTL={isRTL}
+                />
+
+                <Divider
+                  sx={{ margin: "0.25rem" }}
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                />
+
+                <Button
+                  disabled={!isEditable}
+                  color="inherit"
+                  onClick={insertLink}
+                  className={isLink ? "active" : ""}
+                  aria-label={t("toolBarPlugin.insertLink")}
+                  title={t("toolBarPlugin.insertLink")}
+                >
+                  <AddLinkIcon />
+                </Button>
+
+                <InsertNodeDropDown
+                  disabled={!isEditable}
+                  editor={editor}
+                  blockType={blockType}
+                  setOpenTab={setOpen}
+                  setTabValue={setTabValue}
+                />
+
+                <Divider
+                  sx={{ margin: "0.25rem" }}
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                />
+
+                <PreviewModal />
+
+                <StatusSelect />
+
+                <DeleteModal />
+              </Toolbar>
+
+              {/* Right scroll arrow */}
+              {showRightArrow && (
+                <Button
+                  color="inherit"
+                  onClick={() => scrollToolbar("right")}
+                  sx={{
+                    position: "absolute",
+                    right: 0,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    zIndex: 10,
+                    minWidth: "2.5rem",
+                    height: "2rem",
+                    padding: "0.2rem",
+                    borderRadius: 0,
+                    backgroundColor: "background.paper",
+                    border: 1,
+                    borderColor: "divider",
+                    boxShadow: 2,
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      boxShadow: 3,
+                    },
+                  }}
+                  title={t("toolBarPlugin.scrollToolbarRight")}
+                  aria-label={t("toolBarPlugin.scrollToolbarRight")}
+                >
+                  <KeyboardArrowRightIcon />
+                </Button>
+              )}
+            </AppBar>
+
+            {/*
 
 
 
@@ -2985,9 +2985,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
         //     )}
         //     <Divider />
         */}
-        </Box>,
-        toolbarPortalRef.current
-      )}
+          </Box>,
+          toolbarPortalRef.current,
+        )}
     </>
   );
 });

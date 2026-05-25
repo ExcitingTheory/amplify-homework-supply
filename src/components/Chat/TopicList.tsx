@@ -158,7 +158,7 @@ export function TopicList({
                   fontWeight: topic.pinned ? 600 : 400,
                 }}
                 secondary={
-                  topic.scope !== 'section' && topic.scope !== 'guild'
+                  topic.scope !== 'section' && topic.scope !== 'squad'
                     ? topic.scope.split(':')[0]
                     : undefined
                 }

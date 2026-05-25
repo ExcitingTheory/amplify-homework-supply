@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import Box from '@mui/material/Box'
 import { PixelSpriteMascot } from './PixelSpriteMascot'
 
@@ -68,12 +68,12 @@ export const Sleeping: Story = {
   },
 }
 
-export const GuildPet: Story = {
+export const SquadPet: Story = {
   args: {
-    seed: 'guild-phoenix-squad',
+    seed: 'squad-phoenix-squad',
     stage: 4,
     size: 96,
-    label: 'Guild Pet',
+    label: 'Squad Pet',
     tooltip: 'Phoenix Squad mascot (Stage 4)',
   },
 }

@@ -373,7 +373,7 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
         input: {
           id: fileId,
           description: "Generated audio - completed",
-          _version: fileData?.getFile?._version,
+          _version: fileData?.getFile?._version ?? 1,
         },
       },
     });
@@ -394,7 +394,7 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
-            _version: errFileData?.getFile?._version,
+            _version: errFileData?.getFile?._version ?? 1,
           },
         },
       });
@@ -518,7 +518,7 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
         input: {
           id: fileId,
           description: "Generated image - completed",
-          _version: fileData?.getFile?._version,
+          _version: fileData?.getFile?._version ?? 1,
         },
       },
     });
@@ -539,7 +539,7 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
-            _version: errFileData?.getFile?._version,
+            _version: errFileData?.getFile?._version ?? 1,
           },
         },
       });

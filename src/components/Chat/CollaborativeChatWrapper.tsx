@@ -21,7 +21,7 @@ import { MemberInfo } from '../../utils/chatMentions'
 
 export interface CollaborativeChatWrapperProps {
   /** Override room type (defaults to auto-detect from route) */
-  roomType?: 'section' | 'guild'
+  roomType?: 'section' | 'squad'
   /** Override room ID */
   roomId?: string
   /** Override scope */
@@ -65,12 +65,12 @@ export function CollaborativeChatWrapper({
     const id = params?.id as string | undefined
     if (pathname?.includes('/unit/') && id) return `unit:${id}` as TopicScope
     if (pathname?.includes('/workbook/') && id) return `workbook:${id}` as TopicScope
-    if (pathname?.includes('/guild')) return 'guild' as TopicScope
+    if (pathname?.includes('/squad')) return 'squad' as TopicScope
     return 'section' as TopicScope
   }, [pathname, params, scopeProp])
 
   // Auto-detect room type and ID
-  const roomType: 'section' | 'guild' = roomTypeProp || (detectedScope === 'guild' ? 'guild' : 'section')
+  const roomType: 'section' | 'squad' = roomTypeProp || (detectedScope === 'squad' ? 'squad' : 'section')
 
   const roomId = useMemo(() => {
     if (roomIdProp) return roomIdProp

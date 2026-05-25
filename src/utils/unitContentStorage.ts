@@ -1,4 +1,4 @@
-import { uploadData, downloadData } from "aws-amplify/storage";
+import { uploadData, downloadData, list } from "aws-amplify/storage";
 
 /** S3 key helpers — require identityId (from Unit.identityId) */
 function draftKey(identityId: string, unitId: string): string {
@@ -59,14 +59,17 @@ export async function loadYjsSnapshot(
   unitId: string,
 ): Promise<Uint8Array | null> {
   try {
-    const result = await downloadData({
-      path: yjsSnapshotKey(identityId, unitId),
-    }).result;
+    const path = yjsSnapshotKey(identityId, unitId);
+    // Check if the file exists first to avoid 404 console errors
+    const { items } = await list({ path });
+    if (!items || items.length === 0) return null;
+
+    const result = await downloadData({ path }).result;
     const blob = await result.body.blob();
     const buffer = await blob.arrayBuffer();
     return new Uint8Array(buffer);
   } catch {
-    return null; // File doesn't exist yet
+    return null; // File doesn't exist yet or download failed
   }
 }
 
@@ -159,3 +162,30 @@ export async function restoreVersion(
   await saveDraftContent(identityId, unitId, content);
   return true;
 }
+
+/**
+ * List all version history entries for a unit.
+ * Returns version numbers in descending order (newest first).
+ */
+export async function listVersionHistory(
+  identityId: string,
+  unitId: string,
+): Promise<number[]> {
+  try {
+    const prefix = `private/${identityId}/units/${unitId}/history/`;
+    const result = await list({ path: prefix });
+    const versions = result.items
+      .map((item) => {
+        const match = item.path.match(/\/v(\d+)\.json$/);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((v): v is number => v != null)
+      .sort((a, b) => b - a);
+    return versions;
+  } catch {
+    return [];
+  }
+}
+
+// Re-export key helpers for server-side usage
+export { draftKey, publishedKey, yjsSnapshotKey, historyKey };

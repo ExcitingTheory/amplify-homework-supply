@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { getCurrentUser } from "aws-amplify/auth";
@@ -15,8 +15,12 @@ import GridOnIcon from "@mui/icons-material/GridOn";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
-import { GuildLeaderboard } from "@/components/Gamification/GuildLeaderboard";
-import { useGuild } from "@/context/gamificationContext";
+import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
+import { useSquad } from "@/context/gamificationContext";
+import {
+  trackSquadLeaderboardViewed,
+  trackSquadLeaderboardModeChanged,
+} from "@/utils/analytics";
 
 interface LeaderboardEntry {
   studentId: string;
@@ -26,6 +30,10 @@ interface LeaderboardEntry {
   level: number;
   currentStreak: number;
   completedAssignments: number;
+  avatarStyle?: string;
+  avatarOverrides?: any;
+  avatarSeed?: string;
+  avatarLoaded?: boolean;
 }
 
 /**
@@ -41,7 +49,13 @@ export function LiveLeaderboard({
   const [mode, setMode] = useState("completion");
   const [entries, setEntries] = useState<LeaderboardEntry[]>(initialEntries);
   const [currentUserId, setCurrentUserId] = useState("");
-  const { guildLeaderboard, myGuild } = useGuild();
+  const { squadLeaderboard, mySquad } = useSquad();
+  const lastCountRef = useRef(initialEntries.length);
+
+  // Track leaderboard viewed once on mount
+  useEffect(() => {
+    trackSquadLeaderboardViewed(mySquad?.cohortId || "");
+  }, [mySquad?.cohortId]);
 
   useEffect(() => {
     getCurrentUser()
@@ -59,10 +73,18 @@ export function LiveLeaderboard({
     const subscription = client.models.StudentProfile.observeQuery().subscribe({
       next: ({ items }: any) => {
         const valid = items.filter((item: any) => item != null && item.id != null);
+        // Skip if count hasn't changed (simple dedup for initial echo)
+        if (valid.length === lastCountRef.current && lastCountRef.current > 0) return;
+        lastCountRef.current = valid.length;
+
         const byStudent = new Map<string, LeaderboardEntry>();
         for (const entry of valid) {
           const existing = byStudent.get(entry.studentId);
           if (!existing || (entry.totalXP || 0) > existing.totalXP) {
+            let parsedOverrides = entry.avatarOverrides;
+            if (typeof parsedOverrides === "string") {
+              try { parsedOverrides = JSON.parse(parsedOverrides); } catch { parsedOverrides = undefined; }
+            }
             byStudent.set(entry.studentId, {
               studentId: entry.studentId,
               studentName: entry.studentName || entry.studentId,
@@ -71,6 +93,10 @@ export function LiveLeaderboard({
               level: entry.level || 1,
               currentStreak: entry.currentStreak || 0,
               completedAssignments: entry.completedAssignments || 0,
+              avatarStyle: entry.avatarStyle || undefined,
+              avatarOverrides: parsedOverrides,
+              avatarSeed: entry.avatarSeed || entry.studentId,
+              avatarLoaded: !!entry.avatarStyle,
             });
           }
         }
@@ -89,8 +115,27 @@ export function LiveLeaderboard({
     return () => subscription.unsubscribe();
   }, []);
 
+  // Squad entries with member avatars come directly from the Squad model (denormalized)
+  const squadsWithMembers = React.useMemo(() => {
+    return squadLeaderboard.map((g: any) => ({
+      id: g.id,
+      name: g.name,
+      totalXP: g.totalXP || 0,
+      memberCount: g.memberCount || 0,
+      members: (g.members || []).map((m: any) => ({
+        studentId: m.studentId,
+        avatarStyle: m.avatarStyle,
+        avatarOverrides: m.avatarOverrides,
+        avatarSeed: m.avatarSeed || m.studentId,
+      })),
+    }));
+  }, [squadLeaderboard]);
+
   const handleModeChange = (_event: any, newMode: string | null) => {
-    if (newMode) setMode(newMode);
+    if (newMode) {
+      setMode(newMode);
+      trackSquadLeaderboardModeChanged(mySquad?.cohortId || "", newMode);
+    }
   };
 
   return (
@@ -124,11 +169,11 @@ export function LiveLeaderboard({
             {t("leaderboard.completionMode", "Completion")}
           </ToggleButton>
           <ToggleButton
-            value="guilds"
-            aria-label={t("leaderboard.guildsMode", "Guilds")}
+            value="squads"
+            aria-label={t("leaderboard.squadsMode", "Squads")}
           >
             <GroupsIcon sx={{ mr: 0.5 }} />
-            {t("leaderboard.guildsMode", "Guilds")}
+            {t("leaderboard.squadsMode", "Squads")}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -156,15 +201,10 @@ export function LiveLeaderboard({
         />
       )}
 
-      {mode === "guilds" && (
-        <GuildLeaderboard
-          guilds={guildLeaderboard.map((g: any) => ({
-            id: g.id,
-            name: g.name,
-            totalXP: g.totalXP || 0,
-            memberCount: g.memberCount || 0,
-          }))}
-          myGuildId={myGuild?.id}
+      {mode === "squads" && (
+        <SquadLeaderboard
+          squads={squadsWithMembers}
+          mySquadId={mySquad?.id}
         />
       )}
 

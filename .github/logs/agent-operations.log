@@ -96,3 +96,5 @@
 {"timestamp":"2026-05-18T03:13:30.765Z","operation":"write","path":"test.txt","result":"allowed"}
 {"timestamp":"2026-05-18T03:14:58.778Z","operation":"write","path":"test.txt","result":"allowed"}
 {"timestamp":"2026-05-18T03:18:46.040Z","operation":"write","path":"test.txt","result":"allowed"}
+{"timestamp":"2026-05-21T03:20:38.163Z","operation":"write","path":"test.txt","result":"allowed"}
+{"timestamp":"2026-05-21T03:23:02.667Z","operation":"write","path":"test.txt","result":"allowed"}

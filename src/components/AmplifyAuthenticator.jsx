@@ -183,7 +183,9 @@ export default function MyAuth({ children }) {
       >
         {({ signOut, user }) =>
           React.Children.map(children, (child) =>
-            React.cloneElement(child, { signOut, user }),
+            React.isValidElement(child) && typeof child.type === "function"
+              ? React.cloneElement(child, { signOut, user })
+              : child,
           )
         }
       </Authenticator>

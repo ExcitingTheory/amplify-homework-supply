@@ -106,10 +106,16 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
               unitId as string,
             );
             if (yjsBytes) {
-              Y.applyUpdate(provider.getDoc(), yjsBytes);
-              console.log(
-                `[useYjsUnit] Applied Yjs snapshot from S3 for unit ${unitId}`,
-              );
+              const applied = provider.applyUpdate(yjsBytes);
+              if (applied) {
+                console.log(
+                  `[useYjsUnit] Applied Yjs snapshot from S3 for unit ${unitId}`,
+                );
+              } else {
+                console.warn(
+                  `[useYjsUnit] S3 snapshot for unit ${unitId} was corrupt — skipped`,
+                );
+              }
             }
           } catch (err) {
             console.warn("[useYjsUnit] Failed to load snapshot from S3:", err);
@@ -222,7 +228,7 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
                 unitId as string,
               );
               if (yjsBytes) {
-                Y.applyUpdate(provider.getDoc(), yjsBytes);
+                provider.applyUpdate(yjsBytes);
                 console.log(
                   "[useYjsUnit] Re-applied snapshot from S3 after version conflict",
                 );

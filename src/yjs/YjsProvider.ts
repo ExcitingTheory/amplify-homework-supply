@@ -27,6 +27,10 @@ export class YjsDocProvider {
   private awareness: Awareness;
   private config: Required<YjsProviderConfig>;
   private hasLoggedConnectionError = false;
+  private resetCount = 0;
+  private static MAX_RESETS = 2;
+  private listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
+  private lastStatusLog = '';
 
   private defaultConfig: Required<Omit<YjsProviderConfig, "docName">> = {
     wsUrl:
@@ -86,11 +90,14 @@ export class YjsDocProvider {
         }
       });
 
-      // Handle connection status
+      // Handle connection status - only log changes to reduce noise
       this.wsProvider.on("status", ({ status }: { status: string }) => {
-        console.log(
-          `[YjsProvider] ${this.docName} connection status: ${status}`,
-        );
+        if (status !== this.lastStatusLog) {
+          this.lastStatusLog = status;
+          console.log(
+            `[YjsProvider] ${this.docName} connection status: ${status}`,
+          );
+        }
       });
 
       // Handle errors - log first occurrence, then debug to reduce spam
@@ -105,6 +112,45 @@ export class YjsDocProvider {
           console.debug(
             `[YjsProvider] ${this.docName} connection retry failed`,
           );
+        }
+      });
+
+      // Handle server-initiated close with code 4000 (corrupt state reset)
+      // Clear local IndexedDB to prevent replaying corrupt data on reconnect.
+      // Limit resets to prevent infinite loops.
+      this.wsProvider.on("connection-close", (event: CloseEvent | null) => {
+        if (event?.code === 4000) {
+          this.resetCount++;
+          if (this.resetCount > YjsDocProvider.MAX_RESETS) {
+            console.warn(
+              `[YjsProvider] ${this.docName} exceeded max resets (${YjsDocProvider.MAX_RESETS}) — staying disconnected`,
+            );
+            if (this.wsProvider) {
+              this.wsProvider.destroy();
+              this.wsProvider = null;
+            }
+            return;
+          }
+          console.warn(
+            `[YjsProvider] ${this.docName} server rejected corrupt data — clearing local cache (reset ${this.resetCount}/${YjsDocProvider.MAX_RESETS})`,
+          );
+          // 1. Stop auto-reconnect and destroy current provider
+          if (this.wsProvider) {
+            this.wsProvider.destroy();
+            this.wsProvider = null;
+          }
+          // 2. Clear corrupt IndexedDB data
+          this.clearLocalPersistence();
+          // 3. Reset the local Y.Doc and awareness to empty state
+          this.awareness.destroy();
+          this.ydoc.destroy();
+          this.ydoc = new Y.Doc();
+          this.awareness = new Awareness(this.ydoc);
+          // 4. Notify consumers that doc was replaced
+          this.emit('doc-reset', this.ydoc);
+          // 5. Reconnect with fresh state after a short delay
+          this.hasLoggedConnectionError = false;
+          setTimeout(() => this.setupWebSocket(), 1000);
         }
       });
     } catch (error) {
@@ -214,10 +260,20 @@ export class YjsDocProvider {
   }
 
   /**
-   * Apply an update from another client
+   * Apply an update from another client.
+   * Guarded against corrupt data — returns false if the update failed to apply.
    */
-  applyUpdate(update: Uint8Array): void {
-    Y.applyUpdate(this.ydoc, update);
+  applyUpdate(update: Uint8Array): boolean {
+    try {
+      Y.applyUpdate(this.ydoc, update);
+      return true;
+    } catch (err) {
+      console.warn(
+        `[YjsProvider] ${this.docName} failed to apply update (corrupt data):`,
+        (err as Error).message,
+      );
+      return false;
+    }
   }
 
   /**
@@ -260,6 +316,46 @@ export class YjsDocProvider {
   }
 
   /**
+   * Clear local IndexedDB persistence for this document.
+   * Used to recover from corrupt state without replaying bad data on reconnect.
+   */
+  clearLocalPersistence(): void {
+    if (this.indexeddb) {
+      this.indexeddb.clearData();
+      console.log(
+        `[YjsProvider] Cleared IndexedDB persistence for "${this.docName}"`,
+      );
+    }
+  }
+
+  /**
+   * Subscribe to provider events (e.g., 'doc-reset' when Y.Doc is replaced)
+   */
+  on(event: string, callback: (...args: any[]) => void): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)!.add(callback);
+  }
+
+  /**
+   * Unsubscribe from provider events
+   */
+  off(event: string, callback: (...args: any[]) => void): void {
+    this.listeners.get(event)?.delete(callback);
+  }
+
+  private emit(event: string, ...args: any[]): void {
+    this.listeners.get(event)?.forEach((cb) => {
+      try {
+        cb(...args);
+      } catch (e) {
+        console.warn(`[YjsProvider] Error in ${event} listener:`, e);
+      }
+    });
+  }
+
+  /**
    * Destroy provider and clean up resources
    */
   destroy(): void {
@@ -271,6 +367,7 @@ export class YjsDocProvider {
     }
     this.awareness.destroy();
     this.ydoc.destroy();
+    this.listeners.clear();
   }
 }
 

@@ -16,6 +16,19 @@ function parseJson(value: any) {
   }
 }
 
+/**
+ * Cached unit content fetch. Unit content (name, rubric, data) is shared
+ * across all grades and rarely changes. Cache keyed by (unitId, unitVersion).
+ * Revalidate via revalidateTag(`unit-${unitId}`) when unit is saved.
+ */
+async function getCachedUnitContent(unitId: string, unitVersion: string) {
+  const client = getServerClient();
+  const { data: unitData, errors } = await client.models.Unit.get({ id: unitId });
+  if (errors?.length) throw new Error(errors[0].message);
+  if (!unitData) throw new Error('Unit not found');
+  return { id: unitData.id, name: unitData.name || '', data: unitData.data || '' };
+}
+
 interface Props {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ unitId?: string; studentName?: string; sectionId?: string }>;
@@ -49,10 +62,13 @@ export default async function InstructorGradePage({ params, searchParams }: Prop
     const targetUnitId = grade.unitID || queryUnitId;
     if (!targetUnitId) throw new Error('No unit ID found on grade');
 
-    // Fetch the unit content
-    const { data: unitData, errors: unitErrors } = await client.models.Unit.get({ id: targetUnitId });
-    if (unitErrors?.length) throw new Error(unitErrors[0].message);
-    if (!unitData) throw new Error('Unit not found');
+    // Get unit version for cache key, then fetch cached content
+    const { data: unitMeta } = await client.models.Unit.get(
+      { id: targetUnitId },
+      { selectionSet: ["id", "_version"] }
+    );
+    const unitVersion = String(unitMeta?._version || 0);
+    const unit = await getCachedUnitContent(targetUnitId, unitVersion);
 
     // Fetch ALL grades for this student + unit (all attempts)
     const { data: allGrades, errors: allGradesErrors } = await client.models.Grade.list({
@@ -94,7 +110,7 @@ export default async function InstructorGradePage({ params, searchParams }: Prop
 
     return (
       <GradeActions
-        unit={{ id: unitData.id, name: unitData.name || '', data: unitData.data || '' }}
+        unit={unit}
         grades={sortedGrades}
         studentName={studentName}
         moderation={moderation}

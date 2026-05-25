@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CampaignBriefing } from './CampaignBriefing'
 
 const meta: Meta<typeof CampaignBriefing> = {
-  title: '🏆 Gamification/Guilds & Teams/Campaign Briefing',
+  title: '🏆 Gamification/Squads & Teams/Campaign Briefing',
   component: CampaignBriefing,
   tags: ['autodocs'],
 }

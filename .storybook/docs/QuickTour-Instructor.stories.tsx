@@ -3,7 +3,7 @@
  * Live interactive demo using actual page components with play() interactions.
  */
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { within, waitFor, userEvent } from 'storybook/test';
 import { Box } from '@mui/material';
 import { setMockUser } from '@storybook-mocks/aws-amplify-auth';

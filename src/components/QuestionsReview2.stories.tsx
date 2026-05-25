@@ -11,7 +11,7 @@
  * @module components/QuestionsReview2.stories
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect } from 'storybook/test';
 import { within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

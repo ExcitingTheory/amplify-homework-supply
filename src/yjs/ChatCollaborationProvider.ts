@@ -4,7 +4,7 @@
  * Supports two room types:
  * - Section chat (`chat-section-{sectionId}`) — shared by all section members,
  *   with topics scoped to section/unit/workbook contexts
- * - Guild chat (`chat-guild-{guildId}`) — guild members only
+ * - Squad chat (`chat-squad-{squadId}`) — squad members only
  *
  * Y.Doc structure:
  * - `meta` Y.Map — room metadata (name, type, createdAt)
@@ -22,11 +22,11 @@ import { YjsDocProvider, YjsProviderConfig } from "./YjsProvider";
 // Types
 // ============================================================================
 
-export type ChatRoomType = "section" | "guild";
+export type ChatRoomType = "section" | "squad";
 
 export type TopicScope =
   | "section"
-  | "guild"
+  | "squad"
   | `unit:${string}`
   | `workbook:${string}`;
 
@@ -54,10 +54,14 @@ export interface ChatMessage {
   authorId: string;
   authorName: string;
   content: string;
+  /** Serialized Lexical JSON for rich content (quiz blocks, images, etc.) */
+  contentJson?: string | null;
   mentions: string[];
   createdAt: string;
   editedAt: string | null;
   reactions: Record<string, string[]>;
+  /** True while Kai is streaming a response */
+  isStreaming?: boolean;
 }
 
 export interface ChatRoomConfig extends Omit<YjsProviderConfig, "docName"> {
@@ -230,10 +234,12 @@ export class ChatCollaborationProvider extends YjsDocProvider {
       authorId: this.user.username,
       authorName: this.user.displayName,
       content,
+      contentJson: null,
       mentions,
       createdAt: new Date().toISOString(),
       editedAt: null,
       reactions: {},
+      isStreaming: false,
     };
 
     const threadArray = this.getThreadArray(topicId);
@@ -242,7 +248,12 @@ export class ChatCollaborationProvider extends YjsDocProvider {
     return message;
   }
 
-  editMessage(topicId: string, messageId: string, newContent: string): void {
+  editMessage(
+    topicId: string,
+    messageId: string,
+    newContent: string,
+    contentJson?: string,
+  ): void {
     const threadArray = this.getThreadArray(topicId);
     const items = Array.from(threadArray);
     const index = items.findIndex((m) => m.id === messageId);
@@ -253,6 +264,7 @@ export class ChatCollaborationProvider extends YjsDocProvider {
     const updated: ChatMessage = {
       ...items[index],
       content: newContent,
+      contentJson: contentJson ?? items[index].contentJson,
       mentions: extractMentions(newContent),
       editedAt: new Date().toISOString(),
     };

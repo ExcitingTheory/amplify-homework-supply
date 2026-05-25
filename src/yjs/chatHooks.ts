@@ -48,7 +48,11 @@ export interface UseChatThreadReturn {
   messages: ChatMessage[];
   topLevelMessages: ChatMessage[];
   sendMessage: (content: string, parentId?: string) => ChatMessage | null;
-  editMessage: (messageId: string, content: string) => void;
+  editMessage: (
+    messageId: string,
+    content: string,
+    contentJson?: string,
+  ) => void;
   deleteMessage: (messageId: string) => void;
   addReaction: (messageId: string, emoji: string) => void;
   getReplies: (parentId: string) => ChatMessage[];
@@ -235,9 +239,9 @@ export function useChatThread(
   );
 
   const editMessage = useCallback(
-    (messageId: string, content: string) => {
+    (messageId: string, content: string, contentJson?: string) => {
       if (!provider || !topicId) return;
-      provider.editMessage(topicId, messageId, content);
+      provider.editMessage(topicId, messageId, content, contentJson);
     },
     [provider, topicId],
   );

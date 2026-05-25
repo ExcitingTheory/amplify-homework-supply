@@ -2,7 +2,7 @@
  * Integration test: Full XP pipeline flow through the Lambda handler
  *
  * Tests the realistic sequence:
- *   awardXP → checkBadges → updateStreak → checkPersonalBest → updateGuildXP → contributeToChallenge
+ *   awardXP → checkBadges → updateStreak → checkPersonalBest → updateSquadXP → contributeToChallenge
  *
  * Each call is independent but this test verifies they chain correctly
  * with the same mocked GraphQL layer.
@@ -11,7 +11,7 @@
  * - checkBadges: uses getOrCreateStudentProfile (listStudentProfileByStudentId) + listStudentXPLogByStudentId
  * - updateStreak: uses getOrCreateStudentProfile + updateStudentProfile
  * - checkPersonalBest: uses getOrCreateStudentProfile (reads personalBests JSON) + updateStudentProfile
- * - updateGuildXP: uses getOrCreateStudentProfile (reads cohortId) + listGuildByCohortId + updateGuild
+ * - updateSquadXP: uses getOrCreateStudentProfile (reads cohortId) + listSquadByCohortId + updateSquad
  * - contributeToChallenge: listGroupChallengeByCohortId + updateGroupChallenge (contributions array)
  */
 
@@ -65,7 +65,7 @@ describe("gamification handler — full XP pipeline integration", () => {
     process.env.AWS_REGION = "us-east-1";
   });
 
-  it("completes the full award → badge → streak → personalBest → guild → challenge pipeline", async () => {
+  it("completes the full award → badge → streak → personalBest → squad → challenge pipeline", async () => {
     const { handler } = await import("../gamification/handler");
 
     // =====================================================================
@@ -231,8 +231,8 @@ describe("gamification handler — full XP pipeline integration", () => {
     );
 
     // =====================================================================
-    // Step 5: updateGuildXP — getOrCreateStudentProfile (get cohortId)
-    // → listGuildByCohortId (check members) → updateGuild → contributeToChallenge
+    // Step 5: updateSquadXP — getOrCreateStudentProfile (get cohortId)
+    // → listSquadByCohortId (check members) → updateSquad → contributeToChallenge
     // =====================================================================
     mockGraphql.mockReset();
     mockGraphql.mockImplementation(({ query }: any) => {
@@ -245,13 +245,13 @@ describe("gamification handler — full XP pipeline integration", () => {
           },
         });
       }
-      if (query?.includes("listGuildByCohortId")) {
+      if (query?.includes("listSquadByCohortId")) {
         return Promise.resolve({
           data: {
-            listGuildByCohortId: {
+            listSquadByCohortId: {
               items: [
                 {
-                  id: "guild-1",
+                  id: "squad-1",
                   cohortId: "c1",
                   totalXP: 200,
                   members: [{ studentId: "student-1", role: "MEMBER" }],
@@ -262,9 +262,9 @@ describe("gamification handler — full XP pipeline integration", () => {
           },
         });
       }
-      if (query?.includes("updateGuild")) {
+      if (query?.includes("updateSquad")) {
         return Promise.resolve({
-          data: { updateGuild: { id: "guild-1", totalXP: 250, _version: 4 } },
+          data: { updateSquad: { id: "squad-1", totalXP: 250, _version: 4 } },
         });
       }
       if (query?.includes("listGroupChallengeByCohortId")) {
@@ -275,19 +275,19 @@ describe("gamification handler — full XP pipeline integration", () => {
       return Promise.resolve({ data: {} });
     });
 
-    const guildResult = await handler(
+    const squadResult = await handler(
       {
-        fieldName: "updateGuildXP",
+        fieldName: "updateSquadXP",
         arguments: { studentId: "student-1", xpAmount: 50 },
       },
       {} as any,
       vi.fn(),
     );
 
-    expect(guildResult).toEqual(
+    expect(squadResult).toEqual(
       expect.objectContaining({
         updated: true,
-        guilds: expect.arrayContaining(["guild-1"]),
+        squads: expect.arrayContaining(["squad-1"]),
       }),
     );
 
@@ -393,7 +393,7 @@ describe("gamification handler — full XP pipeline integration", () => {
     );
   });
 
-  it("handles updateGuildXP when student has no guild", async () => {
+  it("handles updateSquadXP when student has no squad", async () => {
     const { handler } = await import("../gamification/handler");
 
     mockGraphql.mockImplementation(({ query }: any) => {
@@ -402,9 +402,9 @@ describe("gamification handler — full XP pipeline integration", () => {
           data: { listStudentProfileByStudentId: { items: [baseProfile()] } },
         });
       }
-      if (query?.includes("listGuildByCohortId")) {
+      if (query?.includes("listSquadByCohortId")) {
         return Promise.resolve({
-          data: { listGuildByCohortId: { items: [] } },
+          data: { listSquadByCohortId: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -412,7 +412,7 @@ describe("gamification handler — full XP pipeline integration", () => {
 
     const result = await handler(
       {
-        fieldName: "updateGuildXP",
+        fieldName: "updateSquadXP",
         arguments: { studentId: "student-1", xpAmount: 50 },
       },
       {} as any,
@@ -420,7 +420,7 @@ describe("gamification handler — full XP pipeline integration", () => {
     );
 
     expect(result.updated).toBe(false);
-    expect(result.reason).toContain("no guild");
+    expect(result.reason).toContain("no squad");
   });
 
   it("handles contributeToChallenge when no active challenges exist", async () => {

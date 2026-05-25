@@ -17,6 +17,7 @@ import CardContent from '@mui/material/CardContent'
 import Avatar from '@mui/material/Avatar'
 import Tooltip from '@mui/material/Tooltip'
 import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 import PauseIcon from '@mui/icons-material/Pause'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
@@ -45,6 +46,7 @@ export interface BossBattleProgressProps {
   contributors?: Contributor[]
   onToggleActive?: (id: string, active: boolean) => void
   onDelete?: (id: string) => void
+  onEdit?: (id: string) => void
 }
 
 // ============================================================================
@@ -86,6 +88,7 @@ export function BossBattleProgress({
   contributors = [],
   onToggleActive,
   onDelete,
+  onEdit,
 }: BossBattleProgressProps) {
   const progress = targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0
   const isComplete = currentXP >= targetXP
@@ -152,6 +155,18 @@ export function BossBattleProgress({
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+
+          {onEdit && (
+            <Tooltip title="Edit">
+              <IconButton
+                size="small"
+                onClick={() => onEdit(id)}
+                aria-label="Edit battle"
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
 
         {/* Progress bar */}

@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Button, TextField, Box } from '@mui/material';
 import TutorialStep from '../../.storybook/components/TutorialStep';
 import QuizMode from '../../.storybook/components/QuizMode';

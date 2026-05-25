@@ -114,7 +114,7 @@ const REASON_LABELS: Record<string, string> = {
   [XPReason.COMEBACK]: 'Comeback!',
   [XPReason.PERSONAL_BEST]: 'New personal best!',
   [XPReason.EASTER_EGG]: 'Secret discovered!',
-  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild challenge bonus',
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad challenge bonus',
 }
 
 // ============================================================================
@@ -132,6 +132,7 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
   const { xpLogs, isLoading, currentToast } = state
   const knownIdsRef = useRef<Set<string>>(new Set())
   const initialLoadRef = useRef(true)
+  const xpVersionMapRef = useRef<Record<string, number>>({})
 
   // Subscribe to StudentXPLog
   useEffect(() => {
@@ -142,6 +143,23 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
     }).subscribe({
       next: ({ items }: { items: any[] }) => {
         const validItems = items.filter((item: any) => item != null && item.id != null)
+
+        // Version map guard: skip dispatch if no item has a newer _version
+        const hasChanges = validItems.some((item: any) => {
+          const tracked = xpVersionMapRef.current[item.id]
+          return tracked == null || item._version > tracked
+        })
+
+        if (!hasChanges && Object.keys(xpVersionMapRef.current).length > 0) {
+          return
+        }
+
+        // Update version map
+        xpVersionMapRef.current = {}
+        validItems.forEach((item: any) => {
+          xpVersionMapRef.current[item.id] = item._version
+        })
+
         dispatch({ type: 'SET_LOGS', logs: validItems })
 
         // Queue toasts for new entries (skip initial load)

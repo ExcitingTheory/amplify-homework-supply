@@ -2,7 +2,7 @@
  * Tests for GamificationProvider (gamificationContext.tsx)
  *
  * Tests the unified context that consolidates XP, Progress, Campaign,
- * Guild, SkillTree, and ContentLock state.
+ * Squad, SkillTree, and ContentLock state.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -14,7 +14,7 @@ import {
   useXP,
   useProgress,
   useCampaign,
-  useGuild,
+  useSquad,
   useSkillTree,
   useContentLock,
 } from '../gamificationContext'
@@ -24,7 +24,7 @@ import {
 // ============================================================================
 
 /** Creates a mock client with observeQuery for each model.
- * The context subscribes to: StudentProfile, GroupChallenge, Guild, Skill, StudentXPLog, Grade.
+ * The context subscribes to: StudentProfile, GroupChallenge, Squad, Skill, StudentXPLog, Grade.
  * Legacy model names (StudentProgress, StudentStreak, StudentPersonalBest, etc.) are auto-mapped
  * into a StudentProfile item so tests using old-style data still work.
  */
@@ -61,11 +61,11 @@ function createMockClient(data: Record<string, any[]> = {}) {
     if (hasLegacy) data.StudentProfile = [profile]
   }
 
-  // Auto-embed GuildMembership into Guild.members if provided separately
-  if (data.GuildMembership && data.Guild) {
-    data.Guild = data.Guild.map((g: any) => ({
+  // Auto-embed SquadMembership into Squad.members if provided separately
+  if (data.SquadMembership && data.Squad) {
+    data.Squad = data.Squad.map((g: any) => ({
       ...g,
-      members: (data.GuildMembership || []).filter((m: any) => m.guildId === g.id),
+      members: (data.SquadMembership || []).filter((m: any) => m.squadId === g.id),
     }))
   }
 
@@ -74,7 +74,7 @@ function createMockClient(data: Record<string, any[]> = {}) {
       StudentXPLog: createModel('StudentXPLog'),
       StudentProfile: createModel('StudentProfile'),
       GroupChallenge: createModel('GroupChallenge'),
-      Guild: createModel('Guild'),
+      Squad: createModel('Squad'),
       Skill: createModel('Skill'),
       Grade: createModel('Grade'),
       Unit: createModel('Unit'),
@@ -122,15 +122,15 @@ function CampaignConsumer() {
   )
 }
 
-function GuildConsumer() {
-  const { myGuild, myMembership, guildLeaderboard, guildMembers, isLoading } = useGuild()
+function SquadConsumer() {
+  const { mySquad, myMembership, squadLeaderboard, squadMembers, isLoading } = useSquad()
   return (
     <div>
-      <div data-testid="guild-loading">{String(isLoading)}</div>
-      <div data-testid="my-guild">{myGuild?.name ?? 'none'}</div>
+      <div data-testid="squad-loading">{String(isLoading)}</div>
+      <div data-testid="my-squad">{mySquad?.name ?? 'none'}</div>
       <div data-testid="my-role">{myMembership?.role ?? 'none'}</div>
-      <div data-testid="leaderboard-count">{guildLeaderboard.length}</div>
-      <div data-testid="guild-member-count">{guildMembers.length}</div>
+      <div data-testid="leaderboard-count">{squadLeaderboard.length}</div>
+      <div data-testid="squad-member-count">{squadMembers.length}</div>
     </div>
   )
 }
@@ -347,49 +347,49 @@ describe('GamificationProvider', () => {
     })
   })
 
-  // ==== Guild ====
-  describe('Guild domain', () => {
-    it('identifies student guild and membership', () => {
+  // ==== Squad ====
+  describe('Squad domain', () => {
+    it('identifies student squad and membership', () => {
       const client = createMockClient({
-        Guild: [
+        Squad: [
           { id: 'g1', name: 'Alpha', cohortId: 'c1', totalXP: 500 },
           { id: 'g2', name: 'Beta', cohortId: 'c1', totalXP: 300 },
         ],
-        GuildMembership: [
-          { id: 'm1', guildId: 'g1', studentId: 's1', role: 'LEADER' },
-          { id: 'm2', guildId: 'g1', studentId: 's2', role: 'MEMBER' },
-          { id: 'm3', guildId: 'g2', studentId: 's3', role: 'MEMBER' },
+        SquadMembership: [
+          { id: 'm1', squadId: 'g1', studentId: 's1', role: 'LEADER' },
+          { id: 'm2', squadId: 'g1', studentId: 's2', role: 'MEMBER' },
+          { id: 'm3', squadId: 'g2', studentId: 's3', role: 'MEMBER' },
         ],
       })
 
       render(
         <GamificationProvider client={client} studentId="s1">
-          <GuildConsumer />
+          <SquadConsumer />
         </GamificationProvider>,
       )
 
-      expect(screen.getByTestId('my-guild').textContent).toBe('Alpha')
+      expect(screen.getByTestId('my-squad').textContent).toBe('Alpha')
       expect(screen.getByTestId('my-role').textContent).toBe('LEADER')
       expect(screen.getByTestId('leaderboard-count').textContent).toBe('2')
-      expect(screen.getByTestId('guild-member-count').textContent).toBe('2')
+      expect(screen.getByTestId('squad-member-count').textContent).toBe('2')
     })
 
     it('sorts leaderboard by XP descending', () => {
       const client = createMockClient({
-        Guild: [
+        Squad: [
           { id: 'g1', name: 'Alpha', cohortId: 'c1', totalXP: 200 },
           { id: 'g2', name: 'Beta', cohortId: 'c1', totalXP: 500 },
         ],
-        GuildMembership: [],
+        SquadMembership: [],
       })
 
       render(
         <GamificationProvider client={client} studentId="s1">
-          <GuildConsumer />
+          <SquadConsumer />
         </GamificationProvider>,
       )
 
-      expect(screen.getByTestId('my-guild').textContent).toBe('none')
+      expect(screen.getByTestId('my-squad').textContent).toBe('none')
     })
   })
 
@@ -550,8 +550,8 @@ describe('GamificationProvider', () => {
           StudentStreak: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           Campaign: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           GroupChallenge: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
-          Guild: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
-          GuildMembership: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
+          Squad: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
+          SquadMembership: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           Skill: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           StudentSkillProgress: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
           Unit: { observeQuery: () => ({ subscribe: (h: any) => { h.next({ items: [] }); return { unsubscribe: vi.fn() } } }) },
@@ -591,8 +591,8 @@ describe('GamificationProvider', () => {
           StudentStreak: makeModel(),
           Campaign: makeModel(),
           GroupChallenge: makeModel(),
-          Guild: makeModel(),
-          GuildMembership: makeModel(),
+          Squad: makeModel(),
+          SquadMembership: makeModel(),
           Skill: makeModel(),
           StudentSkillProgress: makeModel(),
           Unit: makeModel(),
@@ -795,9 +795,9 @@ describe('gamificationReducer', () => {
       { type: actionTypes.SET_RAW_CHALLENGES, payload: [] },
       { type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false },
       { type: actionTypes.SET_CHALLENGES_LOADING, payload: false },
-      { type: actionTypes.SET_RAW_GUILDS, payload: [] },
+      { type: actionTypes.SET_RAW_SQUADS, payload: [] },
       { type: actionTypes.SET_RAW_MEMBERSHIPS, payload: [] },
-      { type: actionTypes.SET_GUILDS_LOADING, payload: false },
+      { type: actionTypes.SET_SQUADS_LOADING, payload: false },
       { type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false },
       { type: actionTypes.SET_RAW_SKILLS, payload: [] },
       { type: actionTypes.SET_RAW_SKILL_PROGRESS, payload: [] },

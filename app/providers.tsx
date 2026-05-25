@@ -21,6 +21,9 @@ import GlobalChatButton from '../src/components/GlobalChatButton';
 import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
 import OfflineBanner from '../src/components/OfflineBanner';
 import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
+import { usePageViewTracking } from '../src/hooks/usePageViewTracking';
+import { useAnalyticsSegmentation } from '../src/hooks/useAnalyticsSegmentation';
+import { initAnalytics } from '../src/utils/analytics';
 import AppSkeleton from '../src/components/AppSkeleton';
 import outputs from '../amplify_outputs.json';
 import { usePathname, useRouter } from 'next/navigation';
@@ -60,6 +63,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Sync section membership to Pinpoint for segmentation
+  useAnalyticsSegmentation();
+
   React.useEffect(() => {
     if (isLoading) return;
     if (user) return;
@@ -83,6 +89,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useGlobalChatShortcut();
+  usePageViewTracking();
+
+  // Initialize Pinpoint auto-tracking once on mount
+  React.useEffect(() => {
+    initAnalytics();
+  }, []);
 
   const hideChatButton =
     pathname?.startsWith('/workbook/') || pathname?.startsWith('/unit/');

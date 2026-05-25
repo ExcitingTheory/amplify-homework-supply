@@ -352,7 +352,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
           variables: {
             input: {
               id: parsedContent.id,
-              _version: parsedContent._version,
+              _version: parsedContent._version ?? 1,
               metadata: JSON.stringify({
                 embeddings: embeddedPages,
                 embeddingCount,
@@ -409,7 +409,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
           input: {
             id: parsedContent.documentID,
             status: "embedded",
-            _version: docData?.getDocument?._version,
+            _version: docData?.getDocument?._version ?? 1,
           },
         },
       } as any);

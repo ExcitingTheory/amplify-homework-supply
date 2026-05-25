@@ -31,13 +31,13 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 
 const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!, $cohortId: String) {
   listStudentProfiles(filter: { studentId: { eq: $studentId }, cohortId: { eq: $cohortId } }) {
-    items { id studentId cohortId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges easterEggs reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId cohortId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
 const GET_SECTION_PROGRESS = `query GetSectionProgress($studentId: String!, $sectionId: String!) {
   listSectionProgresses(filter: { studentId: { eq: $studentId }, sectionId: { eq: $sectionId } }) {
-    items { id studentId sectionId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId sectionId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
@@ -335,7 +335,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
               maxFailedAttemptsOnSingleRef: maxFailed,
               recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
               activeDaysCount: newActiveDaysCount,
-              _version: profile._version,
+              _version: profile._version ?? 1,
             },
           },
         });
@@ -472,7 +472,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                     recentSubmissionTimestamps:
                       JSON.stringify(spRecentTimestamps),
                     activeDaysCount: spActiveDaysCount,
-                    _version: sectionProgress._version,
+                    _version: sectionProgress._version ?? 1,
                   },
                 },
               });

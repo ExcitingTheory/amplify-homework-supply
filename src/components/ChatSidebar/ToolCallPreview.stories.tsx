@@ -10,7 +10,7 @@
  * @module ChatSidebar/ToolCallPreview.stories
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import ToolCallPreview from './ToolCallPreview';
 import { toolDefinitions } from '../../utils/chatTools';
 

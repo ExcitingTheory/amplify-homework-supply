@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import React from "react";
 import { Box } from "@mui/material";
 import NotificationList from "./NotificationList";
@@ -57,11 +57,11 @@ const sampleNotifications = [
   {
     id: "n4",
     recipientId: "user-1",
-    type: "GUILD_POST_NEW",
-    category: "GUILD",
+    type: "SQUAD_POST_NEW",
+    category: "SQUAD",
     title: "New post in Science Explorers",
     body: "Bob shared study notes.",
-    linkPath: "/guilds/guild-1",
+    linkPath: "/squads/squad-1",
     linkLabel: "View Post",
     senderName: "Bob",
     seen: true,
@@ -85,7 +85,7 @@ const sampleNotifications = [
     type: "SYSTEM_ANNOUNCEMENT",
     category: "SYSTEM",
     title: "New features available",
-    body: "Practice drills and guild challenges are now live.",
+    body: "Practice drills and squad challenges are now live.",
     seen: true,
     interacted: true,
     createdAt: new Date(now - 1000 * 60 * 60 * 24 * 2).toISOString(),

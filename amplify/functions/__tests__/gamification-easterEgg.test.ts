@@ -237,7 +237,7 @@ describe("gamification handler — discoverEasterEgg", () => {
       data: {
         getEasterEgg: {
           id: "egg-1",
-          trigger: "UI_INTERACTION",
+          trigger: "SECRET_LINK",
           xpReward: 100,
           revealMessage: "Secret unlocked!",
           active: true,
@@ -269,7 +269,7 @@ describe("gamification handler — discoverEasterEgg", () => {
         data: {
           getEasterEgg: {
             id: "egg-1",
-            trigger: "UI_INTERACTION",
+            trigger: "SECRET_LINK",
             xpReward: 100,
             revealMessage: "Secret unlocked!",
             active: true,

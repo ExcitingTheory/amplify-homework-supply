@@ -92,9 +92,9 @@ const sampleNotifications = [
   {
     id: "n3",
     recipientId: "user-1",
-    type: "GUILD_POST_NEW",
-    category: "GUILD",
-    title: "New guild post",
+    type: "SQUAD_POST_NEW",
+    category: "SQUAD",
+    title: "New squad post",
     seen: false,
     interacted: false,
     createdAt: "2026-05-01T08:00:00Z",

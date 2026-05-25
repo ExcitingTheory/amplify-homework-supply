@@ -23,7 +23,7 @@ const CATEGORY_ICONS = {
   ASSIGNMENT: AssignmentIcon,
   COLLABORATION: GroupsIcon,
   GAMIFICATION: EmojiEventsIcon,
-  GUILD: CampaignIcon,
+  SQUAD: CampaignIcon,
   CHAT: ChatIcon,
   SYSTEM: InfoIcon,
 };
@@ -32,7 +32,7 @@ const CATEGORY_COLORS = {
   ASSIGNMENT: "primary",
   COLLABORATION: "secondary",
   GAMIFICATION: "warning",
-  GUILD: "info",
+  SQUAD: "info",
   CHAT: "default",
   SYSTEM: "error",
 };

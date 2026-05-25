@@ -196,144 +196,148 @@ export default function ToolBarRoPlugin({
           min-width: 1rem;
         }
       `}</style>
-      {toolbarPortalRef?.current && createPortal(
-      <Box
-        ref={firstAppBarRef}
-        sx={{
-          flexShrink: 0,
-          overflowX: "hidden",
-          overflowY: "visible",
-          boxShadow: "none",
-          zIndex: (theme) => theme.zIndex.drawer + 2,
-          transition: "all 0.3s ease",
-          width: "100%",
-          backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(7px)",
-          borderBottom: 1,
-          borderColor: "divider",
-          p: 1,
-        }}
-      >
-        <Box
-          sx={{
-            flexGrow: 1,
-            margin: isScrolled ? "0.5rem 1rem" : "1rem",
-            transition: "all 0.3s ease",
-            display: "flex",
-            alignItems: isScrolled ? "center" : "flex-start",
-            flexDirection: isScrolled ? "row" : "column",
-            gap: isScrolled ? 2 : 0,
-            width: "100%",
-            maxWidth: "100%",
-            overflow: "hidden",
-            boxSizing: "border-box",
-          }}
-        >
-          <Box sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}>
-            <title>{name}</title>
-            <Typography
-              variant={isScrolled ? "body1" : "h6"}
-              component="div"
-              sx={{
-                flexGrow: 1,
-                transition: "all 0.3s ease",
-                fontWeight: isScrolled ? 500 : 400,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {name || t("toolBarRoPlugin.untitledUnit")}
-            </Typography>
-
-            {!isScrolled && (
-              <Typography
-                variant="p"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  transition: "opacity 0.3s ease",
-                  display: { xs: "none", sm: "block" },
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {description || t("toolBarRoPlugin.noDescription")}
-              </Typography>
-            )}
-          </Box>
-
+      {toolbarPortalRef?.current &&
+        createPortal(
           <Box
+            ref={firstAppBarRef}
             sx={{
-              display: "flex",
-              alignItems: "center",
               flexShrink: 0,
-              minWidth: 0,
+              overflowX: "hidden",
+              overflowY: "visible",
+              boxShadow: "none",
+              zIndex: (theme) => theme.zIndex.drawer + 2,
+              transition: "all 0.3s ease",
+              width: "100%",
+              backgroundColor: "custom.glassNavbar",
+              backdropFilter: "blur(7px)",
+              borderBottom: 1,
+              borderColor: "divider",
+              p: 1,
             }}
           >
-            {showLeftArrow && (
-              <ToolbarScrollButton
-                direction="left"
-                onClick={() => scrollToolbar("left")}
-                ariaLabel={t("toolBarRoPlugin.scrollLeft", "Scroll left")}
-                height={isScrolled ? "1.5rem" : "2rem"}
-              />
-            )}
-            <Stack
-              ref={toolbarRef}
-              direction="row"
-              spacing={1}
+            <Box
               sx={{
-                alignItems: "center",
-                flex: 1,
-                minWidth: 0,
-                overflowX: "hidden",
-                scrollSnapType: "x mandatory",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
-                msOverflowStyle: "none",
-                "& > *": {
-                  scrollSnapAlign: "start",
-                  flexShrink: 0,
-                },
+                flexGrow: 1,
+                margin: isScrolled ? "0.5rem 1rem" : "1rem",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: isScrolled ? "center" : "flex-start",
+                flexDirection: isScrolled ? "row" : "column",
+                gap: isScrolled ? 2 : 0,
+                width: "100%",
+                maxWidth: "100%",
+                overflow: "hidden",
+                boxSizing: "border-box",
               }}
             >
-              <TimeLeft />
-              <StreakIndicator currentStreak={currentStreak} size="small" />
-              <ConnectionStatus
-                size={isScrolled ? "small" : "small"}
-                showLabel={!isScrolled}
-              />
-              <Chip
-                label={
-                  <Box component="span">
-                    {`${finishedQuestions} of ${rubric?.length || 0}`}
-                    <Box
-                      component="span"
-                      sx={{ display: { xs: "none", sm: "inline" }, ml: 0.5 }}
-                    >
-                      Questions Completed
-                    </Box>
-                  </Box>
-                }
-                variant="outlined"
-                size={isScrolled ? "small" : "medium"}
-              />
-            </Stack>
-            {showRightArrow && (
-              <ToolbarScrollButton
-                direction="right"
-                onClick={() => scrollToolbar("right")}
-                ariaLabel={t("toolBarRoPlugin.scrollRight", "Scroll right")}
-                height={isScrolled ? "1.5rem" : "2rem"}
-              />
-            )}
-          </Box>
-        </Box>
-      </Box>,
-      toolbarPortalRef.current
-      )}
+              <Box sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}>
+                <title>{name}</title>
+                <Typography
+                  variant={isScrolled ? "body1" : "h6"}
+                  component="div"
+                  sx={{
+                    flexGrow: 1,
+                    transition: "all 0.3s ease",
+                    fontWeight: isScrolled ? 500 : 400,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {name || t("toolBarRoPlugin.untitledUnit")}
+                </Typography>
+
+                {!isScrolled && (
+                  <Typography
+                    variant="p"
+                    component="div"
+                    sx={{
+                      flexGrow: 1,
+                      transition: "opacity 0.3s ease",
+                      display: { xs: "none", sm: "block" },
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {description || t("toolBarRoPlugin.noDescription")}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  minWidth: 0,
+                }}
+              >
+                {showLeftArrow && (
+                  <ToolbarScrollButton
+                    direction="left"
+                    onClick={() => scrollToolbar("left")}
+                    ariaLabel={t("toolBarRoPlugin.scrollLeft", "Scroll left")}
+                    height={isScrolled ? "1.5rem" : "2rem"}
+                  />
+                )}
+                <Stack
+                  ref={toolbarRef}
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                    flex: 1,
+                    minWidth: 0,
+                    overflowX: "hidden",
+                    scrollSnapType: "x mandatory",
+                    scrollbarWidth: "none",
+                    "&::-webkit-scrollbar": { display: "none" },
+                    msOverflowStyle: "none",
+                    "& > *": {
+                      scrollSnapAlign: "start",
+                      flexShrink: 0,
+                    },
+                  }}
+                >
+                  <TimeLeft />
+                  <StreakIndicator currentStreak={currentStreak} size="small" />
+                  <ConnectionStatus
+                    size={isScrolled ? "small" : "small"}
+                    showLabel={!isScrolled}
+                  />
+                  <Chip
+                    label={
+                      <Box component="span">
+                        {`${finishedQuestions} of ${rubric?.length || 0}`}
+                        <Box
+                          component="span"
+                          sx={{
+                            display: { xs: "none", sm: "inline" },
+                            ml: 0.5,
+                          }}
+                        >
+                          Questions Completed
+                        </Box>
+                      </Box>
+                    }
+                    variant="outlined"
+                    size={isScrolled ? "small" : "medium"}
+                  />
+                </Stack>
+                {showRightArrow && (
+                  <ToolbarScrollButton
+                    direction="right"
+                    onClick={() => scrollToolbar("right")}
+                    ariaLabel={t("toolBarRoPlugin.scrollRight", "Scroll right")}
+                    height={isScrolled ? "1.5rem" : "2rem"}
+                  />
+                )}
+              </Box>
+            </Box>
+          </Box>,
+          toolbarPortalRef.current,
+        )}
     </>
   );
 }

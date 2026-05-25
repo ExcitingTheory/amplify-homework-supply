@@ -31,7 +31,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
   // awardXPAndCheck
   // ==========================================================================
   describe("awardXPAndCheck", () => {
-    it("returns parsed XP result and fires badge/streak/guild calls", async () => {
+    it("returns parsed XP result and fires badge/streak/squad calls", async () => {
       mockMutations.awardXP = vi.fn().mockResolvedValue({
         data: JSON.stringify({
           alreadyAwarded: false,
@@ -42,7 +42,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       });
       mockMutations.checkBadges = vi.fn().mockResolvedValue({});
       mockMutations.updateStreak = vi.fn().mockResolvedValue({});
-      mockMutations.updateGuildXP = vi.fn().mockResolvedValue({});
+      mockMutations.updateSquadXP = vi.fn().mockResolvedValue({});
 
       const { awardXPAndCheck } = await import("../gamificationActions");
       const result = await awardXPAndCheck(
@@ -67,8 +67,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       expect(mockMutations.updateStreak).toHaveBeenCalledWith({
         studentId: "student-1",
       });
-      // Guild XP should fire because xpAmount > 0 and not already awarded
-      expect(mockMutations.updateGuildXP).toHaveBeenCalledWith({
+      // Squad XP should fire because xpAmount > 0 and not already awarded
+      expect(mockMutations.updateSquadXP).toHaveBeenCalledWith({
         studentId: "student-1",
         xpAmount: 50,
       });
@@ -99,19 +99,19 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       expect(result).toBeNull();
     });
 
-    it("skips guild XP when already awarded", async () => {
+    it("skips squad XP when already awarded", async () => {
       mockMutations.awardXP = vi.fn().mockResolvedValue({
         data: { alreadyAwarded: true, xpAmount: 0, totalXP: 250 },
         errors: null,
       });
       mockMutations.checkBadges = vi.fn().mockResolvedValue({});
       mockMutations.updateStreak = vi.fn().mockResolvedValue({});
-      mockMutations.updateGuildXP = vi.fn().mockResolvedValue({});
+      mockMutations.updateSquadXP = vi.fn().mockResolvedValue({});
 
       const { awardXPAndCheck } = await import("../gamificationActions");
       await awardXPAndCheck("student-1", "HOMEWORK_SUBMITTED", "grade-1");
 
-      expect(mockMutations.updateGuildXP).not.toHaveBeenCalled();
+      expect(mockMutations.updateSquadXP).not.toHaveBeenCalled();
     });
 
     it("handles badge/streak failures gracefully (fire-and-forget)", async () => {
@@ -125,9 +125,9 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.updateStreak = vi
         .fn()
         .mockRejectedValue(new Error("streak fail"));
-      mockMutations.updateGuildXP = vi
+      mockMutations.updateSquadXP = vi
         .fn()
-        .mockRejectedValue(new Error("guild fail"));
+        .mockRejectedValue(new Error("squad fail"));
 
       const consoleSpy = vi
         .spyOn(console, "error")

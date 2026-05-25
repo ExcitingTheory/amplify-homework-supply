@@ -1,36 +1,25 @@
-'use client';
-import * as React from 'react';
-import { fetchUserAttributes } from 'aws-amplify/auth';
-import Box from '@mui/material/Box';
-import AppSkeleton from "@/components/AppSkeleton";
-import MyAuth from "@/components/AmplifyAuthenticator";
-import { useRouter } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { fetchAuthSession } from "aws-amplify/auth/server";
+import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 
-function ProfileRedirect() {
-  const router = useRouter();
+export default async function ProfileRedirectPage() {
+  let sub = null;
 
-  React.useEffect(() => {
-    async function redirect() {
-      try {
-        const userAttributes = await fetchUserAttributes();
-        const username = userAttributes?.sub || '';
-        if (username) {
-          router.replace(`/profile/${username}`);
-        }
-      } catch (err) {
-        console.warn('[Profile] Could not fetch user for redirect:', err);
-      }
-    }
-    redirect();
-  }, [router]);
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
 
-  return <AppSkeleton variant="redirect" />;
-}
+    sub = session?.tokens?.idToken?.payload?.sub;
+  } catch {
+    // Auth failed — fall through to login redirect
+  }
 
-export default function WrappedPage() {
-  return (
-    <MyAuth>
-      <ProfileRedirect />
-    </MyAuth>
-  )
+  if (sub) {
+    redirect(`/profile/${sub}`);
+  }
+
+  redirect("/?returnUrl=/profile");
 }

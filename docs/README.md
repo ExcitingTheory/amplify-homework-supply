@@ -1,26 +1,134 @@
 # Homework Supply Documentation
 
-Elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
+Elearning platform built with Next.js 16, AWS Amplify Gen 2, and OpenAI.
 
 ## Quick Start
 
 1. **[Quick Start Guide](QUICK_START.md)** — Essential links and communication channels
 2. **[Onboarding Guide](ONBOARDING.md)** — Complete developer setup walkthrough
+3. **[Storybook Onboarding](STORYBOOK_ONBOARDING.md)** — Adding components to Storybook
 
-## Core Documentation
+## Architecture & Reference
 
-- **[API Documentation](API.md)** — Data models (33), Lambda functions (16), routes, features, and Gen 2 patterns
-- **[Onboarding Guide](ONBOARDING.md)** — Zero to productive developer
-- **[Quick Start](QUICK_START.md)** — Essential links and first steps
-- **[Storybook Onboarding](STORYBOOK_ONBOARDING.md)** — Adding components to Storybook guided tasks
+- **[API Documentation](API.md)** — Data models, Lambda functions, routes, and Gen 2 patterns
+- **[SSR & Performance](SSR_PERFORMANCE.md)** — Server-side rendering, Amplify server client, React Compiler, Turbopack, View Transitions, Server Actions
+- **[File Processing Pipeline](FILE_PROCESSING_PIPELINE.md)** — Fan-out upload architecture: image processing, thumbnails, embeddings, media conversion
+
+### App Router & Server Actions
+
+> **Next.js 16.x** with App Router | **i18n**: `next-intl` (6 locales, 10 namespaces) | **PWA**: Serwist
+
+All routes live under `app/[locale]/`.
+
+**Pages (`app/[locale]/`)**:
+
+| Route | Rendering | Notes |
+|-------|-----------|-------|
+| `/` | Client | Home/landing |
+| `/units` | Client | Unit list |
+| `/unit/[id]` | RSC | Unit detail |
+| `/workbook/[id]` | RSC | Server-side Lexical rendering (`@lexical/headless` + `linkedom`) |
+| `/instructor/grade/[id]` | RSC | `getServerClient()` |
+| `/profile/[username]` | RSC | NailedIt client island |
+| `/leaderboard` | ISR | `revalidate: 60s`, live subscription hydration |
+| `/skills` | ISR | `revalidate: 300s`, client hydration |
+| `/sections` | Client | Section management |
+| `/section/[id]` | Client | Section detail |
+| `/section/[id]/settings/gamification` | Client | Gamification config |
+| `/squads` | Client | Squad list |
+| `/squad/[id]` | Client | Squad detail |
+| `/settings` | Client | User settings |
+| `/profile` | Client | Own profile |
+| `/profile/notifications` | Client | Notification inbox |
+| `/admin/settings` | Client | Admin panel |
+| `/offline` | Client | Offline status |
+| `/review/[id]` | Client | Peer review |
+| `/xp-history` | Client | XP log |
+| `/privacy` | Client | Privacy policy |
+
+**Route Handlers (`app/api/`)**:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/api/chat` | Streaming chat (Vercel AI SDK + block tools + auth) |
+| `/api/suggest-blocks` | Block suggestion streaming |
+| `/api/content-completion` | Editor content completion |
+| `/api/grade-ai` | Custom AI block grading |
+
+**Server Actions (`app/actions/`)**:
+
+| File | Exports |
+|------|---------|
+| `chat.ts` | `chatCompletion` |
+| `drill.ts` | `generatePracticeDrill` |
+| `embeddings.ts` | `generateEmbedding`, `generateEmbeddings` |
+| `feedback.ts` | `summarizeGradeFeedback` |
+| `gamification.ts` | `awardXP`, `recordGradeCompletion`, `generateSkillTreeFromUnit`, `rebuildLeaderboard` |
+| `generate.ts` | `generateAudioFile`, `generateImage`, `generateContent` |
+| `grading.ts` | `gradeAnswer`, `gradeCustomAnswer`, `gradeRecording` |
+| `moderate.ts` | `moderateContent` |
+| `peerReview.ts` | `handleAIMention`, `generateReviewSummary` |
+| `section.ts` | `joinSection`, `listSectionStudents` |
+| `storage.ts` | S3 upload/download helpers |
+| `unitContent.ts` | Unit content operations |
+
+No Lambda functions are called from UI code. Retained Lambdas (streakResetCron, yjsSync, mediaConvert, notificationCron) are purely event-driven.
+
+**Key decisions**:
+1. No `middleware.ts` — Next.js 16+ handles locale routing without it.
+2. Emotion SSR — MUI v7 streaming support, no manual `getInitialProps`.
+3. Provider nesting in `app/providers.tsx` (`'use client'`): CacheProvider → ThemeProvider → AuthProvider → SettingsProvider → ChatContextProvider → children.
+
+## Feature Documentation
+
+- **[Custom AI Block](CUSTOM_AI_BLOCK.md)** — Instructor-customizable AI-graded Lexical editor block with security guardrails
+- **[Notification System](NOTIFICATION_SYSTEM.md)** — Real-time notifications with category filtering, badge counts, and Lambda utilities
+- **[Offline Experience](OFFLINE_EXPERIENCE.md)** — PWA with service worker, IndexedDB sync queue, and on-device LLM fallback
+
+**Optimistic Concurrency**: All contexts use `client.models.X.observeQuery()` with `_version` map refs and optimistic `_version+1` bumps before saves. No manual `onCreate`/`onUpdate`/`onDelete` subscriptions remain.
+
+### AI Practice Drills (`src/components/PracticeDrill/`)
+
+AI-generated drill exercises from vocabulary, questions, documents, and Lexical content. Stripped-down Workbook popup with diminishing XP returns.
+
+**Entry points**: "Practice" button on unit cards | Chat command ("quiz me" → `startPracticeDrill` tool)
+
+| Component | Purpose |
+|-----------|---------|
+| `PracticeDrillDialog.tsx` | Full-screen dialog container |
+| `PracticeDrillWorkbook.tsx` | Stripped-down Lexical editor (graded blocks only) |
+| `PracticeDrillProgress.tsx` | Progress bar + XP indicator |
+| `PracticeDrillConfigPopup.tsx` | Drill type/count selection |
+| `DrillStatePlugin.tsx` | Tracks completion state per block |
+| `DrillGradeAdapter.tsx` | Adapts responses to Grade model format |
+| `buildDrillEditorState.ts` | Constructs Lexical JSON from AI blocks |
+| `usePracticeDrill.ts` | Hook: session lifecycle, calls `app/actions/drill.ts` |
+| `useDrillCoverage.ts` | Tracks which material has been drilled |
+
+Block types: `quiz`, `answer`, `meaning-association`, `custom-answer`. TTS audio pre-generated via `tts-1` (base64 or S3 paths for large drills).
+
+### Collaborative Chat (`src/components/CollaborativeChat/` + `src/yjs/`)
+
+Yjs-backed real-time chat with section/squad rooms, scoped topics, threaded messages, @mentions, and server-side `@kai` AI bot.
+
+| Component | Purpose |
+|-----------|---------|
+| `ChatPanel.tsx` | Main container (TopicList + ThreadView + input) |
+| `ThreadView.tsx` | Message list with rich content rendering |
+| `TopicList.tsx` | Scoped topic sidebar |
+| `MessageInput.tsx` | Plain text input |
+| `MentionChip.tsx` | @mention display |
+| `CollaborativeChatWrapper.tsx` | Provider/connection wrapper |
+
+Server: `amplify/functions/yjsSync/botObserver.ts` handles bot streaming via OpenAI → throttled Yjs writes → broadcast to all clients.
 
 ## In-Progress Plans
 
-- **[AI Practice Drills](AI_PRACTICE_DRILLS_PLAN.md)** — Chat-triggered drill sessions (partially done — missing ChatSidebar wiring)
-- **[Offline Experience](OFFLINE_EXPERIENCE_PLAN.md)** — PWA with service worker and offline data cache (partially done — manifest only)
-- **[RecordingStudio3 Integration](RECORDING_STUDIO3_INTEGRATION.md)** — Wire RS3 into instructor workflows (partially done — DictionaryEditor2 done, FileManager2 pending)
-- **[Unified Undo/Redo](UNIFIED_UNDO_REDO_PLAN.md)** — Y.UndoManager across editor surfaces (not started)
-- **[Component Remediation](COMPONENT_REMEDIATION_PLAN.md)** — Dead code cleanup (not started)
+| Plan | Status | What Remains |
+|------|--------|--------------|
+| [Gamification Improvements](GAMIFICATION_IMPROVEMENTS_PLAN.md) | Partial | Instructor panel section scoping, skill-unit linking, boss battle form |
+| [S3 Content Storage](S3_CONTENT_STORAGE_SPEC.md) | Partial | Full content migration + versioning |
+| [Unified Undo/Redo](UNIFIED_UNDO_REDO_PLAN.md) | Not started | Y.UndoManager not wired to any surface |
 
 ## Support & Contact
 
@@ -34,14 +142,48 @@ Elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
 
 - **[Contributing Guidelines](../CONTRIBUTING.md)** — Code standards and PR process
 
-## 📬 Communication & Support
+---
 
-### Primary Contact
-- **Email**: [info@homework.supply.com](mailto:info@homework.supply.com)
-- **Discord**: [Join Discord](https://discord.gg/BNsTK6nvYw)
+<details><summary><strong>Acronyms used in this document</strong></summary>
 
-### Getting Help
-- **Quick Questions**: Team chat (Discord) or email
-- **Detailed Issues**: Create a GitHub issue in the repository
-- **Bug Reports**: [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
-- **Security Issues**: info@homework.supply.com (see [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md))
+| Acronym | Definition |
+|---------|------------|
+| RSC | React Server Component — rendered on the server, zero client JS |
+| ISR | Incremental Static Regeneration — static page revalidated on a timer |
+| SSR | Server-Side Rendering — rendered per-request on the server |
+| i18n | Internationalization — multi-language support |
+| PWA | Progressive Web App — installable, offline-capable web app |
+| TTS | Text-to-Speech — audio generation from text |
+| XP | Experience Points — gamification reward currency |
+| SDK | Software Development Kit |
+
+</details>
+
+<details><summary><strong>App-specific terminology</strong></summary>
+
+| Term | Definition |
+|------|------------|
+| Unit | A learning module — contains Lexical JSON content, vocabulary, questions, and files. The core content object instructors author. |
+| Workbook | The student-facing read-only editor view where learners complete graded blocks within a Unit. |
+| Section | A class or student group with a join code. Instructors assign Units to Sections. |
+| Assignment | A Unit assigned to a Section with a due date. |
+| Grade | A student submission record. `Grade.data` is a JSON object keyed by block ID tracking each response and accuracy. |
+| Block | A graded Lexical editor node — one of: `quiz`, `answer`, `meaning-association`, `custom-answer`, `custom-ai`. |
+| Rubric | Array of graded block IDs within a Unit, used to calculate overall Grade accuracy. |
+| Editor3 | The current (3rd-generation) Lexical-based rich text editor for authoring Units. Located at `src/components/Editor3/`. |
+| MiniEditor | Lightweight Lexical editor for chat messages — supports all block types in read-only, and basic rich text when editable. |
+| Block Inserter | Notion-style hover "+" button on empty paragraphs that opens a categorized menu for inserting content blocks. |
+| Kai | The AI teaching assistant bot. In collaborative chat, `@kai` mentions are handled server-side by `botObserver`. In private chat, uses `ChatSidebar` with Vercel AI SDK. |
+| Squad | A student collaborative group — has its own chat room and shared activities. |
+| Practice Drill | An AI-generated exercise session. Reuses Workbook graded blocks but with fresh AI-created content from the Unit's source material. |
+| ParsedContent | Extracted text, vocabulary, questions, and summaries from an uploaded PDF document. Created by the `analyzeDocument` pipeline. |
+| Boss Battle | A gamification challenge format where students collectively defeat a boss by completing assignments correctly. |
+| Skill Tree | A visual progression system (our term for "learning path") mapping Unit content to learnable skills. Generated via `generateSkillTreeFromUnit` server action. |
+| NailedIt | A student achievement/milestone celebration component shown on profile pages. |
+| Data Client | Amplify Gen 2's generated client (`client.models.X`) for type-safe CRUD operations against DynamoDB. |
+| observeQuery | Amplify's real-time subscription method — returns a stream of the full item set, automatically handling creates/updates/deletes. |
+| `_version` | Integer field on every model for optimistic locking. Incremented on each mutation; used to detect conflicts and suppress subscription echoes. |
+| Server Action | A Next.js `'use server'` function in `app/actions/` — replaces direct Lambda calls from the client. Handles auth automatically. |
+| botObserver | The Yjs server-side observer that detects bot mentions in collaborative chat and streams OpenAI responses directly into the Y.Doc. |
+
+</details>

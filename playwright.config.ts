@@ -14,12 +14,15 @@ import { defineConfig, devices } from "@playwright/test";
  *   npx playwright test --ui                       # interactive UI mode
  */
 export default defineConfig({
-  testDir: "./e2e-collaboration",
+  testDir: "./test/e2e-collaboration",
   fullyParallel: false, // Tests share state within a file — run sequentially
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1, // Multi-user tests must be sequential (shared backend state)
-  reporter: [["html", { open: "never" }], ["list"]],
+  reporter: [
+    ["html", { open: "never", outputFolder: "test/e2e-collaboration-report" }],
+    ["list"],
+  ],
   timeout: 120_000, // 2 min per test — collaboration flows are slow
   expect: {
     timeout: 15_000,

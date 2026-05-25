@@ -37,6 +37,8 @@ function PeerReviewContent() {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [closing, setClosing] = useState(false);
+  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
 
   // Fetch HomeworkRoom record
   useEffect(() => {
@@ -91,8 +93,6 @@ function PeerReviewContent() {
 
   const isOwner = room?.ownerId === session?.username;
   const isClosed = room?.status === "REVIEW_COMPLETE";
-  const [closing, setClosing] = useState(false);
-  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
 
   const handleCloseReview = async () => {
     if (!roomId || closing) return;
