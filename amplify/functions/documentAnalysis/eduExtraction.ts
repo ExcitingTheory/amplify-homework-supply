@@ -599,7 +599,7 @@ function extractQuestionsFromHtml(html: string): unknown[] {
     );
     if (!promptMatch) continue;
 
-    const prompt = promptMatch[1].replace(/<[^>]+>/g, "").trim();
+    const prompt = convert(promptMatch[1], { wordwrap: false }).trim();
     if (!prompt) continue;
 
     // Extract options from radio/checkbox inputs
@@ -607,7 +607,7 @@ function extractQuestionsFromHtml(html: string): unknown[] {
     const optionPattern = /<(?:label|li)[^>]*>(.*?)<\/(?:label|li)>/gi;
     let optMatch;
     while ((optMatch = optionPattern.exec(block)) !== null) {
-      const optText = optMatch[1].replace(/<[^>]+>/g, "").trim();
+      const optText = convert(optMatch[1], { wordwrap: false }).trim();
       if (optText) options.push(optText);
     }
 
@@ -635,7 +635,7 @@ function extractQuestionsFromHtml(html: string): unknown[] {
       const liPattern = /<li[^>]*>([\s\S]*?)<\/li>/gi;
       let liMatch;
       while ((liMatch = liPattern.exec(listBlock)) !== null) {
-        const text = liMatch[1].replace(/<[^>]+>/g, "").trim();
+        const text = convert(liMatch[1], { wordwrap: false }).trim();
         if (text && text.length > 10) {
           questions.push({
             prompt: text,
