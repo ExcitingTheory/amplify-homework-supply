@@ -29,9 +29,13 @@
     "settings": "設定"
   },
   "unitCompletedPlugin": {
+    "allCaughtUp": "すべて完了！課題はありません。",
     "completionMessage": "ユニットが完了しました！",
     "continueButton": "続行",
-    "sectionHeading": "次のステップ"
+    "nextAssignment": "次の課題",
+    "retrying": "新しい試行を開始しています...",
+    "sectionHeading": "次のステップ",
+    "tryAgain": "もう一度"
   },
   "quizComponent": {
     "gradeDisplay": "成績: {{score}}%"

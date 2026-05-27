@@ -6,7 +6,7 @@
  * Files can optionally include embeddings for semantic search.
  */
 
-import { MOCK_MEDIA, generateMockWaveformData } from './mockMediaData';
+import { MOCK_MEDIA } from './mockMediaData';
 import { generateMockEmbedding } from './mockEmbeddingUtils';
 import {
   MOCK_DOC_DOCX_1, MOCK_DOC_DOCX_2,
@@ -27,7 +27,6 @@ export const createMockFile = ({
   description = '',
   owner = 'mock-user-sub',
   identityId = 'us-east-1:mock-identity-123',
-  waveformData = null,
   duration = null,
   width = null,
   height = null,
@@ -57,7 +56,6 @@ export const createMockFile = ({
     description,
     owner,
     identityId,
-    waveformData,
     duration,
     width,
     height,
@@ -84,7 +82,6 @@ export const MOCK_FILE_AUDIO_JAPANESE = createMockFile({
   mimeType: 'audio/mpeg',
   size: 48256,
   description: 'Japanese word pronunciation: こんにちは (Konnichiwa)',
-  waveformData: JSON.stringify(generateMockWaveformData(400)),
   duration: 2.5,
 });
 
@@ -95,7 +92,6 @@ export const MOCK_FILE_AUDIO_SPANISH = createMockFile({
   mimeType: 'audio/mpeg',
   size: 52480,
   description: 'Spanish AR-verb pronunciation: hablar',
-  waveformData: JSON.stringify(generateMockWaveformData(380)),
   duration: 2.8,
 });
 
@@ -106,7 +102,6 @@ export const MOCK_FILE_AUDIO_FRENCH = createMockFile({
   mimeType: 'audio/wav',
   size: 88200,
   description: 'French season pronunciation: printemps, été, automne, hiver',
-  waveformData: JSON.stringify(generateMockWaveformData(420)),
   duration: 3.2,
 });
 
@@ -117,7 +112,6 @@ export const MOCK_FILE_AUDIO_LISTENING_EXERCISE = createMockFile({
   mimeType: 'audio/mpeg',
   size: 524288,
   description: 'Biology lecture on photosynthesis process',
-  waveformData: JSON.stringify(generateMockWaveformData(1200)),
   duration: 30.0,
 });
 

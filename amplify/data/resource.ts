@@ -112,11 +112,12 @@ const NotificationCategory = a.enum([
 
 // Consolidated types for DRY principles
 const EmbeddingInfo = a.customType({
-  embedding: a.json(), // Array of PageEmbedding objects
+  // Vector data moved to S3: private/{identityId}/embeddings/{model}/{id}.json
   model: a.string(),
   dimensions: a.integer(),
-  version: a.timestamp(),
+  version: a.timestamp(), // Cache key — fetch from S3 when version changes
   wordCount: a.integer(),
+  pageCount: a.integer(), // Number of page embeddings (for multi-page files)
 });
 
 const ModerationInfo = a.customType({
@@ -312,6 +313,15 @@ const QuestionEntry = a.customType({
   type: a.string(),
 });
 
+const PendingMediaEntry = a.customType({
+  filename: a.string().required(),
+  mimeType: a.string().required(),
+  s3Key: a.string().required(),
+  size: a.integer().required(),
+  description: a.string(),
+  approved: a.boolean(),
+});
+
 // --- Practice / Insights ---
 const SourcesEnabled = a.customType({
   vocabulary: a.boolean(),
@@ -449,6 +459,13 @@ const schema = a
       message: a.string(),
     }),
 
+    ApproveMediaResult: a.customType({
+      success: a.boolean().required(),
+      parsedContentID: a.id().required(),
+      approvedCount: a.integer(),
+      message: a.string(),
+    }),
+
     GenerateEmbeddingsResult: a.customType({
       success: a.boolean().required(),
       fileID: a.id().required(),
@@ -481,6 +498,7 @@ const schema = a
     ObjectiveEntry,
     ConceptEntry,
     QuestionEntry,
+    PendingMediaEntry,
     SourcesEnabled,
     CoverageSnapshot,
     BlockBreakdown,
@@ -716,9 +734,7 @@ const schema = a
         choices: a.json(), // Array of Choice objects
         // Audio/media
         audio: a.string().array(),
-        audioWaveformData: a.json(),
         answerAudio: a.string().array(),
-        answerAudioWaveformData: a.json(),
         // Generation metadata
         generated: a.boolean(),
         model: a.string(),
@@ -796,7 +812,6 @@ const schema = a
         hex: a.string(),
         byHex: a.string(),
         thumbnail: a.string(),
-        waveformData: a.json(),
         // Relationships - enable querying files by associated model
         documentID: a.id(),
         document: a.belongsTo("Document", ["documentID"]),
@@ -842,9 +857,7 @@ const schema = a
         rubyTags: a.string(),
         // Audio
         audio: a.string().array(),
-        waveformData: a.json(),
         definitionAudio: a.string().array(),
-        definitionWaveformData: a.json(),
         // Metadata
         importedAt: a.datetime(),
         // Embeddings
@@ -1034,8 +1047,8 @@ const schema = a
         filename: a.string().required(),
         s3Key: a.string().required(), // S3 path to original PDF
         status: a.string().required(), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
-        // Content
-        extractedText: a.string(), // Full text extracted from PDF
+        // Content (full text stored in S3: private/{identityId}/documents/{id}/extracted-text.txt)
+        textExtractedAt: a.timestamp(), // Signals text is available in S3
         pageCount: a.integer(),
         fileSize: a.integer(),
         mimeType: a.string(),
@@ -1091,6 +1104,7 @@ const schema = a
         objectivesJSON: a.ref("ObjectiveEntry").array(),
         conceptsJSON: a.ref("ConceptEntry").array(),
         questionsJSON: a.ref("QuestionEntry").array(),
+        pendingMediaJSON: a.ref("PendingMediaEntry").array(),
         // API tracking
         responseId: a.string(), // OpenAI response ID
         modelUsed: a.string(),
@@ -1098,7 +1112,6 @@ const schema = a
         processingTime: a.integer(),
         // Timestamps (createdAt/updatedAt auto-generated)
         importedAt: a.datetime(),
-        metadata: a.json(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -1772,30 +1785,58 @@ const schema = a
         _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
+        // ─── Dimension keys ───
         date: a.date().required(), // YYYY-MM-DD
-        sectionId: a.string(), // null = platform-wide, set = per-section
-        // User activity
+        scope: a.string().required(), // "platform" | "section" | "unit" | "squad" | "page" | "geo"
+        scopeId: a.string().required(), // ID of the scoped entity (or "all" / URL path / country code)
+        sectionId: a.string(), // Parent section (for unit/squad/section records)
+        unitId: a.string(), // Set when scope = "unit"
+        squadId: a.string(), // Set when scope = "squad"
+        isWorkbook: a.boolean(), // true = workbook content
+        isReview: a.boolean(), // true = peer review content
+        // ─── Geolocation ───
+        country: a.string(), // ISO 3166-1 alpha-2 (e.g., "US", "JP", "BR")
+        region: a.string(), // Region/state (e.g., "California", "Tokyo")
+        city: a.string(), // City name (optional, for page/perf scope)
+        // ─── User activity ───
         dailyActiveUsers: a.integer().default(0),
         totalPageViews: a.integer().default(0),
         totalSessions: a.integer().default(0),
         avgSessionDurationMs: a.integer(),
-        // Engagement
+        // ─── Engagement ───
         totalEngagedTimeMs: a.integer().default(0),
         avgEngagedTimeMs: a.integer(),
-        // Academic
+        // ─── Academic ───
         gradesSubmitted: a.integer().default(0),
         avgAccuracy: a.float(),
         workbooksStarted: a.integer().default(0),
         workbooksCompleted: a.integer().default(0),
-        // AI usage
-        chatMessagesSent: a.integer().default(0),
+        // ─── Chat (split by role) ───
+        studentChatMessagesSent: a.integer().default(0),
+        instructorChatMessagesSent: a.integer().default(0),
+        // ─── AI usage ───
         documentsAnalyzed: a.integer().default(0),
-        // Top pages by view count
-        topPages: a.json(), // [{ path: string, views: number }]
+        // ─── Performance (Web Vitals p75) ───
+        p75LCP: a.integer(), // Largest Contentful Paint (ms)
+        p75INP: a.integer(), // Interaction to Next Paint (ms)
+        p75TTFB: a.integer(), // Time to First Byte (ms)
+        p75FCP: a.integer(), // First Contentful Paint (ms)
+        p75CLS: a.float(), // Cumulative Layout Shift (score)
+        perfSampleCount: a.integer(), // Number of measurements
+        // ─── JSON Rollups (on platform/section records) ───
+        topPages: a.json(), // [{ path, views, avgTimeMs }]
+        slowestPages: a.json(), // [{ path, p75LCP, p75INP, sampleCount }]
+        topUnits: a.json(), // [{ unitId, name, completions, avgAccuracy }]
+        bottomUnits: a.json(), // [{ unitId, name, completions, avgAccuracy }]
+        topSquads: a.json(), // [{ squadId, name, xp, avgAccuracy }]
+        bottomSquads: a.json(), // [{ squadId, name, xp, avgAccuracy }]
+        topCountries: a.json(), // [{ country, sessions, avgEngagedTimeMs, p75LCP }]
       })
       .secondaryIndexes((index) => [
-        index("date").name("byDate"),
-        index("sectionId").name("bySection"),
+        index("date").sortKeys(["scope"]).name("byDate"),
+        index("sectionId").sortKeys(["scope"]).name("bySection"),
+        index("scope").sortKeys(["date"]).name("byScope"),
+        index("country").sortKeys(["date"]).name("byCountry"),
       ])
       .authorization((allow) => [
         allow.group("Admins"),
@@ -2036,6 +2077,16 @@ const schema = a
         fileID: a.id().required(),
       })
       .returns(a.ref("CancelDocumentAnalysisResult"))
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(documentAnalysisHandler)),
+
+    approveMedia: a
+      .mutation()
+      .arguments({
+        parsedContentID: a.id().required(),
+        approvedIndices: a.integer().array().required(),
+      })
+      .returns(a.ref("ApproveMediaResult"))
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(documentAnalysisHandler)),
 

@@ -29,9 +29,13 @@
     "settings": "Paramètres"
   },
   "unitCompletedPlugin": {
+    "allCaughtUp": "Tout est à jour ! Plus de devoirs.",
     "completionMessage": "Unité terminée !",
     "continueButton": "Continuer",
-    "sectionHeading": "Prochaines étapes"
+    "nextAssignment": "Devoir suivant",
+    "retrying": "Nouveau essai en cours...",
+    "sectionHeading": "Prochaines étapes",
+    "tryAgain": "Réessayer"
   },
   "quizComponent": {
     "gradeDisplay": "Note : {{score}} %"

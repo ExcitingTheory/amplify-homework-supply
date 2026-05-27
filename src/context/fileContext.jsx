@@ -251,22 +251,39 @@ const FilesProvider = ({ children }) => {
         }
       }
 
-      // Add file-level embedding
-      if (file.embedding && !pageEmbeddings) {
-        vectorStore.add({
-          id: file.id,
-          documentId: file.documentID || file.id,
-          page: null,
-          text: file.description || file.name,
-          vector: file.embedding,
-          metadata: {
-            fileId: file.id,
-            documentId: file.documentID,
-            page: null,
-            fileName: file.name,
-            mimeType: file.mimeType,
-          },
-        });
+      // Add file-level embedding from S3 (metadata-only in DynamoDB now)
+      if (file.embedding?.version && !pageEmbeddings) {
+        try {
+          const { loadEmbedding } = await import("../utils/embeddingStorage");
+          const embeddingFile = await loadEmbedding(
+            file.identityId || file.owner,
+            "file",
+            file.id,
+          );
+          if (embeddingFile?.pages?.length > 0) {
+            embeddingFile.pages.forEach((pageData) => {
+              vectorStore.add({
+                id: `${file.id}-page-${pageData.page}`,
+                documentId: file.documentID || file.id,
+                page: pageData.page,
+                text: pageData.text || file.description || file.name,
+                vector: pageData.embedding,
+                metadata: {
+                  fileId: file.id,
+                  documentId: file.documentID,
+                  page: pageData.page,
+                  fileName: file.name,
+                  mimeType: file.mimeType,
+                },
+              });
+            });
+          }
+        } catch (error) {
+          console.warn(
+            `[FilesContext] Failed to load embedding from S3 for ${file.name}:`,
+            error,
+          );
+        }
       }
 
       if (currentVersion) {
@@ -393,7 +410,38 @@ const FilesProvider = ({ children }) => {
         }
 
         // Single observeQuery replaces list() + 3 manual subscriptions
-        const subscription = client.models.File.observeQuery().subscribe({
+        // Exclude heavy fields: yjsSnapshot
+        const subscription = client.models.File.observeQuery({
+          selectionSet: [
+            "id",
+            "owner",
+            "identityId",
+            "name",
+            "description",
+            "prompt",
+            "model",
+            "variant",
+            "mimeType",
+            "level",
+            "path",
+            "size",
+            "duration",
+            "generated",
+            "hex",
+            "byHex",
+            "thumbnail",
+            "documentID",
+            "embedding.*",
+            "hlsUrl",
+            "transcodeStatus",
+            "mediaConvertJobId",
+            "_version",
+            "_lastChangedAt",
+            "_deleted",
+            "createdAt",
+            "updatedAt",
+          ],
+        }).subscribe({
           next: ({ items }) => {
             const validItems = (items || []).filter(
               (item) => item != null && item.id != null,
@@ -468,10 +516,8 @@ const FilesProvider = ({ children }) => {
         s3Key: doc.s3Key,
         status: doc.status,
         pageCount: doc.pageCount,
-        extractedText: doc.extractedText,
         pageEmbeddings: pageEmbeddings,
         embeddingsS3Key: doc.embeddingsS3Key,
-        metadata: doc.metadata,
         updatedAt: doc.updatedAt,
         _version: doc._version,
       };
@@ -493,7 +539,33 @@ const FilesProvider = ({ children }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
-    const subscription = client.models.Document.observeQuery().subscribe({
+    // Exclude heavy fields: metadata, yjsSnapshot (extractedText moved to S3)
+    const subscription = client.models.Document.observeQuery({
+      selectionSet: [
+        "id",
+        "owner",
+        "identityId",
+        "learner",
+        "sectionID",
+        "readableGroups.*",
+        "writableGroups.*",
+        "filename",
+        "s3Key",
+        "status",
+        "textExtractedAt",
+        "pageCount",
+        "fileSize",
+        "mimeType",
+        "sourceFormat",
+        "uploadedAt",
+        "resumeState.*",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
+    }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
         const validItems = (items || []).filter(

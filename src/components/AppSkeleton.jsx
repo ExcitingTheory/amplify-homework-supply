@@ -2,52 +2,215 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 
+const DRAWER_WIDTH = 280;
+const APPBAR_HEIGHT = 48;
+
 /**
- * Full-page skeleton used while the app is loading (auth resolving, data fetching, etc.)
- * Mimics the typical page layout without an AppBar (AppShell provides that globally).
+ * Quick synchronous check of localStorage for a likely valid Cognito session.
+ * Looks for an idToken and checks if its exp claim is in the future.
+ * Does NOT validate signature — just a heuristic for skeleton selection.
+ */
+function hasLikelySession() {
+  if (typeof window === "undefined") return false;
+  try {
+    // Amplify Gen 2 stores tokens with key pattern:
+    // CognitoIdentityServiceProvider.{clientId}.{username}.idToken
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.endsWith(".idToken")) {
+        const token = localStorage.getItem(key);
+        if (!token) continue;
+        // Decode JWT payload (base64url, no validation)
+        const parts = token.split(".");
+        if (parts.length !== 3) continue;
+        const payload = JSON.parse(
+          atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+        );
+        if (payload.exp && payload.exp * 1000 > Date.now()) {
+          return true;
+        }
+      }
+    }
+  } catch {
+    // Any error means we can't determine — default to logged-out
+  }
+  return false;
+}
+
+/**
+ * Full-page skeleton used while the app is loading (auth resolving, providers mounting).
+ * Checks localStorage for a likely valid session to decide whether to show
+ * the authenticated layout (AppBar + drawer) or a minimal loading state.
  *
  * @param {object} props
  * @param {'page'|'cards'|'detail'|'sections'} [props.variant='page'] - Layout variant
  */
 export default function AppSkeleton({ variant = "page" }) {
-  const isFullWidth = variant === "detail";
+  const isLikelyLoggedIn = hasLikelySession();
+
+  if (!isLikelyLoggedIn) {
+    // Logged-out: centered horizontally, flush to top (matches Authenticator modal position)
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ width: 360 }}>
+          <Skeleton
+            variant="rectangular"
+            width={360}
+            height={400}
+            sx={{ borderRadius: 2 }}
+          />
+        </Box>
+      </Box>
+    );
+  }
+
+  // Logged-in: show AppBar + drawer + content skeleton
   return (
-    <Box
-      sx={{
-        p: { xs: 2, sm: 3 },
-        ...(!isFullWidth && { maxWidth: "60rem", mx: "auto" }),
-      }}
-    >
-      {variant === "cards" && <CardsSkeleton />}
-      {variant === "sections" && <SectionsSkeleton />}
-      {variant === "detail" && <DetailSkeleton />}
-      {variant === "page" && <PageSkeleton />}
+    <Box sx={{ minHeight: "100vh" }}>
+      {/* AppBar skeleton */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: APPBAR_HEIGHT,
+          zIndex: 1300,
+          backgroundColor: "background.paper",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          px: 1.5,
+          gap: 1,
+        }}
+      >
+        <Skeleton variant="circular" width={36} height={36} />
+        <Box sx={{ flexGrow: 1 }} />
+        <Skeleton variant="circular" width={32} height={32} />
+        <Skeleton variant="circular" width={32} height={32} />
+        <Skeleton variant="circular" width={32} height={32} />
+      </Box>
+
+      <Box sx={{ display: "flex", mt: `${APPBAR_HEIGHT}px` }}>
+        {/* Left nav drawer — desktop only */}
+        <Box
+          sx={{
+            width: DRAWER_WIDTH,
+            minWidth: DRAWER_WIDTH,
+            borderRight: "1px solid",
+            borderColor: "divider",
+            height: `calc(100vh - ${APPBAR_HEIGHT}px)`,
+            p: 2,
+            display: { xs: "none", md: "block" },
+          }}
+        >
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Box
+              key={i}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}
+            >
+              <Skeleton variant="circular" width={24} height={24} />
+              <Skeleton variant="text" width={`${40 + i * 10}%`} height={24} />
+            </Box>
+          ))}
+          <Skeleton
+            variant="rectangular"
+            height={1}
+            sx={{ my: 2, opacity: 0.3 }}
+          />
+          {[0, 1].map((i) => (
+            <Box
+              key={`s${i}`}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}
+            >
+              <Skeleton variant="circular" width={24} height={24} />
+              <Skeleton variant="text" width={`${50 + i * 15}%`} height={24} />
+            </Box>
+          ))}
+        </Box>
+
+        {/* Main content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            maxWidth: variant === "detail" ? "none" : "80rem",
+            mx: variant === "detail" ? 0 : "auto",
+            width: "100%",
+          }}
+        >
+          {variant === "cards" && <CardsSkeleton />}
+          {variant === "sections" && <SectionsSkeleton />}
+          {variant === "detail" && <DetailSkeleton />}
+          {variant === "page" && <PageSkeleton />}
+        </Box>
+      </Box>
     </Box>
   );
 }
 
-/** Default page skeleton: title + a few content blocks */
+/** Default page skeleton: streak row + progress rings + divider + assignment cards (home page) */
 function PageSkeleton() {
   return (
     <>
-      <Skeleton variant="text" width="40%" height={40} sx={{ mb: 2 }} />
-      <Skeleton variant="text" width="70%" height={24} sx={{ mb: 3 }} />
+      {/* Streak indicator row */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+        <Skeleton variant="circular" width={40} height={40} />
+        <Skeleton variant="text" width={120} height={28} />
+      </Box>
+      {/* Progress rings placeholder */}
+      <Box sx={{ display: "flex", gap: 3, mb: 3, flexWrap: "wrap" }}>
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} variant="circular" width={80} height={80} />
+        ))}
+      </Box>
+      <Skeleton variant="rectangular" height={1} sx={{ mb: 3, opacity: 0.3 }} />
+      {/* Assignment cards */}
       {[0, 1, 2].map((i) => (
-        <Box key={i} sx={{ mb: 3 }}>
+        <Box
+          key={i}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 1.5,
+            p: 2,
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+          }}
+        >
           <Skeleton
             variant="rectangular"
-            height={120}
-            sx={{ borderRadius: 1, mb: 1 }}
+            width={80}
+            height={60}
+            sx={{ borderRadius: 1 }}
           />
-          <Skeleton variant="text" width="60%" height={20} />
-          <Skeleton variant="text" width="40%" height={20} />
+          <Box sx={{ flexGrow: 1 }}>
+            <Skeleton variant="text" width="60%" height={24} />
+            <Skeleton variant="text" width="35%" height={18} />
+          </Box>
+          <Skeleton
+            variant="rectangular"
+            width={60}
+            height={24}
+            sx={{ borderRadius: 0.5 }}
+          />
         </Box>
       ))}
     </>
   );
 }
 
-/** Sections skeleton: vertical list of bordered cards matching sections page */
+/** Sections skeleton: title + bordered cards with left accent matching sections page */
 function SectionsSkeleton() {
   return (
     <>

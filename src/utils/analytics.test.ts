@@ -1,17 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// Mock aws-amplify/analytics before importing the module
-vi.mock("aws-amplify/analytics", () => ({
-  record: vi.fn(),
-  configureAutoTrack: vi.fn(),
-  identifyUser: vi.fn(),
-}));
+// Mock sendBeacon globally
+const mockSendBeacon = vi.fn(() => true);
+Object.defineProperty(globalThis.navigator, "sendBeacon", {
+  value: mockSendBeacon,
+  writable: true,
+});
 
-import {
-  record,
-  configureAutoTrack,
-  identifyUser,
-} from "aws-amplify/analytics";
 import {
   trackEvent,
   trackPageView,
@@ -23,6 +18,7 @@ import {
   trackGuildViewed,
   identifyAnalyticsUser,
   initAnalytics,
+  flush,
   trackChatMessageSent,
   trackChatResponseReceived,
   trackChatToolUsed,
@@ -41,23 +37,33 @@ import {
   AnalyticsEvents,
 } from "./analytics";
 
-describe("analytics utilities", () => {
+describe("analytics utilities (Kinesis-backed)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Flush any leftover buffer between tests
+    flush();
+    mockSendBeacon.mockClear();
   });
 
   describe("trackEvent", () => {
-    it("calls record with event name", () => {
-      trackEvent(AnalyticsEvents.PAGE_VIEW);
-      expect(record).toHaveBeenCalledWith({ name: "pageView" });
+    it("buffers events and flushes via sendBeacon", () => {
+      trackEvent(AnalyticsEvents.PAGE_VIEW, { path: "/test" });
+      flush();
+      expect(mockSendBeacon).toHaveBeenCalledTimes(1);
+      const [url, payload] = mockSendBeacon.mock.calls[0];
+      expect(url).toBe("/api/analytics");
+      const events = JSON.parse(payload as string);
+      expect(events).toHaveLength(1);
+      expect(events[0].name).toBe("pageView");
+      expect(events[0].attributes).toEqual({ path: "/test" });
     });
 
-    it("includes attributes when provided", () => {
+    it("includes timestamp and sessionId in events", () => {
       trackEvent(AnalyticsEvents.AUDIO_PLAYED, { unitId: "u1" });
-      expect(record).toHaveBeenCalledWith({
-        name: "audioPlayed",
-        attributes: { unitId: "u1" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].timestamp).toBeDefined();
+      expect(events[0].sessionId).toBeDefined();
     });
 
     it("includes metrics when provided", () => {
@@ -66,122 +72,98 @@ describe("analytics utilities", () => {
         { unitId: "u1" },
         { engagedTimeMs: 5000 },
       );
-      expect(record).toHaveBeenCalledWith({
-        name: "engagedTimeUpdate",
-        attributes: { unitId: "u1" },
-        metrics: { engagedTimeMs: 5000 },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].metrics).toEqual({ engagedTimeMs: 5000 });
     });
 
-    it("does not crash if record throws", () => {
-      vi.mocked(record).mockImplementationOnce(() => {
+    it("does not crash on errors", () => {
+      mockSendBeacon.mockImplementationOnce(() => {
         throw new Error("Network error");
       });
-      expect(() => trackEvent(AnalyticsEvents.PAGE_VIEW)).not.toThrow();
+      trackEvent(AnalyticsEvents.PAGE_VIEW);
+      expect(() => flush()).not.toThrow();
+    });
+
+    it("does not flush if buffer is empty", () => {
+      flush();
+      expect(mockSendBeacon).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("initAnalytics", () => {
+    it("sets userId and userRole on subsequent events", () => {
+      initAnalytics({ userId: "user-1", userRole: "Learner" });
+      trackEvent(AnalyticsEvents.PAGE_VIEW);
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].userId).toBe("user-1");
+      expect(events[0].userRole).toBe("Learner");
+    });
+  });
+
+  describe("identifyAnalyticsUser", () => {
+    it("updates the userId for subsequent events", () => {
+      identifyAnalyticsUser({
+        userId: "user-123",
+        userRole: "Instructor",
+        sectionIds: ["s1"],
+      });
+      trackEvent(AnalyticsEvents.PAGE_VIEW);
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].userId).toBe("user-123");
+      expect(events[0].userRole).toBe("Instructor");
     });
   });
 
   describe("trackPageView", () => {
     it("records a pageView event with path", () => {
       trackPageView("/workbook/abc");
-      expect(record).toHaveBeenCalledWith({
-        name: "pageView",
-        attributes: { path: "/workbook/abc" },
-      });
-    });
-
-    it("merges additional attributes", () => {
-      trackPageView("/unit/123", { unitId: "123" });
-      expect(record).toHaveBeenCalledWith({
-        name: "pageView",
-        attributes: { path: "/unit/123", unitId: "123" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("pageView");
+      expect(events[0].attributes.path).toBe("/workbook/abc");
     });
   });
 
   describe("trackEngagedTime", () => {
     it("records engaged time with unit and grade ids", () => {
       trackEngagedTime("unit-1", "grade-1", 45000);
-      expect(record).toHaveBeenCalledWith({
-        name: "engagedTimeUpdate",
-        attributes: { unitId: "unit-1", gradeId: "grade-1" },
-        metrics: { engagedTimeMs: 45000 },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("engagedTimeUpdate");
+      expect(events[0].attributes).toEqual({
+        unitId: "unit-1",
+        gradeId: "grade-1",
       });
+      expect(events[0].metrics).toEqual({ engagedTimeMs: 45000 });
     });
   });
 
   describe("trackWorkbookCompleted", () => {
     it("records completion with accuracy and time", () => {
       trackWorkbookCompleted("unit-1", "grade-1", 92.5, 120000);
-      expect(record).toHaveBeenCalledWith({
-        name: "workbookCompleted",
-        attributes: { unitId: "unit-1", gradeId: "grade-1" },
-        metrics: { accuracy: 92.5, engagedTimeMs: 120000 },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("workbookCompleted");
+      expect(events[0].metrics).toEqual({
+        accuracy: 92.5,
+        engagedTimeMs: 120000,
       });
     });
   });
 
-  describe("initAnalytics", () => {
-    it("configures session and pageView auto-tracking", () => {
-      initAnalytics();
-      expect(configureAutoTrack).toHaveBeenCalledTimes(2);
-      expect(configureAutoTrack).toHaveBeenCalledWith({
-        enable: true,
-        type: "session",
-      });
-      expect(configureAutoTrack).toHaveBeenCalledWith({
-        enable: true,
-        type: "pageView",
-        options: { appType: "singlePage" },
-      });
-    });
-
-    it("does not crash if configureAutoTrack throws", () => {
-      vi.mocked(configureAutoTrack).mockImplementationOnce(() => {
-        throw new Error("Not configured");
-      });
-      expect(() => initAnalytics()).not.toThrow();
-    });
-  });
-
-  describe("identifyAnalyticsUser", () => {
-    it("calls identifyUser with section membership and role", () => {
-      identifyAnalyticsUser({
-        userId: "user-123",
-        userRole: "Learner",
-        sectionIds: ["section-a", "section-b"],
-        sectionNames: ["Japanese 101", "Biology 101"],
-      });
-      expect(identifyUser).toHaveBeenCalledWith({
-        userId: "user-123",
-        userProfile: {
-          customProperties: {
-            userRole: ["Learner"],
-            sectionIds: ["section-a", "section-b"],
-            sectionNames: ["Japanese 101", "Biology 101"],
-          },
-        },
-      });
-    });
-
-    it("does not crash if identifyUser throws", () => {
-      vi.mocked(identifyUser).mockImplementationOnce(() => {
-        throw new Error("Not configured");
-      });
-      expect(() => identifyAnalyticsUser({ userId: "user-1" })).not.toThrow();
-    });
-  });
-
-  describe("section-aware tracking (multi-section user)", () => {
+  describe("section-aware tracking", () => {
     it("trackSectionWorkbookStarted tags with correct sectionId", () => {
       trackSectionWorkbookStarted("unit-1", "section-a", "assignment-1");
-      expect(record).toHaveBeenCalledWith({
-        name: "sectionWorkbookStarted",
-        attributes: {
-          unitId: "unit-1",
-          sectionId: "section-a",
-          assignmentId: "assignment-1",
-        },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("sectionWorkbookStarted");
+      expect(events[0].attributes).toEqual({
+        unitId: "unit-1",
+        sectionId: "section-a",
+        assignmentId: "assignment-1",
       });
     });
 
@@ -193,175 +175,149 @@ describe("analytics utilities", () => {
         88,
         300000,
       );
-      expect(record).toHaveBeenCalledWith({
-        name: "workbookCompleted",
-        attributes: {
-          unitId: "unit-2",
-          gradeId: "grade-2",
-          sectionId: "section-b",
-        },
-        metrics: { accuracy: 88, engagedTimeMs: 300000 },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.sectionId).toBe("section-b");
     });
 
     it("trackSectionEngagedTime includes section context", () => {
       trackSectionEngagedTime("unit-1", "grade-1", "section-a", 60000);
-      expect(record).toHaveBeenCalledWith({
-        name: "engagedTimeUpdate",
-        attributes: {
-          unitId: "unit-1",
-          gradeId: "grade-1",
-          sectionId: "section-a",
-        },
-        metrics: { engagedTimeMs: 60000 },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.sectionId).toBe("section-a");
     });
 
     it("trackGuildViewed tags with section context", () => {
       trackGuildViewed("section-b", "leaderboard");
-      expect(record).toHaveBeenCalledWith({
-        name: "guildViewed",
-        attributes: { sectionId: "section-b", guildType: "leaderboard" },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("guildViewed");
+      expect(events[0].attributes).toEqual({
+        sectionId: "section-b",
+        guildType: "leaderboard",
       });
     });
   });
 
   describe("chat engagement tracking", () => {
-    it("trackChatMessageSent records with chatId, sectionId, and message length", () => {
+    it("trackChatMessageSent records with chatId and sectionId", () => {
       trackChatMessageSent("chat-1", "section-a", 42);
-      expect(record).toHaveBeenCalledWith({
-        name: "chatMessageSent",
-        attributes: { chatId: "chat-1", sectionId: "section-a" },
-        metrics: { messageLength: 42 },
-      });
-    });
-
-    it("trackChatMessageSent works without optional params", () => {
-      trackChatMessageSent("chat-2");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatMessageSent",
-        attributes: { chatId: "chat-2" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("chatMessageSent");
+      expect(events[0].attributes.chatId).toBe("chat-1");
+      expect(events[0].attributes.sectionId).toBe("section-a");
+      expect(events[0].metrics).toEqual({ messageLength: 42 });
     });
 
     it("trackChatResponseReceived records tools used", () => {
       trackChatResponseReceived("chat-1", ["search_content", "practice_drill"]);
-      expect(record).toHaveBeenCalledWith({
-        name: "chatResponseReceived",
-        attributes: {
-          chatId: "chat-1",
-          toolsUsed: "search_content,practice_drill",
-        },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.toolsUsed).toBe(
+        "search_content,practice_drill",
+      );
     });
 
     it("trackChatToolUsed records tool name with section", () => {
       trackChatToolUsed("chat-1", "search_content", "section-a");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatToolUsed",
-        attributes: {
-          chatId: "chat-1",
-          toolName: "search_content",
-          sectionId: "section-a",
-        },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.toolName).toBe("search_content");
     });
 
     it("trackChatFileUploaded records file type", () => {
       trackChatFileUploaded("chat-1", "application/pdf");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatFileUploaded",
-        attributes: { chatId: "chat-1", fileType: "application/pdf" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.fileType).toBe("application/pdf");
     });
 
     it("trackChatSessionStarted records with section", () => {
       trackChatSessionStarted("section-b");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatSessionStarted",
-        attributes: { sectionId: "section-b" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.sectionId).toBe("section-b");
     });
 
     it("trackChatBlockInserted records block type", () => {
       trackChatBlockInserted("chat-1", "quiz");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatBlockInserted",
-        attributes: { chatId: "chat-1", blockType: "quiz" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes.blockType).toBe("quiz");
     });
 
     it("trackChatRegenerated records chatId", () => {
       trackChatRegenerated("chat-1");
-      expect(record).toHaveBeenCalledWith({
-        name: "chatRegenerated",
-        attributes: { chatId: "chat-1" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("chatRegenerated");
     });
   });
 
   describe("squad engagement tracking", () => {
     it("trackSquadViewed records squad and section", () => {
       trackSquadViewed("squad-1", "section-a");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadViewed",
-        attributes: { squadId: "squad-1", sectionId: "section-a" },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes).toEqual({
+        squadId: "squad-1",
+        sectionId: "section-a",
       });
     });
 
     it("trackSquadJoined records squad and section", () => {
       trackSquadJoined("squad-1", "section-a");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadJoined",
-        attributes: { squadId: "squad-1", sectionId: "section-a" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("squadJoined");
     });
 
     it("trackSquadLeft records squad and section", () => {
       trackSquadLeft("squad-1", "section-a");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadLeft",
-        attributes: { squadId: "squad-1", sectionId: "section-a" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("squadLeft");
     });
 
     it("trackSquadPostCreated records squad and section", () => {
       trackSquadPostCreated("squad-1", "section-b");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadPostCreated",
-        attributes: { squadId: "squad-1", sectionId: "section-b" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("squadPostCreated");
     });
 
     it("trackSquadPostDeleted records squad and section", () => {
       trackSquadPostDeleted("squad-1", "section-b");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadPostDeleted",
-        attributes: { squadId: "squad-1", sectionId: "section-b" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("squadPostDeleted");
     });
 
     it("trackSquadEdited records squad and field", () => {
       trackSquadEdited("squad-1", "name");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadEdited",
-        attributes: { squadId: "squad-1", field: "name" },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes).toEqual({
+        squadId: "squad-1",
+        field: "name",
       });
     });
 
     it("trackSquadLeaderboardViewed records sectionId", () => {
       trackSquadLeaderboardViewed("section-a");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadLeaderboardViewed",
-        attributes: { sectionId: "section-a" },
-      });
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].name).toBe("squadLeaderboardViewed");
     });
 
     it("trackSquadLeaderboardModeChanged records section and mode", () => {
       trackSquadLeaderboardModeChanged("section-a", "squads");
-      expect(record).toHaveBeenCalledWith({
-        name: "squadLeaderboardModeChanged",
-        attributes: { sectionId: "section-a", mode: "squads" },
+      flush();
+      const events = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(events[0].attributes).toEqual({
+        sectionId: "section-a",
+        mode: "squads",
       });
     });
   });

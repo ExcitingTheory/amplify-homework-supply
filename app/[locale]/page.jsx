@@ -18,8 +18,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import MyAuth from "@/components/AmplifyAuthenticator";
-import getCachedUrl from "@/utils/getCachedUrl";
-import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
+import LazyCardMedia from "@/components/LazyCardMedia";
 import HistoryIcon from "@mui/icons-material/History";
 import AverageIcon from "@mui/icons-material/Timeline";
 import HighIcon from "@mui/icons-material/ArrowUpward";
@@ -59,74 +58,6 @@ function getColor(grade = 0) {
   }
 
   return gradeColor;
-}
-
-function CardMediaComponent({
-  s3Key,
-  identityId,
-  fileId,
-  level = "protected",
-  filter = null,
-  grade = null,
-}) {
-  const [url, setUrl] = React.useState(null);
-  const [srcSet, setSrcSet] = React.useState(null);
-  const [sizes, setSizes] = React.useState(null);
-  const [loaded, setLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    setLoaded(false);
-    const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
-
-    asyncFunc();
-
-    if (fileId && identityId) {
-      getResponsiveImageUrls(fileId, identityId)
-        .then((result) => {
-          if (result) {
-            setSrcSet(result.srcSet);
-            setSizes(result.sizes);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [s3Key, fileId, identityId]);
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        width: 400,
-        alignSelf: "left",
-        flexShrink: 0,
-      }}
-    >
-      <img
-        src={url || undefined}
-        srcSet={srcSet || undefined}
-        sizes={sizes || undefined}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          visibility: loaded ? "visible" : "hidden",
-          filter: filter || undefined,
-        }}
-        onLoad={() => setLoaded(true)}
-      />
-      {!loaded && (
-        <Skeleton
-          variant="rectangular"
-          animation="wave"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        />
-      )}
-    </Box>
-  );
 }
 
 function getUserId(user) {
@@ -186,7 +117,8 @@ function Index({ signOut, user }) {
         items = items.filter((item) => item != null && item.id != null);
 
         // Skip if count unchanged (dedup initial echo)
-        if (items.length === gradeCountRef.current && gradeCountRef.current > 0) return;
+        if (items.length === gradeCountRef.current && gradeCountRef.current > 0)
+          return;
         gradeCountRef.current = items.length;
 
         // Process my grades (complete only)
@@ -227,7 +159,11 @@ function Index({ signOut, user }) {
         items = items.filter((item) => item != null && item.id != null);
 
         // Skip if count unchanged (dedup initial echo)
-        if (items.length === assignmentCountRef.current && assignmentCountRef.current > 0) return;
+        if (
+          items.length === assignmentCountRef.current &&
+          assignmentCountRef.current > 0
+        )
+          return;
         assignmentCountRef.current = items.length;
 
         const myAssignments = items.filter((a) => a.owner === myUserId);
@@ -261,7 +197,11 @@ function Index({ signOut, user }) {
         );
 
         // Skip if count unchanged (dedup initial echo)
-        if (validItems.length === sectionCountRef.current && sectionCountRef.current > 0) return;
+        if (
+          validItems.length === sectionCountRef.current &&
+          sectionCountRef.current > 0
+        )
+          return;
         sectionCountRef.current = validItems.length;
 
         // Sections I own (I'm the instructor)
@@ -523,11 +463,21 @@ function Index({ signOut, user }) {
 
                   return (
                     <Card key={assignment.id || index} sx={{ mb: 1, mx: 1 }}>
-                      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: 1, "&:last-child": { pb: 1 } }}>
+                      <CardContent
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                          py: 1,
+                          "&:last-child": { pb: 1 },
+                        }}
+                      >
                         <Box sx={{ flexGrow: 1 }}>
                           <Typography variant="body1">{itemPrimary}</Typography>
                           {itemSecondary && (
-                            <Typography variant="body2" color="text.secondary">{itemSecondary}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {itemSecondary}
+                            </Typography>
                           )}
                         </Box>
                         <PrefetchButton
@@ -580,7 +530,7 @@ function Index({ signOut, user }) {
                 const itemPrimary = `${localTime} - ${units[assignment.unitID]?.name}`;
                 const itemSecondary = units[assignment.unitID]?.description;
                 const featuredImage = units[assignment.unitID]?.featuredImage;
-                const owner = units[assignment.unitID]?.owner;
+                const identityId = units[assignment.unitID]?.identityId;
 
                 const workbookUrl = `/workbook/${assignment.unitID}`;
                 const unitUrl = `/unit/${assignment.unitID}`;
@@ -686,7 +636,7 @@ function Index({ signOut, user }) {
                             }}
                           >
                             {t("index.editUnit")}
-                          </Button>
+                          </PrefetchButton>
                         </Box>
                       </Box>
                       {/* <CardMedia
@@ -696,9 +646,9 @@ function Index({ signOut, user }) {
                                 alt="Live from space album cover"
                               /> */}
                       {featuredImage && (
-                        <CardMediaComponent
+                        <LazyCardMedia
                           s3Key={featuredImage}
-                          owner={owner}
+                          identityId={identityId}
                         />
                       )}
                     </Card>
@@ -895,9 +845,9 @@ function Index({ signOut, user }) {
                   alt="Live from space album cover"
                 /> */}
                     {section?.featuredImage && (
-                      <CardMediaComponent
+                      <LazyCardMedia
                         s3Key={section.featuredImage}
-                        owner={section.owner}
+                        identityId={section.identityId}
                       />
                     )}
                   </Card>
@@ -1013,7 +963,7 @@ function Index({ signOut, user }) {
                               alt="Live from space album cover"
                             /> */}
                     {section?.featuredImage && (
-                      <CardMediaComponent
+                      <LazyCardMedia
                         s3Key={section.featuredImage}
                         identityId={section.identityId}
                       />

@@ -1,10 +1,10 @@
 "use client";
 
-import {
-  record,
-  configureAutoTrack,
-  identifyUser,
-} from "aws-amplify/analytics";
+// ============================================================================
+// Analytics SDK — Kinesis-backed event buffering with sendBeacon flush
+// Replaces AWS Pinpoint with a lightweight client that buffers events and
+// flushes to /api/analytics via navigator.sendBeacon.
+// ============================================================================
 
 /**
  * Analytics event names — centralized to avoid typos and enable autocomplete
@@ -56,8 +56,84 @@ export const AnalyticsEvents = {
 export type AnalyticsEventName =
   (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
 
+// ============================================================================
+// Event buffering & flush infrastructure
+// ============================================================================
+
+interface AnalyticsEvent {
+  name: string;
+  timestamp: string;
+  sessionId: string;
+  userId?: string;
+  userRole?: "Admin" | "Instructor" | "Learner";
+  sectionId?: string;
+  squadId?: string;
+  unitId?: string;
+  path?: string;
+  attributes?: Record<string, string>;
+  metrics?: Record<string, number>;
+}
+
+const buffer: AnalyticsEvent[] = [];
+let flushTimer: ReturnType<typeof setInterval> | null = null;
+let currentSessionId: string | null = null;
+let currentUserId: string | undefined;
+let currentUserRole: "Admin" | "Instructor" | "Learner" | undefined;
+
+function getSessionId(): string {
+  if (currentSessionId) return currentSessionId;
+  // Generate a session ID per browser tab
+  currentSessionId =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  return currentSessionId;
+}
+
 /**
- * Record a custom analytics event with optional attributes and metrics
+ * Flush buffered events to the analytics API endpoint.
+ * Uses sendBeacon for reliability on page unload.
+ */
+export function flush() {
+  if (buffer.length === 0) return;
+  const events = buffer.splice(0, buffer.length);
+  try {
+    const payload = JSON.stringify(events);
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      navigator.sendBeacon("/api/analytics", payload);
+    } else {
+      // Fallback for environments without sendBeacon (SSR guard)
+      fetch("/api/analytics", {
+        method: "POST",
+        body: payload,
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+      }).catch(() => {
+        // Silently fail — analytics should never block UX
+      });
+    }
+  } catch {
+    // Analytics should never crash the app
+  }
+}
+
+// Auto-flush setup (client-side only)
+if (typeof document !== "undefined") {
+  // Flush on page hide (reliable even on tab close)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flush();
+  });
+  // Flush every 30s
+  flushTimer = setInterval(flush, 30_000);
+}
+
+// ============================================================================
+// Core tracking function
+// ============================================================================
+
+/**
+ * Record a custom analytics event with optional attributes and metrics.
+ * Events are buffered and flushed in batches to /api/analytics.
  */
 export function trackEvent(
   name: AnalyticsEventName | string,
@@ -65,14 +141,21 @@ export function trackEvent(
   metrics?: Record<string, number>,
 ) {
   try {
-    record({
+    buffer.push({
       name,
-      ...(attributes && { attributes }),
-      ...(metrics && { metrics }),
+      timestamp: new Date().toISOString(),
+      sessionId: getSessionId(),
+      userId: currentUserId,
+      userRole: currentUserRole,
+      path:
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+      attributes,
+      metrics,
     });
-  } catch (err) {
+    // Auto-flush when buffer reaches 20 events
+    if (buffer.length >= 20) flush();
+  } catch {
     // Analytics should never crash the app
-    console.warn("[Analytics] Failed to record event:", name, err);
   }
 }
 
@@ -121,95 +204,38 @@ export function trackWorkbookCompleted(
 }
 
 /**
- * Initialize auto-tracking for sessions and page views.
- * Call once during app initialization.
+ * Initialize analytics. Call once during app initialization.
+ * Sets up the user identity for event attribution.
  */
-export function initAnalytics() {
-  try {
-    configureAutoTrack({
-      enable: true,
-      type: "session",
-    });
-    configureAutoTrack({
-      enable: true,
-      type: "pageView",
-      options: {
-        appType: "singlePage",
-      },
-    });
-  } catch (err) {
-    console.warn("[Analytics] Failed to initialize auto-tracking:", err);
-  }
-}
-
-// ============================================================================
-// User Segmentation — Pinpoint endpoint attributes for filtering/targeting
-// ============================================================================
-
-interface UserSegmentationOptions {
-  /** Cognito userId / sub */
-  userId: string;
-  /** User's role (Admin, Instructor, Learner) */
-  userRole?: string;
-  /** Section IDs the user belongs to */
-  sectionIds?: string[];
-  /** Section names for human-readable segments */
-  sectionNames?: string[];
-  /** The user's active/current section ID (if applicable) */
-  activeSectionId?: string;
+export function initAnalytics(options?: {
+  userId?: string;
+  userRole?: "Admin" | "Instructor" | "Learner";
+}) {
+  if (options?.userId) currentUserId = options.userId;
+  if (options?.userRole) currentUserRole = options.userRole;
 }
 
 /**
- * Set user attributes on the Pinpoint endpoint for segmentation.
- * Call when:
- * - User signs in
- * - User joins/leaves a section
- * - Section membership changes
- *
- * This enables filtering analytics by section, role, etc. in Pinpoint console
- * and the admin dashboard.
+ * Update user identity after sign-in or role change.
+ * Replaces the old Pinpoint identifyUser pattern — user attributes
+ * are now sent as event metadata with every event.
  */
-export function identifyAnalyticsUser({
-  userId,
-  userRole,
-  sectionIds,
-  sectionNames,
-  activeSectionId,
-}: UserSegmentationOptions) {
-  try {
-    identifyUser({
-      userId,
-      userProfile: {
-        customProperties: {
-          ...(userRole && { userRole: [userRole] }),
-          ...(sectionIds && sectionIds.length > 0 && { sectionIds }),
-          ...(sectionNames && sectionNames.length > 0 && { sectionNames }),
-          ...(activeSectionId && { activeSectionId: [activeSectionId] }),
-        },
-      },
-    });
-  } catch (err) {
-    console.warn("[Analytics] Failed to identify user:", err);
+export function identifyAnalyticsUser(options: {
+  userId: string;
+  userRole?: string;
+  sectionIds?: string[];
+  sectionNames?: string[];
+  activeSectionId?: string;
+}) {
+  currentUserId = options.userId;
+  if (options.userRole) {
+    currentUserRole = options.userRole as "Admin" | "Instructor" | "Learner";
   }
 }
 
 // ============================================================================
 // Section-aware event tracking
 // ============================================================================
-
-/**
- * Every engagement event should include the sectionId it belongs to.
- * This resolves ambiguity when a user is in multiple sections:
- *
- * Example: User in Section A and Section B
- * - Workbook 1 (assigned in Section A) → events tagged sectionId: "A"
- * - Squad 1 (belongs to Section A) → events tagged sectionId: "A"
- * - Workbook 2 (assigned in Section B) → events tagged sectionId: "B"
- * - Squad 2 (belongs to Section B) → events tagged sectionId: "B"
- *
- * The user's Pinpoint profile has sectionIds: ["A", "B"] for membership queries,
- * but each event carries its own sectionId for per-section analytics.
- */
 
 /**
  * Track a workbook started within the context of a specific section assignment

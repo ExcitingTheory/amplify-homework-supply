@@ -796,11 +796,7 @@ export const KitchenSink = {
           answer: "Paris",
           hint: "Known as the City of Light",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(mockWaveformData.slice(0, 100)),
           answerAudio: [MOCK_AUDIO_BASE64],
-          answerAudioWaveformData: JSON.stringify(
-            mockWaveformData.slice(100, 200),
-          ),
           owner: "mock-user-sub",
         },
         {
@@ -809,7 +805,6 @@ export const KitchenSink = {
           answer: "London",
           hint: "This is incorrect - not the capital of France",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(mockWaveformData.slice(50, 150)),
           owner: "mock-user-sub",
         },
         {
@@ -818,7 +813,6 @@ export const KitchenSink = {
           answer: "Berlin",
           hint: "This is incorrect - this is Germany's capital",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(mockWaveformData.slice(75, 175)),
           owner: "mock-user-sub",
         },
         {
@@ -827,7 +821,6 @@ export const KitchenSink = {
           answer: "Madrid",
           hint: "This is incorrect - this is Spain's capital",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(mockWaveformData.slice(125, 225)),
           owner: "mock-user-sub",
         },
         {
@@ -837,11 +830,7 @@ export const KitchenSink = {
             "Sample answer about learning Japanese words and their meanings",
           hint: "Think about how studying vocabulary has helped you",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(mockWaveformData.slice(200, 300)),
           answerAudio: [MOCK_AUDIO_BASE64],
-          answerAudioWaveformData: JSON.stringify(
-            mockWaveformData.slice(300, 400),
-          ),
           owner: "mock-user-sub",
         },
       ]);

@@ -20,7 +20,14 @@ export function GamificationProviderWrapper({
 }) {
   const { user, session } = useContext(AuthContext);
   const client = useMemo(() => getAmplifyClient(), []);
-  const studentId = user?.username || user?.attributes?.sub || "";
+
+  // Skip gamification subscriptions for instructors/admins — they don't earn XP
+  const isInstructor =
+    session?.groups?.includes("Instructors") ||
+    session?.groups?.includes("Admins");
+  const studentId = isInstructor
+    ? ""
+    : user?.username || user?.attributes?.sub || "";
 
   // Consume from SectionContext if a SectionProvider exists above us.
   // At app-level there is no SectionProvider, so we get defaults (empty arrays).

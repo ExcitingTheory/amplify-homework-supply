@@ -189,3 +189,49 @@ export async function listVersionHistory(
 
 // Re-export key helpers for server-side usage
 export { draftKey, publishedKey, yjsSnapshotKey, historyKey };
+
+// ─── Generic Model Yjs Snapshot Storage ───────────────────────────────────────
+// Used by useYjsWord, useYjsQuestion, useYjsFile to store Yjs snapshots in S3
+// instead of DynamoDB (same pattern as Unit snapshots above).
+
+type ModelType = "words" | "questions" | "files";
+
+function modelSnapshotKey(
+  identityId: string,
+  modelType: ModelType,
+  modelId: string,
+): string {
+  return `private/${identityId}/${modelType}/${modelId}/yjs-snapshot.bin`;
+}
+
+export async function saveModelYjsSnapshot(
+  identityId: string,
+  modelType: ModelType,
+  modelId: string,
+  snapshot: Uint8Array,
+): Promise<void> {
+  await uploadData({
+    path: modelSnapshotKey(identityId, modelType, modelId),
+    data: new Blob([new Uint8Array(snapshot)]),
+    options: { contentType: "application/octet-stream" },
+  }).result;
+}
+
+export async function loadModelYjsSnapshot(
+  identityId: string,
+  modelType: ModelType,
+  modelId: string,
+): Promise<Uint8Array | null> {
+  try {
+    const path = modelSnapshotKey(identityId, modelType, modelId);
+    const { items } = await list({ path });
+    if (!items || items.length === 0) return null;
+
+    const result = await downloadData({ path }).result;
+    const blob = await result.body.blob();
+    const buffer = await blob.arrayBuffer();
+    return new Uint8Array(buffer);
+  } catch {
+    return null;
+  }
+}

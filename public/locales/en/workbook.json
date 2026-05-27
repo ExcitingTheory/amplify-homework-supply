@@ -30,9 +30,13 @@
     "tableOfContents": "Table of Contents"
   },
   "unitCompletedPlugin": {
+    "allCaughtUp": "All caught up! No more assignments.",
     "completionMessage": "Unit completed!",
     "continueButton": "Continue",
-    "sectionHeading": "Next Steps"
+    "nextAssignment": "Next Assignment",
+    "retrying": "Starting new attempt...",
+    "sectionHeading": "Next Steps",
+    "tryAgain": "Try Again"
   },
   "quizComponent": {
     "gradeDisplay": "Grade: {score}%"

@@ -74,7 +74,6 @@ import {
 import { useYjsFile } from "../../../hooks/useYjsFile";
 import { uploadData, remove } from "aws-amplify/storage";
 import { fetchAuthSession } from "aws-amplify/auth";
-import { calculateWaveformData } from "../../../utils/calculateWaveformData";
 import {
   uploadFile,
   uploadAndAnalyzePDF,
@@ -2032,11 +2031,6 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
             {audioSrc && (
               <AudioWaveformPlayer
                 audioUrl={audioSrc}
-                waveformData={
-                  previewFile?.waveformData
-                    ? JSON.parse(previewFile.waveformData)
-                    : undefined
-                }
                 width={600}
                 height={120}
                 title={previewFile?.name || "Audio Preview"}
@@ -2473,9 +2467,6 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
               <AudioWaveformPlayer
                 audioUrl={audioUrl}
                 file={file}
-                waveformData={
-                  file.waveformData ? JSON.parse(file.waveformData) : undefined
-                }
                 width={Math.max(audioWidth - 36, 100)}
                 height={80}
                 title={file.name}
@@ -2489,9 +2480,6 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             >
               <StaticWaveform
                 file={file}
-                waveformData={
-                  file.waveformData ? JSON.parse(file.waveformData) : undefined
-                }
                 width={Math.max(audioWidth - 2, 100)}
                 height={80}
                 backgroundColor="transparent"
@@ -2916,9 +2904,6 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
               audioUrl={url}
               displayTitle={true}
               title={file.name}
-              waveformData={
-                file.waveformData ? JSON.parse(file.waveformData) : undefined
-              }
               width={200}
               height={60}
               showDuration={true}
@@ -3794,14 +3779,6 @@ export default function FileManager2() {
 
       // Search in file description/summary
       if (file.description && containsSearchTerm(file.description, search))
-        return true;
-
-      // Search in extracted text (for documents)
-      const docStatus = documentStatuses[file.documentID];
-      if (
-        docStatus?.extractedText &&
-        containsSearchTerm(docStatus.extractedText, search)
-      )
         return true;
 
       // Search in metadata if available

@@ -14,29 +14,82 @@ import SettingsContext from "../../../context/settingsContext";
 import { usePlatformSettings } from "../../../context/gamificationContext";
 import CameraIcon from "@mui/icons-material/Camera";
 import getCachedUrl from "../../../utils/getCachedUrl";
+import { getResponsiveImageUrls } from "../../../utils/getResponsiveImageUrls";
 import FilesContext from "../../../context/fileContext";
 import { useTranslations } from "next-intl";
 
 function FeaturedImage({ style, s3Key, identityId }) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
+  const containerRef = React.useRef(null);
+  const [isVisible, setIsVisible] = React.useState(false);
 
   React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (!isVisible || !s3Key) return;
     setLoaded(false);
-    const asyncFunc = async () => {
+    let cancelled = false;
+
+    const fetchUrl = async () => {
       const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
+      if (!cancelled) setUrl(_url);
     };
-    asyncFunc();
-  }, [s3Key]);
+    fetchUrl();
+
+    if (identityId) {
+      const parts = s3Key.split("/");
+      const filesIdx = parts.indexOf("files");
+      const fileId = filesIdx >= 0 ? parts[filesIdx + 1] : null;
+      if (fileId) {
+        getResponsiveImageUrls(fileId, identityId)
+          .then((result) => {
+            if (!cancelled && result) {
+              setSrcSet(result.srcSet);
+              setSizes(result.sizes);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isVisible, s3Key, identityId]);
 
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
-      <img
-        src={url || undefined}
-        style={{ ...style, visibility: loaded ? "visible" : "hidden" }}
-        onLoad={() => setLoaded(true)}
-      />
+    <div
+      ref={containerRef}
+      style={{ position: "relative", width: "100%", overflow: "hidden" }}
+    >
+      {isVisible && url ? (
+        <img
+          src={url}
+          srcSet={srcSet || undefined}
+          sizes={sizes || undefined}
+          loading="lazy"
+          decoding="async"
+          style={{ ...style, visibility: loaded ? "visible" : "hidden" }}
+          onLoad={() => setLoaded(true)}
+        />
+      ) : null}
       {!loaded && (
         <Skeleton
           variant="rectangular"

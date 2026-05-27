@@ -1,28 +1,32 @@
 /**
  * useYjsWord - Real-time collaborative word/vocabulary editing hook
- * 
+ *
  * Integrates Yjs CRDT for conflict-free word operations with Amplify GraphQL
  * for cross-device persistence. Enables collaborative dictionary editing.
- * 
+ *
  * @example
  * ```typescript
  * const { metadata, deleteWord, isSynced } = useYjsWord({ wordId: 'w-123' });
- * 
+ *
  * // Update metadata - syncs automatically across clients
  * metadata?.set('phrase', 'ありがとう');
  * metadata?.set('phonetic', 'arigatō');
  * metadata?.set('definition', 'thank you');
- * 
+ *
  * // Delete word - no version conflicts!
  * await deleteWord();
  * ```
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useYjsProvider } from '../yjs/hooks';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import type { YjsDocProvider } from '../yjs/YjsProvider';
-import * as Y from 'yjs';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useYjsProvider } from "../yjs/hooks";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import {
+  saveModelYjsSnapshot,
+  loadModelYjsSnapshot,
+} from "../utils/unitContentStorage";
+import type { YjsDocProvider } from "../yjs/YjsProvider";
+import * as Y from "yjs";
 
 export interface UseYjsWordConfig {
   wordId?: string | null;
@@ -30,7 +34,10 @@ export interface UseYjsWordConfig {
   enablePersistence?: boolean;
   saveDebounceMs?: number;
   /** Optional optimistic version bump — call before save to block subscription echo */
-  bumpVersion?: (id: string, currentVersion: number) => { confirm: (v: number) => void; rollback: () => void };
+  bumpVersion?: (
+    id: string,
+    currentVersion: number,
+  ) => { confirm: (v: number) => void; rollback: () => void };
 }
 
 export interface UseYjsWordReturn {
@@ -48,7 +55,7 @@ export interface UseYjsWordReturn {
 
 /**
  * Hook for managing real-time collaborative word editing with Yjs
- * 
+ *
  * Features:
  * - Real-time sync via WebSocket (<100ms latency)
  * - Offline persistence via IndexedDB
@@ -62,7 +69,7 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
     enableWebSocket = true,
     enablePersistence = true,
     saveDebounceMs = 3000,
-    bumpVersion
+    bumpVersion,
   } = config;
 
   const client = getAmplifyClient();
@@ -74,13 +81,13 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
 
   // Initialize Yjs provider only if we have a wordId
   const { provider, isSynced, isConnected } = useYjsProvider({
-    docName: wordId ? `word-${wordId}` : 'word-null',
+    docName: wordId ? `word-${wordId}` : "word-null",
     connect: enableWebSocket && !!wordId,
-    persistence: enablePersistence && !!wordId
+    persistence: enablePersistence && !!wordId,
   });
 
   // Get metadata map from Yjs doc
-  const metadata = provider?.getDoc().getMap('metadata') || null;
+  const metadata = provider?.getDoc().getMap("metadata") || null;
 
   // Load initial state from Amplify
   useEffect(() => {
@@ -93,34 +100,62 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
       try {
         setIsLoading(true);
         const { data } = await client.models.Word.get({ id: wordId as string });
-        
+
         if (!data) {
           throw new Error(`Word ${wordId} not found`);
         }
 
         setWord(data);
 
-        // Apply Yjs snapshot if exists
-        if ((data as any).yjsSnapshot && provider) {
-          const yjsSnapshot = (data as any).yjsSnapshot as string;
-          const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-          if (provider.applyUpdate(updateBytes)) {
-            console.log(`[useYjsWord] Applied Yjs snapshot for word ${wordId}`);
-          } else {
-            console.warn(`[useYjsWord] Snapshot for word ${wordId} was corrupt — skipped`);
+        // Apply Yjs snapshot from S3 (fall back to DynamoDB field for migration)
+        if (provider) {
+          const identityId = (data as any).identityId || (data as any).owner;
+          let applied = false;
+
+          if (identityId) {
+            const s3Snapshot = await loadModelYjsSnapshot(
+              identityId,
+              "words",
+              wordId as string,
+            );
+            if (s3Snapshot) {
+              applied = provider.applyUpdate(s3Snapshot);
+              if (applied) {
+                console.log(
+                  `[useYjsWord] Applied Yjs snapshot from S3 for word ${wordId}`,
+                );
+              }
+            }
+          }
+
+          // Fall back to DynamoDB field (legacy data)
+          if (!applied && (data as any).yjsSnapshot) {
+            const updateBytes = Buffer.from(
+              (data as any).yjsSnapshot,
+              "base64",
+            );
+            if (provider.applyUpdate(updateBytes)) {
+              console.log(
+                `[useYjsWord] Applied legacy DynamoDB snapshot for word ${wordId}`,
+              );
+            } else {
+              console.warn(
+                `[useYjsWord] Snapshot for word ${wordId} was corrupt — skipped`,
+              );
+            }
           }
         }
 
         // Initialize metadata if empty (first time or no snapshot)
         if (metadata && metadata.size === 0) {
-          metadata.set('id', data.id);
-          metadata.set('phrase', data.phrase || '');
-          metadata.set('pronunciation', data.pronunciation || '');
-          metadata.set('definition', data.definition || '');
-          metadata.set('audio', data.audio || []);
-          metadata.set('rubyTags', data.rubyTags || '');
-          metadata.set('definitionAudio', data.definitionAudio || []);
-          metadata.set('updatedAt', new Date().toISOString());
+          metadata.set("id", data.id);
+          metadata.set("phrase", data.phrase || "");
+          metadata.set("pronunciation", data.pronunciation || "");
+          metadata.set("definition", data.definition || "");
+          metadata.set("audio", data.audio || []);
+          metadata.set("rubyTags", data.rubyTags || "");
+          metadata.set("definitionAudio", data.definitionAudio || []);
+          metadata.set("updatedAt", new Date().toISOString());
           console.log(`[useYjsWord] Initialized metadata for word ${wordId}`);
         }
 
@@ -143,36 +178,45 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
     try {
       // Get current state from metadata
       const updates: any = {
-        id: wordId
+        id: wordId,
       };
 
-      if (metadata.has('phrase')) updates.phrase = metadata.get('phrase');
-      if (metadata.has('pronunciation')) updates.pronunciation = metadata.get('pronunciation');
-      if (metadata.has('definition')) updates.definition = metadata.get('definition');
-      if (metadata.has('audio')) updates.audio = metadata.get('audio');
-      if (metadata.has('rubyTags')) updates.rubyTags = metadata.get('rubyTags');
-      if (metadata.has('definitionAudio')) updates.definitionAudio = metadata.get('definitionAudio');
+      if (metadata.has("phrase")) updates.phrase = metadata.get("phrase");
+      if (metadata.has("pronunciation"))
+        updates.pronunciation = metadata.get("pronunciation");
+      if (metadata.has("definition"))
+        updates.definition = metadata.get("definition");
+      if (metadata.has("audio")) updates.audio = metadata.get("audio");
+      if (metadata.has("rubyTags")) updates.rubyTags = metadata.get("rubyTags");
+      if (metadata.has("definitionAudio"))
+        updates.definitionAudio = metadata.get("definitionAudio");
 
-      // Capture snapshot
-      const yjsUpdate = Y.encodeStateAsUpdate(provider!.getDoc());
-      const yjsSnapshot = Buffer.from(yjsUpdate).toString('base64');
-      updates.yjsSnapshot = yjsSnapshot;
+      // Save Yjs snapshot to S3 (not DynamoDB)
+      const yjsState = Y.encodeStateAsUpdate(provider!.getDoc());
+      const identityId = word?.identityId || word?.owner;
+      if (identityId) {
+        await saveModelYjsSnapshot(identityId, "words", wordId, yjsState);
+      }
 
       // Optimistic version bump to block subscription echo
       const currentVersion = word?._version;
-      const versionCtrl = (bumpVersion && currentVersion != null)
-        ? bumpVersion(wordId, currentVersion)
-        : null;
+      const versionCtrl =
+        bumpVersion && currentVersion != null
+          ? bumpVersion(wordId, currentVersion)
+          : null;
       if (currentVersion != null) {
         updates._version = currentVersion;
       }
 
       console.log(`[useYjsWord] Saving word ${wordId} to GraphQL`);
-      
+
       const { data, errors } = await client.models.Word.update(updates);
-      
+
       if (errors) {
-        console.error(`[useYjsWord] GraphQL errors saving word ${wordId}:`, errors);
+        console.error(
+          `[useYjsWord] GraphQL errors saving word ${wordId}:`,
+          errors,
+        );
         versionCtrl?.rollback();
       } else {
         if (data) setWord(data);
@@ -196,8 +240,8 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
 
       // Debounce save
       saveTimerRef.current = setTimeout(() => {
-        saveToGraphQL().catch(err => {
-          console.error('[useYjsWord] Debounced save failed:', err);
+        saveToGraphQL().catch((err) => {
+          console.error("[useYjsWord] Debounced save failed:", err);
         });
       }, saveDebounceMs);
     };
@@ -215,18 +259,21 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
   /**
    * Update word metadata (applies to Yjs, will auto-sync)
    */
-  const updateMetadata = useCallback((updates: Record<string, any>) => {
-    if (!metadata) {
-      console.warn('[useYjsWord] Cannot update metadata - not initialized');
-      return;
-    }
+  const updateMetadata = useCallback(
+    (updates: Record<string, any>) => {
+      if (!metadata) {
+        console.warn("[useYjsWord] Cannot update metadata - not initialized");
+        return;
+      }
 
-    Object.entries(updates).forEach(([key, value]) => {
-      metadata.set(key, value);
-    });
+      Object.entries(updates).forEach(([key, value]) => {
+        metadata.set(key, value);
+      });
 
-    metadata.set('updatedAt', new Date().toISOString());
-  }, [metadata]);
+      metadata.set("updatedAt", new Date().toISOString());
+    },
+    [metadata],
+  );
 
   /**
    * Delete word from both GraphQL and any associated resources
@@ -234,7 +281,7 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
    */
   const deleteWord = useCallback(async () => {
     if (!wordId) {
-      throw new Error('Cannot delete word - no wordId provided');
+      throw new Error("Cannot delete word - no wordId provided");
     }
 
     isDeletingRef.current = true;
@@ -278,6 +325,6 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
     isConnected,
     updateMetadata,
     deleteWord,
-    forceSave
+    forceSave,
   };
 }

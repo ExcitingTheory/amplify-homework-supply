@@ -329,10 +329,7 @@ export default forwardRef(function RecordingStudio3(
   const handleAudioWaveformRecordingComplete = useCallback(
     async (file) => {
       if (!selectedDialogue) return;
-      // file is { path: blobURL, waveformData } or a saved File record
-      const waveformData = file?.waveformData
-        ? JSON.parse(file.waveformData)
-        : null;
+      // file is { path: blobURL } or a saved File record
       // Fetch the blob from the URL for handleRecordingComplete
       try {
         const response = await fetch(file.path);

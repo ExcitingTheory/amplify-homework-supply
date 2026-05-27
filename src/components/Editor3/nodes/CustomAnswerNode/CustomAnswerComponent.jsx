@@ -397,11 +397,6 @@ export default function CustomAnswerComponent({
                   {currentPromptMethod === "audio" && question?.audio && (
                     <AudioWaveformPlayer
                       audioUrl={question.audio[0]}
-                      waveformData={
-                        question.waveformData
-                          ? JSON.parse(question.waveformData)
-                          : undefined
-                      }
                       width={400}
                       height={60}
                       title={

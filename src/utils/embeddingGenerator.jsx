@@ -16,6 +16,7 @@
 
 import { getAmplifyClient } from "./amplifyClient";
 import { generateEmbedding as generateEmbeddingAction } from "../../app/actions/embeddings";
+import { saveEmbedding } from "./embeddingStorage";
 // Note: Type import commented out for .js file
 // import type { Schema } from '../../amplify/data/resource';
 import {
@@ -295,13 +296,26 @@ export async function generateUnitEmbedding(unitId, options = {}) {
       throw new Error("Failed to generate embedding");
     }
 
-    // Save to unit
+    // Save vector to S3 (private — owner only)
+    await saveEmbedding(unit.identityId, "unit", unit.id, {
+      model: "text-embedding-3-small",
+      dimensions: 512,
+      generatedAt: Date.now(),
+      wordCount: extracted.totalWordCount,
+      pages: [{ page: 0, embedding, text: extracted.text.substring(0, 200) }],
+    });
+
+    // Update metadata only in DynamoDB (no vector payload)
     await amplifyClient.models.Unit.update({
       id: unit.id,
-      embedding: JSON.stringify(embedding),
-      embeddingVersion: Date.now(),
-      embeddingWordCount: extracted.totalWordCount,
-      embeddingSectionCount: extracted.sections.length,
+      embedding: {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        version: Date.now(),
+        wordCount: extracted.totalWordCount,
+        pageCount: 1,
+      },
+      _version: unit._version,
     });
 
     console.log(
@@ -359,13 +373,31 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
       throw new Error("Failed to generate embedding");
     }
 
-    // Save to section
+    // Save vector to S3 (private — owner only)
+    await saveEmbedding(
+      section.identityId || section.owner,
+      "section",
+      section.id,
+      {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        generatedAt: Date.now(),
+        wordCount: extracted.wordCount,
+        pages: [{ page: 0, embedding, text: extracted.text.substring(0, 200) }],
+      },
+    );
+
+    // Update metadata only in DynamoDB (no vector payload)
     await amplifyClient.models.Section.update({
       id: section.id,
-      embedding: JSON.stringify(embedding),
-      textContent: extracted.text,
-      wordCount: extracted.wordCount,
-      embeddingVersion: Date.now(),
+      embedding: {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        version: Date.now(),
+        wordCount: extracted.wordCount,
+        pageCount: 1,
+      },
+      _version: section._version,
     });
 
     console.log(
@@ -415,10 +447,26 @@ export async function generateWordEmbedding(wordId, options = {}) {
 
     const embedding = await generateEmbedding(text);
 
+    // Save vector to S3
+    await saveEmbedding(word.identityId || word.owner, "word", word.id, {
+      model: "text-embedding-3-small",
+      dimensions: 512,
+      generatedAt: Date.now(),
+      wordCount: text.split(/\s+/).length,
+      pages: [{ page: 0, embedding, text: text.substring(0, 200) }],
+    });
+
+    // Update metadata only in DynamoDB
     await amplifyClient.models.Word.update({
       id: word.id,
-      embedding: JSON.stringify(embedding),
-      embeddingVersion: Date.now(),
+      embedding: {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        version: Date.now(),
+        wordCount: text.split(/\s+/).length,
+        pageCount: 1,
+      },
+      _version: word._version,
     });
 
     return { success: true, cached: false };
@@ -459,10 +507,31 @@ export async function generateQuestionEmbedding(questionId, options = {}) {
 
     const embedding = await generateEmbedding(text);
 
+    // Save vector to S3
+    await saveEmbedding(
+      question.identityId || question.owner,
+      "question",
+      question.id,
+      {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        generatedAt: Date.now(),
+        wordCount: text.split(/\s+/).length,
+        pages: [{ page: 0, embedding, text: text.substring(0, 200) }],
+      },
+    );
+
+    // Update metadata only in DynamoDB
     await amplifyClient.models.Question.update({
       id: question.id,
-      embedding: JSON.stringify(embedding),
-      embeddingVersion: Date.now(),
+      embedding: {
+        model: "text-embedding-3-small",
+        dimensions: 512,
+        version: Date.now(),
+        wordCount: text.split(/\s+/).length,
+        pageCount: 1,
+      },
+      _version: question._version,
     });
 
     return { success: true, cached: false };
@@ -531,21 +600,28 @@ export async function getOrGenerateUnitEmbedding(
   maxAge = 7 * 24 * 60 * 60 * 1000,
 ) {
   const amplifyClient = getAmplifyClient();
+  const { loadEmbedding } = await import("./embeddingStorage");
   try {
     const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
     if (!unit) {
       throw new Error(`Unit not found: ${unitId}`);
     }
 
-    // Check if embedding exists and is fresh
-    if (unit.embedding && unit.embeddingVersion) {
-      const age = Date.now() - unit.embeddingVersion;
+    // Check if embedding metadata exists and is fresh
+    if (unit.embedding?.version) {
+      const age = Date.now() - unit.embedding.version;
       if (age < maxAge) {
+        // Load vector from S3
+        const embeddingFile = await loadEmbedding(
+          unit.identityId,
+          "unit",
+          unit.id,
+        );
         return {
           success: true,
           cached: true,
           age: age,
-          embedding: JSON.parse(unit.embedding),
+          embedding: embeddingFile?.pages?.[0]?.embedding || null,
         };
       }
     }
@@ -553,16 +629,12 @@ export async function getOrGenerateUnitEmbedding(
     // Generate new embedding
     const result = await generateUnitEmbedding(unitId, { force: true });
 
-    // Fetch updated unit to get embedding
-    const { data: updatedUnit } = await amplifyClient.models.Unit.get({
-      id: unitId,
-    });
+    // Load newly saved embedding from S3
+    const embeddingFile = await loadEmbedding(unit.identityId, "unit", unit.id);
 
     return {
       ...result,
-      embedding: updatedUnit.embedding
-        ? JSON.parse(updatedUnit.embedding)
-        : null,
+      embedding: embeddingFile?.pages?.[0]?.embedding || null,
     };
   } catch (error) {
     console.error(

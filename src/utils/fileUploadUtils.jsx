@@ -12,7 +12,6 @@ import {
   cancelDocumentAnalysis as cancelDocumentAnalysisAction,
 } from "../../app/actions/embeddings";
 // Type import removed - not needed in runtime JS
-import { calculateWaveformData } from "./calculateWaveformData";
 import { isMimeType } from "@lexical/utils";
 import { Hub } from "aws-amplify/utils";
 import {
@@ -249,17 +248,6 @@ export async function uploadFile(
   const uploadResult = await uploadOperation.result;
   console.log("Upload completed successfully, S3 path:", uploadResult.path);
 
-  // Calculate waveform data for audio files
-  let waveformData = null;
-  if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-    try {
-      waveformData = await calculateWaveformData(file, 600);
-      console.log("Calculated waveform data:", waveformData);
-    } catch (error) {
-      console.error("Error calculating waveform:", error);
-    }
-  }
-
   // Create File model entry with the full S3 path from upload result
   const fileData = {
     path: uploadResult.path, // Use the actual S3 path from upload
@@ -270,10 +258,6 @@ export async function uploadFile(
     mimeType: correctedMimeType,
     level: "PROTECTED",
   };
-
-  if (waveformData) {
-    fileData.waveformData = JSON.stringify(waveformData);
-  }
 
   // If analyzable document type, create Document record first (so we have an ID for the File)
   let documentModel = null;

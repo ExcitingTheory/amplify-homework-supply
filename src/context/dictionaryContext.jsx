@@ -203,7 +203,28 @@ const DictionaryProvider = ({ children }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
-    const subscription = client.models.Word.observeQuery().subscribe({
+    // Exclude heavy fields: yjsSnapshot
+    const subscription = client.models.Word.observeQuery({
+      selectionSet: [
+        "id",
+        "owner",
+        "identityId",
+        "phrase",
+        "pronunciation",
+        "definition",
+        "rubyTags",
+        "audio.*",
+        "definitionAudio.*",
+        "importedAt",
+        "embedding.*",
+        "moderation.*",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
+    }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
         const validItems = (items || []).filter(
@@ -293,7 +314,32 @@ const DictionaryProvider = ({ children }) => {
       console.error(`[DictionaryContext] ${label} error:`, error);
     }
 
-    const subscription = client.models.Question.observeQuery().subscribe({
+    // Exclude heavy fields: yjsSnapshot
+    const subscription = client.models.Question.observeQuery({
+      selectionSet: [
+        "id",
+        "owner",
+        "identityId",
+        "prompt",
+        "answer",
+        "choices.*",
+        "audio.*",
+        "answerAudio.*",
+        "image",
+        "answerImage",
+        "type",
+        "difficulty",
+        "points",
+        "tags.*",
+        "embedding.*",
+        "moderation.*",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
+    }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
         const validItems = (items || []).filter(

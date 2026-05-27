@@ -737,8 +737,35 @@ const UnitProvider = ({ children, id }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
+    // Exclude heavy fields: generatedContent, data (loaded on-demand)
     const subscription = client.models.PracticeSession.observeQuery({
       filter: { unitID: { eq: id } },
+      selectionSet: [
+        "id",
+        "unitID",
+        "drillType",
+        "accuracy",
+        "blockCount",
+        "blocksCompleted",
+        "complete",
+        "xpAwarded",
+        "sourcesEnabled.*",
+        "coverageSnapshot.*",
+        "collaborative",
+        "roomCode",
+        "maxParticipants",
+        "insightStudentId",
+        "weakAreas.*",
+        "strongAreas.*",
+        "sourcesUsedList.*",
+        "blockBreakdown.*",
+        "insightTimestamp",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
     }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;

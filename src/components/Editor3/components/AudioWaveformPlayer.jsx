@@ -20,6 +20,10 @@ import { useColorScheme } from "@mui/material/styles";
 import { hexToRgb } from "../../../utils/hexToRgb";
 import FilesContext from "../../../context/fileContext";
 
+// Module-level cache: avoids redundant fetch+decode when the same URL
+// is rendered by multiple players or across remounts.
+const waveformCache = new Map();
+
 /**
  * AudioWaveformPlayer - Complete audio player with waveform visualization and recording
  *
@@ -57,8 +61,7 @@ import FilesContext from "../../../context/fileContext";
  *
  * @param {Object} props
  * @param {string} props.audioUrl - URL of the audio file to play
- * @param {Object} props.file - File object with waveformData (alternative to audioUrl)
- * @param {number[]} props.waveformData - Pre-calculated waveform data
+ * @param {Object} props.file - File object with path (alternative to audioUrl)
  * @param {number} props.width - Waveform width (default: 600)
  * @param {number} props.height - Waveform height (default: 80)
  * @param {string} props.title - Optional title to display above player
@@ -72,7 +75,6 @@ import FilesContext from "../../../context/fileContext";
 export default function AudioWaveformPlayer({
   audioUrl,
   file,
-  waveformData,
   width = 600,
   height = 80,
   title,
@@ -123,6 +125,7 @@ export default function AudioWaveformPlayer({
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordedWaveformData, setRecordedWaveformData] = useState(null);
+  const [computedWaveformData, setComputedWaveformData] = useState(null);
   const [pendingRecordingStart, setPendingRecordingStart] = useState(false);
 
   // Mic preview state (hover to show room noise)
@@ -236,6 +239,32 @@ export default function AudioWaveformPlayer({
   // Use audioUrl if provided, otherwise use blob URL, otherwise use recorded blob URL
   const sourceUrl = audioUrl || blobUrl || recordedBlobUrl;
   const useLocalAudio = !!recordedBlobUrl;
+
+  // Compute waveform from audioUrl when no file is provided
+  useEffect(() => {
+    if (!audioUrl || file) return;
+    const cacheKey = `${audioUrl}:${width}`;
+    const cached = waveformCache.get(cacheKey);
+    if (cached) {
+      setComputedWaveformData(cached);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const waveform = await calculateWaveformData(arrayBuffer, width);
+        waveformCache.set(cacheKey, waveform);
+        if (!cancelled) setComputedWaveformData(waveform);
+      } catch (err) {
+        console.warn("[AudioWaveformPlayer] Failed to compute waveform:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [audioUrl, file, width]);
 
   // Check if this player is currently active
   const isActive = useLocalAudio
@@ -451,7 +480,7 @@ export default function AudioWaveformPlayer({
       recording ||
       audioBlob ||
       sourceUrl ||
-      waveformData ||
+      computedWaveformData ||
       file ||
       previewing
     )
@@ -479,7 +508,7 @@ export default function AudioWaveformPlayer({
     recording,
     audioBlob,
     sourceUrl,
-    waveformData,
+    computedWaveformData,
     file,
     previewing,
   ]);
@@ -582,7 +611,7 @@ export default function AudioWaveformPlayer({
       recording ||
       audioBlob ||
       sourceUrl ||
-      waveformData ||
+      computedWaveformData ||
       file ||
       previewing
     ) {
@@ -606,7 +635,7 @@ export default function AudioWaveformPlayer({
     recording,
     audioBlob,
     sourceUrl,
-    waveformData,
+    computedWaveformData,
     file,
     enableRecording,
     previewing,
@@ -712,7 +741,6 @@ export default function AudioWaveformPlayer({
             nodeKey: nodeKey,
             fileType: "mp3",
             metadata: {
-              ...(waveform ? { waveformData: JSON.stringify(waveform) } : {}),
               ...metadata,
             },
           });
@@ -736,7 +764,6 @@ export default function AudioWaveformPlayer({
               size: blob.size,
               mimeType: actualMimeType,
               level: "PRIVATE",
-              ...(waveform ? { waveformData: JSON.stringify(waveform) } : {}),
             });
 
           if (fileErrors?.length > 0 || !newFile) {
@@ -758,11 +785,9 @@ export default function AudioWaveformPlayer({
 
       // Always call onRecordingComplete so the story/UI gets feedback
       if (onRecordingComplete) {
-        const waveformJson = waveform ? JSON.stringify(waveform) : null;
         onRecordingComplete(
           savedFile || {
             path: URL.createObjectURL(blob),
-            ...(waveformJson ? { waveformData: waveformJson } : {}),
           },
           uploadResult,
         );
@@ -850,7 +875,7 @@ export default function AudioWaveformPlayer({
     }
   }, [mediaRecorder]);
 
-  if (!sourceUrl && !file && !waveformData && !enableRecording) {
+  if (!sourceUrl && !file && !enableRecording) {
     return (
       <Box sx={{ p: 2, textAlign: "center", color: "text.secondary" }}>
         {t("audioWaveformPlayer.noAudioSource")}
@@ -885,7 +910,7 @@ export default function AudioWaveformPlayer({
       {/* Waveform with progress overlay */}
       <Box sx={{ position: "relative", borderRadius: 1, width: "100%" }}>
         {/* Show static waveform when not recording and we have data */}
-        {!recording && (waveformData || file) && !audioBlob && (
+        {!recording && (computedWaveformData || file) && !audioBlob && (
           <div
             style={{
               position: "relative",
@@ -895,7 +920,7 @@ export default function AudioWaveformPlayer({
           >
             <StaticWaveform
               file={file}
-              waveformData={waveformData}
+              waveformData={computedWaveformData}
               width={width}
               height={height}
               showLoading={false}
@@ -927,7 +952,7 @@ export default function AudioWaveformPlayer({
         )}
 
         {/* Canvas - shown for idle, preview, or recording */}
-        {enableRecording && !waveformData && !file && !audioBlob && (
+        {enableRecording && !computedWaveformData && !file && !audioBlob && (
           <canvas
             ref={recordingCanvasRef}
             width={width}

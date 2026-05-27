@@ -209,7 +209,8 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
           _lastChangedAt
           _deleted
           filename
-          extractedText
+          identityId
+          textExtractedAt
           parsedContent {
             items {
               id

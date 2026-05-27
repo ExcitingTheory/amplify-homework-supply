@@ -357,8 +357,13 @@ export function GamificationProvider({
 
   // ── Safety timeout: if subscriptions never fire, unblock UI after 5s ──
   useEffect(() => {
-    console.log('[GamificationContext] Provider mounted', { studentId, cohortId, hasClient: !!client })
     const timer = setTimeout(() => {
+      // Only force-clear if any loading states are still true
+      const stillLoading =
+        state.progressLoading || state.campaignsLoading || state.challengesLoading ||
+        state.squadsLoading || state.membershipsLoading || state.skillsLoading ||
+        state.skillProgressLoading || state.locksLoading || state.xpLoading
+      if (!stillLoading) return
       console.warn('[GamificationContext] Safety timeout: forcing loading states to false')
       dispatch({ type: actionTypes.SET_PROGRESS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })

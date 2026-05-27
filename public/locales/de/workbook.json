@@ -29,9 +29,13 @@
     "settings": "Einstellungen"
   },
   "unitCompletedPlugin": {
+    "allCaughtUp": "Alles erledigt! Keine weiteren Aufgaben.",
     "completionMessage": "Einheit abgeschlossen!",
     "continueButton": "Fortfahren",
-    "sectionHeading": "Nächste Schritte"
+    "nextAssignment": "Nächste Aufgabe",
+    "retrying": "Neuer Versuch wird gestartet...",
+    "sectionHeading": "Nächste Schritte",
+    "tryAgain": "Erneut versuchen"
   },
   "quizComponent": {
     "gradeDisplay": "Note: {{score}}%"

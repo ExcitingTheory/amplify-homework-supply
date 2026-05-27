@@ -6,15 +6,6 @@ export const MOCK_AUDIO_URL_3 = '/story-mocks/sound-design-elements-sfx-ps-022-3
 // For backwards compatibility with existing code
 export const MOCK_AUDIO_BASE64 = MOCK_AUDIO_URL_1;
 
-// Mock waveform data (simulates an audio waveform)
-export const mockWaveformData = Array.from({ length: 600 }, (_, i) => {
-  // Create a realistic-looking waveform with varying amplitudes
-  const position = i / 600;
-  const envelope = Math.sin(position * Math.PI); // Fade in/out at edges
-  const detail = Math.sin(i * 0.1) * 0.3 + Math.sin(i * 0.05) * 0.2;
-  return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
-});
-
 // Image files
 export const MOCK_IMAGE_URL_1 = '/story-mocks/piano-10046998_1280.jpg';
 export const MOCK_IMAGE_URL_2 = '/story-mocks/animals-10008941_1280.jpg';

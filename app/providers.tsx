@@ -22,8 +22,6 @@ import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
 import OfflineBanner from '../src/components/OfflineBanner';
 import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
 import { usePageViewTracking } from '../src/hooks/usePageViewTracking';
-import { useAnalyticsSegmentation } from '../src/hooks/useAnalyticsSegmentation';
-import { initAnalytics } from '../src/utils/analytics';
 import AppSkeleton from '../src/components/AppSkeleton';
 import outputs from '../amplify_outputs.json';
 import { usePathname, useRouter } from 'next/navigation';
@@ -63,9 +61,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Sync section membership to Pinpoint for segmentation
-  useAnalyticsSegmentation();
-
   React.useEffect(() => {
     if (isLoading) return;
     if (user) return;
@@ -82,6 +77,10 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   }, [isLoading, user, pathname, router]);
 
   if (isLoading) return <AppSkeleton />;
+
+  // Logged-out users on public paths get no navigation shell
+  if (!user) return <>{children}</>;
+
   return <>{children}</>;
 }
 
@@ -90,11 +89,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   useGlobalChatShortcut();
   usePageViewTracking();
-
-  // Initialize Pinpoint auto-tracking once on mount
-  React.useEffect(() => {
-    initAnalytics();
-  }, []);
 
   const hideChatButton =
     pathname?.startsWith('/workbook/') || pathname?.startsWith('/unit/');
@@ -108,11 +102,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               <NotificationProvider>
               <ChatContextProvider>
                 <TourProvider>
-                  <AppShell>{children}</AppShell>
-                  <GlobalChatButton show={!hideChatButton} />
-                  <GlobalChatDrawer />
-                  <OfflineBanner />
-                  <EasterEggLayer />
+                  <AuthenticatedShell hideChatButton={hideChatButton}>
+                    {children}
+                  </AuthenticatedShell>
                 </TourProvider>
               </ChatContextProvider>
               </NotificationProvider>
@@ -121,5 +113,27 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         </AuthProvider>
       </DebugPanelProvider>
     </ThemeRegistry>
+  );
+}
+
+/**
+ * Conditionally wraps children in AppShell (with nav) only when authenticated.
+ * Logged-out users see content without the AppBar/drawer navigation.
+ */
+function AuthenticatedShell({ children, hideChatButton }: { children: React.ReactNode; hideChatButton: boolean }) {
+  const { user } = React.useContext(AuthContext);
+
+  if (!user) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <AppShell>{children}</AppShell>
+      <GlobalChatButton show={!hideChatButton} />
+      <GlobalChatDrawer />
+      <OfflineBanner />
+      <EasterEggLayer />
+    </>
   );
 }

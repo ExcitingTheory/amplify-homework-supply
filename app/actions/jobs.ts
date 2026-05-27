@@ -42,7 +42,10 @@ async function getAuthenticatedClient() {
   return client;
 }
 
-function isStuck(startedAt: string | null | undefined, thresholdMinutes = 30): boolean {
+function isStuck(
+  startedAt: string | null | undefined,
+  thresholdMinutes = 30,
+): boolean {
   if (!startedAt) return false;
   const started = new Date(startedAt).getTime();
   const now = Date.now();
@@ -68,7 +71,8 @@ export async function listJobs(filter?: {
     }
     if (filter?.type === "agent_job" || !filter?.type) {
       const { data: agentJobs } = await (client.models as any).AgentJob.list({
-        filter: Object.keys(agentJobFilter).length > 0 ? agentJobFilter : undefined,
+        filter:
+          Object.keys(agentJobFilter).length > 0 ? agentJobFilter : undefined,
         limit: 200,
       });
       for (const job of agentJobs || []) {
@@ -198,7 +202,7 @@ export async function listJobs(filter?: {
 
 export async function retryJob(
   jobId: string,
-  jobType: "agent_job" | "document_analysis" | "media_transcode"
+  jobType: "agent_job" | "document_analysis" | "media_transcode",
 ): Promise<{ success: boolean; message: string }> {
   const client = await getAuthenticatedClient();
 
@@ -206,7 +210,9 @@ export async function retryJob(
     switch (jobType) {
       case "agent_job": {
         // Reset AgentJob status and bump retry count
-        const { data: job } = await (client.models as any).AgentJob.get({ id: jobId });
+        const { data: job } = await (client.models as any).AgentJob.get({
+          id: jobId,
+        });
         if (!job) return { success: false, message: "Job not found" };
 
         await (client.models as any).AgentJob.update({
@@ -221,15 +227,22 @@ export async function retryJob(
 
         // Re-invoke the appropriate Lambda based on job type
         if (job.type === "pdf_analysis" && job.documentID) {
-          await (client as any).mutations.analyzeDocument({ fileID: job.documentID });
+          await (client as any).mutations.analyzeDocument({
+            fileID: job.documentID,
+          });
         }
 
-        return { success: true, message: `Job ${jobId} queued for retry (#${(job.retryCount || 0) + 1})` };
+        return {
+          success: true,
+          message: `Job ${jobId} queued for retry (#${(job.retryCount || 0) + 1})`,
+        };
       }
 
       case "document_analysis": {
         // Reset Document status and re-invoke analyzeDocument
-        const { data: doc } = await (client.models as any).Document.get({ id: jobId });
+        const { data: doc } = await (client.models as any).Document.get({
+          id: jobId,
+        });
         if (!doc) return { success: false, message: "Document not found" };
 
         // Reset to uploaded so the Lambda starts fresh
@@ -243,13 +256,18 @@ export async function retryJob(
         const fileID = doc.fileID || jobId;
         await (client as any).mutations.analyzeDocument({ fileID });
 
-        return { success: true, message: `Document analysis restarted for ${doc.title || jobId}` };
+        return {
+          success: true,
+          message: `Document analysis restarted for ${doc.title || jobId}`,
+        };
       }
 
       case "media_transcode": {
         // Reset File transcode status — the Lambda is triggered by the status update
         // or we'd need to manually invoke it
-        const { data: file } = await (client.models as any).File.get({ id: jobId });
+        const { data: file } = await (client.models as any).File.get({
+          id: jobId,
+        });
         if (!file) return { success: false, message: "File not found" };
 
         await (client.models as any).File.update({
@@ -262,7 +280,10 @@ export async function retryJob(
         // MediaConvert Lambda is triggered by S3 events, not mutations
         // For retry, we re-invoke it if there's a processFileVideo mutation
         // Otherwise the status reset allows manual re-trigger from the UI
-        return { success: true, message: `Transcode status reset for ${file.name || jobId}. Re-upload or re-trigger to start.` };
+        return {
+          success: true,
+          message: `Transcode status reset for ${file.name || jobId}. Re-upload or re-trigger to start.`,
+        };
       }
 
       default:
@@ -280,14 +301,16 @@ export async function retryJob(
 
 export async function cancelJob(
   jobId: string,
-  jobType: "agent_job" | "document_analysis" | "media_transcode"
+  jobType: "agent_job" | "document_analysis" | "media_transcode",
 ): Promise<{ success: boolean; message: string }> {
   const client = await getAuthenticatedClient();
 
   try {
     switch (jobType) {
       case "agent_job": {
-        const { data: job } = await (client.models as any).AgentJob.get({ id: jobId });
+        const { data: job } = await (client.models as any).AgentJob.get({
+          id: jobId,
+        });
         if (!job) return { success: false, message: "Job not found" };
         await (client.models as any).AgentJob.update({
           id: jobId,
@@ -299,7 +322,9 @@ export async function cancelJob(
       }
 
       case "document_analysis": {
-        const { data: doc } = await (client.models as any).Document.get({ id: jobId });
+        const { data: doc } = await (client.models as any).Document.get({
+          id: jobId,
+        });
         if (!doc) return { success: false, message: "Document not found" };
         // Use the existing cancelDocumentAnalysis mutation
         const fileID = doc.fileID || jobId;
@@ -308,7 +333,9 @@ export async function cancelJob(
       }
 
       case "media_transcode": {
-        const { data: file } = await (client.models as any).File.get({ id: jobId });
+        const { data: file } = await (client.models as any).File.get({
+          id: jobId,
+        });
         if (!file) return { success: false, message: "File not found" };
         await (client.models as any).File.update({
           id: jobId,

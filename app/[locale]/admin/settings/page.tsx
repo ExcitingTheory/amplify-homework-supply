@@ -3,6 +3,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MyAuth from "@/components/AmplifyAuthenticator";
+import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { InstructorGamificationPanel } from "@/components/Gamification/InstructorGamificationPanel";
 import {
   useSkillTree,
@@ -828,11 +829,13 @@ function GamificationAdmin() {
 export default function WrappedPage() {
   return (
     <MyAuth>
-      <SectionProvider>
-        <GamificationProviderWrapper>
-          <GamificationAdmin />
-        </GamificationProviderWrapper>
-      </SectionProvider>
+      <AdminRouteGuard>
+        <SectionProvider>
+          <GamificationProviderWrapper>
+            <GamificationAdmin />
+          </GamificationProviderWrapper>
+        </SectionProvider>
+      </AdminRouteGuard>
     </MyAuth>
   );
 }

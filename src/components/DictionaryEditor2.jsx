@@ -1314,9 +1314,6 @@ function WordRowComponent({
               .filter(Boolean);
             const audioUrls = audio || [];
             updates.audio = deduplicateUrls([...audioUrls, ...newPaths]);
-            if (phraseAudio[0]?.waveformData) {
-              updates.waveformData = phraseAudio[0].waveformData;
-            }
           }
 
           // Map definition track takes to Word.definitionAudio[]
@@ -1329,9 +1326,6 @@ function WordRowComponent({
               ...defUrls,
               ...newPaths,
             ]);
-            if (definitionAudio[0]?.waveformData) {
-              updates.definitionWaveformData = definitionAudio[0].waveformData;
-            }
           }
 
           // Persist full scriptData for re-opening
@@ -1553,6 +1547,9 @@ function WordsPlugin({
       const word = Object.values(dictionary).find((w) => w.id === wordId);
       if (!word) return;
 
+      // Skip DynamoDB update if no fields remain
+      if (Object.keys(updates).length === 0) return;
+
       const versionCtrl = bumpWordVersion(word.id, word._version);
       const client = getAmplifyClient();
       const { data: saved, errors } = await client.models.Word.update({
@@ -1567,7 +1564,6 @@ function WordsPlugin({
       }
     } catch (error) {
       console.error("Failed to update word:", error);
-      // Rollback handled by catch — version map will self-correct on next subscription emit
     }
   };
 

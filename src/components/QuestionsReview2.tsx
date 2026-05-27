@@ -40,17 +40,7 @@ import {
 } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
 import DictionaryContext from '../context/dictionaryContext';
-
-// Placeholder functions until utils are created
-const importQuestionsToUnit = async (...args: any[]): Promise<any> => {
-    console.log('importQuestionsToUnit called with:', args);
-    return { success: true, imported: 0, skipped: 0, errors: 0 };
-};
-
-const updateQuestionItem = async (...args: any[]): Promise<boolean> => {
-    console.log('updateQuestionItem called with:', args);
-    return true;
-};
+import { importQuestionsToUnit, updateQuestionItem } from '../utils/questionImportUtils';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';

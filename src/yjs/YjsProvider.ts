@@ -30,7 +30,7 @@ export class YjsDocProvider {
   private resetCount = 0;
   private static MAX_RESETS = 2;
   private listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
-  private lastStatusLog = '';
+  private lastStatusLog = "";
 
   private defaultConfig: Required<Omit<YjsProviderConfig, "docName">> = {
     wsUrl:
@@ -40,7 +40,10 @@ export class YjsDocProvider {
         : "ws://localhost:3001",
     resyncInterval: 5000,
     maxBackoffTime: 30000,
-    connect: true,
+    connect:
+      typeof window !== "undefined"
+        ? !!process.env.NEXT_PUBLIC_YJS_WS_URL
+        : false,
     persistence: true,
   };
 
@@ -147,7 +150,7 @@ export class YjsDocProvider {
           this.ydoc = new Y.Doc();
           this.awareness = new Awareness(this.ydoc);
           // 4. Notify consumers that doc was replaced
-          this.emit('doc-reset', this.ydoc);
+          this.emit("doc-reset", this.ydoc);
           // 5. Reconnect with fresh state after a short delay
           this.hasLoggedConnectionError = false;
           setTimeout(() => this.setupWebSocket(), 1000);

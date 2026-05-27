@@ -64,6 +64,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
+import LazyCardMedia from "@/components/LazyCardMedia";
 import FilesContext from "@/context/fileContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
@@ -82,20 +83,64 @@ import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
 
 function FeaturedImage({ style, s3Key, identityId }) {
   const [url, setUrl] = React.useState(null);
+  const [srcSet, setSrcSet] = React.useState(null);
+  const [sizes, setSizes] = React.useState(null);
   const [loaded, setLoaded] = React.useState(false);
+  const containerRef = React.useRef(null);
+  const [isVisible, setIsVisible] = React.useState(false);
 
   React.useEffect(() => {
-    setLoaded(false);
-    const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
-    asyncFunc();
-  }, [s3Key]);
+  React.useEffect(() => {
+    if (!isVisible || !s3Key) return;
+    setLoaded(false);
+    let cancelled = false;
+
+    const fetchUrl = async () => {
+      const _url = await getCachedUrl(s3Key);
+      if (!cancelled) setUrl(_url);
+    };
+    fetchUrl();
+
+    if (identityId) {
+      // Extract fileId from s3Key path (e.g. "protected/{id}/files/{fileId}/original.webp")
+      const parts = s3Key.split("/");
+      const filesIdx = parts.indexOf("files");
+      const fileId = filesIdx >= 0 ? parts[filesIdx + 1] : null;
+      if (fileId) {
+        getResponsiveImageUrls(fileId, identityId)
+          .then((result) => {
+            if (!cancelled && result) {
+              setSrcSet(result.srcSet);
+              setSizes(result.sizes);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isVisible, s3Key, identityId]);
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: "relative",
         width: "100%",
@@ -103,9 +148,13 @@ function FeaturedImage({ style, s3Key, identityId }) {
         overflow: "hidden",
       }}
     >
-      {url && (
+      {isVisible && url && (
         <img
           src={url}
+          srcSet={srcSet || undefined}
+          sizes={sizes || undefined}
+          loading="lazy"
+          decoding="async"
           style={{
             ...style,
             display: "block",
@@ -133,72 +182,6 @@ function FeaturedImage({ style, s3Key, identityId }) {
         />
       )}
     </div>
-  );
-}
-
-function CardMediaComponent({
-  s3Key,
-  identityId,
-  fileId,
-  level = "protected",
-}) {
-  const [url, setUrl] = React.useState(null);
-  const [srcSet, setSrcSet] = React.useState(null);
-  const [sizes, setSizes] = React.useState(null);
-  const [loaded, setLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    setLoaded(false);
-    const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
-
-    asyncFunc();
-
-    if (fileId && identityId) {
-      getResponsiveImageUrls(fileId, identityId)
-        .then((result) => {
-          if (result) {
-            setSrcSet(result.srcSet);
-            setSizes(result.sizes);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [s3Key, fileId, identityId]);
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        width: 400,
-        alignSelf: "left",
-        flexShrink: 0,
-      }}
-    >
-      <img
-        src={url || undefined}
-        srcSet={srcSet || undefined}
-        sizes={sizes || undefined}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          opacity: loaded ? 1 : 0,
-          transition: "opacity 0.3s ease",
-        }}
-        onLoad={() => setLoaded(true)}
-      />
-      {!loaded && (
-        <Skeleton
-          variant="rectangular"
-          animation="wave"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        />
-      )}
-    </Box>
   );
 }
 
@@ -2501,7 +2484,7 @@ function SectionDetail({ user, signOut }) {
                                 alt="Live from space album cover"
                               /> */}
                   {featuredImage && (
-                    <CardMediaComponent
+                    <LazyCardMedia
                       s3Key={featuredImage}
                       identityId={identityId}
                     />

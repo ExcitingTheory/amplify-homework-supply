@@ -51,9 +51,6 @@ function AudioRecordingCard({ file, index, identityId }) {
           <AudioWaveformPlayer
             audioUrl={audioUrl}
             file={file}
-            waveformData={
-              file.waveformData ? JSON.parse(file.waveformData) : undefined
-            }
             width={600}
             height={80}
             title={
@@ -194,14 +191,12 @@ export function RecordingStudio2({
           gradeID = _updatedGrade.id;
         }
         const nodeKey = qk || "unknown";
-        const waveformData = await calculateWaveformData(audioBlob, 600);
         const uploadResult = await uploadStudentSubmission({
           file: audioBlob,
           gradeId: gradeID,
           nodeKey,
           fileType: "mp3",
           metadata: {
-            waveformData: JSON.stringify(waveformData),
             phrase: phrase || "",
             definition: definition || "",
           },
@@ -217,7 +212,6 @@ export function RecordingStudio2({
             size: audioBlob.size,
             mimeType: "audio/mp3",
             level: "PRIVATE",
-            waveformData: JSON.stringify(waveformData),
           });
         if ((fileErrors && fileErrors.length > 0) || !newFile) {
           setError(fileErrors?.[0]?.message || "Failed to create File record");

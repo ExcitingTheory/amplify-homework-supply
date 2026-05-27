@@ -1,26 +1,30 @@
 /**
  * useYjsFile - Real-time collaborative file metadata management hook
- * 
+ *
  * Integrates Yjs CRDT for conflict-free file operations with Amplify GraphQL
  * for cross-device persistence. Eliminates version conflicts during file deletion.
- * 
+ *
  * @example
  * ```typescript
  * const { metadata, deleteFile, isSynced } = useYjsFile({ fileId: 'file-123' });
- * 
+ *
  * // Update metadata - syncs automatically across clients
  * metadata?.set('name', 'new-name.pdf');
- * 
+ *
  * // Delete file - no version conflicts!
  * await deleteFile();
  * ```
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useYjsProvider } from '../yjs/hooks';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { remove } from 'aws-amplify/storage';
-import * as Y from 'yjs';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useYjsProvider } from "../yjs/hooks";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import {
+  saveModelYjsSnapshot,
+  loadModelYjsSnapshot,
+} from "../utils/unitContentStorage";
+import { remove } from "aws-amplify/storage";
+import * as Y from "yjs";
 
 export interface UseYjsFileConfig {
   fileId?: string | null;
@@ -28,11 +32,14 @@ export interface UseYjsFileConfig {
   enablePersistence?: boolean;
   saveDebounceMs?: number;
   /** Optional optimistic version bump — call before save to block subscription echo */
-  bumpVersion?: (id: string, currentVersion: number) => { confirm: (v: number) => void; rollback: () => void };
+  bumpVersion?: (
+    id: string,
+    currentVersion: number,
+  ) => { confirm: (v: number) => void; rollback: () => void };
 }
 
 export interface UseYjsFileReturn {
-  provider: ReturnType<typeof useYjsProvider>['provider'] | null;
+  provider: ReturnType<typeof useYjsProvider>["provider"] | null;
   file: any | null;
   metadata: Y.Map<any> | null;
   isLoading: boolean;
@@ -46,7 +53,7 @@ export interface UseYjsFileReturn {
 
 /**
  * Hook for managing real-time collaborative file metadata with Yjs
- * 
+ *
  * Features:
  * - Real-time sync via WebSocket (<100ms latency)
  * - Offline persistence via IndexedDB
@@ -60,7 +67,7 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
     enableWebSocket = true,
     enablePersistence = true,
     saveDebounceMs = 3000,
-    bumpVersion
+    bumpVersion,
   } = config;
 
   const client = getAmplifyClient();
@@ -72,9 +79,9 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
 
   // Initialize Yjs provider only if we have a fileId
   const { provider, isSynced, isConnected } = useYjsProvider({
-    docName: fileId ? `file-${fileId}` : 'file-null',
+    docName: fileId ? `file-${fileId}` : "file-null",
     connect: enableWebSocket && !!fileId,
-    persistence: enablePersistence && !!fileId
+    persistence: enablePersistence && !!fileId,
   });
 
   // Load initial state from Amplify
@@ -88,46 +95,82 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
       try {
         setIsLoading(true);
         const { data } = await client.models.File.get({ id: fileId as string });
-        
+
         if (!data) {
           throw new Error(`File ${fileId} not found`);
         }
 
         setFile(data);
 
-        // Apply Yjs snapshot if exists
-        if ((data as any).yjsSnapshot && provider) {
-          const yjsSnapshot = (data as any).yjsSnapshot as string;
-          const updateBytes = Buffer.from(yjsSnapshot, 'base64');
-          if (provider.applyUpdate(updateBytes)) {
-            console.log(`[useYjsFile] Applied Yjs snapshot for file ${fileId}`);
-          } else {
-            console.warn('[useYjsFile] Snapshot was corrupt — skipped');
-          }
-        } else if (provider) {
-          // Initialize Yjs metadata from existing file data
-          const ymap = provider.getMap('metadata');
-          
-          // Only initialize if empty (first time)
-          if (ymap.size === 0) {
-            Object.entries(data).forEach(([key, value]) => {
-              // Skip internal fields, relationships, and timestamps
-              if (!key.startsWith('_') && !key.includes('ID') && key !== 'createdAt' && key !== 'updatedAt') {
-                // Only set primitive types that Yjs Y.Map supports (string, number, boolean, null)
-                // Skip functions, objects (lazy-loaded relationships), and undefined
-                const type = typeof value;
-                if (value === null || type === 'string' || type === 'number' || type === 'boolean') {
-                  ymap.set(key, value);
-                }
+        // Apply Yjs snapshot from S3 (fall back to DynamoDB for migration)
+        if (provider) {
+          const identityId = (data as any).identityId || (data as any).owner;
+          let applied = false;
+
+          if (identityId) {
+            const s3Snapshot = await loadModelYjsSnapshot(
+              identityId,
+              "files",
+              fileId as string,
+            );
+            if (s3Snapshot) {
+              applied = provider.applyUpdate(s3Snapshot);
+              if (applied) {
+                console.log(
+                  `[useYjsFile] Applied Yjs snapshot from S3 for file ${fileId}`,
+                );
               }
-            });
-            console.log(`[useYjsFile] Initialized Yjs metadata for file ${fileId}`);
+            }
+          }
+
+          // Fall back to DynamoDB field (legacy data)
+          if (!applied && (data as any).yjsSnapshot) {
+            const updateBytes = Buffer.from(
+              (data as any).yjsSnapshot,
+              "base64",
+            );
+            if (provider.applyUpdate(updateBytes)) {
+              console.log(
+                `[useYjsFile] Applied legacy DynamoDB snapshot for file ${fileId}`,
+              );
+            } else {
+              console.warn("[useYjsFile] Snapshot was corrupt — skipped");
+            }
+          } else if (!applied) {
+            // Initialize Yjs metadata from existing file data
+            const ymap = provider.getMap("metadata");
+
+            // Only initialize if empty (first time)
+            if (ymap.size === 0) {
+              Object.entries(data).forEach(([key, value]) => {
+                // Skip internal fields, relationships, and timestamps
+                if (
+                  !key.startsWith("_") &&
+                  !key.includes("ID") &&
+                  key !== "createdAt" &&
+                  key !== "updatedAt"
+                ) {
+                  const type = typeof value;
+                  if (
+                    value === null ||
+                    type === "string" ||
+                    type === "number" ||
+                    type === "boolean"
+                  ) {
+                    ymap.set(key, value);
+                  }
+                }
+              });
+              console.log(
+                `[useYjsFile] Initialized Yjs metadata for file ${fileId}`,
+              );
+            }
           }
         }
 
         setIsLoading(false);
       } catch (err) {
-        console.error('[useYjsFile] Failed to load file:', err);
+        console.error("[useYjsFile] Failed to load file:", err);
         setError(err as Error);
         setIsLoading(false);
       }
@@ -145,36 +188,41 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
     }
 
     try {
-      const ymap = provider.getMap('metadata');
-      
+      const ymap = provider.getMap("metadata");
+
       // Check if file is marked deleted
-      if (ymap.get('_deleted')) {
-        console.log(`[useYjsFile] File ${fileId} marked deleted, skipping save`);
+      if (ymap.get("_deleted")) {
+        console.log(
+          `[useYjsFile] File ${fileId} marked deleted, skipping save`,
+        );
         return;
       }
-      
-      // Extract state
+
+      // Save Yjs snapshot to S3 (not DynamoDB)
       const yjsState = Y.encodeStateAsUpdate(provider.getDoc());
-      const yjsSnapshot = Buffer.from(yjsState).toString('base64');
-      
-      // Extract metadata
+      const identityId = file?.identityId || file?.owner;
+      if (identityId) {
+        await saveModelYjsSnapshot(identityId, "files", fileId, yjsState);
+      }
+
+      // Extract metadata for GraphQL update (no yjsSnapshot field)
       const fileData: any = {
         id: fileId,
-        yjsSnapshot: yjsSnapshot,
       };
-      
+
       ymap.forEach((value, key) => {
         // Skip internal Yjs fields
-        if (!key.startsWith('_')) {
+        if (!key.startsWith("_")) {
           fileData[key] = value;
         }
       });
 
       // Optimistic version bump to block subscription echo
       const currentVersion = file?._version;
-      const versionCtrl = (bumpVersion && currentVersion != null)
-        ? bumpVersion(fileId, currentVersion)
-        : null;
+      const versionCtrl =
+        bumpVersion && currentVersion != null
+          ? bumpVersion(fileId, currentVersion)
+          : null;
       if (currentVersion != null) {
         fileData._version = currentVersion;
       }
@@ -192,7 +240,7 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
         console.log(`[useYjsFile] Successfully saved file ${fileId}`);
       }
     } catch (err: any) {
-      console.error('[useYjsFile] Failed to save to GraphQL:', err);
+      console.error("[useYjsFile] Failed to save to GraphQL:", err);
       setError(err as Error);
     }
   }, [provider, fileId, client, file, bumpVersion]);
@@ -209,8 +257,8 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
 
       // Schedule new save
       saveTimerRef.current = setTimeout(() => {
-        saveToGraphQL().catch(err => {
-          console.error('[useYjsFile] Debounced save failed:', err);
+        saveToGraphQL().catch((err) => {
+          console.error("[useYjsFile] Debounced save failed:", err);
         });
       }, saveDebounceMs);
     };
@@ -226,33 +274,38 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
   }, [provider, saveToGraphQL, saveDebounceMs]);
 
   // Update metadata helper
-  const updateMetadata = useCallback((updates: Record<string, any>) => {
-    if (!fileId || !provider) {
-      console.warn('[useYjsFile] Cannot update metadata: no fileId or provider');
-      return;
-    }
+  const updateMetadata = useCallback(
+    (updates: Record<string, any>) => {
+      if (!fileId || !provider) {
+        console.warn(
+          "[useYjsFile] Cannot update metadata: no fileId or provider",
+        );
+        return;
+      }
 
-    const ymap = provider.getMap('metadata');
-    Object.entries(updates).forEach(([key, value]) => {
-      ymap.set(key, value);
-    });
+      const ymap = provider.getMap("metadata");
+      Object.entries(updates).forEach(([key, value]) => {
+        ymap.set(key, value);
+      });
 
-    console.log('[useYjsFile] Updated metadata:', updates);
-  }, [provider, fileId]);
+      console.log("[useYjsFile] Updated metadata:", updates);
+    },
+    [provider, fileId],
+  );
 
   // Delete file helper - no version conflicts!
   const deleteFile = useCallback(async () => {
     if (!fileId || !provider) {
-      throw new Error('Cannot delete: no fileId or provider');
+      throw new Error("Cannot delete: no fileId or provider");
     }
 
     isDeletingRef.current = true;
 
     try {
-      const ymap = provider.getMap('metadata');
-      
+      const ymap = provider.getMap("metadata");
+
       // Get S3 path (access level is encoded in the path for Gen 2)
-      const path = ymap.get('path') || file?.path;
+      const path = ymap.get("path") || file?.path;
 
       console.log(`[useYjsFile] Deleting file ${fileId} from S3: ${path}`);
 
@@ -265,14 +318,14 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
           });
           console.log(`[useYjsFile] Deleted from S3: ${path}`);
         } catch (s3Error) {
-          console.warn('[useYjsFile] S3 deletion failed:', s3Error);
+          console.warn("[useYjsFile] S3 deletion failed:", s3Error);
           // Continue with database deletion even if S3 fails
         }
       }
 
       // Mark deleted in Yjs
-      ymap.set('_deleted', true);
-      ymap.set('deletedAt', new Date().toISOString());
+      ymap.set("_deleted", true);
+      ymap.set("deletedAt", new Date().toISOString());
 
       // Force immediate save
       if (saveTimerRef.current) {
@@ -302,13 +355,13 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
   return {
     provider: provider || null,
     file,
-    metadata: provider ? provider.getMap('metadata') : null,
+    metadata: provider ? provider.getMap("metadata") : null,
     isLoading,
     error,
     isSynced,
     isConnected,
     updateMetadata,
     deleteFile,
-    forceSave
+    forceSave,
   };
 }

@@ -19,8 +19,7 @@ import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 
-import getCachedUrl from "@/utils/getCachedUrl";
-import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
+import LazyCardMedia from "@/components/LazyCardMedia";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import AuthContext from "@/context/authContext";
 import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
@@ -38,74 +37,6 @@ import {
 
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
-
-function CardMediaComponent({
-  s3Key,
-  identityId,
-  fileId,
-  level = "protected",
-}) {
-  const [url, setUrl] = React.useState(null);
-  const [srcSet, setSrcSet] = React.useState(null);
-  const [sizes, setSizes] = React.useState(null);
-  const [loaded, setLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!s3Key) return;
-    setLoaded(false);
-
-    const fetchUrl = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
-
-    fetchUrl();
-
-    // Load responsive variants if fileId is available
-    if (fileId && identityId) {
-      getResponsiveImageUrls(fileId, identityId)
-        .then((result) => {
-          if (result) {
-            setSrcSet(result.srcSet);
-            setSizes(result.sizes);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [s3Key, fileId, identityId]);
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        width: 400,
-        alignSelf: "left",
-        flexShrink: 0,
-      }}
-    >
-      <img
-        src={url || undefined}
-        srcSet={srcSet || undefined}
-        sizes={sizes || undefined}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          visibility: loaded ? "visible" : "hidden",
-        }}
-        onLoad={() => setLoaded(true)}
-      />
-      {!loaded && (
-        <Skeleton
-          variant="rectangular"
-          animation="wave"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        />
-      )}
-    </Box>
-  );
-}
 
 function Units() {
   const t = useTranslations("pages");
@@ -610,7 +541,7 @@ function Units() {
                         </Box>
                       </Box>
                       {unit?.featuredImage && (
-                        <CardMediaComponent
+                        <LazyCardMedia
                           s3Key={unit?.featuredImage}
                           identityId={unit?.identityId}
                         />
@@ -752,7 +683,7 @@ function Units() {
                       </Box>
                     </Box>
                     {unit?.featuredImage && (
-                      <CardMediaComponent
+                      <LazyCardMedia
                         s3Key={unit?.featuredImage}
                         identityId={unit?.identityId}
                       />
@@ -893,7 +824,7 @@ function Units() {
                       </Box>
                     </Box>
                     {unit?.featuredImage && (
-                      <CardMediaComponent
+                      <LazyCardMedia
                         s3Key={unit?.featuredImage}
                         identityId={unit?.identityId}
                       />

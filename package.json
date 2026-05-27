@@ -83,6 +83,7 @@
     "@aws-amplify/adapter-nextjs": "^1.7.3",
     "@aws-amplify/ui-react": "^6.0.7",
     "@aws-sdk/client-cognito-identity-provider": "^3.971.0",
+    "@aws-sdk/client-kinesis": "^3.971.0",
     "@dicebear/adventurer": "^9.4.2",
     "@dicebear/adventurer-neutral": "^9.4.2",
     "@dicebear/avataaars": "^9.4.2",
@@ -167,7 +168,8 @@
     "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.7",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.29"
+    "yjs": "^13.6.29",
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^3.0.7",

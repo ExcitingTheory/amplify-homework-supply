@@ -1,23 +1,46 @@
-import { Skeleton, Box, Card, CardContent, Grid as Grid } from '@mui/material';
+import { Skeleton, Box } from '@mui/material';
 
+/**
+ * Skills page loading skeleton.
+ * Matches: Full-height container with skill tree visualization (graph/node layout).
+ */
 export default function Loading() {
   return (
-    <Box sx={{ mt: '5rem', p: 2, maxWidth: '1200px', mx: 'auto' }}>
-      <Skeleton variant="text" width="25%" height={40} sx={{ mb: 3 }} />
-      <Grid container spacing={2}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Grid key={i} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Card>
-              <CardContent>
-                <Skeleton variant="text" width="70%" height={28} sx={{ mb: 1 }} />
-                <Skeleton variant="text" width="90%" height={18} />
-                <Skeleton variant="text" width="50%" height={18} sx={{ mt: 1 }} />
-                <Skeleton variant="rectangular" height={8} sx={{ mt: 2, borderRadius: 1 }} />
-              </CardContent>
-            </Card>
-          </Grid>
+    <Box sx={{ height: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column' }}>
+      {/* Full-height tree area with scattered node placeholders */}
+      <Box
+        sx={{
+          flex: 1,
+          position: 'relative',
+          overflow: 'hidden',
+          p: 3,
+        }}
+      >
+        {/* Simulated skill tree nodes at various positions */}
+        {[
+          { top: '10%', left: '45%', size: 64 },
+          { top: '30%', left: '25%', size: 56 },
+          { top: '30%', left: '65%', size: 56 },
+          { top: '50%', left: '15%', size: 48 },
+          { top: '50%', left: '45%', size: 48 },
+          { top: '50%', left: '75%', size: 48 },
+          { top: '70%', left: '30%', size: 44 },
+          { top: '70%', left: '60%', size: 44 },
+        ].map((node, i) => (
+          <Skeleton
+            key={i}
+            variant="circular"
+            width={node.size}
+            height={node.size}
+            sx={{
+              position: 'absolute',
+              top: node.top,
+              left: node.left,
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }

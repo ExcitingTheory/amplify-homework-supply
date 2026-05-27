@@ -24,7 +24,8 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CancelIcon from "@mui/icons-material/Cancel";
 import MyAuth from "@/components/AmplifyAuthenticator";
-import { listJobs, retryJob, cancelJob, type JobRecord } from "@/app/actions/jobs";
+import AdminRouteGuard from "../_components/AdminRouteGuard";
+import { listJobs, retryJob, cancelJob, type JobRecord } from "../../../actions/jobs";
 
 // ============================================================================
 // Status chip color mapping
@@ -249,9 +250,11 @@ function JobsDashboard() {
             </Select>
           </FormControl>
           <Tooltip title="Refresh">
-            <IconButton onClick={fetchJobs} disabled={loading}>
-              <RefreshIcon />
-            </IconButton>
+            <span>
+              <IconButton onClick={fetchJobs} disabled={loading}>
+                <RefreshIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       </Box>
@@ -371,26 +374,30 @@ function JobsDashboard() {
                     <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
                       {canRetry(job) && (
                         <Tooltip title="Retry">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleRetry(job)}
-                            disabled={actionInProgress === job.id}
-                          >
-                            <ReplayIcon fontSize="small" />
-                          </IconButton>
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => handleRetry(job)}
+                              disabled={actionInProgress === job.id}
+                            >
+                              <ReplayIcon fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                       )}
                       {canCancel(job) && (
                         <Tooltip title="Cancel">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleCancel(job)}
-                            disabled={actionInProgress === job.id}
-                          >
-                            <CancelIcon fontSize="small" />
-                          </IconButton>
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleCancel(job)}
+                              disabled={actionInProgress === job.id}
+                            >
+                              <CancelIcon fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                       )}
                     </Box>
@@ -451,7 +458,9 @@ function JobsDashboard() {
 export default function AdminJobsPage() {
   return (
     <MyAuth>
-      <JobsDashboard />
+      <AdminRouteGuard>
+        <JobsDashboard />
+      </AdminRouteGuard>
     </MyAuth>
   );
 }

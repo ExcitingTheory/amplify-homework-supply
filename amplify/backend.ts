@@ -15,7 +15,9 @@ import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
-import { CfnApp } from "aws-cdk-lib/aws-pinpoint";
+import { Stream, StreamEncryption } from "aws-cdk-lib/aws-kinesis";
+import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { StartingPosition } from "aws-cdk-lib/aws-lambda";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
@@ -42,6 +44,7 @@ import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
 import { notificationCronHandler } from "./functions/notificationCron/resource";
 import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource";
+import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
@@ -130,6 +133,7 @@ export const backend = defineBackend({
   streakResetCronHandler,
   notificationCronHandler,
   leaderboardStreamHandler,
+  analyticsAggregatorHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -249,6 +253,15 @@ const embeddingsAppSyncPolicy = new Policy(
 );
 backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(
   embeddingsAppSyncPolicy,
+);
+
+// Grant Embeddings handler S3 access for storing embedding vectors
+backend.embeddingsHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.storage.resources.bucket.grantReadWrite(
+  backend.embeddingsHandler.resources.lambda,
 );
 
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
@@ -916,19 +929,58 @@ backend.notificationCronHandler.resources.lambda.role?.attachInlinePolicy(
 );
 
 // ==========================================================================
-// Pinpoint Analytics — page views, engagement, custom events
+// Analytics — Kinesis stream + Aggregator Lambda (in data stack to avoid circular deps)
 // ==========================================================================
 
-const analyticsStack = backend.createStack("analytics");
-const pinpointApp = new CfnApp(analyticsStack, "PinpointApp", {
-  name: "homework-supply-analytics",
+// Kinesis stream for buffered analytics events and Web Vitals
+const analyticsStream = new Stream(dataStack, "AnalyticsStream", {
+  streamName: "homework-supply-analytics",
+  shardCount: 1,
+  encryption: StreamEncryption.MANAGED,
+  retentionPeriod: cdk.Duration.days(7),
 });
 
+// Aggregator Lambda — consumes Kinesis batches, writes to AnalyticsSummary DynamoDB table
+const aggregatorLambda = backend.analyticsAggregatorHandler.resources.lambda;
+
+// Grant the aggregator access to the GraphQL API for writing AnalyticsSummary records
+const analyticsAppSyncPolicy = new Policy(
+  dataStack,
+  "AnalyticsAggregatorAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+aggregatorLambda.role?.attachInlinePolicy(analyticsAppSyncPolicy);
+
+// Add API endpoint env var so Lambda can call GraphQL
+backend.analyticsAggregatorHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+// Wire Kinesis as event source for the aggregator
+aggregatorLambda.addEventSource(
+  new KinesisEventSource(analyticsStream, {
+    batchSize: 100,
+    maxBatchingWindow: cdk.Duration.minutes(5),
+    startingPosition: StartingPosition.LATEST,
+  }),
+);
+
+// Output the stream name so API routes can find it
 backend.addOutput({
   custom: {
-    Pinpoint: {
-      appId: pinpointApp.ref,
-      region: analyticsStack.region,
+    AnalyticsStream: {
+      name: analyticsStream.streamName,
+      region: dataStack.region,
     },
   },
 });

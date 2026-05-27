@@ -642,6 +642,103 @@ for (const [idx, content] of Object.entries(unitContentMap)) {
 }
 console.log(`✅ Uploaded unit content to S3`);
 
+// Upload seed embeddings to S3 for units, words, and questions
+// Path: private/{identityId}/embeddings/{modelName}/{modelId}.json
+console.log("\n🧮 Uploading seed embeddings to S3...");
+
+function makeFakeEmbedding(wordCount: number): object {
+  // Generate a deterministic 256-dim fake vector for seed data
+  const dims = 256;
+  const embedding = Array.from(
+    { length: dims },
+    (_, i) => Math.sin(i * 0.1 + wordCount) * 0.5,
+  );
+  return {
+    model: "text-embedding-3-small",
+    dimensions: dims,
+    generatedAt: Date.now(),
+    wordCount,
+    pages: [{ page: 0, embedding, text: "Seed embedding placeholder" }],
+  };
+}
+
+const embeddingUploads: Promise<any>[] = [];
+
+// Unit embeddings
+for (const unit of units) {
+  const path = `private/${instructor1IdentityId}/embeddings/unit/${unit.id}.json`;
+  embeddingUploads.push(
+    uploadData({
+      path,
+      data: JSON.stringify(makeFakeEmbedding(150)),
+      options: { contentType: "application/json" },
+    }).result,
+  );
+}
+
+// Word embeddings
+for (const word of words) {
+  const path = `private/${instructor1IdentityId}/embeddings/word/${word.id}.json`;
+  embeddingUploads.push(
+    uploadData({
+      path,
+      data: JSON.stringify(makeFakeEmbedding(1)),
+      options: { contentType: "application/json" },
+    }).result,
+  );
+}
+
+// Question embeddings
+for (const question of questions) {
+  const path = `private/${instructor1IdentityId}/embeddings/question/${question.id}.json`;
+  embeddingUploads.push(
+    uploadData({
+      path,
+      data: JSON.stringify(makeFakeEmbedding(20)),
+      options: { contentType: "application/json" },
+    }).result,
+  );
+}
+
+await Promise.all(embeddingUploads);
+console.log(
+  `✅ Uploaded ${embeddingUploads.length} embeddings to S3 (${units.length} units, ${words.length} words, ${questions.length} questions)`,
+);
+
+// Update embedding metadata on the model records
+const embeddingMeta = {
+  model: "text-embedding-3-small",
+  dimensions: 256,
+  version: Date.now(),
+  wordCount: 1,
+  pageCount: 1,
+};
+
+await Promise.all([
+  ...units.map((u) =>
+    client.models.Unit.update({
+      id: u.id,
+      embedding: embeddingMeta,
+      _version: u._version,
+    }),
+  ),
+  ...words.map((w) =>
+    client.models.Word.update({
+      id: w.id,
+      embedding: { ...embeddingMeta, wordCount: 1 },
+      _version: w._version,
+    }),
+  ),
+  ...questions.map((q) =>
+    client.models.Question.update({
+      id: q.id,
+      embedding: { ...embeddingMeta, wordCount: 20 },
+      _version: q._version,
+    }),
+  ),
+]);
+console.log(`✅ Updated embedding metadata on model records`);
+
 // ========================================================================
 // SECTION 5: Create Join Tables (Unit-Word, Unit-Question)
 // ========================================================================
@@ -1237,15 +1334,93 @@ if (unitFileAssociations.length > 0) {
 // ========================================================================
 console.log("\n📄 Creating document analysis records...");
 
+// Upload actual PDF/doc files to S3 for the Document records so EventBridge triggers fire
+const docS3Paths = {
+  photosynthesis: `protected/${instructor1IdentityId}/documents/photosynthesis-notes.pdf`,
+  japaneseGrammar: `protected/${instructor1IdentityId}/documents/japanese-grammar-guide.pdf`,
+  waterCycle: `protected/${instructor1IdentityId}/documents/science-lesson-water-cycle.pdf`,
+  biologyCell: `protected/${instructor1IdentityId}/documents/biology-cell-structure.docx`,
+  frenchVocab: `protected/${instructor1IdentityId}/documents/french-seasons-vocabulary.txt`,
+  spanishQuiz: `protected/${instructor1IdentityId}/documents/spanish-quiz.gift`,
+  biologyQti: `protected/${instructor1IdentityId}/documents/biology-cell-quiz.qti`,
+  japaneseCourse: `protected/${instructor1IdentityId}/documents/japanese-grammar-course.imscc`,
+  scormPackage: `protected/${instructor1IdentityId}/documents/biology-photosynthesis-scorm.zip`,
+};
+
+// Upload actual files from test/mocks to S3
+const docFileUploads = [
+  {
+    path: docS3Paths.photosynthesis,
+    local: "science-lesson-water-cycle.pdf",
+    mime: "application/pdf",
+  },
+  {
+    path: docS3Paths.japaneseGrammar,
+    local: "japanese-grammar-guide.pdf",
+    mime: "application/pdf",
+  },
+  {
+    path: docS3Paths.waterCycle,
+    local: "science-lesson-water-cycle.pdf",
+    mime: "application/pdf",
+  },
+  {
+    path: docS3Paths.biologyCell,
+    local: "biology-cell-structure.docx",
+    mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  },
+  {
+    path: docS3Paths.frenchVocab,
+    local: "french-seasons-vocabulary.txt",
+    mime: "text/plain",
+  },
+  {
+    path: docS3Paths.spanishQuiz,
+    local: "spanish-quiz.gift",
+    mime: "text/x-gift",
+  },
+  {
+    path: docS3Paths.biologyQti,
+    local: "biology-cell-quiz.qti",
+    mime: "application/x-qti+xml",
+  },
+  {
+    path: docS3Paths.japaneseCourse,
+    local: "japanese-grammar-course.imscc",
+    mime: "application/x-imscc+zip",
+  },
+  {
+    path: docS3Paths.scormPackage,
+    local: "biology-photosynthesis-scorm.zip",
+    mime: "application/zip",
+  },
+];
+
+const docFileSizes: Record<string, number> = {};
+await Promise.all(
+  docFileUploads.map(async ({ path, local, mime }) => {
+    const fileBuffer = await readFile(resolve(mocksDir, local));
+    docFileSizes[path] = fileBuffer.length;
+    await uploadData({ path, data: fileBuffer, options: { contentType: mime } })
+      .result;
+    console.log(`  ↑ ${local} → ${path}`);
+  }),
+);
+console.log(
+  `  ✓ Uploaded ${docFileUploads.length} document files to S3 (EventBridge will trigger processing)`,
+);
+
 const documentsResponse = await Promise.all([
+  // PDF - already analyzed (completed state)
   client.models.Document.create({
     filename: "photosynthesis-notes.pdf",
-    s3Key: "public/documents/photosynthesis-notes.pdf",
+    s3Key: docS3Paths.photosynthesis,
     status: "completed",
-    extractedText: "Photosynthesis is the process by which plants...",
+    textExtractedAt: Date.now(),
     pageCount: 5,
-    fileSize: 524288,
+    fileSize: docFileSizes[docS3Paths.photosynthesis] || 0,
     mimeType: "application/pdf",
+    sourceFormat: "pdf",
     uploadedAt: new Date().toISOString(),
     owner: instructor1OwnerSub,
     readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
@@ -1257,20 +1432,143 @@ const documentsResponse = await Promise.all([
     );
     return { data: null, errors: err.errors };
   }),
+  // PDF - freshly uploaded (triggers analysis)
   client.models.Document.create({
-    filename: "japanese-grammar.pdf",
-    s3Key: "public/documents/japanese-grammar.pdf",
+    filename: "japanese-grammar-guide.pdf",
+    s3Key: docS3Paths.japaneseGrammar,
     status: "uploaded",
     pageCount: 0,
-    fileSize: 1048576,
+    fileSize: docFileSizes[docS3Paths.japaneseGrammar] || 0,
     mimeType: "application/pdf",
+    sourceFormat: "pdf",
     uploadedAt: new Date().toISOString(),
     owner: instructor1OwnerSub,
     readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
     writableGroups: ["section-jpn101-instructors"],
   }).catch((err) => {
     console.error(
-      "  ✗ Failed to create japanese-grammar.pdf:",
+      "  ✗ Failed to create japanese-grammar-guide.pdf:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // DOCX - Word document (triggers documentThumbnail + documentAnalysis)
+  client.models.Document.create({
+    filename: "biology-cell-structure.docx",
+    s3Key: docS3Paths.biologyCell,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.biologyCell] || 0,
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    sourceFormat: "docx",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
+    writableGroups: ["section-bio101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create biology-cell-structure.docx:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // TXT - plain text (triggers documentAnalysis)
+  client.models.Document.create({
+    filename: "french-seasons-vocabulary.txt",
+    s3Key: docS3Paths.frenchVocab,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.frenchVocab] || 0,
+    mimeType: "text/plain",
+    sourceFormat: "txt",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
+    writableGroups: ["section-jpn101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create french-seasons-vocabulary.txt:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // GIFT - Moodle quiz format (edu LMS)
+  client.models.Document.create({
+    filename: "spanish-quiz.gift",
+    s3Key: docS3Paths.spanishQuiz,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.spanishQuiz] || 0,
+    mimeType: "text/x-gift",
+    sourceFormat: "gift",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
+    writableGroups: ["section-jpn101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create spanish-quiz.gift:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // QTI - assessment format (edu LMS)
+  client.models.Document.create({
+    filename: "biology-cell-quiz.qti",
+    s3Key: docS3Paths.biologyQti,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.biologyQti] || 0,
+    mimeType: "application/x-qti+xml",
+    sourceFormat: "qti-2.1",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
+    writableGroups: ["section-bio101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create biology-cell-quiz.qti:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // IMS Common Cartridge (edu LMS course package)
+  client.models.Document.create({
+    filename: "japanese-grammar-course.imscc",
+    s3Key: docS3Paths.japaneseCourse,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.japaneseCourse] || 0,
+    mimeType: "application/x-imscc+zip",
+    sourceFormat: "imscc-1.3",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
+    writableGroups: ["section-jpn101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create japanese-grammar-course.imscc:",
+      err.errors || err.message,
+    );
+    return { data: null, errors: err.errors };
+  }),
+  // SCORM package (edu LMS interactive content)
+  client.models.Document.create({
+    filename: "biology-photosynthesis-scorm.zip",
+    s3Key: docS3Paths.scormPackage,
+    status: "uploaded",
+    pageCount: 0,
+    fileSize: docFileSizes[docS3Paths.scormPackage] || 0,
+    mimeType: "application/zip",
+    sourceFormat: "scorm-1.2",
+    uploadedAt: new Date().toISOString(),
+    owner: instructor1OwnerSub,
+    readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
+    writableGroups: ["section-bio101-instructors"],
+  }).catch((err) => {
+    console.error(
+      "  ✗ Failed to create biology-photosynthesis-scorm.zip:",
       err.errors || err.message,
     );
     return { data: null, errors: err.errors };
@@ -1294,6 +1592,31 @@ const documents = documentsResponse
   .map((r) => r.data)
   .filter((d) => d !== null && d !== undefined);
 console.log(`✅ Created ${documents.length} document records`);
+
+// Upload extracted text to S3 for the completed document
+if (documents[0]) {
+  const extractedTextContent = `Photosynthesis is the process by which plants convert light energy into chemical energy stored in glucose. This process takes place primarily in the chloroplasts of plant cells, using the green pigment chlorophyll to capture light energy.
+
+The overall equation for photosynthesis is:
+6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂
+
+Key stages:
+1. Light-dependent reactions occur in the thylakoid membranes
+2. Light-independent reactions (Calvin cycle) occur in the stroma
+3. Carbon fixation converts CO₂ into organic molecules
+
+Chlorophyll absorbs red and blue light wavelengths while reflecting green light, which is why plants appear green to our eyes.`;
+
+  const extractedTextPath = `private/${instructor1IdentityId}/documents/${documents[0].id}/extracted-text.txt`;
+  await uploadData({
+    path: extractedTextPath,
+    data: extractedTextContent,
+    options: { contentType: "text/plain" },
+  }).result;
+  console.log(
+    `  📄 Uploaded extracted text to S3 for: ${documents[0].filename}`,
+  );
+}
 
 // ========================================================================
 // SECTION 11: Create Parsed Content from Document Analysis

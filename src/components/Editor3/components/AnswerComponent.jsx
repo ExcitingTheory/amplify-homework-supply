@@ -38,14 +38,7 @@ import getCachedUrl from "../../../utils/getCachedUrl";
 import { RecordingStudio2 } from "../../RecordingStudio2";
 
 // Component to handle signed URL for word audio
-function SignedAudioPlayer({
-  audioKey,
-  identityId,
-  waveformData,
-  width,
-  height,
-  title,
-}) {
+function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
   const t = useTranslations("workbook");
   const [signedUrl, setSignedUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +77,6 @@ function SignedAudioPlayer({
   return (
     <AudioWaveformPlayer
       audioUrl={signedUrl}
-      waveformData={waveformData}
       width={width}
       height={height}
       title={title}
@@ -407,11 +399,6 @@ function ByWordList(
                     <SignedAudioPlayer
                       audioKey={dictionary[wordId].audio[0]}
                       identityId={dictionary[wordId].identityId}
-                      waveformData={
-                        dictionary[wordId].waveformData
-                          ? JSON.parse(dictionary[wordId].waveformData)
-                          : undefined
-                      }
                       width={400}
                       height={60}
                       title={dictionary[wordId].phrase}
@@ -531,11 +518,6 @@ function ByWordList(
                   <SignedAudioPlayer
                     audioKey={dictionary[wordId].audio[0]}
                     identityId={dictionary[wordId].identityId}
-                    waveformData={
-                      dictionary[wordId].waveformData
-                        ? JSON.parse(dictionary[wordId].waveformData)
-                        : undefined
-                    }
                     width={400}
                     height={60}
                     title={dictionary[wordId].phrase}
@@ -650,11 +632,6 @@ function ByWordList(
                   <SignedAudioPlayer
                     audioKey={dictionary[wordId].audio[0]}
                     identityId={dictionary[wordId].identityId}
-                    waveformData={
-                      dictionary[wordId].waveformData
-                        ? JSON.parse(dictionary[wordId].waveformData)
-                        : undefined
-                    }
                     width={400}
                     height={60}
                     title={dictionary[wordId].phrase}
@@ -784,11 +761,6 @@ function ByDefinitionWordList(
                   <SignedAudioPlayer
                     audioKey={dictionary[wordId].definitionAudio[0]}
                     identityId={dictionary[wordId].identityId}
-                    waveformData={
-                      dictionary[wordId].definitionWaveformData
-                        ? JSON.parse(dictionary[wordId].definitionWaveformData)
-                        : undefined
-                    }
                     width={400}
                     height={60}
                     title={dictionary[wordId].definition}
@@ -893,11 +865,6 @@ function ByDefinitionWordList(
                   <SignedAudioPlayer
                     audioKey={dictionary[wordId].definitionAudio[0]}
                     identityId={dictionary[wordId].identityId}
-                    waveformData={
-                      dictionary[wordId].definitionWaveformData
-                        ? JSON.parse(dictionary[wordId].definitionWaveformData)
-                        : undefined
-                    }
                     width={400}
                     height={60}
                     title={dictionary[wordId].definition}
@@ -965,11 +932,6 @@ function ByDefinitionWordList(
                   <SignedAudioPlayer
                     audioKey={dictionary[wordId].definitionAudio[0]}
                     identityId={dictionary[wordId].identityId}
-                    waveformData={
-                      dictionary[wordId].definitionWaveformData
-                        ? JSON.parse(dictionary[wordId].definitionWaveformData)
-                        : undefined
-                    }
                     width={400}
                     height={60}
                     title={dictionary[wordId].definition}

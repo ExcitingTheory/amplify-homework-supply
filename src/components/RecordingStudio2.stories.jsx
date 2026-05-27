@@ -4,16 +4,6 @@ import FilesContext from "../context/fileContext";
 import UnitContext from "../context/unitContext";
 import { seedMockFiles } from "../../.storybook/__mocks__/aws-amplify-data";
 
-// Helper function to generate realistic waveform data
-const generateWaveformData = (length = 100) => {
-  return Array.from({ length }, (_, i) => {
-    const position = i / length;
-    const envelope = Math.sin(position * Math.PI);
-    const detail = Math.sin(i * 0.3) * 0.3 + Math.sin(i * 0.15) * 0.2;
-    return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
-  });
-};
-
 export default {
   title: "🎙️ Recording Studio/Recording Studio (Legacy)",
   component: RecordingStudio2,
@@ -75,16 +65,12 @@ export const WithFeedback = {
   },
 };
 
-// Mock waveform data (simulates an audio waveform)
-const mockWaveformData = generateWaveformData(200);
-
 // Mock file data for DataStore
 const mockFileData = {
   id: "audio-1",
   name: "bonjour_recording.mp3",
   path: "protected/audio/bonjour-recording.mp3",
   mimeType: "audio/mpeg",
-  waveformData: JSON.stringify(generateWaveformData(200)),
   createdAt: new Date().toISOString(),
   owner: "mock-user-sub",
   identityId: "us-east-1:mock-identity-123",

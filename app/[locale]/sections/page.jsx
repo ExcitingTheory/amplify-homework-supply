@@ -43,74 +43,9 @@ import AppShell from "@/components/AppShell";
 import { useAppShell } from "@/components/AppShellContext";
 import MyAuth from "@/components/AmplifyAuthenticator";
 import AppSkeleton from "@/components/AppSkeleton";
-import getCachedUrl from "@/utils/getCachedUrl";
-import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
+import LazyCardMedia from "@/components/LazyCardMedia";
 import InstructorDashboard from "@/components/InstructorDashboard";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
-
-function CardMediaComponent({
-  s3Key,
-  identityId,
-  fileId,
-  level = "protected",
-}) {
-  const [url, setUrl] = React.useState(null);
-  const [srcSet, setSrcSet] = React.useState(null);
-  const [sizes, setSizes] = React.useState(null);
-  const [loaded, setLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    setLoaded(false);
-    const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key);
-      setUrl(_url);
-    };
-    asyncFunc();
-
-    if (fileId && identityId) {
-      getResponsiveImageUrls(fileId, identityId)
-        .then((result) => {
-          if (result) {
-            setSrcSet(result.srcSet);
-            setSizes(result.sizes);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [s3Key, fileId, identityId]);
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        width: 400,
-        alignSelf: "left",
-        flexShrink: 0,
-      }}
-    >
-      <img
-        src={url || undefined}
-        srcSet={srcSet || undefined}
-        sizes={sizes || undefined}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          visibility: loaded ? "visible" : "hidden",
-        }}
-        onLoad={() => setLoaded(true)}
-      />
-      {!loaded && (
-        <Skeleton
-          variant="rectangular"
-          animation="wave"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        />
-      )}
-    </Box>
-  );
-}
 
 function getUserGroups(user) {
   return (
@@ -652,7 +587,7 @@ function Sections({ user }) {
                     </Box>
                   </Box>
                   {section?.featuredImage && (
-                    <CardMediaComponent
+                    <LazyCardMedia
                       s3Key={section?.featuredImage}
                       identityId={section?.identityId}
                     />
