@@ -13,6 +13,11 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
+const ALLOWED_AUDIO_HOSTS = new Set<string>([
+  // Add trusted storage/CDN hosts used for uploaded audio
+  "example-bucket.s3.amazonaws.com",
+]);
+
 function getOpenAI() {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
@@ -154,10 +159,8 @@ export async function transcribeAudio(params: {
     throw new Error("Audio URL must use HTTPS");
   }
   const hostname = parsedUrl.hostname.toLowerCase();
-  const blockedPatterns =
-    /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
-  if (blockedPatterns.test(hostname)) {
-    throw new Error("Audio URL points to a disallowed host");
+  if (!ALLOWED_AUDIO_HOSTS.has(hostname)) {
+    throw new Error("Audio URL host is not allowlisted");
   }
 
   // Fetch the audio file
