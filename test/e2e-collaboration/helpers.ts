@@ -68,7 +68,7 @@ export async function createUserSession(
     ) {
       return;
     }
-    console.warn(`[${user.username}] Page error:`, msg);
+    console.warn("[user-session] Page error:", msg);
   });
 
   await loginOnPage(page, user, `${baseURL}${targetPath}`);
