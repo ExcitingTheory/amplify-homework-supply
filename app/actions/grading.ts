@@ -143,8 +143,25 @@ export async function transcribeAudio(params: {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
 
+  // Validate audioUrl to prevent SSRF
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(params.audioUrl);
+  } catch {
+    throw new Error("Invalid audio URL");
+  }
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error("Audio URL must use HTTPS");
+  }
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const blockedPatterns =
+    /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+  if (blockedPatterns.test(hostname)) {
+    throw new Error("Audio URL points to a disallowed host");
+  }
+
   // Fetch the audio file
-  const response = await fetch(params.audioUrl);
+  const response = await fetch(parsedUrl.toString());
   if (!response.ok)
     throw new Error(`Failed to fetch audio: ${response.statusText}`);
   const audioBlob = await response.blob();

@@ -393,7 +393,7 @@ export function InlineGradeCell({
         clearTimeout(saveTimerRef.current)
         saveTimerRef.current = null
       }
-      const trimmed = text.replace('%', '').replace('*', '').trim()
+      const trimmed = text.replace(/[%*]/g, '').trim()
 
       // Empty → remove override
       if (!trimmed) {

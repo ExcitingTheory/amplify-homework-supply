@@ -230,7 +230,16 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
     e.stopPropagation();
   };
 
-  const _setRubyTags = (rubyTag) => {
+  const _escapeHtml = (str) =>
+    str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  const _setRubyTags = (phraseText, pronunciationText) => {
+    const rubyTag = `${_escapeHtml(phraseText)}<rt>${_escapeHtml(pronunciationText)}</rt>`;
     setRubyTags([...rubyTags, rubyTag]);
   };
 
@@ -255,7 +264,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
       setSelectionStart(null);
 
       if (selectedPhrase.length > 0 && selectedPronunciation.length > 0) {
-        _setRubyTags(`${selectedPhrase}<rt>${selectedPronunciation}</rt>`);
+        _setRubyTags(selectedPhrase, selectedPronunciation);
         setSelectedPhrase("");
         setSelectedPronunciation("");
       }
@@ -274,7 +283,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
       setSelectionStart(null);
 
       if (selectedPhrase.length > 0 && selectedPronunciation.length > 0) {
-        _setRubyTags(`${selectedPhrase}<rt>${selectedPronunciation}</rt>`);
+        _setRubyTags(selectedPhrase, selectedPronunciation);
         setSelectedPhrase("");
         setSelectedPronunciation("");
       }

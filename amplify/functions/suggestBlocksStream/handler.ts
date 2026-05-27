@@ -25,10 +25,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    console.log(
-      "[SuggestBlocks] OpenAI API key loaded:",
-      apiKey.substring(0, 7) + "..." + apiKey.substring(apiKey.length - 4),
-    );
     openaiInstance = createOpenAI({ apiKey });
   }
   return openaiInstance;
