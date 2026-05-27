@@ -286,6 +286,16 @@ function findTextContent(obj: any, key: string): string | undefined {
   return undefined;
 }
 
+function stripHtmlToText(fragment: string): string {
+  return convert(fragment, {
+    wordwrap: false,
+    selectors: [
+      { selector: "script", format: "skip" },
+      { selector: "style", format: "skip" },
+    ],
+  }).trim();
+}
+
 /**
  * Extract vocabulary from HTML content using common patterns:
  * - Definition lists (<dl><dt>term</dt><dd>definition</dd></dl>)
@@ -303,8 +313,8 @@ function extractVocabularyFromHtml(html: string, page: number): unknown[] {
     const dtPattern = /<dt[^>]*>([\s\S]*?)<\/dt>\s*<dd[^>]*>([\s\S]*?)<\/dd>/gi;
     let pair;
     while ((pair = dtPattern.exec(dlContent)) !== null) {
-      const word = pair[1].replace(/<[^>]+>/g, "").trim();
-      const definition = pair[2].replace(/<[^>]+>/g, "").trim();
+      const word = stripHtmlToText(pair[1]);
+      const definition = stripHtmlToText(pair[2]);
       if (word && definition) {
         vocabulary.push({ word, definition, context: "", page });
       }
@@ -322,7 +332,10 @@ function extractVocabularyFromHtml(html: string, page: number): unknown[] {
       /<(?:strong|b|em)[^>]*>([\s\S]*?)<\/(?:strong|b|em)>\s*[-–:]\s*([^<]+)/gi;
     let termMatch;
     while ((termMatch = termPattern.exec(section)) !== null) {
-      const word = termMatch[1].replace(/<[^>]+>/g, "").trim();
+      const word = convert(termMatch[1], {
+        wordwrap: false,
+        selectors: [{ selector: "script,style", format: "skip" }],
+      }).trim();
       const definition = termMatch[2].trim();
       if (word && definition && word.length < 50) {
         vocabulary.push({ word, definition, context: "", page });
@@ -335,7 +348,7 @@ function extractVocabularyFromHtml(html: string, page: number): unknown[] {
     /<span[^>]*class="[^"]*(?:vocab|term|keyword|definition-term)[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
   let spanMatch;
   while ((spanMatch = vocabSpanPattern.exec(html)) !== null) {
-    const word = spanMatch[1].replace(/<[^>]+>/g, "").trim();
+    const word = stripHtmlToText(spanMatch[1]);
     if (
       word &&
       word.length < 50 &&

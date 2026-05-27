@@ -103,7 +103,7 @@ async function main() {
 
   try {
     await signIn({ username, password });
-    console.log(`Authenticated as ${username}`);
+    console.log("Authentication successful.");
   } catch (err: any) {
     console.error("Authentication failed:", err.message);
     process.exit(1);

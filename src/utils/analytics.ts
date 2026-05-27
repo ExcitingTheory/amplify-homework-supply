@@ -86,7 +86,11 @@ function getSessionId(): string {
   currentSessionId =
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+      : typeof crypto !== "undefined" && crypto.getRandomValues
+        ? `${Date.now()}-${Array.from(crypto.getRandomValues(new Uint8Array(8)))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("")}`
+        : `${Date.now()}`;
   return currentSessionId;
 }
 
