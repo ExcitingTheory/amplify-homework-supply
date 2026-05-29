@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 import { ViewTransition } from 'react';
 import { routing } from '../../src/i18n/routing';
 import Providers from '../providers';
-import AppSkeleton from '../../src/components/AppSkeleton';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -52,7 +51,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <Suspense fallback={<AppSkeleton />}>
+    <Suspense fallback={null}>
       <LocaleContent locale={locale}>{children}</LocaleContent>
     </Suspense>
   );

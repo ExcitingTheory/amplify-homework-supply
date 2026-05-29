@@ -41,7 +41,7 @@ export function mentionsKai(message: ChatMessage): boolean {
 
 /** Extract the prompt for @kai from message content */
 export function extractKaiPrompt(content: string): string | null {
-  const match = content.match(/@kai\s+(.*)/is);
+  const match = content.match(/@kai\s+([\s\S]*)/i);
   return match ? match[1].trim() : null;
 }
 

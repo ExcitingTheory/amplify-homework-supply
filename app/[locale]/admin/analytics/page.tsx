@@ -10,7 +10,6 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 
@@ -476,10 +475,8 @@ function AnalyticsDashboard() {
 
 export default function AnalyticsPage() {
   return (
-    <MyAuth>
       <AdminRouteGuard>
         <AnalyticsDashboard />
       </AdminRouteGuard>
-    </MyAuth>
   );
 }

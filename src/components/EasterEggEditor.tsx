@@ -24,9 +24,6 @@ import Alert from '@mui/material/Alert'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import SaveIcon from '@mui/icons-material/Save'
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 // ============================================================================
 // Types
@@ -108,8 +105,8 @@ export function EasterEggEditor({
   const [active, setActive] = useState(initialData?.active ?? true)
 
   // Schedule-specific state (stored as JSON in triggerValue)
-  const [scheduleStart, setScheduleStart] = useState<Date | null>(null)
-  const [scheduleEnd, setScheduleEnd] = useState<Date | null>(null)
+  const [scheduleStart, setScheduleStart] = useState('')
+  const [scheduleEnd, setScheduleEnd] = useState('')
 
   // Achievement-specific
   const [achievementMetric, setAchievementMetric] = useState('accuracy')
@@ -128,8 +125,8 @@ export function EasterEggEditor({
       case 'SCHEDULE':
         if (scheduleStart && scheduleEnd) {
           return JSON.stringify({
-            start: scheduleStart.toISOString(),
-            end: scheduleEnd.toISOString(),
+            start: new Date(scheduleStart).toISOString(),
+            end: new Date(scheduleEnd).toISOString(),
           })
         }
         return triggerValue
@@ -210,20 +207,22 @@ export function EasterEggEditor({
             )}
 
             {triggerType === 'SCHEDULE' && (
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Stack spacing={2}>
-                  <DateTimePicker
-                    label="Start Date"
-                    value={scheduleStart}
-                    onChange={(val) => setScheduleStart(val)}
-                  />
-                  <DateTimePicker
-                    label="End Date"
-                    value={scheduleEnd}
-                    onChange={(val) => setScheduleEnd(val)}
-                  />
-                </Stack>
-              </LocalizationProvider>
+              <Stack spacing={2}>
+                <TextField
+                  label="Start Date"
+                  type="datetime-local"
+                  value={scheduleStart}
+                  onChange={(e) => setScheduleStart(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                  label="End Date"
+                  type="datetime-local"
+                  value={scheduleEnd}
+                  onChange={(e) => setScheduleEnd(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Stack>
             )}
 
             {triggerType === 'SECRET_LINK' && (

@@ -4,6 +4,7 @@
  */
 import type { FormatExtractionResult } from "./formatRegistry.js";
 import { getS3Object } from "./textExtraction.js";
+import { convert } from "html-to-text";
 
 /**
  * Extract content from an EPUB file
@@ -21,7 +22,6 @@ export async function extractEpub(
   // @ts-ignore
   const JSZip = (await import("jszip")).default;
   const { XMLParser } = await import("fast-xml-parser");
-  const { convert } = await import("html-to-text");
 
   const zip = await JSZip.loadAsync(buffer);
   const parser = new XMLParser({

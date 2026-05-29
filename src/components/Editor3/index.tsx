@@ -137,7 +137,7 @@ function EditorRefPlugin(): null {
 /**
  * Main Editor component with collaborative editing support
  */
-export default function Editor(): JSX.Element {
+export default function Editor(): React.ReactElement {
   const t = useTranslations('common');
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);

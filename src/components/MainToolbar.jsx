@@ -71,10 +71,10 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 import { joinSection } from "../../app/actions/section";
 import { useColorMode } from "../hooks/useColorMode";
 import { LevelBadge } from "./Gamification/LevelBadge";
-import { DiceBearAvatar } from "./Gamification/DiceBearAvatar";
+import { AvatarDisplay } from "./Gamification/AvatarDisplay";
 import { useAvatarConfig } from "../hooks/useAvatarConfig";
 import SyncStatusIndicator from "./SyncStatusIndicator";
-import { useXP } from "../context/gamificationContext";
+import { useXP, useProgress, useSquad } from "../context/gamificationContext";
 import AuthContext from "../context/authContext";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import RateReviewIcon from "@mui/icons-material/RateReview";
@@ -246,6 +246,9 @@ export function HelpMenu() {
 export function UserMenu() {
   const tCommon = useTranslations("common");
   const tAuth = useTranslations("auth");
+  const { level } = useXP();
+  const { streak } = useProgress();
+  const { mySquad } = useSquad();
   const { user } = React.useContext(AuthContext);
   const {
     style: avatarStyle,
@@ -254,8 +257,7 @@ export function UserMenu() {
     isLoaded,
     glowRing,
   } = useAvatarConfig();
-  const avatarSeed =
-    configSeed || user?.username || user?.attributes?.sub || "";
+  const avatarSeed = user?.attributes?.sub || "";
   const [anchorEl, setAnchorEl] = React.useState(null);
   // const [username, setUsername] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -278,18 +280,24 @@ export function UserMenu() {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
+        sx={{ overflow: "visible", px: 0.5 }}
       >
         {/**
          * @todo Replace this with the user's name.
          */}
         {/* <ProfileIcon />&nbsp;{username} */}
         {avatarSeed && isLoaded ? (
-          <DiceBearAvatar
+          <AvatarDisplay
             seed={avatarSeed}
             size={28}
             style={avatarStyle}
             overrides={avatarOverrides}
             glowRing={glowRing}
+            level={level}
+            streak={streak?.currentStreak || 0}
+            guildCrestSvg={mySquad?.crestSvg ?? null}
+            guildName={mySquad?.name}
+            guildId={mySquad?.id}
           />
         ) : (
           <ProfileIcon />
@@ -936,14 +944,6 @@ export default function MainToolbar({ children }) {
             <ListItemText primary={tCommon("navigation.squads")} />
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton component="a" href="/skills">
-            <ListItemIcon sx={{ color: "text.primary" }}>
-              <AccountTreeIcon />
-            </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.skills")} />
-          </ListItemButton>
-        </ListItem>
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/settings">
@@ -1034,6 +1034,10 @@ export default function MainToolbar({ children }) {
         </IconButton>
         {/* <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}> */}
         {children && children}
+        <div
+          ref={appShell.toolbarChildrenPortalRef}
+          style={{ display: "contents" }}
+        />
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />

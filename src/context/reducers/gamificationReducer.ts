@@ -65,6 +65,7 @@ export interface SquadInfo {
   name: string;
   cohortId: string;
   totalXP: number;
+  crestSvg?: string | null;
   description?: string;
   memberCount: number;
   members?: Array<{

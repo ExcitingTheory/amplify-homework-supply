@@ -1,39 +1,61 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import AuthFormSkeleton from "./AuthFormSkeleton";
 
 const DRAWER_WIDTH = 280;
 const APPBAR_HEIGHT = 48;
 
 /**
- * Quick synchronous check of localStorage for a likely valid Cognito session.
- * Looks for an idToken and checks if its exp claim is in the future.
- * Does NOT validate signature — just a heuristic for skeleton selection.
+ * Quick synchronous check for a likely valid Cognito session.
+ * Checks both localStorage (Amplify default) and cookies (ChunkedCookieStorage).
+ * Decodes the JWT exp claim to confirm the token hasn't expired.
+ * Does NOT validate the signature — just a heuristic for skeleton selection.
  */
-function hasLikelySession() {
+export function hasLikelySession() {
   if (typeof window === "undefined") return false;
+
+  function isLiveJwt(token) {
+    if (!token) return false;
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return false;
+      const payload = JSON.parse(
+        atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+      );
+      return payload.exp && payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
   try {
-    // Amplify Gen 2 stores tokens with key pattern:
-    // CognitoIdentityServiceProvider.{clientId}.{username}.idToken
+    // 1. Check localStorage (Amplify default storage)
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.endsWith(".idToken")) {
-        const token = localStorage.getItem(key);
-        if (!token) continue;
-        // Decode JWT payload (base64url, no validation)
-        const parts = token.split(".");
-        if (parts.length !== 3) continue;
-        const payload = JSON.parse(
-          atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
-        );
-        if (payload.exp && payload.exp * 1000 > Date.now()) {
-          return true;
-        }
+        if (isLiveJwt(localStorage.getItem(key))) return true;
       }
     }
   } catch {
-    // Any error means we can't determine — default to logged-out
+    // localStorage may be blocked in some contexts
   }
+
+  try {
+    // 2. Check cookies (ChunkedCookieStorage path — ssr:true)
+    for (const raw of document.cookie.split(";")) {
+      const eqIdx = raw.indexOf("=");
+      if (eqIdx === -1) continue;
+      const name = raw.slice(0, eqIdx).trim();
+      if (name.endsWith(".idToken")) {
+        const value = decodeURIComponent(raw.slice(eqIdx + 1).trim());
+        if (isLiveJwt(value)) return true;
+      }
+    }
+  } catch {
+    // cookies may be blocked
+  }
+
   return false;
 }
 
@@ -49,25 +71,39 @@ export default function AppSkeleton({ variant = "page" }) {
   const isLikelyLoggedIn = hasLikelySession();
 
   if (!isLikelyLoggedIn) {
-    // Logged-out: centered horizontally, flush to top (matches Authenticator modal position)
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <Box sx={{ width: 360 }}>
-          <Skeleton
-            variant="rectangular"
-            width={360}
-            height={400}
-            sx={{ borderRadius: 2 }}
-          />
-        </Box>
-      </Box>
-    );
+    return <AuthFormSkeleton />;
+  }
+
+  // Logged-in users: return null for the top-level auth gate skeleton.
+  // Auth resolves in <200ms from cookies — rendering a full frame skeleton
+  // that immediately swaps for the real AppShell causes ugly flashing.
+  // The real AppShell + route loading.tsx will handle any visible loading state.
+  if (variant === "page") {
+    return null;
+  }
+
+  const contentSkeleton = (
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        p: { xs: 2, sm: 3 },
+        maxWidth: variant === "detail" ? "none" : "80rem",
+        mx: variant === "detail" ? 0 : "auto",
+        width: "100%",
+      }}
+    >
+      {variant === "cards" && <CardsSkeleton />}
+      {variant === "sections" && <SectionsSkeleton />}
+      {variant === "detail" && <DetailSkeleton />}
+      {variant === "page" && <PageSkeleton />}
+    </Box>
+  );
+
+  // Inner loading states happen inside an already-mounted AppShell.
+  // Avoid rendering another frame/drawer in that case.
+  if (variant !== "page") {
+    return contentSkeleton;
   }
 
   // Logged-in: show AppBar + drawer + content skeleton
@@ -137,21 +173,7 @@ export default function AppSkeleton({ variant = "page" }) {
         </Box>
 
         {/* Main content */}
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: { xs: 2, sm: 3 },
-            maxWidth: variant === "detail" ? "none" : "80rem",
-            mx: variant === "detail" ? 0 : "auto",
-            width: "100%",
-          }}
-        >
-          {variant === "cards" && <CardsSkeleton />}
-          {variant === "sections" && <SectionsSkeleton />}
-          {variant === "detail" && <DetailSkeleton />}
-          {variant === "page" && <PageSkeleton />}
-        </Box>
+        {contentSkeleton}
       </Box>
     </Box>
   );

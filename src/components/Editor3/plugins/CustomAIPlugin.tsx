@@ -18,7 +18,13 @@ import {
   DecoratorNode,
   $getSelection,
 } from "lexical";
-import type { LexicalNode, NodeKey, SerializedLexicalNode } from "lexical";
+import type {
+  LexicalNode,
+  NodeKey,
+  SerializedLexicalNode,
+  DOMConversionMap,
+  DOMConversionOutput,
+} from "lexical";
 import * as React from "react";
 import { useEffect, lazy, Suspense } from "react";
 
@@ -45,7 +51,7 @@ export interface SerializedCustomAINode extends SerializedLexicalNode {
 
 function convertCustomAIElement(
   domNode: HTMLElement,
-): { node: CustomAINode } | null {
+): DOMConversionOutput | null {
   const idsAttr = domNode.getAttribute("data-lexical-custom-ai");
   if (!idsAttr) return null;
 
@@ -164,12 +170,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
     return div;
   }
 
-  static importDOM(): Record<
-    string,
-    (
-      domNode: HTMLElement,
-    ) => { conversion: typeof convertCustomAIElement; priority: number } | null
-  > {
+  static importDOM(): DOMConversionMap | null {
     return {
       div: (domNode: HTMLElement) => {
         if (!domNode.hasAttribute("data-lexical-custom-ai")) {
@@ -177,7 +178,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
         }
         return {
           conversion: convertCustomAIElement,
-          priority: 1,
+          priority: 1 as const,
         };
       },
     };

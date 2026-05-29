@@ -21,7 +21,6 @@ import { useXP, useBadges } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 
-import MyAuth from "@/components/AmplifyAuthenticator";
 import Snackbar from "@mui/material/Snackbar";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 
@@ -632,10 +631,8 @@ function Settings() {
 
 export default function WrappedPage() {
   return (
-    <MyAuth>
-      <GamificationProviderWrapper>
-        <Settings />
-      </GamificationProviderWrapper>
-    </MyAuth>
+    <GamificationProviderWrapper>
+      <Settings />
+    </GamificationProviderWrapper>
   );
 }

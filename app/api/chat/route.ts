@@ -104,6 +104,226 @@ const allChatTools = {
     // No execute — client-side only
   }),
 
+  // Recording Studio 3 script generation tool - produces scriptData JSON for RS3 presets
+  create_recording_script: tool({
+    description: `Generate a Recording Studio 3 script as structured JSON, stored inside a Word or File model.
+- "word": Creates/updates a Word record with phrase and definition tracks. Speaker IDs: phrase_track, definition_track.
+- "conversation": Creates a File record (application/json) with a multi-speaker dialogue script.
+- "question": Creates a File record (application/json) with prompt and answer tracks. Speaker IDs: prompt_track, answer_track.
+The script can be opened in Recording Studio 3 for TTS generation or human recording.`,
+    parameters: z.object({
+      preset: z
+        .enum(["word", "conversation", "question"])
+        .describe("The RS3 preset type"),
+      title: z.string().describe("Title for the recording script"),
+      scene: z
+        .string()
+        .optional()
+        .describe('Scene description (e.g., "INT. CLASSROOM - MORNING")'),
+      speakers: z
+        .record(
+          z.string(),
+          z.object({
+            name: z.string().describe("Display name of the speaker"),
+            voice: z
+              .enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"])
+              .optional()
+              .describe("TTS voice to use (default: alloy)"),
+            description: z
+              .string()
+              .optional()
+              .describe(
+                'Character description (e.g., "30s, energetic, teacher")',
+              ),
+          }),
+        )
+        .describe(
+          'Map of speaker IDs to speaker config. For "word" preset use keys "phrase_track" and "definition_track". For "question" preset use "prompt_track" and "answer_track". For "conversation" use any descriptive keys.',
+        ),
+      dialogue: z
+        .array(
+          z.object({
+            speaker: z
+              .string()
+              .describe("Speaker ID matching a key in the speakers object"),
+            text: z.string().describe("The line of dialogue or text to speak"),
+            direction: z
+              .string()
+              .optional()
+              .describe(
+                'Acting/delivery direction (e.g., "slowly, with emphasis")',
+              ),
+            emotion: z
+              .string()
+              .optional()
+              .describe(
+                'Emotional tone (e.g., "cheerful", "serious", "questioning")',
+              ),
+          }),
+        )
+        .describe("Ordered array of dialogue lines"),
+      pronunciation: z
+        .string()
+        .optional()
+        .describe('Phonetic pronunciation for word preset (e.g., "koh-hee")'),
+      existingWordId: z
+        .string()
+        .optional()
+        .describe(
+          "ID of an existing Word to update with this script (word preset only)",
+        ),
+      existingFileId: z
+        .string()
+        .optional()
+        .describe(
+          "ID of an existing File to update with this script (conversation/question presets only)",
+        ),
+    }),
+    execute: async ({
+      preset,
+      title,
+      scene,
+      speakers,
+      dialogue,
+      pronunciation,
+      existingWordId,
+      existingFileId,
+    }) => {
+      const speakerIds = Object.keys(speakers);
+      const warnings: string[] = [];
+
+      if (preset === "word") {
+        if (!speakerIds.includes("phrase_track"))
+          warnings.push('Word preset should include "phrase_track" speaker');
+        if (!speakerIds.includes("definition_track"))
+          warnings.push(
+            'Word preset should include "definition_track" speaker',
+          );
+      } else if (preset === "question") {
+        if (!speakerIds.includes("prompt_track"))
+          warnings.push(
+            'Question preset should include "prompt_track" speaker',
+          );
+        if (!speakerIds.includes("answer_track"))
+          warnings.push(
+            'Question preset should include "answer_track" speaker',
+          );
+      }
+
+      const unknownSpeakers = dialogue
+        .map((d: any) => d.speaker)
+        .filter((s: string) => !speakerIds.includes(s));
+      if (unknownSpeakers.length > 0) {
+        warnings.push(
+          `Dialogue references undefined speakers: ${[...new Set(unknownSpeakers)].join(", ")}`,
+        );
+      }
+
+      const scriptData = {
+        metadata: {
+          title,
+          scene: scene || "",
+          date: new Date().toISOString().split("T")[0],
+          version: "1.0",
+        },
+        speakers: Object.fromEntries(
+          Object.entries(speakers).map(([id, config]: [string, any]) => [
+            id,
+            {
+              name: config.name,
+              voice: config.voice || "alloy",
+              description: config.description || "",
+            },
+          ]),
+        ),
+        dialogue: dialogue.map((line: any, index: number) => ({
+          id: index + 1,
+          speaker: line.speaker,
+          text: line.text,
+          timing: { start: 0, end: 0 },
+          direction: line.direction || "",
+          emotion: line.emotion || "",
+          takes: [],
+          activeTakeIndex: 0,
+        })),
+      };
+
+      const lockedTracks =
+        preset === "word"
+          ? ["phrase_track", "definition_track"]
+          : preset === "question"
+            ? ["prompt_track", "answer_track"]
+            : [];
+
+      let wordData = undefined;
+      if (preset === "word") {
+        const phraseLines = dialogue.filter(
+          (d: any) => d.speaker === "phrase_track",
+        );
+        const definitionLines = dialogue.filter(
+          (d: any) => d.speaker === "definition_track",
+        );
+        wordData = {
+          phrase: phraseLines.map((d: any) => d.text).join(" "),
+          definition: definitionLines.map((d: any) => d.text).join(" "),
+          pronunciation: pronunciation || "",
+          existingWordId: existingWordId || null,
+        };
+      }
+
+      let fileData = undefined;
+      if (preset === "conversation" || preset === "question") {
+        fileData = {
+          name: `${title
+            .replace(/[^a-zA-Z0-9-_ ]/g, "")
+            .replace(/\s+/g, "-")
+            .toLowerCase()}.json`,
+          mimeType: "application/json",
+          existingFileId: existingFileId || null,
+        };
+      }
+
+      return {
+        success: true,
+        action: "create_recording_script",
+        preset,
+        scriptData,
+        lockedTracks,
+        wordData,
+        fileData,
+        warnings: warnings.length > 0 ? warnings : undefined,
+        preview: {
+          title,
+          preset,
+          speakerCount: speakerIds.length,
+          speakers: Object.entries(speakers).map(
+            ([id, config]: [string, any]) => ({
+              id,
+              name: config.name,
+              voice: config.voice || "alloy",
+            }),
+          ),
+          dialogueCount: dialogue.length,
+          dialoguePreview: dialogue.slice(0, 5).map((line: any) => ({
+            speaker: speakers[line.speaker]?.name || line.speaker,
+            text:
+              line.text.length > 80
+                ? line.text.substring(0, 80) + "..."
+                : line.text,
+          })),
+          ...(wordData
+            ? {
+                wordPhrase: wordData.phrase,
+                wordDefinition: wordData.definition,
+              }
+            : {}),
+          ...(fileData ? { fileName: fileData.name } : {}),
+        },
+        message: `Recording script "${title}" ready with ${dialogue.length} lines across ${speakerIds.length} speaker(s)`,
+      };
+    },
+  }),
+
   // Server-side block insertion tools
   ...blockTools,
 };

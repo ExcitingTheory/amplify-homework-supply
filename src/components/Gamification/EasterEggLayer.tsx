@@ -1,13 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useEasterEggKeyword } from './EasterEggTrigger';
 import { EasterEggToast } from './EasterEggToast';
-import { generateClient } from 'aws-amplify/data';
+import { getAmplifyClient } from '../../utils/amplifyClient';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-let _client: ReturnType<typeof generateClient> | null = null;
 function getClient() {
-  if (!_client) _client = generateClient();
-  return _client;
+  return getAmplifyClient();
 }
 
 /**
@@ -75,7 +73,7 @@ export function EasterEggLayer({ studentId: studentIdProp }: EasterEggLayerProps
                 xpReward: e.xpReward || 0,
               };
             })
-            .filter((e) => !e.end || e.end >= now), // exclude expired
+            .filter((e: { id: string; start: string; end: string; message: string; xpReward: number }) => !e.end || e.end >= now), // exclude expired
         );
 
         // Mark already-discovered eggs

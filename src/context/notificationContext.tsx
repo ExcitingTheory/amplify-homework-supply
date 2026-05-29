@@ -21,10 +21,58 @@ import React, {
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";
 
+type NotificationCategory =
+  | "ASSIGNMENT"
+  | "COLLABORATION"
+  | "GAMIFICATION"
+  | "SQUAD"
+  | "CHAT"
+  | "SYSTEM";
+
+interface NotificationItem {
+  id: string;
+  type?: string | null;
+  category?: NotificationCategory | string | null;
+  title?: string;
+  body?: string;
+  linkPath?: string;
+  linkLabel?: string;
+  referenceId?: string;
+  referenceType?: string;
+  senderName?: string;
+  seen?: boolean;
+  interacted?: boolean;
+  createdAt?: string;
+  _version?: number | null;
+  [key: string]: unknown;
+}
+
+interface NotificationState {
+  notifications: NotificationItem[];
+  loading: boolean;
+}
+
+type NotificationAction =
+  | { type: "SET_NOTIFICATIONS"; payload: NotificationItem[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "MARK_SEEN"; payload: string }
+  | { type: "MARK_INTERACTED"; payload: string }
+  | { type: "MARK_ALL_SEEN" };
+
+interface NotificationContextValue {
+  notifications: NotificationItem[];
+  unseenCount: number;
+  unseenByCategory: Record<string, number>;
+  loading: boolean;
+  markSeen: (notificationId: string) => Promise<void>;
+  markInteracted: (notificationId: string) => Promise<void>;
+  markAllSeen: () => Promise<void>;
+  deleteNotification: (notificationId: string) => Promise<void>;
+}
+
 // ============================================================================
 // Types
 // ============================================================================
-
 /**
  * @typedef {'ASSIGNMENT' | 'COLLABORATION' | 'GAMIFICATION' | 'SQUAD' | 'CHAT' | 'SYSTEM'} NotificationCategory
  */
@@ -54,21 +102,23 @@ import AuthContext from "./authContext";
 // ============================================================================
 // Reducer
 // ============================================================================
-
 const actionTypes = {
   SET_NOTIFICATIONS: "SET_NOTIFICATIONS",
   SET_LOADING: "SET_LOADING",
   MARK_SEEN: "MARK_SEEN",
   MARK_INTERACTED: "MARK_INTERACTED",
   MARK_ALL_SEEN: "MARK_ALL_SEEN",
-};
+} as const;
 
-const initialState = {
+const initialState: NotificationState = {
   notifications: [],
   loading: true,
 };
 
-function notificationReducer(state, action) {
+function notificationReducer(
+  state: NotificationState,
+  action: NotificationAction,
+): NotificationState {
   switch (action.type) {
     case actionTypes.SET_NOTIFICATIONS:
       return { ...state, notifications: action.payload, loading: false };
@@ -105,26 +155,24 @@ function notificationReducer(state, action) {
 // ============================================================================
 // Context
 // ============================================================================
-
-const NotificationContext = createContext({
+const NotificationContext = createContext<NotificationContextValue>({
   notifications: [],
   unseenCount: 0,
   unseenByCategory: {},
   loading: true,
-  markSeen: () => {},
-  markInteracted: () => {},
-  markAllSeen: () => {},
-  deleteNotification: () => {},
+  markSeen: async () => {},
+  markInteracted: async () => {},
+  markAllSeen: async () => {},
+  deleteNotification: async () => {},
 });
 
 // ============================================================================
 // Provider
 // ============================================================================
-
-function NotificationProvider({ children }) {
-  const { user, isLoading: authLoading } = useContext(AuthContext);
+function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { user, isLoading: authLoading } = useContext(AuthContext) as any;
   const [state, dispatch] = useReducer(notificationReducer, initialState);
-  const versionMapRef = useRef({});
+  const versionMapRef = useRef<Record<string, number>>({});
 
   // Subscribe to notifications for the current user
   useEffect(() => {
@@ -140,14 +188,19 @@ function NotificationProvider({ children }) {
     // "subscription filter uses same fieldName multiple time" error.
     const subscription = client.models.Notification.observeQuery().subscribe({
       next: ({ items }) => {
-        const validItems = (items || []).filter(
-          (item) => item != null && item.id != null,
-        );
-
+        const baseItems = (items || []) as any[];
+        const validItems = baseItems
+          .filter((item) => item != null && item.id != null)
+          .map((item) => ({
+            ...item,
+            type: item.type ?? "SYSTEM_ANNOUNCEMENT",
+            category: item.category ?? "SYSTEM",
+          })) as NotificationItem[];
         // Version guard: skip if no item has a newer _version
         const hasChanges = validItems.some((item) => {
           const tracked = versionMapRef.current[item.id];
-          return tracked == null || item._version > tracked;
+          const incomingVersion = item._version ?? 0;
+          return tracked == null || incomingVersion > tracked;
         });
 
         if (
@@ -159,18 +212,19 @@ function NotificationProvider({ children }) {
 
         // Update version map
         validItems.forEach((item) => {
-          versionMapRef.current[item.id] = item._version || 0;
+          versionMapRef.current[item.id] = item._version ?? 0;
         });
 
         // Sort newest first
         const sorted = [...validItems].sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime(),
         );
 
         dispatch({ type: actionTypes.SET_NOTIFICATIONS, payload: sorted });
       },
-      error: (err) => {
+      error: (err: any) => {
         const msg =
           err?.message ||
           err?.errors?.[0]?.message ||
@@ -201,8 +255,8 @@ function NotificationProvider({ children }) {
   );
 
   const unseenByCategory = useMemo(() => {
-    const counts = {};
-    state.notifications.forEach((n) => {
+    const counts: Record<string, number> = {};
+    state.notifications.forEach((n: NotificationItem) => {
       if (!n.seen && n.category) {
         counts[n.category] = (counts[n.category] || 0) + 1;
       }
@@ -212,7 +266,7 @@ function NotificationProvider({ children }) {
 
   // Actions
   const markSeen = useCallback(
-    async (notificationId) => {
+    async (notificationId: string) => {
       dispatch({ type: actionTypes.MARK_SEEN, payload: notificationId });
       try {
         const client = getAmplifyClient();
@@ -221,7 +275,7 @@ function NotificationProvider({ children }) {
           await client.models.Notification.update({
             id: notificationId,
             seen: true,
-            _version: item._version,
+            _version: item._version ?? 0,
           });
         }
       } catch (err) {
@@ -232,7 +286,7 @@ function NotificationProvider({ children }) {
   );
 
   const markInteracted = useCallback(
-    async (notificationId) => {
+    async (notificationId: string) => {
       dispatch({ type: actionTypes.MARK_INTERACTED, payload: notificationId });
       try {
         const client = getAmplifyClient();
@@ -242,7 +296,7 @@ function NotificationProvider({ children }) {
             id: notificationId,
             seen: true,
             interacted: true,
-            _version: item._version,
+            _version: item._version ?? 0,
           });
         }
       } catch (err) {
@@ -262,7 +316,7 @@ function NotificationProvider({ children }) {
           client.models.Notification.update({
             id: n.id,
             seen: true,
-            _version: n._version,
+            _version: n._version ?? 0,
           }),
         ),
       );
@@ -276,7 +330,7 @@ function NotificationProvider({ children }) {
   }, [state.notifications]);
 
   const deleteNotification = useCallback(
-    async (notificationId) => {
+    async (notificationId: string) => {
       try {
         const client = getAmplifyClient();
         await client.models.Notification.delete({ id: notificationId });
@@ -320,12 +374,11 @@ function NotificationProvider({ children }) {
 // ============================================================================
 // Hooks
 // ============================================================================
-
-function useNotifications() {
+function useNotifications(): NotificationContextValue {
   return useContext(NotificationContext);
 }
 
-function useUnseenCount(category) {
+function useUnseenCount(category?: string): number {
   const { unseenByCategory, unseenCount } = useContext(NotificationContext);
   if (category) return unseenByCategory[category] || 0;
   return unseenCount;

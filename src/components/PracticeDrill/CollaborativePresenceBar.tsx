@@ -141,7 +141,7 @@ export default function CollaborativePresenceBar({
 
       {/* Participant count */}
       <Typography variant="caption" color="text.secondary">
-        {t('practiceDrill.collab.participants', '{{count}} studying', {
+        {t('practiceDrill.collab.participants', {
           count: allParticipants.length,
         })}
       </Typography>
@@ -154,7 +154,7 @@ export default function CollaborativePresenceBar({
           <Chip
             icon={<GroupsIcon />}
             size="small"
-            label={t('practiceDrill.collab.groupAccuracy', 'Group: {{accuracy}}%', {
+            label={t('practiceDrill.collab.groupAccuracy', {
               accuracy: Math.round(groupStats.averageAccuracy),
             })}
             variant="outlined"

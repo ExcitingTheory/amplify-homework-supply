@@ -232,7 +232,7 @@ export default function PracticeDrillDialog({
               {t('practiceDrill.dialog.complete', 'Drill Complete!')}
             </Typography>
             <Typography variant="body2">
-              {t('practiceDrill.dialog.completeSummary', 'Accuracy: {{accuracy}}% — XP earned: +{{xp}}', {
+              {t('practiceDrill.dialog.completeSummary', {
                 accuracy: drillStats.accuracy,
                 xp: session.xpAwarded,
               })}

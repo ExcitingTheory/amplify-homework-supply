@@ -17,7 +17,6 @@ import {
 import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import LazyCardMedia from "@/components/LazyCardMedia";
 import HistoryIcon from "@mui/icons-material/History";
 import AverageIcon from "@mui/icons-material/Timeline";
@@ -33,7 +32,7 @@ import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { CampaignBriefing } from "@/components/Gamification/CampaignBriefing";
 import { BossBattleCard } from "@/components/Gamification/BossBattleCard";
 import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
-import { SkillTree } from "@/components/Gamification/SkillTree";
+import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 import {
   useXP,
   useProgress,
@@ -381,19 +380,8 @@ function Index({ signOut, user }) {
             </Box>
           )}
 
-          {/* Skill Tree — full width */}
-          {skillNodes?.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                {t("index.learningPathway", "Learning Pathway")}
-              </Typography>
-              <SkillTree
-                skills={skillNodes}
-                onSkillClick={(skillId) => router.push("/skills")}
-                height={450}
-              />
-            </Box>
-          )}
+          {/* Skill Tree Popup Button */}
+          <SkillTreePopupButton sectionId={mySections?.[0]?.id} />
 
           {/* Badges */}
           {earnedBadges?.length > 0 && (
@@ -981,13 +969,11 @@ function Index({ signOut, user }) {
 
 function WrappedPage({ signOut, user, ...args }) {
   return (
-    <MyAuth>
-      <GamificationProviderWrapper>
-        <FilesProvider>
-          <Index signOut={signOut} user={user} {...args} />
-        </FilesProvider>
-      </GamificationProviderWrapper>
-    </MyAuth>
+    <GamificationProviderWrapper>
+      <FilesProvider>
+        <Index signOut={signOut} user={user} {...args} />
+      </FilesProvider>
+    </GamificationProviderWrapper>
   );
 }
 

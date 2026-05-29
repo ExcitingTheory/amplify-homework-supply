@@ -929,6 +929,7 @@ export function GamificationProvider({
           name: g.name,
           cohortId: g.cohortId,
           totalXP: g.totalXP || 0,
+          crestSvg: g.crestSvg || null,
           description: g.description,
           memberCount: memberCountMap.get(g.id) || 0,
           members: (g.members || []).map((m: any) => ({

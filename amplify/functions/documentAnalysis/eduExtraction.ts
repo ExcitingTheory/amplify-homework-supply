@@ -3,6 +3,7 @@
  */
 import type { FormatExtractionResult } from "./formatRegistry.js";
 import { getS3Object } from "./textExtraction.js";
+import { convert } from "html-to-text";
 
 /**
  * Extract content from an IMS Common Cartridge (.imscc) package
@@ -17,7 +18,6 @@ export async function extractIMSCC(
   // @ts-ignore
   const JSZip = (await import("jszip")).default;
   const { XMLParser } = await import("fast-xml-parser");
-  const { convert } = await import("html-to-text");
 
   const zip = await JSZip.loadAsync(buffer);
   const parser = new XMLParser({
@@ -183,7 +183,6 @@ export async function extractSCORM(
   console.log("[extractSCORM] Extracting SCORM content...");
 
   const { XMLParser } = await import("fast-xml-parser");
-  const { convert } = await import("html-to-text");
 
   const parser = new XMLParser({
     ignoreAttributes: false,

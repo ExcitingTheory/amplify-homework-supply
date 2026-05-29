@@ -23,7 +23,6 @@ import Skeleton from "@mui/material/Skeleton";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CancelIcon from "@mui/icons-material/Cancel";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { listJobs, retryJob, cancelJob, type JobRecord } from "../../../actions/jobs";
 
@@ -457,10 +456,8 @@ function JobsDashboard() {
 
 export default function AdminJobsPage() {
   return (
-    <MyAuth>
       <AdminRouteGuard>
         <JobsDashboard />
       </AdminRouteGuard>
-    </MyAuth>
   );
 }

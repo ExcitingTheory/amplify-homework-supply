@@ -747,7 +747,7 @@ export function ArmorEditor({
             <Box
               dangerouslySetInnerHTML={{ __html: previewSvg }}
               role="img"
-              aria-label={t('armorEditor.shieldPreview', 'Shield preview')}
+              aria-label={t('armorEditor.shieldPreview')}
             />
           </Box>
 
@@ -822,7 +822,7 @@ export function ArmorEditor({
                 <Typography variant="caption" color="text.secondary">Charges</Typography>
                 {charges.length > 0 && charges.length < 5 && (
                   <Tooltip title="Add another charge">
-                    <IconButton size="small" onClick={addCharge} aria-label={t('armorEditor.addCharge', 'Add charge')}>
+                    <IconButton size="small" onClick={addCharge} aria-label={t('armorEditor.addCharge')}>
                       <AddCircleOutlineIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -915,7 +915,7 @@ export function ArmorEditor({
                       ]}
                       size="small"
                       sx={{ mt: 1.5 }}
-                      aria-label={t('armorEditor.chargeSize', 'Charge size')}
+                      aria-label={t('armorEditor.chargeSize')}
                     />
                   </Box>
                   <Box>
@@ -934,7 +934,7 @@ export function ArmorEditor({
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => `${v}°`}
                       sx={{ mt: 1.5 }}
-                      aria-label={t('armorEditor.chargeRotation', 'Charge rotation')}
+                      aria-label={t('armorEditor.chargeRotation')}
                     />
                   </Box>
                 </Stack>
@@ -949,7 +949,7 @@ export function ArmorEditor({
                       step={1}
                       size="small"
                       valueLabelDisplay="auto"
-                      aria-label={t('armorEditor.xOffset', 'X offset')}
+                      aria-label={t('armorEditor.xOffset')}
                     />
                   </Box>
                   <Box sx={{ flex: 1 }}>
@@ -962,7 +962,7 @@ export function ArmorEditor({
                       step={1}
                       size="small"
                       valueLabelDisplay="auto"
-                      aria-label={t('armorEditor.yOffset', 'Y offset')}
+                      aria-label={t('armorEditor.yOffset')}
                     />
                   </Box>
                 </Stack>

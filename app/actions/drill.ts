@@ -43,7 +43,7 @@ export async function generatePracticeDrill(params: {
   };
 }): Promise<{ blocks: PracticeDrillBlock[] }> {
   const openai = getOpenAI();
-  const client = getServerClient();
+  const client = getServerClient() as any;
 
   // Fetch unit data
   const { data: unit } = await client.models.Unit.get({ id: params.unitId });
@@ -66,9 +66,10 @@ export async function generatePracticeDrill(params: {
       );
       const words = wordResults
         .filter(
-          (r): r is PromiseFulfilledResult<any> => r.status === "fulfilled",
+          (r: PromiseSettledResult<any>): r is PromiseFulfilledResult<any> =>
+            r.status === "fulfilled",
         )
-        .map((r) => r.value);
+        .map((r: PromiseFulfilledResult<any>) => r.value);
       const validWords = words.filter(Boolean);
       if (validWords.length) {
         sources.push(
@@ -101,9 +102,10 @@ export async function generatePracticeDrill(params: {
       );
       const questions = questionResults
         .filter(
-          (r): r is PromiseFulfilledResult<any> => r.status === "fulfilled",
+          (r: PromiseSettledResult<any>): r is PromiseFulfilledResult<any> =>
+            r.status === "fulfilled",
         )
-        .map((r) => r.value);
+        .map((r: PromiseFulfilledResult<any>) => r.value);
       const validQuestions = questions.filter(Boolean);
       if (validQuestions.length) {
         sources.push(

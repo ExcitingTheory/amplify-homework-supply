@@ -21,7 +21,6 @@ import Typography from "@mui/material/Typography";
 import { Workbook } from "@/components/Editor3";
 import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
 import { SecretLinkIcon } from "@/components/Gamification/SecretLinkIcon";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
 import { UnitProvider } from "@/context/unitContext";
@@ -237,7 +236,6 @@ export default function WorkbookClient({ ssrHtml }: WorkbookClientProps) {
   const { id } = useParams() as { id: string };
 
   return (
-    <MyAuth>
       <SectionProvider unitId={id}>
         <FilesProvider>
           <DictionaryProvider>
@@ -248,6 +246,5 @@ export default function WorkbookClient({ ssrHtml }: WorkbookClientProps) {
         </FilesProvider>
         <CollaborativeChatWrapper />
       </SectionProvider>
-    </MyAuth>
   );
 }

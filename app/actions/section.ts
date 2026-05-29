@@ -205,7 +205,7 @@ export async function joinPeerReview(
 
   try {
     const { data, errors } = await (client as any).mutations.joinPeerReview({
-      roomCode: code.trim(),
+      code: code.trim(),
     });
 
     if (errors?.length) {

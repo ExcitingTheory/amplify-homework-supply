@@ -2,7 +2,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { InstructorGamificationPanel } from "@/components/Gamification/InstructorGamificationPanel";
 import {
@@ -828,7 +827,6 @@ function GamificationAdmin() {
 
 export default function WrappedPage() {
   return (
-    <MyAuth>
       <AdminRouteGuard>
         <SectionProvider>
           <GamificationProviderWrapper>
@@ -836,6 +834,5 @@ export default function WrappedPage() {
           </GamificationProviderWrapper>
         </SectionProvider>
       </AdminRouteGuard>
-    </MyAuth>
   );
 }

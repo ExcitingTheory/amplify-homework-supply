@@ -160,7 +160,7 @@ export default function ToolBarRoPlugin({
 }) {
   const t = useTranslations("workbook");
   const { unit, finishedQuestions, rubric } = React.useContext(UnitContext);
-  const { toolbarPortalRef, appBarHeight } = useAppShell();
+  const { toolbarChildrenPortalRef, appBarHeight } = useAppShell();
   const { xpLogs } = useXP();
   // Derive current streak from XP logs (latest streak entry)
   const currentStreak = React.useMemo(() => {
@@ -196,23 +196,15 @@ export default function ToolBarRoPlugin({
           min-width: 1rem;
         }
       `}</style>
-      {toolbarPortalRef?.current &&
+      {toolbarChildrenPortalRef?.current &&
         createPortal(
           <Box
             ref={firstAppBarRef}
             sx={{
-              flexShrink: 0,
+              flexGrow: 1,
               overflowX: "hidden",
-              overflowY: "visible",
-              boxShadow: "none",
-              zIndex: (theme) => theme.zIndex.drawer + 2,
               transition: "all 0.3s ease",
-              width: "100%",
-              backgroundColor: "custom.glassNavbar",
-              backdropFilter: "blur(7px)",
-              borderBottom: 1,
-              borderColor: "divider",
-              p: 1,
+              display: "contents",
             }}
           >
             <Box
@@ -336,7 +328,7 @@ export default function ToolBarRoPlugin({
               </Box>
             </Box>
           </Box>,
-          toolbarPortalRef.current,
+          toolbarChildrenPortalRef.current,
         )}
     </>
   );

@@ -16,6 +16,7 @@ export const AppShellContext = React.createContext({
   setToolbarContent: undefined,
   appBarHeight: 48,
   toolbarPortalRef: { current: null },
+  toolbarChildrenPortalRef: { current: null },
 });
 
 export function useAppShell() {

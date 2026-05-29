@@ -48,10 +48,14 @@ const mockModels: Record<string, any> = {
   UnitQuestion: { list: mockList },
   XPTransaction: { create: mockCreate, list: mockList },
   PersonalBest: { create: mockCreate, get: mockGet, update: mockUpdate },
-  EasterEgg: { create: mockCreate, get: mockGet },
+  EasterEgg: { create: mockCreate, get: mockGet, list: mockList },
   SkillTree: { create: mockCreate, get: mockGet, list: mockList },
-  Skill: { create: mockCreate, list: mockList },
+  Skill: { create: mockCreate, list: mockList, delete: mockDelete, update: mockUpdate, get: mockGet },
   LearningMemory: { create: mockCreate, get: mockGet, update: mockUpdate },
+  StudentProfile: { create: mockCreate, list: mockList, update: mockUpdate, get: mockGet },
+  StudentXPLog: { create: mockCreate, list: mockList },
+  Squad: { list: mockList, update: mockUpdate },
+  Notification: { create: mockCreate },
 };
 const mockMutations: Record<string, any> = {
   addSelfToSection: vi.fn(),
@@ -544,9 +548,9 @@ describe("Server Actions Integration Tests", () => {
             "The process plants use to convert light energy into chemical energy",
         });
 
-        expect(result.correct).toBe(true);
+        expect(result.answer).toBe(true);
         expect(result.score).toBe(95);
-        expect(result.feedback).toBe("Excellent definition!");
+        expect(result.reason).toBe("Excellent definition!");
 
         // Verify generateText was called with correct params
         expect(mockGenerateText).toHaveBeenCalledWith(
@@ -568,9 +572,9 @@ describe("Server Actions Integration Tests", () => {
           expectedDefinition: "expected",
         });
 
-        expect(result.correct).toBe(false);
+        expect(result.answer).toBe(false);
         expect(result.score).toBe(0);
-        expect(result.feedback).toContain("Unable to grade");
+        expect(result.reason).toContain("Unable to grade");
       });
     });
 
@@ -591,9 +595,9 @@ describe("Server Actions Integration Tests", () => {
             "The water cycle is the continuous movement of water through evaporation, condensation, and precipitation",
         });
 
-        expect(result.correct).toBe(true);
+        expect(result.answer).toBe(true);
         expect(result.score).toBe(85);
-        expect(result.feedback).toContain("Good");
+        expect(result.reason).toContain("Good");
       });
     });
 
@@ -616,7 +620,7 @@ describe("Server Actions Integration Tests", () => {
         });
 
         expect(result.description).toBe("A diagram showing the water cycle");
-        expect(result.correct).toBe(true);
+        expect(result.answer).toBe(true);
         expect(result.score).toBe(90);
       });
     });
@@ -633,23 +637,34 @@ describe("Server Actions Integration Tests", () => {
           ok: true,
           json: () => Promise.resolve({ text: "Konnichiwa genki desu ka" }),
         });
-        // Third: grading via generateText
+        // Third fetch: moderation API (piggyback)
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              results: [
+                { flagged: false, categories: {}, category_scores: {} },
+              ],
+              model: "omni-moderation-latest",
+            }),
+        });
+        // grading via generateText
         mockGenerateText.mockResolvedValueOnce({
           text: JSON.stringify({
-            transcript: "Konnichiwa genki desu ka",
-            correct: true,
+            answer: true,
+            reason: "Good pronunciation",
             score: 90,
-            feedback: "Good pronunciation",
           }),
         });
 
         const result = await transcribeAudio({
-          audioUrl: "https://example.com/recording.mp3",
+          audioUrl:
+            "https://test-bucket.s3.us-east-1.amazonaws.com/public/audio/recording.mp3",
           expectedAnswer: "konnichiwa genki desu ka",
         });
 
         expect(result.transcript).toBe("Konnichiwa genki desu ka");
-        expect(result.correct).toBe(true);
+        expect(result.answer).toBe(true);
         expect(result.score).toBe(90);
       });
 
@@ -664,11 +679,12 @@ describe("Server Actions Integration Tests", () => {
         });
 
         const result = await transcribeAudio({
-          audioUrl: "https://example.com/audio.mp3",
+          audioUrl:
+            "https://test-bucket.s3.us-east-1.amazonaws.com/public/audio/test.mp3",
         });
 
         expect(result.transcript).toBe("Hello world");
-        expect(result.correct).toBe(true);
+        expect(result.answer).toBe(true);
         expect(result.score).toBe(100);
       });
     });
@@ -845,7 +861,7 @@ describe("Server Actions Integration Tests", () => {
         expect(result.success).toBe(true);
         expect(result.sectionName).toBe("Japanese 101");
         expect(mockMutations.addSelfToSection).toHaveBeenCalledWith(
-          expect.objectContaining({ sectionCode: "JP101" }),
+          expect.objectContaining({ code: "JP101" }),
         );
       });
 
@@ -888,44 +904,34 @@ describe("Server Actions Integration Tests", () => {
   });
 
   // ==========================================================================
-  // SA8. Gamification (gamification.ts)
+  // SA8. Gamification (gamification.ts) — engine calls via client.models.*
   // ==========================================================================
   describe("SA8. Gamification", () => {
-    describe("recordGradeCompletion", () => {
-      it("awards XP and checks personal best", async () => {
-        // 1. awardXP mutation
-        mockMutations.awardXP.mockResolvedValueOnce({
-          data: JSON.stringify({
-            alreadyAwarded: false,
-            xpAmount: 50,
-            totalXP: 500,
-          }),
-          errors: null,
-        });
-        // 2. checkBadges, updateStreak, updateGuildXP (parallel via allSettled)
-        mockMutations.checkBadges.mockResolvedValueOnce({
-          data: null,
-          errors: null,
-        });
-        mockMutations.updateStreak.mockResolvedValueOnce({
-          data: null,
-          errors: null,
-        });
-        mockMutations.updateGuildXP.mockResolvedValueOnce({
-          data: null,
-          errors: null,
-        });
-        // 3. checkPersonalBest
-        mockMutations.checkPersonalBest.mockResolvedValueOnce({
-          data: JSON.stringify({
-            isNewBest: true,
-            firstAttempt: true,
-            bestScore: 85,
-            previousBest: null,
-          }),
-          errors: null,
-        });
+    beforeEach(() => {
+      // Default: all model operations succeed with sensible empty/stub values.
+      // Individual tests override with mockResolvedValueOnce as needed.
+      mockList.mockResolvedValue({ data: [] });
+      mockGet.mockResolvedValue({ data: null });
+      mockCreate.mockResolvedValue({
+        data: {
+          id: "mock-id",
+          studentId: "student-1",
+          totalXP: 0,
+          level: 1,
+          badges: [],
+          personalBests: [],
+          activeDebuffs: null,
+          currentStreak: 0,
+          longestStreak: 0,
+          freezesRemaining: 0,
+        },
+      });
+      mockUpdate.mockResolvedValue({ data: { id: "mock-id" } });
+      mockDelete.mockResolvedValue({ data: {} });
+    });
 
+    describe("recordGradeCompletion", () => {
+      it("creates an XP log and returns xp + personalBest result", async () => {
         const result = await recordGradeCompletion(
           "student-1",
           "unit-1",
@@ -934,64 +940,104 @@ describe("Server Actions Integration Tests", () => {
         );
 
         expect(result).toBeDefined();
-        expect(result.xp).toMatchObject({
-          alreadyAwarded: false,
-          xpAmount: 50,
-          totalXP: 500,
-        });
-        expect(result.personalBest).toMatchObject({
-          isNewBest: true,
-          firstAttempt: true,
-          bestScore: 85,
-        });
-        expect(result.easterEggs).toBeNull(); // no submissionText
-        expect(mockMutations.awardXP).toHaveBeenCalledWith(
+
+        // engineAwardXP must have created a StudentXPLog with the right fields
+        expect(mockCreate).toHaveBeenCalledWith(
           expect.objectContaining({
             studentId: "student-1",
-            unitID: "unit-1",
+            reason: "HOMEWORK_SUBMITTED",
             accuracy: 85,
           }),
         );
+
+        // XP was awarded (no existing logs → not a duplicate)
+        expect(result.xp).not.toBeNull();
+        expect(result.xp?.alreadyAwarded).toBe(false);
+        expect(result.xp?.xpAmount).toBeGreaterThan(0);
+
+        // Personal best recorded on first attempt (no prior profile data)
+        expect(result.personalBest?.firstAttempt).toBe(true);
+        expect(result.personalBest?.isNewBest).toBe(true);
+        expect(result.personalBest?.bestScore).toBe(85);
+
+        // No easter eggs without submissionText
+        expect(result.easterEggs).toBeNull();
+      });
+
+      it("returns alreadyAwarded:true when referenceId was previously logged", async () => {
+        const existingLog = {
+          id: "log-1",
+          studentId: "student-1",
+          reason: "HOMEWORK_SUBMITTED",
+          referenceId: "grade-ref-1",
+          xpAmount: 50,
+          createdAt: new Date().toISOString(),
+        };
+        // All list calls return the existing log (duplicate detected in engineAwardXP)
+        mockList.mockResolvedValue({ data: [existingLog] });
+
+        const result = await recordGradeCompletion(
+          "student-1",
+          "unit-1",
+          85,
+          "grade-ref-1",
+        );
+
+        expect(result.xp?.alreadyAwarded).toBe(true);
+        expect(result.xp?.xpAmount).toBe(0);
       });
     });
 
     describe("generateSkillTreeFromUnit", () => {
-      it("generates a skill tree from unit content", async () => {
-        // This is a pure mutation pass-through
-        mockMutations.generateSkillTree.mockResolvedValueOnce({
-          data: JSON.stringify({
-            generated: true,
-            unitID: "unit-1",
-            skillCount: 3,
+      it("generates skills from unit content via AI", async () => {
+        // Unit.get returns a unit
+        mockGet.mockResolvedValueOnce({
+          data: { id: "unit-1", name: "Japanese Verbs", data: null },
+        });
+
+        // UnitWord.list — no vocabulary for simplicity
+        mockList.mockResolvedValueOnce({ data: [] });
+
+        // UnitQuestion.list — no questions
+        mockList.mockResolvedValueOnce({ data: [] });
+
+        // Skill.list — no existing skills to delete
+        mockList.mockResolvedValueOnce({ data: [] });
+
+        // AI generates skill definitions
+        mockGenerateText.mockResolvedValueOnce({
+          text: JSON.stringify({
             skills: [
               {
-                id: "skill-1",
                 title: "Basic Verbs",
                 description: "Master basic Japanese verbs",
-                xpReward: 100,
                 prerequisites: [],
+                xpReward: 100,
               },
             ],
           }),
-          errors: null,
+        });
+
+        // Skill.create for the new skill
+        mockCreate.mockResolvedValueOnce({
+          data: { id: "skill-db-1", title: "Basic Verbs", _version: 1 },
         });
 
         const result = await generateSkillTreeFromUnit("unit-1");
 
         expect(result).toBeDefined();
         expect(result?.generated).toBe(true);
-        expect(result?.skillCount).toBe(3);
-        expect(mockMutations.generateSkillTree).toHaveBeenCalledWith(
-          expect.objectContaining({ unitID: "unit-1" }),
+        expect(result?.skillCount).toBe(1);
+        expect(result?.skills?.[0].title).toBe("Basic Verbs");
+
+        // AI was invoked
+        expect(mockGenerateText).toHaveBeenCalledWith(
+          expect.objectContaining({ model: "mock-model" }),
         );
       });
 
-      it("returns null on error", async () => {
-        mockMutations.generateSkillTree.mockResolvedValueOnce({
-          data: null,
-          errors: [{ message: "Unit not found" }],
-        });
-
+      it("returns null when unit does not exist", async () => {
+        mockGet.mockResolvedValueOnce({ data: null });
         const result = await generateSkillTreeFromUnit("nonexistent");
         expect(result).toBeNull();
       });

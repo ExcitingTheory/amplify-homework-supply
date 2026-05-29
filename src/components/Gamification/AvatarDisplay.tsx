@@ -11,6 +11,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
+import Avatar from '@mui/material/Avatar'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import TravelExploreIcon from '@mui/icons-material/TravelExplore'
@@ -99,6 +100,30 @@ export interface AvatarDisplayProps {
   label?: string
   /** Whether the avatar is locked */
   locked?: boolean
+  /** Optional guild/squad crest SVG markup */
+  guildCrestSvg?: string | null
+  /** Guild/squad name used for fallback initials + tooltip */
+  guildName?: string
+  /** Guild/squad id used for deterministic fallback color */
+  guildId?: string
+}
+
+function hashToColor(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    hash |= 0
+  }
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 60%, 45%)`
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join('')
 }
 
 // ============================================================================
@@ -189,11 +214,18 @@ export function AvatarDisplay({
   onClick,
   label,
   locked = false,
+  guildCrestSvg,
+  guildName,
+  guildId,
 }: AvatarDisplayProps) {
   const showGlow = glowRing && isGlowActive(glowRing)
   const effectGlow = getEffectGlowConfig(borderEffect, borderColor, borderColorSecondary)
   const activeGlow = showGlow ? glowRing! : effectGlow
   const borderStyles = activeGlow ? {} : BORDER_CONFIGS[borderEffect](borderColor, borderColorSecondary)
+  const hasGuildBadge = Boolean(guildCrestSvg || guildName)
+  const guildBadgeSize = Math.max(18, Math.round(size * 0.3))
+  const guildBgColor = hashToColor(guildId || guildName || seed)
+  const guildInitials = getInitials(guildName || 'Guild')
 
   // Total width including border effect space
   const containerSize = size + 16
@@ -233,6 +265,54 @@ export function AvatarDisplay({
             {streak}
           </Typography>
         </Box>
+      )}
+
+      {/* Guild crest — 8 o'clock position */}
+      {hasGuildBadge && (
+        <Tooltip title={guildName ? `Guild: ${guildName}` : 'Guild crest'} arrow>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '60%',
+              left: -20,
+              zIndex: 3,
+              bgcolor: 'background.paper',
+              borderRadius: '50%',
+              boxShadow: 1,
+              p: '2px',
+              display: 'inline-flex',
+            }}
+          >
+            {guildCrestSvg ? (
+              <Avatar
+                sx={{
+                  width: guildBadgeSize,
+                  height: guildBadgeSize,
+                  bgcolor: 'transparent',
+                  '& svg': { width: '100%', height: '100%' },
+                }}
+              >
+                <Box
+                  component="span"
+                  dangerouslySetInnerHTML={{ __html: guildCrestSvg }}
+                  sx={{ display: 'flex', width: '100%', height: '100%' }}
+                />
+              </Avatar>
+            ) : (
+              <Avatar
+                sx={{
+                  width: guildBadgeSize,
+                  height: guildBadgeSize,
+                  bgcolor: guildBgColor,
+                  fontSize: Math.max(10, Math.round(guildBadgeSize * 0.4)),
+                  fontWeight: 700,
+                }}
+              >
+                {guildInitials}
+              </Avatar>
+            )}
+          </Box>
+        </Tooltip>
       )}
 
       {/* Level indicator — 2 o'clock position */}

@@ -1,7 +1,6 @@
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { Box, Card, Typography } from "@mui/material";
 import { getTranslations } from "next-intl/server";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { StreakCalendar } from "@/components/Gamification/StreakCalendar";
@@ -121,7 +120,6 @@ export default async function ProfilePage({ params }: Props) {
   const isOwnProfile = false;
 
   return (
-    <MyAuth>
       <GamificationProviderWrapper cohortId={undefined as any}>
         <Box
           sx={{
@@ -164,22 +162,20 @@ export default async function ProfilePage({ params }: Props) {
               </Box>
             </Card>
 
-            {/* Activity Calendar Card (square) */}
+            {/* Activity Calendar Card */}
             <Card
               sx={{
-                padding: "2rem 1rem",
-                aspectRatio: "1",
+                padding: "2rem",
                 display: "flex",
                 flexDirection: "column",
-                overflow: "hidden",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Typography variant="h5" gutterBottom>
                 {t("profile.activity" as any)}
               </Typography>
-              <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <StreakCalendar activeDays={new Set(activeDays)} />
-              </Box>
+              <StreakCalendar activeDays={new Set(activeDays)} />
             </Card>
           </Box>
 
@@ -218,6 +214,5 @@ export default async function ProfilePage({ params }: Props) {
           <NailedItSection profileUsername={routeUsername} />
         </Box>
       </GamificationProviderWrapper>
-    </MyAuth>
   );
 }

@@ -29,7 +29,7 @@ export interface YjsCollaborationPluginProps {
   username: string;
   color?: string;
   shouldBootstrap?: boolean;
-  cursorsContainerRef?: React.RefObject<HTMLElement>;
+  cursorsContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -86,7 +86,7 @@ export default function YjsCollaborationPlugin({
         shouldBootstrap={shouldBootstrap}
         username={username}
         cursorColor={color}
-        cursorsContainerRef={cursorsContainerRef}
+        cursorsContainerRef={cursorsContainerRef as React.RefObject<HTMLElement>}
         awarenessData={{ user: { name: username, color } }}
       />
     </LexicalCollaboration>

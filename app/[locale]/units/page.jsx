@@ -14,7 +14,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import AppShell from "@/components/AppShell";
 
-import MyAuth from "@/components/AmplifyAuthenticator";
 import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -871,11 +870,9 @@ function Units() {
 
 function WrappedPage() {
   return (
-    <MyAuth>
-      <GamificationProviderWrapper>
-        <Units />
-      </GamificationProviderWrapper>
-    </MyAuth>
+    <GamificationProviderWrapper>
+      <Units />
+    </GamificationProviderWrapper>
   );
 }
 

@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
-import MyAuth from "@/components/AmplifyAuthenticator";
 import UnitContext, { UnitProvider } from "@/context/unitContext";
 import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
@@ -12,7 +11,6 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
-import AppSkeleton from "@/components/AppSkeleton";
 import { Workbook } from "@/components/Editor3";
 import { PeerReviewChat } from "@/components/PeerReview";
 import { PeerReviewFeedbackPrompt } from "@/components/PeerReview/PeerReviewFeedbackPrompt";
@@ -78,7 +76,7 @@ function PeerReviewContent() {
   );
 
   if (loading) {
-    return <AppSkeleton variant="detail" />;
+    return null;
   }
 
   if (error) {
@@ -265,14 +263,12 @@ function PeerReviewContent() {
  */
 export default function PeerReviewPage() {
   return (
-    <MyAuth>
-      <UnitProvider>
-        <FilesProvider>
-          <DictionaryProvider>
-            <PeerReviewContent />
-          </DictionaryProvider>
-        </FilesProvider>
-      </UnitProvider>
-    </MyAuth>
+    <UnitProvider>
+      <FilesProvider>
+        <DictionaryProvider>
+          <PeerReviewContent />
+        </DictionaryProvider>
+      </FilesProvider>
+    </UnitProvider>
   );
 }

@@ -37,7 +37,7 @@ export default function NotificationInvitations({
 
   const invitations = useMemo(() => {
     return notifications.filter(
-      (n) => types.includes(n.type) && !n.interacted,
+      (n) => typeof n.type === "string" && types.includes(n.type) && !n.interacted,
     );
   }, [notifications, types]);
 

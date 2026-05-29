@@ -161,6 +161,7 @@ export function Workbook(): JSX.Element {
               sx={{
                 display: 'flex',
                 overflow: 'hidden',
+                height: `calc(100vh - ${appBarHeight}px)`,
               }}
             >
               <ToolBarRoPlugin
@@ -172,17 +173,14 @@ export function Workbook(): JSX.Element {
               <Drawer
                 ref={drawerRef}
                 drawerwidth={currentDrawerWidth}
-                sx={{ height: '100%' }}
+                sx={{
+                  height: '100%',
+                  flexShrink: 0,
+                  position: 'relative',
+                }}
                 variant="permanent"
                 open={openTab}
               >
-                <Box
-                  sx={{
-                    minHeight: 'var(--app-bar-height, 11rem)',
-                    flexShrink: 0,
-                    transition: 'min-height 0.3s ease',
-                  }}
-                />
                 <VerticalTabsRo
                   setOpen={setOpenTab}
                   open={openTab}
@@ -200,18 +198,14 @@ export function Workbook(): JSX.Element {
                   margin: 0,
                   padding: 0,
                   boxSizing: 'border-box',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100vh',
+                  transition: (theme) =>
+                    theme.transitions.create('margin', {
+                      easing: theme.transitions.easing.sharp,
+                      duration: theme.transitions.duration.leavingScreen,
+                    }),
+                  marginLeft: 0,
                 }}
               >
-                <Box
-                  sx={{
-                    minHeight: 'var(--app-bar-height, 11rem)',
-                    flexShrink: 0,
-                    transition: 'min-height 0.3s ease',
-                  }}
-                />
                 <RichTextPlugin
                   contentEditable={
                     <div
@@ -223,7 +217,7 @@ export function Workbook(): JSX.Element {
                         margin: '0',
                         padding: '0',
                         paddingLeft: '1.5rem',
-                        flexGrow: 1,
+                        height: '100%',
                         overflowY: 'auto',
                         width: '100%',
                         boxSizing: 'border-box',

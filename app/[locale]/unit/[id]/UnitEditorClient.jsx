@@ -4,9 +4,6 @@ import PermissionErrorOverlay from "@/components/PermissionErrorOverlay";
 import React from "react";
 import { useTranslations } from "next-intl";
 
-import MyAuth from "@/components/AmplifyAuthenticator";
-import AppSkeleton from "@/components/AppSkeleton";
-
 import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
 import { UnitProvider } from "@/context/unitContext";
@@ -30,7 +27,7 @@ function UnitPageContent() {
 
   // Don't render the editor until unit data is loaded — prevents
   // saveEditorContent firing before editorStateRef is populated
-  if (!unit?.id) return <AppSkeleton variant="detail" />;
+  if (!unit?.id) return null;
 
   return (
     <>
@@ -70,11 +67,7 @@ function UnitPage() {
 }
 
 function WrappedPage() {
-  return (
-    <MyAuth>
-      <UnitPage />
-    </MyAuth>
-  );
+  return <UnitPage />;
 }
 
 export default WrappedPage;

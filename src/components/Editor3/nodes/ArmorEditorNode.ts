@@ -3,6 +3,7 @@
  * No React dependencies. decorate() returns null (only used client-side).
  */
 import { DecoratorNode } from "lexical";
+import type { DOMConversionMap, DOMConversionOutput } from "lexical";
 
 /**
  * Configuration type for the ArmorEditor block.
@@ -14,7 +15,9 @@ export interface ArmorEditorConfig {
   [key: string]: unknown;
 }
 
-function convertArmorEditorElement(domNode: HTMLElement) {
+function convertArmorEditorElement(
+  domNode: HTMLElement,
+): DOMConversionOutput | null {
   const data = domNode.getAttribute("data-lexical-armor-editor");
   if (data) {
     try {
@@ -72,15 +75,7 @@ export class ArmorEditorNode extends DecoratorNode<null> {
     return div;
   }
 
-  static importDOM(): Record<
-    string,
-    (
-      domNode: HTMLElement,
-    ) => {
-      conversion: typeof convertArmorEditorElement;
-      priority: number;
-    } | null
-  > {
+  static importDOM(): DOMConversionMap | null {
     return {
       div: (domNode: HTMLElement) => {
         if (!domNode.hasAttribute("data-lexical-armor-editor")) {
@@ -88,7 +83,7 @@ export class ArmorEditorNode extends DecoratorNode<null> {
         }
         return {
           conversion: convertArmorEditorElement,
-          priority: 1,
+          priority: 1 as const,
         };
       },
     };

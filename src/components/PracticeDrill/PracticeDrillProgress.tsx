@@ -73,7 +73,7 @@ export default function PracticeDrillProgress({
         </Tooltip>
 
         {streakCount != null && streakCount > 0 && (
-          <Tooltip title={t('practiceDrill.progress.streakTooltip', '{{count}}-day streak maintained', { count: streakCount })}>
+          <Tooltip title={t('practiceDrill.progress.streakTooltip', { count: streakCount })}>
             <Chip
               size="small"
               icon={<BoltIcon />}

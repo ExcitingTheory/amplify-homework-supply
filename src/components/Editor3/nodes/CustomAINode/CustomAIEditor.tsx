@@ -85,13 +85,14 @@ export default React.memo(function CustomAIEditor({
   >(allowedInput?.length > 0 ? allowedInput : ["text"]);
 
   const { questionBank } = React.useContext(DictionaryContext);
+  const questionBankMap = (questionBank || {}) as Record<string, any>;
 
   // Build rows from question IDs
   const rows = React.useMemo(() => {
-    if (!questionIDs) return [];
+    if (!questionIDs) return [] as { id: string; prompt: string; answer: string }[];
     return questionIDs
       .map((id) => {
-        const q = questionBank[id];
+        const q = questionBankMap[id];
         if (!q) return null;
         return {
           id: q.id,
@@ -99,8 +100,10 @@ export default React.memo(function CustomAIEditor({
           answer: q.answer || "",
         };
       })
-      .filter(Boolean);
-  }, [questionIDs, questionBank]);
+      .filter(
+        (row): row is { id: string; prompt: string; answer: string } => row != null,
+      );
+  }, [questionIDs, questionBankMap]);
 
   const columns = React.useMemo(
     () => [
@@ -128,13 +131,13 @@ export default React.memo(function CustomAIEditor({
   // Available questions for the autocomplete
   const availableQuestions = React.useMemo(() => {
     const usedIds = new Set(questionIDs || []);
-    return Object.values(questionBank)
+    return Object.values(questionBankMap)
       .filter((q: any) => q && !usedIds.has(q.id))
       .map((q: any) => ({
         id: q.id,
         prompt: q.prompt || q.question || `Question ${q.id}`,
       }));
-  }, [questionBank, questionIDs]);
+  }, [questionBankMap, questionIDs]);
 
   const addQuestion = React.useCallback(
     (questionId: string) => {

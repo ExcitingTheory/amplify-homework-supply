@@ -7,11 +7,9 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import AppSkeleton from "@/components/AppSkeleton";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import AddIcon from "@mui/icons-material/Add";
 import MainToolbar from "@/components/MainToolbar";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
 import { useSquad } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
@@ -77,7 +75,7 @@ function SquadsPage() {
   }, [router, selectedSection]);
 
   if (isLoading) {
-    return <AppSkeleton variant="cards" />;
+    return null;
   }
 
   return (
@@ -159,13 +157,11 @@ function SquadsPage() {
 
 export default function WrappedPage() {
   return (
-    <MyAuth>
-      <SectionProvider>
-        <GamificationProviderWrapper>
-          <SquadsPage />
-        </GamificationProviderWrapper>
-        <CollaborativeChatWrapper roomType="squad" />
-      </SectionProvider>
-    </MyAuth>
+    <SectionProvider>
+      <GamificationProviderWrapper>
+        <SquadsPage />
+      </GamificationProviderWrapper>
+      <CollaborativeChatWrapper roomType="squad" />
+    </SectionProvider>
   );
 }

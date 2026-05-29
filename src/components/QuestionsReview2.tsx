@@ -59,7 +59,7 @@ import {
     importReviewReducer,
     createInitialImportReviewState,
 } from './importReviewReducer';
-import type { ImportReviewAction } from './importReviewReducer';
+import type { ImportReviewAction, ImportResult } from './importReviewReducer';
 
 export interface QuestionItem {
     prompt: string;
@@ -604,7 +604,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             (current: number, total: number, message: string) => {
                 dispatch({ type: 'IMPORT_PROGRESS', progress: { current, total, message } });
             }
-        );
+        ) as ImportResult;
         
         if (result.success) {
             dispatch({ type: 'IMPORT_SUCCESS', result });

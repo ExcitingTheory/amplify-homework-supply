@@ -10,9 +10,19 @@
 
 import React from "react";
 import Badge from "@mui/material/Badge";
+import type { BadgeProps } from "@mui/material/Badge";
 import { useUnseenCount } from "../context/notificationContext";
 
-export default function NotificationBadge({ category, children, ...badgeProps }) {
+interface NotificationBadgeProps extends Omit<BadgeProps, "badgeContent"> {
+  category?: string;
+  children: React.ReactNode;
+}
+
+export default function NotificationBadge({
+  category,
+  children,
+  ...badgeProps
+}: NotificationBadgeProps) {
   const count = useUnseenCount(category);
 
   if (count === 0) return <>{children}</>;

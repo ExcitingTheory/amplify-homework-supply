@@ -107,7 +107,7 @@ export default function JoinPracticeDialog({
       const maxParticipants = activeSession.maxParticipants || 10
 
       if (participantIds.length >= maxParticipants) {
-        setError(t('practiceDrill.join.full', 'This session is full ({{max}} participants max)', {
+        setError(t('practiceDrill.join.full', {
           max: maxParticipants,
         }))
         setLoading(false)

@@ -29,9 +29,7 @@ import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhance
 
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
 
-const SketchPad = lazy(
-  async () => (await import("../../components/SketchPad")).default,
-);
+const SketchPad = lazy(() => import("../../components/SketchPad"));
 
 interface GradingResponse {
   correct: boolean;
@@ -111,6 +109,8 @@ export default function CustomAIComponent({
 
   const { grade, saveGrade, workbook } = useContext(UnitContext);
   const { questionBank } = useContext(DictionaryContext);
+  const questionBankMap = (questionBank || {}) as Record<string, any>;
+  const workbookApi = workbook as any;
 
   const gradeId = grade?.id;
   const inProgress = grade?.data?.[nodeKey];
@@ -187,7 +187,7 @@ export default function CustomAIComponent({
   };
 
   const handleTextSubmit = async (questionID: string, text: string) => {
-    const question = questionBank[questionID];
+    const question = questionBankMap[questionID];
     if (!question) return;
 
     setGrading((prev) => ({ ...prev, [questionID]: true }));
@@ -202,7 +202,7 @@ export default function CustomAIComponent({
       });
 
       setFeedback((prev) => ({ ...prev, [questionID]: result }));
-      workbook?.setFeedback?.(nodeKey, {
+      workbookApi?.setFeedback?.(nodeKey, {
         text: result.feedback,
         timestamp: Date.now(),
       });
@@ -225,7 +225,7 @@ export default function CustomAIComponent({
     questionID: string,
     imageBase64: string,
   ) => {
-    const question = questionBank[questionID];
+    const question = questionBankMap[questionID];
     if (!question) return;
 
     setGrading((prev) => ({ ...prev, [questionID]: true }));
@@ -241,7 +241,7 @@ export default function CustomAIComponent({
       });
 
       setFeedback((prev) => ({ ...prev, [questionID]: result }));
-      workbook?.setFeedback?.(nodeKey, {
+      workbookApi?.setFeedback?.(nodeKey, {
         text: result.feedback,
         timestamp: Date.now(),
       });
@@ -308,7 +308,7 @@ export default function CustomAIComponent({
 
         <ol>
           {questionIDs?.map((questionID) => {
-            const question = questionBank[questionID] || {};
+            const question = questionBankMap[questionID] || {};
             const isCompleted = feedback[questionID] !== undefined;
             const isGrading = grading[questionID] === true;
             const displayPrompt =
@@ -408,6 +408,7 @@ export default function CustomAIComponent({
                             : "inherit"
                       }
                       testId="custom-ai-input"
+                      wordId={questionID}
                       questionId={questionID}
                       disabled={isCompleted}
                     />
@@ -420,9 +421,15 @@ export default function CustomAIComponent({
                     <AudioAutoSubmitWrapper>
                       {({ wrapOnRecordingComplete }: { wrapOnRecordingComplete: Function }) => (
                         <AudioWaveformPlayer
+                          audioUrl=""
+                          file={{}}
+                          width={600}
+                          height={80}
+                          showDuration={true}
                           enableRecording={true}
-                          gradeId={grade?.id}
+                          gradeId={grade?.id || ""}
                           nodeKey={`custom-ai-${questionID}`}
+                          metadata={{}}
                           title={displayPrompt}
                           onRecordingComplete={wrapOnRecordingComplete(
                             async (audioFile: any) => {
@@ -454,7 +461,7 @@ export default function CustomAIComponent({
                                     ...prev,
                                     [questionID]: result,
                                   }));
-                                  workbook?.setFeedback?.(nodeKey, {
+                                  workbookApi?.setFeedback?.(nodeKey, {
                                     text: result.feedback,
                                     timestamp: Date.now(),
                                   });
@@ -479,7 +486,6 @@ export default function CustomAIComponent({
                     <Suspense fallback={<div>Loading...</div>}>
                       <SketchPad
                         excalidrawData={inProgress?.excalidrawData ?? {}}
-                        className={className?.base}
                         expect={question.answer || ""}
                         questionID={questionID}
                         setFeedback={(data: any) => {
@@ -495,13 +501,12 @@ export default function CustomAIComponent({
                               },
                             }));
                           }
-                          workbook?.setFeedback?.(nodeKey, {
+                          workbookApi?.setFeedback?.(nodeKey, {
                             text: data?.reason || "",
                             timestamp: Date.now(),
                           });
                         }}
                         feedback={feedback}
-                        question={displayPrompt}
                       />
                     </Suspense>
                   </Box>

@@ -113,6 +113,32 @@ export const Minimal: Story = {
   },
 }
 
+const sampleCrestSvg = `
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="crestGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f51b5" />
+      <stop offset="100%" stop-color="#26c6da" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#crestGrad)" />
+  <path d="M50 20 L68 38 L50 80 L32 38 Z" fill="#ffffff" fill-opacity="0.95" />
+</svg>
+`
+
+export const WithGuildCrest: Story = {
+  args: {
+    seed: 'guild-student',
+    size: 72,
+    streak: 8,
+    level: { level: 4, label: 'Contributor', xpRequired: 800, xpForNextLevel: 1500, progress: 55 },
+    borderEffect: 'solid',
+    guildName: 'Iron Dragons',
+    guildId: 'guild-iron-dragons',
+    guildCrestSvg: sampleCrestSvg,
+  },
+}
+
 /** All border effects side by side for comparison */
 export const AllBorderEffects: Story = {
   render: () => {

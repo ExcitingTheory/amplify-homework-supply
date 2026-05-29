@@ -185,7 +185,7 @@ export default function HorizontalTimeline({
           onClick={playing ? onStop : onPlay}
           disabled={readOnly && !playing}
           color={playing ? 'error' : 'default'}
-          aria-label={playing ? t('recordingStudio3.stop') : t('recordingStudio3.play', 'Play')}
+          aria-label={playing ? t('recordingStudio3.stop') : t('recordingStudio3.play')}
         >
           {playing ? <StopIcon /> : <PlayIcon />}
         </IconButton>

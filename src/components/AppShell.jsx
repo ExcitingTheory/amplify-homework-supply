@@ -61,6 +61,7 @@ export default function AppShell({ children, toolbarChildren }) {
   const [toolbarContent, setToolbarContent] = React.useState(null);
   const appBarRef = React.useRef(null);
   const toolbarPortalRef = React.useRef(null);
+  const toolbarChildrenPortalRef = React.useRef(null);
   const [appBarHeight, setAppBarHeight] = React.useState(48);
 
   // Measure actual AppBar height (changes when secondary toolbar is present)
@@ -96,6 +97,7 @@ export default function AppShell({ children, toolbarChildren }) {
       setToolbarContent,
       appBarHeight,
       toolbarPortalRef,
+      toolbarChildrenPortalRef,
     }),
     [drawerOpen, isDesktop, toolbarContent, appBarHeight],
   );

@@ -26,7 +26,7 @@ function TabPanel(props) {
       style={{
         width: "100%",
         minWidth: 0,
-        height: "calc(100vh - var(--app-bar-height, 11rem))",
+        height: "100%",
         overflow: overflowY === "hidden" ? "hidden" : "auto",
       }}
       {...other}

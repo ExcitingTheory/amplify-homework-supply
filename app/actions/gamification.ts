@@ -3,16 +3,26 @@
 /**
  * Gamification Server Actions
  *
- * Replaces client-side gamificationActions.ts calls that traverse:
- * Client → AppSync GraphQL → Lambda → DynamoDB → Lambda → AppSync → Client
- *
- * New flow: Client → Server Action → AppSync GraphQL → Lambda → DynamoDB (2 fewer hops)
- *
- * These actions batch multiple sequential operations into single server round-trips.
+ * Calls the gamification engine directly — no Lambda round-trip.
+ * Flow: Client → Server Action → engine functions → DynamoDB via cookie-based client
  */
 
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { chatCompletion } from "./chat";
+import {
+  engineAwardXP,
+  engineCheckBadges,
+  engineUpdateStreak,
+  engineUpdateSquadXP,
+  engineCheckPersonalBest,
+  engineCheckEasterEggs,
+  engineDiscoverEasterEgg,
+  engineUpdateStudentUnitMemory,
+  engineRebuildStudentMemoryProfile,
+  engineAdvanceSkillProgress,
+  engineGenerateSkillTree,
+  engineRebuildLeaderboard,
+} from "./gamification-engine";
 
 // ============================================================================
 // Types
@@ -78,19 +88,14 @@ export async function awardXP(
 
   let xpResult: AwardXPResult | null = null;
   try {
-    const { data, errors } = await (client as any).mutations.awardXP({
+    xpResult = await engineAwardXP(client, {
       studentId,
       reason,
-      referenceId: referenceId ?? null,
-      cohortId: cohortId ?? null,
-      unitID: unitID ?? null,
-      accuracy: accuracy != null ? accuracy : null,
+      referenceId: referenceId ?? undefined,
+      cohortId: cohortId ?? undefined,
+      unitID: unitID ?? undefined,
+      accuracy: accuracy ?? undefined,
     });
-    if (errors?.length) {
-      console.error("[gamification action] awardXP errors:", errors);
-      return null;
-    }
-    xpResult = typeof data === "string" ? JSON.parse(data) : data;
   } catch (err) {
     console.error("[gamification action] awardXP error:", err);
     return null;
@@ -98,16 +103,10 @@ export async function awardXP(
 
   // Fire-and-forget: badges, streak, squad XP
   Promise.allSettled([
-    (client as any).mutations.checkBadges({
-      studentId,
-      cohortId: cohortId ?? null,
-    }),
-    (client as any).mutations.updateStreak({ studentId }),
+    engineCheckBadges(client, { studentId, cohortId: cohortId ?? undefined }),
+    engineUpdateStreak(client, { studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
-      ? (client as any).mutations.updateSquadXP?.({
-          studentId,
-          xpAmount: xpResult.xpAmount,
-        })
+      ? engineUpdateSquadXP(client, { studentId, xpAmount: xpResult.xpAmount })
       : Promise.resolve(null),
   ]).catch(() => {});
 
@@ -134,47 +133,35 @@ export async function recordGradeCompletion(
   // 1. Award XP (blocking — core operation)
   let xpResult: AwardXPResult | null = null;
   try {
-    const { data, errors } = await (client as any).mutations.awardXP({
+    xpResult = await engineAwardXP(client, {
       studentId,
       reason: "HOMEWORK_SUBMITTED",
       referenceId,
-      cohortId: cohortId ?? null,
+      cohortId: cohortId ?? undefined,
       unitID,
       accuracy,
     });
-    if (!errors?.length) {
-      xpResult = typeof data === "string" ? JSON.parse(data) : data;
-    }
   } catch (err) {
     console.error("[gamification action] awardXP error:", err);
   }
 
-  // 2. Check badges + update streak (parallel, fire-and-forget on server)
-  const [badgeResult, streakResult, squadResult] = await Promise.allSettled([
-    (client as any).mutations.checkBadges({
-      studentId,
-      cohortId: cohortId ?? null,
-    }),
-    (client as any).mutations.updateStreak({ studentId }),
+  // 2. Check badges + update streak + squad XP (parallel)
+  await Promise.allSettled([
+    engineCheckBadges(client, { studentId, cohortId: cohortId ?? undefined }),
+    engineUpdateStreak(client, { studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
-      ? (client as any).mutations.updateSquadXP?.({
-          studentId,
-          xpAmount: xpResult.xpAmount,
-        })
+      ? engineUpdateSquadXP(client, { studentId, xpAmount: xpResult.xpAmount })
       : Promise.resolve(null),
   ]);
 
   // 3. Check personal best (blocking — needed for UI)
   let personalBest: PersonalBestResult | null = null;
   try {
-    const { data, errors } = await (client as any).mutations.checkPersonalBest({
+    personalBest = await engineCheckPersonalBest(client, {
       studentId,
       unitID,
       score: accuracy,
     });
-    if (!errors?.length) {
-      personalBest = typeof data === "string" ? JSON.parse(data) : data;
-    }
   } catch (err) {
     console.error("[gamification action] checkPersonalBest error:", err);
   }
@@ -183,14 +170,11 @@ export async function recordGradeCompletion(
   let easterEggs: EasterEggResult | null = null;
   if (submissionText) {
     try {
-      const { data, errors } = await (client as any).mutations.checkEasterEggs({
+      easterEggs = await engineCheckEasterEggs(client, {
         studentId,
         submissionText,
-        triggerType: null,
+        triggerType: undefined,
       });
-      if (!errors?.length) {
-        easterEggs = typeof data === "string" ? JSON.parse(data) : data;
-      }
     } catch (err) {
       console.error("[gamification action] checkEasterEggs error:", err);
     }
@@ -218,9 +202,7 @@ export async function updateLearningMemory(
   const client = getServerClient();
 
   try {
-    const { errors } = await (
-      client as any
-    ).mutations.updateStudentUnitMemoryFromGrade({
+    await engineUpdateStudentUnitMemory(client, {
       studentId,
       unitID,
       accuracy,
@@ -231,17 +213,10 @@ export async function updateLearningMemory(
       sourceType: options?.sourceType ?? "practice",
     });
 
-    if (errors?.length) {
-      console.error("[gamification action] updateUnitMemory errors:", errors);
-      return { success: false };
-    }
-
     // Rebuild profile (fire-and-forget on server side)
-    (client as any).mutations
-      .rebuildStudentMemoryProfile({ studentId })
-      .catch((err: any) =>
-        console.error("[gamification action] rebuildProfile error:", err),
-      );
+    engineRebuildStudentMemoryProfile(client, { studentId }).catch((err: any) =>
+      console.error("[gamification action] rebuildProfile error:", err),
+    );
 
     return { success: true };
   } catch (err) {
@@ -261,20 +236,11 @@ export async function advanceSkill(
   const client = getServerClient();
 
   try {
-    const { data, errors } = await (
-      client as any
-    ).mutations.advanceSkillProgress({
+    return await engineAdvanceSkillProgress(client, {
       studentId,
       skillId,
       newStatus,
     });
-
-    if (errors?.length) {
-      console.error("[gamification action] advanceSkill errors:", errors);
-      return null;
-    }
-
-    return typeof data === "string" ? JSON.parse(data) : data;
   } catch (err) {
     console.error("[gamification action] advanceSkill error:", err);
     return null;
@@ -291,17 +257,10 @@ export async function generateSkillTreeFromUnit(
   const client = getServerClient();
 
   try {
-    const { data, errors } = await (client as any).mutations.generateSkillTree({
+    return await engineGenerateSkillTree(client, {
       unitID,
-      cohortId: cohortId ?? null,
+      cohortId: cohortId ?? undefined,
     });
-
-    if (errors?.length) {
-      console.error("[gamification action] generateSkillTree errors:", errors);
-      return null;
-    }
-
-    return typeof data === "string" ? JSON.parse(data) : data;
   } catch (err) {
     console.error("[gamification action] generateSkillTree error:", err);
     return null;
@@ -322,17 +281,7 @@ export async function discoverEasterEgg(
   const client = getServerClient();
 
   try {
-    const { data, errors } = await (client as any).mutations.discoverEasterEgg({
-      studentId,
-      eggId,
-    });
-
-    if (errors?.length) {
-      console.error("[gamification action] discoverEasterEgg errors:", errors);
-      return null;
-    }
-
-    return typeof data === "string" ? JSON.parse(data) : data;
+    return await engineDiscoverEasterEgg(client, { studentId, eggId });
   } catch (err) {
     console.error("[gamification action] discoverEasterEgg error:", err);
     return null;
@@ -405,7 +354,7 @@ export async function rebuildLeaderboard(cohortId: string): Promise<void> {
   const client = getServerClient();
 
   try {
-    await (client as any).mutations.rebuildLeaderboard({ cohortId });
+    await engineRebuildLeaderboard(client, { cohortId });
   } catch (err) {
     console.warn("[gamification action] rebuildLeaderboard error:", err);
   }

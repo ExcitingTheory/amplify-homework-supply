@@ -98,7 +98,7 @@ export function GradeReviewDrawer({
         if (cancelled) return;
 
         const grade = gradeResult.data;
-        const unitData = unitResult.data;
+        const unitData = unitResult.data as any;
 
         if (!grade || !unitData) {
           setLoading(false);
@@ -108,8 +108,12 @@ export function GradeReviewDrawer({
         setUnit({ id: unitData.id, name: unitData.name || '', data: unitData.data || '' });
 
         // Fetch all grades for this student + unit
+        const listFilter: any = { unitID: { eq: unitId! } };
+        if (grade.owner) {
+          listFilter.owner = { eq: grade.owner };
+        }
         const { data: allGrades } = await client.models.Grade.list({
-          filter: { unitID: { eq: unitId! }, owner: { eq: grade.owner } },
+          filter: listFilter,
         });
 
         if (cancelled) return;

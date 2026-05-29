@@ -10,7 +10,7 @@
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getServerClient } from "@/utils/amplifyServerClient";
-import outputs from "@/../amplify_outputs.json";
+import outputs from "../../amplify_outputs.json";
 
 const OPENAI_API_URL = "https://api.openai.com/v1";
 
@@ -48,7 +48,7 @@ export async function generateSpeech(params: {
   model?: "tts-1" | "tts-1-hd";
 }): Promise<GenerateFileResult> {
   const apiKey = getApiKey();
-  const client = getServerClient();
+  const client = getServerClient() as any;
   const s3 = getS3Client();
 
   const timestamp = Date.now();
@@ -117,7 +117,7 @@ export async function generateImage(params: {
   size?: "1024x1024" | "1792x1024" | "1024x1792";
 }): Promise<GenerateFileResult> {
   const apiKey = getApiKey();
-  const client = getServerClient();
+  const client = getServerClient() as any;
   const s3 = getS3Client();
 
   const timestamp = Date.now();

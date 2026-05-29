@@ -4,18 +4,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import GroupIcon from "@mui/icons-material/Group";
 import SportsKabaddiIcon from "@mui/icons-material/SportsKabaddi";
-import AppSkeleton from "@/components/AppSkeleton";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { SquadJoinPanel } from "@/components/Gamification/SquadJoinPanel";
 import { SquadEditor } from "@/components/Gamification/SquadEditor";
+import { ArmoriaShield } from "@/components/Gamification/ArmoriaShield";
 import { DiceBearAvatar } from "@/components/Gamification/DiceBearAvatar";
 import { useSquad, useXP, useCampaign } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
@@ -117,6 +112,7 @@ function SquadPage() {
             name: squad.name,
             totalXP: squad.totalXP || 0,
             description: squad.description,
+            crestSvg: squad.crestSvg || null,
             members: squad.members || [],
             posts: squad.posts || [],
           });
@@ -183,21 +179,46 @@ function SquadPage() {
   }, [mySquad]);
 
   const memberEntries = React.useMemo(
-    () =>
-      squadMembers.map((m) => ({
-        id: m.id,
-        studentId: m.studentId,
-        displayName: displayNameMap[m.studentId] || friendlyName(m.studentId),
-        role: m.role,
-        joinedAt: m.joinedAt,
-        ...(m.studentId === studentId && {
-          avatarSeed: myAvatarSeed || studentId,
-          avatarStyle: myAvatarStyle,
-          avatarOverrides: myAvatarOverrides,
-        }),
-      })),
+    () => {
+      // Build a lookup from mySquad.members which has full avatar data
+      const avatarLookup = {};
+      if (mySquad?.members) {
+        for (const m of mySquad.members) {
+          if (m?.studentId) {
+            avatarLookup[m.studentId] = {
+              avatarSeed: m.avatarSeed || m.studentId,
+              avatarStyle: m.avatarStyle,
+              avatarOverrides: m.avatarOverrides,
+            };
+          }
+        }
+      }
+
+      return squadMembers.map((m) => {
+        // For the current user, prefer local hook data (most up-to-date)
+        const avatar =
+          m.studentId === studentId
+            ? {
+                avatarSeed: myAvatarSeed || studentId,
+                avatarStyle: myAvatarStyle,
+                avatarOverrides: myAvatarOverrides,
+              }
+            : avatarLookup[m.studentId] || { avatarSeed: m.studentId };
+
+        return {
+          id: m.id,
+          studentId: m.studentId,
+          displayName:
+            displayNameMap[m.studentId] || friendlyName(m.studentId),
+          role: m.role,
+          joinedAt: m.joinedAt,
+          ...avatar,
+        };
+      });
+    },
     [
       squadMembers,
+      mySquad?.members,
       studentId,
       displayNameMap,
       myAvatarSeed,
@@ -347,6 +368,7 @@ function SquadPage() {
           id: mySquad.id,
           name,
           description: description || undefined,
+          crestSvg: svg || undefined,
           _version: data?._version,
         });
       } catch (err) {
@@ -378,7 +400,7 @@ function SquadPage() {
   }, [client, mySquad?.id, router]);
 
   if (isLoading) {
-    return <AppSkeleton variant="detail" />;
+    return null;
   }
 
   // ── Instructor view — read-only squad detail ───────────────────────────
@@ -391,6 +413,16 @@ function SquadPage() {
     return (
       <>
         <Box sx={{ padding: "1.5rem", maxWidth: "48rem", margin: "0 auto" }}>
+          {/* Coat of Arms */}
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+            <ArmoriaShield
+              squadId={instructorSquad.id}
+              squadName={instructorSquad.name || "Squad"}
+              crestSvg={instructorSquad.crestSvg}
+              size={120}
+            />
+          </Box>
+
           {instructorSquad.description && (
             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
               {instructorSquad.description}
@@ -407,7 +439,7 @@ function SquadPage() {
               direction="row"
               spacing={1}
               alignItems="center"
-              sx={{ mb: 1 }}
+              sx={{ mb: 1.5 }}
             >
               <GroupIcon color="action" fontSize="small" />
               <Typography variant="subtitle1" fontWeight={600}>
@@ -419,25 +451,38 @@ function SquadPage() {
                 variant="outlined"
               />
             </Stack>
-            <List dense disablePadding>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                gap: 2,
+              }}
+            >
               {instructorMembers.map((member) => (
-                <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
-                  <ListItemAvatar sx={{ minWidth: 44 }}>
-                    <DiceBearAvatar
-                      seed={member.studentId}
-                      size={32}
-                      label={friendlyName(member.studentId)}
-                    />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={friendlyName(member.studentId)}
-                    secondary={
-                      member.role === "LEADER" ? "⭐ Leader" : "Member"
-                    }
+                <Box
+                  key={member.id}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  <DiceBearAvatar
+                    seed={member.studentId}
+                    size={64}
+                    label={friendlyName(member.studentId)}
                   />
-                </ListItem>
+                  <Typography variant="body2" noWrap sx={{ maxWidth: "100%" }}>
+                    {friendlyName(member.studentId)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {member.role === "LEADER" ? "⭐ Leader" : "Member"}
+                  </Typography>
+                </Box>
               ))}
-            </List>
+            </Box>
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -497,12 +542,24 @@ function SquadPage() {
       )}
 
       <Box sx={{ padding: "1.5rem", maxWidth: "48rem", margin: "0 auto" }}>
+        {/* Coat of Arms */}
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+          <ArmoriaShield
+            squadId={mySquad.id}
+            squadName={mySquad.name}
+            crestSvg={mySquad.crestSvg}
+            armoriaUnlocked={isLeader && (level?.level || 1) >= 2}
+            size={120}
+          />
+        </Box>
+
         {/* Squad Editor — leaders only */}
         {isLeader && (
           <Box sx={{ mb: 3 }}>
             <SquadEditor
               squadName={mySquad.name}
               squadDescription={mySquad.description}
+              crestConfig={null}
               onSave={handleSquadSave}
               onDelete={handleDeleteSquad}
               autoSaveDelay={1500}
@@ -513,7 +570,12 @@ function SquadPage() {
 
         {/* Members section */}
         <Box sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ mb: 1.5 }}
+          >
             <GroupIcon color="action" fontSize="small" />
             <Typography variant="subtitle1" fontWeight={600}>
               Members
@@ -524,38 +586,53 @@ function SquadPage() {
               variant="outlined"
             />
           </Stack>
-          <List dense disablePadding>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+              gap: 2,
+            }}
+          >
             {memberEntries.map((member) => (
-              <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
-                <ListItemAvatar sx={{ minWidth: 44 }}>
-                  <DiceBearAvatar
-                    seed={member.avatarSeed || member.studentId}
-                    size={32}
-                    label={member.displayName}
-                    style={member.avatarStyle}
-                    overrides={member.avatarOverrides}
-                  />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={member.displayName}
-                  secondary={member.role === "LEADER" ? "⭐ Leader" : "Member"}
-                  primaryTypographyProps={{
-                    variant: "body2",
-                    fontWeight: member.studentId === studentId ? 600 : 400,
-                  }}
+              <Box
+                key={member.id}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  gap: 0.5,
+                }}
+              >
+                <DiceBearAvatar
+                  seed={member.avatarSeed || member.studentId}
+                  size={64}
+                  label={member.displayName}
+                  style={member.avatarStyle}
+                  overrides={member.avatarOverrides}
                 />
+                <Typography
+                  variant="body2"
+                  fontWeight={member.studentId === studentId ? 600 : 400}
+                  noWrap
+                  sx={{ maxWidth: "100%" }}
+                >
+                  {member.displayName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {member.role === "LEADER" ? "⭐ Leader" : "Member"}
+                </Typography>
                 {member.studentId === studentId && (
                   <Chip
                     label="You"
                     size="small"
                     color="primary"
                     variant="outlined"
-                    sx={{ ml: 1 }}
                   />
                 )}
-              </ListItem>
+              </Box>
             ))}
-          </List>
+          </Box>
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -665,10 +742,8 @@ export default function WrappedPage() {
   }, [squadId]);
 
   return (
-    <MyAuth>
-      <GamificationProviderWrapper cohortId={cohortId}>
-        <SquadPage />
-      </GamificationProviderWrapper>
-    </MyAuth>
+    <GamificationProviderWrapper cohortId={cohortId}>
+      <SquadPage />
+    </GamificationProviderWrapper>
   );
 }

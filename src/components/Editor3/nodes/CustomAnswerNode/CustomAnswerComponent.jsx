@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "../../../../utils/amplifyClient";
-import { gradeShortAnswer } from "../../../../../app/actions/grading";
 
 import { useEffect, useState, useRef } from "react";
 
@@ -306,8 +305,7 @@ export default function CustomAnswerComponent({
 
               // If still no prompt but we have feedback, try to extract from there
               if (!displayPrompt && isCompleted && feedback[questionID]) {
-                // Try to extract the original question from the feedback reason
-                displayPrompt = `Question for ID: ${questionID}`;
+                displayPrompt = feedback[questionID]?.prompt || null;
               }
 
               console.log("CustomAnswerComponent.displayPrompt", displayPrompt);
@@ -423,11 +421,20 @@ export default function CustomAnswerComponent({
                         }}
                         onAutoSubmit={async (text) => {
                           try {
-                            const data = await gradeShortAnswer({
-                              question: prompt,
+                            const client = getAmplifyClient();
+
+                            const response = await client.queries.verifyShortAnswer({
                               answer: text,
-                              expectedAnswer: answer,
+                              prompt: prompt,
+                              expected: answer,
+                              model: 'gpt-3.5-turbo',
+                              studentMemory,
+                              contentContext,
                             });
+
+                            console.log('response', response);
+
+                            const data = JSON.parse(response?.data) || {};
 
                             setFeedback({
                               ...feedback,
@@ -452,9 +459,7 @@ export default function CustomAnswerComponent({
                         placeholder={t(
                           "customAnswerComponent.answerPlaceholder",
                         )}
-                        ariaLabel={t("customAnswerComponent.yourAnswer", {
-                          ns: "editor",
-                        })}
+                        ariaLabel={tEditor("customAnswerComponent.yourAnswer")}
                         borderStyle={borderStyle}
                         textColor={
                           feedback[questionID]?.answer === true
@@ -500,17 +505,20 @@ export default function CustomAnswerComponent({
 
                                 // Verify the recorded audio
                                 try {
+                                  const client = getAmplifyClient();
                                   const audioUrl =
                                     audioFile?.path || uploadResult?.path;
                                   if (audioUrl) {
-                                    const feedbackData = await gradeShortAnswer(
-                                      {
-                                        question: prompt,
-                                        answer: audioUrl,
-                                        expectedAnswer: answer,
-                                      },
-                                    );
-                                    if (feedbackData) {
+                                    const { data, errors } = await client.queries.verifyShortAnswer({
+                                      answer: audioUrl,
+                                      prompt: prompt,
+                                      expected: answer,
+                                      model: 'gpt-3.5-turbo',
+                                      studentMemory,
+                                      contentContext,
+                                    });
+                                    if (!errors && data) {
+                                      const feedbackData = JSON.parse(data);
                                       setFeedback((prev) => ({
                                         ...prev,
                                         [questionID]: feedbackData,

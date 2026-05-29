@@ -57,8 +57,6 @@ import {
   GradeCellRegistryContext,
 } from "@/components/InlineGradeCell";
 
-import MyAuth from "@/components/AmplifyAuthenticator";
-
 import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -1287,6 +1285,19 @@ function SectionDetail({ user, signOut }) {
             },
           }}
         >
+          {/* Section-scoped Skill Tree modal button */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              padding: "1rem",
+            }}
+          >
+            <React.Suspense fallback={null}>
+              {/* Dynamically import to avoid SSR issues if needed */}
+              {id && <SkillTreePopupButton sectionId={id} />}
+            </React.Suspense>
+          </div>
           {/* {section?.featuredImage &&
           <CardMediaComponent
           s3Key={section?.featuredImage}
@@ -2606,11 +2617,7 @@ function SectionDetail({ user, signOut }) {
   );
 }
 function WrappedPage() {
-  return (
-    <MyAuth>
-      <SectionDetail />
-    </MyAuth>
-  );
+  return <SectionDetail />;
 }
 
 export default WrappedPage;

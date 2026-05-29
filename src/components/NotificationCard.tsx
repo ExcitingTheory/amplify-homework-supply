@@ -19,6 +19,28 @@ import ChatIcon from "@mui/icons-material/Chat";
 import InfoIcon from "@mui/icons-material/Info";
 import { useTranslations } from "next-intl";
 
+type NotificationCategoryKey = keyof typeof CATEGORY_ICONS;
+interface NotificationCardItem {
+  id: string;
+  category?: string | null;
+  title?: string;
+  body?: string;
+  linkPath?: string;
+  linkLabel?: string;
+  senderName?: string;
+  seen?: boolean;
+  interacted?: boolean;
+  createdAt?: string;
+}
+
+interface NotificationCardProps {
+  notification: NotificationCardItem;
+  onMarkSeen?: (notificationId: string) => void;
+  onMarkInteracted?: (notificationId: string) => void;
+  onDelete?: (notificationId: string) => void;
+  onNavigate?: (path: string) => void;
+}
+
 const CATEGORY_ICONS = {
   ASSIGNMENT: AssignmentIcon,
   COLLABORATION: GroupsIcon,
@@ -35,12 +57,14 @@ const CATEGORY_COLORS = {
   SQUAD: "info",
   CHAT: "default",
   SYSTEM: "error",
-};
+} as const;
 
-function timeAgo(dateString) {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diffMs = now - date;
+function timeAgo(dateString?: string): string {
+  if (!dateString) return "Just now";
+  const now = Date.now();
+  const dateMs = new Date(dateString).getTime();
+  if (!Number.isFinite(dateMs)) return "Just now";
+  const diffMs = now - dateMs;
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return "Just now";
   if (diffMin < 60) return `${diffMin}m ago`;
@@ -48,7 +72,7 @@ function timeAgo(dateString) {
   if (diffHrs < 24) return `${diffHrs}h ago`;
   const diffDays = Math.floor(diffHrs / 24);
   if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  return new Date(dateMs).toLocaleDateString();
 }
 
 export default function NotificationCard({
@@ -57,11 +81,11 @@ export default function NotificationCard({
   onMarkInteracted,
   onDelete,
   onNavigate,
-}) {
+}: NotificationCardProps) {
   const t = useTranslations("components");
-  const Icon =
-    CATEGORY_ICONS[notification.category] || InfoIcon;
-  const chipColor = CATEGORY_COLORS[notification.category] || "default";
+  const categoryKey = (notification.category || "SYSTEM") as NotificationCategoryKey;
+  const Icon = CATEGORY_ICONS[categoryKey] || InfoIcon;
+  const chipColor = CATEGORY_COLORS[categoryKey] || "default";
 
   const isUnseen = !notification.seen;
   const isInteracted = notification.interacted;

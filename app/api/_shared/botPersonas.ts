@@ -88,6 +88,7 @@ const SAGE_TOOLS = [
   "search_content",
   "create_section",
   "copy_gamification_settings",
+  "create_recording_script",
   // Block insertion tools
   "insert_heading",
   "insert_paragraph",
@@ -180,17 +181,31 @@ export function buildPersonaSystemMessage(
     if (context.unit.content) {
       const contentPreview =
         typeof context.unit.content === "string"
-          ? context.unit.content.substring(0, 2000)
-          : JSON.stringify(context.unit.content).substring(0, 2000);
+          ? context.unit.content.substring(0, 8000)
+          : JSON.stringify(context.unit.content).substring(0, 8000);
       systemContent += `\n\nUnit Content:\n${contentPreview}`;
+      if (
+        (typeof context.unit.content === "string"
+          ? context.unit.content.length
+          : JSON.stringify(context.unit.content).length) > 8000
+      ) {
+        systemContent += `\n... (content truncated)`;
+      }
     }
     // Legacy support: check unit.data if content isn't set
     if (!context.unit.content && context.unit.data) {
       const contentPreview =
         typeof context.unit.data === "string"
-          ? context.unit.data.substring(0, 2000)
-          : JSON.stringify(context.unit.data).substring(0, 2000);
+          ? context.unit.data.substring(0, 8000)
+          : JSON.stringify(context.unit.data).substring(0, 8000);
       systemContent += `\n\nUnit Content:\n${contentPreview}`;
+      if (
+        (typeof context.unit.data === "string"
+          ? context.unit.data.length
+          : JSON.stringify(context.unit.data).length) > 8000
+      ) {
+        systemContent += `\n... (content truncated)`;
+      }
     }
   }
 
@@ -251,8 +266,11 @@ export function buildPersonaSystemMessage(
   }
 
   if (context?.studentMemory && persona.name === "Kai") {
-    systemContent += `\n\nStudent Memory (past interactions summary):`;
-    systemContent += `\n${typeof context.studentMemory === "string" ? context.studentMemory : JSON.stringify(context.studentMemory).substring(0, 500)}`;
+    systemContent += `\n\n## Student Memory\n${typeof context.studentMemory === "string" ? context.studentMemory : JSON.stringify(context.studentMemory).substring(0, 500)}`;
+    systemContent += `\n\nWhen providing feedback, reference the student's memory only when directly relevant (e.g., if they are repeating a known mistake). Acknowledge genuine improvement when you see it compared to their history. Be direct and warm.`;
+
+    // Nailed It evaluation — only for student chats with memory
+    systemContent += `\n\n## Nailed It Evaluation\nWhen you believe the student has demonstrated genuine mastery of a concept — not just getting the right answer, but showing understanding — include the following JSON block at the END of your response on its own line:\n\n\`\`\`nailed-it\n{"nailedIt": true, "nailedItReason": "<one-sentence explanation of what they mastered>", "xpToAward": 50}\n\`\`\`\n\nOnly include this block when you are genuinely confident the student deeply understood the concept. Do NOT include it for simple correct answers or guesses. Reserve it for moments of real insight.\nIf the student has NOT demonstrated mastery, do NOT include any nailed-it block.`;
   }
 
   return systemContent;

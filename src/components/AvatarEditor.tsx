@@ -33,9 +33,11 @@ export interface AvatarEditorProps {
   level?: number
   /** Called after a successful save */
   onSave?: (overrides: AvatarOverrides, style: AvatarStyleTier) => void
+  /** When true, hides the avatar preview and only renders the Customize button + dialog */
+  hidePreview?: boolean
 }
 
-export function AvatarEditor({ seed, size = 128, level: levelProp, onSave }: AvatarEditorProps) {
+export function AvatarEditor({ seed, size = 128, level: levelProp, onSave, hidePreview = false }: AvatarEditorProps) {
   const { settings, updateSettings } = React.useContext(SettingsContext) || {}
   const { style: currentStyle, overrides: savedOverrides, seed: configSeed, isLoaded, glowRing } = useAvatarConfig()
   const { level: xpLevel, avatarUnlockConfig } = useXP()
@@ -97,17 +99,19 @@ export function AvatarEditor({ seed, size = 128, level: levelProp, onSave }: Ava
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, py: 2 }}>
-      {!isLoaded ? (
-        <Skeleton variant="circular" width={size} height={size} />
-      ) : (
-        <DiceBearAvatar
-          seed={avatarSeed}
-          style={displayStyle}
-          size={size}
-          overrides={displayOverrides}
-          glowRing={glowRing}
-          onClick={() => setCustomizerOpen(true)}
-        />
+      {!hidePreview && (
+        !isLoaded ? (
+          <Skeleton variant="circular" width={size} height={size} />
+        ) : (
+          <DiceBearAvatar
+            seed={avatarSeed}
+            style={displayStyle}
+            size={size}
+            overrides={displayOverrides}
+            glowRing={glowRing}
+            onClick={() => setCustomizerOpen(true)}
+          />
+        )
       )}
       <Button
         variant="outlined"

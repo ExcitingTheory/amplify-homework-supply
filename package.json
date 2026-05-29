@@ -66,6 +66,7 @@
     "agent:logs": "tsx scripts/agent-cli.ts logs",
     "agent:safe-mode": "tsx scripts/agent-cli.ts safe-mode",
     "typecheck": "tsc --noEmit --project config/tsconfig.build-src.json && tsc --noEmit --project config/tsconfig.build-gamification.json && tsc --noEmit --project config/tsconfig.build-pages.json",
+    "typecheck:parallel": "concurrently -n src,gamification,pages \"tsc --noEmit --project config/tsconfig.build-src.json\" \"tsc --noEmit --project config/tsconfig.build-gamification.json\" \"tsc --noEmit --project config/tsconfig.build-pages.json\"",
     "chromatic": "chromatic --project-token=",
     "storybook:run": "NODE_OPTIONS='--experimental-import-meta-resolve' npx vitest --project=storybook --run",
     "storybook:clear": "rm -rf node_modules/.cache/storybook && rm -rf node_modules/.vite && echo \"Caches cleared\"",

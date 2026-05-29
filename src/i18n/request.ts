@@ -1,5 +1,4 @@
 import { getRequestConfig } from "next-intl/server";
-import { hasLocale } from "next-intl";
 import { readFileSync } from "fs";
 import path from "path";
 import { routing } from "./routing";
@@ -28,9 +27,18 @@ const namespaces = [
   "workbook",
 ] as const;
 
+function isSupportedLocale(
+  locale: unknown,
+): locale is (typeof routing.locales)[number] {
+  return (
+    typeof locale === "string" &&
+    (routing.locales as readonly string[]).includes(locale)
+  );
+}
+
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested)
+  const locale = isSupportedLocale(requested)
     ? requested
     : routing.defaultLocale;
 
@@ -38,7 +46,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Dotted namespaces (e.g. "editor.authoring") are nested so that
   // next-intl can resolve them via useTranslations('editor.authoring').
   const messages: Record<string, any> = {};
-  const localesDir = path.join(process.cwd(), "public", "locales", locale!);
+  const localesDir = path.join(process.cwd(), "public", "locales", locale);
 
   for (const ns of namespaces) {
     try {

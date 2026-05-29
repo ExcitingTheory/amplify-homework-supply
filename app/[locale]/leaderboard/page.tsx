@@ -2,7 +2,6 @@ import { getServerClient } from "@/utils/amplifyServerClient";
 import { AppBar, Box, Typography } from "@mui/material";
 import { getTranslations } from "next-intl/server";
 import MainToolbar from "@/components/MainToolbar";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { LiveLeaderboard } from "./LiveLeaderboard";
 
@@ -39,10 +38,8 @@ export default async function LeaderboardPage() {
   }
 
   return (
-    <MyAuth>
       <GamificationProviderWrapper>
         <LiveLeaderboard initialEntries={initialEntries} />
       </GamificationProviderWrapper>
-    </MyAuth>
   );
 }

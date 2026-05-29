@@ -95,6 +95,7 @@ const BASE_XP: Record<XPReason, number> = {
   [XPReason.SQUAD_CHALLENGE_BONUS]: 100,
   [XPReason.PRACTICE_DRILL_COMPLETED]: 30,
   [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: 15,
+  [XPReason.PEER_REVIEW_TOP_REVIEWER]: 50,
 }
 
 /** Human-readable labels for each XP reason */
@@ -117,6 +118,7 @@ const REASON_LABELS: Record<XPReason, string> = {
   [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad Challenge Bonus',
   [XPReason.PRACTICE_DRILL_COMPLETED]: 'Practice Drill Completed',
   [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: 'Practice Drill Accuracy Bonus',
+  [XPReason.PEER_REVIEW_TOP_REVIEWER]: 'Top Reviewer',
 }
 
 /** Grouped categories for better organization */

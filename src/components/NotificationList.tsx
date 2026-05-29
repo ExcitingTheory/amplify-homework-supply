@@ -25,9 +25,13 @@ const CATEGORIES = [
   "SQUAD",
   "CHAT",
   "SYSTEM",
-];
+] as const;
 
-export default function NotificationList({ onNavigate }) {
+interface NotificationListProps {
+  onNavigate?: (path: string) => void;
+}
+
+export default function NotificationList({ onNavigate }: NotificationListProps) {
   const t = useTranslations("components");
   const {
     notifications,

@@ -67,6 +67,134 @@ const CREATE_NOTIFICATION = `mutation CreateNotification($input: CreateNotificat
   createNotification(input: $input) { id }
 }`;
 
+const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListActiveChallenges($cohortId: String!) {
+  listGroupChallenges(filter: { cohortId: { eq: $cohortId }, active: { eq: true } }) {
+    items { id cohortId title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge contributions { studentId xpContributed contributedAt } _version }
+  }
+}`;
+
+const UPDATE_GROUP_CHALLENGE = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!) {
+  updateGroupChallenge(input: $input) { id currentXP active _version }
+}`;
+
+const CREATE_STUDENT_XP_LOG = `mutation CreateStudentXPLog($input: CreateStudentXPLogInput!) {
+  createStudentXPLog(input: $input) { id }
+}`;
+
+const GET_STUDENT_PROFILE_FOR_REWARDS = `query GetStudentProfileForRewards($studentId: String!) {
+  listStudentProfiles(filter: { studentId: { eq: $studentId } }) {
+    items { id studentId cosmeticRewards badges _version }
+  }
+}`;
+
+const UPDATE_STUDENT_PROFILE_REWARDS = `mutation UpdateStudentProfileRewards($input: UpdateStudentProfileInput!) {
+  updateStudentProfile(input: $input) { id _version }
+}`;
+
+// ============================================================================
+// Reward helpers — called from challenge completion with IAM credentials
+// ============================================================================
+
+async function grantCosmeticRewardToProfile(
+  gqlClient: any,
+  studentId: string,
+  rewardCosmetic: string,
+  sourceId: string,
+): Promise<void> {
+  const parts = rewardCosmetic.split(":");
+  if (parts.length < 2) return;
+
+  const type = parts[0];
+  const value = parts.slice(1, parts.length > 2 ? -1 : undefined).join(":");
+  const durationStr = parts.length > 2 ? parts[parts.length - 1] : null;
+
+  let expiresAt: string | null = null;
+  let durationHours: number | null = null;
+  if (durationStr && durationStr !== "permanent") {
+    const parsed = parseInt(durationStr, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      durationHours = parsed;
+      expiresAt = new Date(Date.now() + parsed * 60 * 60 * 1000).toISOString();
+    }
+  }
+
+  const { data } = await (gqlClient as any).graphql({
+    query: GET_STUDENT_PROFILE_FOR_REWARDS,
+    variables: { studentId },
+  });
+  const profile = data?.listStudentProfiles?.items?.[0];
+  if (!profile) return;
+
+  const existing = profile.cosmeticRewards || [];
+  const alreadyGranted = existing.some(
+    (r: any) => r.sourceId === sourceId && r.type === type && r.value === value,
+  );
+  if (alreadyGranted) return;
+
+  await (gqlClient as any).graphql({
+    query: UPDATE_STUDENT_PROFILE_REWARDS,
+    variables: {
+      input: {
+        id: profile.id,
+        cosmeticRewards: [
+          ...existing,
+          {
+            type,
+            value,
+            durationHours,
+            awardedAt: new Date().toISOString(),
+            expiresAt,
+            sourceId,
+            label: `${type}: ${value}`,
+          },
+        ],
+        _version: profile._version ?? 1,
+      },
+    },
+  });
+}
+
+async function grantChallengeBadgeToProfile(
+  gqlClient: any,
+  studentId: string,
+  badgeType: string,
+  challengeId: string,
+  cohortId: string,
+): Promise<void> {
+  const { data } = await (gqlClient as any).graphql({
+    query: GET_STUDENT_PROFILE_FOR_REWARDS,
+    variables: { studentId },
+  });
+  const profile = data?.listStudentProfiles?.items?.[0];
+  if (!profile) return;
+
+  const existingBadges = profile.badges || [];
+  const alreadyGranted = existingBadges.some(
+    (b: any) =>
+      b.badgeType === badgeType && b.sourceId === `challenge-${challengeId}`,
+  );
+  if (alreadyGranted) return;
+
+  await (gqlClient as any).graphql({
+    query: UPDATE_STUDENT_PROFILE_REWARDS,
+    variables: {
+      input: {
+        id: profile.id,
+        badges: [
+          ...existingBadges,
+          {
+            badgeType,
+            sourceId: `challenge-${challengeId}`,
+            awardedAt: new Date().toISOString(),
+            cohortId,
+          },
+        ],
+        _version: profile._version ?? 1,
+      },
+    },
+  });
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -534,6 +662,179 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             console.warn(
               `[xpStream] SectionProgress update failed for ${studentId}:`,
               spErr,
+            );
+          }
+
+          // 4b. GroupChallenge rollup — increment currentXP on active challenges.
+          // Students have read-only access to GroupChallenge; only this Lambda
+          // (IAM credentials) can update challenge records.
+          try {
+            const { data: challengeData } = await (gqlClient as any).graphql({
+              query: LIST_ACTIVE_CHALLENGES_BY_COHORT,
+              variables: { cohortId },
+            });
+            const activeChallenges = (
+              challengeData?.listGroupChallenges?.items || []
+            ).filter((c: any) => c != null && c.active);
+
+            for (const challenge of activeChallenges) {
+              // Skip if past deadline
+              if (
+                challenge.deadline &&
+                new Date(challenge.deadline) < new Date()
+              ) {
+                continue;
+              }
+
+              const oldChallengeXP = challenge.currentXP || 0;
+              const newChallengeXP = oldChallengeXP + totalDelta;
+              const goalReached = newChallengeXP >= challenge.targetXP;
+              const existingContributions = challenge.contributions || [];
+              const updatedContributions = [
+                ...existingContributions,
+                {
+                  studentId,
+                  xpContributed: totalDelta,
+                  contributedAt: new Date().toISOString(),
+                },
+              ];
+
+              let updateSucceeded = false;
+              try {
+                await (gqlClient as any).graphql({
+                  query: UPDATE_GROUP_CHALLENGE,
+                  variables: {
+                    input: {
+                      id: challenge.id,
+                      currentXP: newChallengeXP,
+                      active: !goalReached,
+                      contributions: updatedContributions,
+                      _version: challenge._version ?? 1,
+                    },
+                  },
+                });
+                updateSucceeded = true;
+              } catch (updateErr: any) {
+                // Version conflict from concurrent stream events — expected, skip
+                const msg =
+                  updateErr?.message || updateErr?.errors?.[0]?.message || "";
+                if (
+                  msg.includes("ConditionalCheckFailedException") ||
+                  msg.includes("version")
+                ) {
+                  console.warn(
+                    `[xpStream] challenge ${challenge.id} version conflict — skipping`,
+                  );
+                } else {
+                  console.error(
+                    `[xpStream] challenge update error for ${challenge.id}:`,
+                    updateErr,
+                  );
+                }
+              }
+
+              // Award completion bonus XP to all contributors only if WE
+              // successfully set active: false (prevents double-awarding on retries)
+              if (goalReached && updateSucceeded) {
+                const baseRewardXP = challenge.rewardXP || 500;
+                const multiplier = challenge.bonusMultiplier || 1.5;
+                const finalRewardXP = Math.round(baseRewardXP * multiplier);
+
+                const contributorIds = new Set<string>(
+                  updatedContributions
+                    .map((c: any) => c.studentId)
+                    .filter((id: string) => !!id),
+                );
+
+                for (const contributorId of contributorIds) {
+                  try {
+                    // Create XP log directly (Lambda has IAM access)
+                    // The resulting stream event will do the profile rollup
+                    await (gqlClient as any).graphql({
+                      query: CREATE_STUDENT_XP_LOG,
+                      variables: {
+                        input: {
+                          studentId: contributorId,
+                          xpAmount: finalRewardXP,
+                          reason: "SQUAD_CHALLENGE_BONUS",
+                          referenceId: `challenge-${challenge.id}`,
+                          cohortId,
+                        },
+                      },
+                    });
+                  } catch (bonusErr) {
+                    console.error(
+                      `[xpStream] challenge bonus XP error for ${contributorId}:`,
+                      bonusErr,
+                    );
+                  }
+
+                  // Grant cosmetic reward if configured
+                  if (challenge.rewardCosmetic) {
+                    try {
+                      await grantCosmeticRewardToProfile(
+                        gqlClient,
+                        contributorId,
+                        challenge.rewardCosmetic,
+                        challenge.id,
+                      );
+                    } catch (cosErr) {
+                      console.warn(
+                        `[xpStream] cosmetic reward error for ${contributorId}:`,
+                        cosErr,
+                      );
+                    }
+                  }
+
+                  // Grant badge reward if configured
+                  if (challenge.rewardBadge) {
+                    try {
+                      await grantChallengeBadgeToProfile(
+                        gqlClient,
+                        contributorId,
+                        challenge.rewardBadge,
+                        challenge.id,
+                        cohortId,
+                      );
+                    } catch (badgeErr) {
+                      console.warn(
+                        `[xpStream] badge reward error for ${contributorId}:`,
+                        badgeErr,
+                      );
+                    }
+                  }
+                }
+
+                // Notify all contributors of the victory
+                for (const contributorId of contributorIds) {
+                  try {
+                    await (gqlClient as any).graphql({
+                      query: CREATE_NOTIFICATION,
+                      variables: {
+                        input: {
+                          recipientId: contributorId,
+                          type: "CHALLENGE_COMPLETE",
+                          title: `Challenge Complete: ${challenge.title}`,
+                          body: `Your cohort completed the challenge! You earned ${finalRewardXP} bonus XP.`,
+                          referenceId: `challenge-${challenge.id}`,
+                          referenceType: "GroupChallenge",
+                          senderName: "System",
+                        },
+                      },
+                    });
+                  } catch (notifErr) {
+                    console.warn(
+                      "[xpStream] challenge completion notification error:",
+                      notifErr,
+                    );
+                  }
+                }
+              }
+            }
+          } catch (challengeErr) {
+            console.warn(
+              `[xpStream] challenge rollup failed for cohort ${cohortId}:`,
+              challengeErr,
             );
           }
         }

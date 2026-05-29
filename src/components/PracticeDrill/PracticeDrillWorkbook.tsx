@@ -148,7 +148,7 @@ export default function PracticeDrillWorkbook({
                   <Chip
                     icon={<GroupsIcon />}
                     size="small"
-                    label={t('practiceDrill.collab.participants', '{{count}} participants', {
+                    label={t('practiceDrill.collab.participants', {
                       count: groupStats.totalParticipants,
                     })}
                     variant="outlined"

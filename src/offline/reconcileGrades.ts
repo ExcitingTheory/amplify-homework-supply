@@ -111,7 +111,7 @@ export async function reconcileOfflineGrades(
         gradeData[blockId] = {
           ...block,
           accuracy: serverResult.score,
-          feedback: serverResult.feedback,
+          feedback: serverResult.reason,
           reconciledFromOffline: true,
           offlineScore,
         };

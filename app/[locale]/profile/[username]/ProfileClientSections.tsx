@@ -2,7 +2,7 @@
 import * as React from "react";
 import { NailedItWall } from "@/components/Gamification/NailedItWall";
 import { AvatarEditor } from "@/components/AvatarEditor";
-import { useXP, useContentLock } from "@/context/gamificationContext";
+import { useXP, useContentLock, useSquad } from "@/context/gamificationContext";
 import { LevelBadge } from "@/components/Gamification/LevelBadge";
 import { AvatarDisplay } from "@/components/Gamification/AvatarDisplay";
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
@@ -81,21 +81,39 @@ export function AvatarSection({
   streak?: number;
 }) {
   const { level } = useXP();
+  const { mySquad } = useSquad();
   const { style: avatarStyle, overrides: avatarOverrides, seed: configSeed, isLoaded, glowRing } = useAvatarConfig();
   const { user } = React.useContext(AuthContext) as any;
 
   // Detect own profile client-side: compare route username with current user
-  const currentUsername = user?.username || user?.attributes?.sub || "";
+  const currentUsername = user?.attributes?.sub || "";
   const isOwnProfile = isOwnProfileHint || (currentUsername && currentUsername === profileUsername);
 
-  // Always use configSeed for own profile (matches toolbar), profileUsername for others
-  const avatarSeed = isOwnProfile ? (configSeed || profileUsername) : profileUsername;
+  // Always use user.attributes.sub as the seed — it's the only value guaranteed
+  // to be identical across all component trees (toolbar, profile, etc.)
+  const avatarSeed = isOwnProfile
+    ? (user?.attributes?.sub || profileUsername)
+    : profileUsername;
 
   if (isOwnProfile) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
         {isLoaded ? (
-          <AvatarEditor />
+          <>
+            <AvatarDisplay
+              seed={avatarSeed}
+              size={128}
+              style={avatarStyle}
+              overrides={avatarOverrides}
+              streak={streak}
+              level={level}
+              glowRing={glowRing}
+              guildCrestSvg={mySquad?.crestSvg ?? null}
+              guildName={mySquad?.name}
+              guildId={mySquad?.id}
+            />
+            <AvatarEditor seed={avatarSeed} hidePreview />
+          </>
         ) : (
           <Box sx={{ width: 128, height: 128 }} />
         )}
@@ -115,6 +133,9 @@ export function AvatarSection({
           streak={streak}
           level={level}
           glowRing={glowRing}
+          guildCrestSvg={mySquad?.crestSvg ?? null}
+          guildName={mySquad?.name}
+          guildId={mySquad?.id}
         />
       ) : (
         <Box sx={{ width: 96, height: 96 }} />

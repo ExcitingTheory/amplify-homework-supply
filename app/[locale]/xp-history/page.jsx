@@ -11,7 +11,6 @@ import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import MainToolbar from "@/components/MainToolbar";
-import MyAuth from "@/components/AmplifyAuthenticator";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { fetchAuthSession } from "aws-amplify/auth";
 
@@ -154,9 +153,5 @@ function XPHistoryContent() {
 }
 
 export default function XPHistoryPage() {
-  return (
-    <MyAuth>
-      <XPHistoryContent />
-    </MyAuth>
-  );
+  return <XPHistoryContent />;
 }

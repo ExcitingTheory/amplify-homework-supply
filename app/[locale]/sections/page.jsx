@@ -41,8 +41,6 @@ import AddIcon from "@mui/icons-material/Add";
 
 import AppShell from "@/components/AppShell";
 import { useAppShell } from "@/components/AppShellContext";
-import MyAuth from "@/components/AmplifyAuthenticator";
-import AppSkeleton from "@/components/AppSkeleton";
 import LazyCardMedia from "@/components/LazyCardMedia";
 import InstructorDashboard from "@/components/InstructorDashboard";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
@@ -388,9 +386,7 @@ function Sections({ user }) {
             <InstructorDashboard sections={ownedSections} />
           )}
 
-          {!sectionsLoaded && sections.length === 0 && (
-            <AppSkeleton variant="sections" />
-          )}
+          {!sectionsLoaded && sections.length === 0 && null}
 
           {sectionsLoaded && sections.length === 0 && (
             //embed url to create a new section
@@ -651,12 +647,10 @@ function Sections({ user }) {
 
 function WrappedPage() {
   return (
-    <MyAuth>
-      <SectionProvider>
-        <Sections />
-        <CollaborativeChatWrapper />
-      </SectionProvider>
-    </MyAuth>
+    <SectionProvider>
+      <Sections />
+      <CollaborativeChatWrapper />
+    </SectionProvider>
   );
 }
 

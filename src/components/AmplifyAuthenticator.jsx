@@ -22,6 +22,7 @@ import { useColorScheme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Hub } from "aws-amplify/utils";
+import AuthContext from "@/context/authContext";
 
 const amplifyAuthTheme = {
   name: "homework-supply-auth",
@@ -152,20 +153,18 @@ export default function MyAuth({ children }) {
   const formFields = getFormFields(t);
   const router = useRouter();
   const { mode } = useColorScheme();
+  const { user: authUser } = React.useContext(AuthContext);
   // Map MUI mode to Amplify UI colorMode ('light' | 'dark' | 'system')
   const colorMode = mode || "system";
 
   React.useEffect(() => {
-    // Listen for successful sign in events
     const hubListener = Hub.listen("auth", ({ payload }) => {
       if (payload.event === "signedIn") {
         console.log("[MyAuth] User signed in, checking for return URL");
-        // Check if there's a return URL stored
         const returnUrl = sessionStorage.getItem("returnUrl");
         if (returnUrl) {
           console.log("[MyAuth] Redirecting to return URL:", returnUrl);
           sessionStorage.removeItem("returnUrl");
-          // Use replace to avoid adding to history
           router.replace(returnUrl);
         }
       }
@@ -173,6 +172,12 @@ export default function MyAuth({ children }) {
 
     return () => hubListener();
   }, [router]);
+
+  // If the user is already authenticated (past the AuthGate), skip the
+  // Authenticator's internal loading state and render children immediately.
+  if (authUser) {
+    return <>{children}</>;
+  }
 
   return (
     <AmplifyThemeProvider theme={amplifyAuthTheme} colorMode={colorMode}>

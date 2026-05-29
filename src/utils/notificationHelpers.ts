@@ -10,7 +10,7 @@ import { getAmplifyClient } from "./amplifyClient";
 
 interface NotificationInput {
   recipientId: string;
-  type: string;
+  type: keyof typeof TYPE_TO_CATEGORY;
   title: string;
   body?: string;
   linkPath?: string;
@@ -22,7 +22,7 @@ interface NotificationInput {
   metadata?: Record<string, unknown>;
 }
 
-const TYPE_TO_CATEGORY: Record<string, string> = {
+const TYPE_TO_CATEGORY = {
   ASSIGNMENT_NEW: "ASSIGNMENT",
   ASSIGNMENT_DUE_SOON: "ASSIGNMENT",
   ASSIGNMENT_DUE_NOW: "ASSIGNMENT",
@@ -52,15 +52,21 @@ const TYPE_TO_CATEGORY: Record<string, string> = {
   CHAT_NEW_MESSAGE: "CHAT",
   SYSTEM_ANNOUNCEMENT: "SYSTEM",
   SYSTEM_MAINTENANCE: "SYSTEM",
-};
+} as const;
+
+type NotificationCategory =
+  (typeof TYPE_TO_CATEGORY)[keyof typeof TYPE_TO_CATEGORY];
 
 /**
  * Create a notification for a single recipient.
  * Uses the Amplify Data Client with user auth.
  */
-export async function sendNotification(input: NotificationInput): Promise<void> {
+export async function sendNotification(
+  input: NotificationInput,
+): Promise<void> {
   const client = getAmplifyClient();
-  const category = TYPE_TO_CATEGORY[input.type] || "SYSTEM";
+  const category: NotificationCategory =
+    TYPE_TO_CATEGORY[input.type] || "SYSTEM";
   try {
     await client.models.Notification.create({
       recipientId: input.recipientId,
@@ -77,10 +83,12 @@ export async function sendNotification(input: NotificationInput): Promise<void> 
       interacted: false,
       expiresAt: input.expiresAt,
       metadata: input.metadata ? JSON.stringify(input.metadata) : undefined,
-      createdAt: new Date().toISOString(),
     });
   } catch (err) {
-    console.warn(`[notification] Failed to send ${input.type} to ${input.recipientId}:`, err);
+    console.warn(
+      `[notification] Failed to send ${input.type} to ${input.recipientId}:`,
+      err,
+    );
   }
 }
 
@@ -102,7 +110,12 @@ export async function sendNotificationToMany(
  * Pre-built notification senders for common events.
  */
 export const notifications = {
-  squadPostNew: (recipientIds: string[], senderName: string, squadId: string, squadName: string) =>
+  squadPostNew: (
+    recipientIds: string[],
+    senderName: string,
+    squadId: string,
+    squadName: string,
+  ) =>
     sendNotificationToMany(recipientIds, {
       type: "SQUAD_POST_NEW",
       title: `New post in ${squadName}`,
@@ -114,7 +127,12 @@ export const notifications = {
       senderName,
     }),
 
-  squadMemberJoined: (recipientIds: string[], memberName: string, squadId: string, squadName: string) =>
+  squadMemberJoined: (
+    recipientIds: string[],
+    memberName: string,
+    squadId: string,
+    squadName: string,
+  ) =>
     sendNotificationToMany(recipientIds, {
       type: "SQUAD_MEMBER_JOINED",
       title: `${memberName} joined ${squadName}`,
@@ -126,7 +144,12 @@ export const notifications = {
       senderName: memberName,
     }),
 
-  practiceSessionInvite: (recipientId: string, senderName: string, roomCode: string, unitName?: string) =>
+  practiceSessionInvite: (
+    recipientId: string,
+    senderName: string,
+    roomCode: string,
+    unitName?: string,
+  ) =>
     sendNotification({
       recipientId,
       type: "PRACTICE_SESSION_INVITE",
@@ -139,7 +162,12 @@ export const notifications = {
       metadata: { roomCode },
     }),
 
-  workbookSessionInvite: (recipientId: string, senderName: string, unitId: string, unitName?: string) =>
+  workbookSessionInvite: (
+    recipientId: string,
+    senderName: string,
+    unitId: string,
+    unitName?: string,
+  ) =>
     sendNotification({
       recipientId,
       type: "WORKBOOK_SESSION_INVITE",
@@ -152,7 +180,12 @@ export const notifications = {
       senderName,
     }),
 
-  challengeStarted: (recipientIds: string[], challengeName: string, challengeId: string, squadId: string) =>
+  challengeStarted: (
+    recipientIds: string[],
+    challengeName: string,
+    challengeId: string,
+    squadId: string,
+  ) =>
     sendNotificationToMany(recipientIds, {
       type: "CHALLENGE_STARTED",
       title: `Challenge Started: ${challengeName}`,
@@ -164,7 +197,12 @@ export const notifications = {
       senderName: "System",
     }),
 
-  challengeCompleted: (recipientIds: string[], challengeName: string, challengeId: string, squadId: string) =>
+  challengeCompleted: (
+    recipientIds: string[],
+    challengeName: string,
+    challengeId: string,
+    squadId: string,
+  ) =>
     sendNotificationToMany(recipientIds, {
       type: "CHALLENGE_COMPLETED",
       title: `Challenge Complete: ${challengeName}`,

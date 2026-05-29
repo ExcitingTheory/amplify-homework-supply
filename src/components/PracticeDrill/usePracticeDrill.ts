@@ -162,7 +162,7 @@ export function usePracticeDrill(
           blocksCompleted: 0,
           complete: false,
           xpAwarded: 0,
-          metadata: result.metadata,
+          metadata: (result as any)?.metadata,
         });
       } catch (err: any) {
         console.error("[usePracticeDrill] Generation error:", err);

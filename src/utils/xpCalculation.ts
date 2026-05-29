@@ -85,6 +85,7 @@ const XP_AMOUNTS: Record<XPReason, number> = {
   [XPReason.ALL_BLOCKS_COMPLETED]: 75,
   [XPReason.PEER_REVIEW_GIVEN]: 40,
   [XPReason.PEER_REVIEW_HOSTED]: 30,
+  [XPReason.PEER_REVIEW_TOP_REVIEWER]: 50,
   [XPReason.NAILED_IT]: 20,
   [XPReason.ON_TIME_SUBMISSION]: 15,
   [XPReason.STREAK_3DAY]: 30,
