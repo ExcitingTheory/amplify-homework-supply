@@ -293,6 +293,63 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/server-actions.js",
       ),
+      // Mock server actions that import amplify_outputs.json (gitignored — missing in CI)
+      [path.resolve(__dirname, "../app/actions/generate")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/generate.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/grading")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/grading.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/chat")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/chat.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/feedback")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/feedback.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/jobs")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/jobs.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/moderate")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/moderate.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/drill")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/drill.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
     };
 
     // Deduplicate React to prevent multiple instances

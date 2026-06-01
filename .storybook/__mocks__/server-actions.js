@@ -39,3 +39,32 @@ export async function generateSkillTreeFromUnit() { return { skills: [] }; }
 export async function discoverEasterEgg() { return { success: true }; }
 export async function generateCampaignNarrative() { return { narrative: '' }; }
 export async function rebuildLeaderboard() { return; }
+
+// --- app/actions/generate ---
+export async function generateSpeech() { return { url: '' }; }
+export async function generateImage() { return { url: '' }; }
+
+// --- app/actions/grading ---
+export async function gradeDefinition() { return { answer: false, reason: 'Mock', score: 0 }; }
+export async function gradeShortAnswer() { return { answer: false, reason: 'Mock', score: 0 }; }
+export async function gradeImage() { return { answer: false, reason: 'Mock', description: 'Mock image', score: 0 }; }
+export async function transcribeAudio() { return { answer: false, reason: 'Mock', transcript: 'Mock transcript', score: 0 }; }
+export async function verifySketchImage() { return { answer: false, reason: 'Mock', accuracy: 0 }; }
+
+// --- app/actions/chat ---
+export async function chatCompletion() { return { content: 'Mock response' }; }
+
+// --- app/actions/feedback ---
+export async function summarizeFeedback() { return { summary: '', insights: [] }; }
+
+// --- app/actions/jobs ---
+export async function listJobs() { return { jobs: [], nextToken: null }; }
+export async function retryJob() { return { success: true }; }
+export async function cancelJob() { return { success: true }; }
+
+// --- app/actions/moderate ---
+export async function moderateContent() { return { flagged: false, categories: {} }; }
+export async function moderateImage() { return { flagged: false, categories: {} }; }
+
+// --- app/actions/drill ---
+export async function generatePracticeDrill() { return { blocks: [] }; }
