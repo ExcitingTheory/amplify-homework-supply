@@ -10,8 +10,10 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import CheckIcon from '@mui/icons-material/Check';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 export interface SpotlightStep {
   /** ID of the step */
@@ -50,6 +52,8 @@ export interface SpotlightOverlayProps {
   onNext?: () => void;
   /** Callback when user clicks Skip */
   onSkip?: () => void;
+  /** Callback when user clicks Back (go to previous step) */
+  onBack?: () => void;
   /** Callback when user completes the flow */
   onComplete?: () => void;
   /** Callback when user closes the spotlight */
@@ -82,6 +86,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   currentStepIndex = 0,
   onNext,
   onSkip,
+  onBack,
   onComplete,
   onClose,
   isOpen,
@@ -91,6 +96,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [iframeRect, setIframeRect] = useState<DOMRect | null>(null);
   const [scrimContainer, setScrimContainer] = useState<HTMLElement | null>(null);
+  const [isPageReady, setIsPageReady] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
@@ -127,6 +133,33 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       tooltipRef.current.style.transform = '';
     }
   }, [currentStepIndex]);
+
+  // Track whether the preview iframe has fully loaded — gates the Next button.
+  // Checks readyState immediately on open/step-change; otherwise waits for the
+  // iframe's load event plus a short settle delay for React to mount inside it.
+  useEffect(() => {
+    if (!isOpen) {
+      setIsPageReady(false);
+      return;
+    }
+    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    if (!isNavigating && iframe?.contentDocument?.readyState === 'complete') {
+      setIsPageReady(true);
+      return;
+    }
+    setIsPageReady(false);
+    const handleLoad = () => {
+      // Extra settle time to let React components mount inside the iframe
+      setTimeout(() => setIsPageReady(true), 400);
+    };
+    iframe?.addEventListener('load', handleLoad, { once: true });
+    return () => iframe?.removeEventListener('load', handleLoad);
+  }, [isOpen, currentStepIndex]);
+
+  // When parent signals navigation start, immediately mark page as not ready
+  useEffect(() => {
+    if (isNavigating) setIsPageReady(false);
+  }, [isNavigating]);
 
   // Drag handlers — direct DOM manipulation for performance
   const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -500,25 +533,26 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   };
 
   const isLastStep = currentStep.isLast || currentStepIndex === steps.length - 1;
+  const isFirstStep = currentStepIndex === 0;
 
-  // Disable Next while navigating or while a targeted element hasn't loaded yet
-  const isNextDisabled = isNavigating || (!!currentStep.targetSelector && !targetRect);
+  // Disable Next while the page is loading, navigating, or target element not found yet
+  const isNextDisabled = isNavigating || !isPageReady || (!!currentStep.targetSelector && !targetRect);
+  const isLoading = isNavigating || !isPageReady;
 
   return (
     <>
-      {/* Scrim + spotlight cutout — rendered inside the iframe's parent so it stays UNDER the addon panel */}
-      {scrimContainer && (
-        <Portal container={scrimContainer}>
+      {/* Scrim + spotlight cutout — fixed over the full Storybook management UI */}
+      <Portal>
           <Box
             ref={overlayRef}
             data-testid="spotlight-overlay"
             sx={{
-              position: 'absolute',
+              position: 'fixed',
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 1,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 9998,
               pointerEvents: 'none',
             }}
           >
@@ -537,18 +571,8 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             <mask id="spotlight-mask">
               {/* White background - visible area */}
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              {/* Black spotlight - transparent area */}
-              {targetRect && iframeRect && (
-                <rect
-                  x={targetRect.left - 8 - iframeRect.left}
-                  y={targetRect.top - 8 - iframeRect.top}
-                  width={targetRect.width + 16}
-                  height={targetRect.height + 16}
-                  rx="8"
-                  fill="black"
-                />
-              )}
-              {targetRect && !iframeRect && (
+              {/* Black spotlight - transparent area (viewport coordinates) */}
+              {targetRect && (
                 <rect
                   x={targetRect.left - 8}
                   y={targetRect.top - 8}
@@ -576,8 +600,8 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           <Box
             sx={{
               position: 'absolute',
-              top: (targetRect.top - 8) - (iframeRect?.top ?? 0),
-              left: (targetRect.left - 8) - (iframeRect?.left ?? 0),
+              top: targetRect.top - 8,
+              left: targetRect.left - 8,
               width: targetRect.width + 16,
               height: targetRect.height + 16,
               border: '3px solid',
@@ -605,7 +629,6 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         )}
       </Box>
         </Portal>
-      )}
 
       {/* Tooltip/Coachmark — separate Portal to body, above everything */}
       <Portal>
@@ -670,15 +693,15 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                 {currentStep.description}
               </Typography>
 
-              {/* Warning if target element not found or page is navigating */}
-              {(isNavigating || (currentStep.targetSelector && !targetRect)) && (
+              {/* Warning if page is loading or target element not found */}
+              {(isLoading || (currentStep.targetSelector && !targetRect)) && (
                 <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(255, 152, 0, 0.1)', borderRadius: 1, borderLeft: '3px solid #FF9800' }}>
                   <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    {isNavigating ? '⏳ Loading page...' : '⚠️ Target Element Not Found'}
+                    {isLoading ? '⏳ Loading page...' : '⚠️ Target Element Not Found'}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}>
-                    {isNavigating
-                      ? 'Navigating to the story. The Next button will be enabled once the page loads.'
+                    {isLoading
+                      ? 'The story page is still loading. Next will be enabled once the page is fully ready.'
                       : 'The component we\'re looking for hasn\'t loaded yet. The spotlight will keep trying to find it. Follow the instructions below to complete this step.'}
                   </Typography>
                 </Box>
@@ -716,12 +739,24 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
               {/* Navigation buttons */}
               <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                {/* Back button — disabled on first step */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onBack}
+                  disabled={isFirstStep || !onBack}
+                  startIcon={<ArrowBackIcon />}
+                  sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
+                  aria-label="Go to previous step"
+                >
+                  Back
+                </Button>
                 <Button
                   variant="outlined"
                   size="small"
                   onClick={onSkip}
                   startIcon={<SkipNextIcon />}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
                 >
                   Skip
                 </Button>
@@ -730,7 +765,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                   size="small"
                   onClick={handleNext}
                   disabled={isNextDisabled}
-                  endIcon={isLastStep ? <CheckIcon /> : <ArrowForwardIcon />}
+                  endIcon={isLoading ? undefined : isLastStep ? <CheckIcon /> : isFirstStep ? <PlayArrowIcon /> : <ArrowForwardIcon />}
                   sx={{ 
                     textTransform: 'none',
                     flex: 1,
@@ -743,7 +778,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                     },
                   }}
                 >
-                  {isNavigating ? 'Loading...' : isLastStep ? 'Done' : 'Next'}
+                  {isLoading ? 'Loading...' : isLastStep ? 'Done' : isFirstStep ? 'Start' : 'Next'}
                 </Button>
               </Stack>
             </CardContent>

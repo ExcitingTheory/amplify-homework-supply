@@ -76,24 +76,43 @@ export default function MediaPlayerComponent({
                     console.log('MediaPlayerComponent.files[id]', files[id]);
 
                     const file = files[id];
+                    // Prefer HLS manifest when available (produced by MediaConvert pipeline)
+                    const hlsPath = file?.hlsUrl;
                     const url = file?.path;
                     
-                    if (key === 0 && url) {
-                        // sign url
-                        const src = await getCachedUrl(url);
-                        if (src) {
-                            // Detect MIME type from file extension
-                            const ext = url.split('.').pop().toLowerCase();
-                            const mimeType = ext === 'mp4' ? 'video/mp4' : 
-                                           ext === 'webm' ? 'video/webm' :
-                                           ext === 'ogg' ? 'audio/ogg' :
-                                           ext === 'wav' ? 'audio/wav' :
-                                           ext === 'm4a' ? 'audio/mp4' :
-                                           'audio/mpeg'; // default for mp3
-                            newSources.push({
-                                src,
-                                type: mimeType,
-                            });
+                    if (key === 0) {
+                        if (hlsPath) {
+                            // When CDN is configured, proxy the manifest through /api/hls.
+                            // The proxy rewrites relative segment paths to absolute CloudFront
+                            // signed URLs so video.js can load each segment directly.
+                            const cdnDomain = process.env.NEXT_PUBLIC_CDN_DOMAIN;
+                            const src = cdnDomain
+                              ? `/api/hls?path=${encodeURIComponent(hlsPath)}`
+                              : await getCachedUrl(hlsPath);
+                            if (src) {
+                                newSources.push({
+                                    src,
+                                    type: 'application/x-mpegURL',
+                                });
+                            }
+                        } else if (url) {
+                            // sign url
+                            const src = await getCachedUrl(url);
+                            if (src) {
+                                // Detect MIME type from file extension
+                                const ext = url.split('.').pop().toLowerCase();
+                                const mimeType = ext === 'mp4' ? 'video/mp4' :
+                                               ext === 'webm' ? 'video/webm' :
+                                               ext === 'm3u8' ? 'application/x-mpegURL' :
+                                               ext === 'ogg' ? 'audio/ogg' :
+                                               ext === 'wav' ? 'audio/wav' :
+                                               ext === 'm4a' ? 'audio/mp4' :
+                                               'audio/mpeg'; // default for mp3
+                                newSources.push({
+                                    src,
+                                    type: mimeType,
+                                });
+                            }
                         }
                     }
                     

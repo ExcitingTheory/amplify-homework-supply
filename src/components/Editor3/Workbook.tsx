@@ -50,7 +50,7 @@ import UnitContext from '../../context/unitContext';
  * Workbook component - read-only editor view for students
  * Displays unit content with grading and progress tracking
  */
-export function Workbook(): JSX.Element {
+export function Workbook(): React.JSX.Element {
   const t = useTranslations('common');
   const { appBarHeight = 48 } = useAppShell();
   const [openTab, setOpenTab] = React.useState<boolean>(false);

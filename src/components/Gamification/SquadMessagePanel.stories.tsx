@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { SquadMessagePanel } from './SquadMessagePanel'
-import { fn } from '@storybook/test'
+import { fn } from 'storybook/test'
 
 const mockSquads = [
   { id: 'squad-1', name: 'Iron Dragons', totalXP: 4250, crestSvg: null },

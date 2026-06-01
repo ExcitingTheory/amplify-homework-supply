@@ -23,14 +23,13 @@ import Skeleton from "@mui/material/Skeleton";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CancelIcon from "@mui/icons-material/Cancel";
-import AdminRouteGuard from "../_components/AdminRouteGuard";
-import { listJobs, retryJob, cancelJob, type JobRecord } from "../../../actions/jobs";
+import { listJobs, retryJob, cancelJob, type JobRecord } from "../../app/actions/jobs";
 
 // ============================================================================
-// Status chip color mapping
+// Helpers
 // ============================================================================
 
-function getStatusColor(status: string): "error" | "warning" | "info" | "success" | "default" {
+export function getStatusColor(status: string): "error" | "warning" | "info" | "success" | "default" {
   switch (status) {
     case "failed":
     case "ERROR":
@@ -54,7 +53,7 @@ function getStatusColor(status: string): "error" | "warning" | "info" | "success
   }
 }
 
-function getTypeLabel(type: string): string {
+export function getTypeLabel(type: string): string {
   switch (type) {
     case "agent_job":
       return "Agent Job";
@@ -67,7 +66,7 @@ function getTypeLabel(type: string): string {
   }
 }
 
-function formatTime(dateStr?: string | null): string {
+export function formatTime(dateStr?: string | null): string {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
   const now = Date.now();
@@ -78,7 +77,7 @@ function formatTime(dateStr?: string | null): string {
   return d.toLocaleDateString();
 }
 
-function getDuration(startedAt?: string | null, completedAt?: string | null): string {
+export function getDuration(startedAt?: string | null, completedAt?: string | null): string {
   if (!startedAt) return "—";
   const start = new Date(startedAt).getTime();
   const end = completedAt ? new Date(completedAt).getTime() : Date.now();
@@ -90,15 +89,15 @@ function getDuration(startedAt?: string | null, completedAt?: string | null): st
 }
 
 // ============================================================================
-// Page Component
+// Component
 // ============================================================================
 
 /**
- * Jobs dashboard accessible to Admins and Instructors.
- * Shows all background processing jobs (document analysis, transcoding, AI tasks)
- * with the ability to retry stuck/failed jobs.
+ * Jobs dashboard for Admins and Instructors.
+ * Shows background processing jobs with retry/cancel actions.
+ * Can be embedded in a panel (compact=true) or used as a full-page view.
  */
-function JobsDashboard() {
+export default function JobsDashboard({ compact = false }: { compact?: boolean }) {
   const [jobs, setJobs] = React.useState<JobRecord[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [typeFilter, setTypeFilter] = React.useState<string>("all");
@@ -115,7 +114,6 @@ function JobsDashboard() {
     try {
       const filter: { status?: string; type?: string } = {};
       if (typeFilter !== "all") filter.type = typeFilter;
-      // "active" shows default (processing + queued + failed), "all" shows everything
       if (statusFilter !== "all" && statusFilter !== "active") {
         filter.status = statusFilter;
       }
@@ -135,7 +133,7 @@ function JobsDashboard() {
     fetchJobs();
   }, [fetchJobs]);
 
-  // Auto-refresh every 30s while page is visible
+  // Auto-refresh every 30s while visible
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") {
@@ -194,32 +192,31 @@ function JobsDashboard() {
   ).length;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+    <Box sx={{ p: compact ? 1.5 : 3 }}>
       {/* Header */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
+          mb: 2,
           flexWrap: "wrap",
-          gap: 2,
+          gap: 1.5,
         }}
       >
-        <Box>
-          <Typography variant="h4">Agent Jobs</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {activeCount > 0 && (
-              <Chip label={`${activeCount} active`} color="warning" size="small" sx={{ mr: 1 }} />
-            )}
-            {failedCount > 0 && (
-              <Chip label={`${failedCount} failed`} color="error" size="small" sx={{ mr: 1 }} />
-            )}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          {activeCount > 0 && (
+            <Chip label={`${activeCount} active`} color="warning" size="small" />
+          )}
+          {failedCount > 0 && (
+            <Chip label={`${failedCount} failed`} color="error" size="small" />
+          )}
+          <Typography variant="body2" color="text.secondary">
             {jobs.length} total jobs
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
             <InputLabel>Type</InputLabel>
             <Select
               value={typeFilter}
@@ -228,11 +225,11 @@ function JobsDashboard() {
             >
               <MenuItem value="all">All Types</MenuItem>
               <MenuItem value="agent_job">Agent Jobs</MenuItem>
-              <MenuItem value="document_analysis">Document Analysis</MenuItem>
+              <MenuItem value="document_analysis">Doc Analysis</MenuItem>
               <MenuItem value="media_transcode">Media Transcode</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 140 }}>
+          <FormControl size="small" sx={{ minWidth: 130 }}>
             <InputLabel>Status</InputLabel>
             <Select
               value={statusFilter}
@@ -250,7 +247,7 @@ function JobsDashboard() {
           </FormControl>
           <Tooltip title="Refresh">
             <span>
-              <IconButton onClick={fetchJobs} disabled={loading}>
+              <IconButton onClick={fetchJobs} disabled={loading} size="small">
                 <RefreshIcon />
               </IconButton>
             </span>
@@ -324,13 +321,19 @@ function JobsDashboard() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {job.owner ? job.owner.slice(0, 12) + "…" : "—"}
+                    <Typography
+                      variant="body2"
+                      sx={{ maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
+                      {job.owner ? job.owner.slice(0, 10) + "…" : "—"}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {job.resourceName || job.resourceId?.slice(0, 12) || "—"}
+                    <Typography
+                      variant="body2"
+                      sx={{ maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
+                      {job.resourceName || job.resourceId?.slice(0, 10) || "—"}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -355,7 +358,7 @@ function JobsDashboard() {
                           variant="body2"
                           color="error"
                           sx={{
-                            maxWidth: 180,
+                            maxWidth: 160,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -408,17 +411,16 @@ function JobsDashboard() {
         </Table>
       </TableContainer>
 
-      {/* Retry All Failed button */}
+      {/* Retry All Failed */}
       {failedCount > 0 && (
         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="outlined"
             color="warning"
+            size="small"
             startIcon={<ReplayIcon />}
             onClick={async () => {
-              const failedJobs = jobs.filter((j) =>
-                ["failed", "ERROR"].includes(j.status)
-              );
+              const failedJobs = jobs.filter((j) => ["failed", "ERROR"].includes(j.status));
               for (const job of failedJobs) {
                 await retryJob(job.id, job.type);
               }
@@ -451,13 +453,5 @@ function JobsDashboard() {
         </Alert>
       </Snackbar>
     </Box>
-  );
-}
-
-export default function AdminJobsPage() {
-  return (
-      <AdminRouteGuard>
-        <JobsDashboard />
-      </AdminRouteGuard>
   );
 }

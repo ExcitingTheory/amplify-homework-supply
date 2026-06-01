@@ -98,6 +98,7 @@ import {
   ACCEPTABLE_IMAGE_TYPES,
 } from "../plugins/DragDropPastePlugin";
 import { INSERT_PLAYLIST_COMMAND } from "../plugins/PlaylistPlugin";
+import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "../plugins/ConversationPlaylistPlugin";
 import { INSERT_IMAGE_COMMAND } from "../plugins/ImagesPlugin";
 import { INSERT_PDF_COMMAND } from "../plugins/PdfViewerPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -159,6 +160,7 @@ import {
 } from "./EnhancedGenerators";
 import { SuggestedVocabulary, SuggestedQuestions } from "./SuggestedContent";
 import RecordingStudio3Modal from "../../RecordingStudio3Modal";
+import RecordingStudioEnhancedModal from "../../RecordingStudioEnhancedModal";
 import { createConversationPreset } from "../../../utils/recordingStudioPresets";
 
 // Utility functions for hybrid search
@@ -3464,6 +3466,149 @@ export default function FileManager2() {
     // Future: save as .fountain file and create/update UnitFile join.
   }, []);
 
+  /**
+   * Save handler for RecordingStudioEnhancedModal.
+   * Uploads each track's recorded clips as protected audio File records, then
+   * inserts a ConversationPlaylistNode into the editor with the resulting file IDs
+   * and dialogue subtitle lines derived from the track prompts.
+   */
+  const handleEnhancedStudioSave = React.useCallback(
+    async (studioState) => {
+      const { tracks = [], filters } = studioState || {};
+      const client = getAmplifyClient();
+
+      try {
+        // Resolve the caller's identityId once
+        const { fetchAuthSession, getCurrentUser } = await import("aws-amplify/auth");
+        const session = await fetchAuthSession();
+        const resolvedIdentityId = session?.identityCredentials?.identityId;
+        const { username: owner } = await getCurrentUser();
+
+        const audioFileIds = [];
+        const dialogue = [];
+
+        for (let trackIdx = 0; trackIdx < tracks.length; trackIdx++) {
+          const track = tracks[trackIdx];
+          for (let clipIdx = 0; clipIdx < (track.clips || []).length; clipIdx++) {
+            const clip = track.clips[clipIdx];
+            if (!clip?.audioBlob) continue;
+
+            const filename = [
+              "conversation",
+              unit?.name?.replace(/[^a-zA-Z0-9]/g, "-") || "audio",
+              track.name?.replace(/[^a-zA-Z0-9]/g, "-") || `track${trackIdx + 1}`,
+              clip.id || clipIdx,
+            ].join("-") + ".mp3";
+
+            const file = new File([clip.audioBlob], filename, {
+              type: "audio/mpeg",
+            });
+
+            const s3Path = `protected/${resolvedIdentityId}/audio/${filename}`;
+            const { uploadData } = await import("aws-amplify/storage");
+            const uploadResult = await uploadData({
+              path: s3Path,
+              data: file,
+              options: { contentType: "audio/mpeg" },
+            }).result;
+
+            const { data: fileRecord } = await client.models.File.create({
+              path: uploadResult.path,
+              owner,
+              identityId: resolvedIdentityId,
+              name: filename,
+              size: file.size,
+              mimeType: "audio/mpeg",
+              level: "PROTECTED",
+            });
+
+            if (fileRecord?.id) {
+              audioFileIds.push(fileRecord.id);
+
+              // Create UnitFile join
+              if (unit?.id) {
+                await client.models.UnitFile.create({
+                  unitID: unit.id,
+                  fileID: fileRecord.id,
+                }).catch((err) =>
+                  console.warn("[FileManager2] UnitFile create error:", err),
+                );
+              }
+
+              // Build a dialogue line from this clip's track prompt
+              if (track.prompt?.trim()) {
+                dialogue.push({
+                  id: audioFileIds.length,
+                  speaker: track.name || `Track ${trackIdx + 1}`,
+                  text: track.prompt,
+                  timing: { start: 0, end: 0 },
+                  audioFileID: fileRecord.id,
+                  stillFileID: null,
+                });
+              }
+            }
+          }
+        }
+
+        // Persist the script as a text/x-fountain File record for re-opening
+        if (audioFileIds.length > 0) {
+          const scriptTitle = unit?.name || "Conversation";
+          const scriptContent = JSON.stringify({
+            title: scriptTitle,
+            tracks: tracks.map((tr) => ({ name: tr.name, voice: tr.voice, prompt: tr.prompt })),
+            dialogue,
+            audioFileIds,
+          });
+          const scriptBlob = new Blob([scriptContent], { type: "text/x-fountain" });
+          const scriptFile = new File(
+            [scriptBlob],
+            `${scriptTitle.replace(/[^a-zA-Z0-9]/g, "-")}-conversation.fountain`,
+            { type: "text/x-fountain" },
+          );
+          const scriptS3Path = `protected/${resolvedIdentityId}/files/${scriptFile.name}`;
+          const { uploadData: uploadScriptData } = await import("aws-amplify/storage");
+          const scriptUploadResult = await uploadScriptData({
+            path: scriptS3Path,
+            data: scriptFile,
+            options: { contentType: "text/x-fountain" },
+          }).result;
+          const { data: scriptFileRecord } = await client.models.File.create({
+            path: scriptUploadResult.path,
+            owner,
+            identityId: resolvedIdentityId,
+            name: scriptFile.name,
+            size: scriptFile.size,
+            mimeType: "text/x-fountain",
+            level: "PROTECTED",
+          });
+          if (scriptFileRecord?.id && unit?.id) {
+            await client.models.UnitFile.create({
+              unitID: unit.id,
+              fileID: scriptFileRecord.id,
+            }).catch((err) =>
+              console.warn("[FileManager2] UnitFile (script) create error:", err),
+            );
+          }
+        }
+
+        // Insert ConversationPlaylistNode into editor
+        if (audioFileIds.length > 0) {
+          editor.dispatchCommand(INSERT_CONVERSATION_PLAYLIST_COMMAND, {
+            fileIDs: audioFileIds,
+            dialogue,
+            scriptTitle: unit?.name || "Conversation",
+            movieFileID: null,
+          });
+        }
+      } catch (err) {
+        console.error("[FileManager2] handleEnhancedStudioSave error:", err);
+      }
+
+      setEnhancedStudioOpen(false);
+    },
+    [unit, editor],
+  );
+
   // // Expand/Collapse handlers
   // const handleExpandAll = () => {
   //     const allFileIds = new Set(files.map(f => f.id));
@@ -3569,6 +3714,9 @@ export default function FileManager2() {
   // RecordingStudio3 modal state
   const [studioOpen, setStudioOpen] = React.useState(false);
   const [studioScriptFile, setStudioScriptFile] = React.useState(null);
+
+  // RecordingStudioEnhanced modal state
+  const [enhancedStudioOpen, setEnhancedStudioOpen] = React.useState(false);
 
   // Load generator tab from localStorage, default to 'all'
   const [generator, setGenerator] = React.useState(() => {
@@ -4567,11 +4715,11 @@ export default function FileManager2() {
               <Tooltip
                 title={t(
                   "fileManager2.toolbar.recordConversation",
-                  "Record Conversation",
+                  "Generate Conversation",
                 )}
               >
                 <IconButton
-                  onClick={() => handleOpenStudio()}
+                  onClick={() => setEnhancedStudioOpen(true)}
                   size="small"
                   aria-label={t(
                     "fileManager2.toolbar.recordConversation",
@@ -5115,6 +5263,19 @@ export default function FileManager2() {
               scriptData={createConversationPreset(unit?.name).scriptData}
               lockedTracks={[]}
               identityId={identityId}
+            />
+
+            {/* RecordingStudioEnhanced Modal — Generate Conversation */}
+            <RecordingStudioEnhancedModal
+              open={enhancedStudioOpen}
+              onClose={() => setEnhancedStudioOpen(false)}
+              onSave={handleEnhancedStudioSave}
+              title={
+                unit?.name
+                  ? `Generate Conversation: ${unit.name}`
+                  : "Generate Conversation"
+              }
+              metadata={{ unitId: unit?.id }}
             />
           </Box>
         </FileManagerProvider>

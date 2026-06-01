@@ -1318,3 +1318,122 @@ describe("B. GraphQL API Tests (Gen 2)", () => {
 afterAll(async () => {
   await signOut();
 });
+
+// ==========================================================================
+// Phase 0-C — getStudentSubmissionUrl Authorization Tests
+// ==========================================================================
+
+describe("C. getStudentSubmissionUrl Authorization", () => {
+  /**
+   * These tests verify that the getStudentSubmissionUrl Lambda enforces
+   * section membership before returning a presigned URL for a student's
+   * private submission file.
+   *
+   * Test matrix:
+   *  - Instructor of the grade's section → should succeed
+   *  - Instructor NOT in the grade's section → should fail
+   *  - Student (Learner) → should be blocked at AppSync auth layer
+   *  - Path traversal attempt (key not under grade owner identity) → should fail
+   */
+
+  let sectionId: string;
+  let gradeId: string;
+  let studentIdentityId: string;
+  const validSubmissionKey = () => `private/${studentIdentityId}/user-submissions/${gradeId}/q1/test_q1_1234567890.mp3`;
+
+  beforeEach(async () => {
+    // Instructor creates a section and a grade for a student
+    await signInAs("instructor1");
+    const session = await fetchAuthSession();
+    const instructorUsername = session.tokens?.accessToken.payload.username as string;
+
+    const { data: section } = await client.models.Section.create({
+      name: "Test Section",
+      description: "For getStudentSubmissionUrl tests",
+      code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      instructor: session.tokens?.accessToken.payload.sub as string,
+      status: "PUBLISHED",
+    });
+    sectionId = section!.id;
+
+    // Student creates a grade in that section
+    await signInAs("student1");
+    const studentSession = await fetchAuthSession();
+    studentIdentityId = studentSession.identityId!;
+
+    const { data: grade } = await client.models.Grade.create({
+      unitID: "test-unit-id",
+      sectionID: sectionId,
+      identityId: studentIdentityId,
+      complete: false,
+      percentComplete: 0,
+    });
+    gradeId = grade!.id;
+  });
+
+  afterEach(async () => {
+    // Cleanup
+    await signInAs("instructor1");
+    if (gradeId) await safeDelete(client.models.Grade, gradeId);
+    if (sectionId) await safeDelete(client.models.Section, sectionId);
+    await signOut();
+  });
+
+  test("Instructor of the section can get submission URL", async () => {
+    await signInAs("instructor1");
+
+    const { data, errors } = await client.queries.getStudentSubmissionUrl({
+      gradeId,
+      submissionKey: validSubmissionKey(),
+    });
+
+    // May return null URL if the S3 object doesn't exist, but should NOT throw
+    // an authorization error (errors array should be empty or undefined)
+    expect(errors).toBeUndefined();
+    // data is either a URL string or null (object not in S3 during tests)
+    // The important assertion is that no auth error was thrown
+  });
+
+  test("Learner cannot call getStudentSubmissionUrl (AppSync blocks it)", async () => {
+    await signInAs("student1");
+
+    const { data, errors } = await client.queries.getStudentSubmissionUrl({
+      gradeId,
+      submissionKey: validSubmissionKey(),
+    });
+
+    // AppSync auth rule allows only Instructors + Admins — learner should get an error
+    expect(errors).toBeDefined();
+    expect(errors!.length).toBeGreaterThan(0);
+    expect(data).toBeNull();
+  });
+
+  test("Path traversal rejected: key not under grade owner identity", async () => {
+    await signInAs("instructor1");
+
+    // Attempt to get a presigned URL for a different user's private file
+    const { data, errors } = await client.queries.getStudentSubmissionUrl({
+      gradeId,
+      submissionKey: "private/other-identity-id/user-submissions/grade-other/q1/file.mp3",
+    });
+
+    expect(errors).toBeDefined();
+    expect(errors!.length).toBeGreaterThan(0);
+    expect(data).toBeNull();
+  });
+
+  test("Instructor NOT in the grade's section is rejected", async () => {
+    // instructor2 did not create the section in beforeEach — they are not the section instructor
+    await signInAs("instructor2");
+
+    const { data, errors } = await client.queries.getStudentSubmissionUrl({
+      gradeId,
+      submissionKey: validSubmissionKey(),
+    });
+
+    // Lambda must reject with an authorization error
+    expect(errors).toBeDefined();
+    expect(errors!.length).toBeGreaterThan(0);
+    expect(data).toBeNull();
+  });
+});

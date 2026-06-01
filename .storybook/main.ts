@@ -27,7 +27,7 @@ const config: StorybookConfig = {
   framework: getAbsolutePath("@storybook/nextjs-vite"),
   staticDirs: [
     { from: "../public", to: "/" },
-    { from: "../mocks", to: "/story-mocks" },
+    { from: "../test/mocks", to: "/story-mocks" },
     { from: "../translation-cache", to: "/translation-cache" },
   ],
 

@@ -13,9 +13,12 @@ import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import WorkIcon from "@mui/icons-material/Work";
 import { useTranslations } from "next-intl";
 import { useNotifications } from "../context/notificationContext";
+import AuthContext from "../context/authContext";
 import NotificationCard from "./NotificationCard";
+import JobsDashboard from "./JobsDashboard";
 
 const CATEGORIES = [
   "ALL",
@@ -43,6 +46,15 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
     markAllSeen,
     deleteNotification,
   } = useNotifications();
+  const { session } = React.useContext(AuthContext);
+
+  const isAdminOrInstructor = useMemo(() => {
+    const groups: string[] = (session as any)?.groups ?? [];
+    return groups.includes("Admins") || groups.includes("Instructors");
+  }, [session]);
+
+  // JOBS_TAB_INDEX is one past the last CATEGORIES index
+  const JOBS_TAB_INDEX = CATEGORIES.length;
 
   const [selectedCategory, setSelectedCategory] = useState(0);
 
@@ -134,10 +146,23 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             />
           );
         })}
+        {isAdminOrInstructor && (
+          <Tab
+            key="jobs"
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <WorkIcon sx={{ fontSize: 16 }} />
+                Jobs
+              </Box>
+            }
+          />
+        )}
       </Tabs>
 
-      {/* Notification list */}
-      {filteredNotifications.length === 0 ? (
+      {/* Jobs tab — admins/instructors only */}
+      {isAdminOrInstructor && selectedCategory === JOBS_TAB_INDEX ? (
+        <JobsDashboard compact />
+      ) : selectedCategory < CATEGORIES.length && filteredNotifications.length === 0 ? (
         <Box
           sx={{
             display: "flex",
@@ -160,7 +185,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             )}
           </Typography>
         </Box>
-      ) : (
+      ) : selectedCategory < CATEGORIES.length ? (
         <Box>
           {filteredNotifications.map((notification) => (
             <NotificationCard
@@ -173,7 +198,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             />
           ))}
         </Box>
-      )}
+      ) : null}
     </Box>
   );
 }

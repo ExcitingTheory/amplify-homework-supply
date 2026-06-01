@@ -28,6 +28,7 @@ export interface ChatMessage {
 export async function chatCompletion(params: {
   messages: ChatMessage[];
   model?: string;
+  responseFormat?: { type: "json_object" | "text" };
 }): Promise<string> {
   const openai = getOpenAI();
   const model = params.model || "gpt-4o";
@@ -37,6 +38,9 @@ export async function chatCompletion(params: {
     messages: params.messages,
     temperature: 0.7,
     maxOutputTokens: 4000,
+    ...(params.responseFormat
+      ? { providerOptions: { openai: { responseFormat: params.responseFormat } } }
+      : {}),
   });
 
   return text;

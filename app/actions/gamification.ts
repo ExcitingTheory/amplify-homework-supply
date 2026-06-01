@@ -281,7 +281,9 @@ export async function discoverEasterEgg(
   const client = getServerClient();
 
   try {
-    return await engineDiscoverEasterEgg(client, { studentId, eggId });
+    const result = await engineDiscoverEasterEgg(client, { studentId, eggId });
+    if (!result || "error" in result) return null;
+    return result;
   } catch (err) {
     console.error("[gamification action] discoverEasterEgg error:", err);
     return null;

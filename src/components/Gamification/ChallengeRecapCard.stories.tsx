@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ChallengeRecapCard } from './ChallengeRecapCard'
-import { fn } from '@storybook/test'
+import { fn } from 'storybook/test'
 
 const mockRecaps = [
   {

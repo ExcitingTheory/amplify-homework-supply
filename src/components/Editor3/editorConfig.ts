@@ -31,6 +31,7 @@ import { CustomAnswerNode } from "./plugins/CustomAnswerPlugin";
 import { CustomAINode } from "./plugins/CustomAIPlugin";
 import { ArmorEditorNode } from "./plugins/ArmorEditorPlugin";
 import { FileMetadataNode } from "./nodes/FileMetadataNode";
+import { ConversationPlaylistNode } from "./plugins/ConversationPlaylistPlugin";
 /**
  * All custom Lexical nodes used in the editor
  * Note: Using any[] due to strict type incompatibilities with custom node implementations
@@ -66,6 +67,7 @@ export const EditorNodes: any[] = [
   CustomAINode,
   ArmorEditorNode,
   FileMetadataNode,
+  ConversationPlaylistNode,
 ];
 
 /**

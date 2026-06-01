@@ -51,6 +51,9 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_YJS_WS_URL: getWebSocketUrl(),
     NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION: process.env.NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION || 'true',
+    // CloudFront CDN domain — populated from amplify_outputs.json during build.
+    // Leave empty for local dev; getCachedUrl and cdnImageLoader fall back gracefully.
+    NEXT_PUBLIC_CDN_DOMAIN: process.env.NEXT_PUBLIC_CDN_DOMAIN || '',
   },
 
   // Reduce build output size for Amplify deployment
@@ -64,9 +67,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Optimize images
+  // Optimize images via CloudFront CDN + pre-generated WebP variants.
+  // Uses a custom loader (src/utils/cdnImageLoader.js) that maps next/image
+  // width requests to the nearest pre-generated variant (small/medium/large.webp).
+  // Falls back gracefully when NEXT_PUBLIC_CDN_DOMAIN is not set (local dev).
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './src/utils/cdnImageLoader.js',
   },
 
   // Turbopack config

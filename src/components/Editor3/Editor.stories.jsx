@@ -18,12 +18,8 @@ import {
   seedMockSections,
 } from "../../../.storybook/__mocks__/aws-amplify-data";
 import kitchenSinkEditorState from "./__fixtures__/kitchenSinkEditorState.json";
-const {
-  MOCK_AUDIO_BASE64,
-  mockWaveformData,
-  MOCK_IMAGE_URL_1,
-  MOCK_IMAGE_URL_2,
-} = await import("../../../.storybook/__mocks__/media");
+const { MOCK_AUDIO_BASE64, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } =
+  await import("../../../.storybook/__mocks__/media");
 const {
   MOCK_JAPANESE_GRAMMAR_PDF,
   MOCK_VOCABULARY_LIST_PDF,
@@ -627,7 +623,6 @@ const mockFiles = [
     size: 2458000,
     identityId: "us-east-1:abc-123",
     level: "PROTECTED",
-    waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
     createdAt: new Date().toISOString(),
   },
   {
@@ -647,7 +642,6 @@ const mockFiles = [
     size: 4856000,
     identityId: "us-east-1:abc-123",
     level: "PROTECTED",
-    waveformData: JSON.stringify(mockWaveformData.slice(50, 250)),
     createdAt: new Date().toISOString(),
   },
   {
@@ -668,7 +662,6 @@ const mockFiles = [
     size: 1234000,
     identityId: "us-east-1:abc-123",
     level: "PROTECTED",
-    waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
     createdAt: new Date().toISOString(),
   },
   {
@@ -723,7 +716,6 @@ export const KitchenSink = {
           context: "education",
           level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
           owner: "mock-user-sub",
           identityId: "us-east-1:abc-123",
         },
@@ -736,7 +728,6 @@ export const KitchenSink = {
           context: "education",
           level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(mockWaveformData.slice(50, 200)),
           owner: "mock-user-sub",
           identityId: "us-east-1:abc-123",
         },
@@ -771,7 +762,6 @@ export const KitchenSink = {
           context: "greetings",
           level: "beginner",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
           owner: "mock-user-sub",
           identityId: "us-east-1:abc-123",
         },

@@ -50,7 +50,7 @@ const imageCache = new CacheFirst({
 });
 
 const s3MediaCache = new CacheFirst({
-  cacheName: "s3-media-v1",
+  cacheName: "s3-media-v2",
   plugins: [
     new ExpirationPlugin({ maxEntries: 300, maxAgeSeconds: 7 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -82,15 +82,20 @@ function stripS3QueryParams(url: URL): string {
 }
 
 /**
- * Detect S3 media requests (audio, video, PDF, images from S3 buckets).
+ * Detect S3 media requests (audio, video, PDF, images from S3 buckets)
+ * or requests to the CloudFront CDN distribution.
  */
 function isS3MediaRequest(url: URL): boolean {
   const hostname = url.hostname;
+  // CloudFront CDN domain is injected at build time via NEXT_PUBLIC_CDN_DOMAIN
+  const cdnDomain = (self as any).__CDN_DOMAIN__ ||
+    (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_CDN_DOMAIN) || '';
   return (
     hostname.includes(".s3.") ||
     hostname.includes("s3.amazonaws.com") ||
     hostname.includes(".s3-") ||
-    hostname.endsWith(".amazonaws.com")
+    hostname.endsWith(".amazonaws.com") ||
+    (cdnDomain !== '' && hostname === cdnDomain)
   );
 }
 
@@ -175,7 +180,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
           .then((response) => {
             if (response.ok) {
               const clone = response.clone();
-              caches.open("s3-media-v1").then((cache) => {
+              caches.open("s3-media-v2").then((cache) => {
                 cache.put(cacheKey, clone);
               });
             }

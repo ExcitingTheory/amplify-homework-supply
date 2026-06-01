@@ -11,6 +11,13 @@ const getCachedUrl = async (filePath) => {
     if (filePath.startsWith('data:') || filePath.startsWith('http://') || filePath.startsWith('https://')) {
         return filePath;
     }
+
+    // Public paths are served directly from CloudFront — no presigning needed.
+    // The CDN URL is stable (no expiry), so we skip the Amplify Cache layer too.
+    const cdnDomain = process.env.NEXT_PUBLIC_CDN_DOMAIN;
+    if (cdnDomain && filePath.startsWith('public/')) {
+        return `https://${cdnDomain}/${filePath}`;
+    }
     
     const cachePath = 'getCachedUrl_' + filePath;
     const cachedFile = await Cache.getItem(cachePath);

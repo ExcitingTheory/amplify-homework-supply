@@ -444,6 +444,15 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   /**
+   * Handle going back to the previous spotlight step
+   */
+  const handleSpotlightBack = () => {
+    if (spotlightCurrentStep > 0) {
+      setSpotlightCurrentStep(spotlightCurrentStep - 1);
+    }
+  };
+
+  /**
    * Handle completing the spotlight tour
    * Does NOT auto-complete the task — the user must actually perform the task
    */
@@ -861,6 +870,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         isNavigating={isNavigating}
         mode={mode}
         onNext={handleSpotlightNext}
+        onBack={handleSpotlightBack}
         onSkip={handleSpotlightSkip}
         onComplete={handleSpotlightComplete}
         onClose={handleSpotlightClose}

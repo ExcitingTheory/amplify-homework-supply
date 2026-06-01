@@ -38,7 +38,6 @@ export default {
 export const WithWaveformData = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     title: "Sample Audio with Waveform",
@@ -57,7 +56,6 @@ export const WithWaveformData = {
 export const CompactPlayer = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 400,
     height: 60,
     showDuration: true,
@@ -75,7 +73,6 @@ export const CompactPlayer = {
 export const WithTitle = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     title: "Student Recording - December 24, 2025",
@@ -93,7 +90,6 @@ export const WithTitle = {
 export const NoDuration = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     showDuration: false,
@@ -145,17 +141,14 @@ export const MultiplePlayersInList = () => {
     {
       id: 1,
       title: 'Pronunciation Practice - "Hello"',
-      waveform: mockWaveformData,
     },
     {
       id: 2,
       title: 'Pronunciation Practice - "Goodbye"',
-      waveform: mockWaveformData.map((v) => v * 0.8),
     },
     {
       id: 3,
       title: 'Pronunciation Practice - "Thank you"',
-      waveform: mockWaveformData.map((v) => v * 1.2),
     },
   ];
 

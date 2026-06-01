@@ -61,7 +61,7 @@ Amplify.configure(
       REST: {
         ...amplifyConfig.API?.REST,
         homeworkSupplyStreamApi: {
-          endpoint: (amplifyOutputs.custom as any).STREAM_API.endpoint,
+          endpoint: ((amplifyOutputs.custom as any).STREAM_API.endpoint as string).replace(/\/$/, ''),
           region: (amplifyOutputs.custom as any).STREAM_API.region,
         },
       },

@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Gamification Engine — Core Business Logic
  *
@@ -1346,7 +1344,7 @@ export async function engineCheckEasterEggs(
     } else if (egg.trigger === "ACHIEVEMENT") {
       // Condition string: "accuracy>=95", "streak>=7", "xp>=1000"
       if (studentStats) {
-        matched = evaluateAchievementCondition(
+        matched = await evaluateAchievementCondition(
           egg.triggerValue || "",
           studentStats,
         );
@@ -2296,7 +2294,10 @@ export async function engineRebuildLeaderboard(
 // evaluateAchievementCondition — Internal helper for ACHIEVEMENT easter eggs
 // ============================================================================
 
-function evaluateAchievementCondition(condition: string, stats: any): boolean {
+async function evaluateAchievementCondition(
+  condition: string,
+  stats: any,
+): Promise<boolean> {
   const match = condition.match(/^(\w+)(>=|<=|>|<|==)(\d+)$/);
   if (!match) return false;
 

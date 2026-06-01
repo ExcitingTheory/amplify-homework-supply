@@ -69,6 +69,7 @@ function LazyImage({
       sizes={sizes || undefined}
       alt={altText}
       ref={imageRef}
+      loading="lazy"
       style={{
         height: "auto",
         maxWidth: "100%",

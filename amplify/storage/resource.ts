@@ -54,11 +54,12 @@ export const storage = defineStorage({
     // Private files - owner (entity_id) only
     // Pattern: private/{entity_id}/*
     // Use for: personal/instructor materials, answer keys
-    // Note: groups added because Cognito group roles override the authenticated
-    // role, so allow.entity('identity') alone is insufficient for group members.
+    // Cross-user access (instructor reviewing student submissions) is mediated
+    // by the getStudentSubmissionUrl Lambda, which validates section membership
+    // before generating a short-lived presigned/signed URL. No group-level
+    // bucket access is granted here — that would bypass the authorization check.
     'private/{entity_id}/*': [
       allow.entity('identity').to(['read', 'write', 'delete']),
-      allow.groups(['Admins', 'Instructors', 'Moderators', 'Learners']).to(['read', 'write', 'delete']),
     ],
 
     // Section handler write access - allows handlers to create files in private paths

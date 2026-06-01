@@ -175,6 +175,10 @@ import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "./MeaningAssociationPl
 import { INSERT_WORD_BLOCK_COMMAND } from "./WordBlockPlugin";
 
 import { INSERT_PLAYLIST_COMMAND } from "./PlaylistPlugin";
+import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "./ConversationPlaylistPlugin";
+import RecordingStudioEnhancedModal from "../../RecordingStudioEnhancedModal";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import { getAmplifyClient } from "../../../utils/amplifyClient";
 
 import { INSERT_QUIZ_COMMAND } from "./QuizPlugin";
 
@@ -329,6 +333,128 @@ const LAYOUTS = [
   { label: "3 columns (25% - 50% - 25%)", value: "1fr 2fr 1fr" },
   { label: "4 columns (equal width)", value: "1fr 1fr 1fr 1fr" },
 ];
+
+/**
+ * Sub-component that renders a "Generate Conversation" MenuItem and manages
+ * the RecordingStudioEnhancedModal lifecycle. Follows the LayoutModal pattern.
+ */
+function GenerateConversationModal({ editor }) {
+  const t = useTranslations("editor.authoring");
+  const [open, setOpen] = React.useState(false);
+  const { unit, identityId } = React.useContext(UnitContext);
+
+  const handleSave = React.useCallback(
+    async (studioState) => {
+      const { tracks = [] } = studioState || {};
+      const client = getAmplifyClient();
+
+      try {
+        const { fetchAuthSession, getCurrentUser } = await import("aws-amplify/auth");
+        const session = await fetchAuthSession();
+        const resolvedIdentityId =
+          session?.identityCredentials?.identityId || identityId;
+        const { username: owner } = await getCurrentUser();
+
+        const audioFileIds = [];
+        const dialogue = [];
+
+        for (let trackIdx = 0; trackIdx < tracks.length; trackIdx++) {
+          const track = tracks[trackIdx];
+          for (let clipIdx = 0; clipIdx < (track.clips || []).length; clipIdx++) {
+            const clip = track.clips[clipIdx];
+            if (!clip?.audioBlob) continue;
+
+            const filename =
+              [
+                "conversation",
+                unit?.name?.replace(/[^a-zA-Z0-9]/g, "-") || "audio",
+                track.name?.replace(/[^a-zA-Z0-9]/g, "-") || `track${trackIdx + 1}`,
+                clip.id || clipIdx,
+              ].join("-") + ".mp3";
+
+            const file = new File([clip.audioBlob], filename, { type: "audio/mpeg" });
+            const s3Path = `protected/${resolvedIdentityId}/audio/${filename}`;
+
+            const { uploadData } = await import("aws-amplify/storage");
+            const uploadResult = await uploadData({
+              path: s3Path,
+              data: file,
+              options: { contentType: "audio/mpeg" },
+            }).result;
+
+            const { data: fileRecord } = await client.models.File.create({
+              path: uploadResult.path,
+              owner,
+              identityId: resolvedIdentityId,
+              name: filename,
+              size: file.size,
+              mimeType: "audio/mpeg",
+              level: "PROTECTED",
+            });
+
+            if (fileRecord?.id) {
+              audioFileIds.push(fileRecord.id);
+              if (unit?.id) {
+                await client.models.UnitFile.create({
+                  unitID: unit.id,
+                  fileID: fileRecord.id,
+                }).catch((err) =>
+                  console.warn("[GenerateConversationModal] UnitFile create error:", err),
+                );
+              }
+              if (track.prompt?.trim()) {
+                dialogue.push({
+                  id: audioFileIds.length,
+                  speaker: track.name || `Track ${trackIdx + 1}`,
+                  text: track.prompt,
+                  timing: { start: 0, end: 0 },
+                  audioFileID: fileRecord.id,
+                  stillFileID: null,
+                });
+              }
+            }
+          }
+        }
+
+        if (audioFileIds.length > 0) {
+          editor.dispatchCommand(INSERT_CONVERSATION_PLAYLIST_COMMAND, {
+            fileIDs: audioFileIds,
+            dialogue,
+            scriptTitle: unit?.name || "Conversation",
+            movieFileID: null,
+          });
+        }
+      } catch (err) {
+        console.error("[GenerateConversationModal] save error:", err);
+      }
+
+      setOpen(false);
+    },
+    [unit, identityId, editor],
+  );
+
+  return (
+    <>
+      <MenuItem tabIndex={-1} onClick={() => setOpen(true)}>
+        <RecordVoiceOverIcon />
+        <span className="text">
+          {t("toolBarPlugin.generateConversation", "Generate Conversation")}
+        </span>
+      </MenuItem>
+      <RecordingStudioEnhancedModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSave={handleSave}
+        title={
+          unit?.name
+            ? `Generate Conversation: ${unit.name}`
+            : "Generate Conversation"
+        }
+        metadata={{ unitId: unit?.id }}
+      />
+    </>
+  );
+}
 
 function LayoutModal({ editor }) {
   const t = useTranslations("editor.authoring");
@@ -1233,6 +1359,8 @@ const InsertNodeDropDown = ({
         </MenuItem>
 
         <LayoutModal editor={editor} />
+
+        <GenerateConversationModal editor={editor} />
 
         <InsertNewTableDialog editor={editor} onClose={handleClose} />
         {/**

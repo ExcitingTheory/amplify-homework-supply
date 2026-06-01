@@ -3,7 +3,7 @@ import { TranslationDemo } from './addons/translation-mode/components/Translatio
 import { withTranslationMode } from './addons/translation-mode';
 
 const meta: Meta<typeof TranslationDemo> = {
-  title: '🌐 Internationalization/Translation Mode',
+  title: 'Translation Mode/Demo',
   component: TranslationDemo,
   decorators: [withTranslationMode],
   parameters: {

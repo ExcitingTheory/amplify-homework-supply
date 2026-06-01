@@ -83,16 +83,21 @@ export async function reconcileOfflineGrades(
     blocksReconciled++;
 
     try {
-      let serverResult: { score: number; feedback: string } | null = null;
+      let serverResult: { answer: boolean; reason: string; score: number } | null = null;
 
       // Use provided cloud grader, or fall back to Server Action
       if (cloudGrader) {
-        serverResult = await cloudGrader({
+        const raw = await cloudGrader({
           answer: block.userAnswer,
           prompt: block.prompt,
           expected: block.expectedAnswer,
           type: "shortAnswer",
         });
+        serverResult = {
+          answer: raw.score >= 50,
+          reason: raw.feedback,
+          score: raw.score,
+        };
       } else {
         serverResult = await gradeShortAnswer({
           question: block.prompt || "",

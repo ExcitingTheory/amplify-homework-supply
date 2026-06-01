@@ -54,6 +54,8 @@ export default function RecordingStudioEnhanced({
   nodeKey,
   onRecordingComplete,
   metadata = {},
+  /** Optional ref — parent can read current state on demand (e.g. modal Save button) */
+  stateRef,
 }) {
   const t = useTranslations("components");
   const [state, dispatch] = useReducer(
@@ -70,6 +72,11 @@ export default function RecordingStudioEnhanced({
     selectionEnd,
   } = state;
   const recording = recordingStatus === "recording";
+
+  // Keep stateRef current so parent modal can read state on Save
+  if (stateRef) {
+    stateRef.current = state;
+  }
 
   // Refs
   const trackContainerRef = useRef(null);

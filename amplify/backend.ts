@@ -38,6 +38,8 @@ import {
   WebSocketApiConstruct,
 } from "./custom/websocket/resource";
 import { MediaConvertConstruct } from "./custom/mediaConvert/resource";
+import { MediaCDNConstruct } from "./custom/mediaCDN/resource";
+import { CfKeyRotationConstruct } from "./custom/cfKeyRotation/resource";
 import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
@@ -329,6 +331,72 @@ const mediaConvert = new MediaConvertConstruct(dataStack, "MediaConvert", {
   bucket: backend.storage.resources.bucket,
   handlerLambda: backend.mediaConvertHandler.resources.lambda,
 });
+
+// ==========================================================================
+// CfKeyRotation — generates RSA key pair and writes to SSM before CloudFront
+// ==========================================================================
+const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation");
+
+// ==========================================================================
+// MediaCDN — CloudFront distribution in front of S3 with OAC
+// ==========================================================================
+
+const mediaCDN = new MediaCDNConstruct(dataStack, "MediaCDN", {
+  bucket: backend.storage.resources.bucket,
+  cfPublicKeyParamName: cfKeyRotation.publicKeyParamName,
+});
+
+// Ensure key pair is written to SSM before the distribution is created/updated
+mediaCDN.node.addDependency(cfKeyRotation);
+
+// Export CDN domain so Next.js and the frontend can construct stable CDN URLs
+backend.addOutput({
+  custom: {
+    CLOUDFRONT: {
+      domain: mediaCDN.distribution.distributionDomainName,
+      distributionId: mediaCDN.distribution.distributionId,
+    },
+  },
+});
+
+// Grant sectionHandler S3 read via IAM role policy only (no bucket policy modification).
+// Using addToRolePolicy instead of bucket.grantRead() avoids a storage→data cross-stack
+// reference which would create a circular dependency between the two nested stacks.
+backend.sectionHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [
+      `${backend.storage.resources.bucket.bucketArn}/private/*`,
+    ],
+  }),
+);
+backend.sectionHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.sectionHandler.addEnvironment(
+  "CDN_DOMAIN",
+  mediaCDN.distribution.distributionDomainName,
+);
+
+// Grant sectionHandler SSM read so it can fetch the CF private key and key pair ID at runtime
+const sectionHandlerSSMPolicy = new Policy(
+  backend.sectionHandler.resources.lambda.stack,
+  "SectionHandlerSSMPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["ssm:GetParameter", "ssm:GetParameters"],
+        resources: [
+          `arn:aws:ssm:${dataStack.region}:${dataStack.account}:parameter/homework-supply/cloudfront/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(
+  sectionHandlerSSMPolicy,
+);
 
 // S3 event notifications via EventBridge — avoids circular dependency between storage and data stacks.
 // Instead of bucket.addEventNotification (which creates storage → data cross-stack ref),

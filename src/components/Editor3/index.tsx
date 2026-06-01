@@ -68,6 +68,7 @@ import AnswerPlugin from './plugins/AnswerPlugin';
 import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
 import CustomAIPlugin from './plugins/CustomAIPlugin';
 import ArmorEditorPlugin from './plugins/ArmorEditorPlugin';
+import ConversationPlaylistPlugin from './plugins/ConversationPlaylistPlugin';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
@@ -475,6 +476,7 @@ export default function Editor(): React.ReactElement {
                 <QuizPlugin />
                 <MeaningAssociationPlugin />
                 <PlaylistPlugin />
+                <ConversationPlaylistPlugin />
                 <PdfViewerPlugin />
                 <AutocompletePlugin />
                 <DragDropPastePlugin />

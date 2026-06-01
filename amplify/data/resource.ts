@@ -2197,6 +2197,23 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(sectionHandler)),
 
+    // Returns a short-lived presigned/signed URL for a student's private submission file.
+    // AppSync enforces that only Instructors and Admins can call this query.
+    // The Lambda further validates the caller is an instructor of the grade's section
+    // and that the submissionKey belongs to the grade owner (path traversal prevention).
+    getStudentSubmissionUrl: a
+      .query()
+      .arguments({
+        gradeId: a.id().required(),
+        submissionKey: a.string().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [
+        allow.group("Instructors"),
+        allow.group("Admins"),
+      ])
+      .handler(a.handler.function(sectionHandler)),
+
     // Gamification Mutations
     awardXP: a
       .mutation()
