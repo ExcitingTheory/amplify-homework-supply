@@ -31,7 +31,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::759854655984:role/GitHubActionsRole
           aws-region: us-east-1
       - name: Generate Amplify outputs
         run: npx ampx generate outputs --branch main --app-id ${{ secrets.AMPLIFY_APP_ID }}
