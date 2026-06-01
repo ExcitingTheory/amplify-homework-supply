@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -140,7 +140,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
     allowedInput,
     promptMethod,
 }) {
-    const { t } = useTranslation('editor.blocks');
+    const t = useTranslations('editor.blocks');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

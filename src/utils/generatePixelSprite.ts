@@ -56,7 +56,7 @@ const PALETTES: string[][] = [
 // ============================================================================
 
 export interface SpriteConfig {
-  /** Deterministic seed string (e.g. studentId, guildId) */
+  /** Deterministic seed string (e.g. studentId, squadId) */
   seed: string
   /** Evolution stage (1-5) — affects grid size, palette, complexity */
   stage?: number

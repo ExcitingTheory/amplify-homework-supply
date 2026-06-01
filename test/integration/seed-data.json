@@ -1,0 +1,964 @@
+{
+  "generatedAt": "2026-05-25T08:06:18.209Z",
+  "users": {
+    "admin": {
+      "username": "admin@example.com",
+      "sub": "34c86438-2021-70cd-602f-1341774bd4c8",
+      "group": "Admins"
+    },
+    "instructor1": {
+      "username": "instructor1@example.com",
+      "sub": "64485468-a001-7056-9f7f-08bbcc1a9b71",
+      "identityId": "us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d",
+      "group": "Instructors"
+    },
+    "instructor2": {
+      "username": "instructor2@example.com",
+      "group": "Instructors"
+    },
+    "student1": {
+      "username": "student1@example.com",
+      "sub": "a41884f8-30d1-7050-efd7-0233536c8e27",
+      "identityId": "us-east-1:b0eadde9-f0e5-c890-e26c-c02c1ce078d7",
+      "group": "Learners"
+    },
+    "student2": {
+      "username": "student2@example.com",
+      "group": "Learners"
+    }
+  },
+  "words": [
+    {
+      "id": "27849720-6e7e-4f43-9b09-805eb911e034",
+      "phrase": "こんにちは",
+      "pronunciation": "konnichiwa",
+      "definition": "Hello (daytime greeting)"
+    },
+    {
+      "id": "7489938c-8775-4814-bbbe-5f0a2b377742",
+      "phrase": "ありがとう",
+      "pronunciation": "arigatou",
+      "definition": "Thank you"
+    },
+    {
+      "id": "c3e7336d-6286-414e-b5a6-3b32be20a0f8",
+      "phrase": "さようなら",
+      "pronunciation": "sayounara",
+      "definition": "Goodbye"
+    },
+    {
+      "id": "c6856a55-4973-4c43-9c2b-eebc9c058ee7",
+      "phrase": "photosynthesis",
+      "pronunciation": "foh-toh-SIN-thuh-sis",
+      "definition": "The process by which plants use sunlight to convert carbon dioxide and water into glucose and oxygen"
+    },
+    {
+      "id": "3070372d-6cd5-4b3c-9e8b-0c6cde6f9936",
+      "phrase": "chloroplast",
+      "pronunciation": "KLOR-uh-plast",
+      "definition": "Organelle in plant cells where photosynthesis occurs"
+    }
+  ],
+  "questions": [
+    {
+      "id": "2f37e946-fdf9-4cdb-b4e0-2994c0a2392e",
+      "prompt": "What is the Japanese word for \"hello\"?",
+      "answer": "こんにちは (konnichiwa)"
+    },
+    {
+      "id": "6f56c38d-2d73-443f-9af0-b3c902395566",
+      "prompt": "What is the main product of photosynthesis?",
+      "answer": "Glucose (sugar) and oxygen"
+    },
+    {
+      "id": "24dd9deb-2753-4fb7-9d75-8121805913c2",
+      "prompt": "In which organelle does photosynthesis occur?",
+      "answer": "Chloroplast"
+    }
+  ],
+  "units": [
+    {
+      "id": "0cb9f9dd-ae1c-4270-be3e-c023ba702ca7",
+      "name": "Japanese Greetings",
+      "status": "PUBLISHED"
+    },
+    {
+      "id": "6d49fdd0-72ca-4ec3-b7b0-332ca7cc0a40",
+      "name": "Photosynthesis",
+      "status": "PUBLISHED"
+    },
+    {
+      "id": "2bc990f1-eecc-40e8-9df7-78dded6936de",
+      "name": "Advanced Japanese Verbs",
+      "status": "DRAFT"
+    },
+    {
+      "id": "c75f0c5b-6254-49c6-a4a5-a0db7f995798",
+      "name": "AI Biology Exercise",
+      "status": "PUBLISHED"
+    }
+  ],
+  "sections": [
+    {
+      "id": "e661852a-fa07-4c11-9598-76c7ac6ca536",
+      "name": "Japanese 101 - Period 1",
+      "code": "JPN101-P1"
+    },
+    {
+      "id": "81e94c07-bedb-4663-a3a5-3c7bb9d15d15",
+      "name": "Biology 101 - Period 3",
+      "code": "BIO101-P3"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "634b9280-19d9-4b7b-b6fd-782dc27fa4e9",
+      "sectionID": "e661852a-fa07-4c11-9598-76c7ac6ca536",
+      "unitID": "0cb9f9dd-ae1c-4270-be3e-c023ba702ca7"
+    },
+    {
+      "id": "917a40bd-fca0-41c8-b17c-df0fc251cc45",
+      "sectionID": "e661852a-fa07-4c11-9598-76c7ac6ca536",
+      "unitID": "0cb9f9dd-ae1c-4270-be3e-c023ba702ca7"
+    },
+    {
+      "id": "55c8df82-374c-4e99-a755-1501ca2f7e21",
+      "sectionID": "81e94c07-bedb-4663-a3a5-3c7bb9d15d15",
+      "unitID": "6d49fdd0-72ca-4ec3-b7b0-332ca7cc0a40"
+    },
+    {
+      "id": "fc650565-c07e-4fef-8eb6-49b0c4f6dbce",
+      "sectionID": "81e94c07-bedb-4663-a3a5-3c7bb9d15d15",
+      "unitID": "6d49fdd0-72ca-4ec3-b7b0-332ca7cc0a40"
+    }
+  ],
+  "grades": [
+    {
+      "id": "0b7ed46b-e8a1-4a65-9842-01d1ac544eda",
+      "unitID": "0cb9f9dd-ae1c-4270-be3e-c023ba702ca7",
+      "sectionID": "e661852a-fa07-4c11-9598-76c7ac6ca536",
+      "complete": true
+    },
+    {
+      "id": "f95e86f2-7611-4e82-9c7e-1ea08693df6e",
+      "unitID": "6d49fdd0-72ca-4ec3-b7b0-332ca7cc0a40",
+      "sectionID": "81e94c07-bedb-4663-a3a5-3c7bb9d15d15",
+      "complete": false
+    },
+    {
+      "id": "6349cf62-cd06-4117-b602-e4d2cbe6aa98",
+      "unitID": "0cb9f9dd-ae1c-4270-be3e-c023ba702ca7",
+      "sectionID": "e661852a-fa07-4c11-9598-76c7ac6ca536",
+      "complete": false
+    }
+  ],
+  "files": [
+    {
+      "id": "d86888e3-8551-499f-b09c-8c9142116617",
+      "name": "chloroplast-diagram.jpg",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/chloroplast-diagram.jpg",
+      "mimeType": "image/jpeg"
+    },
+    {
+      "id": "627eae0a-2a87-4b92-826b-266bf72dee40",
+      "name": "animals-photo.jpg",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/animals-photo.jpg",
+      "mimeType": "image/jpeg"
+    },
+    {
+      "id": "2c550dae-27c0-434c-935a-319e524ce3d3",
+      "name": "pattern-texture.png",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/pattern-texture.png",
+      "mimeType": "image/png"
+    },
+    {
+      "id": "6b091086-4ebd-4887-b279-e9ab31e71e11",
+      "name": "japanese-grammar-guide.pdf",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/japanese-grammar-guide.pdf",
+      "mimeType": "application/pdf"
+    },
+    {
+      "id": "0133f28d-07be-4d5e-88fa-02685c103867",
+      "name": "science-lesson-water-cycle.pdf",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/science-lesson-water-cycle.pdf",
+      "mimeType": "application/pdf"
+    },
+    {
+      "id": "67c7c931-ed03-4863-8cad-c7fe7bf80ad5",
+      "name": "biology-cell-structure.docx",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/biology-cell-structure.docx",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "id": "fde41efa-5b7b-4b0e-a398-5c0eed08d5db",
+      "name": "science-lesson-water-cycle.docx",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/science-lesson-water-cycle.docx",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "id": "4b7545f9-a1c5-43c8-8e34-ea0ca70bc851",
+      "name": "french-seasons-vocabulary.txt",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/french-seasons-vocabulary.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "8b6317e5-4a7b-4bde-95c1-b4b30db25375",
+      "name": "spanish-ar-verbs.txt",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/spanish-ar-verbs.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "b6f66cfd-d04f-4eff-87b9-5fad46c362f6",
+      "name": "philosophy-presocratics.txt",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/philosophy-presocratics.txt",
+      "mimeType": "text/plain"
+    },
+    {
+      "id": "32421ef0-5e9e-4f33-9257-e49a1ec4adf6",
+      "name": "japanese-grammar-guide.md",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/japanese-grammar-guide.md",
+      "mimeType": "text/markdown"
+    },
+    {
+      "id": "365c7322-551e-46db-8ea8-5de5f47ebe3e",
+      "name": "biology-cell-structure.md",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/biology-cell-structure.md",
+      "mimeType": "text/markdown"
+    },
+    {
+      "id": "f7469737-22c0-4c47-b11d-6567254cda66",
+      "name": "biology-vocabulary-list.csv",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/biology-vocabulary-list.csv",
+      "mimeType": "text/csv"
+    },
+    {
+      "id": "229a0330-138a-4e11-bac0-9ab20f382a6b",
+      "name": "spanish-verbs-vocabulary.csv",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/spanish-verbs-vocabulary.csv",
+      "mimeType": "text/csv"
+    },
+    {
+      "id": "a807e2e7-4e5c-4e2c-9df9-36006fc4a6db",
+      "name": "philosophy-presocratics.rtf",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/philosophy-presocratics.rtf",
+      "mimeType": "application/rtf"
+    },
+    {
+      "id": "57fbfba0-13b5-44b4-8616-b40429a51187",
+      "name": "water-cycle-guide.epub",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/water-cycle-guide.epub",
+      "mimeType": "application/epub+zip"
+    },
+    {
+      "id": "fb224e49-0529-4533-874f-04c348ccaf78",
+      "name": "spanish-quiz.gift",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/spanish-quiz.gift",
+      "mimeType": "text/x-gift"
+    },
+    {
+      "id": "cdd2590c-f7b5-4a7d-8398-1d1927f3e430",
+      "name": "biology-cell-quiz.qti",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/biology-cell-quiz.qti",
+      "mimeType": "application/x-qti+xml"
+    },
+    {
+      "id": "33613611-f30f-40cc-aaa1-ee595befee94",
+      "name": "japanese-grammar-course.imscc",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/japanese-grammar-course.imscc",
+      "mimeType": "application/x-imscc+zip"
+    },
+    {
+      "id": "6aadde90-b253-4790-b884-957dadf0429c",
+      "name": "biology-photosynthesis-scorm.zip",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/biology-photosynthesis-scorm.zip",
+      "mimeType": "application/zip"
+    },
+    {
+      "id": "4031c342-6068-4b03-99ca-6f28858a398d",
+      "name": "cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      "mimeType": "audio/mpeg"
+    },
+    {
+      "id": "66c51847-65f0-4737-82c6-00509249f4dd",
+      "name": "descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+      "mimeType": "audio/mpeg"
+    },
+    {
+      "id": "23a08856-4aae-4642-9396-102415b23f26",
+      "name": "sound-design-elements-sfx-ps-022-302865.mp3",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/sound-design-elements-sfx-ps-022-302865.mp3",
+      "mimeType": "audio/mpeg"
+    },
+    {
+      "id": "bb9b512a-ed52-4809-9fc8-eca4c892f873",
+      "name": "sample-tone.wav",
+      "path": "protected/us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d/files/sample-tone.wav",
+      "mimeType": "audio/wav"
+    }
+  ],
+  "documents": [
+    {
+      "id": "f7f8aa10-49cd-4a54-8cfc-28632fb2d9df",
+      "filename": "photosynthesis-notes.pdf",
+      "s3Key": "public/documents/photosynthesis-notes.pdf",
+      "status": "completed"
+    },
+    {
+      "id": "dcac6d1b-781c-4c9a-acbd-1a1db3601931",
+      "filename": "japanese-grammar.pdf",
+      "s3Key": "public/documents/japanese-grammar.pdf",
+      "status": "uploaded"
+    }
+  ],
+  "analyticsSummaries": [
+    {
+      "id": "ba74498e-238b-4394-bc20-944557440276",
+      "date": "2026-04-26",
+      "dailyActiveUsers": 16,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "8b5a23bf-3d95-4e2f-b9de-9f2c77e95d23",
+      "date": "2026-04-26",
+      "dailyActiveUsers": 5,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 87
+    },
+    {
+      "id": "86e58c17-e2bd-4d32-b77a-5f39f658b8c5",
+      "date": "2026-04-26",
+      "dailyActiveUsers": 4,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "4e77ce99-05bd-48c4-97e9-a90df10233f9",
+      "date": "2026-04-27",
+      "dailyActiveUsers": 23,
+      "gradesSubmitted": 24,
+      "avgAccuracy": 81
+    },
+    {
+      "id": "d99d59b2-3cdf-4c7a-bb8e-47379755b031",
+      "date": "2026-04-27",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 12,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "0a9b36a8-13f0-4ad8-b088-56d6a5481284",
+      "date": "2026-04-27",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "d4f7b1d7-05d1-429c-86a9-fee778f92ec6",
+      "date": "2026-04-28",
+      "dailyActiveUsers": 25,
+      "gradesSubmitted": 20,
+      "avgAccuracy": 72
+    },
+    {
+      "id": "82768240-7165-47d0-b68b-2a01f2bf371a",
+      "date": "2026-04-28",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 6,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "186ebfe4-3f21-477d-8174-d6a798632643",
+      "date": "2026-04-28",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 81
+    },
+    {
+      "id": "2417e49c-65ef-471d-ad47-3e0df4c508ed",
+      "date": "2026-04-29",
+      "dailyActiveUsers": 25,
+      "gradesSubmitted": 17,
+      "avgAccuracy": 82
+    },
+    {
+      "id": "3af3c720-b603-43b1-97fe-295241282bac",
+      "date": "2026-04-29",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 75
+    },
+    {
+      "id": "6dfba442-417b-4a0f-af12-30a09c7bafff",
+      "date": "2026-04-29",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 61
+    },
+    {
+      "id": "a0a0b188-6c35-4754-8529-1436b427ed26",
+      "date": "2026-04-30",
+      "dailyActiveUsers": 34,
+      "gradesSubmitted": 25,
+      "avgAccuracy": 91
+    },
+    {
+      "id": "82ba0259-4624-4eda-8c44-b71cdb0aab5c",
+      "date": "2026-04-30",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 92
+    },
+    {
+      "id": "b7655bfd-053f-433d-8ff7-1fd651d98385",
+      "date": "2026-04-30",
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "e73d1462-7f79-4fe6-9ba1-ce718b96af1d",
+      "date": "2026-05-01",
+      "dailyActiveUsers": 35,
+      "gradesSubmitted": 18,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "d6afd8de-64c0-47d6-9dd3-b69b67786db4",
+      "date": "2026-05-01",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 74
+    },
+    {
+      "id": "a774bd9f-a864-437f-8648-095cfb5b8a9e",
+      "date": "2026-05-01",
+      "dailyActiveUsers": 16,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 87
+    },
+    {
+      "id": "e9956b3e-2a1b-4cff-a40b-61d4901107f5",
+      "date": "2026-05-02",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "050d5be2-9fad-47bd-a096-76d615e6e48b",
+      "date": "2026-05-02",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "e0846bbd-2b40-4c8f-bbc6-e136adf766fd",
+      "date": "2026-05-02",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 71
+    },
+    {
+      "id": "520f205e-001b-492c-82ec-e344700133de",
+      "date": "2026-05-03",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 79
+    },
+    {
+      "id": "2b0550d6-9c91-436a-9f72-3faaec59fbe5",
+      "date": "2026-05-03",
+      "dailyActiveUsers": 3,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "8af3f804-db30-45ad-8483-bac2caa723f6",
+      "date": "2026-05-03",
+      "dailyActiveUsers": 3,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 61
+    },
+    {
+      "id": "cdcb25f0-7bb2-469b-a319-5dcda8d1c1f9",
+      "date": "2026-05-04",
+      "dailyActiveUsers": 26,
+      "gradesSubmitted": 11,
+      "avgAccuracy": 78
+    },
+    {
+      "id": "fbad5498-bfb6-48ed-94e6-d892785bf0ab",
+      "date": "2026-05-04",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 84
+    },
+    {
+      "id": "2d9e29cc-7a79-4427-8152-a4e3b70c1c76",
+      "date": "2026-05-04",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 62
+    },
+    {
+      "id": "d30fb9d4-0b6f-46d7-9a5d-505cad46e7c0",
+      "date": "2026-05-05",
+      "dailyActiveUsers": 27,
+      "gradesSubmitted": 23,
+      "avgAccuracy": 89
+    },
+    {
+      "id": "0f676b04-4b43-4fa2-b8c5-7bd079870639",
+      "date": "2026-05-05",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 6,
+      "avgAccuracy": 67
+    },
+    {
+      "id": "694afe42-c28e-4c15-9aa0-cadf1623f0e7",
+      "date": "2026-05-05",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 77
+    },
+    {
+      "id": "a3be91c9-0daf-4a70-891a-20a63416941f",
+      "date": "2026-05-06",
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "1ebaa1c5-28d2-4ef4-8889-d4e898355f24",
+      "date": "2026-05-06",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 66
+    },
+    {
+      "id": "b2e186e8-dbf1-4d52-8ed0-7e8b8cf5231b",
+      "date": "2026-05-06",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 69
+    },
+    {
+      "id": "37dc2385-d63f-41cd-b136-913998967b60",
+      "date": "2026-05-07",
+      "dailyActiveUsers": 33,
+      "gradesSubmitted": 21,
+      "avgAccuracy": 77
+    },
+    {
+      "id": "2beaeef9-f19c-42a0-9244-bbe044ddf743",
+      "date": "2026-05-07",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 92
+    },
+    {
+      "id": "4a50aa55-89f0-4b79-9dc7-4d4996a9ea7f",
+      "date": "2026-05-07",
+      "dailyActiveUsers": 19,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 78
+    },
+    {
+      "id": "e4bd6f90-7d99-4d54-8537-8ab8d35b071e",
+      "date": "2026-05-08",
+      "dailyActiveUsers": 32,
+      "gradesSubmitted": 19,
+      "avgAccuracy": 87
+    },
+    {
+      "id": "7fa89dc3-b5cb-42e5-b24c-ee0a4fb29163",
+      "date": "2026-05-08",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 96
+    },
+    {
+      "id": "c5d830c7-6c67-4c0b-84c6-b1b763503550",
+      "date": "2026-05-08",
+      "dailyActiveUsers": 18,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "fad32969-fe48-4bb4-8817-074be258b46a",
+      "date": "2026-05-09",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "0f834e50-5406-4b2f-bf74-22a22159e9d1",
+      "date": "2026-05-09",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "507d87ab-84dc-489c-94af-8a8436e53058",
+      "date": "2026-05-09",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "037bd643-d261-43b1-bbfd-b1cf045229e1",
+      "date": "2026-05-10",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 69
+    },
+    {
+      "id": "ed6dd04f-9809-4c7e-9093-56f5233af6b8",
+      "date": "2026-05-10",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "bb0ee7a4-d3e9-4ad1-9e5a-95db295b2d88",
+      "date": "2026-05-10",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "30417bdc-f5a6-4060-996e-b16a89a7c8bf",
+      "date": "2026-05-11",
+      "dailyActiveUsers": 25,
+      "gradesSubmitted": 18,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "3dd08062-55a3-473b-9fbf-561fc4f76510",
+      "date": "2026-05-11",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 93
+    },
+    {
+      "id": "f5a3944d-04cd-4138-9dea-c986bf093193",
+      "date": "2026-05-11",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 75
+    },
+    {
+      "id": "d4bd802e-4628-4024-a9d8-b769e6ec75ba",
+      "date": "2026-05-12",
+      "dailyActiveUsers": 22,
+      "gradesSubmitted": 24,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "260671e7-7cc9-4f93-ace1-02668a7bfbc2",
+      "date": "2026-05-12",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 80
+    },
+    {
+      "id": "614dc2eb-0472-4b82-886f-7dea80a25bd9",
+      "date": "2026-05-12",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "dcdd958a-386b-4e01-a2fd-a89461c560e6",
+      "date": "2026-05-13",
+      "dailyActiveUsers": 24,
+      "gradesSubmitted": 19,
+      "avgAccuracy": 82
+    },
+    {
+      "id": "e62ec529-916f-4ac1-8687-f4b72b8ffc0a",
+      "date": "2026-05-13",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 69
+    },
+    {
+      "id": "526c72e9-d067-4f10-bd81-e9f137e59123",
+      "date": "2026-05-13",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "cd470011-1132-4ebc-ab14-aa196c5473fc",
+      "date": "2026-05-14",
+      "dailyActiveUsers": 33,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "72d249c4-6599-428b-87e7-f7465586890c",
+      "date": "2026-05-14",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "60ef2da9-9187-43d4-97c3-cdd50c5da0dc",
+      "date": "2026-05-14",
+      "dailyActiveUsers": 16,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 77
+    },
+    {
+      "id": "6ac4495e-cafd-4e8a-82af-7ed7371c4040",
+      "date": "2026-05-15",
+      "dailyActiveUsers": 21,
+      "gradesSubmitted": 22,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "40465ce4-ddcf-40ae-befb-e6d6b587cf01",
+      "date": "2026-05-15",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 78
+    },
+    {
+      "id": "5104ded6-7caa-40ac-b1c4-4e097c1a7806",
+      "date": "2026-05-15",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 62
+    },
+    {
+      "id": "39503a8d-354f-418f-93d8-a0a8e3bdb725",
+      "date": "2026-05-16",
+      "dailyActiveUsers": 5,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 72
+    },
+    {
+      "id": "0eb0d31a-24bc-4eb2-a21d-c4bcb76f262d",
+      "date": "2026-05-16",
+      "dailyActiveUsers": 1,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 92
+    },
+    {
+      "id": "23dbc985-7ec5-45e7-b207-b1ed11331cc5",
+      "date": "2026-05-16",
+      "dailyActiveUsers": 1,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 77
+    },
+    {
+      "id": "b64c24f4-5122-4bd4-9a4f-8c46d3320a29",
+      "date": "2026-05-17",
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "0791d8a9-486a-4c30-8071-05bce1c3603e",
+      "date": "2026-05-17",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 87
+    },
+    {
+      "id": "ce6d8315-047b-4df1-bf8f-88a1c900dd22",
+      "date": "2026-05-17",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "7bf85f9a-bce9-4d5c-935a-83db1aa2a84b",
+      "date": "2026-05-18",
+      "dailyActiveUsers": 30,
+      "gradesSubmitted": 17,
+      "avgAccuracy": 69
+    },
+    {
+      "id": "aa199f3c-42f6-43ef-87dc-c866f41f0996",
+      "date": "2026-05-18",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "58d53564-5166-40f3-937c-f1accbd5bb21",
+      "date": "2026-05-18",
+      "dailyActiveUsers": 14,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "c2cfde92-6296-4f79-bb75-ebed055bd46e",
+      "date": "2026-05-19",
+      "dailyActiveUsers": 26,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "126106d2-2d7d-40a5-89bd-b323bacf2370",
+      "date": "2026-05-19",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 60
+    },
+    {
+      "id": "7798f3bf-941a-43f0-a2c8-8a001ac9accb",
+      "date": "2026-05-19",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 70
+    },
+    {
+      "id": "3878588e-915a-4479-bf52-aa38fa44a3d0",
+      "date": "2026-05-20",
+      "dailyActiveUsers": 31,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "b721c979-051a-4f81-a7c1-a2b012405d18",
+      "date": "2026-05-20",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 78
+    },
+    {
+      "id": "e61cd220-adf3-43a7-af3e-3eae681e1e8a",
+      "date": "2026-05-20",
+      "dailyActiveUsers": 16,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 91
+    },
+    {
+      "id": "d468961b-6ee2-4fa7-8429-bf7a5f6a4a33",
+      "date": "2026-05-21",
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 25,
+      "avgAccuracy": 84
+    },
+    {
+      "id": "3f3d375c-4a86-4845-9dcf-9e02347b51d5",
+      "date": "2026-05-21",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 92
+    },
+    {
+      "id": "b22d6c58-4de1-4806-9821-937357203a50",
+      "date": "2026-05-21",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 79
+    },
+    {
+      "id": "2a9b421a-930f-48c8-a857-198044716c39",
+      "date": "2026-05-22",
+      "dailyActiveUsers": 28,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 67
+    },
+    {
+      "id": "80fe94c3-eef7-4d8c-9581-3d52d76099b7",
+      "date": "2026-05-22",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 77
+    },
+    {
+      "id": "8b2ec331-385b-4b1b-a763-f33207757df7",
+      "date": "2026-05-22",
+      "dailyActiveUsers": 14,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 74
+    },
+    {
+      "id": "6fc137a9-7cf3-4896-bdd8-aa3a4c293675",
+      "date": "2026-05-23",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "c23339e3-055b-4150-a290-e0553760586b",
+      "date": "2026-05-23",
+      "dailyActiveUsers": 3,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 91
+    },
+    {
+      "id": "7b442133-3d63-49e3-9333-03f46c3b70fc",
+      "date": "2026-05-23",
+      "dailyActiveUsers": 2,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 87
+    },
+    {
+      "id": "ee4500f8-df68-4060-8cb6-42503c42c6c3",
+      "date": "2026-05-24",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 6,
+      "avgAccuracy": 79
+    },
+    {
+      "id": "533c3d6a-aa14-469d-a661-2bd60813514d",
+      "date": "2026-05-24",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 63
+    },
+    {
+      "id": "0266b590-7f11-4860-b591-2f9ffb7fe3f4",
+      "date": "2026-05-24",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 71
+    },
+    {
+      "id": "fb5cecf1-0ac4-4f30-a95d-8ab5d6bfcbbd",
+      "date": "2026-05-25",
+      "dailyActiveUsers": 27,
+      "gradesSubmitted": 12,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "c65c08da-bd83-4b41-a824-9be2da926e8c",
+      "date": "2026-05-25",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "24ad107c-3090-49a1-a8cd-43eb28d2abca",
+      "date": "2026-05-25",
+      "dailyActiveUsers": 14,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 84
+    }
+  ],
+  "squads": [
+    {
+      "id": "2042ed3b-eb5d-408b-9b58-3295096d94b2",
+      "name": "Dragon Scholars"
+    },
+    {
+      "id": "ea61ad51-2511-405d-a6a5-c9293477f9af",
+      "name": "Phoenix Writers"
+    }
+  ],
+  "homeworkRoom": {
+    "id": "de68baac-bd67-46bb-9470-62514caf9626",
+    "code": "REVIEW1"
+  },
+  "platformSettings": {
+    "id": "477f0651-6ec0-4f32-a13a-22675a497bb6"
+  }
+}

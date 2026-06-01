@@ -1,10 +1,10 @@
 import * as React from 'react';
 import Typography from '@mui/material/Typography';
 import MuiLink from '@mui/material/Link';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 export default function Copyright() {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   
   return (
     <Typography variant="body2" color="text.secondary" align="center">

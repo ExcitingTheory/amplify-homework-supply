@@ -1,3 +1,4 @@
+"use client";
 /**
  * StreakCalendar — Displays a compact monthly calendar grid showing activity days.
  *
@@ -56,8 +57,8 @@ export function StreakCalendar({ activeDays, year, month }: StreakCalendarProps)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
 
   return (
-    <Box sx={{ maxWidth: 200 }}>
-      <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5, textAlign: 'center', display: 'block' }}>
+    <Box sx={{ width: '100%', maxWidth: 360 }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, textAlign: 'center', display: 'block' }}>
         {monthName}
       </Typography>
 
@@ -66,31 +67,31 @@ export function StreakCalendar({ activeDays, year, month }: StreakCalendarProps)
         sx={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '2px',
+          gap: '4px',
         }}
       >
         {DAY_LABELS.map((label, i) => (
           <Typography
             key={`${label}-${i}`}
             variant="caption"
-            sx={{ textAlign: 'center', fontSize: '0.6rem', fontWeight: 600, color: 'text.secondary', lineHeight: 1.2 }}
+            sx={{ textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary', lineHeight: 1.4 }}
           >
             {label}
           </Typography>
         ))}
       </Box>
 
-      {/* Calendar grid — compact cells with dots/fire icons */}
+      {/* Calendar grid */}
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '2px',
+          gap: '4px',
         }}
       >
         {cells.map((day, idx) => {
           if (day === null) {
-            return <Box key={`blank-${idx}`} sx={{ width: 24, height: 24 }} />
+            return <Box key={`blank-${idx}`} sx={{ aspectRatio: '1', minWidth: 36 }} />
           }
 
           const dateISO = toISODate(displayYear, displayMonth, day)
@@ -102,26 +103,26 @@ export function StreakCalendar({ activeDays, year, month }: StreakCalendarProps)
             <Tooltip key={dateISO} title={`${dateISO}${isActive ? ' — Active' : ''}`} arrow>
               <Box
                 sx={{
-                  width: 24,
-                  height: 24,
+                  aspectRatio: '1',
+                  minWidth: 36,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   bgcolor: isToday ? 'action.selected' : 'transparent',
                   ...(isToday && {
-                    outline: '1.5px solid',
+                    outline: '2px solid',
                     outlineColor: 'primary.main',
                     outlineOffset: -1,
                   }),
                 }}
               >
                 {isFuture ? (
-                  <FiberManualRecordIcon sx={{ fontSize: '0.25rem', color: 'text.disabled' }} />
+                  <FiberManualRecordIcon sx={{ fontSize: '0.4rem', color: 'text.disabled' }} />
                 ) : isActive ? (
-                  <WhatshotIcon sx={{ fontSize: '0.85rem', color: '#ff9800' }} />
+                  <WhatshotIcon sx={{ fontSize: '1.25rem', color: '#ff9800' }} />
                 ) : (
-                  <FiberManualRecordIcon sx={{ fontSize: '0.25rem', color: 'text.disabled' }} />
+                  <FiberManualRecordIcon sx={{ fontSize: '0.4rem', color: 'text.disabled' }} />
                 )}
               </Box>
             </Tooltip>

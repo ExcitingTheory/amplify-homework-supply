@@ -17,11 +17,11 @@ import {
   FormHelperText
 } from '@mui/material';
 import SectionContext from '../context/sectionContext';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 
 export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog, ContentModel }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
 
   const {
     sections = [], sectionMap = {}, assignments = []

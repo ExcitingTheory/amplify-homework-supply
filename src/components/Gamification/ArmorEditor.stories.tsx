@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ArmorEditor } from './ArmorEditor'
 
 const meta: Meta<typeof ArmorEditor> = {
@@ -13,8 +13,8 @@ type Story = StoryObj<typeof ArmorEditor>
 export const Default: Story = {
   args: {
     open: true,
-    guildName: 'Phoenix Squad',
-    guildDescription: 'Rising from the ashes',
+    squadName: 'Phoenix Squad',
+    squadDescription: 'Rising from the ashes',
     onSave: (config, svg, name, description) => {
       console.log('Saved config:', config)
       console.log('SVG:', svg)
@@ -27,8 +27,8 @@ export const Default: Story = {
 export const WithInitialConfig: Story = {
   args: {
     open: true,
-    guildName: 'Dragon Knights',
-    guildDescription: 'Fire and honor',
+    squadName: 'Dragon Knights',
+    squadDescription: 'Fire and honor',
     initialConfig: {
       shape: 'pointed',
       fieldColor: '#c62828',
@@ -46,7 +46,7 @@ export const WithInitialConfig: Story = {
 export const QuarteredShield: Story = {
   args: {
     open: true,
-    guildName: 'The Scholars',
+    squadName: 'The Scholars',
     initialConfig: {
       shape: 'classic',
       fieldColor: '#1565c0',
@@ -65,8 +65,8 @@ export const QuarteredShield: Story = {
 export const ChevronBand: Story = {
   args: {
     open: true,
-    guildName: 'Mountain Guard',
-    guildDescription: 'Guardians of the summit',
+    squadName: 'Mountain Guard',
+    squadDescription: 'Guardians of the summit',
     initialConfig: {
       shape: 'classic',
       fieldColor: '#2e7d32',
@@ -85,7 +85,7 @@ export const ChevronBand: Story = {
 export const SaltireCross: Story = {
   args: {
     open: true,
-    guildName: 'Star Raiders',
+    squadName: 'Star Raiders',
     initialConfig: {
       shape: 'rounded',
       fieldColor: '#1565c0',
@@ -103,7 +103,7 @@ export const SaltireCross: Story = {
 export const BendWithBorder: Story = {
   args: {
     open: true,
-    guildName: 'Night Watch',
+    squadName: 'Night Watch',
     initialConfig: {
       shape: 'diamond',
       fieldColor: '#212121',
@@ -121,7 +121,7 @@ export const BendWithBorder: Story = {
 export const ChiefBand: Story = {
   args: {
     open: true,
-    guildName: 'Royal Lions',
+    squadName: 'Royal Lions',
     initialConfig: {
       shape: 'classic',
       fieldColor: '#c62828',
@@ -139,7 +139,7 @@ export const ChiefBand: Story = {
 export const LargeCharge: Story = {
   args: {
     open: true,
-    guildName: 'Iron Wreath',
+    squadName: 'Iron Wreath',
     initialConfig: {
       shape: 'classic',
       fieldColor: '#212121',
@@ -158,7 +158,7 @@ export const LargeCharge: Story = {
 export const MultipleCharges: Story = {
   args: {
     open: true,
-    guildName: 'Triple Crown',
+    squadName: 'Triple Crown',
     initialConfig: {
       shape: 'classic',
       fieldColor: '#1565c0',

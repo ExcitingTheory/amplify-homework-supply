@@ -1,13 +1,13 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * Inline countdown UI shown before auto-submitting an answer.
  * Reuses the SketchPad's grace period pattern and translation keys.
  */
 export default function SubmissionCountdown({ countdown, onCancel, onSubmitNow }) {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
 
   if (countdown === null || countdown === undefined) return null;
 

@@ -1,6 +1,6 @@
 'use strict';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box, IconButton } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -26,7 +26,7 @@ const SEGMENT_MAX = [99, 59, 59]; // HH, MM, SS
 const LABELS = ['HH', 'MM', 'SS'];
 
 export default function TimerEditor() {
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
   const { unit, beginSaving, endSaving } = React.useContext(UnitContext);
   const debounceRef = useRef(null);
   const editingRef = useRef(false);

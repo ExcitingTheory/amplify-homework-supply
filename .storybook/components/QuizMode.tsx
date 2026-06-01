@@ -34,7 +34,7 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/story/📄-pages-application-pages--units',
     label: 'Open Units Page',
     alternatives: [
-      { url: '?path=/story/�-creating-lessons-editor--editor-with-content', label: 'Editor' },
+      { url: '?path=/story/📚-creating-lessons-editor--editor-with-content', label: 'Editor' },
       { url: '?path=/story/📄-pages-application-pages--unit-detail', label: 'Unit Detail' }
     ]
   },
@@ -78,7 +78,7 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/story/help-keyboard-shortcut-trainer--default',
     label: 'Open Keyboard Shortcuts Trainer',
     alternatives: [
-      { url: '?path=/story/�-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Demo' },
+      { url: '?path=/story/📚-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Demo' },
       { url: '?path=/story/📚-creating-lessons-editor--empty-editor-text-formatting', label: 'Practice in Editor' }
     ]
   },
@@ -126,7 +126,7 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
     label: 'Open Keyboard Shortcuts',
     alternatives: [
-      { url: '?path=/story/�-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Automated Demo' }
+      { url: '?path=/story/📚-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Automated Demo' }
     ]
   },
   // Secret tasks

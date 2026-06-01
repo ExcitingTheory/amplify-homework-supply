@@ -116,7 +116,7 @@ export default function ArmorEditorBlock({
       {isEditable && (
         <ArmorEditor
           open={dialogOpen}
-          guildName={''} 
+          squadName={''} 
           initialConfig={data}
           onSave={handleSave}
           onClose={handleClose}

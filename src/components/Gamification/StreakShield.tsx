@@ -1,3 +1,4 @@
+"use client";
 /**
  * StreakShield — Shows remaining streak freezes with a shield icon.
  * Clicking reveals a tooltip explaining the mechanic.

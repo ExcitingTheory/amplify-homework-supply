@@ -2,7 +2,7 @@
  * Storybook stories for StateInspector component
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { StateInspector } from './StateInspector';
 import { StateSnapshot } from '../../utils/debug/StateSnapshot';
 

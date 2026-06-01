@@ -43,6 +43,19 @@ const mockModels = {
     list: vi.fn(),
   },
   ParsedContent: {
+    get: vi.fn().mockResolvedValue({
+      data: {
+        id: 'parsed-1',
+        documentID: 'doc-1',
+        questionsJSON: JSON.stringify([
+          {
+            prompt: 'What is kanji?',
+            answer: 'Chinese characters used in Japanese',
+            type: 'short_answer',
+          },
+        ]),
+      },
+    }),
     list: vi.fn().mockResolvedValue({
       data: [
         {
@@ -76,11 +89,8 @@ vi.mock('../../src/utils/amplifyClient', () => ({
   getAmplifyClient: vi.fn(() => ({ models: mockModels })),
 }));
 
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { language: 'en' },
-  }),
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 describe('QuestionEditor2 Integration Tests', () => {
@@ -117,6 +127,20 @@ describe('QuestionEditor2 Integration Tests', () => {
           ]),
         },
       ],
+    });
+    mockModels.ParsedContent.get.mockResolvedValue({
+      data: {
+        id: 'parsed-1',
+        documentID: 'doc-1',
+        questionsJSON: JSON.stringify([
+          {
+            prompt: 'What is kanji?',
+            answer: 'Chinese characters used in Japanese',
+            type: 'short_answer',
+            hint: '',
+          },
+        ]),
+      },
     });
     mockModels.ParsedContent.observeQuery.mockReturnValue({
       subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })),

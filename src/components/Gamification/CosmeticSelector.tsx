@@ -16,7 +16,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import PaletteIcon from '@mui/icons-material/Palette'
 import FaceIcon from '@mui/icons-material/Face'
 import { DiceBearAvatar, getStyleTierStatus } from './DiceBearAvatar'
-import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
+import type { AvatarStyleTier, AvatarOverrides, AvatarUnlockConfig } from './DiceBearAvatar'
 import { AvatarCustomizer } from './AvatarCustomizer'
 
 // ============================================================================
@@ -61,6 +61,8 @@ export interface CosmeticSelectorProps {
   avatarOverrides?: AvatarOverrides
   /** Called when avatar overrides are saved from customizer */
   onAvatarOverridesSave?: (overrides: AvatarOverrides, style: AvatarStyleTier) => void
+  /** Optional avatar unlock config from global settings */
+  avatarUnlockConfig?: AvatarUnlockConfig | null
 }
 
 export function CosmeticSelector({
@@ -73,9 +75,10 @@ export function CosmeticSelector({
   onAvatarTierSelect,
   avatarOverrides,
   onAvatarOverridesSave,
+  avatarUnlockConfig,
 }: CosmeticSelectorProps) {
   const [customizerOpen, setCustmizerOpen] = useState(false)
-  const tierStatuses = getStyleTierStatus(level)
+  const tierStatuses = getStyleTierStatus(level, avatarUnlockConfig)
 
   return (
     <Stack spacing={3}>
@@ -128,6 +131,7 @@ export function CosmeticSelector({
           selectedStyle={selectedAvatarTier}
           overrides={avatarOverrides}
           onSave={(overrides, style) => onAvatarOverridesSave?.(overrides, style)}
+          avatarUnlockConfig={avatarUnlockConfig}
         />
       </Box>
 

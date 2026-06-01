@@ -23,7 +23,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import CheckIcon from '@mui/icons-material/Check'
 import LinkIcon from '@mui/icons-material/Link'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import type { PresenceUser } from '../../yjs/workbookHooks'
 
 // ============================================================================
@@ -57,7 +57,7 @@ export function WorkbookInviteShare({
   workbookId,
   isConnected = true,
 }: WorkbookInviteShareProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [copied, setCopied] = useState(false)
 

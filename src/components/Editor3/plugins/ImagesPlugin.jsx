@@ -28,7 +28,7 @@ import {
 } from 'lexical';
 import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 // import landscapeImage from '../../images/landscape.jpg';
 // import yellowFlowerImage from '../../images/yellow-flower.jpg';
@@ -46,7 +46,7 @@ import {
 export const INSERT_IMAGE_COMMAND = createCommand('INSERT_IMAGE_COMMAND');
 
 export function InsertImageUriDialogBody({ onClick }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [src, setSrc] = useState('');
     const [altText, setAltText] = useState('');
 
@@ -82,7 +82,7 @@ export function InsertImageUriDialogBody({ onClick }) {
 }
 
 export function InsertImageUploadedDialogBody({ onClick }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [src, setSrc] = useState('');
     const [altText, setAltText] = useState('');
 
@@ -130,7 +130,7 @@ export function InsertImageUploadedDialogBody({ onClick }) {
 }
 
 export function InsertImageDialog({ activeEditor, onClose }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [mode, setMode] = useState(null);
     const hasModifier = useRef(false);
 

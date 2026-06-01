@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { TranslationDemo } from './addons/translation-mode/components/TranslationDemo';
 import { withTranslationMode } from './addons/translation-mode';
 
 const meta: Meta<typeof TranslationDemo> = {
-  title: '🌐 Internationalization/Translation Mode',
+  title: 'Translation Mode/Demo',
   component: TranslationDemo,
   decorators: [withTranslationMode],
   parameters: {

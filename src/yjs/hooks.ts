@@ -13,6 +13,7 @@ export function useYjsProvider(config: YjsProviderConfig) {
   const providerRef = useRef<YjsDocProvider | null>(null)
   const [isSynced, setIsSynced] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
+  const [, forceUpdate] = useState(0)
 
   useEffect(() => {
     // Create provider if not already created
@@ -33,12 +34,19 @@ export function useYjsProvider(config: YjsProviderConfig) {
       setIsConnected(status === 'connected')
     }
 
+    // Listen for doc-reset so consumers re-acquire Y.Doc references
+    const handleDocReset = () => {
+      forceUpdate((n) => n + 1)
+    }
+    provider.on('doc-reset', handleDocReset)
+
     if (wsProvider) {
       wsProvider.on('sync', handleSync)
       wsProvider.on('status', handleStatus)
     }
 
     return () => {
+      provider.off('doc-reset', handleDocReset)
       if (wsProvider) {
         wsProvider.off('sync', handleSync)
         wsProvider.off('status', handleStatus)

@@ -2,7 +2,7 @@
  * Tests for the 6 new gamification feature components:
  * CampaignBriefing, DiceBearAvatar, CosmeticSelector,
  * BossBattleCard, EasterEggTrigger hooks, InstructorGamificationPanel,
- * AvatarCustomizer, GuildJoinPanel
+ * AvatarCustomizer, SquadJoinPanel
  */
 
 import { describe, it, expect, vi } from 'vitest'
@@ -16,7 +16,7 @@ import { BossBattleCard } from '../BossBattleCard'
 import { HiddenEasterEgg } from '../EasterEggTrigger'
 import { InstructorGamificationPanel } from '../InstructorGamificationPanel'
 import { AvatarCustomizer } from '../AvatarCustomizer'
-import { GuildJoinPanel } from '../GuildJoinPanel'
+import { SquadJoinPanel } from '../SquadJoinPanel'
 
 // Mock NarrativeReader (used by CampaignBriefing when contentJson is provided)
 vi.mock('../../Editor3/NarrativeReader', () => ({
@@ -343,7 +343,7 @@ describe('InstructorGamificationPanel', () => {
     expect(screen.getByText('Gamification Admin')).toBeDefined()
     expect(screen.getByText(/Skill Tree \(/)).toBeDefined()
     expect(screen.getByText(/Campaign \(/)).toBeDefined()
-    expect(screen.getByText(/Guilds \(/)).toBeDefined()
+    expect(screen.getByText(/Squads \(/)).toBeDefined()
     expect(screen.getByText(/Easter Eggs \(/)).toBeDefined()
     expect(screen.getByText(/Boss Battles \(/)).toBeDefined()
   })
@@ -356,7 +356,7 @@ describe('InstructorGamificationPanel', () => {
     )
     // Expand Skill Tree accordion
     fireEvent.click(screen.getByText(/Skill Tree/))
-    expect(screen.getByText('Variables')).toBeDefined()
+    expect(screen.getAllByText('Variables').length).toBeGreaterThanOrEqual(1)
   })
 
   it('calls onAddSkill when add button clicked', () => {
@@ -371,31 +371,31 @@ describe('InstructorGamificationPanel', () => {
     expect(onAddSkill).toHaveBeenCalledWith(expect.objectContaining({ title: 'Loops' }))
   })
 
-  it('renders existing guilds', () => {
+  it('renders existing squads', () => {
     render(
       <InstructorGamificationPanel
-        guilds={[{ id: 'g1', name: 'Code Warriors', memberCount: 5 }]}
+        squads={[{ id: 'g1', name: 'Code Warriors', memberCount: 5 }]}
       />,
     )
-    fireEvent.click(screen.getByText(/Guilds/))
+    fireEvent.click(screen.getByText(/Squads/))
     expect(screen.getByText('Code Warriors')).toBeDefined()
     expect(screen.getByText('5 members')).toBeDefined()
   })
 
-  it('calls onCreateGuild with guild name and cohortId', () => {
-    const onCreateGuild = vi.fn()
+  it('calls onCreateSquad with squad name and cohortId', () => {
+    const onCreateSquad = vi.fn()
     const sections = [{ id: 'sec-1', name: 'Biology 101', description: 'Intro to biology' }]
-    render(<InstructorGamificationPanel sections={sections} onCreateGuild={onCreateGuild} />)
-    fireEvent.click(screen.getByText(/Guilds/))
+    render(<InstructorGamificationPanel sections={sections} onCreateSquad={onCreateSquad} />)
+    fireEvent.click(screen.getByText(/Squads/))
     // Select a section from the autocomplete
     const sectionInput = screen.getByLabelText('Section')
     fireEvent.change(sectionInput, { target: { value: 'Biology' } })
     fireEvent.click(screen.getByText('Biology 101'))
-    // Enter guild name
-    const input = screen.getByLabelText('Guild name')
+    // Enter squad name
+    const input = screen.getByLabelText('Squad name')
     fireEvent.change(input, { target: { value: 'Phoenix' } })
     fireEvent.click(screen.getByText('Create'))
-    expect(onCreateGuild).toHaveBeenCalledWith('Phoenix', 'sec-1')
+    expect(onCreateSquad).toHaveBeenCalledWith('Phoenix', 'sec-1')
   })
 
   it('renders easter eggs and calls onDeleteEasterEgg', () => {
@@ -435,10 +435,10 @@ describe('AvatarCustomizer', () => {
     expect(screen.getByText('Background')).toBeDefined()
   })
 
-  it('renders detailed customization at level 2', () => {
+  it('renders detailed customization at level 5 (all features unlocked)', () => {
     const onSave = vi.fn()
     render(
-      <AvatarCustomizer open={true} onClose={() => {}} level={2} seed="test" selectedStyle="detailed" onSave={onSave} />,
+      <AvatarCustomizer open={true} onClose={() => {}} level={5} seed="test" selectedStyle="detailed" onSave={onSave} />,
     )
     expect(screen.getByText('Hair / Top')).toBeDefined()
     expect(screen.getByText('Clothing')).toBeDefined()
@@ -468,17 +468,17 @@ describe('AvatarCustomizer', () => {
       <AvatarCustomizer open={true} onClose={onClose} level={2} seed="test" onSave={onSave} />,
     )
     fireEvent.click(screen.getByText('Save'))
-    expect(onSave).toHaveBeenCalledWith({}, 'detailed')
+    expect(onSave).toHaveBeenCalledWith({}, 'detailed', null)
     expect(onClose).toHaveBeenCalled()
   })
 })
 
 // ============================================================================
-// GuildJoinPanel
+// SquadJoinPanel
 // ============================================================================
 
-describe('GuildJoinPanel', () => {
-  const mockGuilds = [
+describe('SquadJoinPanel', () => {
+  const mockSquads = [
     { id: 'g1', name: 'Code Warriors', totalXP: 1200, memberCount: 4 },
     { id: 'g2', name: 'Phoenix Rising', totalXP: 980, memberCount: 3 },
   ]
@@ -488,58 +488,58 @@ describe('GuildJoinPanel', () => {
     { id: 'm2', studentId: 'student-2', role: 'MEMBER' as const, displayName: 'Bob' },
   ]
 
-  it('shows available guilds when not in a guild', () => {
+  it('shows available squads when not in a squad', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
         studentId="student-5"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
-    expect(screen.getByText('Join a Guild')).toBeDefined()
+    expect(screen.getByText('Join a Squad')).toBeDefined()
     expect(screen.getByText('Code Warriors')).toBeDefined()
     expect(screen.getByText('Phoenix Rising')).toBeDefined()
   })
 
-  it('shows empty state when no guilds available', () => {
+  it('shows empty state when no squads available', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={[]}
+      <SquadJoinPanel
+        availableSquads={[]}
         studentId="student-5"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
-    expect(screen.getByText(/No guilds available/)).toBeDefined()
+    expect(screen.getByText(/No squads available/)).toBeDefined()
   })
 
-  it('shows current guild when student is a member', () => {
+  it('shows current squad when student is a member', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
-        myGuild={mockGuilds[0]}
-        myGuildMembers={mockMembers}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
+        mySquad={mockSquads[0]}
+        mySquadMembers={mockMembers}
         studentId="student-1"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
     expect(screen.getByText('Code Warriors')).toBeDefined()
     expect(screen.getByText('Members')).toBeDefined()
     expect(screen.getByText('Alice')).toBeDefined()
-    expect(screen.getByText('Leave Guild')).toBeDefined()
+    expect(screen.getByText('Leave Squad')).toBeDefined()
   })
 
-  it('shows Leader chip for guild leader', () => {
+  it('shows Leader chip for squad leader', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
-        myGuild={mockGuilds[0]}
-        myGuildMembers={mockMembers}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
+        mySquad={mockSquads[0]}
+        mySquadMembers={mockMembers}
         studentId="student-1"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
     expect(screen.getByText('Leader')).toBeDefined()
@@ -547,11 +547,11 @@ describe('GuildJoinPanel', () => {
 
   it('opens join confirmation dialog on Join click', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
         studentId="student-5"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
     const joinButtons = screen.getAllByText('Join')
@@ -559,51 +559,51 @@ describe('GuildJoinPanel', () => {
     expect(screen.getByText('Join Code Warriors?')).toBeDefined()
   })
 
-  it('calls onJoinGuild when confirming join', () => {
-    const onJoinGuild = vi.fn()
+  it('calls onJoinSquad when confirming join', () => {
+    const onJoinSquad = vi.fn()
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
         studentId="student-5"
-        onJoinGuild={onJoinGuild}
-        onLeaveGuild={() => {}}
+        onJoinSquad={onJoinSquad}
+        onLeaveSquad={() => {}}
       />,
     )
     const joinButtons = screen.getAllByText('Join')
     fireEvent.click(joinButtons[0])
-    fireEvent.click(screen.getByText('Join Guild'))
-    expect(onJoinGuild).toHaveBeenCalledWith('g1')
+    fireEvent.click(screen.getByText('Join Squad'))
+    expect(onJoinSquad).toHaveBeenCalledWith('g1')
   })
 
   it('opens leave confirmation dialog', () => {
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
-        myGuild={mockGuilds[0]}
-        myGuildMembers={mockMembers}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
+        mySquad={mockSquads[0]}
+        mySquadMembers={mockMembers}
         studentId="student-2"
-        onJoinGuild={() => {}}
-        onLeaveGuild={() => {}}
+        onJoinSquad={() => {}}
+        onLeaveSquad={() => {}}
       />,
     )
-    fireEvent.click(screen.getByText('Leave Guild'))
+    fireEvent.click(screen.getByText('Leave Squad'))
     expect(screen.getByText('Leave Code Warriors?')).toBeDefined()
   })
 
-  it('calls onLeaveGuild when confirming leave', () => {
-    const onLeaveGuild = vi.fn()
+  it('calls onLeaveSquad when confirming leave', () => {
+    const onLeaveSquad = vi.fn()
     render(
-      <GuildJoinPanel
-        availableGuilds={mockGuilds}
-        myGuild={mockGuilds[0]}
-        myGuildMembers={mockMembers}
+      <SquadJoinPanel
+        availableSquads={mockSquads}
+        mySquad={mockSquads[0]}
+        mySquadMembers={mockMembers}
         studentId="student-2"
-        onJoinGuild={() => {}}
-        onLeaveGuild={onLeaveGuild}
+        onJoinSquad={() => {}}
+        onLeaveSquad={onLeaveSquad}
       />,
     )
-    fireEvent.click(screen.getByText('Leave Guild'))
+    fireEvent.click(screen.getByText('Leave Squad'))
     fireEvent.click(screen.getByText('Leave'))
-    expect(onLeaveGuild).toHaveBeenCalled()
+    expect(onLeaveSquad).toHaveBeenCalled()
   })
 })

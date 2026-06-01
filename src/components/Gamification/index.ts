@@ -102,21 +102,21 @@ export type { ContentUnlockAnimationProps } from "./ContentUnlockAnimation";
 export { SkillTree } from "./SkillTree";
 export type { SkillTreeProps, SkillNodeData, SkillStatus } from "./SkillTree";
 
-export { GuildCrest } from "./GuildCrest";
-export type { GuildCrestProps } from "./GuildCrest";
+export { SquadCrest } from "./SquadCrest";
+export type { SquadCrestProps } from "./SquadCrest";
 
-export { GuildLeaderboard } from "./GuildLeaderboard";
+export { SquadLeaderboard } from "./SquadLeaderboard";
 export type {
-  GuildLeaderboardProps,
-  GuildLeaderboardEntry,
-} from "./GuildLeaderboard";
+  SquadLeaderboardProps,
+  SquadLeaderboardEntry,
+} from "./SquadLeaderboard";
 
-export { GuildJoinPanel } from "./GuildJoinPanel";
+export { SquadJoinPanel } from "./SquadJoinPanel";
 export type {
-  GuildJoinPanelProps,
-  GuildListEntry,
-  GuildMemberEntry,
-} from "./GuildJoinPanel";
+  SquadJoinPanelProps,
+  SquadListEntry,
+  SquadMemberEntry,
+} from "./SquadJoinPanel";
 
 export { GroupChallengeCard } from "./GroupChallengeCard";
 export type { GroupChallengeCardProps } from "./GroupChallengeCard";
@@ -125,6 +125,9 @@ export { GamificationToastLayer } from "./GamificationToastLayer";
 
 export { StreakCalendar } from "./StreakCalendar";
 export type { StreakCalendarProps } from "./StreakCalendar";
+
+export { SectionXPGauge } from "./SectionXPGauge";
+export type { SectionXPGaugeProps } from "./SectionXPGauge";
 
 export { CampaignBriefing } from "./CampaignBriefing";
 export type { CampaignBriefingProps } from "./CampaignBriefing";
@@ -184,7 +187,7 @@ export type {
   InstructorGamificationPanelProps,
   SkillEntry,
   CampaignEntry,
-  GuildEntry,
+  SquadEntry,
   EasterEggEntry,
   BossEntry,
   UnitLockRequirement,
@@ -201,15 +204,16 @@ export type {
 export { LexicalPlainTextField } from "./LexicalPlainTextField";
 export type { LexicalPlainTextFieldProps } from "./LexicalPlainTextField";
 
-export { GuildEditor } from "./GuildEditor";
-export type { GuildEditorProps } from "./GuildEditor";
+export { SquadEditor } from "./SquadEditor";
+export type { SquadEditorProps } from "./SquadEditor";
 
 export { PixelSpriteMascot, STAGE_LABELS } from "./PixelSpriteMascot";
 export type { PixelSpriteMascotProps } from "./PixelSpriteMascot";
 
-export { XPTunerDialog } from "./XPTunerDialog";
+export { XPTunerDialog, XPTunerInline } from "./XPTunerDialog";
 export type {
   XPTunerDialogProps,
+  XPTunerInlineProps,
   XPTunerConfig,
   XPMultipliers,
   XPMultiplierConfig,
@@ -230,3 +234,16 @@ export type {
   CustomBadgeVisual,
   BadgeBuff,
 } from "./BadgeEditor";
+
+export { SquadMentionPill, renderSquadMentions } from "./SquadMentionPill";
+export type { SquadMentionPillProps } from "./SquadMentionPill";
+
+export { SquadMessagePanel } from "./SquadMessagePanel";
+export type {
+  SquadMessagePanelProps,
+  SquadInfo,
+  ResolvedMessage,
+} from "./SquadMessagePanel";
+
+export { ChallengeRecapCard } from "./ChallengeRecapCard";
+export type { ChallengeRecapCardProps, RecapEntry } from "./ChallengeRecapCard";

@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   Paper,
@@ -79,7 +79,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   compact = false,
   showInsertButton = true,
 }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [viewMode, setViewMode] = useState<'preview' | 'raw'>('preview');
   const [copied, setCopied] = useState(false);
   const [inserted, setInserted] = useState(false);

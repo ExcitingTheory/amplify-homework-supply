@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useReducer,
 } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   TextField,
@@ -33,7 +33,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import { awardXPAndCheck } from "../utils/gamificationActions";
+import { awardXP } from "../../app/actions/gamification";
 import ChatIcon from "@mui/icons-material/Chat";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
@@ -62,7 +62,6 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { fetchAuthSession } from "aws-amplify/auth";
-import { post } from "aws-amplify/api";
 import {
   uploadAndAnalyzePDF,
   cancelPDFAnalysis,
@@ -92,9 +91,19 @@ import { INSERT_ANSWER_BLOCK_COMMAND } from "../components/Editor3/plugins/Answe
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "../components/Editor3/plugins/MeaningAssociationPlugin";
 import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from "../components/Editor3/plugins/CustomAnswerPlugin";
 import { BotAvatar } from "./BotAvatar";
+import {
+  trackChatMessageSent,
+  trackChatFileUploaded,
+  trackChatSessionStarted,
+  trackChatBlockInserted,
+  trackChatRegenerated,
+  trackChatToolUsed,
+} from "../utils/analytics";
 
 const ChatSidebar = ({ onClose }) => {
-  const { t, ready } = useTranslation("components");
+  const t = useTranslations("components");
+  const tCommon = useTranslations("common");
+  const ready = true; // next-intl translations are always ready when provider is mounted
 
   // Utility function to deep clone messages to prevent frozen object errors
   // The AI SDK mutates message objects during streaming, so they must be mutable
@@ -286,6 +295,7 @@ const ChatSidebar = ({ onClose }) => {
     assistantChat,
     chatHistories,
     setCurrentChat,
+    chatVersionRef,
     isLoadingChat,
     chatCreationError,
   } = React.useContext(ChatContext);
@@ -312,10 +322,10 @@ const ChatSidebar = ({ onClose }) => {
         const valid = (items || []).filter((i) => i != null && i.id != null);
         if (valid.length > 0) {
           const memory = valid[0];
-          // Version guard
+          // Version guard: only rerender if incoming version is greater than expected
           if (
             memory._version != null &&
-            memory._version <= studentMemoryVersionRef.current
+            !(memory._version > studentMemoryVersionRef.current)
           )
             return;
           studentMemoryVersionRef.current = memory._version || 0;
@@ -352,6 +362,7 @@ const ChatSidebar = ({ onClose }) => {
         console.error("[ChatSidebar] No editor ref available");
         return;
       }
+      trackChatBlockInserted(assistantChat?.id, blockType);
 
       const editor = editorRef.current;
 
@@ -589,7 +600,7 @@ const ChatSidebar = ({ onClose }) => {
   const customFetch = useCallback(
     async (url, options) => {
       console.log(
-        "[ChatSidebar] Custom fetch with Amplify post client, ignoring AI SDK url:",
+        "[ChatSidebar] Custom fetch routing to local /api/chat route, ignoring AI SDK url:",
         url,
       );
 
@@ -647,14 +658,6 @@ const ChatSidebar = ({ onClose }) => {
       // ── End offline routing ─────────────────────────────────────────
 
       try {
-        // Get the current auth session to include the token
-        const { tokens } = await fetchAuthSession();
-        const idToken = tokens?.idToken?.toString();
-
-        if (!idToken) {
-          throw new Error("No authentication token available");
-        }
-
         // Parse the request body from AI SDK
         const requestBody = options.body ? JSON.parse(options.body) : {};
 
@@ -664,53 +667,26 @@ const ChatSidebar = ({ onClose }) => {
           context: contextData,
         };
 
-        console.log("[ChatSidebar] Sending request with context:", {
+        console.log("[ChatSidebar] Sending request to /api/chat:", {
           hasUnit: !!contextData.unit,
           filesCount: contextData.files?.length || 0,
           questionsCount: contextData.questionBank?.length || 0,
           wordsCount: contextData.dictionary?.length || 0,
         });
 
-        // Use Amplify's post with custom headers including auth token
-        const restOperation = post({
-          apiName: "homeworkSupplyStreamApi",
-          path: "/chat",
-          options: {
-            body: bodyWithContext,
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          },
+        // Call local Route Handler — no Lambda cold start, same-origin
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyWithContext),
         });
-
-        const response = await restOperation.response;
 
         console.log("[ChatSidebar] Response received:", {
-          status: response.statusCode,
-          headers: response.headers,
-          bodyType: typeof response.body,
-          hasBody: !!response.body,
+          ok: response.ok,
+          status: response.status,
         });
 
-        // Convert Amplify headers to Headers object
-        const webHeaders = new Headers({
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-        });
-
-        // Amplify response.body is already a ReadableStream - use it directly
-        const webResponse = new Response(response.body, {
-          status: response.statusCode,
-          headers: webHeaders,
-        });
-
-        console.log("[ChatSidebar] Created Web Response with streaming body:", {
-          ok: webResponse.ok,
-          status: webResponse.status,
-          bodyUsed: webResponse.bodyUsed,
-        });
-
-        return webResponse;
+        return response;
       } catch (error) {
         console.error("[ChatSidebar] Error in customFetch:", error);
         throw error;
@@ -767,6 +743,7 @@ const ChatSidebar = ({ onClose }) => {
             try {
               const result = await executeTool(toolName, args);
               console.log(`[ChatSidebar] ${toolName} result:`, result);
+              trackChatToolUsed(assistantChat?.id, toolName, sectionId);
               return result;
             } catch (error) {
               console.error(
@@ -783,10 +760,6 @@ const ChatSidebar = ({ onClose }) => {
       }
     });
 
-    console.log(
-      "[ChatSidebar] Registered client-side tools:",
-      Object.keys(tools),
-    );
     return tools;
   }, []);
 
@@ -812,6 +785,10 @@ const ChatSidebar = ({ onClose }) => {
           pending.chatId,
         );
         return;
+      }
+      // Optimistic version bump — subscription echo will be skipped
+      if (chatVersionRef) {
+        chatVersionRef.current = (fresh._version || 0) + 1;
       }
       await client.models.AssistantChat.update({
         id: pending.chatId,
@@ -918,7 +895,7 @@ const ChatSidebar = ({ onClose }) => {
   } = useNailedItDetection({
     onAwardXP: (xp, reason) => {
       if (!user?.username) return;
-      awardXPAndCheck(user.username, reason);
+      awardXP(user.username, reason);
     },
   });
 
@@ -977,18 +954,6 @@ const ChatSidebar = ({ onClose }) => {
     stop,
     toolCalls = [],
   } = chatHookResult || {};
-
-  // Only log useChat status on meaningful changes
-  if (status !== "ready" || messages?.length > 0 || toolCalls?.length > 0) {
-    console.log(
-      "[ChatSidebar] useChat status:",
-      status,
-      "messages:",
-      messages.length,
-      "toolCalls:",
-      toolCalls.length,
-    );
-  }
 
   // Derive loading state from useChat status
   const isLoading =
@@ -1072,6 +1037,7 @@ const ChatSidebar = ({ onClose }) => {
       try {
         sendMessage({ text: input });
         dispatch({ type: ACTIONS.SET_INPUT, payload: "" });
+        trackChatMessageSent(assistantChat?.id, sectionId, input.length);
 
         // Clear draft (debounced)
         if (assistantChat?.draft) {
@@ -1224,6 +1190,9 @@ const ChatSidebar = ({ onClose }) => {
     const files = Array.from(e.target.files);
     console.log("Files selected:", files);
     dispatch({ type: ACTIONS.ADD_UPLOADED_FILES, payload: files });
+    files.forEach((f) =>
+      trackChatFileUploaded(assistantChat?.id, f.type || "unknown"),
+    );
   };
 
   const removeFile = (index) => {
@@ -1595,6 +1564,7 @@ const ChatSidebar = ({ onClose }) => {
                       // Clear local state
                       setMessages([]);
                       dispatch({ type: ACTIONS.RESET_FOR_NEW_CHAT });
+                      trackChatSessionStarted(sectionId);
 
                       // Create new AssistantChat directly
                       const client = getAmplifyClient();
@@ -3355,7 +3325,7 @@ const ChatSidebar = ({ onClose }) => {
             <Button
               type="submit"
               variant="contained"
-              aria-label={t("actions.send", { ns: "common" })}
+              aria-label={tCommon("actions.send")}
               disabled={isLoading || !assistantChat?.id || !user}
               data-testid="chat-send"
               sx={{

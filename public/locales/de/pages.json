@@ -92,7 +92,7 @@
     "emailHeader": "E-Mail",
     "actionsHeader": "Aktionen",
     "gradebook": "Notenbuch",
-    "showingAssignments": "(Zeige {{visible}} von {{total}} Aufgaben)",
+    "showingAssignments": "(Zeige {visible} von {total} Aufgaben)",
     "showFutureAssignments": "Zukunft anzeigen",
     "showDraftAssignments": "Entwürfe anzeigen",
     "applyCurve": "Kurve anwenden",
@@ -138,6 +138,7 @@
     "viewWorkbook": "Arbeitsheft anzeigen",
     "editUnit": "Einheit bearbeiten",
     "myDrafts": "Meine Entwürfe",
+    "practice": "Üben",
     "archivedUnits": "Archivierte Einheiten"
   },
   "unitDetail": {

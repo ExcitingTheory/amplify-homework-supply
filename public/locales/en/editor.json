@@ -3,7 +3,7 @@
     "tabToAccept": "Tab To Accept"
   },
   "answerComponent": {
-    "audioNotAvailable": "{{text}} (audio not available)",
+    "audioNotAvailable": "{text} (audio not available)",
     "audioNotAvailableParens": "(audio not available)",
     "errorMessages": {
       "noAnswer": "Please provide an answer",
@@ -54,8 +54,8 @@
   "autoEmbedPlugin": {
     "dismiss": "Dismiss",
     "embed": "Embed",
-    "embedOption": "Embed {{contentName}}",
-    "embedTitle": "Embed {{contentName}}",
+    "embedOption": "Embed {contentName}",
+    "embedTitle": "Embed {contentName}",
     "youtubeVideo": "Youtube Video"
   },
   "autocompleteNode": {
@@ -138,7 +138,7 @@
     "errorMessages": {
       "noSupportedFiles": "No supported documents found. Please upload PDF, Word, Text, or Excel files.",
       "skippedFiles": "Some files were skipped (unsupported type)",
-      "uploadFailed": "Failed to upload {{fileName}}: {{error}}"
+      "uploadFailed": "Failed to upload {fileName}: {error}"
     },
     "extractionTypes": {
       "dictionary": "dictionary",
@@ -148,9 +148,9 @@
     },
     "howItWorks": {
       "step1": "1. Upload your documents (PDF, Word, Text, or Excel files)",
-      "step2": "2. AI will analyze the content and extract {{extractionType}}",
+      "step2": "2. AI will analyze the content and extract {extractionType}",
       "step3": "3. Review and approve suggestions in the \"Suggestions\" tab",
-      "step4": "4. Import selected items to your {{target}}",
+      "step4": "4. Import selected items to your {target}",
       "title": "How it works:"
     },
     "recentUploads": "Recent Uploads",
@@ -160,8 +160,8 @@
       "processing": "Processing..."
     },
     "supportedFormats": "Supported: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
-    "title": "Upload Documents for {{extractionType}} Extraction",
-    "uploadingProgress": "Uploading... {{progress}}%"
+    "title": "Upload Documents for {extractionType} Extraction",
+    "uploadingProgress": "Uploading... {progress}%"
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "Enter text to convert to speech...",
@@ -176,7 +176,7 @@
     "close": "Close",
     "create": "Create",
     "draftChanges": "Draft changes",
-    "errorRendering": "Error rendering FileManager: {{message}}",
+    "errorRendering": "Error rendering FileManager: {message}",
     "revert": "Revert",
     "save": "Save",
     "textToImagePreview": "Text to Image Preview",
@@ -184,10 +184,10 @@
   },
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "Delete {{count}} selected file(s)?",
-      "deleteSelected": "Delete Selected ({{count}})",
+      "deleteConfirmMessage": "Delete {count} selected file(s)?",
+      "deleteSelected": "Delete Selected ({count})",
       "deselectAll": "Deselect All",
-      "reAnalyzeSelected": "Re-analyze Selected ({{count}})"
+      "reAnalyzeSelected": "Re-analyze Selected ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "Description:",
@@ -258,10 +258,10 @@
     "cancel": "Cancel",
     "collapse": "Collapse",
     "concepts": "Concepts",
-    "conceptsCount": "Concepts ({{count}})",
+    "conceptsCount": "Concepts ({count})",
     "confirm": "Confirm",
     "created": "Created:",
-    "deleteConfirmation": "Delete file: \"{{fileName}}\"?",
+    "deleteConfirmation": "Delete file: \"{fileName}\"?",
     "deleteFile": "Delete File",
     "expand": "Expand",
     "fileInfo": "File Info",
@@ -269,22 +269,22 @@
     "noMetadataAvailable": "No metadata available for this file.",
     "noParsedContentAvailable": "No parsed content available for this file.",
     "objectives": "Objectives",
-    "objectivesCount": "Objectives ({{count}})",
+    "objectivesCount": "Objectives ({count})",
     "parsedContent": "Parsed Content",
     "path": "Path:",
     "protectionLevel": "Protection Level:",
     "questions": "Questions",
-    "questionsCount": "Questions ({{count}})",
+    "questionsCount": "Questions ({count})",
     "rawMetadata": "Raw Metadata",
     "searchPlaceholder": "Search file content...",
     "summaries": "Summaries",
-    "summariesCount": "Summaries ({{count}})",
+    "summariesCount": "Summaries ({count})",
     "type": "Type:",
     "unknown": "Unknown",
     "unknownSize": "Unknown size",
     "unset": "UNSET",
     "vocabulary": "Vocabulary",
-    "vocabularyCount": "Vocabulary ({{count}})"
+    "vocabularyCount": "Vocabulary ({count})"
   },
   "floatingLinkEditorPlugin": {
     "cancelLinkEditing": "Cancel link editing",
@@ -305,11 +305,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "Apply Mask & Regenerate",
-    "brushSize": "Brush Size: {{size}}",
+    "brushSize": "Brush Size: {size}",
     "cancel": "Cancel",
     "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
     "save": "Save",
-    "zoomInfo": "Zoom: {{level}}% | Hold Shift to pan"
+    "zoomInfo": "Zoom: {level}% | Hold Shift to pan"
   },
   "imageResizer": {
     "addCaption": "Add Caption"
@@ -381,7 +381,7 @@
     "unsavedChanges": "unsaved changes"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "Loading PDF: {{filename}}",
+    "loadingPdf": "Loading PDF: {filename}",
     "noPdfToDisplay": "No PDF to display"
   },
   "placeholders": {
@@ -419,14 +419,14 @@
     "submit": "Submit"
   },
   "quizComponent": {
-    "gradeDisplay": "Grade: {{score}}%"
+    "gradeDisplay": "Grade: {score}%"
   },
   "quizEditor": {
     "addAnswer": "Add Answer",
     "cancel": "Cancel",
     "done": "Done",
     "edit": "Edit",
-    "gradeDisplay": "Grade: {{score}}",
+    "gradeDisplay": "Grade: {score}",
     "invalid": "Invalid",
     "reset": "Reset",
     "save": "Save",
@@ -452,14 +452,14 @@
     "generateTTS": "Generate TTS",
     "importFailed": "Failed to import JSON file",
     "importJSON": "Import JSON",
-    "lineNumber": "Line #{{number}} - {{speaker}}",
+    "lineNumber": "Line #{number} - {speaker}",
     "lockedTrack": "Locked track",
     "micAccessFailed": "Failed to access microphone",
     "name": "Name",
     "noMissingAudio": "No missing audio to generate",
     "noTextToGenerate": "No text to generate",
     "play": "Play",
-    "processing": "Processing {{count}} lines...",
+    "processing": "Processing {count} lines...",
     "record": "Record",
     "recordingSaveFailed": "Failed to save recording",
     "save": "Save",
@@ -469,7 +469,7 @@
     "speakerNotFound": "Speaker not found",
     "speakers": "Speakers",
     "stop": "Stop",
-    "takeNumber": "Take {{number}} ({{type}})",
+    "takeNumber": "Take {number} ({type})",
     "takes": "Takes",
     "text": "Text",
     "timeline": "Timeline",
@@ -495,7 +495,7 @@
     "activatingDrawingPad": "Activating drawing pad...",
     "cancelSubmission": "Cancel Submission",
     "hoverToStartDrawing": "Hover to start drawing",
-    "submittingInSeconds": "Submitting drawing for grading in {{countdown}} seconds..."
+    "submittingInSeconds": "Submitting drawing for grading in {countdown} seconds..."
   },
   "staticWaveform": {
     "errorLoading": "Error loading waveform"
@@ -588,7 +588,7 @@
     "clearAllTextFormatting": "Clear all text formatting",
     "clearFormatting": "Clear Formatting",
     "clearTextFormatting": "Clear text formatting",
-    "closePreview": "Close Preview of {{name}}",
+    "closePreview": "Close Preview of {name}",
     "columnsLayout": "Columns Layout",
     "delete": "Delete",
     "deleteUnitConfirmation": "Are you sure you want to delete this Unit?",
@@ -667,9 +667,9 @@
     "discard": "Discard",
     "discardChanges": "Discard changes?",
     "generate": "Generate",
-    "generating": "Generating {{type}}...",
+    "generating": "Generating {type}...",
     "keepEditing": "Keep Editing",
-    "lostWarning": "Your generated {{type}} will be lost if you cancel now.",
+    "lostWarning": "Your generated {type} will be lost if you cancel now.",
     "preview": "Preview",
     "saveClose": "Save & Close",
     "takeMoments": "This may take a few moments"
@@ -682,13 +682,13 @@
   "unitEmbedding": {
     "allSectionsComplete": "All sections complete!",
     "cached": "Cached",
-    "completedCount": "{{completed}}/{{total}} completed",
+    "completedCount": "{completed}/{total} completed",
     "generateEmbeddings": "Generate Embeddings",
     "generating": "Generating...",
     "publishSuccess": "Unit published with embeddings generated!",
     "publishUnit": "Publish Unit",
     "publishing": "Publishing...",
-    "wordsEmbedded": "{{count}} words embedded"
+    "wordsEmbedded": "{count} words embedded"
   },
   "unitEmbeddingComponents": {
     "errorMessage": "Error generating embeddings",
@@ -709,10 +709,10 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio not available",
     "loadingAudio": "Loading audio...",
-    "wordNotFound": "Word not found: {{wordID}}"
+    "wordNotFound": "Word not found: {wordID}"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "Embedding generated: {{count}} words processed"
+    "embeddingGenerated": "Embedding generated: {count} words processed"
   },
   "wordEmbeddingIntegration": {
     "alertMessage": "Embeddings will be generated",

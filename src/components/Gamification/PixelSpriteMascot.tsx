@@ -2,7 +2,7 @@
  * PixelSpriteMascot — Renders a procedurally generated pixel creature
  * that evolves visually as the student levels up.
  *
- * Seed determines the creature shape (deterministic from studentId/guildId).
+ * Seed determines the creature shape (deterministic from studentId/squadId).
  * Stage controls visual complexity (maps to player level tiers).
  *
  * @module PixelSpriteMascot
@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography'
 import { generatePixelSpriteSvg } from '../../utils/generatePixelSprite'
 
 export interface PixelSpriteMascotProps {
-  /** Deterministic seed (e.g. studentId, guildId) */
+  /** Deterministic seed (e.g. studentId, squadId) */
   seed: string
   /** Evolution stage 1-5, maps to level tiers */
   stage?: number

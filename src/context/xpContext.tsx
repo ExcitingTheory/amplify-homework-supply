@@ -7,7 +7,7 @@
  * @module XPContext
  */
 
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useReducer, useRef, useCallback, useMemo } from 'react'
 import { XPToast } from '../components/Gamification/XPToast'
 import { calculateTotalXP, getLevelInfo, XPReason } from '../utils/xpCalculation'
 import type { StudentXPLog, LevelInfo } from '../utils/xpCalculation'
@@ -27,6 +27,56 @@ interface XPContextValue {
   level: LevelInfo
   xpLogs: StudentXPLog[]
   isLoading: boolean
+}
+
+// ============================================================================
+// Reducer
+// ============================================================================
+
+interface XPState {
+  xpLogs: StudentXPLog[]
+  isLoading: boolean
+  toastQueue: XPToastItem[]
+  currentToast: XPToastItem | null
+}
+
+type XPAction =
+  | { type: 'SET_LOGS'; logs: StudentXPLog[] }
+  | { type: 'SET_LOADING'; isLoading: boolean }
+  | { type: 'ENQUEUE_TOASTS'; toasts: XPToastItem[] }
+  | { type: 'SHOW_NEXT_TOAST' }
+  | { type: 'DISMISS_TOAST' }
+
+const initialXPState: XPState = {
+  xpLogs: [],
+  isLoading: true,
+  toastQueue: [],
+  currentToast: null,
+}
+
+function xpReducer(state: XPState, action: XPAction): XPState {
+  switch (action.type) {
+    case 'SET_LOGS':
+      return { ...state, xpLogs: action.logs, isLoading: false }
+
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.isLoading }
+
+    case 'ENQUEUE_TOASTS':
+      return { ...state, toastQueue: [...state.toastQueue, ...action.toasts] }
+
+    case 'SHOW_NEXT_TOAST': {
+      if (state.currentToast || state.toastQueue.length === 0) return state
+      const [next, ...rest] = state.toastQueue
+      return { ...state, currentToast: next, toastQueue: rest }
+    }
+
+    case 'DISMISS_TOAST':
+      return { ...state, currentToast: null }
+
+    default:
+      return state
+  }
 }
 
 // ============================================================================
@@ -64,7 +114,7 @@ const REASON_LABELS: Record<string, string> = {
   [XPReason.COMEBACK]: 'Comeback!',
   [XPReason.PERSONAL_BEST]: 'New personal best!',
   [XPReason.EASTER_EGG]: 'Secret discovered!',
-  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild challenge bonus',
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad challenge bonus',
 }
 
 // ============================================================================
@@ -78,12 +128,11 @@ export interface XPProviderProps {
 }
 
 export function XPProvider({ client, studentId, children }: XPProviderProps) {
-  const [xpLogs, setXpLogs] = useState<StudentXPLog[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [toastQueue, setToastQueue] = useState<XPToastItem[]>([])
-  const [currentToast, setCurrentToast] = useState<XPToastItem | null>(null)
+  const [state, dispatch] = useReducer(xpReducer, initialXPState)
+  const { xpLogs, isLoading, currentToast } = state
   const knownIdsRef = useRef<Set<string>>(new Set())
   const initialLoadRef = useRef(true)
+  const xpVersionMapRef = useRef<Record<string, number>>({})
 
   // Subscribe to StudentXPLog
   useEffect(() => {
@@ -94,27 +143,43 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
     }).subscribe({
       next: ({ items }: { items: any[] }) => {
         const validItems = items.filter((item: any) => item != null && item.id != null)
-        setXpLogs(validItems)
+
+        // Version map guard: skip dispatch if no item has a newer _version
+        const hasChanges = validItems.some((item: any) => {
+          const tracked = xpVersionMapRef.current[item.id]
+          return tracked == null || item._version > tracked
+        })
+
+        if (!hasChanges && Object.keys(xpVersionMapRef.current).length > 0) {
+          return
+        }
+
+        // Update version map
+        xpVersionMapRef.current = {}
+        validItems.forEach((item: any) => {
+          xpVersionMapRef.current[item.id] = item._version
+        })
+
+        dispatch({ type: 'SET_LOGS', logs: validItems })
 
         // Queue toasts for new entries (skip initial load)
         if (!initialLoadRef.current) {
           const newEntries = validItems.filter((item: any) => !knownIdsRef.current.has(item.id))
-          for (const entry of newEntries) {
-            setToastQueue((prev) => [
-              ...prev,
-              {
+          if (newEntries.length > 0) {
+            dispatch({
+              type: 'ENQUEUE_TOASTS',
+              toasts: newEntries.map((entry: any) => ({
                 id: entry.id,
                 xpAmount: entry.xpAmount,
                 xpReason: REASON_LABELS[entry.reason] || entry.reason,
-              },
-            ])
+              })),
+            })
           }
         }
 
         // Update known IDs
         knownIdsRef.current = new Set(validItems.map((item: any) => item.id))
         initialLoadRef.current = false
-        setIsLoading(false)
       },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || err?.error?.errors?.[0]?.message || String(err)
@@ -123,7 +188,7 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
           return
         }
         console.error('[XPContext] subscription error:', err)
-        setIsLoading(false)
+        dispatch({ type: 'SET_LOADING', isLoading: false })
       },
     })
 
@@ -132,14 +197,11 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
 
   // Process toast queue — show one at a time
   useEffect(() => {
-    if (currentToast || toastQueue.length === 0) return
-    const [next, ...rest] = toastQueue
-    setCurrentToast(next)
-    setToastQueue(rest)
-  }, [toastQueue, currentToast])
+    dispatch({ type: 'SHOW_NEXT_TOAST' })
+  }, [state.toastQueue, state.currentToast])
 
   const handleToastClose = useCallback(() => {
-    setCurrentToast(null)
+    dispatch({ type: 'DISMISS_TOAST' })
   }, [])
 
   const totalXP = useMemo(() => calculateTotalXP(xpLogs), [xpLogs])

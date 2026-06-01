@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, within } from 'storybook/test'
 import { BossBattleCard } from './BossBattleCard'
 
 const meta: Meta<typeof BossBattleCard> = {
-  title: '🏆 Gamification/Guilds & Teams/Boss Battle Card',
+  title: '🏆 Gamification/Squads & Teams/Boss Battle Card',
   component: BossBattleCard,
   tags: ['autodocs'],
 }
@@ -20,7 +20,7 @@ const defaultPhases = [
 export const Active: Story = {
   args: {
     title: 'The Algorithm Dragon',
-    narrative: 'A fearsome dragon guards the sorting algorithms. Only by mastering Big-O can your guild defeat it.',
+    narrative: 'A fearsome dragon guards the sorting algorithms. Only by mastering Big-O can your squad defeat it.',
     phases: defaultPhases,
     totalHP: 1000,
     totalDamage: 650,

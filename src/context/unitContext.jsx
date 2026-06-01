@@ -1,14 +1,20 @@
 import * as React from "react";
 import { useState, useRef, useReducer, createContext } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import yaml from "js-yaml";
 import { moderateContent } from "../utils/moderateContent";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import {
-  awardXPAndCheck,
-  updateUnitMemoryAndRebuild,
-  checkPersonalBest,
-} from "../utils/gamificationActions";
+  saveDraftContent,
+  loadContent,
+  publishContent,
+} from "../utils/unitContentStorage";
+import {
+  awardXP,
+  recordGradeCompletion,
+  updateLearningMemory,
+} from "../../app/actions/gamification";
+import { summarizeFeedback as summarizeFeedbackAction } from "../../app/actions/feedback";
 import AuthContext from "../context/authContext";
 import { useWorkbookCollaboration } from "../yjs/workbookHooks";
 import {
@@ -24,8 +30,9 @@ export const gradedBlockTypes = [
   "meaning-association",
   "answer",
   "custom-answer",
+  "custom-ai",
 ];
-const UnitProvider = ({ children, id, sectionId }) => {
+const UnitProvider = ({ children, id }) => {
   // Get auth state from centralized context
   const {
     user,
@@ -34,10 +41,12 @@ const UnitProvider = ({ children, id, sectionId }) => {
   } = React.useContext(AuthContext);
 
   const [state, dispatch] = useReducer(unitReducer, unitInitialState);
+  const [sectionId, setSectionId] = React.useState(undefined);
   const savingCountRef = useRef(0);
 
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
   const practiceSessionVersionMapRef = useRef({});
+  const gradeVersionMapRef = useRef({});
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -189,6 +198,42 @@ const UnitProvider = ({ children, id, sectionId }) => {
     }
   }, [user]);
 
+  // Derive sectionId from Assignment record (server-authoritative, not URL)
+  React.useEffect(() => {
+    if (!id || authLoading || !user) return;
+
+    let cancelled = false;
+    const client = getAmplifyClient();
+
+    async function lookupAssignment() {
+      try {
+        const { data: assignments } = await client.models.Assignment.list({
+          filter: { unitID: { eq: id } },
+        });
+        if (cancelled) return;
+        // Use the first assignment that matches this unit for the current user
+        const assignment = (assignments || []).find(
+          (a) => a != null && a.sectionID,
+        );
+        if (assignment?.sectionID) {
+          setSectionId(assignment.sectionID);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn(
+            "[UnitContext] Failed to look up Assignment for sectionId:",
+            err,
+          );
+        }
+      }
+    }
+
+    lookupAssignment();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, user, authLoading]);
+
   const verifyAccuracy = React.useCallback((data) => {
     let total = 0;
     let accuracy = 0;
@@ -252,7 +297,7 @@ const UnitProvider = ({ children, id, sectionId }) => {
       dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
 
       // Award XP for submitting homework (first time only — dedup by gradeId)
-      awardXPAndCheck(
+      awardXP(
         currentUsername,
         "HOMEWORK_SUBMITTED",
         _grade.id,
@@ -299,14 +344,19 @@ const UnitProvider = ({ children, id, sectionId }) => {
       }
       const gradeYaml = yaml.dump({ blocks });
 
-      const { data: feedbackJson, errors } =
-        await client.queries.summarizeFeedback({
+      let feedbackJson;
+      try {
+        feedbackJson = await summarizeFeedbackAction({
           assignmentData: assignmentYaml,
           gradeData: gradeYaml,
         });
+      } catch (err) {
+        console.error("[unitContext] summarizeFeedback failed:", err?.message);
+        return;
+      }
 
-      if (errors || !feedbackJson) {
-        console.error("[unitContext] summarizeFeedback query failed:", errors);
+      if (!feedbackJson) {
+        console.error("[unitContext] summarizeFeedback returned empty");
         return;
       }
 
@@ -417,33 +467,50 @@ const UnitProvider = ({ children, id, sectionId }) => {
         }
         if (unitIsComplete && !timeLimitSeconds) {
           dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
-          // Award XP for completing all blocks
+          // Award XP + badges + streak + personal best via batched Server Action
           const currentUsername = usernameRef.current || user?.attributes?.sub;
           if (currentUsername && state.grade?.id) {
-            awardXPAndCheck(
-              currentUsername,
-              "ALL_BLOCKS_COMPLETED",
-              state.grade.id,
-              sectionId || undefined,
-              id,
-              unitAccuracy,
-            );
-            // Award perfect score if accuracy is 100%
-            if (unitAccuracy >= 100) {
-              awardXPAndCheck(
-                currentUsername,
-                "PERFECT_SCORE",
-                state.grade.id,
-                sectionId || undefined,
-                id,
-                unitAccuracy,
-              );
-            }
+            // Primary: Server Action batches XP, badges, streak, personal best, easter eggs
+            (async () => {
+              try {
+                const result = await recordGradeCompletion(
+                  currentUsername,
+                  id,
+                  unitAccuracy,
+                  state.grade.id,
+                  undefined,
+                  sectionId || undefined,
+                );
+                // Show personal best banner if applicable
+                if (result?.personalBest?.isNewBest) {
+                  dispatch({
+                    type: actionTypes.SET_PERSONAL_BEST_RESULT,
+                    payload: result.personalBest,
+                  });
+                }
+              } catch (err) {
+                console.error(
+                  "[unitContext] recordGradeCompletion failed:",
+                  err?.message,
+                );
+              }
+            })();
 
             // Summarize feedback via GPT-4o-mini (fire-and-forget)
             summarizeGradeFeedback(data, state.grade.id).catch((err) =>
               console.error("[unitContext] summarizeGradeFeedback error:", err),
             );
+
+            // Evaluate skills linked to this unit (fire-and-forget)
+            client.mutations
+              .evaluateSkillsForUnit({
+                studentId: currentUsername,
+                unitId: id,
+                cohortId: sectionId || undefined,
+              })
+              .catch((err) =>
+                console.warn("[unitContext] Skill evaluation:", err),
+              );
 
             // Update per-unit learning memory with block-level accuracy data
             const weakAreas = [];
@@ -458,7 +525,7 @@ const UnitProvider = ({ children, id, sectionId }) => {
                 }
               });
             }
-            updateUnitMemoryAndRebuild(
+            updateLearningMemory(
               currentUsername,
               id,
               unitAccuracy,
@@ -466,27 +533,8 @@ const UnitProvider = ({ children, id, sectionId }) => {
               strongAreas,
               { sourceType: "workbook" },
             ).catch((err) =>
-              console.error(
-                "[unitContext] updateUnitMemoryAndRebuild error:",
-                err,
-              ),
+              console.error("[unitContext] updateLearningMemory error:", err),
             );
-
-            // Check personal best (fire-and-forget, sets state for banner)
-            if (unitAccuracy != null) {
-              checkPersonalBest(currentUsername, id, unitAccuracy)
-                .then((result) => {
-                  if (result?.isNewBest) {
-                    dispatch({
-                      type: actionTypes.SET_PERSONAL_BEST_RESULT,
-                      payload: result,
-                    });
-                  }
-                })
-                .catch((err) =>
-                  console.error("[unitContext] checkPersonalBest error:", err),
-                );
-            }
           }
         }
       } catch (error) {
@@ -632,6 +680,23 @@ const UnitProvider = ({ children, id, sectionId }) => {
         const validItems = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+
+        // Version map guard: skip dispatch if no item has a newer _version
+        const hasChanges = validItems.some((item) => {
+          const tracked = gradeVersionMapRef.current[item.id];
+          return tracked == null || item._version > tracked;
+        });
+
+        if (!hasChanges && Object.keys(gradeVersionMapRef.current).length > 0) {
+          return;
+        }
+
+        // Update version map
+        gradeVersionMapRef.current = {};
+        validItems.forEach((item) => {
+          gradeVersionMapRef.current[item.id] = item._version;
+        });
+
         processGrades(validItems);
       },
       error: (error) => handleGradeError("Grade observeQuery", error),
@@ -672,8 +737,35 @@ const UnitProvider = ({ children, id, sectionId }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
+    // Exclude heavy fields: generatedContent, data (loaded on-demand)
     const subscription = client.models.PracticeSession.observeQuery({
       filter: { unitID: { eq: id } },
+      selectionSet: [
+        "id",
+        "unitID",
+        "drillType",
+        "accuracy",
+        "blockCount",
+        "blocksCompleted",
+        "complete",
+        "xpAwarded",
+        "sourcesEnabled.*",
+        "coverageSnapshot.*",
+        "collaborative",
+        "roomCode",
+        "maxParticipants",
+        "insightStudentId",
+        "weakAreas.*",
+        "strongAreas.*",
+        "sourcesUsedList.*",
+        "blockBreakdown.*",
+        "insightTimestamp",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
     }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
@@ -852,12 +944,32 @@ const UnitProvider = ({ children, id, sectionId }) => {
       // Permission checking is handled by individual pages (editor vs workbook)
       dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
 
-      // Skip if version is same or older than what we're tracking (includes optimistic bumps)
+      // Only process if incoming version is greater than what we're tracking
       if (
         unitRecord?._version != null &&
-        unitRecord._version <= versionRef.current
+        !(unitRecord._version > versionRef.current)
       ) {
         return;
+      }
+
+      // Detect contentVersion change — fetch content from S3
+      const prevContentVersion = unitRef.current?.contentVersion || 0;
+      if (
+        unitRecord.identityId &&
+        (unitRecord.contentVersion || 0) > prevContentVersion
+      ) {
+        const isInstructor =
+          authSession?.groups?.includes("Instructors") ||
+          authSession?.groups?.includes("Admins");
+        const variant = isInstructor ? "draft" : "published";
+        const s3Content = await loadContent(
+          unitRecord.identityId,
+          unitRecord.id,
+          variant,
+        );
+        if (s3Content) {
+          unitRecord = { ...unitRecord, data: s3Content };
+        }
       }
 
       const _files = {};
@@ -1078,11 +1190,19 @@ const UnitProvider = ({ children, id, sectionId }) => {
       versionRef.current = predictedNextVersion;
 
       try {
-        // Save with Gen2 client
+        // 1. Upload content to S3 (private — owner only)
+        await saveDraftContent(
+          currentUnit.identityId,
+          currentUnit.id,
+          newContent,
+        );
+
+        // 2. Bump contentVersion in DynamoDB (no content payload)
+        const nextContentVersion = (currentUnit.contentVersion || 0) + 1;
         const client = getAmplifyClient();
         const { data: savedUnit, errors } = await client.models.Unit.update({
           id: currentUnit.id,
-          data: newContent,
+          contentVersion: nextContentVersion,
           _version: currentUnit._version,
         });
         if (errors?.length) {
@@ -1094,6 +1214,7 @@ const UnitProvider = ({ children, id, sectionId }) => {
           unitRef.current = {
             ...unitRef.current,
             _version: savedUnit._version,
+            contentVersion: nextContentVersion,
           };
           versionRef.current = savedUnit._version;
         }
@@ -1264,6 +1385,31 @@ const UnitProvider = ({ children, id, sectionId }) => {
       } else if (savedUnit) {
         unitRef.current = { ...unitRef.current, _version: savedUnit._version };
         versionRef.current = savedUnit._version;
+
+        // On publish: copy draft to published + create history snapshot
+        if (status === "PUBLISHED") {
+          const currentVersion = currentUnit.contentVersion || 1;
+          await publishContent(
+            currentUnit.identityId,
+            currentUnit.id,
+            currentVersion,
+          );
+
+          // Update publishedContentVersion + publishedAt in DynamoDB
+          const { data: publishedUnit } = await client.models.Unit.update({
+            id: currentUnit.id,
+            publishedContentVersion: currentVersion,
+            publishedAt: Date.now(),
+            _version: savedUnit._version,
+          });
+          if (publishedUnit) {
+            unitRef.current = {
+              ...unitRef.current,
+              _version: publishedUnit._version,
+            };
+            versionRef.current = publishedUnit._version;
+          }
+        }
       }
     } catch (error) {
       console.log("error", error);

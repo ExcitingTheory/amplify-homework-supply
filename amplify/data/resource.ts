@@ -6,6 +6,8 @@ import { moderationHandler } from "../functions/moderation/resource";
 import { documentAnalysisHandler } from "../functions/documentAnalysis/resource";
 
 import { mediaConvertHandler } from "../functions/mediaConvert/resource";
+import { imageProcessHandler } from "../functions/imageProcess/resource";
+import { documentThumbnailHandler } from "../functions/documentThumbnail/resource";
 import { gamificationHandler } from "../functions/gamification/resource";
 import { peerReviewAIHandler } from "../functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "../functions/generatePracticeDrill/resource";
@@ -67,13 +69,55 @@ const PracticeDrillType = a.enum([
   "REVIEW",
 ]);
 
+const NotificationType = a.enum([
+  "ASSIGNMENT_NEW",
+  "ASSIGNMENT_DUE_SOON",
+  "ASSIGNMENT_DUE_NOW",
+  "GRADE_RECEIVED",
+  "PEER_REVIEW_COMPLETE",
+  "PEER_REVIEW_INVITE",
+  "PRACTICE_SESSION_INVITE",
+  "WORKBOOK_SESSION_INVITE",
+  "HOMEWORK_ROOM_OPENED",
+  "XP_MILESTONE",
+  "LEVEL_UP",
+  "BADGE_EARNED",
+  "BADGE_LOST",
+  "DEBUFF_APPLIED",
+  "DEBUFF_EXPIRED",
+  "STREAK_MILESTONE",
+  "STREAK_AT_RISK",
+  "PERSONAL_BEST",
+  "CHALLENGE_STARTED",
+  "CHALLENGE_ENDING_SOON",
+  "CHALLENGE_COMPLETED",
+  "SQUAD_POST_NEW",
+  "SQUAD_MEMBER_JOINED",
+  "SQUAD_METADATA_UPDATED",
+  "SQUAD_INVITE",
+  "CHAT_MENTION",
+  "CHAT_NEW_MESSAGE",
+  "SYSTEM_ANNOUNCEMENT",
+  "SYSTEM_MAINTENANCE",
+]);
+
+const NotificationCategory = a.enum([
+  "ASSIGNMENT",
+  "COLLABORATION",
+  "GAMIFICATION",
+  "SQUAD",
+  "CHAT",
+  "SYSTEM",
+]);
+
 // Consolidated types for DRY principles
 const EmbeddingInfo = a.customType({
-  embedding: a.json(), // Array of PageEmbedding objects
+  // Vector data moved to S3: private/{identityId}/embeddings/{model}/{id}.json
   model: a.string(),
   dimensions: a.integer(),
-  version: a.timestamp(),
+  version: a.timestamp(), // Cache key — fetch from S3 when version changes
   wordCount: a.integer(),
+  pageCount: a.integer(), // Number of page embeddings (for multi-page files)
 });
 
 const ModerationInfo = a.customType({
@@ -91,6 +135,49 @@ const Choice = a.customType({
 // ============================================================================
 // PHASE 1: TYPED CUSTOM TYPES (replace a.json() usage)
 // ============================================================================
+
+// --- Gamification settings custom types ---
+const LevelThreshold = a.customType({
+  level: a.integer().required(),
+  xpRequired: a.integer().required(),
+  title: a.string(), // Optional custom title for this level (e.g., "Apprentice", "Master")
+});
+
+const BadgeConfig = a.customType({
+  badgeType: a.string().required(),
+  enabled: a.boolean().required(),
+  // Override criteria thresholds per section
+  thresholdOverride: a.integer(),
+});
+
+const CustomBadgeDefinition = a.customType({
+  id: a.string().required(),
+  title: a.string().required(),
+  description: a.string(),
+  icon: a.string(), // URL or emoji
+  shape: a.string(), // "circle" | "hexagon" | "shield" | "diamond"
+  rarity: a.string(), // "common" | "uncommon" | "rare" | "epic" | "legendary"
+  category: a.string(),
+  criteria: a.json(), // Evaluation criteria object
+  isAnti: a.boolean(), // Whether this is an anti-badge
+  autoEvaluate: a.boolean(),
+});
+
+const SectionGamificationConfig = a.customType({
+  // Feature toggles
+  easterEggsEnabled: a.boolean(), // Toggle easter egg discovery (default: true)
+  groupChallengesEnabled: a.boolean(), // Toggle group/boss battle challenges (default: true)
+  squadsEnabled: a.boolean(), // Toggle squad formation (default: true)
+  skillTreesEnabled: a.boolean(), // Toggle skill tree progression (default: true)
+  streaksEnabled: a.boolean(), // Toggle streak tracking (default: true)
+  collaborativePracticeEnabled: a.boolean(), // Toggle collaborative drill mode (default: true)
+  // Streak settings
+  streakFreezesAllowed: a.integer(), // Per-section freeze cap override
+  // Badge configuration — which badge types are active in this section
+  badgeConfigs: a.ref("BadgeConfig").array(),
+  // Custom badge definitions — instructor-created badges for this section
+  customBadges: a.ref("CustomBadgeDefinition").array(),
+});
 
 // --- Gamification aggregates ---
 const BadgeEntry = a.customType({
@@ -133,13 +220,17 @@ const UnitMemoryEntry = a.customType({
   lastPracticedAt: a.datetime(),
 });
 
-const GuildMember = a.customType({
+const SquadMember = a.customType({
   studentId: a.string().required(),
   role: a.string(), // LEADER | MEMBER
   joinedAt: a.datetime(),
+  // Denormalized avatar config — synced from StudentProfile on rebuild
+  avatarStyle: a.string(),
+  avatarOverrides: a.json(),
+  avatarSeed: a.string(),
 });
 
-const GuildPostEntry = a.customType({
+const SquadPostEntry = a.customType({
   authorId: a.string().required(),
   title: a.string().required(),
   data: a.string(),
@@ -152,9 +243,42 @@ const ChallengeContribution = a.customType({
   contributedAt: a.datetime(),
 });
 
+const CosmeticRewardEntry = a.customType({
+  /** Type of cosmetic: ring | title | border | flair | style | theme */
+  type: a.string().required(),
+  /** Value: preset name, display text, style tier key, or theme key */
+  value: a.string().required(),
+  /** Duration in hours. null = permanent */
+  durationHours: a.integer(),
+  /** When this cosmetic was awarded */
+  awardedAt: a.datetime(),
+  /** When it expires (null = permanent) */
+  expiresAt: a.datetime(),
+  /** Source challenge/badge that granted it */
+  sourceId: a.string(),
+  /** Human-readable label for UI display */
+  label: a.string(),
+});
+
+const SquadRecapEntry = a.customType({
+  challengeId: a.string().required(),
+  challengeTitle: a.string(),
+  recap: a.string().required(),
+  rivalSquadId: a.string(),
+  rivalSquadName: a.string(),
+  performance: a.string(),
+  generatedAt: a.datetime(),
+});
+
 const EasterEggDiscoveryEntry = a.customType({
   studentId: a.string().required(),
   discoveredAt: a.datetime(),
+});
+
+const EasterEggProfileEntry = a.customType({
+  easterEggId: a.string().required(),
+  discoveredAt: a.datetime(),
+  xpReward: a.integer(),
 });
 
 // --- Document analysis ---
@@ -187,6 +311,15 @@ const QuestionEntry = a.customType({
   expectedAnswer: a.string(),
   hint: a.string(),
   type: a.string(),
+});
+
+const PendingMediaEntry = a.customType({
+  filename: a.string().required(),
+  mimeType: a.string().required(),
+  s3Key: a.string().required(),
+  size: a.integer().required(),
+  description: a.string(),
+  approved: a.boolean(),
 });
 
 // --- Practice / Insights ---
@@ -249,6 +382,27 @@ const ConfusionPair = a.customType({
   frequency: a.integer(),
 });
 
+// --- Report Card (grade rollup stats) ---
+const GradeStats = a.customType({
+  min: a.float().required(),
+  max: a.float().required(),
+  avg: a.float().required(),
+  count: a.integer().required(),
+});
+
+const TimeStats = a.customType({
+  min: a.integer().required(), // fastest completion (ms)
+  max: a.integer().required(), // slowest completion (ms)
+  avg: a.integer().required(), // mean completion time (ms)
+  count: a.integer().required(),
+});
+
+const ReportCard = a.customType({
+  gradeStats: a.ref("GradeStats"),
+  timeStats: a.ref("TimeStats"),
+  lastUpdated: a.datetime(),
+});
+
 // ============================================================================
 // MAIN SCHEMA DEFINITION
 // ============================================================================
@@ -305,6 +459,13 @@ const schema = a
       message: a.string(),
     }),
 
+    ApproveMediaResult: a.customType({
+      success: a.boolean().required(),
+      parsedContentID: a.id().required(),
+      approvedCount: a.integer(),
+      message: a.string(),
+    }),
+
     GenerateEmbeddingsResult: a.customType({
       success: a.boolean().required(),
       fileID: a.id().required(),
@@ -316,20 +477,28 @@ const schema = a
     // ========================================================================
     // REGISTERED CUSTOM TYPES (defined above, referenced via a.ref())
     // ========================================================================
+    LevelThreshold,
+    BadgeConfig,
+    CustomBadgeDefinition,
+    SectionGamificationConfig,
     BadgeEntry,
     ModuleProgressEntry,
     PersonalBestEntry,
     SkillProgressEntry,
     UnitMemoryEntry,
-    GuildMember,
-    GuildPostEntry,
+    SquadMember,
+    SquadPostEntry,
     ChallengeContribution,
+    CosmeticRewardEntry,
+    SquadRecapEntry,
     EasterEggDiscoveryEntry,
+    EasterEggProfileEntry,
     VocabularyEntry,
     SummaryEntry,
     ObjectiveEntry,
     ConceptEntry,
     QuestionEntry,
+    PendingMediaEntry,
     SourcesEnabled,
     CoverageSnapshot,
     BlockBreakdown,
@@ -339,6 +508,9 @@ const schema = a
     JobError,
     ConceptStrength,
     ConfusionPair,
+    GradeStats,
+    TimeStats,
+    ReportCard,
 
     // ========================================================================
     // CORE MODELS
@@ -355,8 +527,9 @@ const schema = a
         number: a.float(),
         name: a.string(),
         description: a.string(),
-        // Editor content as Lexical JSON
-        data: a.json(),
+        // S3-backed content versioning (content stored in S3, not DynamoDB)
+        contentVersion: a.integer(),
+        publishedContentVersion: a.integer(),
         status: PublishedStatus,
         timeLimitSeconds: a.integer(),
         retryEnabled: a.boolean(),
@@ -381,8 +554,6 @@ const schema = a
         moderation: ModerationInfo,
         publishedAt: a.timestamp(),
         isDraft: a.boolean(),
-        // Yjs CRDT snapshot for conflict-free collaborative editing
-        yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
         // Content gating (absorbed from ContentLock model)
         requiredXP: a.integer(),
         requiredBadgeId: a.string(),
@@ -449,6 +620,8 @@ const schema = a
         data: a.json(), // JSON object keyed by block IDs with { complete, accuracy, userAnswer, feedback }
         feedback: a.json(), // Generated feedback by block
         files: a.string().array(), // Submitted file paths
+        // Engaged time — accumulated ms of active interaction (visible + focused + not idle)
+        engagedTimeMs: a.integer(),
         unitVersion: a.integer(),
         // Peer review
         reviewRoomId: a.id(),
@@ -519,11 +692,18 @@ const schema = a
         gradeOverrides: a.json(), // { [studentId]: { [unitID]: { score: number, updatedAt: string } } }
         // Leaderboard
         leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
+        leaderboardRebuiltAt: a.datetime(), // Timestamp of last successful leaderboard rebuild (debounce)
+        leaderboardUpdateInProgressAt: a.datetime(), // Lock timestamp — prevents concurrent rebuilds; ignored after staleness threshold
         // Linear progression — lock units in due-date order until prior is completed
         linearLockEnabled: a.boolean(),
         // XP tuner — per-section overrides for XP multipliers and caps
         // { multipliers?: Record<XPReason, number>, dailyCap?: number, weeklyCap?: number, enabled?: boolean }
         xpConfig: a.json(),
+        // Badge toggles — per-section control over badge awarding
+        badgesEnabled: a.boolean(), // Instructor toggle — enable/disable all badge awarding for this section (default: true)
+        antiBadgesEnabled: a.boolean(), // Instructor toggle — enable/disable anti-badge awarding specifically (default: true)
+        // Per-section gamification feature config (typed)
+        gamificationConfig: a.ref("SectionGamificationConfig"),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -554,9 +734,7 @@ const schema = a
         choices: a.json(), // Array of Choice objects
         // Audio/media
         audio: a.string().array(),
-        audioWaveformData: a.json(),
         answerAudio: a.string().array(),
-        answerAudioWaveformData: a.json(),
         // Generation metadata
         generated: a.boolean(),
         model: a.string(),
@@ -634,7 +812,6 @@ const schema = a
         hex: a.string(),
         byHex: a.string(),
         thumbnail: a.string(),
-        waveformData: a.json(),
         // Relationships - enable querying files by associated model
         documentID: a.id(),
         document: a.belongsTo("Document", ["documentID"]),
@@ -680,9 +857,7 @@ const schema = a
         rubyTags: a.string(),
         // Audio
         audio: a.string().array(),
-        waveformData: a.json(),
         definitionAudio: a.string().array(),
-        definitionWaveformData: a.json(),
         // Metadata
         importedAt: a.datetime(),
         // Embeddings
@@ -872,8 +1047,8 @@ const schema = a
         filename: a.string().required(),
         s3Key: a.string().required(), // S3 path to original PDF
         status: a.string().required(), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
-        // Content
-        extractedText: a.string(), // Full text extracted from PDF
+        // Content (full text stored in S3: private/{identityId}/documents/{id}/extracted-text.txt)
+        textExtractedAt: a.timestamp(), // Signals text is available in S3
         pageCount: a.integer(),
         fileSize: a.integer(),
         mimeType: a.string(),
@@ -929,6 +1104,7 @@ const schema = a
         objectivesJSON: a.ref("ObjectiveEntry").array(),
         conceptsJSON: a.ref("ConceptEntry").array(),
         questionsJSON: a.ref("QuestionEntry").array(),
+        pendingMediaJSON: a.ref("PendingMediaEntry").array(),
         // API tracking
         responseId: a.string(), // OpenAI response ID
         modelUsed: a.string(),
@@ -936,7 +1112,6 @@ const schema = a
         processingTime: a.integer(),
         // Timestamps (createdAt/updatedAt auto-generated)
         importedAt: a.datetime(),
-        metadata: a.json(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -1046,6 +1221,35 @@ const schema = a
         allow.owner(),
         allow.group("Admins"),
         allow.authenticated(),
+      ]),
+
+    Notification: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        recipientId: a.string().required(),
+        type: NotificationType,
+        category: NotificationCategory,
+        title: a.string().required(),
+        body: a.string(),
+        linkPath: a.string(),
+        linkLabel: a.string(),
+        referenceId: a.string(),
+        referenceType: a.string(),
+        senderName: a.string(),
+        seen: a.boolean().default(false),
+        interacted: a.boolean().default(false),
+        expiresAt: a.datetime(),
+        metadata: a.json(),
+      })
+      .secondaryIndexes((index) => [
+        index("recipientId").name("byRecipient"),
+        index("type").name("byType"),
+      ])
+      .authorization((allow) => [
+        allow.ownerDefinedIn("recipientId"),
+        allow.group("Admins"),
       ]),
 
     AIFeedback: a
@@ -1158,7 +1362,7 @@ const schema = a
           "COMEBACK",
           "PERSONAL_BEST",
           "EASTER_EGG",
-          "GUILD_CHALLENGE_BONUS",
+          "SQUAD_CHALLENGE_BONUS",
           "PRACTICE_DRILL_COMPLETED",
           "PRACTICE_DRILL_ACCURACY_BONUS",
         ]),
@@ -1208,14 +1412,129 @@ const schema = a
         completedAssignments: a.integer(),
         nailedItCount: a.integer(),
         lastUpdated: a.datetime(),
+        // Rollup counters — maintained by XP stream handler, eliminates log scans
+        reasonCounts: a.json(), // { "PERFECT_SCORE": 5, "NAILED_IT": 12, ... }
+        totalSubmissions: a.integer().default(0),
+        maxFailedAttemptsOnSingleRef: a.integer().default(0),
+        recentSubmissionTimestamps: a.json(), // last 5 HOMEWORK_SUBMITTED timestamps
+        activeDaysCount: a.integer().default(0),
         // Cosmetic penalty (boss battle consequence)
         cosmeticPenalty: a.json(),
+        // Earned cosmetic rewards (rings, titles, borders, styles, themes)
+        cosmeticRewards: a.ref("CosmeticRewardEntry").array(),
         // Active debuffs from anti-badges (JSON array with expiry timestamps)
         activeDebuffs: a.json(),
+        // Easter eggs discovered by this student
+        easterEggs: a.ref("EasterEggProfileEntry").array(),
+        // Report card — rollup of grade accuracy and engaged time stats
+        reportCard: a.ref("ReportCard"),
+        // Denormalized avatar config — synced from Settings.metadata on save & rebuild
+        avatarStyle: a.string(),
+        avatarOverrides: a.json(),
+        avatarSeed: a.string(),
       })
       .secondaryIndexes((index) => [
         index("studentId").name("byStudent"),
         index("cohortId").name("byCohort"),
+      ])
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    // Global platform settings — admin-only singleton for all platform-wide configuration
+    PlatformSettings: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        // === Gamification ===
+        // Leveling curve — ordered thresholds defining XP needed per level
+        levelThresholds: a.ref("LevelThreshold").array(),
+        // XP multipliers per reason (overrides global defaults)
+        xpMultipliers: a.json(), // { "PERFECT_SCORE": 1.5, "NAILED_IT": 2.0, ... }
+        // XP caps
+        dailyCap: a.integer(),
+        weeklyCap: a.integer(),
+        // Badge toggles — which badge/anti-badge types are active
+        badgeConfigs: a.ref("BadgeConfig").array(),
+        badgesEnabled: a.boolean().default(true),
+        antiBadgesEnabled: a.boolean().default(true),
+        // Streak settings
+        streakFreezesAllowed: a.integer().default(3),
+        // Leaderboard
+        leaderboardEnabled: a.boolean().default(true),
+        leaderboardAnonymous: a.boolean().default(false),
+        // Custom badge definitions (admin-created badges)
+        customBadges: a.ref("CustomBadgeDefinition").array(),
+        // Avatar unlock schedule — JSON: { unlocks: [{minLevel, tier}], glowOnLevelUp?, featureUnlockLevels? }
+        avatarUnlockConfig: a.json(),
+        // === AI & Document Analysis ===
+        autoAnalyzeDocuments: a.boolean().default(true),
+        documentAnalysisModel: a.string(), // e.g. "gpt-4", "gpt-4o"
+        defaultAIModel: a.string().default("gpt-4o-mini"), // default model for chat/assistant
+        // === Bot Personas ===
+        kaiEnabled: a.boolean().default(true), // Student tutor bot
+        sageEnabled: a.boolean().default(true), // Instructor assistant bot
+        kaiModel: a.string(), // Model override for Kai (defaults to defaultAIModel)
+        sageModel: a.string(), // Model override for Sage
+        kaiSystemPromptOverride: a.string(), // Custom system prompt (replaces default)
+        sageSystemPromptOverride: a.string(), // Custom system prompt (replaces default)
+        // === Ownership ===
+        owner: a.string(),
+      })
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    // Per-student, per-section progress — enables different XP/level/badges per section
+    SectionProgress: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        studentId: a.string().required(),
+        sectionId: a.string().required(),
+        studentName: a.string(),
+        // XP & Level (scoped to this section, computed using section's leveling curve)
+        totalXP: a.integer().default(0),
+        level: a.integer().default(1),
+        // Streak (scoped to this section)
+        currentStreak: a.integer().default(0),
+        longestStreak: a.integer().default(0),
+        lastActivityDate: a.date(),
+        freezesRemaining: a.integer().default(0),
+        freezesUsed: a.integer().default(0),
+        // Badges earned in this section
+        badges: a.ref("BadgeEntry").array(),
+        // Active debuffs from anti-badges
+        activeDebuffs: a.json(),
+        // Easter eggs discovered in this section
+        easterEggs: a.ref("EasterEggProfileEntry").array(),
+        // Leaderboard position fields
+        completedAssignments: a.integer().default(0),
+        nailedItCount: a.integer().default(0),
+        lastUpdated: a.datetime(),
+        // Rollup counters — maintained by stream handler (same as StudentProfile)
+        reasonCounts: a.json(),
+        totalSubmissions: a.integer().default(0),
+        maxFailedAttemptsOnSingleRef: a.integer().default(0),
+        recentSubmissionTimestamps: a.json(),
+        activeDaysCount: a.integer().default(0),
+        // Module progress within this section
+        moduleProgress: a.ref("ModuleProgressEntry").array(),
+        owner: a.string(),
+        // Denormalized avatar config — synced from Settings.metadata on save & rebuild
+        avatarStyle: a.string(),
+        avatarOverrides: a.json(),
+        avatarSeed: a.string(),
+      })
+      .secondaryIndexes((index) => [
+        index("studentId").name("byStudent"),
+        index("sectionId").name("bySection"),
       ])
       .authorization((allow) => [
         allow.owner(),
@@ -1259,17 +1578,13 @@ const schema = a
         _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        trigger: a.enum([
-          "KEYWORD",
-          "UI_INTERACTION",
-          "TIME_BASED",
-          "SUBMISSION_QUALITY",
-        ]),
+        trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
         triggerValue: a.string().required(),
         xpReward: a.integer().required(),
         badgeId: a.string(),
         revealMessage: a.string().required(),
         active: a.boolean().default(true),
+        cohortId: a.string(),
         // Embedded discoveries (absorbed from EasterEggDiscovery)
         discoveries: a.ref("EasterEggDiscoveryEntry").array(),
       })
@@ -1290,6 +1605,8 @@ const schema = a
         prerequisites: a.json(),
         xpReward: a.integer(),
         cohortId: a.string(),
+        unitIds: a.string().array(),
+        minimumAccuracy: a.integer().default(70),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1299,7 +1616,7 @@ const schema = a
         allow.authenticated().to(["read"]),
       ]),
 
-    Guild: a
+    Squad: a
       .model({
         _version: a.integer(),
         _lastChangedAt: a.timestamp(),
@@ -1308,10 +1625,15 @@ const schema = a
         cohortId: a.string().required(),
         totalXP: a.integer().default(0),
         description: a.string(),
-        // Embedded members (absorbed from GuildMembership)
-        members: a.ref("GuildMember").array(),
-        // Embedded posts (absorbed from GuildPost)
-        posts: a.ref("GuildPostEntry").array(),
+        // Embedded members (absorbed from SquadMembership)
+        members: a.ref("SquadMember").array(),
+        // Embedded posts (absorbed from SquadPost)
+        posts: a.ref("SquadPostEntry").array(),
+        // Squad identity
+        crestSvg: a.string(),
+        featuredImage: a.string(),
+        // Per-challenge recaps (generated at challenge resolution)
+        recaps: a.ref("SquadRecapEntry").array(),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1336,8 +1658,71 @@ const schema = a
         setting: a.string(),
         stakes: a.string(),
         systemPromptSeed: a.string(),
+        chapterOrder: a.integer(),
+        // Image generation
+        featuredImage: a.string(),
+        bodyImages: a.json(),
+        // Resolution / outcome
+        outcome: a.string(),
+        // Cloning provenance
+        clonedFrom: a.id(),
+        // Rewards on completion
+        rewardXP: a.integer(), // bonus XP awarded to all contributors on victory
+        rewardBadge: a.string(), // badge type key to award on victory
+        rewardCosmetic: a.string(), // cosmetic item key (title/border/flair)
+        unlockContentId: a.id(), // Unit ID to unlock on victory
         // Embedded contributions (absorbed from GroupChallengeContribution)
         contributions: a.ref("ChallengeContribution").array(),
+      })
+      .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.group("Instructors"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    Badge: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        title: a.string().required(),
+        description: a.string(),
+        icon: a.string(),
+        shape: a.enum(["circle", "hexagon", "shield", "diamond"]),
+        rarity: a.enum(["common", "uncommon", "rare", "epic", "legendary"]),
+        category: a.string(),
+        criteria: a.json(),
+        cohortId: a.string(),
+        autoEvaluate: a.boolean().default(true),
+      })
+      .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.group("Instructors"),
+        allow.authenticated().to(["read"]),
+      ]),
+
+    // ========================================================================
+    // SQUAD MESSAGING
+    // ========================================================================
+
+    SquadMessage: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        cohortId: a.string().required(),
+        // Target squads (one or many)
+        recipientSquadIds: a.string().array().required(),
+        // Template with {{SQUAD_NAME}}, {{SQUAD_RIVAL}}, {{SQUAD_XP}} vars
+        template: a.string().required(),
+        // Hydrated per-squad messages [{squadId, squadName, body}]
+        resolvedMessages: a.json(),
+        sentAt: a.datetime(),
+        owner: a.string(),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1389,6 +1774,73 @@ const schema = a
         allow.group("Admins").to(["read", "create", "update", "delete"]),
         allow.group("Instructors").to(["read"]),
         allow.authenticated().to(["read"]),
+      ]),
+
+    // ========================================================================
+    // ANALYTICS — daily rollups for admin dashboard
+    // ========================================================================
+
+    AnalyticsSummary: a
+      .model({
+        _version: a.integer(),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        // ─── Dimension keys ───
+        date: a.date().required(), // YYYY-MM-DD
+        scope: a.string().required(), // "platform" | "section" | "unit" | "squad" | "page" | "geo"
+        scopeId: a.string().required(), // ID of the scoped entity (or "all" / URL path / country code)
+        sectionId: a.string(), // Parent section (for unit/squad/section records)
+        unitId: a.string(), // Set when scope = "unit"
+        squadId: a.string(), // Set when scope = "squad"
+        isWorkbook: a.boolean(), // true = workbook content
+        isReview: a.boolean(), // true = peer review content
+        // ─── Geolocation ───
+        country: a.string(), // ISO 3166-1 alpha-2 (e.g., "US", "JP", "BR")
+        region: a.string(), // Region/state (e.g., "California", "Tokyo")
+        city: a.string(), // City name (optional, for page/perf scope)
+        // ─── User activity ───
+        dailyActiveUsers: a.integer().default(0),
+        totalPageViews: a.integer().default(0),
+        totalSessions: a.integer().default(0),
+        avgSessionDurationMs: a.integer(),
+        // ─── Engagement ───
+        totalEngagedTimeMs: a.integer().default(0),
+        avgEngagedTimeMs: a.integer(),
+        // ─── Academic ───
+        gradesSubmitted: a.integer().default(0),
+        avgAccuracy: a.float(),
+        workbooksStarted: a.integer().default(0),
+        workbooksCompleted: a.integer().default(0),
+        // ─── Chat (split by role) ───
+        studentChatMessagesSent: a.integer().default(0),
+        instructorChatMessagesSent: a.integer().default(0),
+        // ─── AI usage ───
+        documentsAnalyzed: a.integer().default(0),
+        // ─── Performance (Web Vitals p75) ───
+        p75LCP: a.integer(), // Largest Contentful Paint (ms)
+        p75INP: a.integer(), // Interaction to Next Paint (ms)
+        p75TTFB: a.integer(), // Time to First Byte (ms)
+        p75FCP: a.integer(), // First Contentful Paint (ms)
+        p75CLS: a.float(), // Cumulative Layout Shift (score)
+        perfSampleCount: a.integer(), // Number of measurements
+        // ─── JSON Rollups (on platform/section records) ───
+        topPages: a.json(), // [{ path, views, avgTimeMs }]
+        slowestPages: a.json(), // [{ path, p75LCP, p75INP, sampleCount }]
+        topUnits: a.json(), // [{ unitId, name, completions, avgAccuracy }]
+        bottomUnits: a.json(), // [{ unitId, name, completions, avgAccuracy }]
+        topSquads: a.json(), // [{ squadId, name, xp, avgAccuracy }]
+        bottomSquads: a.json(), // [{ squadId, name, xp, avgAccuracy }]
+        topCountries: a.json(), // [{ country, sessions, avgEngagedTimeMs, p75LCP }]
+      })
+      .secondaryIndexes((index) => [
+        index("date").sortKeys(["scope"]).name("byDate"),
+        index("sectionId").sortKeys(["scope"]).name("bySection"),
+        index("scope").sortKeys(["date"]).name("byScope"),
+        index("country").sortKeys(["date"]).name("byCountry"),
+      ])
+      .authorization((allow) => [
+        allow.group("Admins"),
+        allow.group("Instructors").to(["read"]),
       ]),
 
     // ========================================================================
@@ -1628,6 +2080,16 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(documentAnalysisHandler)),
 
+    approveMedia: a
+      .mutation()
+      .arguments({
+        parsedContentID: a.id().required(),
+        approvedIndices: a.integer().array().required(),
+      })
+      .returns(a.ref("ApproveMediaResult"))
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(documentAnalysisHandler)),
+
     // Embeddings Mutations
     generateEmbeddings: a
       .mutation()
@@ -1735,6 +2197,23 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(sectionHandler)),
 
+    // Returns a short-lived presigned/signed URL for a student's private submission file.
+    // AppSync enforces that only Instructors and Admins can call this query.
+    // The Lambda further validates the caller is an instructor of the grade's section
+    // and that the submissionKey belongs to the grade owner (path traversal prevention).
+    getStudentSubmissionUrl: a
+      .query()
+      .arguments({
+        gradeId: a.id().required(),
+        submissionKey: a.string().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [
+        allow.group("Instructors"),
+        allow.group("Admins"),
+      ])
+      .handler(a.handler.function(sectionHandler)),
+
     // Gamification Mutations
     awardXP: a
       .mutation()
@@ -1754,6 +2233,15 @@ const schema = a
       .mutation()
       .arguments({
         studentId: a.string().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(gamificationHandler)),
+
+    checkBadgesBatch: a
+      .mutation()
+      .arguments({
+        entries: a.json().required(),
       })
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
@@ -1864,7 +2352,7 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(gamificationHandler)),
 
-    updateGuildXP: a
+    updateSquadXP: a
       .mutation()
       .arguments({
         studentId: a.string().required(),
@@ -1906,6 +2394,17 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(gamificationHandler)),
 
+    evaluateSkillsForUnit: a
+      .mutation()
+      .arguments({
+        studentId: a.string().required(),
+        unitId: a.string().required(),
+        cohortId: a.string(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(gamificationHandler)),
+
     claimStorybookBadges: a
       .mutation()
       .arguments({
@@ -1937,12 +2436,34 @@ const schema = a
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(peerReviewAIHandler)),
+
+    // Image Processing Mutations
+    processFileImage: a
+      .mutation()
+      .arguments({
+        fileID: a.id().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(imageProcessHandler)),
+
+    // Document Thumbnail Mutations
+    processDocumentThumbnail: a
+      .mutation()
+      .arguments({
+        fileID: a.id().required(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(documentThumbnailHandler)),
   })
   .authorization((allow) => [
     allow.resource(openaiHandler),
     allow.resource(documentAnalysisHandler),
     allow.resource(embeddingsHandler),
     allow.resource(mediaConvertHandler),
+    allow.resource(imageProcessHandler),
+    allow.resource(documentThumbnailHandler),
     allow.resource(gamificationHandler),
     allow.resource(moderationHandler),
   ]);

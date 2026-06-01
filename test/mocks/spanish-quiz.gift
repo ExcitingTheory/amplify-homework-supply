@@ -1,0 +1,26 @@
+// GIFT format quiz - Spanish AR Verb Conjugation
+// Category: Spanish/Verbs/AR-Conjugation
+
+$CATEGORY: Spanish/AR-Verbs
+
+::Hablar - yo:: ¿Cuál es la conjugación de "hablar" para "yo"? {=hablo ~hablas ~habla ~hablamos}
+
+::Hablar - tú:: ¿Cuál es la conjugación de "hablar" para "tú"? {=hablas ~hablo ~habla ~hablan}
+
+::Hablar - él/ella:: ¿Cuál es la conjugación de "hablar" para "él/ella/usted"? {=habla ~hablo ~hablas ~hablan}
+
+::Hablar - nosotros:: ¿Cuál es la conjugación de "hablar" para "nosotros"? {=hablamos ~hablo ~hablan ~habláis}
+
+::Hablar - ellos:: ¿Cuál es la conjugación de "hablar" para "ellos/ellas/ustedes"? {=hablan ~hablo ~habla ~hablamos}
+
+::Cantar meaning:: What does "cantar" mean in English? {=to sing ~to dance ~to talk ~to walk}
+
+::Bailar - yo:: ¿Cuál es la conjugación de "bailar" para "yo"? {=bailo ~bailas ~baila ~bailamos}
+
+::Caminar - nosotros:: ¿Cuál es la conjugación de "caminar" para "nosotros"? {=caminamos ~camino ~caminan ~camináis}
+
+// True/False
+::AR verb pattern:: Los verbos AR siguen el patrón: -o, -as, -a, -amos, -áis, -an {TRUE}
+
+// Short answer
+::Infinitive ending:: What are the three types of Spanish verb infinitive endings? {=ar, er, ir =-ar, -er, -ir}

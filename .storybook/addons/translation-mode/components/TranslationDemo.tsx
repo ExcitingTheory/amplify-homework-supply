@@ -3,7 +3,7 @@ import { Box, Button, Typography, TextField, Alert } from '@mui/material';
 import { TranslationOverlay } from './TranslationOverlay';
 import { useContext } from 'react';
 import { useGlobals } from 'storybook/preview-api';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 export interface TranslationDemoProps {
   namespace?: string;
@@ -15,7 +15,7 @@ export interface TranslationDemoProps {
  * This demo uses actual translation keys from the auth namespace to showcase rich metadata
  */
 export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'auth', storyName }) => {
-  const { t } = useTranslation('auth');
+  const t = useTranslations('auth');
   
   return (
     <Box sx={{ p: 3, maxWidth: 600 }} data-tour="translation-demo">

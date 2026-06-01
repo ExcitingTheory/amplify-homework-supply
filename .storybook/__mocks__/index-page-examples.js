@@ -17,7 +17,9 @@ import {
   seedMockUnit,
   seedMockGrade,
   seedMockSections,
-  seedMockAssignments
+  seedMockAssignments,
+  seedMockStudentProfiles,
+  seedMockHomeworkRooms
 } from './aws-amplify-data';
 
 /**
@@ -32,17 +34,27 @@ export const mockUnits = {
     identityId: 'us-east-1:teacher-identity-1',
     data: JSON.stringify({
       root: {
+        type: 'root',
         children: [
           {
             type: 'heading',
             tag: 'h1',
-            children: [{ type: 'text', text: 'Japanese Greetings' }]
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [{ type: 'text', text: 'Japanese Greetings', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
           }
-        ]
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1
       }
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CLASSROOM,
     published: true,
+    status: 'PUBLISHED',
     createdAt: new Date('2024-01-01T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-10T15:00:00Z').toISOString(),
     _version: 3,
@@ -57,17 +69,27 @@ export const mockUnits = {
     identityId: 'us-east-1:teacher-identity-1',
     data: JSON.stringify({
       root: {
+        type: 'root',
         children: [
           {
             type: 'heading',
             tag: 'h1',
-            children: [{ type: 'text', text: 'Numbers and Counting' }]
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [{ type: 'text', text: 'Numbers and Counting', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
           }
-        ]
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1
       }
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CULTURE,
     published: true,
+    status: 'PUBLISHED',
     timeLimitSeconds: 120,
     createdAt: new Date('2024-01-05T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-12T15:00:00Z').toISOString(),
@@ -83,17 +105,27 @@ export const mockUnits = {
     identityId: 'us-east-1:teacher-identity-1',
     data: JSON.stringify({
       root: {
+        type: 'root',
         children: [
           {
             type: 'heading',
             tag: 'h1',
-            children: [{ type: 'text', text: 'Daily Activities' }]
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [{ type: 'text', text: 'Daily Activities', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
           }
-        ]
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1
       }
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_MODERN,
     published: true,
+    status: 'PUBLISHED',
     createdAt: new Date('2024-01-10T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-15T15:00:00Z').toISOString(),
     _version: 1,
@@ -108,17 +140,27 @@ export const mockUnits = {
     identityId: 'us-east-1:teacher-identity-2',
     data: JSON.stringify({
       root: {
+        type: 'root',
         children: [
           {
             type: 'heading',
             tag: 'h1',
-            children: [{ type: 'text', text: 'Basic Kanji' }]
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [{ type: 'text', text: 'Basic Kanji', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
           }
-        ]
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1
       }
     }),
     featuredImage: MOCK_MEDIA.IMAGE_JPEG,
     published: true,
+    status: 'PUBLISHED',
     createdAt: new Date('2024-01-08T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-18T15:00:00Z').toISOString(),
     _version: 4,
@@ -621,6 +663,119 @@ export const emptyDashboardData = {
 };
 
 /**
+ * Mock StudentProfile entries — XP and leaderboard data derived from grades.
+ * Each completed assignment earns ~100 XP, plus bonus for high accuracy.
+ */
+export const mockStudentProfiles = [
+  {
+    id: 'profile-alice',
+    studentId: 'student-alice-sub',
+    cohortId: 'section-jpn-101',
+    studentName: 'Alice Johnson',
+    totalXP: 450,
+    level: 3,
+    currentStreak: 5,
+    longestStreak: 7,
+    lastActivityDate: '2024-01-23',
+    completedAssignments: 2,
+    nailedItCount: 1,
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-23T15:00:00Z'),
+    _deleted: false,
+  },
+  {
+    id: 'profile-bob',
+    studentId: 'student-bob-sub',
+    cohortId: 'section-jpn-101',
+    studentName: 'Bob Smith',
+    totalXP: 320,
+    level: 2,
+    currentStreak: 3,
+    longestStreak: 3,
+    lastActivityDate: '2024-01-22',
+    completedAssignments: 2,
+    nailedItCount: 0,
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-22T09:30:00Z'),
+    _deleted: false,
+  },
+  {
+    id: 'profile-carol',
+    studentId: 'student-carol-sub',
+    cohortId: 'section-jpn-101',
+    studentName: 'Carol Davis',
+    totalXP: 280,
+    level: 2,
+    currentStreak: 2,
+    longestStreak: 4,
+    lastActivityDate: '2024-01-20',
+    completedAssignments: 1,
+    nailedItCount: 1,
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-20T14:15:00Z'),
+    _deleted: false,
+  },
+  {
+    id: 'profile-dave',
+    studentId: 'student-dave-sub',
+    cohortId: 'section-jpn-101',
+    studentName: 'Dave Wilson',
+    totalXP: 380,
+    level: 2,
+    currentStreak: 0,
+    longestStreak: 2,
+    lastActivityDate: '2024-01-24',
+    completedAssignments: 2,
+    nailedItCount: 0,
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-24T10:00:00Z'),
+    _deleted: false,
+  },
+];
+
+/**
+ * Mock open collaboration rooms — students working together on peer review.
+ */
+export const mockHomeworkRooms = [
+  {
+    id: 'room-alice-1',
+    gradeId: 'grade-alice-1',
+    ownerId: 'student-alice-sub',
+    sectionID: 'section-jpn-101',
+    status: 'OPEN',
+    code: 'ABC123',
+    invitedUserIds: ['student-bob-sub'],
+    messages: null,
+    aiReviewSummary: null,
+    closedAt: null,
+    peerGroup: 'review-room-alice-1-peers',
+    createdAt: new Date('2024-01-23T14:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-23T14:00:00Z').toISOString(),
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-23T14:00:00Z'),
+    _deleted: false,
+  },
+  {
+    id: 'room-dave-1',
+    gradeId: 'grade-dave-2',
+    ownerId: 'student-dave-sub',
+    sectionID: 'section-jpn-101',
+    status: 'OPEN',
+    code: 'XYZ789',
+    invitedUserIds: ['student-carol-sub'],
+    messages: null,
+    aiReviewSummary: null,
+    closedAt: null,
+    peerGroup: 'review-room-dave-1-peers',
+    createdAt: new Date('2024-01-24T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-24T09:00:00Z').toISOString(),
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-24T09:00:00Z'),
+    _deleted: false,
+  },
+];
+
+/**
  * Helper function to seed index page data in Storybook
  */
 export function seedIndexPageData(scenario = 'student') {
@@ -663,6 +818,12 @@ export function seedIndexPageData(scenario = 'student') {
     data.grades.forEach(grade => seedMockGrade(grade));
   }
 
+  // Seed student profiles (XP / leaderboard data)
+  seedMockStudentProfiles(mockStudentProfiles);
+
+  // Seed open collaboration rooms
+  seedMockHomeworkRooms(mockHomeworkRooms);
+
   console.log('[IndexPageData] Seeded', scenario, 'dashboard with', {
     units: Object.keys(data.units).length,
     sections: allSections.length,
@@ -678,6 +839,8 @@ export default {
   instructorAssignments,
   studentGrades,
   otherStudentGrades,
+  mockStudentProfiles,
+  mockHomeworkRooms,
   studentDashboardData,
   instructorDashboardData,
   emptyDashboardData,

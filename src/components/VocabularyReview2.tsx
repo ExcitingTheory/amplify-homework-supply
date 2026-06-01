@@ -11,7 +11,7 @@
  * - Import state indicators
  */
 
-import React, { useState, useEffect, useContext, useRef, useMemo } from 'react';
+import React, { useReducer, useEffect, useContext, useRef, useMemo, useCallback } from 'react';
 import {
     Box,
     Paper,
@@ -27,7 +27,7 @@ import {
     Collapse,
     Tooltip,
 } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Download as ImportIcon,
     CheckCircle as CheckCircleIcon,
@@ -59,6 +59,11 @@ import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
 // Virtual scrolling
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Icon } from '@aws-amplify/ui-react';
+import {
+    importReviewReducer,
+    createInitialImportReviewState,
+} from './importReviewReducer';
+import type { ImportReviewAction } from './importReviewReducer';
 
 export interface VocabularyItem {
     word: string;
@@ -480,20 +485,29 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     onImportComplete,
     searchTerm = '',
 }) => {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const { user, isLoading: authLoading } = (useContext(AuthContext) || { user: undefined, isLoading: true }) as { user: { username?: string; [key: string]: any } | undefined; isLoading: boolean };
-    const [parsedContent, setParsedContent] = useState<any>(null);
-    const [document, setDocument] = useState<any>(null);
-    const [vocabularyItems, setVocabularyItems] = useState<VocabularyItem[]>([]);
-    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
-    const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(true);
-    const [importing, setImporting] = useState(false);
-    const [importProgress, setImportProgress] = useState<any>(null);
-    const [importResult, setImportResult] = useState<any>(null);
-    const [showSummaries, setShowSummaries] = useState(false);
-    const [summaries, setSummaries] = useState<any[]>([]);
-    const [objectives, setObjectives] = useState<any[]>([]);
+
+    const [state, dispatch] = useReducer(
+        importReviewReducer<VocabularyItem>,
+        undefined,
+        () => createInitialImportReviewState<VocabularyItem>()
+    );
+    const {
+        parsedContent,
+        document,
+        items: vocabularyItems,
+        selectedItems,
+        expandedItems,
+        loading,
+        importStatus,
+        importProgress,
+        importResult,
+        showSummaries,
+        summaries,
+        objectives,
+    } = state;
+    const importing = importStatus === 'importing';
     
     // Use DictionaryContext to access existing dictionary words
     const { dictionary } = useContext(DictionaryContext) || { dictionary: {} };
@@ -550,14 +564,13 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         return () => subscription.unsubscribe();
     }, [documentId, authLoading, user?.username]);
 
-    const loadParsedContent = async () => {
+    const loadParsedContent = useCallback(async () => {
         try {
-            setLoading(true);
+            dispatch({ type: 'LOAD_START' });
             
             const client = getAmplifyClient();
             // Get document
             const { data: doc } = await client.models.Document.get({ id: documentId });
-            setDocument(doc);
             
             // Get parsed content for this document
             const { data: parsedContents } = await client.models.ParsedContent.list({
@@ -566,7 +579,6 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             
             if (parsedContents.length > 0) {
                 const content = parsedContents[0];
-                setParsedContent(content);
                 
                 // Parse vocabulary - a.json() fields may be returned as objects or strings
                 const vocab = content.vocabularyJSON 
@@ -581,82 +593,69 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                     filename: doc?.filename || undefined,
                 }));
                 
-                setVocabularyItems(enrichedVocab);
-                
                 // Parse summaries - a.json() fields may be returned as objects or strings
                 const sums = content.summariesJSON 
                     ? (typeof content.summariesJSON === 'string' ? JSON.parse(content.summariesJSON) : content.summariesJSON)
                     : [];
-                setSummaries(sums);
                 
                 // Parse objectives - a.json() fields may be returned as objects or strings
                 const objs = content.objectivesJSON 
                     ? (typeof content.objectivesJSON === 'string' ? JSON.parse(content.objectivesJSON) : content.objectivesJSON)
                     : [];
-                setObjectives(objs);
-                
-                // Auto-select all items by default if not imported
-                if (!content.importedAt) {
-                    setSelectedItems(new Set(enrichedVocab.map((_: any, i: number) => i)));
-                }
+
+                dispatch({
+                    type: 'LOAD_SUCCESS',
+                    parsedContent: content,
+                    document: doc,
+                    items: enrichedVocab,
+                    summaries: sums,
+                    objectives: objs,
+                    autoSelectAll: !content.importedAt,
+                });
+            } else {
+                dispatch({ type: 'LOAD_ERROR' });
             }
         } catch (error) {
             console.error('Error loading parsed content:', error);
-        } finally {
-            setLoading(false);
+            dispatch({ type: 'LOAD_ERROR' });
         }
-    };
+    }, [documentId]);
 
-    const toggleItem = (index: number) => {
-        const newSelected = new Set(selectedItems);
-        if (newSelected.has(index)) {
-            newSelected.delete(index);
-        } else {
-            newSelected.add(index);
-        }
-        setSelectedItems(newSelected);
-    };
+    const toggleItem = useCallback((index: number) => {
+        dispatch({ type: 'TOGGLE_SELECT', index });
+    }, []);
 
-    const toggleExpand = (index: number) => {
-        const newExpanded = new Set(expandedItems);
-        if (newExpanded.has(index)) {
-            newExpanded.delete(index);
-        } else {
-            newExpanded.add(index);
-        }
-        setExpandedItems(newExpanded);
-    };
+    const toggleExpand = useCallback((index: number) => {
+        dispatch({ type: 'TOGGLE_EXPAND', index });
+    }, []);
 
-    const toggleAll = () => {
+    const toggleAll = useCallback(() => {
         if (selectedItems.size === vocabularyItems.length) {
-            setSelectedItems(new Set());
+            dispatch({ type: 'DESELECT_ALL' });
         } else {
-            setSelectedItems(new Set(vocabularyItems.map((_, i) => i)));
+            dispatch({ type: 'SELECT_ALL', count: vocabularyItems.length });
         }
-    };
+    }, [selectedItems.size, vocabularyItems.length]);
 
-    const handleUpdate = async (index: number, field: string, newValue: string) => {
+    const handleUpdate = useCallback(async (index: number, field: string, newValue: string) => {
         if (!parsedContent) return;
         
         const updates = { [field]: newValue };
         const success = await updateVocabularyItem(parsedContent.id, index, updates);
         
         if (success) {
-            // Update local state
-            const newItems = [...vocabularyItems];
-            newItems[index] = { ...newItems[index], ...updates };
-            setVocabularyItems(newItems);
+            const updated = { ...vocabularyItems[index], ...updates } as VocabularyItem;
+            dispatch({ type: 'UPDATE_ITEM', index, item: updated });
         }
-    };
+    }, [parsedContent, vocabularyItems]);
 
-    const handleImport = async () => {
+    const handleImport = useCallback(async () => {
         if (!parsedContent || !unitId) {
             console.error('Missing parsedContent or unitId');
             return;
         }
         
-        setImporting(true);
-        setImportResult(null);
+        dispatch({ type: 'IMPORT_START' });
         
         const selectedIndices = Array.from(selectedItems).map(String);
         
@@ -667,21 +666,20 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             owner,
             identityId,
             (current: number, total: number, message: string) => {
-                setImportProgress({ current, total, message });
+                dispatch({ type: 'IMPORT_PROGRESS', progress: { current, total, message } });
             }
         );
         
-        setImporting(false);
-        setImportProgress(null);
-        setImportResult(result);
-        
-        if (result?.success && onImportComplete) {
-            onImportComplete(result);
+        if (result?.success) {
+            dispatch({ type: 'IMPORT_SUCCESS', result });
+            onImportComplete?.(result);
+        } else {
+            dispatch({ type: 'IMPORT_ERROR', result });
         }
         
         // Reload to show updated status
         loadParsedContent();
-    };
+    }, [parsedContent, unitId, selectedItems, owner, identityId, onImportComplete, loadParsedContent]);
 
     if (loading) {
         return (
@@ -742,7 +740,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                 <Box sx={{ px: 2, pb: 1, flexShrink: 0 }}>
                     <Button
                         size="small"
-                        onClick={() => setShowSummaries(!showSummaries)}
+                        onClick={() => dispatch({ type: 'TOGGLE_SUMMARIES' })}
                         endIcon={showSummaries ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         variant="outlined"
                     >
@@ -831,7 +829,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                 <Box sx={{ px: 2, pb: 1, flexShrink: 0 }}>
                     <Alert 
                         severity={importResult.success ? 'success' : 'error'} 
-                        onClose={() => setImportResult(null)}
+                        onClose={() => dispatch({ type: 'CLEAR_IMPORT_RESULT' })}
                     >
                         {importResult.message || 
                             `Imported ${importResult.imported} new words, ${importResult.skipped} already existed, ${importResult.errors} errors`}

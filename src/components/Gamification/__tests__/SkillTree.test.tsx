@@ -11,8 +11,8 @@ import type { SkillNodeData } from '../SkillTree'
 
 // Mock gamificationActions
 const mockGenerateSkillTree = vi.fn()
-vi.mock('../../../utils/gamificationActions', () => ({
-  generateSkillTree: (...args: any[]) => mockGenerateSkillTree(...args),
+vi.mock('../../../../app/actions/gamification', () => ({
+  generateSkillTreeFromUnit: (...args: any[]) => mockGenerateSkillTree(...args),
 }))
 
 // Mock @xyflow/react since it requires a DOM layout for React Flow
@@ -35,15 +35,21 @@ vi.mock('@xyflow/react', () => {
     )
   }
 
+  function ReactFlowProvider({ children }: any) { return <>{children}</> }
   function Background() { return <div data-testid="background" /> }
   function Controls() { return <div data-testid="controls" /> }
 
   return {
     ReactFlow: MockReactFlow,
+    ReactFlowProvider,
     Background,
     Controls,
     Position,
     MarkerType,
+    useNodesState: (initialNodes: any[]) => [initialNodes || [], vi.fn(), vi.fn()],
+    useEdgesState: (initialEdges: any[]) => [initialEdges || [], vi.fn(), vi.fn()],
+    useReactFlow: () => ({ getZoom: () => 1, zoomTo: vi.fn() }),
+    addEdge: vi.fn(),
   }
 })
 

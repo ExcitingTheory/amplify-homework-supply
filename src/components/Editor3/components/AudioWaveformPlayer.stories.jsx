@@ -8,10 +8,7 @@ import { userEvent, within, waitFor, expect } from "storybook/test";
 import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import { Box } from "@mui/material";
-import {
-  MOCK_AUDIO_URL_1,
-  mockWaveformData,
-} from "../../../../.storybook/__mocks__/media";
+import { MOCK_AUDIO_URL_1 } from "../../../../.storybook/__mocks__/media";
 
 export default {
   title: "✏️ Lesson Editor/Media/Audio Waveform Player",
@@ -41,7 +38,6 @@ export default {
 export const WithWaveformData = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     title: "Sample Audio with Waveform",
@@ -60,7 +56,6 @@ export const WithWaveformData = {
 export const CompactPlayer = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 400,
     height: 60,
     showDuration: true,
@@ -78,7 +73,6 @@ export const CompactPlayer = {
 export const WithTitle = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     title: "Student Recording - December 24, 2025",
@@ -96,7 +90,6 @@ export const WithTitle = {
 export const NoDuration = {
   args: {
     audioUrl: MOCK_AUDIO_URL_1,
-    waveformData: mockWaveformData,
     width: 600,
     height: 80,
     showDuration: false,
@@ -114,7 +107,6 @@ export const VariousSizes = () => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
     <AudioWaveformPlayer
       audioUrl={MOCK_AUDIO_URL_1}
-      waveformData={mockWaveformData}
       width={300}
       height={50}
       title="Small (300x50)"
@@ -122,14 +114,12 @@ export const VariousSizes = () => (
     />
     <AudioWaveformPlayer
       audioUrl={MOCK_AUDIO_URL_1}
-      waveformData={mockWaveformData}
       width={450}
       height={70}
       title="Medium (450x70)"
     />
     <AudioWaveformPlayer
       audioUrl={MOCK_AUDIO_URL_1}
-      waveformData={mockWaveformData}
       width={700}
       height={100}
       title="Large (700x100)"
@@ -151,17 +141,14 @@ export const MultiplePlayersInList = () => {
     {
       id: 1,
       title: 'Pronunciation Practice - "Hello"',
-      waveform: mockWaveformData,
     },
     {
       id: 2,
       title: 'Pronunciation Practice - "Goodbye"',
-      waveform: mockWaveformData.map((v) => v * 0.8),
     },
     {
       id: 3,
       title: 'Pronunciation Practice - "Thank you"',
-      waveform: mockWaveformData.map((v) => v * 1.2),
     },
   ];
 
@@ -173,7 +160,6 @@ export const MultiplePlayersInList = () => {
         <AudioWaveformPlayer
           key={recording.id}
           audioUrl={MOCK_AUDIO_URL_1}
-          waveformData={recording.waveform}
           width={600}
           height={70}
           title={recording.title}
@@ -398,7 +384,6 @@ const UsageExample = () => (
 
 // With pre-calculated waveform data
 <AudioWaveformPlayer
-  waveformData={waveformArray}
   width={600}
   height={80}
   title="Student Recording"
@@ -436,7 +421,6 @@ const UsageExample = () => (
       {`// With audio URL and separate waveform
 <AudioWaveformPlayer
   audioUrl="https://example.com/audio.mp3"
-  waveformData={waveformArray}
   width={600}
   height={80}
   title="Playable Recording"

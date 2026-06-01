@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import type { Decorator } from '@storybook/react';
+import type { Decorator } from '@storybook/nextjs-vite';
 import { addons, useGlobals } from 'storybook/preview-api';
 import { TranslationModeProvider, TranslationModeContext, TranslationModeType } from './contexts/TranslationModeContext';
 import { TranslationCaptureProvider, TranslationCaptureContext } from './contexts/TranslationCaptureContext';

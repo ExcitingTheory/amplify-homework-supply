@@ -8,7 +8,7 @@ import {
   mockContentCompletion, 
   mockSuggestBlocks,
   mockChat,
-} from '../../mocks/responses/index.js';
+} from '../../test/mocks/responses/index.js';
 
 /**
  * Mock REST API post() function with streaming support
@@ -227,7 +227,6 @@ export const generateClient = () => ({
             mimeType: 'audio/mpeg',
             size: 150000,
             name: `generated-${variables.phrase?.slice(0, 20) || 'audio'}.mp3`,
-            waveformData: JSON.stringify([0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.2]),
           }
         }
       };

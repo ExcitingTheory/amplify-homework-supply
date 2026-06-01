@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React, { useState } from 'react'
 import { AvatarCustomizer } from './AvatarCustomizer'
 import type { AvatarOverrides } from './AvatarCustomizer'

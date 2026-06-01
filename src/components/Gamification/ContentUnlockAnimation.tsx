@@ -1,3 +1,4 @@
+"use client";
 /**
  * ContentUnlockAnimation — Shows a padlock-open + shimmer animation
  * when content transitions from locked to unlocked.

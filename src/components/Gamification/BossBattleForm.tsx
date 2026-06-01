@@ -17,7 +17,11 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import Collapse from '@mui/material/Collapse'
 import MenuItem from '@mui/material/MenuItem'
+import CircularProgress from '@mui/material/CircularProgress'
 import AddIcon from '@mui/icons-material/Add'
+import ImageIcon from '@mui/icons-material/Image'
+import { generateImage } from '../../../app/actions/generate'
+import getCachedUrl from '../../utils/getCachedUrl'
 
 // ============================================================================
 // Types
@@ -77,11 +81,14 @@ export interface BossBattleFormData {
   bonusMultiplier: number
   setting?: string
   stakes: string // JSON-serialized BattleStakes
+  featuredImage?: string
 }
 
 export interface BossBattleFormProps {
   /** Called when form is submitted with valid data */
   onSubmit: (data: BossBattleFormData) => void
+  /** Pre-fill form for editing an existing battle */
+  initialValues?: Partial<BossBattleFormData>
   /** Disable form during submission */
   submitting?: boolean
 }
@@ -90,16 +97,42 @@ export interface BossBattleFormProps {
 // Component
 // ============================================================================
 
-export function BossBattleForm({ onSubmit, submitting = false }: BossBattleFormProps) {
-  const [title, setTitle] = useState('')
-  const [targetXP, setTargetXP] = useState<number | ''>('')
-  const [startDate, setStartDate] = useState('')
-  const [deadline, setDeadline] = useState('')
-  const [bonusMultiplier, setBonusMultiplier] = useState(1.5)
-  const [setting, setSetting] = useState('')
-  const [stakes, setStakes] = useState<BattleStakes>({ ...DEFAULT_STAKES })
+export function BossBattleForm({ onSubmit, initialValues, submitting = false }: BossBattleFormProps) {
+  const isEditMode = !!initialValues
+
+  const [title, setTitle] = useState(initialValues?.title || '')
+  const [targetXP, setTargetXP] = useState<number | ''>(initialValues?.targetXP || '')
+  const [startDate, setStartDate] = useState(initialValues?.startDate || '')
+  const [deadline, setDeadline] = useState(initialValues?.deadline || '')
+  const [bonusMultiplier, setBonusMultiplier] = useState(initialValues?.bonusMultiplier ?? 1.5)
+  const [setting, setSetting] = useState(initialValues?.setting || '')
+  const [stakes, setStakes] = useState<BattleStakes>(() => {
+    if (initialValues?.stakes) {
+      try { return { ...DEFAULT_STAKES, ...JSON.parse(initialValues.stakes) } } catch { /* ignore */ }
+    }
+    return { ...DEFAULT_STAKES }
+  })
+  const [featuredImage, setFeaturedImage] = useState(initialValues?.featuredImage || '')
+  const [featuredImageUrl, setFeaturedImageUrl] = useState('')
+  const [imagePrompt, setImagePrompt] = useState('')
+  const [imageGenerating, setImageGenerating] = useState(false)
 
   const isValid = title.trim().length > 0 && typeof targetXP === 'number' && targetXP > 0
+
+  const handleGenerateImage = async () => {
+    const prompt = imagePrompt.trim() || `Epic boss battle scene: ${title}. ${setting}`
+    setImageGenerating(true)
+    try {
+      const result = await generateImage({ phrase: prompt, model: 'dall-e-3', size: '1792x1024' })
+      setFeaturedImage(result.path)
+      const url = await getCachedUrl(result.path)
+      setFeaturedImageUrl(url)
+    } catch (err) {
+      console.error('Image generation failed:', err)
+    } finally {
+      setImageGenerating(false)
+    }
+  }
 
   const handleStakeToggle = (key: keyof Pick<BattleStakes,
     'loseLevel' | 'loseXP' | 'loseStreakFreeze' | 'resetStreak' | 'loseBadge' |
@@ -120,16 +153,22 @@ export function BossBattleForm({ onSubmit, submitting = false }: BossBattleFormP
       bonusMultiplier,
       setting: setting.trim() || undefined,
       stakes: JSON.stringify(stakes),
+      featuredImage: featuredImage || undefined,
     })
 
-    // Reset form
-    setTitle('')
-    setTargetXP('')
-    setStartDate('')
-    setDeadline('')
-    setBonusMultiplier(1.5)
-    setSetting('')
-    setStakes({ ...DEFAULT_STAKES })
+    // Only reset form in create mode
+    if (!isEditMode) {
+      setTitle('')
+      setTargetXP('')
+      setStartDate('')
+      setDeadline('')
+      setBonusMultiplier(1.5)
+      setSetting('')
+      setStakes({ ...DEFAULT_STAKES })
+      setFeaturedImage('')
+      setFeaturedImageUrl('')
+      setImagePrompt('')
+    }
   }
 
   return (
@@ -383,6 +422,45 @@ export function BossBattleForm({ onSubmit, submitting = false }: BossBattleFormP
           </Stack>
         </Box>
 
+        {/* Featured Image Generation */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>
+            Featured Image
+          </Typography>
+          <Stack spacing={1}>
+            <TextField
+              size="small"
+              label="Image Prompt"
+              value={imagePrompt}
+              onChange={(e) => setImagePrompt(e.target.value)}
+              multiline
+              rows={2}
+              fullWidth
+              placeholder={`e.g., Epic boss battle: ${title || 'The Algorithm Dragon'}. ${setting || 'A world where bugs rule...'}`}
+              helperText="Describe the image (leave blank for auto-prompt from title + setting)"
+              disabled={submitting}
+            />
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={imageGenerating ? <CircularProgress size={14} /> : <ImageIcon />}
+              onClick={handleGenerateImage}
+              disabled={imageGenerating || submitting || (!imagePrompt.trim() && !title.trim())}
+            >
+              {imageGenerating ? 'Generating...' : featuredImage ? 'Regenerate' : 'Generate Image'}
+            </Button>
+            {featuredImageUrl && (
+              <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
+                <img
+                  src={featuredImageUrl}
+                  alt="Featured"
+                  style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }}
+                />
+              </Box>
+            )}
+          </Stack>
+        </Box>
+
         <Button
           type="submit"
           variant="contained"
@@ -390,7 +468,9 @@ export function BossBattleForm({ onSubmit, submitting = false }: BossBattleFormP
           startIcon={<AddIcon />}
           disabled={!isValid || submitting}
         >
-          {submitting ? 'Creating...' : 'Create Boss Battle'}
+          {submitting
+            ? (isEditMode ? 'Updating...' : 'Creating...')
+            : (isEditMode ? 'Update Battle' : 'Create Boss Battle')}
         </Button>
       </Stack>
     </Box>

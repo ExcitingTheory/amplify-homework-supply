@@ -1,4 +1,5 @@
 import { defineBackend } from "@aws-amplify/backend";
+import * as cdk from "aws-cdk-lib";
 import { Stack, Aspects, IAspect } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
 import { CfnResolver, CfnDataSource } from "aws-cdk-lib/aws-appsync";
@@ -14,6 +15,9 @@ import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
+import { Stream, StreamEncryption } from "aws-cdk-lib/aws-kinesis";
+import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { StartingPosition } from "aws-cdk-lib/aws-lambda";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
@@ -27,14 +31,24 @@ import { embeddingsHandler } from "./functions/embeddings/resource";
 
 import { moderationHandler } from "./functions/moderation/resource";
 import { mediaConvertHandler } from "./functions/mediaConvert/resource";
+import { imageProcessHandler } from "./functions/imageProcess/resource";
+import { documentThumbnailHandler } from "./functions/documentThumbnail/resource";
 import {
   websocketHandler,
   WebSocketApiConstruct,
 } from "./custom/websocket/resource";
 import { MediaConvertConstruct } from "./custom/mediaConvert/resource";
+import { MediaCDNConstruct } from "./custom/mediaCDN/resource";
+import { CfKeyRotationConstruct } from "./custom/cfKeyRotation/resource";
 import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
+import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
+import { notificationCronHandler } from "./functions/notificationCron/resource";
+import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource";
+import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/resource";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 /**
  * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
@@ -112,10 +126,16 @@ export const backend = defineBackend({
   embeddingsHandler,
   moderationHandler,
   mediaConvertHandler,
+  imageProcessHandler,
+  documentThumbnailHandler,
   websocketHandler,
   gamificationHandler,
   peerReviewAIHandler,
+  generatePracticeDrillHandler,
   streakResetCronHandler,
+  notificationCronHandler,
+  leaderboardStreamHandler,
+  analyticsAggregatorHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -237,6 +257,15 @@ backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(
   embeddingsAppSyncPolicy,
 );
 
+// Grant Embeddings handler S3 access for storing embedding vectors
+backend.embeddingsHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.storage.resources.bucket.grantReadWrite(
+  backend.embeddingsHandler.resources.lambda,
+);
+
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
 const openaiSelfInvokePolicy = new Policy(
   backend.openaiHandler.resources.lambda.stack,
@@ -303,6 +332,72 @@ const mediaConvert = new MediaConvertConstruct(dataStack, "MediaConvert", {
   handlerLambda: backend.mediaConvertHandler.resources.lambda,
 });
 
+// ==========================================================================
+// CfKeyRotation — generates RSA key pair and writes to SSM before CloudFront
+// ==========================================================================
+const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation");
+
+// ==========================================================================
+// MediaCDN — CloudFront distribution in front of S3 with OAC
+// ==========================================================================
+
+const mediaCDN = new MediaCDNConstruct(dataStack, "MediaCDN", {
+  bucket: backend.storage.resources.bucket,
+  cfPublicKeyParamName: cfKeyRotation.publicKeyParamName,
+});
+
+// Ensure key pair is written to SSM before the distribution is created/updated
+mediaCDN.node.addDependency(cfKeyRotation);
+
+// Export CDN domain so Next.js and the frontend can construct stable CDN URLs
+backend.addOutput({
+  custom: {
+    CLOUDFRONT: {
+      domain: mediaCDN.distribution.distributionDomainName,
+      distributionId: mediaCDN.distribution.distributionId,
+    },
+  },
+});
+
+// Grant sectionHandler S3 read via IAM role policy only (no bucket policy modification).
+// Using addToRolePolicy instead of bucket.grantRead() avoids a storage→data cross-stack
+// reference which would create a circular dependency between the two nested stacks.
+backend.sectionHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [
+      `${backend.storage.resources.bucket.bucketArn}/private/*`,
+    ],
+  }),
+);
+backend.sectionHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.sectionHandler.addEnvironment(
+  "CDN_DOMAIN",
+  mediaCDN.distribution.distributionDomainName,
+);
+
+// Grant sectionHandler SSM read so it can fetch the CF private key and key pair ID at runtime
+const sectionHandlerSSMPolicy = new Policy(
+  backend.sectionHandler.resources.lambda.stack,
+  "SectionHandlerSSMPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["ssm:GetParameter", "ssm:GetParameters"],
+        resources: [
+          `arn:aws:ssm:${dataStack.region}:${dataStack.account}:parameter/homework-supply/cloudfront/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(
+  sectionHandlerSSMPolicy,
+);
+
 // S3 event notifications via EventBridge — avoids circular dependency between storage and data stacks.
 // Instead of bucket.addEventNotification (which creates storage → data cross-stack ref),
 // we enable EventBridge on the bucket and create a rule in the data stack (one-way data → storage).
@@ -347,6 +442,210 @@ backend.mediaConvertHandler.addEnvironment(
 backend.mediaConvertHandler.addEnvironment(
   "MEDIACONVERT_ROLE_ARN",
   mediaConvert.mediaConvertRole.roleArn,
+);
+
+// generatePracticeDrill — S3 access for reading published unit content
+backend.generatePracticeDrillHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.generatePracticeDrillHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.storage.resources.bucket.grantRead(
+  backend.generatePracticeDrillHandler.resources.lambda,
+);
+
+// ---------------------------------------------------------------------------
+// Image Processing — EventBridge rule for image/document uploads
+// ---------------------------------------------------------------------------
+
+new events.Rule(dataStack, "S3ImageUploadRule", {
+  description:
+    "Routes S3 image/PDF uploads to imageProcess handler via EventBridge",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".jpg"),
+          events.Match.suffix(".jpeg"),
+          events.Match.suffix(".png"),
+          events.Match.suffix(".gif"),
+          events.Match.suffix(".webp"),
+          events.Match.suffix(".avif"),
+          events.Match.suffix(".tiff"),
+          events.Match.suffix(".bmp"),
+          events.Match.suffix(".pdf"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(backend.imageProcessHandler.resources.lambda),
+  ],
+});
+
+// Environment variables for imageProcess
+backend.imageProcessHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.imageProcessHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+
+// S3 read/write access for downloading source files and uploading processed variants
+backend.storage.resources.bucket.grantReadWrite(
+  backend.imageProcessHandler.resources.lambda,
+);
+
+// AppSync GraphQL access (to query/update File records)
+const imageProcessAppSyncPolicy = new Policy(
+  backend.imageProcessHandler.resources.lambda.stack,
+  "ImageProcessAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.imageProcessHandler.resources.lambda.role?.attachInlinePolicy(
+  imageProcessAppSyncPolicy,
+);
+
+// ---------------------------------------------------------------------------
+// Document Thumbnail Lambda (LibreOffice layer for office documents)
+// ---------------------------------------------------------------------------
+
+// EventBridge rule for document uploads (office docs + edu formats — for thumbnail generation)
+new events.Rule(dataStack, "S3DocumentUploadRule", {
+  description:
+    "Routes S3 office/edu document uploads to documentThumbnail handler via EventBridge",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".doc"),
+          events.Match.suffix(".docx"),
+          events.Match.suffix(".xls"),
+          events.Match.suffix(".xlsx"),
+          events.Match.suffix(".ppt"),
+          events.Match.suffix(".pptx"),
+          events.Match.suffix(".odt"),
+          events.Match.suffix(".ods"),
+          events.Match.suffix(".odp"),
+          events.Match.suffix(".rtf"),
+          events.Match.suffix(".epub"),
+          events.Match.suffix(".txt"),
+          events.Match.suffix(".md"),
+          events.Match.suffix(".csv"),
+          events.Match.suffix(".imscc"),
+          events.Match.suffix(".qti"),
+          events.Match.suffix(".gift"),
+          events.Match.suffix(".zip"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(
+      backend.documentThumbnailHandler.resources.lambda,
+    ),
+  ],
+});
+
+// EventBridge rule for document analysis (auto-analyze on upload)
+new events.Rule(dataStack, "S3DocumentAnalysisRule", {
+  description:
+    "Routes S3 document/edu uploads to documentAnalysis handler for auto-analysis",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.anyOf(
+          events.Match.suffix(".pdf"),
+          events.Match.suffix(".doc"),
+          events.Match.suffix(".docx"),
+          events.Match.suffix(".xls"),
+          events.Match.suffix(".xlsx"),
+          events.Match.suffix(".ppt"),
+          events.Match.suffix(".pptx"),
+          events.Match.suffix(".odt"),
+          events.Match.suffix(".ods"),
+          events.Match.suffix(".odp"),
+          events.Match.suffix(".txt"),
+          events.Match.suffix(".md"),
+          events.Match.suffix(".csv"),
+          events.Match.suffix(".epub"),
+          events.Match.suffix(".rtf"),
+          events.Match.suffix(".imscc"),
+          events.Match.suffix(".qti"),
+          events.Match.suffix(".gift"),
+          events.Match.suffix(".zip"),
+        ),
+      },
+    },
+  },
+  targets: [
+    new targets.LambdaFunction(
+      backend.documentAnalysisHandler.resources.lambda,
+    ),
+  ],
+});
+
+// Environment variables for documentThumbnail
+backend.documentThumbnailHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.documentThumbnailHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+
+// S3 read/write access
+backend.storage.resources.bucket.grantReadWrite(
+  backend.documentThumbnailHandler.resources.lambda,
+);
+
+// AppSync GraphQL access (to query/update File records)
+const documentThumbnailAppSyncPolicy = new Policy(
+  backend.documentThumbnailHandler.resources.lambda.stack,
+  "DocumentThumbnailAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.documentThumbnailHandler.resources.lambda.role?.attachInlinePolicy(
+  documentThumbnailAppSyncPolicy,
 );
 
 // AppSync GraphQL access (to update File records)
@@ -567,6 +866,56 @@ backend.gamificationHandler.resources.lambda.role?.attachInlinePolicy(
 );
 
 // ==========================================================================
+// Leaderboard Stream Handler — DynamoDB Stream on StudentXPLog
+// ==========================================================================
+
+backend.leaderboardStreamHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+const leaderboardStreamAppSyncPolicy = new Policy(
+  backend.leaderboardStreamHandler.resources.lambda.stack,
+  "LeaderboardStreamAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.leaderboardStreamHandler.resources.lambda.role?.attachInlinePolicy(
+  leaderboardStreamAppSyncPolicy,
+);
+
+// Connect DynamoDB Stream from StudentXPLog table to the leaderboard stream handler
+const studentXPLogTable = backend.data.resources.tables["StudentXPLog"];
+const leaderboardStreamLambda =
+  backend.leaderboardStreamHandler.resources.lambda;
+
+leaderboardStreamLambda.addEventSource(
+  new DynamoEventSource(studentXPLogTable, {
+    startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+    batchSize: 25,
+    maxBatchingWindow: cdk.Duration.seconds(10), // Wait up to 10s to batch records
+    retryAttempts: 3,
+    bisectBatchOnError: true,
+    filters: [
+      lambda.FilterCriteria.filter({
+        eventName: lambda.FilterRule.isEqual("INSERT"),
+      }),
+    ],
+  }),
+);
+
+// Grant the stream handler read access to the StudentXPLog table stream
+studentXPLogTable.grantStreamRead(leaderboardStreamLambda);
+
+// ==========================================================================
 // Peer Review AI Handler — IAM + env config
 // ==========================================================================
 
@@ -619,3 +968,87 @@ const streakResetCronAppSyncPolicy = new Policy(
 backend.streakResetCronHandler.resources.lambda.role?.attachInlinePolicy(
   streakResetCronAppSyncPolicy,
 );
+
+// ==========================================================================
+// Notification Cron Handler — IAM + env config
+// ==========================================================================
+
+backend.notificationCronHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+const notificationCronAppSyncPolicy = new Policy(
+  backend.notificationCronHandler.resources.lambda.stack,
+  "NotificationCronAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.notificationCronHandler.resources.lambda.role?.attachInlinePolicy(
+  notificationCronAppSyncPolicy,
+);
+
+// ==========================================================================
+// Analytics — Kinesis stream + Aggregator Lambda (in data stack to avoid circular deps)
+// ==========================================================================
+
+// Kinesis stream for buffered analytics events and Web Vitals
+const analyticsStream = new Stream(dataStack, "AnalyticsStream", {
+  streamName: "homework-supply-analytics",
+  shardCount: 1,
+  encryption: StreamEncryption.MANAGED,
+  retentionPeriod: cdk.Duration.days(7),
+});
+
+// Aggregator Lambda — consumes Kinesis batches, writes to AnalyticsSummary DynamoDB table
+const aggregatorLambda = backend.analyticsAggregatorHandler.resources.lambda;
+
+// Grant the aggregator access to the GraphQL API for writing AnalyticsSummary records
+const analyticsAppSyncPolicy = new Policy(
+  dataStack,
+  "AnalyticsAggregatorAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+aggregatorLambda.role?.attachInlinePolicy(analyticsAppSyncPolicy);
+
+// Add API endpoint env var so Lambda can call GraphQL
+backend.analyticsAggregatorHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+// Wire Kinesis as event source for the aggregator
+aggregatorLambda.addEventSource(
+  new KinesisEventSource(analyticsStream, {
+    batchSize: 100,
+    maxBatchingWindow: cdk.Duration.minutes(5),
+    startingPosition: StartingPosition.LATEST,
+  }),
+);
+
+// Output the stream name so API routes can find it
+backend.addOutput({
+  custom: {
+    AnalyticsStream: {
+      name: analyticsStream.streamName,
+      region: dataStack.region,
+    },
+  },
+});

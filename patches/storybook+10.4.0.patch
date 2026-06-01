@@ -1,0 +1,44 @@
+diff --git a/node_modules/storybook/dist/_node-chunks/builder-manager-SBMOFRIH.js b/node_modules/storybook/dist/_node-chunks/builder-manager-SBMOFRIH.js
+index 306ab32..414583d 100644
+--- a/node_modules/storybook/dist/_node-chunks/builder-manager-SBMOFRIH.js
++++ b/node_modules/storybook/dist/_node-chunks/builder-manager-SBMOFRIH.js
+@@ -622,6 +622,8 @@ var exports_default = {
+     "version"
+   ],
+   "react-dom/client": ["createRoot", "hydrateRoot"],
++  "react/jsx-runtime": ["jsx", "jsxs", "Fragment"],
++  "react/jsx-dev-runtime": ["jsx", "jsxs", "jsxDEV", "Fragment"],
+   "@storybook/icons": [
+     "AccessibilityAltIcon",
+     "AccessibilityIcon",
+@@ -1253,6 +1255,8 @@ var globalsNameReferenceMap = {
+   react: "__REACT__",
+   "react-dom": "__REACT_DOM__",
+   "react-dom/client": "__REACT_DOM_CLIENT__",
++  "react/jsx-runtime": "__REACT_JSX_RUNTIME__",
++  "react/jsx-dev-runtime": "__REACT_JSX_RUNTIME__",
+   "@storybook/icons": "__STORYBOOK_ICONS__",
+   "storybook/manager-api": "__STORYBOOK_API__",
+   "storybook/test": "__STORYBOOK_TEST__",
+diff --git a/node_modules/storybook/dist/manager/globals-runtime.js b/node_modules/storybook/dist/manager/globals-runtime.js
+index ef57e61..a6a6dab 100644
+--- a/node_modules/storybook/dist/manager/globals-runtime.js
++++ b/node_modules/storybook/dist/manager/globals-runtime.js
+@@ -29680,6 +29680,8 @@ var globalsNameReferenceMap = {
+   react: "__REACT__",
+   "react-dom": "__REACT_DOM__",
+   "react-dom/client": "__REACT_DOM_CLIENT__",
++  "react/jsx-runtime": "__REACT_JSX_RUNTIME__",
++  "react/jsx-dev-runtime": "__REACT_JSX_RUNTIME__",
+   "@storybook/icons": "__STORYBOOK_ICONS__",
+   "storybook/manager-api": "__STORYBOOK_API__",
+   "storybook/test": "__STORYBOOK_TEST__",
+@@ -76685,6 +76687,8 @@ var globalsNameValueMap = {
+   react: REACT,
+   "react-dom": REACT_DOM,
+   "react-dom/client": REACT_DOM_CLIENT,
++  "react/jsx-runtime": __toESM(require_jsx_runtime(), 1),
++  "react/jsx-dev-runtime": __toESM(require_jsx_runtime(), 1),
+   "@storybook/icons": dist_exports2,
+   "storybook/manager-api": manager_api_exports,
+   "storybook/theming": theming_exports,

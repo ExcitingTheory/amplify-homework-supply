@@ -16,7 +16,17 @@ const fs = require('fs');
 const path = require('path');
 
 const PAGES_DIR = path.join(__dirname, '../pages');
+const APP_DIR = path.join(__dirname, '../app');
 const DEFAULT_OUTPUT = path.join(__dirname, '../cypress/fixtures/routes.json');
+
+/**
+ * Known App Router routes (app/ directory uses folder-based routing)
+ * These are maintained manually since App Router uses page.tsx convention.
+ */
+const APP_ROUTER_ROUTES = [
+  { route: '/[locale]/admin/settings', file: 'app/[locale]/admin/settings/page.tsx', isDynamic: true },
+  { route: '/[locale]/section/[id]/settings/gamification', file: 'app/[locale]/section/[id]/settings/gamification/page.tsx', isDynamic: true },
+];
 
 /**
  * Convert file path to Next.js route
@@ -158,7 +168,7 @@ function main() {
   console.log(`   Path: ${PAGES_DIR}`);
   
   // Scan all routes
-  const allRoutes = scanDirectory(PAGES_DIR);
+  const allRoutes = [...scanDirectory(PAGES_DIR), ...APP_ROUTER_ROUTES];
   
   console.log(`\n✅ Found ${allRoutes.length} routes`);
   

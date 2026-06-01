@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview useScrolledAppBar - Shared hook for page-level AppBar shrink-on-scroll.
  * @module useScrolledAppBar

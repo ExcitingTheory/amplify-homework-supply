@@ -25,11 +25,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    console.log(
-      "[SuggestBlocks] OpenAI API key loaded:",
-      apiKey.substring(0, 7) + "..." + apiKey.substring(apiKey.length - 4),
-    );
-    const { createOpenAI } = await import("@ai-sdk/openai");
     openaiInstance = createOpenAI({ apiKey });
   }
   return openaiInstance;
@@ -47,6 +42,8 @@ export const handler = awslambda.streamifyResponse(
     responseStream: awslambda.HttpResponseStream,
     _context: any,
   ) => {
+    // Prevent Lambda from waiting for empty event loop (OpenAI SDK keep-alive connections)
+    _context.callbackWaitsForEmptyEventLoop = false;
     let streamStarted = false;
     try {
       const body = event.body ? JSON.parse(event.body) : {};
@@ -165,7 +162,10 @@ Call 2-4 of these tools with appropriate data. Each tool call represents one sug
       );
       responseStream.end();
     } catch (error) {
-      console.error("[SuggestBlocks] Error:", error);
+      console.error(
+        "[SuggestBlocks] Error:",
+        error instanceof Error ? error.message : String(error),
+      );
       if (streamStarted) {
         responseStream.write(
           `data: ${JSON.stringify({ type: "error", error: error instanceof Error ? error.message : "Internal server error" })}\n\n`,

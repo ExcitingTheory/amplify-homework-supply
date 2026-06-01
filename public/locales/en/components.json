@@ -12,8 +12,14 @@
     "confirmPasswordPlaceholder": "Please confirm your Password",
     "displayNameLabel": "Display Name:",
     "displayNamePlaceholder": "Choose a display name",
+    "preferredNameLabel": "Preferred Name (optional):",
+    "preferredNamePlaceholder": "Name you'd like to go by in class",
     "emailLabel": "Email:",
     "emailPlaceholder": "Enter your Email:",
+    "firstNameLabel": "First Name:",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNameLabel": "Last Name:",
+    "lastNamePlaceholder": "Enter your last name",
     "nameLabel": "Name:",
     "namePlaceholder": "Enter your Name:",
     "passwordLabel": "Password:",
@@ -42,13 +48,14 @@
     "cancellingMessage": "Cancelling...",
     "chatHistory": "Chat history",
     "chatInitFailure": "Chat initialization failed. Please refresh the page.",
+    "close": "Close",
     "complete": "✓ Complete",
     "confirm": "Confirm",
     "confirmAndExecute": "Confirm & Execute",
     "contentPreview": {
       "copied": "Copied!",
       "copyToClipboard": "Copy to clipboard",
-      "generatedContent": "Generated {{contentType}}",
+      "generatedContent": "Generated {contentType}",
       "insertButton": "Insert",
       "insertIntoEditor": "Insert into Editor",
       "inserted": "Inserted",
@@ -58,7 +65,7 @@
       "successMessage": "Content inserted into editor!",
       "topic": "Topic"
     },
-    "contentTypeAndTopic": "{{contentType}}: \"{{topic}}\"",
+    "contentTypeAndTopic": "{contentType}: \"{topic}\"",
     "createSection": "➕ Create Section",
     "created": "Created",
     "dropFilesHere": "Drop files here",
@@ -69,7 +76,7 @@
     "errorRenderingMessage": "Error rendering message",
     "execute": "Execute",
     "extracting": "extracting",
-    "foundResults": "Found {{count}} result",
+    "foundResults": "Found {count} result",
     "generateContent": "✨ Generate Content",
     "history": "History",
     "messageList": {
@@ -166,7 +173,7 @@
     "categories": "Categories",
     "flagged": "Flagged",
     "flaggedForReview": "Content Flagged for Review",
-    "flaggedWithCategories": "Flagged: {{categories}}",
+    "flaggedWithCategories": "Flagged: {categories}",
     "savedMessage": "Content has been saved. Please review according to your school's policies."
   },
   "moderationPanel": {
@@ -185,28 +192,28 @@
       "violence": "Content depicting death, violence, or physical injury",
       "violence graphic": "Graphic content depicting death, violence, or physical injury"
     },
-    "checked": "Checked: {{date}}",
-    "confidence": "Confidence: {{score}}%",
+    "checked": "Checked: {date}",
+    "confidence": "Confidence: {score}%",
     "disclaimerLabel": "Note:",
     "disclaimerNote": "Automated moderation is not perfect. Please review this content in context and handle according to your institution's specific policies and local jurisdiction requirements.",
     "flaggedCategories": "Flagged Categories:",
-    "model": "Model: {{model}}",
+    "model": "Model: {model}",
     "title": "Content Moderation"
   },
   "pdfThumbnail": {
     "failedToLoad": "Failed to load PDF",
-    "pageNumber": "{{current}} / {{total}}"
+    "pageNumber": "{current} / {total}"
   },
   "proTip": {
     "message": "Pro tip: Use the editor to create engaging learning materials!"
   },
   "questionBlock": {
     "addAnswerPlaceholder": "Add Answer",
-    "answerLabel": "Answer {{number}}",
+    "answerLabel": "Answer {number}",
     "correct": "Correct",
     "done": "Done",
     "edit": "Edit",
-    "gradeDisplay": "Grade: {{score}}",
+    "gradeDisplay": "Grade: {score}",
     "incorrect": "Incorrect",
     "invalid": "Invalid",
     "remove": "Remove",
@@ -222,14 +229,14 @@
     "enterAnswer": "Enter answer...",
     "enterHint": "Enter hint...",
     "enterQuestion": "Enter question...",
-    "filteringBySearch": "Filtering by search: \"{{searchTerm}}\" ({{count}} of {{total}} items)",
+    "filteringBySearch": "Filtering by search: \"{searchTerm}\" ({count} of {total} items)",
     "from": "From",
     "hasAudio": "Has audio",
     "hasImage": "Has image",
     "hide": "Hide",
     "hintOptional": "Hint (optional)",
     "importToQuestionBank": "Import to Question Bank",
-    "importedOn": "Imported on {{date}}",
+    "importedOn": "Imported on {date}",
     "learningObjectives": "Learning Objectives",
     "loading": "Loading questions...",
     "noQuestions": "No questions found for this document.",
@@ -237,7 +244,7 @@
     "questionPrompt": "Question Prompt",
     "sectionHeading": "Questions Review",
     "selectAll": "Select All",
-    "selectedCount": "{{count}} of {{total}} selected",
+    "selectedCount": "{count} of {total} selected",
     "show": "Show",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
@@ -245,7 +252,7 @@
   "recordingStudio2": {
     "existingRecordings": "Existing Recordings",
     "recordedAudioWaveform": "Recorded Audio Waveform:",
-    "recordingNumber": "Recording {{number}}",
+    "recordingNumber": "Recording {number}",
     "staticWaveformPreview": "Static Waveform Preview:"
   },
   "recordingStudio3": {
@@ -257,11 +264,11 @@
     "generateTts": "Generate TTS",
     "importFailed": "Failed to import JSON file",
     "importJson": "Import JSON",
-    "lineNumber": "Line #{{number}} - {{speaker}}",
+    "lineNumber": "Line #{number} - {speaker}",
     "micAccessFailed": "Failed to access microphone",
     "noMissingAudio": "No missing audio to generate",
     "noTextToGenerate": "No text to generate",
-    "processingLines": "Processing {{count}} lines...",
+    "processingLines": "Processing {count} lines...",
     "record": "Record",
     "saveRecordingFailed": "Failed to save recording",
     "script": "Script",
@@ -303,14 +310,14 @@
     "selectToCut": "Please select a portion of audio to cut",
     "speechEnhancement": "Speech Enhancement",
     "tips": "Tips: Use filters to clean up background noise and enhance speech. Click on a track to select it for recording. Generated audio will be appended to the selected track. Drag to select portions of audio and use the cut button to remove them.",
-    "trackName": "Track {{number}}",
+    "trackName": "Track {number}",
     "ttsGenerationFailed": "Failed to generate audio from prompt",
     "ttsNotImplemented": "Text-to-speech generation not yet implemented",
     "voice": "Voice"
   },
   "savedPdfThumbnail": {
     "errorMessage": "Error loading PDF",
-    "pageOverlay": "Page {{number}}"
+    "pageOverlay": "Page {number}"
   },
   "screenplayEditor": {
     "formatLabel": "Format",
@@ -328,7 +335,7 @@
     "selectSectionHelper": "Select a section to assign the due date to"
   },
   "sortableAnswers": {
-    "answerLabel": "Answer {{number}}",
+    "answerLabel": "Answer {number}",
     "correct": "Correct",
     "incorrect": "Incorrect"
   },
@@ -339,7 +346,7 @@
   "unitEmbedding": {
     "embeddingFresh": "Embedding fresh",
     "embeddingStale": "Embedding stale",
-    "error": "Error: {{message}}",
+    "error": "Error: {message}",
     "generateEmbeddings": "Generate Embeddings",
     "generating": "Generating...",
     "noEmbedding": "No embedding",
@@ -366,7 +373,7 @@
     "summariesAndObjectives": "Summaries And Objectives"
   },
   "wordEmbedding": {
-    "embeddingFailed": "Word saved, but embedding generation failed: {{error}}",
+    "embeddingFailed": "Word saved, but embedding generation failed: {error}",
     "questionSaveFailed": "Save with embedding error"
   },
   "wordEmbeddingIntegration": {
@@ -391,7 +398,7 @@
   },
   "permissionError": {
     "title": "Access Denied",
-    "defaultMessage": "You don't have permission to access this {{resourceType}}.",
+    "defaultMessage": "You don't have permission to access this {resourceType}.",
     "explanation": "This content is restricted. You need to be the owner or have instructor permissions to access it.",
     "contactInfo": "If you believe this is an error, please contact your instructor or administrator.",
     "goBack": "Go Back",
@@ -405,7 +412,7 @@
   },
   "practiceDrill": {
     "config": {
-      "title": "Practice: {{unitName}}",
+      "title": "Practice: {unitName}",
       "subtitle": "Choose what to practice:",
       "vocabulary": "Vocabulary",
       "vocabularyDesc": "Words, definitions, matching",
@@ -415,7 +422,7 @@
       "textDesc": "From lesson text and graded blocks",
       "documents": "Documents",
       "documentsDesc": "From uploaded PDFs and parsed content",
-      "coverage": "Coverage: {{covered}}/{{total}} items practiced ({{percent}}%)",
+      "coverage": "Coverage: {covered}/{total} items practiced ({percent}%)",
       "questionCount": "Number of questions",
       "drillType": "Drill type",
       "mixed": "Mixed",
@@ -426,6 +433,93 @@
       "cancel": "Cancel",
       "start": "Start Practice",
       "generating": "Generating..."
+    },
+    "join": {
+      "title": "Join Study Session",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "description": "Enter the room code shared by your instructor or classmate to join their study session.",
+      "codeLabel": "Room Code",
+      "cancel": "Cancel",
+      "joinButton": "Join Session",
+      "joining": "Joining...",
+      "noInvitations": "No pending session invitations"
     }
+  },
+  "workbook": {
+    "joinDialog": {
+      "title": "Join Workbook Session",
+      "tabLink": "Enter Link",
+      "tabInvitations": "Invitations",
+      "description": "Paste a workbook link or enter a unit ID to join a collaborative editing session.",
+      "inputLabel": "Workbook link or unit ID",
+      "joinButton": "Join Workbook",
+      "joining": "Finding...",
+      "noInvitations": "No pending workbook invitations"
+    },
+    "invite": {
+      "shareTooltip": "Invite others to this workbook",
+      "title": "Share Workbook",
+      "description": "Anyone with this link who is enrolled in the same section can join and work together in real-time.",
+      "copy": "Copy link",
+      "copied": "Copied!",
+      "copyLink": "Copy Link",
+      "currentlyOnline": "Currently online",
+      "noOthers": "No one else is here yet",
+      "idle": "idle"
+    }
+  },
+  "peerReview": {
+    "joinDialog": {
+      "title": "Join Peer Review",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "description": "Enter the review room code shared by your classmate to join their peer review session.",
+      "codeLabel": "Review Room Code",
+      "joinButton": "Join Review",
+      "joining": "Joining...",
+      "noInvitations": "No pending review invitations"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "delete": "Delete",
+    "empty": "No notifications yet",
+    "emptyDescription": "You'll see notifications for assignments, grades, badges, and more here.",
+    "category": {
+      "all": "All",
+      "assignment": "Assignments",
+      "collaboration": "Collaboration",
+      "gamification": "Gamification",
+      "squad": "Squads",
+      "chat": "Chat",
+      "system": "System"
+    }
+  },
+  "common": {
+    "close": "Close"
+  },
+  "recordingStudio3Modal": {
+    "done": "Done"
+  },
+  "sectionDetail": {
+    "students": "Students",
+    "gradebook": "Gradebook",
+    "completionGrid": "Completion Grid",
+    "leaderboard": "Leaderboard",
+    "assignments": "Assignments"
+  },
+  "armorEditor": {
+    "shieldPreview": "Shield preview",
+    "addCharge": "Add charge",
+    "chargeSize": "Charge size",
+    "chargeRotation": "Charge rotation",
+    "xOffset": "X offset",
+    "yOffset": "Y offset"
+  },
+  "skillTree": {
+    "title": "Skill Tree",
+    "empty": "No skills available yet. Your instructor will set up the skill tree."
   }
 }

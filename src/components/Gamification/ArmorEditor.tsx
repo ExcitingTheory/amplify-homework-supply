@@ -1,5 +1,5 @@
 /**
- * ArmorEditor — Modal UI for designing a guild coat of arms.
+ * ArmorEditor — Modal UI for designing a squad coat of arms.
  *
  * Features:
  *   - 4 shield shapes (Classic, Rounded, Pointed, Diamond)
@@ -9,14 +9,14 @@
  *   - Randomize button for instant inspiration
  *   - Live SVG preview
  *   - Full undo/redo stack with Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z
- *   - Guild name & description as Lexical plain text editors
+ *   - Squad name & description as Lexical plain text editors
  *   - Autosave on change (debounced)
  *
  * @module ArmorEditor
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { CHARGES, CHARGE_VIEWBOX } from './armoriaCharges'
 import type { ChargeEntry } from './armoriaCharges'
 import { useArmorUndoRedo } from './useArmorUndoRedo'
@@ -175,8 +175,8 @@ function getCharges(config: ArmorEditorConfig): ChargeConfig[] {
 
 export interface ArmorEditorProps {
   open: boolean
-  guildName: string
-  guildDescription?: string
+  squadName: string
+  squadDescription?: string
   initialConfig?: ArmorEditorConfig | null
   onSave: (config: ArmorEditorConfig, svg: string, name: string, description: string) => void
   onClose: () => void
@@ -538,20 +538,20 @@ const DEFAULT_CONFIG: ArmorEditorConfig = {
 
 export function ArmorEditor({
   open,
-  guildName,
-  guildDescription = '',
+  squadName,
+  squadDescription = '',
   initialConfig,
   onSave,
   onClose,
   autoSaveDelay = 1500,
 }: ArmorEditorProps) {
-  const { t } = useTranslation('common')
+  const t = useTranslations('components')
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(() => ({
     config: initialConfig ? { ...DEFAULT_CONFIG, ...initialConfig } : DEFAULT_CONFIG,
-    name: guildName,
-    description: guildDescription,
-  }), [initialConfig, guildName, guildDescription])
+    name: squadName,
+    description: squadDescription,
+  }), [initialConfig, squadName, squadDescription])
 
   const {
     snapshot,
@@ -704,7 +704,7 @@ export function ArmorEditor({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>Design Coat of Arms — {name || guildName}</span>
+        <span>Design Coat of Arms — {name || squadName}</span>
         <Stack direction="row" spacing={0.5}>
           <Tooltip title="Undo (Ctrl+Z)">
             <span>
@@ -747,7 +747,7 @@ export function ArmorEditor({
             <Box
               dangerouslySetInnerHTML={{ __html: previewSvg }}
               role="img"
-              aria-label={t('armorEditor.shieldPreview', 'Shield preview')}
+              aria-label={t('armorEditor.shieldPreview')}
             />
           </Box>
 
@@ -822,7 +822,7 @@ export function ArmorEditor({
                 <Typography variant="caption" color="text.secondary">Charges</Typography>
                 {charges.length > 0 && charges.length < 5 && (
                   <Tooltip title="Add another charge">
-                    <IconButton size="small" onClick={addCharge} aria-label={t('armorEditor.addCharge', 'Add charge')}>
+                    <IconButton size="small" onClick={addCharge} aria-label={t('armorEditor.addCharge')}>
                       <AddCircleOutlineIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -915,7 +915,7 @@ export function ArmorEditor({
                       ]}
                       size="small"
                       sx={{ mt: 1.5 }}
-                      aria-label={t('armorEditor.chargeSize', 'Charge size')}
+                      aria-label={t('armorEditor.chargeSize')}
                     />
                   </Box>
                   <Box>
@@ -934,7 +934,7 @@ export function ArmorEditor({
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => `${v}°`}
                       sx={{ mt: 1.5 }}
-                      aria-label={t('armorEditor.chargeRotation', 'Charge rotation')}
+                      aria-label={t('armorEditor.chargeRotation')}
                     />
                   </Box>
                 </Stack>
@@ -949,7 +949,7 @@ export function ArmorEditor({
                       step={1}
                       size="small"
                       valueLabelDisplay="auto"
-                      aria-label={t('armorEditor.xOffset', 'X offset')}
+                      aria-label={t('armorEditor.xOffset')}
                     />
                   </Box>
                   <Box sx={{ flex: 1 }}>
@@ -962,7 +962,7 @@ export function ArmorEditor({
                       step={1}
                       size="small"
                       valueLabelDisplay="auto"
-                      aria-label={t('armorEditor.yOffset', 'Y offset')}
+                      aria-label={t('armorEditor.yOffset')}
                     />
                   </Box>
                 </Stack>

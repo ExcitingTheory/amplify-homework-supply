@@ -13,6 +13,8 @@ import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import OpenAI from "openai";
 
 // Configure Amplify at module level (before creating client)
 // Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
@@ -54,10 +56,38 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
+}
+
+const s3 = new S3Client({});
+const STORAGE_BUCKET = process.env.STORAGE_BUCKET || "";
+
+/**
+ * Save embedding vectors to S3.
+ * Path: private/{identityId}/embeddings/{modelName}/{modelId}.json
+ */
+async function saveEmbeddingToS3(
+  identityId: string,
+  modelName: string,
+  modelId: string,
+  data: {
+    model: string;
+    dimensions: number;
+    generatedAt: number;
+    wordCount: number;
+    pages: Array<{ page: number; embedding: number[]; text?: string }>;
+  },
+): Promise<void> {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: STORAGE_BUCKET,
+      Key: `private/${identityId}/embeddings/${modelName}/${modelId}.json`,
+      Body: JSON.stringify(data),
+      ContentType: "application/json",
+    }),
+  );
 }
 
 /**
@@ -326,11 +356,88 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       `[Generate Embeddings] Saving ${embeddedPages.length} embeddings to database...`,
     );
 
-    // Note: PageEmbedding model doesn't exist in schema - storing as parsedContent metadata instead
-    // The embeddings are now part of the ParsedContent record itself
+    // Note: PageEmbedding model doesn't exist in schema - storing in S3 and ParsedContent metadata
     console.log(
-      "[Generate Embeddings] Embeddings generated, storing in ParsedContent metadata...",
+      "[Generate Embeddings] Saving embeddings to S3 and ParsedContent metadata...",
     );
+
+    // Save all page embeddings to S3 as a single file
+    if (STORAGE_BUCKET && embeddedPages.length > 0) {
+      // Get file owner's identityId from File record
+      const getFileOwnerQuery = /* GraphQL */ `
+        query GetFile($id: ID!) {
+          getFile(id: $id) {
+            id
+            owner
+            identityId
+          }
+        }
+      `;
+      const { data: fileOwnerData } = (await client.graphql({
+        query: getFileOwnerQuery,
+        variables: { id: fileID },
+      })) as any;
+
+      const identityId =
+        fileOwnerData?.getFile?.identityId || fileOwnerData?.getFile?.owner;
+
+      if (identityId) {
+        await saveEmbeddingToS3(identityId, "file", fileID, {
+          model: "text-embedding-3-small",
+          dimensions: 512,
+          generatedAt: Date.now(),
+          wordCount: embeddedPages.reduce(
+            (sum: number, p: any) => sum + (p.text?.split(/\s+/).length || 0),
+            0,
+          ),
+          pages: embeddedPages.map((p: any) => ({
+            page: p.page,
+            embedding: JSON.parse(p.embedding),
+            text: p.text?.substring(0, 200),
+          })),
+        });
+        console.log(
+          `[Generate Embeddings] Saved ${embeddedPages.length} embeddings to S3`,
+        );
+
+        // Update File model with embedding metadata only (no vector)
+        const updateFileMutation = /* GraphQL */ `
+          mutation UpdateFile($input: UpdateFileInput!) {
+            updateFile(input: $input) {
+              id
+              _version
+            }
+          }
+        `;
+        try {
+          await client.graphql({
+            query: updateFileMutation,
+            variables: {
+              input: {
+                id: fileID,
+                embedding: JSON.stringify({
+                  model: "text-embedding-3-small",
+                  dimensions: 512,
+                  version: Date.now(),
+                  wordCount: embeddedPages.reduce(
+                    (sum: number, p: any) =>
+                      sum + (p.text?.split(/\s+/).length || 0),
+                    0,
+                  ),
+                  pageCount: embeddedPages.length,
+                }),
+                _version: fileData.getFile._version,
+              },
+            },
+          } as any);
+        } catch (error) {
+          console.error(
+            "[Generate Embeddings] Error updating File embedding metadata:",
+            error,
+          );
+        }
+      }
+    }
 
     // Update ParsedContent with embedding metadata
     if (parsedContent && parsedContents.length > 0) {
@@ -352,7 +459,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
           variables: {
             input: {
               id: parsedContent.id,
-              _version: parsedContent._version,
+              _version: parsedContent._version ?? 1,
               metadata: JSON.stringify({
                 embeddings: embeddedPages,
                 embeddingCount,
@@ -409,7 +516,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
           input: {
             id: parsedContent.documentID,
             status: "embedded",
-            _version: docData?.getDocument?._version,
+            _version: docData?.getDocument?._version ?? 1,
           },
         },
       } as any);

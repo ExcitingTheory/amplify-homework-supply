@@ -114,7 +114,9 @@ const DictionaryProvider = ({ children }) => {
         }
       },
     );
-    const _filteredWords = await Promise.all(_processingQueue);
+    const _filteredWords = (await Promise.allSettled(_processingQueue))
+      .filter((r) => r.status === "fulfilled")
+      .map((r) => r.value);
 
     if (Object.keys(_filteredWords).length === 0) {
       dispatch({ type: actionTypes.FILTER_COMPLETE, payload: state.words });
@@ -201,7 +203,28 @@ const DictionaryProvider = ({ children }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
-    const subscription = client.models.Word.observeQuery().subscribe({
+    // Exclude heavy fields: yjsSnapshot
+    const subscription = client.models.Word.observeQuery({
+      selectionSet: [
+        "id",
+        "owner",
+        "identityId",
+        "phrase",
+        "pronunciation",
+        "definition",
+        "rubyTags",
+        "audio.*",
+        "definitionAudio.*",
+        "importedAt",
+        "embedding.*",
+        "moderation.*",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
+    }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
         const validItems = (items || []).filter(
@@ -291,7 +314,32 @@ const DictionaryProvider = ({ children }) => {
       console.error(`[DictionaryContext] ${label} error:`, error);
     }
 
-    const subscription = client.models.Question.observeQuery().subscribe({
+    // Exclude heavy fields: yjsSnapshot
+    const subscription = client.models.Question.observeQuery({
+      selectionSet: [
+        "id",
+        "owner",
+        "identityId",
+        "prompt",
+        "answer",
+        "choices.*",
+        "audio.*",
+        "answerAudio.*",
+        "image",
+        "answerImage",
+        "type",
+        "difficulty",
+        "points",
+        "tags.*",
+        "embedding.*",
+        "moderation.*",
+        "_version",
+        "_lastChangedAt",
+        "_deleted",
+        "createdAt",
+        "updatedAt",
+      ],
+    }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
         const validItems = (items || []).filter(
@@ -345,6 +393,33 @@ const DictionaryProvider = ({ children }) => {
     [],
   );
 
+  // Optimistic version bump helpers — call before save to block subscription echo
+  const bumpWordVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = wordVersionMapRef.current[id] || currentVersion;
+    wordVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => {
+        wordVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        wordVersionMapRef.current[id] = previousVersion;
+      },
+    };
+  }, []);
+
+  const bumpQuestionVersion = React.useCallback((id, currentVersion) => {
+    const previousVersion = questionVersionMapRef.current[id] || currentVersion;
+    questionVersionMapRef.current[id] = currentVersion + 1;
+    return {
+      confirm: (actualVersion) => {
+        questionVersionMapRef.current[id] = actualVersion;
+      },
+      rollback: () => {
+        questionVersionMapRef.current[id] = previousVersion;
+      },
+    };
+  }, []);
+
   const contextValue = React.useMemo(
     () => ({
       dictionary: state.words,
@@ -358,6 +433,8 @@ const DictionaryProvider = ({ children }) => {
       filterWords,
       searching: state.searching,
       setSearching,
+      bumpWordVersion,
+      bumpQuestionVersion,
     }),
     [
       state.words,
@@ -371,6 +448,8 @@ const DictionaryProvider = ({ children }) => {
       filterWords,
       state.searching,
       setSearching,
+      bumpWordVersion,
+      bumpQuestionVersion,
     ],
   );
 

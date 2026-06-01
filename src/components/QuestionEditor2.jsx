@@ -63,7 +63,7 @@ import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
 
 // i18n
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 // Import QuestionCard from QuestionsReview2
 import { QuestionCard } from './QuestionsReview2';
@@ -776,6 +776,7 @@ function QuestionsPlugin({
   setConfirmDialog,
   fullQuestionBank,
 }) {
+  const { bumpQuestionVersion } = React.useContext(DictionaryContext);
   const [editor] = useLexicalComposerContext();
 
   // Setup virtualizer for performance
@@ -831,16 +832,24 @@ function QuestionsPlugin({
 
   const handleUpdateQuestion = async (questionId, updates) => {
     try {
+      const question = fullQuestionBank?.[questionId];
+      const currentVersion = question?._version;
+      const versionCtrl = currentVersion != null
+        ? bumpQuestionVersion(questionId, currentVersion)
+        : null;
+
       const client = getAmplifyClient();
       const { data, errors } = await client.models.Question.update({
         id: questionId,
-        ...updates
+        ...updates,
+        ...(currentVersion != null && { _version: currentVersion }),
       });
       
       if (errors) {
         console.error('Error updating question:', errors);
+        versionCtrl?.rollback();
       } else {
-        console.log('Question updated:', data);
+        versionCtrl?.confirm(data._version);
       }
     } catch (error) {
       console.error('Error updating question:', error);
@@ -883,7 +892,7 @@ function QuestionsPlugin({
 // =============================================================================
 
 export function QuestionEditor2() {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [open, setOpen] = React.useState(false);
   const [isHelpOpen, setHelpOpen] = React.useState(false);
   const [expandedItems, setExpandedItems] = React.useState(new Set());

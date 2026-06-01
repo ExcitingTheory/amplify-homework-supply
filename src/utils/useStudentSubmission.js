@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { getAmplifyClient } from './amplifyClient';
+import { getStudentSubmissionUrl as getStudentSubmissionUrlAction } from '../../app/actions/storage';
 import getCachedUrl from './getCachedUrl';
 
 /**
@@ -55,17 +55,11 @@ export function useStudentSubmission({ submissionKey, grade, userGroups = [] }) 
           const directUrl = await getCachedUrl(submissionKey);
           setUrl(directUrl);
         } else if (isInstructor) {
-          // Teacher accessing student file - use GraphQL endpoint
-          console.log('[useStudentSubmission] Teacher access - using GraphQL endpoint');
+          // Teacher accessing student file - use Server Action
+          console.log('[useStudentSubmission] Teacher access - using Server Action');
           
-          const client = getAmplifyClient();
-
-          const response = await client.queries.getStudentSubmissionUrl({
-            gradeId: grade.id,
-            submissionKey: submissionKey,
-          });
-
-          const teacherUrl = response.data?.url;
+          const result = await getStudentSubmissionUrlAction(grade.id, submissionKey);
+          const teacherUrl = result.url;
           setUrl(teacherUrl);
         } else {
           throw new Error('Unauthorized: Must be the student owner or an instructor');
@@ -123,14 +117,8 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
               const directUrl = await getCachedUrl(key);
               return [key, directUrl];
             } else if (isInstructor) {
-              const client = getAmplifyClient();
-
-              const response = await client.queries.getStudentSubmissionUrl({
-                gradeId: grade.id,
-                submissionKey: key,
-              });
-
-              return [key, response.data?.url];
+              const result = await getStudentSubmissionUrlAction(grade.id, key);
+              return [key, result.url];
             }
             throw new Error('Unauthorized');
           } catch (err) {
@@ -139,8 +127,12 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
           }
         });
 
-        const results = await Promise.all(urlPromises);
-        const urlMap = Object.fromEntries(results);
+        const results = await Promise.allSettled(urlPromises);
+        const urlMap = Object.fromEntries(
+          results
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value)
+        );
         setUrls(urlMap);
 
         console.log('[useStudentSubmissions] Fetched URLs:', urlMap);

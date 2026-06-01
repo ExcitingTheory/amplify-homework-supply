@@ -2,6 +2,15 @@
  * Mock aws-amplify/utils for Storybook
  */
 
+export const sharedInMemoryStorage = {
+  getItem: (key) => null,
+  setItem: (key, value) => {},
+  removeItem: (key) => {},
+  clear: () => {},
+};
+
+export const parseAmplifyConfig = (config) => config || {};
+
 export const Cache = {
   getItem: async (key) => {
     console.log('Mock Cache.getItem called with:', key);

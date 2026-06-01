@@ -1,3 +1,4 @@
+"use client";
 /**
  * BadgeShelf — Grid display of achievement badges.
  * Earned badges show in full color; unearned badges are grayed out with a lock overlay.

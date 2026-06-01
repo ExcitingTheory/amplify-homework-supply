@@ -52,6 +52,7 @@
       "title": "Add to Section"
     },
     "help": "Help",
+    "joinStudyGroup": "Join Study Group",
     "settings": {
       "colorMode": "Color mode",
       "darkMode": "Dark Mode",
@@ -61,9 +62,10 @@
     }
   },
   "navigation": {
+    "drafts": "Drafts",
     "gamification": "Gamification",
     "grades": "Grades",
-    "guilds": "Guilds",
+    "squads": "Squads",
     "home": "Home",
     "joinPeerReview": "Join Peer Review",
     "joinPeerReviewDesc": "Enter a review room code",
@@ -72,7 +74,9 @@
     "joinWorkbook": "Join Workbook Session",
     "joinWorkbookDesc": "Enter a workbook link or ID",
     "leaderboard": "Leaderboard",
+    "notifications": "Notifications",
     "profile": "Profile",
+    "published": "Published",
     "sections": "Sections",
     "settings": "Settings",
     "skills": "Skill Tree",
@@ -80,7 +84,7 @@
     "workbook": "Workbook"
   },
   "quizComponent": {
-    "grade": "Grade: {{grade}}"
+    "grade": "Grade: {grade}"
   },
   "status": {
     "complete": "Complete",
@@ -99,5 +103,16 @@
     "created": "Created",
     "due": "Due",
     "updated": "Updated"
+  },
+  "timer": {
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "increase": "Increase selected time segment",
+    "decrease": "Decrease selected time segment"
+  },
+  "peerReview": {
+    "helpful": "Peer review was helpful",
+    "notHelpful": "Peer review was not helpful"
   }
 }

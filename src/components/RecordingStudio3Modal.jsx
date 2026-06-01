@@ -31,7 +31,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   AppBar,
@@ -167,7 +167,7 @@ export default function RecordingStudio3Modal({
   identityId,
   readOnly = false,
 }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
 
   // Track latest script state from RS3's reactive callbacks
   const scriptDataRef = useRef(initialScriptData);

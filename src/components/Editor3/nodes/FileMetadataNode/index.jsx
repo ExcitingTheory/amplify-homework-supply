@@ -1,23 +1,16 @@
-import {
-  $applyNodeReplacement,
-  DecoratorNode,
-} from 'lexical';
-import { Suspense } from 'react';
+import { $applyNodeReplacement, DecoratorNode } from "lexical";
+import { Suspense } from "react";
 
 export class FileMetadataNode extends DecoratorNode {
   __file;
   __parsedContent;
 
   static getType() {
-    return 'file-metadata';
+    return "file-metadata";
   }
 
   static clone(node) {
-    return new FileMetadataNode(
-      node.__file,
-      node.__parsedContent,
-      node.__key,
-    );
+    return new FileMetadataNode(node.__file, node.__parsedContent, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -30,7 +23,7 @@ export class FileMetadataNode extends DecoratorNode {
     return {
       file: this.__file,
       parsedContent: this.__parsedContent,
-      type: 'file-metadata',
+      type: "file-metadata",
       version: 1,
     };
   }
@@ -42,13 +35,39 @@ export class FileMetadataNode extends DecoratorNode {
   }
 
   createDOM(config) {
-    const div = document.createElement('div');
-    div.style.display = 'contents';
+    const div = document.createElement("div");
+    div.style.display = "contents";
     return div;
   }
 
   updateDOM() {
     return false;
+  }
+
+  exportDOM() {
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-file-metadata", "true");
+    element.setAttribute("data-file", JSON.stringify(this.__file));
+    return { element };
+  }
+
+  static importDOM() {
+    return {
+      div: (domNode) => {
+        if (!domNode.hasAttribute("data-lexical-file-metadata")) {
+          return null;
+        }
+        return {
+          conversion: (element) => {
+            const fileStr = element.getAttribute("data-file");
+            const file = fileStr ? JSON.parse(fileStr) : null;
+            if (!file) return null;
+            return { node: $createFileMetadataNode(file, null) };
+          },
+          priority: 1,
+        };
+      },
+    };
   }
 
   setFile(file) {
@@ -72,7 +91,7 @@ export class FileMetadataNode extends DecoratorNode {
   decorate(editor, config) {
     return (
       <Suspense fallback={null}>
-        <FileMetadataComponent 
+        <FileMetadataComponent
           file={this.__file}
           parsedContent={this.__parsedContent}
           nodeKey={this.getKey()}
@@ -81,7 +100,7 @@ export class FileMetadataNode extends DecoratorNode {
               const writableNode = this.getWritable();
               writableNode.__file = {
                 ...writableNode.__file,
-                name: newName
+                name: newName,
               };
             });
           }}
@@ -116,5 +135,5 @@ export function $isFileMetadataNode(node) {
 }
 
 // Import the component
-import FileMetadataComponent from './FileMetadataComponent';
-import { $getNodeByKey } from 'lexical';
+import FileMetadataComponent from "./FileMetadataComponent";
+import { $getNodeByKey } from "lexical";

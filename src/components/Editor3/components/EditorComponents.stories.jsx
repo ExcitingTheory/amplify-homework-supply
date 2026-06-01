@@ -110,6 +110,7 @@ const MOCK_MEDIA_FILES = [
   },
   {
     id: "image-animals",
+    fileId: "image-animals",
     name: "Animals in Nature",
     owner: "mock-user-id",
     identityId: "us-east-1:mock-identity",
@@ -126,6 +127,7 @@ const MOCK_MEDIA_FILES = [
   },
   {
     id: "image-piano",
+    fileId: "image-piano",
     name: "Piano Keys",
     owner: "mock-user-id",
     identityId: "us-east-1:mock-identity",
@@ -142,6 +144,7 @@ const MOCK_MEDIA_FILES = [
   },
   {
     id: "image-meerkat",
+    fileId: "image-meerkat",
     name: "Meerkat PNG",
     owner: "mock-user-id",
     identityId: "us-east-1:mock-identity",
@@ -411,6 +414,8 @@ export const ImageDefault = {
               nodeKey="image-1"
               src="/story-mocks/animals-10008941_1280.jpg"
               altText="Wildlife animals in nature"
+              fileId="image-animals"
+              identityId="us-east-1:mock-identity"
               width={640}
               height={360}
               resizable={false}
@@ -463,6 +468,8 @@ export const ImageWithCaption = {
               nodeKey="image-2"
               src="/story-mocks/piano-10046998_1280.jpg"
               altText="Piano keyboard"
+              fileId="image-piano"
+              identityId="us-east-1:mock-identity"
               width={640}
               height={360}
               resizable={false}
@@ -513,6 +520,8 @@ export const ImageSmall = {
               nodeKey="image-3"
               src="/story-mocks/meerkat-10071273_1280.png"
               altText="Meerkat standing"
+              fileId="image-meerkat"
+              identityId="us-east-1:mock-identity"
               width={320}
               height={320}
               resizable={false}

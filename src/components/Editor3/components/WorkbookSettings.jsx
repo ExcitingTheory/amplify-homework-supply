@@ -19,10 +19,10 @@ import {
   InputLabel,
 } from '@mui/material';
 import SettingsContext from '../../../context/settingsContext';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 export default function WorkbookSettings() {
-  const { t } = useTranslation('workbook');
+  const t = useTranslations('workbook');
   
   const settingsContext = React.useContext(SettingsContext);
   const settings = settingsContext?.settings || null;

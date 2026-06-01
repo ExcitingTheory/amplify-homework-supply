@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box } from '@mui/material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -41,7 +41,8 @@ import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
 import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH } from './editorConfig';
-import { Drawer, DrawerHeader } from './styledComponents';
+import { Drawer } from './styledComponents';
+import { useAppShell } from '../AppShellContext';
 import { TutorPresenceBanner, WorkbookProgress, TutorCursorOverlay, WorkbookPresenceBar, AIFeedbackSnackbar } from '../Workbook';
 import UnitContext from '../../context/unitContext';
 
@@ -49,8 +50,9 @@ import UnitContext from '../../context/unitContext';
  * Workbook component - read-only editor view for students
  * Displays unit content with grading and progress tracking
  */
-export function Workbook(): JSX.Element {
-  const { t } = useTranslation('common');
+export function Workbook(): React.JSX.Element {
+  const t = useTranslations('common');
+  const { appBarHeight = 48 } = useAppShell();
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
   const drawerRef = React.useRef<HTMLDivElement>(null);
@@ -159,7 +161,7 @@ export function Workbook(): JSX.Element {
               sx={{
                 display: 'flex',
                 overflow: 'hidden',
-                height: '100vh',
+                height: `calc(100vh - ${appBarHeight}px)`,
               }}
             >
               <ToolBarRoPlugin
@@ -179,12 +181,6 @@ export function Workbook(): JSX.Element {
                 variant="permanent"
                 open={openTab}
               >
-                <DrawerHeader
-                  style={{
-                    minHeight: 'var(--app-bar-height, 11rem)',
-                  }}
-                />
-
                 <VerticalTabsRo
                   setOpen={setOpenTab}
                   open={openTab}
@@ -220,9 +216,8 @@ export function Workbook(): JSX.Element {
                       style={{
                         margin: '0',
                         padding: '0',
-                        paddingTop: 'var(--app-bar-height, 11rem)',
                         paddingLeft: '1.5rem',
-                        height: '100vh',
+                        height: '100%',
                         overflowY: 'auto',
                         width: '100%',
                         boxSizing: 'border-box',
@@ -236,12 +231,12 @@ export function Workbook(): JSX.Element {
                       <TutorCursorOverlay />
                       <ContentEditable
                         data-lexical-editor="true"
-                        aria-label={t('navigation.workbook', { ns: 'common' })}
+                        aria-label={t('navigation.workbook')}
                         style={{
                           width: '100%',
                           maxWidth: '100%',
                           boxSizing: 'border-box',
-                          minHeight: '100vh',
+                          minHeight: '100%',
                           padding: '1rem 2rem 1rem 0.5rem',
                         }}
                       />

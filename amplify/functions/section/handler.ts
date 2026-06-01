@@ -13,13 +13,56 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { GroupManager } from "./groupManager";
 import {
+  createNotification,
+  createNotificationsForRecipients,
+} from "../shared/notificationUtils";
+import {
   CloudFormationClient,
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+import * as crypto from "crypto";
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
+
+// Cold-start cache for CloudFront signing credentials
+let cfPrivateKey: string | null = null;
+let cfKeyPairId: string | null = null;
+
+/**
+ * Generate a CloudFront canned-policy signed URL using Node.js built-in crypto.
+ * Avoids any external signing library dependency.
+ */
+function signCFUrl(
+  url: string,
+  privateKey: string,
+  keyPairId: string,
+  expiresAt: number, // Unix epoch seconds
+): string {
+  const policy = JSON.stringify({
+    Statement: [
+      {
+        Resource: url,
+        Condition: {
+          DateLessThan: { "AWS:EpochTime": expiresAt },
+        },
+      },
+    ],
+  });
+
+  const sign = crypto.createSign("RSA-SHA1");
+  sign.update(Buffer.from(policy));
+  const rawSig = sign.sign(privateKey, "base64");
+
+  // CloudFront base64 uses - _ ~ instead of + = /
+  const signature = rawSig.replace(/\+/g, "-").replace(/=/g, "_").replace(/\//g, "~");
+
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}Expires=${expiresAt}&Signature=${signature}&Key-Pair-Id=${keyPairId}`;
+}
 
 /**
  * Discover User Pool ID from CloudFormation stack exports
@@ -273,6 +316,28 @@ const LIST_GRADES_BY_SECTION = /* GraphQL */ `
   }
 `;
 
+// Query used by getStudentSubmissionUrl — includes identityId for path validation
+const GET_GRADE_WITH_IDENTITY = /* GraphQL */ `
+  query GetGradeWithIdentity($id: ID!) {
+    getGrade(id: $id) {
+      id
+      sectionID
+      owner
+      identityId
+    }
+  }
+`;
+
+// Query used by getStudentSubmissionUrl — includes instructor for section ownership check
+const GET_SECTION_INSTRUCTOR = /* GraphQL */ `
+  query GetSectionInstructor($id: ID!) {
+    getSection(id: $id) {
+      id
+      instructor
+    }
+  }
+`;
+
 // Initialize client lazily to ensure environment variables are set
 let client: any = null;
 
@@ -357,6 +422,8 @@ export const handler: Handler = async (event: any, context: any) => {
           username || userId,
           groupManager,
         );
+      case "getStudentSubmissionUrl":
+        return await handleGetStudentSubmissionUrl(args, userId, claims);
       default:
         throw new Error(`Unknown operation: ${operationName}`);
     }
@@ -601,14 +668,32 @@ async function handleListSectionStudents(
     // Get learners from Cognito group
     const learners = await groupManager.listLearnersInSection(sectionId);
 
-    return learners.map((learner: any) => ({
-      id: learner.Username,
-      name:
-        learner.Attributes?.find((a: any) => a.Name === "name")?.Value ||
-        learner.Username,
-      email:
-        learner.Attributes?.find((a: any) => a.Name === "email")?.Value || "",
-    }));
+    return learners.map((learner: any) => {
+      const attrs = learner.Attributes || [];
+      const firstName =
+        attrs.find((a: any) => a.Name === "given_name")?.Value || "";
+      const lastName =
+        attrs.find((a: any) => a.Name === "family_name")?.Value || "";
+      const preferredName =
+        attrs.find((a: any) => a.Name === "preferred_username")?.Value || "";
+      const legacyName = attrs.find((a: any) => a.Name === "name")?.Value || "";
+      const email = attrs.find((a: any) => a.Name === "email")?.Value || "";
+
+      // Build display name: prefer first+last, fall back to legacy "name", then username
+      const name =
+        firstName && lastName
+          ? `${firstName} ${lastName}`
+          : legacyName || learner.Username;
+
+      return {
+        id: learner.Username,
+        name,
+        firstName,
+        lastName,
+        preferredName,
+        email,
+      };
+    });
   } catch (error) {
     console.error("[List Section Students Error]:", error);
     throw error;
@@ -725,10 +810,29 @@ async function handleCreatePeerReviewRoom(
           id: gradeId,
           reviewRoomId: roomId,
           peerReviewGroup: peerGroupName,
-          _version: grade._version,
+          _version: grade._version ?? 1,
         },
       },
     });
+
+    // 7. Create notifications for invited users
+    if (validInvites.length > 0) {
+      try {
+        await createNotificationsForRecipients(client, validInvites, {
+          type: "PEER_REVIEW_INVITE",
+          title: "Peer Review Invitation",
+          body: `${username} invited you to review their work. Code: ${code}`,
+          linkPath: `/review/${roomId}`,
+          linkLabel: "Join Review",
+          referenceId: roomId,
+          referenceType: "HomeworkRoom",
+          senderName: username,
+          metadata: { roomId, code, gradeId },
+        });
+      } catch (err) {
+        console.warn("[PeerReview] Notification creation failed:", err);
+      }
+    }
 
     return JSON.stringify({
       success: true,
@@ -835,7 +939,7 @@ async function handleJoinPeerReview(
         input: {
           id: room.id,
           invitedUserIds: updatedInvites,
-          _version: room._version,
+          _version: room._version ?? 1,
         },
       },
     });
@@ -875,4 +979,139 @@ async function isUserInSection(
     console.warn(`[PeerReview] Section check failed for ${userId}:`, error);
     return false;
   }
+}
+
+// ========================================================================
+// STUDENT SUBMISSION URL (instructor cross-user file access)
+// ========================================================================
+
+/**
+ * Returns a short-lived S3 presigned URL for a student's private submission file.
+ *
+ * Authorization checks (in order):
+ *  1. AppSync auth rule already verified caller is in Instructors or Admins group.
+ *  2. Grade exists and its identityId is used to validate the submissionKey prefix
+ *     (prevents path traversal — an instructor cannot request an arbitrary private path).
+ *  3. Caller is the section instructor (section.instructor === userId) OR is an Admin
+ *     OR is in the section's Cognito instructor group.
+ */
+async function handleGetStudentSubmissionUrl(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<string> {
+  const { gradeId, submissionKey } = args;
+
+  if (!gradeId || !submissionKey) {
+    throw new Error("gradeId and submissionKey are required");
+  }
+
+  const client = getClient();
+
+  // 1. Fetch grade — needs identityId and sectionID
+  const { data: gradeData, errors: gradeErrors } = await client.graphql({
+    query: GET_GRADE_WITH_IDENTITY,
+    variables: { id: gradeId },
+  });
+
+  if (gradeErrors?.length || !gradeData?.getGrade) {
+    console.error("[getStudentSubmissionUrl] Grade not found:", gradeErrors);
+    throw new Error("Grade not found");
+  }
+
+  const grade = gradeData.getGrade;
+
+  // 2. Path traversal prevention — submissionKey must be under the grade owner's private path
+  const expectedPrefix = `private/${grade.identityId}/`;
+  if (!grade.identityId || !submissionKey.startsWith(expectedPrefix)) {
+    console.error(
+      "[getStudentSubmissionUrl] submissionKey does not match grade owner identity",
+      { submissionKey, expectedPrefix },
+    );
+    throw new Error(
+      "Unauthorized: submission key does not match grade owner identity",
+    );
+  }
+
+  // 3. Section authorization — caller must be the section's instructor or an Admin
+  const userGroups: string[] = claims["cognito:groups"] || [];
+  const isAdmin = userGroups.includes("Admins");
+
+  if (!isAdmin) {
+    if (!grade.sectionID) {
+      throw new Error(
+        "Unauthorized: grade is not associated with a section",
+      );
+    }
+
+    const { data: sectionData, errors: sectionErrors } = await client.graphql({
+      query: GET_SECTION_INSTRUCTOR,
+      variables: { id: grade.sectionID },
+    });
+
+    if (sectionErrors?.length || !sectionData?.getSection) {
+      console.error(
+        "[getStudentSubmissionUrl] Section not found:",
+        sectionErrors,
+      );
+      throw new Error("Section not found");
+    }
+
+    const section = sectionData.getSection;
+    const sectionInstructorGroup = `section-${grade.sectionID}-instructors`;
+    const isInstructorOfSection =
+      section.instructor === userId ||
+      userGroups.includes(sectionInstructorGroup);
+
+    if (!isInstructorOfSection) {
+      console.error(
+        "[getStudentSubmissionUrl] Caller is not an instructor of this section",
+        { userId, sectionId: grade.sectionID, sectionInstructor: section.instructor },
+      );
+      throw new Error(
+        "Unauthorized: caller is not an instructor of this section",
+      );
+    }
+  }
+
+  // 4. Generate short-lived CloudFront signed URL (15 minutes)
+  const cdnDomain = process.env.CDN_DOMAIN;
+  if (!cdnDomain) {
+    throw new Error("CDN_DOMAIN environment variable not set");
+  }
+
+  // Load CF credentials from SSM on first invocation, then reuse from cache
+  if (!cfPrivateKey || !cfKeyPairId) {
+    const ssmClient = new SSMClient({ region: process.env.AWS_REGION || "us-east-1" });
+    const [pkResult, kpIdResult] = await Promise.all([
+      ssmClient.send(new GetParameterCommand({
+        Name: "/homework-supply/cloudfront/private-key",
+        WithDecryption: true,
+      })),
+      ssmClient.send(new GetParameterCommand({
+        Name: "/homework-supply/cloudfront/key-pair-id",
+      })),
+    ]);
+    cfPrivateKey = pkResult.Parameter?.Value ?? null;
+    cfKeyPairId = kpIdResult.Parameter?.Value ?? null;
+  }
+
+  if (!cfPrivateKey || !cfKeyPairId) {
+    throw new Error("CloudFront signing credentials not available in SSM");
+  }
+
+  const signedUrl = signCFUrl(
+    `https://${cdnDomain}/${submissionKey}`,
+    cfPrivateKey,
+    cfKeyPairId,
+    Math.floor((Date.now() + 15 * 60 * 1000) / 1000),
+  );
+
+  console.log("[getStudentSubmissionUrl] Generated CloudFront signed URL for:", {
+    gradeId,
+    sectionID: grade.sectionID,
+    requestedBy: userId,
+  });
+
+  return signedUrl;
 }

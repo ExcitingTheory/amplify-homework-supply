@@ -11,14 +11,12 @@ import React from 'react';
 import QuestionBlockRo from '../QuizComponent';
 import UnitContext from '../../../../context/unitContext';
 
-// Mock next-i18next
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: any) => {
-      if (key === 'quizComponent.gradeDisplay') return `Score: ${params?.score ?? 0}%`;
-      return key;
-    },
-  }),
+// Mock next-intl
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, params?: any) => {
+    if (key === 'quizComponent.gradeDisplay') return `Score: ${params?.score ?? 0}%`;
+    return key;
+  },
 }));
 
 function renderQuiz({

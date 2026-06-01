@@ -14,28 +14,7 @@ import {
   MOCK_IMAGE_URL_1,
   MOCK_AUDIO_BASE64,
 } from "../../../.storybook/__mocks__/media";
-import { calculateWaveformData } from "../../utils/calculateWaveformData";
 import { within, waitFor, userEvent } from "storybook/test";
-
-/**
- * Fetch a real audio file and compute waveform data via calculateWaveformData.
- * Returns the full waveform array (600 samples by default).
- * Falls back to an empty array on error so stories still render.
- */
-async function computeRealWaveform(audioUrl, samples = 600) {
-  try {
-    const response = await fetch(audioUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    return await calculateWaveformData(arrayBuffer, samples);
-  } catch (err) {
-    console.warn(
-      "[Workbook.stories] Failed to compute waveform from",
-      audioUrl,
-      err,
-    );
-    return [];
-  }
-}
 
 import { Workbook } from "./index";
 
@@ -704,7 +683,6 @@ export const WorkbookWithContent = {
 
       // Compute real waveform data from the actual audio file
       const audioUrl = `${baseUrl}${MOCK_AUDIO_BASE64}`;
-      const realWaveform = await computeRealWaveform(audioUrl);
 
       const pdfPath = `${baseUrl}/story-mocks/japanese-grammar-guide.pdf`;
 
@@ -782,7 +760,6 @@ export const WorkbookWithContent = {
           pronunciation: "がくせい",
           definition: "student",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(0, 100)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -806,7 +783,6 @@ export const WorkbookWithContent = {
           pronunciation: "せんせい",
           definition: "teacher",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(100, 200)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -830,7 +806,6 @@ export const WorkbookWithContent = {
           pronunciation: "にほんご",
           definition: "Japanese language",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(200, 300)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -860,7 +835,6 @@ export const WorkbookWithContent = {
           answer: "Hello",
           hint: "A common greeting used during the day",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(realWaveform.slice(0, 200)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -942,7 +916,6 @@ export const WorkbookWithContent = {
           answer: "今晩は (こんばんは)",
           hint: "Said when greeting someone in the evening",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(realWaveform.slice(200, 400)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -1025,9 +998,7 @@ export const WorkbookWithContent = {
             "Audio or text response demonstrating proper pronunciation of がくせい",
           hint: "Remember to pronounce both syllables clearly: ga-ku-se-i",
           audio: [MOCK_AUDIO_BASE64],
-          audioWaveformData: JSON.stringify(realWaveform.slice(400, 500)),
           answerAudio: [MOCK_AUDIO_BASE64],
-          answerAudioWaveformData: JSON.stringify(realWaveform.slice(500, 600)),
           embedding: {
             embedding: JSON.stringify([
               {
@@ -1582,7 +1553,6 @@ export const WorkbookWithProgress = {
           ? window.location.origin
           : "http://localhost:6006";
       const audioUrl = `${baseUrl}${MOCK_AUDIO_BASE64}`;
-      const realWaveform = await computeRealWaveform(audioUrl);
 
       seedMockUnit({
         id: "workbook-with-progress-id",
@@ -1697,9 +1667,7 @@ export const WorkbookWithProgress = {
           pronunciation: "kon-ni-chi-wa",
           definition: "Hello (Japanese)",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(0, 100)),
           definitionAudio: [MOCK_AUDIO_BASE64],
-          definitionWaveformData: JSON.stringify(realWaveform.slice(100, 200)),
           owner: "student-alice-sub",
           _version: 1,
         },
@@ -1709,9 +1677,7 @@ export const WorkbookWithProgress = {
           pronunciation: "neko",
           definition: "Cat (Japanese)",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(200, 300)),
           definitionAudio: [MOCK_AUDIO_BASE64],
-          definitionWaveformData: JSON.stringify(realWaveform.slice(300, 400)),
           owner: "student-alice-sub",
           _version: 1,
         },
@@ -1721,9 +1687,7 @@ export const WorkbookWithProgress = {
           pronunciation: "a-ri-ga-tou",
           definition: "Thank you (Japanese)",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(400, 500)),
           definitionAudio: [MOCK_AUDIO_BASE64],
-          definitionWaveformData: JSON.stringify(realWaveform.slice(500, 600)),
           owner: "student-alice-sub",
           _version: 1,
         },
@@ -1733,9 +1697,7 @@ export const WorkbookWithProgress = {
           pronunciation: "inu",
           definition: "Dog (Japanese)",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(0, 100)),
           definitionAudio: [MOCK_AUDIO_BASE64],
-          definitionWaveformData: JSON.stringify(realWaveform.slice(100, 200)),
           owner: "student-alice-sub",
           _version: 1,
         },
@@ -1745,9 +1707,7 @@ export const WorkbookWithProgress = {
           pronunciation: "sa-you-na-ra",
           definition: "Goodbye (Japanese)",
           audio: [MOCK_AUDIO_BASE64],
-          waveformData: JSON.stringify(realWaveform.slice(200, 300)),
           definitionAudio: [MOCK_AUDIO_BASE64],
-          definitionWaveformData: JSON.stringify(realWaveform.slice(300, 400)),
           owner: "student-alice-sub",
           _version: 1,
         },
@@ -3290,7 +3250,6 @@ export const KitchenSink = {
           ? window.location.origin
           : "http://localhost:6006";
       const audioUrl = `${baseUrl}${MOCK_AUDIO_BASE64}`;
-      const realWaveform = await computeRealWaveform(audioUrl);
 
       seedMockUnit({
         id: "kitchen-sink-workbook-id",
@@ -3605,7 +3564,6 @@ export const KitchenSink = {
           identityId: "mock-identity-id",
           owner: "mock-user-sub",
           createdAt: new Date("2024-01-17T14:00:00Z").toISOString(),
-          waveformData: JSON.stringify(realWaveform),
           _version: 1,
         },
         {
@@ -3617,7 +3575,6 @@ export const KitchenSink = {
           identityId: "mock-identity-id",
           owner: "mock-user-sub",
           createdAt: new Date("2024-01-18T09:15:00Z").toISOString(),
-          waveformData: JSON.stringify(realWaveform),
           _version: 1,
         },
         {
@@ -3629,7 +3586,6 @@ export const KitchenSink = {
           identityId: "mock-identity-id",
           owner: "mock-user-sub",
           createdAt: new Date("2024-01-22T15:10:00Z").toISOString(),
-          waveformData: JSON.stringify(realWaveform),
           _version: 1,
         },
       ]);

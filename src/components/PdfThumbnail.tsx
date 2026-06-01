@@ -13,7 +13,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { Box, Skeleton, Typography, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 // Configure PDF.js worker from local public directory (skip if already configured by Storybook)
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -49,7 +49,7 @@ export default function PdfThumbnail({
     showBorder = true,
     onClick,
 }: PdfThumbnailProps) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [numPages, setNumPages] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

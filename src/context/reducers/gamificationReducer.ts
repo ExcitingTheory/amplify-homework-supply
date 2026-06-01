@@ -1,6 +1,6 @@
 /**
  * gamificationReducer — Unified reducer for all gamification state:
- * Progress, Campaign, Guild, SkillTree, ContentLock.
+ * Progress, Campaign, Squad, SkillTree, ContentLock.
  *
  * Each domain has its own action types and state slice, but they share
  * a single reducer so they can live in one context/provider.
@@ -60,18 +60,32 @@ export interface GroupChallengeInfo {
   }>;
 }
 
-export interface GuildInfo {
+export interface SquadInfo {
   id: string;
   name: string;
   cohortId: string;
   totalXP: number;
+  crestSvg?: string | null;
   description?: string;
   memberCount: number;
+  members?: Array<{
+    studentId: string;
+    role?: string;
+    avatarStyle?: string;
+    avatarOverrides?: any;
+    avatarSeed?: string;
+  }>;
+  posts?: Array<{
+    authorId: string;
+    title: string;
+    data?: string;
+    createdAt?: string;
+  }>;
 }
 
-export interface GuildMember {
+export interface SquadMember {
   id: string;
-  guildId: string;
+  squadId: string;
   studentId: string;
   role: "LEADER" | "MEMBER";
   joinedAt?: string;
@@ -110,10 +124,10 @@ export interface GamificationState {
   campaignsLoading: boolean;
   challengesLoading: boolean;
 
-  // Guild
-  rawGuilds: any[];
+  // Squad
+  rawSquads: any[];
   rawMemberships: any[];
-  guildsLoading: boolean;
+  squadsLoading: boolean;
   membershipsLoading: boolean;
 
   // SkillTree
@@ -155,10 +169,10 @@ export const initialState: GamificationState = {
   campaignsLoading: true,
   challengesLoading: true,
 
-  // Guild
-  rawGuilds: [],
+  // Squad
+  rawSquads: [],
   rawMemberships: [],
-  guildsLoading: true,
+  squadsLoading: true,
   membershipsLoading: true,
 
   // SkillTree
@@ -204,10 +218,10 @@ export const actionTypes = {
   SET_CAMPAIGNS_LOADING: "SET_CAMPAIGNS_LOADING",
   SET_CHALLENGES_LOADING: "SET_CHALLENGES_LOADING",
 
-  // Guild
-  SET_RAW_GUILDS: "SET_RAW_GUILDS",
+  // Squad
+  SET_RAW_SQUADS: "SET_RAW_SQUADS",
   SET_RAW_MEMBERSHIPS: "SET_RAW_MEMBERSHIPS",
-  SET_GUILDS_LOADING: "SET_GUILDS_LOADING",
+  SET_SQUADS_LOADING: "SET_SQUADS_LOADING",
   SET_MEMBERSHIPS_LOADING: "SET_MEMBERSHIPS_LOADING",
 
   // SkillTree
@@ -282,17 +296,17 @@ export function gamificationReducer(
     case actionTypes.SET_CHALLENGES_LOADING:
       return { ...state, challengesLoading: action.payload };
 
-    // ── Guild ───────────────────────────────────────────────────────
-    case actionTypes.SET_RAW_GUILDS:
-      return { ...state, rawGuilds: action.payload, guildsLoading: false };
+    // ── Squad ───────────────────────────────────────────────────────
+    case actionTypes.SET_RAW_SQUADS:
+      return { ...state, rawSquads: action.payload, squadsLoading: false };
     case actionTypes.SET_RAW_MEMBERSHIPS:
       return {
         ...state,
         rawMemberships: action.payload,
         membershipsLoading: false,
       };
-    case actionTypes.SET_GUILDS_LOADING:
-      return { ...state, guildsLoading: action.payload };
+    case actionTypes.SET_SQUADS_LOADING:
+      return { ...state, squadsLoading: action.payload };
     case actionTypes.SET_MEMBERSHIPS_LOADING:
       return { ...state, membershipsLoading: action.payload };
 

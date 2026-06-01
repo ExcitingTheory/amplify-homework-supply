@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box, Skeleton, Typography } from '@mui/material';
 import { createPortal } from 'react-dom';
 
@@ -29,7 +29,7 @@ export default function AIContentSuggestion({
   onAccept,
   onDismiss,
 }) {
-  const { t } = useTranslation('editor.ai');
+  const t = useTranslations('editor.ai');
   const suggestionRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   

@@ -1,3 +1,4 @@
+"use client";
 /**
  * GamificationToastLayer — Global overlay that renders event-driven
  * micro-interaction toasts: RankChangeToast, BadgeCoinFlip, EasterEggToast,

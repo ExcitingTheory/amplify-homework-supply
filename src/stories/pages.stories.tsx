@@ -1,80 +1,61 @@
 /**
- * @fileoverview Storybook stories for Next.js application pages
- * 
+ * @fileoverview Storybook stories for Next.js application pages (App Router)
+ *
  * Full-page stories demonstrating complete workflows:
  * - Index (Home/Dashboard)
- * - Profile management
  * - Sections (class management)
  * - Units (lesson content)
  * - Section Detail (class overview)
  * - Unit Detail (Lexical editor)
  * - Workbook (student assignment view)
- * 
+ * - Peer Review
+ *
  * All pages use mocked AWS Amplify services and authentication.
- * 
+ * Server actions are aliased to mocks in .storybook/main.ts.
+ *
  * @module stories/pages.stories
  */
 
-// Import page components lazily to avoid breaking Vitest browser mode
 import React from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-const PageLoadingFallback = ({ name = 'page' }: { name?: string }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: 2 }}>
-    <CircularProgress size={44} thickness={4} />
-    <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
-      Loading {name}…
-    </Box>
-  </Box>
-);
-
-// Lazy load page components
-const IndexPage = React.lazy(() => import('../../pages/index.jsx'));
-const ProfilePage = React.lazy(() => import('../../pages/profile.jsx'));
-const SectionsPage = React.lazy(() => import('../../pages/sections.jsx'));
-const UnitsPage = React.lazy(() => import('../../pages/units.jsx'));
-const SectionDetailPage = React.lazy(() => import('../../pages/section/[id].jsx').then(m => ({ default: m.SectionDetail })));
-const UnitDetailPage = React.lazy(() => import('../../pages/unit/[id].jsx'));
-const WorkbookPage = React.lazy(() => import('../../pages/workbook/[id].jsx'));
-const PeerReviewPage = React.lazy(() => import('../../pages/review/[id].jsx'));
+// App Router pages — all marked 'use client', safe for Storybook.
+// Server action imports are aliased to mocks in .storybook/main.ts.
+import IndexPage from '../../app/[locale]/page.jsx';
+import SectionsPage from '../../app/[locale]/sections/page.jsx';
+import UnitsPage from '../../app/[locale]/units/page.jsx';
+import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
+import UnitDetailPage from '../../app/[locale]/unit/[id]/page.jsx';
+import PeerReviewPage from '../../app/[locale]/review/[id]/page.jsx';
+// WorkbookPage is an async server component — import the client component directly
+import WorkbookClient from '../../app/[locale]/workbook/[id]/WorkbookClient';
 
 // Mock data imports
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
-import { FilesProvider } from '../context/fileContext';
-import { useRouter } from 'next/router';
+import { FilesProvider } from '../../src/context/fileContext';
 
-/**
- * Pages Stories - Storybook stories for all Next.js pages
- * 
- * This file contains stories for all pages in the application:
- * - Index (Home/Dashboard)
- * - Profile
- * - Sections
- * - Units
- * - Section Detail
- * - Unit Detail (Editor)
- * - Workbook (Student View)
- */
-
-const meta = {
+const meta: Meta = {
   title: '📄 Pages/Application Pages',
   parameters: {
     layout: 'fullscreen',
+    // Page components manage their own providers — disable the preview-level wrappers
+    disableUnitContext: true,
+    disableSectionContext: true,
+    disableDictionaryContext: true,
     nextjs: {
-      appDirectory: false,
+      appDirectory: true,
       navigation: {
         pathname: '/',
       },
     },
-    // Ensure viewport can scroll for long pages
     viewport: {
       defaultViewport: 'responsive',
     },
     docs: {
       description: {
         component: `
-Complete Next.js page layouts demonstrating full application flows.
+Complete Next.js App Router page layouts demonstrating full application flows.
 
 ## Page Types
 - **Dashboard**: Assignment overview and quick actions
@@ -82,8 +63,9 @@ Complete Next.js page layouts demonstrating full application flows.
 - **Sections**: Class sections and student groups
 - **Workbook**: Student interface for completing assignments
 - **Editor**: Instructor interface for creating/editing units
+- **Peer Review**: Student peer review workflow
 
-All pages use AWS Amplify DataStore for real-time sync and Cognito for authentication.
+All pages use AWS Amplify Data Client for real-time sync and Cognito for authentication.
         `.trim(),
       },
       toc: true,
@@ -96,26 +78,22 @@ All pages use AWS Amplify DataStore for real-time sync and Cognito for authentic
 };
 
 export default meta;
+type Story = StoryObj;
+
+// ---------------------------------------------------------------------------
+// Index Page (Home/Dashboard)
+// ---------------------------------------------------------------------------
 
 /**
- * Index Page (Home/Dashboard)
- * 
- * The landing page shows:
- * - Assignments that need completion
- * - Completed assignments with grades
- * - User's own assignments (if instructor)
- * - Sections the user belongs to
+ * Home page displaying assignments, grades, and sections for the current user.
  */
-export const Index = {
+export const Index: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         userId: 'student-alice-sub',
-        attributes: {
-          sub: 'student-alice-sub',
-          email: 'alice@example.com',
-        },
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
         groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
@@ -126,73 +104,49 @@ export const Index = {
       );
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
-      <IndexPage
-        user={{
-          username: 'student-alice-sub',
-          userId: 'student-alice-sub',
-          attributes: {
-            sub: 'student-alice-sub',
-            email: 'alice@example.com',
-          },
-          groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-        }}
-        signOut={() => console.log('Sign out clicked')}
-      />
-    </React.Suspense>
-  ),
+  render: () => <IndexPage />,
   parameters: {
-    docs: {
-      description: {
-        story: 'Home page displaying assignments, grades, and sections for the current user.',
-      },
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
     },
+    nextjs: { navigation: { pathname: '/' } },
   },
 };
 
 /**
- * Profile Page
- * 
- * User profile management:
- * - View/edit email
- * - View user ID and identity ID
- * - Change password
+ * Home page state when user has no sections — prompts to join or create.
  */
-export const Profile = {
+export const IndexNoSections: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
+        username: 'new-student',
+        attributes: { sub: 'new-student', email: 'new.student@example.com' },
+        groups: [],
       });
-      return <Story />;
+      seedIndexPageData('empty');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Profile" />}>
-      <ProfilePage />
-    </React.Suspense>
-  ),
+  render: () => <IndexPage />,
   parameters: {
-    docs: {
-      description: {
-        story: 'User profile page for managing account information and password.',
-      },
+    mockAuth: {
+      user: { attributes: { sub: 'new-student', email: 'new.student@example.com' } },
+      session: { username: 'new-student' },
     },
+    nextjs: { navigation: { pathname: '/' } },
   },
 };
 
 /**
- * Sections Page
- * 
- * Section management:
- * - List all sections user is enrolled in
- * - List sections user created (instructors)
- * - Create new sections
+ * Home page showing both pending and completed assignments with grade statistics.
  */
-export const Sections = {
+export const IndexAssignments: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
@@ -201,414 +155,85 @@ export const Sections = {
         groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
-      return <Story />;
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Sections" />}>
-      <SectionsPage />
-    </React.Suspense>
-  ),
+  render: () => <IndexPage />,
   parameters: {
-    docs: {
-      description: {
-        story: 'Sections list page with ability to create and view sections.',
-      },
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
     },
+    nextjs: { navigation: { pathname: '/' } },
   },
 };
 
+// ---------------------------------------------------------------------------
+// Units Page
+// ---------------------------------------------------------------------------
+
 /**
- * Units Page
- * 
- * Learning unit management:
- * - Published units (available to all)
- * - Draft units (instructor's work in progress)
- * - Archived units
- * - Create new units
+ * Units list page showing published, draft, and archived learning units.
  */
-export const Units = {
+export const Units: Story = {
   decorators: [
     (Story: React.FC) => {
-      setMockUser({
-        username: 'teacher-1',
-        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        groups: [],
-      });
-      seedIndexPageData('instructor');
-      return <Story />;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Units" />}>
-      <UnitsPage />
-    </React.Suspense>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Units list page showing published, draft, and archived learning units.',
-      },
-    },
-  },
-};
-
-/**
- * Section Detail Page
- * 
- * Individual section view:
- * - Section information (Japanese 101 with 4 students)
- * - Student roster (Alice, Bob, Carol, Dave)
- * - Assignments for the section (2 unit assignments)
- * - Grade overview (gradebook showing all student scores)
- * - Upload featured image
- * 
- * Mock data includes:
- * - Alice: 2 completed units (97%, 88%)
- * - Bob: 2 completed units (87%, 82%)
- * - Carol: 1 completed (91%), 1 in-progress (60%)
- * - Dave: 2 completed units (78%, 84%)
- */
-export const SectionDetail = {
-  decorators: [
-    (Story: React.FC, context: any) => {
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
         groups: ['Instructors'],
       });
       seedIndexPageData('instructor');
-      
-      // Mock router to provide section id from parameters
-      const router = useRouter();
-      if (context.parameters.nextRouter) {
-        Object.assign(router, context.parameters.nextRouter);
-      }
-      
-      return <FilesProvider><Story /></FilesProvider>;
+      return <Story />;
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Section Detail" />}>
-      <SectionDetailPage
-        user={{
-          username: 'teacher-1',
-          attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        }}
-        signOut={() => console.log('Sign out clicked')}
-      />
-    </React.Suspense>
-  ),
+  render: () => <UnitsPage />,
   parameters: {
-    nextRouter: {
-      pathname: '/section/[id]',
-      query: { id: 'section-jpn-101' },
-      isReady: true,
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
     },
-    docs: {
-      description: {
-        story: 'Section detail page for instructors - shows student roster (4 students: Alice, Bob, Carol, Dave), gradebook with all student scores across 2 assignments, and section management tools. Mock data includes varied completion states and accuracy scores.',
-      },
-    },
+    nextjs: { navigation: { pathname: '/units' } },
   },
 };
 
 /**
- * Section Detail Page (Student View)
- * 
- * Student viewing their section - shows their own grades and assignments
+ * Units page empty state prompting to create first unit.
  */
-export const SectionDetailStudent = {
-  decorators: [
-    (Story: React.FC, context: any) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-        groups: ['section-jpn-101-learners'],
-      });
-      seedIndexPageData('student');
-      
-      // Mock router to provide id from parameters
-      const router = useRouter();
-      if (context.parameters.nextRouter) {
-        Object.assign(router, context.parameters.nextRouter);
-      }
-      
-      return <FilesProvider><Story /></FilesProvider>;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Section Detail" />}>
-      <SectionDetailPage
-        user={{
-          username: 'student-alice-sub',
-          attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-        }}
-        signOut={() => console.log('Sign out clicked')}
-      />
-    </React.Suspense>
-  ),
-  parameters: {
-    nextRouter: {
-      pathname: '/section/[id]',
-      query: { id: 'section-jpn-101' },
-      isReady: true,
-    },
-    docs: {
-      description: {
-        story: 'Section detail page for students - shows their personal grades and assignments for the section.',
-      },
-    },
-  },
-};
-
-/**
- * Unit Detail Page (Editor)
- * 
- * Unit editor for instructors:
- * - Rich text editor with educational nodes
- * - Add quizzes, vocabulary exercises
- * - Add media (images, audio, video)
- * - Manage unit settings
- * - Publish/unpublish units
- */
-export const UnitDetail = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'teacher-1',
-        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        groups: [],
-      });
-      seedIndexPageData('instructor');
-      return <FilesProvider><Story /></FilesProvider>;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Unit Editor" />}>
-      <UnitDetailPage />
-    </React.Suspense>
-  ),
-  parameters: {
-    nextRouter: {
-      pathname: '/unit/[id]',
-      query: { id: 'unit-japanese-1' },
-    },
-    docs: {
-      description: {
-        story: 'Unit editor page with Lexical-based rich text editor and educational content nodes.',
-      },
-    },
-  },
-};
-
-/**
- * Workbook Page (Student View)
- * 
- * Student workbook interface:
- * - View unit content
- * - Complete exercises and quizzes
- * - Submit answers
- * - View grades
- * - Timed exercises with countdown
- */
-export const Workbook = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
-      });
-      seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Workbook" />}>
-      <WorkbookPage />
-    </React.Suspense>
-  ),
-  parameters: {
-    nextRouter: {
-      pathname: '/workbook/[id]',
-      query: { id: 'assignment-1' },
-    },
-    docs: {
-      description: {
-        story: 'Student workbook view for completing unit exercises and viewing results.',
-      },
-    },
-  },
-};
-
-/**
- * Index - With No Sections
- * 
- * State when user has not joined or created any sections yet
- */
-export const IndexNoSections = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'new-student',
-        attributes: { sub: 'new-student', email: 'new.student@example.com' },
-        groups: [],
-      });
-      seedIndexPageData('empty');
-      return <FilesProvider><Story /></FilesProvider>;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
-      <IndexPage
-        user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
-        signOut={() => console.log('Sign out')}
-      />
-    </React.Suspense>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Home page state when user has no sections - prompts to join or create.',
-      },
-    },
-  },
-};
-
-/**
- * Units - Empty State
- * 
- * State when no published units exist yet
- */
-export const UnitsEmptyState = {
+export const UnitsEmptyState: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
         username: 'new-teacher',
         attributes: { sub: 'new-teacher', email: 'new.teacher@example.com' },
-        groups: [],
+        groups: ['Instructors'],
       });
       seedIndexPageData('empty');
       return <Story />;
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Units" />}>
-      <UnitsPage />
-    </React.Suspense>
-  ),
+  render: () => <UnitsPage />,
   parameters: {
-    docs: {
-      description: {
-        story: 'Units page empty state prompting to create first unit.',
-      },
+    mockAuth: {
+      user: { attributes: { sub: 'new-teacher', email: 'new.teacher@example.com' } },
+      session: { username: 'new-teacher' },
     },
+    nextjs: { navigation: { pathname: '/units' } },
   },
 };
 
-/**
- * Sections - Empty State
- * 
- * State when user has no sections
- */
-export const SectionsEmptyState = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'new-student',
-        attributes: { sub: 'new-student', email: 'new.student@example.com' },
-        groups: [],
-      });
-      seedIndexPageData('empty');
-      return <Story />;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Sections" />}>
-      <SectionsPage />
-    </React.Suspense>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Sections page empty state prompting to create first section.',
-      },
-    },
-  },
-};
+// ---------------------------------------------------------------------------
+// Sections Page
+// ---------------------------------------------------------------------------
 
 /**
- * Profile - Password Change Flow
- * 
- * Demonstrates the password change form
+ * Sections list page with ability to create and view sections.
  */
-export const ProfilePasswordChange = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
-      });
-      return <Story />;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Profile" />}>
-      <ProfilePage />
-    </React.Suspense>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Profile page focused on password change functionality.',
-      },
-    },
-  },
-};
-
-/**
- * Workbook - Timed Exercise
- * 
- * Shows the timer interface before starting a timed exercise
- */
-export const WorkbookTimedExercise = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
-      });
-      seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
-    },
-  ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Workbook" />}>
-      <WorkbookPage />
-    </React.Suspense>
-  ),
-  parameters: {
-    nextRouter: {
-      pathname: '/workbook/[id]',
-      query: { id: 'assignment-2' },
-    },
-    docs: {
-      description: {
-        story: 'Workbook page showing timed exercise start screen with instructions.',
-      },
-    },
-  },
-};
-
-/**
- * Index - Assignments View
- * 
- * Shows pending and completed assignments
- */
-export const IndexAssignments = {
+export const Sections: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
@@ -617,70 +242,265 @@ export const IndexAssignments = {
         groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
+      return <Story />;
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Dashboard" />}>
-      <IndexPage
-        user={{
-          username: 'student-alice-sub',
-          attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-          groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-        }}
-        signOut={() => console.log('Sign out')}
-      />
-    </React.Suspense>
-  ),
+  render: () => <SectionsPage />,
   parameters: {
-    docs: {
-      description: {
-        story: 'Home page showing both pending and completed assignments with grade statistics.',
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+    },
+    nextjs: { navigation: { pathname: '/sections' } },
+  },
+};
+
+/**
+ * Sections page empty state prompting to create first section.
+ */
+export const SectionsEmptyState: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'new-student',
+        attributes: { sub: 'new-student', email: 'new.student@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('empty');
+      return <Story />;
+    },
+  ],
+  render: () => <SectionsPage />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'new-student', email: 'new.student@example.com' } },
+      session: { username: 'new-student' },
+    },
+    nextjs: { navigation: { pathname: '/sections' } },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Section Detail Page
+// ---------------------------------------------------------------------------
+
+/**
+ * Section detail page for instructors — student roster, gradebook, assignments.
+ */
+export const SectionDetail: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: ['Instructors'],
+      });
+      seedIndexPageData('instructor');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <SectionDetailPage />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/section/section-jpn-101',
+        segments: [['id', 'section-jpn-101']],
       },
     },
   },
 };
 
 /**
- * Peer Review Room
- *
- * Split-pane view with:
- * - Read-only workbook (left) showing the student's homework
- * - Real-time peer review chat (right)
- * - AppBar with status chip, online count, and "End Review" button (owner only)
- * - Feedback prompt shown after closing review
+ * Section detail page for students — personal grades and assignments.
  */
-export const PeerReview = {
+export const SectionDetailStudent: Story = {
   decorators: [
     (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
-        userId: 'student-alice-sub',
-        attributes: {
-          sub: 'student-alice-sub',
-          email: 'alice@example.com',
-        },
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
         groups: ['section-jpn-101-learners'],
       });
       seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
     },
   ],
-  render: () => (
-    <React.Suspense fallback={<PageLoadingFallback name="Peer Review" />}>
-      <PeerReviewPage />
-    </React.Suspense>
-  ),
+  render: () => <SectionDetailPage />,
   parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+    },
     nextjs: {
+      appDirectory: true,
       navigation: {
-        pathname: '/review/[id]',
-        query: { id: 'room-mock-001' },
+        pathname: '/section/section-jpn-101',
+        segments: [['id', 'section-jpn-101']],
       },
     },
-    docs: {
-      description: {
-        story: 'Peer review room with split-pane workbook + chat. Uses mocked Yjs provider for real-time state.',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Unit Detail Page (Editor)
+// ---------------------------------------------------------------------------
+
+/**
+ * Unit editor page with Lexical-based rich text editor and educational content nodes.
+ */
+export const UnitDetail: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: ['Instructors'],
+      });
+      seedIndexPageData('instructor');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <UnitDetailPage />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/unit/unit-japanese-1',
+        segments: [['id', 'unit-japanese-1']],
+      },
+    },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Workbook Page (Student View)
+// ---------------------------------------------------------------------------
+
+/**
+ * Student workbook view for completing unit exercises and viewing results.
+ */
+export const Workbook: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <WorkbookClient />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/workbook/unit-japanese-1',
+        segments: [['id', 'unit-japanese-1']],
+      },
+    },
+  },
+};
+
+/**
+ * Workbook page showing timed exercise start screen with instructions.
+ */
+export const WorkbookTimedExercise: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <WorkbookClient />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/workbook/assignment-2',
+        segments: [['id', 'assignment-2']],
+      },
+    },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Peer Review Page
+// ---------------------------------------------------------------------------
+
+/**
+ * Peer review page where students review each other's work.
+ */
+export const PeerReview: Story = {
+  decorators: [
+    (Story: React.FC) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <PeerReviewPage />,
+  parameters: {
+    mockAuth: {
+      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/review/assignment-1',
+        segments: [['id', 'assignment-1']],
       },
     },
   },

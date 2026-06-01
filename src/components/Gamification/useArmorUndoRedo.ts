@@ -3,8 +3,8 @@
  *
  * Manages a single undo/redo stack encompassing:
  *   - Armor config (shape, colors, division, charges)
- *   - Guild name
- *   - Guild description
+ *   - Squad name
+ *   - Squad description
  *
  * Supports Ctrl/Cmd+Z (undo) and Ctrl/Cmd+Shift+Z (redo) keyboard shortcuts.
  *

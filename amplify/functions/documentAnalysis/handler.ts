@@ -2,14 +2,21 @@
  * Document Analysis Lambda Handler for Gen 2
  *
  * Handles:
- * - analyzeDocument: Start async PDF analysis
- * - cancelDocumentAnalysis: Cancel running analysis
+ * - analyzeDocument: Start async PDF analysis (GraphQL mutation)
+ * - cancelDocumentAnalysis: Cancel running analysis (GraphQL mutation)
+ * - EventBridge S3 Object Created: Auto-analyze on document upload
  *
  * Reference: amplify/backend/function/analyzeDocument/
  */
 
 import type { Handler } from "aws-lambda";
-import { S3Client } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  CopyObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
@@ -18,6 +25,9 @@ import {
   addTraceAttributes,
 } from "../shared/phoenix-tracer";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import OpenAI from "openai";
+import { extractByFormat } from "./formatRegistry.js";
+import { analyzePages } from "./analysis.js";
 
 // Initialize Phoenix tracing
 initializePhoenixTracing();
@@ -51,6 +61,25 @@ let openaiInstance: any = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
 // Raw GraphQL operations - .models API doesn't work in Lambda resolvers
+const LIST_FILES_BY_PATH = /* GraphQL */ `
+  query ListFiles($filter: ModelFileFilterInput) {
+    listFiles(filter: $filter, limit: 1) {
+      items {
+        id
+        _version
+        _lastChangedAt
+        _deleted
+        documentID
+        name
+        mimeType
+        path
+        identityId
+        owner
+      }
+    }
+  }
+`;
+
 const GET_FILE = /* GraphQL */ `
   query GetFile($id: ID!) {
     getFile(id: $id) {
@@ -103,7 +132,7 @@ const UPDATE_DOCUMENT = /* GraphQL */ `
       _lastChangedAt
       _deleted
       status
-      extractedText
+      textExtractedAt
       sourceFormat
     }
   }
@@ -135,15 +164,30 @@ const CREATE_PARSED_CONTENT = /* GraphQL */ `
       objectivesJSON
       conceptsJSON
       questionsJSON
+      pendingMediaJSON
       modelUsed
       createdAt
     }
   }
 `;
 
+const CREATE_FILE = /* GraphQL */ `
+  mutation CreateFile($input: CreateFileInput!) {
+    createFile(input: $input) {
+      id
+      _version
+      _lastChangedAt
+      _deleted
+      documentID
+      name
+      mimeType
+      path
+    }
+  }
+`;
+
 async function getS3Object(s3Key: string): Promise<Buffer> {
   const bucketName = process.env.STORAGE_BUCKET || "";
-  const { GetObjectCommand } = await import("@aws-sdk/client-s3");
 
   const command = new GetObjectCommand({
     Bucket: bucketName,
@@ -166,7 +210,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
@@ -200,24 +243,141 @@ function requireAuth(event: any) {
   return { userId, username: username || userId };
 }
 
+/** Analyzable document extensions (including edu LMS formats) */
+const ANALYZABLE_EXTENSIONS = [
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".odt",
+  ".ods",
+  ".odp",
+  ".txt",
+  ".md",
+  ".csv",
+  ".epub",
+  ".rtf",
+  // Edu LMS export/upload formats
+  ".imscc",
+  ".qti",
+  ".gift",
+  ".zip",
+];
+
+/**
+ * Handle EventBridge S3 Object Created event.
+ * Looks up the File record by path and auto-analyzes if analyzable.
+ */
+async function handleS3Event(event: any): Promise<void> {
+  const key = event.detail?.object?.key;
+  if (!key) {
+    console.warn("[DocumentAnalysis] EventBridge event missing object key");
+    return;
+  }
+
+  console.log(`[DocumentAnalysis] S3 upload detected: ${key}`);
+
+  // Skip processed variant files (thumbnail outputs from other Lambdas)
+  if (
+    key.includes("/thumbnail.webp") ||
+    key.includes("/small.webp") ||
+    key.includes("/medium.webp") ||
+    key.includes("/large.webp")
+  ) {
+    console.log("[DocumentAnalysis] Skipping processed variant file");
+    return;
+  }
+
+  const client = getDataClient();
+
+  // Look up File record by S3 path
+  const { data, errors } = (await client.graphql({
+    query: LIST_FILES_BY_PATH,
+    variables: { filter: { path: { eq: key } } },
+  })) as any;
+
+  if (errors) {
+    console.error("[DocumentAnalysis] GraphQL error looking up file:", errors);
+    return;
+  }
+
+  const file = data?.listFiles?.items?.[0];
+  if (!file) {
+    console.warn(
+      `[DocumentAnalysis] No File record found for path: ${key}, skipping`,
+    );
+    return;
+  }
+
+  // Check if document is already being analyzed (avoid re-triggering)
+  if (file.documentID) {
+    const { data: docData } = (await client.graphql({
+      query: GET_DOCUMENT,
+      variables: { id: file.documentID },
+    })) as any;
+
+    const doc = docData?.getDocument;
+    if (doc && doc.status !== "uploaded" && doc.status !== "error") {
+      console.log(
+        `[DocumentAnalysis] Document ${file.documentID} already in status: ${doc.status}, skipping`,
+      );
+      return;
+    }
+  }
+
+  // Proceed with analysis
+  try {
+    await handleAnalyzeDocument({ fileID: file.id });
+    console.log(
+      `[DocumentAnalysis] Auto-analysis started for file: ${file.id}`,
+    );
+  } catch (error) {
+    console.error(
+      `[DocumentAnalysis] Auto-analysis failed for file ${file.id}:`,
+      error,
+    );
+  }
+}
+
 export const handler: Handler = async (event: any, context: any) => {
+  // 1. EventBridge S3 Object Created event (auto-analyze on upload)
+  if (event.source === "aws.s3" && event["detail-type"] === "Object Created") {
+    const key = event.detail?.object?.key;
+    if (!key) return;
+
+    const lowerKey = key.toLowerCase();
+    const isAnalyzable = ANALYZABLE_EXTENSIONS.some((ext) =>
+      lowerKey.endsWith(ext),
+    );
+
+    if (!isAnalyzable) {
+      console.log(`[DocumentAnalysis] Skipping non-analyzable file: ${key}`);
+      return;
+    }
+
+    return handleS3Event(event);
+  }
+
+  // 2. GraphQL resolver (analyzeDocument / cancelDocumentAnalysis mutations — UI retry path)
   const operationName = event.info?.fieldName || event.fieldName;
   const args = event.arguments || {};
 
   console.log(`[DocumentAnalysis Handler] ${operationName}`, args);
 
-  // Debug: Log full event structure if operation name is missing
   if (!operationName) {
     console.error(
-      "[DocumentAnalysis Handler] Missing operation name. Full event:",
+      "[DocumentAnalysis Handler] Unknown event type. Full event:",
       JSON.stringify(event, null, 2),
     );
     throw new Error(
-      "Operation name is required but was not provided in the event",
+      "Unknown event type — not EventBridge and no GraphQL fieldName",
     );
   }
 
-  // Require authentication
+  // Require authentication for GraphQL mutations (UI retry path)
   const { userId, username } = requireAuth(event);
 
   // Add trace attributes
@@ -234,6 +394,8 @@ export const handler: Handler = async (event: any, context: any) => {
         return await handleAnalyzeDocument(args);
       case "cancelDocumentAnalysis":
         return await handleCancelDocumentAnalysis(args);
+      case "approveMedia":
+        return await handleApproveMedia(args);
       default:
         throw new Error(`Unknown operation: ${operationName}`);
     }
@@ -254,6 +416,12 @@ export const handler: Handler = async (event: any, context: any) => {
       return {
         success: false,
         fileID: args.fileID || "",
+        message: errorMessage,
+      };
+    } else if (operationName === "approveMedia") {
+      return {
+        success: false,
+        parsedContentID: args.parsedContentID || "",
         message: errorMessage,
       };
     }
@@ -324,7 +492,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           input: {
             id: fileID,
             documentID: documentID,
-            _version: file._version,
+            _version: file._version ?? 1,
           },
         },
       })) as any;
@@ -367,7 +535,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
         input: {
           id: document.id,
           status: "extracting",
-          _version: document._version,
+          _version: document._version ?? 1,
         },
       },
     })) as any;
@@ -388,7 +556,6 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
 
     console.log("[Analyze Document] Extracting text from:", s3Key);
 
-    const { extractByFormat } = await import("./formatRegistry.js");
     const extraction = await extractByFormat(s3Key);
 
     const text = extraction.text;
@@ -401,19 +568,33 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
       `[Analyze Document] Extracted ${text.length} characters from ${pageCount} pages (format: ${sourceFormat})`,
     );
 
-    // Update document with extracted text and source format
+    // Save extracted text to S3 (private — owner only)
+    const bucketName = process.env.STORAGE_BUCKET || "";
+    const textS3Key = `private/${file.identityId}/documents/${document.id}/extracted-text.txt`;
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: textS3Key,
+        Body: text,
+        ContentType: "text/plain; charset=utf-8",
+      }),
+    );
+    console.log(`[Analyze Document] Saved extracted text to S3: ${textS3Key}`);
+
+    // Update document with metadata only (no text payload in DynamoDB)
     const analyzingUpdate = (await client.graphql({
       query: UPDATE_DOCUMENT,
       variables: {
         input: {
           id: document.id,
-          extractedText: text,
+          textExtractedAt: Date.now(),
           pageCount,
           sourceFormat,
           status: "analyzing",
           _version:
-            extractingUpdate?.data?.updateDocument?._version ||
-            document._version,
+            extractingUpdate?.data?.updateDocument?._version ??
+            document._version ??
+            1,
         },
       },
     })) as any;
@@ -421,7 +602,6 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
     // Analyze with OpenAI
     console.log("[Analyze Document] Analyzing with GPT-4o...");
     const openai = await getOpenAI();
-    const { analyzePages } = await import("./analysis.js");
 
     let parsedContent;
     if (s3Key.toLowerCase().endsWith(".pdf") && pages.length > 0) {
@@ -479,6 +659,50 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
     }
 
     console.log("[Analyze Document] Creating ParsedContent record...");
+
+    // Stage extracted media files to S3 pending prefix (requires user approval before becoming File records)
+    let pendingMedia: Array<{
+      filename: string;
+      mimeType: string;
+      s3Key: string;
+      size: number;
+      description?: string;
+    }> = [];
+    if (extraction.mediaFiles && extraction.mediaFiles.length > 0) {
+      console.log(
+        `[Analyze Document] Staging ${extraction.mediaFiles.length} media files for approval...`,
+      );
+      const bucketName = process.env.STORAGE_BUCKET || "";
+
+      for (const media of extraction.mediaFiles) {
+        try {
+          const stagingKey = `protected/${file.identityId}/pending-media/${documentID}/${media.filename}`;
+
+          await s3Client.send(
+            new PutObjectCommand({
+              Bucket: bucketName,
+              Key: stagingKey,
+              Body: media.data,
+              ContentType: media.mimeType,
+            }),
+          );
+
+          pendingMedia.push({
+            filename: media.filename,
+            mimeType: media.mimeType,
+            s3Key: stagingKey,
+            size: media.data.length,
+            description: media.description,
+          });
+        } catch (mediaErr) {
+          console.warn(
+            `[Analyze Document] Failed to stage media ${media.filename}:`,
+            mediaErr,
+          );
+        }
+      }
+    }
+
     await client.graphql({
       query: CREATE_PARSED_CONTENT,
       variables: {
@@ -490,6 +714,8 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           objectivesJSON: JSON.stringify(parsedContent.objectivesJSON || []),
           conceptsJSON: JSON.stringify(parsedContent.conceptsJSON || []),
           questionsJSON: JSON.stringify(parsedContent.questionsJSON || []),
+          pendingMediaJSON:
+            pendingMedia.length > 0 ? JSON.stringify(pendingMedia) : undefined,
           modelUsed: "gpt-4o",
           createdAt: new Date().toISOString(),
         },
@@ -504,8 +730,9 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           id: document.id,
           status: "completed",
           _version:
-            analyzingUpdate?.data?.updateDocument?._version ||
-            document._version,
+            analyzingUpdate?.data?.updateDocument?._version ??
+            document._version ??
+            1,
         },
       },
     });
@@ -541,7 +768,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
             input: {
               id: file.documentID,
               status: "failed",
-              _version: docData?.getDocument?._version,
+              _version: docData?.getDocument?._version ?? 1,
             },
           },
         });
@@ -679,7 +906,7 @@ async function handleCancelDocumentAnalysis(args: any): Promise<any> {
         input: {
           id: document.id,
           status: "cancelled",
-          _version: document._version,
+          _version: document._version ?? 1,
         },
       },
     });
@@ -708,5 +935,158 @@ async function handleCancelDocumentAnalysis(args: any): Promise<any> {
       fileID,
       message: errorMessage,
     };
+  }
+}
+
+const GET_PARSED_CONTENT = /* GraphQL */ `
+  query GetParsedContent($id: ID!) {
+    getParsedContent(id: $id) {
+      id
+      _version
+      _lastChangedAt
+      _deleted
+      documentID
+      fileID
+      owner
+      identityId
+      pendingMediaJSON
+    }
+  }
+`;
+
+const UPDATE_PARSED_CONTENT = /* GraphQL */ `
+  mutation UpdateParsedContent($input: UpdateParsedContentInput!) {
+    updateParsedContent(input: $input) {
+      id
+      _version
+      _lastChangedAt
+      _deleted
+      pendingMediaJSON
+    }
+  }
+`;
+
+/**
+ * Approve selected media files from pending staging area.
+ * Copies from pending-media prefix to final files/ prefix and creates File records.
+ */
+async function handleApproveMedia(args: any): Promise<any> {
+  const { parsedContentID, approvedIndices } = args;
+
+  try {
+    console.log(
+      "[Approve Media] parsedContentID:",
+      parsedContentID,
+      "indices:",
+      approvedIndices,
+    );
+
+    const client = getDataClient();
+
+    // Get ParsedContent to read pendingMediaJSON
+    const { data: pcData, errors: pcErrors } = (await client.graphql({
+      query: GET_PARSED_CONTENT,
+      variables: { id: parsedContentID },
+    })) as any;
+
+    if (pcErrors || !pcData?.getParsedContent) {
+      throw new Error(`ParsedContent not found: ${parsedContentID}`);
+    }
+
+    const parsedContent = pcData.getParsedContent;
+    const pendingMedia: Array<{
+      filename: string;
+      mimeType: string;
+      s3Key: string;
+      size: number;
+      description?: string;
+      approved?: boolean;
+    }> =
+      typeof parsedContent.pendingMediaJSON === "string"
+        ? JSON.parse(parsedContent.pendingMediaJSON)
+        : parsedContent.pendingMediaJSON || [];
+
+    if (pendingMedia.length === 0) {
+      return {
+        success: true,
+        parsedContentID,
+        approvedCount: 0,
+        message: "No pending media to approve",
+      };
+    }
+
+    const bucketName = process.env.STORAGE_BUCKET || "";
+    const identityId = parsedContent.identityId;
+    const owner = parsedContent.owner;
+    const documentID = parsedContent.documentID;
+    let approvedCount = 0;
+
+    for (const idx of approvedIndices) {
+      if (idx < 0 || idx >= pendingMedia.length) continue;
+      const media = pendingMedia[idx];
+      if (media.approved) continue; // already approved
+
+      const finalKey = `protected/${identityId}/files/${media.filename}`;
+
+      // Copy from staging to final path
+      await s3Client.send(
+        new CopyObjectCommand({
+          Bucket: bucketName,
+          CopySource: `${bucketName}/${media.s3Key}`,
+          Key: finalKey,
+          ContentType: media.mimeType,
+        }),
+      );
+
+      // Create File record
+      await client.graphql({
+        query: CREATE_FILE,
+        variables: {
+          input: {
+            documentID,
+            name: media.filename,
+            mimeType: media.mimeType,
+            path: finalKey,
+            identityId,
+            owner,
+          },
+        },
+      } as any);
+
+      // Delete staged copy
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: media.s3Key,
+        }),
+      );
+
+      media.approved = true;
+      approvedCount++;
+    }
+
+    // Update pendingMediaJSON to reflect approvals
+    await client.graphql({
+      query: UPDATE_PARSED_CONTENT,
+      variables: {
+        input: {
+          id: parsedContentID,
+          pendingMediaJSON: JSON.stringify(pendingMedia),
+          _version: parsedContent._version ?? 1,
+        },
+      },
+    } as any);
+
+    return {
+      success: true,
+      parsedContentID,
+      approvedCount,
+      message: `Approved ${approvedCount} media file(s)`,
+    };
+  } catch (error) {
+    console.error("[Approve Media Error]:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to approve media";
+    return { success: false, parsedContentID, message: errorMessage };
   }
 }

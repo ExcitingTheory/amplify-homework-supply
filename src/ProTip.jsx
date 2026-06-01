@@ -2,7 +2,7 @@ import * as React from 'react';
 import Link from '@mui/material/Link';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 function LightBulbIcon(props) {
   return (
@@ -13,7 +13,7 @@ function LightBulbIcon(props) {
 }
 
 export default function ProTip() {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   
   return (
     <Typography sx={{ mt: 6, mb: 3 }} color="text.secondary">

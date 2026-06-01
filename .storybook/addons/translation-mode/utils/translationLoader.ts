@@ -122,9 +122,9 @@ export async function loadMetadata(
     return null;
   }
 
-  // Try multiple paths: translation-cache static dir, then public locales dir
+  // Try multiple paths: translation-cache static dir (flat), then public locales dir
   const paths = [
-    `/translation-cache/${language}/${namespace}.meta.json`,
+    `/translation-cache/${namespace}.meta.json`,
     `/locales/${language}/${namespace}.meta.json`,
   ];
 

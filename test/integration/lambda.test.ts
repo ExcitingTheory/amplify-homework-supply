@@ -40,6 +40,7 @@ import { post } from "aws-amplify/api";
 import { signIn, signOut, fetchAuthSession } from "aws-amplify/auth";
 import type { Schema } from "../../amplify/data/resource";
 import amplifyOutputs from "../../amplify_outputs.json";
+import seedData from "./seed-data.json";
 import {
   signInAs,
   parseSSEStream,
@@ -60,7 +61,7 @@ Amplify.configure(
       REST: {
         ...amplifyConfig.API?.REST,
         homeworkSupplyStreamApi: {
-          endpoint: (amplifyOutputs.custom as any).STREAM_API.endpoint,
+          endpoint: ((amplifyOutputs.custom as any).STREAM_API.endpoint as string).replace(/\/$/, ''),
           region: (amplifyOutputs.custom as any).STREAM_API.region,
         },
       },
@@ -716,8 +717,10 @@ describe("C. Lambda Handler Integration Tests", () => {
     test("Add self to section via join code", async () => {
       await signInAs("student1");
 
+      // Use section code from seed data
+      const sectionCode = seedData.sections[0]?.code || "JPN101-P1";
       const { data, errors } = await client.mutations.addSelfToSection({
-        code: "TEST123",
+        code: sectionCode,
       });
 
       expect(typeof data === "string" || errors !== undefined).toBe(true);
@@ -795,12 +798,15 @@ describe("C. Lambda Handler Integration Tests", () => {
     test("Generate embeddings for file", async () => {
       await signInAs("instructor1");
 
-      // This test assumes a file with ID exists - in real scenario, create first
+      // Use file ID from seed data
+      const fileID = seedData.files[0]?.id;
+      expect(fileID).toBeDefined();
+
       const { data, errors } = await client.mutations.generateEmbeddings({
-        fileID: "test-file-id",
+        fileID,
       });
 
-      // May error if file doesn't exist, but handler should respond
+      // Handler should process the file or return structured response
       expect(typeof data === "object" || errors !== undefined).toBe(true);
     }, 30000);
 
@@ -832,17 +838,21 @@ describe("C. Lambda Handler Integration Tests", () => {
   });
 
   // ========================================================================
-  // C6. OpenAI Handler (Multiple Operations)
+  // C6. OpenAI Handler (Remaining Lambda Operations)
+  // NOTE: generateAudioFile/generateImageFile are now Server Actions.
+  //       See test/integration/server-actions.test.ts for SA1 tests.
   // ========================================================================
-  describe("C6. OpenAI Handler (Multiple Operations)", () => {
+  describe("C6. OpenAI Handler (Remaining Lambda Operations)", () => {
     afterEach(cleanup);
 
-    // Text-to-Speech
-    test("Generate audio from text (TTS)", async () => {
+    // Text-to-Speech (base64 return — legacy Lambda, not the File-creating Server Action)
+    test("Generate audio base64 from text (TTS)", async () => {
       await signInAs("instructor1");
 
+      // Use seed vocabulary for TTS input
+      const phrase = seedData.words[0]?.phrase || "Konnichiwa, genki desu ka?";
       const { data, errors } = await client.mutations.generateAudio({
-        phrase: "Konnichiwa, genki desu ka?",
+        phrase,
         voice: "alloy",
         model: "tts-1",
       });
@@ -870,7 +880,7 @@ describe("C. Lambda Handler Integration Tests", () => {
 
       const { data, errors } = await client.queries.processImageUrl({
         imageUrl: "https://example.com/image.jpg",
-        model: "gpt-4-vision",
+        model: "gpt-4o",
       });
 
       expect(typeof data === "string" || errors !== undefined).toBe(true);
@@ -882,45 +892,23 @@ describe("C. Lambda Handler Integration Tests", () => {
       const { data, errors } = await client.queries.verifyImageUrl({
         expected: "contains the letter A",
         imageUrl: "https://example.com/image.jpg",
-        model: "gpt-4-vision",
+        model: "gpt-4o",
       });
 
       expect(typeof data === "string" || errors !== undefined).toBe(true);
-    }, 30000);
-
-    // Image Generation (DALL-E)
-    test("Generate image from text (DALL-E)", async () => {
-      await signInAs("instructor1");
-
-      const { data, errors } = await client.mutations.generateImage({
-        phrase: "A serene Japanese garden with a pagoda",
-        model: "dall-e-3",
-      });
-
-      expect(typeof data === "string" || errors !== undefined).toBe(true);
-    }, 30000);
-
-    test("Generate image file", async () => {
-      await signInAs("instructor1");
-
-      const { data, errors } = await client.mutations.generateImageFile({
-        phrase: "Mount Fuji at sunrise",
-        model: "dall-e-3",
-      });
-
-      expect(
-        typeof data === "object" || typeof data === "string" || errors,
-      ).toBeDefined();
     }, 30000);
 
     // Answer Verification
     test("Verify short answer", async () => {
       await signInAs("student1");
 
+      // Use seed question data for answer verification
+      const question = seedData.questions[1]; // photosynthesis question
       const { data, errors } = await client.queries.verifyShortAnswer({
-        expected: "Photosynthesis is the process plants use to make food",
+        expected: question?.answer || "Glucose (sugar) and oxygen",
         answer: "Plants use photosynthesis to make food",
-        prompt: "What process do plants use to make food?",
+        prompt:
+          question?.prompt || "What is the main product of photosynthesis?",
         model: "gpt-4",
       });
 
@@ -932,10 +920,12 @@ describe("C. Lambda Handler Integration Tests", () => {
     test("Verify word translation", async () => {
       await signInAs("student1");
 
+      // Use seed vocabulary data
+      const word = seedData.words[0]; // こんにちは
       const { data, errors } = await client.queries.verifyWord({
-        word: "konnichiwa",
-        expected: "こんにちは",
-        definition: "Good afternoon / hello",
+        word: word?.pronunciation || "konnichiwa",
+        expected: word?.phrase || "こんにちは",
+        definition: word?.definition || "Hello (daytime greeting)",
         model: "gpt-4",
       });
 
@@ -961,7 +951,7 @@ describe("C. Lambda Handler Integration Tests", () => {
       // Test with invalid URL
       const { data, errors } = await client.queries.processImageUrl({
         imageUrl: "https://invalid-url-12345.example.com/notfound.jpg",
-        model: "gpt-4-vision",
+        model: "gpt-4o",
       });
 
       // Should handle error gracefully

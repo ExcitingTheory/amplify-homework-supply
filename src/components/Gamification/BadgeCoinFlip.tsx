@@ -1,3 +1,4 @@
+"use client";
 /**
  * BadgeCoinFlip — CSS 3D coin-flip animation for badge awards.
  *

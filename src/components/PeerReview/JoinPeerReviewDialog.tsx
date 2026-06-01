@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview JoinPeerReviewDialog — Dialog for joining a peer review room
  * by entering a review room code. Calls the joinPeerReview mutation and
@@ -15,10 +16,14 @@ import {
   Typography,
   Skeleton,
   Alert,
+  Tabs,
+  Tab,
+  Box,
 } from '@mui/material'
 import RateReviewIcon from '@mui/icons-material/RateReview'
-import { useTranslation } from 'next-i18next'
-import { getAmplifyClient } from '../../utils/amplifyClient'
+import { useTranslations } from 'next-intl'
+import { joinPeerReview as joinPeerReviewAction } from '../../../app/actions/section'
+import NotificationInvitations from '../Notifications/NotificationInvitations'
 
 // ============================================================================
 // Types
@@ -39,10 +44,12 @@ export default function JoinPeerReviewDialog({
   onClose,
   onJoin,
 }: JoinPeerReviewDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
+  const tCommon = useTranslations('common')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState(0)
 
   const handleCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setCode(e.target.value.trim())
@@ -59,20 +66,13 @@ export default function JoinPeerReviewDialog({
     setError(null)
 
     try {
-      const client = getAmplifyClient()
-      const { data, errors } = await client.mutations.joinPeerReview({ code })
+      const result = await joinPeerReviewAction(code)
 
-      if (errors?.length) {
-        throw new Error(errors[0]?.message || 'Failed to join peer review')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to join peer review')
       }
 
-      const result = typeof data === 'string' ? JSON.parse(data) : data
-
-      if (!result?.success) {
-        throw new Error(result?.error || result?.message || 'Failed to join peer review')
-      }
-
-      onJoin({ roomId: result.roomId, gradeId: result.gradeId })
+      onJoin({ roomId: result.roomId! })
       setCode('')
       setError(null)
     } catch (err: any) {
@@ -107,32 +107,58 @@ export default function JoinPeerReviewDialog({
       </DialogTitle>
 
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('peerReview.joinDialog.description', 'Enter the review room code shared by your classmate to join their peer review session.')}
-        </Typography>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Tab label={t('peerReview.joinDialog.tabCode', 'Enter Code')} />
+          <Tab label={t('peerReview.joinDialog.tabInvitations', 'Invitations')} />
+        </Tabs>
 
-        <TextField
-          autoFocus
-          fullWidth
-          label={t('peerReview.joinDialog.codeLabel', 'Review Room Code')}
-          value={code}
-          onChange={handleCodeChange}
-          onKeyDown={handleKeyDown}
-          placeholder="room-abc123"
-          disabled={loading}
-          sx={{ mb: 1 }}
-        />
+        {tab === 0 && (
+          <Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {t('peerReview.joinDialog.description', 'Enter the review room code shared by your classmate to join their peer review session.')}
+            </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {error}
-          </Alert>
+            <TextField
+              autoFocus
+              fullWidth
+              label={t('peerReview.joinDialog.codeLabel', 'Review Room Code')}
+              value={code}
+              onChange={handleCodeChange}
+              onKeyDown={handleKeyDown}
+              placeholder="room-abc123"
+              disabled={loading}
+              sx={{ mb: 1 }}
+            />
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {error}
+              </Alert>
+            )}
+          </Box>
+        )}
+
+        {tab === 1 && (
+          <NotificationInvitations
+            types={['PEER_REVIEW_INVITE']}
+            onJoin={(notification) => {
+              if (notification.linkPath) {
+                const match = notification.linkPath.match(/\/review\/([a-zA-Z0-9-]+)/)
+                if (match) {
+                  onJoin({ roomId: match[1] })
+                  onClose()
+                }
+              }
+            }}
+            joinLabel={t('peerReview.joinDialog.joinButton', 'Join Review')}
+            emptyMessage={t('peerReview.joinDialog.noInvitations', 'No pending review invitations')}
+          />
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {t('common:actions.cancel', 'Cancel')}
+          {tCommon('actions.cancel')}
         </Button>
         <Button
           variant="contained"

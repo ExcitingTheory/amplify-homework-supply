@@ -1,16 +1,16 @@
-import { defineAuth } from '@aws-amplify/backend';
+import { defineAuth } from "@aws-amplify/backend";
 
 /**
  * Authentication configuration for Amplify Gen 2
  * Migrated from Gen 1 Cognito user pool configuration
- * 
+ *
  * User groups: ADMINS, INSTRUCTORS, LEARNERS
- * 
+ *
  * Authorization Rules:
  * - ADMINS: Full access to all resources
  * - INSTRUCTORS: Can create content, manage sections and students
  * - LEARNERS: Read-only access to published content, can submit work
- * 
+ *
  * Note: Cognito permissions for section handler are granted via IAM policy in backend.ts
  * to avoid circular dependency between auth and data stacks
  */
@@ -18,17 +18,24 @@ import { defineAuth } from '@aws-amplify/backend';
 export const auth = defineAuth({
   loginWith: {
     email: {
-      verificationEmailSubject: 'Verify your email for Homework Supply',
+      verificationEmailSubject: "Verify your email for Homework Supply",
     },
-    phone: true,
   },
   multifactor: {
-    mode: 'OPTIONAL',
+    mode: "OPTIONAL",
     totp: true,
     sms: true,
   },
-  groups: ['Learners', 'Instructors', 'Moderators', 'Admins'],
+  groups: ["Learners", "Instructors", "Moderators", "Admins"],
   userAttributes: {
+    givenName: {
+      mutable: true,
+      required: true,
+    },
+    familyName: {
+      mutable: true,
+      required: true,
+    },
     locale: {
       mutable: true,
       required: false,
@@ -38,5 +45,5 @@ export const auth = defineAuth({
       required: false,
     },
   },
-  accountRecovery: 'EMAIL_ONLY',
+  accountRecovery: "EMAIL_ONLY",
 });

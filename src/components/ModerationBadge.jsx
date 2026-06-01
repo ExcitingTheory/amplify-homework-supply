@@ -3,7 +3,7 @@ import { Chip, Tooltip, Box } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 /**
  * ModerationBadge Component
@@ -13,7 +13,7 @@ import { useTranslation } from 'next-i18next';
  * Instructors can see what categories were flagged.
  */
 export default function ModerationBadge({ item, showDetails = false }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   if (!item || !item.moderationCheckedAt) {
     return null; // Not yet moderated
   }
@@ -91,7 +91,7 @@ export default function ModerationBadge({ item, showDetails = false }) {
  * Simple icon-only indicator for compact layouts
  */
 export function ModerationStatusIcon({ item }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   
   if (!item || !item.moderationCheckedAt) {
     return null;

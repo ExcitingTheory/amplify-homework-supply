@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Box,
     Card,
@@ -98,7 +98,7 @@ export default function FileMetadataComponent({
     search = '',
     index = 0
 }) {
-    const { t } = useTranslation('editor.files');
+    const t = useTranslations('editor.files');
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const [editingFileName, setEditingFileName] = useState(false);

@@ -1,6 +1,7 @@
+"use client";
 /**
  * GamificationContext — Unified context for all gamification state:
- * XP, Progress, Campaign, Guild, SkillTree, and ContentLock.
+ * XP, Progress, Campaign, Squad, SkillTree, and ContentLock.
  *
  * Consolidates 6 separate contexts into one provider with a single
  * useReducer + domain-specific useMemo selectors.
@@ -10,8 +11,9 @@
 
 import React, { createContext, useContext, useEffect, useReducer, useCallback, useMemo, useState, useRef } from 'react'
 import type { SkillNodeData, SkillStatus } from '../components/Gamification/SkillTree'
+import type { AvatarUnlockConfig } from '../components/Gamification/DiceBearAvatar'
 import { XPToast } from '../components/Gamification/XPToast'
-import { calculateTotalXP, getLevelInfo, XPReason } from '../utils/xpCalculation'
+import { calculateMultipliedXP, getLevelInfoWithThresholds, XPReason } from '../utils/xpCalculation'
 import type { StudentXPLog, LevelInfo } from '../utils/xpCalculation'
 import {
   gamificationReducer,
@@ -24,8 +26,8 @@ import type {
   StreakInfo,
   CampaignInfo,
   GroupChallengeInfo,
-  GuildInfo,
-  GuildMember,
+  SquadInfo,
+  SquadMember,
   LockStatus,
 } from './reducers/gamificationReducer'
 
@@ -36,8 +38,8 @@ export type {
   StreakInfo,
   CampaignInfo,
   GroupChallengeInfo,
-  GuildInfo,
-  GuildMember,
+  SquadInfo,
+  SquadMember,
   LockStatus,
 }
 
@@ -91,12 +93,12 @@ export interface GamificationContextValue {
   completedChallenges: GroupChallengeInfo[]
   campaignLoading: boolean
 
-  // Guild
-  myGuild: GuildInfo | null
-  myMembership: GuildMember | null
-  guildLeaderboard: GuildInfo[]
-  guildMembers: GuildMember[]
-  guildLoading: boolean
+  // Squad
+  mySquad: SquadInfo | null
+  myMembership: SquadMember | null
+  squadLeaderboard: SquadInfo[]
+  squadMembers: SquadMember[]
+  squadLoading: boolean
 
   // SkillTree
   skillNodes: SkillNodeData[]
@@ -109,6 +111,11 @@ export interface GamificationContextValue {
   isLocked: (contentId: string) => boolean
   getLockStatus: (contentId: string) => LockStatus | undefined
   contentLockLoading: boolean
+
+  // Global settings (from PlatformSettings singleton)
+  avatarUnlockConfig: AvatarUnlockConfig | null
+  platformSettings: any | null
+  autoAnalyzeDocuments: boolean
 
   // Overall
   isLoading: boolean
@@ -142,12 +149,12 @@ const GamificationContext = createContext<GamificationContextValue>({
   completedChallenges: [],
   campaignLoading: true,
 
-  // Guild
-  myGuild: null,
+  // Squad
+  mySquad: null,
   myMembership: null,
-  guildLeaderboard: [],
-  guildMembers: [],
-  guildLoading: true,
+  squadLeaderboard: [],
+  squadMembers: [],
+  squadLoading: true,
 
   // SkillTree
   skillNodes: [],
@@ -160,6 +167,11 @@ const GamificationContext = createContext<GamificationContextValue>({
   isLocked: () => false,
   getLockStatus: () => undefined,
   contentLockLoading: true,
+
+  // Global settings
+  avatarUnlockConfig: null,
+  platformSettings: null,
+  autoAnalyzeDocuments: true,
 
   // Overall
   isLoading: true,
@@ -204,15 +216,15 @@ export function useCampaign() {
   }
 }
 
-/** Drop-in replacement for the old useGuild() hook */
-export function useGuild() {
+/** Drop-in replacement for the old useSquad() hook */
+export function useSquad() {
   const ctx = useContext(GamificationContext)
   return {
-    myGuild: ctx.myGuild,
+    mySquad: ctx.mySquad,
     myMembership: ctx.myMembership,
-    guildLeaderboard: ctx.guildLeaderboard,
-    guildMembers: ctx.guildMembers,
-    isLoading: ctx.guildLoading,
+    squadLeaderboard: ctx.squadLeaderboard,
+    squadMembers: ctx.squadMembers,
+    isLoading: ctx.squadLoading,
   }
 }
 
@@ -248,6 +260,17 @@ export function useXP() {
     sectionLevel: ctx.sectionLevel,
     xpLogs: ctx.xpLogs,
     isLoading: ctx.xpLoading,
+    avatarUnlockConfig: ctx.avatarUnlockConfig,
+  }
+}
+
+/** Access global platform settings (admin-configured singleton) */
+export function usePlatformSettings() {
+  const ctx = useContext(GamificationContext)
+  return {
+    platformSettings: ctx.platformSettings,
+    autoAnalyzeDocuments: ctx.autoAnalyzeDocuments,
+    avatarUnlockConfig: ctx.avatarUnlockConfig,
   }
 }
 
@@ -271,7 +294,7 @@ const REASON_LABELS: Record<string, string> = {
   [XPReason.COMEBACK]: 'Comeback!',
   [XPReason.PERSONAL_BEST]: 'New personal best!',
   [XPReason.EASTER_EGG]: 'Secret discovered!',
-  [XPReason.GUILD_CHALLENGE_BONUS]: 'Guild challenge bonus',
+  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad challenge bonus',
 }
 
 interface XPToastItem {
@@ -321,9 +344,10 @@ export function GamificationProvider({
   const xpInitialLoadRef = useRef(true)
   const profileVersionRef = useRef(0)
   const challengeVersionMapRef = useRef<Record<string, number>>({})
-  const guildVersionMapRef = useRef<Record<string, number>>({})
+  const squadVersionMapRef = useRef<Record<string, number>>({})
   const skillVersionMapRef = useRef<Record<string, number>>({})
   const xpLogVersionMapRef = useRef<Record<string, number>>({})
+  const unitLockVersionMapRef = useRef<Record<string, number>>({})
 
   // Stable setter for selectedSkillId
   const setSelectedSkillId = useCallback(
@@ -333,13 +357,18 @@ export function GamificationProvider({
 
   // ── Safety timeout: if subscriptions never fire, unblock UI after 5s ──
   useEffect(() => {
-    console.log('[GamificationContext] Provider mounted', { studentId, cohortId, hasClient: !!client })
     const timer = setTimeout(() => {
+      // Only force-clear if any loading states are still true
+      const stillLoading =
+        state.progressLoading || state.campaignsLoading || state.challengesLoading ||
+        state.squadsLoading || state.membershipsLoading || state.skillsLoading ||
+        state.skillProgressLoading || state.locksLoading || state.xpLoading
+      if (!stillLoading) return
       console.warn('[GamificationContext] Safety timeout: forcing loading states to false')
       dispatch({ type: actionTypes.SET_PROGRESS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CHALLENGES_LOADING, payload: false })
-      dispatch({ type: actionTypes.SET_GUILDS_LOADING, payload: false })
+      dispatch({ type: actionTypes.SET_SQUADS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_SKILLS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_SKILL_PROGRESS_LOADING, payload: false })
@@ -369,8 +398,8 @@ export function GamificationProvider({
         return
       }
 
-      // Version guard: skip if same version
-      if (profile._version != null && profile._version <= profileVersionRef.current) {
+      // Version guard: only rerender if incoming version is greater than expected
+      if (profile._version != null && !(profile._version > profileVersionRef.current)) {
         return
       }
       profileVersionRef.current = profile._version || 0
@@ -407,9 +436,8 @@ export function GamificationProvider({
         payload: (profile.skillProgress || []).map((sp: any) => ({ ...sp, id: sp.skillId })),
       })
 
-      // Content lock: now computed from Unit fields, not a separate model
-      // Dispatch empty locks — lock logic now derived from units in the lockMap useMemo
-      dispatch({ type: actionTypes.SET_RAW_LOCKS, payload: [] })
+      // Content locks are derived from Unit model fields (requiredXP, requiredBadgeId,
+      // requiredModuleCompletion) — see Unit subscription below. Not stored on profile.
     }
 
     // Single observeQuery replaces list() + onCreate + onUpdate
@@ -465,44 +493,44 @@ export function GamificationProvider({
     return () => subscription.unsubscribe()
   }, [client, cohortId])
 
-  // ── Guild subscription (includes members) ───────────────────────
+  // ── Squad subscription (includes members) ───────────────────────
   useEffect(() => {
-    if (!client?.models?.Guild) {
-      dispatch({ type: actionTypes.SET_GUILDS_LOADING, payload: false })
+    if (!client?.models?.Squad) {
+      dispatch({ type: actionTypes.SET_SQUADS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_MEMBERSHIPS_LOADING, payload: false })
       return
     }
     const filter = cohortId ? { cohortId: { eq: cohortId } } : undefined
 
-    const processGuilds = (data: any[]) => {
+    const processSquads = (data: any[]) => {
       const valid = (data || []).filter((i: any) => i != null && i.id != null)
 
       // Version map guard
       const hasChanges = valid.some((item: any) => {
-        const tracked = guildVersionMapRef.current[item.id]
+        const tracked = squadVersionMapRef.current[item.id]
         return tracked == null || item._version > tracked
       })
-      if (!hasChanges && Object.keys(guildVersionMapRef.current).length > 0) return
+      if (!hasChanges && Object.keys(squadVersionMapRef.current).length > 0) return
 
-      guildVersionMapRef.current = {}
-      valid.forEach((item: any) => { guildVersionMapRef.current[item.id] = item._version })
+      squadVersionMapRef.current = {}
+      valid.forEach((item: any) => { squadVersionMapRef.current[item.id] = item._version })
 
-      dispatch({ type: actionTypes.SET_RAW_GUILDS, payload: valid })
-      // Extract memberships from Guild.members arrays
+      dispatch({ type: actionTypes.SET_RAW_SQUADS, payload: valid })
+      // Extract memberships from Squad.members arrays
       const allMemberships: any[] = []
-      for (const guild of valid) {
-        for (const member of (guild.members || [])) {
-          allMemberships.push({ ...member, id: `${guild.id}-${member.studentId}`, guildId: guild.id })
+      for (const squad of valid) {
+        for (const member of (squad.members || [])) {
+          allMemberships.push({ ...member, id: `${squad.id}-${member.studentId}`, squadId: squad.id })
         }
       }
       dispatch({ type: actionTypes.SET_RAW_MEMBERSHIPS, payload: allMemberships })
     }
 
-    const subscription = client.models.Guild.observeQuery(filter ? { filter } : undefined).subscribe({
-      next: ({ items }: any) => { processGuilds(items) },
+    const subscription = client.models.Squad.observeQuery(filter ? { filter } : undefined).subscribe({
+      next: ({ items }: any) => { processSquads(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
-        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Guild error:', err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Squad error:', err)
       },
     })
 
@@ -541,6 +569,83 @@ export function GamificationProvider({
 
     return () => subscription.unsubscribe()
   }, [client, cohortId])
+
+  // ── Unit subscription (content lock fields) ─────────────────────
+  // Reads requiredXP, requiredBadgeId, requiredModuleCompletion from
+  // published units to derive content locks. This is the source of truth
+  // for XP/badge/completion gates — NOT StudentProfile.contentLocks.
+  useEffect(() => {
+    if (!client?.models?.Unit) {
+      dispatch({ type: actionTypes.SET_LOCKS_LOADING, payload: false })
+      return
+    }
+
+    const subscription = client.models.Unit.observeQuery({
+      filter: { status: { eq: 'PUBLISHED' } },
+    }).subscribe({
+      next: ({ items }: any) => {
+        const valid = (items || []).filter((u: any) => u != null && u.id != null)
+
+        // Version map guard
+        const hasChanges = valid.some((item: any) => {
+          const tracked = unitLockVersionMapRef.current[item.id]
+          return tracked == null || item._version > tracked
+        })
+        if (!hasChanges && Object.keys(unitLockVersionMapRef.current).length > 0) return
+
+        unitLockVersionMapRef.current = {}
+        valid.forEach((item: any) => { unitLockVersionMapRef.current[item.id] = item._version })
+
+        // Extract units that have at least one lock requirement set
+        const lockData = valid
+          .filter((u: any) =>
+            (u.requiredXP != null && u.requiredXP > 0) ||
+            u.requiredBadgeId ||
+            (u.requiredModuleCompletion != null && u.requiredModuleCompletion > 0),
+          )
+          .map((u: any) => ({
+            contentId: u.id,
+            requiredXP: u.requiredXP || undefined,
+            requiredBadgeId: u.requiredBadgeId || undefined,
+            requiredModuleCompletion: u.requiredModuleCompletion || undefined,
+          }))
+
+        dispatch({ type: actionTypes.SET_RAW_LOCKS, payload: lockData })
+      },
+      error: (err: any) => {
+        const msg = err?.message || err?.errors?.[0]?.message || String(err)
+        if (!msg.includes('DuplicatedOperationError')) console.error('[GamificationContext] Unit lock error:', err)
+        dispatch({ type: actionTypes.SET_LOCKS_LOADING, payload: false })
+      },
+    })
+
+    return () => subscription.unsubscribe()
+  }, [client])
+
+  // ── PlatformSettings subscription (global singleton) ────────
+  // One record for the whole platform: XP multipliers, level thresholds,
+  // avatar unlock config, badge toggles, caps, AI settings. Admin-only write.
+  const [globalSettings, setGlobalSettings] = useState<any>(null)
+
+  useEffect(() => {
+    if (!client?.models?.PlatformSettings) return
+
+    const subscription = client.models.PlatformSettings.observeQuery().subscribe({
+      next: ({ items }: any) => {
+        const valid = (items || []).filter((item: any) => item != null && item.id != null)
+        // Take the first (and only) record
+        setGlobalSettings(valid[0] || null)
+      },
+      error: (err: any) => {
+        const msg = err?.message || err?.errors?.[0]?.message || err?.error?.errors?.[0]?.message || String(err)
+        if (!msg.includes('DuplicatedOperationError')) {
+          console.warn('[GamificationContext] PlatformSettings error:', msg)
+        }
+      },
+    })
+
+    return () => subscription.unsubscribe()
+  }, [client])
 
   // ── Linear Lock data (Sections, Assignments, Grades) ───────────
   // Sections and Assignments are accepted from parent contexts via props —
@@ -646,16 +751,58 @@ export function GamificationProvider({
   const handleToastClose = useCallback(() => setCurrentToast(null), [])
 
   // ── Derived: XP ─────────────────────────────────────────────────
-  const computedTotalXP = useMemo(() => calculateTotalXP(state.xpLogs), [state.xpLogs])
-  const level = useMemo(() => getLevelInfo(computedTotalXP), [computedTotalXP])
+  // Parse multipliers and level thresholds from global settings
+  const xpMultipliers = useMemo<Record<string, number> | null>(() => {
+    if (!globalSettings?.xpMultipliers) return null
+    try {
+      return typeof globalSettings.xpMultipliers === 'string'
+        ? JSON.parse(globalSettings.xpMultipliers)
+        : globalSettings.xpMultipliers
+    } catch { return null }
+  }, [globalSettings?.xpMultipliers])
+
+  const dbLevelThresholds = useMemo<{ level: number; xpRequired: number; title?: string }[] | null>(() => {
+    if (!globalSettings?.levelThresholds) return null
+    try {
+      const parsed = typeof globalSettings.levelThresholds === 'string'
+        ? JSON.parse(globalSettings.levelThresholds)
+        : globalSettings.levelThresholds
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : null
+    } catch { return null }
+  }, [globalSettings?.levelThresholds])
+
+  // Total XP applies multipliers globally (all logs)
+  const computedTotalXP = useMemo(
+    () => calculateMultipliedXP(state.xpLogs, xpMultipliers),
+    [state.xpLogs, xpMultipliers],
+  )
+  // Level uses DB thresholds when configured, otherwise hardcoded defaults
+  const level = useMemo(
+    () => getLevelInfoWithThresholds(computedTotalXP, dbLevelThresholds),
+    [computedTotalXP, dbLevelThresholds],
+  )
 
   // Section-scoped XP: only XP logs matching the current cohortId
   const computedSectionXP = useMemo(() => {
     if (!cohortId) return 0
     const sectionLogs = state.xpLogs.filter((log: any) => log.cohortId === cohortId)
-    return calculateTotalXP(sectionLogs)
-  }, [state.xpLogs, cohortId])
-  const sectionLevel = useMemo(() => getLevelInfo(computedSectionXP), [computedSectionXP])
+    return calculateMultipliedXP(sectionLogs, xpMultipliers)
+  }, [state.xpLogs, cohortId, xpMultipliers])
+  const sectionLevel = useMemo(
+    () => getLevelInfoWithThresholds(computedSectionXP, dbLevelThresholds),
+    [computedSectionXP, dbLevelThresholds],
+  )
+
+  // Avatar unlock config from global settings
+  const avatarUnlockConfig = useMemo<AvatarUnlockConfig | null>(() => {
+    if (!globalSettings?.avatarUnlockConfig) return null
+    try {
+      const parsed = typeof globalSettings.avatarUnlockConfig === 'string'
+        ? JSON.parse(globalSettings.avatarUnlockConfig)
+        : globalSettings.avatarUnlockConfig
+      return parsed?.unlocks?.length ? parsed : null
+    } catch { return null }
+  }, [globalSettings?.avatarUnlockConfig])
 
   // ── Derived: Progress ───────────────────────────────────────────
   const modules = useMemo<ModuleProgress[]>(
@@ -753,13 +900,13 @@ export function GamificationProvider({
     return { activeChallenges: active, completedChallenges: completed }
   }, [state.rawChallenges])
 
-  // ── Derived: Guild ──────────────────────────────────────────────
-  const myMembership = useMemo<GuildMember | null>(() => {
+  // ── Derived: Squad ──────────────────────────────────────────────
+  const myMembership = useMemo<SquadMember | null>(() => {
     const found = state.rawMemberships.find((m: any) => m.studentId === studentId)
     if (!found) return null
     return {
       id: found.id,
-      guildId: found.guildId,
+      squadId: found.squadId,
       studentId: found.studentId,
       role: found.role || 'MEMBER',
       joinedAt: found.joinedAt,
@@ -769,38 +916,49 @@ export function GamificationProvider({
   const memberCountMap = useMemo(() => {
     const counts = new Map<string, number>()
     state.rawMemberships.forEach((m: any) => {
-      counts.set(m.guildId, (counts.get(m.guildId) || 0) + 1)
+      counts.set(m.squadId, (counts.get(m.squadId) || 0) + 1)
     })
     return counts
   }, [state.rawMemberships])
 
-  const guildLeaderboard = useMemo<GuildInfo[]>(
+  const squadLeaderboard = useMemo<SquadInfo[]>(
     () =>
-      state.rawGuilds
+      state.rawSquads
         .map((g: any) => ({
           id: g.id,
           name: g.name,
           cohortId: g.cohortId,
           totalXP: g.totalXP || 0,
+          crestSvg: g.crestSvg || null,
           description: g.description,
           memberCount: memberCountMap.get(g.id) || 0,
+          members: (g.members || []).map((m: any) => ({
+            studentId: m.studentId,
+            role: m.role,
+            avatarStyle: m.avatarStyle,
+            avatarOverrides: typeof m.avatarOverrides === 'string'
+              ? JSON.parse(m.avatarOverrides)
+              : m.avatarOverrides,
+            avatarSeed: m.avatarSeed || m.studentId,
+          })),
+          posts: g.posts || [],
         }))
-        .sort((a: GuildInfo, b: GuildInfo) => b.totalXP - a.totalXP),
-    [state.rawGuilds, memberCountMap],
+        .sort((a: SquadInfo, b: SquadInfo) => b.totalXP - a.totalXP),
+    [state.rawSquads, memberCountMap],
   )
 
-  const myGuild = useMemo<GuildInfo | null>(() => {
+  const mySquad = useMemo<SquadInfo | null>(() => {
     if (!myMembership) return null
-    return guildLeaderboard.find((g) => g.id === myMembership.guildId) || null
-  }, [myMembership, guildLeaderboard])
+    return squadLeaderboard.find((g) => g.id === myMembership.squadId) || null
+  }, [myMembership, squadLeaderboard])
 
-  const guildMembers = useMemo<GuildMember[]>(() => {
+  const squadMembers = useMemo<SquadMember[]>(() => {
     if (!myMembership) return []
     return state.rawMemberships
-      .filter((m: any) => m.guildId === myMembership.guildId)
+      .filter((m: any) => m.squadId === myMembership.squadId)
       .map((m: any) => ({
         id: m.id,
-        guildId: m.guildId,
+        squadId: m.squadId,
         studentId: m.studentId,
         role: m.role || 'MEMBER',
         joinedAt: m.joinedAt,
@@ -943,13 +1101,13 @@ export function GamificationProvider({
 
   // ── Loading flags ───────────────────────────────────────────────
   const campaignLoading = state.campaignsLoading || state.challengesLoading
-  const guildLoading = state.guildsLoading || state.membershipsLoading
+  const squadLoading = state.squadsLoading || state.membershipsLoading
   const skillTreeLoading = state.skillsLoading || state.skillProgressLoading
   const isLoading =
     state.xpLoading ||
     state.progressLoading ||
     campaignLoading ||
-    guildLoading ||
+    squadLoading ||
     skillTreeLoading ||
     state.locksLoading
 
@@ -979,12 +1137,12 @@ export function GamificationProvider({
       completedChallenges,
       campaignLoading,
 
-      // Guild
-      myGuild,
+      // Squad
+      mySquad,
       myMembership,
-      guildLeaderboard,
-      guildMembers,
-      guildLoading,
+      squadLeaderboard,
+      squadMembers,
+      squadLoading,
 
       // SkillTree
       skillNodes,
@@ -997,6 +1155,11 @@ export function GamificationProvider({
       isLocked: isLockedFn,
       getLockStatus,
       contentLockLoading: state.locksLoading,
+
+      // Global settings
+      avatarUnlockConfig,
+      platformSettings: globalSettings,
+      autoAnalyzeDocuments: globalSettings?.autoAnalyzeDocuments !== false,
 
       // Overall
       isLoading,
@@ -1019,11 +1182,11 @@ export function GamificationProvider({
       activeChallenges,
       completedChallenges,
       campaignLoading,
-      myGuild,
+      mySquad,
       myMembership,
-      guildLeaderboard,
-      guildMembers,
-      guildLoading,
+      squadLeaderboard,
+      squadMembers,
+      squadLoading,
       skillNodes,
       skillTreeLoading,
       state.selectedSkillId,
@@ -1032,6 +1195,8 @@ export function GamificationProvider({
       isLockedFn,
       getLockStatus,
       state.locksLoading,
+      avatarUnlockConfig,
+      globalSettings,
       isLoading,
     ],
   )

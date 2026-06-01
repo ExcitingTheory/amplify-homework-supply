@@ -137,7 +137,8 @@
     "ps -aux": true,
     "ps -ef": true,
     "ps -eo": true,
-    "npx vitest": true
+    "npx vitest": true,
+    "npx playwright": true
   },
   // Editor settings for safety
   "editor.formatOnSave": true,

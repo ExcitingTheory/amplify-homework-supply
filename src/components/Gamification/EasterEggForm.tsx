@@ -34,10 +34,17 @@ export type EasterEggTriggerType = 'KEYWORD' | 'SCHEDULE' | 'SECRET_LINK' | 'ACH
 export type AchievementMetric = 'accuracy' | 'streak' | 'xp'
 export type AchievementComparator = '>=' | '>' | '='
 
+export interface BadgeOption {
+  id: string
+  title: string
+}
+
 export interface EasterEggFormData {
   type: EasterEggTriggerType
   message: string
   xpReward: number
+  /** Optional badge to award on discovery */
+  badgeId?: string
   /** KEYWORD: the key sequence to type */
   keyword?: string
   /** SCHEDULE: ISO date string for window start */
@@ -55,6 +62,8 @@ export interface EasterEggFormProps {
   onSubmit: (data: EasterEggFormData) => void
   /** Available units for SECRET_LINK target */
   availableUnits?: UnitOption[]
+  /** Available badges to award on discovery */
+  availableBadges?: BadgeOption[]
   /** Disable form during submission */
   submitting?: boolean
 }
@@ -87,11 +96,13 @@ const COMPARATORS: AchievementComparator[] = ['>=', '>', '=']
 export function EasterEggForm({
   onSubmit,
   availableUnits = [],
+  availableBadges = [],
   submitting = false,
 }: EasterEggFormProps) {
   const [type, setType] = useState<EasterEggTriggerType>('KEYWORD')
   const [message, setMessage] = useState('')
   const [xpReward, setXpReward] = useState(50)
+  const [selectedBadge, setSelectedBadge] = useState<BadgeOption | null>(null)
 
   // KEYWORD fields
   const [keyword, setKeyword] = useState('')
@@ -132,6 +143,7 @@ export function EasterEggForm({
       type,
       message: message.trim(),
       xpReward,
+      badgeId: selectedBadge?.id || undefined,
     }
 
     switch (type) {
@@ -159,6 +171,7 @@ export function EasterEggForm({
     setScheduleStart('')
     setScheduleEnd('')
     setSelectedUnit(null)
+    setSelectedBadge(null)
     setMetric('accuracy')
     setComparator('>=')
     setThreshold(95)
@@ -331,6 +344,26 @@ export function EasterEggForm({
           sx={{ width: 150 }}
           disabled={submitting}
         />
+
+        {availableBadges.length > 0 && (
+          <Autocomplete
+            options={availableBadges}
+            value={selectedBadge}
+            onChange={(_, value) => setSelectedBadge(value)}
+            getOptionLabel={(option) => option.title}
+            isOptionEqualToValue={(opt, val) => opt.id === val.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                label="Award Badge (optional)"
+                placeholder="Select badge to award on discovery"
+              />
+            )}
+            disabled={submitting}
+            noOptionsText="No badges available"
+          />
+        )}
 
         <Button
           type="submit"

@@ -21,6 +21,7 @@ import {
   addTraceAttributes,
 } from "../shared/phoenix-tracer";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import OpenAI from "openai";
 
 // Initialize Phoenix tracing at module load
 initializePhoenixTracing();
@@ -96,7 +97,6 @@ async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    const OpenAI = (await import("openai")).default;
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
@@ -373,7 +373,7 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
         input: {
           id: fileId,
           description: "Generated audio - completed",
-          _version: fileData?.getFile?._version,
+          _version: fileData?.getFile?._version ?? 1,
         },
       },
     });
@@ -394,7 +394,7 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
-            _version: errFileData?.getFile?._version,
+            _version: errFileData?.getFile?._version ?? 1,
           },
         },
       });
@@ -518,7 +518,7 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
         input: {
           id: fileId,
           description: "Generated image - completed",
-          _version: fileData?.getFile?._version,
+          _version: fileData?.getFile?._version ?? 1,
         },
       },
     });
@@ -539,7 +539,7 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
           input: {
             id: fileId,
             description: `Error: ${String(error).substring(0, 200)}`,
-            _version: errFileData?.getFile?._version,
+            _version: errFileData?.getFile?._version ?? 1,
           },
         },
       });
@@ -749,7 +749,7 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
     if (systemMsg) messages.push({ role: "system", content: systemMsg });
     messages.push({ role: "user", content: verifyPrompt });
 
-    const [verifyResponse, moderationResponse] = await Promise.all([
+    const [verifySettled, moderationSettled] = await Promise.allSettled([
       openai.chat.completions.create({
         model: chatModel,
         messages,
@@ -771,6 +771,13 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
             })
         : Promise.resolve(null),
     ]);
+
+    if (verifySettled.status === "rejected") {
+      throw verifySettled.reason;
+    }
+    const verifyResponse = verifySettled.value;
+    const moderationResponse =
+      moderationSettled.status === "fulfilled" ? moderationSettled.value : null;
 
     // Build base verification result
     const verifyContent = verifyResponse.choices[0]?.message?.content || "{}";

@@ -16,7 +16,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LexicalMessageRenderer } from './LexicalMessageRenderer';
 import { useAutoScroll } from './hooks/useAutoScroll';
@@ -27,7 +27,7 @@ import styles from './VirtualizedMessageList.module.css';
  * Shows role and timestamp for each message
  */
 const MessageHeader = ({ role, timestamp }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const roleLabel = role === 'user' ? t('chatSidebar.messageList.you') : t('chatSidebar.messageList.assistant');
   const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
   
@@ -120,7 +120,7 @@ export const VirtualizedMessageList = ({
   useLexicalRenderer = true,
   'data-testid': dataTestId,
 }) => {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const parentRef = useRef(null);
   
   // Auto-scroll hook

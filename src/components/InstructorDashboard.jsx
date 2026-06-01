@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   Box,
@@ -30,6 +30,8 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { SkillTree } from "./Gamification/SkillTree";
 import { useSkillTree } from "../context/gamificationContext";
+import { listSectionStudents } from "../../app/actions/section";
+import { formatLastFirst, getInitials } from "../utils/formatUserName";
 
 /**
  * InstructorDashboard displays aggregate performance metrics across all sections
@@ -42,7 +44,7 @@ import { useSkillTree } from "../context/gamificationContext";
  * - Expandable section details
  */
 export default function InstructorDashboard({ sections = [] }) {
-  const { t } = useTranslation("components");
+  const t = useTranslations("components");
   const client = getAmplifyClient();
 
   const [sectionStats, setSectionStats] = useState({});
@@ -138,6 +140,29 @@ export default function InstructorDashboard({ sections = [] }) {
 
     return () => subscription.unsubscribe();
   }, [sections.length]);
+
+  // Fetch student name data for each section
+  useEffect(() => {
+    if (sections.length === 0) return;
+    const validSections = sections.filter(
+      (s) => s != null && s.id != null && s.code,
+    );
+    if (validSections.length === 0) return;
+
+    async function fetchStudentNames() {
+      const nameMap = {};
+      for (const section of validSections) {
+        const result = await listSectionStudents(section.code);
+        if (result.success && result.students) {
+          result.students.forEach((student) => {
+            nameMap[student.id] = student;
+          });
+        }
+      }
+      setSectionStudents(nameMap);
+    }
+    fetchStudentNames();
+  }, [sections]);
 
   // Calculate statistics for each section
   useEffect(() => {
@@ -533,16 +558,22 @@ export default function InstructorDashboard({ sections = [] }) {
                                             fontSize: 12,
                                           }}
                                         >
-                                          {student.studentId
-                                            .slice(0, 2)
-                                            .toUpperCase()}
+                                          {getInitials(
+                                            sectionStudents[
+                                              student.studentId
+                                            ] || { id: student.studentId },
+                                          )}
                                         </Avatar>
                                         <Typography
                                           variant="body2"
                                           noWrap
                                           sx={{ maxWidth: 200 }}
                                         >
-                                          {student.studentId}
+                                          {formatLastFirst(
+                                            sectionStudents[
+                                              student.studentId
+                                            ] || { id: student.studentId },
+                                          )}
                                         </Typography>
                                       </Box>
                                     </TableCell>

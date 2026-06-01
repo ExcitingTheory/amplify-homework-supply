@@ -28,8 +28,10 @@ import { LayoutContainerNode } from "./components/LayoutContainerNode";
 import { LayoutItemNode } from "./components/LayoutItemNode";
 import { AnswerNode } from "./plugins/AnswerPlugin";
 import { CustomAnswerNode } from "./plugins/CustomAnswerPlugin";
+import { CustomAINode } from "./plugins/CustomAIPlugin";
 import { ArmorEditorNode } from "./plugins/ArmorEditorPlugin";
 import { FileMetadataNode } from "./nodes/FileMetadataNode";
+import { ConversationPlaylistNode } from "./plugins/ConversationPlaylistPlugin";
 /**
  * All custom Lexical nodes used in the editor
  * Note: Using any[] due to strict type incompatibilities with custom node implementations
@@ -62,8 +64,10 @@ export const EditorNodes: any[] = [
   LayoutItemNode,
   AnswerNode,
   CustomAnswerNode,
+  CustomAINode,
   ArmorEditorNode,
   FileMetadataNode,
+  ConversationPlaylistNode,
 ];
 
 /**
@@ -120,7 +124,16 @@ export function sanitizeEditorStateJSON(
   try {
     const parsed = JSON.parse(jsonString);
     if (!parsed?.root) return jsonString; // Not a Lexical state format, pass through
-    sanitizeNodeChildren(parsed.root);
+
+    // Ensure root node has required Lexical fields
+    const root = parsed.root;
+    if (!root.type) root.type = "root";
+    if (root.version == null) root.version = 1;
+    if (!("direction" in root)) root.direction = null;
+    if (!("format" in root)) root.format = "";
+    if (!("indent" in root)) root.indent = 0;
+
+    sanitizeNodeChildren(root);
     return JSON.stringify(parsed);
   } catch {
     console.warn("[Editor] Failed to sanitize editor state JSON, using null");

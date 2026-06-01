@@ -277,7 +277,7 @@ async function handleTranscodeMedia(args: any): Promise<string> {
         id: file.id,
         transcodeStatus: 'PROCESSING',
         mediaConvertJobId: jobId,
-        _version: file._version,
+        _version: file._version ?? 1,
       },
     },
   });
@@ -330,7 +330,7 @@ async function handleS3Event(event: any): Promise<void> {
             id: file.id,
             transcodeStatus: 'PROCESSING',
             mediaConvertJobId: jobId,
-            _version: file._version,
+            _version: file._version ?? 1,
           },
         },
       });
@@ -392,7 +392,7 @@ async function handleEventBridge(event: any): Promise<void> {
           id: fileId,
           hlsUrl: hlsManifestPath,
           transcodeStatus: 'COMPLETE',
-          _version: file._version,
+          _version: file._version ?? 1,
         },
       },
     });
@@ -408,7 +408,7 @@ async function handleEventBridge(event: any): Promise<void> {
         input: {
           id: fileId,
           transcodeStatus: 'ERROR',
-          _version: file._version,
+          _version: file._version ?? 1,
         },
       },
     });

@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { Box } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -66,7 +66,9 @@ import PdfViewerPlugin from './plugins/PdfViewerPlugin';
 import { LayoutPlugin } from './plugins/LayoutPlugin';
 import AnswerPlugin from './plugins/AnswerPlugin';
 import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
+import CustomAIPlugin from './plugins/CustomAIPlugin';
 import ArmorEditorPlugin from './plugins/ArmorEditorPlugin';
+import ConversationPlaylistPlugin from './plugins/ConversationPlaylistPlugin';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
@@ -78,6 +80,7 @@ import { useChatPageContext } from '../../hooks/useChatPageContext';
 import { useYjsUnit } from '../../hooks/useYjsUnit';
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH, DEBOUNCE_SAVE_DELAY_MS, sanitizeEditorStateJSON } from './editorConfig';
 import { Drawer, DrawerHeader } from './styledComponents';
+import { useAppShell } from '../AppShellContext';
 
 /**
  * Custom OnChange Plugin following Lexical best practices
@@ -135,11 +138,12 @@ function EditorRefPlugin(): null {
 /**
  * Main Editor component with collaborative editing support
  */
-export default function Editor(): JSX.Element {
-  const { t } = useTranslation('common');
+export default function Editor(): React.ReactElement {
+  const t = useTranslations('common');
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);
   const vectorStoreContext = useContext(VectorStoreContext);
+  const { appBarHeight = 48 } = useAppShell();
   const direction = typeof document !== 'undefined' ? (document.documentElement.dir || 'ltr') : 'ltr';
 
   // Register page context with global chat
@@ -472,6 +476,7 @@ export default function Editor(): JSX.Element {
                 <QuizPlugin />
                 <MeaningAssociationPlugin />
                 <PlaylistPlugin />
+                <ConversationPlaylistPlugin />
                 <PdfViewerPlugin />
                 <AutocompletePlugin />
                 <DragDropPastePlugin />
@@ -479,6 +484,7 @@ export default function Editor(): JSX.Element {
                 <LayoutPlugin />
                 <AnswerPlugin />
                 <CustomAnswerPlugin />
+                <CustomAIPlugin />
                 <ArmorEditorPlugin />
                 <BlockSuggestionPlugin useAI={true} />
                 <AIContentCompletionPlugin />
@@ -524,11 +530,7 @@ export default function Editor(): JSX.Element {
                     ref={drawerRefLeft}
                     drawerwidth={currentDrawerWidthLeft}
                     anchor="left"
-                    sx={{
-                      height: '100%',
-                      flexShrink: 0,
-                      position: 'relative',
-                    }}
+                    sx={{ height: '100%' }}
                     variant="permanent"
                     open={openTabVerticalLeft}
                   >
@@ -557,6 +559,7 @@ export default function Editor(): JSX.Element {
                     component="main"
                     sx={{
                       flexGrow: 1,
+                      minWidth: 0,
                       padding: 0,
                       width: `calc(100% - ${openTabVerticalLeft ? actualDrawerWidthLeft : 40}px - ${
                         openTabVerticalRight ? actualDrawerWidthRight : 40
@@ -604,11 +607,11 @@ export default function Editor(): JSX.Element {
                               className="editor"
                               data-tour="editor"
                               data-lexical-editor="true"
-                              aria-label={t('actions.edit', { ns: 'common' })}
+                              aria-label={t('actions.edit')}
                               style={{
                                 maxWidth: '100%',
                                 outline: 'none',
-                                minHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+                                minHeight: '100%',
                                 padding: '1rem 2rem 1rem 0.5rem',
                               }}
                             />
@@ -631,11 +634,7 @@ export default function Editor(): JSX.Element {
                     ref={drawerRefRight}
                     drawerwidth={currentDrawerWidthRight}
                     anchor="right"
-                    sx={{
-                      height: '100%',
-                      flexShrink: 0,
-                      position: 'relative',
-                    }}
+                    sx={{ height: '100%' }}
                     variant="permanent"
                     open={openTabVerticalRight}
                   >
@@ -643,12 +642,11 @@ export default function Editor(): JSX.Element {
                       style={{
                         minHeight: 'var(--app-bar-height, 11rem)',
                         flexShrink: 0,
-                        justifyContent: 'flex-start',
                         transition: 'min-height 0.3s ease',
                       }}
                     >
                       <IconButton onClick={handleDrawerRightClose}>
-                        {direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                        {direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                       </IconButton>
                     </DrawerHeader>
                     <TabsVerticalRight
@@ -673,4 +671,5 @@ export default function Editor(): JSX.Element {
 export { Workbook } from './Workbook';
 export { NarrativeReader } from './NarrativeReader';
 export type { NarrativeReaderProps } from './NarrativeReader';
+export { WorkbookSSRSkeleton } from './WorkbookSSRSkeleton';
 export { EditorNodes, ALL_TRANSFORMERS } from './editorConfig';

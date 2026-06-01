@@ -137,7 +137,7 @@ export function LexicalPlainTextField({
             borderColor: 'divider',
             borderRadius: 1,
             px: 1.5,
-            py: multiline ? 1 : 0.75,
+            py: multiline ? 1 : 0.5,
             minHeight: multiline ? 60 : 'auto',
             '&:focus-within': {
               borderColor: 'primary.main',
@@ -145,6 +145,9 @@ export function LexicalPlainTextField({
             },
             opacity: disabled ? 0.5 : 1,
             pointerEvents: disabled ? 'none' : 'auto',
+            '& p': {
+              margin: 0,
+            },
           }}
         >
           <PlainTextPlugin

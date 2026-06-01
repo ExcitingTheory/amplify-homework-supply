@@ -29,7 +29,7 @@ export interface YjsCollaborationPluginProps {
   username: string;
   color?: string;
   shouldBootstrap?: boolean;
-  cursorsContainerRef?: React.RefObject<HTMLElement>;
+  cursorsContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -46,11 +46,8 @@ export default function YjsCollaborationPlugin({
 }: YjsCollaborationPluginProps) {
   // Offline mode - no collaboration
   if (!provider) {
-    console.log('[YjsCollaborationPlugin] No provider - offline mode');
     return null;
   }
-
-  console.log('[YjsCollaborationPlugin] Initializing collaboration for', username);
 
   // Create a provider factory for CollaborationPlugin
   const providerFactory = React.useCallback(
@@ -89,7 +86,7 @@ export default function YjsCollaborationPlugin({
         shouldBootstrap={shouldBootstrap}
         username={username}
         cursorColor={color}
-        cursorsContainerRef={cursorsContainerRef}
+        cursorsContainerRef={cursorsContainerRef as React.RefObject<HTMLElement>}
         awarenessData={{ user: { name: username, color } }}
       />
     </LexicalCollaboration>

@@ -10,7 +10,7 @@
 import React, { useContext } from 'react';
 import { Fab, Badge, Tooltip, Zoom } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import ChatContext from '../context/chatContext';
 
 /**
@@ -22,7 +22,7 @@ import ChatContext from '../context/chatContext';
  * @returns {JSX.Element}
  */
 export function GlobalChatButton({ show = true, unreadCount = 0 }) {
-    const { t } = useTranslation('common', { bindI18nStore: '' });
+    const t = useTranslations('common', { bindI18nStore: '' });
     const { isChatOpen, setIsChatOpen } = useContext(ChatContext);
     
     const handleClick = () => {

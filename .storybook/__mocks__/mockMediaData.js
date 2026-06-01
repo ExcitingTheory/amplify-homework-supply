@@ -21,17 +21,6 @@ export const MOCK_VIDEO_MP4_BASE64 = '/story-mocks/326739_medium.mp4';
 // PDF — real file from mocks/
 export const MOCK_PDF_BASE64 = '/story-mocks/science-lesson-water-cycle.pdf';
 
-// Mock waveform data (simulates an audio waveform)
-export const generateMockWaveformData = (length = 600) => {
-  return Array.from({ length }, (_, i) => {
-    const position = i / length;
-    const envelope = Math.sin(position * Math.PI);
-    const detail = Math.sin(i * 0.1) * 0.3 + Math.sin(i * 0.05) * 0.2;
-    return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
-  });
-};
-
-export const mockWaveformData = generateMockWaveformData();
 
 // Import high-quality featured images (real file URLs)
 import { FEATURED_IMAGES } from './featuredImagesData.js';

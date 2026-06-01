@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Drawer,
   Box,
@@ -73,7 +73,7 @@ export function DebugPanel({
   width = 600,
   height = '100%',
 }: DebugPanelProps) {
-  const { t } = useTranslation('common');
+  const t = useTranslations('common');
   const [currentTab, setCurrentTab] = useState<DebugPanelTab>(defaultTab);
   const [componentTree, setComponentTree] = useState<ComponentMetadata[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -226,7 +226,7 @@ export function DebugPanel({
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Debug Panel
         </Typography>
-        <IconButton edge="end" onClick={onClose} aria-label={t('actions.close', { ns: 'common' })}>
+        <IconButton edge="end" onClick={onClose} aria-label={t('actions.close')}>
           <CloseIcon />
         </IconButton>
       </Toolbar>

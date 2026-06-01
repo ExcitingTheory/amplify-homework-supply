@@ -11,27 +11,25 @@ import React from 'react';
 import GradeHistory from '../GradeHistory';
 import UnitContext from '../../../../context/unitContext';
 
-// Mock next-i18next
-vi.mock('next-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'gradeHistory.title': 'Grade History',
-        'gradeHistory.noAttempts': 'No previous attempts',
-        'gradeHistory.completeFirstAttempt': 'Complete the assignment to see your history',
-        'gradeHistory.attempts': 'attempts',
-        'gradeHistory.trend.up': 'Improving',
-        'gradeHistory.trend.down': 'Declining',
-        'gradeHistory.trend.flat': 'Steady',
-        'gradeHistory.bestScore': 'Best Score',
-        'gradeHistory.averageScore': 'Average Score',
-        'gradeHistory.recentAttempts': 'Recent Attempts',
-        'gradeHistory.best': 'Best',
-        'gradeHistory.complete': 'complete',
-      };
-      return translations[key] || key;
-    },
-  }),
+// Mock next-intl
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => {
+    const translations: Record<string, string> = {
+      'gradeHistory.title': 'Grade History',
+      'gradeHistory.noAttempts': 'No previous attempts',
+      'gradeHistory.completeFirstAttempt': 'Complete the assignment to see your history',
+      'gradeHistory.attempts': 'attempts',
+      'gradeHistory.trend.up': 'Improving',
+      'gradeHistory.trend.down': 'Declining',
+      'gradeHistory.trend.flat': 'Steady',
+      'gradeHistory.bestScore': 'Best Score',
+      'gradeHistory.averageScore': 'Average Score',
+      'gradeHistory.recentAttempts': 'Recent Attempts',
+      'gradeHistory.best': 'Best',
+      'gradeHistory.complete': 'complete',
+    };
+    return translations[key] || key;
+  },
 }));
 
 function renderWithContext(recentGrades: any[] = [], grade: any = null) {

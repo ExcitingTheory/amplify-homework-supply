@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import PdfThumbnail, { PdfThumbnailGrid } from './PdfThumbnail';
 import { Box, Paper, Typography } from '@mui/material';
 

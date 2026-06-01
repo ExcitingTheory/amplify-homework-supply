@@ -9,23 +9,37 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
-
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Test logs and results
+test/logs/*
+!test/logs/.gitkeep
+test/results/*
+!test/results/.gitkeep
+
+# Legacy log locations (root)
+collab.log
 next-dev.log*
 sandbox-logs.txt*
 storybook-logs.txt*
+crawl-results.txt
+crawl-results.log
+test-results.txt
+build-storybook.log
+debug-storybook.log
+test-console.output.log
 
 # Next.js
 .next
 
+test/test-results/*
+!test/test-results/.gitkeep
 
 amplify/mock-api-resources
 
 cypress/screenshots
-
-debug-storybook.log
 
 
 .env
@@ -61,7 +75,8 @@ amplifytools.xcconfig
 .yarn/install-state.gz
 
 # testing
-/coverage
+/test/coverage
+/test/test-results
 
 # next.js
 /.next/
@@ -94,6 +109,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated GraphQL client code (if regenerated)
+# src/graphql/
+
 # i18n missing translations (generated in development)
 *.missing.json
 
@@ -102,5 +120,9 @@ next-env.d.ts
 amplify_outputs*
 amplifyconfiguration*
 
+# auto-generated type declarations (but keep our custom ones)
 *.d.ts
+!types/*.d.ts
+!next-env.d.ts
 tsconfig.tsbuildinfo
+test/certificates

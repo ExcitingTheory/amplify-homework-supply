@@ -1,9 +1,10 @@
-import React, { useContext, useMemo } from 'react';
-import AuthContext from './authContext';
-import SectionContext from './sectionContext';
-import { GamificationProvider } from './gamificationContext';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { GamificationToastLayer } from '../components/Gamification/GamificationToastLayer';
+"use client";
+import React, { useContext, useMemo } from "react";
+import AuthContext from "./authContext";
+import SectionContext from "./sectionContext";
+import { GamificationProvider } from "./gamificationContext";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { GamificationToastLayer } from "../components/Gamification/GamificationToastLayer";
 
 /**
  * Bridges AuthContext → GamificationProvider by extracting the current user's
@@ -13,10 +14,20 @@ import { GamificationToastLayer } from '../components/Gamification/GamificationT
  * to avoid duplicate subscriptions (zero extra API calls).
  * Renders children directly when no user is logged in.
  */
-export function GamificationProviderWrapper({ children, cohortId: cohortIdProp }) {
+export function GamificationProviderWrapper({
+  children,
+  cohortId: cohortIdProp,
+}) {
   const { user, session } = useContext(AuthContext);
   const client = useMemo(() => getAmplifyClient(), []);
-  const studentId = user?.username || user?.attributes?.sub || '';
+
+  // Skip gamification subscriptions for instructors/admins — they don't earn XP
+  const isInstructor =
+    session?.groups?.includes("Instructors") ||
+    session?.groups?.includes("Admins");
+  const studentId = isInstructor
+    ? ""
+    : user?.username || user?.attributes?.sub || "";
 
   // Consume from SectionContext if a SectionProvider exists above us.
   // At app-level there is no SectionProvider, so we get defaults (empty arrays).
@@ -24,7 +35,7 @@ export function GamificationProviderWrapper({ children, cohortId: cohortIdProp }
   const { sections, assignments } = useContext(SectionContext) || {};
 
   // Derive cohortId from section-based Cognito groups, or use explicit prop
-  // (e.g. guild/[id] page reads cohortId from the guild record itself)
+  // (e.g. squad/[id] page reads cohortId from the squad record itself)
   const cohortId = useMemo(() => {
     if (cohortIdProp) return cohortIdProp;
     const groups = session?.groups || [];
@@ -35,7 +46,7 @@ export function GamificationProviderWrapper({ children, cohortId: cohortIdProp }
     return undefined;
   }, [session?.groups, cohortIdProp]);
 
-  // Always render Provider so child hooks (useGuild, useXP, etc.) never read
+  // Always render Provider so child hooks (useSquad, useXP, etc.) never read
   // the static default context. Subscriptions inside the Provider bail early
   // and set loading=false when studentId is empty.
   return (

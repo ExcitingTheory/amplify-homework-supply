@@ -62,9 +62,13 @@ describe('GamificationProviderWrapper', () => {
     renderWithAuth({ user: null, session: null })
 
     expect(screen.getByTestId('child')).toBeDefined()
-    // GamificationProvider should NOT be rendered
-    expect(screen.queryByTestId('gamification-provider')).toBeNull()
-    expect(providerSpy).not.toHaveBeenCalled()
+    // GamificationProvider is always rendered so hooks never read static defaults
+    expect(screen.getByTestId('gamification-provider')).toBeDefined()
+    expect(providerSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        studentId: '',
+      }),
+    )
   })
 
   it('wraps children in GamificationProvider when user exists', () => {

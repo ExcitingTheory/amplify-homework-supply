@@ -1,3 +1,4 @@
+"use client";
 /**
  * @fileoverview JoinWorkbookDialog — Dialog for instructors to join a student's
  * workbook session by entering the student's Grade ID or workbook link.
@@ -15,10 +16,14 @@ import {
   Typography,
   Skeleton,
   Alert,
+  Tabs,
+  Tab,
+  Box,
 } from '@mui/material'
 import EditNoteIcon from '@mui/icons-material/EditNote'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 import { getAmplifyClient } from '../../utils/amplifyClient'
+import NotificationInvitations from '../Notifications/NotificationInvitations'
 
 // ============================================================================
 // Types
@@ -39,10 +44,12 @@ export default function JoinWorkbookDialog({
   onClose,
   onJoin,
 }: JoinWorkbookDialogProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
+  const tCommon = useTranslations('common')
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState(0)
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value.trim())
@@ -110,32 +117,58 @@ export default function JoinWorkbookDialog({
       </DialogTitle>
 
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('workbook.joinDialog.description', 'Paste a workbook link or enter a unit ID to join a student\'s workbook as an instructor.')}
-        </Typography>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Tab label={t('workbook.joinDialog.tabLink', 'Enter Link')} />
+          <Tab label={t('workbook.joinDialog.tabInvitations', 'Invitations')} />
+        </Tabs>
 
-        <TextField
-          autoFocus
-          fullWidth
-          label={t('workbook.joinDialog.inputLabel', 'Workbook link or Unit ID')}
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="https://...workbook/abc-123 or abc-123"
-          disabled={loading}
-          sx={{ mb: 1 }}
-        />
+        {tab === 0 && (
+          <Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {t('workbook.joinDialog.description', 'Paste a workbook link or enter a unit ID to join a student\'s workbook as an instructor.')}
+            </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {error}
-          </Alert>
+            <TextField
+              autoFocus
+              fullWidth
+              label={t('workbook.joinDialog.inputLabel', 'Workbook link or Unit ID')}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="https://...workbook/abc-123 or abc-123"
+              disabled={loading}
+              sx={{ mb: 1 }}
+            />
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {error}
+              </Alert>
+            )}
+          </Box>
+        )}
+
+        {tab === 1 && (
+          <NotificationInvitations
+            types={['WORKBOOK_SESSION_INVITE']}
+            onJoin={(notification) => {
+              if (notification.linkPath) {
+                const match = notification.linkPath.match(/\/workbook\/([a-zA-Z0-9-]+)/)
+                if (match) {
+                  onJoin({ unitId: match[1], gradeId: '' })
+                  onClose()
+                }
+              }
+            }}
+            joinLabel={t('workbook.joinDialog.joinButton', 'Join Workbook')}
+            emptyMessage={t('workbook.joinDialog.noInvitations', 'No pending workbook invitations')}
+          />
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {t('common:actions.cancel', 'Cancel')}
+          {tCommon('actions.cancel')}
         </Button>
         <Button
           variant="contained"

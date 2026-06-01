@@ -15,7 +15,7 @@ import {
 } from 'lexical';
 import {createContext, useContext, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
-import {useTranslation} from 'next-i18next';
+import {useTranslations} from 'next-intl';
 
 import {$createTableNodeWithDimensions, TableNode} from '../components/TableNode';
 
@@ -66,7 +66,7 @@ export function TableContext({children}) {
 }
 
 export function InsertNewTableDialog({editor, onClose}) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);

@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useReducer, useRef } from "react";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";
@@ -92,10 +93,10 @@ const SettingsProvider = ({ children }) => {
 
           const settings = validItems[0];
 
-          // Version guard: skip if version is same or older (echo from our own save)
+          // Version guard: only rerender if incoming version is greater than expected
           if (
             settings._version != null &&
-            settings._version <= settingsVersionRef.current
+            !(settings._version > settingsVersionRef.current)
           ) {
             return;
           }
@@ -114,6 +115,92 @@ const SettingsProvider = ({ children }) => {
       subscription?.unsubscribe();
     };
   }, [authLoading, user]);
+
+  // Sync avatar config from Settings.metadata → StudentProfile + Squad.members (denormalized for leaderboard/chat)
+  async function syncAvatarToProfile(client, authUser, metadata) {
+    if (!client?.models?.StudentProfile || !authUser) return;
+    const studentId = authUser.username || authUser.userId;
+    if (!studentId) return;
+
+    // Find the user's StudentProfile(s) and update avatar fields
+    const { data: profiles } = await client.models.StudentProfile.list({
+      filter: { studentId: { eq: studentId } },
+    });
+    const validProfiles = (profiles || []).filter(
+      (p) => p != null && p.id != null,
+    );
+
+    const avatarUpdate = {
+      avatarStyle: metadata.avatarStyle || undefined,
+      avatarOverrides: metadata.avatarOverrides
+        ? JSON.stringify(metadata.avatarOverrides)
+        : undefined,
+      avatarSeed: metadata.avatarSeed || studentId,
+    };
+
+    for (const profile of validProfiles) {
+      await client.models.StudentProfile.update({
+        id: profile.id,
+        _version: profile._version,
+        ...avatarUpdate,
+      });
+    }
+
+    // Also update SectionProgress records
+    if (client.models.SectionProgress) {
+      const { data: sectionProgs } = await client.models.SectionProgress.list({
+        filter: { studentId: { eq: studentId } },
+      });
+      const validSP = (sectionProgs || []).filter(
+        (p) => p != null && p.id != null,
+      );
+      for (const sp of validSP) {
+        await client.models.SectionProgress.update({
+          id: sp.id,
+          _version: sp._version,
+          ...avatarUpdate,
+        });
+      }
+    }
+
+    // Update Squad.members with new avatar (denormalized for squad leaderboard)
+    if (client.models.Squad) {
+      try {
+        const cohortId = validProfiles[0]?.cohortId;
+        if (cohortId) {
+          const { data: squads } = await client.models.Squad.list({
+            filter: { cohortId: { eq: cohortId } },
+          });
+          const validSquads = (squads || []).filter(
+            (s) => s != null && s.id != null,
+          );
+          for (const squad of validSquads) {
+            const members = squad.members || [];
+            const memberIdx = members.findIndex(
+              (m) => m?.studentId === studentId,
+            );
+            if (memberIdx === -1) continue;
+            const updatedMembers = [...members];
+            updatedMembers[memberIdx] = {
+              ...updatedMembers[memberIdx],
+              avatarStyle: metadata.avatarStyle || undefined,
+              avatarOverrides: metadata.avatarOverrides
+                ? JSON.stringify(metadata.avatarOverrides)
+                : undefined,
+              avatarSeed: metadata.avatarSeed || studentId,
+            };
+            await client.models.Squad.update({
+              id: squad.id,
+              _version: squad._version,
+              members: updatedMembers,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("[SettingsContext] squad avatar sync failed:", err);
+      }
+    }
+  }
 
   const updateSettings = React.useCallback(
     async (updates) => {
@@ -137,6 +224,22 @@ const SettingsProvider = ({ children }) => {
         if (updated) {
           settingsVersionRef.current = updated._version || 0;
           dispatch({ type: actionTypes.SET_SETTINGS, payload: updated });
+
+          // Sync avatar config to StudentProfile (denormalized for leaderboard/chat)
+          if (updates.metadata) {
+            const meta =
+              typeof updates.metadata === "string"
+                ? JSON.parse(updates.metadata)
+                : updates.metadata;
+            if (meta.avatarStyle || meta.avatarOverrides) {
+              syncAvatarToProfile(client, user, meta).catch((err) =>
+                console.warn(
+                  "[SettingsContext] avatar sync to profile failed:",
+                  err,
+                ),
+              );
+            }
+          }
         }
         return updated;
       } catch (error) {
@@ -145,7 +248,7 @@ const SettingsProvider = ({ children }) => {
         throw error;
       }
     },
-    [state.settings],
+    [state.settings, user],
   );
 
   const contextValue = React.useMemo(

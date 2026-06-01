@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   Typography,
@@ -90,7 +90,7 @@ export default function HorizontalTimeline({
   onRecordingComplete,
   readOnly = false,
 }: HorizontalTimelineProps) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const containerRef = useRef(null);
   const [zoom, setZoom] = useState(1);
 
@@ -185,7 +185,7 @@ export default function HorizontalTimeline({
           onClick={playing ? onStop : onPlay}
           disabled={readOnly && !playing}
           color={playing ? 'error' : 'default'}
-          aria-label={playing ? t('recordingStudio3.stop') : t('recordingStudio3.play', 'Play')}
+          aria-label={playing ? t('recordingStudio3.stop') : t('recordingStudio3.play')}
         >
           {playing ? <StopIcon /> : <PlayIcon />}
         </IconButton>

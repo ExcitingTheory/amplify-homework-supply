@@ -6,7 +6,7 @@
  */
 
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { GradedWorkbookViewer } from './GradedWorkbookViewer'
 import type { GradeAttempt, ModerationInfo } from './GradedWorkbookViewer'
 

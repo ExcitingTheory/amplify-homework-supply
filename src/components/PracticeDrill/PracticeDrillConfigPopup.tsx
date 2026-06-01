@@ -28,7 +28,7 @@ import QuizIcon from '@mui/icons-material/Quiz'
 import TextSnippetIcon from '@mui/icons-material/TextSnippet'
 import DescriptionIcon from '@mui/icons-material/Description'
 import GroupsIcon from '@mui/icons-material/Groups'
-import { useTranslation } from 'next-i18next'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -135,7 +135,7 @@ export default function PracticeDrillConfigPopup({
   initialDrillType,
   loading = false,
 }: PracticeDrillConfigPopupProps) {
-  const { t } = useTranslation('components')
+  const t = useTranslations('components')
 
   // Source counts map
   const sourceCounts: Record<keyof DrillSourceConfig, number> = useMemo(
@@ -211,7 +211,7 @@ export default function PracticeDrillConfigPopup({
       aria-labelledby="practice-drill-config-title"
     >
       <DialogTitle id="practice-drill-config-title">
-        {t('practiceDrill.config.title', 'Practice: {{unitName}}', { unitName })}
+        {t('practiceDrill.config.title', { unitName })}
       </DialogTitle>
 
       <DialogContent>
@@ -287,7 +287,7 @@ export default function PracticeDrillConfigPopup({
         {coverageTotals && coverageTotals.total > 0 && (
           <Box sx={{ mt: 2, mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              {t('practiceDrill.config.coverage', 'Coverage: {{covered}}/{{total}} items practiced ({{percent}}%)', {
+              {t('practiceDrill.config.coverage', {
                 covered: coverageTotals.covered,
                 total: coverageTotals.total,
                 percent: coverageTotals.percent,

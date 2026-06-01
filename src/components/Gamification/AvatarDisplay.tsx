@@ -10,12 +10,42 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
+import Tooltip from '@mui/material/Tooltip'
+import Avatar from '@mui/material/Avatar'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
+import AutoStoriesIcon from '@mui/icons-material/AutoStories'
+import TravelExploreIcon from '@mui/icons-material/TravelExplore'
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu'
+import Diversity3Icon from '@mui/icons-material/Diversity3'
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects'
+import SchoolIcon from '@mui/icons-material/School'
 import { DiceBearAvatar } from './DiceBearAvatar'
 import { AvatarGlowRing, isGlowActive } from './AvatarGlowRing'
 import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
 import type { GlowRingConfig } from './AvatarGlowRing'
 import type { LevelInfo } from '../../utils/xpCalculation'
+
+// ============================================================================
+// Level icon/color config (matches LevelBadge)
+// ============================================================================
+
+const LEVEL_COLORS: Record<number, string> = {
+  1: '#9e9e9e',   // Beginner - grey
+  2: '#4caf50',   // Explorer - green
+  3: '#2196f3',   // Practitioner - blue
+  4: '#9c27b0',   // Contributor - purple
+  5: '#ff9800',   // Expert - orange
+  6: '#f44336',   // Master - red
+}
+
+const LEVEL_ICONS: Record<number, React.ReactElement> = {
+  1: <AutoStoriesIcon sx={{ fontSize: '0.9rem' }} />,
+  2: <TravelExploreIcon sx={{ fontSize: '0.9rem' }} />,
+  3: <HistoryEduIcon sx={{ fontSize: '0.9rem' }} />,
+  4: <Diversity3Icon sx={{ fontSize: '0.9rem' }} />,
+  5: <EmojiObjectsIcon sx={{ fontSize: '0.9rem' }} />,
+  6: <SchoolIcon sx={{ fontSize: '0.9rem' }} />,
+}
 
 // ============================================================================
 // Types
@@ -70,6 +100,30 @@ export interface AvatarDisplayProps {
   label?: string
   /** Whether the avatar is locked */
   locked?: boolean
+  /** Optional guild/squad crest SVG markup */
+  guildCrestSvg?: string | null
+  /** Guild/squad name used for fallback initials + tooltip */
+  guildName?: string
+  /** Guild/squad id used for deterministic fallback color */
+  guildId?: string
+}
+
+function hashToColor(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    hash |= 0
+  }
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 60%, 45%)`
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join('')
 }
 
 // ============================================================================
@@ -160,11 +214,18 @@ export function AvatarDisplay({
   onClick,
   label,
   locked = false,
+  guildCrestSvg,
+  guildName,
+  guildId,
 }: AvatarDisplayProps) {
   const showGlow = glowRing && isGlowActive(glowRing)
   const effectGlow = getEffectGlowConfig(borderEffect, borderColor, borderColorSecondary)
   const activeGlow = showGlow ? glowRing! : effectGlow
   const borderStyles = activeGlow ? {} : BORDER_CONFIGS[borderEffect](borderColor, borderColorSecondary)
+  const hasGuildBadge = Boolean(guildCrestSvg || guildName)
+  const guildBadgeSize = Math.max(18, Math.round(size * 0.3))
+  const guildBgColor = hashToColor(guildId || guildName || seed)
+  const guildInitials = getInitials(guildName || 'Guild')
 
   // Total width including border effect space
   const containerSize = size + 16
@@ -206,28 +267,77 @@ export function AvatarDisplay({
         </Box>
       )}
 
+      {/* Guild crest — 8 o'clock position */}
+      {hasGuildBadge && (
+        <Tooltip title={guildName ? `Guild: ${guildName}` : 'Guild crest'} arrow>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '60%',
+              left: -20,
+              zIndex: 3,
+              bgcolor: 'background.paper',
+              borderRadius: '50%',
+              boxShadow: 1,
+              p: '2px',
+              display: 'inline-flex',
+            }}
+          >
+            {guildCrestSvg ? (
+              <Avatar
+                sx={{
+                  width: guildBadgeSize,
+                  height: guildBadgeSize,
+                  bgcolor: 'transparent',
+                  '& svg': { width: '100%', height: '100%' },
+                }}
+              >
+                <Box
+                  component="span"
+                  dangerouslySetInnerHTML={{ __html: guildCrestSvg }}
+                  sx={{ display: 'flex', width: '100%', height: '100%' }}
+                />
+              </Avatar>
+            ) : (
+              <Avatar
+                sx={{
+                  width: guildBadgeSize,
+                  height: guildBadgeSize,
+                  bgcolor: guildBgColor,
+                  fontSize: Math.max(10, Math.round(guildBadgeSize * 0.4)),
+                  fontWeight: 700,
+                }}
+              >
+                {guildInitials}
+              </Avatar>
+            )}
+          </Box>
+        </Tooltip>
+      )}
+
       {/* Level indicator — 2 o'clock position */}
       {level && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '28%',
-            right: -18,
-            zIndex: 3,
-            bgcolor: 'background.paper',
-            borderRadius: '10px',
-            px: 0.5,
-            py: '1px',
-            boxShadow: 1,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{ fontWeight: 700, lineHeight: 1, fontSize: '0.65rem' }}
+        <Tooltip title={`Lv. ${level.level} · ${level.label}`} arrow>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '28%',
+              right: -18,
+              zIndex: 3,
+              bgcolor: 'background.paper',
+              borderRadius: '50%',
+              width: 22,
+              height: 22,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 1,
+              color: LEVEL_COLORS[level.level] || LEVEL_COLORS[1],
+            }}
           >
-            Lv.{level.level}
-          </Typography>
-        </Box>
+            {LEVEL_ICONS[level.level] || LEVEL_ICONS[1]}
+          </Box>
+        </Tooltip>
       )}
 
       {/* Avatar with border effect */}

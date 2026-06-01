@@ -1,1 +1,11 @@
-{}
+{
+  "unitCompletedPlugin": {
+    "allCaughtUp": "¡Todo al día! No hay más tareas.",
+    "completionMessage": "¡Unidad completada!",
+    "continueButton": "Continuar",
+    "nextAssignment": "Siguiente tarea",
+    "retrying": "Comenzando nuevo intento...",
+    "sectionHeading": "Próximos pasos",
+    "tryAgain": "Intentar de nuevo"
+  }
+}

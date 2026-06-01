@@ -92,7 +92,7 @@
     "emailHeader": "Email",
     "actionsHeader": "Acciones",
     "gradebook": "Libro de calificaciones",
-    "showingAssignments": "(Mostrando {{visible}} de {{total}} tareas)",
+    "showingAssignments": "(Mostrando {visible} de {total} tareas)",
     "showFutureAssignments": "Mostrar Futuro",
     "showDraftAssignments": "Mostrar borradores",
     "applyCurve": "Aplicar Curva",
@@ -138,6 +138,7 @@
     "viewWorkbook": "Ver Cuaderno de Trabajo",
     "editUnit": "Editar Unidad",
     "myDrafts": "Mis borradores",
+    "practice": "Practicar",
     "archivedUnits": "Unidades archivadas"
   },
   "unitDetail": {

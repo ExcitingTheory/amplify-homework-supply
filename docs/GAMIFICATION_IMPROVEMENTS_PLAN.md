@@ -2,540 +2,379 @@
 
 Comprehensive plan for completing and improving the instructor gamification panel, skill evaluation system, group challenges, and student-facing gamification features.
 
+_Last updated: May 2026_
+
 ## Current State Summary
 
-The gamification system has strong backend infrastructure but the **instructor panel is too minimal to control it**, and several student-facing features are incomplete or missing.
+Most planned features have been implemented. The instructor panel now lives in the **App Router** at `app/[locale]/admin/settings/page.tsx` (not the old Pages Router path). The system has full section scoping, skill evaluation, all four easter egg trigger types, boss battle CRUD, campaign timeline, badge model + editor with visual picker, and content lock management UI.
 
-### What Works Well
+### What Works Well (Implemented)
 - XP ledger with deduplication
-- Badge auto-evaluation after XP awards
+- Badge auto-evaluation after XP awards (hardcoded + DB Badge model both evaluated)
+- Anti-badge system with debuffs and redemption
 - Streaks with freezes and milestones
-- Content locking (XP/badge/linear gating)
+- Content locking (XP/badge/linear gating) with instructor UI
 - Cosmetic unlocks by level (avatar styles, editor themes)
-- Guild system with embedded members/posts
+- Squad system with embedded members/posts
 - Leaderboard per section
-- Dashboard widgets (StreakIndicator, ProgressRings, BadgeShelf, NailedItWall)
+- Dashboard widgets (StreakIndicator, ProgressRings, BadgeShelf, NailedItWall, CampaignTimeline, BossBattleCard)
 - Practice drills with diminishing returns
 - Peer review XP
+- Section-scoped instructor panel with SectionSelector + URL persistence
+- Copy From Section (skills, easter eggs, group challenges)
+- Skill tree with unit linking, auto-evaluation on unit completion, and AI generation
+- Easter Egg system: all 4 triggers (KEYWORD, SCHEDULE, SECRET_LINK, ACHIEVEMENT) work end-to-end
+- Boss Battle creation form with stakes, featured image generation, progress display
+- Campaign Timeline on student dashboard (chapter ordering via `chapterOrder`)
+- Badge model with full CRUD, visual picker (shape/icon/gradient/animation), criteria config
+- Content lock management in instructor panel (per-unit XP/badge/module requirements)
+- XP history page at `/xp-history`
+- Skills page at `/skills` with visual skill tree
+- `SecretLinkIcon` on workbook pages
 
-### What's Broken or Incomplete
-- `/instructor/gamification` panel is too bare to control any feature properly
-- Skills have no unit linking — mastery is never triggered by completion
-- Easter Egg creation form lacks trigger configuration (only KEYWORD works end-to-end)
-- Boss Battle has no creation form — only a delete list
-- Group challenge narratives are only partially displayed
-- Campaign chapter progression has no student-facing UI
-- No section scoping on the instructor panel
-
----
-
-## Phase 1: Section-Scoped Instructor Panel
-
-**Goal**: Make `/instructor/gamification` actually useful for instructors.
-
-### 1.1 Section Selector (Foundation)
-
-Add a section picker at the top of the page. All data is already `cohortId`-based, so this scopes queries by the selected section ID.
-
-**Files**: `pages/instructor/gamification.jsx`, `InstructorGamificationPanel.tsx`
-
-**Behavior**:
-- Show instructor's owned sections in a dropdown
-- Selected section ID becomes the `cohortId` for all queries/mutations
-- Persist selection in URL query param (`?section=abc-123`)
-- Show section's assigned units in a data prop for skill creation
-
-### 1.2 Copy Settings Between Sections
-
-"Copy From Section" button that clones gamification config from another section:
-- Skills (reset progress, remap unitIds if matching assignments exist)
-- Easter Eggs (clone with reset discoveries)
-- Group Challenges (clone with currentXP=0, reset contributions)
-- Does NOT copy: Guilds, StudentProfiles, XP logs (student-specific)
-
-**Files**: `pages/instructor/gamification.jsx` (new callback), could be a Lambda mutation for atomicity
+### What's Still Incomplete or Missing
+- **Easter Egg badge picker** — form has no `badgeId` field; discovery doesn't let instructor choose which badge to award
+- **AI Badge Designer** — planned chat-style badge generator not yet built into BadgeEditor
+- **Squad page challenges** — `squad/[id]` does not display active group challenges
+- **Campaign model references** — admin settings page still references `client.models.Campaign` which no longer exists in schema (dead code)
+- **BossBattleForm is create-only** — no edit mode for existing battles
 
 ---
 
-## Phase 2: Skill Tree — Unit Linking & Auto-Evaluation
+## Phase 1: Section-Scoped Instructor Panel ✅ COMPLETE
 
-**Goal**: Skills are tied to units. Completing all linked units at ≥70% accuracy masters the skill.
+**Status**: Fully implemented. Panel lives at `app/[locale]/admin/settings/page.tsx` with section-level settings at `app/[locale]/section/[id]/settings/gamification/page.tsx`.
 
-### 2.1 Schema Change
+### 1.1 Section Selector ✅
 
-```typescript
-Skill: a.model({
-  ...existing,
-  unitIds: a.string().array(),           // Units required to master this skill
-  minimumAccuracy: a.integer().default(70), // Min accuracy per unit
-})
-```
+- `SectionSelector` component rendered at panel top
+- Selected section ID stored in state and URL query param
+- All queries/mutations scoped by `cohortId` = selected section
+- Section's assigned units passed as `availableUnits` prop to skill/easter-egg forms
 
-Add mutation:
-```typescript
-evaluateSkillsForUnit: a.mutation()
-  .arguments({ studentId: a.string().required(), unitId: a.string().required(), cohortId: a.string() })
-  .returns(a.json())
-  .handler(a.handler.function(gamificationFunction))
-  .authorization(...)
-```
+**Files**: `app/[locale]/admin/settings/page.tsx`, `src/components/Gamification/SectionSelector.tsx`, `src/components/Gamification/InstructorGamificationPanel.tsx`
 
-### 2.2 Lambda Handler: `handleEvaluateSkillsForUnit`
+### 1.2 Copy Settings Between Sections ✅
 
-```
-Input: { studentId, unitId, cohortId }
-1. Query Skills where unitIds contains unitId (filter client-side from cohort skills)
-2. For each matching skill:
-   a. For each unitId in skill.unitIds, fetch student's Grade where:
-      - owner = studentId
-      - unitID = unitId (via assignment lookup)
-      - complete = true
-      - accuracy >= skill.minimumAccuracy (default 70)
-   b. If ALL units pass → advanceSkillProgress(studentId, skillId, 'MASTERED')
-   c. If SOME but not all → set IN_PROGRESS
-   d. If NONE → leave as AVAILABLE
-3. Prerequisite unlocking handled by existing advanceSkillProgress logic
-```
+Implemented in admin settings page callback, clones:
+- Skills (preserves structure, resets student progress)
+- Easter Eggs (resets discoveries, sets active=true)
+- Group Challenges (resets currentXP=0, empties contributions)
+- Does NOT copy: Squads, StudentProfiles, XP logs (student-specific)
 
-### 2.3 Frontend Trigger
+Also: Section-level gamification config copy available at per-section settings page.
 
-In `src/context/unitContext.jsx`, after `awardXPAndCheck('ALL_BLOCKS_COMPLETED', ...)`:
+---
+
+## Phase 2: Skill Tree — Unit Linking & Auto-Evaluation ✅ COMPLETE
+
+**Status**: Fully implemented. Skills have unit linking, auto-evaluation triggers on unit completion, and the instructor form has all planned fields plus AI generation.
+
+### 2.1 Schema ✅
+
+`Skill` model has: `unitIds: a.string().array()`, `minimumAccuracy: a.integer()` (defaults to 70 in Lambda).
+
+`evaluateSkillsForUnit` mutation exists with args: `studentId`, `unitId`, `cohortId`.
+
+### 2.2 Lambda Handler ✅
+
+`handleEvaluateSkillsForUnit` implemented at handler.ts:3442:
+- Loads skills from cohortId, filters by unitIds containing current unit
+- Checks completed grades with accuracy >= minimumAccuracy
+- Updates StudentProfile.skillProgress
+- Awards XP for mastery
+- Calls advanceSkillProgress for prerequisite unlock propagation
+
+### 2.3 Frontend Trigger ✅
+
+Called in `src/context/unitContext.jsx` after unit completion (line ~506):
 ```javascript
-client.mutations.evaluateSkillsForUnit({ studentId: username, unitId, cohortId: sectionId })
-  .catch(err => console.warn('[unitContext] Skill evaluation:', err))
+client.mutations.evaluateSkillsForUnit({ studentId, unitId, cohortId: sectionId })
 ```
 
-### 2.4 `generateSkillTree` Update
+### 2.4 `generateSkillTree` ✅
 
-Lambda's `generateSkillTree` already knows the source `unitID`. Update it to:
-- Set `unitIds: [unitID]` on each generated Skill
-- Set `minimumAccuracy: 70` on each
+Lambda sets `unitIds: [unitID]` and `minimumAccuracy: 70` on each generated Skill (handler.ts:4040-4041).
 
-### 2.5 Instructor Panel — Skill Form
+### 2.5 Instructor Panel — Skill Form ✅
 
-Replace current title-only input with:
-
-| Field | Type | Notes |
-|-------|------|-------|
-| Title | text | required |
-| Description | text (multiline) | optional |
-| XP Reward | number | default 0 |
-| Required Units | Autocomplete (multi) | from section's assignments |
-| Prerequisites | Autocomplete (multi) | from existing skills in section |
-| Min Accuracy | number | default 70%, range 0-100 |
-
-Plus "Generate from Unit" button that calls `generateSkillTree` for a selected unit.
+`SkillForm.tsx` has all planned fields:
+- Title (required)
+- Description (multiline)
+- XP Reward (number)
+- Required Units (Autocomplete multi-select from `availableUnits`)
+- Prerequisites (Autocomplete multi-select from `availableSkills`)
+- Min Accuracy (Slider, default 70%)
+- "Generate from Unit" button via `onGenerateFromUnit` prop
 
 ---
 
-## Phase 3: Easter Egg Trigger Redesign
+## Phase 3: Easter Egg Trigger Redesign ✅ MOSTLY COMPLETE
 
-**Goal**: Replace the broken/incomplete trigger types with ones that actually work end-to-end without developer intervention.
+**Status**: All 4 new trigger types work end-to-end. Badge picker on discovery is the main remaining gap.
 
-### Current Problems
-1. Form uses "Message" field as both `triggerValue` and `revealMessage`
-2. `TIME_BASED` — Lambda stores `"HH:MM-HH:MM"` UTC but frontend hook expects ISO datetime strings. Never globally wired.
-3. `UI_INTERACTION` — Requires hardcoded component placement. Instructor can't configure where.
-4. `SUBMISSION_QUALITY` — In the enum but completely unimplemented everywhere.
+### Implementation vs Plan
 
-### Redesigned Trigger Types
+**Schema**: EasterEgg trigger enum is `["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]`. The last two are legacy holdovers — only the first four are exposed in the instructor form and actively handled.
 
-Replace the current enum:
-```typescript
-// OLD (broken)
-trigger: a.enum(["KEYWORD", "UI_INTERACTION", "TIME_BASED", "SUBMISSION_QUALITY"])
+**Lambda** (`handleCheckEasterEggs` at handler.ts:2898): Handles KEYWORD, SCHEDULE, and ACHIEVEMENT matching. `evaluateAchievementCondition` (handler.ts:3014) supports metrics: `accuracy`, `streak`, `xp`, `level`, `units_completed` with operators `>=`, `<=`, `>`, `<`, `==`.
 
-// NEW (all work automatically)
-trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"])
-```
+**Frontend**:
+- `EasterEggLayer.tsx` — KEYWORD listener + SCHEDULE polling/auto-discovery ✅
+- `SecretLinkIcon.tsx` — renders hidden icon on workbook pages for SECRET_LINK eggs ✅
+- `WorkbookClient.tsx` — imports and renders `SecretLinkIcon` with unit ID ✅
+- ACHIEVEMENT — Lambda evaluates automatically, no frontend needed ✅
 
-| Type | What it does | `triggerValue` format | How it triggers |
-|------|-------------|----------------------|-----------------|
-| **KEYWORD** | Secret word typed anywhere in app | `"konami"` (case-insensitive) | `EasterEggLayer` global keypress listener (already works) |
-| **SCHEDULE** | Active during a date/time window | ISO JSON: `{"start":"2026-05-10T00:00:00Z","end":"2026-05-11T23:59:59Z"}` | `EasterEggLayer` polls active SCHEDULE eggs every 60s, auto-triggers on match |
-| **SECRET_LINK** | Hidden on a specific unit page | Unit ID: `"unit-abc123"` | Renders a tiny hidden icon on that unit's workbook page. Student clicks it. |
-| **ACHIEVEMENT** | Triggered by grade/streak/XP milestones | Condition string: `"accuracy>=95"` or `"streak>=7"` or `"xp>=1000"` | Lambda evaluates after `awardXP`/grade submission. No frontend hook needed. |
+**Instructor Form** (`EasterEggForm.tsx`): Full type-conditional UI ✅
+- KEYWORD: keyword/sequence text input
+- SCHEDULE: start + end datetime-local inputs
+- SECRET_LINK: target unit autocomplete from `availableUnits`
+- ACHIEVEMENT: metric + comparator + numeric threshold → serialized as `"accuracy>=95"`
 
-### 3.1 Schema Change
+### Remaining Work
 
-```typescript
-EasterEgg: a.model({
-  trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
-  triggerValue: a.string().required(),
-  xpReward: a.integer().required(),
-  revealMessage: a.string().required(),
-  active: a.boolean().default(true),
-  cohortId: a.string(),  // ADD — section scoping
-  discoveries: a.ref("EasterEggDiscoveryEntry").array(),
-})
-```
-
-### 3.2 Lambda Changes
-
-**`handleCheckEasterEggs`** — update matching logic:
-```typescript
-if (egg.trigger === "KEYWORD") {
-  matched = textLower.includes((egg.triggerValue || "").toLowerCase());
-} else if (egg.trigger === "SCHEDULE") {
-  const { start, end } = JSON.parse(egg.triggerValue || "{}");
-  const now = new Date().toISOString();
-  matched = (!start || now >= start) && (!end || now <= end);
-} else if (egg.trigger === "ACHIEVEMENT") {
-  // Parse condition: "accuracy>=95", "streak>=7", "xp>=1000"
-  const [metric, op, value] = parseTriggerCondition(egg.triggerValue);
-  matched = evaluateCondition(metric, op, Number(value), studentStats);
-}
-// SECRET_LINK — uses discoverEasterEgg mutation directly (no checkEasterEggs call)
-```
-
-**New**: Call `checkEasterEggs` with `triggerType: "ACHIEVEMENT"` after `awardXP` and grade completion pipelines, passing student stats (current XP, streak, last accuracy).
-
-### 3.3 Frontend Changes
-
-**`EasterEggLayer`** — add SCHEDULE polling:
-```typescript
-// Fetch SCHEDULE eggs, check if current time is in window
-// Poll every 60s, trigger discoverEasterEgg when matched
-useEffect(() => {
-  const scheduleEggs = allEggs.filter(e => e.trigger === 'SCHEDULE' && e.active);
-  const interval = setInterval(() => {
-    for (const egg of scheduleEggs) {
-      const { start, end } = JSON.parse(egg.triggerValue || '{}');
-      const now = new Date().toISOString();
-      if ((!start || now >= start) && (!end || now <= end)) {
-        discoverEasterEgg(studentId, egg.id);
-      }
-    }
-  }, 60000);
-  return () => clearInterval(interval);
-}, [allEggs, studentId]);
-```
-
-**Workbook page** — add SECRET_LINK rendering:
-```typescript
-// In workbook/[id] page, check if any SECRET_LINK eggs target this unit
-// Render a tiny semi-hidden icon (magnifying glass) that triggers discoverEasterEgg on click
-```
-
-**ACHIEVEMENT** — no frontend changes needed. Lambda triggers automatically.
-
-### 3.4 Instructor Form
-
-Separate fields with type-conditional UI:
-
-| Field | Purpose |
-|-------|---------|
-| Type | Select: Keyword / Schedule / Secret Link / Achievement |
-| Trigger Value | **Changes based on type** (see below) |
-| Reveal Message | What students see when discovered |
-| XP Reward | number, default 50 |
-
-**Type-conditional input:**
-
-| Type | Input UI | Description shown to instructor |
-|------|----------|--------------------------------|
-| KEYWORD | Text field | "Secret word students must type anywhere in the app." |
-| SCHEDULE | Date range picker (start + end) | "Active time window. Students who are online during this period discover it automatically." |
-| SECRET_LINK | Unit autocomplete (from section assignments) | "Places a hidden icon on this unit's workbook page." |
-| ACHIEVEMENT | Metric select + comparator + value | "Triggered automatically when a student reaches this milestone." |
-
-**Achievement metric options**: `accuracy` (last submission), `streak` (current), `xp` (total), `level`, `units_completed`
-
-### 3.4.1 Badge on Discovery
-
-Every easter egg awards a badge when found. The instructor form includes a badge picker (from Phase 6 Badge model) so instructors can assign a specific badge to each egg. If no badge is selected, a default `EASTER_EGG_HUNTER` badge is awarded.
-
-The Lambda's `handleCheckEasterEggs` and `handleDiscoverEasterEgg` already have a `badgeId` field on the EasterEgg model — once badges become a proper model (Phase 6), this wires up naturally.
+| Item | Status | Notes |
+|------|--------|-------|
+| Badge picker on form | ❌ Not implemented | `EasterEggFormData` has no `badgeId`; form needs badge autocomplete |
+| `EasterEggTrigger.tsx` cleanup | ❌ Not done | File defines unused CLICK/TIME/INTERACTION hooks — should be deleted or replaced |
 
 
 
 ---
 
-## Phase 4: Boss Battle / Group Challenge Creation
+## Phase 4: Boss Battle / Group Challenge Creation ✅ MOSTLY COMPLETE
 
-**Goal**: Full CRUD for Group Challenges with proper fields.
+**Status**: Full creation form with rich fields including stakes and AI image generation. Progress display with pause/activate/delete. Edit mode not yet implemented.
 
-### 4.1 Creation Form
+### 4.1 Creation Form ✅
+
+`BossBattleForm.tsx` includes:
 
 | Field | Type | Notes |
 |-------|------|-------|
 | Title | text | required |
-| Target XP (HP) | number | required — total XP the group must earn |
+| Target XP (HP) | number | required |
+| Start Date | date picker | optional |
 | Deadline | date picker | optional |
-| Bonus Multiplier | number | default 1.5 — XP multiplier when completed |
-| Narrative Setting | text (multiline) | optional — displayed in CampaignBriefing |
-| Stakes | text (multiline) | optional — "what's at risk" flavor text |
+| Bonus Multiplier | number | default 1.5 |
+| Narrative Setting | text (multiline) | displayed in CampaignBriefing |
+| Stakes | structured JSON | full BattleStakes config (see below) |
+| Featured Image | AI-generated | via `generateImage` action |
 
-### 4.2 Existing Battle Display
+**Stakes system** (richer than originally planned):
+- Lose level, lose XP (configurable amount), lose streak freeze, reset streak
+- Lose badge (by rarity target), streak miss XP penalty (per day)
+- Lose cosmetics (with penalty duration in days)
 
-Replace current bare list with:
-- Title + active/inactive chip
-- Progress bar: `currentXP / targetXP` with percentage
-- Deadline countdown (if set)
-- Top contributors list (from `contributions` array)
-- Toggle active/inactive button
+### 4.2 Existing Battle Display ✅
+
+`BossBattleProgress` component (rendered in instructor panel) shows:
+- Title + active/paused state
+- Progress bar: `currentXP / targetXP`
+- Pause/activate toggle
 - Delete button
 
-### 4.3 Where Challenges Should Be Displayed (Student-Facing)
+**Missing from plan**: Top contributors list, deadline countdown display.
 
-| Location | What to Show |
-|----------|-------------|
-| **Student Dashboard** (`pages/index.jsx`) | Active challenges as `BossBattleCard` — already wired |
-| **Guild Page** (`pages/guild/[id].jsx`) | Active challenges for the guild's section — add below posts |
-| **Section Detail** (`pages/section/[id].jsx`) | For instructors: progress overview of active challenges |
+### 4.3 Student-Facing Challenge Display
+
+| Location | Status | Notes |
+|----------|--------|-------|
+| Student Dashboard | ✅ | `BossBattleCard` rendered on home page |
+| Squad Page | ❌ | `squad/[id]` does not show challenges |
+| Section Detail | Not checked | |
 
 ---
 
-## Phase 5: Campaign Chapter Progression (Future)
+## Phase 5: Campaign Chapter Progression ✅ COMPLETE
 
-**Goal**: Give campaigns a visual chapter structure.
+**Status**: Implemented. `CampaignTimeline` component exists and renders on the student dashboard.
 
-Currently, `GroupChallenge` absorbed the Campaign model's narrative fields. The suggested approach:
+### Implementation
 
 - Each `GroupChallenge` with `setting`/`stakes` IS a campaign chapter
-- Order chapters by creation date or a `chapterOrder` field
-- Show a "Campaign Timeline" on the dashboard:
-  ```
-  Chapter 1: "The Awakening" ✓ (completed)
-  Chapter 2: "The Deep Forest" → [progress bar 65%]
-  Chapter 3: "The Final Battle" 🔒
-  ```
-- Requires adding `chapterOrder: a.integer()` to GroupChallenge schema
-- Frontend: new `CampaignTimeline` component on the dashboard
+- `chapterOrder: a.integer()` exists on GroupChallenge schema
+- `CampaignTimeline.tsx` sorts by `chapterOrder`, computes progress percent from `currentXP/targetXP`
+- Classifies chapter state as completed/active/locked with status icons and progress bars
+- Rendered on the main dashboard page (`app/[locale]/page.jsx`)
+
+### Differences from Plan
+
+- `CampaignTimeline` is simpler than originally envisioned — it's a list with progress bars and status chips, not the full chapter timeline visualization with locked/unlocked iconography described in the plan
+- The "Campaign" model was fully absorbed into GroupChallenge (confirmed)
+- **Dead code**: `app/[locale]/admin/settings/page.tsx` still references `client.models.Campaign` in handlers (~line 343) — this model no longer exists and should be cleaned up
 
 ---
 
-## Phase 6: Badge System — Custom Badges & Content Locking
+## Phase 6: Badge System — Custom Badges & Content Locking ✅ MOSTLY COMPLETE
 
-**Goal**: Make badges instructor-configurable instead of hardcoded. Add content-lock UI.
+**Status**: Badge model exists in schema with full CRUD. Lambda evaluates both hardcoded criteria AND DB Badge records. BadgeEditor has visual picker with live preview. Content lock management UI exists in instructor panel. AI Badge Designer is the main remaining gap.
 
-### Current State
-- 14 badge criteria hardcoded in `BADGE_CRITERIA` array in Lambda
-- Visual config in `badgeRegistry.ts` (icon, gradient, shape, rarity)
-- Stored as `BadgeEntry` array on `StudentProfile.badges` (JSON)
-- No `Badge` model — no instructor CRUD
-- `EasterEgg.badgeId` field exists but has no badge to reference
-- `Unit.requiredBadgeId` field exists but no UI to configure it
+### 6.1 Badge Model ✅
 
-### 6.1 New `Badge` Model
-
+Schema (`amplify/data/resource.ts:1640`) matches plan exactly:
 ```typescript
 Badge: a.model({
   title: a.string().required(),
   description: a.string(),
-  icon: a.string(),           // react-icons identifier or emoji
+  icon: a.string(),
   shape: a.enum(["circle", "hexagon", "shield", "diamond"]),
   rarity: a.enum(["common", "uncommon", "rare", "epic", "legendary"]),
-  category: a.string(),       // "core", "streak", "special", custom
-  criteria: a.json(),         // Evaluation criteria (see below)
-  cohortId: a.string(),       // Section scoping (null = global/system badge)
-  autoEvaluate: a.boolean().default(true),  // Lambda checks this automatically
+  category: a.string(),
+  criteria: a.json(),
+  cohortId: a.string(),
+  autoEvaluate: a.boolean().default(true),
 })
 ```
 
-**Criteria JSON format** (evaluated by Lambda):
-```json
-{
-  "type": "xp_log_count",
-  "reason": "PERFECT_SCORE",
-  "threshold": 3
-}
-```
-Or:
-```json
-{
-  "type": "stat_threshold",
-  "metric": "totalXP",
-  "operator": ">=",
-  "value": 500
-}
-```
-Or:
-```json
-{
-  "type": "manual"
-}
-```
-(Manual badges are awarded only by instructor action or easter egg discovery.)
+### 6.2 Lambda Changes ✅
 
-### 6.2 Lambda Changes
+`handleCheckBadges` (handler.ts:1343) evaluates:
+1. Hardcoded `BADGE_CRITERIA` (15 badges: FIRST_SUBMISSION, GOOD_EYE, QUICK_DRAW, SHARPSHOOTER, CONSISTENT, TEAM_PLAYER, DEEP_THINKER, TOP_OF_CLASS, PERFECTIONIST, DRILL_MASTER, COMEBACK_KID, STREAK_14, STREAK_30, EASTER_EGG_HUNTER, PEER_REVIEW_CHAMPION)
+2. Hardcoded `ANTI_BADGE_CRITERIA` (6 anti-badges: CONSISTENTLY_WRONG, STREAK_BREAKER, SPEED_RUN_SCHOLAR, THE_GHOST, XP_ZERO_HERO, MINIMALLY_VIABLE_STUDENT)
+3. DB Badge records with `autoEvaluate=true` + custom criteria JSON
+4. Anti-badge debuffs and redemption logic
 
-**Replace `BADGE_CRITERIA` hardcoded array** with a DB query:
-```typescript
-async function handleCheckBadges(gqlClient, args) {
-  // 1. Fetch all Badge records (global + student's cohort)
-  // 2. For each with autoEvaluate=true, evaluate criteria against student stats/logs
-  // 3. Award if criteria met and not already earned
-}
-```
+**Note**: Hardcoded criteria were NOT replaced by DB records as originally planned. Both coexist — the Lambda evaluates hardcoded first, then DB badges. This is a pragmatic simplification (no migration/seed needed).
 
-**Seed system badges**: On first deploy, create Badge records for the existing 14 hardcoded badges so nothing breaks.
+### 6.3 Instructor Panel — Badge Creation UI ✅ (Partial)
 
-**Easter egg → badge linking**: When `handleDiscoverEasterEgg` fires, if `egg.badgeId` is set, award that Badge directly (skip criteria evaluation).
+`BadgeEditor.tsx` provides:
+- Badge Name, Description
+- Trigger Event (reason from XP log)
+- Times Required threshold
+- Rarity select
+- Visual Design section (via `BadgeVisualPicker`)
+- Buff configuration (XP multiplier, duration, streak freezes, unlock IDs)
 
-### 6.3 Instructor Panel — Badge Creation UI with AI Assistant
+`BadgeVisualPicker.tsx` provides:
+- Icon catalog with search/tabs
+- Shape toggle (circle/hexagon/shield/diamond)
+- Background + icon color pickers
+- Gradient preset picker
+- Animation select
+- **Live preview** via `BadgeIcon` component ✅
 
-The badge creation form uses the existing `BadgeIcon` component as a **live preview** and an AI assistant to help instructors design badges.
+#### AI Badge Designer ❌ NOT IMPLEMENTED
 
-#### Live Preview
+The planned chat-style AI badge designer (using `useChat` hook with a badge-designer system prompt, `generate_badge_config` tool call, real-time preview updates) has **not been built**. This remains a future enhancement.
 
-The form renders a `<BadgeIcon config={...} size={96} />` that updates in real-time as the instructor changes fields. This lets them see exactly what students will see.
+### 6.4 Content-Lock Configuration UI ✅
 
-#### Form Fields
+Implemented in `InstructorGamificationPanel.tsx` "Unit Progression" accordion section:
+- Linear lock toggle (sequential unit progression)
+- Per-unit configuration: Required XP, Required Badge, Required Module Completion
+- Maps to `Unit.requiredXP`, `Unit.requiredBadgeId`, `Unit.requiredModuleCompletion`
 
-| Field | Type | Maps to `BadgeVisualConfig` |
-|-------|------|----------------------------|
-| Title | text | `name` |
-| Description | text | `description` |
-| Shape | visual picker (4 shape thumbnails) | `shape` |
-| Rarity | select with color preview | `rarity` |
-| Category | select | `category` |
-| Icon | icon search/picker (react-icons) | `icon` |
-| Background | gradient builder OR color picker | `gradient` / `bgColor` |
-| Icon Color | color picker | `iconColor` |
-| Animation | select with preview button | `animation` |
-| Criteria Type | select: XP Log Count / Stat Threshold / Manual | `criteria.type` |
-| Criteria Config | conditional fields (metric, threshold, reason) | `criteria` |
+Also available at section-level: `app/[locale]/section/[id]/settings/gamification/page.tsx` with feature toggles and typed gamificationConfig.
 
-#### AI Badge Designer
+`ContentLockCard` component and `useContentLock()` hook consume these values on the student side.
 
-"Design with AI" button opens a chat-style input where the instructor describes what they want:
+### 6.5 Badge ↔ Easter Egg Integration ❌ NOT IMPLEMENTED
 
-> "A gold shield badge for students who get 100% on 3 assignments in a row"
-
-The AI (via existing `chatStream` Lambda) returns a complete `BadgeVisualConfig` + criteria JSON:
-
-```json
-{
-  "config": {
-    "name": "Triple Crown",
-    "description": "Score 100% on 3 consecutive assignments",
-    "shape": "shield",
-    "rarity": "epic",
-    "gradient": { "type": "linear", "angle": "135deg", "stops": [{"color": "#FFD700", "position": "0%"}, {"color": "#B8860B", "position": "100%"}] },
-    "iconColor": "#FFFFFF",
-    "icon": "FaCrown",
-    "animation": "bounce-in",
-    "category": "core"
-  },
-  "criteria": {
-    "type": "xp_log_count",
-    "reason": "PERFECT_SCORE",
-    "threshold": 3
-  }
-}
-```
-
-The preview updates immediately with the AI suggestion. Instructor can accept, tweak individual fields, or describe changes ("make it diamond shaped instead").
-
-#### Implementation
-
-- System prompt includes the `BadgeVisualConfig` type definition, available shapes/rarities/animations, react-icons library names, and the criteria schema
-- Uses existing `useChat` hook pointed at a badge-designer system prompt
-- Tool call: `generate_badge_config` returns structured JSON (parsed into form state)
-- The AI response populates form fields — instructor has full override on every field
-- "Award Manually" button for manual badges — picks students from section roster
-
-#### Existing Components Leveraged
-
-| Component | Usage |
-|-----------|-------|
-| `BadgeIcon` | Live preview with `config` prop override |
-| `BadgeCoinFlip` | "Preview Award" animation — shows what the student will see |
-| `badgeRegistry` | Source of shape/rarity/animation constants for the form pickers |
-| `GamificationToastLayer` | Preview the toast notification |
-
-### 6.4 Content-Lock Configuration UI
-
-Add a "Requirements" section to the Unit editor or Assignment form:
-
-| Field | Type | Notes |
-|-------|------|-------|
-| Required XP | number (optional) | Student must have ≥ this XP to access |
-| Required Badge | Badge autocomplete (optional) | Student must have earned this badge |
-| Required Module | Unit autocomplete (optional) | Student must have completed this unit |
-
-These map to existing schema fields: `Unit.requiredXP`, `Unit.requiredBadgeId`, `Unit.requiredModuleCompletion`.
-
-The `ContentLockCard` component and `useContentLock()` hook already exist — they just need the instructor UI to set the values.
-
-### 6.5 Badge ↔ Easter Egg Integration
-
-In the Easter Egg form (Phase 3), add a badge picker field:
-- Instructor selects which badge to award when this egg is discovered
-- Maps to existing `EasterEgg.badgeId` field
-- On discovery, Lambda awards the badge directly (no criteria check)
+- `EasterEgg.badgeId` field exists in schema
+- Lambda `handleDiscoverEasterEgg` can award the badge if `badgeId` is set
+- **But**: `EasterEggForm.tsx` has no badge picker field — instructors cannot select which badge to award
+- This is a small UI addition (badge autocomplete in the easter egg form)
 
 ---
 
-## Missing Features (Not Yet Planned)
+## Remaining Work (Not Yet Implemented)
 
-Features that exist in other gamification systems but are absent here:
+Features that were planned or exist in other gamification systems but are still missing:
 
-| Feature | Impact | Effort |
-|---------|--------|--------|
-| **XP History Page** | Students can't review their earning history | Low — data exists, needs a page |
-| **Notification Center** | Toasts are ephemeral, no persistent record | Medium |
-| **Daily/Weekly Personal Quests** | No recurring engagement hooks beyond streaks | High — new model + evaluation logic |
-| **Recent XP Feed on Dashboard** | `AnimatedXPCounter` exists but unused | Low |
-| **Unlock Roadmap/Preview** | Students can't see future unlocks | Low — UI only |
-| **Campaign Chapter Progression UI** | Narrative system has no visual tracker | Medium |
-| **Side-by-Side Student Comparison** | Can view profiles but can't compare | Low |
-| **Privacy Controls for Profiles** | No "make my profile private" option | Low |
-| **Completed Challenges Display** | `completedChallenges` never rendered | Low |
-| **Lock Management UI for Instructors** | Content locking is code-configured only | Medium |
+| Feature | Impact | Effort | Notes |
+|---------|--------|--------|-------|
+| **Easter Egg badge picker** | Instructors can't assign badges to egg discoveries | Low | Add badge autocomplete to EasterEggForm |
+| **AI Badge Designer** | No AI-assisted badge creation | Medium | Chat-style input + `generate_badge_config` tool call |
+| **Squad page challenges** | Squad members can't see active challenges on their squad page | Low | Add GroupChallenge query + display to `squad/[id]` |
+| **BossBattle edit mode** | Can only create, not edit existing battles | Low | Add initial values prop to BossBattleForm |
+| **Clean up Campaign dead code** | Admin settings references non-existent model | Low | Remove `client.models.Campaign` handlers from admin settings page |
+| **EasterEggTrigger.tsx cleanup** | Unused hooks file | Low | Delete or replace with only SecretLinkIcon |
+| **Boss Battle contributors display** | Can't see who contributed most XP | Low | Render `contributions` array in BossBattleProgress |
+| **Boss Battle deadline countdown** | No visual urgency indicator | Low | Add countdown timer to BossBattleProgress |
+| **Notification Center** | Toasts are ephemeral, no persistent record | Medium | New model + page |
+| **Daily/Weekly Personal Quests** | No recurring engagement hooks beyond streaks | High | New model + evaluation logic |
+| **Unlock Roadmap/Preview** | Students can't see future unlocks | Low | UI only — show what each level unlocks |
+| **Side-by-Side Student Comparison** | Can view profiles but can't compare | Low | UI only |
+| **Privacy Controls for Profiles** | No "make my profile private" option | Low | Add field to StudentProfile |
 
 ### Priority Recommendations
 
-**Quick wins** (build immediately after panel improvements):
-1. XP history page/tab on profile
-2. Recent XP feed on dashboard (AnimatedXPCounter is ready)
-3. Completed challenges section on dashboard
-4. Unlock roadmap (show what each level unlocks)
+**Quick wins** (small PRs, mostly UI):
+1. Easter Egg badge picker (add field to form + wire to `badgeId`)
+2. Squad page active challenges display
+3. BossBattle edit mode
+4. Remove dead code (Campaign references, legacy enum values, EasterEggTrigger.tsx)
+5. Boss Battle contributors + deadline countdown
 
 **Medium term**:
-5. Campaign chapter timeline UI
-6. Challenge display on guild page
+6. AI Badge Designer (chat UX + system prompt + tool call)
 7. Notification center with history
+8. Unlock roadmap visualization
 
 **Long term**:
-8. Daily/weekly personal quest system
-9. Instructor lock management UI
+9. Daily/weekly personal quest system
 10. Privacy controls
 
 ---
 
-## Implementation Order
+## Implementation Status Summary
 
 ```
-Phase 1: Section scoping + copy           → Foundation for all other work
-Phase 2: Skill tree (schema + Lambda + UI) → Biggest functional gap
-Phase 3: Easter egg redesign (schema + Lambda + EasterEggLayer + form) → Makes all types work automatically
-Phase 4: Boss battle creation              → Completes instructor CRUD
-Phase 5: Campaign chapters                 → Future enhancement
-Phase 6: Badge system (model + Lambda + CRUD + content locking UI) → Makes badges configurable
-Quick wins: XP history, feed, roadmap      → Polish after core is done
+Phase 1: Section scoping + copy           ✅ COMPLETE
+Phase 2: Skill tree (schema + Lambda + UI) ✅ COMPLETE
+Phase 3: Easter egg redesign              ✅ MOSTLY COMPLETE (missing badge picker)
+Phase 4: Boss battle creation             ✅ MOSTLY COMPLETE (missing edit mode)
+Phase 5: Campaign chapters                ✅ COMPLETE
+Phase 6: Badge system                     ✅ MOSTLY COMPLETE (missing AI designer + egg integration)
+Quick wins: XP history, feed, roadmap     ✅ XP history done; roadmap still missing
 ```
 
-Note: Phase 3 depends on Phase 6 for the badge picker (easter eggs award badges on discovery). Implement Phase 6 before or alongside Phase 3.
+### Implementation Differences from Original Plan
+
+| Planned | Actual |
+|---------|--------|
+| Panel at `pages/instructor/gamification.jsx` | Panel at `app/[locale]/admin/settings/page.tsx` (App Router) |
+| Replace hardcoded BADGE_CRITERIA with DB | Both coexist — hardcoded evaluated first, then DB badges |
+| Campaign as separate concept | Fully absorbed into GroupChallenge with `chapterOrder` |
+| Badge seeding on first deploy | Not needed — hardcoded criteria still run alongside DB |
+| Stakes as free-text | Structured `BattleStakes` JSON with typed penalty options |
+| BossBattle simple form | Rich form with AI image generation for featured image |
+| Anti-badge system (not in plan) | Implemented: 6 anti-badges with debuffs and redemption |
+| `applyBattleStakes` mutation (not in plan) | Implemented: penalties applied when boss battle deadline passes |
+| Section-level gamification config page (not in plan) | Implemented at `/section/[id]/settings/gamification` |
+| Skills page (not in plan) | Implemented at `/skills` with SkillTreeClient |
 
 ---
 
-## Files Affected (Summary)
+## Files Affected (Updated)
 
-| File | Changes |
-|------|---------|
-| `amplify/data/resource.ts` | Add `unitIds`, `minimumAccuracy` to Skill; add `evaluateSkillsForUnit` mutation; change EasterEgg trigger enum to `KEYWORD/SCHEDULE/SECRET_LINK/ACHIEVEMENT`; add `cohortId` to EasterEgg; new `Badge` model; optionally add `chapterOrder` to GroupChallenge |
-| `amplify/functions/gamification/handler.ts` | Add `handleEvaluateSkillsForUnit`; update `generateSkillTree` to set `unitIds`; rewrite `handleCheckEasterEggs` for new trigger types; add ACHIEVEMENT evaluation after `awardXP` pipeline |
-| `src/context/unitContext.jsx` | Call `evaluateSkillsForUnit` after unit completion |
-| `src/components/Gamification/EasterEggLayer.tsx` | Add SCHEDULE polling; fetch all active eggs (not just KEYWORD) |
-| `src/components/Gamification/EasterEggTrigger.tsx` | Remove `useEasterEggTime`/`useEasterEggRapidClick` (unused); add `SecretLinkIcon` component |
-| `src/components/Gamification/InstructorGamificationPanel.tsx` | Rewrite all form sections (skills, easter eggs, boss battles) |
-| `pages/instructor/gamification.jsx` | Section selector, new callbacks, unit/assignment data, copy logic |
-| `pages/workbook/[id].jsx` | Render SECRET_LINK hidden icons for eggs targeting this unit |
-| `pages/guild/[id].jsx` | Add active challenges section (instructor + member view) |
-| `pages/section/[id].jsx` | Add challenge progress for instructors |
+| File | Status | Role |
+|------|--------|------|
+| `amplify/data/resource.ts` | ✅ Done | Skill (unitIds, minimumAccuracy), EasterEgg (new triggers + cohortId), Badge model, GroupChallenge (chapterOrder, stakes, rewards) |
+| `amplify/functions/gamification/handler.ts` | ✅ Done | evaluateSkillsForUnit, generateSkillTree (sets unitIds), checkEasterEggs (KEYWORD/SCHEDULE/ACHIEVEMENT), checkBadges (hardcoded + DB), applyBattleStakes |
+| `src/context/unitContext.jsx` | ✅ Done | Calls evaluateSkillsForUnit after unit completion |
+| `src/context/gamificationContext.tsx` | ✅ Done | Content lock evaluation, linear lock, useContentLock hook |
+| `src/components/Gamification/EasterEggLayer.tsx` | ✅ Done | KEYWORD listener + SCHEDULE polling |
+| `src/components/Gamification/SecretLinkIcon.tsx` | ✅ Done | SECRET_LINK hidden icon on workbook pages |
+| `src/components/Gamification/EasterEggForm.tsx` | ✅ Done | Type-conditional form (missing badge picker) |
+| `src/components/Gamification/SkillForm.tsx` | ✅ Done | Full form with units, prerequisites, accuracy |
+| `src/components/Gamification/BossBattleForm.tsx` | ✅ Done | Create form with stakes + image gen |
+| `src/components/Gamification/BadgeEditor.tsx` | ✅ Done | Badge CRUD with visual picker (missing AI designer) |
+| `src/components/Gamification/BadgeVisualPicker.tsx` | ✅ Done | Icon/shape/color/gradient/animation pickers with live preview |
+| `src/components/Gamification/CampaignTimeline.tsx` | ✅ Done | Chapter progression display |
+| `src/components/Gamification/InstructorGamificationPanel.tsx` | ✅ Done | All accordion sections wired |
+| `src/components/Gamification/SectionSelector.tsx` | ✅ Done | Section picker |
+| `app/[locale]/admin/settings/page.tsx` | ✅ Done | Panel host with section scoping + copy logic |
+| `app/[locale]/section/[id]/settings/gamification/page.tsx` | ✅ Done | Per-section gamification config |
+| `app/[locale]/workbook/[id]/WorkbookClient.tsx` | ✅ Done | Renders SecretLinkIcon |
+| `app/[locale]/xp-history/page.jsx` | ✅ Done | XP earning history |
+| `app/[locale]/skills/page.tsx` | ✅ Done | Visual skill tree page |
+| `app/[locale]/squad/[id]/page.jsx` | ❌ Missing | Needs active challenges section |
+| `src/components/Gamification/EasterEggTrigger.tsx` | 🧹 Cleanup | Unused hooks — should be deleted |
 
 ---
 
-_Created: May 2026_
+_Created: May 2026_  
+_Last updated: May 23, 2026 — Reconciled with implemented code_

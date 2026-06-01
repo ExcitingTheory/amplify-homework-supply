@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   TextField,
@@ -100,7 +100,7 @@ export default function ScreenplayEditor({
   isGenerating = false,
   readOnly = false,
 }) {
-  const { t } = useTranslation('components');
+  const t = useTranslations('components');
   const [promptValue, setPromptValue] = useState('');
 
   // Track the text that the editor itself produced so we can distinguish

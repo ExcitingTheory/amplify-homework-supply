@@ -7,14 +7,14 @@
     "assignmentHeader": "Assignment",
     "gradeHeader": "Grade"
   },
-  "guilds": {
-    "title": "Guilds",
-    "heading": "All Guilds",
-    "description": "Join a guild to compete with your team and climb the leaderboard together.",
+  "squads": {
+    "title": "Squads",
+    "heading": "All Squads",
+    "description": "Join a squad to compete with your team and climb the leaderboard together.",
     "selectSection": "Select a Section",
     "noSections": "No sections found",
-    "createGuild": "Start a New Guild",
-    "guildPosts": "Guild Posts"
+    "createSquad": "Start a New Squad",
+    "squadPosts": "Squad Posts"
   },
   "index": {
     "title": "Homework Supply",
@@ -30,20 +30,47 @@
     "untitledSection": "Untitled Section",
     "noDescription": "No description",
     "viewSection": "View Section",
-    "sections": "Sections"
+    "sections": "Sections",
+    "learningPathway": "Skill Tree"
   },
   "leaderboard": {
     "title": "Leaderboard",
     "heading": "Overall Leaderboard",
     "xpMode": "XP",
     "completionMode": "Completion",
-    "guildsMode": "Guilds",
+    "squadsMode": "Squads",
     "empty": "No leaderboard data yet. Complete assignments to earn XP!"
+  },
+  "settings": {
+    "title": "Settings",
+    "heading": "Settings",
+    "description": "Manage your account settings and preferences",
+    "privacy": {
+      "heading": "Privacy",
+      "leaderboardOptIn": "Show my name on leaderboards",
+      "leaderboardOptInHint": "When off, your name appears as \"Anonymous Student\" on leaderboards."
+    },
+    "customization": {
+      "heading": "Customization",
+      "description": "Unlock new avatar styles and editor themes as you level up."
+    },
+    "botCustomizer": {
+      "heading": "AI Assistant Avatar",
+      "description": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges."
+    },
+    "profileInfo": {
+      "heading": "Profile Information",
+      "description": "Update your display name and email address"
+    }
   },
   "profile": {
     "title": "My Profile",
-    "heading": "My Profile",
+    "heading": "Profile",
     "description": "View and update your profile information",
+    "progress": "Progress",
+    "activity": "Activity",
+    "badges": "Badges",
+    "nailedItWall": "Nailed It Wall",
     "userId": "User Id",
     "identityId": "Identity Id",
     "cancel": "Cancel",
@@ -92,7 +119,7 @@
     "emailHeader": "Email",
     "actionsHeader": "Actions",
     "gradebook": "Gradebook",
-    "showingAssignments": "(Showing {{visible}} of {{total}} assignments)",
+    "showingAssignments": "(Showing {visible} of {total} assignments)",
     "showFutureAssignments": "Show Future",
     "showDraftAssignments": "Show Drafts",
     "applyCurve": "Apply Curve",
@@ -111,6 +138,7 @@
     "editTooltip": "Edit",
     "assignments": "Assignments",
     "viewWorkbook": "View Workbook",
+    "completionGrid": "Completion Overview",
     "deleteSection": "Delete Section",
     "deleteSectionConfirm": "Are you sure you want to delete this section?",
     "loading": "Loading...",
@@ -126,7 +154,11 @@
       "saveFailed": "Failed to save grade. Please try again.",
       "cancel": "Cancel",
       "save": "Save Grade"
-    }
+    },
+    "leaderboard": "Leaderboard",
+    "noLeaderboardEntries": "No leaderboard data yet. Students will appear here as they earn XP.",
+    "leaderboardEnabled": "Show Leaderboard",
+    "squads": "Squads"
   },
   "sections": {
     "title": "Sections",
@@ -137,6 +169,13 @@
     "viewSection": "View Section",
     "loading": "Loading...",
     "joinCode": "Join Code",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "archived": "Archived",
+    "showArchived": "Show Archived ({count})",
+    "archivedSuccess": "Section archived successfully",
+    "unarchivedSuccess": "Section unarchived successfully",
+    "archiveError": "Failed to update section. Please try again.",
     "newSection": {
       "title": "New Section",
       "description": "Create a new Section by entering the following information",
@@ -158,12 +197,91 @@
     "untitledUnit": "Untitled Unit",
     "viewWorkbook": "View Workbook",
     "editUnit": "Edit Unit",
+    "practice": "Practice",
     "myDrafts": "My Drafts",
     "archivedUnits": "Archived Units"
   },
   "workbook": {
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
     "start": "Start",
-    "loading": "Loading…"
-  }
+    "loading": "Loading…",
+    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
+    "reload": "Reload"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: May 2026",
+    "introduction": {
+      "heading": "Introduction",
+      "content": "Welcome to Homework Supply. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and share your information when you use our educational platform."
+    },
+    "informationWeCollect": {
+      "heading": "Information We Collect",
+      "intro": "We collect the following types of information to provide and improve our educational services:",
+      "accountInfo": "Account Information:",
+      "accountInfoText": "Email address, display name, and authentication credentials when you create an account.",
+      "learningData": "Learning Data:",
+      "learningDataText": "Assignment submissions, grades, progress tracking, XP earned, and learning analytics.",
+      "userContent": "User-Generated Content:",
+      "userContentText": "Audio recordings, text responses, uploaded files, and chat messages created during learning activities.",
+      "usageInfo": "Usage Information:",
+      "usageInfoText": "Device information, browser type, pages visited, and interaction patterns to improve the platform experience."
+    },
+    "howWeUseInfo": {
+      "heading": "How We Use Your Information",
+      "intro": "We use your information for the following purposes:",
+      "item1": "Providing personalized learning experiences and AI-powered tutoring",
+      "item2": "Tracking academic progress and generating performance reports for instructors",
+      "item3": "Processing audio and text through AI services (OpenAI) for feedback and assessment",
+      "item4": "Enabling real-time collaboration features between students and instructors",
+      "item5": "Improving platform features, fixing bugs, and enhancing educational outcomes"
+    },
+    "dataStorage": {
+      "heading": "Data Storage & Security",
+      "intro": "Your data is stored securely using industry-standard practices:",
+      "item1": "All data is encrypted in transit (TLS/SSL) and at rest using AWS encryption services",
+      "item2": "Files are stored in Amazon S3 with access controls based on your role and ownership",
+      "item3": "Database records are managed through AWS DynamoDB with fine-grained access control",
+      "outro": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your data at any time."
+    },
+    "dataSharing": {
+      "heading": "Data Sharing",
+      "intro": "We do not sell your personal information. We may share data in the following limited circumstances:",
+      "instructors": "Instructors:",
+      "instructorsText": "Your instructors can view your submissions, grades, and learning progress within their sections.",
+      "classmates": "Classmates:",
+      "classmatesText": "Leaderboard rankings and squad activity may be visible to other students in your section (you can opt out).",
+      "aiProcessing": "AI Processing:",
+      "aiProcessingText": "Audio and text content is sent to OpenAI for transcription, feedback, and assessment. OpenAI does not use this data for training.",
+      "legal": "Legal Requirements:",
+      "legalText": "We may disclose information if required by law or to protect the safety of our users."
+    },
+    "yourRights": {
+      "heading": "Your Rights",
+      "intro": "You have the following rights regarding your personal data:",
+      "item1": "Access: Request a copy of all personal data we hold about you",
+      "item2": "Correction: Update or correct inaccurate personal information",
+      "item3": "Deletion: Request deletion of your account and associated data",
+      "item4": "Export: Download your learning data in a portable format",
+      "item5": "Opt-out: Disable leaderboard visibility and certain data sharing features",
+      "outro": "To exercise these rights, contact your instructor or reach out to us using the contact information below."
+    },
+    "cookies": {
+      "heading": "Cookies & Local Storage",
+      "content": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access."
+    },
+    "childrensPrivacy": {
+      "heading": "Children's Privacy",
+      "content": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent."
+    },
+    "policyChanges": {
+      "heading": "Changes to This Policy",
+      "content": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy."
+    },
+    "contactUs": {
+      "heading": "Contact Us",
+      "content": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform."
+    }
+  },
+  "Peer Review": "Peer Review"
 }

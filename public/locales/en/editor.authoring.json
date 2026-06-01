@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "Clear all text formatting",
     "clearFormatting": "Clear Formatting",
     "clearTextFormatting": "Clear text formatting",
-    "closePreview": "Close Preview of {{name}}",
+    "closePreview": "Close Preview of {name}",
     "columnsLayout": "Columns Layout",
     "delete": "Delete",
     "deleteUnitConfirmation": "Are you sure you want to delete this Unit?",
@@ -119,7 +119,9 @@
     "sectionLabel": "Section",
     "selectSectionHelper": "Select a section to assign the due date to",
     "timerDescription": "The timer will start after the user has clicked the \"Start\" button. Users will be allowed to continue after the timer has run out, and it will be recorded when the assignment was started and completed. The countdown will be displayed at the top of the screen for the duration of the timer.",
-    "timerLabel": "Timer"
+    "timerLabel": "Timer",
+    "retryEnabled": "Allow students to retry after completing",
+    "retryEnabledDescription": "When enabled, students see a \"Try Again\" button on the completion screen."
   },
   "toolbar": {
     "align_center": "Align Center",

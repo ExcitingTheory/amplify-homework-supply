@@ -21,7 +21,7 @@ import {
 import { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 import { getSelectedNode } from '../utils/getSelectedNode';
 
@@ -136,7 +136,7 @@ function FloatingLinkEditor({
     isLeftDrawerOpen = false,
     isRightDrawerOpen = false,
 }) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const editorRef = useRef(null);
     const inputRef = useRef(null);
     const [linkUrl, setLinkUrl] = useState('');

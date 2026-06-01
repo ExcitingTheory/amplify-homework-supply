@@ -155,16 +155,15 @@ export function ChatContextProvider({ children }) {
             (item) => item.id === prevCurrent.id,
           );
           if (
-            updatedCurrent &&
-            chatVersionRef.current !== updatedCurrent._version
+            !updatedCurrent ||
+            updatedCurrent._version == null ||
+            !(updatedCurrent._version > chatVersionRef.current)
           ) {
-            chatVersionRef.current = updatedCurrent._version;
-            console.log(
-              "[ChatContext] Chat updated, new _version:",
-              updatedCurrent._version,
-            );
-            newChat = updatedCurrent;
+            // Echo, stale, or missing — skip
+            return;
           }
+          chatVersionRef.current = updatedCurrent._version;
+          newChat = updatedCurrent;
         }
       } else {
         chatVersionRef.current = null;
@@ -317,6 +316,8 @@ export function ChatContextProvider({ children }) {
           "at:",
           result.data.createdAt,
         );
+        // Optimistic version bump — subscription echo will have _version 1
+        chatVersionRef.current = (result.data._version || 0) + 1;
         dispatch({ type: actionTypes.CHAT_CREATION_SUCCEEDED });
       } catch (error) {
         console.error("[ChatContext] Error creating chat:", error);
@@ -364,6 +365,7 @@ export function ChatContextProvider({ children }) {
       isLoadingChat: state.isLoadingChat,
       chatCreationError: state.chatCreationError,
       setCurrentChat,
+      chatVersionRef,
 
       // Global chat UI
       isChatOpen: state.isChatOpen,

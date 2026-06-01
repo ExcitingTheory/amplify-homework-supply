@@ -92,7 +92,7 @@
     "emailHeader": "E-mail",
     "actionsHeader": "Actions",
     "gradebook": "Carnet de notes",
-    "showingAssignments": "(Affichage de {{visible}} sur {{total}} devoirs)",
+    "showingAssignments": "(Affichage de {visible} sur {total} devoirs)",
     "showFutureAssignments": "Afficher l'avenir",
     "showDraftAssignments": "Afficher les brouillons",
     "applyCurve": "Appliquer la courbe",
@@ -138,6 +138,7 @@
     "viewWorkbook": "Voir le cahier d'exercices",
     "editUnit": "Modifier l'unité",
     "myDrafts": "Mes brouillons",
+    "practice": "Pratiquer",
     "archivedUnits": "Unités archivées"
   },
   "unitDetail": {

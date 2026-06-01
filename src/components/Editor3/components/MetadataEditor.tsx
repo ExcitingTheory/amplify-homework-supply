@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Box,
     Typography,
@@ -185,7 +185,7 @@ export default function MetadataEditor({
     onUpdate,
     autoSaveDelay = 2000,
 }: MetadataEditorProps) {
-    const { t } = useTranslation('editor.shared');
+    const t = useTranslations('editor.shared');
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         name: file.name || '',

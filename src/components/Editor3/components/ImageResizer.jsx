@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Button } from '@mui/material';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -24,7 +24,7 @@ export default function ImageResizer({
   setShowCaption,
   captionsEnabled,
 }) {
-  const { t } = useTranslation('editor.shared');
+  const t = useTranslations('editor.shared');
   const controlWrapperRef = useRef(null);
   const userSelect = useRef({
     priority: '',

@@ -16,8 +16,10 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
+import Skeleton from '@mui/material/Skeleton'
 import Box from '@mui/material/Box'
+import { DiceBearAvatar } from '../Gamification/DiceBearAvatar'
+import type { AvatarStyleTier, AvatarOverrides } from '../Gamification/DiceBearAvatar'
 
 export interface LeaderboardEntry {
   studentId: string
@@ -26,6 +28,14 @@ export interface LeaderboardEntry {
   totalXP: number
   level: number
   currentStreak: number
+  /** DiceBear style tier from the student's saved config. When undefined, avatar is not yet loaded. */
+  avatarStyle?: AvatarStyleTier
+  /** DiceBear overrides from the student's saved config. */
+  avatarOverrides?: AvatarOverrides
+  /** Seed string for DiceBear generation. Falls back to studentId. */
+  avatarSeed?: string
+  /** Whether this entry's avatar config has been resolved (true = render avatar, false/undefined = show placeholder). */
+  avatarLoaded?: boolean
 }
 
 export interface LeaderboardTableProps {
@@ -36,6 +46,20 @@ export interface LeaderboardTableProps {
 }
 
 const MEDALS = ['🥇', '🥈', '🥉']
+
+function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
+  if (!entry.avatarLoaded) {
+    return <Skeleton variant="circular" width={24} height={24} />
+  }
+  return (
+    <DiceBearAvatar
+      seed={entry.avatarSeed || entry.studentId}
+      size={24}
+      style={entry.avatarStyle || 'simple'}
+      overrides={entry.avatarOverrides}
+    />
+  )
+}
 
 export function LeaderboardTable({
   entries,
@@ -83,16 +107,7 @@ export function LeaderboardTable({
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        fontSize: 12,
-                        bgcolor: entry.avatarColor,
-                      }}
-                    >
-                      {entry.studentName.charAt(0)}
-                    </Avatar>
+                    <StudentAvatar entry={entry} />
                     <Typography variant="body2" fontWeight={isCurrentUser ? 700 : 400}>
                       {isCurrentUser ? `${entry.studentName} (You)` : entry.studentName}
                     </Typography>
@@ -124,16 +139,7 @@ export function LeaderboardTable({
                 <TableCell>{currentIndex + 1}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        fontSize: 12,
-                        bgcolor: currentRow.avatarColor,
-                      }}
-                    >
-                      {currentRow.studentName.charAt(0)}
-                    </Avatar>
+                    <StudentAvatar entry={currentRow} />
                     <Typography variant="body2" fontWeight={700}>
                       {currentRow.studentName} (You)
                     </Typography>

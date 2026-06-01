@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import {
     Box,
     Typography,
@@ -93,7 +93,7 @@ function renderSimpleMarkdown(text) {
  * Component to display truncated text with show more/less and optional markdown
  */
 function TruncatedText({ text, maxLength = 150, variant = 'caption', sx = {}, searchTerm = '', markdown = false }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [expanded, setExpanded] = React.useState(false);
     
     if (!text || text.length <= maxLength) {
@@ -161,7 +161,7 @@ function ResultSkeleton() {
  * Enhanced empty state with icon and message
  */
 function EmptyState({ query }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     return (
         <Box
             sx={{
@@ -218,7 +218,7 @@ export default function SearchResults({
     onFocusItem,
     isLoading = false,
 }) {
-    const { t } = useTranslation('components');
+    const t = useTranslations('components');
     const [linkingStates, setLinkingStates] = React.useState({});
     const [expandedSections, setExpandedSections] = React.useState({
         files: true,

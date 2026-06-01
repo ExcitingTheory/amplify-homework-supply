@@ -55,6 +55,7 @@ export const BADGE_EVENTS = [
   { value: 'EASTER_EGG', label: 'Easter Egg Found' },
   { value: 'NAILED_IT', label: 'Nailed It (100% accuracy)' },
   { value: 'PEER_REVIEW_HOSTED', label: 'Peer Review Hosted' },
+  { value: 'PEER_REVIEW_TOP_REVIEWER', label: 'Peer Review Top Reviewer (bonus XP)' },
   { value: 'PRACTICE_DRILL_ACCURACY_BONUS', label: 'Drill Accuracy Bonus' },
   { value: 'STREAK_3DAY', label: '3-Day Streak' },
 ] as const

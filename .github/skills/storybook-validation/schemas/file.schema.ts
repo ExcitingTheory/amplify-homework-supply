@@ -58,7 +58,6 @@ export const fileSchema = z.object({
   generated: z.boolean().nullish(),
   hex: z.string().nullish(),
   byHex: z.string().nullish(),
-  waveformData: z.string().nullish(),
   embedding: z.any().nullish(),
   createdAt: z.string().datetime().nullish(),
   updatedAt: z.string().datetime().nullish(),

@@ -3,14 +3,15 @@
  * from SettingsContext. All DiceBearAvatar instances for the current user
  * should consume this hook so they render identically.
  *
- * Returns `undefined` for style/overrides when no config is saved yet,
- * signalling DiceBearAvatar to use seed-based defaults.
+ * IMPORTANT: This hook must NOT depend on GamificationContext/useXP for
+ * style resolution. The toolbar renders outside any GamificationProvider,
+ * so level-based fallbacks would produce different styles than the profile
+ * page (which has a provider). The saved style in settings.metadata is the
+ * single source of truth. If none is saved, 'simple' is the default.
  */
 
 import { useContext, useMemo } from "react";
 import SettingsContext from "../context/settingsContext";
-import { getUnlockedStyleTier } from "../components/Gamification/DiceBearAvatar";
-import { useXP } from "../context/gamificationContext";
 import type {
   AvatarStyleTier,
   AvatarOverrides,
@@ -18,7 +19,7 @@ import type {
 import type { GlowRingConfig } from "../components/Gamification/AvatarGlowRing";
 
 export interface AvatarConfig {
-  /** Resolved style tier — saved preference or level-based default */
+  /** Resolved style tier — saved preference or 'simple' default */
   style: AvatarStyleTier;
   /** Saved overrides, or empty object if not customized */
   overrides: AvatarOverrides;
@@ -34,8 +35,6 @@ export function useAvatarConfig(): AvatarConfig {
   const ctx = useContext(SettingsContext);
   const settings = ctx?.settings;
   const isLoaded = ctx ? !ctx.isLoading : false;
-  const { level } = useXP();
-  const numericLevel = level?.level ?? 1;
 
   // metadata can be a parsed object or a JSON string depending on Amplify's response
   const rawMetadata = settings?.metadata;
@@ -54,12 +53,14 @@ export function useAvatarConfig(): AvatarConfig {
         : ((rawMetadata || {}) as Record<string, unknown>);
 
     const savedStyle = (metadata.avatarStyle as AvatarStyleTier) || undefined;
-    const style = savedStyle || getUnlockedStyleTier(numericLevel);
+    // Use saved style or fixed default — never level-dependent fallback
+    // (level comes from GamificationContext which isn't available everywhere)
+    const style: AvatarStyleTier = savedStyle || 'simple';
     const overrides = (metadata.avatarOverrides as AvatarOverrides) || {};
     const glowRing = (metadata.glowRing as GlowRingConfig) || null;
 
     return { style, overrides, isLoaded, seed, glowRing };
-  }, [rawMetadata, isLoaded, numericLevel, seed]);
+  }, [rawMetadata, isLoaded, seed]);
 }
 
 export default useAvatarConfig;

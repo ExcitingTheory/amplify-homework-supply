@@ -2,7 +2,7 @@
  * Storybook stories for LogViewer component
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { LogViewer } from './LogViewer';
 import { LogEntry } from '../../utils/debug/DebugLogger';
 

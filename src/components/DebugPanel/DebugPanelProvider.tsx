@@ -33,20 +33,23 @@ export function DebugPanelProvider({
 }: DebugPanelProviderProps) {
   const { isOpen, close } = useDebugPanel();
 
-  // Defer localStorage check to after mount to avoid SSR/client hydration mismatch.
-  // On the server, isDebugModeEnabled() always returns false (no window), but on the
-  // client it may return true — changing the render tree and causing a hydration error.
+  // Defer ALL DebugPanel rendering to after mount to avoid hydration mismatch.
+  // MUI Drawer renders differently on server vs client (Box/Skeleton vs Drawer/Typography).
+  // Since DebugPanel is a client-only tool (accesses window globals), skip SSR entirely.
+  const [mounted, setMounted] = React.useState(false);
+
   const [shouldEnable, setShouldEnable] = React.useState(
     enabled ?? process.env.NODE_ENV === 'development'
   );
 
   React.useEffect(() => {
+    setMounted(true);
     if (enabled == null && process.env.NODE_ENV !== 'development') {
       setShouldEnable(isDebugModeEnabled());
     }
   }, [enabled]);
 
-  if (!shouldEnable) {
+  if (!shouldEnable || !mounted) {
     return <>{children}</>;
   }
 

@@ -1,5 +1,5 @@
-import { useReducer, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/router';
+import { useReducer, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import {
   loadTabState,
   saveTabState,
@@ -80,8 +80,17 @@ export function useTabState(options = {}) {
   } = options;
 
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isInitialized = useRef(false);
   const isUpdatingURL = useRef(false);
+
+  // Convert URLSearchParams to plain object for parseTabStateFromURL
+  const queryObject = useMemo(() => {
+    const obj = {};
+    searchParams.forEach((value, key) => { obj[key] = value; });
+    return obj;
+  }, [searchParams]);
 
   // Initialize state from URL and localStorage
   const [state, dispatch] = useReducer(tabStateReducer, null, () => {
@@ -96,7 +105,13 @@ export function useTabState(options = {}) {
       };
     }
 
-    const urlState = parseTabStateFromURL(router.query);
+    // On initial render, parse from current URL search params
+    const currentParams = {};
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      sp.forEach((value, key) => { currentParams[key] = value; });
+    }
+    const urlState = parseTabStateFromURL(currentParams);
     const localState = syncToLocalStorage ? loadTabState() : null;
     
     // Prioritize: URL state > component defaults > localStorage
@@ -124,39 +139,37 @@ export function useTabState(options = {}) {
 
   // Sync to URL whenever state changes (debounced)
   useEffect(() => {
-    if (!syncToURL || !isInitialized.current || isUpdatingURL.current || !router.isReady) return;
+    if (!syncToURL || !isInitialized.current || isUpdatingURL.current) return;
 
     const timeoutId = setTimeout(() => {
       // Build tab state query params
       const tabQuery = buildTabStateQuery(state);
       
       // Only update URL if tab query actually changed
-      const currentTabQuery = buildTabStateQuery(parseTabStateFromURL(router.query));
+      const currentTabQuery = buildTabStateQuery(parseTabStateFromURL(queryObject));
       const newTabQuery = buildTabStateQuery(state);
       
       if (JSON.stringify(currentTabQuery) !== JSON.stringify(newTabQuery)) {
         isUpdatingURL.current = true;
         
-        // Build URL string to avoid interpolation issues with dynamic routes
-        // Use only tab state params, not dynamic route params like 'id'
-        const currentPath = router.asPath.split('?')[0];
+        // Build URL string using pathname from next/navigation
         const queryString = new URLSearchParams(tabQuery).toString();
-        const newUrl = queryString ? `${currentPath}?${queryString}` : currentPath;
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
         
-        router.replace(newUrl, undefined, { shallow: true }).finally(() => {
-          isUpdatingURL.current = false;
-        });
+        router.replace(newUrl);
+        // Reset the flag after a tick to allow subsequent updates
+        setTimeout(() => { isUpdatingURL.current = false; }, 100);
       }
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [state, syncToURL, router.pathname, router.query, router.isReady]);
+  }, [state, syncToURL, pathname, queryObject]);
 
   // Listen for URL changes from external sources (browser back/forward, manual URL edits)
   useEffect(() => {
     if (!syncToURL || isUpdatingURL.current) return;
 
-    const urlState = parseTabStateFromURL(router.query);
+    const urlState = parseTabStateFromURL(queryObject);
     const localState = syncToLocalStorage ? loadTabState() : null;
     
     // Merge with component defaults, not utility defaults
@@ -175,10 +188,9 @@ export function useTabState(options = {}) {
       dispatch({ type: 'RESTORE_FROM_URL', payload: merged });
     } else {
       // For subsequent changes, only restore if URL was changed externally
-      // (We detect this by checking if we're not currently updating the URL ourselves)
       dispatch({ type: 'RESTORE_FROM_URL', payload: merged });
     }
-  }, [router.query, syncToURL, syncToLocalStorage, defaultLeftTab, defaultRightTab, defaultLeftWidth, defaultRightWidth]);
+  }, [queryObject, syncToURL, syncToLocalStorage, defaultLeftTab, defaultRightTab, defaultLeftWidth, defaultRightWidth]);
 
   // Setter functions with dispatch
   const setLeftTab = useCallback((value) => {

@@ -29,9 +29,13 @@
     "settings": "设置"
   },
   "unitCompletedPlugin": {
+    "allCaughtUp": "全部完成！没有更多作业了。",
     "completionMessage": "单元已完成！",
     "continueButton": "继续",
-    "sectionHeading": "下一步"
+    "nextAssignment": "下一个作业",
+    "retrying": "正在开始新的尝试...",
+    "sectionHeading": "下一步",
+    "tryAgain": "再试一次"
   },
   "quizComponent": {
     "gradeDisplay": "成绩：{{score}}%"

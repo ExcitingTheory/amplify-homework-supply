@@ -1,9 +1,9 @@
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { GroupChallengeCard } from './GroupChallengeCard'
 
 const meta: Meta<typeof GroupChallengeCard> = {
-  title: '🏆 Gamification/Guilds & Teams/Group Challenge Card',
+  title: '🏆 Gamification/Squads & Teams/Group Challenge Card',
   component: GroupChallengeCard,
 }
 export default meta

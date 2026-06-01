@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { linkTo } from '@storybook/addon-links';
 import { 
   Box, 
@@ -416,16 +416,16 @@ export const Welcome: Story = {
             />
             <FeatureCard
               icon={<ShieldIcon sx={{ fontSize: 36 }} />}
-              title="Guilds & Social"
-              description="Guild system with custom crests, leaderboards, post feeds, group challenges, boss battles, and campaign missions for team-based learning."
-              chips={['Guilds', 'Crests', 'Challenges', 'Boss Battles', 'Campaigns']}
-              storyLink={['Gamification/GuildLeaderboard', 'Default']}
+              title="Squads & Social"
+              description="Squad system with custom crests, leaderboards, post feeds, group challenges, boss battles, and campaign missions for team-based learning."
+              chips={['Squads', 'Crests', 'Challenges', 'Boss Battles', 'Campaigns']}
+              storyLink={['Gamification/SquadLeaderboard', 'Default']}
               color="error.main"
             />
             <FeatureCard
               icon={<PersonIcon sx={{ fontSize: 36 }} />}
               title="Avatar & Customization"
-              description="DiceBear-based avatars with armor editor, cosmetic selector, and style tiers unlocked by level. Heraldic shield crests for guilds."
+              description="DiceBear-based avatars with armor editor, cosmetic selector, and style tiers unlocked by level. Heraldic shield crests for squads."
               chips={['DiceBear', 'Armor', 'Cosmetics', 'Level-Gated', 'Shield Crests']}
               storyLink={['Gamification/AvatarCustomizer', 'Default']}
               color="info.main"
