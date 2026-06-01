@@ -56,7 +56,10 @@ export const Introduction: Story = {
             <Chip label="AWS Amplify" size="small" />
             <Chip label="OpenAI" size="small" />
             <Chip label="Real-time Collaboration" size="small" />
+            <Chip label="Peer Review" size="small" />
+            <Chip label="Practice Drills" size="small" />
             <Chip label="Gamification" size="small" />
+            <Chip label="Offline Support" size="small" />
           </Box>
         </Box>
 
@@ -84,7 +87,7 @@ export const Introduction: Story = {
             <PillarCard
               icon={<GroupsIcon sx={{ fontSize: 48 }} />}
               title="Collaborative"
-              description="Real-time workbooks with tutor cursors, peer review, squads, and class sections. Students see instructor guidance live."
+              description="Real-time workbooks with tutor cursors, peer review with shared annotation, class chat rooms, squads, and group challenges. Students see instructor guidance live."
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -115,7 +118,13 @@ export const Introduction: Story = {
               <Typography><strong>AI</strong> assists both roles — generating content for instructors and providing feedback to students</Typography>
             </li>
             <li>
-              <Typography><strong>Gamification</strong> keeps students engaged with XP, badges, streaks, squads, and leaderboards</Typography>
+              <Typography><strong>Practice Drills</strong> let students replay graded content as AI-generated variations for extra practice</Typography>
+            </li>
+            <li>
+              <Typography><strong>Peer Review</strong> enables students to give structured feedback on each other's work in collaborative rooms</Typography>
+            </li>
+            <li>
+              <Typography><strong>Gamification</strong> keeps students engaged with XP, badges, skill trees, boss battles, streaks, squads, and leaderboards</Typography>
             </li>
           </Box>
         </Paper>

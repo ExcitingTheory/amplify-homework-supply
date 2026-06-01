@@ -41,7 +41,7 @@ export const Architecture: Story = {
         {/* Stack */}
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Tech Stack</Typography>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 4 }}>
-          <Chip label="Next.js 15 (Pages Router)" />
+          <Chip label="Next.js 16 (App Router)" />
           <Chip label="React 19" />
           <Chip label="AWS Amplify Gen 2" />
           <Chip label="DynamoDB" />
@@ -61,7 +61,7 @@ export const Architecture: Story = {
 ┌──────────────────────────────────────────────────────────────┐
 │                        Next.js Frontend                        │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐│
-│  │  Pages   │ │ Contexts │ │Components│ │  Lexical Editor   ││
+│  │  App     │ │ Contexts │ │Components│ │  Lexical Editor   ││
 │  │  Router  │ │  (State) │ │  (MUI)   │ │  (Rich Content)  ││
 │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────────┬─────────┘│
 │       │             │            │                 │          │
@@ -88,13 +88,15 @@ export const Architecture: Story = {
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Project Structure</Typography>
         <Paper sx={{ p: 2, mb: 4, fontFamily: 'monospace', fontSize: 13, overflow: 'auto' }}>
           <pre style={{ margin: 0 }}>{`
-pages/              → Next.js routes (.jsx/.tsx)
+app/                → Next.js App Router routes
+  [locale]/         → i18n-prefixed pages
+  actions/          → Server actions
+  api/              → API routes
 src/
   components/       → React components (MUI-based)
   context/          → React Context providers (state management)
   utils/            → Pure functions and helpers
-  graphql/          → GraphQL queries/mutations/subscriptions
-  yjs/              → Yjs collaboration hooks and provider
+  yjs/              → Yjs CRDT collaboration hooks and provider
 amplify/
   data/resource.ts  → Data schema (models + auth rules)
   functions/        → Lambda functions (TypeScript)

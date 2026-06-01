@@ -59,19 +59,28 @@ const painPoints = [
     problem: 'Audio/pronunciation practice is hard to manage',
     solution: 'Built-in recording studio with AI transcription and TTS',
   },
+  {
+    problem: 'Students lose context switching between lesson and chat',
+    solution: 'Class chat lives inside the platform, scoped to each lesson or section',
+  },
+  {
+    problem: 'Students give up after getting an answer wrong once',
+    solution: 'AI-generated practice drills create fresh variations so students can keep drilling',
+  },
 ];
 
 const comparisons = [
   { feature: 'AI Content Generation', us: true, lms: false, docs: false },
   { feature: 'Real-time Collaboration', us: true, lms: false, docs: true },
   { feature: 'Auto-graded Interactive Blocks', us: true, lms: true, docs: false },
-  { feature: 'Gamification (XP/Badges/Squads)', us: true, lms: false, docs: false },
+  { feature: 'Gamification (XP/Badges/Skill Tree/Boss Battles)', us: true, lms: false, docs: false },
   { feature: 'Audio Recording + Transcription', us: true, lms: false, docs: false },
   { feature: 'PDF Analysis + Vocab Extraction', us: true, lms: false, docs: false },
+  { feature: 'AI Practice Drills (unique variations)', us: true, lms: false, docs: false },
+  { feature: 'Peer Review System', us: true, lms: false, docs: true },
+  { feature: 'Class Chat (scoped to lessons)', us: true, lms: false, docs: false },
   { feature: 'Offline Support', us: true, lms: true, docs: true },
   { feature: '6-Language i18n', us: true, lms: true, docs: false },
-  { feature: 'Peer Review System', us: true, lms: false, docs: true },
-  { feature: 'Practice Drills (AI-generated)', us: true, lms: false, docs: false },
 ];
 
 export const WhyHomeworkSupply: Story = {
