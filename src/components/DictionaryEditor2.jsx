@@ -1,5 +1,6 @@
 "use strict";
 import React from "react";
+import DOMPurify from "dompurify";
 import { useTranslations } from "next-intl";
 
 // Lexical imports
@@ -508,7 +509,10 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
             <ruby
               style={{ fontSize: "2.5rem" }}
               dangerouslySetInnerHTML={{
-                __html: rubyTagsString || "<em>No ruby tags yet</em>",
+                __html: DOMPurify.sanitize(
+                  rubyTagsString || "<em>No ruby tags yet</em>",
+                  { ALLOWED_TAGS: ["rt", "rp", "em"], ALLOWED_ATTR: [] },
+                ),
               }}
             />
           </Box>

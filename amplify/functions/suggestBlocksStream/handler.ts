@@ -162,7 +162,10 @@ Call 2-4 of these tools with appropriate data. Each tool call represents one sug
       );
       responseStream.end();
     } catch (error) {
-      console.error("[SuggestBlocks] Error:", error);
+      console.error(
+        "[SuggestBlocks] Error:",
+        error instanceof Error ? error.message : String(error),
+      );
       if (streamStarted) {
         responseStream.write(
           `data: ${JSON.stringify({ type: "error", error: error instanceof Error ? error.message : "Internal server error" })}\n\n`,

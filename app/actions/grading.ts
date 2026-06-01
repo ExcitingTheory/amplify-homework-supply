@@ -155,6 +155,7 @@ export async function gradeImage(params: {
   expectedContent?: string;
 }) {
   const openai = getOpenAI();
+  const safeImageUrl = validateAudioUrl(params.imageUrl);
   const { text } = await generateText({
     model: openai("gpt-4o"),
     messages: [
@@ -168,7 +169,7 @@ export async function gradeImage(params: {
         content: [
           {
             type: "image",
-            image: new URL(params.imageUrl),
+            image: new URL(safeImageUrl),
           },
           {
             type: "text",
