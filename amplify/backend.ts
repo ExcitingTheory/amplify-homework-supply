@@ -40,7 +40,6 @@ import {
 import { MediaConvertConstruct } from "./custom/mediaConvert/resource";
 import { MediaCDNConstruct } from "./custom/mediaCDN/resource";
 import { CfKeyRotationConstruct } from "./custom/cfKeyRotation/resource";
-import { GitHubActionsConstruct } from "./custom/githubActions/resource";
 import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
@@ -332,11 +331,6 @@ const mediaConvert = new MediaConvertConstruct(dataStack, "MediaConvert", {
   bucket: backend.storage.resources.bucket,
   handlerLambda: backend.mediaConvertHandler.resources.lambda,
 });
-
-// ==========================================================================
-// GitHubActions OIDC — role for CI to run `ampx generate outputs` (no static keys)
-// ==========================================================================
-new GitHubActionsConstruct(dataStack, "GitHubActions");
 
 // ==========================================================================
 // CfKeyRotation — generates RSA key pair and writes to SSM before CloudFront

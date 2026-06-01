@@ -31,11 +31,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (CI account)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::238809176525:role/gitHubDeployRole
+          aws-region: us-east-1
+      
+      - name: Assume Amplify read role (et-prod)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::759854655984:role/GitHubActionsRole
           aws-region: us-east-1
+          role-chaining: true
       
       - name: Generate Amplify outputs
         run: npx ampx generate outputs --branch main --app-id ${{ secrets.AMPLIFY_APP_ID }}
