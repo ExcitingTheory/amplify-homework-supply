@@ -73,7 +73,7 @@ export const Introduction: Story = {
             <PillarCard
               icon={<SchoolIcon sx={{ fontSize: 48 }} />}
               title="Create Lessons"
-              description="Rich editor with quizzes, fill-in-the-blank, vocabulary drills, audio, video, and PDF content. Build a full curriculum in minutes."
+              description="Rich editor with quizzes, fill-in-the-blank, vocabulary drills, audio, video, and PDF content. Use autocomplete and AI suggestions to speed up content creation. Build a full curriculum in minutes."
             />
           </Grid>
           <Grid item xs={12} sm={6}>
