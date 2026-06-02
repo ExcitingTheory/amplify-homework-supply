@@ -50,7 +50,7 @@ export default function PracticeDrillProgress({
           sx={{ flex: 1, height: 8, borderRadius: 4 }}
         />
         <Typography variant="caption" color="text.secondary" sx={{ minWidth: 70, textAlign: 'right' }}>
-          {blocksCompleted}/{blockCount} {t('practiceDrill.progress.questions', 'questions')}
+          {blocksCompleted}/{blockCount} {t('practiceDrill.progress.questions')}
         </Typography>
       </Box>
 
@@ -59,8 +59,8 @@ export default function PracticeDrillProgress({
         <Tooltip
           title={
             xpDiminished
-              ? t('practiceDrill.progress.xpDiminishedTooltip', 'Practice XP decreases with each session today. Try again tomorrow for full XP!')
-              : t('practiceDrill.progress.xpTooltip', 'XP earned this session')
+              ? t('practiceDrill.progress.xpDiminishedTooltip')
+              : t('practiceDrill.progress.xpTooltip')
           }
         >
           <Chip

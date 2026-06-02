@@ -248,7 +248,7 @@ function TableHoverActions({
         <button
           ref={topRef}
           className="table-hover-add-button table-hover-add-column"
-          aria-label={t('table.addColumn', 'Add column')}
+          aria-label={t('table.addColumn')}
           type="button"
           style={{
             position: 'fixed',
@@ -264,7 +264,7 @@ function TableHoverActions({
         <button
           ref={leftRef}
           className="table-hover-add-button table-hover-add-row"
-          aria-label={t('table.addRow', 'Add row')}
+          aria-label={t('table.addRow')}
           type="button"
           style={{
             position: 'fixed',

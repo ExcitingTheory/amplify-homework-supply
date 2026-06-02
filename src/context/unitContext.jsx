@@ -23,6 +23,7 @@ import {
   actionTypes,
 } from "./reducers/unitReducer";
 // Provider and Consumer are connected through their "parent" context
+/** @type {import('react').Context<Record<string, any>>} */
 const UnitContext = createContext({});
 
 export const gradedBlockTypes = [

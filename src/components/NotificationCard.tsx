@@ -211,7 +211,7 @@ export default function NotificationCard({
       </Box>
 
       {onDelete && (
-        <Tooltip title={t("notification.delete", "Delete")}>
+        <Tooltip title={t("notification.delete")}>
           <IconButton
             size="small"
             onClick={(e) => {

@@ -37,7 +37,7 @@ export function TutorPresenceBanner() {
     >
       <Box display="flex" alignItems="center" gap={2}>
         <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 32, height: 32 } }}>
-          {tutors.map((tutor, i) => (
+          {tutors.map((tutor: any, i: number) => (
             <Avatar
               key={i}
               sx={{ bgcolor: tutor.color || '#f59e0b' }}
@@ -50,7 +50,7 @@ export function TutorPresenceBanner() {
         
         <Typography variant="body2">
           <strong>
-            {tutors.map((t) => t.displayName).join(', ')}
+            {tutors.map((tutor: any) => tutor.displayName).join(', ')}
           </strong>
           {' '}
           {tutors.length === 1 ? 'is' : 'are'} here to help you

@@ -93,7 +93,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="h5">
-            {t("notification.title", "Notifications")}
+            {t("notification.title")}
           </Typography>
           {unseenCount > 0 && (
             <Chip
@@ -109,7 +109,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             startIcon={<DoneAllIcon />}
             onClick={markAllSeen}
           >
-            {t("notification.markAllRead", "Mark all read")}
+              {t("notification.markAllRead")}
           </Button>
         )}
       </Box>
@@ -132,7 +132,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
                 <Box
                   sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                 >
-                  {t(`notification.category.${cat.toLowerCase()}`, cat)}
+                  {t(`notification.category.${cat.toLowerCase()}`)}
                   {count > 0 && (
                     <Chip
                       label={count}
@@ -176,13 +176,10 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
           />
           <Typography variant="body1" color="text.secondary">
-            {t("notification.empty", "No notifications yet")}
+            {t("notification.empty")}
           </Typography>
           <Typography variant="body2" color="text.disabled">
-            {t(
-              "notification.emptyDescription",
-              "You'll see notifications for assignments, grades, badges, and more here.",
-            )}
+            {t("notification.emptyDescription")}
           </Typography>
         </Box>
       ) : selectedCategory < CATEGORIES.length ? (

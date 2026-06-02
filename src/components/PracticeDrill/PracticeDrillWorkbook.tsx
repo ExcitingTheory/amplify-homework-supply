@@ -112,7 +112,7 @@ export default function PracticeDrillWorkbook({
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography color="text.secondary">
-          {t('practiceDrill.workbook.noBlocks', 'No practice blocks generated.')}
+          {t('practiceDrill.workbook.noBlocks')}
         </Typography>
       </Box>
     )
@@ -144,7 +144,7 @@ export default function PracticeDrillWorkbook({
             {/* Collaborative header */}
             {collaborative && groupStats && (
               <Box sx={{ px: 2, pt: 1 }}>
-                <Tooltip title={t('practiceDrill.collab.groupProgress', 'Group practice progress')}>
+                <Tooltip title={t('practiceDrill.collab.groupProgress')}>
                   <Chip
                     icon={<GroupsIcon />}
                     size="small"
@@ -163,7 +163,7 @@ export default function PracticeDrillWorkbook({
                 <Box sx={{ p: 2 }}>
                   <ContentEditable
                     data-lexical-editor="true"
-                    aria-label={t('practiceDrill.workbook.label', 'Practice drill content')}
+                    aria-label={t('practiceDrill.workbook.label')}
                     style={{
                       width: '100%',
                       minHeight: '200px',

@@ -58,7 +58,7 @@ export default function JoinPeerReviewDialog({
 
   const handleJoin = useCallback(async () => {
     if (!code) {
-      setError(t('peerReview.joinDialog.emptyCode', 'Please enter a review room code'))
+      setError(t('peerReview.joinDialog.emptyCode'))
       return
     }
 
@@ -77,7 +77,7 @@ export default function JoinPeerReviewDialog({
       setError(null)
     } catch (err: any) {
       console.error('[JoinPeerReviewDialog] Error:', err)
-      const message = err.message || t('peerReview.joinDialog.error', 'Failed to join review')
+      const message = err.message || t('peerReview.joinDialog.error')
       setError(message)
     } finally {
       setLoading(false)
@@ -103,25 +103,25 @@ export default function JoinPeerReviewDialog({
     >
       <DialogTitle id="join-peer-review-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <RateReviewIcon color="primary" />
-        {t('peerReview.joinDialog.title', 'Join Peer Review')}
+        {t('peerReview.joinDialog.title')}
       </DialogTitle>
 
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label={t('peerReview.joinDialog.tabCode', 'Enter Code')} />
-          <Tab label={t('peerReview.joinDialog.tabInvitations', 'Invitations')} />
+          <Tab label={t('peerReview.joinDialog.tabCode')} />
+          <Tab label={t('peerReview.joinDialog.tabInvitations')} />
         </Tabs>
 
         {tab === 0 && (
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('peerReview.joinDialog.description', 'Enter the review room code shared by your classmate to join their peer review session.')}
+              {t('peerReview.joinDialog.description')}
             </Typography>
 
             <TextField
               autoFocus
               fullWidth
-              label={t('peerReview.joinDialog.codeLabel', 'Review Room Code')}
+              label={t('peerReview.joinDialog.codeLabel')}
               value={code}
               onChange={handleCodeChange}
               onKeyDown={handleKeyDown}
@@ -150,8 +150,8 @@ export default function JoinPeerReviewDialog({
                 }
               }
             }}
-            joinLabel={t('peerReview.joinDialog.joinButton', 'Join Review')}
-            emptyMessage={t('peerReview.joinDialog.noInvitations', 'No pending review invitations')}
+            joinLabel={t('peerReview.joinDialog.joinButton')}
+            emptyMessage={t('peerReview.joinDialog.noInvitations')}
           />
         )}
       </DialogContent>
@@ -167,8 +167,8 @@ export default function JoinPeerReviewDialog({
           startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <RateReviewIcon />}
         >
           {loading
-            ? t('peerReview.joinDialog.joining', 'Joining...')
-            : t('peerReview.joinDialog.joinButton', 'Join Review')}
+            ? t('peerReview.joinDialog.joining')
+            : t('peerReview.joinDialog.joinButton')}
         </Button>
       </DialogActions>
     </Dialog>

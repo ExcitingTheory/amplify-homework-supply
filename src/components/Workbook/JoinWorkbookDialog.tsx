@@ -58,7 +58,7 @@ export default function JoinWorkbookDialog({
 
   const handleJoin = useCallback(async () => {
     if (!input) {
-      setError(t('workbook.joinDialog.emptyInput', 'Please enter a workbook link or unit ID'))
+      setError(t('workbook.joinDialog.emptyInput'))
       return
     }
 
@@ -78,7 +78,7 @@ export default function JoinWorkbookDialog({
       const { data: unit, errors } = await client.models.Unit.get({ id: unitId })
 
       if (errors?.length || !unit) {
-        setError(t('workbook.joinDialog.notFound', 'No workbook found with that ID'))
+        setError(t('workbook.joinDialog.notFound'))
         setLoading(false)
         return
       }
@@ -88,7 +88,7 @@ export default function JoinWorkbookDialog({
       setError(null)
     } catch (err: any) {
       console.error('[JoinWorkbookDialog] Error:', err)
-      setError(err.message || t('workbook.joinDialog.error', 'Failed to find workbook'))
+      setError(err.message || t('workbook.joinDialog.error'))
     } finally {
       setLoading(false)
     }
@@ -113,25 +113,25 @@ export default function JoinWorkbookDialog({
     >
       <DialogTitle id="join-workbook-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <EditNoteIcon color="primary" />
-        {t('workbook.joinDialog.title', 'Join Workbook Session')}
+        {t('workbook.joinDialog.title')}
       </DialogTitle>
 
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label={t('workbook.joinDialog.tabLink', 'Enter Link')} />
-          <Tab label={t('workbook.joinDialog.tabInvitations', 'Invitations')} />
+          <Tab label={t('workbook.joinDialog.tabLink')} />
+          <Tab label={t('workbook.joinDialog.tabInvitations')} />
         </Tabs>
 
         {tab === 0 && (
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('workbook.joinDialog.description', 'Paste a workbook link or enter a unit ID to join a student\'s workbook as an instructor.')}
+              {t('workbook.joinDialog.description')}
             </Typography>
 
             <TextField
               autoFocus
               fullWidth
-              label={t('workbook.joinDialog.inputLabel', 'Workbook link or Unit ID')}
+              label={t('workbook.joinDialog.inputLabel')}
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
@@ -160,8 +160,8 @@ export default function JoinWorkbookDialog({
                 }
               }
             }}
-            joinLabel={t('workbook.joinDialog.joinButton', 'Join Workbook')}
-            emptyMessage={t('workbook.joinDialog.noInvitations', 'No pending workbook invitations')}
+            joinLabel={t('workbook.joinDialog.joinButton')}
+            emptyMessage={t('workbook.joinDialog.noInvitations')}
           />
         )}
       </DialogContent>
@@ -177,8 +177,8 @@ export default function JoinWorkbookDialog({
           startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <EditNoteIcon />}
         >
           {loading
-            ? t('workbook.joinDialog.joining', 'Finding...')
-            : t('workbook.joinDialog.joinButton', 'Join Workbook')}
+            ? t('workbook.joinDialog.joining')
+            : t('workbook.joinDialog.joinButton')}
         </Button>
       </DialogActions>
     </Dialog>

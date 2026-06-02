@@ -63,7 +63,7 @@ export function PeerReviewFeedbackPrompt({
               size="small"
               onClick={() => handleFeedback(true)}
               sx={{ color: 'inherit' }}
-              aria-label={t('peerReview.helpful', 'Peer review was helpful')}
+              aria-label={t('peerReview.helpful')}
             >
               <ThumbUpIcon fontSize="small" />
             </IconButton>
@@ -71,7 +71,7 @@ export function PeerReviewFeedbackPrompt({
               size="small"
               onClick={() => handleFeedback(false)}
               sx={{ color: 'inherit' }}
-              aria-label={t('peerReview.notHelpful', 'Peer review was not helpful')}
+              aria-label={t('peerReview.notHelpful')}
             >
               <ThumbDownIcon fontSize="small" />
             </IconButton>

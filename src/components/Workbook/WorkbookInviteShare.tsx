@@ -93,12 +93,12 @@ export function WorkbookInviteShare({
 
   return (
     <>
-      <Tooltip title={t('workbook.invite.shareTooltip', 'Invite others to this workbook')}>
+      <Tooltip title={t('workbook.invite.shareTooltip')}>
         <IconButton
           size="small"
           onClick={handleOpen}
           color={open ? 'primary' : 'default'}
-          aria-label={t('workbook.invite.shareTooltip', 'Invite others to this workbook')}
+          aria-label={t('workbook.invite.shareTooltip')}
         >
           <ShareIcon fontSize="small" />
         </IconButton>
@@ -117,10 +117,10 @@ export function WorkbookInviteShare({
         }}
       >
         <Typography variant="subtitle2" gutterBottom>
-          {t('workbook.invite.title', 'Share Workbook')}
+          {t('workbook.invite.title')}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-          {t('workbook.invite.description', 'Anyone with this link who is enrolled in the same section can join and work together in real-time.')}
+          {t('workbook.invite.description')}
         </Typography>
 
         {/* Share link */}
@@ -142,7 +142,7 @@ export function WorkbookInviteShare({
                     size="small"
                     onClick={handleCopy}
                     color={copied ? 'success' : 'default'}
-                    aria-label={t('workbook.invite.copy', 'Copy link')}
+                    aria-label={t('workbook.invite.copy')}
                   >
                     {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
@@ -164,20 +164,20 @@ export function WorkbookInviteShare({
           sx={{ mb: 2 }}
         >
           {copied
-            ? t('workbook.invite.copied', 'Copied!')
-            : t('workbook.invite.copyLink', 'Copy Link')}
+            ? t('workbook.invite.copied')
+            : t('workbook.invite.copyLink')}
         </Button>
 
         <Divider sx={{ mb: 1.5 }} />
 
         {/* Current participants */}
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-          {t('workbook.invite.currentlyOnline', 'Currently online')} ({users.length})
+          {t('workbook.invite.currentlyOnline')} ({users.length})
         </Typography>
 
         {users.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 1 }}>
-            {t('workbook.invite.noOthers', 'No one else is here yet')}
+            {t('workbook.invite.noOthers')}
           </Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -215,7 +215,7 @@ export function WorkbookInviteShare({
                 )}
                 {user.isIdle && (
                   <Typography variant="caption" color="text.secondary">
-                    {t('workbook.invite.idle', 'idle')}
+                    {t('workbook.invite.idle')}
                   </Typography>
                 )}
               </Box>
