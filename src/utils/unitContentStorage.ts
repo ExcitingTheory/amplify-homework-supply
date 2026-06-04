@@ -1,11 +1,17 @@
 import { uploadData, downloadData, list } from "aws-amplify/storage";
+import { extractTextFromLexical } from "./extractTextFromLexical";
 
 /** S3 key helpers — require identityId (from Unit.identityId) */
 function draftKey(identityId: string, unitId: string): string {
   return `private/${identityId}/units/${unitId}/draft.json`;
 }
-function publishedKey(identityId: string, unitId: string): string {
-  return `protected/${identityId}/units/${unitId}/published.json`;
+/**
+ * Phase 6: published content lives under the type-scoped CDN path.
+ * identityId is intentionally excluded — the publishUnit Lambda writes here
+ * using its IAM execution role (no Cognito identity needed).
+ */
+function publishedKey(unitId: string): string {
+  return `protected/units/${unitId}/published.json`;
 }
 function yjsSnapshotKey(identityId: string, unitId: string): string {
   return `private/${identityId}/units/${unitId}/yjs-snapshot.bin`;
@@ -16,6 +22,10 @@ function historyKey(
   version: number,
 ): string {
   return `private/${identityId}/units/${unitId}/history/v${version}.json`;
+}
+
+function plainTextKey(identityId: string, unitId: string): string {
+  return `protected/${identityId}/units/${unitId}/plain.txt`;
 }
 
 /**
@@ -74,8 +84,15 @@ export async function loadYjsSnapshot(
 }
 
 /**
- * Publish: copy current draft to published key + history snapshot.
- * Returns the new contentVersion used for the history key.
+ * Publish: write a history snapshot only.
+ *
+ * Phase 6: writing to the CDN path (protected/units/{id}/published.json)
+ * is handled exclusively by the publishUnit Lambda, which runs under its
+ * IAM execution role and also rewrites media paths. Callers in unitContext
+ * should call client.mutations.publishUnit({ unitId }) instead.
+ *
+ * This function is kept for the history-snapshot side-effect and for any
+ * callers that haven't been migrated yet.
  */
 export async function publishContent(
   identityId: string,
@@ -87,44 +104,74 @@ export async function publishContent(
     .result;
   const draftContent = await draftResult.body.text();
 
-  // Write to protected/ (published) and private/ (history) in parallel
-  const publishResults = await Promise.allSettled([
-    uploadData({
-      path: publishedKey(identityId, unitId),
-      data: draftContent,
-      options: { contentType: "application/json" },
-    }).result,
-    uploadData({
+  // Only write history snapshot — published.json is written by the publishUnit Lambda
+  try {
+    await uploadData({
       path: historyKey(identityId, unitId, contentVersion),
       data: draftContent,
       options: { contentType: "application/json" },
-    }).result,
-  ]);
-  const publishFailures = publishResults.filter((r) => r.status === "rejected");
-  if (publishFailures.length > 0) {
-    console.error(
-      "[unitContentStorage] Publish partially failed:",
-      publishFailures.map((f) => (f as PromiseRejectedResult).reason),
-    );
+    }).result;
+  } catch (err) {
+    console.error("[unitContentStorage] History snapshot failed:", err);
+  }
+
+  // Write plain text for embedding generation and full-text search
+  try {
+    const plainText = extractTextFromLexical(draftContent);
+    if (plainText) {
+      await uploadData({
+        path: plainTextKey(identityId, unitId),
+        data: plainText,
+        options: { contentType: "text/plain" },
+      }).result;
+    }
+  } catch (err) {
+    console.error("[unitContentStorage] Plain text write failed:", err);
   }
 }
 
 /**
- * Load content from S3.
- * Instructors load draft (private/), learners load published (protected/).
+ * Load content from S3 / CDN.
+ * Instructors load draft (Amplify Storage private/), learners load published
+ * directly from CloudFront using the signed cookie issued at login.
+ *
+ * identityId is still required for the 'draft' variant; it is intentionally
+ * unused for 'published' to keep the caller signature stable.
  */
 export async function loadContent(
   identityId: string,
   unitId: string,
   variant: "draft" | "published",
 ): Promise<string | null> {
-  const path =
-    variant === "draft"
-      ? draftKey(identityId, unitId)
-      : publishedKey(identityId, unitId);
+  if (variant === "draft") {
+    try {
+      const result = await downloadData({ path: draftKey(identityId, unitId) })
+        .result;
+      return await result.body.text();
+    } catch {
+      return null;
+    }
+  }
+
+  // Phase 6: published content is fetched from CloudFront.
+  // The browser automatically sends the CloudFront-Policy / CloudFront-Signature /
+  // CloudFront-Key-Pair-Id cookies set by app/providers.tsx at login.
+  const cdnDomain = process.env.NEXT_PUBLIC_CDN_DOMAIN;
+  if (!cdnDomain) {
+    // Fallback: read via Amplify Storage (no CDN available, e.g. local dev)
+    try {
+      const result = await downloadData({ path: publishedKey(unitId) }).result;
+      return await result.body.text();
+    } catch {
+      return null;
+    }
+  }
+
   try {
-    const result = await downloadData({ path }).result;
-    return await result.body.text();
+    const url = `https://${cdnDomain}/${publishedKey(unitId)}`;
+    const res = await fetch(url, { credentials: "include" });
+    if (!res.ok) return null;
+    return await res.text();
   } catch {
     return null;
   }

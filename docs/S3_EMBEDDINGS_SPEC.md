@@ -1,8 +1,22 @@
 # S3 Embeddings Storage Spec
 
+> **Status: COMPLETED** — June 2026
+>
+> All items below are implemented. This document is kept as a reference for the storage conventions and S3 key structure.
+>
+> **What shipped:**
+> - `EmbeddingInfo` schema no longer contains inline vectors — only `model`, `dimensions`, `version`, `wordCount`, `pageCount`
+> - `src/utils/embeddingStorage.ts` — `saveEmbedding`, `loadEmbedding`, `loadEmbeddingVectors`
+> - S3 path: `private/{identityId}/embeddings/{modelName}/{modelId}.json`
+> - `getCachedUrl` used for presigned URL caching in `loadEmbedding`
+>
+> **Remaining work tracked separately:**
+> - `executeSearchContent` in `chatTools.js` still uses a fallback path that calls `generateEmbedding` at query time — see `SEARCH_ARCHITECTURE.md` for the consolidation plan.
+> - Dimension mismatch (512 vs 1536) — see `SEARCH_ARCHITECTURE.md`.
+
 ## Overview
 
-Move embedding vectors from inline DynamoDB fields (`embedding: EmbeddingInfo`) to S3 objects. This eliminates ~5 KB per model item from subscription payloads and DynamoDB storage, while keeping lightweight metadata in-place for freshness checks.
+~~Move~~ Moved embedding vectors from inline DynamoDB fields (`embedding: EmbeddingInfo`) to S3 objects. This eliminates ~5 KB per model item from subscription payloads and DynamoDB storage, while keeping lightweight metadata in-place for freshness checks.
 
 ## Problem
 

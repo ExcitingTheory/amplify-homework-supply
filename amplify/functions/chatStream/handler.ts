@@ -47,7 +47,7 @@ const tools = {
     inputSchema: z.object({
       query: z.string().describe("The search query text"),
       type: z
-        .enum(["all", "files", "words", "questions"])
+        .enum(["all", "files", "words", "questions", "units", "sections"])
         .optional()
         .describe('Type of content to search - defaults to "all"'),
       limit: z

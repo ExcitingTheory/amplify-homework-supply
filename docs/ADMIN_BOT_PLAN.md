@@ -218,7 +218,7 @@ SECURITY (SYSTEM LEVEL):
 | Document | Relevance |
 |----------|-----------|
 | [docs/NOTIFICATION_SYSTEM.md](NOTIFICATION_SYSTEM.md) | Notification model, admin CLI, announcement patterns |
-| [docs/GAMIFICATION_IMPROVEMENTS_PLAN.md](GAMIFICATION_IMPROVEMENTS_PLAN.md) | XP config, badge templates, section-scoped settings |
+| [docs/GAMIFICATION.md](GAMIFICATION.md) | XP config, badge templates, section-scoped settings |
 | [docs/API.md](API.md) | Data models and GraphQL API reference |
 | [docs/ONBOARDING.md](ONBOARDING.md) | Dev setup for testing |
 | [app/api/_shared/botPersonas.ts](../app/api/_shared/botPersonas.ts) | Existing persona pattern to extend |

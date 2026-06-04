@@ -22,6 +22,7 @@ vi.mock('@lexical/react/LexicalComposerContext', () => ({
       setEditorState: mockSetEditorState,
       parseEditorState: mockParseEditorState,
       registerUpdateListener: vi.fn(() => vi.fn()),
+      update: vi.fn((callback: (() => void) | undefined) => { if (typeof callback === 'function') callback() }),
     },
   ],
 }))
@@ -138,7 +139,7 @@ describe('NarrativeReader', () => {
 
   it('handles invalid JSON gracefully', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    render(<NarrativeReader contentJson="not valid json {" />)
+    render(<NarrativeReader contentJson="{ invalid json" />)
     expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining('[NarrativeStatePlugin]'),
       expect.any(SyntaxError),

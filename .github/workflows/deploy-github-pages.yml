@@ -43,6 +43,8 @@ jobs:
         run: npx ampx generate outputs --branch main --app-id ${{ secrets.AMPLIFY_APP_ID }}
       - name: Build Storybook
         run: npm run build-storybook
+        env:
+          STORYBOOK_BASE_PATH: /amplify-homework-supply/
       # Upload pages artifact
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

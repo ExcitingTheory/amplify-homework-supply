@@ -4,7 +4,13 @@ import React from "react";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string, fallback?: string) => fallback || key,
+  useTranslations: () => (key: string, fallback?: string) => {
+    const map: Record<string, string> = {
+      "notification.empty": "No notifications yet",
+      "notification.markAllRead": "Mark all read",
+    };
+    return map[key] ?? fallback ?? key;
+  },
 }));
 
 // Mock notificationContext

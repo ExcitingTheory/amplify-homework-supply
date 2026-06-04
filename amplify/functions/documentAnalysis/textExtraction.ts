@@ -4,9 +4,8 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-const s3Client = new S3Client();
-
 export async function getS3Object(s3Key: string): Promise<Buffer> {
+  const s3Client = new S3Client();
   const bucketName = process.env.STORAGE_BUCKET || "";
 
   const command = new GetObjectCommand({

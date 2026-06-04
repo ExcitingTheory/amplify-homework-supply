@@ -11,7 +11,7 @@ import {
   CognitoUserPoolsAuthorizer,
   Cors,
 } from "aws-cdk-lib/aws-apigateway";
-import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Policy, PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
@@ -47,6 +47,8 @@ import { streakResetCronHandler } from "./functions/streakResetCron/resource";
 import { notificationCronHandler } from "./functions/notificationCron/resource";
 import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource";
 import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/resource";
+import { publishUnitHandler } from "./functions/publishUnit/resource";
+import { rebuildNgramIndexHandler } from "./functions/rebuildNgramIndex/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
@@ -136,6 +138,8 @@ export const backend = defineBackend({
   notificationCronHandler,
   leaderboardStreamHandler,
   analyticsAggregatorHandler,
+  publishUnitHandler,
+  rebuildNgramIndexHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -262,8 +266,19 @@ backend.embeddingsHandler.addEnvironment(
   "STORAGE_BUCKET",
   backend.storage.resources.bucket.bucketName,
 );
-backend.storage.resources.bucket.grantReadWrite(
-  backend.embeddingsHandler.resources.lambda,
+backend.embeddingsHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+    ],
+    resources: [
+      backend.storage.resources.bucket.bucketArn,
+      `${backend.storage.resources.bucket.bucketArn}/*`,
+    ],
+  }),
 );
 
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
@@ -343,11 +358,28 @@ const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation");
 
 const mediaCDN = new MediaCDNConstruct(dataStack, "MediaCDN", {
   bucket: backend.storage.resources.bucket,
-  cfPublicKeyParamName: cfKeyRotation.publicKeyParamName,
+  cfPublicKeyPem: cfKeyRotation.publicKeyPem,
 });
 
 // Ensure key pair is written to SSM before the distribution is created/updated
 mediaCDN.node.addDependency(cfKeyRotation);
+
+// -------------------------------------------------------------------------
+// CloudFront OAC bucket policy — allow CloudFront service principal to read
+// from the S3 bucket. This is added here (not inside MediaCDNConstruct)
+// because the bucket lives in the storage stack and the distribution lives
+// in the data stack. Using just the service principal (without a SourceArn
+// condition referencing the distribution) avoids creating a circular
+// dependency between the two nested stacks.
+// -------------------------------------------------------------------------
+backend.storage.resources.bucket.addToResourcePolicy(
+  new PolicyStatement({
+    sid: "AllowCloudFrontServicePrincipalReadOnly",
+    actions: ["s3:GetObject"],
+    principals: [new ServicePrincipal("cloudfront.amazonaws.com")],
+    resources: [backend.storage.resources.bucket.arnForObjects("*")],
+  }),
+);
 
 // Export CDN domain so Next.js and the frontend can construct stable CDN URLs
 backend.addOutput({
@@ -365,9 +397,7 @@ backend.addOutput({
 backend.sectionHandler.resources.lambda.addToRolePolicy(
   new PolicyStatement({
     actions: ["s3:GetObject"],
-    resources: [
-      `${backend.storage.resources.bucket.bucketArn}/private/*`,
-    ],
+    resources: [`${backend.storage.resources.bucket.bucketArn}/private/*`],
   }),
 );
 backend.sectionHandler.addEnvironment(
@@ -396,6 +426,100 @@ const sectionHandlerSSMPolicy = new Policy(
 );
 backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(
   sectionHandlerSSMPolicy,
+);
+
+// ==========================================================================
+// publishUnit — Phase 6: copies media, rewrites Lexical JSON, writes published.json
+// ==========================================================================
+
+// Full S3 read/write: reads from private/* (draft) and writes to protected/units/*
+// Using addToRolePolicy instead of bucket.grantReadWrite() avoids a storage→data
+// cross-stack reference which would create a circular dependency between nested stacks.
+backend.publishUnitHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject", "s3:PutObject", "s3:CopyObject", "s3:ListBucket"],
+    resources: [
+      backend.storage.resources.bucket.bucketArn,
+      `${backend.storage.resources.bucket.bucketArn}/*`,
+    ],
+  }),
+);
+
+// AppSync access to query Unit and update publishedContentVersion + publishedAt
+const publishUnitAppSyncPolicy = new Policy(
+  backend.publishUnitHandler.resources.lambda.stack,
+  "PublishUnitAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.publishUnitHandler.resources.lambda.role?.attachInlinePolicy(
+  publishUnitAppSyncPolicy,
+);
+
+backend.publishUnitHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.publishUnitHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+// ==========================================================================
+// rebuildNgramIndex — Phase 6: scans published units, writes ngrams/v1.json
+// ==========================================================================
+
+// Read all published unit JSON + write ngrams index under protected/units/
+backend.rebuildNgramIndexHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [
+      `${backend.storage.resources.bucket.bucketArn}/protected/units/*`,
+    ],
+  }),
+);
+backend.rebuildNgramIndexHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObject"],
+    resources: [
+      `${backend.storage.resources.bucket.bucketArn}/protected/units/ngrams/*`,
+    ],
+  }),
+);
+
+const rebuildNgramAppSyncPolicy = new Policy(
+  backend.rebuildNgramIndexHandler.resources.lambda.stack,
+  "RebuildNgramAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.rebuildNgramIndexHandler.resources.lambda.role?.attachInlinePolicy(
+  rebuildNgramAppSyncPolicy,
+);
+
+backend.rebuildNgramIndexHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.rebuildNgramIndexHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
 );
 
 // S3 event notifications via EventBridge — avoids circular dependency between storage and data stacks.
@@ -453,8 +577,23 @@ backend.generatePracticeDrillHandler.addEnvironment(
   "API_ENDPOINT",
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
 );
-backend.storage.resources.bucket.grantRead(
-  backend.generatePracticeDrillHandler.resources.lambda,
+backend.generatePracticeDrillHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [`${backend.storage.resources.bucket.bucketArn}/*`],
+  }),
+);
+
+// gamification — S3 access for reading published unit content
+backend.gamificationHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.gamificationHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [`${backend.storage.resources.bucket.bucketArn}/*`],
+  }),
 );
 
 // ---------------------------------------------------------------------------
@@ -502,8 +641,19 @@ backend.imageProcessHandler.addEnvironment(
 );
 
 // S3 read/write access for downloading source files and uploading processed variants
-backend.storage.resources.bucket.grantReadWrite(
-  backend.imageProcessHandler.resources.lambda,
+backend.imageProcessHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+    ],
+    resources: [
+      backend.storage.resources.bucket.bucketArn,
+      `${backend.storage.resources.bucket.bucketArn}/*`,
+    ],
+  }),
 );
 
 // AppSync GraphQL access (to query/update File records)
@@ -625,8 +775,19 @@ backend.documentThumbnailHandler.addEnvironment(
 );
 
 // S3 read/write access
-backend.storage.resources.bucket.grantReadWrite(
-  backend.documentThumbnailHandler.resources.lambda,
+backend.documentThumbnailHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+    ],
+    resources: [
+      backend.storage.resources.bucket.bucketArn,
+      `${backend.storage.resources.bucket.bucketArn}/*`,
+    ],
+  }),
 );
 
 // AppSync GraphQL access (to query/update File records)

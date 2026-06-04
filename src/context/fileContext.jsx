@@ -14,6 +14,7 @@ import {
   loadEmbeddingsByDocument,
   loadEmbeddingsFromS3,
 } from "../utils/vectorStoreDB";
+import { loadUnitBundle, loadInstructorBundle } from "../utils/searchBundles";
 
 // Provider and Consumer are connected through their "parent" context
 const FilesContext = createContext({
@@ -497,7 +498,6 @@ const FilesProvider = ({ children }) => {
       }
       filesFetchedRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, session?.identityId]);
 
   // Subscribe to Document status changes

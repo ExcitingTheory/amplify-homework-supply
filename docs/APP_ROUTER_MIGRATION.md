@@ -9,6 +9,65 @@ This is a reference for the completed Pages → App Router migration. The `pages
 
 ---
 
+## Request Flow
+
+```mermaid
+graph LR
+    subgraph Client
+        Browser[Browser]
+    end
+
+    subgraph "Next.js App Router"
+        direction TB
+        Layout["app/layout.tsx<br/>(root)"]
+        Providers["app/providers.tsx<br/>'use client'"]
+        Locale["app/[locale]/layout.tsx<br/>next-intl"]
+        
+        subgraph Rendering
+            RSC["Server Components<br/>(unit, workbook, grade, profile)"]
+            ISR["ISR Pages<br/>(leaderboard, skills)"]
+            CSR["Client Pages<br/>(sections, settings, admin)"]
+        end
+
+        subgraph "API Layer"
+            RA["Route Handlers<br/>/api/chat, /api/grade-ai"]
+            SA["Server Actions<br/>app/actions/*.ts"]
+        end
+    end
+
+    subgraph AWS
+        AppSync[AppSync GraphQL]
+        S3[S3 + CloudFront]
+        Cognito[Cognito Auth]
+        Lambda["Event-driven Lambdas<br/>(crons, Yjs sync)"]
+    end
+
+    Browser --> Layout
+    Layout --> Providers
+    Providers --> Locale
+    Locale --> RSC & ISR & CSR
+    RSC --> SA
+    CSR --> SA
+    SA --> AppSync
+    SA --> S3
+    RA --> AppSync
+    Browser -->|"real-time"| AppSync
+    AppSync --> Lambda
+```
+
+## Provider Nesting
+
+```
+CacheProvider (Emotion)
+  └─ ThemeProvider (MUI)
+       └─ AuthProvider (Cognito)
+            └─ SettingsProvider
+                 └─ ChatContextProvider
+                      └─ children
+```
+
+---
+
 ## Route Structure
 
 ### Pages (`app/[locale]/`)

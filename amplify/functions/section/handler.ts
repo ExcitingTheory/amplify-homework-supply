@@ -58,10 +58,99 @@ function signCFUrl(
   const rawSig = sign.sign(privateKey, "base64");
 
   // CloudFront base64 uses - _ ~ instead of + = /
-  const signature = rawSig.replace(/\+/g, "-").replace(/=/g, "_").replace(/\//g, "~");
+  const signature = rawSig
+    .replace(/\+/g, "-")
+    .replace(/=/g, "_")
+    .replace(/\//g, "~");
 
   const sep = url.includes("?") ? "&" : "?";
   return `${url}${sep}Expires=${expiresAt}&Signature=${signature}&Key-Pair-Id=${keyPairId}`;
+}
+
+/**
+ * Generate CloudFront custom-policy signed cookie values for a resource pattern.
+ * Used by getUnitsCdnCookie to issue a 4-hour cookie covering protected/units/*.
+ *
+ * Returns the three cookie component values (not Set-Cookie headers).
+ * The browser client sets them via document.cookie in app/providers.tsx.
+ */
+function signCFCookies(
+  resourcePattern: string,
+  privateKey: string,
+  keyPairId: string,
+  expiresAt: number, // Unix epoch seconds
+): { policy: string; signature: string; keyPairId: string } {
+  const policyObj = JSON.stringify({
+    Statement: [
+      {
+        Resource: resourcePattern,
+        Condition: {
+          DateLessThan: { "AWS:EpochTime": expiresAt },
+        },
+      },
+    ],
+  });
+
+  // Base64-encode the policy using CloudFront-safe alphabet
+  const policyB64 = Buffer.from(policyObj)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/=/g, "_")
+    .replace(/\//g, "~");
+
+  const sign = crypto.createSign("RSA-SHA1");
+  sign.update(Buffer.from(policyObj));
+  const rawSig = sign.sign(privateKey, "base64");
+  const signature = rawSig
+    .replace(/\+/g, "-")
+    .replace(/=/g, "_")
+    .replace(/\//g, "~");
+
+  return { policy: policyB64, signature, keyPairId };
+}
+
+/**
+ * Handler for the getUnitsCdnCookie AppSync query.
+ * Loads CF signing credentials from SSM (cold-start cached), then issues a
+ * 4-hour signed cookie set for protected/units/* on the CDN domain.
+ */
+async function handleGetUnitsCdnCookie(): Promise<{
+  policy: string;
+  signature: string;
+  keyPairId: string;
+}> {
+  // Load CF credentials from SSM if not already cached
+  if (!cfPrivateKey || !cfKeyPairId) {
+    const ssm = new SSMClient({ region: process.env.AWS_REGION });
+    const [keyResult, idResult] = await Promise.all([
+      ssm.send(
+        new GetParameterCommand({
+          Name: "/homework-supply/cloudfront/private-key",
+          WithDecryption: true,
+        }),
+      ),
+      ssm.send(
+        new GetParameterCommand({
+          Name: "/homework-supply/cloudfront/key-pair-id",
+          WithDecryption: false,
+        }),
+      ),
+    ]);
+    cfPrivateKey = keyResult.Parameter?.Value ?? null;
+    cfKeyPairId = idResult.Parameter?.Value ?? null;
+  }
+
+  if (!cfPrivateKey || !cfKeyPairId) {
+    throw new Error("CloudFront signing credentials not found in SSM");
+  }
+
+  const cdnDomain = process.env.CDN_DOMAIN;
+  if (!cdnDomain) throw new Error("CDN_DOMAIN environment variable not set");
+
+  const resourcePattern = `https://${cdnDomain}/protected/units/*`;
+  const expiresAt = Math.floor(Date.now() / 1000) + 4 * 60 * 60; // 4 hours
+
+  return signCFCookies(resourcePattern, cfPrivateKey, cfKeyPairId, expiresAt);
 }
 
 /**
@@ -424,6 +513,8 @@ export const handler: Handler = async (event: any, context: any) => {
         );
       case "getStudentSubmissionUrl":
         return await handleGetStudentSubmissionUrl(args, userId, claims);
+      case "getUnitsCdnCookie":
+        return await handleGetUnitsCdnCookie();
       default:
         throw new Error(`Unknown operation: ${operationName}`);
     }
@@ -1039,9 +1130,7 @@ async function handleGetStudentSubmissionUrl(
 
   if (!isAdmin) {
     if (!grade.sectionID) {
-      throw new Error(
-        "Unauthorized: grade is not associated with a section",
-      );
+      throw new Error("Unauthorized: grade is not associated with a section");
     }
 
     const { data: sectionData, errors: sectionErrors } = await client.graphql({
@@ -1066,7 +1155,11 @@ async function handleGetStudentSubmissionUrl(
     if (!isInstructorOfSection) {
       console.error(
         "[getStudentSubmissionUrl] Caller is not an instructor of this section",
-        { userId, sectionId: grade.sectionID, sectionInstructor: section.instructor },
+        {
+          userId,
+          sectionId: grade.sectionID,
+          sectionInstructor: section.instructor,
+        },
       );
       throw new Error(
         "Unauthorized: caller is not an instructor of this section",
@@ -1082,15 +1175,21 @@ async function handleGetStudentSubmissionUrl(
 
   // Load CF credentials from SSM on first invocation, then reuse from cache
   if (!cfPrivateKey || !cfKeyPairId) {
-    const ssmClient = new SSMClient({ region: process.env.AWS_REGION || "us-east-1" });
+    const ssmClient = new SSMClient({
+      region: process.env.AWS_REGION || "us-east-1",
+    });
     const [pkResult, kpIdResult] = await Promise.all([
-      ssmClient.send(new GetParameterCommand({
-        Name: "/homework-supply/cloudfront/private-key",
-        WithDecryption: true,
-      })),
-      ssmClient.send(new GetParameterCommand({
-        Name: "/homework-supply/cloudfront/key-pair-id",
-      })),
+      ssmClient.send(
+        new GetParameterCommand({
+          Name: "/homework-supply/cloudfront/private-key",
+          WithDecryption: true,
+        }),
+      ),
+      ssmClient.send(
+        new GetParameterCommand({
+          Name: "/homework-supply/cloudfront/key-pair-id",
+        }),
+      ),
     ]);
     cfPrivateKey = pkResult.Parameter?.Value ?? null;
     cfKeyPairId = kpIdResult.Parameter?.Value ?? null;
@@ -1107,11 +1206,14 @@ async function handleGetStudentSubmissionUrl(
     Math.floor((Date.now() + 15 * 60 * 1000) / 1000),
   );
 
-  console.log("[getStudentSubmissionUrl] Generated CloudFront signed URL for:", {
-    gradeId,
-    sectionID: grade.sectionID,
-    requestedBy: userId,
-  });
+  console.log(
+    "[getStudentSubmissionUrl] Generated CloudFront signed URL for:",
+    {
+      gradeId,
+      sectionID: grade.sectionID,
+      requestedBy: userId,
+    },
+  );
 
   return signedUrl;
 }

@@ -20,8 +20,6 @@ npx tsx scripts/test-chat-tools-llm-judge.ts --verbose
 npx tsx scripts/test-chat-tools-llm-judge.ts --tool=create_section
 ```
 
-**Documentation**: [LLM_JUDGE_TESTING.md](../docs/LLM_JUDGE_TESTING.md)
-
 **Features**:
 - Tests all 12 CRUD chat tools
 - Claude 4.5 evaluates response quality (0-100 score)
@@ -275,7 +273,5 @@ aws sso login
 
 ## Related Documentation
 
-- [LLM_JUDGE_TESTING.md](../docs/LLM_JUDGE_TESTING.md) - LLM testing details
 - [ONBOARDING.md](../docs/ONBOARDING.md) - Developer setup
-- [CHATBOT_TOOLS.md](../docs/CHATBOT_TOOLS.md) - Chat tools documentation
-- [TYPESCRIPT_MIGRATION.md](../docs/TYPESCRIPT_MIGRATION.md) - TS migration guide
+- [API.md](../docs/API.md) - Data models and GraphQL API

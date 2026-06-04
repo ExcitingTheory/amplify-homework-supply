@@ -103,7 +103,7 @@ export const toolDefinitions = [
     type: 'function',
     function: {
       name: 'search_content',
-      description: 'Search through files, vocabulary words, and questions using semantic similarity. Returns the most relevant results based on the query.',
+      description: 'Search through files, vocabulary words, questions, and units using semantic similarity. Returns the most relevant results based on the query.',
       parameters: {
         type: 'object',
         properties: {
@@ -113,7 +113,7 @@ export const toolDefinitions = [
           },
           type: {
             type: 'string',
-            enum: ['all', 'files', 'words', 'questions'],
+            enum: ['all', 'files', 'words', 'questions', 'units', 'sections'],
             description: 'Type of content to search. "all" searches everything.'
           },
           limit: {
@@ -597,6 +597,31 @@ export const toolDefinitions = [
  * Tool Execution Functions
  */
 
+/**
+ * Normalized keyword score using TF-IDF-inspired matching.
+ * Returns a score between 0 and 0.75 (below vector match scores).
+ */
+function keywordScore(query, text) {
+  const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  if (terms.length === 0) return text.toLowerCase().includes(query.toLowerCase()) ? 0.5 : 0;
+  const matched = terms.filter(term => text.toLowerCase().includes(term));
+  return (matched.length / terms.length) * 0.75;
+}
+
+/**
+ * Paginate through all records for a model to avoid the 100-record silent limit.
+ */
+async function listAll(client, modelName) {
+  const items = [];
+  let nextToken = undefined;
+  do {
+    const response = await client.models[modelName].list({ nextToken });
+    items.push(...(response.data || []));
+    nextToken = response.nextToken;
+  } while (nextToken);
+  return items;
+}
+
 export async function executeSearchContent({ query, type = 'all', limit = 10 }) {
   try {
     console.log(`[executeSearchContent] Starting search: query="${query}", type="${type}", limit=${limit}`);
@@ -646,7 +671,8 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
         let keywordMatches = 0;
         words.forEach(word => {
           const text = `${word.phrase} ${word.pronunciation || ''} ${word.definition}`.toLowerCase();
-          if (text.includes(query.toLowerCase())) {
+          const score = keywordScore(query, text);
+          if (score > 0) {
             keywordMatches++;
             results.push({
               type: 'word',
@@ -654,7 +680,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
               phrase: word.phrase,
               pronunciation: word.pronunciation,
               definition: word.definition,
-              similarity: 0.7, // Keyword match score
+              similarity: score,
             });
           }
         });
@@ -667,14 +693,15 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
         keywordMatches = 0;
         questions.forEach(question => {
           const text = `${question.prompt} ${question.answer || ''}`.toLowerCase();
-          if (text.includes(query.toLowerCase())) {
+          const score = keywordScore(query, text);
+          if (score > 0) {
             keywordMatches++;
             results.push({
               type: 'question',
               id: question.id,
               prompt: question.prompt,
               answer: question.answer,
-              similarity: 0.7,
+              similarity: score,
             });
           }
         });
@@ -711,12 +738,12 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     console.log(`[executeSearchContent] Query embedding generated: ${queryEmbedding.length} dimensions`);
     
     const results = [];
+    const client = getAmplifyClient();
 
     // Search Files
     if (type === 'all' || type === 'files') {
       console.log('[executeSearchContent] Searching files...');
-      const client = getAmplifyClient();
-      const { data: files } = await client.models.File.list();
+      const files = await listAll(client, 'File');
       console.log(`[executeSearchContent] Found ${files.length} total files`);
       
       const filesWithEmbeddings = files.filter(f => f.embedding);
@@ -736,7 +763,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Search Words
     if (type === 'all' || type === 'words') {
       console.log('[executeSearchContent] Searching words...');
-      const { data: words } = await client.models.Word.list();
+      const words = await listAll(client, 'Word');
       console.log(`[executeSearchContent] Found ${words.length} total words`);
       
       const wordsWithEmbeddings = words.filter(w => w.embedding);
@@ -768,7 +795,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Search Questions
     if (type === 'all' || type === 'questions') {
       console.log('[executeSearchContent] Searching questions...');
-      const { data: questions } = await client.models.Question.list();
+      const questions = await listAll(client, 'Question');
       console.log(`[executeSearchContent] Found ${questions.length} total questions`);
       
       const questionsWithEmbeddings = questions.filter(q => q.embedding);
@@ -795,6 +822,28 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
       }
       
       console.log(`[executeSearchContent] Questions with embeddings: ${questionsWithEmbeddings.length}/${questions.length}, keyword matches: ${results.filter(r => r.type === 'question' && r.similarity === 0.7).length}`);
+    }
+
+    // Search Units
+    if (type === 'all' || type === 'units') {
+      console.log('[executeSearchContent] Searching units...');
+      const units = await listAll(client, 'Unit');
+      console.log(`[executeSearchContent] Found ${units.length} total units`);
+
+      units.forEach(unit => {
+        const text = `${unit.name || ''} ${unit.description || ''}`.toLowerCase();
+        const score = keywordScore(query, text);
+        if (score > 0) {
+          results.push({
+            type: 'unit',
+            id: unit.id,
+            name: unit.name,
+            description: unit.description,
+            similarity: score,
+          });
+        }
+      });
+      console.log(`[executeSearchContent] Unit keyword matches: ${results.filter(r => r.type === 'unit').length}`);
     }
 
     // Sort by similarity and limit (using worker for large result sets)

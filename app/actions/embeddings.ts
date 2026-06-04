@@ -7,6 +7,8 @@
  * Generates text embeddings using OpenAI's text-embedding-3-small model.
  */
 
+import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from "./embedding-constants";
+
 export async function generateEmbedding(params: {
   content: string;
   model?: string;
@@ -20,8 +22,8 @@ export async function generateEmbedding(params: {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
 
-  const model = params.model || "text-embedding-3-small";
-  const dimensions = params.dimensions || 512;
+  const model = params.model || EMBEDDING_MODEL;
+  const dimensions = params.dimensions || EMBEDDING_DIMENSIONS;
 
   const response = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",

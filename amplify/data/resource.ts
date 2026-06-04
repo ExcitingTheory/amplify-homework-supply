@@ -11,6 +11,8 @@ import { documentThumbnailHandler } from "../functions/documentThumbnail/resourc
 import { gamificationHandler } from "../functions/gamification/resource";
 import { peerReviewAIHandler } from "../functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "../functions/generatePracticeDrill/resource";
+import { publishUnitHandler } from "../functions/publishUnit/resource";
+import { rebuildNgramIndexHandler } from "../functions/rebuildNgramIndex/resource";
 
 /**
  * Amplify Gen 2 Data Schema
@@ -109,6 +111,13 @@ const NotificationCategory = a.enum([
   "CHAT",
   "SYSTEM",
 ]);
+
+// Phase 6 — CloudFront signed cookie values returned by getUnitsCdnCookie
+const CdnCookies = a.customType({
+  policy: a.string().required(),
+  signature: a.string().required(),
+  keyPairId: a.string().required(),
+});
 
 // Consolidated types for DRY principles
 const EmbeddingInfo = a.customType({
@@ -511,6 +520,7 @@ const schema = a
     GradeStats,
     TimeStats,
     ReportCard,
+    CdnCookies,
 
     // ========================================================================
     // CORE MODELS
@@ -2213,6 +2223,40 @@ const schema = a
         allow.group("Admins"),
       ])
       .handler(a.handler.function(sectionHandler)),
+
+    // Phase 6 — Issues CloudFront signed cookie values for the protected/units/* path prefix.
+    // Authenticated users receive a 4-hour custom-policy cookie so their browser can fetch
+    // published unit JSON, images, and audio directly from CloudFront without per-request
+    // signing. The app/providers.tsx AuthGate sets these via document.cookie on login.
+    getUnitsCdnCookie: a
+      .query()
+      .returns(a.ref("CdnCookies"))
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(sectionHandler)),
+
+    // Phase 6 — Reads the unit draft from S3, rewrites media paths, and writes
+    // protected/units/{unitId}/published.json. Also updates Unit.publishedContentVersion
+    // and publishedAt in DynamoDB. Replaces the client-side publishContent() call.
+    publishUnit: a
+      .mutation()
+      .arguments({
+        unitId: a.id().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [
+        allow.group("Instructors"),
+        allow.group("Admins"),
+      ])
+      .handler(a.handler.function(publishUnitHandler)),
+
+    // Phase 6 — Admin-only mutation that scans all published units and writes a
+    // bigram/trigram frequency index to protected/units/ngrams/v1.json for the
+    // layout suggestion system. Served via CloudFront behind the signed cookie.
+    rebuildNgramIndex: a
+      .mutation()
+      .returns(a.json())
+      .authorization((allow) => [allow.group("Admins")])
+      .handler(a.handler.function(rebuildNgramIndexHandler)),
 
     // Gamification Mutations
     awardXP: a

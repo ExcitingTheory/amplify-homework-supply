@@ -72,6 +72,8 @@ export interface KaiBotConfig {
    * Lower = more real-time but more network traffic. Default: 100ms.
    */
   streamThrottleMs?: number;
+  /** Additional mention strings (e.g. ['@Kai']) to strip from prompt text */
+  _additionalMentionsToStrip?: string[];
 }
 
 /** Configuration for the Sage (instructor) bot — same shape as KaiBotConfig */
@@ -154,6 +156,24 @@ export function attachKaiBotObserver(
   doc: Y.Doc,
   config: KaiBotConfig | DualBotConfig,
 ): () => void {
+  // For DualBotConfig, attach observers for both bots and combine cleanup
+  if ("kai" in config && config.sage) {
+    const kaiBotName = config.kai.botName ?? "Kai";
+    const sageBotName = config.sage.botName ?? "Sage";
+    const cleanupKai = attachKaiBotObserver(doc, {
+      ...config.kai,
+      _additionalMentionsToStrip: [`@${sageBotName.toLowerCase()}`],
+    });
+    const cleanupSage = attachKaiBotObserver(doc, {
+      ...config.sage,
+      _additionalMentionsToStrip: [`@${kaiBotName.toLowerCase()}`],
+    });
+    return () => {
+      cleanupKai();
+      cleanupSage();
+    };
+  }
+
   // Normalize config — extract the single bot config to use for this doc
   const botConfig: KaiBotConfig = "kai" in config ? config.kai : config;
 
@@ -163,6 +183,7 @@ export function attachKaiBotObserver(
     botName = "Kai",
     botAuthorId = "kai-bot",
     streamThrottleMs = 100,
+    _additionalMentionsToStrip = [],
   } = botConfig;
 
   // Determine which mention this bot responds to based on its name
@@ -212,9 +233,17 @@ export function attachKaiBotObserver(
         };
 
         // Strip bot mention from content to get the prompt
-        const prompt = message.content
+        let prompt = message.content
           .replace(new RegExp(`@${botName}\\b`, "gi"), "")
           .trim();
+        for (const extra of _additionalMentionsToStrip) {
+          prompt = prompt
+            .replace(
+              new RegExp(extra.replace(/[@]/g, "\\$&") + "\\b", "gi"),
+              "",
+            )
+            .trim();
+        }
 
         if (streamResponse) {
           // ── Streaming path ──────────────────────────────────────────────

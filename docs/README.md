@@ -11,8 +11,14 @@ Elearning platform built with Next.js 16, AWS Amplify Gen 2, and OpenAI.
 ## Architecture & Reference
 
 - **[API Documentation](API.md)** — Data models, Lambda functions, routes, and Gen 2 patterns
+- **[App Router Migration](APP_ROUTER_MIGRATION.md)** — Next.js App Router architecture and route map
 - **[SSR & Performance](SSR_PERFORMANCE.md)** — Server-side rendering, Amplify server client, React Compiler, Turbopack, View Transitions, Server Actions
+- **[CloudFront CDN](CLOUDFRONT_CDN.md)** — CDN architecture, signed cookies, image optimization
 - **[File Processing Pipeline](FILE_PROCESSING_PIPELINE.md)** — Fan-out upload architecture: image processing, thumbnails, embeddings, media conversion
+- **[Optimistic Concurrency](OPTIMISTIC_CONCURRENCY.md)** — `_version`-based conflict resolution with observeQuery
+- **[Search Architecture](SEARCH_ARCHITECTURE.md)** — Semantic search with embeddings and IVF indexing
+- **[S3 Content Storage](S3_CONTENT_STORAGE_SPEC.md)** — Storage paths, versioning, and content lifecycle
+- **[S3 Embeddings](S3_EMBEDDINGS_SPEC.md)** — Embedding bundle storage and retrieval
 
 ### App Router & Server Actions
 
@@ -82,8 +88,10 @@ No Lambda functions are called from UI code. Retained Lambdas (streakResetCron, 
 ## Feature Documentation
 
 - **[Custom AI Block](CUSTOM_AI_BLOCK.md)** — Instructor-customizable AI-graded Lexical editor block with security guardrails
+- **[Gamification](GAMIFICATION.md)** — XP, badges, streaks, boss battles, skill trees, content locks, squads
+- **[Layout Suggestions](LAYOUT_SUGGESTIONS.md)** — Data-driven block autocomplete from instructor usage patterns
 - **[Notification System](NOTIFICATION_SYSTEM.md)** — Real-time notifications with category filtering, badge counts, and Lambda utilities
-- **[Offline Experience](OFFLINE_EXPERIENCE.md)** — PWA with service worker, IndexedDB sync queue, and on-device LLM fallback
+- **[Offline Experience](OFFLINE_EXPERIENCE.md)** — PWA with Serwist service worker caching; offline data planned
 
 **Optimistic Concurrency**: All contexts use `client.models.X.observeQuery()` with `_version` map refs and optimistic `_version+1` bumps before saves. No manual `onCreate`/`onUpdate`/`onDelete` subscriptions remain.
 
@@ -126,9 +134,10 @@ Server: `amplify/functions/yjsSync/botObserver.ts` handles bot streaming via Ope
 
 | Plan | Status | What Remains |
 |------|--------|--------------|
-| [Gamification Improvements](GAMIFICATION_IMPROVEMENTS_PLAN.md) | Partial | Instructor panel section scoping, skill-unit linking, boss battle form |
-| [S3 Content Storage](S3_CONTENT_STORAGE_SPEC.md) | Partial | Full content migration + versioning |
-| [Unified Undo/Redo](UNIFIED_UNDO_REDO_PLAN.md) | Not started | Y.UndoManager not wired to any surface |
+| [Admin Bot](ADMIN_BOT_PLAN.md) | Not started | Atlas admin AI assistant — schema, Lambda, and UI |
+| [Custom Themes](CUSTOM_THEMES_PLAN.md) | Not started | Cosmetic palette swap for Midnight/Forest/Sunset/Aurora |
+| [Audio Processing](RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md) | Not started | ML noise suppression, filter panel, versioned takes |
+| [Unified Undo/Redo](UNIFIED_UNDO_REDO_PLAN.md) | Not started | Y.UndoManager across Editor3, DictionaryEditor2, QuestionEditor2, Workbook |
 
 ## Support & Contact
 

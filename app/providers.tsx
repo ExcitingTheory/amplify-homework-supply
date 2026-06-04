@@ -23,9 +23,12 @@ import OfflineBanner from '../src/components/OfflineBanner';
 import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
 import { usePageViewTracking } from '../src/hooks/usePageViewTracking';
 import AppSkeleton from '../src/components/AppSkeleton';
+import MyAuth from '../src/components/AmplifyAuthenticator';
 import outputs from '../amplify_outputs.json';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ChunkedCookieStorage } from '../src/utils/chunkedCookieStorage';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../amplify/data/resource';
 
 // Configure Amplify Gen 2 with existing REST API resources
 const amplifyConfig = parseAmplifyConfig(outputs);
@@ -60,6 +63,51 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { isLoading, user } = React.useContext(AuthContext);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [hydrated, setHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  // Capture returnUrl query param into sessionStorage so MyAuth can redirect after login
+  React.useEffect(() => {
+    const returnUrl = searchParams?.get('returnUrl');
+    if (returnUrl && !user) {
+      sessionStorage.setItem('returnUrl', returnUrl);
+    }
+  }, [searchParams, user]);
+
+  // Phase 6: When the user logs in, fetch CloudFront signed cookie values from
+  // the getUnitsCdnCookie AppSync query and set them via document.cookie.
+  // This gives the browser a 4-hour pass to fetch published unit content
+  // (JSON, audio, images) directly from CloudFront at protected/units/*.
+  React.useEffect(() => {
+    if (!user) return;
+
+    const client = generateClient<Schema>();
+    // Guard: query may not exist until schema is deployed with getUnitsCdnCookie
+    if (typeof client.queries.getUnitsCdnCookie !== 'function') return;
+    client.queries
+      .getUnitsCdnCookie()
+      .then(({ data, errors }) => {
+        if (errors?.length || !data) {
+          console.warn('[AuthGate] getUnitsCdnCookie errors:', errors);
+          return;
+        }
+        const { policy, signature, keyPairId } = data;
+        // Set as session cookies so they're sent on every CloudFront request.
+        // The CDN domain must share a parent domain with the app for cookies to work
+        // (handled at infra level — same Route 53 zone).
+        const cookieBase = '; Path=/; Secure; SameSite=None';
+        document.cookie = `CloudFront-Policy=${policy}${cookieBase}`;
+        document.cookie = `CloudFront-Signature=${signature}${cookieBase}`;
+        document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieBase}`;
+      })
+      .catch((err) => {
+        console.warn('[AuthGate] getUnitsCdnCookie failed:', err);
+      });
+  }, [user]);
 
   React.useEffect(() => {
     if (isLoading) return;
@@ -76,10 +124,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     router.replace(`/?returnUrl=${encodeURIComponent(pathname)}`);
   }, [isLoading, user, pathname, router]);
 
-  if (isLoading) return <AppSkeleton />;
+  if (isLoading) return hydrated ? <AppSkeleton /> : null;
 
-  // Logged-out users on public paths get no navigation shell
-  if (!user) return <>{children}</>;
+  // Logged-out users see the Authenticator login form
+  if (!user) {
+    return <MyAuth>{children}</MyAuth>;
+  }
 
   return <>{children}</>;
 }

@@ -168,7 +168,7 @@ VERDICT: {PASS | ISSUES FOUND | CRITICAL FAILURES}
 
 ### Subscription Storms
 
-Repeated identical console messages (≥5x in 5 seconds on one page).
+Repeated identical console messages (≥5x in 5 seconds on one page).p
 
 **Common causes**:
 

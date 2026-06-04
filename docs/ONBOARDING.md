@@ -330,22 +330,21 @@ OpenAI integration for content generation and grading:
 
 ### Common Issues and Solutions
 
-See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common problems and their solutions.
+Check [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues) or ask in Discord for common problems and solutions.
 
 ## 🎯 Next Steps
 
 1. **Complete setup** following this guide
-2. **Review the codebase** - Start with simple pages like `pages/index.js`
-3. **Read project roadmap** - [ROADMAP.md](./ROADMAP.md)
+2. **Review the codebase** - Start with `app/[locale]/page.jsx` (home page)
+3. **Read the docs** - [docs/README.md](./README.md) for architecture overview
 4. **Pick up first issue** - Look for "good first issue" labels
 5. **Join team meetings** - Get familiar with current priorities
 
 ## 📄 Additional Documentation
 
-- [Project Roadmap](./ROADMAP.md) - Future plans and priorities
-- [Troubleshooting Guide](./TROUBLESHOOTING.md) - Common issues
+- [Documentation Hub](./README.md) - Full docs index
 - [API Documentation](./API.md) - Backend API details
 - [Contributing Guidelines](../CONTRIBUTING.md) - Code standards
-- [TypeScript Migration Guide](./TYPESCRIPT_MIGRATION.md) - TS transition plan
+- [Storybook Onboarding](./STORYBOOK_ONBOARDING.md) - Component development
 
-Welcome to the team! 🎉
+Welcome to the team!

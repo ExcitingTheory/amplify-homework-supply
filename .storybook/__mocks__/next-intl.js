@@ -3,9 +3,14 @@
  * Uses Vite's import.meta.glob to eagerly load all locale JSON files
  * so that useTranslations(namespace) returns actual translated strings.
  * Supports dynamic locale switching via the Storybook toolbar.
+ * Integrates with the translation-mode addon to wrap t() output in TranslationOverlay
+ * when highlight or edit mode is active.
  */
 
-import { useSyncExternalStore } from 'react';
+import React, { useSyncExternalStore, useContext, useRef } from 'react';
+import { TranslationModeContext } from '../addons/translation-mode/contexts/TranslationModeContext';
+import { TranslationCaptureContext } from '../addons/translation-mode/contexts/TranslationCaptureContext';
+import { TranslationOverlay } from '../addons/translation-mode/components/TranslationOverlay';
 
 // Eagerly load ALL locale JSON files at build time
 const allLocaleModules = import.meta.glob('../../public/locales/**/*.json', { eager: true });
@@ -81,6 +86,25 @@ export const useTranslations = (namespace) => {
   // Subscribe to locale changes so components re-render when language switches
   const locale = useSyncExternalStore(subscribe, getSnapshot);
 
+  // Translation mode integration
+  let mode = 'off';
+  let storyName = '';
+  let captureTranslation = null;
+  let getTranslation = null;
+  try {
+    const modeCtx = useContext(TranslationModeContext);
+    const captureCtx = useContext(TranslationCaptureContext);
+    mode = modeCtx?.mode || 'off';
+    storyName = modeCtx?.storyName || '';
+    captureTranslation = captureCtx?.captureTranslation;
+    getTranslation = captureCtx?.getTranslation;
+  } catch (e) {
+    // Context not available — translation mode off
+  }
+
+  // Track captured keys to avoid duplicates
+  const capturedKeys = useRef(new Set());
+
   // Support array of namespaces: useTranslations(["common", "components", "editor.authoring"])
   const namespaces = Array.isArray(namespace) ? namespace : [namespace];
 
@@ -126,15 +150,62 @@ export const useTranslations = (namespace) => {
       value = resolve(fallbackNsData, resolveKey);
     }
 
+    let result;
     if (value === undefined) {
       // Use default value if provided
-      if (defaultValue !== undefined) return interpolate(defaultValue, params);
-      // Fallback: return "namespace.key" so missing keys are visible
-      return `${targetNs}.${resolveKey}`;
+      if (defaultValue !== undefined) {
+        result = interpolate(defaultValue, params);
+      } else {
+        // Fallback: return "namespace.key" so missing keys are visible
+        result = `${targetNs}.${resolveKey}`;
+      }
+    } else if (typeof value === 'string') {
+      result = interpolate(value, params);
+    } else {
+      // If the resolved value is an object (nested namespace), return the key
+      result = key;
     }
-    if (typeof value === 'string') return interpolate(value, params);
-    // If the resolved value is an object (nested namespace), return the key
-    return key;
+
+    // Translation mode: wrap in TranslationOverlay for highlight/edit modes
+    if ((mode === 'highlight' || mode === 'edit') && typeof result === 'string') {
+      // Capture translation for the panel (only once per key)
+      const captureKey = `${targetNs}:${resolveKey}`;
+      if (captureTranslation && !capturedKeys.current.has(captureKey)) {
+        capturedKeys.current.add(captureKey);
+        captureTranslation({
+          key: resolveKey,
+          namespace: targetNs,
+          value: result,
+          usedIn: storyName ? [storyName] : undefined,
+        });
+      }
+
+      const element = React.createElement(
+        TranslationOverlay,
+        {
+          tKey: resolveKey,
+          namespace: targetNs,
+          value: result,
+          storyName,
+        },
+        result
+      );
+      // Return a Proxy that renders as React element but coerces to string
+      // for non-JSX contexts (aria-label, title attributes, etc.)
+      return new Proxy(element, {
+        get(target, prop) {
+          if (prop === Symbol.toPrimitive) {
+            return () => String(result);
+          }
+          if (prop === 'toString' || prop === 'valueOf') {
+            return () => String(result);
+          }
+          return target[prop];
+        },
+      });
+    }
+
+    return result;
   };
   // next-intl t.rich() for rich text translations
   t.rich = (key, paramsOrDefault) => t(key, paramsOrDefault);

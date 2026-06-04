@@ -41,6 +41,10 @@ const config: StorybookConfig = {
   }),
 
   async viteFinal(config) {
+    // Base path for GitHub Pages deployment (e.g. /amplify-homework-supply/).
+    // Used by the rewrite plugin below. In local dev, defaults to '/' (no rewriting).
+    const basePath = process.env.STORYBOOK_BASE_PATH || "/";
+
     // Disable Vite's publicDir to suppress "Assets in public directory cannot be imported
     // from JavaScript" warnings. Storybook's staticDirs already serves public files.
     config.publicDir = false;
@@ -52,6 +56,58 @@ const config: StorybookConfig = {
     );
 
     config.plugins = config.plugins || [];
+
+    // Rewrite absolute paths for static assets to include the base path for
+    // GitHub Pages deployment. Without this, paths like /story-mocks/image.jpg
+    // resolve to the domain root instead of the /amplify-homework-supply/ subpath.
+    if (basePath !== "/") {
+      const staticPrefixes = [
+        "/story-mocks/",
+        "/translation-cache/",
+        "/locales/",
+      ];
+      config.plugins.push({
+        name: "rewrite-static-asset-paths",
+        enforce: "pre",
+        transform(code, id) {
+          if (id.includes("node_modules")) return null;
+          if (!/\.(jsx?|tsx?|mjs|json)$/.test(id)) return null;
+          let modified = code;
+          for (const prefix of staticPrefixes) {
+            if (modified.includes(prefix)) {
+              modified = modified.replaceAll(
+                prefix,
+                `${basePath}${prefix.slice(1)}`,
+              );
+            }
+          }
+          return modified !== code ? modified : null;
+        },
+      });
+    }
+
+    // Strip "use client" / "use server" directives so Rollup never sees them.
+    // This eliminates MODULE_LEVEL_DIRECTIVE warnings AND the associated
+    // "Can't resolve original location" sourcemap errors.
+    config.plugins.push({
+      name: "strip-use-directives",
+      enforce: "pre",
+      transform(code, id) {
+        if (id.includes("node_modules")) return null;
+        if (!/\.(jsx?|tsx?|mjs)$/.test(id)) return null;
+        // Match directive anywhere in first 500 chars (handles JSDoc, comments, whitespace)
+        const directiveRe = /['"]use (client|server)['"];?[^\S\n]*\n?/;
+        const idx = code.search(directiveRe);
+        if (idx === -1 || idx > 500) return null;
+        const match = code.match(directiveRe)!;
+        // Replace directive with newlines to preserve line count for sourcemaps
+        const replacement = "\n".repeat((match[0].match(/\n/g) || []).length);
+        const newCode =
+          code.slice(0, idx) + replacement + code.slice(idx + match[0].length);
+        return newCode;
+      },
+    });
+
     config.plugins.push({
       name: "mock-collaboration-plugin",
       enforce: "pre",
@@ -427,14 +483,9 @@ const config: StorybookConfig = {
       rollupOptions: {
         ...config.build?.rollupOptions,
         onwarn(warning, warn) {
+          // "use client" in node_modules is expected (React, MUI, etc.)
+          // Our own files are stripped by the plugin above.
           if (warning.code === "MODULE_LEVEL_DIRECTIVE") return;
-          // Locale JSON files live in public/ for Next.js serving but are
-          // legitimately imported in Storybook mocks for translation support.
-          if (
-            typeof warning.message === "string" &&
-            warning.message.includes("public directory cannot be imported")
-          )
-            return;
           warn(warning);
         },
       },

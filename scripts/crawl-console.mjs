@@ -2,10 +2,32 @@ import { chromium } from 'playwright';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
 import { resolve, dirname, join, relative } from 'path';
 import { fileURLToPath } from 'url';
+import { Amplify } from 'aws-amplify';
+import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth';
+import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RESULTS_DIR = resolve(__dirname, '../test/results');
 const SCREENSHOTS_DIR = resolve(RESULTS_DIR, 'screenshots');
+
+// ── Load Amplify outputs for Cognito config ──────────────────────────────────
+const amplifyOutputs = JSON.parse(readFileSync(resolve(__dirname, '../amplify_outputs.json'), 'utf8'));
+const COGNITO_REGION = amplifyOutputs.auth.aws_region;
+const COGNITO_CLIENT_ID = amplifyOutputs.auth.user_pool_client_id;
+const COGNITO_USER_POOL_ID = amplifyOutputs.auth.user_pool_id;
+
+// In-memory key-value storage for Amplify token provider (Node.js has no localStorage)
+class InMemoryStorage {
+  constructor() { this.store = new Map(); }
+  async setItem(key, value) { this.store.set(key, value); }
+  async getItem(key) { return this.store.get(key) ?? null; }
+  async removeItem(key) { this.store.delete(key); }
+  async clear() { this.store.clear(); }
+}
+
+// Configure Amplify for server-side auth with in-memory token storage
+Amplify.configure(amplifyOutputs, { ssr: true });
+cognitoUserPoolsTokenProvider.setKeyValueStorage(new InMemoryStorage());
 
 // ── Configuration from environment (.env.test) ──────────────────────────────
 const BASE_URL = process.env.CRAWL_BASE_URL || 'https://localhost:3000';
@@ -189,9 +211,70 @@ function analyzeMessages(messages) {
   return analysis;
 }
 
+// ── Cognito programmatic authentication ─────────────────────────────────────
+
+async function authenticateWithCognito(email, password) {
+  // Use Amplify's signIn (handles SRP auth flow)
+  // Must sign out first to avoid "already signed in" conflicts
+  try {
+    await signOut();
+  } catch (_) { /* ignore if not signed in */ }
+
+  const result = await signIn({ username: email, password });
+  if (!result.isSignedIn) {
+    throw new Error(`signIn not complete: step=${result.nextStep?.signInStep}`);
+  }
+
+  // Fetch the session tokens
+  const session = await fetchAuthSession();
+  const idToken = session.tokens?.idToken?.toString();
+  const accessToken = session.tokens?.accessToken?.toString();
+
+  if (!idToken || !accessToken) {
+    throw new Error('No tokens in session after signIn');
+  }
+
+  return { idToken, accessToken };
+}
+
+function buildAmplifyStorageTokens(email, tokens) {
+  // Amplify v6 stores tokens in localStorage with this key pattern
+  const keyPrefix = `CognitoIdentityServiceProvider.${COGNITO_CLIENT_ID}`;
+  // Parse the sub from the ID token
+  const idTokenPayload = JSON.parse(Buffer.from(tokens.idToken.split('.')[1], 'base64').toString());
+  const username = idTokenPayload.sub;
+
+  return {
+    [`${keyPrefix}.${username}.idToken`]: tokens.idToken,
+    [`${keyPrefix}.${username}.accessToken`]: tokens.accessToken,
+    [`${keyPrefix}.${username}.clockDrift`]: '0',
+    [`${keyPrefix}.LastAuthUser`]: username,
+  };
+}
+
+/**
+ * Pre-authenticate all users sequentially (Amplify signIn is stateful).
+ * Returns a map of role -> storageItems for localStorage injection.
+ */
+async function preAuthenticateAll(users, password) {
+  const tokenMap = {};
+  for (const { role, email } of users) {
+    console.log(`[pre-auth] Authenticating ${role} (${email})...`);
+    try {
+      const tokens = await authenticateWithCognito(email, password);
+      tokenMap[role] = buildAmplifyStorageTokens(email, tokens);
+      console.log(`[pre-auth] ${role} authenticated.`);
+    } catch (e) {
+      console.error(`[pre-auth] ${role} FAILED: ${e.message}`);
+      tokenMap[role] = null;
+    }
+  }
+  return tokenMap;
+}
+
 // ── Main crawl logic ────────────────────────────────────────────────────────
 
-async function crawlAsUser(browser, user) {
+async function crawlAsUser(browser, user, storageItems) {
   const { role, email } = user;
   const { static: staticPages, dynamic: dynamicPages } = getRoutesForRole(role);
   const pages = [...staticPages, ...dynamicPages];
@@ -240,14 +323,26 @@ async function crawlAsUser(browser, user) {
     });
   });
 
-  // Login
+  // Login via pre-collected token injection into localStorage
   console.log(`[${role}] Logging in as ${email}...`);
   try {
-    await page.goto(BASE_URL, { waitUntil: 'networkidle', timeout: 120000 });
-    await page.getByRole('textbox', { name: 'Email' }).fill(email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(PASSWORD);
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.waitForTimeout(5000);
+    if (!storageItems) {
+      throw new Error('Pre-authentication failed for this role');
+    }
+
+    // Navigate to page first to establish origin for localStorage
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 120000 });
+
+    // Inject tokens into localStorage
+    await page.evaluate((items) => {
+      for (const [key, value] of Object.entries(items)) {
+        localStorage.setItem(key, value);
+      }
+    }, storageItems);
+
+    // Reload to pick up authenticated state
+    await page.goto(BASE_URL, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.waitForTimeout(3000);
     console.log(`[${role}] Logged in.\n`);
   } catch (e) {
     console.error(`[${role}] LOGIN FAILED: ${e.message}`);
@@ -374,8 +469,11 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true });
 
+  // Pre-authenticate all users sequentially (Amplify signIn is stateful)
+  const tokenMap = await preAuthenticateAll(USERS, PASSWORD);
+
   // Run all roles simultaneously with separate browser contexts (isolated IndexedDB/cache)
-  const results = await Promise.all(USERS.map(user => crawlAsUser(browser, user)));
+  const results = await Promise.all(USERS.map(user => crawlAsUser(browser, user, tokenMap[user.role])));
 
   await browser.close();
   const totalTimeMs = Date.now() - startTime;

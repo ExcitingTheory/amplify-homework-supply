@@ -4,6 +4,21 @@ Next.js 16.2.1 with Turbopack, React Compiler, and Amplify Gen 2 server-side dat
 
 ---
 
+## Request Flow
+
+```mermaid
+graph LR
+    R[Request] --> P["proxy.ts<br/>(locale rewrite)"]
+    P --> RSC["React Server Component<br/>(cookieBasedClient)"]
+    RSC --> DDB[DynamoDB via AppSync]
+    RSC --> HTML[Streaming HTML]
+    HTML --> VT["View Transitions<br/>(app/layout.tsx)"]
+    VT --> Client["Client Hydration<br/>(React Compiler optimized)"]
+    Client --> OQ["observeQuery()<br/>(real-time subscriptions)"]
+```
+
+---
+
 ## Current Configuration
 
 | Feature | Status | Config Location |

@@ -11,6 +11,7 @@ import type { Handler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { createNotification } from "../shared/notificationUtils";
 import {
   getEffectiveConfig,
@@ -20,6 +21,27 @@ import {
   type EffectiveGamificationConfig,
 } from "../shared/gamificationConfigCache";
 import OpenAI from "openai";
+
+/**
+ * Read published unit content from S3.
+ * Path: protected/units/{unitId}/published.json (type-scoped, no identityId)
+ */
+async function getUnitContentFromS3(unitId: string): Promise<string | null> {
+  const bucketName = process.env.STORAGE_BUCKET;
+  if (!bucketName) return null;
+  const s3 = new S3Client({});
+  try {
+    const response = await s3.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: `protected/units/${unitId}/published.json`,
+      }),
+    );
+    return (await response.Body?.transformToString()) ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // ============================================================================
 // GraphQL Queries & Mutations
@@ -156,7 +178,7 @@ const GET_SETTINGS_BY_OWNER = `query GetSettings($owner: String!) {
 
 // Skill tree generation queries/mutations
 const GET_UNIT = `query GetUnit($id: ID!) {
-  getUnit(id: $id) { id name description data _version _lastChangedAt _deleted }
+  getUnit(id: $id) { id name description contentVersion _version _lastChangedAt _deleted }
 }`;
 
 const LIST_UNIT_WORDS = `query ListUnitWords($unitID: String!) {
@@ -3916,10 +3938,14 @@ async function handleGenerateSkillTree(
   const unit = unitResult?.getUnit;
   if (!unit) throw new Error(`Unit not found: ${unitID}`);
 
-  // Parse Lexical JSON
-  const lexicalData =
-    typeof unit.data === "string" ? JSON.parse(unit.data) : unit.data;
-  const unitText = extractTextFromLexicalJSON(lexicalData);
+  // Fetch published content from S3 (content moved out of DynamoDB in S3 content storage migration)
+  const s3Content = await getUnitContentFromS3(unitID);
+  const lexicalData = s3Content
+    ? typeof s3Content === "string"
+      ? JSON.parse(s3Content)
+      : s3Content
+    : null;
+  const unitText = lexicalData ? extractTextFromLexicalJSON(lexicalData) : "";
 
   // 2. Fetch related vocabulary
   const { data: wordsResult } = await gqlClient.graphql({

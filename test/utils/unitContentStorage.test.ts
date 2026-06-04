@@ -64,7 +64,11 @@ describe("unitContentStorage", () => {
       const testData = new Uint8Array([10, 20, 30]);
       const mockBlob = new Blob([testData]);
       mockList.mockResolvedValue({
-        items: [{ path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin` }],
+        items: [
+          {
+            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
+          },
+        ],
       });
       mockDownloadData.mockReturnValue({
         result: Promise.resolve({
@@ -124,7 +128,7 @@ describe("unitContentStorage", () => {
 
       expect(result).toBe('{"root":{}}');
       expect(mockDownloadData).toHaveBeenCalledWith({
-        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/published.json`,
+        path: `protected/units/${TEST_UNIT_ID}/published.json`,
       });
     });
 
@@ -154,14 +158,8 @@ describe("unitContentStorage", () => {
         path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
       });
 
-      // Should upload to published (protected/) and history (private/)
-      expect(mockUploadData).toHaveBeenCalledTimes(2);
-      expect(mockUploadData).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/published.json`,
-          data: '{"root":{"children":[]}}',
-        }),
-      );
+      // Should upload only to history (private/) — published.json is written by the publishUnit Lambda
+      expect(mockUploadData).toHaveBeenCalledTimes(1);
       expect(mockUploadData).toHaveBeenCalledWith(
         expect.objectContaining({
           path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v5.json`,

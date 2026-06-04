@@ -5,23 +5,38 @@ Welcome to the Homework Supply documentation! This directory contains comprehens
 ## 📚 Documentation Structure
 
 ### 🚀 Getting Started
-- **[Onboarding Guide](./docs/ONBOARDING.md)** - Complete guide from zero to productive developer
-- **[Troubleshooting Guide](./docs/TROUBLESHOOTING.md)** - Solutions to common development issues
-
-### 🗺️ Project Planning
-- **[Project Roadmap](./docs/ROADMAP.md)** - Timeline and phases for production launch
-- **[TypeScript Migration](./docs/TYPESCRIPT_MIGRATION.md)** - Strategy for JS to TS conversion
+- **[Quick Start](./docs/QUICK_START.md)** - Essential links and communication channels
+- **[Onboarding Guide](./docs/ONBOARDING.md)** - Complete developer setup walkthrough
+- **[Storybook Onboarding](./docs/STORYBOOK_ONBOARDING.md)** - Adding components to Storybook
 
 ### 🔧 Technical Reference
-- **[API Documentation](./docs/API.md)** - Backend services, data models, and GraphQL API
-- **[Architecture Overview](./docs/ARCHITECTURE.md)** - System design and component relationships *(Coming Soon)*
-- **[Test Coverage Plan](./docs/TEST_COVERAGE_PLAN.md)** - Comprehensive testing strategy and implementation guide
-- **[E2E Testing Guide](./docs/E2E_TESTING_GUIDE.md)** - Running E2E tests with Amplify sandbox (no mocks)
+- **[API Documentation](./docs/API.md)** - Data models, Lambda functions, routes, and Gen 2 patterns
+- **[App Router Migration](./docs/APP_ROUTER_MIGRATION.md)** - Next.js App Router architecture and migration status
+- **[SSR & Performance](./docs/SSR_PERFORMANCE.md)** - Server-side rendering, React Compiler, Turbopack, View Transitions
+- **[CloudFront CDN](./docs/CLOUDFRONT_CDN.md)** - CDN architecture, signed cookies, image optimization
+- **[File Processing Pipeline](./docs/FILE_PROCESSING_PIPELINE.md)** - Fan-out upload architecture
+- **[Optimistic Concurrency](./docs/OPTIMISTIC_CONCURRENCY.md)** - `_version`-based conflict resolution
+- **[Search Architecture](./docs/SEARCH_ARCHITECTURE.md)** - Embeddings and semantic search
+- **[S3 Content Storage](./docs/S3_CONTENT_STORAGE_SPEC.md)** - Storage paths, versioning, and content lifecycle
+- **[S3 Embeddings](./docs/S3_EMBEDDINGS_SPEC.md)** - Embedding storage and retrieval
+
+### 🎮 Features
+- **[Custom AI Block](./docs/CUSTOM_AI_BLOCK.md)** - Instructor-customizable AI-graded editor block
+- **[Gamification](./docs/GAMIFICATION.md)** - XP, badges, streaks, boss battles, skill trees
+- **[Notification System](./docs/NOTIFICATION_SYSTEM.md)** - Real-time notifications with categories and badges
+- **[Offline Experience](./docs/OFFLINE_EXPERIENCE.md)** - PWA with service worker and IndexedDB sync
+- **[Analytics](./docs/ANALYTICS_IMPLEMENTATION.md)** - Usage tracking and reporting
 
 ### 📋 Process Documentation
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - Code standards and pull request process
 - **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community standards and behavior expectations
 - **[Security Policy](./SECURITY.md)** - Security reporting and best practices
+
+### 📝 In-Progress Plans
+- **[Admin Bot](./docs/ADMIN_BOT_PLAN.md)** - "Atlas" AI admin assistant (not started)
+- **[Custom Themes](./docs/CUSTOM_THEMES_PLAN.md)** - Cosmetic editor themes (not started)
+- **[Audio Processing](./docs/RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md)** - ML noise suppression and filter panel (not started)
+- **[Unified Undo/Redo](./docs/UNIFIED_UNDO_REDO_PLAN.md)** - Cross-surface Yjs UndoManager (not started)
 
 # 🔍 Document Maintenance
 
@@ -29,59 +44,17 @@ Welcome to the Homework Supply documentation! This directory contains comprehens
 1. **Edit in place**: Make changes directly to markdown files
 2. **Update index**: Modify this file if adding new documents
 3. **Review process**: Get team review for major changes
-4. **Version control**: All docs are tracked in Git
-
-## Documentation Standards
-- **Markdown format**: All docs use GitHub-flavored markdown
-- **Clear headers**: Use consistent heading structure
-- **Code examples**: Include working code snippets
-- **Links**: Use relative links between documents
-- **Updates**: Include last updated date in each document
 
 ## 🆘 Getting Help
 
-### If Documentation is Unclear
-1. **Search existing docs** - Use Cmd/Ctrl+F to search within files
-2. **Check troubleshooting** - Many issues have known solutions
-3. **Ask the team** - Use Discord for quick clarification
-4. **Improve the docs** - Submit PR with clarifications
-
-### Missing Information
-If you can't find what you need:
-1. **Check GitHub issues** - May be documented in issue discussions
-2. **Review code comments** - Inline documentation in source files
-3. **Ask in chat** - Someone likely knows the answer
-4. **Document findings** - Add to appropriate guide for others
-
-## 📋 Contribution Guidelines
-
-### Adding New Documentation
-1. **Create in `/docs` directory**
-2. **Use descriptive filename** (e.g., `DEPLOYMENT_GUIDE.md`)
-3. **Follow existing format** - Include table of contents, clear sections
-4. **Update this index** - Add entry to table above
-5. **Get team review** - Especially for technical documentation
-
-### Updating Existing Documentation
-1. **Keep current** - Update dates and version-specific information
-2. **Preserve links** - Don't break existing internal/external links
-3. **Test examples** - Verify code examples still work
-4. **Maintain style** - Follow existing formatting and tone
-
-## 🏷️ Document Tags
-
-Use these tags to quickly identify document types:
-
-- 🚀 **Getting Started** - New developer onboarding
-- 🗺️ **Planning** - Project roadmaps and timelines
-- 🔧 **Technical** - API docs, architecture, code guides
-- 📋 **Process** - Workflows, standards, guidelines
-- 🐛 **Troubleshooting** - Problem solving and debugging
-- 📈 **Reference** - Quick lookup information
+- **Search existing docs** - Use Cmd/Ctrl+F to search within files
+- **Check code** - Inline documentation in source files
+- **Ask the team** - Use Discord for quick clarification
+- **Improve the docs** - Submit PR with clarifications
 
 ---
 
-**Need something not covered here?** Check the [docs folder](./docs) Otherwise create an issue or ask in Discord!
+**Need help?** Check the [docs folder](./docs) or create an issue.
 
 
 ## 📬 Communication & Support
@@ -95,4 +68,7 @@ Use these tags to quickly identify document types:
 - **Detailed Issues**: Create a GitHub issue in the repository
 - **Bug Reports**: [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
 - **Security Issues**: info@homework.supply.com (see [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md))
+
+### Resources
+- **Storybook**: [Component Library](https://main--67e40f1917d7a8ef683541d7.chromatic.com)
 

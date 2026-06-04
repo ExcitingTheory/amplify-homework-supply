@@ -24,6 +24,42 @@ A graded Lexical editor block type (`custom-ai`) providing instructor-customizab
 
 ## Architecture
 
+### Security & Grading Flow
+
+```mermaid
+flowchart TB
+    subgraph Instructor["Instructor (Editor3)"]
+        Config["Configure block:<br/>input mode + criteria"]
+    end
+
+    subgraph Student["Student (Workbook)"]
+        Input["Submit answer<br/>(text/audio/image/drawing)"]
+    end
+
+    subgraph API["POST /api/grade-ai"]
+        Auth[validateAuth]
+        Sanitize[sanitizeInput<br/>strip HTML, injection patterns]
+        Build[buildSecurePrompt<br/>immutable system prompt + criteria]
+        Call[OpenAI gpt-4o-mini<br/>temperature=0.1]
+        Validate[validateOutputSchema<br/>JSON: correct, score, feedback]
+        Filter[filterPII<br/>check for data leakage]
+    end
+
+    subgraph Response
+        Grade["{ correct, score, feedback }"]
+    end
+
+    Config -->|"criteria stored in Lexical node"| Build
+    Input --> Auth
+    Auth --> Sanitize
+    Sanitize --> Build
+    Build --> Call
+    Call --> Validate
+    Validate --> Filter
+    Filter --> Grade
+    Grade -->|"saveGrade()"| Student
+```
+
 ### Security Model
 
 The block enforces multiple security layers:

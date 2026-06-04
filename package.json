@@ -34,9 +34,11 @@
     "dev:collab:with-logs": "concurrently -n yjs,next -c blue,green \"tsx scripts/yjs-dev-server.ts 2>&1 | tee test/logs/collab.log\" \"NEXT_PUBLIC_YJS_WS_URL=wss://localhost:3001 next dev --experimental-https 2>&1 | tee test/logs/next-dev.log\"",
     "dev:yjs": "tsx scripts/yjs-dev-server.ts",
     "dev:with-logs": "next dev --experimental-https 2>&1 | tee test/logs/next-dev.log",
-    "build": "npm run typecheck && next build",
+    "build": "next build",
+    "build:checked": "npm run typecheck && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' 'pages/**/*.{js,jsx,ts,tsx}' 'app/**/*.{ts,tsx}' 'amplify/**/*.ts' --max-warnings=0",
+    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' 'pages/**/*.{js,jsx,ts,tsx}' 'app/**/*.{ts,tsx}' 'amplify/**/*.ts' --fix",
     "lint:translate": "eslint 'src/**/*.{js,jsx,ts,tsx}' 'pages/**/*.{js,jsx,ts,tsx}'",
     "lint:translate:report": "eslint 'src/*.{js,jsx,ts,tsx}' 'src/**/*.{js,jsx,ts,tsx}' 'pages/**/*.{js,jsx,ts,tsx}' -o i18n-report.txt && echo 'Translation report generated: i18n-report.txt'",
     "lint:translate:stories": "eslint '**/*.stories.{js,jsx,ts,tsx}'",
@@ -254,6 +256,12 @@
     "fast-xml-parser": "^5.0.0",
     "minimatch": "^9.0.5",
     "ajv": "^8.17.1",
+    "@eslint/eslintrc": {
+      "ajv": "^6.14.0"
+    },
+    "eslint": {
+      "ajv": "^6.14.0"
+    },
     "immutable": "^4.3.7",
     "tmp": "^0.2.3"
   }

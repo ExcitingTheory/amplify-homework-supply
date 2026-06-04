@@ -109,7 +109,7 @@ describe('GamificationProviderWrapper', () => {
 
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        studentId: 'instructor-1',
+        studentId: '',
         cohortId: 'myClass',
       }),
     )
@@ -133,7 +133,7 @@ describe('GamificationProviderWrapper', () => {
   it('passes undefined cohortId when no section groups match', () => {
     renderWithAuth({
       user: { username: 'student-1' },
-      session: { groups: ['Admins', 'SomeOtherGroup'] },
+      session: { groups: ['SomeOtherGroup'] },
     })
 
     expect(providerSpy).toHaveBeenCalledWith(

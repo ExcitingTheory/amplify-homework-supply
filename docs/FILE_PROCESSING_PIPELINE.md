@@ -73,10 +73,8 @@ flowchart TD
     ContentEmbed --> OpenAI_Embed
 
     %% Branch 5: Media Conversion
-    FanOut -->|Audio/Video| MediaMutation["transcodeMedia<br/>(GraphQL Mutation)"]
-    FanOut -->|Audio/Video| MediaEvent["S3 OBJECT_CREATED<br/>Event"]
-    MediaMutation --> MediaLambda["mediaConvert Lambda"]
-    MediaEvent --> MediaLambda
+    FanOut -->|Audio/Video| MediaEvent["S3 OBJECT_CREATED<br/>Event (EventBridge)"]
+    MediaEvent --> MediaLambda["mediaConvert Lambda"]
     MediaLambda --> MediaConvert["AWS MediaConvert<br/>Transcode to HLS"]
     MediaConvert --> HLS["HLS Output<br/>(.m3u8 + segments)"]
     HLS --> UpdateFile3["Update File.hlsUrl<br/>+ transcodeStatus"]
@@ -175,7 +173,7 @@ protected/{identityId}/{fileId}/thumbnail.webp
 |----------|-------|
 | **Trigger** | `generateEmbedding(content)` / `generateEmbeddings(fileID)` mutations |
 | **Model** | OpenAI `text-embedding-3-small` |
-| **Dimensions** | 1536 (default) |
+| **Dimensions** | 512 |
 | **Storage** | `File.embedding`, `ParsedContent.embedding`, `Word.embedding`, `Question.embedding` |
 
 **Processing stages:**
@@ -183,8 +181,8 @@ protected/{identityId}/{fileId}/thumbnail.webp
 ```
 Content (text string or file content)
   → OpenAI Embeddings API (text-embedding-3-small)
-  → Vector (1536 dimensions)
-  → Store in model field (embedding, embeddingModel, embeddingDimensions)
+  → Vector (512 dimensions)
+  → Store in S3: private/{identityId}/embeddings/{model}/{id}.json
 ```
 
 **Used for:**
@@ -237,7 +235,7 @@ File in S3
 
 | Property | Value |
 |----------|-------|
-| **Trigger** | `transcodeMedia(fileID)` mutation + S3 OBJECT_CREATED event |
+| **Trigger** | S3 OBJECT_CREATED event via EventBridge (`S3VideoUploadRule`) |
 | **Input** | Audio files (MP3, WAV, M4A, etc.) and video files (MP4, MOV, WebM, etc.) |
 | **Output** | HLS streaming format (.m3u8 manifest + .ts segments) |
 | **Service** | AWS Elemental MediaConvert |

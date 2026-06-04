@@ -5,6 +5,32 @@
 
 All contexts migrated from manual `onCreate`/`onUpdate`/`onDelete` subscriptions to `observeQuery()` with `_version` guards to prevent echo rerenders.
 
+---
+
+## How It Works
+
+```mermaid
+sequenceDiagram
+    participant C as Component
+    participant Ctx as Context (versionRef)
+    participant API as client.models.X.update()
+    participant Sub as observeQuery subscription
+
+    C->>Ctx: Save request
+    Ctx->>Ctx: versionRef = _version + 1 (optimistic)
+    Ctx->>API: update({ ..., _version })
+    API-->>Sub: Subscription echo (same _version+1)
+    Sub->>Ctx: New record received
+    Ctx->>Ctx: record._version <= versionRef?
+    Note over Ctx: YES → skip (echo suppressed)
+    
+    Note over Sub: Later: another user's update
+    Sub->>Ctx: New record (_version > versionRef)
+    Ctx->>Ctx: record._version > versionRef?
+    Note over Ctx: YES → update state
+    Ctx->>C: Re-render with new data
+```
+
 ## Background
 
 Gen1 used `DataStore.observeQuery()` which provided:

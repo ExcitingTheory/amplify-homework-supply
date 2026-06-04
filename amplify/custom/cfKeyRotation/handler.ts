@@ -33,10 +33,13 @@ const PRIVATE_KEY_PARAM = "/homework-supply/cloudfront/private-key";
 
 async function parameterExists(name: string): Promise<boolean> {
   try {
-    await ssm.send(new GetParameterCommand({ Name: name, WithDecryption: false }));
+    await ssm.send(
+      new GetParameterCommand({ Name: name, WithDecryption: false }),
+    );
     return true;
   } catch (e: any) {
-    if (e instanceof ParameterNotFound || e.name === "ParameterNotFound") return false;
+    if (e instanceof ParameterNotFound || e.name === "ParameterNotFound")
+      return false;
     throw e;
   }
 }
@@ -58,7 +61,7 @@ async function writeKeyPair(overwrite: boolean): Promise<void> {
       Type: "String",
       Overwrite: overwrite,
       Description: "CloudFront RSA public key PEM for signed URL verification",
-    })
+    }),
   );
 
   await ssm.send(
@@ -68,12 +71,22 @@ async function writeKeyPair(overwrite: boolean): Promise<void> {
       Type: "SecureString",
       Overwrite: overwrite,
       Description: "CloudFront RSA private key PEM for signed URL generation",
-    })
+    }),
   );
 }
 
-export const handler = async (event: any): Promise<any> => {
-  console.log("cfKeyRotation event:", JSON.stringify({ ...event, ResponseURL: "[redacted]" }));
+async function getPublicKeyPem(): Promise<string> {
+  const resp = await ssm.send(
+    new GetParameterCommand({ Name: PUBLIC_KEY_PARAM, WithDecryption: false }),
+  );
+  return resp.Parameter?.Value ?? "";
+}
+
+export const handler = async (event: any): Promise<CrResponse> => {
+  console.log(
+    "cfKeyRotation event:",
+    JSON.stringify({ ...event, ResponseURL: "[redacted]" }),
+  );
 
   const requestType: string = event.RequestType;
   const forceRotate: boolean = event.ResourceProperties?.forceRotate === "true";
@@ -89,60 +102,65 @@ export const handler = async (event: any): Promise<any> => {
       const exists = await parameterExists(PUBLIC_KEY_PARAM);
       if (!exists) {
         await writeKeyPair(false);
-        return success(event, PUBLIC_KEY_PARAM, { Action: "Created" });
+        const publicKeyPem = await getPublicKeyPem();
+        return success(event, PUBLIC_KEY_PARAM, {
+          Action: "Created",
+          PublicKeyPem: publicKeyPem,
+        });
       }
-      return success(event, PUBLIC_KEY_PARAM, { Action: "AlreadyExists" });
+      const publicKeyPem = await getPublicKeyPem();
+      return success(event, PUBLIC_KEY_PARAM, {
+        Action: "AlreadyExists",
+        PublicKeyPem: publicKeyPem,
+      });
     }
 
     if (requestType === "Update") {
       if (forceRotate) {
         await writeKeyPair(true);
-        return success(event, PUBLIC_KEY_PARAM, { Action: "Rotated" });
+        const publicKeyPem = await getPublicKeyPem();
+        return success(event, PUBLIC_KEY_PARAM, {
+          Action: "Rotated",
+          PublicKeyPem: publicKeyPem,
+        });
       }
       // No-op update — key pair is managed separately.
-      return success(event, PUBLIC_KEY_PARAM, { Action: "NoOp" });
+      const publicKeyPem = await getPublicKeyPem();
+      return success(event, PUBLIC_KEY_PARAM, {
+        Action: "NoOp",
+        PublicKeyPem: publicKeyPem,
+      });
     }
 
     return success(event, PUBLIC_KEY_PARAM, { Action: "UnknownRequestType" });
   } catch (err: any) {
     console.error("cfKeyRotation error:", err);
-    return failure(event, err.message ?? String(err));
+    failure(event, err.message ?? String(err));
   }
 };
 
 // ---------------------------------------------------------------------------
 // CloudFormation custom resource response helpers
+// The cr.Provider framework handles sending the response to CloudFormation.
+// We just need to return the appropriate object.
 // ---------------------------------------------------------------------------
 
-function success(event: any, physicalResourceId: string, data?: Record<string, string>) {
-  return cfnResponse(event, "SUCCESS", physicalResourceId, data);
+interface CrResponse {
+  PhysicalResourceId: string;
+  Data?: Record<string, string>;
 }
 
-function failure(event: any, reason: string) {
-  return cfnResponse(event, "FAILED", event.PhysicalResourceId ?? "unknown", undefined, reason);
-}
-
-async function cfnResponse(
-  event: any,
-  status: "SUCCESS" | "FAILED",
+function success(
+  _event: any,
   physicalResourceId: string,
   data?: Record<string, string>,
-  reason?: string,
-): Promise<void> {
-  const body = JSON.stringify({
-    Status: status,
-    Reason: reason ?? `See CloudWatch log stream for ${event.LogicalResourceId}`,
+): CrResponse {
+  return {
     PhysicalResourceId: physicalResourceId,
-    StackId: event.StackId,
-    RequestId: event.RequestId,
-    LogicalResourceId: event.LogicalResourceId,
     Data: data ?? {},
-  });
+  };
+}
 
-  const url = event.ResponseURL as string;
-  await fetch(url, {
-    method: "PUT",
-    headers: { "Content-Type": "" },
-    body,
-  });
+function failure(_event: any, reason: string): never {
+  throw new Error(reason);
 }

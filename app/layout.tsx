@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 
 export const metadata: Metadata = {
   title: 'Homework Supply',
@@ -21,11 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning>
+    <html data-mui-color-scheme="light" suppressHydrationWarning>
       <head>
         <style>{`*, *::before, *::after { box-sizing: border-box; } body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }`}</style>
       </head>
       <body>
+        <InitColorSchemeScript attribute="data-mui-color-scheme" />
         {children}
       </body>
     </html>

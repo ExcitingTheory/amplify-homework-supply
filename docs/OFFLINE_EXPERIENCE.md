@@ -1,9 +1,8 @@
 # Offline Student Experience
 
-> **Status**: Complete  
-> **Implemented**: May 2026
+> **Status**: Partial — Service worker and PWA implemented; offline data/AI planned
 
-Full PWA with service worker, offline data cache, sync queue, and on-device LLM fallback. Students can complete lessons, chat with AI, and receive grading offline — results sync on reconnect.
+PWA with Serwist service worker for caching. Offline data cache, sync queue, and on-device LLM are planned features.
 
 ---
 
@@ -11,54 +10,42 @@ Full PWA with service worker, offline data cache, sync queue, and on-device LLM 
 
 | Capability | Status |
 |---|---|
-| Service Worker / PWA | ❌ None |
-| App manifest / install prompt | ❌ None |
-| Offline data cache (DynamoDB) | ❌ None |
-| Offline media cache (S3) | ❌ None |
-| Grade submission queue | ❌ None — `saveGrade` throws on network failure |
-| AI chat offline | ❌ All AI calls require Lambda/OpenAI network access |
-| AI grading offline | ❌ `verifyDefinition`, `verifyWord`, `verifyShortAnswer` all require Lambda |
+| Service Worker / PWA (Serwist) | ✅ `src/sw.ts` with caching strategies |
+| App manifest / install prompt | ✅ `public/manifest.json` |
+| S3 media cache (`s3-media-v2`) | ✅ CacheFirst 7-day, CDN hostname support |
+| App shell cache | ✅ StaleWhileRevalidate |
+| Font cache | ✅ CacheFirst 30-day |
+| Static image cache | ✅ CacheFirst 7-day |
+| API cache | ✅ NetworkFirst with fallback |
 | Yjs local persistence | ✅ `y-indexeddb` persists CRDT state across reloads |
-| Embedding cache | ✅ `VectorStoreDB` in IndexedDB (performance cache only) |
+| Embedding cache | ✅ `VectorStoreDB` in IndexedDB |
+| Offline data cache (DynamoDB) | ❌ Planned |
+| Grade submission queue | ❌ Planned |
+| AI chat offline (on-device LLM) | ❌ Planned |
+| AI grading offline | ❌ Planned |
 
 ---
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Student Browser                         │
-│                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │  Service      │  │  IndexedDB   │  │  On-Device LLM   │  │
-│  │  Worker       │  │  DataStore   │  │  (WebLLM /        │  │
-│  │  (Workbox)    │  │              │  │   Transformers.js)│  │
-│  │              │  │  • Units     │  │                   │  │
-│  │  Cache:      │  │  • Words     │  │  • Chat responses │  │
-│  │  • App shell │  │  • Questions │  │  • Answer grading │  │
-│  │  • Static    │  │  • Grades    │  │  • Feedback gen   │  │
-│  │  • Media     │  │  • Files     │  │                   │  │
-│  │  • Fonts     │  │  • Memory    │  │  Model: ~2-4GB    │  │
-│  └──────┬───────┘  │  • Sync queue│  │  (Phi-3/Gemma-2B) │  │
-│         │          └──────┬───────┘  └────────┬──────────┘  │
-│         │                 │                    │             │
-│  ┌──────┴─────────────────┴────────────────────┴──────────┐  │
-│  │               Offline Orchestrator                      │  │
-│  │  • Network status detection                             │  │
-│  │  • Route to on-device vs cloud AI                       │  │
-│  │  • Sync queue management                                │  │
-│  │  • Conflict resolution                                  │  │
-│  └─────────────────────────┬──────────────────────────────┘  │
-│                            │                                 │
-└────────────────────────────┼─────────────────────────────────┘
-                             │ (when online)
-                    ┌────────▼────────┐
-                    │  AWS Backend    │
-                    │  • AppSync      │
-                    │  • Lambda/OpenAI│
-                    │  • S3           │
-                    │  • Cognito      │
-                    └─────────────────┘
+```mermaid
+graph TB
+    subgraph Browser["Student Browser"]
+        SW["Service Worker (Serwist)<br/>• App shell (StaleWhileRevalidate)<br/>• Fonts (CacheFirst 30d)<br/>• Static images (CacheFirst 7d)<br/>• S3 media (CacheFirst 7d)<br/>• API (NetworkFirst)"]
+        IDB["IndexedDB<br/>• Yjs CRDT state (y-indexeddb)<br/>• VectorStoreDB embeddings<br/>• Sync queue (planned)"]
+        LLM["On-Device LLM (planned)<br/>• Chat responses<br/>• Answer grading<br/>• Feedback generation"]
+    end
+
+    subgraph Backend["AWS Backend (when online)"]
+        AS[AppSync / GraphQL]
+        L[Lambda + OpenAI]
+        S3[S3 via CloudFront]
+    end
+
+    SW -->|"cache miss"| S3
+    SW -->|"NetworkFirst fallback"| AS
+    IDB -->|"sync on reconnect"| AS
+    Browser -->|"online"| Backend
 ```
 
 ---

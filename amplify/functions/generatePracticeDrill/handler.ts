@@ -124,17 +124,15 @@ const bucketName = process.env.STORAGE_BUCKET;
 /**
  * Read published unit content from S3.
  * Lambda IAM role has full bucket access — no path prefix restrictions.
+ * Path: protected/units/{unitId}/published.json (no identityId — type-scoped)
  */
-async function getUnitContentFromS3(
-  identityId: string,
-  unitId: string,
-): Promise<string | null> {
+async function getUnitContentFromS3(unitId: string): Promise<string | null> {
   if (!bucketName) return null;
   try {
     const response = await s3.send(
       new GetObjectCommand({
         Bucket: bucketName,
-        Key: `protected/${identityId}/units/${unitId}/published.json`,
+        Key: `protected/units/${unitId}/published.json`,
       }),
     );
     return (await response.Body?.transformToString()) ?? null;
@@ -338,9 +336,9 @@ async function fetchSourceMaterial(
   }
 
   // Extract text blocks from Lexical content (read from S3)
-  if (sourcesEnabled.text && unit.identityId) {
+  if (sourcesEnabled.text) {
     try {
-      const s3Content = await getUnitContentFromS3(unit.identityId, unitId);
+      const s3Content = await getUnitContentFromS3(unitId);
       if (s3Content) {
         const lexicalData =
           typeof s3Content === "string" ? JSON.parse(s3Content) : s3Content;

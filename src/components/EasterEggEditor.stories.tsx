@@ -70,19 +70,6 @@ export const AchievementTrigger: Story = {
   },
 }
 
-/** Submission quality trigger */
-export const SubmissionQuality: Story = {
-  args: {
-    initialData: {
-      triggerType: 'SUBMISSION_QUALITY',
-      triggerValue: 'perfectScore',
-      xpReward: 150,
-      revealMessage: 'Perfect submission!',
-      active: true,
-    },
-  },
-}
-
 /** Inactive egg */
 export const InactiveEgg: Story = {
   args: {

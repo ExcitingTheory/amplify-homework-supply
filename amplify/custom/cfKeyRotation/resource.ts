@@ -28,6 +28,7 @@
 import { Construct } from "constructs";
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as logs from "aws-cdk-lib/aws-logs";
@@ -63,6 +64,9 @@ export class CfKeyRotationConstruct extends Construct {
 
   /** The Lambda function backing the custom resource */
   public readonly providerFn: lambda.Function;
+
+  /** The public key PEM as a CDK token (resolved at deploy time from custom resource output) */
+  public readonly publicKeyPem: string;
 
   constructor(scope: Construct, id: string, props: CfKeyRotationConstructProps = {}) {
     super(scope, id);
@@ -119,18 +123,21 @@ export class CfKeyRotationConstruct extends Construct {
     );
 
     // -----------------------------------------------------------------------
-    // Lambda function (Node 22, ESM, bundled handler)
+    // Lambda function (Node 22, bundled from TypeScript via esbuild)
     // -----------------------------------------------------------------------
-    this.providerFn = new lambda.Function(this, "Handler", {
+    this.providerFn = new NodejsFunction(this, "Handler", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      // Amplify uses esbuild to bundle TypeScript in amplify/custom/
-      // handler path relative to the built output root
-      handler: "handler.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, ".")),
+      entry: path.join(__dirname, "handler.ts"),
+      handler: "handler",
       role,
       timeout: cdk.Duration.minutes(1),
       description: "CloudFormation CR — generates CloudFront RSA key pair and writes to SSM",
       logRetention: logs.RetentionDays.ONE_WEEK,
+      bundling: {
+        format: OutputFormat.ESM,
+        mainFields: ["module", "main"],
+        banner: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
+      },
     });
 
     // -----------------------------------------------------------------------
@@ -141,7 +148,7 @@ export class CfKeyRotationConstruct extends Construct {
       logRetention: logs.RetentionDays.ONE_WEEK,
     });
 
-    new cdk.CustomResource(this, "Resource", {
+    const customResource = new cdk.CustomResource(this, "Resource", {
       serviceToken: provider.serviceToken,
       properties: {
         // Changing any property triggers an UPDATE event in the Lambda.
@@ -153,5 +160,11 @@ export class CfKeyRotationConstruct extends Construct {
       },
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
+
+    // Expose the public key PEM as a deploy-time token from the custom resource output.
+    // This avoids using ssm.StringParameter.valueForStringParameter() which creates a
+    // {{resolve:ssm:...}} dynamic reference that fails on first deploy (before the
+    // custom resource creates the parameter).
+    this.publicKeyPem = customResource.getAttString("PublicKeyPem");
   }
 }

@@ -35,7 +35,7 @@ import {
 } from "@/components/PracticeDrill";
 
 import { fetchAuthSession } from "aws-amplify/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function Units() {
   const t = useTranslations("pages");
@@ -74,6 +74,8 @@ function Units() {
 
   const [work, setIsWorking] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams?.get("q") || "";
   const { badges: earnedBadges } = useBadges();
   const { isLocked, getLockStatus } = useContentLock();
   const { totalXP } = useXP();
@@ -116,6 +118,20 @@ function Units() {
   const allUnits = React.useMemo(
     () => [...draftUnits, ...publishedUnits, ...archivedUnits],
     [draftUnits, publishedUnits, archivedUnits],
+  );
+
+  // Filter units by ?q= search param for URL-driven highlighting
+  const filterBySearchQuery = React.useCallback(
+    (units) => {
+      if (!searchQuery) return units;
+      const q = searchQuery.toLowerCase();
+      return units.filter(
+        (u) =>
+          u.name?.toLowerCase().includes(q) ||
+          u.description?.toLowerCase().includes(q),
+      );
+    },
+    [searchQuery],
   );
 
   useChatPageContext({

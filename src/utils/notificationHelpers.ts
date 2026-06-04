@@ -48,6 +48,8 @@ const TYPE_TO_CATEGORY = {
   SQUAD_MEMBER_JOINED: "SQUAD",
   SQUAD_METADATA_UPDATED: "SQUAD",
   SQUAD_INVITE: "SQUAD",
+  GUILD_POST_NEW: "GUILD",
+  GUILD_MEMBER_JOINED: "GUILD",
   CHAT_MENTION: "CHAT",
   CHAT_NEW_MESSAGE: "CHAT",
   SYSTEM_ANNOUNCEMENT: "SYSTEM",
@@ -212,5 +214,41 @@ export const notifications = {
       referenceId: challengeId,
       referenceType: "GroupChallenge",
       senderName: "System",
+    }),
+
+  guildPostNew: (
+    recipientIds: string[],
+    senderName: string,
+    guildId: string,
+    guildName: string,
+  ) =>
+    sendNotificationToMany(recipientIds, {
+      type: "GUILD_POST_NEW",
+      category: "GUILD",
+      title: `New post in ${guildName}`,
+      body: `${senderName} posted in your guild.`,
+      linkPath: `/guilds/${guildId}`,
+      linkLabel: "View Post",
+      referenceId: guildId,
+      referenceType: "Guild",
+      senderName,
+    }),
+
+  guildMemberJoined: (
+    recipientIds: string[],
+    memberName: string,
+    guildId: string,
+    guildName: string,
+  ) =>
+    sendNotificationToMany(recipientIds, {
+      type: "GUILD_MEMBER_JOINED",
+      category: "GUILD",
+      title: `${memberName} joined ${guildName}`,
+      body: `A new member has joined your guild.`,
+      linkPath: `/guilds/${guildId}`,
+      linkLabel: "View Guild",
+      referenceId: guildId,
+      referenceType: "Guild",
+      senderName: memberName,
     }),
 };

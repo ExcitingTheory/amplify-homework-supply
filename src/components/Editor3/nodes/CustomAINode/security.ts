@@ -66,23 +66,18 @@ export function sanitizeInput(input: string): string {
   sanitized = sanitized.replace(/<<SYS>>/gi, "[FILTERED]");
   sanitized = sanitized.replace(/<\|im_start\|>/gi, "[FILTERED]");
 
-  // Strip HTML metacharacters to prevent tag/script injection
+  // Strip HTML tags first, then any remaining stray angle brackets
+  sanitized = sanitized.replace(/<[^>]*>/g, "");
   sanitized = sanitized.replace(/[<>]/g, "");
 
   // Strip common script injection patterns
-  sanitized = sanitized.replace(
-    /javascript\s*:/gi,
-    "",
-  );
+  sanitized = sanitized.replace(/javascript\s*:/gi, "");
   // Apply repeatedly to prevent overlapping/re-emerging multi-character matches
   // from bypassing single-pass replacement.
   let previousSanitized: string;
   do {
     previousSanitized = sanitized;
-    sanitized = sanitized.replace(
-      /on\w+\s*=\s*["'][^"']*["']/gi,
-      "",
-    );
+    sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, "");
   } while (sanitized !== previousSanitized);
 
   // Strip prompt injection patterns
@@ -139,9 +134,7 @@ export function validateOutputSchema(
     return {
       correct: parsed.correct,
       score: Math.max(0, Math.min(100, Math.round(score))),
-      feedback: filterPII(
-        parsed.feedback.substring(0, MAX_FEEDBACK_LENGTH),
-      ),
+      feedback: filterPII(parsed.feedback.substring(0, MAX_FEEDBACK_LENGTH)),
     };
   } catch {
     return null;
@@ -183,6 +176,7 @@ export function buildSecurePrompt(
   // Sanitize the criteria too - instructors shouldn't be able to inject
   // system-level instructions either
   const safeCriteria = criteria
+    .replace(/<[^>]*>/g, "")
     .replace(/[<>]/g, "")
     .substring(0, 2000);
 

@@ -26,6 +26,7 @@ import {
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { signIn, signOut, fetchAuthSession } from "aws-amplify/auth";
+import { uploadData, getUrl, remove } from "aws-amplify/storage";
 import type { Schema } from "../../amplify/data/resource";
 import amplifyOutputs from "../../amplify_outputs.json";
 import { signInAs } from "./shared";
@@ -1339,13 +1340,15 @@ describe("C. getStudentSubmissionUrl Authorization", () => {
   let sectionId: string;
   let gradeId: string;
   let studentIdentityId: string;
-  const validSubmissionKey = () => `private/${studentIdentityId}/user-submissions/${gradeId}/q1/test_q1_1234567890.mp3`;
+  const validSubmissionKey = () =>
+    `private/${studentIdentityId}/user-submissions/${gradeId}/q1/test_q1_1234567890.mp3`;
 
   beforeEach(async () => {
     // Instructor creates a section and a grade for a student
     await signInAs("instructor1");
     const session = await fetchAuthSession();
-    const instructorUsername = session.tokens?.accessToken.payload.username as string;
+    const instructorUsername = session.tokens?.accessToken.payload
+      .username as string;
 
     const { data: section } = await client.models.Section.create({
       name: "Test Section",
@@ -1414,7 +1417,8 @@ describe("C. getStudentSubmissionUrl Authorization", () => {
     // Attempt to get a presigned URL for a different user's private file
     const { data, errors } = await client.queries.getStudentSubmissionUrl({
       gradeId,
-      submissionKey: "private/other-identity-id/user-submissions/grade-other/q1/file.mp3",
+      submissionKey:
+        "private/other-identity-id/user-submissions/grade-other/q1/file.mp3",
     });
 
     expect(errors).toBeDefined();
@@ -1435,5 +1439,165 @@ describe("C. getStudentSubmissionUrl Authorization", () => {
     expect(errors).toBeDefined();
     expect(errors!.length).toBeGreaterThan(0);
     expect(data).toBeNull();
+  });
+});
+
+// ==========================================================================
+// Phase 5-T5 — private/{entity_id}/* IAM path access control
+// ==========================================================================
+
+describe("D. S3 private/ path access control (Phase 5-T5)", () => {
+  /**
+   * Verifies that the private/{entity_id}/* storage rule only grants access
+   * to the file owner. A student must not be able to get a download URL for
+   * another student's private file via Amplify Storage getUrl().
+   *
+   * This is an IAM + Cognito Identity pool rule enforced by Amplify Storage
+   * (the generated S3 bucket policy restricts the ${cognito-identity.amazonaws.com:sub}
+   * prefix). We verify it surfaces as an error when using the Amplify client.
+   */
+
+  test("Student cannot access another student's private/ file via getUrl", async () => {
+    // Sign in as student1 and capture their identity ID
+    await signInAs("student1");
+    const student1Session = await fetchAuthSession();
+    const student1IdentityId = student1Session.credentials?.identityId;
+    expect(student1IdentityId).toBeTruthy();
+
+    // student1 creates a file in their own private/ path
+    const ownKey = `private/${student1IdentityId}/test-access-control.txt`;
+    await uploadData({
+      path: ownKey,
+      data: "hello",
+      options: { contentType: "text/plain" },
+    }).result;
+
+    // Verify student1 CAN get their own file
+    const { url: ownUrl } = await getUrl({ path: ownKey });
+    expect(ownUrl).toBeTruthy();
+
+    // Sign in as student2 and attempt to access student1's private file
+    await signInAs("student2");
+
+    // Using the explicit other-student path must fail — Amplify Storage
+    // injects ${cognito-identity.amazonaws.com:sub} into the IAM condition,
+    // so student2's credentials will be denied access to student1's key.
+    let errorThrown = false;
+    try {
+      await getUrl({ path: ownKey });
+    } catch {
+      errorThrown = true;
+    }
+
+    // The attempt must either throw (access denied) or — if the library
+    // returns a signed URL — the subsequent GET must return 403/404.
+    // Either outcome proves the IAM policy is enforced.
+    if (!errorThrown) {
+      // If getUrl returned a URL despite the wrong identity, verify the
+      // presigned URL is rejected at the S3 level.
+      const ownUrlResult = await getUrl({ path: ownKey });
+      const res = await fetch(ownUrlResult.url.toString());
+      expect(res.status).toBeGreaterThanOrEqual(400);
+    } else {
+      expect(errorThrown).toBe(true);
+    }
+
+    // Cleanup: delete test file as student1
+    await signInAs("student1");
+    await remove({ path: ownKey });
+  });
+});
+
+// ==========================================================================
+// Phase 6-A — getUnitsCdnCookie (CloudFront signed cookies)
+// ==========================================================================
+
+describe("E. getUnitsCdnCookie — CloudFront signed cookies (Phase 6-A)", () => {
+  /**
+   * The getUnitsCdnCookie query issues a CloudFront signed cookie scoped
+   * to protected/units/* for any authenticated user.
+   *
+   * Design: CDN is not the security boundary — AppSync data queries enforce
+   * enrollment. The cookie merely proves "authenticated platform user."
+   *
+   * Cookie fields use the CloudFront base64 alphabet (+ → -, = → _, / → ~).
+   *
+   * Cookie format:
+   *  - policy:    base64(JSON policy) with CF alphabet
+   *  - signature: base64(RSA-SHA1 signature) with CF alphabet
+   *  - keyPairId: SSM-backed CF key pair ID string
+   */
+
+  afterEach(cleanup);
+
+  test("Authenticated instructor receives policy, signature, and keyPairId", async () => {
+    await signInAs("instructor1");
+    const { data, errors } = await client.queries.getUnitsCdnCookie();
+
+    expect(errors).toBeUndefined();
+    expect(data).toBeTruthy();
+    expect(typeof data!.policy).toBe("string");
+    expect(data!.policy.length).toBeGreaterThan(0);
+    expect(typeof data!.signature).toBe("string");
+    expect(data!.signature.length).toBeGreaterThan(0);
+    expect(typeof data!.keyPairId).toBe("string");
+    expect(data!.keyPairId.length).toBeGreaterThan(0);
+  });
+
+  test("Policy decodes to a valid CloudFront custom-policy JSON", async () => {
+    await signInAs("instructor1");
+    const { data } = await client.queries.getUnitsCdnCookie();
+
+    expect(data!.policy).toBeTruthy();
+
+    // CloudFront base64 uses its own alphabet: - _ ~ instead of + = /
+    // Convert back to standard base64 to decode
+    const standardBase64 = data!.policy
+      .replace(/-/g, "+")
+      .replace(/_/g, "=")
+      .replace(/~/g, "/");
+
+    const decoded = Buffer.from(standardBase64, "base64").toString("utf-8");
+    const policy = JSON.parse(decoded) as {
+      Statement: Array<{
+        Resource: string;
+        Condition: { DateLessThan: { "AWS:EpochTime": number } };
+      }>;
+    };
+
+    expect(policy).toHaveProperty("Statement");
+    expect(Array.isArray(policy.Statement)).toBe(true);
+    expect(policy.Statement.length).toBeGreaterThan(0);
+
+    const stmt = policy.Statement[0];
+    // Resource must cover the protected/units/* path
+    expect(stmt.Resource).toMatch(/protected\/units/);
+    // Expiry must be a future epoch timestamp
+    const expiry = stmt.Condition.DateLessThan["AWS:EpochTime"];
+    expect(typeof expiry).toBe("number");
+    expect(expiry).toBeGreaterThan(Math.floor(Date.now() / 1000));
+  });
+
+  test("Authenticated learner also receives valid cookie values", async () => {
+    await signInAs("student1");
+    const { data, errors } = await client.queries.getUnitsCdnCookie();
+
+    // CDN is not the enrollment gate — any authenticated user gets the cookie
+    expect(errors).toBeUndefined();
+    expect(data).toBeTruthy();
+    expect(data!.policy.length).toBeGreaterThan(0);
+    expect(data!.signature.length).toBeGreaterThan(0);
+    expect(data!.keyPairId.length).toBeGreaterThan(0);
+  });
+
+  test("Unauthenticated request is rejected by AppSync", async () => {
+    // Ensure no active session
+    await signOut().catch(() => undefined);
+    const unauthClient = generateClient<Schema>();
+    const { data, errors } = await unauthClient.queries.getUnitsCdnCookie();
+
+    expect(data).toBeNull();
+    expect(errors).toBeDefined();
+    expect(errors!.length).toBeGreaterThan(0);
   });
 });

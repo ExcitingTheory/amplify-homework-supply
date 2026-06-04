@@ -25,6 +25,23 @@ const metadataCache: Map<string, TranslationMetadata> = new Map();
 const missingFiles: Set<string> = new Set();
 
 /**
+ * Get the base path for static asset URLs.
+ * Detects the GitHub Pages subpath from the current URL at runtime.
+ */
+function getBasePath(): string {
+  if (typeof window === 'undefined') return '/';
+  // Use pathname up to index.html or iframe.html to infer the deployment base
+  const path = window.location.pathname;
+  // Match pattern like /repo-name/ at the start
+  const match = path.match(/^(\/[^/]+\/)/);
+  // If path starts with a subpath (not just /), use it
+  if (match && match[1] !== '/') {
+    return match[1];
+  }
+  return '/';
+}
+
+/**
  * Load a translation file for a specific language and namespace
  * @param language - The language code (e.g., 'en', 'ja')
  * @param namespace - The namespace (e.g., 'common', 'auth')
@@ -49,7 +66,8 @@ export async function loadTranslation(
   try {
     // Dynamically import the translation file using fetch
     // This works in both manager and preview contexts
-    const response = await fetch(`/locales/${language}/${namespace}.json`);
+    const base = getBasePath();
+    const response = await fetch(`${base}locales/${language}/${namespace}.json`);
     
     if (!response.ok) {
       // Mark as missing to avoid repeated warnings
@@ -123,9 +141,10 @@ export async function loadMetadata(
   }
 
   // Try multiple paths: translation-cache static dir (flat), then public locales dir
+  const base = getBasePath();
   const paths = [
-    `/translation-cache/${namespace}.meta.json`,
-    `/locales/${language}/${namespace}.meta.json`,
+    `${base}translation-cache/${namespace}.meta.json`,
+    `${base}locales/${language}/${namespace}.meta.json`,
   ];
 
   for (const path of paths) {

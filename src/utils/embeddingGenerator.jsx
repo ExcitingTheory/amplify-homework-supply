@@ -240,7 +240,12 @@ export async function generateEmbedding(text, options = {}) {
 }
 
 /**
- * Generate embedding for a Unit from all its sections
+ * Generate embedding for a Unit from all its sections.
+ *
+ * @deprecated Manual/force-only path. The primary embedding generation path is
+ * now the `rebuildSearchBundle` Lambda, triggered automatically on unit publish.
+ * Use this only for admin "regenerate all embeddings" workflows or development.
+ *
  * @param {string} unitId - Unit ID
  * @param {object} options - Generation options
  * @returns {Promise<object>} Result with embedding and metadata

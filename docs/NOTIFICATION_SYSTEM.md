@@ -10,6 +10,64 @@ Real-time notification system with model, context, UI components, Lambda utiliti
 
 A full notification system for Homework Supply covering real-time in-app notifications, scheduled reminders, badge counts on navigation items, a notification inbox, and an admin CLI for system-wide announcements.
 
+## Delivery Architecture
+
+```mermaid
+graph TB
+    subgraph "Trigger Sources"
+        UA[User Actions<br/>grade, review, challenge]
+        Cron[notificationCron Lambda<br/>hourly checks]
+        CLI[Admin CLI<br/>scripts/send-notification.ts]
+    end
+
+    subgraph "Creation Layer"
+        Inline[Inline Creation<br/>in existing handlers]
+        Scheduled[Scheduled Creation<br/>due dates, streaks, endings]
+        System[System Creation<br/>announcements, maintenance]
+    end
+
+    subgraph "Storage"
+        DB[(DynamoDB<br/>Notification model)]
+    end
+
+    subgraph "Delivery"
+        Sub[AppSync observeQuery<br/>real-time push]
+        Poll[NotificationContext<br/>initial load + badge count]
+    end
+
+    subgraph "Frontend"
+        Badge[NotificationBadge<br/>AppBar + nav items]
+        Drawer[Notification Drawer<br/>category tabs]
+        Page[/profile/notifications<br/>full inbox]
+        Toast[Snackbar<br/>instant feedback]
+    end
+
+    UA --> Inline
+    Cron --> Scheduled
+    CLI --> System
+
+    Inline --> DB
+    Scheduled --> DB
+    System --> DB
+
+    DB --> Sub
+    DB --> Poll
+
+    Sub --> Badge & Toast
+    Poll --> Badge & Drawer & Page
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unseen: Created
+    Unseen --> Seen: User opens drawer/page
+    Seen --> Interacted: User clicks link/action
+    Interacted --> [*]: TTL expires or deleted
+    
+    Unseen --> [*]: expiresAt reached
+    Seen --> [*]: expiresAt reached
+```
+
 ---
 
 ## 1. Data Model

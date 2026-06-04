@@ -4,11 +4,7 @@ import { useRouter } from "next/navigation";
 import yaml from "js-yaml";
 import { moderateContent } from "../utils/moderateContent";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import {
-  saveDraftContent,
-  loadContent,
-  publishContent,
-} from "../utils/unitContentStorage";
+import { saveDraftContent, loadContent } from "../utils/unitContentStorage";
 import {
   awardXP,
   recordGradeCompletion,
@@ -1387,29 +1383,10 @@ const UnitProvider = ({ children, id }) => {
         unitRef.current = { ...unitRef.current, _version: savedUnit._version };
         versionRef.current = savedUnit._version;
 
-        // On publish: copy draft to published + create history snapshot
+        // On publish: delegate to publishUnit Lambda which handles
+        // media path rewriting, S3 writes, and DynamoDB update atomically.
         if (status === "PUBLISHED") {
-          const currentVersion = currentUnit.contentVersion || 1;
-          await publishContent(
-            currentUnit.identityId,
-            currentUnit.id,
-            currentVersion,
-          );
-
-          // Update publishedContentVersion + publishedAt in DynamoDB
-          const { data: publishedUnit } = await client.models.Unit.update({
-            id: currentUnit.id,
-            publishedContentVersion: currentVersion,
-            publishedAt: Date.now(),
-            _version: savedUnit._version,
-          });
-          if (publishedUnit) {
-            unitRef.current = {
-              ...unitRef.current,
-              _version: publishedUnit._version,
-            };
-            versionRef.current = publishedUnit._version;
-          }
+          await client.mutations.publishUnit({ unitId: currentUnit.id });
         }
       }
     } catch (error) {

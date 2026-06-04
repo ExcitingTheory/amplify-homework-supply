@@ -102,6 +102,7 @@ import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "../plugins/ConversationPla
 import { INSERT_IMAGE_COMMAND } from "../plugins/ImagesPlugin";
 import { INSERT_PDF_COMMAND } from "../plugins/PdfViewerPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useSearchParams } from "next/navigation";
 
 // Lexical imports for inline editing
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -3278,7 +3279,13 @@ function SelectedFileDetailsPanel({
 export default function FileManager2() {
   const t = useTranslations("editor.files");
   const [editor] = useLexicalComposerContext();
-  const [search, setSearch] = React.useState("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return searchParams?.get("q") || "";
+    }
+    return "";
+  });
   const [searchMode, setSearchMode] = React.useState("hybrid"); // 'keyword', 'semantic', 'hybrid'
   const [searching, setSearching] = React.useState(false);
   const [selectedItems, setSelectedItems] = React.useState(new Set());
@@ -3479,7 +3486,8 @@ export default function FileManager2() {
 
       try {
         // Resolve the caller's identityId once
-        const { fetchAuthSession, getCurrentUser } = await import("aws-amplify/auth");
+        const { fetchAuthSession, getCurrentUser } =
+          await import("aws-amplify/auth");
         const session = await fetchAuthSession();
         const resolvedIdentityId = session?.identityCredentials?.identityId;
         const { username: owner } = await getCurrentUser();
@@ -3489,16 +3497,22 @@ export default function FileManager2() {
 
         for (let trackIdx = 0; trackIdx < tracks.length; trackIdx++) {
           const track = tracks[trackIdx];
-          for (let clipIdx = 0; clipIdx < (track.clips || []).length; clipIdx++) {
+          for (
+            let clipIdx = 0;
+            clipIdx < (track.clips || []).length;
+            clipIdx++
+          ) {
             const clip = track.clips[clipIdx];
             if (!clip?.audioBlob) continue;
 
-            const filename = [
-              "conversation",
-              unit?.name?.replace(/[^a-zA-Z0-9]/g, "-") || "audio",
-              track.name?.replace(/[^a-zA-Z0-9]/g, "-") || `track${trackIdx + 1}`,
-              clip.id || clipIdx,
-            ].join("-") + ".mp3";
+            const filename =
+              [
+                "conversation",
+                unit?.name?.replace(/[^a-zA-Z0-9]/g, "-") || "audio",
+                track.name?.replace(/[^a-zA-Z0-9]/g, "-") ||
+                  `track${trackIdx + 1}`,
+                clip.id || clipIdx,
+              ].join("-") + ".mp3";
 
             const file = new File([clip.audioBlob], filename, {
               type: "audio/mpeg",
@@ -3555,18 +3569,25 @@ export default function FileManager2() {
           const scriptTitle = unit?.name || "Conversation";
           const scriptContent = JSON.stringify({
             title: scriptTitle,
-            tracks: tracks.map((tr) => ({ name: tr.name, voice: tr.voice, prompt: tr.prompt })),
+            tracks: tracks.map((tr) => ({
+              name: tr.name,
+              voice: tr.voice,
+              prompt: tr.prompt,
+            })),
             dialogue,
             audioFileIds,
           });
-          const scriptBlob = new Blob([scriptContent], { type: "text/x-fountain" });
+          const scriptBlob = new Blob([scriptContent], {
+            type: "text/x-fountain",
+          });
           const scriptFile = new File(
             [scriptBlob],
             `${scriptTitle.replace(/[^a-zA-Z0-9]/g, "-")}-conversation.fountain`,
             { type: "text/x-fountain" },
           );
           const scriptS3Path = `protected/${resolvedIdentityId}/files/${scriptFile.name}`;
-          const { uploadData: uploadScriptData } = await import("aws-amplify/storage");
+          const { uploadData: uploadScriptData } =
+            await import("aws-amplify/storage");
           const scriptUploadResult = await uploadScriptData({
             path: scriptS3Path,
             data: scriptFile,
@@ -3586,7 +3607,10 @@ export default function FileManager2() {
               unitID: unit.id,
               fileID: scriptFileRecord.id,
             }).catch((err) =>
-              console.warn("[FileManager2] UnitFile (script) create error:", err),
+              console.warn(
+                "[FileManager2] UnitFile (script) create error:",
+                err,
+              ),
             );
           }
         }
@@ -3895,7 +3919,7 @@ export default function FileManager2() {
     [files],
   );
 
-  // Enhanced text search function (no external API calls)
+  // Enhanced text search function — uses vector store when available
   const performSemanticSearch = React.useCallback(
     async (query) => {
       if (!query.trim()) {
@@ -3905,13 +3929,21 @@ export default function FileManager2() {
 
       setSearching(true);
       try {
-        // Use enhanced text search instead of external API calls
+        if (vectorStoreReady) {
+          // Use actual vector search when embeddings are loaded
+          const { results } = await performVectorSearch(query);
+          if (results && results.length > 0) {
+            setSemanticResults(results);
+            return;
+          }
+        }
+        // Fallback to text search
         performSimpleTextSearch(query);
       } finally {
         setSearching(false);
       }
     },
-    [performSimpleTextSearch],
+    [vectorStoreReady, performVectorSearch, performSimpleTextSearch],
   );
 
   // Filter files based on search term and mode
@@ -4500,7 +4532,7 @@ export default function FileManager2() {
         const result = await generateEmbeddingAction({
           content: query,
           model: "text-embedding-3-small",
-          dimensions: 1536,
+          dimensions: 512,
         });
         const queryEmbedding = result.embedding;
         console.log(

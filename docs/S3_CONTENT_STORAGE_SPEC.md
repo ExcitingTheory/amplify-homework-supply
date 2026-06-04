@@ -7,15 +7,21 @@ Move Lexical editor content (`Unit.data`) and Yjs snapshots (`Unit.yjsSnapshot`)
 ## S3 Path Convention
 
 ```
-private/{identityId}/units/{unitId}/draft.json        ← Current draft (owner-only)
-private/{identityId}/units/{unitId}/yjs-snapshot.bin  ← Yjs Y.Doc state (owner-only)
-private/{identityId}/units/{unitId}/history/v{N}.json ← Snapshot at publish time (owner-only)
-protected/{identityId}/units/{unitId}/published.json  ← Published (all authenticated can read)
+private/{identityId}/units/{unitId}/draft.json          ← Current draft (owner-only)
+private/{identityId}/units/{unitId}/yjs-snapshot.bin    ← Yjs Y.Doc state (owner-only)
+private/{identityId}/units/{unitId}/history/v{N}.json   ← Snapshot at publish time (owner-only)
+
+protected/units/{unitId}/published.json                 ← Published Lexical JSON (CDN, signed cookie)
+protected/units/audio/{fileId}.mp3                      ← Audio assets copied from instructor prefix
+protected/units/images/{fileId}/{size}.webp             ← Image WebP variants copied from instructor prefix
+protected/units/ngrams/v1.json                          ← Layout ngrams index (shared, all authenticated)
 ```
+
+Video (HLS) is NOT copied on publish. HLS manifests and segments remain at `protected/{identityId}/{fileId}/` and are served through the `/api/hls` proxy which generates per-request signed URLs. Published Lexical JSON stores `/api/hls?path=...` proxy URLs for video nodes.
 
 **Access model**:
 - **`private/{entity_id}/*`**: Only the owner (instructor) can read/write. Drafts, Yjs state, and version history are invisible to learners and other instructors.
-- **`protected/{entity_id}/*`**: Owner can read/write/delete. All authenticated users can read. Published content is accessible to any signed-in learner.
+- **`protected/units/*`**: Served via CloudFront with a signed cookie required. Cookie is issued to any authenticated user whose enrollment is confirmed by `getUnitAccess(unitId)`. Type-scoped flat paths (`audio/{fileId}`, `images/{fileId}/`) mean a file referenced by multiple units is only copied once on first publish.
 
 The `identityId` is already stored on the `Unit` model (`Unit.identityId`). This is the Cognito identity pool ID — the same value used for `protected/` and `private/` paths throughout the app.
 
@@ -50,8 +56,14 @@ import { uploadData, downloadData } from 'aws-amplify/storage';
 function draftKey(identityId: string, unitId: string): string {
   return `private/${identityId}/units/${unitId}/draft.json`;
 }
-function publishedKey(identityId: string, unitId: string): string {
-  return `protected/${identityId}/units/${unitId}/published.json`;
+function publishedKey(unitId: string): string {
+  return `protected/units/${unitId}/published.json`;
+}
+function publishedAudioKey(fileId: string): string {
+  return `protected/units/audio/${fileId}.mp3`;
+}
+function publishedImageKey(fileId: string, size: string): string {
+  return `protected/units/images/${fileId}/${size}.webp`;
 }
 function yjsSnapshotKey(identityId: string, unitId: string): string {
   return `private/${identityId}/units/${unitId}/yjs-snapshot.bin`;
@@ -125,7 +137,7 @@ export async function publishContent(
   // Write to protected/ (published) and private/ (history) in parallel
   await Promise.all([
     uploadData({
-      path: publishedKey(identityId, unitId),
+      path: publishedKey(unitId),
       data: draftContent,
       options: { contentType: 'application/json' },
     }).result,
@@ -148,7 +160,7 @@ export async function loadContent(
 ): Promise<string | null> {
   const path = variant === 'draft'
     ? draftKey(identityId, unitId)       // private/ — only owner can read
-    : publishedKey(identityId, unitId);  // protected/ — all authenticated can read
+    : publishedKey(unitId);  // protected/units/ — CloudFront signed cookie required
   try {
     const result = await downloadData({ path }).result;
     return await result.body.text();
