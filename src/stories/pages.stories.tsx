@@ -74,7 +74,6 @@ All pages use AWS Amplify Data Client for real-time sync and Cognito for authent
       },
     },
   },
-  tags: ['autodocs'],
 };
 
 export default meta;

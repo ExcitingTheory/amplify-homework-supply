@@ -69,7 +69,6 @@ A polished file metadata editor with advanced features:
             description: 'Delay in milliseconds before auto-save triggers',
         },
     },
-    tags: ['autodocs'],
 };
 
 export default meta;

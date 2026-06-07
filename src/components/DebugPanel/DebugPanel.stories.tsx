@@ -13,7 +13,6 @@ const meta: Meta<typeof DebugPanel> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
 };
 
 export default meta;

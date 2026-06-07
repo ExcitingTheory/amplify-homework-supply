@@ -73,7 +73,6 @@ const meta: Meta<typeof TopicList> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
   args: {
     onSelectTopic: fn(),
     onCreateTopic: fn(),

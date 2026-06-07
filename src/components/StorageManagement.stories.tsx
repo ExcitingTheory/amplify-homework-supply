@@ -17,7 +17,6 @@ const meta: Meta<typeof StorageManagement> = {
       },
     },
   },
-  tags: ['autodocs'],
 };
 export default meta;
 type Story = StoryObj<typeof StorageManagement>;

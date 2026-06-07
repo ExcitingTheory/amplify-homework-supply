@@ -104,10 +104,10 @@ function MessageBubble({
 }
 
 export function PeerReviewChat({
-  messages,
-  typingPeers,
+  messages = [],
+  typingPeers = [],
   currentUsername,
-  isClosed,
+  isClosed = false,
   onSendMessage,
   onTypingChange,
   onAIMention,

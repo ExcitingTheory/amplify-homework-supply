@@ -5,6 +5,7 @@
 
 import React from "react";
 import { within, waitFor } from "@testing-library/react";
+import { expect } from "storybook/test";
 import userEvent from "@testing-library/user-event";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -283,7 +284,6 @@ export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for insert button to be visible
     await waitFor(
@@ -302,7 +302,6 @@ export const EditableWithQuiz = {
   render: () => <EditableTemplate editorState={sampleQuizState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for quiz block to render
     await waitFor(
@@ -323,7 +322,6 @@ export const ReadOnlyWithQuiz = {
   render: () => <ReadOnlyTemplate editorState={sampleQuizState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for quiz in read-only mode
     await waitFor(

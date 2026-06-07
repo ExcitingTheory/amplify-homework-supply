@@ -57,7 +57,6 @@ const steps: SpotlightStep[] = [
       },
     },
   },
-  tags: ['autodocs'],
 };
 
 export default meta;

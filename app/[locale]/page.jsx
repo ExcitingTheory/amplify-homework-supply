@@ -386,7 +386,7 @@ function Index({ signOut, user }) {
           {/* Badges */}
           {earnedBadges?.length > 0 && (
             <Box sx={{ mb: 3 }}>
-              <BadgeShelf earnedBadges={earnedBadges} columns={4} earnedOnly />
+              <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
             </Box>
           )}
 
@@ -533,10 +533,12 @@ function Index({ signOut, user }) {
                         margin: "1rem auto",
                         width: "90vw",
                         maxWidth: "80rem",
+                        height: 180,
                         borderRadius: 2,
                         borderLeft: "4px solid",
                         borderLeftColor: "text.primary",
                         transition: "all 0.3s ease-in-out",
+                        overflow: "hidden",
                         "&:hover": {
                           elevation: 6,
                           transform: "translateY(-2px)",
@@ -757,10 +759,12 @@ function Index({ signOut, user }) {
                       margin: "1rem auto",
                       width: "ƒ",
                       maxWidth: "80rem",
+                      height: 180,
                       borderRadius: 2,
                       borderLeft: "4px solid",
                       borderLeftColor: "text.primary",
                       transition: "all 0.3s ease-in-out",
+                      overflow: "hidden",
                       "&:hover": {
                         elevation: 6,
                         transform: "translateY(-2px)",
@@ -875,10 +879,12 @@ function Index({ signOut, user }) {
                       margin: "1rem auto",
                       width: "90vw",
                       maxWidth: "80rem",
+                      height: 180,
                       borderRadius: 2,
                       borderLeft: "4px solid",
                       borderLeftColor: "text.primary",
                       transition: "all 0.3s ease-in-out",
+                      overflow: "hidden",
                       "&:hover": {
                         elevation: 6,
                         transform: "translateY(-2px)",

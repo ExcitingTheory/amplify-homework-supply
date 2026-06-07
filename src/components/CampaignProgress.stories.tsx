@@ -4,7 +4,6 @@ import { CampaignProgress } from './CampaignProgress'
 const meta: Meta<typeof CampaignProgress> = {
   title: '🏆 Gamification/Student/Campaign Progress',
   component: CampaignProgress,
-  tags: ['autodocs'],
 }
 export default meta
 

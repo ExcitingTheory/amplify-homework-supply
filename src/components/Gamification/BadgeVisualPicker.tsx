@@ -10,7 +10,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
-import Grid from '@mui/material/Grid'
+import ButtonBase from '@mui/material/ButtonBase'
 import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
@@ -400,36 +400,33 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
         ))}
       </Tabs>
       <Box sx={{ maxHeight: 160, overflow: 'auto', mb: 2 }}>
-        <Grid container spacing={0.5}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
           {(iconSearch ? filteredIcons : ICON_CATALOG)[iconTab]?.icons.map((entry) => {
             const Icon = entry.icon
             const isSelected = value.iconName === entry.name
             return (
-              <Grid key={entry.name}>
-                <Tooltip title={entry.label} placement="top">
-                  <Box
-                    onClick={() => handleChange({ iconName: entry.name, iconLib: entry.lib })}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: 1,
-                      cursor: 'pointer',
-                      border: isSelected ? '2px solid' : '1px solid transparent',
-                      borderColor: isSelected ? 'primary.main' : 'transparent',
-                      bgcolor: isSelected ? 'primary.light' : 'transparent',
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <Icon size={22} />
-                  </Box>
-                </Tooltip>
-              </Grid>
+              <Tooltip key={entry.name} title={entry.label} placement="top">
+                <ButtonBase
+                  onClick={() => handleChange({ iconName: entry.name, iconLib: entry.lib })}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 1,
+                    border: isSelected ? '2px solid' : '1px solid transparent',
+                    borderColor: isSelected ? 'primary.main' : 'transparent',
+                    bgcolor: isSelected ? 'primary.light' : 'transparent',
+                    '&:hover': { bgcolor: 'action.hover' },
+                  }}
+                >
+                  <Icon size={22} />
+                </ButtonBase>
+              </Tooltip>
             )
           })}
-        </Grid>
+        </Box>
       </Box>
 
       {/* ---- Shape ---- */}
@@ -458,7 +455,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
             {COLOR_PRESETS.map((c) => (
-              <Box
+              <ButtonBase
                 key={c}
                 onClick={() => handleChange({ bgColor: c })}
                 sx={{
@@ -466,7 +463,6 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
                   height: 22,
                   borderRadius: '50%',
                   bgcolor: c,
-                  cursor: 'pointer',
                   border: value.bgColor === c ? '2px solid white' : 'none',
                   boxShadow: value.bgColor === c ? `0 0 0 2px ${c}` : 'none',
                 }}
@@ -487,7 +483,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
           </Typography>
           <Stack direction="row" spacing={0.5} sx={{ mb: 0.5 }}>
             {['#ffffff', '#000000', '#ffd700', '#1a237e'].map((c) => (
-              <Box
+              <ButtonBase
                 key={c}
                 onClick={() => handleChange({ iconColor: c })}
                 sx={{
@@ -495,7 +491,6 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
                   height: 22,
                   borderRadius: '50%',
                   bgcolor: c,
-                  cursor: 'pointer',
                   border: '1px solid',
                   borderColor: value.iconColor === c ? 'primary.main' : 'divider',
                 }}
@@ -524,14 +519,13 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             : '#ccc'
           return (
             <Tooltip key={gp.label} title={gp.label}>
-              <Box
+              <ButtonBase
                 onClick={() => handleChange({ gradient: gp.gradient })}
                 sx={{
                   width: 32,
                   height: 32,
                   borderRadius: 1,
                   background: bg,
-                  cursor: 'pointer',
                   border: isSelected ? '2px solid' : '1px solid',
                   borderColor: isSelected ? 'primary.main' : 'divider',
                   display: 'flex',
@@ -542,7 +536,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
                 }}
               >
                 {!gp.gradient && '∅'}
-              </Box>
+              </ButtonBase>
             </Tooltip>
           )
         })}

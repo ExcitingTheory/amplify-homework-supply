@@ -321,29 +321,31 @@ export function BadgeIcon({
         />
       </svg>
 
-      {/* Icon overlay */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <DrawableIcon
-          Icon={config.icon}
-          color={earned ? config.iconColor : '#9e9e9e'}
-          size={size}
-          draw={animate && earned && drawIcon}
-          scale={config.iconScale ?? 1}
-          translate={config.iconTranslate ?? [0, 0]}
-          animationDelay={animationDelay + 0.3}
-        />
-      </Box>
+      {/* Icon overlay — hidden when unearned */}
+      {earned && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <DrawableIcon
+            Icon={config.icon}
+            color={config.iconColor}
+            size={size}
+            draw={animate && drawIcon}
+            scale={config.iconScale ?? 1}
+            translate={config.iconTranslate ?? [0, 0]}
+            animationDelay={animationDelay + 0.3}
+          />
+        </Box>
+      )}
     </MotionBox>
   )
 }

@@ -98,10 +98,27 @@ const initializeStores = () => {
     dataStores.ParsedContent.set(parsed.id, parsed);
   });
 
+  // Seed default Unit so UnitProvider decorator's Unit.get() succeeds
+  dataStores.Unit.set('mock-unit-id', {
+    id: 'mock-unit-id',
+    name: 'Sample Unit',
+    description: 'A mock unit for Storybook development',
+    data: JSON.stringify({ root: { children: [], direction: null, format: '', indent: 0, type: 'root', version: 1 } }),
+    owner: 'mock-user-sub',
+    published: true,
+    contentVersion: 0,
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+
   console.log('[Mock Data] Initialized stores:', {
     File: dataStores.File.size,
     Document: dataStores.Document.size,
     ParsedContent: dataStores.ParsedContent.size,
+    Unit: dataStores.Unit.size,
   });
 };
 
@@ -489,7 +506,7 @@ const createMockModel = (modelName) => ({
     const enhancedItem = item ? addRelationshipAccessors(item, modelName) : null;
     return {
       data: enhancedItem,
-      errors: item ? [] : [{ message: 'Not found' }],
+      errors: [],
     };
   },
   
@@ -1195,6 +1212,24 @@ export const cancelDocumentAnalysis = (documentId) => {
 export const initializeMockData = () => {
   console.log('[Mock Data Gen 2] Initializing mock data');
   
+  // Seed a default Unit so UnitProvider's Unit.get({ id: "mock-unit-id" }) succeeds
+  const defaultUnit = {
+    id: 'mock-unit-id',
+    name: 'Sample Unit',
+    description: 'A mock unit for Storybook development',
+    data: JSON.stringify({ root: { children: [], direction: null, format: '', indent: 0, type: 'root', version: 1 } }),
+    owner: 'mock-user-sub',
+    published: true,
+    contentVersion: 0,
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  dataStores.Unit.set(defaultUnit.id, defaultUnit);
+  console.log('[Mock Data Gen 2] Seeded default Unit:', defaultUnit.id);
+
   // Seed AssistantChat data
   if (allChatData) {
     seedMockAssistantChats([allChatData]);

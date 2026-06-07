@@ -5,7 +5,6 @@ import { BossBattleCard } from './BossBattleCard'
 const meta: Meta<typeof BossBattleCard> = {
   title: '🏆 Gamification/Squads & Teams/Boss Battle Card',
   component: BossBattleCard,
-  tags: ['autodocs'],
 }
 export default meta
 
@@ -97,6 +96,6 @@ export const ActiveInteraction: Story = {
     await expect(canvas.getByText(/Review and improve/)).toBeInTheDocument()
 
     // Bonus multiplier chip
-    await expect(canvas.getByText(/2x/)).toBeInTheDocument()
+    await expect(canvas.getByText(/2.*bonus/)).toBeInTheDocument()
   },
 }

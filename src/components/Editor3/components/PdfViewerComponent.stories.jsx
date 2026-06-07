@@ -1,6 +1,27 @@
 import React from "react";
 import PdfViewerComponent from "./PdfViewerComponent";
 import { Box } from "@mui/material";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+
+function LexicalWrapper({ children }) {
+  const initialConfig = {
+    namespace: "PdfViewerStory",
+    onError: (error) => console.error(error),
+    nodes: [],
+  };
+  return (
+    <LexicalComposer initialConfig={initialConfig}>
+      <RichTextPlugin
+        contentEditable={<ContentEditable style={{ display: "none" }} />}
+        ErrorBoundary={LexicalErrorBoundary}
+      />
+      {children}
+    </LexicalComposer>
+  );
+}
 
 export default {
   title: "✏️ Lesson Editor/Media/PDF Viewer",
@@ -14,7 +35,9 @@ export default {
   decorators: [
     (Story) => (
       <Box sx={{ maxWidth: 800, mx: "auto" }}>
-        <Story />
+        <LexicalWrapper>
+          <Story />
+        </LexicalWrapper>
       </Box>
     ),
   ],

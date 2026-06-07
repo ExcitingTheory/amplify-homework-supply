@@ -99,7 +99,7 @@ function SingleStudentGrid({
         <TableBody>
           {assignments.map((a) => {
             const status: CompletionStatus =
-              student.assignments[a.id] || 'not_started'
+              (student.assignments || {})[a.id] || 'not_started'
             return (
               <TableRow key={a.id}>
                 <TableCell>
@@ -186,7 +186,7 @@ function MultiStudentGrid({
                 </TableCell>
                 {assignments.map((a) => {
                   const status: CompletionStatus =
-                    student.assignments[a.id] || 'not_started'
+                    (student.assignments || {})[a.id] || 'not_started'
                   return (
                     <TableCell key={a.id} align="center">
                       <StatusChip status={status} />

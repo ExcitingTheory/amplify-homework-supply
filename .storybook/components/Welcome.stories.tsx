@@ -411,7 +411,7 @@ export const Welcome: Story = {
               title="XP, Levels & Badges"
               description="Full progression system with animated XP toasts, level badges, streak calendars, skill trees, personal bests, and a 'Nailed It' celebration wall."
               chips={['XP System', 'Levels', 'Streaks', 'Skill Tree', 'Badges', 'Celebrations']}
-              storyLink={['Gamification/AnimatedXPCounter', 'Default']}
+              storyLink={['Gamification/LevelBadge', 'Default']}
               color="warning.main"
             />
             <FeatureCard

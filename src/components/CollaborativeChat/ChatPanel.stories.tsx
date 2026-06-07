@@ -199,7 +199,6 @@ const meta: Meta = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
   decorators: [
     (Story) => (
       <Box sx={{ p: 2 }}>

@@ -1,25 +1,19 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import UnitContext from '../../context/unitContext';
-import { Grid, Box, IconButton, Button, Typography } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { LinearProgressWithLabel, AnswerDrop, ResultCard } from '.';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import UnitContext from "../../context/unitContext";
+import { Grid, Box, IconButton, Button, Typography } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { LinearProgressWithLabel, AnswerDrop, ResultCard } from ".";
 
-import DictionaryContext from '../../context/dictionaryContext';
-import { shuffle } from './utils';
-import {DragBox} from './DragBox'
+import DictionaryContext from "../../context/dictionaryContext";
+import { shuffle } from "./utils";
+import { DragBox } from "./DragBox";
 
-
-
-
-export const Easy = ({
-  tabIndex, setTabIndex, nodeKey, wordIDs,
-}) => {
-
+export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
   let [assignment, setAssignment] = React.useState([]);
   const [answers, setAnswers] = React.useState([]);
-  
+
   const [filterEasy, setFilterEasy] = React.useState([]);
   const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
   const [completedEasy, setCompletedEasy] = React.useState(0);
@@ -32,34 +26,34 @@ export const Easy = ({
   const mountSeed = React.useRef(Math.floor(Math.random() * 2147483647));
   const shuffleSeed = React.useMemo(() => {
     let hash = mountSeed.current;
-    const str = String(nodeKey) + '-easy';
+    const str = String(nodeKey) + "-easy";
     for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = (hash << 5) - hash + str.charCodeAt(i);
       hash = hash & hash;
     }
     return Math.abs(hash);
   }, [nodeKey]);
 
-  const { wordMapId: dictionary } = React.useContext(DictionaryContext)
+  const { wordMapId: dictionary } = React.useContext(DictionaryContext);
 
   useEffect(() => {
     // Use dictionary context instead of DataStore for Storybook compatibility
-    const _vocabulary = wordIDs.map(id => dictionary[id]).filter(Boolean);
-    console.log('MeaningAssociationExercise._vocabulary', _vocabulary)
-    setAssignment([..._vocabulary])
-    setAnswers([..._vocabulary])
+    const _vocabulary = wordIDs.map((id) => dictionary[id]).filter(Boolean);
+    console.log("MeaningAssociationExercise._vocabulary", _vocabulary);
+    setAssignment([..._vocabulary]);
+    setAnswers([..._vocabulary]);
   }, [wordIDs, dictionary]);
-  
+
   const { grade, saveGrade } = React.useContext(UnitContext);
 
   // Parse grade.data if it's a string
   const gradeData = React.useMemo(() => {
     if (!grade?.data) return {};
-    if (typeof grade.data === 'string') {
+    if (typeof grade.data === "string") {
       try {
         return JSON.parse(grade.data);
       } catch (e) {
-        console.error('Failed to parse grade.data:', e);
+        console.error("Failed to parse grade.data:", e);
         return {};
       }
     }
@@ -67,7 +61,7 @@ export const Easy = ({
   }, [grade?.data]);
 
   const inProgress = gradeData[nodeKey] || {};
-  
+
   // Show completion screen once when exercise completes — don't re-show after dismiss
   React.useEffect(() => {
     const isComplete = inProgress?.easy?.complete;
@@ -76,21 +70,24 @@ export const Easy = ({
       setShowCompletion(true);
     }
   }, [inProgress?.easy?.complete]);
-  
-  console.log('Easy.nodeKey', nodeKey, 'type:', typeof nodeKey);
-  console.log('Easy.grade:', grade);
-  console.log('Easy.grade.data:', grade?.data);
-  console.log('Easy.grade.data === grade?', grade?.data === grade);
-  console.log('Easy.grade.data keys:', grade?.data ? Object.keys(grade.data) : 'no data');
-  console.log('Easy.grade.data[nodeKey]:', grade?.data?.[nodeKey]);
-  console.log('Easy.inProgress', inProgress);
+
+  console.log("Easy.nodeKey", nodeKey, "type:", typeof nodeKey);
+  console.log("Easy.grade:", grade);
+  console.log("Easy.grade.data:", grade?.data);
+  console.log("Easy.grade.data === grade?", grade?.data === grade);
+  console.log(
+    "Easy.grade.data keys:",
+    grade?.data ? Object.keys(grade.data) : "no data",
+  );
+  console.log("Easy.grade.data[nodeKey]:", grade?.data?.[nodeKey]);
+  console.log("Easy.inProgress", inProgress);
 
   // Update progress state when grade data changes
   useEffect(() => {
     if (inProgress && Object.keys(inProgress).length > 0) {
       const verified = inProgress?.easy?.verifiedAnswers || [];
       const percentComplete = (inProgress?.easy?.percentComplete || 0) * 100;
-      
+
       setFilterEasy(verified);
       setVerifiedAnswers(verified);
       setCompletedEasy(percentComplete);
@@ -116,20 +113,23 @@ export const Easy = ({
 
   // Filter out matched cards from stable order — no reshuffling
   const easyVocab = shuffledDragOrder
-    .filter(word => !filterEasy.includes(word?.id))
-    .map(word => <DragBox answer={word.phrase} wordID={word.id} key={word.id} />);
+    .filter((word) => !filterEasy.includes(word?.id))
+    .map((word) => (
+      <DragBox answer={word.phrase} wordID={word.id} key={word.id} />
+    ));
 
   // Find the first unmatched word in the stable shuffled order
-  const correctAnswer = shuffledWords.find(word => !filterEasy.includes(word?.id));
+  const correctAnswer = shuffledWords.find(
+    (word) => !filterEasy.includes(word?.id),
+  );
   const currentQuestion = startPositionEasy;
   const percentComplete = completedEasy;
   const loadAttemptedAnswers = inProgress?.easy?.attemptedAnswers || {};
 
-
-  let _correctAnswer = '';
+  let _correctAnswer = "";
 
   // console.log('Easy.correctAnswer', correctAnswer)
-  if (typeof correctAnswer === 'string') {
+  if (typeof correctAnswer === "string") {
     _correctAnswer = dictionary[correctAnswer];
   } else {
     _correctAnswer = correctAnswer;
@@ -138,17 +138,20 @@ export const Easy = ({
   // console.log('Easy._correctAnswer', _correctAnswer)
   const correctId = _correctAnswer?.id;
   const correctWord = _correctAnswer;
-  // const attemptsCount = inProgress?.easy?.attemptsCount || 0; 
+  // const attemptsCount = inProgress?.easy?.attemptsCount || 0;
 
   // const [attemptedAnswers, setAttemptedAnswers] = useState(loadAttemptedAnswers);
 
   const totalWords = shuffledWords.length;
 
-
   async function progressAssignment(draggedWordID, targetWordID) {
     // Verify the match is correct
     if (draggedWordID !== targetWordID) {
-      console.error('Mismatch in Easy progressAssignment:', draggedWordID, targetWordID);
+      console.error(
+        "Mismatch in Easy progressAssignment:",
+        draggedWordID,
+        targetWordID,
+      );
       return;
     }
 
@@ -159,7 +162,7 @@ export const Easy = ({
 
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+    if (typeof _attemptedAnswers[targetWordID] === "undefined") {
       _attemptedAnswers[targetWordID] = [];
     }
 
@@ -170,7 +173,7 @@ export const Easy = ({
     Object.entries(_attemptedAnswers).forEach(([key, value]) => {
       attemptedAnswersLength += value.length;
     });
-    
+
     const attempts = attemptedAnswersLength;
 
     // setAttemptedAnswers(_attemptedAnswers);
@@ -189,25 +192,24 @@ export const Easy = ({
 
       // Don't auto-advance, show completion screen instead
       // newTab++;
-    
-    } 
+    }
 
     let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
-        'easy': {}
+        easy: {},
       };
     }
 
     // console.log('easy _verified.length / length,', _verified.length, totalWords)
-    savedGradeCopy[nodeKey]['easy'] = {
+    savedGradeCopy[nodeKey]["easy"] = {
       verifiedAnswers: _verified,
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: _verified.length / attempts,
       percentComplete: _verified.length / totalWords,
-      complete: thisExerciseComplete
+      complete: thisExerciseComplete,
     };
 
     if (allTabsComplete) {
@@ -231,13 +233,11 @@ export const Easy = ({
   }
 
   async function sendFail(draggedWordID, targetWordID) {
-
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+    if (typeof _attemptedAnswers[targetWordID] === "undefined") {
       _attemptedAnswers[targetWordID] = [];
     }
-
 
     _attemptedAnswers[targetWordID].push(draggedWordID);
 
@@ -246,41 +246,37 @@ export const Easy = ({
     Object.entries(_attemptedAnswers).forEach(([key, value]) => {
       attemptedAnswersLength += value.length;
     });
-    
+
     const attempts = attemptedAnswersLength;
 
     // setAttemptsCount(attempts);
-
 
     let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
-        'easy': {}
+        easy: {},
       };
     }
 
     // console.log('easy verifiedAnswers.length / length,', verifiedAnswers.length, totalWords)
     // console.log('easy currentQuestion+1 / length', currentQuestion + 1, totalWords)
-    savedGradeCopy[nodeKey]['easy'] = {
-      ...savedGradeCopy[nodeKey]['easy'],
+    savedGradeCopy[nodeKey]["easy"] = {
+      ...savedGradeCopy[nodeKey]["easy"],
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: verifiedAnswers.length / attempts,
       percentComplete: currentQuestion / totalWords,
-      complete: false
+      complete: false,
     };
 
     savedGradeCopy[nodeKey].tabIndex = 1;
 
     await saveGrade(savedGradeCopy);
-
-
-
   }
 
   function sendPass() {
-    console.log('sendPass');
+    console.log("sendPass");
   }
 
   const handleContinueFromCompletion = () => {
@@ -298,159 +294,241 @@ export const Easy = ({
   const dropZoneMinHeight = Math.max(300, allCardRows * 56);
 
   // Build result cards for completed state — check if word was matched on first try
-  const resultCards = shuffledDragOrder.map(word => {
+  const resultCards = shuffledDragOrder.map((word) => {
     const attempts = loadAttemptedAnswers[word?.id] || [];
     // Passed if the first attempt was correct (word matched itself)
     const passed = attempts.length > 0 && attempts[0] === word?.id;
-    return <ResultCard key={word?.id} phrase={word?.phrase} passed={passed} audioPaths={word?.audio} />;
+    return (
+      <ResultCard
+        key={word?.id}
+        phrase={word?.phrase}
+        passed={passed}
+        audioPaths={word?.audio}
+      />
+    );
   });
 
   const accuracyPercent = Math.round(
-    (verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)) * 100
+    (verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)) * 100,
   );
 
   return (
-    <Box sx={{ 
-      position: 'relative', 
-      flex: '1 1 auto',
-      minHeight: `${dropZoneMinHeight}px`,
-      overflow: 'auto',
-      width: '100%',
-      maxWidth: '100vw',
-    }}>
+    <Box
+      sx={{
+        position: "relative",
+        flex: "1 1 auto",
+        minHeight: `${dropZoneMinHeight}px`,
+        overflow: "auto",
+        width: "100%",
+        maxWidth: "100vw",
+      }}
+    >
       {showCompletion ? (
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
-        <Box sx={{ flexShrink: 0, width: '100%' }}>
-          <LinearProgressWithLabel value={100} />
-        </Box>
-        <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1 }}>
-          <Typography variant="body2" color="textSecondary">
-            Easy Mode Complete — {accuracyPercent}% accuracy
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" size="small" onClick={handleDismissCompletion}>Back</Button>
-            <Button variant="contained" size="small" onClick={handleContinueFromCompletion}>Continue to Hard Mode</Button>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            width: "100%",
+            maxWidth: "100%",
+            gap: 1,
+            overflow: "hidden",
+          }}
+        >
+          <Box sx={{ flexShrink: 0, width: "100%" }}>
+            <LinearProgressWithLabel value={100} />
           </Box>
-        </Box>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          flex: '1 1 auto',
-          minHeight: 0,
-          width: '100%',
-          maxWidth: '100%',
-          gap: 1,
-          overflow: 'hidden',
-        }}>
-          {/* Blank drop zone */}
-          <Box sx={{
-            minWidth: 0,
-            flex: { xs: '0 0 auto', sm: '1 1 0' },
-            minHeight: { xs: `${dropZoneMinHeight}px`, sm: `${dropZoneMinHeight}px` },
-            maxWidth: { xs: '100%', sm: '66.666667%' },
-          }}>
-            <Box sx={{
-              height: '100%',
-              minHeight: `${dropZoneMinHeight}px`,
-              display: 'flex',
-              borderRadius: '8px',
-              border: '1px dashed var(--mui-palette-divider)',
-              backgroundColor: 'var(--mui-palette-action-disabledBackground)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Typography variant="body2" color="textSecondary">Complete</Typography>
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 1,
+            }}
+          >
+            <Typography variant="body2" color="textSecondary">
+              Easy Mode Complete — {accuracyPercent}% accuracy
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleDismissCompletion}
+              >
+                Back
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleContinueFromCompletion}
+              >
+                Continue to Hard Mode
+              </Button>
             </Box>
           </Box>
-          {/* Result cards with check/X */}
-          <Box sx={{
-            minWidth: 0,
-            flex: { xs: '1 1 auto', sm: '0 0 auto' },
-            maxWidth: { xs: '100%', sm: '33.333333%' },
-          }}>
-            <Box sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              gap: 0,
-              height: { xs: 'auto', sm: '100%' },
-              minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              padding: 0.5,
-              alignContent: 'flex-start',
-              justifyContent: 'flex-start',
-              width: '100%',
-              maxWidth: '100%',
-              boxSizing: 'border-box',
-            }}>
-              {resultCards}
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-      ) : (
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
-        <Box sx={{ flexShrink: 0, width: '100%' }}>
-          <LinearProgressWithLabel value={percentComplete} />
-        </Box>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          flex: '1 1 auto',
-          minHeight: 0,
-          width: '100%',
-          maxWidth: '100%',
-          gap: 1,
-          overflow: 'hidden',
-        }}>
-          {/* Drop target */}
-          <Box sx={{
-            minWidth: 0,
-            flex: { xs: '0 0 auto', sm: '1 1 0' },
-            minHeight: { xs: `${dropZoneMinHeight}px`, sm: `${dropZoneMinHeight}px` },
-            maxWidth: { xs: '100%', sm: '66.666667%' },
-          }}>
-            <Box sx={{
-              height: '100%',
-              minHeight: `${dropZoneMinHeight}px`,
-              display: 'flex',
-            }}>
-              <AnswerDrop
-                correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
-            </Box>
-          </Box>
-          {/* Drag cards */}
-          <Box sx={{
-            minWidth: 0,
-            flex: { xs: '1 1 auto', sm: '0 0 auto' },
-            maxWidth: { xs: '100%', sm: '33.333333%' },
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              flex: "1 1 auto",
+              minHeight: 0,
+              width: "100%",
+              maxWidth: "100%",
+              gap: 1,
+              overflow: "hidden",
+            }}
+          >
+            {/* Blank drop zone */}
             <Box
               sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                gap: 0,
-                height: { xs: 'auto', sm: '100%' },
-                minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
-                maxHeight: { xs: 'none', sm: '100%' },
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                padding: 0.5,
-                alignContent: 'flex-start',
-                justifyContent: { xs: 'flex-start', sm: 'flex-start' },
-                width: '100%',
-                maxWidth: '100%',
-                boxSizing: 'border-box',
+                minWidth: 0,
+                flex: { xs: "0 0 auto", sm: "1 1 0" },
+                minHeight: {
+                  xs: `${dropZoneMinHeight}px`,
+                  sm: `${dropZoneMinHeight}px`,
+                },
+                maxWidth: { xs: "100%", sm: "66.666667%" },
               }}
             >
-              {easyVocab}
+              <Box
+                sx={{
+                  height: "100%",
+                  minHeight: `${dropZoneMinHeight}px`,
+                  display: "flex",
+                  borderRadius: "8px",
+                  border: "1px dashed var(--mui-palette-divider)",
+                  backgroundColor:
+                    "var(--mui-palette-action-disabledBackground)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography variant="body2" color="textSecondary">
+                  Complete
+                </Typography>
+              </Box>
+            </Box>
+            {/* Result cards with check/X */}
+            <Box
+              sx={{
+                minWidth: 0,
+                flex: { xs: "1 1 auto", sm: "0 0 auto" },
+                maxWidth: { xs: "100%", sm: "33.333333%" },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  flexDirection: "row",
+                  gap: 0,
+                  height: { xs: "auto", sm: "100%" },
+                  minHeight: { xs: "auto", sm: `${dropZoneMinHeight}px` },
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                  padding: 0.5,
+                  alignContent: "flex-start",
+                  justifyContent: "flex-start",
+                  width: "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                {resultCards}
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
-    )}
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            width: "100%",
+            maxWidth: "100%",
+            gap: 1,
+            overflow: "hidden",
+          }}
+        >
+          <Box sx={{ flexShrink: 0, width: "100%" }}>
+            <LinearProgressWithLabel value={percentComplete} />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              flex: "1 1 auto",
+              minHeight: 0,
+              width: "100%",
+              maxWidth: "100%",
+              gap: 1,
+              overflow: "hidden",
+            }}
+          >
+            {/* Drop target */}
+            <Box
+              sx={{
+                minWidth: 0,
+                flex: { xs: "0 0 auto", sm: "1 1 0" },
+                minHeight: {
+                  xs: `${dropZoneMinHeight}px`,
+                  sm: `${dropZoneMinHeight}px`,
+                },
+                maxWidth: { xs: "100%", sm: "66.666667%" },
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  minHeight: `${dropZoneMinHeight}px`,
+                  display: "flex",
+                }}
+              >
+                <AnswerDrop
+                  correctAnswer={{
+                    ...correctWord,
+                    progressAssignment,
+                    sendFail,
+                    sendPass,
+                  }}
+                />
+              </Box>
+            </Box>
+            {/* Drag cards */}
+            <Box
+              sx={{
+                minWidth: 0,
+                flex: { xs: "1 1 auto", sm: "0 0 auto" },
+                maxWidth: { xs: "100%", sm: "33.333333%" },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  flexDirection: "row",
+                  gap: 0,
+                  height: { xs: "auto", sm: "100%" },
+                  minHeight: { xs: "auto", sm: `${dropZoneMinHeight}px` },
+                  maxHeight: { xs: "none", sm: "100%" },
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                  padding: 0.5,
+                  alignContent: "flex-start",
+                  justifyContent: { xs: "flex-start", sm: "flex-start" },
+                  width: "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                {easyVocab}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

@@ -20,7 +20,6 @@ const mockSkills = [
 const meta: Meta<typeof SkillForm> = {
   title: '🏆 Gamification/Instructor/Skill Form',
   component: SkillForm,
-  tags: ['autodocs'],
   args: {
     onSubmit: fn(),
     onGenerateFromUnit: fn(),

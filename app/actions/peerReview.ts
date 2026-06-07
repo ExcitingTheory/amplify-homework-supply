@@ -10,6 +10,8 @@
  */
 
 import { getServerClient } from "@/utils/amplifyServerClient";
+import { moderateContent } from "./moderate";
+import { notifyModerationFlagged } from "./moderation-notify";
 
 // ============================================================================
 // Handle AI Mention
@@ -111,6 +113,35 @@ export async function generateReviewSummary(
     }
 
     const result = typeof data === "string" ? JSON.parse(data) : data;
+
+    // Batch-moderate the full chat log on room close (periodic Yjs moderation)
+    moderateContent({ content: chatLog.trim() })
+      .then(async (modResult) => {
+        if (modResult.flagged) {
+          const flaggedCategories = Object.entries(modResult.categories || {})
+            .filter(([, v]) => v === true)
+            .map(([k]) => k);
+          console.warn("[peerReview] Chat log flagged on room close:", {
+            roomId,
+            categories: flaggedCategories,
+          });
+          // Look up section from room for notification routing
+          try {
+            const { data: room } = await (client as any).models.HomeworkRoom.get({ id: roomId });
+            await notifyModerationFlagged({
+              modelName: "HomeworkRoom",
+              recordId: roomId,
+              sectionId: room?.sectionID || undefined,
+              ownerId: room?.ownerId || undefined,
+              flaggedCategories,
+            });
+          } catch (notifyErr) {
+            console.warn("[peerReview] Moderation notification failed:", notifyErr);
+          }
+        }
+      })
+      .catch((err) => console.warn("[peerReview] Batch moderation failed:", err));
+
     return {
       success: true,
       summary: result?.summary || result?.aiReviewSummary || undefined,

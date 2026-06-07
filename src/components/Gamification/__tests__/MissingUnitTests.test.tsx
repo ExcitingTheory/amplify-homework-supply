@@ -228,7 +228,7 @@ describe('BadgeShelf', () => {
 
   it('renders with custom column count', () => {
     const { container } = render(
-      <BadgeShelf earnedBadges={sampleBadges} columns={2} />
+      <BadgeShelf earnedBadges={sampleBadges} />
     )
     // Grid should exist
     expect(container.innerHTML).not.toBe('')

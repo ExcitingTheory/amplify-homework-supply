@@ -200,6 +200,10 @@ export const useTranslations = (namespace) => {
           if (prop === 'toString' || prop === 'valueOf') {
             return () => String(result);
           }
+          // Prevent React from treating this as a thenable/async component
+          if (prop === 'then') {
+            return undefined;
+          }
           return target[prop];
         },
       });

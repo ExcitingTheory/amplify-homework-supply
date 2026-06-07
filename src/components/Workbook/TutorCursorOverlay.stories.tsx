@@ -3,12 +3,22 @@ import { TutorCursorOverlay } from './TutorCursorOverlay';
 import UnitContext from '../../context/unitContext';
 
 function withUnitContext(overrides = {}) {
+  const awareness = {
+    getStates: () => new Map(),
+    on: () => {},
+    off: () => {},
+    clientID: 0,
+  };
   const base = {
     unit: { id: 'unit-1' },
     workbookEnabled: true,
     workbook: {
-      provider: { awareness: { getStates: () => new Map(), on: () => {}, off: () => {} } },
-      ...overrides.workbook,
+      provider: {
+        awareness,
+        getAwareness: () => awareness,
+        onAwarenessChange: () => () => {},
+        ...overrides.workbook,
+      },
     },
     ...overrides,
   };

@@ -11,6 +11,7 @@
 
 import { getAmplifyClient } from "./amplifyClient";
 import { moderateContent as moderateServerAction } from "../../app/actions/moderate";
+import { notifyModerationFlagged } from "../../app/actions/moderation-notify";
 
 /**
  * Extract text content from various data structures for moderation
@@ -70,6 +71,8 @@ function extractTextContent(data) {
  * @param {Object} [options] - Optional context for server-side persist
  * @param {string} [options.modelName] - Model to update ('Unit'|'Grade'|'Word'|'Question')
  * @param {string} [options.recordId] - Record ID to update
+ * @param {string} [options.sectionId] - Section ID for instructor notification
+ * @param {string} [options.ownerId] - Owner of the content
  * @returns {Promise<Object>} - Moderation result
  */
 export async function moderateContent(content, options = {}) {
@@ -95,6 +98,24 @@ export async function moderateContent(content, options = {}) {
 
     // Primary path: Server Action (no Lambda cold start)
     const result = await moderateServerAction({ content: textToModerate });
+
+    // Dispatch notification to instructors/admins if flagged
+    if (result.flagged && options.modelName && options.recordId) {
+      const flaggedCategories = Object.entries(result.categories || {})
+        .filter(([, v]) => v === true)
+        .map(([k]) => k);
+
+      notifyModerationFlagged({
+        modelName: options.modelName,
+        recordId: options.recordId,
+        sectionId: options.sectionId,
+        ownerId: options.ownerId,
+        flaggedCategories,
+      }).catch((err) =>
+        console.warn("[moderation] Notification dispatch failed:", err),
+      );
+    }
+
     return { ...result, error: null };
   } catch (error) {
     console.error("Error moderating content:", error);
@@ -137,9 +158,12 @@ export function buildModerationFields(moderationResult) {
  * @param {string} modelName - 'Unit'|'Grade'|'Word'|'Question'
  * @param {Object} item - Item with `id` field
  * @param {string|Object} content - Content to moderate
+ * @param {Object} [context] - Optional context for notifications
+ * @param {string} [context.sectionId] - Section ID for instructor lookup
+ * @param {string} [context.ownerId] - Owner of the content
  * @returns {Promise<Object>} - Moderation result from API
  */
-export async function moderateAndSave(modelName, item, content) {
+export async function moderateAndSave(modelName, item, content, context = {}) {
   const result = await moderateContent(content, {
     modelName,
     recordId: item.id,
@@ -151,6 +175,21 @@ export async function moderateAndSave(modelName, item, content) {
       itemId: item.id,
       modelName,
     });
+
+    // Notify instructors and admins asynchronously (non-blocking)
+    const flaggedCategories = Object.entries(result.categories || {})
+      .filter(([, v]) => v === true)
+      .map(([k]) => k);
+
+    notifyModerationFlagged({
+      modelName,
+      recordId: item.id,
+      sectionId: context.sectionId,
+      ownerId: context.ownerId || item.owner,
+      flaggedCategories,
+    }).catch((err) =>
+      console.warn("[moderation] Notification dispatch failed:", err),
+    );
   }
 
   return result;

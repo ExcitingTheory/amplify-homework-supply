@@ -48,7 +48,6 @@ const mockRecaps = [
 const meta: Meta<typeof ChallengeRecapCard> = {
   title: 'Gamification/ChallengeRecapCard',
   component: ChallengeRecapCard,
-  tags: ['autodocs'],
   args: {
     challengeTitle: 'The Algorithm Dragon',
     recaps: mockRecaps,

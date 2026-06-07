@@ -6,7 +6,6 @@ import { HiddenEasterEgg } from './EasterEggTrigger'
 const meta: Meta<typeof HiddenEasterEgg> = {
   title: '🏆 Gamification/Easter Eggs/Hidden Easter Egg',
   component: HiddenEasterEgg,
-  tags: ['autodocs'],
 }
 export default meta
 

@@ -8,7 +8,6 @@ import type { AvatarStyleTier } from './DiceBearAvatar'
 const meta: Meta<typeof DiceBearAvatar> = {
   title: '🏆 Gamification/Avatars & Cosmetics/DiceBear Avatar',
   component: DiceBearAvatar,
-  tags: ['autodocs'],
 }
 export default meta
 

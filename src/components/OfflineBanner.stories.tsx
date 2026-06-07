@@ -21,7 +21,6 @@ const meta: Meta<typeof OfflineBanner> = {
       },
     },
   },
-  tags: ['autodocs'],
   decorators: [
     (Story) => (
       <Box sx={{ minHeight: '200px', position: 'relative' }}>

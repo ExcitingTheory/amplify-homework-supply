@@ -4,7 +4,6 @@ import { ArmorEditor } from './ArmorEditor'
 const meta: Meta<typeof ArmorEditor> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Armor Editor',
   component: ArmorEditor,
-  tags: ['autodocs'],
 }
 
 export default meta

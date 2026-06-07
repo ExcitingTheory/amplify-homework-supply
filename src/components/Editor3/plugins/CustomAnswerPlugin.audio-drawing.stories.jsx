@@ -5,6 +5,7 @@
 
 import React from "react";
 import { within, waitFor } from "@testing-library/react";
+import { expect } from "storybook/test";
 import userEvent from "@testing-library/user-event";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -318,7 +319,6 @@ export const AudioOnlyQuestion = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for audio question to render
     await waitFor(
@@ -367,7 +367,6 @@ export const DrawingOnlyQuestion = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for drawing question to render
     await waitFor(
@@ -418,7 +417,6 @@ export const MultiModalQuestion = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for multi-modal question to render
     await waitFor(
@@ -851,7 +849,6 @@ export const AnsweredAudioQuestion = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for answered audio question to render
     await waitFor(
@@ -896,7 +893,6 @@ export const AnsweredDrawingQuestion = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import("storybook/test");
 
     // Wait for answered drawing question to render
     await waitFor(

@@ -4,6 +4,12 @@ import { AIFeedbackSnackbar } from './AIFeedbackSnackbar';
 // Minimal mock provider that emits awareness events
 function createMockProvider(opts = {}) {
   const listeners = new Map();
+  const feedbackMap = {
+    observe: (fn) => { listeners.set('feedback', fn); },
+    unobserve: (fn) => { listeners.delete('feedback'); },
+    get: () => undefined,
+    toJSON: () => ({}),
+  };
   return {
     awareness: {
       on: (event, fn) => {
@@ -17,6 +23,7 @@ function createMockProvider(opts = {}) {
       getLocalState: () => ({}),
       getStates: () => new Map(),
     },
+    getMap: (name) => feedbackMap,
     // Simulate an AI feedback event after mount
     _emitFeedback: (blockId) => {
       const fns = listeners.get('change') || [];

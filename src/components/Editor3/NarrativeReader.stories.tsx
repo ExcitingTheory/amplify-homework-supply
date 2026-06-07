@@ -4,7 +4,6 @@ import { NarrativeReader } from './NarrativeReader'
 const meta: Meta<typeof NarrativeReader> = {
   title: '✏️ Lesson Editor/Narrative Reader',
   component: NarrativeReader,
-  tags: ['autodocs'],
   parameters: {
     docs: {
       description: {

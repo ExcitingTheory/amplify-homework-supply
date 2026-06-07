@@ -13,7 +13,6 @@ const mockSections = [
 const meta: Meta<typeof SectionSelector> = {
   title: '🏆 Gamification/Instructor/Section Selector',
   component: SectionSelector,
-  tags: ['autodocs'],
   args: {
     onSectionChange: fn(),
   },
@@ -93,6 +92,7 @@ export const SelectSection: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
 
     // Verify hint text is shown
     await expect(canvas.getByText(/Select a section to scope/i)).toBeInTheDocument()
@@ -104,8 +104,8 @@ export const SelectSection: Story = {
     // Type to filter
     await userEvent.type(input, 'Chemistry')
 
-    // Select the option
-    const option = await canvas.findByText('Period 3 - Chemistry')
+    // Select the option (portaled to document body by MUI Autocomplete)
+    const option = await body.findByText('Period 3 - Chemistry')
     await userEvent.click(option)
 
     // Verify callback was called

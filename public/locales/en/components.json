@@ -501,7 +501,20 @@
     "close": "Close"
   },
   "recordingStudio3Modal": {
-    "done": "Done"
+    "backToStudio": "Back to Studio",
+    "confirmSave": "Save",
+    "confirmTitle": "Confirm Save",
+    "conversationSaveInfo": "Audio files will be saved as File records attached to this unit.",
+    "done": "Done",
+    "generateMissingTts": "Generate Missing ({count})",
+    "generatingTts": "Generating...",
+    "generatingTtsProgress": "Generating TTS audio...",
+    "missingTakesWarning": "{count} lines have no active take and will not be saved.",
+    "noActiveTake": "No active take",
+    "recording": "Recording",
+    "saving": "Saving...",
+    "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
+    "wordSaveInfo": "Audio will be saved to the Word model's audio and definitionAudio fields."
   },
   "sectionDetail": {
     "students": "Students",

@@ -13,7 +13,7 @@ type Story = StoryObj<typeof BadgeCoinFlip>
 export const Sharpshooter: Story = {
   args: {
     open: true,
-    badgeEmoji: '🎯',
+    badgeType: 'SHARPSHOOTER',
     badgeName: 'Sharpshooter',
     badgeDescription: '3 perfect scores in a row',
     onClose: () => {},
@@ -23,7 +23,7 @@ export const Sharpshooter: Story = {
 export const FirstSteps: Story = {
   args: {
     open: true,
-    badgeEmoji: '📝',
+    badgeType: 'FIRST_SUBMISSION',
     badgeName: 'First Steps',
     badgeDescription: 'Submitted your first assignment',
     onClose: () => {},

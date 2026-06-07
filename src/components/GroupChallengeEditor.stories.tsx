@@ -5,7 +5,6 @@ import { GroupChallengeEditor } from './GroupChallengeEditor'
 const meta: Meta<typeof GroupChallengeEditor> = {
   title: '🏆 Gamification/Instructor/Group Challenge Editor',
   component: GroupChallengeEditor,
-  tags: ['autodocs'],
   args: {
     onSubmit: fn(),
   },

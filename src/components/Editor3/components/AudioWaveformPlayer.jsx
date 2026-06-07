@@ -159,6 +159,8 @@ export default function AudioWaveformPlayer({
   // Create blob URL only once from file
   useEffect(() => {
     if (file && !audioUrl) {
+      // Guard: file must be a Blob/File to create an object URL
+      if (!(file instanceof Blob)) return;
       const url = URL.createObjectURL(file);
       setBlobUrl(url);
       return () => {

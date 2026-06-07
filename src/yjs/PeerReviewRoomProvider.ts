@@ -66,6 +66,9 @@ export class PeerReviewRoomProvider extends YjsDocProvider {
   private user: PeerReviewUser
   private roomStateMap: Y.Map<any>
   private messagesArray: Y.Array<RoomMessage>
+  private retractedIds: Set<string> = new Set()
+  private retractListeners: Set<(messageId: string) => void> = new Set()
+  private wsMessageHandler: ((event: MessageEvent) => void) | null = null
 
   constructor(config: PeerReviewRoomConfig) {
     const docName = `review-${config.roomId}`
@@ -83,6 +86,7 @@ export class PeerReviewRoomProvider extends YjsDocProvider {
     this.messagesArray = this.getDoc().getArray<RoomMessage>('messages')
 
     this.initializeAwareness()
+    this.setupRetractListener()
   }
 
   // ========================================================================
@@ -96,6 +100,90 @@ export class PeerReviewRoomProvider extends YjsDocProvider {
       typing: false,
       viewingBlockId: null,
     })
+  }
+
+  /**
+   * Listen for server-sent JSON messages on the underlying WebSocket.
+   * y-websocket uses binary frames for Yjs protocol; our server sends
+   * JSON text frames for side-channel events (retract, chat confirmations).
+   */
+  private setupRetractListener(): void {
+    const wsProvider = (this as any).wsProvider
+    if (!wsProvider) return
+
+    // y-websocket exposes the raw WebSocket as `ws` or via `websocket` getter
+    const attachListener = () => {
+      const ws: WebSocket | null = wsProvider.ws || wsProvider.websocket || null
+      if (!ws) return
+
+      this.wsMessageHandler = (event: MessageEvent) => {
+        // Only handle text frames (JSON); binary frames are Yjs protocol
+        if (typeof event.data !== 'string') return
+
+        try {
+          const msg = JSON.parse(event.data)
+          if (msg.action === 'retract' && msg.messageId) {
+            this.handleRetract(msg.messageId)
+          }
+        } catch {
+          // Not JSON — ignore (could be y-websocket internal text)
+        }
+      }
+
+      ws.addEventListener('message', this.wsMessageHandler)
+    }
+
+    // WebSocket might not be connected yet — listen for status changes
+    wsProvider.on('status', ({ status }: { status: string }) => {
+      if (status === 'connected') {
+        attachListener()
+      }
+    })
+
+    // If already connected, attach immediately
+    if (wsProvider.ws || wsProvider.websocket) {
+      attachListener()
+    }
+  }
+
+  /**
+   * Handle a retract event — mark a message as retracted.
+   */
+  private handleRetract(messageId: string): void {
+    this.retractedIds.add(messageId)
+    // Notify listeners (hooks will update their state)
+    this.retractListeners.forEach((cb) => {
+      try {
+        cb(messageId)
+      } catch (e) {
+        console.warn('[PeerReviewRoom] Error in retract listener:', e)
+      }
+    })
+  }
+
+  /**
+   * Subscribe to retraction events.
+   * Returns an unsubscribe function.
+   */
+  onRetract(callback: (messageId: string) => void): () => void {
+    this.retractListeners.add(callback)
+    return () => {
+      this.retractListeners.delete(callback)
+    }
+  }
+
+  /**
+   * Check if a message has been retracted by moderation.
+   */
+  isRetracted(messageId: string): boolean {
+    return this.retractedIds.has(messageId)
+  }
+
+  /**
+   * Get the set of all retracted message IDs.
+   */
+  getRetractedIds(): Set<string> {
+    return new Set(this.retractedIds)
   }
 
   /**

@@ -10,7 +10,6 @@ import QuizMode from '../../.storybook/components/QuizMode';
 
 const meta: Meta = {
   title: '🏠 Getting Started/Onboarding/Learning Modes',
-  tags: ['autodocs'],
   parameters: {
     docs: {
       description: {

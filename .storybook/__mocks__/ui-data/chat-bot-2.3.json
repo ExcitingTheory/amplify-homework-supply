@@ -1,51 +1,658 @@
 [
-    {
-        "parts": [
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "search for hiragana content"
+      }
+    ],
+    "id": "sTZUZiYXp3ejvxzp",
+    "role": "user"
+  },
+  {
+    "id": "T7hox8NcKnAe93Si",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY",
+        "state": "output-available",
+        "input": {
+          "query": "hiragana",
+          "type": "all",
+          "limit": 10
+        },
+        "output": {
+          "success": true,
+          "query": "hiragana",
+          "results": [
             {
-                "type": "text",
-                "text": "search for hiragana content"
-            }
-        ],
-        "id": "sTZUZiYXp3ejvxzp",
-        "role": "user"
-    },
-    {
-        "id": "T7hox8NcKnAe93Si",
-        "role": "assistant",
-        "parts": [
-            {
-                "type": "step-start",
-                "toolCall": "search_content",
-                "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY"
+              "type": "word",
+              "id": "935084fa-8184-4977-a747-afa8f0ffc28a",
+              "similarity": 0.95,
+              "phrase": "ひらがな",
+              "phonetic": "hiragana",
+              "definition": "Japanese syllabary used for native words"
             },
             {
-                "type": "tool-search_content",
-                "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY",
-                "state": "output-available",
-                "input": {
-                    "query": "hiragana",
-                    "type": "all",
-                    "limit": 10
-                },
-                "output": {
-                    "success": true,
-                    "query": "hiragana",
-                    "results": [
-                        {
-                            "type": "word",
-                            "id": "935084fa-8184-4977-a747-afa8f0ffc28a",
-                            "similarity": 0.7,
-                            "phrase": "hiragana",
-                            "definition": null
-                        }
-                    ]
-                },
-                "callProviderMetadata": {
-                    "openai": {
-                        "itemId": "fc_05a38e269f84ace30069660ca1d42481938067ef5586b41b9f"
-                    }
-                }
+              "type": "word",
+              "id": "word-ka-001",
+              "similarity": 0.88,
+              "phrase": "か",
+              "phonetic": "ka",
+              "definition": "Hiragana character for 'ka' sound"
+            },
+            {
+              "type": "question",
+              "id": "q-hira-001",
+              "similarity": 0.82,
+              "prompt": "What is hiragana used for in Japanese writing?",
+              "answer": "Hiragana is used for native Japanese words, grammatical particles, and verb endings."
+            },
+            {
+              "type": "file",
+              "id": "file-hira-chart",
+              "similarity": 0.78,
+              "name": "Hiragana_Chart.pdf",
+              "description": "Complete hiragana character chart with stroke order"
             }
-        ]
-    }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "I found 4 results related to hiragana in your content library. Would you like me to create some practice exercises using these materials?"
+      }
+    ]
+  },
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "Yes\\! Create a quiz about hiragana characters"
+      }
+    ],
+    "id": "msg-user-quiz-request",
+    "role": "user"
+  },
+  {
+    "id": "msg-assistant-quiz",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_quiz",
+        "toolCallId": "call_quiz_hiragana_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll create a quiz with multiple choice questions about hiragana characters."
+      },
+      {
+        "type": "tool-insert_quiz",
+        "toolCallId": "call_quiz_hiragana_001",
+        "state": "output-available",
+        "input": {
+          "topic": "hiragana characters",
+          "count": 3,
+          "questionType": "multiple_choice",
+          "difficulty": "beginner"
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "quiz",
+          "blockData": [
+            {
+              "id": "q1-a",
+              "answer": "き (ki)",
+              "question": "Which hiragana character represents the sound \"ka\"?",
+              "correct": false
+            },
+            {
+              "id": "q1-b",
+              "answer": "か (ka)",
+              "question": "Which hiragana character represents the sound \"ka\"?",
+              "correct": true
+            },
+            {
+              "id": "q1-c",
+              "answer": "く (ku)",
+              "question": "Which hiragana character represents the sound \"ka\"?",
+              "correct": false
+            },
+            {
+              "id": "q1-d",
+              "answer": "け (ke)",
+              "question": "Which hiragana character represents the sound \"ka\"?",
+              "correct": false
+            },
+            {
+              "id": "q2-a",
+              "answer": "shi",
+              "question": "What sound does the hiragana \"す\" make?",
+              "correct": false
+            },
+            {
+              "id": "q2-b",
+              "answer": "su",
+              "question": "What sound does the hiragana \"す\" make?",
+              "correct": true
+            },
+            {
+              "id": "q2-c",
+              "answer": "sa",
+              "question": "What sound does the hiragana \"す\" make?",
+              "correct": false
+            },
+            {
+              "id": "q2-d",
+              "answer": "se",
+              "question": "What sound does the hiragana \"す\" make?",
+              "correct": false
+            },
+            {
+              "id": "q3-a",
+              "answer": "ん",
+              "question": "Which of these is the correct hiragana for \"n\"?",
+              "correct": true
+            },
+            {
+              "id": "q3-b",
+              "answer": "を",
+              "question": "Which of these is the correct hiragana for \"n\"?",
+              "correct": false
+            },
+            {
+              "id": "q3-c",
+              "answer": "ね",
+              "question": "Which of these is the correct hiragana for \"n\"?",
+              "correct": false
+            },
+            {
+              "id": "q3-d",
+              "answer": "に",
+              "question": "Which of these is the correct hiragana for \"n\"?",
+              "correct": false
+            }
+          ],
+          "preview": {
+            "title": "Hiragana Characters Quiz",
+            "questionCount": 3,
+            "totalPoints": 3,
+            "questions": [
+              {
+                "prompt": "Which hiragana character represents the sound \"ka\"?",
+                "type": "multiple_choice"
+              },
+              {
+                "prompt": "What sound does the hiragana \"す\" make?",
+                "type": "multiple_choice"
+              },
+              {
+                "prompt": "Which of these is the correct hiragana for \"n\"?",
+                "type": "multiple_choice"
+              }
+            ]
+          },
+          "message": "Quiz block ready to insert"
+        }
+      }
+    ]
+  },
+  {
+    "id": "msg-assistant-quiz-confirm",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I've created a 3-question quiz about hiragana characters. Click \"Insert into Editor\" to add it to your unit. The quiz will be interactive — students select answers and get immediate feedback\\!"
+      }
+    ]
+  },
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "Now make a matching exercise for Japanese color words"
+      }
+    ],
+    "id": "msg-user-meaning-request",
+    "role": "user"
+  },
+  {
+    "id": "msg-assistant-meaning",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_meaning_association",
+        "toolCallId": "call_meaning_colors_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll create a meaning association exercise where students match Japanese color words with their English translations."
+      },
+      {
+        "type": "tool-insert_meaning_association",
+        "toolCallId": "call_meaning_colors_001",
+        "state": "output-available",
+        "input": {
+          "wordIDs": [
+            "word-aka",
+            "word-ao",
+            "word-midori",
+            "word-kiiro"
+          ],
+          "enabledModes": [
+            "learn",
+            "easy",
+            "hard"
+          ]
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "meaning-association",
+          "blockData": [
+            "word-aka",
+            "word-ao",
+            "word-midori",
+            "word-kiiro"
+          ],
+          "preview": {
+            "wordCount": 4,
+            "instructions": "Match each Japanese color word with its English meaning",
+            "modes": [
+              "learn",
+              "easy",
+              "hard"
+            ]
+          },
+          "message": "Meaning association block ready to insert"
+        }
+      }
+    ]
+  },
+  {
+    "id": "msg-assistant-meaning-confirm",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Done\\! I've created a matching exercise with 4 color words (赤, 青, 緑, 黄色). Students can practice in three modes:\n- **Learn**: Flashcard review\n- **Easy**: Drag-and-drop matching\n- **Hard**: Timed challenge"
+      }
+    ]
+  },
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "Add an answer block where students translate greetings"
+      }
+    ],
+    "id": "msg-user-answer-request",
+    "role": "user"
+  },
+  {
+    "id": "msg-assistant-answer",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_answer_block",
+        "toolCallId": "call_answer_greetings_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll create an answer block with greeting vocabulary for translation practice."
+      },
+      {
+        "type": "tool-insert_answer_block",
+        "toolCallId": "call_answer_greetings_001",
+        "state": "output-available",
+        "input": {
+          "wordIDs": [
+            "word-konnichiwa",
+            "word-arigatou",
+            "word-sayounara"
+          ],
+          "mode": "translate"
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "answer",
+          "blockData": [
+            "word-konnichiwa",
+            "word-arigatou",
+            "word-sayounara"
+          ],
+          "preview": {
+            "wordCount": 3,
+            "mode": "translate",
+            "inputMethods": [
+              "text",
+              "audio",
+              "writing"
+            ]
+          },
+          "message": "Answer block ready to insert"
+        }
+      }
+    ]
+  },
+  {
+    "id": "msg-assistant-answer-confirm",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Created\\! Students will see 3 greeting words (こんにちは, ありがとう, さようなら) and can respond by typing, recording audio, or writing."
+      }
+    ]
+  },
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "Finally, create a listening exercise with audio prompts"
+      }
+    ],
+    "id": "msg-user-custom-answer",
+    "role": "user"
+  },
+  {
+    "id": "msg-assistant-custom-answer",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_custom_answer",
+        "toolCallId": "call_custom_listening_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll create a custom answer block with audio-based listening comprehension questions."
+      },
+      {
+        "type": "tool-insert_custom_answer",
+        "toolCallId": "call_custom_listening_001",
+        "state": "output-available",
+        "input": {
+          "questionIDs": [
+            "q-listen-1",
+            "q-listen-2"
+          ],
+          "allowedInput": [
+            "text"
+          ],
+          "promptMethod": [
+            "audio"
+          ]
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "custom-answer",
+          "blockData": [
+            "q-listen-1",
+            "q-listen-2"
+          ],
+          "preview": {
+            "questionCount": 2,
+            "prompt": "Listen to the audio and type what you hear",
+            "answerCount": 2,
+            "caseSensitive": false,
+            "allowMultipleAttempts": true,
+            "inputMethods": [
+              "text"
+            ],
+            "promptMethods": [
+              "audio"
+            ]
+          },
+          "message": "Custom answer block ready to insert"
+        }
+      }
+    ]
+  },
+  {
+    "id": "msg-assistant-custom-confirm",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Done\\! I've created a listening exercise with 2 audio prompts. Students will hear the audio and type their answers in hiragana.\n\nHere's a summary of everything I created for your unit:\n1. ✅ **Quiz** — 3 multiple choice questions about hiragana\n2. ✅ **Matching** — 4 color words drag-and-drop\n3. ✅ **Answer Block** — 3 greeting translations\n4. ✅ **Listening** — 2 audio transcription exercises\n\nWould you like me to generate any additional content or make adjustments?"
+      }
+    ]
+  },
+  {
+    "parts": [
+      {
+        "type": "text",
+        "text": "Generate an introductory paragraph about hiragana to put before the exercises"
+      }
+    ],
+    "id": "msg-user-content-block",
+    "role": "user"
+  },
+  {
+    "id": "msg-assistant-content-block",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_content_block",
+        "toolCallId": "call_content_intro_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll generate an introductory section about hiragana that you can insert before the exercises."
+      },
+      {
+        "type": "tool-insert_content_block",
+        "toolCallId": "call_content_intro_001",
+        "state": "output-available",
+        "input": {
+          "contentType": "explanation",
+          "topic": "Introduction to Hiragana",
+          "instructions": "Write a brief introduction explaining what hiragana is and why it's important for Japanese learners"
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "content",
+          "blockData": {
+            "root": {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Introduction to Hiragana",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "heading",
+                  "version": 1,
+                  "tag": "h2"
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Hiragana (ひらがな) is one of the three writing systems used in Japanese. It consists of 46 basic characters, each representing a syllable. Unlike kanji, which represent meanings, hiragana characters represent sounds — making it the perfect starting point for learning Japanese.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Why Learn Hiragana First?",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "heading",
+                  "version": 1,
+                  "tag": "h3"
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Foundation for reading",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Most Japanese textbooks use hiragana extensively, and it appears in everyday text for grammatical particles, verb endings, and native Japanese words.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Pronunciation guide",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Each hiragana character maps to exactly one sound, so learning hiragana also teaches you Japanese pronunciation.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Furigana reading aid",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Small hiragana characters (furigana) appear above kanji to show pronunciation, so knowing hiragana lets you read any text with furigana.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "In this lesson, you'll practice recognizing hiragana characters through quizzes, matching exercises, and listening activities.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "type": "root",
+              "version": 1
+            }
+          },
+          "preview": {
+            "title": "Introduction to Hiragana",
+            "contentType": "explanation",
+            "nodeCount": 7,
+            "excerpt": "An introduction to hiragana explaining why it's the best starting point for Japanese learners"
+          },
+          "message": "Content block ready to insert"
+        }
+      }
+    ]
+  },
+  {
+    "id": "msg-assistant-content-confirm",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I've generated an introductory section about hiragana. It covers what hiragana is, why learners should start with it, and sets up the exercises that follow. Click \"Insert into Editor\" to add it to your unit\\!"
+      }
+    ]
+  }
 ]

@@ -155,11 +155,13 @@ export const ImageMaskEditorDemo = () => {
                     )}
                 </Box>
             ) : (
-                <Box sx={{ height: '80vh' }}>
+                <Box sx={{ height: '80vh', width: '100%', maxWidth: 800 }}>
                     <ImageMaskEditor
                         imageUrl={sampleImage}
                         onMaskComplete={handleMaskComplete}
                         onCancel={() => setShowEditor(false)}
+                        width={760}
+                        height={500}
                     />
                 </Box>
             )}

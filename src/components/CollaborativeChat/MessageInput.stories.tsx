@@ -22,7 +22,6 @@ const meta: Meta<typeof MessageInput> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
   args: {
     onSend: fn(),
     onTypingChange: fn(),

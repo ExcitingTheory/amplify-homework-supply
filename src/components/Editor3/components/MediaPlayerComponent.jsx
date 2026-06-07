@@ -334,6 +334,7 @@ export default function MediaPlayerComponent({
                     }}
                     pageSizeOptions={[5, 10, 100]}
                     checkboxSelection={false}
+                    rowSelectionModel={gridSelection}
                     onRowSelectionModelChange={async (e) => {
                         console.log('onRowSelectionModelChange', e);
                         if (e.length > 0) {

@@ -137,8 +137,9 @@ export default function NotificationCard({
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            gap: 1,
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 0.5,
             mb: 0.25,
           }}
         >
@@ -148,9 +149,8 @@ export default function NotificationCard({
               fontWeight: isUnseen ? 700 : isInteracted ? 400 : 500,
               color: isInteracted ? "text.secondary" : "text.primary",
               flex: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              minWidth: 0,
+              wordBreak: "break-word",
             }}
           >
             {notification.title}
@@ -180,7 +180,7 @@ export default function NotificationCard({
         )}
 
         <Box
-          sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}
+          sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}
         >
           <Chip
             label={notification.category}

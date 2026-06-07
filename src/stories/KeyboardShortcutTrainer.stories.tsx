@@ -55,7 +55,7 @@ Completing all shortcuts unlocks the secret "Keyboard Master Challenge" onboardi
       },
     },
   },
-  tags: ['autodocs'],
+  tags: [],
 } satisfies Meta<typeof KeyboardShortcutTrainer>;
 
 export default meta;
@@ -66,15 +66,3 @@ type Story = StoryObj<typeof meta>;
  * Try pressing keyboard shortcuts to see them light up!
  */
 export const Default: Story = {};
-
-/**
- * Mobile responsive view
- */
-export const Mobile: Story = {
-  globals: {
-    viewport: {
-      value: 'mobile1',
-      isRotated: false
-    }
-  },
-};

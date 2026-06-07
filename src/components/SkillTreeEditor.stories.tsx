@@ -20,7 +20,6 @@ const mockSkills = [
 const meta: Meta<typeof SkillTreeEditor> = {
   title: '🏆 Gamification/Instructor/Skill Tree Editor',
   component: SkillTreeEditor,
-  tags: ['autodocs'],
   args: {
     onSubmit: fn(),
     availableUnits: mockUnits,

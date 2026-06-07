@@ -87,7 +87,6 @@ const meta: Meta<typeof ThreadView> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
   args: {
     onReply: fn(),
     onReaction: fn(),

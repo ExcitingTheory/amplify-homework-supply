@@ -12,7 +12,6 @@ export default {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
 };
 
 // Template for stories

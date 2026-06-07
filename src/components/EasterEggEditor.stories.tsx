@@ -17,7 +17,6 @@ const mockUnits = [
 const meta: Meta<typeof EasterEggEditor> = {
   title: '🏆 Gamification/Instructor/Easter Egg Editor',
   component: EasterEggEditor,
-  tags: ['autodocs'],
   args: {
     onSubmit: fn(),
     availableBadges: mockBadges,

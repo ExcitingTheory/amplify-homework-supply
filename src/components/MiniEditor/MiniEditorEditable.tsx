@@ -65,6 +65,8 @@ import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
 import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
 import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
 
+import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
+import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
 import BlockInserterPlugin from './BlockInserterPlugin'
 import type { MiniEditorEditableProps, MentionSuggestion } from './types'
 
@@ -235,6 +237,10 @@ export default function MiniEditorEditable({
       <CustomAnswerPlugin />
       <ArmorEditorPlugin />
 
+      {/* Floating toolbar and link editor */}
+      <FloatingToolbarPlugin />
+      <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
+
       {/* Auto-focus */}
       {autoFocus && <AutoFocusPlugin />}
 
@@ -254,7 +260,8 @@ export default function MiniEditorEditable({
         sx={{
           position: 'relative',
           maxHeight: maxHeight || undefined,
-          overflowY: maxHeight ? 'auto' : undefined,
+          overflowX: 'visible',
+          overflowY: maxHeight ? 'auto' : 'visible',
           border: '1px solid',
           borderColor: 'divider',
           borderRadius: 1,

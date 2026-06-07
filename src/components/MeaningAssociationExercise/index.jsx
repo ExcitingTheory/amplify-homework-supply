@@ -53,6 +53,7 @@ export function LinearProgressWithLabel(props) {
 
 /** Lightweight play button that signs an S3 audio path and plays it */
 export const PlayAudioButton = ({ audioPaths, size = "small" }) => {
+  const t = useTranslations("common");
   const audioRef = React.useRef(null);
   const [playing, setPlaying] = React.useState(false);
 

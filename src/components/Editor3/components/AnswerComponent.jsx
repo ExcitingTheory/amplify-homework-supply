@@ -4,9 +4,8 @@
 // update the progress bar with the number of correct answers.
 // silently record incorrect answers for review, but allow the user to continue and try to answer the question again.
 
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import { useTranslations } from "next-intl";
-import { getAmplifyClient } from "../../../utils/amplifyClient";
 import {
   gradeDefinition,
   transcribeAudio,
@@ -14,13 +13,17 @@ import {
 
 import { useEffect, useState, useRef } from "react";
 
-import { Box, LinearProgress, Typography } from "@mui/material";
+import {
+  Box,
+  LinearProgress,
+  Typography,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 
 import { createEmptyHistoryState } from "@lexical/react/LexicalHistoryPlugin";
 import PlainTextAnswerInput from "./PlainTextAnswerInput";
 import AudioAutoSubmitWrapper from "./AudioAutoSubmitWrapper";
-
-import Chip from "@mui/material/Chip";
 
 import UnitContext from "../../../context/unitContext";
 
@@ -35,7 +38,6 @@ const SketchPad = dynamic(async () => (await import("./SketchPad")).default, {
 
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import getCachedUrl from "../../../utils/getCachedUrl";
-import { RecordingStudio2 } from "../../RecordingStudio2";
 
 // Component to handle signed URL for word audio
 function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
@@ -146,10 +148,28 @@ export default function AnswerComponent({
   const [progress, setProgress] = useState(0);
   const sharedHistoryState = useRef(createEmptyHistoryState());
 
-  const currentInputMethod = allowedInput?.[0] || "text";
+  const [currentInputMethod, setCurrentInputMethod] = useState(
+    allowedInput?.[0] || "text",
+  );
+  const [allowedInputMethods, setAllowedInputMethods] = useState(
+    allowedInput?.length > 0 ? allowedInput : ["text", "audio", "writing"],
+  );
   const [currentPromptMethod, setCurrentPromptMethod] = useState(
     promptMethod?.[0] || "text",
   );
+
+  const handleInputChange = (event, newInputMethod) => {
+    if (newInputMethod !== null) {
+      setCurrentInputMethod(newInputMethod);
+    }
+  };
+
+  React.useEffect(() => {
+    if (allowedInput?.length > 0) {
+      setAllowedInputMethods(allowedInput);
+      setCurrentInputMethod(allowedInput[0]);
+    }
+  }, [JSON.stringify(allowedInput)]);
 
   React.useEffect(() => {
     if (promptMethod?.length > 0) {
@@ -175,8 +195,6 @@ export default function AnswerComponent({
       }
     }
   }, [grade?.id, grade?.data, nodeKey]);
-
-  console.log("AnswerComponent   ", wordIDs, dictionary);
 
   let thisPrompt = customPrompt
     ? customPrompt
@@ -241,12 +259,34 @@ export default function AnswerComponent({
           </Typography>
         </Box>
 
-        <Chip
-          label={t(`answerComponent.inputMethods.${currentInputMethod}`)}
-          variant="outlined"
-          size="small"
-          sx={{ my: 1 }}
-        />
+        <ToggleButtonGroup
+          exclusive
+          value={currentInputMethod}
+          onChange={handleInputChange}
+          aria-label={t("answerComponent.inputMethodSelector")}
+        >
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("text")}
+            value="text"
+            aria-label={t("answerComponent.inputMethods.text")}
+          >
+            {t("answerComponent.inputMethods.text")}
+          </ToggleButton>
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("audio")}
+            value="audio"
+            aria-label={t("answerComponent.inputMethods.audio")}
+          >
+            {t("answerComponent.inputMethods.audio")}
+          </ToggleButton>
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("writing")}
+            value="writing"
+            aria-label={t("answerComponent.inputMethods.writing")}
+          >
+            {t("answerComponent.inputMethods.writing")}
+          </ToggleButton>
+        </ToggleButtonGroup>
 
         {/**
          * Progress bar to show the user how many questions they have answered correctly
@@ -305,14 +345,6 @@ function ByWordList(
   saveGrade,
   historyState,
 ) {
-  console.log("ByWordList", wordIDs, feedback, answers);
-  console.log("ByWordList.currentPromptMethod", currentPromptMethod);
-  console.log(
-    "ByWordList.dictionary keys:",
-    dictionary ? Object.keys(dictionary) : "dictionary is null/undefined",
-  );
-  console.log("ByWordList.dictionary:", dictionary);
-
   // Add defensive check for dictionary
   if (!dictionary) {
     return (
@@ -328,153 +360,6 @@ function ByWordList(
         wordIDs.map((wordId, key) => {
           const isCorrect = feedback[key]?.answer;
 
-          console.log(`currentInputMethod === 'text' for wordId: ${wordId}`);
-          console.log(`dictionary[${wordId}]:`, dictionary[wordId]);
-          console.log("audio", dictionary[wordId]?.audio);
-          console.log("definitionAudio", dictionary[wordId]?.definitionAudio);
-          console.log("phrase:", dictionary[wordId]?.phrase);
-
-          // Skip if word not in dictionary
-          if (!dictionary[wordId]) {
-            console.warn(`Word ${wordId} not found in dictionary`);
-            return null;
-          }
-
-          let borderStyle = "1px solid #ccc";
-          if (isCorrect === true) {
-            borderStyle = "1px solid green";
-          } else if (isCorrect === false) {
-            borderStyle = "1px solid red";
-          }
-
-          return (
-            <React.Fragment key={`${wordId}-${key}`}>
-              <li display="flex">
-                {/**
-                 * Area for feedback from api call
-                 */}
-                <Typography
-                  variant="body2"
-                  component="div"
-                  style={{
-                    flexBasis: "40%",
-                    minWidth: "fit-content",
-                    textWrap: "wrap",
-                    wordBreak: "normal",
-                    color:
-                      isCorrect === true
-                        ? "green"
-                        : isCorrect === false
-                          ? "red"
-                          : "black",
-                  }}
-                  sx={{ flexGrow: 1 }}
-                >
-                  {feedback[key]?.reason || ""}
-                </Typography>
-
-                {currentPromptMethod === "text" && (
-                  <Typography
-                    variant="body1"
-                    display="flex"
-                    style={{
-                      flexBasis: "40%",
-                      minWidth: "fit-content",
-                      textWrap: "wrap",
-                      wordBreak: "normal",
-                      color:
-                        isCorrect === true
-                          ? "green"
-                          : isCorrect === false
-                            ? "red"
-                            : "black",
-                    }}
-                    color="textSecondary"
-                  >
-                    {dictionary[wordId]?.phrase}
-                  </Typography>
-                )}
-                {currentPromptMethod === "audio" &&
-                  (dictionary[wordId]?.audio ? (
-                    <SignedAudioPlayer
-                      audioKey={dictionary[wordId].audio[0]}
-                      identityId={dictionary[wordId].identityId}
-                      width={400}
-                      height={60}
-                      title={dictionary[wordId].phrase}
-                    />
-                  ) : (
-                    <Typography
-                      variant="body1"
-                      display="flex"
-                      style={{
-                        flexBasis: "40%",
-                        minWidth: "fit-content",
-                        textWrap: "wrap",
-                        wordBreak: "normal",
-                        fontStyle: "italic",
-                        color: "text.disabled",
-                      }}
-                    >
-                      {dictionary[wordId]?.phrase}{" "}
-                      {t("answerComponent.audioNotAvailableParens")}
-                    </Typography>
-                  ))}
-                <Box
-                  display="flex"
-                  style={{
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <PlainTextAnswerInput
-                    value={answers[key] || ""}
-                    onChange={(text) => {
-                      setAnswers({
-                        ...answers,
-                        [key]: text,
-                      });
-                    }}
-                    onAutoSubmit={async (text) => {
-                      const data = await gradeDefinition({
-                        word: dictionary[wordId]?.phrase,
-                        definition: text,
-                        expectedDefinition: dictionary[wordId]?.definition,
-                      });
-
-                      console.log("verifyDefinition parsed data", data);
-
-                      setFeedback({
-                        ...feedback,
-                        [key]: data,
-                      });
-                    }}
-                    historyState={historyState}
-                    placeholder="Answer text"
-                    ariaLabel={t("customAnswerComponent.yourAnswer", {
-                      ns: "editor",
-                    })}
-                    borderStyle={borderStyle}
-                    textColor={
-                      isCorrect === true
-                        ? "green"
-                        : isCorrect === false
-                          ? "red"
-                          : "inherit"
-                    }
-                    testId="answer-input"
-                    wordId={wordId}
-                    disabled={isCorrect !== undefined}
-                  />
-                </Box>
-              </li>
-            </React.Fragment>
-          );
-        })}
-
-      {currentInputMethod === "audio" &&
-        wordIDs.map((wordId, key) => {
-          const isCorrect = feedback[key]?.answer;
-
           // Skip if word not in dictionary
           if (!dictionary[wordId]) {
             console.warn(`Word ${wordId} not found in dictionary`);
@@ -482,31 +367,11 @@ function ByWordList(
           }
 
           return (
-            <li display="flex" key={`${wordId}-${key}`}>
-              <Typography
-                color={
-                  isCorrect === true
-                    ? "green"
-                    : isCorrect === false
-                      ? "red"
-                      : "black"
-                }
-                variant="body2"
-                component="div"
-                sx={{ flexGrow: 1 }}
-              >
-                {feedback[key]?.reason || ""}
-              </Typography>
+            <li key={`${wordId}-${key}`}>
+              {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
-                  color={
-                    isCorrect === true
-                      ? "green"
-                      : isCorrect === false
-                        ? "red"
-                        : "black"
-                  }
-                  variant="body1"
+                  variant="body2"
                   component="div"
                   sx={{ flexGrow: 1 }}
                 >
@@ -524,7 +389,108 @@ function ByWordList(
                   />
                 ) : (
                   <Typography
-                    variant="body1"
+                    variant="body2"
+                    component="div"
+                    sx={{
+                      flexGrow: 1,
+                      fontStyle: "italic",
+                      color: "text.disabled",
+                    }}
+                  >
+                    {dictionary[wordId]?.phrase}{" "}
+                    {t("answerComponent.audioNotAvailableParens")}
+                  </Typography>
+                ))}
+
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
+                >
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Text input */}
+              <PlainTextAnswerInput
+                value={answers[key] || ""}
+                onChange={(text) => {
+                  setAnswers({
+                    ...answers,
+                    [key]: text,
+                  });
+                }}
+                onAutoSubmit={async (text) => {
+                  const data = await gradeDefinition({
+                    word: dictionary[wordId]?.phrase,
+                    definition: text,
+                    expectedDefinition: dictionary[wordId]?.definition,
+                  });
+
+                  setFeedback({
+                    ...feedback,
+                    [key]: data,
+                  });
+                }}
+                historyState={historyState}
+                placeholder={t("answerComponent.placeholder")}
+                ariaLabel={t("customAnswerComponent.yourAnswer", {
+                  ns: "editor",
+                })}
+                testId="answer-input"
+                wordId={wordId}
+                disabled={isCorrect !== undefined}
+              />
+            </li>
+          );
+        })}
+
+      {currentInputMethod === "audio" &&
+        wordIDs.map((wordId, key) => {
+          const isCorrect = feedback[key]?.answer;
+
+          // Skip if word not in dictionary
+          if (!dictionary[wordId]) {
+            console.warn(`Word ${wordId} not found in dictionary`);
+            return null;
+          }
+
+          return (
+            <li key={`${wordId}-${key}`}>
+              {/* Prompt display */}
+              {currentPromptMethod === "text" && (
+                <Typography
+                  variant="body2"
+                  component="div"
+                  sx={{ flexGrow: 1 }}
+                >
+                  {dictionary[wordId]?.phrase}
+                </Typography>
+              )}
+              {currentPromptMethod === "audio" &&
+                (dictionary[wordId]?.audio ? (
+                  <SignedAudioPlayer
+                    audioKey={dictionary[wordId].audio[0]}
+                    identityId={dictionary[wordId].identityId}
+                    width={400}
+                    height={60}
+                    title={dictionary[wordId].phrase}
+                  />
+                ) : (
+                  <Typography
+                    variant="body2"
                     component="div"
                     sx={{
                       flexGrow: 1,
@@ -537,6 +503,28 @@ function ByWordList(
                     })}
                   </Typography>
                 ))}
+
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
+                >
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
+              )}
+
               <AudioAutoSubmitWrapper>
                 {({ wrapOnRecordingComplete }) => (
                   <AudioWaveformPlayer
@@ -546,19 +534,6 @@ function ByWordList(
                     title={dictionary[wordId]?.phrase}
                     onRecordingComplete={wrapOnRecordingComplete(
                       async (audioFile, uploadResult) => {
-                        const currentGradeData = grade?.data || {};
-                        const audioNodeKey = `${nodeKey}-${wordId}`;
-                        const updatedGradeData = {
-                          ...currentGradeData,
-                          [audioNodeKey]: {
-                            ...currentGradeData[audioNodeKey],
-                            audioFilePath: audioFile?.path || null,
-                            audioFileId: audioFile?.id || null,
-                            inputMethod: "audio",
-                          },
-                        };
-                        saveGrade(updatedGradeData);
-
                         // Verify the recorded audio against expected word
                         try {
                           const audioUrl =
@@ -578,17 +553,6 @@ function ByWordList(
                                 text: feedbackData?.reason || "",
                                 timestamp: Date.now(),
                               });
-                              // Log moderation flag if content was flagged during grading
-                              if (feedbackData?.moderation?.flagged) {
-                                console.warn(
-                                  "[AnswerComponent] Audio submission flagged by moderation",
-                                  {
-                                    wordId,
-                                    categories:
-                                      feedbackData.moderation.categories,
-                                  },
-                                );
-                              }
                             }
                           }
                         } catch (err) {
@@ -609,14 +573,17 @@ function ByWordList(
       {/* sketchPad for drawing */}
       {currentInputMethod === "writing" &&
         wordIDs.map((wordId, key) => {
-          const isCorrect = feedback[wordId]?.answer;
+          const isCorrect = feedback[key]?.answer;
 
-          console.log("currentPromptMethod", currentPromptMethod);
-          console.log("dictionary[wordId]?.phrase", dictionary[wordId]?.phrase);
-          console.log("feedback[wordId]", feedback);
+          // Skip if word not in dictionary
+          if (!dictionary[wordId]) {
+            console.warn(`Word ${wordId} not found in dictionary`);
+            return null;
+          }
+
           return (
-            <li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
-              {/* Display prompt based on currentPromptMethod */}
+            <li key={`${wordId}-${key}`}>
+              {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
                   variant="body2"
@@ -652,45 +619,46 @@ function ByWordList(
                   </Typography>
                 ))}
 
-              {isCorrect === true && (
-                <Typography
-                  variant="body2"
-                  component="div"
-                  sx={{ flexGrow: 1 }}
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
                 >
-                  {t("answerComponent.feedback.correct")} "
-                  {feedback[wordId]?.reason || ""}"
-                </Typography>
-              )}
-              {isCorrect === false && (
-                <Typography
-                  variant="body2"
-                  component="div"
-                  sx={{ flexGrow: 1 }}
-                >
-                  {t("answerComponent.feedback.incorrect")} "
-                  {feedback[wordId]?.reason || ""}"
-                </Typography>
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
               )}
 
-              <SketchPad
-                expect={dictionary[wordId]?.definition}
-                excalidrawData={{}} // pass graded data here
-                setFeedback={(data) => {
-                  setFeedback({
-                    ...feedback,
-                    [wordId]: data,
-                  });
-                  // Broadcast to collaborators via Yjs
-                  workbook?.setFeedback?.(nodeKey, {
-                    text: data?.reason || "",
-                    timestamp: Date.now(),
-                  });
-                }}
-                feedback={feedback}
-                questionID={key}
-                // excalidrawData={dictionary[wordId]}
-              />
+              <Suspense fallback={<Typography variant="body2">Loading...</Typography>}>
+                <SketchPad
+                  expect={dictionary[wordId]?.definition}
+                  excalidrawData={{}}
+                  setFeedback={(data) => {
+                    setFeedback({
+                      ...feedback,
+                      [key]: data,
+                    });
+                    // Broadcast to collaborators via Yjs
+                    workbook?.setFeedback?.(nodeKey, {
+                      text: data?.reason || "",
+                      timestamp: Date.now(),
+                    });
+                  }}
+                  feedback={feedback}
+                  questionID={key}
+                />
+              </Suspense>
             </li>
           );
         })}
@@ -725,8 +693,7 @@ function ByDefinitionWordList(
     <ol>
       {currentInputMethod === "text" &&
         wordIDs.map((wordId, key) => {
-          console.log("currentPromptMethod", currentPromptMethod);
-          console.log("dictionary[wordId]?.phrase", dictionary[wordId]?.phrase);
+          const isCorrect = feedback[key]?.answer;
 
           // Skip if word not in dictionary
           if (!dictionary[wordId]) {
@@ -734,18 +701,9 @@ function ByDefinitionWordList(
             return null;
           }
 
-          let borderStyle = "1px solid #ccc";
-          if (feedback[key]?.answer === true) {
-            borderStyle = "1px solid green";
-          } else if (feedback[key]?.answer === false) {
-            borderStyle = "1px solid red";
-          }
-
           return (
-            <li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
-              <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
-                {JSON.stringify(feedback[key]) || ""}
-              </Typography>
+            <li key={`${wordId}-${key}`}>
+              {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
                   variant="body2"
@@ -780,10 +738,29 @@ function ByDefinitionWordList(
                     })}
                   </Typography>
                 ))}
-              {/**
-               * Area for feedback from api call
-               */}
 
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
+                >
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Text input */}
               <PlainTextAnswerInput
                 value={answers[key] || ""}
                 onChange={(text) => {
@@ -799,25 +776,19 @@ function ByDefinitionWordList(
                     expectedDefinition: dictionary[wordId]?.phrase,
                   });
 
-                  console.log("verifyWord parsed data", data);
-
                   setFeedback({
                     ...feedback,
                     [key]: data,
                   });
                 }}
                 historyState={historyState}
-                placeholder="Enter answer here"
-                borderStyle={borderStyle}
-                textColor={
-                  feedback[key]?.answer === true
-                    ? "green"
-                    : feedback[key]?.answer === false
-                      ? "red"
-                      : "inherit"
-                }
-                style={{ maxWidth: "500px" }}
-                disabled={feedback[key]?.answer !== undefined}
+                placeholder={t("answerComponent.placeholder")}
+                ariaLabel={t("customAnswerComponent.yourAnswer", {
+                  ns: "editor",
+                })}
+                testId="answer-input"
+                wordId={wordId}
+                disabled={isCorrect !== undefined}
               />
             </li>
           );
@@ -825,30 +796,16 @@ function ByDefinitionWordList(
 
       {currentInputMethod === "audio" &&
         wordIDs.map((wordId, key) => {
-          return (
-            <li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
-              <Typography
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  // red if incorrect, green if correct
-                  color:
-                    feedback[wordId]?.answer === true
-                      ? "green"
-                      : feedback[wordId]?.answer === false
-                        ? "red"
-                        : "black",
-                }}
-              >
-                {feedback[wordId]?.answer === true
-                  ? t("answerComponent.feedback.correct") + " "
-                  : feedback[wordId]?.answer === false
-                    ? t("answerComponent.feedback.incorrect") + " "
-                    : ""}
-                {JSON.stringify(feedback[wordId]?.reason) || ""}
-              </Typography>
+          const isCorrect = feedback[key]?.answer;
 
+          // Skip if word not in dictionary
+          if (!dictionary[wordId]) {
+            console.warn(`Word ${wordId} not found in dictionary`);
+            return null;
+          }
+
+          return (
+            <li key={`${wordId}-${key}`}>
               {/* Display prompt based on currentPromptMethod */}
               {currentPromptMethod === "text" && (
                 <Typography
@@ -885,20 +842,60 @@ function ByDefinitionWordList(
                   </Typography>
                 ))}
 
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
+                >
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
+              )}
+
               <AudioAutoSubmitWrapper>
-                {({ wrapSetFeedback }) => (
-                  <RecordingStudio2
-                    item={dictionary[wordId]}
-                    word={dictionary[wordId]?.definition}
-                    requestDefinition={true}
-                    feedback={feedback}
-                    qk={wordId}
-                    setFeedback={wrapSetFeedback((data) => {
-                      setFeedback({
-                        ...feedback,
-                        [wordId]: data,
-                      });
-                    })}
+                {({ wrapOnRecordingComplete }) => (
+                  <AudioWaveformPlayer
+                    enableRecording={true}
+                    gradeId={grade?.id}
+                    nodeKey={`${nodeKey}-${wordId}`}
+                    title={dictionary[wordId]?.definition}
+                    onRecordingComplete={wrapOnRecordingComplete(
+                      async (audioFile, uploadResult) => {
+                        // Verify the recorded audio against expected word
+                        try {
+                          const audioUrl =
+                            audioFile?.path || uploadResult?.path;
+                          if (audioUrl) {
+                            const feedbackData = await transcribeAudio({
+                              audioUrl,
+                              expectedAnswer: dictionary[wordId]?.phrase,
+                            });
+                            if (feedbackData) {
+                              setFeedback((prev) => ({
+                                ...prev,
+                                [key]: feedbackData,
+                              }));
+                            }
+                          }
+                        } catch (err) {
+                          console.error(
+                            "[AnswerComponent] Audio verification error:",
+                            err,
+                          );
+                        }
+                      },
+                    )}
                   />
                 )}
               </AudioAutoSubmitWrapper>
@@ -908,6 +905,8 @@ function ByDefinitionWordList(
 
       {currentInputMethod === "writing" &&
         wordIDs.map((wordId, key) => {
+          const isCorrect = feedback[key]?.answer;
+
           // Skip if word not in dictionary
           if (!dictionary[wordId]) {
             console.warn(`Word ${wordId} not found in dictionary`);
@@ -915,8 +914,8 @@ function ByDefinitionWordList(
           }
 
           return (
-            <li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
-              {/* Display prompt based on currentPromptMethod */}
+            <li key={`${wordId}-${key}`}>
+              {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
                   variant="body2"
@@ -952,20 +951,42 @@ function ByDefinitionWordList(
                   </Typography>
                 ))}
 
-              <SketchPad
-                expect={dictionary[wordId]?.definition}
-                excalidrawData={{}}
-                requestDefinition={true}
-                setFeedback={(data) => {
-                  setFeedback({
-                    ...feedback,
-                    [key]: data,
-                  });
-                }}
-                feedback={feedback}
-                questionID={key}
-                // excalidrawData={dictionary[wordId]}
-              />
+              {/* Feedback display */}
+              {isCorrect !== undefined && (
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: isCorrect ? "success.main" : "error.main",
+                    borderRadius: 1,
+                    p: 1,
+                    my: 1,
+                    bgcolor: isCorrect
+                      ? "success.light"
+                      : "error.light",
+                    opacity: 0.9,
+                  }}
+                >
+                  <Typography variant="body2">
+                    {feedback[key]?.reason || ""}
+                  </Typography>
+                </Box>
+              )}
+
+              <Suspense fallback={<Typography variant="body2">Loading...</Typography>}>
+                <SketchPad
+                  expect={dictionary[wordId]?.definition}
+                  excalidrawData={{}}
+                  requestDefinition={true}
+                  setFeedback={(data) => {
+                    setFeedback({
+                      ...feedback,
+                      [key]: data,
+                    });
+                  }}
+                  feedback={feedback}
+                  questionID={key}
+                />
+              </Suspense>
             </li>
           );
         })}

@@ -101,13 +101,11 @@ export interface EarnedBadge {
 export interface BadgeShelfProps {
   /** Array of badges the student has earned. */
   earnedBadges: EarnedBadge[]
-  /** Number of columns in the grid. Defaults to 3. */
-  columns?: number
   /** When true, only earned badges are rendered (unearned are hidden). Defaults to false. */
   earnedOnly?: boolean
 }
 
-export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: BadgeShelfProps) {
+export function BadgeShelf({ earnedBadges, earnedOnly = false }: BadgeShelfProps) {
   // Split earned badges into regular and anti
   const regularEarned = earnedBadges.filter(b => !b.isAnti)
   const antiEarned = earnedBadges.filter(b => b.isAnti)
@@ -154,10 +152,10 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
     <>
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: 1.5,
-          justifyItems: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1,
+          alignItems: 'center',
         }}
       >
         {badgesToShow.map((type) => {
@@ -225,10 +223,10 @@ export function BadgeShelf({ earnedBadges, columns = 3, earnedOnly = false }: Ba
           </Divider>
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: 1.5,
-              justifyItems: 'center',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              alignItems: 'center',
             }}
           >
             {antiEarned.map((badge) => {

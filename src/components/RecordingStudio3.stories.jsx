@@ -940,7 +940,7 @@ export const ConversationPreset = {
     // Title from preset metadata
     await waitFor(
       () => {
-        expect(canvas.getByText(/Coffee Shop/i)).toBeInTheDocument();
+        expect(canvas.getAllByText(/Coffee Shop/i).length).toBeGreaterThan(0);
       },
       { timeout: 5000 },
     );

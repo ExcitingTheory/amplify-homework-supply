@@ -6,7 +6,6 @@ import type { PracticeDrillProgressProps } from './PracticeDrillProgress'
 const meta: Meta<PracticeDrillProgressProps> = {
   title: '🎯 Practice Drills/Progress',
   component: PracticeDrillProgress,
-  tags: ['autodocs'],
   argTypes: {
     blocksCompleted: { control: { type: 'range', min: 0, max: 20 } },
     blockCount: { control: { type: 'range', min: 1, max: 20 } },

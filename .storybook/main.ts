@@ -324,6 +324,17 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/vectorStoreDB.js",
       ),
+      // Mock moderateContent utility to prevent OPENAI_API_KEY errors
+      [path.resolve(__dirname, "../src/utils/moderateContent")]: path.resolve(
+        __dirname,
+        "./__mocks__/moderateContent.js",
+      ),
+      [path.resolve(__dirname, "../src/utils/moderateContent.jsx")]:
+        path.resolve(__dirname, "./__mocks__/moderateContent.js"),
+      "../utils/moderateContent": path.resolve(
+        __dirname,
+        "./__mocks__/moderateContent.js",
+      ),
       // Mock server actions (marked "use server") that cannot run in Storybook
       [path.resolve(__dirname, "../app/actions/section")]: path.resolve(
         __dirname,
@@ -398,11 +409,39 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/server-actions.js",
       ),
+      [path.resolve(__dirname, "../app/actions/moderation-notify")]:
+        path.resolve(__dirname, "./__mocks__/server-actions.js"),
+      [path.resolve(__dirname, "../app/actions/moderation-notify.ts")]:
+        path.resolve(__dirname, "./__mocks__/server-actions.js"),
       [path.resolve(__dirname, "../app/actions/drill")]: path.resolve(
         __dirname,
         "./__mocks__/server-actions.js",
       ),
       [path.resolve(__dirname, "../app/actions/drill.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/embeddings")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/embeddings.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/storage")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/storage.ts")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/peerReview")]: path.resolve(
+        __dirname,
+        "./__mocks__/server-actions.js",
+      ),
+      [path.resolve(__dirname, "../app/actions/peerReview.ts")]: path.resolve(
         __dirname,
         "./__mocks__/server-actions.js",
       ),

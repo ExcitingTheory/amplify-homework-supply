@@ -22,6 +22,7 @@ import {
   Typography,
   Stack,
   CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';

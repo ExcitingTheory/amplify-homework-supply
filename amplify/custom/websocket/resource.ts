@@ -1,4 +1,4 @@
-import { defineFunction } from "@aws-amplify/backend";
+import { defineFunction, secret } from "@aws-amplify/backend";
 import { Construct } from "constructs";
 import { Stack, RemovalPolicy } from "aws-cdk-lib";
 import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
@@ -11,6 +11,8 @@ import { IFunction } from "aws-cdk-lib/aws-lambda";
 export interface WebSocketApiProps {
   unitTable: ITable;
   homeworkRoomTable: ITable;
+  sectionTable: ITable;
+  notificationTable: ITable;
   websocketLambda: IFunction;
 }
 
@@ -18,6 +20,9 @@ export const websocketHandler = defineFunction({
   timeoutSeconds: 30,
   memoryMB: 256,
   resourceGroupName: "data", // Keep in data stack with WebSocket construct
+  environment: {
+    OPENAI_API_KEY: secret("OPENAI_API_KEY"),
+  },
 });
 
 /**
@@ -36,7 +41,13 @@ export class WebSocketApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: WebSocketApiProps) {
     super(scope, id);
 
-    const { unitTable, homeworkRoomTable, websocketLambda } = props;
+    const {
+      unitTable,
+      homeworkRoomTable,
+      sectionTable,
+      notificationTable,
+      websocketLambda,
+    } = props;
 
     // DynamoDB table for WebSocket connections
     // Tracks which connections are editing which units
@@ -69,6 +80,12 @@ export class WebSocketApiConstruct extends Construct {
 
     // Grant Lambda read access to HomeworkRoom for review room authorization
     homeworkRoomTable.grantReadData(websocketLambda);
+
+    // Grant Lambda read access to Section for instructor lookup (moderation notifications)
+    sectionTable.grantReadData(websocketLambda);
+
+    // Grant Lambda write access to Notification for moderation alerts
+    notificationTable.grantReadWriteData(websocketLambda);
 
     // WebSocket API
     this.api = new WebSocketApi(this, "CollaborationWebSocketApi", {

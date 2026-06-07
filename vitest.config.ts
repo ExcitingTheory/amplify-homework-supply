@@ -52,7 +52,7 @@ export default defineConfig({
             "build",
             "test/integration/**",
             "test/performance/**",
-            "test/storybook/**",
+            "test/storybook/smoke-test-all-stories.test.tsx",
           ],
         },
         resolve: {
@@ -172,8 +172,116 @@ export default defineConfig({
               storybookConfigDir,
               "./__mocks__/CollaborationPlugin.js",
             ),
+            // Mock moderateContent utility to prevent OPENAI_API_KEY errors
+            [path.resolve(__dirname, "src/utils/moderateContent")]:
+              path.resolve(
+                storybookConfigDir,
+                "./__mocks__/moderateContent.js",
+              ),
+            [path.resolve(__dirname, "src/utils/moderateContent.jsx")]:
+              path.resolve(
+                storybookConfigDir,
+                "./__mocks__/moderateContent.js",
+              ),
+            // Mock ALL server actions that require API keys or server environment
+            [path.resolve(__dirname, "app/actions/moderate")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/moderate.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/moderation-notify")]:
+              path.resolve(storybookConfigDir, "./__mocks__/server-actions.js"),
+            [path.resolve(__dirname, "app/actions/moderation-notify.ts")]:
+              path.resolve(storybookConfigDir, "./__mocks__/server-actions.js"),
+            [path.resolve(__dirname, "app/actions/drill")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/drill.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/section")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/section.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/gamification")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/gamification.ts")]:
+              path.resolve(storybookConfigDir, "./__mocks__/server-actions.js"),
+            [path.resolve(__dirname, "app/actions/generate")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/generate.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/grading")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/grading.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/chat")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/chat.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/feedback")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/feedback.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/jobs")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/jobs.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/embeddings")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/embeddings.ts")]:
+              path.resolve(storybookConfigDir, "./__mocks__/server-actions.js"),
+            [path.resolve(__dirname, "app/actions/storage")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/storage.ts")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/peerReview")]: path.resolve(
+              storybookConfigDir,
+              "./__mocks__/server-actions.js",
+            ),
+            [path.resolve(__dirname, "app/actions/peerReview.ts")]:
+              path.resolve(storybookConfigDir, "./__mocks__/server-actions.js"),
             // Workaround for Lexical packages that don't have "." export
             "@lexical/react$": "@lexical/react/LexicalComposer",
+            // Stub native canvas module (pulled in by linkedom) to prevent .node loader error
+            canvas: path.resolve(storybookConfigDir, "./__mocks__/canvas.js"),
           },
           conditions: ["import", "module", "browser", "default"],
           mainFields: ["module", "jsnext:main", "jsnext", "main"],
@@ -195,6 +303,7 @@ export default defineConfig({
           ],
           exclude: [
             "qrcode", // Exclude qrcode to prevent Node.js module issues in browser
+            "canvas", // Exclude canvas to prevent .node native module loader error
           ],
         },
         server: {

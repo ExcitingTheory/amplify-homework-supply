@@ -6,7 +6,6 @@ import type { PracticeDrillDialogProps } from './PracticeDrillDialog'
 const meta: Meta<PracticeDrillDialogProps> = {
   title: '🎯 Practice Drills/Dialog',
   component: PracticeDrillDialog,
-  tags: ['autodocs'],
   argTypes: {
     sessionsCompletedToday: { control: { type: 'range', min: 0, max: 10 } },
   },

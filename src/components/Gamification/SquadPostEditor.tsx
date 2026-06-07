@@ -61,6 +61,7 @@ import PdfViewerPlugin from '../Editor3/plugins/PdfViewerPlugin'
 import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
 import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
 import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
+import BlockInserterPlugin from '../MiniEditor/BlockInserterPlugin'
 
 import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
 
@@ -138,6 +139,7 @@ export function SquadPostEditor({
 }: SquadPostEditorProps) {
   const [title, setTitle] = useState(initialTitle)
   const editorRef = useRef<any>(null)
+  const [anchorElem, setAnchorElem] = useState<HTMLDivElement | null>(null)
 
   const initialConfig = React.useMemo(
     () => ({
@@ -182,6 +184,7 @@ export function SquadPostEditor({
             <AudioPlayerProvider>
               <LexicalComposer initialConfig={initialConfig}>
                 <Box
+                  ref={setAnchorElem}
                   sx={{
                     position: 'relative',
                     minHeight: 120,
@@ -189,10 +192,12 @@ export function SquadPostEditor({
                     borderColor: 'divider',
                     borderRadius: 1,
                     mt: 1,
+                    overflowX: 'visible',
                   }}
                 >
                   <FloatingToolbarPlugin config={SQUAD_POST_TOOLBAR_CONFIG} />
                   <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
+                  {anchorElem && <BlockInserterPlugin anchorElem={anchorElem} />}
                   <RichTextPlugin
                     contentEditable={
                       <ContentEditable

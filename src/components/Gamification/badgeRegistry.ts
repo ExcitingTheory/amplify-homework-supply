@@ -36,6 +36,7 @@ import {
   GiFireShield,
   GiAllSeeingEye,
   GiRingedPlanet,
+  GiHammerNails,
   // Storybook documentation promo badges
   GiSpellBook,
   GiTeacher,
@@ -604,23 +605,23 @@ export const BADGE_REGISTRY: Record<string, BadgeVisualConfig> = {
   },
 
   NAILED_IT: {
-    icon: GiStarMedal,
+    icon: GiHammerNails,
     name: "Nailed It",
     description: "Received a perfect AI evaluation on a block",
-    bgColor: "#ffc107",
+    bgColor: "#e65100",
     gradient: {
       type: "radial",
       stops: [
-        { color: "#fff176", position: "0%" },
-        { color: "#f9a825", position: "100%" },
+        { color: "#ffab40", position: "0%" },
+        { color: "#bf360c", position: "100%" },
       ],
     },
     iconColor: "#ffffff",
-    shape: "circle",
+    shape: "hexagon",
     animation: "bounce-in",
-    hoverAnimation: "glow",
+    hoverAnimation: "shake",
     category: "core",
-    rarity: "uncommon",
+    rarity: "rare",
   },
 
   // ── Additional Streak Badges ──────────────────────────────────────────

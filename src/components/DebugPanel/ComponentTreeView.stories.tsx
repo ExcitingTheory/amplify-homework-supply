@@ -9,7 +9,6 @@ import { ComponentMetadata } from '../../utils/debug/ComponentTreeStore';
 const meta: Meta<typeof ComponentTreeView> = {
   title: '🛠️ Developer Tools/Debug Panel/Component Tree View',
   component: ComponentTreeView,
-  tags: ['autodocs'],
 };
 
 export default meta;

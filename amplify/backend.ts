@@ -971,6 +971,8 @@ backend.addOutput({
 const websocketApi = new WebSocketApiConstruct(dataStack, "WebSocketApi", {
   unitTable: backend.data.resources.tables["Unit"],
   homeworkRoomTable: backend.data.resources.tables["HomeworkRoom"],
+  sectionTable: backend.data.resources.tables["Section"],
+  notificationTable: backend.data.resources.tables["Notification"],
   websocketLambda: backend.websocketHandler.resources.lambda,
 });
 
@@ -986,6 +988,14 @@ backend.websocketHandler.addEnvironment(
 backend.websocketHandler.addEnvironment(
   "HOMEWORK_ROOM_TABLE_NAME",
   backend.data.resources.tables["HomeworkRoom"].tableName,
+);
+backend.websocketHandler.addEnvironment(
+  "SECTION_TABLE_NAME",
+  backend.data.resources.tables["Section"].tableName,
+);
+backend.websocketHandler.addEnvironment(
+  "NOTIFICATION_TABLE_NAME",
+  backend.data.resources.tables["Notification"].tableName,
 );
 
 // Export WebSocket endpoint using CFN intrinsic functions to construct URL at deploy time

@@ -11,7 +11,16 @@ const mockSettingsProvider = (metadata: Record<string, unknown> = {}) => ({
 
 // Mock useXP
 vi.mock('../context/gamificationContext', () => ({
-  useXP: () => ({ level: { level: 4, label: 'Expert', xpRequired: 0, xpForNextLevel: 100, progress: 0 } }),
+  useXP: () => ({
+    level: { level: 4, label: 'Expert', xpRequired: 0, xpForNextLevel: 100, progress: 0 },
+    avatarUnlockConfig: null,
+    totalXP: 400,
+    sectionXP: 100,
+    sectionLevel: { level: 2, label: 'Intermediate', xpRequired: 100, xpForNextLevel: 200, progress: 0.5 },
+    xpLogs: [],
+    isLoading: false,
+  }),
+  GamificationProvider: ({ children }) => children,
 }))
 
 import { vi } from 'vitest'

@@ -6,7 +6,6 @@ import { BossBattleForm, DEFAULT_STAKES } from './BossBattleForm'
 const meta: Meta<typeof BossBattleForm> = {
   title: '🏆 Gamification/Instructor/Boss Battle Form',
   component: BossBattleForm,
-  tags: ['autodocs'],
   args: {
     onSubmit: fn(),
   },

@@ -4,7 +4,6 @@ import { CampaignBriefing } from './CampaignBriefing'
 const meta: Meta<typeof CampaignBriefing> = {
   title: '🏆 Gamification/Squads & Teams/Campaign Briefing',
   component: CampaignBriefing,
-  tags: ['autodocs'],
 }
 export default meta
 

@@ -99,6 +99,7 @@ const NotificationType = a.enum([
   "SQUAD_INVITE",
   "CHAT_MENTION",
   "CHAT_NEW_MESSAGE",
+  "MODERATION_FLAGGED",
   "SYSTEM_ANNOUNCEMENT",
   "SYSTEM_MAINTENANCE",
 ]);
@@ -107,6 +108,7 @@ const NotificationCategory = a.enum([
   "ASSIGNMENT",
   "COLLABORATION",
   "GAMIFICATION",
+  "MODERATION",
   "SQUAD",
   "CHAT",
   "SYSTEM",

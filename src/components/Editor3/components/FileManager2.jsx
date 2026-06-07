@@ -3397,6 +3397,7 @@ export default function FileManager2() {
 
   // Use vector store from FilesContext (shared across entire app, initialized early)
   const { vectorStore, vectorStoreReady } = React.useContext(FilesContext);
+  const { unit } = React.useContext(UnitContext);
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
   const debouncedSearch = React.useRef(
@@ -3774,7 +3775,6 @@ export default function FileManager2() {
   }, [files]);
   const documentStatuses = documents || {};
   const { identityId } = session || {};
-  const { unit } = React.useContext(UnitContext);
 
   // Enhanced text search function
   const performSimpleTextSearch = React.useCallback(
@@ -3917,6 +3917,69 @@ export default function FileManager2() {
       setSemanticResults(Object.keys(results).length > 0 ? results : null);
     },
     [files],
+  );
+
+  // Vector store search function exposed to other components
+  const performVectorSearch = React.useCallback(
+    async (query, options = {}) => {
+      const { topK = 10, filters = {}, includeText = true } = options;
+
+      console.log(
+        `[FileManager2.performVectorSearch] Query: "${query}", topK: ${topK}`,
+      );
+
+      if (!query.trim()) {
+        return { results: [], query };
+      }
+
+      try {
+        // Generate embedding for the query
+        const result = await generateEmbeddingAction({
+          content: query,
+          model: "text-embedding-3-small",
+          dimensions: 512,
+        });
+        const queryEmbedding = result.embedding;
+        console.log(
+          `[FileManager2.performVectorSearch] Generated ${queryEmbedding.length}D embedding`,
+        );
+
+        // Search vector store (now async due to worker usage)
+        const results = await vectorStore.search(
+          queryEmbedding,
+          filters,
+          topK,
+          query,
+        );
+        console.log(
+          `[FileManager2.performVectorSearch] Found ${results.length} results`,
+        );
+
+        return {
+          success: true,
+          query,
+          results: results.map((r) => ({
+            id: r.id,
+            documentId: r.documentId || r.metadata?.documentId,
+            fileId: r.metadata?.fileId,
+            fileName: r.metadata?.fileName,
+            page: r.page,
+            similarity: r.similarity,
+            text: includeText ? r.text : undefined,
+            metadata: r.metadata,
+          })),
+        };
+      } catch (error) {
+        console.error("[FileManager2.performVectorSearch] Error:", error);
+        return {
+          success: false,
+          error: error.message,
+          query,
+          results: [],
+        };
+      }
+    },
+    [vectorStore],
   );
 
   // Enhanced text search function — uses vector store when available
@@ -4513,69 +4576,6 @@ export default function FileManager2() {
   const handleChange = (event) => {
     console.log("handleChange", event.target.value);
   };
-
-  // Vector store search function exposed to other components
-  const performVectorSearch = React.useCallback(
-    async (query, options = {}) => {
-      const { topK = 10, filters = {}, includeText = true } = options;
-
-      console.log(
-        `[FileManager2.performVectorSearch] Query: "${query}", topK: ${topK}`,
-      );
-
-      if (!query.trim()) {
-        return { results: [], query };
-      }
-
-      try {
-        // Generate embedding for the query
-        const result = await generateEmbeddingAction({
-          content: query,
-          model: "text-embedding-3-small",
-          dimensions: 512,
-        });
-        const queryEmbedding = result.embedding;
-        console.log(
-          `[FileManager2.performVectorSearch] Generated ${queryEmbedding.length}D embedding`,
-        );
-
-        // Search vector store (now async due to worker usage)
-        const results = await vectorStore.search(
-          queryEmbedding,
-          filters,
-          topK,
-          query,
-        );
-        console.log(
-          `[FileManager2.performVectorSearch] Found ${results.length} results`,
-        );
-
-        return {
-          success: true,
-          query,
-          results: results.map((r) => ({
-            id: r.id,
-            documentId: r.documentId || r.metadata?.documentId,
-            fileId: r.metadata?.fileId,
-            fileName: r.metadata?.fileName,
-            page: r.page,
-            similarity: r.similarity,
-            text: includeText ? r.text : undefined,
-            metadata: r.metadata,
-          })),
-        };
-      } catch (error) {
-        console.error("[FileManager2.performVectorSearch] Error:", error);
-        return {
-          success: false,
-          error: error.message,
-          query,
-          results: [],
-        };
-      }
-    },
-    [vectorStore],
-  );
 
   // Context value for VectorStoreContext
   const vectorStoreContextValue = {

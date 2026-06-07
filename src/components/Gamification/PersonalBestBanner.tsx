@@ -8,7 +8,7 @@ import React from 'react'
 import Alert from '@mui/material/Alert'
 import Collapse from '@mui/material/Collapse'
 import Typography from '@mui/material/Typography'
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import BadgeIcon from './BadgeIcon'
 
 export interface PersonalBestBannerProps {
   open: boolean
@@ -29,7 +29,7 @@ export function PersonalBestBanner({
     <Collapse in={open}>
       <Alert
         severity="success"
-        icon={<EmojiEventsIcon />}
+        icon={<BadgeIcon badgeType="TOP_OF_CLASS" size={32} earned animate />}
         onClose={onClose}
         sx={{
           fontWeight: 600,

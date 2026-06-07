@@ -52,6 +52,7 @@ const TYPE_TO_CATEGORY = {
   GUILD_MEMBER_JOINED: "GUILD",
   CHAT_MENTION: "CHAT",
   CHAT_NEW_MESSAGE: "CHAT",
+  MODERATION_FLAGGED: "MODERATION",
   SYSTEM_ANNOUNCEMENT: "SYSTEM",
   SYSTEM_MAINTENANCE: "SYSTEM",
 } as const;
@@ -250,5 +251,28 @@ export const notifications = {
       referenceId: guildId,
       referenceType: "Guild",
       senderName: memberName,
+    }),
+
+  moderationFlagged: (
+    recipientIds: string[],
+    modelName: string,
+    recordId: string,
+    flaggedCategories: string[],
+  ) =>
+    sendNotificationToMany(recipientIds, {
+      type: "MODERATION_FLAGGED",
+      title: `Content flagged: ${modelName}`,
+      body: `A ${modelName.toLowerCase()} was flagged for: ${flaggedCategories.join(", ")}`,
+      linkPath:
+        modelName === "Grade"
+          ? `/instructor/grade/${recordId}`
+          : modelName === "Unit"
+            ? `/units/${recordId}`
+            : `/admin/moderation`,
+      linkLabel: "Review Content",
+      referenceId: recordId,
+      referenceType: modelName,
+      senderName: "Moderation System",
+      metadata: { modelName, flaggedCategories },
     }),
 };

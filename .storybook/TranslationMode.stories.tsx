@@ -74,7 +74,6 @@ export default {
       },
     },
   },
-  tags: ['autodocs'],
 };
 
 export default meta;

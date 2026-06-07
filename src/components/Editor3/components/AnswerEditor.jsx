@@ -633,6 +633,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     }}
                     pageSizeOptions={[5, 10, 100]}
                     checkboxSelection
+                    rowSelectionModel={gridSelection}
                     onRowSelectionModelChange={(e) => {
                         console.log('onRowSelectionModelChange', e);
                         setGridSelection(e)

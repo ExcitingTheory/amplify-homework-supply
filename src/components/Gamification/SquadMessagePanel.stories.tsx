@@ -13,7 +13,6 @@ const mockSquads = [
 const meta: Meta<typeof SquadMessagePanel> = {
   title: 'Gamification/SquadMessagePanel',
   component: SquadMessagePanel,
-  tags: ['autodocs'],
   args: {
     squads: mockSquads,
     onSend: fn(),

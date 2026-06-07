@@ -176,41 +176,14 @@ function StoryLoadingFallback({ title, component, phase, isDark }) {
  * preventing a blank gap between the fallback disappearing and the story rendering.
  */
 function DeferredStory({ children, title, component, isDark }) {
-  const [phase, setPhase] = React.useState("init");
-  const [renderChildren, setRenderChildren] = React.useState(false);
   const [showFallback, setShowFallback] = React.useState(true);
 
-  // Transition through phases on successive animation frames
-  React.useEffect(() => {
-    let raf2;
-    setPhase("providers");
-    const raf1 = requestAnimationFrame(() => {
-      setPhase("render");
-      raf2 = requestAnimationFrame(() => setRenderChildren(true));
-    });
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2) cancelAnimationFrame(raf2);
-    };
-  }, []);
-
-  // Once children are committed to the DOM, hide the fallback overlay after next paint
+  // Hide the fallback overlay after children commit to the DOM
   const onChildrenMount = React.useCallback((node) => {
     if (node) {
       requestAnimationFrame(() => setShowFallback(false));
     }
   }, []);
-
-  if (!renderChildren) {
-    return (
-      <StoryLoadingFallback
-        title={title}
-        component={component}
-        phase={phase}
-        isDark={isDark}
-      />
-    );
-  }
 
   return (
     <div
@@ -244,7 +217,12 @@ function DeferredStory({ children, title, component, isDark }) {
   );
 }
 
-// Mock fetch for /api/chat endpoint
+// Mock navigator.sendBeacon (used by analytics/vitals — no-op in Storybook)
+if (typeof navigator !== "undefined") {
+  navigator.sendBeacon = () => true;
+}
+
+// Mock fetch for API endpoints that would call external services
 const originalFetch = globalThis.fetch;
 globalThis.fetch = async (url, options) => {
   // Intercept chat API calls
@@ -257,7 +235,7 @@ globalThis.fetch = async (url, options) => {
     // Generate mock response
     const responseText = await mockChatAPI(messages, context);
 
-    // Create a readable stream that simulates streaming response
+    // Create a readable stream using AI SDK "data" stream protocol format
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -266,8 +244,13 @@ globalThis.fetch = async (url, options) => {
         for (let i = 0; i < words.length; i++) {
           await new Promise((resolve) => setTimeout(resolve, 50));
           const chunk = words[i] + (i < words.length - 1 ? " " : "");
-          controller.enqueue(encoder.encode(`0:"${chunk}"\n`));
+          // AI SDK data stream protocol: 0:JSON_STRING\n for text chunks
+          controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
         }
+        // Send finish event
+        controller.enqueue(
+          encoder.encode(`d:${JSON.stringify({ finishReason: "stop" })}\n`),
+        );
         controller.close();
       },
     });
@@ -275,8 +258,234 @@ globalThis.fetch = async (url, options) => {
     return new Response(stream, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
       },
+    });
+  }
+
+  // Intercept suggest-blocks API calls
+  if (typeof url === "string" && url.includes("/api/suggest-blocks")) {
+    console.log("[Mock Fetch] Intercepted /api/suggest-blocks");
+
+    const body = JSON.parse(options?.body || "{}");
+    const { unitStructure, currentContext } = body;
+
+    // Select mock suggestion data based on lesson structure
+    const suggestBlocksMocks =
+      await import("../test/mocks/responses/suggestBlocks.js");
+    const blockCount = unitStructure?.length || 0;
+    const lastBlock = unitStructure?.[blockCount - 1];
+    let mockData;
+
+    if (blockCount === 0) {
+      mockData = suggestBlocksMocks.emptyLesson;
+    } else if (lastBlock?.type === "heading") {
+      mockData = suggestBlocksMocks.afterHeading;
+    } else if (lastBlock?.type === "paragraph" && blockCount <= 2) {
+      mockData = suggestBlocksMocks.afterExplanation;
+    } else if (lastBlock?.type === "paragraph" && blockCount > 2) {
+      mockData = suggestBlocksMocks.afterMultipleExplanations;
+    } else if (lastBlock?.type === "quiz") {
+      mockData = suggestBlocksMocks.afterQuiz;
+    } else if (lastBlock?.type?.includes("answer")) {
+      mockData = suggestBlocksMocks.afterPractice;
+    } else {
+      mockData = suggestBlocksMocks.afterExplanation;
+    }
+
+    // Fallback if import doesn't have the key
+    if (!mockData) {
+      mockData = {
+        suggestions: [
+          {
+            type: "paragraph",
+            label: "Add Explanation",
+            icon: "📝",
+            reasoning: "Mock suggestion for Storybook",
+            priority: "high",
+          },
+        ],
+        overallAssessment: "Mock assessment",
+      };
+    }
+
+    // Transform legacy mock data (type/label/icon format) into the production
+    // tool result format that toDataStreamResponse() emits from the route's
+    // insert_* tools: { success, action, blockType, blockData, preview, reasoning, message }
+    const suggestions = (mockData.suggestions || []).map((s) => ({
+      success: true,
+      action: "insert_editor_block",
+      blockType: s.type,
+      blockData:
+        s.type === "heading"
+          ? { level: "h2", text: s.label }
+          : s.type === "paragraph"
+            ? { markdown: s.reasoning }
+            : s.type === "quiz"
+              ? { questionIDs: ["mock-q-1", "mock-q-2"] }
+              : s.type === "answer"
+                ? { wordIDs: ["mock-w-1", "mock-w-2"] }
+                : s.type === "meaning-association"
+                  ? { wordIDs: ["mock-w-1", "mock-w-2", "mock-w-3"] }
+                  : s.type === "custom-answer"
+                    ? { questionIDs: ["mock-q-1"] }
+                    : {},
+      preview: { text: s.label },
+      reasoning: s.reasoning,
+      message: `${s.label} (${s.type})`,
+    }));
+
+    // Emit AI SDK data stream protocol — one tool result per suggestion
+    // Matches production: each insert_* tool returns independently via 9: prefix
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        for (let i = 0; i < suggestions.length; i++) {
+          const toolCallId = `call_mock_${Date.now()}_${i}`;
+          const toolName = `insert_${suggestions[i].blockType}`;
+
+          // Emit tool call start (b: prefix)
+          controller.enqueue(
+            encoder.encode(`b:${JSON.stringify({ toolCallId, toolName })}\n`),
+          );
+
+          // Emit tool result (9: prefix)
+          const toolResult = {
+            toolCallId,
+            toolName,
+            args: {},
+            result: suggestions[i],
+          };
+          controller.enqueue(
+            encoder.encode(`9:${JSON.stringify(toolResult)}\n`),
+          );
+        }
+
+        // Send finish event
+        controller.enqueue(
+          encoder.encode(`d:${JSON.stringify({ finishReason: "stop" })}\n`),
+        );
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+      },
+    });
+  }
+
+  // Intercept content-completion API calls
+  if (typeof url === "string" && url.includes("/api/content-completion")) {
+    console.log("[Mock Fetch] Intercepted /api/content-completion");
+
+    const body = JSON.parse(options?.body || "{}");
+    const { prompt } = body;
+
+    // Generate contextual mock completion based on prompt
+    let completionText =
+      "This is a sample paragraph about Japanese language. " +
+      "The hiragana writing system consists of 46 basic characters. " +
+      "Each character represents a syllable, making it a syllabary rather than an alphabet.";
+
+    if (prompt?.includes("verb") || prompt?.includes("動詞")) {
+      completionText =
+        "Japanese verbs conjugate based on tense, politeness level, and mood. " +
+        "The dictionary form (辞書形) is the base form used in casual speech. " +
+        "For polite speech, verbs take the -ます form.";
+    } else if (prompt?.includes("hiragana") || prompt?.includes("ひらがな")) {
+      completionText =
+        "Hiragana (ひらがな) is one of three Japanese writing systems. " +
+        "It is used for native Japanese words and grammatical elements. " +
+        "Children learn hiragana first before moving to katakana and kanji.";
+    }
+
+    // Stream text chunks using AI SDK data stream protocol
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const words = completionText.split(" ");
+        for (let i = 0; i < words.length; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+          const chunk = words[i] + (i < words.length - 1 ? " " : "");
+          controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
+        }
+        controller.enqueue(
+          encoder.encode(`d:${JSON.stringify({ finishReason: "stop" })}\n`),
+        );
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+      },
+    });
+  }
+
+  // Intercept grade-ai API calls (CustomAINode grading)
+  if (typeof url === "string" && url.includes("/api/grade-ai")) {
+    console.log("[Mock Fetch] Intercepted /api/grade-ai");
+
+    // Return a mock AI grading JSON response (not streaming)
+    const mockGrading = {
+      correct: true,
+      score: 75,
+      feedback:
+        "Good understanding of the concept. The answer addresses key points but could benefit from more specific examples.",
+    };
+
+    return new Response(JSON.stringify(mockGrading), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Intercept analytics API calls (no-op in Storybook)
+  if (typeof url === "string" && url.includes("/api/analytics")) {
+    console.log("[Mock Fetch] Intercepted /api/analytics");
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Intercept vitals API calls (no-op in Storybook)
+  if (typeof url === "string" && url.includes("/api/vitals")) {
+    console.log("[Mock Fetch] Intercepted /api/vitals");
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Intercept HLS API calls (return valid test manifest)
+  if (typeof url === "string" && url.includes("/api/hls")) {
+    console.log("[Mock Fetch] Intercepted /api/hls");
+    // Apple's public bipbop test stream — valid master playlist with multiple variants
+    const manifest = [
+      "#EXTM3U",
+      "#EXT-X-VERSION:3",
+      "#EXT-X-STREAM-INF:BANDWIDTH=200000,RESOLUTION=960x540",
+      "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8",
+      "#EXT-X-STREAM-INF:BANDWIDTH=311111,RESOLUTION=480x270",
+      "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8",
+      "#EXT-X-STREAM-INF:BANDWIDTH=484444,RESOLUTION=640x360",
+      "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/gear3/prog_index.m3u8",
+      "",
+    ].join("\n");
+    return new Response(manifest, {
+      status: 200,
+      headers: { "Content-Type": "application/vnd.apple.mpegurl" },
     });
   }
 
@@ -396,7 +605,7 @@ const preview = {
           styles: { width: "1280px", height: "800px" },
           type: "desktop",
         },
-      }
+      },
     },
 
     // Configure layout settings
@@ -735,10 +944,15 @@ const preview = {
         },
       });
 
-      // Merge tracked actions into context args
+      // Merge tracked actions into context args — only for args NOT already defined
+      // by the story (preserves fn() spies needed by play() interaction tests)
       React.useEffect(() => {
         if (context.args) {
-          Object.assign(context.args, trackableActions);
+          for (const [key, value] of Object.entries(trackableActions)) {
+            if (!(key in context.args) || context.args[key] === undefined) {
+              context.args[key] = value;
+            }
+          }
         }
       }, [context.args]);
 
@@ -959,9 +1173,9 @@ const preview = {
   initialGlobals: {
     viewport: {
       value: "responsive",
-      isRotated: false
-    }
-  }
+      isRotated: false,
+    },
+  },
 };
 
 export default preview;

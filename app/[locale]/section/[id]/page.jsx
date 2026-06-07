@@ -76,6 +76,7 @@ import {
 } from "../../../actions/peerReview";
 import { useRouter, useParams } from "next/navigation";
 import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
+import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -2437,10 +2438,12 @@ function SectionDetail({ user, signOut }) {
                     margin: "1rem auto",
                     width: "90vw",
                     maxWidth: "80rem",
+                    height: 180,
                     borderRadius: 2,
                     borderLeft: "4px solid",
                     borderLeftColor: "primary.main",
                     transition: "all 0.3s ease-in-out",
+                    overflow: "hidden",
                     "&:hover": {
                       boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                     },

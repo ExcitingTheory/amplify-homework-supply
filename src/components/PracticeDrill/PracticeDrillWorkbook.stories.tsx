@@ -6,7 +6,6 @@ import type { PracticeDrillWorkbookProps } from './PracticeDrillWorkbook'
 const meta: Meta<PracticeDrillWorkbookProps> = {
   title: '🎯 Practice Drills/Workbook',
   component: PracticeDrillWorkbook,
-  tags: ['autodocs'],
 }
 
 export default meta

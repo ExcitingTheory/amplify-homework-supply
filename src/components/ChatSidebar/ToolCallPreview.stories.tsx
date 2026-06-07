@@ -20,7 +20,6 @@ const meta: Meta<typeof ToolCallPreview> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
 };
 
 export default meta;

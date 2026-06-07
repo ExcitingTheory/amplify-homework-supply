@@ -6,7 +6,6 @@ import { BossBattleProgress } from './BossBattleProgress'
 const meta: Meta<typeof BossBattleProgress> = {
   title: '🏆 Gamification/Instructor/Boss Battle Progress',
   component: BossBattleProgress,
-  tags: ['autodocs'],
   args: {
     onToggleActive: fn(),
     onDelete: fn(),

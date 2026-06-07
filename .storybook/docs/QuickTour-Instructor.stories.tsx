@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { within, waitFor, userEvent } from 'storybook/test';
+import { within, waitFor, userEvent, expect } from 'storybook/test';
 import { Box } from '@mui/material';
 import { setMockUser } from '@storybook-mocks/aws-amplify-auth';
 import { seedIndexPageData } from '@storybook-mocks/index-page-examples';
@@ -13,7 +13,7 @@ import { FilesProvider } from '../../src/context/fileContext';
 // App Router pages — all marked 'use client', safe for Storybook.
 // Server action imports are aliased to mocks in .storybook/main.ts.
 import UnitsPage from '../../app/[locale]/units/page.jsx';
-import UnitDetailPage from '../../app/[locale]/unit/[id]/page.jsx';
+import UnitEditorClient from '../../app/[locale]/unit/[id]/UnitEditorClient.jsx';
 import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
 
 const meta: Meta = {
@@ -96,7 +96,7 @@ export const Step2_UnitEditor: Story = {
   ],
   render: () => (
     <Box>
-      <UnitDetailPage />
+      <UnitEditorClient />
     </Box>
   ),
   parameters: {
@@ -108,7 +108,7 @@ export const Step2_UnitEditor: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/unit/unit-japanese-1',
-        segments: [['id', 'unit-japanese-1']],
+        params: { id: 'unit-japanese-1' },
       },
     },
   },
@@ -160,7 +160,7 @@ export const Step3_SectionGrades: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/section/section-jpn-101',
-        segments: [['id', 'section-jpn-101']],
+        params: { id: 'section-jpn-101' },
       },
     },
   },
@@ -168,7 +168,7 @@ export const Step3_SectionGrades: Story = {
     const canvas = within(canvasElement);
     await step('View class roster and assignments', async () => {
       await waitFor(() => {
-        canvas.getByText(/Japanese/i);
+        expect(canvas.getAllByText(/Japanese/i).length).toBeGreaterThan(0);
       }, { timeout: 8000 });
     });
     await step('Review student grades', async () => {

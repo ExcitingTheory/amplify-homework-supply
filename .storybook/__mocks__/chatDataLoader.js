@@ -12,7 +12,8 @@ import chatBot23 from './ui-data/chat-bot-2.3.json';
  * This wraps the individual message objects into an AssistantChat structure
  * 
  * Note: messages is stored as an array (not JSON string) because Amplify Gen 2
- * automatically parses a.json() fields when reading from the database
+ * automatically parses a.json() fields when reading from the database.
+ * chatBot23 IS the messages array (it's a JSON array at the top level).
  */
 const allChatData = {
   id: 'mock-assistant-chat-1',
@@ -22,8 +23,8 @@ const allChatData = {
   threadInstructions: 'You are a helpful Japanese language learning assistant.',
   additionalInstructions: null,
   moderationFlag: false,
-  // Extract messages array from chat-bot-2.3.json which contains the full conversation
-  messages: chatBot23.messages || [],
+  // chatBot23 is the messages array directly (top-level JSON array)
+  messages: chatBot23,
   draft: '',
   archived: false,
   inputTokens: '150',

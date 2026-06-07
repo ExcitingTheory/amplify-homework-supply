@@ -4,7 +4,6 @@ import { ArmoriaShield } from './ArmoriaShield'
 const meta: Meta<typeof ArmoriaShield> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Armoria Shield',
   component: ArmoriaShield,
-  tags: ['autodocs'],
   argTypes: {
     size: { control: { type: 'range', min: 40, max: 200 } },
   },

@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { within, waitFor, userEvent } from 'storybook/test';
+import { within, waitFor, userEvent, expect } from 'storybook/test';
 import { Box } from '@mui/material';
 import { setMockUser } from '@storybook-mocks/aws-amplify-auth';
 import { seedIndexPageData } from '@storybook-mocks/index-page-examples';
@@ -43,7 +43,7 @@ export const Step1_Dashboard: Story = {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-        groups: ['Learners'],
+        groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
       return <FilesProvider><Story /></FilesProvider>;
@@ -51,7 +51,7 @@ export const Step1_Dashboard: Story = {
   ],
   render: () => (
     <Box>
-      <HomePage />
+      <HomePage user={{ username: 'student-alice-sub', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] }} />
     </Box>
   ),
   parameters: {
@@ -87,7 +87,7 @@ export const Step2_JoinSection: Story = {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-        groups: ['Learners'],
+        groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
       return <FilesProvider><Story /></FilesProvider>;
@@ -107,7 +107,7 @@ export const Step2_JoinSection: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/section/section-jpn-101',
-        segments: [['id', 'section-jpn-101']],
+        params: { id: 'section-jpn-101' },
       },
     },
   },
@@ -135,7 +135,7 @@ export const Step3_Workbook: Story = {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-        groups: ['Learners'],
+        groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
       seedIndexPageData('student');
       return <FilesProvider><Story /></FilesProvider>;
@@ -155,7 +155,7 @@ export const Step3_Workbook: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/workbook/unit-japanese-1',
-        segments: [['id', 'unit-japanese-1']],
+        params: { id: 'unit-japanese-1' },
       },
     },
   },
@@ -163,7 +163,7 @@ export const Step3_Workbook: Story = {
     const canvas = within(canvasElement);
     await step('Wait for workbook to load', async () => {
       await waitFor(() => {
-        canvas.getByText(/Japanese/i);
+        expect(canvas.getAllByText(/Japanese/i).length).toBeGreaterThan(0);
       }, { timeout: 8000 });
     });
     await step('Student interacts with graded content', async () => {

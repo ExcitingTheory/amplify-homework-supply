@@ -170,21 +170,41 @@ export default function AIContentCompletionPlugin() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let completion = '';
+      let buffer = '';
 
       console.log('Starting to stream response...');
       
-      // Stream the response
+      // Stream the AI SDK data stream protocol response
+      // Format: each line is TYPE_CODE:JSON_PAYLOAD\n
+      // 0: = text chunk (JSON-encoded string)
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value, { stream: true });
-        completion += chunk;
+        buffer += decoder.decode(value, { stream: true });
         
-        console.log('Streaming chunk, total length:', completion.length);
+        // Process complete lines
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // Keep incomplete line in buffer
         
-        // Update suggestion in real-time as we stream
-        updateSuggestion(completion);
+        for (const line of lines) {
+          if (!line) continue;
+          // AI SDK data stream: "0:..." for text chunks
+          if (line.startsWith('0:')) {
+            try {
+              const text = JSON.parse(line.slice(2));
+              completion += text;
+            } catch {
+              // Skip unparseable lines
+            }
+          }
+        }
+        
+        if (completion) {
+          console.log('Streaming chunk, total length:', completion.length);
+          // Update suggestion in real-time as we stream
+          updateSuggestion(completion);
+        }
       }
       
       if (!completion) {

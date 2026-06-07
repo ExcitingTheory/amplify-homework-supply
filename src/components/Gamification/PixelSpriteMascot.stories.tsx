@@ -5,7 +5,6 @@ import { PixelSpriteMascot } from './PixelSpriteMascot'
 const meta: Meta<typeof PixelSpriteMascot> = {
   title: '🏆 Gamification/Easter Eggs/Pixel Sprite Mascot',
   component: PixelSpriteMascot,
-  tags: ['autodocs'],
   argTypes: {
     stage: { control: { type: 'range', min: 1, max: 5 } },
     size: { control: { type: 'range', min: 32, max: 200 } },

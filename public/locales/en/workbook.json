@@ -10,12 +10,14 @@
       "correct": "Correct!",
       "incorrect": "Try again"
     },
+    "inputMethodSelector": "Input method",
     "inputMethods": {
       "audio": "Audio",
       "text": "Text",
       "writing": "Writing"
     },
     "noDictionaryAvailable": "No Dictionary Available",
+    "placeholder": "Enter answer here",
     "submit": "Submit"
   },
   "toolBarRoPlugin": {

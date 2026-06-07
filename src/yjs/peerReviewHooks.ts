@@ -30,6 +30,7 @@ export interface UsePeerReviewRoomOptions {
 export interface UsePeerReviewRoomReturn {
   provider: PeerReviewRoomProvider | null
   messages: RoomMessage[]
+  retractedIds: Set<string>
   roomState: RoomState | null
   peers: PeerReviewUser[]
   typingPeers: PeerReviewUser[]
@@ -64,6 +65,7 @@ export function usePeerReviewRoom(
 
   const providerRef = useRef<PeerReviewRoomProvider | null>(null)
   const [messages, setMessages] = useState<RoomMessage[]>([])
+  const [retractedIds, setRetractedIds] = useState<Set<string>>(new Set())
   const [roomState, setRoomState] = useState<RoomState | null>(null)
   const [peers, setPeers] = useState<PeerReviewUser[]>([])
   const [typingPeers, setTypingPeers] = useState<PeerReviewUser[]>([])

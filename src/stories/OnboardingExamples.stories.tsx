@@ -32,7 +32,6 @@ import { useCompleteTask, useTrackTask, useOnboardingStatus } from '../../.story
 
 const meta: Meta = {
   title: '🏠 Getting Started/Onboarding/Task Completion Examples',
-  tags: ['autodocs'],
 };
 
 export default meta;

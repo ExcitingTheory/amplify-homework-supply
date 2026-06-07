@@ -30,7 +30,7 @@ export default function SubmissionCountdown({ countdown, onCancel, onSubmitNow }
       </Typography>
       <Button
         variant="contained"
-        color="primary"
+        color="warning"
         size="small"
         onClick={onSubmitNow}
       >

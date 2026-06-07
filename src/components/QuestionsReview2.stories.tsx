@@ -131,7 +131,6 @@ Enhanced questions review panel for PDF analysis with modern UX improvements.
             },
         },
     },
-    tags: ['autodocs'],
     decorators: [
         (Story) => (
             <Box>

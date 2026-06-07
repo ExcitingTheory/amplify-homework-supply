@@ -170,6 +170,37 @@ export function GradedWorkbookViewer({
   maxHeight,
 }: GradedWorkbookViewerProps) {
   const [selectedAttempt, setSelectedAttempt] = React.useState(0)
+  const [gutterWidth, setGutterWidth] = React.useState(320)
+  const isDraggingRef = React.useRef(false)
+  const startXRef = React.useRef(0)
+  const startWidthRef = React.useRef(320)
+
+  const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
+    isDraggingRef.current = true
+    startXRef.current = e.clientX
+    startWidthRef.current = gutterWidth
+    e.preventDefault()
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      const delta = startXRef.current - moveEvent.clientX
+      const newWidth = Math.max(200, Math.min(600, startWidthRef.current + delta))
+      setGutterWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [gutterWidth])
 
   const currentGrade = grades[selectedAttempt]
 
@@ -378,8 +409,34 @@ export function GradedWorkbookViewer({
           </DndWrapper>
         </Paper>
 
+        {/* Resize handle */}
+        <Box
+          onMouseDown={handleMouseDown}
+          sx={{
+            width: 8,
+            flexShrink: 0,
+            cursor: 'col-resize',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 1,
+            transition: 'background-color 0.15s',
+            '&:hover': { backgroundColor: 'action.hover' },
+            '&:active': { backgroundColor: 'action.selected' },
+          }}
+        >
+          <Box
+            sx={{
+              width: 4,
+              height: 32,
+              borderRadius: 2,
+              backgroundColor: 'divider',
+            }}
+          />
+        </Box>
+
         {/* Gutter annotations sidebar */}
-        <Box sx={{ width: 320, flexShrink: 0, overflow: 'auto', maxHeight: maxHeight || '70vh' }}>
+        <Box sx={{ width: gutterWidth, flexShrink: 0, overflow: 'auto', maxHeight: maxHeight || '70vh' }}>
           <GutterAnnotations
             wrongAnswersByBlock={wrongAnswersByBlock}
             currentAttempt={selectedAttempt}

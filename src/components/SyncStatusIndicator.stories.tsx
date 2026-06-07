@@ -18,7 +18,6 @@ const meta: Meta<typeof SyncStatusIndicator> = {
       },
     },
   },
-  tags: ['autodocs'],
   decorators: [
     (Story) => (
       <Box sx={{ p: 4 }}>

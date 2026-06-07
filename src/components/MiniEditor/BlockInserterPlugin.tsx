@@ -145,7 +145,7 @@ export default function BlockInserterPlugin({ anchorElem }: BlockInserterPluginP
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
   const [filter, setFilter] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [buttonEl, setButtonEl] = useState<HTMLButtonElement | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const currentNodeKeyRef = useRef<string | null>(null)
 
@@ -160,6 +160,13 @@ export default function BlockInserterPlugin({ anchorElem }: BlockInserterPluginP
 
       const anchor = selection.anchor
       const node = anchor.getNode()
+
+      // Root/shadow-root nodes cannot call getTopLevelElementOrThrow
+      if ($isRootOrShadowRoot(node)) {
+        setVisible(false)
+        return
+      }
+
       const topElement = node.getTopLevelElementOrThrow()
       const textContent = topElement.getTextContent()
 
@@ -338,7 +345,7 @@ export default function BlockInserterPlugin({ anchorElem }: BlockInserterPluginP
       {/* Hover-reveal + button */}
       <Fade in={visible && !menuOpen}>
         <IconButton
-          ref={buttonRef}
+          ref={setButtonEl}
           size="small"
           onClick={() => {
             setMenuOpen(true)
@@ -365,7 +372,7 @@ export default function BlockInserterPlugin({ anchorElem }: BlockInserterPluginP
       {/* Block menu popup */}
       <Popper
         open={menuOpen}
-        anchorEl={buttonRef.current}
+        anchorEl={buttonEl}
         placement="bottom-start"
         transition
         sx={{ zIndex: 1300 }}

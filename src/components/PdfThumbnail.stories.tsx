@@ -18,7 +18,6 @@ const meta: Meta<typeof PdfThumbnail> = {
             },
         },
     },
-    tags: ['autodocs'],
 };
 
 export default meta;

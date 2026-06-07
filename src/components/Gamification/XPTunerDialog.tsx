@@ -53,6 +53,9 @@ export interface XPTunerConfig {
   avatarUnlocks?: AvatarUnlockConfig
 }
 
+// Stable default to avoid infinite render loops from new {} on each render
+const EMPTY_CONFIG: XPTunerConfig = {}
+
 /** @deprecated Use XPTunerConfig instead */
 export type XPMultiplierConfig = XPTunerConfig
 
@@ -190,7 +193,7 @@ const SLIDER_MARKS = [
 export function XPTunerDialog({
   open,
   onClose,
-  config = {},
+  config = EMPTY_CONFIG,
   onSave,
   sectionName,
   unitCount = 0,
@@ -670,7 +673,7 @@ export interface XPTunerInlineProps {
 }
 
 export function XPTunerInline({
-  config = {},
+  config = EMPTY_CONFIG,
   onSave,
   sectionName,
   unitCount = 0,

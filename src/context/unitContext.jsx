@@ -448,19 +448,22 @@ const UnitProvider = ({ children, id }) => {
 
         // Moderate async — backend fetches _version and writes to Grade.moderation
         if (gradeId) {
-          moderateContent(data, { modelName: "Grade", recordId: gradeId }).then(
-            (result) => {
-              if (result.flagged) {
-                console.warn(
-                  "[UnitContext] Student submission flagged by moderation, saving for instructor review",
-                  {
-                    categories: result.categories,
-                    username: user?.attributes?.sub,
-                  },
-                );
-              }
-            },
-          );
+          moderateContent(data, {
+            modelName: "Grade",
+            recordId: gradeId,
+            sectionId,
+            ownerId: user?.attributes?.sub,
+          }).then((result) => {
+            if (result.flagged) {
+              console.warn(
+                "[UnitContext] Student submission flagged by moderation, saving for instructor review",
+                {
+                  categories: result.categories,
+                  username: user?.attributes?.sub,
+                },
+              );
+            }
+          });
         }
         if (unitIsComplete && !timeLimitSeconds) {
           dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
@@ -1220,6 +1223,8 @@ const UnitProvider = ({ children, id }) => {
         moderateContent(newContent, {
           modelName: "Unit",
           recordId: currentUnit.id,
+          sectionId,
+          ownerId: user?.attributes?.sub,
         }).then((result) => {
           if (result.flagged) {
             console.warn(
@@ -1478,6 +1483,8 @@ const UnitProvider = ({ children, id }) => {
           moderateContent(data, {
             modelName: "Grade",
             recordId: state.grade.id,
+            sectionId,
+            ownerId: user?.attributes?.sub,
           }).then((result) => {
             if (result.flagged) {
               console.warn(

@@ -5,7 +5,6 @@ import { CosmeticSelector } from './CosmeticSelector'
 const meta: Meta<typeof CosmeticSelector> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Cosmetic Selector',
   component: CosmeticSelector,
-  tags: ['autodocs'],
 }
 export default meta
 

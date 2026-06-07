@@ -7,7 +7,6 @@ import Stack from '@mui/material/Stack'
 const meta: Meta<typeof SquadMentionPill> = {
   title: 'Gamification/SquadMentionPill',
   component: SquadMentionPill,
-  tags: ['autodocs'],
   args: {
     squadId: 'squad-alpha-001',
     squadName: 'Iron Dragons',

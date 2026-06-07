@@ -9,7 +9,6 @@ import { LogEntry } from '../../utils/debug/DebugLogger';
 const meta: Meta<typeof LogViewer> = {
   title: '🛠️ Developer Tools/Debug Panel/Log Viewer',
   component: LogViewer,
-  tags: ['autodocs'],
 };
 
 export default meta;

@@ -410,6 +410,7 @@ export default function PlaylistEditor({
                     }}
                     pageSizeOptions={[5, 10, 100]}
                     checkboxSelection
+                    rowSelectionModel={gridSelection}
                     onRowSelectionModelChange={(e) => {
                         console.log('onRowSelectionModelChange', e);
                         setGridSelection(e)

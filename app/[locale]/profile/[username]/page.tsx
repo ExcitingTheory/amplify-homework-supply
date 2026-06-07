@@ -204,7 +204,7 @@ export default async function ProfilePage({ params }: Props) {
             <Typography variant="h5" gutterBottom>
               {t("profile.badges" as any)}
             </Typography>
-            <BadgeShelf earnedBadges={earnedBadges} columns={3} earnedOnly />
+            <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
           </Card>
 
           {/* Unlock Roadmap (live lock state — client component) */}
