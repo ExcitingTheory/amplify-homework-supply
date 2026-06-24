@@ -38,6 +38,12 @@ import {
   CreateGroupCommand,
   AdminAddUserToGroupCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  BatchWriteItemCommand,
+} from "@aws-sdk/client-dynamodb";
+import { AppSyncClient, ListDataSourcesCommand, ListGraphqlApisCommand } from "@aws-sdk/client-appsync";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -82,134 +88,142 @@ function unwrap<T>(
 }
 
 // ========================================================================
-// WIPE ALL DATA — delete every record from every model before seeding
+// WIPE ALL DATA — delete directly from DynamoDB (bypasses AppSync versioned
+// data source which blocks deletes via GraphQL due to _version requirement)
 // ========================================================================
 
+// Initialize DynamoDB client
+const dynamoClient = new DynamoDBClient({ region });
+
 async function wipeAllData() {
-  console.log("🗑️  Wiping all existing data...");
+  console.log("🗑️  Wiping all existing data via DynamoDB...");
 
-  // Order matters: delete join tables and dependents first to avoid orphan issues
-  const modelNames = [
-    // Join tables first
-    "QuestionUnit",
-    "QuestionWord",
-    "QuestionFile",
-    "UnitDocument",
-    "UnitFile",
-    "UnitWord",
-    "WordFile",
-    "AssistantChatFile",
-    "DocumentQuestion",
-    "DocumentWord",
-    // Dependents
-    "Grade",
-    "Assignment",
-    "WorkbookComment",
-    "ParsedContent",
-    "StudentXPLog",
-    "SectionProgress",
-    "SquadMessage",
-    "Notification",
-    "AgentJob",
-    "AIFeedback",
-    "PracticeSession",
-    "CollaboratorAccess",
-    "EasterEgg",
-    "StudentMemory",
-    // Core models
-    "Document",
-    "File",
-    "Question",
-    "Word",
-    "Unit",
-    "Section",
-    "HomeworkRoom",
-    "AssistantChat",
-    "Badge",
-    "GroupChallenge",
-    "Skill",
-    "Squad",
-    "StudentProfile",
-    "Settings",
-    "PlatformSettings",
-    "AnalyticsSummary",
-  ] as const;
+  // Use AppSync ListDataSources to find the exact DynamoDB tables for THIS API.
+  // This is safe because we resolve the API ID from the endpoint URL in
+  // amplify_outputs.json, guaranteeing we only touch the current sandbox's tables.
+  const apiUrl = outputs.data?.url || "";
+  if (!apiUrl) {
+    console.log(
+      "  ⚠️  No API URL in amplify_outputs.json — skipping wipe",
+    );
+    return;
+  }
 
-  for (const modelName of modelNames) {
-    try {
-      const model = (client.models as any)[modelName];
-      if (!model?.list) {
-        console.log(`  ⏭️  ${modelName} — no list method, skipping`);
-        continue;
+  // The URL subdomain is NOT the API ID. List APIs and match by endpoint.
+  const appsyncClient = new AppSyncClient({ region });
+  let apiId = "";
+  let apisNextToken: string | undefined;
+
+  do {
+    const resp = await appsyncClient.send(
+      new ListGraphqlApisCommand({ nextToken: apisNextToken, maxResults: 25 }),
+    );
+    for (const api of resp.graphqlApis || []) {
+      if (api.uris?.GRAPHQL && apiUrl.startsWith(api.uris.GRAPHQL.replace(/\/graphql$/, ""))) {
+        apiId = api.apiId || "";
+        break;
       }
+    }
+    if (apiId) break;
+    apisNextToken = resp.nextToken;
+  } while (apisNextToken);
 
-      let deleted = 0;
-      let nextToken: string | undefined;
+  if (!apiId) {
+    console.log(
+      `  ⚠️  Could not find AppSync API matching ${apiUrl.slice(0, 40)}... — skipping wipe`,
+    );
+    return;
+  }
 
-      process.stdout.write(`  ${modelName} `);
+  const sandboxTables: string[] = [];
+  let nextToken: string | undefined;
 
-      // Page through all records
-      do {
-        const { data: items, nextToken: nt } = await model.list({
-          limit: 100,
-          ...(nextToken ? { nextToken } : {}),
-        });
-        nextToken = nt;
+  do {
+    const resp = await appsyncClient.send(
+      new ListDataSourcesCommand({ apiId, nextToken, maxResults: 25 }),
+    );
+    for (const ds of resp.dataSources || []) {
+      const tableName = ds.dynamodbConfig?.tableName;
+      if (tableName) sandboxTables.push(tableName);
+    }
+    nextToken = resp.nextToken;
+  } while (nextToken);
 
-        const validItems = (items || []).filter(
-          (item: any) => item != null && item.id != null,
-        );
+  console.log(
+    `  Found ${sandboxTables.length} DynamoDB tables for API ${apiId.slice(0, 8)}...`,
+  );
 
-        // Batch deletes in parallel (groups of 25)
-        for (let i = 0; i < validItems.length; i += 25) {
-          const batch = validItems.slice(i, i + 25);
-          await Promise.all(
-            batch.map(async (item: any) => {
-              try {
-                await model.delete({
-                  id: item.id,
-                  _version: item._version,
-                });
-                deleted++;
-              } catch (e: any) {
-                // Log delete errors for debugging
-                console.warn(
-                  `\n    ⚠ delete ${modelName}/${item.id} failed: ${e.message || e}`,
-                );
-              }
+  if (sandboxTables.length === 0) {
+    console.log("  ⚠️  No tables found — skipping wipe");
+    return;
+  }
+
+  let totalDeleted = 0;
+
+  for (const tableName of sandboxTables) {
+    const shortName = tableName.split("-")[0]; // Model name prefix
+    let deleted = 0;
+    let lastKey: Record<string, any> | undefined;
+
+    process.stdout.write(`  ${shortName} `);
+
+    // Scan all items and delete in batches of 25
+    do {
+      const scanResp = await dynamoClient.send(
+        new ScanCommand({
+          TableName: tableName,
+          ProjectionExpression: "id",
+          ExclusiveStartKey: lastKey,
+          Limit: 500,
+        }),
+      );
+      lastKey = scanResp.LastEvaluatedKey;
+
+      const items = scanResp.Items || [];
+      if (items.length === 0) break;
+
+      // BatchWriteItem supports max 25 items per request
+      for (let i = 0; i < items.length; i += 25) {
+        const batch = items.slice(i, i + 25);
+        const deleteRequests = batch.map((item) => ({
+          DeleteRequest: { Key: { id: item.id } },
+        }));
+
+        try {
+          await dynamoClient.send(
+            new BatchWriteItemCommand({
+              RequestItems: { [tableName]: deleteRequests },
             }),
           );
-          process.stdout.write(".");
+          deleted += batch.length;
+        } catch (e: any) {
+          // Some tables might have composite keys — skip gracefully
+          if (e.name === "ValidationException") {
+            process.stdout.write("(skip-composite) ");
+            break;
+          }
+          throw e;
         }
-      } while (nextToken);
-
-      if (deleted > 0) {
-        console.log(` ✓ ${deleted}`);
-      } else {
-        console.log(" (empty)");
+        process.stdout.write(".");
       }
-    } catch (e: any) {
-      console.log(`\n  ⚠️  ${modelName} — error: ${e.message || e}`);
+    } while (lastKey);
+
+    if (deleted > 0) {
+      console.log(` ✓ ${deleted}`);
+      totalDeleted += deleted;
+    } else {
+      console.log(" (empty)");
     }
   }
 
-  console.log("✅ Wipe complete\n");
+  console.log(`✅ Wipe complete — ${totalDeleted} records deleted\n`);
 }
 
-// Sign in as admin to wipe (needs broad permissions)
-console.log("🔐 Signing in as admin for data wipe...");
+console.log("🔐 Wiping all data directly from DynamoDB...");
 try {
-  await signInUser({
-    username: "admin@example.com",
-    password,
-    signInFlow: "Password",
-  });
   await wipeAllData();
-  await signOut();
 } catch (e: any) {
-  console.log(
-    `⚠️  Could not wipe data (admin login failed: ${e.message}). Continuing with seed...`,
-  );
+  console.log(`⚠️  Wipe error: ${e.message}. Continuing with seed...`);
 }
 
 console.log("🌱 Starting seed data generation...");

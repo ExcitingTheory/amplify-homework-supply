@@ -554,9 +554,7 @@ const schema = a
 
     Unit: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -564,6 +562,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -613,7 +612,7 @@ const schema = a
         // Owners (creators - typically Instructors) have full control
         allow.owner(),
         // Admins have full access
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Instructors can create new units
         allow.group("Instructors").to(["create"]),
         // Learners can read all units (for published/assigned content)
@@ -624,12 +623,11 @@ const schema = a
 
     Assignment: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         dueDate: a.datetime(),
+        unlockDate: a.datetime(),
         status: PublishedStatus,
         // Foreign keys for relationships
         sectionID: a
@@ -637,6 +635,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a
@@ -644,6 +643,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         section: a.belongsTo("Section", ["sectionID"]),
@@ -660,6 +660,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
       })
@@ -667,7 +668,7 @@ const schema = a
         // Student owns their assignment
         allow.owner(),
         // Admins have full access
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Instructors and Learners have access based on section membership
         allow.group("Instructors"),
         allow.group("Learners").to(["read"]),
@@ -677,15 +678,14 @@ const schema = a
 
     Grade: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Completion tracking
@@ -715,6 +715,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
@@ -735,7 +736,7 @@ const schema = a
         // Student owns their grade
         allow.owner(),
         // Admins have full access
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Dynamic group authorization: only instructors of the section can read/update
         // Single group with access to this grade
         allow.groupDefinedIn("instructorGroup").to(["read", "update"]),
@@ -745,9 +746,7 @@ const schema = a
 
     Section: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         name: a.string(),
@@ -773,6 +772,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -808,7 +808,7 @@ const schema = a
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.group("Learners").to(["read"]),
         allow.authenticated().to(["read"]), // Allow authenticated users to find sections by code
@@ -822,9 +822,7 @@ const schema = a
 
     Question: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -832,6 +830,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -871,7 +870,7 @@ const schema = a
       .authorization((allow) => [
         allow.owner(),
         allow.group("Learners").to(["read"]),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
       ]),
 
     /**
@@ -900,9 +899,7 @@ const schema = a
      * 4. Associate: Create join record (UnitFile, WordFile, etc.)
      */ File: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, controls Data model access
@@ -912,13 +909,14 @@ const schema = a
             allow.owner().to(["create", "read", "delete"]),
             allow.group("Instructors").to(["create", "read"]),
             allow.group("Learners").to(["read"]),
-            allow.group("Admins").to(["create", "read"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
           ]),
         identityId: a
           .string()
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]), // Cognito Identity ID for protected/{identityId}/* paths
         // File metadata
@@ -936,6 +934,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]), // Full S3 path (e.g., "public/units/file-123.json"),
         size: a.integer(),
@@ -974,16 +973,14 @@ const schema = a
         // Learners can read files (for embedded content, shared resources)
         allow.group("Learners").to(["read"]),
         // Admins have full access
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Note: Lambda function access (openai, documentAnalysis, embeddings, mediaConvert)
         // is granted via schema-level .authorization() - see bottom of schema definition
       ]),
 
     Word: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -991,6 +988,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -1022,7 +1020,7 @@ const schema = a
       .authorization((allow) => [
         allow.owner(),
         allow.group("Learners").to(["read"]),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
       ]),
 
     // ========================================================================
@@ -1031,15 +1029,14 @@ const schema = a
 
     UnitFile: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a
@@ -1047,6 +1044,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
@@ -1055,24 +1053,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     UnitWord: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a
@@ -1080,6 +1078,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
@@ -1088,24 +1087,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     QuestionUnit: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         questionID: a
@@ -1113,6 +1112,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         question: a.belongsTo("Question", ["questionID"]),
@@ -1121,24 +1121,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     UnitDocument: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a
@@ -1146,6 +1146,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
@@ -1154,24 +1155,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         document: a.belongsTo("Document", ["documentID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     QuestionFile: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         questionID: a
@@ -1179,6 +1180,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         question: a.belongsTo("Question", ["questionID"]),
@@ -1187,24 +1189,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     WordFile: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         wordID: a
@@ -1212,6 +1214,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         word: a.belongsTo("Word", ["wordID"]),
@@ -1220,24 +1223,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     QuestionWord: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         questionID: a
@@ -1245,6 +1248,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         question: a.belongsTo("Question", ["questionID"]),
@@ -1253,24 +1257,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     DocumentWord: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         documentID: a
@@ -1278,6 +1282,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         document: a.belongsTo("Document", ["documentID"]),
@@ -1286,24 +1291,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     DocumentQuestion: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         documentID: a
@@ -1311,6 +1316,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         document: a.belongsTo("Document", ["documentID"]),
@@ -1319,24 +1325,24 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         question: a.belongsTo("Question", ["questionID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     AssistantChatFile: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         chatID: a
@@ -1344,6 +1350,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         chat: a.belongsTo("AssistantChat", ["chatID"]),
@@ -1352,12 +1359,13 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     // ========================================================================
     // COLLABORATION MODELS
@@ -1371,9 +1379,7 @@ const schema = a
      */
     CollaboratorAccess: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // The unit being shared
@@ -1382,6 +1388,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unit: a.belongsTo("Unit", ["unitID"]),
@@ -1391,6 +1398,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Who granted the access
@@ -1399,6 +1407,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Permission level
@@ -1410,12 +1419,13 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read"]),
       ]),
 
@@ -1445,9 +1455,7 @@ const schema = a
      * - Admins have full access
      */ Document: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, tracks document creator
@@ -1455,6 +1463,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -1473,6 +1482,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         s3Key: a
@@ -1480,6 +1490,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         status: a
@@ -1487,6 +1498,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
         // Content (full text stored in S3: private/{identityId}/documents/{id}/extracted-text.txt)
@@ -1518,7 +1530,7 @@ const schema = a
         // Document owner (student) can manage their documents
         allow.owner(),
         // Admins have full access
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Instructors can create and manage documents
         allow.group("Instructors"),
         // Learners can read documents (section-based access controlled by Lambda/client-side)
@@ -1531,9 +1543,7 @@ const schema = a
 
     ParsedContent: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -1541,6 +1551,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -1550,6 +1561,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         document: a.belongsTo("Document", ["documentID"]),
@@ -1574,22 +1586,21 @@ const schema = a
       .authorization((allow) => [
         allow.owner(),
         allow.group("Learners").to(["read"]),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         // Note: Lambda function access (documentAnalysis, embeddings)
         // is granted via schema-level .authorization() - see bottom of schema definition
       ]),
 
     AgentJob: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Job tracking
@@ -1598,6 +1609,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]), // pdf_analysis, exercise_generation, vocabulary_extraction
         status: a
@@ -1605,6 +1617,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]), // queued, processing, completed, failed, cancelled
         // Foreign keys
@@ -1629,7 +1642,7 @@ const schema = a
       .authorization((allow) => [
         allow.owner(),
         allow.group("Learners").to(["read"]),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated(),
       ]),
 
@@ -1639,9 +1652,7 @@ const schema = a
 
     AssistantChat: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -1649,6 +1660,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Record type: "chat" (default) or "memory" (aggregated conversation memory)
@@ -1693,7 +1705,7 @@ const schema = a
       .secondaryIndexes((index) => [
         index("unitID").sortKeys(["type"]).name("byUnit"),
       ])
-      .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
 
     // ========================================================================
     // USER & SETTINGS MODELS
@@ -1701,9 +1713,7 @@ const schema = a
 
     Settings: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -1711,6 +1721,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -1744,29 +1755,31 @@ const schema = a
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated(),
       ]),
 
     Notification: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         recipientId: a
           .string()
           .required()
           .authorization((allow) => [
-            allow
-              .ownerDefinedIn("recipientId")
-              .to(["create", "read", "delete"]),
-            allow.group("Admins").to(["create", "read"]),
+            allow.authenticated().to(["read"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
           ]),
         type: NotificationType,
         category: NotificationCategory,
-        title: a.string().required(),
+        title: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.authenticated().to(["read"]),
+            allow.group("Admins").to(["create", "read"]),
+          ]),
         body: a.string(),
         linkPath: a.string(),
         linkLabel: a.string(),
@@ -1784,14 +1797,12 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.ownerDefinedIn("recipientId"),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
       ]),
 
     AIFeedback: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
@@ -1799,6 +1810,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         identityId: a.string(),
@@ -1821,7 +1833,7 @@ const schema = a
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated(),
       ]),
 
@@ -1831,15 +1843,14 @@ const schema = a
 
     WorkbookComment: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         gradeId: a
@@ -1847,6 +1858,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         blockId: a
@@ -1854,6 +1866,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         threadId: a
@@ -1861,6 +1874,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         content: a
@@ -1868,6 +1882,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         resolved: a.boolean(),
@@ -1878,21 +1893,20 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
       ]),
 
     HomeworkRoom: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         gradeId: a
@@ -1900,6 +1914,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         ownerId: a
@@ -1907,6 +1922,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         sectionID: a.id(), // Section this room belongs to (for same-section validation)
@@ -1926,7 +1942,7 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors").to(["read"]),
         // Invited peers can read the room
         allow.groupDefinedIn("peerGroup").to(["read"]),
@@ -1934,15 +1950,14 @@ const schema = a
 
     StudentXPLog: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         studentId: a
@@ -1950,6 +1965,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         xpAmount: a
@@ -1957,6 +1973,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         accuracy: a.float(),
@@ -1990,22 +2007,21 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read"]),
       ]),
 
     // Aggregate student gamification profile (absorbs 7 models)
     StudentProfile: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         studentId: a
@@ -2013,6 +2029,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         cohortId: a.string(),
@@ -2067,16 +2084,14 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read"]),
       ]),
 
     // Global platform settings — admin-only singleton for all platform-wide configuration
     PlatformSettings: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // === Gamification Feature Defaults ===
@@ -2151,21 +2166,20 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read"]),
       ]),
 
     // Per-student, per-section progress — enables different XP/level/badges per section
     SectionProgress: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         studentId: a
@@ -2173,6 +2187,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         sectionId: a
@@ -2180,6 +2195,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         studentName: a.string(),
@@ -2214,6 +2230,7 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Denormalized avatar config — synced from Settings.metadata on save & rebuild
@@ -2227,21 +2244,20 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read"]),
       ]),
 
     StudentMemory: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         studentId: a
@@ -2249,6 +2265,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a.string(), // null = global memory, set = per-unit memory
@@ -2272,21 +2289,20 @@ const schema = a
       ])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors").to(["read"]),
       ]),
 
     EasterEgg: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
@@ -2295,6 +2311,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         xpReward: a
@@ -2302,6 +2319,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         badgeId: a.string(),
@@ -2310,6 +2328,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         active: a.boolean().default(true),
@@ -2319,22 +2338,21 @@ const schema = a
       })
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.authenticated().to(["read"]),
       ]),
 
     Skill: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         title: a
@@ -2342,6 +2360,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         description: a.string(),
@@ -2354,22 +2373,21 @@ const schema = a
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.authenticated().to(["read"]),
       ]),
 
     Squad: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         name: a
@@ -2377,6 +2395,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         cohortId: a
@@ -2384,6 +2403,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         totalXP: a.integer().default(0),
@@ -2401,21 +2421,20 @@ const schema = a
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.authenticated().to(["read", "create", "update"]),
       ]),
 
     GroupChallenge: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         cohortId: a
@@ -2423,6 +2442,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         title: a
@@ -2430,6 +2450,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         targetXP: a
@@ -2437,6 +2458,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         currentXP: a.integer().default(0),
@@ -2448,6 +2470,7 @@ const schema = a
         stakes: a.string(),
         systemPromptSeed: a.string(),
         chapterOrder: a.integer(),
+        unlockDate: a.datetime(),
         // Image generation
         featuredImage: a.string(),
         bodyImages: a.json(),
@@ -2466,22 +2489,21 @@ const schema = a
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.authenticated().to(["read"]),
       ]),
 
     Badge: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         title: a
@@ -2489,6 +2511,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         description: a.string(),
@@ -2503,7 +2526,7 @@ const schema = a
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.authenticated().to(["read"]),
       ]),
@@ -2514,9 +2537,7 @@ const schema = a
 
     SquadMessage: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         cohortId: a
@@ -2524,6 +2545,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Target squads (one or many)
@@ -2533,6 +2555,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Template with {{SQUAD_NAME}}, {{SQUAD_RIVAL}}, {{SQUAD_XP}} vars
@@ -2541,6 +2564,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         // Hydrated per-squad messages [{squadId, squadName, body}]
@@ -2550,13 +2574,14 @@ const schema = a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
         allow.owner(),
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors"),
         allow.authenticated().to(["read"]),
       ]),
@@ -2567,15 +2592,14 @@ const schema = a
 
     PracticeSession: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         owner: a
           .string()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         unitID: a
@@ -2583,6 +2607,7 @@ const schema = a
           .required()
           .authorization((allow) => [
             allow.owner().to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read", "delete"]),
             allow.authenticated().to(["read"]),
           ]),
         drillType: PracticeDrillType,
@@ -2625,15 +2650,13 @@ const schema = a
 
     AnalyticsSummary: a
       .model({
-        _version: a
-          .integer()
-          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _version: a.integer(),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // ─── Dimension keys ───
-        date: a.date().required(), // YYYY-MM-DD
-        scope: a.string().required(), // "platform" | "section" | "unit" | "squad" | "page" | "geo"
-        scopeId: a.string().required(), // ID of the scoped entity (or "all" / URL path / country code)
+        date: a.date().required(),
+        scope: a.string().required(),
+        scopeId: a.string().required(),
         sectionId: a.string(), // Parent section (for unit/squad/section records)
         unitId: a.string(), // Set when scope = "unit"
         squadId: a.string(), // Set when scope = "squad"
@@ -2684,7 +2707,7 @@ const schema = a
         index("country").sortKeys(["date"]).name("byCountry"),
       ])
       .authorization((allow) => [
-        allow.group("Admins"),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
         allow.group("Instructors").to(["read"]),
       ]),
 
