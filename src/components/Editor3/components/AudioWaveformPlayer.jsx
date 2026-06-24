@@ -16,9 +16,12 @@ import MicLevelIndicator from "./MicLevelIndicator";
 import { useAudioPlayer } from "../context/AudioPlayerContext";
 import { calculateWaveformData } from "../../../utils/calculateWaveformData";
 import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
+import { applyAudioFilters } from "../../../utils/applyAudioFilters";
+import { audioBufferToBlob } from "../../../utils/audioBufferToBlob";
 import { useColorScheme } from "@mui/material/styles";
 import { hexToRgb } from "../../../utils/hexToRgb";
 import FilesContext from "../../../context/fileContext";
+import { getCleanupFilters } from "../../RecordingStudio3/RecordingSettings";
 
 // Module-level cache: avoids redundant fetch+decode when the same URL
 // is rendered by multiple players or across remounts.
@@ -71,6 +74,8 @@ const waveformCache = new Map();
  * @param {string} props.nodeKey - Node key for upload (required if enableRecording is true)
  * @param {Object} props.metadata - Additional metadata for recording upload
  * @param {Function} props.onRecordingComplete - Callback when recording is complete
+ * @param {Set|Array} [props.audioFilters] - Active filter names for filtered playback
+ * @param {string} [props.cleanupStrength] - Pre-submission cleanup strength: 'off'|'light'|'standard'|'aggressive'
  */
 export default function AudioWaveformPlayer({
   audioUrl,
@@ -84,6 +89,8 @@ export default function AudioWaveformPlayer({
   nodeKey,
   metadata = {},
   onRecordingComplete,
+  audioFilters = [],
+  cleanupStrength = "standard",
 }) {
   const t = useTranslations("editor.shared");
   const tEditor = useTranslations("editor");
@@ -127,6 +134,20 @@ export default function AudioWaveformPlayer({
   const [recordedWaveformData, setRecordedWaveformData] = useState(null);
   const [computedWaveformData, setComputedWaveformData] = useState(null);
   const [pendingRecordingStart, setPendingRecordingStart] = useState(false);
+
+  // Filtered playback cache: keyed by `${url}::${sortedFilters}`
+  const filteredBlobCacheRef = useRef(new Map());
+  const [filteredBlobUrl, setFilteredBlobUrl] = useState(null);
+
+  // Cleanup filtered blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      for (const url of filteredBlobCacheRef.current.values()) {
+        URL.revokeObjectURL(url);
+      }
+      filteredBlobCacheRef.current.clear();
+    };
+  }, []);
 
   // Mic preview state (hover to show room noise)
   const [previewing, setPreviewing] = useState(false);
@@ -373,6 +394,14 @@ export default function AudioWaveformPlayer({
   }, [sourceUrl, useLocalAudio, audioPlayer]);
 
   const togglePlayPause = useCallback(async () => {
+    // Normalize audioFilters to a Set
+    const filtersSet =
+      audioFilters instanceof Set
+        ? audioFilters
+        : Array.isArray(audioFilters)
+          ? new Set(audioFilters)
+          : new Set();
+
     // Use local audio for recording playback
     if (useLocalAudio && localAudioRef.current) {
       if (localIsPlaying) {
@@ -388,12 +417,70 @@ export default function AudioWaveformPlayer({
     }
 
     if (!sourceUrl) return;
+
+    // If filters are active, process through OfflineAudioContext
+    if (filtersSet.size > 0) {
+      const cacheKey = `${sourceUrl}::${[...filtersSet].sort().join(",")}`;
+      let processedUrl = filteredBlobCacheRef.current.get(cacheKey);
+
+      if (!processedUrl) {
+        try {
+          const response = await fetch(sourceUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioCtx = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          audioCtx.close();
+
+          const processedBuffer = await applyAudioFilters(
+            audioBuffer,
+            filtersSet,
+          );
+          const processedBlob = await audioBufferToBlob(
+            processedBuffer,
+            "audio/wav",
+          );
+          processedUrl = URL.createObjectURL(processedBlob);
+          filteredBlobCacheRef.current.set(cacheKey, processedUrl);
+          setFilteredBlobUrl(processedUrl);
+        } catch (err) {
+          console.warn(
+            "[AudioWaveformPlayer] Filter processing failed, playing raw:",
+            err,
+          );
+          // Fallback to raw playback
+          if (isPlaying) {
+            audioPlayer.pause();
+          } else {
+            await audioPlayer.play(sourceUrl);
+          }
+          return;
+        }
+      }
+
+      // Play the filtered version
+      if (isPlaying) {
+        audioPlayer.pause();
+      } else {
+        await audioPlayer.play(processedUrl);
+      }
+      return;
+    }
+
     if (isPlaying) {
       audioPlayer.pause();
     } else {
       await audioPlayer.play(sourceUrl);
     }
-  }, [sourceUrl, isPlaying, localIsPlaying, useLocalAudio, audioPlayer]);
+  }, [
+    sourceUrl,
+    isPlaying,
+    localIsPlaying,
+    useLocalAudio,
+    audioPlayer,
+    audioFilters,
+  ]);
 
   const handleSliderChange = useCallback(
     (event, newValue) => {
@@ -487,6 +574,8 @@ export default function AudioWaveformPlayer({
       previewing
     )
       return;
+    // Guard: getUserMedia may not be available in headless/test environments
+    if (!navigator.mediaDevices?.getUserMedia) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       previewStreamRef.current = stream;
@@ -693,7 +782,7 @@ export default function AudioWaveformPlayer({
       audioContext.close();
       // Use the recorder's actual mimeType so decodeAudioData gets a valid container
       const actualMimeType = recorder.mimeType || "audio/webm";
-      const blob = new Blob(audioChunks, { type: actualMimeType });
+      let blob = new Blob(audioChunks, { type: actualMimeType });
 
       // Decode audio to get accurate duration (WebM blobs report Infinity via Audio element)
       try {
@@ -708,6 +797,32 @@ export default function AudioWaveformPlayer({
           setLocalDuration(realDuration);
         }
         decodeCtx.close();
+
+        // Pre-submission cleanup: apply filters based on cleanupStrength setting
+        // Per-file settings override the user-level default (from RecordingStudio3)
+        // TTS recordings are already clean — skip for type==='tts' (checked by parent)
+        const effectiveStrength =
+          file?.settings?.audioCleanupStrength || cleanupStrength;
+        if (enableRecording && effectiveStrength !== "off") {
+          try {
+            const cleanupFilters = getCleanupFilters(effectiveStrength);
+            const processedBuffer = await applyAudioFilters(
+              audioBuffer,
+              cleanupFilters,
+            );
+            const processedBlob = await audioBufferToBlob(
+              processedBuffer,
+              "audio/wav",
+            );
+            blob = processedBlob;
+            console.log("[AudioWaveformPlayer] Pre-submission cleanup applied");
+          } catch (cleanupErr) {
+            console.warn(
+              "[AudioWaveformPlayer] Cleanup failed, using raw recording:",
+              cleanupErr,
+            );
+          }
+        }
       } catch (decodeErr) {
         console.warn(
           "[AudioWaveformPlayer] Duration decode failed:",

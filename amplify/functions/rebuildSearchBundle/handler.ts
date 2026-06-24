@@ -13,6 +13,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const EMBEDDING_DIMENSIONS = 512;
 const EMBEDDING_MODEL = "text-embedding-3-small";
 const IVF_THRESHOLD = 200;
+const HNSW_THRESHOLD = 5000;
 
 // --- Types ---
 
@@ -40,11 +41,20 @@ interface LinearIndex {
   strategy: "linear";
 }
 
+interface HNSWIndex {
+  strategy: "hnsw";
+  M: number;
+  efSearch: number;
+  layers: number[][][];
+  entryPoint: number;
+  nodeLevels: number[];
+}
+
 interface SearchBundle {
   version: number;
   dimensions: number;
   model: string;
-  index: IVFIndex | LinearIndex;
+  index: IVFIndex | LinearIndex | HNSWIndex;
   items: BundleItem[];
 }
 
@@ -152,11 +162,195 @@ function buildIndex(vectors: number[][]): SearchBundle["index"] {
   if (vectors.length <= IVF_THRESHOLD) {
     return { strategy: "linear" };
   }
+  if (vectors.length >= HNSW_THRESHOLD) {
+    return buildHnswIndex(vectors);
+  }
   const k = Math.ceil(Math.sqrt(vectors.length));
   const nProbe = Math.max(2, Math.ceil(k * 0.1));
   const normalized = vectors.map(l2Normalize);
   const { centroids, assignments } = runKMeans(normalized, k);
   return { strategy: "ivf", k, nProbe, centroids, assignments };
+}
+
+// ─── HNSW Graph Builder ───────────────────────────────────────────────────────
+
+/**
+ * Build an HNSW (Hierarchical Navigable Small World) graph for ANN search.
+ * Used for platform-wide bundles with >5000 items.
+ *
+ * Parameters:
+ *   M = 16 (max connections per node per layer)
+ *   efConstruction = 200 (beam width during build)
+ *   mL = 1/ln(M) (level generation factor)
+ */
+function buildHnswIndex(
+  vectors: number[][],
+  M = 16,
+  efConstruction = 200,
+): HNSWIndex {
+  const n = vectors.length;
+  const mL = 1.0 / Math.log(M);
+  const efSearch = 50;
+
+  // Normalize all vectors
+  const normalized = vectors.map(l2Normalize);
+
+  // Assign random levels to each node
+  const nodeLevels: number[] = [];
+  let maxLevel = 0;
+  for (let i = 0; i < n; i++) {
+    const level = Math.floor(-Math.log(Math.random()) * mL);
+    nodeLevels.push(level);
+    if (level > maxLevel) maxLevel = level;
+  }
+
+  // Initialize layers: layers[level][nodeIndex] = neighbors
+  const layers: number[][][] = [];
+  for (let l = 0; l <= maxLevel; l++) {
+    layers.push(Array.from({ length: n }, () => []));
+  }
+
+  let entryPoint = 0;
+  let entryLevel = nodeLevels[0];
+
+  // Insert nodes one by one
+  for (let i = 1; i < n; i++) {
+    const nodeLevel = nodeLevels[i];
+    let currEntry = entryPoint;
+
+    // Greedy descent from top to nodeLevel+1
+    for (let level = entryLevel; level > nodeLevel; level--) {
+      currEntry = greedyClosest(
+        normalized[i],
+        normalized,
+        layers[level],
+        currEntry,
+      );
+    }
+
+    // Insert at each level from min(nodeLevel, entryLevel) down to 0
+    const startLevel = Math.min(nodeLevel, entryLevel);
+    let entryPoints = [currEntry];
+
+    for (let level = startLevel; level >= 0; level--) {
+      // Find efConstruction nearest neighbors at this level
+      const nearest = searchLayerBuild(
+        normalized[i],
+        normalized,
+        layers[level],
+        entryPoints,
+        efConstruction,
+      );
+
+      // Select M best neighbors
+      const neighbors = nearest.slice(0, M).map((n) => n.idx);
+
+      // Add bidirectional edges
+      layers[level][i] = neighbors;
+      for (const neighborIdx of neighbors) {
+        const nNeighbors = layers[level][neighborIdx];
+        nNeighbors.push(i);
+        // Prune if exceeding M connections
+        if (nNeighbors.length > M) {
+          // Keep only M closest
+          const scored = nNeighbors.map((idx) => ({
+            idx,
+            score: dotProduct(normalized[neighborIdx], normalized[idx]),
+          }));
+          scored.sort((a, b) => b.score - a.score);
+          layers[level][neighborIdx] = scored.slice(0, M).map((s) => s.idx);
+        }
+      }
+
+      // Entry points for next level down
+      entryPoints = nearest.map((n) => n.idx);
+    }
+
+    // Update entry point if new node has higher level
+    if (nodeLevel > entryLevel) {
+      entryPoint = i;
+      entryLevel = nodeLevel;
+    }
+  }
+
+  return {
+    strategy: "hnsw",
+    M,
+    efSearch,
+    layers,
+    entryPoint,
+    nodeLevels,
+  };
+}
+
+function greedyClosest(
+  query: number[],
+  allVectors: number[][],
+  layerNeighbors: number[][],
+  start: number,
+): number {
+  let current = start;
+  let bestScore = dotProduct(query, allVectors[current]);
+
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (const neighbor of layerNeighbors[current] || []) {
+      const score = dotProduct(query, allVectors[neighbor]);
+      if (score > bestScore) {
+        bestScore = score;
+        current = neighbor;
+        improved = true;
+      }
+    }
+  }
+  return current;
+}
+
+function searchLayerBuild(
+  query: number[],
+  allVectors: number[][],
+  layerNeighbors: number[][],
+  entryPoints: number[],
+  ef: number,
+): Array<{ idx: number; score: number }> {
+  const visited = new Set<number>(entryPoints);
+  const candidates: Array<{ idx: number; score: number }> = [];
+  const results: Array<{ idx: number; score: number }> = [];
+
+  for (const ep of entryPoints) {
+    const score = dotProduct(query, allVectors[ep]);
+    candidates.push({ idx: ep, score });
+    results.push({ idx: ep, score });
+  }
+
+  candidates.sort((a, b) => b.score - a.score);
+  results.sort((a, b) => b.score - a.score);
+
+  while (candidates.length > 0) {
+    const current = candidates.shift()!;
+    if (
+      results.length >= ef &&
+      current.score < results[results.length - 1].score
+    )
+      break;
+
+    for (const neighborIdx of layerNeighbors[current.idx] || []) {
+      if (visited.has(neighborIdx)) continue;
+      visited.add(neighborIdx);
+
+      const score = dotProduct(query, allVectors[neighborIdx]);
+      if (results.length < ef || score > results[results.length - 1].score) {
+        candidates.push({ idx: neighborIdx, score });
+        results.push({ idx: neighborIdx, score });
+        results.sort((a, b) => b.score - a.score);
+        if (results.length > ef) results.pop();
+        candidates.sort((a, b) => b.score - a.score);
+      }
+    }
+  }
+
+  return results;
 }
 
 // --- S3 Helpers ---
@@ -405,6 +599,54 @@ export const handler: Handler<LambdaEvent> = async (event) => {
         await writeS3JSON(unitBundleKey, unitBundle);
         console.log(
           `[rebuildSearchBundle] Unit bundle: ${uid} (${unitBundle.items.length} items)`,
+        );
+      }
+
+      // Build platform-wide admin search bundle (all instructors' content)
+      try {
+        const allInstructorPrefixes = await listS3Prefix(`private/`);
+        const allItems: BundleItem[] = [...bundle.items]; // Start with current instructor's items
+
+        // Collect embeddings from other instructors' bundles
+        for (const prefix of allInstructorPrefixes) {
+          const otherIdentityId = prefix
+            .replace("private/", "")
+            .replace("/", "");
+          if (!otherIdentityId || otherIdentityId === identityId) continue;
+          try {
+            const otherBundleKey = `private/${otherIdentityId}/search-index/instructor.json`;
+            const otherBundle = await readS3JSON(otherBundleKey);
+            if (otherBundle?.items) {
+              allItems.push(...otherBundle.items);
+            }
+          } catch {
+            // Other instructor bundle may not exist — skip
+          }
+        }
+
+        if (allItems.length > 0) {
+          const vectors = allItems.map((item) => l2Normalize(item.embedding));
+          allItems.forEach((item, i) => {
+            item.embedding = vectors[i];
+          });
+          const platformIndex = buildIndex(vectors);
+          const platformBundle: SearchBundle = {
+            version: Date.now(),
+            dimensions: EMBEDDING_DIMENSIONS,
+            model: EMBEDDING_MODEL,
+            index: platformIndex,
+            items: allItems,
+          };
+          const platformBundleKey = `private/unit/search-index/platform.json`;
+          await writeS3JSON(platformBundleKey, platformBundle);
+          console.log(
+            `[rebuildSearchBundle] Platform-wide admin bundle written: ${platformBundleKey} (${allItems.length} items, ${platformBundle.index.strategy})`,
+          );
+        }
+      } catch (platformErr) {
+        console.error(
+          "[rebuildSearchBundle] Platform bundle generation failed:",
+          platformErr,
         );
       }
     }

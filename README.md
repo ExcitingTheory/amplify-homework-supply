@@ -72,3 +72,41 @@ Welcome to the Homework Supply documentation! This directory contains comprehens
 ### Resources
 - **Storybook**: [Component Library](https://main--67e40f1917d7a8ef683541d7.chromatic.com)
 
+## Journey Tests (Playwright)
+
+Run full end-to-end user journeys (including role-based and offline coverage):
+
+```bash
+npm run journeys
+```
+
+Run only offline readiness and sync recovery journey:
+
+```bash
+npm run journeys:offline
+```
+
+Useful variants:
+
+```bash
+npm run journeys:ui
+npm run journeys:headed
+npm run journeys:wait-and-run
+```
+
+Notes:
+- Start the app first with `npm run dev` (or use `journeys:wait-and-run` if already booting).
+- Offline checks rely on Chromium offline emulation and service worker control.
+- Journey definitions and selector reference live in `docs/USER_JOURNEYS.md`.
+- Each journey test now writes a `journey-diagnostics.json` artifact with:
+	- Console logs (all levels)
+	- Network traffic summary (responses, failed requests, HTTP error counts)
+	- Browser metrics (FCP, LCP, CLS, INP, and navigation timings)
+- Diagnostics are attached to Playwright test output in `test/test-results/journeys-output`.
+
+Direct Playwright UI command:
+
+```bash
+npx playwright test --config=test/e2e/journeys/playwright.config.ts --ui
+```
+

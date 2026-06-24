@@ -28,7 +28,7 @@ export class AutocompleteNode extends DecoratorNode {
 
   exportJSON() {
     return {
-    //   ...super.exportJSON(),
+      ...super.exportJSON(),
       type: 'autocomplete',
       uuid: this.__uuid,
       version: 1,

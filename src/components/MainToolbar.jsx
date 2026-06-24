@@ -72,6 +72,8 @@ import { joinSection } from "../../app/actions/section";
 import { useColorMode } from "../hooks/useColorMode";
 import { LevelBadge } from "./Gamification/LevelBadge";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
+import { StreakIndicator } from "./Gamification/StreakIndicator";
+import { StreakShield } from "./Gamification/StreakShield";
 import { useAvatarConfig } from "../hooks/useAvatarConfig";
 import SyncStatusIndicator from "./SyncStatusIndicator";
 import { useXP, useProgress, useSquad } from "../context/gamificationContext";
@@ -80,6 +82,7 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TuneIcon from "@mui/icons-material/Tune";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import JoinPracticeDialog from "./PracticeDrill/JoinPracticeDialog";
 import { JoinWorkbookDialog } from "./Workbook";
 import { JoinPeerReviewDialog } from "./PeerReview";
@@ -293,8 +296,6 @@ export function UserMenu() {
             style={avatarStyle}
             overrides={avatarOverrides}
             glowRing={glowRing}
-            level={level}
-            streak={streak?.currentStreak || 0}
             guildCrestSvg={mySquad?.crestSvg ?? null}
             guildName={mySquad?.name}
             guildId={mySquad?.id}
@@ -366,6 +367,7 @@ export default function MainToolbar({ children }) {
   const tComponents = useTranslations("components");
   const tEditorAuth = useTranslations("editor.authoring");
   const { level, sectionLevel } = useXP();
+  const { streak } = useProgress();
   const { session: authSession } = React.useContext(AuthContext);
   const isInstructorOrAdmin = React.useMemo(() => {
     const groups = authSession?.groups || [];
@@ -476,10 +478,14 @@ export default function MainToolbar({ children }) {
           );
         }
         setNavSections(
-          (sectionsResult.data || []).filter((s) => s != null && s.id != null),
+          (sectionsResult.data || []).filter(
+            (s) => s != null && s.id != null && s.deletedAt == null,
+          ),
         );
         setNavUnits(
-          (unitsResult.data || []).filter((u) => u != null && u.id != null),
+          (unitsResult.data || []).filter(
+            (u) => u != null && u.id != null && u.deletedAt == null,
+          ),
         );
         setNavDataLoaded(true);
       } catch (err) {
@@ -954,6 +960,16 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/recycle-bin">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <DeleteOutlineIcon />
+              </ListItemIcon>
+              <ListItemText primary="Recycle Bin" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
       <Divider />
       <List sx={{ color: "text.primary" }}>
@@ -1041,6 +1057,17 @@ export default function MainToolbar({ children }) {
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />
+        <StreakIndicator
+          currentStreak={streak?.currentStreak || 0}
+          size="small"
+          showEmpty={!isInstructorOrAdmin}
+        />
+        <StreakShield
+          freezesRemaining={streak?.freezesRemaining || 0}
+          freezesUsed={streak?.freezesUsed || 0}
+          size="small"
+          showEmpty={!isInstructorOrAdmin}
+        />
         <LevelBadge
           level={currentSearchParams.get("sectionId") ? sectionLevel : level}
           showProgress

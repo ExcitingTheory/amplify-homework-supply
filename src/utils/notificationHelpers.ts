@@ -71,10 +71,11 @@ export async function sendNotification(
   const category: NotificationCategory =
     TYPE_TO_CATEGORY[input.type] || "SYSTEM";
   try {
+    // Type assertions needed until `ampx sandbox` regenerates types with GUILD enums
     await client.models.Notification.create({
       recipientId: input.recipientId,
-      type: input.type,
-      category,
+      type: input.type as any,
+      category: category as any,
       title: input.title,
       body: input.body,
       linkPath: input.linkPath,
@@ -225,7 +226,6 @@ export const notifications = {
   ) =>
     sendNotificationToMany(recipientIds, {
       type: "GUILD_POST_NEW",
-      category: "GUILD",
       title: `New post in ${guildName}`,
       body: `${senderName} posted in your guild.`,
       linkPath: `/guilds/${guildId}`,
@@ -243,7 +243,6 @@ export const notifications = {
   ) =>
     sendNotificationToMany(recipientIds, {
       type: "GUILD_MEMBER_JOINED",
-      category: "GUILD",
       title: `${memberName} joined ${guildName}`,
       body: `A new member has joined your guild.`,
       linkPath: `/guilds/${guildId}`,

@@ -5,8 +5,8 @@
 
 import React from "react";
 import { expect } from "storybook/test";
-import { within, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { within, waitFor } from "storybook/test";
+import { userEvent } from "storybook/test";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";

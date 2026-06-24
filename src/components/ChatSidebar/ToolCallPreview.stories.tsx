@@ -10,6 +10,7 @@
  * @module ChatSidebar/ToolCallPreview.stories
  */
 
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import ToolCallPreview from './ToolCallPreview';
 import { toolDefinitions } from '../../utils/chatTools';
@@ -25,10 +26,11 @@ const meta: Meta<typeof ToolCallPreview> = {
 export default meta;
 type Story = StoryObj<typeof ToolCallPreview>;
 
-// Find tool definitions for stories
-const searchContentDef = toolDefinitions.find(t => t.function.name === 'search_content');
-const createSectionDef = toolDefinitions.find(t => t.function.name === 'create_section');
-const generateContentDef = toolDefinitions.find(t => t.function.name === 'generate_unit_content');
+// Find tool definitions for stories — extract .function and cast to match ToolCallPreviewProps.toolDefinition shape
+type ToolDef = NonNullable<React.ComponentProps<typeof ToolCallPreview>['toolDefinition']>;
+const searchContentDef = toolDefinitions.find(t => t.function.name === 'search_content')?.function as ToolDef | undefined;
+const createSectionDef = toolDefinitions.find(t => t.function.name === 'create_section')?.function as ToolDef | undefined;
+const generateContentDef = toolDefinitions.find(t => t.function.name === 'generate_unit_content')?.function as ToolDef | undefined;
 
 export const SearchContentPending: Story = {
   args: {

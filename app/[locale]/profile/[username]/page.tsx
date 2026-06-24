@@ -7,6 +7,7 @@ import { StreakCalendar } from "@/components/Gamification/StreakCalendar";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { StreakShield } from "@/components/Gamification/StreakShield";
 import { NailedItSection, AvatarSection, UnlockRoadmap } from "./ProfileClientSections";
+import ProfileThemeWrapper from "./ProfileThemeWrapper";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -25,6 +26,10 @@ async function getCachedProfileData(routeUsername: string) {
   let freezesRemaining = 0;
   let freezesUsed = 0;
   let displayName = routeUsername;
+  let showBadgesOnProfile = true;
+  let showAntiBadgesOnProfile = false;
+  let profileThemeId: string | null = null;
+  let customThemePalette: any = null;
 
   try {
     const client = getServerClient() as any;
@@ -46,6 +51,7 @@ async function getCachedProfileData(routeUsername: string) {
         badgeType: b.badgeType,
         awardedAt: b.awardedAt || new Date().toISOString(),
         sourceId: b.sourceId || null,
+        isAnti: b.isAnti || false,
         count: 1,
       }));
 
@@ -58,6 +64,24 @@ async function getCachedProfileData(routeUsername: string) {
         completedWorkbooks: p.completedWorkbooks || 0,
       }));
     }
+
+    // Fetch the user's Settings for profile visibility preferences
+    const { data: settingsList } = await client.models.Settings.list({
+      filter: { owner: { eq: routeUsername } },
+    });
+    const userSettings = (settingsList || []).filter((s: any) => s != null)?.[0];
+    if (userSettings) {
+      showBadgesOnProfile = userSettings.showBadgesOnProfile !== false;
+      showAntiBadgesOnProfile = userSettings.showAntiBadgesOnProfile === true;
+      profileThemeId = userSettings.profileThemeId || null;
+      customThemePalette = userSettings.customThemePalette || null;
+    }
+
+    // Filter badges based on the user's visibility preferences
+    earnedBadges = earnedBadges.filter((b: any) => {
+      if (b.isAnti) return showAntiBadgesOnProfile;
+      return showBadgesOnProfile;
+    });
 
     // Resolve unit names for progress modules
     if (progressModules.length > 0) {
@@ -100,7 +124,7 @@ async function getCachedProfileData(routeUsername: string) {
     console.error("[Profile RSC] Data fetch error:", err);
   }
 
-  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName };
+  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName, showBadgesOnProfile, showAntiBadgesOnProfile, profileThemeId, customThemePalette };
 }
 
 export default async function ProfilePage({ params }: Props) {
@@ -115,11 +139,23 @@ export default async function ProfilePage({ params }: Props) {
     freezesRemaining,
     freezesUsed,
     displayName,
+    showBadgesOnProfile,
+    showAntiBadgesOnProfile,
+    profileThemeId,
+    customThemePalette,
   } = await getCachedProfileData(routeUsername);
 
   const isOwnProfile = false;
 
+  // Parse custom palette if it's a JSON string
+  const parsedCustomPalette = customThemePalette
+    ? typeof customThemePalette === 'string'
+      ? JSON.parse(customThemePalette)
+      : customThemePalette
+    : null;
+
   return (
+    <ProfileThemeWrapper themeId={profileThemeId} customPalette={parsedCustomPalette}>
       <GamificationProviderWrapper cohortId={undefined as any}>
         <Box
           sx={{
@@ -194,18 +230,20 @@ export default async function ProfilePage({ params }: Props) {
             </Card>
           )}
 
-          {/* Badges */}
-          <Card
-            sx={{
-              padding: "2rem 1rem",
-              mb: 2,
-            }}
-          >
-            <Typography variant="h5" gutterBottom>
-              {t("profile.badges" as any)}
-            </Typography>
-            <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
-          </Card>
+          {/* Badges — only shown if user opted in and has badges */}
+          {earnedBadges.length > 0 && (
+            <Card
+              sx={{
+                padding: "2rem 1rem",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                {t("profile.badges" as any)}
+              </Typography>
+              <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
+            </Card>
+          )}
 
           {/* Unlock Roadmap (live lock state — client component) */}
           <UnlockRoadmap />
@@ -214,5 +252,6 @@ export default async function ProfilePage({ params }: Props) {
           <NailedItSection profileUsername={routeUsername} />
         </Box>
       </GamificationProviderWrapper>
+    </ProfileThemeWrapper>
   );
 }

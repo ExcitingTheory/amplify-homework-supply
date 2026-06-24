@@ -22,25 +22,28 @@ Combines multiple search strategies (semantic understanding, grep pattern matchi
 ## Search Strategies
 
 ### 1. Semantic Search (Base relevance: 0.5)
+
 AI-powered natural language understanding - best for: "components that handle user authentication"
 
 ### 2. Grep Pattern Search (Base relevance: 0.3)
+
 Exact code pattern matching - best for: "DataStore.observeQuery" or "useChat("
 
 ### 3. File Search (Base relevance: 0.2)
-Filename and path patterns - best for: "*.stories.tsx" or "auth" in filename
+
+Filename and path patterns - best for: "\*.stories.tsx" or "auth" in filename
 
 ## Query Expansion
 
 Automatically expands queries with domain-specific patterns:
 
-| Query | Expanded To |
-|-------|-------------|
+| Query       | Expanded To                                              |
+| ----------- | -------------------------------------------------------- |
 | `datastore` | DataStore, observeQuery, DataStore.query, DataStore.save |
-| `component` | .tsx, .jsx, Component, export const |
-| `context` | Context.Provider, useContext, createContext |
-| `hook` | use[A-Z], useEffect, useState |
-| `ai` | openai, anthropic, useChat, generateText |
+| `component` | .tsx, .jsx, Component, export const                      |
+| `context`   | Context.Provider, useContext, createContext              |
+| `hook`      | use[A-Z], useEffect, useState                            |
+| `ai`        | openai, anthropic, useChat, generateText                 |
 
 ## Usage Examples
 
@@ -51,6 +54,7 @@ User: "Find components using chat functionality"
 ```
 
 **Output**:
+
 ```
 Found 8 files matching "chat functionality"
 
@@ -96,13 +100,19 @@ Limit search using glob patterns:
 
 ```typescript
 // Find components only
-{ scope: "src/components/**/*.{ts,tsx,js,jsx}" }
+{
+  scope: "src/components/**/*.{ts,tsx,js,jsx}";
+}
 
 // Find tests only
-{ scope: "**/*.{test,spec}.*" }
+{
+  scope: "**/*.{test,spec}.*";
+}
 
 // Specific directory
-{ scope: "src/context/**" }
+{
+  scope: "src/context/**";
+}
 ```
 
 ## Implementation
@@ -112,12 +122,12 @@ Limit search using glob patterns:
 **Documentation**: [SEMANTIC_FILE_SEARCH.md](./SEMANTIC_FILE_SEARCH.md)
 
 ```typescript
-import { executeSkill } from '.github/skills/semantic-file-search/semantic-file-search';
+import { executeSkill } from ".github/skills/semantic-file-search/semantic-file-search";
 
 const result = await executeSkill({
   query: "Find DataStore subscriptions",
   scope: "src/**",
-  limit: 10
+  limit: 10,
 });
 ```
 
@@ -129,7 +139,7 @@ npm run test -- .github/skills/semantic-file-search/semantic-file-search.test.ts
 
 ## Related Skills
 
-- [storybook-validation](../storybook-validation/SKILL.md) - Uses this skill to find story files
+- [storybook-audit](../storybook-audit/SKILL.md) - Uses this skill to find story files
 - [mock-data-validator](../mock-data-validator/SKILL.md) - Can be combined to find and validate mocks
 
 ## Related Documentation

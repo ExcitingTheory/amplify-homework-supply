@@ -51,7 +51,7 @@ function expectValidScriptData(scriptData: any) {
 
 describe('createWordPreset', () => {
   it('returns correct speakers and locked tracks from a Word object', () => {
-    const result = createWordPreset({
+    const result: any = createWordPreset({
       phrase: 'こんにちは',
       pronunciation: 'konnichiwa',
       definition: 'Hello. Good afternoon.',
@@ -81,7 +81,7 @@ describe('createWordPreset', () => {
   });
 
   it('produces valid dialogue line shapes', () => {
-    const result = createWordPreset({
+    const result: any = createWordPreset({
       phrase: 'test',
       pronunciation: 'test',
       definition: 'a test',
@@ -90,7 +90,7 @@ describe('createWordPreset', () => {
   });
 
   it('uses phrase as pronunciation fallback when pronunciation is missing', () => {
-    const result = createWordPreset({
+    const result: any = createWordPreset({
       phrase: 'bonjour',
       definition: 'Hello',
     });
@@ -99,7 +99,7 @@ describe('createWordPreset', () => {
   });
 
   it('handles empty definition gracefully', () => {
-    const result = createWordPreset({
+    const result: any = createWordPreset({
       phrase: 'test',
       pronunciation: 'test',
       definition: '',
@@ -111,14 +111,14 @@ describe('createWordPreset', () => {
   });
 
   it('handles null/undefined input gracefully', () => {
-    const result = createWordPreset(null as any);
+    const result: any = createWordPreset(null as any);
     expectValidScriptData(result.scriptData);
     expect(result.scriptData.dialogue).toHaveLength(2);
     expect(result.lockedTracks).toEqual(['phrase_track', 'definition_track']);
   });
 
   it('includes phrase in metadata title', () => {
-    const result = createWordPreset({ phrase: 'agua', definition: 'water' });
+    const result: any = createWordPreset({ phrase: 'agua', definition: 'water' });
     expect(result.scriptData.metadata.title).toContain('agua');
     expect(result.scriptData.metadata.title).toContain('Vocabulary');
   });
@@ -126,7 +126,7 @@ describe('createWordPreset', () => {
 
 describe('createConversationPreset', () => {
   it('returns empty dialogue and no locked tracks by default', () => {
-    const result = createConversationPreset();
+    const result: any = createConversationPreset();
     expectValidScriptData(result.scriptData);
 
     expect(result.scriptData.dialogue).toHaveLength(0);
@@ -136,12 +136,12 @@ describe('createConversationPreset', () => {
   });
 
   it('uses provided title', () => {
-    const result = createConversationPreset('Coffee Shop');
+    const result: any = createConversationPreset('Coffee Shop');
     expect(result.scriptData.metadata.title).toBe('Coffee Shop');
   });
 
   it('seeds speakers when provided', () => {
-    const result = createConversationPreset('Interview', [
+    const result: any = createConversationPreset('Interview', [
       { id: 'host', name: 'Host', voice: 'fable' },
       { id: 'guest', name: 'Guest' },
     ]);
@@ -155,14 +155,14 @@ describe('createConversationPreset', () => {
   });
 
   it('handles empty speakers array', () => {
-    const result = createConversationPreset('Test', []);
+    const result: any = createConversationPreset('Test', []);
     expect(Object.keys(result.scriptData.speakers)).toHaveLength(0);
   });
 });
 
 describe('createQuestionPreset', () => {
   it('returns correct speakers, dialogue, and locked tracks', () => {
-    const result = createQuestionPreset({
+    const result: any = createQuestionPreset({
       prompt: 'What is the capital of France?',
       correctAnswer: 'Paris',
     });
@@ -191,7 +191,7 @@ describe('createQuestionPreset', () => {
   });
 
   it('produces valid dialogue line shapes', () => {
-    const result = createQuestionPreset({
+    const result: any = createQuestionPreset({
       prompt: 'Question?',
       correctAnswer: 'Answer.',
     });
@@ -199,7 +199,7 @@ describe('createQuestionPreset', () => {
   });
 
   it('handles missing correctAnswer', () => {
-    const result = createQuestionPreset({
+    const result: any = createQuestionPreset({
       prompt: 'What color is the sky?',
     } as any);
 
@@ -208,7 +208,7 @@ describe('createQuestionPreset', () => {
   });
 
   it('handles null input gracefully', () => {
-    const result = createQuestionPreset(null as any);
+    const result: any = createQuestionPreset(null as any);
     expectValidScriptData(result.scriptData);
     expect(result.scriptData.dialogue).toHaveLength(2);
     expect(result.lockedTracks).toEqual(['prompt_track', 'answer_track']);
@@ -216,7 +216,7 @@ describe('createQuestionPreset', () => {
 
   it('truncates long prompts in metadata title', () => {
     const longPrompt = 'A'.repeat(60);
-    const result = createQuestionPreset({ prompt: longPrompt, correctAnswer: 'B' });
+    const result: any = createQuestionPreset({ prompt: longPrompt, correctAnswer: 'B' });
     expect(result.scriptData.metadata.title.length).toBeLessThan(longPrompt.length);
     expect(result.scriptData.metadata.title).toContain('…');
     expect(result.scriptData.metadata.title).toContain('Question');

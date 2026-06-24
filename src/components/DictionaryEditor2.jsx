@@ -68,6 +68,8 @@ import DictionaryContext from "../context/dictionaryContext";
 import FilesContext from "../context/fileContext";
 import UnitContext from "../context/unitContext";
 import { useTabContext } from "../context/tabContext";
+import ShowDeletedToggle from "./ShowDeletedToggle";
+import { useRecycleBin } from "../hooks/useRecycleBin";
 
 // Virtualization
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -216,8 +218,10 @@ function getTextWidth(text) {
 
 function RubyTagEditor({ inPhrase, inPronunciation, word }) {
   const { bumpWordVersion } = React.useContext(DictionaryContext);
-  const [phrase, setPhrase] = React.useState(inPhrase);
-  const [pronunciation, setPronunciation] = React.useState(inPronunciation);
+  const [phrase, setPhrase] = React.useState(inPhrase ?? "");
+  const [pronunciation, setPronunciation] = React.useState(
+    inPronunciation ?? "",
+  );
   const [selectedPhrase, setSelectedPhrase] = React.useState("");
   const [selectedPronunciation, setSelectedPronunciation] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -1377,7 +1381,7 @@ function NestedWordField({
   placeholder,
   label = "",
 }) {
-  const [localValue, setLocalValue] = React.useState(value);
+  const [localValue, setLocalValue] = React.useState(value ?? "");
   const saveTimeoutRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -1495,6 +1499,7 @@ function WordsPlugin({
   fullDictionary,
 }) {
   const { bumpWordVersion } = React.useContext(DictionaryContext);
+  const { softDelete } = useRecycleBin();
   const [editor] = useLexicalComposerContext();
 
   // Setup virtualizer for performance
@@ -1586,10 +1591,10 @@ function WordsPlugin({
       return;
     }
 
-    // Show confirmation dialog before deleting
+    // Show confirmation dialog before soft-deleting
     setConfirmDialog({
       open: true,
-      message: `Delete word: "${phrase}"?`,
+      message: `Move to Recycle Bin: "${phrase}"?`,
       severity: "warning",
       onConfirm: async () => {
         try {
@@ -1607,8 +1612,7 @@ function WordsPlugin({
             return;
           }
 
-          const client = getAmplifyClient();
-          await client.models.Word.delete({ id: word.id });
+          await softDelete("Word", word.id);
           setConfirmDialog({
             open: false,
             message: "",
@@ -1616,7 +1620,7 @@ function WordsPlugin({
             severity: "warning",
           });
         } catch (error) {
-          console.error("Failed to delete word:", error);
+          console.error("Failed to soft delete word:", error);
           setConfirmDialog({
             open: false,
             message: "",
@@ -1661,12 +1665,17 @@ export function DictionaryEditor2() {
   const [rubyDialogWord, setRubyDialogWord] = React.useState(null);
   const [newWordFormOpen, setNewWordFormOpen] = React.useState(false);
 
-  const { filteredDictionary: dictionary } =
-    React.useContext(DictionaryContext);
+  const {
+    filteredDictionary: dictionary,
+    showDeleted,
+    setShowDeleted,
+    deletedWords,
+  } = React.useContext(DictionaryContext);
   const { audioFiles, refreshAudioFiles, session } =
     React.useContext(FilesContext);
   const { identityId } = session || {};
   const { unit } = React.useContext(UnitContext);
+  const { softDelete } = useRecycleBin();
 
   const parentRef = React.useRef(null);
 
@@ -1742,21 +1751,20 @@ export function DictionaryEditor2() {
 
     setConfirmDialog({
       open: true,
-      message: `Delete ${selectedItems.size} selected word(s)?`,
-      severity: "error",
+      message: `Move ${selectedItems.size} selected word(s) to Recycle Bin?`,
+      severity: "warning",
       onConfirm: async () => {
         try {
           const words = Object.values(dictionary).filter((w) =>
             selectedItems.has(w.id),
           );
-          const client = getAmplifyClient();
           const results = await Promise.allSettled(
-            words.map((word) => client.models.Word.delete({ id: word.id })),
+            words.map((word) => softDelete("Word", word.id)),
           );
           const failures = results.filter((r) => r.status === "rejected");
           if (failures.length > 0) {
             console.warn(
-              `[DictionaryEditor] ${failures.length} word(s) failed to delete`,
+              `[DictionaryEditor] ${failures.length} word(s) failed to soft delete`,
             );
           }
           setSelectedItems(new Set());
@@ -1767,7 +1775,7 @@ export function DictionaryEditor2() {
             severity: "warning",
           });
         } catch (error) {
-          console.error("Failed to delete words:", error);
+          console.error("Failed to soft delete words:", error);
           setConfirmDialog({
             open: false,
             message: "",
@@ -1870,7 +1878,7 @@ export function DictionaryEditor2() {
           }}
         >
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-          Delete Selected
+          Move to Recycle Bin
         </MenuItem>
       </Menu>
 
@@ -1987,6 +1995,11 @@ export function DictionaryEditor2() {
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
+
+        <ShowDeletedToggle
+          showDeleted={showDeleted}
+          setShowDeleted={setShowDeleted}
+        />
       </Box>
 
       {/* Main editor area */}

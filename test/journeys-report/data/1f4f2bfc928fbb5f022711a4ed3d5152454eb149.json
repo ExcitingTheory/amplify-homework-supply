@@ -1,0 +1,3095 @@
+{
+  "test": "instructor can add a vocabulary word to the unit",
+  "file": "/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e/journeys/journey-07-instructor-recording.spec.ts",
+  "project": "chromium",
+  "status": "failed",
+  "retry": 0,
+  "metrics": {
+    "fcp": 2152,
+    "lcp": 2936,
+    "cls": 0.5935695901844237,
+    "inp": 584,
+    "navigation": {
+      "domContentLoaded": 0,
+      "loadEventEnd": 0,
+      "responseEnd": 0,
+      "domInteractive": 0
+    }
+  },
+  "console": {
+    "total": 137,
+    "errors": 36,
+    "warnings": 9,
+    "entries": [
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:35.369Z"
+      },
+      {
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:35.924Z"
+      },
+      {
+        "type": "log",
+        "text": "[AuthContext] User not authenticated - no tokens available",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:37.665Z"
+      },
+      {
+        "type": "log",
+        "text": "[MyAuth] User signed in, checking for return URL",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:39.575Z"
+      },
+      {
+        "type": "log",
+        "text": "[MyAuth] Redirecting to return URL: /unit/986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:39.576Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.510Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.510Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.511Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Initializing tour system with 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.514Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Tour tasks data registered: 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.515Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Exposing tour methods to window for testing",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.516Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting up AssistantChat observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.517Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Waiting for subscription to initialize",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.523Z"
+      },
+      {
+        "type": "log",
+        "text": "[SettingsContext] Setting up Settings subscription for user: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.526Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Cleaning up subscriptions",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.532Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.533Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.534Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.539Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.540Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.541Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Initializing tour system with 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.542Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Tour tasks data registered: 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.543Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Exposing tour methods to window for testing",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.543Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting up AssistantChat observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.544Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Waiting for subscription to initialize",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.546Z"
+      },
+      {
+        "type": "log",
+        "text": "[SettingsContext] Setting up Settings subscription for user: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:40.548Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] AssistantChat initialized with 1 chats",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.540Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting initial chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.540Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] useEffect triggered {id: 986a9ba6-f8bd-4246-8df5-c0a84294b772, authLoading: false, hasUser: true, userSub: 64485468-a001-7056-9f7f-08bbcc1a9b71}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.546Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] Fetching unit data for id: 986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.547Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Initializing vector store from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.553Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] fetchFiles called",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.555Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] User authenticated: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.556Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Identity ID: us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.559Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] About to set up File observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.560Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] useEffect triggered {id: 986a9ba6-f8bd-4246-8df5-c0a84294b772, authLoading: false, hasUser: true, userSub: 64485468-a001-7056-9f7f-08bbcc1a9b71}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.565Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] Fetching unit data for id: 986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.566Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Initializing vector store from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.571Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] fetchFiles called",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.572Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] User authenticated: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.573Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Identity ID: us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.574Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] About to set up File observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.575Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Loading messages for chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43 count: 0",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.606Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] deepCloneMessages: returning empty array",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.607Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Chat exists and not archived, skipping creation",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.608Z"
+      },
+      {
+        "type": "log",
+        "text": "[VectorStoreDB] Loaded 0 total embeddings from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.770Z"
+      },
+      {
+        "type": "log",
+        "text": "[VectorStore] Loaded 0 embeddings from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.770Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] No cached embeddings found in IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.771Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] No cached embeddings found in IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.771Z"
+      },
+      {
+        "type": "warning",
+        "text": "[UnitContext] Subscription filter limit exceeded, using client-side filtering only",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:41.977Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] File observeQuery update: 81 files",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.417Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population triggered {isInitialLoad: true, filesCount: 81, currentVectorStoreSize: 0, documentsCount: 4}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.421Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population complete - 0 total embeddings",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.422Z"
+      },
+      {
+        "type": "log",
+        "text": "[SectionContext] Section observeQuery update: 31",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.436Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:42.470Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:42.778Z"
+      },
+      {
+        "type": "warning",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection error (further retries logged as debug): Event",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.779Z"
+      },
+      {
+        "type": "log",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection status: connecting",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:42.980Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:43.361Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.363Z"
+      },
+      {
+        "type": "log",
+        "text": "[useTabState] Initialized with: {leftTab: 4, rightTab: 5, leftOpen: false, rightOpen: false, leftWidth: 350} from URL: {} localStorage: null defaults: {defaultLeftTab: 4, defaultRightTab: 5}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.372Z"
+      },
+      {
+        "type": "log",
+        "text": "[useTabState] Initialized with: {leftTab: 4, rightTab: 5, leftOpen: false, rightOpen: false, leftWidth: 350} from URL: {} localStorage: null defaults: {defaultLeftTab: 4, defaultRightTab: 5}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.372Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Files received from context: 81 [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.651Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Upload useEffect triggered. filesToUpload: 0 uploadInProgress: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.652Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Skipping upload - no files or already in progress",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.653Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Loading messages for chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43 count: 0",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.654Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] deepCloneMessages: returning empty array",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.655Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.656Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.657Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.658Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.660Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save due to tags: [history-merge]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.667Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.668Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.670Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.671Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Files received from context: 81 [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.677Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Upload useEffect triggered. filesToUpload: 0 uploadInProgress: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.678Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Skipping upload - no files or already in progress",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.679Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.680Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.681Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.682Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.683Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.935Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:43.949Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:43.951Z"
+      },
+      {
+        "type": "log",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection status: connecting",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:44.109Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:44.115Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save - no initial state loaded yet",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:44.118Z"
+      },
+      {
+        "type": "warning",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection error (further retries logged as debug): Event",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:44.409Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:44.409Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:44.716Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:44.716Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:45.021Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:45.021Z"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "location": {
+          "url": "https://amplify-amplifyhomeworksu-homeworksupplystoragebuc-be9hgdskmuef.s3.us-east-1.amazonaws.com/?list-type=2&encoding-type=url&max-keys=1000&prefix=private%2Fus-east-1%3Ab0eadde9-f02b-c9ae-ad23-044b00c16b1d%2Funits%2F986a9ba6-f8bd-4246-8df5-c0a84294b772%2Fyjs-snapshot.bin",
+          "lineNumber": 0,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:45.094Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:45.804Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:45.804Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:46.097Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:46.097Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.782Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.783Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.783Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.784Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.785Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.786Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.871Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.872Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.872Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.874Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.874Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.874Z"
+      },
+      {
+        "type": "error",
+        "text": "A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://react.dev/link/controlled-components",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:46.895Z"
+      },
+      {
+        "type": "warning",
+        "text": "MUI: You are providing a disabled `button` child to the Tooltip component.\nA disabled element does not fire events.\nTooltip needs to listen to the child element's events to display the title.\n\nAdd a simple wrapper element, such as a `span`.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:46.901Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:47.787Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:47.787Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:48.091Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:48.091Z"
+      },
+      {
+        "type": "warning",
+        "text": "Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior=\"smooth\"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:48.881Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.527Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.528Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.528Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.529Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.530Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at processRootScheduleInMicrotask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10200:106)\n    at https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10274:158",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:49.530Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.720Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.720Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.721Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.expandAll` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2069:78)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.722Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.newWordButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2119:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.723Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.dictionaryEditor.actionsButton` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at DictionaryEditor2 (https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js:2144:43)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooksAgain (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4675:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4626:28)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performSyncWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10263:9)\n    at flushSyncWorkAcrossRoots_impl (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10179:316)\n    at flushSyncWork$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9230:86)\n    at batchedUpdates$1 (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:2257:21)\n    at dispatchEventForPluginEventSystem (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10431:9)\n    at dispatchEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:13002:37)\n    at dispatchDiscreteEvent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:12984:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:26:50.723Z"
+      },
+      {
+        "type": "log",
+        "text": "[Fast Refresh] rebuilding",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:50.939Z"
+      },
+      {
+        "type": "log",
+        "text": "[Fast Refresh] done in 167ms",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:50.982Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:51.269Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:51.270Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:51.572Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:26:51.572Z"
+      },
+      {
+        "type": "warning",
+        "text": "The resource https://localhost:3000/_next/static/chunks/node_modules_%40xyflow_react_dist_style_0iupz4v.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+        "location": {
+          "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772?sidebars=dictionary",
+          "lineNumber": 0,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:26:52.618Z"
+      }
+    ]
+  },
+  "network": {
+    "total": 188,
+    "failed": 0,
+    "httpErrors": 1,
+    "entries": [
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "status": 307,
+        "statusText": "Temporary Redirect",
+        "resourceType": "document",
+        "timestamp": "2026-06-20T04:26:34.960Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/?returnUrl=%2Funit%2F986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "document",
+        "timestamp": "2026-06-20T04:26:35.064Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0e_3nnp._.css",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "stylesheet",
+        "timestamp": "2026-06-20T04:26:35.148Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0rx4rba._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.152Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40xyflow_react_dist_style_0iupz4v.css",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "stylesheet",
+        "timestamp": "2026-06-20T04:26:35.153Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.206Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0.4_mz-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.206Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_server_0bxku-~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.208Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.208Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_04ue1eq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.209Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0rqeker._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.240Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/instrumentation-client_ts_03sw2li._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.240Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_layout_tsx_02s15n5._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.241Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_0553esy.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.243Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-_0yg8dr1._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.245Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_client_components_builtin_global-error_0~4-h6u.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.246Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_079ko4n._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.247Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.247Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_10_j6ae._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.248Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.314Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_utils_092xz~-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.349Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_PracticeDrill_0ippopa._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.351Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DebugPanel_092o0wd._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.351Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_MainToolbar_jsx_0qn2z~1._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.351Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Workbook_0vat2bt._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.353Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Gamification_10itoqm._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.353Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_01eg5sl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.355Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_nodes_0on4508._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.355Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_plugins_0sj2j1o._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.356Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_RecordingStudio3_0_5_wnl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.358Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_FileManager2_jsx_0tfr_ws._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.358Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_MeaningAssociationExercise_13pax-6._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.361Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_ChatSidebar_0oh-a53._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.361Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_0v0nc0y._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.479Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_ChatSidebar_jsx_0k7btpl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.536Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_0gnbmhy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.536Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0pw-gbk._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.536Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/amplify_outputs_json_%5Bjson%5D_cjs_0_4ky8h._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.538Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_context_0q85e0_._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.538Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_system_esm_0t0zi7s._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.540Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_Slider_0p25e3e._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.540Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0x9qp2x._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.540Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_styles_085az2c._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.541Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_core_dist_esm_03.hnp4._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.585Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_icons-material_esm_12~iat2._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.672Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40popperjs_core_lib_0zj0l6r._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.717Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_data-schema_dist_esm_runtime_0fml.jf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.739Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_storage_dist_esm_0f264bj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.739Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_api-graphql_dist_esm_105gbhs._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.739Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_graphql_0oeikgq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.741Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/0lkd_%40aws-amplify_auth_dist_esm_0xci_fh._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.741Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_avataaars_lib_13q6pb0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.742Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lib0_0wm-_62._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.742Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_open-peeps_lib_0zs1atj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.742Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_yjs_dist_yjs_mjs_0ju1msx._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.743Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_notionists_lib_114dy6-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.743Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_adventurer_lib_0lhvjt~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.744Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40ai-sdk_03dmk_n._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.745Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_12lluhf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.745Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_react_0wlp43m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.745Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_zod_0slp6p4._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.747Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_10x9b1~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.747Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/0x1h_ai_dist_index_mjs_0r9dk1j._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.747Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_ai_dist_index_mjs_0ssrqvg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_hooks_03ix0ix._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_panel_0pzvjm.._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.749Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_cell_0yhmktp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.750Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lexical_Lexical_dev_mjs_0n7xomq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.750Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_columnHeaders_08s3dvb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.751Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_DataGrid_0de3dpp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.751Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_prismjs_0p18xue._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.795Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_table_LexicalTable_dev_mjs_0kf18jc._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.795Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_026_8nd._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.795Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_hooks_features_0_yb0yw._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.796Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_react-icons_lib_0mt5-rx._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.796Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_0eqomi3._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.797Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_framer-motion_dist_es_10zhgje._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.797Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_motion-dom_dist_es_0n_wqqr._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.797Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lodash_0chba7d._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.814Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_xstate_es_0086qdy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.901Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40emotion_0g4~_u~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.901Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_ui_dist_esm_05t9cyq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.902Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_ui-react_dist_esm_0juyfjb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.902Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_0d1zczj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.904Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_layout_tsx_0~4-h6u._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.904Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_06-yc7e._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.917Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_13c-bu8._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.917Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_page_jsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.918Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_0572q93._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.918Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0yjw1oe._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.919Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0kqddmy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.919Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_0q53tss._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.919Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:35.919Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_react-icons_gi_index_mjs_0hh8x~~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:36.579Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-worker-%5Bclient-fs%5D__next_static_chunks_12ee_mp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:36.974Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-src_workers_embeddingWorker_0b.aluy.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:26:36.980Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_workers_embeddingWorker_0u_uju3.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:26:36.985Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_workers_embeddingWorker_044tjm0.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:26:36.991Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:26:37.233Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:37.415Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:26:37.560Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:37.664Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:26:38.571Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:38.751Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:39.571Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772?_rsc=tdjna",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:39.648Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_loading_tsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:39.663Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:39.954Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:40.306Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_loading_tsx_0e3hfkf._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.699Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_offline_SyncQueue_ts_0rmk.p0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.705Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_offline_0zv8k4m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.705Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_idb_build_index_0rmk.p0.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.720Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_idb_build_index_0gsx_v8.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.783Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_TableComponent_jsx_00tjggy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.785Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0en-atg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.792Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_UnitEditorClient_jsx_0raae4_._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.795Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0vl8try._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.796Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.802Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Chat_06kw_71._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.807Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_page_tsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.811Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_13ijt_i._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.823Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_00wz9d.._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:40.836Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_TableComponent_jsx_00tjggy._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.196Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_00wz9d.._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.196Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.196Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Chat_06kw_71._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.198Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0vl8try._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.198Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0en-atg._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.198Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_UnitEditorClient_jsx_0raae4_._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.200Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_13ijt_i._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.200Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_page_tsx_0e3hfkf._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.200Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.427Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.452Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.453Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.474Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.490Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.529Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.538Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_aws-amplify_dist_esm_storage_index_mjs_008_axb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_0362a-m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:41.748Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_pako_dist_pako_esm_mjs_0rmk.p0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.764Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_pako_dist_pako_esm_mjs_09ei-9a._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:26:41.765Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.070Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.072Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.116Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.128Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.148Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.150Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.175Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.176Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.176Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.284Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.285Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.285Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.285Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.285Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.302Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.317Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.342Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.342Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.384Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.393Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.418Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.425Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.437Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.518Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.518Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:42.916Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:43.146Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:43.353Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/media/draggable-block-menu.11t8bgfarf0tw.svg",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "image",
+        "timestamp": "2026-06-20T04:26:44.134Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.397Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.428Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.428Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.428Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.429Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:44.788Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://amplify-amplifyhomeworksu-homeworksupplystoragebuc-be9hgdskmuef.s3.us-east-1.amazonaws.com/?list-type=2&encoding-type=url&max-keys=1000&prefix=private%2Fus-east-1%3Ab0eadde9-f02b-c9ae-ad23-044b00c16b1d%2Funits%2F986a9ba6-f8bd-4246-8df5-c0a84294b772%2Fyjs-snapshot.bin",
+        "status": 403,
+        "statusText": "Forbidden",
+        "resourceType": "xhr",
+        "timestamp": "2026-06-20T04:26:45.094Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/__nextjs_font/geist-latin.woff2",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "font",
+        "timestamp": "2026-06-20T04:26:47.311Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:47.334Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:47.448Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772?sidebars=dictionary&_rsc=bja9v",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:47.498Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:47.505Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:26:47.506Z"
+      }
+    ]
+  }
+}

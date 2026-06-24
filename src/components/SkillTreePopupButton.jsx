@@ -11,18 +11,19 @@ import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapp
 import { SkillTree } from "@/components/Gamification/SkillTree";
 import { useSkillTree } from "@/context/gamificationContext";
 
-export function SkillTreePopupButton({ sectionId }) {
+export function SkillTreePopupButton({ sectionId, label }) {
   const [open, setOpen] = useState(false);
+  const buttonLabel = label ? `${label} Skill Tree` : "View Skill Tree";
+  const dialogTitle = label ? `Skill Tree — ${label}` : "Skill Tree";
   return (
     <>
       <Button
         variant="outlined"
         color="primary"
         onClick={() => setOpen(true)}
-        sx={{ mb: 2 }}
         disabled={!sectionId}
       >
-        View Skill Tree
+        {buttonLabel}
       </Button>
       <Dialog
         open={open}
@@ -37,7 +38,7 @@ export function SkillTreePopupButton({ sectionId }) {
             justifyContent: "space-between",
           }}
         >
-          Skill Tree
+          {dialogTitle}
           <IconButton onClick={() => setOpen(false)}>
             <CloseIcon />
           </IconButton>

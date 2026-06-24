@@ -143,6 +143,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
             <IconButton
+              component="span"
               size="small"
               onClick={(e) => {
                 e.stopPropagation();

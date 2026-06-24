@@ -13,6 +13,7 @@ import { DebugPanelProvider } from '../src/components/DebugPanel';
 import AuthContext, { AuthProvider } from '../src/context/authContext';
 import AppShell from '../src/components/AppShell';
 import { SettingsProvider } from '../src/context/settingsContext';
+import DynamicThemeProvider from '../src/components/DynamicThemeProvider';
 import { NotificationProvider } from '../src/context/notificationContext';
 import { TourProvider } from '../src/context/tourContext';
 import { ChatContextProvider } from '../src/context/chatContext';
@@ -149,6 +150,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <AuthGate>
             <SettingsProvider>
+              <DynamicThemeProvider>
               <NotificationProvider>
               <ChatContextProvider>
                 <TourProvider>
@@ -158,6 +160,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 </TourProvider>
               </ChatContextProvider>
               </NotificationProvider>
+              </DynamicThemeProvider>
             </SettingsProvider>
           </AuthGate>
         </AuthProvider>
@@ -179,7 +182,7 @@ function AuthenticatedShell({ children, hideChatButton }: { children: React.Reac
 
   return (
     <>
-      <AppShell>{children}</AppShell>
+      <AppShell toolbarChildren={null}>{children}</AppShell>
       <GlobalChatButton show={!hideChatButton} />
       <GlobalChatDrawer />
       <OfflineBanner />

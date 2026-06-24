@@ -18,6 +18,8 @@ import FaceIcon from '@mui/icons-material/Face'
 import { DiceBearAvatar, getStyleTierStatus } from './DiceBearAvatar'
 import type { AvatarStyleTier, AvatarOverrides, AvatarUnlockConfig } from './DiceBearAvatar'
 import { AvatarCustomizer } from './AvatarCustomizer'
+import { ThemeMixer } from './ThemeMixer'
+import type { CustomThemePaletteInput } from './ThemeMixer'
 
 // ============================================================================
 // Editor Theme Data
@@ -36,6 +38,7 @@ export const DEFAULT_EDITOR_THEMES: EditorTheme[] = [
   { id: 'forest', name: 'Forest', minLevel: 3, preview: { bg: '#1b2d1b', text: '#c8e6c9', accent: '#66bb6a' } },
   { id: 'sunset', name: 'Sunset', minLevel: 4, preview: { bg: '#2d1b1b', text: '#ffccbc', accent: '#ff7043' } },
   { id: 'aurora', name: 'Aurora', minLevel: 5, preview: { bg: '#0d1b2a', text: '#e0f7fa', accent: '#ab47bc' } },
+  { id: 'custom', name: 'Custom', minLevel: 2, preview: { bg: '#f5f5f5', text: '#333333', accent: '#ff4081' } },
 ]
 
 // ============================================================================
@@ -51,6 +54,10 @@ export interface CosmeticSelectorProps {
   editorThemes?: EditorTheme[]
   /** Called when theme is selected */
   onThemeSelect?: (themeId: string) => void
+  /** Current custom palette (when theme is 'custom') */
+  customThemePalette?: CustomThemePaletteInput | null
+  /** Called when user saves their custom palette from ThemeMixer */
+  onCustomPaletteSave?: (palette: CustomThemePaletteInput) => void
   /** Avatar seed (e.g. username) for preview */
   avatarSeed?: string
   /** Currently selected avatar tier */
@@ -70,6 +77,8 @@ export function CosmeticSelector({
   selectedThemeId,
   editorThemes = DEFAULT_EDITOR_THEMES,
   onThemeSelect,
+  customThemePalette,
+  onCustomPaletteSave,
   avatarSeed = 'student',
   selectedAvatarTier,
   onAvatarTierSelect,
@@ -182,6 +191,16 @@ export function CosmeticSelector({
           })}
         </Stack>
       </Box>
+
+      {/* Custom Theme Mixer — shown when "Custom" is selected */}
+      {selectedThemeId === 'custom' && (
+        <Box sx={{ mt: 1 }}>
+          <ThemeMixer
+            value={customThemePalette}
+            onSave={(palette) => onCustomPaletteSave?.(palette)}
+          />
+        </Box>
+      )}
     </Stack>
   )
 }

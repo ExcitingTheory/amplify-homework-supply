@@ -15,6 +15,7 @@ import React, {
   useReducer,
   useCallback,
   useMemo,
+  useState,
 } from "react";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";
@@ -90,6 +91,10 @@ export function ChatContextProvider({ children }) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const chatVersionRef = useRef(null); // Track _version to detect changes and prevent rerenders
   const subscriptionInitializedRef = useRef(false);
+
+  // Show deleted toggle state
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [deletedChats, setDeletedChats] = useState([]);
   // Use a ref to access current assistantChat inside subscription without causing re-subscribe
   const assistantChatRef = useRef(state.assistantChat);
   useEffect(() => {
@@ -178,9 +183,14 @@ export function ChatContextProvider({ children }) {
     function handleError(label, error) {
       const msg =
         error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
-      if (msg.includes("DuplicatedOperationError")) {
+      if (
+        msg.includes("DuplicatedOperationError") ||
+        msg.includes("Not Authorized") ||
+        msg === "{}" ||
+        msg === "undefined"
+      ) {
         console.warn(
-          `[ChatContext] ${label}: transient DuplicatedOperationError (safe to ignore)`,
+          `[ChatContext] ${label}: transient subscription error (safe to ignore)`,
         );
         return;
       }
@@ -190,9 +200,13 @@ export function ChatContextProvider({ children }) {
     const subscription = client.models.AssistantChat.observeQuery().subscribe({
       next: ({ items }) => {
         if (cancelled) return;
-        const validItems = (items || []).filter(
+        const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+        const validItems = allValid.filter((item) => item.deletedAt == null);
+        const deleted = allValid.filter((item) => item.deletedAt != null);
+
+        setDeletedChats(deleted);
 
         // Mark subscription as initialized on first emission
         if (!subscriptionInitializedRef.current) {
@@ -378,6 +392,11 @@ export function ChatContextProvider({ children }) {
       // Messages
       messages: state.messages,
       setMessages,
+
+      // Show deleted
+      showDeleted,
+      setShowDeleted,
+      deletedChats,
     }),
     [
       state.assistantChat?.id,
@@ -393,6 +412,8 @@ export function ChatContextProvider({ children }) {
       setIsChatOpen,
       setPageContext,
       setMessages,
+      showDeleted,
+      deletedChats,
     ],
   );
 

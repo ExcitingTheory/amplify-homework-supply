@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { expect } from 'storybook/test';
-import { within, waitFor } from '@testing-library/react';
+import { within, waitFor } from 'storybook/test';
 import HorizontalTimeline from './HorizontalTimeline';
 
 const mockConversationScript = {
@@ -114,7 +114,7 @@ positioned at their timing offsets. Each speaker gets a dedicated track row.
     },
   },
   decorators: [
-    (Story) => (
+    (Story: any) => (
       <div style={{ height: 300 }}>
         <Story />
       </div>
@@ -126,15 +126,15 @@ export const TwoSpeakers = {
   args: {
     scriptData: mockConversationScript,
     selectedDialogueId: null,
-    onSelectDialogue: (id) => console.log('Selected dialogue:', id),
+    onSelectDialogue: (id: any) => console.log('Selected dialogue:', id),
     recording: false,
     playing: false,
     onPlay: () => console.log('Play'),
     onStop: () => console.log('Stop'),
-    onRecordingComplete: (blob, waveform) => console.log('Recording complete:', blob, waveform),
+    onRecordingComplete: (blob: any, waveform: any) => console.log('Recording complete:', blob, waveform),
     readOnly: false,
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: any) => {
     const canvas = within(canvasElement);
 
     await waitFor(() => {
@@ -148,12 +148,12 @@ export const ThreeSpeakers = {
   args: {
     scriptData: mockThreeSpeakers,
     selectedDialogueId: 2,
-    onSelectDialogue: (id) => console.log('Selected dialogue:', id),
+    onSelectDialogue: (id: any) => console.log('Selected dialogue:', id),
     recording: false,
     playing: false,
     onPlay: () => console.log('Play'),
     onStop: () => console.log('Stop'),
-    onRecordingComplete: (blob, waveform) => console.log('Recording complete:', blob, waveform),
+    onRecordingComplete: (blob: any, waveform: any) => console.log('Recording complete:', blob, waveform),
     readOnly: false,
   },
 };
@@ -162,12 +162,12 @@ export const EmptyTimeline = {
   args: {
     scriptData: emptyScript,
     selectedDialogueId: null,
-    onSelectDialogue: (id) => console.log('Selected dialogue:', id),
+    onSelectDialogue: (id: any) => console.log('Selected dialogue:', id),
     recording: false,
     playing: false,
     onPlay: () => console.log('Play'),
     onStop: () => console.log('Stop'),
-    onRecordingComplete: (blob, waveform) => console.log('Recording complete:', blob, waveform),
+    onRecordingComplete: (blob: any, waveform: any) => console.log('Recording complete:', blob, waveform),
     readOnly: false,
   },
 };
@@ -176,12 +176,12 @@ export const RecordingState = {
   args: {
     scriptData: mockConversationScript,
     selectedDialogueId: 1,
-    onSelectDialogue: (id) => console.log('Selected dialogue:', id),
+    onSelectDialogue: (id: any) => console.log('Selected dialogue:', id),
     recording: true,
     playing: false,
     onPlay: () => console.log('Play'),
     onStop: () => console.log('Stop'),
-    onRecordingComplete: (blob, waveform) => console.log('Recording complete:', blob, waveform),
+    onRecordingComplete: (blob: any, waveform: any) => console.log('Recording complete:', blob, waveform),
     readOnly: false,
   },
   parameters: {

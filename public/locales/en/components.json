@@ -534,5 +534,48 @@
   "skillTree": {
     "title": "Skill Tree",
     "empty": "No skills available yet. Your instructor will set up the skill tree."
+  },
+  "collaboratorManager": {
+    "title": "Collaborators",
+    "addCollaborator": "Add Collaborator",
+    "noCollaborators": "No collaborators yet",
+    "searchInstructors": "Search Instructors",
+    "searchPlaceholder": "Search by name, username, or email",
+    "typeAtLeast": "Type at least 2 characters",
+    "noInstructorsFound": "No instructors found",
+    "permissionLevel": "Permission Level",
+    "permissionRead": "Read — View content only",
+    "permissionEdit": "Edit — Can modify content",
+    "add": "Add",
+    "cancel": "Cancel",
+    "removeCollaborator": "Remove {{name}}",
+    "failedToLoad": "Failed to load collaborators",
+    "failedToAdd": "Failed to add collaborator",
+    "failedToRemove": "Failed to remove collaborator",
+    "editPermission": "Edit",
+    "readPermission": "Read"
+  },
+  "communityUnitCard": {
+    "untitledUnit": "Untitled Unit",
+    "noDescription": "No description",
+    "byAuthor": "By: {{author}}",
+    "fork": "Fork",
+    "forking": "Forking..."
+  },
+  "sharedUnitCard": {
+    "untitledUnit": "Untitled Unit",
+    "noDescription": "No description",
+    "editAccess": "Edit Access",
+    "readOnly": "Read Only",
+    "sharedBy": "Shared by: {{owner}}",
+    "edit": "Edit",
+    "view": "View",
+    "showDeletedItems": "Show deleted items"
+  },
+  "showDeletedItems": "Show deleted items",
+  "recordingStudioEnhancedModal": {
+    "cancel": "Cancel",
+    "saveConversation": "Save Conversation",
+    "defaultTitle": "Generate Conversation"
   }
 }

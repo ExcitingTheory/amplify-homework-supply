@@ -37,6 +37,18 @@ export interface Speaker {
   description: string;
 }
 
+export interface Take {
+  id: string | number;
+  type: 'human' | 'tts';
+  version: number;
+  audioPath: string;
+  fileId: string;
+  file: { key: string; level: string; [key: string]: unknown };
+  createdAt: string;
+  updatedAt: string;
+  processingApplied?: string[];
+}
+
 export interface DialogueLine {
   id: number;
   speaker: string;
@@ -44,8 +56,8 @@ export interface DialogueLine {
   timing: { start: number; end: number };
   direction: string;
   emotion: string;
-  takes: never[];
-  activeTakeIndex: null;
+  takes: Take[];
+  activeTakeIndex: number | null;
 }
 
 export interface ScriptData {

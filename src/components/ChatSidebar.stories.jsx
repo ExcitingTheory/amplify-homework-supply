@@ -1536,7 +1536,8 @@ export const CustomAnswerGenerator = {
           prompt: "Listen and type what you hear",
           answer: "おはよう",
           phonetic: "ohayou",
-          audioKey: "public/audio/ohayou.mp3",
+          audioKey:
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
           owner: "mock-user",
         },
         {
@@ -1544,7 +1545,8 @@ export const CustomAnswerGenerator = {
           prompt: "Listen and type what you hear",
           answer: "おやすみ",
           phonetic: "oyasumi",
-          audioKey: "public/audio/oyasumi.mp3",
+          audioKey:
+            "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
           owner: "mock-user",
         },
       ]);

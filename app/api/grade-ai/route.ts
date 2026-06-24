@@ -14,11 +14,11 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject, generateText, Output } from "ai";
+import { z } from "zod";
 import { requireAuth } from "../_shared/auth";
 import {
   sanitizeInput,
-  validateOutputSchema,
   buildSecurePrompt,
   filterPII,
   type GradingResponse,
@@ -138,15 +138,19 @@ export async function POST(req: Request) {
   try {
     const openai = getOpenAI();
 
-    let result: { text: string };
+    const GradeSchema = z.object({
+      correct: z.boolean(),
+      score: z.number(),
+      feedback: z.string(),
+    });
 
-    if (
-      (inputMode === "image" || inputMode === "drawing") &&
-      imageData
-    ) {
-      // Vision model for image/drawing input
-      result = await generateText({
+    let gradingResponse: GradingResponse;
+
+    if ((inputMode === "image" || inputMode === "drawing") && imageData) {
+      // Vision model for image/drawing input — use Output.object with messages
+      const { output } = await generateText({
         model: openai("gpt-4o"),
+        output: Output.object({ schema: GradeSchema }),
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -160,7 +164,7 @@ export async function POST(req: Request) {
               },
               {
                 type: "text",
-                text: `Question: "${sanitizedQuestion}"\nStudent's description of their submission: "${sanitizedAnswer}"\n\nGrade this submission. Respond with ONLY JSON: {"correct": boolean, "score": number, "feedback": "string"}`,
+                text: `Question: "${sanitizedQuestion}"\nStudent's description of their submission: "${sanitizedAnswer}"\n\nGrade this submission.`,
               },
             ],
           },
@@ -168,38 +172,33 @@ export async function POST(req: Request) {
         temperature: 0.1,
         maxOutputTokens: 300,
       });
+
+      if (!output) {
+        return Response.json(
+          {
+            correct: false,
+            score: 0,
+            feedback:
+              "Unable to process the grading response. Please try again.",
+          } satisfies GradingResponse,
+          { status: 200 },
+        );
+      }
+      gradingResponse = output;
     } else {
-      // Text model for text/audio input
-      result = await generateText({
+      // Text model for text/audio input — use generateObject
+      const { object } = await generateObject({
         model: openai("gpt-4o-mini"),
+        schema: GradeSchema,
         system: systemPrompt,
-        prompt: `Question: "${sanitizedQuestion}"\nStudent's answer: "${sanitizedAnswer}"\n\nGrade this answer. Respond with ONLY JSON: {"correct": boolean, "score": number, "feedback": "string"}`,
+        prompt: `Question: "${sanitizedQuestion}"\nStudent's answer: "${sanitizedAnswer}"\n\nGrade this answer.`,
         temperature: 0.1,
         maxOutputTokens: 300,
       });
+      gradingResponse = object;
     }
 
-    // 6. Validate output schema
-    const gradingResponse = validateOutputSchema(result.text);
-
-    if (!gradingResponse) {
-      // AI gave malformed response - return safe fallback
-      console.error(
-        "[grade-ai] Malformed AI response:",
-        result.text.substring(0, 200),
-      );
-      return Response.json(
-        {
-          correct: false,
-          score: 0,
-          feedback:
-            "Unable to process the grading response. Please try again.",
-        } satisfies GradingResponse,
-        { status: 200 },
-      );
-    }
-
-    // 7. Final PII filter on the complete response
+    // 6. Final PII filter on the complete response
     const safeResponse: GradingResponse = {
       ...gradingResponse,
       feedback: filterPII(gradingResponse.feedback),

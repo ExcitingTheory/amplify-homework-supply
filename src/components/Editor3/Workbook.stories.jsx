@@ -637,7 +637,16 @@ export const EmptyWorkbook = {
         description: "This workbook has no content yet",
         data: JSON.stringify({
           root: {
-            children: [],
+            children: [
+              {
+                children: [],
+                direction: "ltr",
+                format: "",
+                indent: 0,
+                type: "paragraph",
+                version: 1,
+              },
+            ],
             direction: "ltr",
             format: "",
             indent: 0,

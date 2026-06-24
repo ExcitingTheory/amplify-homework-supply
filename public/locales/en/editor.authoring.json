@@ -78,7 +78,8 @@
     "textColor": "Text color",
     "backgroundColor": "Background color",
     "increaseFontSize": "Increase font size",
-    "decreaseFontSize": "Decrease font size"
+    "decreaseFontSize": "Decrease font size",
+    "generateConversation": "Generate Conversation"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "AI Assistant",

@@ -19,12 +19,20 @@ export const maxDuration = 30;
 const suggestTools = {
   insert_heading: tool({
     description: "Insert a heading block into the lesson.",
-    parameters: z.object({
+    inputSchema: z.object({
       level: z.enum(["h1", "h2", "h3"]).describe("Heading level"),
       text: z.string().describe("The heading text content"),
       reasoning: z.string().describe("Pedagogical explanation for this block"),
     }),
-    execute: async ({ level, text, reasoning }) => ({
+    execute: async ({
+      level,
+      text,
+      reasoning,
+    }: {
+      level: string;
+      text: string;
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "heading",
@@ -36,11 +44,17 @@ const suggestTools = {
   }),
   insert_paragraph: tool({
     description: "Insert an explanatory paragraph block.",
-    parameters: z.object({
+    inputSchema: z.object({
       markdown: z.string().describe("Paragraph content in markdown format"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ markdown, reasoning }) => ({
+    execute: async ({
+      markdown,
+      reasoning,
+    }: {
+      markdown: string;
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "paragraph",
@@ -52,11 +66,17 @@ const suggestTools = {
   }),
   insert_quiz: tool({
     description: "Insert a multiple-choice quiz block using Question IDs.",
-    parameters: z.object({
+    inputSchema: z.object({
       questionIDs: z.array(z.string()).describe("Array of Question model IDs"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ questionIDs, reasoning }) => ({
+    execute: async ({
+      questionIDs,
+      reasoning,
+    }: {
+      questionIDs: string[];
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "quiz",
@@ -68,11 +88,17 @@ const suggestTools = {
   }),
   insert_answer: tool({
     description: "Insert a vocabulary practice block using Word IDs.",
-    parameters: z.object({
+    inputSchema: z.object({
       wordIDs: z.array(z.string()).describe("Array of Word model IDs"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ wordIDs, reasoning }) => ({
+    execute: async ({
+      wordIDs,
+      reasoning,
+    }: {
+      wordIDs: string[];
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "answer",
@@ -85,7 +111,7 @@ const suggestTools = {
   insert_meaning_association: tool({
     description:
       "Insert a drag-and-drop word matching block using 2-6 Word IDs.",
-    parameters: z.object({
+    inputSchema: z.object({
       wordIDs: z
         .array(z.string())
         .min(2)
@@ -93,7 +119,13 @@ const suggestTools = {
         .describe("Array of 2-6 Word model IDs"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ wordIDs, reasoning }) => ({
+    execute: async ({
+      wordIDs,
+      reasoning,
+    }: {
+      wordIDs: string[];
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "meaning-association",
@@ -105,11 +137,17 @@ const suggestTools = {
   }),
   insert_custom_answer: tool({
     description: "Insert an open-ended practice block using Question IDs.",
-    parameters: z.object({
+    inputSchema: z.object({
       questionIDs: z.array(z.string()).describe("Array of Question model IDs"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ questionIDs, reasoning }) => ({
+    execute: async ({
+      questionIDs,
+      reasoning,
+    }: {
+      questionIDs: string[];
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "custom-answer",
@@ -122,11 +160,17 @@ const suggestTools = {
   insert_markdown: tool({
     description:
       "Insert rich formatted content (lists, tables, emphasis, code, links).",
-    parameters: z.object({
+    inputSchema: z.object({
       markdown: z.string().describe("Content in markdown format"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ markdown, reasoning }) => ({
+    execute: async ({
+      markdown,
+      reasoning,
+    }: {
+      markdown: string;
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "markdown",
@@ -138,11 +182,17 @@ const suggestTools = {
   }),
   insert_playlist: tool({
     description: "Insert an audio/video media playlist block using File IDs.",
-    parameters: z.object({
+    inputSchema: z.object({
       fileIDs: z.array(z.string()).describe("Array of File model IDs"),
       reasoning: z.string().describe("Pedagogical explanation"),
     }),
-    execute: async ({ fileIDs, reasoning }) => ({
+    execute: async ({
+      fileIDs,
+      reasoning,
+    }: {
+      fileIDs: string[];
+      reasoning: string;
+    }) => ({
       success: true,
       action: "insert_editor_block",
       blockType: "playlist",
@@ -161,7 +211,13 @@ export async function POST(req: Request) {
     if (authError) return authError;
 
     const body = await req.json();
-    const { unitStructure, currentContext, dictionary, questionBank } = body;
+    const {
+      unitStructure,
+      currentContext,
+      dictionary,
+      questionBank,
+      courseOutline,
+    } = body;
 
     if (!unitStructure) {
       return new Response(
@@ -186,7 +242,7 @@ export async function POST(req: Request) {
 
     const openai = createOpenAI({ apiKey });
 
-    const systemMessage = `You are an expert educational content designer.
+    let systemMessage = `You are an expert educational content designer.
 
 Analyze the provided lesson structure and suggest the next logical blocks that would best serve the pedagogical progression. Call the appropriate insert tools to suggest blocks.
 
@@ -196,6 +252,26 @@ Guidelines:
 3. Recommend blocks that build on previous content
 4. Call multiple tools to suggest 2-4 blocks in priority order
 5. Only use IDs that exist in the provided dictionary (for wordIDs), question bank (for questionIDs), or files list (for fileIDs)`;
+
+    // Add course outline for progression awareness
+    if (
+      courseOutline &&
+      Array.isArray(courseOutline) &&
+      courseOutline.length > 0
+    ) {
+      systemMessage += `\n\nCourse Chapter Outline (for understanding where this unit fits in the course):`;
+      for (const entry of courseOutline) {
+        systemMessage += `\n  ${entry.number != null ? `${entry.number}. ` : "• "}${entry.name}`;
+        if (entry.vocabularyCount || entry.questionCount) {
+          const meta: string[] = [];
+          if (entry.vocabularyCount)
+            meta.push(`${entry.vocabularyCount} vocab`);
+          if (entry.questionCount)
+            meta.push(`${entry.questionCount} questions`);
+          systemMessage += ` [${meta.join(", ")}]`;
+        }
+      }
+    }
 
     // Build user message with available resources
     let userContent = `Unit Structure:\n${JSON.stringify(unitStructure, null, 2)}\n\nCurrent Context:\n${JSON.stringify(currentContext || {}, null, 2)}`;
@@ -230,7 +306,7 @@ Guidelines:
       maxRetries: 1,
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("[SuggestBlocks Route] Error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

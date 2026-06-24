@@ -8,7 +8,8 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { getServerClient } from "@/utils/amplifyServerClient";
 
 function getOpenAI() {
@@ -30,11 +31,13 @@ export interface PracticeDrillBlock {
 
 /**
  * Generate practice drill questions for a unit.
+ * Optionally accepts sectionId to fetch course outline for context-aware generation.
  */
 export async function generatePracticeDrill(params: {
   unitId: string;
   drillType: string;
   count: number;
+  sectionId?: string;
   sourcesEnabled?: {
     vocabulary?: boolean;
     questions?: boolean;
@@ -48,6 +51,43 @@ export async function generatePracticeDrill(params: {
   // Fetch unit data
   const { data: unit } = await client.models.Unit.get({ id: params.unitId });
   if (!unit) throw new Error("Unit not found");
+
+  // Fetch course outline for pedagogical context
+  let courseContext = "";
+  if (params.sectionId) {
+    try {
+      const { data: section } = await client.models.Section.get(
+        { id: params.sectionId },
+        { selectionSet: ["id", "name", "courseOutline"] },
+      );
+      if (section?.courseOutline) {
+        const outline = Array.isArray(section.courseOutline)
+          ? section.courseOutline
+          : typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : [];
+        if (outline.length > 0) {
+          const currentIdx = outline.findIndex(
+            (e: any) => e.unitId === params.unitId,
+          );
+          const context: string[] = [];
+          if (currentIdx > 0) {
+            const prev = outline[currentIdx - 1];
+            context.push(`Previous unit: "${prev.name}"`);
+          }
+          if (currentIdx >= 0 && currentIdx < outline.length - 1) {
+            const next = outline[currentIdx + 1];
+            context.push(`Next unit: "${next.name}"`);
+          }
+          if (context.length > 0) {
+            courseContext = `\nCourse progression: ${context.join(". ")}. Drills should reinforce content that bridges these topics when relevant.`;
+          }
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
 
   // Gather source material
   const sources: string[] = [];
@@ -122,11 +162,33 @@ export async function generatePracticeDrill(params: {
     }
   }
 
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: openai("gpt-4o"),
+    schema: z.object({
+      blocks: z.array(
+        z.object({
+          type: z.enum([
+            "quiz",
+            "answer",
+            "meaning-association",
+            "custom-answer",
+          ]),
+          instruction: z.string(),
+          choices: z
+            .array(z.object({ choice: z.string(), correct: z.boolean() }))
+            .optional(),
+          expectedAnswer: z.string().optional(),
+          pairs: z
+            .array(z.object({ term: z.string(), definition: z.string() }))
+            .optional(),
+          hint: z.string().optional(),
+          sourceItemId: z.string(),
+          sourceType: z.enum(["vocabulary", "question", "text", "document"]),
+        }),
+      ),
+    }),
     system: `You are an educational content generator specializing in practice drills. Generate exactly ${params.count} practice drill blocks of type "${params.drillType}" using the provided source material. Each block must reference a sourceItemId from the provided materials.
-
-Respond with JSON only: { "blocks": [...] }
+${courseContext}
 
 Block types:
 - "quiz": Multiple choice with choices array (one correct)
@@ -141,10 +203,5 @@ Generate ${params.count} "${params.drillType}" practice blocks.`,
     maxOutputTokens: 3000,
   });
 
-  try {
-    const parsed = JSON.parse(text);
-    return { blocks: parsed.blocks || [] };
-  } catch {
-    return { blocks: [] };
-  }
+  return { blocks: object.blocks };
 }

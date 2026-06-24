@@ -58,7 +58,6 @@ export const Empty: Story = {
 export const TwoColumns: Story = {
   args: {
     earnedBadges: allBadges.slice(0, 4),
-    columns: 2,
   },
 }
 
@@ -107,6 +106,5 @@ export const AvatarProgression: Story = {
       { badgeType: 'BOT_WHISPERER_I', awardedAt: '2025-02-05T10:00:00Z' },
       { badgeType: 'BOT_WHISPERER_II', awardedAt: '2025-03-15T10:00:00Z' },
     ],
-    columns: 4,
   },
 }

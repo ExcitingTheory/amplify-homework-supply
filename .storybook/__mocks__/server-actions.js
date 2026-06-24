@@ -14,6 +14,10 @@ export async function createSection(data) {
   return { id: 'mock-section-id', ...data };
 }
 
+export async function copyGamificationSettings(sourceSectionId, targetSectionId) {
+  return { success: true };
+}
+
 export async function joinPeerReview(sectionId) {
   return { success: true };
 }
@@ -29,6 +33,12 @@ export async function listSectionStudents(code) {
     ],
   };
 }
+
+// --- app/actions/collaborator ---
+export async function grantCollaboratorAccess() { return { success: true }; }
+export async function revokeCollaboratorAccess() { return { success: true }; }
+export async function listUnitCollaborators() { return { collaborators: [] }; }
+export async function searchInstructors() { return { instructors: [] }; }
 
 // --- app/actions/gamification ---
 export async function awardXP() { return { success: true }; }
@@ -70,7 +80,14 @@ export async function moderateImage() { return { flagged: false, categories: {} 
 export async function notifyModerationFlagged() { return { success: true }; }
 
 // --- app/actions/drill ---
-export async function generatePracticeDrill() { return { blocks: [] }; }
+export async function generatePracticeDrill() {
+  return {
+    blocks: [
+      { type: 'quiz', instruction: 'What is the powerhouse of the cell?', choices: [{ choice: 'Mitochondria', correct: true }, { choice: 'Nucleus', correct: false }, { choice: 'Ribosome', correct: false }] },
+      { type: 'answer', instruction: 'Define photosynthesis in your own words.', expectedAnswer: 'The process by which plants convert light energy into chemical energy.' },
+    ],
+  };
+}
 
 // --- app/actions/embeddings ---
 export async function generateEmbedding() {
@@ -83,6 +100,15 @@ export async function cancelDocumentAnalysis() { return { success: true }; }
 
 // --- app/actions/storage ---
 export async function getStudentSubmissionUrl() { return { url: 'https://example.com/mock-submission.pdf' }; }
+
+// --- app/actions/forkUnit ---
+export async function forkUnit(unitId, username, identityId) {
+  return { success: true, id: 'mock-forked-unit-id' };
+}
+
+// --- app/actions/collaborator ---
+export async function listSharedWithMe() { return { units: [] }; }
+export async function listCommunityUnits() { return { units: [] }; }
 
 // --- app/actions/peerReview ---
 export async function handleAIMention() { return { success: true }; }

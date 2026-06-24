@@ -574,6 +574,18 @@ const ChatSidebar = ({ onClose }) => {
         name: s.name,
         description: s.description,
       })),
+      // Course outline from the relevant section for progression context
+      courseOutline: (() => {
+        const section = relevantSections.find((s) => s.courseOutline);
+        if (!section?.courseOutline) return null;
+        try {
+          return typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : section.courseOutline;
+        } catch {
+          return null;
+        }
+      })(),
       grade: grade
         ? {
             id: grade.id,
@@ -584,6 +596,7 @@ const ChatSidebar = ({ onClose }) => {
           }
         : null,
       studentMemory: studentMemory || null,
+      sectionId: sectionId || null,
     };
   }, [
     unit,

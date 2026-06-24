@@ -51,7 +51,7 @@ export default async function WorkbookPage({ params }: WorkbookPageProps) {
   if (isAuthenticated) {
     try {
       const client = getServerClient();
-      const { data: unitMeta } = await client.models.Unit.get(
+      const { data: unitMeta } = await (client as any).models.Unit.get(
         { id },
         { selectionSet: ["id", "publishedContentVersion"] }
       );

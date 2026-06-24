@@ -386,7 +386,47 @@ function Sections({ user }) {
             <InstructorDashboard sections={ownedSections} />
           )}
 
-          {!sectionsLoaded && sections.length === 0 && null}
+          {!sectionsLoaded && sections.length === 0 && (
+            <>
+              {[0, 1, 2].map((i) => (
+                <Card
+                  key={i}
+                  elevation={2}
+                  sx={{
+                    display: "flex",
+                    margin: "1rem auto",
+                    width:
+                      isDesktop && drawerOpen
+                        ? `calc(90vw - ${drawerWidth}px)`
+                        : "90vw",
+                    maxWidth: "80rem",
+                    borderRadius: 2,
+                    borderLeft: "4px solid",
+                    borderLeftColor: "text.primary",
+                    p: 2,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: 1,
+                      gap: 1,
+                    }}
+                  >
+                    <Skeleton variant="text" width="40%" height={36} />
+                    <Skeleton variant="text" width="60%" height={24} />
+                    <Skeleton
+                      variant="rectangular"
+                      width={140}
+                      height={40}
+                      sx={{ borderRadius: 2, mt: 1 }}
+                    />
+                  </Box>
+                </Card>
+              ))}
+            </>
+          )}
 
           {sectionsLoaded && sections.length === 0 && (
             //embed url to create a new section
@@ -583,10 +623,12 @@ function Sections({ user }) {
                     </Box>
                   </Box>
                   {section?.featuredImage && (
-                    <LazyCardMedia
-                      s3Key={section?.featuredImage}
-                      identityId={section?.identityId}
-                    />
+                    <Box sx={{ maxWidth: "50%", flexShrink: 0, maxHeight: 200, overflow: "hidden" }}>
+                      <LazyCardMedia
+                        s3Key={section?.featuredImage}
+                        identityId={section?.identityId}
+                      />
+                    </Box>
                   )}
                 </Card>
               );

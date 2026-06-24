@@ -266,8 +266,30 @@ export default [{
     'i18next/no-literal-string': i18nextRuleConfig,
   },
 }, {
-  // TypeScript files
+  // TypeScript story files — use storybook tsconfig (stories are excluded from root tsconfig)
+  files: ['src/**/*.stories.{ts,tsx}'],
+  languageOptions: {
+    parser: tsparser,
+    parserOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      ecmaFeatures: {
+        jsx: true,
+      },
+      project: './config/tsconfig.stories.json',
+    },
+  },
+  plugins: {
+    '@typescript-eslint': tseslint,
+    i18next,
+  },
+  rules: {
+    'i18next/no-literal-string': 'off',
+  },
+}, {
+  // TypeScript files (non-story)
   files: ['src/**/*.{ts,tsx}', 'pages/**/*.{ts,tsx}'],
+  ignores: ['**/*.stories.{ts,tsx}', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**'],
   languageOptions: {
     parser: tsparser,
     parserOptions: {

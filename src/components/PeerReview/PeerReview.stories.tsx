@@ -52,6 +52,7 @@ export const RoomInviteStandalone: StoryObj<typeof RoomInvite> = {
   render: () => (
     <RoomInvite
       invitedUsers={['alice', 'bob', 'charlie']}
+      onInvite={(user) => console.log('Invite:', user)}
       onRemove={(user) => console.log('Remove:', user)}
     />
   ),
@@ -68,8 +69,8 @@ const invitationsMeta: Meta<typeof PeerReviewInvitations> = {
 }
 
 const sampleInvitations: PeerReviewInvitation[] = [
-  { roomId: 'room-1', gradeId: 'grade-1', ownerId: 'alice', ownerName: 'Alice', unitName: 'Biology 101', status: 'OPEN' },
-  { roomId: 'room-2', gradeId: 'grade-2', ownerId: 'bob', ownerName: 'Bob', unitName: 'French Basics', status: 'IN_REVIEW' },
+  { id: 'room-1', gradeId: 'grade-1', ownerId: 'alice', ownerDisplayName: 'Alice', unitName: 'Biology 101', status: 'OPEN' },
+  { id: 'room-2', gradeId: 'grade-2', ownerId: 'bob', ownerDisplayName: 'Bob', unitName: 'French Basics', status: 'IN_REVIEW' },
 ]
 
 export const InvitationsStory: StoryObj<typeof PeerReviewInvitations> = {
@@ -102,12 +103,14 @@ export const ChatStory: StoryObj<typeof PeerReviewChat> = {
   render: () => (
     <PeerReviewChat
       messages={[
-        { id: '1', author: 'alice', displayName: 'Alice', text: 'I think the answer for Q3 should mention osmosis.', timestamp: new Date(Date.now() - 120000).toISOString() },
-        { id: '2', author: 'bob', displayName: 'Bob', text: 'Good point! I also noticed the diagram labels are switched.', timestamp: new Date(Date.now() - 60000).toISOString() },
-        { id: '3', author: 'alice', displayName: 'Alice', text: '@AI Can you explain the difference between osmosis and diffusion?', timestamp: new Date().toISOString() },
+        { id: '1', author: 'alice', authorRole: 'learner', content: 'I think the answer for Q3 should mention osmosis.', messageType: 'CHAT' as const, createdAt: new Date(Date.now() - 120000).toISOString() },
+        { id: '2', author: 'bob', authorRole: 'learner', content: 'Good point! I also noticed the diagram labels are switched.', messageType: 'CHAT' as const, createdAt: new Date(Date.now() - 60000).toISOString() },
+        { id: '3', author: 'alice', authorRole: 'learner', content: '@AI Can you explain the difference between osmosis and diffusion?', messageType: 'CHAT' as const, createdAt: new Date().toISOString() },
       ]}
       onSendMessage={(text) => console.log('Send:', text)}
       currentUsername="bob"
+      typingPeers={[]}
+      isClosed={false}
     />
   ),
   parameters: { ...chatMeta },

@@ -32,7 +32,7 @@ export default {
   },
 };
 
-const onError = (error) => {
+const onError = (error: Error) => {
   console.error(error);
 };
 
@@ -50,7 +50,7 @@ function InsertCustomAIButton() {
   );
 }
 
-const EditableTemplate = ({ editorState, showInsertButton }) => {
+const EditableTemplate = ({ editorState, showInsertButton }: { editorState?: any; showInsertButton?: boolean }) => {
   const initialConfig = {
     namespace: "CustomAIPluginDemo",
     theme: LanguageEditorTheme,
@@ -129,7 +129,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
   );
 };
 
-const ReadOnlyTemplate = ({ editorState }) => {
+const ReadOnlyTemplate = ({ editorState }: { editorState?: any }) => {
   const initialConfig = {
     namespace: "CustomAIPluginDemo",
     theme: LanguageEditorTheme,

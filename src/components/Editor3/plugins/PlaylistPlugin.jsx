@@ -75,7 +75,7 @@ export class PlaylistNode extends DecoratorNode {
 
   exportJSON() {
     return {
-      // ...super.exportJSON(),
+      ...super.exportJSON(),
       type: 'playlist',
       version: 1,
       fileIDs: [...this.__ids],

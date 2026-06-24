@@ -57,7 +57,7 @@ export class QuizNode extends DecoratorNode {
 
   exportJSON() {
     return {
-      // ...super.exportJSON(),
+      ...super.exportJSON(),
       type: 'quiz',
       version: 1,
       data: this.__data,

@@ -53,7 +53,7 @@ export const WithFeaturedImage = {
   decorators: [
     withContexts({
       unit: {
-        featuredImage: "public/images/featured-biology.jpg",
+        featuredImage: "/story-mocks/animals-10008941_1280.jpg",
       },
     }),
   ],

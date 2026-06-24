@@ -114,6 +114,7 @@ const GET_UNIT = /* GraphQL */ `
       identityId
       contentVersion
       language
+      summary
     }
   }
 `;
@@ -278,6 +279,7 @@ interface SourceMaterial {
     summaries: any[];
   }[];
   language?: string;
+  unitSummary?: string;
 }
 
 async function fetchSourceMaterial(
@@ -300,6 +302,7 @@ async function fetchSourceMaterial(
   const unit = unitData?.getUnit;
   if (!unit) throw new Error(`Unit ${unitId} not found`);
   material.language = unit.language;
+  material.unitSummary = unit.summary || undefined;
 
   // Fetch vocabulary words
   if (sourcesEnabled.vocabulary) {
@@ -497,6 +500,16 @@ function buildGenerationPrompt(
       if (doc.summaries.length > 0)
         parts.push(`  Summaries: ${JSON.stringify(doc.summaries.slice(0, 5))}`);
     }
+    parts.push("");
+  }
+
+  // Cross-unit context from Unit.summary (includes adjacent unit info)
+  if (material.unitSummary) {
+    parts.push("=== UNIT CONTEXT ===");
+    parts.push(material.unitSummary);
+    parts.push(
+      "Use this context for spaced repetition — reference concepts from adjacent units when appropriate.",
+    );
     parts.push("");
   }
 

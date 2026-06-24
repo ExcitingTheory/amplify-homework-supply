@@ -1,5 +1,6 @@
 
-import { NextIntlClientProvider, hasLocale } from 'next-intl';
+// @ts-expect-error next-intl types mismatch under bundler resolution
+import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -44,7 +45,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!hasLocale(routing.locales, locale)) {
+  if (!(routing.locales as readonly string[]).includes(locale)) {
     notFound();
   }
 

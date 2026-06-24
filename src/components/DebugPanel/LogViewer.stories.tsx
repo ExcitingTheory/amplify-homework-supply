@@ -19,31 +19,37 @@ const mockLogs: LogEntry[] = [
     timestamp: Date.now() - 10000,
     level: 'info',
     message: 'Application initialized',
+    stack: null,
   },
   {
     timestamp: Date.now() - 9000,
     level: 'log',
     message: 'DataStore starting sync...',
+    stack: null,
   },
   {
     timestamp: Date.now() - 8000,
     level: 'info',
     message: 'User authenticated: user@example.com',
+    stack: null,
   },
   {
     timestamp: Date.now() - 7000,
     level: 'debug',
     message: 'Fetching unit data: {"unitId": "unit-123"}',
+    stack: null,
   },
   {
     timestamp: Date.now() - 6000,
     level: 'warn',
     message: 'Slow query detected: DataStore.observeQuery took 1200ms',
+    stack: null,
   },
   {
     timestamp: Date.now() - 5000,
     level: 'log',
     message: 'Rendering Editor3 component',
+    stack: null,
   },
   {
     timestamp: Date.now() - 4000,
@@ -55,16 +61,19 @@ const mockLogs: LogEntry[] = [
     timestamp: Date.now() - 3000,
     level: 'warn',
     message: 'Memory usage high: 85% of heap used',
+    stack: null,
   },
   {
     timestamp: Date.now() - 2000,
     level: 'info',
     message: 'Auto-save completed successfully',
+    stack: null,
   },
   {
     timestamp: Date.now() - 1000,
     level: 'log',
     message: 'Component tree updated: 12 components registered',
+    stack: null,
   },
 ];
 
@@ -93,9 +102,7 @@ const manyLogs: LogEntry[] = Array.from({ length: 200 }, (_, i) => ({
   timestamp: Date.now() - i * 100,
   level: (['log', 'info', 'warn', 'error', 'debug'] as const)[i % 5],
   message: `Log entry ${200 - i}: ${['Processing', 'Rendering', 'Fetching', 'Saving', 'Loading'][i % 5]} data...`,
-  ...(i % 10 === 0 && {
-    stack: `Stack trace for log ${200 - i}\n  at function${i}\n  at caller${i}`,
-  }),
+  stack: i % 10 === 0 ? `Stack trace for log ${200 - i}\n  at function${i}\n  at caller${i}` : null,
 }));
 
 export const Default: Story = {
@@ -176,12 +183,12 @@ export const WithStackTraces: Story = {
 export const MixedLevels: Story = {
   args: {
     logs: [
-      { timestamp: Date.now() - 6000, level: 'debug', message: 'Debug: Component mounted' },
-      { timestamp: Date.now() - 5000, level: 'log', message: 'Log: Regular operation' },
-      { timestamp: Date.now() - 4000, level: 'info', message: 'Info: User action completed' },
-      { timestamp: Date.now() - 3000, level: 'warn', message: 'Warning: Performance issue' },
-      { timestamp: Date.now() - 2000, level: 'error', message: 'Error: Operation failed', stack: 'Error stack...' },
-      { timestamp: Date.now() - 1000, level: 'debug', message: 'Debug: Cleanup executed' },
+      { timestamp: Date.now() - 6000, level: 'debug' as const, message: 'Debug: Component mounted', stack: null },
+      { timestamp: Date.now() - 5000, level: 'log' as const, message: 'Log: Regular operation', stack: null },
+      { timestamp: Date.now() - 4000, level: 'info' as const, message: 'Info: User action completed', stack: null },
+      { timestamp: Date.now() - 3000, level: 'warn' as const, message: 'Warning: Performance issue', stack: null },
+      { timestamp: Date.now() - 2000, level: 'error' as const, message: 'Error: Operation failed', stack: 'Error stack...' },
+      { timestamp: Date.now() - 1000, level: 'debug' as const, message: 'Debug: Cleanup executed', stack: null },
     ],
     onClear: () => console.log('Clear logs'),
     autoScroll: true,

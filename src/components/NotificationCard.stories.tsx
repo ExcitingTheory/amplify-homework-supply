@@ -38,7 +38,6 @@ type Story = StoryObj<typeof NotificationCard>;
 const baseNotification = {
   id: "n1",
   recipientId: "user-1",
-  type: "BADGE_EARNED",
   category: "GAMIFICATION",
   title: "You earned the 'Consistent Learner' badge!",
   body: "Congratulations! You've maintained a 7-day learning streak.",
@@ -94,7 +93,6 @@ export const AssignmentDue: Story = {
     notification: {
       ...baseNotification,
       id: "n4",
-      type: "ASSIGNMENT_DUE_SOON",
       category: "ASSIGNMENT",
       title: "Assignment due in 2 hours",
       body: "Unit 5: Cell Biology - submit before the deadline.",
@@ -116,7 +114,6 @@ export const CollaborationInvite: Story = {
     notification: {
       ...baseNotification,
       id: "n5",
-      type: "PEER_REVIEW_INVITE",
       category: "COLLABORATION",
       title: "Peer Review Invitation",
       body: "Alice invited you to review Unit 3: Photosynthesis",
@@ -140,7 +137,6 @@ export const SquadPost: Story = {
     notification: {
       ...baseNotification,
       id: "n6",
-      type: "SQUAD_POST_NEW",
       category: "SQUAD",
       title: "New post in Science Explorers",
       body: "Bob posted in your squad.",
@@ -162,7 +158,6 @@ export const SystemAnnouncement: Story = {
     notification: {
       ...baseNotification,
       id: "n7",
-      type: "SYSTEM_ANNOUNCEMENT",
       category: "SYSTEM",
       title: "New features available!",
       body: "Check out the new practice drill modes and squad challenges.",
@@ -198,12 +193,12 @@ export const AllCategories: Story = {
   render: () => (
     <Box>
       {[
-        { category: "ASSIGNMENT", type: "ASSIGNMENT_DUE_SOON", title: "Assignment due tomorrow" },
-        { category: "COLLABORATION", type: "PEER_REVIEW_INVITE", title: "Peer review invitation" },
-        { category: "GAMIFICATION", type: "BADGE_EARNED", title: "New badge earned!" },
-        { category: "SQUAD", type: "SQUAD_POST_NEW", title: "New squad post" },
-        { category: "CHAT", type: "CHAT_MENTION", title: "You were mentioned" },
-        { category: "SYSTEM", type: "SYSTEM_MAINTENANCE", title: "Scheduled maintenance" },
+        { category: "ASSIGNMENT", title: "Assignment due tomorrow" },
+        { category: "COLLABORATION", title: "Peer review invitation" },
+        { category: "GAMIFICATION", title: "New badge earned!" },
+        { category: "SQUAD", title: "New squad post" },
+        { category: "CHAT", title: "You were mentioned" },
+        { category: "SYSTEM", title: "Scheduled maintenance" },
       ].map((n, i) => (
         <NotificationCard
           key={i}

@@ -103,6 +103,8 @@ import { INSERT_IMAGE_COMMAND } from "../plugins/ImagesPlugin";
 import { INSERT_PDF_COMMAND } from "../plugins/PdfViewerPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useSearchParams } from "next/navigation";
+import ShowDeletedToggle from "../../ShowDeletedToggle";
+import { useRecycleBin } from "../../../hooks/useRecycleBin";
 
 // Lexical imports for inline editing
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -2306,17 +2308,20 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
       case "delete":
         setConfirmDialog({
           open: true,
-          message: `Delete ${file.name}?`,
+          message: `Move to Recycle Bin: ${file.name}?`,
           severity: "warning",
           onConfirm: async () => {
             try {
               console.log(
-                "[FileManager2] Deleting single file:",
+                "[FileManager2] Soft deleting file:",
                 file.name,
                 file.id,
               );
-              await deleteFileCompletely(file);
-              console.log("[FileManager2] Successfully deleted:", file.name);
+              await softDeleteRecord("File", file.id);
+              console.log(
+                "[FileManager2] Successfully soft deleted:",
+                file.name,
+              );
               setConfirmDialog({
                 open: false,
                 message: "",
@@ -2325,13 +2330,13 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
               });
             } catch (error) {
               console.error(
-                "[FileManager2] Failed to delete file:",
+                "[FileManager2] Failed to soft delete file:",
                 file.name,
                 error,
               );
               setConfirmDialog({
                 open: true,
-                message: `Failed to delete ${file.name}: ${error.message}`,
+                message: `Failed to move ${file.name} to Recycle Bin: ${error.message}`,
                 severity: "error",
                 onConfirm: () =>
                   setConfirmDialog({
@@ -3762,8 +3767,15 @@ export default function FileManager2() {
   const [selectedDocument, setSelectedDocument] = React.useState(null);
   const [suggestionTab, setSuggestionTab] = React.useState(0);
 
-  const { files, documents, session, bumpFileVersion } =
-    React.useContext(FilesContext);
+  const {
+    files,
+    documents,
+    session,
+    bumpFileVersion,
+    showDeleted,
+    setShowDeleted,
+  } = React.useContext(FilesContext);
+  const { softDelete: softDeleteRecord } = useRecycleBin();
 
   // Debug: log files received
   React.useEffect(() => {
@@ -4803,21 +4815,18 @@ export default function FileManager2() {
                 </MenuItem>
 
                 {/**
-                 * Delete selected files action
+                 * Delete selected files action (soft delete to recycle bin)
                  */}
                 <MenuItem
                   onClick={() => {
                     setContextMenu(null);
                     setConfirmDialog({
                       open: true,
-                      message: t(
-                        "fileManager2.contextMenu.deleteConfirmMessage",
-                        { count: selectedItems.size },
-                      ),
-                      severity: "error",
+                      message: `Move ${selectedItems.size} file(s) to Recycle Bin?`,
+                      severity: "warning",
                       onConfirm: async () => {
                         console.log(
-                          "[FileManager2] Starting delete operation for",
+                          "[FileManager2] Starting soft delete for",
                           selectedItems.size,
                           "files",
                         );
@@ -4828,18 +4837,18 @@ export default function FileManager2() {
                           if (file) {
                             try {
                               console.log(
-                                "[FileManager2] Deleting file:",
+                                "[FileManager2] Soft deleting file:",
                                 file.name,
                                 file.id,
                               );
-                              await deleteFileCompletely(file);
+                              await softDeleteRecord("File", file.id);
                               console.log(
-                                "[FileManager2] Successfully deleted:",
+                                "[FileManager2] Successfully soft deleted:",
                                 file.name,
                               );
                             } catch (error) {
                               console.error(
-                                "[FileManager2] Failed to delete file:",
+                                "[FileManager2] Failed to soft delete file:",
                                 file.name,
                                 error,
                               );
@@ -4855,12 +4864,12 @@ export default function FileManager2() {
 
                         if (deleteErrors.length > 0) {
                           console.error(
-                            "[FileManager2] Delete operation completed with errors:",
+                            "[FileManager2] Soft delete completed with errors:",
                             deleteErrors,
                           );
                           setConfirmDialog({
                             open: true,
-                            message: `Failed to delete ${deleteErrors.length} file(s): ${deleteErrors.map((e) => e.file).join(", ")}`,
+                            message: `Failed to move ${deleteErrors.length} file(s) to Recycle Bin: ${deleteErrors.map((e) => e.file).join(", ")}`,
                             severity: "error",
                             onConfirm: () =>
                               setConfirmDialog({
@@ -4872,7 +4881,7 @@ export default function FileManager2() {
                           });
                         } else {
                           console.log(
-                            "[FileManager2] All files deleted successfully",
+                            "[FileManager2] All files soft deleted successfully",
                           );
                           setConfirmDialog({
                             open: false,
@@ -4944,9 +4953,11 @@ export default function FileManager2() {
                   })}
                 </MenuItem>
               </Menu>
+              <ShowDeletedToggle
+                showDeleted={showDeleted}
+                setShowDeleted={setShowDeleted}
+              />
             </Box>
-
-            {/* Context Menu for Actions */}
 
             {/* Scrollable Content Area */}
             <Box

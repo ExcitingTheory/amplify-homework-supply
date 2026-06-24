@@ -32,6 +32,13 @@ function handleSubscriptionError(label, error) {
     );
     return;
   }
+  // Empty error objects are transient auth-timing issues (credentials not yet propagated)
+  const msg =
+    error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
+  if (!msg || msg === "{}" || msg === "{}") {
+    console.warn(`[SectionContext] ${label}: transient empty error (safe to ignore)`);
+    return;
+  }
   console.error(`[SectionContext] ${label}:`, error);
 }
 
@@ -42,20 +49,15 @@ const SectionProvider = ({ children, unitId }) => {
   const sectionVersionMapRef = useRef({});
   const assignmentVersionMapRef = useRef({});
 
+  // Show deleted toggle state
+  const [showDeleted, setShowDeleted] = React.useState(false);
+  const [deletedSections, setDeletedSections] = React.useState([]);
+
+  // Gate: don't subscribe until auth is fully resolved
+  const authReady = !authLoading && !!user;
+
   React.useEffect(() => {
-    console.log("[SectionContext] useEffect triggered", {
-      authLoading,
-      hasUser: !!user,
-      userSub: user?.attributes?.sub,
-    });
-    // Wait for auth to be ready
-    if (authLoading || !user) {
-      console.log("[SectionContext] Waiting for auth...", {
-        authLoading,
-        hasUser: !!user,
-      });
-      return;
-    }
+    if (!authReady) return;
 
     const client = getAmplifyClient();
     let cancelled = false;
@@ -64,9 +66,13 @@ const SectionProvider = ({ children, unitId }) => {
     const subscription = client.models.Section.observeQuery().subscribe({
       next: ({ items }) => {
         if (cancelled) return;
-        const validItems = (items || []).filter(
+        const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+        const validItems = allValid.filter((item) => item.deletedAt == null);
+        const deleted = allValid.filter((item) => item.deletedAt != null);
+
+        setDeletedSections(deleted);
 
         // Version map guard: skip if no item has a newer _version
         const hasChanges = validItems.some((item) => {
@@ -97,14 +103,13 @@ const SectionProvider = ({ children, unitId }) => {
     });
 
     return () => {
-      console.log("[SectionContext] Cleaning up subscriptions");
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [user, authLoading]);
+  }, [authReady]);
 
   React.useEffect(() => {
-    if (!unitId) return;
+    if (!authReady || !unitId) return;
 
     const client = getAmplifyClient();
     let cancelled = false;
@@ -148,7 +153,7 @@ const SectionProvider = ({ children, unitId }) => {
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [unitId]);
+  }, [authReady, unitId]);
 
   // Refetch sections - can be called after create/update operations
   const refetchSections = React.useCallback(async () => {
@@ -211,6 +216,9 @@ const SectionProvider = ({ children, unitId }) => {
       refetchSections,
       bumpSectionVersion,
       bumpAssignmentVersion,
+      showDeleted,
+      setShowDeleted,
+      deletedSections,
     }),
     [
       state.sections,
@@ -219,6 +227,8 @@ const SectionProvider = ({ children, unitId }) => {
       refetchSections,
       bumpSectionVersion,
       bumpAssignmentVersion,
+      showDeleted,
+      deletedSections,
     ],
   );
 

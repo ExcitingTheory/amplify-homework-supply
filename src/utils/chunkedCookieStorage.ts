@@ -12,7 +12,7 @@
  * This solves the Cognito idToken cookie being silently dropped when users
  * have many groups (section-{id}-instructors/learners).
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+ 
 // @ts-ignore — js-cookie has no type declarations in this project
 import JsCookie from "js-cookie";
 

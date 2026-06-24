@@ -28,6 +28,7 @@ import Alert from '@mui/material/Alert'
 import { XPReason, LEVEL_DEFAULTS, generateLevelThresholds } from '../../utils/xpCalculation'
 import type { LevelConfig } from '../../utils/xpCalculation'
 import type { AvatarUnlockConfig } from './DiceBearAvatar'
+import type { ThemeUnlockConfig } from './ThemeUnlockEditor'
 import { SectionXPGauge } from './SectionXPGauge'
 
 // ============================================================================
@@ -51,6 +52,8 @@ export interface XPTunerConfig {
   levelConfig?: LevelConfig
   /** Avatar style unlock schedule — which styles unlock at which levels */
   avatarUnlocks?: AvatarUnlockConfig
+  /** Theme unlock schedule — which cosmetic themes unlock at which levels */
+  themeUnlocks?: ThemeUnlockConfig
 }
 
 // Stable default to avoid infinite render loops from new {} on each render

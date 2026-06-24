@@ -216,7 +216,7 @@ export function getModerationStatus(item) {
         return `Flagged: ${flaggedCategories.join(", ")}`;
       }
     } catch (e) {
-      console.error("Error parsing moderation flags:", e);
+      console.warn("Error parsing moderation flags:", e);
     }
     return "Flagged for review";
   }

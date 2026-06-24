@@ -699,7 +699,20 @@ function SectionDetail({ user, signOut }) {
         });
         setAllGradeMap(allGradesByUserUnit);
       },
-      error: (err) => console.error("Grades subscription error:", err),
+      error: (err) => {
+        const msg =
+          err?.message || err?.errors?.[0]?.message || JSON.stringify(err);
+        if (
+          msg === "{}" ||
+          msg === "undefined" ||
+          msg.includes("DuplicatedOperationError") ||
+          msg.includes("Not Authorized")
+        ) {
+          console.warn("Grades subscription: transient error (safe to ignore)");
+          return;
+        }
+        console.error("Grades subscription error:", err);
+      },
     });
 
     return function cleanup() {
@@ -852,6 +865,18 @@ function SectionDetail({ user, signOut }) {
     const client = getAmplifyClient();
     const subscription = client.models.HomeworkRoom.observeQuery({
       filter: { sectionID: { eq: id } },
+      selectionSet: [
+        "id",
+        "gradeId",
+        "ownerId",
+        "sectionID",
+        "status",
+        "code",
+        "invitedUserIds",
+        "createdAt",
+        "updatedAt",
+        "_version",
+      ],
     }).subscribe({
       next: ({ items }) => {
         const valid = items.filter(
@@ -1039,7 +1064,7 @@ function SectionDetail({ user, signOut }) {
           _version: section._version,
         });
 
-        if (errors) {
+        if (errors?.length) {
           console.error("Error saving curve settings:", errors);
         }
       } catch (error) {
@@ -2378,7 +2403,7 @@ function SectionDetail({ user, signOut }) {
         />
       </Box>
 
-      {!sectionAssignments && (
+      {!sectionAssignments && section && (
         <Box sx={{ p: 3, maxWidth: "80rem", mx: "auto" }}>
           <Skeleton variant="text" width="30%" height={36} sx={{ mb: 2 }} />
           {[0, 1, 2].map((i) => (
@@ -2498,10 +2523,12 @@ function SectionDetail({ user, signOut }) {
                                 alt="Live from space album cover"
                               /> */}
                   {featuredImage && (
-                    <LazyCardMedia
-                      s3Key={featuredImage}
-                      identityId={identityId}
-                    />
+                    <Box sx={{ maxWidth: "50%", flexShrink: 0, overflow: "hidden" }}>
+                      <LazyCardMedia
+                        s3Key={featuredImage}
+                        identityId={identityId}
+                      />
+                    </Box>
                   )}
                 </Card>
               </React.Fragment>

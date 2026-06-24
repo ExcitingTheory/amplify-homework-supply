@@ -139,7 +139,7 @@ describe('ComponentTreeStore', () => {
       store.register('Component', {}, {});
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledTimes(1);
       expect(subscriber).toHaveBeenCalledWith(expect.arrayContaining([
@@ -156,7 +156,7 @@ describe('ComponentTreeStore', () => {
       store.unregister(id);
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledWith([]);
     });
@@ -168,13 +168,13 @@ describe('ComponentTreeStore', () => {
       store.subscribe(subscriber);
       
       // Flush microtask from register
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       subscriber.mockClear();
       
       store.register('Component', {}, { count: 1 }, id);
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledTimes(1);
     });
@@ -189,7 +189,7 @@ describe('ComponentTreeStore', () => {
       store.register('Component', {}, {});
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       
       expect(subscriber1).toHaveBeenCalledTimes(1);
       expect(subscriber2).toHaveBeenCalledTimes(1);
@@ -202,7 +202,7 @@ describe('ComponentTreeStore', () => {
       store.register('Component1', {}, {});
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       expect(subscriber).toHaveBeenCalledTimes(1);
       
       unsubscribe();
@@ -211,7 +211,7 @@ describe('ComponentTreeStore', () => {
       store.register('Component2', {}, {});
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       expect(subscriber).not.toHaveBeenCalled();
     });
   });
@@ -286,7 +286,7 @@ describe('ComponentTreeStore', () => {
       store.clear();
       
       // Flush queueMicrotask
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledWith([]);
     });

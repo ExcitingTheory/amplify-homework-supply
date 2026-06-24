@@ -9,10 +9,10 @@ import { LogViewer } from '../LogViewer';
 import { LogEntry, LogLevel } from '../../../utils/debug/DebugLogger';
 
 const mockLogs: LogEntry[] = [
-  { timestamp: Date.now() - 3000, level: 'info', message: 'Info message' },
-  { timestamp: Date.now() - 2000, level: 'warn', message: 'Warning message' },
+  { timestamp: Date.now() - 3000, level: 'info', message: 'Info message', stack: null },
+  { timestamp: Date.now() - 2000, level: 'warn', message: 'Warning message', stack: null },
   { timestamp: Date.now() - 1000, level: 'error', message: 'Error message', stack: 'Error stack' },
-  { timestamp: Date.now(), level: 'log', message: 'Regular log' },
+  { timestamp: Date.now(), level: 'log', message: 'Regular log', stack: null },
 ];
 
 describe('LogViewer', () => {

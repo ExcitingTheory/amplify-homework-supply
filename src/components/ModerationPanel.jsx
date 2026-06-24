@@ -37,7 +37,7 @@ export default function ModerationPanel({ item, title }) {
   try {
     flags = JSON.parse(item.moderationFlags || '{}');
   } catch (e) {
-    console.error('Error parsing moderation flags:', e);
+    console.warn('Error parsing moderation flags:', e);
     return null;
   }
 

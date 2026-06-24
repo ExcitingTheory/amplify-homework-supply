@@ -210,10 +210,12 @@ export function GradedWorkbookViewer({
 
     grades.forEach((grade, attemptIndex) => {
       if (!grade.data) return
+      const gradeData = typeof grade.data === 'string' ? JSON.parse(grade.data) : grade.data
       const attemptNum = grade.attempt || grades.length - attemptIndex
 
-      Object.entries(grade.data).forEach(([blockId, blockData]) => {
+      Object.entries(gradeData).forEach(([blockId, blockData]) => {
         if (!result[blockId]) result[blockId] = []
+        if (typeof blockData !== 'object' || blockData === null) return
 
         // Quiz blocks
         if ('responses' in blockData && 'accuracy' in blockData) {

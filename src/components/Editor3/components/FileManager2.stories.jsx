@@ -258,7 +258,7 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_PDF_1,
       name: "japanese-lesson-photosynthesis.pdf",
-      path: "protected/documents/japanese-lesson-photosynthesis.pdf",
+      path: "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
       mimeType: "application/pdf",
       level: "PROTECTED",
       size: 1234567,
@@ -271,7 +271,7 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_PDF_2,
       name: "french-seasons-vocabulary.pdf",
-      path: "protected/documents/french-seasons.pdf",
+      path: "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
       mimeType: "application/pdf",
       level: "PROTECTED",
       size: 456789,

@@ -75,6 +75,8 @@ const SettingsProvider = ({ children }) => {
             emailNotifications: true,
             webhookNotifications: false,
             language: "en",
+            profileThemeId: "default",
+            audioCleanupStrength: "standard",
           });
           if (cancelled) return;
         }
@@ -205,6 +207,41 @@ const SettingsProvider = ({ children }) => {
   const updateSettings = React.useCallback(
     async (updates) => {
       if (!state.settings) return;
+
+      // ── Theme level-gating enforcement ──────────────────────────────────
+      // Prevent users from persisting a theme they haven't unlocked.
+      if (updates.profileThemeId && updates.profileThemeId !== "default") {
+        const THEME_MIN_LEVELS = {
+          midnight: 2,
+          forest: 3,
+          sunset: 4,
+          aurora: 5,
+          custom: 2,
+        };
+        const requiredLevel = THEME_MIN_LEVELS[updates.profileThemeId];
+        if (requiredLevel) {
+          try {
+            const client = getAmplifyClient();
+            const { data: profiles } = await client.models.StudentProfile.list({
+              filter: { owner: { eq: user } },
+              selectionSet: ["id", "level"],
+            });
+            const userLevel = profiles?.[0]?.level || 1;
+            if (userLevel < requiredLevel) {
+              console.warn(
+                `[SettingsContext] Theme "${updates.profileThemeId}" requires level ${requiredLevel}, user is level ${userLevel}. Blocked.`,
+              );
+              return;
+            }
+          } catch (err) {
+            console.warn(
+              "[SettingsContext] Could not verify theme level-gate, allowing update:",
+              err,
+            );
+            // Fail open — don't block if the profile query fails
+          }
+        }
+      }
 
       // Optimistic version bump — blocks subscription echo
       const predictedNextVersion = (state.settings._version || 0) + 1;

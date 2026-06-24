@@ -14,7 +14,14 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, tool, convertToModelMessages, UIMessage } from "ai";
+import {
+  streamText,
+  tool,
+  convertToModelMessages,
+  UIMessage,
+  generateText,
+  stepCountIs,
+} from "ai";
 import { z } from "zod";
 import { blockTools } from "../_shared/blockTools";
 import { validateAuth } from "../_shared/auth";
@@ -22,10 +29,243 @@ import {
   resolvePersona,
   filterToolsByPersona,
   buildPersonaSystemMessage,
+  resolveAgentConfig,
   type BotPersona,
+  type ResolvedAgentConfig,
 } from "../_shared/botPersonas";
+import { buildAgentTools, type AgentContext } from "../_shared/agentTools";
 
 export const maxDuration = 30; // seconds (matches Lambda timeout of 29s)
+
+// ─── Token Budget Utilities ──────────────────────────────────────────────────
+
+/**
+ * Approximate token count using the ~4 chars/token heuristic.
+ * Fast and allocation-free — suitable for budget enforcement.
+ */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/**
+ * Truncate text to fit within a token budget.
+ * Preserves whole words at the boundary and appends a truncation notice.
+ */
+function truncateToTokenBudget(text: string, budget: number): string {
+  const estimated = estimateTokens(text);
+  if (estimated <= budget) return text;
+
+  const charLimit = budget * 4;
+  let truncated = text.substring(0, charLimit);
+  // Find last space to avoid mid-word cut
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > charLimit * 0.8) {
+    truncated = truncated.substring(0, lastSpace);
+  }
+  return truncated + "\n\n[...truncated to fit token budget]";
+}
+
+// ─── Token Usage Tracking ────────────────────────────────────────────────────
+
+/**
+ * Persist actual token usage from the LLM response to the AssistantChat record.
+ * Accumulates totals across turns for quota enforcement.
+ * Uses the active chat record (type=chat) for the user+unit+section.
+ */
+async function trackTokenUsage(
+  ctx: AgentContext,
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  },
+  stepCount: number,
+) {
+  try {
+    const { getServerClient } = await import("@/utils/amplifyServerClient");
+    const client = getServerClient();
+
+    // Find the active chat record for this user + unit
+    const filter: Record<string, any> = { type: { eq: "chat" } };
+    if (ctx.unitId) filter.unitID = { eq: ctx.unitId };
+
+    const { data: chats } = await (client as any).models.AssistantChat.list({
+      filter,
+      limit: 1,
+    });
+
+    const chat = chats?.find(
+      (c: any) => c != null && c.unitID === ctx.unitId && c.type === "chat",
+    );
+
+    if (chat) {
+      // Accumulate token counts on existing record
+      await (client as any).models.AssistantChat.update({
+        id: chat.id,
+        totalPromptTokens: (chat.totalPromptTokens || 0) + usage.promptTokens,
+        totalCompletionTokens:
+          (chat.totalCompletionTokens || 0) + usage.completionTokens,
+        totalTokens: (chat.totalTokens || 0) + usage.totalTokens,
+        turnCount: (chat.turnCount || 0) + 1,
+        lastTurnPromptTokens: usage.promptTokens,
+        lastTurnCompletionTokens: usage.completionTokens,
+        _version: chat._version,
+      });
+    } else {
+      // Create a new chat record with initial token counts
+      await (client as any).models.AssistantChat.create({
+        type: "chat",
+        unitID: ctx.unitId || undefined,
+        sectionID: ctx.sectionId || undefined,
+        totalPromptTokens: usage.promptTokens,
+        totalCompletionTokens: usage.completionTokens,
+        totalTokens: usage.totalTokens,
+        turnCount: 1,
+        lastTurnPromptTokens: usage.promptTokens,
+        lastTurnCompletionTokens: usage.completionTokens,
+      });
+    }
+  } catch (error: any) {
+    // Non-fatal — don't crash the response for tracking failures
+    console.warn("[trackTokenUsage] Failed:", error.message);
+  }
+}
+
+// ─── Conversation Summarizer ─────────────────────────────────────────────────
+
+/**
+ * Summarize a conversation and update the memory record asynchronously.
+ * Runs after the final response step via onFinish (non-blocking).
+ */
+async function summarizeAndUpdateMemory(
+  apiKey: string,
+  agentCtx: AgentContext,
+  messages: any[],
+  toolCallCount: number,
+) {
+  // Only summarize if there were meaningful exchanges (3+ messages)
+  if (messages.length < 3) return;
+  // Only summarize if user has a unit context
+  if (!agentCtx.unitId) return;
+
+  try {
+    const openai = createOpenAI({ apiKey });
+    const { getServerClient } = await import("@/utils/amplifyServerClient");
+    const client = getServerClient();
+
+    // Extract last few messages for summary (avoid token explosion)
+    const recentMessages = messages.slice(-10);
+    const conversationText = recentMessages
+      .map((m: any) => {
+        const role = m.role === "user" ? "Student" : "Assistant";
+        const text =
+          typeof m.content === "string"
+            ? m.content
+            : m.parts
+                ?.filter((p: any) => p.type === "text")
+                .map((p: any) => p.text)
+                .join("") || "";
+        return `${role}: ${text.substring(0, 500)}`;
+      })
+      .join("\n");
+
+    // Generate summary via lightweight model
+    const { text: newSummary } = await generateText({
+      model: openai("gpt-4o-mini"),
+      system:
+        "You are a conversation summarizer for an educational platform. Produce a 2-3 sentence summary of what was discussed, what the student learned or struggled with, and any key takeaways. Be concise and factual.",
+      prompt: conversationText,
+      maxOutputTokens: 200,
+    });
+
+    // Generate embedding for semantic memory recall
+    let embedding: number[] | undefined;
+    try {
+      const embeddingResponse = await fetch(
+        "https://api.openai.com/v1/embeddings",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: newSummary,
+            dimensions: 512,
+          }),
+        },
+      );
+      if (embeddingResponse.ok) {
+        const embResult = await embeddingResponse.json();
+        embedding = embResult.data?.[0]?.embedding;
+      }
+    } catch {
+      // Non-fatal — continue without embedding
+    }
+
+    // Find existing memory record for this user + unit
+    const { data: existing } = await (client as any).models.AssistantChat.list({
+      filter: {
+        type: { eq: "memory" },
+        unitID: { eq: agentCtx.unitId },
+      },
+      limit: 5,
+    });
+
+    const memory = existing?.find(
+      (m: any) => m?.unitID === agentCtx.unitId && m?.type === "memory",
+    );
+
+    if (memory) {
+      // Append to rolling summary (keep last 3 summaries)
+      const existingSummary = memory.summary || "";
+      const separator = existingSummary ? "\n---\n" : "";
+      let combined = existingSummary + separator + newSummary;
+
+      // Trim to last 3 summary blocks
+      const blocks = combined.split("\n---\n");
+      if (blocks.length > 3) {
+        combined = blocks.slice(-3).join("\n---\n");
+      }
+
+      const updatePayload: Record<string, any> = {
+        id: memory.id,
+        summary: combined,
+        _version: memory._version,
+      };
+      if (embedding) {
+        updatePayload.embedding = JSON.stringify(embedding);
+        updatePayload.embeddingModel = "text-embedding-3-small";
+        updatePayload.embeddingDimensions = 512;
+      }
+
+      await (client as any).models.AssistantChat.update(updatePayload);
+    } else {
+      // Create new memory record with summary
+      const createPayload: Record<string, any> = {
+        type: "memory",
+        unitID: agentCtx.unitId,
+        sectionID: agentCtx.sectionId || undefined,
+        summary: newSummary,
+      };
+      if (embedding) {
+        createPayload.embedding = JSON.stringify(embedding);
+        createPayload.embeddingModel = "text-embedding-3-small";
+        createPayload.embeddingDimensions = 512;
+      }
+
+      await (client as any).models.AssistantChat.create(createPayload);
+    }
+
+    console.log(
+      `[Chat Route] Memory updated for unit ${agentCtx.unitId} (${toolCallCount} tool calls)`,
+    );
+  } catch (error) {
+    // Non-fatal — don't crash the response
+    console.warn("[Chat Route] Memory summarization failed:", error);
+  }
+}
 
 // All available tools — persona filtering happens below
 const allChatTools = {
@@ -33,7 +273,7 @@ const allChatTools = {
   search_content: tool({
     description:
       "Search through unit content, class sections, file contents, questions, answers, vocabulary words, and definitions using semantic search.",
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe("The search query text"),
       type: z
         .enum(["all", "files", "words", "questions"])
@@ -51,7 +291,7 @@ const allChatTools = {
   startPracticeDrill: tool({
     description:
       "Start a practice drill session for the current unit. Opens the practice drill dialog so the student can practice with AI-generated questions.",
-    parameters: z.object({
+    inputSchema: z.object({
       drillType: z
         .enum([
           "mixed",
@@ -74,7 +314,7 @@ const allChatTools = {
   create_section: tool({
     description:
       "Create a new class section (group of students) with a name and optional description. Can optionally copy gamification settings (leveling curve, XP multipliers, badges) from an existing section.",
-    parameters: z.object({
+    inputSchema: z.object({
       name: z.string().describe("Name of the section"),
       description: z
         .string()
@@ -93,7 +333,7 @@ const allChatTools = {
   copy_gamification_settings: tool({
     description:
       "Copy gamification settings (leveling curve, XP multipliers, badge configs) from one section to another. Use when a teacher wants to reuse their gamification configuration across sections.",
-    parameters: z.object({
+    inputSchema: z.object({
       sourceSectionId: z
         .string()
         .describe("The section ID to copy settings FROM"),
@@ -111,7 +351,7 @@ const allChatTools = {
 - "conversation": Creates a File record (application/json) with a multi-speaker dialogue script.
 - "question": Creates a File record (application/json) with prompt and answer tracks. Speaker IDs: prompt_track, answer_track.
 The script can be opened in Recording Studio 3 for TTS generation or human recording.`,
-    parameters: z.object({
+    inputSchema: z.object({
       preset: z
         .enum(["word", "conversation", "question"])
         .describe("The RS3 preset type"),
@@ -188,6 +428,23 @@ The script can be opened in Recording Studio 3 for TTS generation or human recor
       pronunciation,
       existingWordId,
       existingFileId,
+    }: {
+      preset: string;
+      title: string;
+      scene?: string;
+      speakers: Record<
+        string,
+        { name: string; voice?: string; description?: string }
+      >;
+      dialogue: Array<{
+        speaker: string;
+        text: string;
+        direction?: string;
+        emotion?: string;
+      }>;
+      pronunciation?: string;
+      existingWordId?: string;
+      existingFileId?: string;
     }) => {
       const speakerIds = Object.keys(speakers);
       const warnings: string[] = [];
@@ -376,23 +633,105 @@ export async function POST(req: Request) {
 
     const openai = createOpenAI({ apiKey });
 
-    // Build system message with persona-specific prompt + context
-    const systemMessage = buildPersonaSystemMessage(persona, context);
+    // Build agent context for server-side tools
+    const agentCtx: AgentContext = {
+      userId: auth.userId!,
+      groups: auth.groups || [],
+      identityId: context?.identityId,
+      unitId: context?.unit?.id,
+      sectionId: context?.sectionId,
+      courseOutline: context?.courseOutline,
+    };
 
-    // Filter tools to only those allowed by this persona
-    const tools = filterToolsByPersona(allChatTools, persona);
+    // Build system message with persona-specific prompt + context
+    let systemMessage = buildPersonaSystemMessage(persona, context);
+
+    // Resolve model config: Section.aiConfig → PlatformSettings → persona defaults
+    const agentConfig = await resolveAgentConfig(persona, context?.sectionId);
+
+    // Append section/platform prompt overrides if present
+    if (agentConfig.systemPromptAppend) {
+      systemMessage += `\n\n${agentConfig.systemPromptAppend}`;
+    }
+
+    // Enforce system prompt token budget (only when enforcement is enabled)
+    if (agentConfig.enforceTokenBudget) {
+      systemMessage = truncateToTokenBudget(
+        systemMessage,
+        agentConfig.systemPromptBudget,
+      );
+    }
+
+    // Merge server-side agent tools with client-side tools, then filter by persona
+    const agentTools = buildAgentTools(agentCtx, apiKey, {
+      toolResultBudget: agentConfig.enforceTokenBudget
+        ? agentConfig.toolResultBudget
+        : undefined,
+    });
+    const tools = filterToolsByPersona(
+      { ...allChatTools, ...agentTools },
+      persona,
+    );
+
+    let stepToolCallCount = 0;
+    let accumulatedTokens = 0;
+    const abortController = new AbortController();
 
     const result = streamText({
-      model: openai("gpt-4o"),
+      model: openai(agentConfig.model),
       system: systemMessage,
       messages: await convertToModelMessages(messages as UIMessage[]),
       tools,
-      temperature: persona.temperature,
-      maxOutputTokens: persona.maxOutputTokens,
+      stopWhen: stepCountIs(agentConfig.maxSteps),
+      temperature: agentConfig.temperature,
+      maxOutputTokens: agentConfig.maxOutputTokens,
       maxRetries: 1,
+      abortSignal: abortController.signal,
+      onStepFinish: ({ toolCalls, usage }) => {
+        if (toolCalls?.length) {
+          stepToolCallCount += toolCalls.length;
+        }
+        // Enforce totalTurnBudget across all steps
+        if (usage && agentConfig.enforceTokenBudget) {
+          accumulatedTokens +=
+            ((usage as any).inputTokens || 0) +
+            ((usage as any).outputTokens || 0);
+          if (accumulatedTokens >= agentConfig.totalTurnBudget) {
+            console.warn(
+              `[Chat Route] totalTurnBudget exceeded (${accumulatedTokens}/${agentConfig.totalTurnBudget}), aborting.`,
+            );
+            abortController.abort();
+          }
+        }
+      },
+      onFinish: ({ usage, steps }) => {
+        // Track token usage for quotas (fire-and-forget)
+        if (usage) {
+          trackTokenUsage(
+            agentCtx,
+            {
+              promptTokens: (usage as any).inputTokens || 0,
+              completionTokens: (usage as any).outputTokens || 0,
+              totalTokens:
+                ((usage as any).inputTokens || 0) +
+                ((usage as any).outputTokens || 0),
+            },
+            steps?.length || 1,
+          ).catch(() => {});
+        }
+
+        if (!agentConfig.memoryEnabled) return;
+        // Fire-and-forget memory summarization (non-blocking)
+        summarizeAndUpdateMemory(
+          apiKey,
+          agentCtx,
+          messages,
+          stepToolCallCount,
+        ).catch(() => {});
+      },
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("[Chat Route] Error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

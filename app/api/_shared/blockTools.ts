@@ -11,14 +11,22 @@ import { z } from "zod";
 export const insert_heading = tool({
   description:
     "Insert a heading block into the lesson. Use for section titles and subsection headers.",
-  parameters: z.object({
+  inputSchema: z.object({
     level: z.enum(["h1", "h2", "h3"]).describe("Heading level"),
     text: z.string().describe("The heading text content"),
     reasoning: z
       .string()
       .describe("Brief pedagogical explanation for why this block fits here"),
   }),
-  execute: async ({ level, text, reasoning }) => ({
+  execute: async ({
+    level,
+    text,
+    reasoning,
+  }: {
+    level: string;
+    text: string;
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "heading",
@@ -32,13 +40,19 @@ export const insert_heading = tool({
 export const insert_paragraph = tool({
   description:
     "Insert an explanatory paragraph block. Use for teaching content, explanations, and contextual information.",
-  parameters: z.object({
+  inputSchema: z.object({
     markdown: z.string().describe("Paragraph content in markdown format"),
     reasoning: z
       .string()
       .describe("Brief pedagogical explanation for this content"),
   }),
-  execute: async ({ markdown, reasoning }) => ({
+  execute: async ({
+    markdown,
+    reasoning,
+  }: {
+    markdown: string;
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "paragraph",
@@ -54,7 +68,7 @@ export const insert_paragraph = tool({
 export const insert_markdown = tool({
   description:
     "Insert a rich markdown block. Use for structured content with lists, tables, bold, italic, code, links, etc.",
-  parameters: z.object({
+  inputSchema: z.object({
     markdown: z
       .string()
       .describe(
@@ -64,7 +78,13 @@ export const insert_markdown = tool({
       .string()
       .describe("Brief pedagogical explanation for this content"),
   }),
-  execute: async ({ markdown, reasoning }) => ({
+  execute: async ({
+    markdown,
+    reasoning,
+  }: {
+    markdown: string;
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "markdown",
@@ -81,7 +101,7 @@ export const insert_markdown = tool({
 export const insert_quiz = tool({
   description:
     "Insert a quiz block with multiple-choice questions. Use Question IDs from the provided question bank.",
-  parameters: z.object({
+  inputSchema: z.object({
     questionIDs: z
       .array(z.string())
       .describe(
@@ -93,7 +113,13 @@ export const insert_quiz = tool({
         "Brief pedagogical explanation for why these questions fit here",
       ),
   }),
-  execute: async ({ questionIDs, reasoning }) => ({
+  execute: async ({
+    questionIDs,
+    reasoning,
+  }: {
+    questionIDs: string[];
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "quiz",
@@ -107,7 +133,7 @@ export const insert_quiz = tool({
 export const insert_answer = tool({
   description:
     "Insert a vocabulary answer block where students provide translations or definitions. Use Word IDs from the provided dictionary.",
-  parameters: z.object({
+  inputSchema: z.object({
     wordIDs: z
       .array(z.string())
       .describe("Word model IDs from the dictionary for vocabulary practice"),
@@ -133,6 +159,12 @@ export const insert_answer = tool({
     allowedInput,
     promptMethod,
     reasoning,
+  }: {
+    wordIDs: string[];
+    requestDefinition: string;
+    allowedInput: string[];
+    promptMethod: string[];
+    reasoning: string;
   }) => ({
     success: true,
     action: "insert_editor_block",
@@ -151,7 +183,7 @@ export const insert_answer = tool({
 export const insert_custom_answer = tool({
   description:
     "Insert a custom answer block with open-ended questions. Use Question IDs from the provided question bank.",
-  parameters: z.object({
+  inputSchema: z.object({
     questionIDs: z
       .array(z.string())
       .describe(
@@ -161,7 +193,13 @@ export const insert_custom_answer = tool({
       .string()
       .describe("Brief pedagogical explanation for this exercise"),
   }),
-  execute: async ({ questionIDs, reasoning }) => ({
+  execute: async ({
+    questionIDs,
+    reasoning,
+  }: {
+    questionIDs: string[];
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "custom-answer",
@@ -175,7 +213,7 @@ export const insert_custom_answer = tool({
 export const insert_meaning_association = tool({
   description:
     "Insert a meaning association (drag-and-drop matching) block. Use 2-6 Word IDs from the provided dictionary.",
-  parameters: z.object({
+  inputSchema: z.object({
     wordIDs: z
       .array(z.string())
       .describe(
@@ -185,7 +223,13 @@ export const insert_meaning_association = tool({
       .string()
       .describe("Brief pedagogical explanation for this exercise"),
   }),
-  execute: async ({ wordIDs, reasoning }) => ({
+  execute: async ({
+    wordIDs,
+    reasoning,
+  }: {
+    wordIDs: string[];
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "meaning-association",
@@ -199,7 +243,7 @@ export const insert_meaning_association = tool({
 export const insert_playlist = tool({
   description:
     "Insert a media playlist block with audio/video files. Use File IDs from the provided files list.",
-  parameters: z.object({
+  inputSchema: z.object({
     fileIDs: z
       .array(z.string())
       .describe(
@@ -209,7 +253,13 @@ export const insert_playlist = tool({
       .string()
       .describe("Brief pedagogical explanation for this media content"),
   }),
-  execute: async ({ fileIDs, reasoning }) => ({
+  execute: async ({
+    fileIDs,
+    reasoning,
+  }: {
+    fileIDs: string[];
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "playlist",
@@ -222,14 +272,22 @@ export const insert_playlist = tool({
 
 export const insert_image = tool({
   description: "Insert an image block with alt text.",
-  parameters: z.object({
+  inputSchema: z.object({
     path: z.string().describe("S3 storage path for the image file"),
     altText: z.string().describe("Accessible alt text describing the image"),
     reasoning: z
       .string()
       .describe("Brief pedagogical explanation for this image"),
   }),
-  execute: async ({ path, altText, reasoning }) => ({
+  execute: async ({
+    path,
+    altText,
+    reasoning,
+  }: {
+    path: string;
+    altText: string;
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "image",
@@ -249,14 +307,14 @@ export const insert_image = tool({
 export const insert_excalidraw = tool({
   description:
     "Insert an Excalidraw drawing/whiteboard block for diagrams, flowcharts, or visual explanations.",
-  parameters: z.object({
+  inputSchema: z.object({
     reasoning: z
       .string()
       .describe(
         "Brief pedagogical explanation for why a drawing/diagram fits here",
       ),
   }),
-  execute: async ({ reasoning }) => ({
+  execute: async ({ reasoning }: { reasoning: string }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "excalidraw",
@@ -270,7 +328,7 @@ export const insert_excalidraw = tool({
 export const insert_layout = tool({
   description:
     "Insert a multi-column layout container for side-by-side content.",
-  parameters: z.object({
+  inputSchema: z.object({
     columns: z.number().min(2).max(4).describe("Number of columns (2-4)"),
     templateColumns: z
       .string()
@@ -280,7 +338,15 @@ export const insert_layout = tool({
       .string()
       .describe("Brief pedagogical explanation for multi-column layout"),
   }),
-  execute: async ({ columns, templateColumns, reasoning }) => ({
+  execute: async ({
+    columns,
+    templateColumns,
+    reasoning,
+  }: {
+    columns: number;
+    templateColumns: string;
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "layout-container",
@@ -299,7 +365,7 @@ export const insert_layout = tool({
 export const insert_custom_ai = tool({
   description:
     "Insert an AI-graded exercise block with custom grading criteria. Students submit answers (text/audio/image/drawing) and AI grades them using instructor-defined criteria. Use Question IDs from the provided question bank.",
-  parameters: z.object({
+  inputSchema: z.object({
     questionIDs: z
       .array(z.string())
       .describe(
@@ -318,7 +384,17 @@ export const insert_custom_ai = tool({
       .string()
       .describe("Brief pedagogical explanation for this exercise"),
   }),
-  execute: async ({ questionIDs, criteria, allowedInput, reasoning }) => ({
+  execute: async ({
+    questionIDs,
+    criteria,
+    allowedInput,
+    reasoning,
+  }: {
+    questionIDs: string[];
+    criteria: string;
+    allowedInput: string[];
+    reasoning: string;
+  }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "custom-ai",

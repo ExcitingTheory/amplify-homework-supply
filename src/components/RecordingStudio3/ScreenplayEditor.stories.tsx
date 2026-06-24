@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { expect } from 'storybook/test';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { within, waitFor } from 'storybook/test';
+import { userEvent } from 'storybook/test';
 import ScreenplayEditor from './ScreenplayEditor';
 
 const sampleFountain = `Title: Japanese Greetings Lesson
@@ -56,7 +56,7 @@ automatically sync to the Recording Studio timeline.
     },
   },
   decorators: [
-    (Story) => (
+    (Story: any) => (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Story />
       </div>
@@ -67,12 +67,12 @@ automatically sync to the Recording Studio timeline.
 export const WithContent = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
     isGenerating: false,
     readOnly: false,
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: any) => {
     const canvas = within(canvasElement);
 
     await waitFor(() => {
@@ -86,8 +86,8 @@ export const WithContent = {
 export const Empty = {
   args: {
     fountainText: emptyFountain,
-    onFountainChange: (text) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
     isGenerating: false,
     readOnly: false,
   },
@@ -96,8 +96,8 @@ export const Empty = {
 export const AIGenerating = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
     isGenerating: true,
     readOnly: false,
   },
@@ -113,7 +113,7 @@ export const AIGenerating = {
 export const ReadOnly = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text) => console.log('Fountain changed:', text.slice(0, 80)),
+    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
     readOnly: true,
   },
   parameters: {

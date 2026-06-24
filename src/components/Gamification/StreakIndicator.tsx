@@ -15,10 +15,12 @@ export interface StreakIndicatorProps {
   currentStreak: number
   /** Size variant. Defaults to 'medium'. */
   size?: 'small' | 'medium'
+  /** When true, renders a zero-state indicator instead of returning null when streak is 0. */
+  showEmpty?: boolean
 }
 
-export function StreakIndicator({ currentStreak, size = 'medium' }: StreakIndicatorProps) {
-  if (currentStreak <= 0) return null
+export function StreakIndicator({ currentStreak, size = 'medium', showEmpty = false }: StreakIndicatorProps) {
+  if (currentStreak <= 0 && !showEmpty) return null
 
   const isMilestone = currentStreak >= 7
   const isSmall = size === 'small'

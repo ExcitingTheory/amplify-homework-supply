@@ -19,6 +19,11 @@ vi.mock("../amplifyClient", () => ({
 vi.mock("../gamificationActions", () => ({
   awardXPAndCheck: vi.fn(),
   generateSkillTreeFromUnit: vi.fn(),
+  checkPersonalBest: vi.fn(),
+  checkEasterEggs: vi.fn(),
+  discoverEasterEgg: vi.fn(),
+  updateUnitMemoryAndRebuild: vi.fn(),
+  generateSkillTree: vi.fn(),
 }));
 
 describe.skip("gamificationActions (legacy — module moved to app/actions/gamification)", () => {
@@ -44,7 +49,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.updateStreak = vi.fn().mockResolvedValue({});
       mockMutations.updateSquadXP = vi.fn().mockResolvedValue({});
 
-      const { awardXPAndCheck } = await import("../gamificationActions");
+      const { awardXPAndCheck } =
+        (await import("../gamificationActions")) as any;
       const result = await awardXPAndCheck(
         "student-1",
         "HOMEWORK_SUBMITTED",
@@ -82,7 +88,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.checkBadges = vi.fn().mockResolvedValue({});
       mockMutations.updateStreak = vi.fn().mockResolvedValue({});
 
-      const { awardXPAndCheck } = await import("../gamificationActions");
+      const { awardXPAndCheck } =
+        (await import("../gamificationActions")) as any;
       const result = await awardXPAndCheck("student-1", "HOMEWORK_SUBMITTED");
 
       expect(result).toBeNull();
@@ -93,7 +100,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         .fn()
         .mockRejectedValue(new Error("Network error"));
 
-      const { awardXPAndCheck } = await import("../gamificationActions");
+      const { awardXPAndCheck } =
+        (await import("../gamificationActions")) as any;
       const result = await awardXPAndCheck("student-1", "HOMEWORK_SUBMITTED");
 
       expect(result).toBeNull();
@@ -108,7 +116,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.updateStreak = vi.fn().mockResolvedValue({});
       mockMutations.updateSquadXP = vi.fn().mockResolvedValue({});
 
-      const { awardXPAndCheck } = await import("../gamificationActions");
+      const { awardXPAndCheck } =
+        (await import("../gamificationActions")) as any;
       await awardXPAndCheck("student-1", "HOMEWORK_SUBMITTED", "grade-1");
 
       expect(mockMutations.updateSquadXP).not.toHaveBeenCalled();
@@ -133,7 +142,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         .spyOn(console, "error")
         .mockImplementation(() => {});
 
-      const { awardXPAndCheck } = await import("../gamificationActions");
+      const { awardXPAndCheck } =
+        (await import("../gamificationActions")) as any;
       const result = await awardXPAndCheck("student-1", "HOMEWORK_SUBMITTED");
 
       // Main result should still be returned even when fire-and-forget calls fail
@@ -164,7 +174,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { checkPersonalBest } = await import("../gamificationActions");
+      const { checkPersonalBest } =
+        (await import("../gamificationActions")) as any;
       const result = await checkPersonalBest("student-1", "unit-1", 95);
 
       expect(result).toEqual({
@@ -186,7 +197,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: [{ message: "fail" }],
       });
 
-      const { checkPersonalBest } = await import("../gamificationActions");
+      const { checkPersonalBest } =
+        (await import("../gamificationActions")) as any;
       const result = await checkPersonalBest("student-1", "unit-1", 50);
 
       expect(result).toBeNull();
@@ -197,7 +209,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         .fn()
         .mockRejectedValue(new Error("boom"));
 
-      const { checkPersonalBest } = await import("../gamificationActions");
+      const { checkPersonalBest } =
+        (await import("../gamificationActions")) as any;
       const result = await checkPersonalBest("student-1", "unit-1", 50);
 
       expect(result).toBeNull();
@@ -216,7 +229,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { checkEasterEggs } = await import("../gamificationActions");
+      const { checkEasterEggs } =
+        (await import("../gamificationActions")) as any;
       const result = await checkEasterEggs(
         "student-1",
         "photosynthesis is cool",
@@ -232,7 +246,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { checkEasterEggs } = await import("../gamificationActions");
+      const { checkEasterEggs } =
+        (await import("../gamificationActions")) as any;
       await checkEasterEggs("student-1", "", "TIME_BASED");
 
       expect(mockMutations.checkEasterEggs).toHaveBeenCalledWith({
@@ -248,7 +263,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: [{ message: "fail" }],
       });
 
-      const { checkEasterEggs } = await import("../gamificationActions");
+      const { checkEasterEggs } =
+        (await import("../gamificationActions")) as any;
       expect(await checkEasterEggs("s1", "text")).toBeNull();
     });
   });
@@ -263,7 +279,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { discoverEasterEgg } = await import("../gamificationActions");
+      const { discoverEasterEgg } =
+        (await import("../gamificationActions")) as any;
       const result = await discoverEasterEgg("student-1", "egg-1");
 
       expect(result).toEqual({
@@ -283,7 +300,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { discoverEasterEgg } = await import("../gamificationActions");
+      const { discoverEasterEgg } =
+        (await import("../gamificationActions")) as any;
       const result = await discoverEasterEgg("student-1", "egg-1");
 
       expect(result!.alreadyDiscovered).toBe(true);
@@ -294,7 +312,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         .fn()
         .mockRejectedValue(new Error("net"));
 
-      const { discoverEasterEgg } = await import("../gamificationActions");
+      const { discoverEasterEgg } =
+        (await import("../gamificationActions")) as any;
       expect(await discoverEasterEgg("s1", "e1")).toBeNull();
     });
   });
@@ -313,7 +332,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.rebuildStudentMemoryProfile = vi.fn().mockResolvedValue({});
 
       const { updateUnitMemoryAndRebuild } =
-        await import("../gamificationActions");
+        (await import("../gamificationActions")) as any;
       await updateUnitMemoryAndRebuild(
         "student-1",
         "unit-1",
@@ -347,7 +366,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       mockMutations.rebuildStudentMemoryProfile = vi.fn().mockResolvedValue({});
 
       const { updateUnitMemoryAndRebuild } =
-        await import("../gamificationActions");
+        (await import("../gamificationActions")) as any;
       await updateUnitMemoryAndRebuild("s1", "u1", 50, [], []);
 
       expect(mockMutations.rebuildStudentMemoryProfile).not.toHaveBeenCalled();
@@ -378,7 +397,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { generateSkillTree } = await import("../gamificationActions");
+      const { generateSkillTree } =
+        (await import("../gamificationActions")) as any;
       const result = await generateSkillTree("unit-1");
 
       expect(result).toEqual(
@@ -400,7 +420,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: null,
       });
 
-      const { generateSkillTree } = await import("../gamificationActions");
+      const { generateSkillTree } =
+        (await import("../gamificationActions")) as any;
       await generateSkillTree("unit-1", "cohort-abc");
 
       expect(mockMutations.generateSkillTree).toHaveBeenCalledWith({
@@ -415,7 +436,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         errors: [{ message: "fail" }],
       });
 
-      const { generateSkillTree } = await import("../gamificationActions");
+      const { generateSkillTree } =
+        (await import("../gamificationActions")) as any;
       expect(await generateSkillTree("unit-1")).toBeNull();
     });
 
@@ -424,7 +446,8 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         .fn()
         .mockRejectedValue(new Error("timeout"));
 
-      const { generateSkillTree } = await import("../gamificationActions");
+      const { generateSkillTree } =
+        (await import("../gamificationActions")) as any;
       expect(await generateSkillTree("unit-1")).toBeNull();
     });
   });

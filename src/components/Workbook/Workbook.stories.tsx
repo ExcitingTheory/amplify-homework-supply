@@ -56,13 +56,16 @@ const sampleThreads: CommentThread[] = [
     id: 'thread-1',
     blockId: 'block-abc',
     author: 'instructor1',
+    authorRole: 'instructor',
     displayName: 'Prof. Smith',
     text: 'Great answer, but can you elaborate on the process?',
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     resolved: false,
     replies: [
       {
+        id: 'reply-1',
         author: 'student1',
+        authorRole: 'learner',
         displayName: 'Alice',
         text: 'I added more detail about the electron transport chain.',
         createdAt: new Date(Date.now() - 1800000).toISOString(),
@@ -73,6 +76,7 @@ const sampleThreads: CommentThread[] = [
     id: 'thread-2',
     blockId: 'block-abc',
     author: 'instructor1',
+    authorRole: 'instructor',
     displayName: 'Prof. Smith',
     text: 'Check your spelling on "mitochondria".',
     createdAt: new Date(Date.now() - 7200000).toISOString(),
@@ -123,7 +127,6 @@ const historyMeta: Meta<typeof BlockHistoryTimeline> = {
 
 const sampleEntries: HistoryEntry[] = [
   {
-    blockId: 'block-1',
     userId: 'student1',
     displayName: 'Alice',
     fieldChanged: 'userAnswer',
@@ -132,7 +135,6 @@ const sampleEntries: HistoryEntry[] = [
     timestamp: new Date(Date.now() - 300000).toISOString(),
   },
   {
-    blockId: 'block-1',
     userId: 'student1',
     displayName: 'Alice',
     fieldChanged: 'complete',
@@ -141,7 +143,6 @@ const sampleEntries: HistoryEntry[] = [
     timestamp: new Date(Date.now() - 120000).toISOString(),
   },
   {
-    blockId: 'block-1',
     userId: 'instructor1',
     displayName: 'Prof. Smith',
     fieldChanged: 'accuracy',

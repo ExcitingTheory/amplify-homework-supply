@@ -25,12 +25,14 @@ Executes translations using three leading AI models simultaneously (Claude Sonne
 ### Translation Modes
 
 **1. Fake Mode** (Free, Fast)
+
 - Uses Claude runtime to simulate all three models
 - Demonstrates workflow without API costs
 - No cryptographic proof
 - Best for: Development, testing, demos
 
 **2. Provable Mode** (~$5-10 cost)
+
 - Actual parallel API calls to all three providers
 - Generates cryptographic fingerprints (SHA-256)
 - Records request IDs for verification
@@ -40,29 +42,22 @@ Executes translations using three leading AI models simultaneously (Claude Sonne
 ### Workflow Phases
 
 **Phase 1: Multi-Model Translation**
+
 1. Send same source text to all three models in parallel
 2. Each model translates independently
 3. Store outputs separately with metadata
 
-**Phase 2: Consensus Analysis**
-4. Compare all three translations key-by-key
-5. Detect agreement levels:
-   - 3/3 exact match ✅
-   - 2/3 consensus ⚠️
-   - 0/3 no consensus ❌
+**Phase 2: Consensus Analysis** 4. Compare all three translations key-by-key 5. Detect agreement levels:
+
+- 3/3 exact match ✅
+- 2/3 consensus ⚠️
+- 0/3 no consensus ❌
+
 6. Choose final translation (prefer majority)
 
-**Phase 3: Reverse Translation Verification**
-7. Translate final output back to source language
-8. Compare reverse translation to original
-9. Calculate semantic similarity
-10. Flag keys with meaning drift
+**Phase 3: Reverse Translation Verification** 7. Translate final output back to source language 8. Compare reverse translation to original 9. Calculate semantic similarity 10. Flag keys with meaning drift
 
-**Phase 4: Proof Generation** (Provable mode only)
-11. Generate SHA-256 fingerprints of all outputs
-12. Record API request IDs
-13. Validate timestamps show parallel execution
-14. Create verification document
+**Phase 4: Proof Generation** (Provable mode only) 11. Generate SHA-256 fingerprints of all outputs 12. Record API request IDs 13. Validate timestamps show parallel execution 14. Create verification document
 
 ## Input Schema
 
@@ -70,29 +65,29 @@ Executes translations using three leading AI models simultaneously (Claude Sonne
 interface MultiModelTranslationInput {
   /** Source text or structured data to translate */
   source: string | object;
-  
+
   /** Target language code (ISO 639-1) */
   targetLanguage: string;
-  
+
   /** Source language code (default: auto-detect) */
   sourceLanguage?: string;
-  
+
   /** Translation mode */
-  mode: 'fake' | 'provable';
-  
+  mode: "fake" | "provable";
+
   /** Context to inform translation */
   context?: {
-    domain?: string;          // e.g., "medical", "legal", "ui", "marketing"
-    tone?: string;            // e.g., "formal", "casual", "technical"
-    audience?: string;        // e.g., "general", "experts", "children"
-    preservePlaceholders?: boolean;  // Keep {{variables}}, {count}, etc.
+    domain?: string; // e.g., "medical", "legal", "ui", "marketing"
+    tone?: string; // e.g., "formal", "casual", "technical"
+    audience?: string; // e.g., "general", "experts", "children"
+    preservePlaceholders?: boolean; // Keep {{variables}}, {count}, etc.
   };
-  
+
   /** Enable reverse translation verification */
-  verifyReverse?: boolean;  // default: true
-  
+  verifyReverse?: boolean; // default: true
+
   /** Consensus threshold (0.0-1.0) */
-  consensusThreshold?: number;  // default: 0.67 (2/3 agreement)
+  consensusThreshold?: number; // default: 0.67 (2/3 agreement)
 }
 ```
 
@@ -102,18 +97,18 @@ interface MultiModelTranslationInput {
 interface MultiModelTranslationOutput {
   /** Final consensus translation */
   translation: string | object;
-  
+
   /** Individual model outputs */
   models: {
     claude: string | object;
     gpt: string | object;
     translategemma: string | object;
   };
-  
+
   /** Consensus analysis */
   consensus: {
-    level: 'full' | 'partial' | 'none';
-    agreement: number;  // 0.0-1.0
+    level: "full" | "partial" | "none";
+    agreement: number; // 0.0-1.0
     differences: Array<{
       path: string;
       claude: string;
@@ -122,11 +117,11 @@ interface MultiModelTranslationOutput {
       chosen: string;
     }>;
   };
-  
+
   /** Reverse translation verification (if enabled) */
   verification?: {
     passed: boolean;
-    semanticSimilarity: number;  // 0.0-1.0
+    semanticSimilarity: number; // 0.0-1.0
     reverseTranslations: {
       claude: string;
       gpt: string;
@@ -134,11 +129,11 @@ interface MultiModelTranslationOutput {
     };
     driftDetected: boolean;
   };
-  
+
   /** Cryptographic proof (provable mode only) */
   proof?: {
     fingerprints: {
-      claude: string;  // SHA-256
+      claude: string; // SHA-256
       gpt: string;
       translategemma: string;
     };
@@ -154,14 +149,14 @@ interface MultiModelTranslationOutput {
     };
     verified: boolean;
   };
-  
+
   /** Execution metadata */
   metadata: {
     sourceLanguage: string;
     targetLanguage: string;
-    mode: 'fake' | 'provable';
-    duration: number;  // milliseconds
-    cost?: number;     // USD (provable mode only)
+    mode: "fake" | "provable";
+    duration: number; // milliseconds
+    cost?: number; // USD (provable mode only)
   };
 }
 ```
@@ -175,12 +170,14 @@ User: "Translate 'Hello, World!' to Japanese using multi-model approach"
 ```
 
 **Agent Actions**:
+
 1. Use Claude runtime to simulate all three models
 2. Generate three translations
 3. Compare for consensus
 4. Return result with agreement level
 
 **Output**:
+
 ```json
 {
   "translation": "こんにちは、世界！",
@@ -203,6 +200,7 @@ User: "Translate this contract clause to Spanish with proof and verification"
 ```
 
 **Input**:
+
 ```json
 {
   "source": "The parties agree to binding arbitration.",
@@ -217,6 +215,7 @@ User: "Translate this contract clause to Spanish with proof and verification"
 ```
 
 **Agent Actions**:
+
 1. Call Claude API: "Las partes acuerdan un arbitraje vinculante."
 2. Call GPT-4o API: "Las partes aceptan el arbitraje obligatorio."
 3. Call Gemma API: "Las partes acuerdan arbitraje vinculante."
@@ -226,19 +225,22 @@ User: "Translate this contract clause to Spanish with proof and verification"
 7. Generate fingerprints and proof
 
 **Output**:
+
 ```json
 {
   "translation": "Las partes acuerdan un arbitraje vinculante.",
   "consensus": {
     "level": "partial",
     "agreement": 0.67,
-    "differences": [{
-      "path": "root",
-      "claude": "Las partes acuerdan un arbitraje vinculante.",
-      "gpt": "Las partes aceptan el arbitraje obligatorio.",
-      "translategemma": "Las partes acuerdan arbitraje vinculante.",
-      "chosen": "claude"
-    }]
+    "differences": [
+      {
+        "path": "root",
+        "claude": "Las partes acuerdan un arbitraje vinculante.",
+        "gpt": "Las partes aceptan el arbitraje obligatorio.",
+        "translategemma": "Las partes acuerdan arbitraje vinculante.",
+        "chosen": "claude"
+      }
+    ]
   },
   "verification": {
     "passed": true,
@@ -278,6 +280,7 @@ User: "Translate UI strings to French with consensus validation"
 ```
 
 **Input**:
+
 ```json
 {
   "source": {
@@ -296,6 +299,7 @@ User: "Translate UI strings to French with consensus validation"
 ```
 
 **Output**:
+
 ```json
 {
   "translation": {
@@ -313,18 +317,21 @@ User: "Translate UI strings to French with consensus validation"
 ## Translation Models
 
 **Claude Sonnet 4** (Primary)
+
 - Best for context and nuance
 - Excellent instruction following
 - Strong multilingual capability
 - Cost: ~$3 per million input tokens
 
 **GPT-4o**
+
 - Strong multilingual performance
 - Fast parallel processing
 - Good cultural adaptation
 - Cost: ~$2.50 per million input tokens
 
 **Gemini 2.0 Flash**
+
 - Fastest response time
 - Excellent for Asian languages
 - Good technical accuracy
@@ -333,17 +340,20 @@ User: "Translate UI strings to French with consensus validation"
 ## Consensus Resolution Strategy
 
 **Full Consensus (3/3)**:
+
 - All models agree exactly
 - Use translation with confidence
 - No further review needed
 
 **Partial Consensus (2/3)**:
+
 - Two models agree, one differs
 - Use majority translation
 - Log difference for review
 - Consider context to resolve
 
 **No Consensus (0/3)**:
+
 - All three models differ
 - Flag for human review
 - Default to Claude translation
@@ -359,6 +369,7 @@ Validates translation accuracy by translating back to source:
 4. **Flag if similarity < threshold** (default 0.85)
 
 **Semantic Similarity Scoring**:
+
 - 0.95-1.0: Excellent (meaning preserved)
 - 0.85-0.94: Good (minor paraphrasing)
 - 0.70-0.84: Fair (semantic drift detected)
@@ -369,21 +380,25 @@ Validates translation accuracy by translating back to source:
 Generates verifiable evidence of translation:
 
 **Fingerprints (SHA-256)**:
+
 - Hash of each model's output
 - Proves content hasn't changed
 - Enables tamper detection
 
 **Request IDs**:
+
 - Unique identifier from each API
 - Traceable in provider dashboards
 - Proves actual API usage
 
 **Timestamps**:
+
 - UTC timestamps of API calls
 - Validates parallel execution
 - Shows translation timeline
 
 **Verification**:
+
 - Compare stored fingerprint to actual content hash
 - Validate request IDs in API logs
 - Confirm timestamps within expected range
@@ -413,6 +428,7 @@ Generates verifiable evidence of translation:
    - Includes consensus and verification results
 
 **API Requirements (Provable Mode)**:
+
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...
@@ -420,6 +436,7 @@ export GOOGLE_API_KEY=...
 ```
 
 **Rate Limiting**:
+
 - Claude: 500ms delay between requests
 - GPT-4o: 500ms delay between requests
 - Gemma: 2s delay (30 req/min limit for Gemma 3)
@@ -427,18 +444,21 @@ export GOOGLE_API_KEY=...
 ## Error Handling
 
 **API Failures**:
+
 - If any model fails, entire translation aborts
 - Never proceed with partial results (1 or 2 models)
 - Ensures consistency across all models
 - Retry with exponential backoff
 
 **Quota Limits**:
+
 - Detect rate limit errors
 - Apply appropriate delays
 - Never switch modes to work around limits
 - Report quota exhaustion clearly
 
 **Network Issues**:
+
 - Retry transient failures (3 attempts)
 - Timeout after 30 seconds per request
 - Log all network errors
@@ -447,16 +467,19 @@ export GOOGLE_API_KEY=...
 ## Performance
 
 **Fake Mode**:
+
 - Cost: Free
 - Speed: 2-5 seconds
 - Proof: None
 
 **Provable Mode**:
+
 - Cost: ~$0.05-0.15 per 1000 words
 - Speed: 4-8 seconds (parallel execution)
 - Proof: Full cryptographic verification
 
 **Optimization**:
+
 - Parallel API calls (not sequential)
 - Batch processing for multiple items
 - Caching of common translations
@@ -465,24 +488,28 @@ export GOOGLE_API_KEY=...
 ## Use Cases
 
 ### UI Localization
+
 - Translate interface text to multiple languages
 - Validate consistency across similar strings
 - Detect cultural adaptation issues
 - Maintain placeholder syntax
 
 ### Legal Documents
+
 - High-accuracy translation requirement
 - Cryptographic proof for audits
 - Reverse verification critical
 - Formal tone preservation
 
 ### Technical Documentation
+
 - Preserve technical terminology
 - Validate code examples unchanged
 - Ensure accuracy of instructions
 - Multi-language consistency
 
 ### Marketing Content
+
 - Cultural adaptation important
 - Tone matching critical
 - Creative freedom allowed
@@ -491,7 +518,7 @@ export GOOGLE_API_KEY=...
 ## Related Skills
 
 - [extract-code-documentation](../extract-code-documentation/SKILL.md) - Extract context for translation metadata
-- [storybook-validation](../storybook-validation/SKILL.md) - Validate translated UI in stories
+- [storybook-audit](../storybook-audit/SKILL.md) - Validate translated UI in stories
 
 ## Related Documentation
 

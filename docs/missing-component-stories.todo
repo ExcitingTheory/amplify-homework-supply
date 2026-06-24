@@ -1,0 +1,228 @@
+# Missing Component Stories TODO
+
+Generated from current repo scan on 2026-06-10.
+Updated with false-positive removal (bundled stories verified).
+
+Legend:
+  ✅ = covered in a bundled story file (no individual file needed)
+  [ ] = genuinely missing, needs story
+
+---
+
+## root (0 genuinely missing — contexts/providers/wrappers excluded)
+- ✅ src/components/AppSkeleton.jsx → root-components.stories.tsx
+- ✅ src/components/AuthFormSkeleton.jsx → root-components.stories.tsx
+- ✅ src/components/BotAvatar.tsx → root-components.stories.tsx
+- ✅ src/components/BotCustomizer.tsx → root-components.stories.tsx
+- ✅ src/components/CommunityUnitCard.tsx → root-components.stories.tsx
+- ✅ src/components/LazyCardMedia.jsx → root-components.stories.tsx
+- ✅ src/components/PrefetchButton.tsx → root-components.stories.tsx
+- ✅ src/components/SharedUnitCard.tsx → root-components.stories.tsx
+- ✅ src/components/ShowDeletedToggle.jsx → root-components.stories.tsx
+- ✅ src/components/ToolbarScrollButton.jsx → root-components.stories.tsx
+- ✅ src/components/AppShell.jsx → root-components-with-providers.stories.tsx
+- ✅ src/components/GradeReviewDrawer.tsx → root-components-with-providers.stories.tsx
+- ✅ src/components/RecordingStudioEnhancedModal.jsx → root-components-with-providers.stories.tsx
+- ✅ src/components/CollaboratorManager.tsx → root-components-with-providers.stories.tsx
+- ✅ src/components/AppShellContext.jsx → (context provider, no visual output)
+- ✅ src/components/DynamicThemeProvider.tsx → (context provider, no visual output)
+- ✅ src/components/AmplifyAuthenticator.jsx → (auth wrapper, no visual output)
+- ✅ src/components/GlobalSearchBar.tsx → GlobalSearchBar.stories.tsx
+- ✅ src/components/JobsDashboard.tsx → JobsDashboard.stories.tsx
+- ✅ src/components/RecordingStudio2.jsx → RecordingStudio2.stories.tsx
+- ✅ src/components/RecordingStudioEnhanced.jsx → RecordingStudioEnhanced.stories.tsx
+- ✅ src/components/SkillTreePopupButton.jsx → SkillTreePopupButton.stories.tsx
+
+## Chat (0 genuinely missing)
+- ✅ src/components/Chat/MentionChip.tsx → chat-components.stories.tsx
+- ✅ src/components/Chat/MessageComposer.tsx → chat-components.stories.tsx
+- ✅ src/components/Chat/CollaborativeChatWrapper.tsx → (wrapper/provider, no visual output)
+
+## ChatSidebar (0 genuinely missing)
+- ✅ src/components/ChatSidebar/LexicalMessageRenderer.jsx → chat-components.stories.tsx
+- ✅ src/components/ChatSidebar/NavigationPrompt.jsx → chat-components.stories.tsx
+- ✅ src/components/ChatSidebar/RecordingScriptPreview.jsx → chat-components.stories.tsx
+- ✅ src/components/ChatSidebar/ContentPreview.tsx → ContentPreview.stories.tsx
+
+## DebugPanel (0 genuinely missing)
+- ✅ src/components/DebugPanel/DebugPanelProvider.tsx → (context provider, no visual output)
+
+## Editor3 (0 genuinely missing — all sub-components exercised via composite stories)
+
+Editor3 has 39 existing story files covering the full editor, workbook, and all major plugins.
+Sub-components, nodes, and internal plugins only function within the Lexical editor context
+and are already exercised through Editor.stories.jsx, Workbook.stories.jsx, and their
+respective plugin stories (QuizPlugin, TablePlugin, AutocompletePlugin, etc.).
+
+- ✅ src/components/Editor3/components/AnswerComponent.jsx → EditorComponents.stories.jsx
+- ✅ src/components/Editor3/components/ImageNode.jsx → ImageComponent.stories.jsx
+- ✅ src/components/Editor3/components/QuizComponent.jsx → EditorComponents.stories.jsx
+- ✅ src/components/Editor3/components/ContentEditable.jsx → Editor.stories.jsx (thin Lexical wrapper)
+- ✅ src/components/Editor3/components/Placeholder.jsx → Editor.stories.jsx (thin wrapper)
+- ✅ src/components/Editor3/components/AutocompleteHint.jsx → AutocompletePlugin.stories.jsx
+- ✅ src/components/Editor3/components/AutocompleteNode.jsx → AutocompletePlugin.stories.jsx
+- ✅ src/components/Editor3/components/TableComponent.jsx → TablePlugin.stories.jsx
+- ✅ src/components/Editor3/components/TableNode.jsx → TablePlugin.stories.jsx
+- ✅ src/components/Editor3/components/AIContentSuggestionNode.jsx → AIContentSuggestion.stories.jsx
+- ✅ src/components/Editor3/components/AnswerEditor.jsx → AnswerPlugin.stories.jsx
+- ✅ src/components/Editor3/components/AudioAutoSubmitWrapper.jsx → AnswerPlugin.audio-drawing.stories.jsx
+- ✅ src/components/Editor3/components/BlockSuggestionMenu.jsx → BlockSuggestionPlugin.stories.jsx
+- ✅ src/components/Editor3/components/ConversationPlayerComponent.jsx → PlaylistPlugin.stories.jsx
+- ✅ src/components/Editor3/components/ConversationPlaylistEditor.jsx → PlaylistPlugin.stories.jsx
+- ✅ src/components/Editor3/components/EnhancedGenerators.jsx → EnhancedGeneration.stories.jsx
+- ✅ src/components/Editor3/components/FileThumbnail.jsx → FileManager2.stories.jsx
+- ✅ src/components/Editor3/components/GradeHistory.jsx → Editor.stories.jsx (grades tab)
+- ✅ src/components/Editor3/components/ImageMaskEditor.jsx → ImagesPlugin.stories.jsx
+- ✅ src/components/Editor3/components/ImageResizer.jsx → ImagesPlugin.stories.jsx
+- ✅ src/components/Editor3/components/MeaningAssociationEditor.jsx → MeaningAssociationPlugin.stories.jsx
+- ✅ src/components/Editor3/components/MediaPlayerComponent.jsx → EditorComponents.stories.jsx
+- ✅ src/components/Editor3/components/MicLevelIndicator.jsx → AnswerPlugin.audio-drawing.stories.jsx
+- ✅ src/components/Editor3/components/PdfViewerNode.jsx → PdfViewerComponent.stories.jsx
+- ✅ src/components/Editor3/components/PlainTextAnswerInput.jsx → AnswerPlugin.stories.jsx
+- ✅ src/components/Editor3/components/PlaylistEditor.jsx → PlaylistPlugin.stories.jsx
+- ✅ src/components/Editor3/components/PromptMethodSelector.jsx → EnhancedGeneration.stories.jsx
+- ✅ src/components/Editor3/components/QuizEditor.jsx → QuizPlugin.stories.jsx
+- ✅ src/components/Editor3/components/Save.jsx → Editor.stories.jsx (save indicator)
+- ✅ src/components/Editor3/components/SketchPad.jsx → AnswerPlugin.audio-drawing.stories.jsx
+- ✅ src/components/Editor3/components/StaticWaveform.jsx → EditorComponents.stories.jsx (AudioPlayer)
+- ✅ src/components/Editor3/components/SubmissionCountdown.jsx → Workbook.stories.jsx
+- ✅ src/components/Editor3/components/SuggestedContent.jsx → AIContentCompletionPlugin.stories.jsx
+- ✅ src/components/Editor3/components/TableOfContents.jsx → Editor.stories.jsx (ToC tab)
+- ✅ src/components/Editor3/components/TabsVerticalLeft.jsx → Editor.stories.jsx (left sidebar)
+- ✅ src/components/Editor3/components/TabsVerticalRight.jsx → Editor.stories.jsx (right sidebar)
+- ✅ src/components/Editor3/components/TimerEditor.jsx → Editor.stories.jsx
+- ✅ src/components/Editor3/components/UnifiedGenerateModal.jsx → EnhancedGeneration.stories.jsx
+- ✅ src/components/Editor3/components/VerticalTabsRo.jsx → Workbook.stories.jsx (read-only tabs)
+- ✅ src/components/Editor3/components/WorkbookBlockEnhancements.jsx → Workbook.stories.jsx
+- ✅ src/components/Editor3/components/WorkbookSettings.jsx → Workbook.stories.jsx
+- ✅ src/components/Editor3/components/WorkbookSSRSkeleton.tsx → Workbook.stories.jsx
+- ✅ src/components/Editor3/nodes/CustomAINode/CustomAIComponent.tsx → CustomAIPlugin.stories.tsx
+- ✅ src/components/Editor3/nodes/CustomAINode/CustomAIEditor.tsx → CustomAIPlugin.stories.tsx
+- ✅ src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.jsx → CustomAnswerPlugin.stories.jsx
+- ✅ src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.jsx → CustomAnswerPlugin.stories.jsx
+- ✅ src/components/Editor3/nodes/ExcalidrawNode/ExcalidrawModal.tsx → Editor.stories.jsx
+- ✅ src/components/Editor3/plugins/ArmorEditorBlock.tsx → Editor.stories.jsx
+- ✅ src/components/Editor3/plugins/ArmorEditorPlugin.tsx → Editor.stories.jsx
+- ✅ src/components/Editor3/plugins/ConversationPlaylistPlugin.jsx → PlaylistPlugin.stories.jsx
+- ✅ src/components/Editor3/plugins/FloatingToolbarPlugin.tsx → Editor.stories.jsx (floating toolbar)
+- ✅ src/components/Editor3/plugins/ToolBarPlugin.jsx → Editor.stories.jsx (main toolbar)
+- ✅ src/components/Editor3/plugins/ToolBarRoPlugin.jsx → Workbook.stories.jsx (read-only toolbar)
+- ✅ src/components/Editor3/context/AudioPlayerContext.jsx → (context provider, no visual output)
+- ✅ src/components/Editor3/context/SharedAutocompleteContext.jsx → (context provider, no visual output)
+- ✅ src/components/Editor3/context/SharedHistoryContext.jsx → (context provider, no visual output)
+- ✅ src/components/Editor3/context/SuggestionContext.jsx → (context provider, no visual output)
+- ✅ src/components/Editor3/components/FileManagerContext.jsx → (context provider, no visual output)
+- ✅ src/components/Editor3/plugins/DataPlugin.tsx → (headless, returns null — Yjs/DataStore sync)
+- ✅ src/components/Editor3/plugins/CollaborationPlugin.tsx → (headless, returns null — Yjs sync)
+- ✅ src/components/Editor3/plugins/AutoLinkPlugin.jsx → Editor.stories.jsx (wraps Lexical AutoLinkPlugin)
+- ✅ src/components/Editor3/plugins/QuizRoPlugin.jsx → QuizPlugin.stories.jsx (read-only variant)
+- ✅ src/components/Editor3/plugins/WorkbookStatePlugin.jsx → Workbook.stories.jsx (data loader)
+- ✅ src/components/Editor3/plugins/TableCellResizerPlugin.jsx → TablePlugin.stories.jsx
+- ✅ src/components/Editor3/plugins/TableHoverActionsPlugin.tsx → TablePlugin.stories.jsx
+- ✅ src/components/Editor3/plugins/TableActionMenuPlugin.tsx → TablePlugin.stories.jsx
+
+## Gamification (0 genuinely missing)
+- ✅ src/components/Gamification/AnimatedXPCounter.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/BadgeEditor.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/CampaignTimeline.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/EasterEggForm.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/EasterEggLayer.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/LexicalPlainTextField.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/RedemptionConditionForm.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/SecretLinkIcon.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/SkillDetailPanel.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/UnitMemoryCard.tsx → GamificationExtra.stories.tsx
+- ✅ src/components/Gamification/HomeworkXPSummary.tsx → Gamification.stories.tsx
+- ✅ src/components/Gamification/NailedItBadge.tsx → Gamification.stories.tsx
+- ✅ src/components/Gamification/NailedItCelebration.tsx → Gamification.stories.tsx
+- ✅ src/components/Gamification/NailedItWall.tsx → Gamification.stories.tsx
+- ✅ src/components/Gamification/XPToast.tsx → Gamification.stories.tsx
+
+## GradedWorkbookViewer (0 genuinely missing)
+- ✅ src/components/GradedWorkbookViewer/GutterAnnotations.tsx → GutterAnnotations.stories.tsx
+
+## Leaderboard (0 — covered)
+- ✅ src/components/Leaderboard/CompletionGrid.tsx → Leaderboard.stories.tsx
+- ✅ src/components/Leaderboard/LeaderboardTable.tsx → Leaderboard.stories.tsx
+
+## MeaningAssociationExercise (0 — covered)
+- ✅ All sub-components → MeaningAssociation.stories.jsx (Easy, Hard, Learn, DndWrapper, CompletionScreen, DragBox)
+
+## MiniEditor (0 — covered via composite)
+- ✅ MiniEditorEditable, MiniEditorReadOnly, BlockInserterPlugin → MiniEditor.stories.tsx
+
+## PeerReview (0 genuinely missing)
+- ✅ src/components/PeerReview/JoinByCode.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/RoomInvite.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewInvitations.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewChat.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/OpenPeerReviewButton.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/JoinPeerReviewDialog.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewFeedbackPrompt.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewAssignmentDialog.tsx → PeerReviewAssignmentDialog.stories.tsx
+
+## PracticeDrill (0 genuinely missing)
+- ✅ src/components/PracticeDrill/DrillGradeAdapter.tsx → (data adapter, no visual output)
+- ✅ src/components/PracticeDrill/CollaborativePresenceBar.tsx → CollaborativePresenceBar.stories.tsx
+- ✅ src/components/PracticeDrill/JoinPracticeDialog.tsx → JoinPracticeDialog.stories.tsx
+
+## RecordingStudio3 (0 genuinely missing)
+- ✅ src/components/RecordingStudio3/TimelineCard.tsx → TimelineCard.stories.tsx
+
+## Workbook (0 genuinely missing)
+- ✅ src/components/Workbook/BlockHistoryTimeline.tsx → Workbook.stories.tsx
+- ✅ src/components/Workbook/CommentGutterIcon.tsx → Workbook.stories.tsx
+- ✅ src/components/Workbook/CommentThreadDrawer.tsx → Workbook.stories.tsx
+- ✅ src/components/Workbook/JoinWorkbookDialog.tsx → JoinWorkbookDialog.stories.tsx
+- ✅ src/components/Workbook/WorkbookInviteShare.tsx → WorkbookInviteShare.stories.tsx
+
+## App Router Pages (0 genuinely missing)
+- ✅ app/[locale]/page.jsx → pages.stories.tsx
+- ✅ app/[locale]/sections/page.jsx → pages.stories.tsx
+- ✅ app/[locale]/units/page.jsx → pages.stories.tsx
+- ✅ app/[locale]/section/[id]/page.jsx → pages.stories.tsx
+- ✅ app/[locale]/unit/[id]/page.tsx → pages.stories.tsx
+- ✅ app/[locale]/review/[id]/page.jsx → pages.stories.tsx
+- ✅ app/[locale]/workbook/[id]/page.tsx → pages.stories.tsx (via WorkbookClient)
+- ✅ app/[locale]/settings/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/recycle-bin/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/squads/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/squad/[id]/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/xp-history/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/admin/analytics/page.tsx → pages-additional.stories.tsx
+- ✅ app/[locale]/admin/archives/page.jsx → pages-additional.stories.tsx
+- ✅ app/[locale]/admin/moderation/page.tsx → pages-additional.stories.tsx
+- ✅ app/[locale]/admin/settings/page.tsx → pages-additional.stories.tsx
+- ✅ app/[locale]/admin/words/page.tsx → pages-additional.stories.tsx
+- ✅ app/[locale]/profile/notifications/page.tsx → pages-additional.stories.tsx
+- ✅ app/[locale]/leaderboard/page.tsx → pages-additional.stories.tsx (via LiveLeaderboard)
+- ✅ app/[locale]/instructor/grade/[id]/page.tsx → pages-additional.stories.tsx (via GradeActions)
+- ✅ app/[locale]/offline/page.tsx → (static fallback, 44 lines, no dynamic behavior)
+- ✅ app/[locale]/privacy/page.jsx → (static legal content, no interactions)
+- ✅ app/[locale]/profile/page.jsx → (server redirect, no UI rendered)
+- ✅ app/[locale]/profile/[username]/page.tsx → (server component; client sub-components covered by Gamification stories)
+- ✅ app/[locale]/section/[id]/settings/ai/page.tsx → section-settings.stories.tsx
+- ✅ app/[locale]/section/[id]/settings/gamification/page.tsx → section-settings.stories.tsx
+
+---
+
+## Summary
+
+| Group | Genuinely Missing | Already Covered |
+|-------|:-:|:-:|
+| root | 0 | 22 |
+| Chat | 0 | 3 |
+| ChatSidebar | 0 | 4 |
+| DebugPanel | 0 | 1 |
+| Editor3 | 0 | 65 |
+| Gamification | 0 | 15 |
+| GradedWorkbookViewer | 0 | 1 |
+| Leaderboard | 0 | 2 |
+| MeaningAssociationExercise | 0 | 6 |
+| MiniEditor | 0 | 3 |
+| PeerReview | 0 | 8 |
+| PracticeDrill | 0 | 3 |
+| RecordingStudio3 | 0 | 1 |
+| Workbook | 0 | 5 |
+| App Router Pages | 0 | 26 |
+| **TOTAL** | **0** | **165** |

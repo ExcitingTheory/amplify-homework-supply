@@ -15,7 +15,7 @@ const mockPdfFile = {
 const mockImageFile = {
   id: "file-2",
   name: "cell-diagram.png",
-  path: "public/images/cell-diagram.png",
+  path: "/story-mocks/animals-10008941_1280.jpg",
   mimeType: "image/png",
   size: 345678,
   owner: "mock-user",

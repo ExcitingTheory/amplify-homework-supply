@@ -393,7 +393,7 @@ export const EmptyEditorTextFormatting = {
 export const EmptyEditorCustomBlocks = {
   // Skip in vitest: AI suggestion streaming steals focus from datetime-local and
   // Autocomplete portal interactions, causing the component to unmount in headless Chromium.
-  tags: ['!test'],
+  tags: ["!test"],
   loaders: [
     async () => {
       clearMockData();
@@ -1081,6 +1081,20 @@ export const KeyboardShortcutsTest = {
  */
 export const KeyboardShortcutsDemo = {
   args: {},
+  loaders: [
+    async () => {
+      clearMockData();
+
+      seedMockUnit({
+        id: "keyboard-shortcuts-demo-id",
+        name: "Keyboard Shortcuts Demo",
+        description: "Demonstrating all keyboard shortcuts",
+        data: null,
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   render: () => <Editor />,
   parameters: {
     unitId: "keyboard-shortcuts-demo-id",

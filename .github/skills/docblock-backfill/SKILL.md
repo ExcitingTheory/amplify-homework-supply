@@ -42,17 +42,17 @@ Scans workspace for files with user-facing strings:
 ```typescript
 // Target file types
 const patterns = [
-  'src/components/**/*.{ts,tsx,js,jsx}',
-  'pages/**/*.{ts,tsx,js,jsx}',
-  'src/utils/**/*.{ts,tsx,js,jsx}'
+  "src/components/**/*.{ts,tsx,js,jsx}",
+  "pages/**/*.{ts,tsx,js,jsx}",
+  "src/utils/**/*.{ts,tsx,js,jsx}",
 ];
 
 // Excluded patterns
 const exclude = [
-  '**/*.test.*',
-  '**/*.stories.*',
-  '**/node_modules/**',
-  '**/.next/**'
+  "**/*.test.*",
+  "**/*.stories.*",
+  "**/node_modules/**",
+  "**/.next/**",
 ];
 ```
 
@@ -70,18 +70,19 @@ if (existingDoc) {
   // Validate matches current code
   const codeSignature = analyzeFileExports(filePath);
   const isValid = validateDocblock(existingDoc, codeSignature);
-  
+
   if (!isValid) {
     // Mark for update
-    issues.push({ file: filePath, type: 'outdated' });
+    issues.push({ file: filePath, type: "outdated" });
   }
 } else {
   // No docblock found
-  issues.push({ file: filePath, type: 'missing' });
+  issues.push({ file: filePath, type: "missing" });
 }
 ```
 
 Validation checks:
+
 - Component name matches export
 - Props listed match TypeScript interface
 - Return type matches function signature
@@ -95,7 +96,7 @@ Cross-references with English locale files:
 
 ```typescript
 // Load metadata from locale files
-const localeMetadata = loadAllLocaleMetadata('public/locales/en');
+const localeMetadata = loadAllLocaleMetadata("public/locales/en");
 
 // Find matching component metadata
 const componentKey = getComponentLocaleKey(filePath);
@@ -104,14 +105,14 @@ const metadata = localeMetadata[componentKey];
 if (metadata) {
   // Extract metadata fields
   const { context, usage, impact, component } = metadata;
-  
+
   // Update or add to docblock
   docblock.metadata = {
     context,
     usage,
     impact,
     location: component.location,
-    description: component.description
+    description: component.description,
   };
 }
 ```
@@ -141,15 +142,15 @@ See [references/LOCALE_METADATA_SPEC.md](./references/LOCALE_METADATA_SPEC.md) f
 
 Generates or updates JSDoc/TSDoc headers:
 
-```typescript
+````typescript
 /**
  * ChatSidebar - Streaming chat interface with tool calling
- * 
+ *
  * @description
  * Real-time AI chat component with message streaming, tool execution,
  * and context-aware responses. Integrates with Vercel AI SDK for
  * streaming chat completions and custom tool handlers.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -159,20 +160,20 @@ Generates or updates JSDoc/TSDoc headers:
  *   systemContext={unitContext}
  * />
  * ```
- * 
+ *
  * @metadata
  * - context: Chat panel heading shown to all users
- * - usage: Displayed in sidebar header  
+ * - usage: Displayed in sidebar header
  * - impact: high - primary navigation element
  * - location: src/components/ChatSidebar.js
- * 
+ *
  * @see {@link public/locales/en/chat.json} for UI strings
  * @see {@link docs/CHATBOT_TOOLS.md} for tool calling reference
  */
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({ ... }) => {
   // ...
 };
-```
+````
 
 See [references/DOCBLOCK_TEMPLATES.md](./references/DOCBLOCK_TEMPLATES.md) for all template types.
 
@@ -200,15 +201,15 @@ npx tsx scripts/backfill-docblocks.ts src/components/UnitCard.tsx
 ```typescript
 /**
  * UnitCard - Learning unit card display component
- * 
+ *
  * @description
  * Displays unit information in card format with title, description,
  * and action buttons. Used in unit listing and assignment views.
- * 
+ *
  * @component
  * @param {UnitCardProps} props - Component properties
  * @param {Unit} props.unit - Unit data model
- * 
+ *
  * @metadata
  * - location: src/components/UnitCard.tsx
  * - usage: Unit listing grid, assignment selector
@@ -251,13 +252,13 @@ npx tsx scripts/sync-metadata.ts src/components/Editor3/EditorToolbar.tsx
 ```typescript
 /**
  * EditorToolbar - Lexical editor toolbar with formatting controls
- * 
+ *
  * @metadata
  * - context: Editor save button - triggered after content edits
  * - usage: Primary save action, triggers DataStore update
  * - impact: critical - data loss prevention
  * - location: src/components/Editor3/EditorToolbar.tsx
- * 
+ *
  * @see {@link public/locales/en/editor.json} for UI strings
  */
 ```
@@ -321,14 +322,8 @@ Optional `.docblock-backfill.json`:
 
 ```json
 {
-  "include": [
-    "src/components/**/*.{ts,tsx}",
-    "pages/**/*.{ts,tsx}"
-  ],
-  "exclude": [
-    "**/*.test.*",
-    "**/*.stories.*"
-  ],
+  "include": ["src/components/**/*.{ts,tsx}", "pages/**/*.{ts,tsx}"],
+  "exclude": ["**/*.test.*", "**/*.stories.*"],
   "localeDir": "public/locales/en",
   "templates": {
     "component": "jsdoc",
@@ -409,7 +404,7 @@ See [references/CONFIGURATION.md](./references/CONFIGURATION.md) for all options
 
 📊 Summary:
   - Added: 25 docblocks
-  - Updated: 8 docblocks  
+  - Updated: 8 docblocks
   - Metadata synced: 15 files
   - Duration: 3.2s
 
@@ -435,7 +430,7 @@ npm run docblock-workflow
 # 1. Extract component metadata → locale files
 npx tsx .github/skills/extract-code-documentation/scripts/extract-component-docblocks.ts
 
-# 2. Add metadata structure to locale files  
+# 2. Add metadata structure to locale files
 npx tsx .github/skills/extract-code-documentation/scripts/add-metadata-all-namespaces.ts
 
 # 3. Backfill docblocks from locale metadata
@@ -491,7 +486,7 @@ See [references/VALIDATION_RULES.md](./references/VALIDATION_RULES.md) for compl
 
 - [extract-code-documentation](../extract-code-documentation/SKILL.md) - Complement skill: extracts docs → locale files
 - [multi-model-ai-translation](../multi-model-ai-translation/SKILL.md) - Uses locale metadata for translation context
-- [storybook-validation](../storybook-validation/SKILL.md) - Validates components have proper stories
+- [storybook-audit](../storybook-audit/SKILL.md) - Validates components have proper stories
 
 ## Reference Documentation
 
@@ -507,5 +502,7 @@ See [references/VALIDATION_RULES.md](./references/VALIDATION_RULES.md) for compl
 
 **Version**: 1.0.0 | **Status**: Production ready | **License**: MIT  
 **Lines**: ~380
+
+```
 
 ```

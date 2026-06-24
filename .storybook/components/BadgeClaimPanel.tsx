@@ -29,16 +29,14 @@ const onboardingEvents = getOnboardingEmitter()
 // ============================================================================
 
 // Import amplify_outputs.json at build time (Storybook bundles this)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 let amplifyConfigured = false
 
-function ensureAmplifyConfigured() {
+async function ensureAmplifyConfigured() {
   if (amplifyConfigured) return
   try {
-    // Dynamic import - the file is at the repo root
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const outputs = require('../../amplify_outputs.json')
-    Amplify.configure(outputs)
+    // Dynamic ESM import - the file is at the repo root
+    const outputs = await import('../../amplify_outputs.json')
+    Amplify.configure(outputs.default || outputs)
     amplifyConfigured = true
   } catch (err) {
     console.warn('[BadgeClaimPanel] Could not configure Amplify:', err)
@@ -218,15 +216,16 @@ export function BadgeClaimPanel() {
 
   // Configure Amplify and check for existing session on mount
   useEffect(() => {
-    ensureAmplifyConfigured()
-    getCurrentUser()
-      .then(user => {
-        setUsername(user.username || user.userId)
-        setStatus('authenticated')
-      })
-      .catch(() => {
-        // Not signed in — that's fine
-      })
+    ensureAmplifyConfigured().then(() => {
+      getCurrentUser()
+        .then(user => {
+          setUsername(user.username || user.userId)
+          setStatus('authenticated')
+        })
+        .catch(() => {
+          // Not signed in — that's fine
+        })
+    })
   }, [])
 
   // Listen for onboarding events to refresh progress
@@ -265,7 +264,7 @@ export function BadgeClaimPanel() {
     setErrorMessage('')
 
     try {
-      ensureAmplifyConfigured()
+      await ensureAmplifyConfigured()
       const result = await signIn({ username: email, password })
       if (result.isSignedIn) {
         const user = await getCurrentUser()
@@ -299,7 +298,7 @@ export function BadgeClaimPanel() {
     setClaimResult(null)
 
     try {
-      ensureAmplifyConfigured()
+      await ensureAmplifyConfigured()
       const client = generateClient({ authMode: 'userPool' })
 
       const completedTasks = personaProgress.flatMap(p => p.completedTaskIds)

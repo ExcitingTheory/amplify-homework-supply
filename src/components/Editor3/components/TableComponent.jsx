@@ -1280,7 +1280,7 @@ export default function TableComponent({ nodeKey, rows: rawRows, theme }) {
               );
               return;
             }
-            // eslint-disable-next-line no-empty
+             
           } catch {}
         }
         const htmlString =
@@ -1322,7 +1322,7 @@ export default function TableComponent({ nodeKey, rows: rawRows, theme }) {
               },
             );
             return;
-            // eslint-disable-next-line no-empty
+             
           } catch {}
         }
 

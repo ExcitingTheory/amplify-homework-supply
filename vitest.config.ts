@@ -300,6 +300,9 @@ export default defineConfig({
             "@lexical/hashtag",
             "@lexical/markdown",
             "lexical",
+            "zod",
+            "@ai-sdk/openai",
+            "ai",
           ],
           exclude: [
             "qrcode", // Exclude qrcode to prevent Node.js module issues in browser

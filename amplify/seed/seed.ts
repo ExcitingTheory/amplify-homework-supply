@@ -35,6 +35,8 @@ import {
   AdminUpdateUserAttributesCommand,
   AdminDeleteUserCommand,
   AdminSetUserPasswordCommand,
+  CreateGroupCommand,
+  AdminAddUserToGroupCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
@@ -77,6 +79,137 @@ function unwrap<T>(
     }
     return r.data as NonNullable<T>;
   });
+}
+
+// ========================================================================
+// WIPE ALL DATA — delete every record from every model before seeding
+// ========================================================================
+
+async function wipeAllData() {
+  console.log("🗑️  Wiping all existing data...");
+
+  // Order matters: delete join tables and dependents first to avoid orphan issues
+  const modelNames = [
+    // Join tables first
+    "QuestionUnit",
+    "QuestionWord",
+    "QuestionFile",
+    "UnitDocument",
+    "UnitFile",
+    "UnitWord",
+    "WordFile",
+    "AssistantChatFile",
+    "DocumentQuestion",
+    "DocumentWord",
+    // Dependents
+    "Grade",
+    "Assignment",
+    "WorkbookComment",
+    "ParsedContent",
+    "StudentXPLog",
+    "SectionProgress",
+    "SquadMessage",
+    "Notification",
+    "AgentJob",
+    "AIFeedback",
+    "PracticeSession",
+    "CollaboratorAccess",
+    "EasterEgg",
+    "StudentMemory",
+    // Core models
+    "Document",
+    "File",
+    "Question",
+    "Word",
+    "Unit",
+    "Section",
+    "HomeworkRoom",
+    "AssistantChat",
+    "Badge",
+    "GroupChallenge",
+    "Skill",
+    "Squad",
+    "StudentProfile",
+    "Settings",
+    "PlatformSettings",
+    "AnalyticsSummary",
+  ] as const;
+
+  for (const modelName of modelNames) {
+    try {
+      const model = (client.models as any)[modelName];
+      if (!model?.list) {
+        console.log(`  ⏭️  ${modelName} — no list method, skipping`);
+        continue;
+      }
+
+      let deleted = 0;
+      let nextToken: string | undefined;
+
+      process.stdout.write(`  ${modelName} `);
+
+      // Page through all records
+      do {
+        const { data: items, nextToken: nt } = await model.list({
+          limit: 100,
+          ...(nextToken ? { nextToken } : {}),
+        });
+        nextToken = nt;
+
+        const validItems = (items || []).filter(
+          (item: any) => item != null && item.id != null,
+        );
+
+        // Batch deletes in parallel (groups of 25)
+        for (let i = 0; i < validItems.length; i += 25) {
+          const batch = validItems.slice(i, i + 25);
+          await Promise.all(
+            batch.map(async (item: any) => {
+              try {
+                await model.delete({
+                  id: item.id,
+                  _version: item._version,
+                });
+                deleted++;
+              } catch (e: any) {
+                // Log delete errors for debugging
+                console.warn(
+                  `\n    ⚠ delete ${modelName}/${item.id} failed: ${e.message || e}`,
+                );
+              }
+            }),
+          );
+          process.stdout.write(".");
+        }
+      } while (nextToken);
+
+      if (deleted > 0) {
+        console.log(` ✓ ${deleted}`);
+      } else {
+        console.log(" (empty)");
+      }
+    } catch (e: any) {
+      console.log(`\n  ⚠️  ${modelName} — error: ${e.message || e}`);
+    }
+  }
+
+  console.log("✅ Wipe complete\n");
+}
+
+// Sign in as admin to wipe (needs broad permissions)
+console.log("🔐 Signing in as admin for data wipe...");
+try {
+  await signInUser({
+    username: "admin@example.com",
+    password,
+    signInFlow: "Password",
+  });
+  await wipeAllData();
+  await signOut();
+} catch (e: any) {
+  console.log(
+    `⚠️  Could not wipe data (admin login failed: ${e.message}). Continuing with seed...`,
+  );
 }
 
 console.log("🌱 Starting seed data generation...");
@@ -130,6 +263,20 @@ const TEST_USERS: Record<
     phone: "+15550000005",
     firstName: "Liam",
     lastName: "Chen",
+  },
+  student3: {
+    username: "student3@example.com",
+    group: "Learners",
+    phone: "+15550000006",
+    firstName: "Aiko",
+    lastName: "Nakamura",
+  },
+  student4: {
+    username: "student4@example.com",
+    group: "Learners",
+    phone: "+15550000007",
+    firstName: "Marcus",
+    lastName: "Williams",
   },
 };
 
@@ -623,7 +770,7 @@ const unitContentMap: Record<number, string> = {
 for (const [idx, content] of Object.entries(unitContentMap)) {
   const unit = units[Number(idx)];
   if (unit) {
-    const draftPath = `private/${instructor1IdentityId}/units/${unit.id}/draft.json`;
+    const draftPath = `protected/${instructor1IdentityId}/units/${unit.id}/draft.json`;
     const publishedPath = `protected/${instructor1IdentityId}/units/${unit.id}/published.json`;
     await Promise.all([
       uploadData({
@@ -643,7 +790,7 @@ for (const [idx, content] of Object.entries(unitContentMap)) {
 console.log(`✅ Uploaded unit content to S3`);
 
 // Upload seed embeddings to S3 for units, words, and questions
-// Path: private/{identityId}/embeddings/{modelName}/{modelId}.json
+// Path: protected/{identityId}/embeddings/{modelName}/{modelId}.json
 console.log("\n🧮 Uploading seed embeddings to S3...");
 
 function makeFakeEmbedding(wordCount: number): object {
@@ -666,7 +813,7 @@ const embeddingUploads: Promise<any>[] = [];
 
 // Unit embeddings
 for (const unit of units) {
-  const path = `private/${instructor1IdentityId}/embeddings/unit/${unit.id}.json`;
+  const path = `protected/${instructor1IdentityId}/embeddings/unit/${unit.id}.json`;
   embeddingUploads.push(
     uploadData({
       path,
@@ -678,7 +825,7 @@ for (const unit of units) {
 
 // Word embeddings
 for (const word of words) {
-  const path = `private/${instructor1IdentityId}/embeddings/word/${word.id}.json`;
+  const path = `protected/${instructor1IdentityId}/embeddings/word/${word.id}.json`;
   embeddingUploads.push(
     uploadData({
       path,
@@ -690,7 +837,7 @@ for (const word of words) {
 
 // Question embeddings
 for (const question of questions) {
-  const path = `private/${instructor1IdentityId}/embeddings/question/${question.id}.json`;
+  const path = `protected/${instructor1IdentityId}/embeddings/question/${question.id}.json`;
   embeddingUploads.push(
     uploadData({
       path,
@@ -812,6 +959,7 @@ const sectionsResponse = await Promise.all([
     code: "JPN101-P1",
     featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
     thumbnail: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
+    learner: "section-jpn101-learners",
     readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
     writableGroups: ["section-jpn101-instructors"],
     gamificationConfig: {
@@ -854,6 +1002,7 @@ const sectionsResponse = await Promise.all([
     code: "BIO101-P3",
     featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
     thumbnail: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
+    learner: "section-bio101-learners",
     readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
     writableGroups: ["section-bio101-instructors"],
     gamificationConfig: {
@@ -877,6 +1026,80 @@ const sectionsResponse = await Promise.all([
 const sections = unwrap(sectionsResponse, "Section");
 console.log(`✅ Created ${sections.length} sections`);
 
+// ── Create section Cognito groups and enroll students ────────────────────────
+console.log("\n👥 Creating section Cognito groups and enrolling students...");
+
+const sectionGroups = [
+  "section-jpn101-instructors",
+  "section-jpn101-learners",
+  "section-bio101-instructors",
+  "section-bio101-learners",
+];
+
+for (const groupName of sectionGroups) {
+  try {
+    await cognitoClient.send(
+      new CreateGroupCommand({
+        UserPoolId: userPoolId,
+        GroupName: groupName,
+      }),
+    );
+    console.log(`  ✓ Created group: ${groupName}`);
+  } catch (err: any) {
+    if (err.name === "GroupExistsException") {
+      console.log(`  ℹ Group already exists: ${groupName}`);
+    } else {
+      console.warn(`  ⚠ Could not create group ${groupName}:`, err.message);
+    }
+  }
+}
+
+// Enroll instructor1 in instructor groups
+for (const grp of [
+  "section-jpn101-instructors",
+  "section-bio101-instructors",
+]) {
+  try {
+    await cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: TEST_USERS.instructor1.username,
+        GroupName: grp,
+      }),
+    );
+    console.log(`  ✓ instructor1 → ${grp}`);
+  } catch (e: any) {
+    console.warn(`  ⚠ ${e.message}`);
+  }
+}
+
+// Enroll students in learner groups
+const learnerEnrollments: [string, string][] = [
+  [TEST_USERS.student1.username, "section-jpn101-learners"],
+  [TEST_USERS.student1.username, "section-bio101-learners"],
+  [TEST_USERS.student2.username, "section-jpn101-learners"],
+  [TEST_USERS.student3.username, "section-jpn101-learners"],
+  [TEST_USERS.student3.username, "section-bio101-learners"],
+  [TEST_USERS.student4.username, "section-jpn101-learners"],
+];
+
+for (const [username, groupName] of learnerEnrollments) {
+  try {
+    await cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: username,
+        GroupName: groupName,
+      }),
+    );
+    console.log(`  ✓ ${username} → ${groupName}`);
+  } catch (e: any) {
+    console.warn(`  ⚠ ${username} → ${groupName}: ${e.message}`);
+  }
+}
+
+console.log("✅ Section Cognito groups set up");
+
 // ========================================================================
 // SECTION 7: Create Assignments
 // ========================================================================
@@ -886,7 +1109,7 @@ const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 7);
 
 const assignmentsResponse = await Promise.all([
-  // Japanese assignment for section 1
+  // Japanese section - assignment 1: unit 0 (Greetings)
   client.models.Assignment.create({
     sectionID: sections[0].id,
     unitID: units[0].id,
@@ -895,15 +1118,16 @@ const assignmentsResponse = await Promise.all([
     readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
     writableGroups: ["section-jpn101-instructors"],
   }),
+  // Japanese section - assignment 2: unit 2 (a different unit for variety)
   client.models.Assignment.create({
     sectionID: sections[0].id,
-    unitID: units[0].id,
-    dueDate: tomorrow.toISOString(),
+    unitID: units[2].id,
+    dueDate: new Date(Date.now() + 14 * 86400000).toISOString(),
     status: "PUBLISHED",
     readableGroups: ["section-jpn101-instructors", "section-jpn101-learners"],
     writableGroups: ["section-jpn101-instructors"],
   }),
-  // Biology assignment for section 2
+  // Biology section - assignment 1: unit 1 (Cell Biology)
   client.models.Assignment.create({
     sectionID: sections[1].id,
     unitID: units[1].id,
@@ -912,10 +1136,11 @@ const assignmentsResponse = await Promise.all([
     readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
     writableGroups: ["section-bio101-instructors"],
   }),
+  // Biology section - assignment 2: unit 3 (a different unit for variety)
   client.models.Assignment.create({
     sectionID: sections[1].id,
-    unitID: units[1].id,
-    dueDate: tomorrow.toISOString(),
+    unitID: units[3].id,
+    dueDate: new Date(Date.now() + 14 * 86400000).toISOString(),
     status: "PUBLISHED",
     readableGroups: ["section-bio101-instructors", "section-bio101-learners"],
     writableGroups: ["section-bio101-instructors"],
@@ -954,7 +1179,7 @@ const student1Session = await fetchAuthSession();
 console.log(`  ✓ Signed in as student1 (sub: ${student1Session.userSub})`);
 
 const student1Grades = await Promise.all([
-  // Student 1 - Japanese assignment (completed)
+  // Student 1 - Japanese unit 0 (completed, 100%)
   client.models.Grade.create({
     unitID: units[0].id,
     sectionID: sections[0].id,
@@ -965,16 +1190,23 @@ const student1Grades = await Promise.all([
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
   }),
-  // Student 1 - Biology assignment (in progress)
+  // Student 1 - Biology unit 1 (completed, 75%)
   client.models.Grade.create({
     unitID: units[1].id,
     sectionID: sections[1].id,
-    percentComplete: 50,
+    percentComplete: 100,
     accuracy: 75,
-    complete: false,
-    data: JSON.stringify({ "answer-1": { complete: false, accuracy: 0 } }),
+    complete: true,
+    data: JSON.stringify({
+      "answer-1": {
+        complete: true,
+        accuracy: 75,
+        userAnswer: "Photosynthesis",
+        feedback: "Mostly correct, review the light reaction.",
+      },
+    }),
     instructorGroup: "section-bio101-instructors",
-    instructor: "instructor2@example.com",
+    instructor: "instructor1@example.com",
   }),
 ]);
 
@@ -989,14 +1221,102 @@ await signInUser({
 });
 
 const student2Grades = await Promise.all([
-  // Student 2 - Japanese assignment (not started)
+  // Student 2 - Japanese unit 0 (completed, 78%)
   client.models.Grade.create({
     unitID: units[0].id,
     sectionID: sections[0].id,
-    percentComplete: 0,
-    accuracy: 0,
-    complete: false,
-    data: JSON.stringify({}),
+    percentComplete: 100,
+    accuracy: 78,
+    complete: true,
+    data: JSON.stringify({
+      "quiz-1": {
+        complete: true,
+        accuracy: 78,
+        userAnswer: "Hello",
+        feedback: "Good, but work on pronunciation.",
+      },
+    }),
+    instructorGroup: "section-jpn101-instructors",
+    instructor: "instructor1@example.com",
+  }),
+]);
+
+await signOut();
+
+// Sign in as student3 to create their grades
+console.log("  Signing in as student3 for grade creation...");
+await signInUser({
+  username: TEST_USERS.student3.username,
+  password: password,
+  signInFlow: "Password",
+});
+
+const student3Grades = await Promise.all([
+  // Student 3 - Japanese unit 0 (completed, 92%)
+  client.models.Grade.create({
+    unitID: units[0].id,
+    sectionID: sections[0].id,
+    percentComplete: 100,
+    accuracy: 92,
+    complete: true,
+    data: JSON.stringify({
+      "quiz-1": {
+        complete: true,
+        accuracy: 92,
+        userAnswer: "おはようございます (Good morning)",
+        feedback: "Excellent use of formal greeting!",
+      },
+    }),
+    instructorGroup: "section-jpn101-instructors",
+    instructor: "instructor1@example.com",
+  }),
+  // Student 3 - Biology unit 1 (completed, 88%)
+  client.models.Grade.create({
+    unitID: units[1].id,
+    sectionID: sections[1].id,
+    percentComplete: 100,
+    accuracy: 88,
+    complete: true,
+    data: JSON.stringify({
+      "answer-1": {
+        complete: true,
+        accuracy: 88,
+        userAnswer: "ATP is produced in the mitochondria",
+        feedback: "Very good understanding of cellular respiration.",
+      },
+    }),
+    instructorGroup: "section-bio101-instructors",
+    instructor: "instructor1@example.com",
+  }),
+]);
+
+await signOut();
+
+// Sign in as student4 to create their grades (at-risk student)
+console.log("  Signing in as student4 for grade creation...");
+await signInUser({
+  username: TEST_USERS.student4.username,
+  password: password,
+  signInFlow: "Password",
+});
+
+const student4Grades = await Promise.all([
+  // Student 4 - Japanese unit 0 (completed, 52% — at-risk)
+  client.models.Grade.create({
+    unitID: units[0].id,
+    sectionID: sections[0].id,
+    percentComplete: 100,
+    accuracy: 52,
+    complete: true,
+    data: JSON.stringify({
+      "quiz-1": {
+        complete: true,
+        accuracy: 52,
+        userAnswer: "Hello",
+        feedback:
+          "Review basic greetings and pronunciation. Consider extra practice.",
+      },
+    }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
   }),
@@ -1012,15 +1332,12 @@ await signInUser({
   signInFlow: "Password",
 });
 
-const gradesResponse = [...student1Grades, ...student2Grades];
-console.log(
-  "  Grade responses:",
-  JSON.stringify(
-    gradesResponse.map((r) => ({ data: !!r.data, errors: r.errors })),
-    null,
-    2,
-  ),
-);
+const gradesResponse = [
+  ...student1Grades,
+  ...student2Grades,
+  ...student3Grades,
+  ...student4Grades,
+];
 const grades = unwrap(gradesResponse, "Grade");
 console.log(`✅ Created ${grades.length} grade submissions`);
 
@@ -1607,7 +1924,7 @@ Key stages:
 
 Chlorophyll absorbs red and blue light wavelengths while reflecting green light, which is why plants appear green to our eyes.`;
 
-  const extractedTextPath = `private/${instructor1IdentityId}/documents/${documents[0].id}/extracted-text.txt`;
+  const extractedTextPath = `protected/${instructor1IdentityId}/documents/${documents[0].id}/extracted-text.txt`;
   await uploadData({
     path: extractedTextPath,
     data: extractedTextContent,
@@ -2792,7 +3109,16 @@ console.log(`✅ Created ${badges.length} badge definitions`);
 // ========================================================================
 console.log("\n🔔 Creating notifications...");
 
-await Promise.all([
+// Sign in as admin — Notification model only allows ownerDefinedIn("recipientId") and Admins
+await signOut();
+await signInUser({
+  username: TEST_USERS.admin.username,
+  password: password,
+  signInFlow: "Password",
+});
+console.log("  Signed in as admin for notification creation");
+
+const notificationsResponse = await Promise.all([
   client.models.Notification.create({
     recipientId: student1OwnerSub,
     type: "ASSIGNMENT_DUE_SOON",
@@ -2849,7 +3175,16 @@ await Promise.all([
   }),
 ]);
 
-console.log("✅ Created 4 notification records");
+const notifications = unwrap(notificationsResponse, "Notification");
+console.log(`✅ Created ${notifications.length} notification records`);
+
+// Sign back as instructor1 for remaining data
+await signOut();
+await signInUser({
+  username: TEST_USERS.instructor1.username,
+  password: password,
+  signInFlow: "Password",
+});
 
 // ========================================================================
 // SECTION 28d: Agent Jobs
@@ -3509,6 +3844,48 @@ const seedFixture = {
     avgAccuracy: a.avgAccuracy,
   })),
   squads: squads.map((g) => ({ id: g.id, name: g.name })),
+  skills: skills.map((s) => ({ id: s.id, title: s.title })),
+  badges: badges.map((b) => ({
+    id: b.id,
+    title: b.title,
+    category: b.category,
+  })),
+  xpLogs: xpLogs.map((x) => ({
+    id: x.id,
+    studentId: x.studentId,
+    xpAmount: x.xpAmount,
+    reason: x.reason,
+  })),
+  challenges: [
+    ch1Response.data,
+    ch2Response.data,
+    ch3Response.data,
+    ch4Response.data,
+  ]
+    .filter(Boolean)
+    .map((c) => ({
+      id: c!.id,
+      title: c!.title,
+      chapterOrder: c!.chapterOrder,
+      active: c!.active,
+    })),
+  notifications: notifications.map((n) => ({
+    id: n.id,
+    type: n.type,
+    category: n.category,
+    title: n.title,
+  })),
+  easterEggs: easterEggs.map((e) => ({
+    id: e.id,
+    trigger: e.trigger,
+    triggerValue: e.triggerValue,
+  })),
+  practiceSessions: practiceSessions.map((p) => ({
+    id: p.id,
+    unitID: p.unitID,
+    drillType: p.drillType,
+    complete: p.complete,
+  })),
   homeworkRoom: homeworkRoom
     ? { id: homeworkRoom.id, code: homeworkRoom.code }
     : null,

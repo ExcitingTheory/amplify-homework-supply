@@ -16,10 +16,10 @@ Natural language file discovery with relevance ranking and snippet extraction.
 
 **Use when**: Searching for components, patterns, or implementations without knowing exact paths
 
-### [storybook-validation](./storybook-validation/)
-Autonomous validation of all Storybook stories, mock data, and rendering.
+### [storybook-audit](./storybook-audit/)
+Full Storybook health audit using `npm run storybook:run:with-logs`. Validates rendering, console errors, network failures, mock data schemas, and prop types.
 
-**Use when**: Testing Storybook, validating all stories, before releases
+**Use when**: Testing Storybook, validating all stories, before releases, after upgrades
 
 ### [component-versioning](./component-versioning/)
 Automates creation of versioned component copies (Component → Component2) with updated imports, exports, and feature parity checklists.

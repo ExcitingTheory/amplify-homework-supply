@@ -50,9 +50,20 @@ const mockModels: Record<string, any> = {
   PersonalBest: { create: mockCreate, get: mockGet, update: mockUpdate },
   EasterEgg: { create: mockCreate, get: mockGet, list: mockList },
   SkillTree: { create: mockCreate, get: mockGet, list: mockList },
-  Skill: { create: mockCreate, list: mockList, delete: mockDelete, update: mockUpdate, get: mockGet },
+  Skill: {
+    create: mockCreate,
+    list: mockList,
+    delete: mockDelete,
+    update: mockUpdate,
+    get: mockGet,
+  },
   LearningMemory: { create: mockCreate, get: mockGet, update: mockUpdate },
-  StudentProfile: { create: mockCreate, list: mockList, update: mockUpdate, get: mockGet },
+  StudentProfile: {
+    create: mockCreate,
+    list: mockList,
+    update: mockUpdate,
+    get: mockGet,
+  },
   StudentXPLog: { create: mockCreate, list: mockList },
   Squad: { list: mockList, update: mockUpdate },
   Notification: { create: mockCreate },
@@ -117,8 +128,13 @@ vi.mock("@/../amplify_outputs.json", () => ({
 
 // Mock Vercel AI SDK (used by grading.ts, feedback.ts, drill.ts)
 const mockGenerateText = vi.fn();
+const mockGenerateObject = vi.fn();
 vi.mock("ai", () => ({
   generateText: (...args: any[]) => mockGenerateText(...args),
+  generateObject: (...args: any[]) => mockGenerateObject(...args),
+  Output: {
+    object: (opts: any) => ({ type: "object", ...opts }),
+  },
 }));
 
 const mockOpenAIModel = vi.fn(() => "mock-model");
@@ -159,6 +175,7 @@ describe("Server Actions Integration Tests", () => {
   beforeEach(() => {
     // Reset shared mocks' queued values without touching vi.mock() factory fns
     mockGenerateText.mockReset();
+    mockGenerateObject.mockReset();
     mockFetch.mockReset();
     mockGet.mockReset();
     mockList.mockReset();
@@ -528,17 +545,17 @@ describe("Server Actions Integration Tests", () => {
   });
 
   // ==========================================================================
-  // SA4. Grading (grading.ts) — uses Vercel AI SDK (generateText)
+  // SA4. Grading (grading.ts) — uses Vercel AI SDK (generateObject/Output.object)
   // ==========================================================================
   describe("SA4. Grading", () => {
     describe("gradeDefinition", () => {
       it("grades a correct definition", async () => {
-        mockGenerateText.mockResolvedValueOnce({
-          text: JSON.stringify({
-            correct: true,
+        mockGenerateObject.mockResolvedValueOnce({
+          object: {
+            answer: true,
+            reason: "Excellent definition!",
             score: 95,
-            feedback: "Excellent definition!",
-          }),
+          },
         });
 
         const result = await gradeDefinition({
@@ -552,40 +569,24 @@ describe("Server Actions Integration Tests", () => {
         expect(result.score).toBe(95);
         expect(result.reason).toBe("Excellent definition!");
 
-        // Verify generateText was called with correct params
-        expect(mockGenerateText).toHaveBeenCalledWith(
+        // Verify generateObject was called with correct params
+        expect(mockGenerateObject).toHaveBeenCalledWith(
           expect.objectContaining({
             model: "mock-model",
             temperature: 0.1,
           }),
         );
       });
-
-      it("returns fallback on unparseable response", async () => {
-        mockGenerateText.mockResolvedValueOnce({
-          text: "This is not valid JSON",
-        });
-
-        const result = await gradeDefinition({
-          word: "test",
-          definition: "test def",
-          expectedDefinition: "expected",
-        });
-
-        expect(result.answer).toBe(false);
-        expect(result.score).toBe(0);
-        expect(result.reason).toContain("Unable to grade");
-      });
     });
 
     describe("gradeShortAnswer", () => {
       it("grades a student's short answer", async () => {
-        mockGenerateText.mockResolvedValueOnce({
-          text: JSON.stringify({
-            correct: true,
+        mockGenerateObject.mockResolvedValueOnce({
+          object: {
+            answer: true,
+            reason: "Good answer with minor details missing",
             score: 85,
-            feedback: "Good answer with minor details missing",
-          }),
+          },
         });
 
         const result = await gradeShortAnswer({
@@ -604,16 +605,17 @@ describe("Server Actions Integration Tests", () => {
     describe("gradeImage", () => {
       it("analyzes and grades image content", async () => {
         mockGenerateText.mockResolvedValueOnce({
-          text: JSON.stringify({
+          output: {
             description: "A diagram showing the water cycle",
-            correct: true,
+            answer: true,
+            reason: "Clear diagram with all stages labeled",
             score: 90,
-            feedback: "Clear diagram with all stages labeled",
-          }),
+          },
         });
 
         const result = await gradeImage({
-          imageUrl: "https://example.com/water-cycle.png",
+          imageUrl:
+            "https://test-bucket.s3.us-east-1.amazonaws.com/public/images/water-cycle.png",
           question: "Draw the water cycle",
           expectedContent:
             "A diagram showing evaporation, condensation, precipitation",
@@ -648,13 +650,13 @@ describe("Server Actions Integration Tests", () => {
               model: "omni-moderation-latest",
             }),
         });
-        // grading via generateText
-        mockGenerateText.mockResolvedValueOnce({
-          text: JSON.stringify({
+        // grading via generateObject
+        mockGenerateObject.mockResolvedValueOnce({
+          object: {
             answer: true,
             reason: "Good pronunciation",
             score: 90,
-          }),
+          },
         });
 
         const result = await transcribeAudio({
@@ -792,7 +794,7 @@ describe("Server Actions Integration Tests", () => {
       // Mock UnitQuestion.list (2nd call to mockList)
       mockList.mockResolvedValueOnce({ data: [] });
 
-      // Mock generateText for drill generation
+      // Mock generateObject for drill generation
       const drillBlocks = {
         blocks: [
           {
@@ -807,8 +809,8 @@ describe("Server Actions Integration Tests", () => {
           },
         ],
       };
-      mockGenerateText.mockResolvedValueOnce({
-        text: JSON.stringify(drillBlocks),
+      mockGenerateObject.mockResolvedValueOnce({
+        object: drillBlocks,
       });
 
       const result = await generatePracticeDrill({
@@ -823,8 +825,8 @@ describe("Server Actions Integration Tests", () => {
       expect(result.blocks[0].type).toBe("quiz");
       expect(result.blocks[0].sourceType).toBe("vocabulary");
 
-      // Verify generateText was called
-      expect(mockGenerateText).toHaveBeenCalledWith(
+      // Verify generateObject was called
+      expect(mockGenerateObject).toHaveBeenCalledWith(
         expect.objectContaining({
           model: "mock-model",
           temperature: 0.7,

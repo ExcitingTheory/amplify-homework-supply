@@ -1,29 +1,32 @@
-'use strict';
+"use strict";
 
-import React from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { getAmplifyClient } from '../utils/amplifyClient';
-import { uploadData } from 'aws-amplify/storage';
+import React from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { uploadData } from "aws-amplify/storage";
 
 // Lexical imports
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { MarkNode } from '@lexical/mark';
-import { DecoratorNode } from 'lexical';
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import {
+  HistoryPlugin,
+  createEmptyHistoryState,
+} from "@lexical/react/LexicalHistoryPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { MarkNode } from "@lexical/mark";
+import { DecoratorNode } from "lexical";
 import {
   $getRoot,
   $createParagraphNode,
   $createTextNode,
   createCommand,
   COMMAND_PRIORITY_EDITOR,
-} from 'lexical';
-import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
+} from "lexical";
+import SearchHighlightPlugin from "./Editor3/plugins/SearchHighlightPlugin";
 
 // MUI imports
 import {
@@ -47,40 +50,44 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   DeleteOutline as DeleteIcon,
   Description,
   ExpandLess,
   ExpandMore,
   MoreVert as MoreVertIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Context imports
-import DictionaryContext from '../context/dictionaryContext';
-import FilesContext from '../context/fileContext';
-import UnitContext from '../context/unitContext';
-import { useTabContext } from '../context/tabContext';
+import DictionaryContext from "../context/dictionaryContext";
+import FilesContext from "../context/fileContext";
+import UnitContext from "../context/unitContext";
+import { useTabContext } from "../context/tabContext";
+import ShowDeletedToggle from "./ShowDeletedToggle";
+import { useRecycleBin } from "../hooks/useRecycleBin";
 
 // i18n
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 // Import QuestionCard from QuestionsReview2
-import { QuestionCard } from './QuestionsReview2';
+import { QuestionCard } from "./QuestionsReview2";
 
 // Commands for question operations
-const UPDATE_QUESTION_COMMAND = createCommand('UPDATE_QUESTION');
-const DELETE_QUESTION_COMMAND = createCommand('DELETE_QUESTION');
-const POPULATE_QUESTIONS_COMMAND = createCommand('POPULATE_QUESTIONS');
+const UPDATE_QUESTION_COMMAND = createCommand("UPDATE_QUESTION");
+const DELETE_QUESTION_COMMAND = createCommand("DELETE_QUESTION");
+const POPULATE_QUESTIONS_COMMAND = createCommand("POPULATE_QUESTIONS");
 
 // Helper functions
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 const deduplicateUrls = (urls) => {
@@ -111,8 +118,8 @@ const blobToBase64 = (blob) => {
 };
 
 // Convert base64 to blob for deserialization
-const base64ToBlob = (base64, mimeType = 'audio/ogg') => {
-  const byteString = atob(base64.split(',')[1]);
+const base64ToBlob = (base64, mimeType = "audio/ogg") => {
+  const byteString = atob(base64.split(",")[1]);
   const ab = new ArrayBuffer(byteString.length);
   const ia = new Uint8Array(ab);
   for (let i = 0; i < byteString.length; i++) {
@@ -123,31 +130,33 @@ const base64ToBlob = (base64, mimeType = 'audio/ogg') => {
 
 // Conversion function for importing question nodes from HTML
 function convertQuestionElement(domNode) {
-  const questionId = domNode.getAttribute('data-lexical-question-id');
-  const prompt = domNode.getAttribute('data-lexical-question-prompt') || '';
-  const hint = domNode.getAttribute('data-lexical-question-hint') || '';
-  const answer = domNode.getAttribute('data-lexical-question-answer') || '';
-  const version = domNode.getAttribute('data-lexical-question-version') || '1';
+  const questionId = domNode.getAttribute("data-lexical-question-id");
+  const prompt = domNode.getAttribute("data-lexical-question-prompt") || "";
+  const hint = domNode.getAttribute("data-lexical-question-hint") || "";
+  const answer = domNode.getAttribute("data-lexical-question-answer") || "";
+  const version = domNode.getAttribute("data-lexical-question-version") || "1";
 
   // Parse audio keys
   let audio = [];
-  const audioKeysAttr = domNode.getAttribute('data-lexical-audio-keys');
+  const audioKeysAttr = domNode.getAttribute("data-lexical-audio-keys");
   if (audioKeysAttr) {
     try {
       audio = JSON.parse(audioKeysAttr);
     } catch (e) {
-      console.error('Failed to parse audio keys:', e);
+      console.error("Failed to parse audio keys:", e);
     }
   }
 
   // Parse audio URLs from script tag if present
-  const audioScript = domNode.querySelector('script.lexical-question-audio-data');
+  const audioScript = domNode.querySelector(
+    "script.lexical-question-audio-data",
+  );
   let audioData = null;
   if (audioScript) {
     try {
       audioData = JSON.parse(audioScript.textContent);
     } catch (e) {
-      console.error('Failed to parse audio data:', e);
+      console.error("Failed to parse audio data:", e);
     }
   }
 
@@ -161,15 +170,15 @@ function convertQuestionElement(domNode) {
     parseInt(version, 10),
     true, // isExpanded
     false, // isSelected
-    '', // searchTerm
+    "", // searchTerm
     null, // sharedHistory - will be set by plugin
     null, // onUpdate - will be set by plugin
     null, // onDelete - will be set by plugin
     null, // onToggleExpand - will be set by plugin
     null, // onToggleSelect - will be set by plugin
     {}, // audioFiles - would be populated from audioData if needed
-    '', // identityId
-    0 // index
+    "", // identityId
+    0, // index
   );
 
   return { node };
@@ -202,7 +211,7 @@ class QuestionDecoratorNode extends DecoratorNode {
   __page;
 
   static getType() {
-    return 'question-decorator';
+    return "question-decorator";
   }
 
   static clone(node) {
@@ -227,7 +236,7 @@ class QuestionDecoratorNode extends DecoratorNode {
       node.__fileID,
       node.__filename,
       node.__page,
-      node.__key
+      node.__key,
     );
   }
 
@@ -239,20 +248,20 @@ class QuestionDecoratorNode extends DecoratorNode {
     audio,
     isExpanded = true,
     isSelected = false,
-    searchTerm = '',
+    searchTerm = "",
     sharedHistory = null,
     onUpdate = null,
     onDelete = null,
     onToggleExpand = null,
     onToggleSelect = null,
     audioFiles = {},
-    identityId = '',
+    identityId = "",
     index = 0,
     documentID = null,
     fileID = null,
     filename = null,
     page = null,
-    key
+    key,
   ) {
     super(key);
     this.__questionId = questionId;
@@ -298,21 +307,22 @@ class QuestionDecoratorNode extends DecoratorNode {
       version,
       isExpanded,
       isSelected,
-      '',
+      "",
       null,
       null,
       null,
       null,
       null,
       {},
-      '',
-      index
+      "",
+      index,
     );
   }
 
   exportJSON() {
     return {
-      type: 'question-decorator',
+      ...super.exportJSON(),
+      type: "question-decorator",
       questionId: this.__questionId,
       prompt: this.__prompt,
       hint: this.__hint,
@@ -348,27 +358,29 @@ class QuestionDecoratorNode extends DecoratorNode {
   }
 
   createDOM(config) {
-    const div = document.createElement('div');
-    div.setAttribute('data-lexical-question-id', this.__questionId);
-    div.setAttribute('data-lexical-question-prompt', this.__prompt || '');
-    div.setAttribute('data-lexical-question-hint', this.__hint || '');
-    div.setAttribute('data-lexical-question-answer', this.__answer || '');
-    div.setAttribute('data-lexical-question-version', this.__version || '1');
+    const div = document.createElement("div");
+    div.setAttribute("data-lexical-question-id", this.__questionId);
+    div.setAttribute("data-lexical-question-prompt", this.__prompt || "");
+    div.setAttribute("data-lexical-question-hint", this.__hint || "");
+    div.setAttribute("data-lexical-question-answer", this.__answer || "");
+    div.setAttribute("data-lexical-question-version", this.__version || "1");
 
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
-      div.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+      div.setAttribute("data-lexical-audio-keys", JSON.stringify(this.__audio));
     }
 
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
-      const audioUrls = this.__audio.map(key => {
-        const file = this.__audioFiles[key];
-        return file ? { key, url: file.url } : null;
-      }).filter(Boolean);
+      const audioUrls = this.__audio
+        .map((key) => {
+          const file = this.__audioFiles[key];
+          return file ? { key, url: file.url } : null;
+        })
+        .filter(Boolean);
 
       if (audioUrls.length > 0) {
-        div.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+        div.setAttribute("data-lexical-audio-urls", JSON.stringify(audioUrls));
       }
     }
 
@@ -377,26 +389,34 @@ class QuestionDecoratorNode extends DecoratorNode {
 
   // Async method to export question with audio blobs as base64
   async exportDOMWithAudio() {
-    const element = document.createElement('div');
-    element.setAttribute('data-lexical-question-id', this.__questionId);
-    element.setAttribute('data-lexical-question-prompt', this.__prompt || '');
-    element.setAttribute('data-lexical-question-hint', this.__hint || '');
-    element.setAttribute('data-lexical-question-answer', this.__answer || '');
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-question-id", this.__questionId);
+    element.setAttribute("data-lexical-question-prompt", this.__prompt || "");
+    element.setAttribute("data-lexical-question-hint", this.__hint || "");
+    element.setAttribute("data-lexical-question-answer", this.__answer || "");
 
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
-      element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+      element.setAttribute(
+        "data-lexical-audio-keys",
+        JSON.stringify(this.__audio),
+      );
     }
 
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
-      const audioUrls = this.__audio.map(key => {
-        const file = this.__audioFiles[key];
-        return file ? { key, url: file.url } : null;
-      }).filter(Boolean);
+      const audioUrls = this.__audio
+        .map((key) => {
+          const file = this.__audioFiles[key];
+          return file ? { key, url: file.url } : null;
+        })
+        .filter(Boolean);
 
       if (audioUrls.length > 0) {
-        element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+        element.setAttribute(
+          "data-lexical-audio-urls",
+          JSON.stringify(audioUrls),
+        );
       }
 
       // Convert blobs to base64 and store in script tag
@@ -410,20 +430,20 @@ class QuestionDecoratorNode extends DecoratorNode {
             audioBlobs.push({
               key,
               base64,
-              mimeType: file.blob.type || 'audio/ogg',
+              mimeType: file.blob.type || "audio/ogg",
               url: file.url,
             });
           } catch (error) {
-            console.error('Failed to convert blob to base64:', error);
+            console.error("Failed to convert blob to base64:", error);
           }
         }
       }
 
       if (audioBlobs.length > 0) {
-        const script = document.createElement('script');
-        script.type = 'application/json';
-        script.className = 'lexical-question-audio-data';
-        script.setAttribute('data-question-id', this.__questionId);
+        const script = document.createElement("script");
+        script.type = "application/json";
+        script.className = "lexical-question-audio-data";
+        script.setAttribute("data-question-id", this.__questionId);
         script.textContent = JSON.stringify(audioBlobs);
         element.appendChild(script);
       }
@@ -433,27 +453,38 @@ class QuestionDecoratorNode extends DecoratorNode {
   }
 
   exportDOM() {
-    const element = document.createElement('div');
-    element.setAttribute('data-lexical-question-id', this.__questionId);
-    element.setAttribute('data-lexical-question-prompt', this.__prompt || '');
-    element.setAttribute('data-lexical-question-hint', this.__hint || '');
-    element.setAttribute('data-lexical-question-answer', this.__answer || '');
-    element.setAttribute('data-lexical-question-version', this.__version || '1');
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-question-id", this.__questionId);
+    element.setAttribute("data-lexical-question-prompt", this.__prompt || "");
+    element.setAttribute("data-lexical-question-hint", this.__hint || "");
+    element.setAttribute("data-lexical-question-answer", this.__answer || "");
+    element.setAttribute(
+      "data-lexical-question-version",
+      this.__version || "1",
+    );
 
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
-      element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+      element.setAttribute(
+        "data-lexical-audio-keys",
+        JSON.stringify(this.__audio),
+      );
     }
 
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
-      const audioUrls = this.__audio.map(key => {
-        const file = this.__audioFiles[key];
-        return file ? { key, url: file.url } : null;
-      }).filter(Boolean);
+      const audioUrls = this.__audio
+        .map((key) => {
+          const file = this.__audioFiles[key];
+          return file ? { key, url: file.url } : null;
+        })
+        .filter(Boolean);
 
       if (audioUrls.length > 0) {
-        element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+        element.setAttribute(
+          "data-lexical-audio-urls",
+          JSON.stringify(audioUrls),
+        );
       }
     }
 
@@ -466,7 +497,7 @@ class QuestionDecoratorNode extends DecoratorNode {
   static importDOM() {
     return {
       div: (domNode) => {
-        if (!domNode.hasAttribute('data-lexical-question-id')) {
+        if (!domNode.hasAttribute("data-lexical-question-id")) {
           return null;
         }
         return {
@@ -538,7 +569,7 @@ function $createQuestionDecoratorNode(
   documentID = null,
   fileID = null,
   filename = null,
-  page = null
+  page = null,
 ) {
   return new QuestionDecoratorNode(
     questionId,
@@ -560,7 +591,7 @@ function $createQuestionDecoratorNode(
     documentID,
     fileID,
     filename,
-    page
+    page,
   );
 }
 
@@ -619,7 +650,9 @@ function QuestionRowComponent({
             options: {
               onProgress: ({ transferredBytes, totalBytes }) => {
                 if (totalBytes) {
-                  const percentage = Math.round((transferredBytes / totalBytes) * 100);
+                  const percentage = Math.round(
+                    (transferredBytes / totalBytes) * 100,
+                  );
                   _fileOps[i] = { ..._fileOps[i], progress: `${percentage}%` };
                   setFileOperations([..._fileOps]);
                 }
@@ -634,11 +667,11 @@ function QuestionRowComponent({
             await onUpdate(questionId, { audio: newAudio });
           }
 
-          _fileOps[i] = { ..._fileOps[i], progress: 'Complete' };
+          _fileOps[i] = { ..._fileOps[i], progress: "Complete" };
           setFileOperations([..._fileOps]);
         } catch (error) {
-          console.error('Error uploading audio:', error);
-          _fileOps[i] = { ..._fileOps[i], progress: 'Error' };
+          console.error("Error uploading audio:", error);
+          _fileOps[i] = { ..._fileOps[i], progress: "Error" };
           setFileOperations([..._fileOps]);
         }
       }
@@ -665,7 +698,10 @@ function QuestionRowComponent({
       name: `${unit.id}_${questionId}_${Date.now()}_${index}.ogg`,
     }));
 
-    const _fileOperations = files.map((f) => ({ name: f.name, progress: '0%' }));
+    const _fileOperations = files.map((f) => ({
+      name: f.name,
+      progress: "0%",
+    }));
 
     setAudioFilesToUpload(_toupload);
     setFileOperations(_fileOperations);
@@ -686,31 +722,34 @@ function QuestionRowComponent({
     }
   };
 
-  const matchesSearch = searchTerm && (
-    (prompt && prompt.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (answer && answer.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (hint && hint.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const matchesSearch =
+    searchTerm &&
+    ((prompt && prompt.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (answer && answer.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (hint && hint.toLowerCase().includes(searchTerm.toLowerCase())));
 
   const questionItemRef = React.useRef(null);
   const tabContext = useTabContext();
   const [isHighlighted, setIsHighlighted] = React.useState(false);
-  
+
   // Register ref for scrolling
   React.useEffect(() => {
     if (tabContext?.registerItemRef && questionId) {
-      tabContext.registerItemRef('question', questionId, questionItemRef);
+      tabContext.registerItemRef("question", questionId, questionItemRef);
     }
     return () => {
       if (tabContext?.unregisterItemRef && questionId) {
-        tabContext.unregisterItemRef('question', questionId);
+        tabContext.unregisterItemRef("question", questionId);
       }
     };
   }, [questionId, tabContext]);
-  
+
   // Highlight when focused from search results
   React.useEffect(() => {
-    if (tabContext?.focusItem?.type === 'question' && tabContext.focusItem.id === questionId) {
+    if (
+      tabContext?.focusItem?.type === "question" &&
+      tabContext.focusItem.id === questionId
+    ) {
       setIsHighlighted(true);
       // Auto-expand when focused
       if (onToggleExpand && !isExpanded) {
@@ -724,8 +763,8 @@ function QuestionRowComponent({
 
   // Adapt question data to QuestionItem interface
   const questionItem = {
-    prompt: prompt || '',
-    answer: answer || '',
+    prompt: prompt || "",
+    answer: answer || "",
     hint: hint,
     hasAudio: hasAudio,
     documentID: documentID,
@@ -777,6 +816,7 @@ function QuestionsPlugin({
   fullQuestionBank,
 }) {
   const { bumpQuestionVersion } = React.useContext(DictionaryContext);
+  const { softDelete } = useRecycleBin();
   const [editor] = useLexicalComposerContext();
 
   // Setup virtualizer for performance
@@ -823,20 +863,28 @@ function QuestionsPlugin({
           question.documentID,
           question.fileID,
           question.filename,
-          question.page
+          question.page,
         );
         root.append(node);
       });
     });
-  }, [questionBank, searchTerm, expandedItems, selectedItems, audioFiles, editor]);
+  }, [
+    questionBank,
+    searchTerm,
+    expandedItems,
+    selectedItems,
+    audioFiles,
+    editor,
+  ]);
 
   const handleUpdateQuestion = async (questionId, updates) => {
     try {
       const question = fullQuestionBank?.[questionId];
       const currentVersion = question?._version;
-      const versionCtrl = currentVersion != null
-        ? bumpQuestionVersion(questionId, currentVersion)
-        : null;
+      const versionCtrl =
+        currentVersion != null
+          ? bumpQuestionVersion(questionId, currentVersion)
+          : null;
 
       const client = getAmplifyClient();
       const { data, errors } = await client.models.Question.update({
@@ -844,43 +892,49 @@ function QuestionsPlugin({
         ...updates,
         ...(currentVersion != null && { _version: currentVersion }),
       });
-      
+
       if (errors) {
-        console.error('Error updating question:', errors);
+        console.error("Error updating question:", errors);
         versionCtrl?.rollback();
       } else {
         versionCtrl?.confirm(data._version);
       }
     } catch (error) {
-      console.error('Error updating question:', error);
+      console.error("Error updating question:", error);
     }
   };
 
-  const handleDeleteQuestion = async (questionId, prompt = '') => {
+  const handleDeleteQuestion = async (questionId, prompt = "") => {
     if (!setConfirmDialog) {
-      console.error('setConfirmDialog not available');
+      console.error("setConfirmDialog not available");
       return;
     }
 
-    // Show confirmation dialog before deleting
+    // Show confirmation dialog before soft-deleting
     setConfirmDialog({
       open: true,
-      message: `Delete question: "${prompt}"?`,
-      severity: 'warning',
+      message: `Move to Recycle Bin: "${prompt}"?`,
+      severity: "warning",
       onConfirm: async () => {
         try {
-          const question = fullQuestionBank[questionId];
-          const client = getAmplifyClient();
-          await client.models.Question.delete({
-            id: questionId,
+          await softDelete("Question", questionId);
+          console.log("Question soft deleted:", questionId);
+          setConfirmDialog({
+            open: false,
+            message: "",
+            onConfirm: null,
+            severity: "warning",
           });
-          console.log('Question deleted:', questionId);
-          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
         } catch (error) {
-          console.error('Error deleting question:', error);
-          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+          console.error("Error soft deleting question:", error);
+          setConfirmDialog({
+            open: false,
+            message: "",
+            onConfirm: null,
+            severity: "warning",
+          });
         }
-      }
+      },
     });
   };
 
@@ -892,25 +946,33 @@ function QuestionsPlugin({
 // =============================================================================
 
 export function QuestionEditor2() {
-  const t = useTranslations('components');
+  const t = useTranslations("components");
   const [open, setOpen] = React.useState(false);
   const [isHelpOpen, setHelpOpen] = React.useState(false);
   const [expandedItems, setExpandedItems] = React.useState(new Set());
   const [filteredQuestionBank, setFilteredQuestionBank] = React.useState(null);
   const [selectedItems, setSelectedItems] = React.useState(new Set());
   const [contextMenu, setContextMenu] = React.useState(null);
-  const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
+  const [confirmDialog, setConfirmDialog] = React.useState({
+    open: false,
+    message: "",
+    onConfirm: null,
+    severity: "warning",
+  });
   const sharedHistoryState = React.useRef(createEmptyHistoryState());
-  const [search, setSearch] = React.useState('');
-  const [newPrompt, setNewPrompt] = React.useState('');
-  const [newAnswer, setNewAnswer] = React.useState('');
-  const [newHint, setNewHint] = React.useState('');
+  const [search, setSearch] = React.useState("");
+  const [newPrompt, setNewPrompt] = React.useState("");
+  const [newAnswer, setNewAnswer] = React.useState("");
+  const [newHint, setNewHint] = React.useState("");
   const [newQuestionFormOpen, setNewQuestionFormOpen] = React.useState(false);
   const [fileOperations, setFileOperations] = React.useState([]);
 
-  const { questionBank } = React.useContext(DictionaryContext);
-  const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
+  const { questionBank, showDeleted, setShowDeleted } =
+    React.useContext(DictionaryContext);
+  const { audioFiles, refreshAudioFiles, session } =
+    React.useContext(FilesContext);
   const { identityId } = session || {};
+  const { softDelete } = useRecycleBin();
 
   const parentRef = React.useRef(null);
 
@@ -934,7 +996,7 @@ export function QuestionEditor2() {
           (q.hint && q.hint.toLowerCase().includes(searchLower)) ||
           (q.answer && q.answer.toLowerCase().includes(searchLower))
         );
-      })
+      }),
     );
 
     setFilteredQuestionBank(filtered);
@@ -987,26 +1049,26 @@ export function QuestionEditor2() {
   const handleBulkDelete = async () => {
     setConfirmDialog({
       open: true,
-      message: `Delete ${selectedItems.size} questions?`,
-      severity: 'error',
+      message: `Move ${selectedItems.size} question(s) to Recycle Bin?`,
+      severity: "warning",
       onConfirm: async () => {
-        const client = getAmplifyClient();
         for (const id of selectedItems) {
           try {
-            const { errors } = await client.models.Question.delete({ id });
-            
-            if (errors) {
-              console.error('Error deleting question:', id, errors);
-            }
+            await softDelete("Question", id);
           } catch (error) {
-            console.error('Error deleting question:', id, error);
+            console.error("Error soft deleting question:", id, error);
           }
         }
 
         setSelectedItems(new Set());
         setContextMenu(null);
-        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
-      }
+        setConfirmDialog({
+          open: false,
+          message: "",
+          onConfirm: null,
+          severity: "warning",
+        });
+      },
     });
   };
 
@@ -1023,7 +1085,7 @@ export function QuestionEditor2() {
     const { unit } = React.useContext(UnitContext) || {};
 
     if (!unit?.id) {
-      console.error('No unit context available');
+      console.error("No unit context available");
       return;
     }
 
@@ -1038,17 +1100,17 @@ export function QuestionEditor2() {
       });
 
       if (errors) {
-        console.error('Error creating question:', errors);
+        console.error("Error creating question:", errors);
       } else {
-        console.log('Question created:', data);
+        console.log("Question created:", data);
       }
-      
-      setNewPrompt('');
-      setNewHint('');
-      setNewAnswer('');
+
+      setNewPrompt("");
+      setNewHint("");
+      setNewAnswer("");
       toggleNewQuestionFormOpen();
     } catch (error) {
-      console.error('Error creating question:', error);
+      console.error("Error creating question:", error);
     }
   };
 
@@ -1056,7 +1118,7 @@ export function QuestionEditor2() {
     debounce((search) => {
       setSearch(search);
     }, 500),
-    []
+    [],
   );
 
   const handleSearch = (e) => {
@@ -1064,10 +1126,10 @@ export function QuestionEditor2() {
   };
 
   const initialConfig = {
-    namespace: 'QuestionEditor2',
+    namespace: "QuestionEditor2",
     theme: {},
     nodes: [QuestionDecoratorNode],
-    onError: (error) => console.error('Lexical error:', error),
+    onError: (error) => console.error("Lexical error:", error),
   };
 
   return (
@@ -1088,33 +1150,35 @@ export function QuestionEditor2() {
           </Typography>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={() => {
-          handleContextMenuClose();
-          handleBulkDelete();
-        }}>
+        <MenuItem
+          onClick={() => {
+            handleContextMenuClose();
+            handleBulkDelete();
+          }}
+        >
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-          Delete Selected
+          Move to Recycle Bin
         </MenuItem>
       </Menu>
 
       {/* Toolbar */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           gap: 1,
           padding: 1,
-          position: 'sticky',
+          position: "sticky",
           top: 0,
-          bgcolor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          bgcolor: "background.paper",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           zIndex: 1,
         }}
       >
-        <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+        <Box sx={{ display: "flex", gap: 0, alignItems: "center" }}>
           <Tooltip title="Select All">
             <Checkbox
               size="small"
@@ -1125,7 +1189,8 @@ export function QuestionEditor2() {
               }
               indeterminate={
                 selectedItems.size > 0 &&
-                selectedItems.size < Object.keys(filteredQuestionBank || {}).length
+                selectedItems.size <
+                  Object.keys(filteredQuestionBank || {}).length
               }
               onChange={(e) => {
                 if (e.target.checked) {
@@ -1134,18 +1199,32 @@ export function QuestionEditor2() {
                   handleDeselectAll();
                 }
               }}
-              disabled={!filteredQuestionBank || Object.keys(filteredQuestionBank).length === 0}
+              disabled={
+                !filteredQuestionBank ||
+                Object.keys(filteredQuestionBank).length === 0
+              }
               sx={{ p: 0.25 }}
             />
           </Tooltip>
 
-          <Tooltip title={expandedItems.size === 0 ? 'Expand All' : 'Collapse All'}>
+          <Tooltip
+            title={expandedItems.size === 0 ? "Expand All" : "Collapse All"}
+          >
             <IconButton
               size="small"
-              onClick={expandedItems.size === 0 ? handleExpandAll : handleCollapseAll}
-              disabled={!filteredQuestionBank || Object.keys(filteredQuestionBank).length === 0}
+              onClick={
+                expandedItems.size === 0 ? handleExpandAll : handleCollapseAll
+              }
+              disabled={
+                !filteredQuestionBank ||
+                Object.keys(filteredQuestionBank).length === 0
+              }
             >
-              {expandedItems.size === 0 ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+              {expandedItems.size === 0 ? (
+                <ExpandMore fontSize="small" />
+              ) : (
+                <ExpandLess fontSize="small" />
+              )}
             </IconButton>
           </Tooltip>
         </Box>
@@ -1161,7 +1240,11 @@ export function QuestionEditor2() {
         />
 
         <Tooltip title="New Question">
-          <IconButton onClick={toggleNewQuestionFormOpen} color="primary" size="small">
+          <IconButton
+            onClick={toggleNewQuestionFormOpen}
+            color="primary"
+            size="small"
+          >
             <Description />
           </IconButton>
         </Tooltip>
@@ -1169,7 +1252,9 @@ export function QuestionEditor2() {
         <Tooltip title="Actions">
           <IconButton
             onClick={(e) =>
-              setContextMenu(contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY })
+              setContextMenu(
+                contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY },
+              )
             }
             size="small"
             disabled={selectedItems.size === 0}
@@ -1177,14 +1262,19 @@ export function QuestionEditor2() {
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
+
+        <ShowDeletedToggle
+          showDeleted={showDeleted}
+          setShowDeleted={setShowDeleted}
+        />
       </Box>
 
       {/* Main Editor */}
       <Box
         ref={parentRef}
         sx={{
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
         <LexicalComposer initialConfig={initialConfig}>
@@ -1194,8 +1284,8 @@ export function QuestionEditor2() {
                 style={{
                   margin: 0,
                   padding: 0,
-                  outline: 'none',
-                  minHeight: '100%',
+                  outline: "none",
+                  minHeight: "100%",
                 }}
               />
             }
@@ -1221,8 +1311,13 @@ export function QuestionEditor2() {
       </Box>
 
       {/* New Question Dialog */}
-      <Dialog open={newQuestionFormOpen} onClose={toggleNewQuestionFormOpen} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('questionEditor.dialogTitle')}</DialogTitle>
+      <Dialog
+        open={newQuestionFormOpen}
+        onClose={toggleNewQuestionFormOpen}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{t("questionEditor.dialogTitle")}</DialogTitle>
         <DialogContent>
           <form onSubmit={handleCreateQuestion}>
             <TextField
@@ -1253,7 +1348,7 @@ export function QuestionEditor2() {
               variant="outlined"
             />
             <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-              {t('questionEditor.save')}
+              {t("questionEditor.save")}
             </Button>
           </form>
         </DialogContent>
@@ -1263,22 +1358,22 @@ export function QuestionEditor2() {
       <Portal>
         <Snackbar
           open={confirmDialog.open}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
           onClose={(event, reason) => {
-            if (reason === 'clickaway') {
+            if (reason === "clickaway") {
               return;
             }
           }}
-      >
+        >
           <Alert
             severity={confirmDialog.severity}
-            sx={{ 
-              width: '100%',
-              minWidth: '300px',
-              boxShadow: 3
+            sx={{
+              width: "100%",
+              minWidth: "300px",
+              boxShadow: 3,
             }}
             action={
-              <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+              <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
                 <Button
                   color="inherit"
                   size="small"
@@ -1290,18 +1385,23 @@ export function QuestionEditor2() {
                   }}
                   variant="outlined"
                 >
-                  {t('chatSidebar.confirm')}
+                  {t("chatSidebar.confirm")}
                 </Button>
                 <Button
                   color="inherit"
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                    setConfirmDialog({
+                      open: false,
+                      message: "",
+                      onConfirm: null,
+                      severity: "warning",
+                    });
                   }}
                   variant="contained"
                 >
-                  {t('chatSidebar.cancel')}
+                  {t("chatSidebar.cancel")}
                 </Button>
               </Box>
             }

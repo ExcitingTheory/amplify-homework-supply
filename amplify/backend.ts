@@ -49,6 +49,7 @@ import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource
 import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/resource";
 import { publishUnitHandler } from "./functions/publishUnit/resource";
 import { rebuildNgramIndexHandler } from "./functions/rebuildNgramIndex/resource";
+import { collaboratorHandler } from "./functions/collaborator/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
@@ -140,6 +141,7 @@ export const backend = defineBackend({
   analyticsAggregatorHandler,
   publishUnitHandler,
   rebuildNgramIndexHandler,
+  collaboratorHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -178,6 +180,31 @@ const cognitoPolicy = new Policy(
 );
 
 backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(cognitoPolicy);
+
+// Grant Cognito permissions to collaborator handler for instructor search
+const collaboratorCognitoPolicy = new Policy(
+  backend.collaboratorHandler.resources.lambda.stack,
+  "CollaboratorHandlerCognitoPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: [
+          "cognito-idp:ListUsersInGroup",
+          "cognito-idp:AdminGetUser",
+          "cognito-idp:AdminListGroupsForUser",
+        ],
+        resources: [backend.auth.resources.userPool.userPoolArn],
+      }),
+    ],
+  },
+);
+backend.collaboratorHandler.resources.lambda.role?.attachInlinePolicy(
+  collaboratorCognitoPolicy,
+);
+backend.collaboratorHandler.addEnvironment(
+  "USER_POOL_ID",
+  backend.auth.resources.userPool.userPoolId,
+);
 
 // Grant section handler permission to call AppSync GraphQL API
 const sectionHandlerAppSyncPolicy = new Policy(

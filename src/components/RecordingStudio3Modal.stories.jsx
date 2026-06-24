@@ -5,8 +5,8 @@
 
 import React, { useState } from "react";
 import { expect, fn } from "storybook/test";
-import { within, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { within, waitFor } from "storybook/test";
+import { userEvent } from "storybook/test";
 import RecordingStudio3Modal from "./RecordingStudio3Modal";
 import FilesContext from "../context/fileContext";
 import { DemoBanner } from "../../.storybook/components/DemoBanner";
@@ -30,7 +30,7 @@ const mockFilesContext = {
   files: [],
   uploadFile: async (file) => {
     console.log("Mock upload:", file.name);
-    return { path: `protected/${file.name}`, key: `protected/${file.name}` };
+    return { path: `/story-mocks/${file.name}`, key: file.name };
   },
 };
 
@@ -59,12 +59,14 @@ wordPresetWithTakes.scriptData.dialogue[0].takes = [
     id: Date.now() - 5000,
     type: "tts",
     audioBlob: null,
-    audioPath: "protected/agua-phrase-take1.mp3",
+    audioPath:
+      "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
     waveformData: generateMockWaveform(100),
     duration: 1.5,
     file: {
-      key: "protected/agua-phrase-take1.mp3",
-      level: "protected",
+      key: "cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      path: "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      level: "public",
       type: "audio/mpeg",
     },
     createdAt: new Date(Date.now() - 5000).toISOString(),
@@ -91,12 +93,14 @@ conversationWithTakes.scriptData.dialogue = [
         id: Date.now() - 3000,
         type: "human",
         audioBlob: null,
-        audioPath: "protected/teacher-greeting.mp3",
+        audioPath:
+          "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
         waveformData: generateMockWaveform(120),
         duration: 2.0,
         file: {
-          key: "protected/teacher-greeting.mp3",
-          level: "protected",
+          key: "descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          path: "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          level: "public",
           type: "audio/mpeg",
         },
         createdAt: new Date(Date.now() - 3000).toISOString(),

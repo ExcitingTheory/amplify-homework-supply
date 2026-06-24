@@ -13,6 +13,7 @@ import { peerReviewAIHandler } from "../functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "../functions/generatePracticeDrill/resource";
 import { publishUnitHandler } from "../functions/publishUnit/resource";
 import { rebuildNgramIndexHandler } from "../functions/rebuildNgramIndex/resource";
+import { recycleBinHandler } from "../functions/recycleBin/resource";
 
 /**
  * Amplify Gen 2 Data Schema
@@ -36,6 +37,8 @@ import { rebuildNgramIndexHandler } from "../functions/rebuildNgramIndex/resourc
 // ============================================================================
 
 const PublishedStatus = a.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
+
+const CollaboratorPermission = a.enum(["READ", "EDIT"]);
 
 const FileProtectionLevels = a.enum(["PUBLIC", "PRIVATE", "PROTECTED"]);
 
@@ -97,6 +100,8 @@ const NotificationType = a.enum([
   "SQUAD_MEMBER_JOINED",
   "SQUAD_METADATA_UPDATED",
   "SQUAD_INVITE",
+  "GUILD_POST_NEW",
+  "GUILD_MEMBER_JOINED",
   "CHAT_MENTION",
   "CHAT_NEW_MESSAGE",
   "MODERATION_FLAGGED",
@@ -110,6 +115,7 @@ const NotificationCategory = a.enum([
   "GAMIFICATION",
   "MODERATION",
   "SQUAD",
+  "GUILD",
   "CHAT",
   "SYSTEM",
 ]);
@@ -175,13 +181,19 @@ const CustomBadgeDefinition = a.customType({
 });
 
 const SectionGamificationConfig = a.customType({
-  // Feature toggles
-  easterEggsEnabled: a.boolean(), // Toggle easter egg discovery (default: true)
-  groupChallengesEnabled: a.boolean(), // Toggle group/boss battle challenges (default: true)
-  squadsEnabled: a.boolean(), // Toggle squad formation (default: true)
-  skillTreesEnabled: a.boolean(), // Toggle skill tree progression (default: true)
-  streaksEnabled: a.boolean(), // Toggle streak tracking (default: true)
-  collaborativePracticeEnabled: a.boolean(), // Toggle collaborative drill mode (default: true)
+  // Feature toggles — null means "use platform default"
+  xpEnabled: a.boolean(), // Toggle XP earning and display (default: platform)
+  leaderboardEnabled: a.boolean(), // Toggle leaderboard visibility (default: platform)
+  badgesEnabled: a.boolean(), // Toggle badge awarding (default: platform)
+  antiBadgesEnabled: a.boolean(), // Toggle anti-badge awarding (default: platform)
+  easterEggsEnabled: a.boolean(), // Toggle easter egg discovery (default: platform)
+  groupChallengesEnabled: a.boolean(), // Toggle group/boss battle challenges (default: platform)
+  squadsEnabled: a.boolean(), // Toggle squad formation (default: platform)
+  skillTreesEnabled: a.boolean(), // Toggle skill tree progression (default: platform)
+  streaksEnabled: a.boolean(), // Toggle streak tracking (default: platform)
+  collaborativePracticeEnabled: a.boolean(), // Toggle collaborative drill mode (default: platform)
+  cosmeticsEnabled: a.boolean(), // Toggle avatar/cosmetic unlocks (default: platform)
+  contentLocksEnabled: a.boolean(), // Toggle XP/badge-gated content locks (default: platform)
   // Streak settings
   streakFreezesAllowed: a.integer(), // Per-section freeze cap override
   // Badge configuration — which badge types are active in this section
@@ -304,6 +316,17 @@ const SummaryEntry = a.customType({
   title: a.string().required(),
   content: a.string(),
   pageRange: a.string(),
+});
+
+const CourseOutlineEntry = a.customType({
+  unitId: a.id().required(),
+  name: a.string().required(),
+  number: a.float(),
+  summary: a.string(),
+  vocabularyCount: a.integer(),
+  questionCount: a.integer(),
+  fileCount: a.integer(),
+  documentSummaries: a.string(),
 });
 
 const ObjectiveEntry = a.customType({
@@ -506,6 +529,7 @@ const schema = a
     EasterEggProfileEntry,
     VocabularyEntry,
     SummaryEntry,
+    CourseOutlineEntry,
     ObjectiveEntry,
     ConceptEntry,
     QuestionEntry,
@@ -530,11 +554,18 @@ const schema = a
 
     Unit: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         number: a.float(),
         name: a.string(),
@@ -553,6 +584,7 @@ const schema = a
         questionUnits: a.hasMany("QuestionUnit", ["unitID"]),
         unitDocuments: a.hasMany("UnitDocument", ["unitID"]),
         agentJobs: a.hasMany("AgentJob", ["unitID"]),
+        collaborators: a.hasMany("CollaboratorAccess", ["unitID"]),
         // Dynamic group authorization - students and instructors can read
         // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
         readableGroups: a.string().array(),
@@ -566,10 +598,16 @@ const schema = a
         moderation: ModerationInfo,
         publishedAt: a.timestamp(),
         isDraft: a.boolean(),
+        // AI-generated summary of unit content (headings + key points)
+        // Written on publish by publishUnit Lambda; used for course outline context
+        summary: a.string(),
         // Content gating (absorbed from ContentLock model)
         requiredXP: a.integer(),
         requiredBadgeId: a.string(),
         requiredModuleCompletion: a.float(),
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         // Owners (creators - typically Instructors) have full control
@@ -586,14 +624,28 @@ const schema = a
 
     Assignment: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         dueDate: a.datetime(),
         status: PublishedStatus,
         // Foreign keys for relationships
-        sectionID: a.id().required(),
-        unitID: a.id().required(),
+        sectionID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         section: a.belongsTo("Section", ["sectionID"]),
         unit: a.belongsTo("Unit", ["unitID"]),
         // Dynamic group authorization - students and instructors can read
@@ -604,7 +656,12 @@ const schema = a
         writableGroups: a.string().array(),
         // Tracking
         learner: a.string(),
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
       })
       .authorization((allow) => [
         // Student owns their assignment
@@ -620,9 +677,17 @@ const schema = a
 
     Grade: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Completion tracking
         percentComplete: a.float(),
         accuracy: a.float(),
@@ -645,7 +710,13 @@ const schema = a
         practiceSessionID: a.id(),
         attempt: a.integer(),
         // Foreign keys
-        unitID: a.id().required(),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unit: a.belongsTo("Unit", ["unitID"]),
         sectionID: a.id(), // Section this grade is for (for section-based authorization)
         // Dynamic group authorization - single instructor group that can grade this submission
@@ -674,7 +745,9 @@ const schema = a
 
     Section: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         name: a.string(),
@@ -696,7 +769,12 @@ const schema = a
         backgroundColor: a.string(),
         embedding: EmbeddingInfo,
         learner: a.string(), // For student access
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Gradebook curve settings — per-assignment
         curveSettings: a.ref("CurveSettings").array(),
@@ -716,6 +794,17 @@ const schema = a
         antiBadgesEnabled: a.boolean(), // Instructor toggle — enable/disable anti-badge awarding specifically (default: true)
         // Per-section gamification feature config (typed)
         gamificationConfig: a.ref("SectionGamificationConfig"),
+        // AI-generated course outline — rolled up from published unit summaries
+        // Ordered by unit number; rebuilt on each unit publish
+        courseOutline: a.ref("CourseOutlineEntry").array(),
+        // Per-section AI configuration overrides — JSON shape:
+        // { kaiEnabled?, sageEnabled?, kaiModel?, sageModel?, kaiTemperature?, sageTemperature?,
+        //   kaiMaxTokens?, sageMaxTokens?, kaiMaxSteps?, sageMaxSteps?,
+        //   kaiSystemPromptAppend?, sageSystemPromptAppend?, searchThreshold?, memoryEnabled? }
+        aiConfig: a.json(),
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -733,11 +822,18 @@ const schema = a
 
     Question: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Question content
         prompt: a.string(),
@@ -768,6 +864,9 @@ const schema = a
         documentQuestions: a.hasMany("DocumentQuestion", ["questionID"]),
         // Yjs CRDT snapshot for conflict-free collaborative editing
         yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -801,12 +900,27 @@ const schema = a
      * 4. Associate: Create join record (UnitFile, WordFile, etc.)
      */ File: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, controls Data model access
-        owner: a.string().required(),
-        identityId: a.string().required(), // Cognito Identity ID for protected/{identityId}/* paths
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.group("Instructors").to(["create", "read"]),
+            allow.group("Learners").to(["read"]),
+            allow.group("Admins").to(["create", "read"]),
+          ]),
+        identityId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]), // Cognito Identity ID for protected/{identityId}/* paths
         // File metadata
         name: a.string(),
         description: a.string(),
@@ -817,7 +931,13 @@ const schema = a
         // File details
         mimeType: a.string(),
         level: FileProtectionLevels, // PUBLIC, PROTECTED, PRIVATE - determines S3 path prefix
-        path: a.string().required(), // Full S3 path (e.g., "public/units/file-123.json")
+        path: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]), // Full S3 path (e.g., "public/units/file-123.json"),
         size: a.integer(),
         duration: a.integer(),
         generated: a.boolean(),
@@ -840,6 +960,11 @@ const schema = a
         hlsUrl: a.string(), // S3 path to .m3u8 manifest (e.g. protected/{identityId}/{fileId}/{fileId}.m3u8)
         transcodeStatus: a.string(), // PENDING | PROCESSING | COMPLETE | ERROR
         mediaConvertJobId: a.string(), // AWS MediaConvert job ID for tracking
+        // Per-file settings (e.g. audioCleanupStrength override from RecordingStudio3)
+        settings: a.json(),
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         // Owner has full control
@@ -856,11 +981,18 @@ const schema = a
 
     Word: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Content
         phrase: a.string(),
@@ -883,6 +1015,9 @@ const schema = a
         documentWords: a.hasMany("DocumentWord", ["wordID"]),
         // Yjs CRDT snapshot for conflict-free collaborative editing
         yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -896,123 +1031,393 @@ const schema = a
 
     UnitFile: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        unitID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unit: a.belongsTo("Unit", ["unitID"]),
-        fileID: a.id().required(),
+        fileID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         file: a.belongsTo("File", ["fileID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     UnitWord: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        unitID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unit: a.belongsTo("Unit", ["unitID"]),
-        wordID: a.id().required(),
+        wordID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         word: a.belongsTo("Word", ["wordID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     QuestionUnit: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        questionID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        questionID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         question: a.belongsTo("Question", ["questionID"]),
-        unitID: a.id().required(),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unit: a.belongsTo("Unit", ["unitID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     UnitDocument: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        unitID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unit: a.belongsTo("Unit", ["unitID"]),
-        documentID: a.id().required(),
+        documentID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         document: a.belongsTo("Document", ["documentID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     QuestionFile: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        questionID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        questionID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         question: a.belongsTo("Question", ["questionID"]),
-        fileID: a.id().required(),
+        fileID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         file: a.belongsTo("File", ["fileID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     WordFile: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        wordID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        wordID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         word: a.belongsTo("Word", ["wordID"]),
-        fileID: a.id().required(),
+        fileID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         file: a.belongsTo("File", ["fileID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     QuestionWord: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        questionID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        questionID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         question: a.belongsTo("Question", ["questionID"]),
-        wordID: a.id().required(),
+        wordID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         word: a.belongsTo("Word", ["wordID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     DocumentWord: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        documentID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        documentID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         document: a.belongsTo("Document", ["documentID"]),
-        wordID: a.id().required(),
+        wordID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         word: a.belongsTo("Word", ["wordID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     DocumentQuestion: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        documentID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        documentID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         document: a.belongsTo("Document", ["documentID"]),
-        questionID: a.id().required(),
+        questionID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         question: a.belongsTo("Question", ["questionID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     AssistantChatFile: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        chatID: a.id().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        chatID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         chat: a.belongsTo("AssistantChat", ["chatID"]),
-        fileID: a.id().required(),
+        fileID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         file: a.belongsTo("File", ["fileID"]),
+        deletedAt: a.datetime(),
       })
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
+
+    // ========================================================================
+    // COLLABORATION MODELS
+    // ========================================================================
+
+    /**
+     * CollaboratorAccess - Grants instructor-to-instructor visibility on units
+     *
+     * Owner of the unit can share with other instructors at "read" or "edit" level.
+     * Collaborators discover shared units by querying their own collaboratorId.
+     */
+    CollaboratorAccess: a
+      .model({
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
+        _lastChangedAt: a.timestamp(),
+        _deleted: a.boolean(),
+        // The unit being shared
+        unitID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unit: a.belongsTo("Unit", ["unitID"]),
+        // The instructor being granted access
+        collaboratorId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        // Who granted the access
+        grantedBy: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        // Permission level
+        permission: CollaboratorPermission,
+        // Metadata
+        grantedAt: a.datetime(),
+        // Owner = the unit owner (for auth purposes)
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+      })
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins"),
+        allow.authenticated().to(["read"]),
+      ]),
 
     // ========================================================================
     // ANALYSIS MODELS
@@ -1040,11 +1445,18 @@ const schema = a
      * - Admins have full access
      */ Document: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership - auto-populated by Cognito, tracks document creator
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         learner: a.string(), // Alternate learner reference
         // Section context - for section-based authorization
@@ -1056,9 +1468,27 @@ const schema = a
         // Format: ['section-{sectionId}-instructors']
         writableGroups: a.string().array(),
         // Document metadata
-        filename: a.string().required(),
-        s3Key: a.string().required(), // S3 path to original PDF
-        status: a.string().required(), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
+        filename: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        s3Key: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        status: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
         // Content (full text stored in S3: private/{identityId}/documents/{id}/extracted-text.txt)
         textExtractedAt: a.timestamp(), // Signals text is available in S3
         pageCount: a.integer(),
@@ -1080,6 +1510,9 @@ const schema = a
         metadata: a.json(),
         // Yjs CRDT snapshot for conflict-free document status management
         yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
       .authorization((allow) => [
         // Document owner (student) can manage their documents
@@ -1098,14 +1531,27 @@ const schema = a
 
     ParsedContent: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Foreign keys
-        documentID: a.id().required(),
+        documentID: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         document: a.belongsTo("Document", ["documentID"]),
         fileID: a.id(),
         file: a.belongsTo("File", ["fileID"]),
@@ -1135,12 +1581,32 @@ const schema = a
 
     AgentJob: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Job tracking
-        type: a.string().required(), // pdf_analysis, exercise_generation, vocabulary_extraction
-        status: a.string().required(), // queued, processing, completed, failed, cancelled
+        type: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]), // pdf_analysis, exercise_generation, vocabulary_extraction
+        status: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]), // queued, processing, completed, failed, cancelled
         // Foreign keys
         documentID: a.id(),
         document: a.belongsTo("Document", ["documentID"]),
@@ -1173,27 +1639,60 @@ const schema = a
 
     AssistantChat: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        // Record type: "chat" (default) or "memory" (aggregated conversation memory)
+        type: a.enum(["chat", "memory"]),
+        // Scoping — which unit/section this chat or memory belongs to
+        unitID: a.id(),
+        sectionID: a.id(),
         // Assistant configuration
         model: a.string(),
         threadInstructions: a.string(),
         additionalInstructions: a.string(),
         threadId: a.string(), // OpenAI thread ID
         moderationFlag: a.boolean(),
-        // Chat session
+        // Chat session (type=chat)
         messages: a.json(), // Chat messages as JSON array
         draft: a.string(), // Current draft message
         archived: a.boolean(),
-        // Usage tracking
+        // Usage tracking (legacy string fields kept for backward compat)
         inputTokens: a.string(),
         outputTokens: a.string(),
+        // Token usage tracking (actual values from LLM responses)
+        totalPromptTokens: a.integer(), // Cumulative prompt tokens for this chat
+        totalCompletionTokens: a.integer(), // Cumulative completion tokens
+        totalTokens: a.integer(), // Cumulative total tokens (prompt + completion)
+        turnCount: a.integer(), // Number of chat turns (for averaging)
+        lastTurnPromptTokens: a.integer(), // Most recent turn prompt tokens
+        lastTurnCompletionTokens: a.integer(), // Most recent turn completion tokens
+        // Memory fields (type=memory) — rolling conversation summaries & insights
+        summary: a.string(), // Rolling summary of recent conversations
+        insights: a.json(), // [{topic, insight, confidence, updatedAt}]
+        topicsDiscussed: a.json(), // [{topic, lastDiscussedAt, depth, wasResolved}]
+        // Embedding for semantic memory recall
+        embedding: a.string(), // JSON-encoded 512d vector
+        embeddingModel: a.string(), // e.g. "text-embedding-3-small"
+        embeddingDimensions: a.integer(), // e.g. 512
         // Relationships
         chatFiles: a.hasMany("AssistantChatFile", ["chatID"]),
+        // Soft delete
+        deletedAt: a.datetime(),
+        deletedBy: a.string(),
       })
+      .secondaryIndexes((index) => [
+        index("unitID").sortKeys(["type"]).name("byUnit"),
+      ])
       .authorization((allow) => [allow.owner(), allow.group("Admins")]),
 
     // ========================================================================
@@ -1202,11 +1701,18 @@ const schema = a
 
     Settings: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Document analysis
         autoAnalyzeDocuments: a.boolean(),
@@ -1225,8 +1731,15 @@ const schema = a
         timezone: a.string(),
         // Profile
         displayName: a.string(),
+        // Profile visibility — what others see on your profile page
+        showBadgesOnProfile: a.boolean(), // Show earned badges on profile (default: true)
+        showAntiBadgesOnProfile: a.boolean(), // Show anti-badges on profile (default: false)
+        profileThemeId: a.string(), // Cosmetic theme applied to profile page (from CosmeticSelector)
+        customThemePalette: a.json(), // User-mixed custom theme colors (when profileThemeId is 'custom')
         // Leaderboard & gamification
         leaderboardOptIn: a.boolean(), // Student opt-in for overall leaderboard
+        // Recording settings
+        audioCleanupStrength: a.string(), // 'off' | 'light' | 'standard' | 'aggressive' (default: 'standard')
         metadata: a.json(),
       })
       .authorization((allow) => [
@@ -1237,10 +1750,20 @@ const schema = a
 
     Notification: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        recipientId: a.string().required(),
+        recipientId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow
+              .ownerDefinedIn("recipientId")
+              .to(["create", "read", "delete"]),
+            allow.group("Admins").to(["create", "read"]),
+          ]),
         type: NotificationType,
         category: NotificationCategory,
         title: a.string().required(),
@@ -1266,11 +1789,18 @@ const schema = a
 
     AIFeedback: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // Ownership
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         identityId: a.string(),
         // Content type
         contentType: AiContentType,
@@ -1301,13 +1831,45 @@ const schema = a
 
     WorkbookComment: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        gradeId: a.id().required(),
-        blockId: a.string().required(),
-        threadId: a.string().required(),
-        content: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        gradeId: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        blockId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        threadId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        content: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         resolved: a.boolean(),
         replies: a.ref("CommentReply").array(),
       })
@@ -1322,11 +1884,31 @@ const schema = a
 
     HomeworkRoom: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        gradeId: a.id().required(),
-        ownerId: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        gradeId: a
+          .id()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        ownerId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         sectionID: a.id(), // Section this room belongs to (for same-section validation)
         status: a.enum(["OPEN", "IN_REVIEW", "REVIEW_COMPLETE"]),
         code: a.string(), // Short join code for self-join (like Section.code)
@@ -1352,11 +1934,31 @@ const schema = a
 
     StudentXPLog: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        studentId: a.string().required(),
-        xpAmount: a.integer().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        studentId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        xpAmount: a
+          .integer()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         accuracy: a.float(),
         reason: a.enum([
           "HOMEWORK_SUBMITTED",
@@ -1395,10 +1997,24 @@ const schema = a
     // Aggregate student gamification profile (absorbs 7 models)
     StudentProfile: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        studentId: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        studentId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         cohortId: a.string(),
         studentName: a.string(),
         // XP & Level (computed from StudentXPLog by Lambda)
@@ -1458,10 +2074,27 @@ const schema = a
     // Global platform settings — admin-only singleton for all platform-wide configuration
     PlatformSettings: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        // === Gamification ===
+        // === Gamification Feature Defaults ===
+        // These are the system-wide defaults. Teachers can override per section.
+        xpEnabled: a.boolean().default(true), // Master XP toggle
+        badgesEnabled: a.boolean().default(true),
+        antiBadgesEnabled: a.boolean().default(true),
+        leaderboardEnabled: a.boolean().default(true),
+        leaderboardAnonymous: a.boolean().default(false),
+        streaksEnabled: a.boolean().default(true),
+        easterEggsEnabled: a.boolean().default(true),
+        groupChallengesEnabled: a.boolean().default(true),
+        squadsEnabled: a.boolean().default(true),
+        skillTreesEnabled: a.boolean().default(true),
+        collaborativePracticeEnabled: a.boolean().default(true),
+        cosmeticsEnabled: a.boolean().default(true),
+        contentLocksEnabled: a.boolean().default(true),
+        // === Gamification Tuning ===
         // Leveling curve — ordered thresholds defining XP needed per level
         levelThresholds: a.ref("LevelThreshold").array(),
         // XP multipliers per reason (overrides global defaults)
@@ -1471,13 +2104,8 @@ const schema = a
         weeklyCap: a.integer(),
         // Badge toggles — which badge/anti-badge types are active
         badgeConfigs: a.ref("BadgeConfig").array(),
-        badgesEnabled: a.boolean().default(true),
-        antiBadgesEnabled: a.boolean().default(true),
         // Streak settings
         streakFreezesAllowed: a.integer().default(3),
-        // Leaderboard
-        leaderboardEnabled: a.boolean().default(true),
-        leaderboardAnonymous: a.boolean().default(false),
         // Custom badge definitions (admin-created badges)
         customBadges: a.ref("CustomBadgeDefinition").array(),
         // Avatar unlock schedule — JSON: { unlocks: [{minLevel, tier}], glowOnLevelUp?, featureUnlockLevels? }
@@ -1493,8 +2121,38 @@ const schema = a
         sageModel: a.string(), // Model override for Sage
         kaiSystemPromptOverride: a.string(), // Custom system prompt (replaces default)
         sageSystemPromptOverride: a.string(), // Custom system prompt (replaces default)
+        // === Agent Behavior Tuning ===
+        agentMaxSteps: a.integer(), // Max tool-calling rounds per turn (default: 5)
+        kaiTemperature: a.float(), // Temperature override for Kai (default: 0.7)
+        kaiMaxTokens: a.integer(), // Max output tokens for Kai (default: 2000)
+        kaiMaxSteps: a.integer(), // Max agent steps for Kai
+        sageTemperature: a.float(), // Temperature override for Sage (default: 0.7)
+        sageMaxTokens: a.integer(), // Max output tokens for Sage (default: 4000)
+        sageMaxSteps: a.integer(), // Max agent steps for Sage
+        // === Search Tuning ===
+        searchThreshold: a.float(), // Min cosine similarity (default: 0.3)
+        searchDefaultLimit: a.integer(), // Default result count (default: 5)
+        // === Memory ===
+        memoryEnabled: a.boolean().default(true), // Enable conversation memory
+        memorySummarizationModel: a.string(), // Model for summarization (default: gpt-4o-mini)
+        // === Token Budgets ===
+        systemPromptBudget: a.integer(), // Max tokens for system prompt (default: 2000)
+        toolResultBudget: a.integer(), // Max tokens per tool result (default: 4000)
+        totalTurnBudget: a.integer(), // Max total tokens per agent turn (default: 16000)
+        kaiSystemPromptBudget: a.integer(), // Per-persona system prompt budget
+        sageSystemPromptBudget: a.integer(),
+        kaiToolResultBudget: a.integer(), // Per-persona tool result budget
+        sageToolResultBudget: a.integer(),
+        kaiTotalTurnBudget: a.integer(), // Per-persona total turn budget
+        sageTotalTurnBudget: a.integer(),
+        enforceTokenBudget: a.boolean(), // Whether to actively enforce totalTurnBudget (default: true)
         // === Ownership ===
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
       })
       .authorization((allow) => [
         allow.owner(),
@@ -1505,11 +2163,25 @@ const schema = a
     // Per-student, per-section progress — enables different XP/level/badges per section
     SectionProgress: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        studentId: a.string().required(),
-        sectionId: a.string().required(),
+        studentId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        sectionId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         studentName: a.string(),
         // XP & Level (scoped to this section, computed using section's leveling curve)
         totalXP: a.integer().default(0),
@@ -1538,7 +2210,12 @@ const schema = a
         activeDaysCount: a.integer().default(0),
         // Module progress within this section
         moduleProgress: a.ref("ModuleProgressEntry").array(),
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Denormalized avatar config — synced from Settings.metadata on save & rebuild
         avatarStyle: a.string(),
         avatarOverrides: a.json(),
@@ -1556,10 +2233,24 @@ const schema = a
 
     StudentMemory: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        studentId: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        studentId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         unitID: a.string(), // null = global memory, set = per-unit memory
         memoryMarkdown: a.string(),
         structuredProfile: a.json(),
@@ -1587,14 +2278,40 @@ const schema = a
 
     EasterEgg: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
-        triggerValue: a.string().required(),
-        xpReward: a.integer().required(),
+        triggerValue: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        xpReward: a
+          .integer()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         badgeId: a.string(),
-        revealMessage: a.string().required(),
+        revealMessage: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         active: a.boolean().default(true),
         cohortId: a.string(),
         // Embedded discoveries (absorbed from EasterEggDiscovery)
@@ -1609,10 +2326,24 @@ const schema = a
 
     Skill: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        title: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        title: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         description: a.string(),
         prerequisites: a.json(),
         xpReward: a.integer(),
@@ -1630,11 +2361,31 @@ const schema = a
 
     Squad: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        name: a.string().required(),
-        cohortId: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        name: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        cohortId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         totalXP: a.integer().default(0),
         description: a.string(),
         // Embedded members (absorbed from SquadMembership)
@@ -1656,12 +2407,38 @@ const schema = a
 
     GroupChallenge: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        cohortId: a.string().required(),
-        title: a.string().required(),
-        targetXP: a.integer().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        cohortId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        title: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        targetXP: a
+          .integer()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         currentXP: a.integer().default(0),
         deadline: a.datetime(),
         active: a.boolean().default(true),
@@ -1696,10 +2473,24 @@ const schema = a
 
     Badge: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        title: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        title: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         description: a.string(),
         icon: a.string(),
         shape: a.enum(["circle", "hexagon", "shield", "diamond"]),
@@ -1723,18 +2514,44 @@ const schema = a
 
     SquadMessage: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        cohortId: a.string().required(),
+        cohortId: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Target squads (one or many)
-        recipientSquadIds: a.string().array().required(),
+        recipientSquadIds: a
+          .string()
+          .array()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Template with {{SQUAD_NAME}}, {{SQUAD_RIVAL}}, {{SQUAD_XP}} vars
-        template: a.string().required(),
+        template: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         // Hydrated per-squad messages [{squadId, squadName, body}]
         resolvedMessages: a.json(),
         sentAt: a.datetime(),
-        owner: a.string(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
       })
       .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
       .authorization((allow) => [
@@ -1750,10 +2567,24 @@ const schema = a
 
     PracticeSession: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
-        unitID: a.string().required(),
+        owner: a
+          .string()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
+        unitID: a
+          .string()
+          .required()
+          .authorization((allow) => [
+            allow.owner().to(["create", "read", "delete"]),
+            allow.authenticated().to(["read"]),
+          ]),
         drillType: PracticeDrillType,
         data: a.json(), // Same format as Grade.data — keyed by generated block IDs
         accuracy: a.float(), // Overall accuracy 0-100
@@ -1794,7 +2625,9 @@ const schema = a
 
     AnalyticsSummary: a
       .model({
-        _version: a.integer(),
+        _version: a
+          .integer()
+          .authorization((allow) => [allow.authenticated().to(["read"])]),
         _lastChangedAt: a.timestamp(),
         _deleted: a.boolean(),
         // ─── Dimension keys ───
@@ -2502,6 +3335,69 @@ const schema = a
       .returns(a.string())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(documentThumbnailHandler)),
+
+    // ========================================================================
+    // RECYCLE BIN OPERATIONS
+    // ========================================================================
+
+    softDelete: a
+      .mutation()
+      .arguments({
+        modelName: a.string().required(),
+        id: a.id().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(recycleBinHandler)),
+
+    restoreRecord: a
+      .mutation()
+      .arguments({
+        modelName: a.string().required(),
+        id: a.id().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(recycleBinHandler)),
+
+    permanentDelete: a
+      .mutation()
+      .arguments({
+        modelName: a.string().required(),
+        id: a.id().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(recycleBinHandler)),
+
+    unarchiveRecord: a
+      .mutation()
+      .arguments({
+        archiveKey: a.string().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.group("Admins")])
+      .handler(a.handler.function(recycleBinHandler)),
+
+    listArchives: a
+      .query()
+      .arguments({
+        modelName: a.string(),
+        limit: a.integer(),
+        continuationToken: a.string(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.group("Admins")])
+      .handler(a.handler.function(recycleBinHandler)),
+
+    getArchive: a
+      .query()
+      .arguments({
+        archiveKey: a.string().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.group("Admins")])
+      .handler(a.handler.function(recycleBinHandler)),
   })
   .authorization((allow) => [
     allow.resource(openaiHandler),
@@ -2512,6 +3408,7 @@ const schema = a
     allow.resource(documentThumbnailHandler),
     allow.resource(gamificationHandler),
     allow.resource(moderationHandler),
+    allow.resource(recycleBinHandler),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;

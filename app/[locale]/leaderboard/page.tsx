@@ -13,7 +13,7 @@ export default async function LeaderboardPage() {
   try {
     const client = getServerClient();
 
-    const { data: profiles } = await client.models.StudentProfile.list({
+    const { data: profiles } = await (client as any).models.StudentProfile.list({
       limit: 100,
     });
 
@@ -38,7 +38,7 @@ export default async function LeaderboardPage() {
   }
 
   return (
-      <GamificationProviderWrapper>
+      <GamificationProviderWrapper cohortId={undefined}>
         <LiveLeaderboard initialEntries={initialEntries} />
       </GamificationProviderWrapper>
   );

@@ -1,0 +1,331 @@
+{
+  "generated": "2026-06-15T23:37:20.068Z",
+  "total": 26,
+  "static": [],
+  "dynamic": [
+    {
+      "route": "/[locale]/admin/analytics",
+      "mockUrl": "/mock-locale/admin/analytics",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/admin/archives",
+      "mockUrl": "/mock-locale/admin/archives",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/admin/moderation",
+      "mockUrl": "/mock-locale/admin/moderation",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/admin/settings",
+      "mockUrl": "/mock-locale/admin/settings",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/admin/words",
+      "mockUrl": "/mock-locale/admin/words",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/instructor/grade/[id]",
+      "mockUrl": "/mock-locale/instructor/grade/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/leaderboard",
+      "mockUrl": "/mock-locale/leaderboard",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/offline",
+      "mockUrl": "/mock-locale/offline",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]",
+      "mockUrl": "/mock-locale",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/privacy",
+      "mockUrl": "/mock-locale/privacy",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/profile/[username]",
+      "mockUrl": "/mock-locale/profile/mock-username",
+      "params": [
+        "locale",
+        "username"
+      ]
+    },
+    {
+      "route": "/[locale]/profile/notifications",
+      "mockUrl": "/mock-locale/profile/notifications",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/profile",
+      "mockUrl": "/mock-locale/profile",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/recycle-bin",
+      "mockUrl": "/mock-locale/recycle-bin",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/review/[id]",
+      "mockUrl": "/mock-locale/review/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/section/[id]",
+      "mockUrl": "/mock-locale/section/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/section/[id]/settings/ai",
+      "mockUrl": "/mock-locale/section/mock-id/settings/ai",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/section/[id]/settings/gamification",
+      "mockUrl": "/mock-locale/section/mock-id/settings/gamification",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/sections",
+      "mockUrl": "/mock-locale/sections",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/settings",
+      "mockUrl": "/mock-locale/settings",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/squad/[id]",
+      "mockUrl": "/mock-locale/squad/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/squads",
+      "mockUrl": "/mock-locale/squads",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/unit/[id]",
+      "mockUrl": "/mock-locale/unit/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/units",
+      "mockUrl": "/mock-locale/units",
+      "params": [
+        "locale"
+      ]
+    },
+    {
+      "route": "/[locale]/workbook/[id]",
+      "mockUrl": "/mock-locale/workbook/mock-id",
+      "params": [
+        "locale",
+        "id"
+      ]
+    },
+    {
+      "route": "/[locale]/xp-history",
+      "mockUrl": "/mock-locale/xp-history",
+      "params": [
+        "locale"
+      ]
+    }
+  ],
+  "catchAll": [],
+  "allRoutes": [
+    {
+      "route": "/[locale]/admin/analytics",
+      "file": "app/[locale]/admin/analytics/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/admin/archives",
+      "file": "app/[locale]/admin/archives/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/admin/moderation",
+      "file": "app/[locale]/admin/moderation/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/admin/settings",
+      "file": "app/[locale]/admin/settings/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/admin/words",
+      "file": "app/[locale]/admin/words/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/instructor/grade/[id]",
+      "file": "app/[locale]/instructor/grade/[id]/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/leaderboard",
+      "file": "app/[locale]/leaderboard/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/offline",
+      "file": "app/[locale]/offline/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]",
+      "file": "app/[locale]/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/privacy",
+      "file": "app/[locale]/privacy/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/profile/[username]",
+      "file": "app/[locale]/profile/[username]/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/profile/notifications",
+      "file": "app/[locale]/profile/notifications/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/profile",
+      "file": "app/[locale]/profile/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/recycle-bin",
+      "file": "app/[locale]/recycle-bin/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/review/[id]",
+      "file": "app/[locale]/review/[id]/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/section/[id]",
+      "file": "app/[locale]/section/[id]/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/section/[id]/settings/ai",
+      "file": "app/[locale]/section/[id]/settings/ai/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/section/[id]/settings/gamification",
+      "file": "app/[locale]/section/[id]/settings/gamification/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/sections",
+      "file": "app/[locale]/sections/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/settings",
+      "file": "app/[locale]/settings/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/squad/[id]",
+      "file": "app/[locale]/squad/[id]/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/squads",
+      "file": "app/[locale]/squads/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/unit/[id]",
+      "file": "app/[locale]/unit/[id]/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/units",
+      "file": "app/[locale]/units/page.jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/workbook/[id]",
+      "file": "app/[locale]/workbook/[id]/page.tsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/[locale]/xp-history",
+      "file": "app/[locale]/xp-history/page.jsx",
+      "isDynamic": true
+    }
+  ]
+}

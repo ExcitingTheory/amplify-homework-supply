@@ -66,7 +66,7 @@ export const WithData: Story = {
       { id: 'g2', name: 'Bug Busters', memberCount: 4 },
     ],
     easterEggs: [
-      { id: 'e1', type: 'CLICK' as const, message: 'Found the hidden bug!', xpReward: 50 },
+      { id: 'e1', type: 'KEYWORD' as const, message: 'Found the hidden bug!', xpReward: 50 },
       { id: 'e2', type: 'KEYWORD' as const, message: 'Typed the secret word!', xpReward: 75, keyword: 'konami' },
     ],
     bossBattles: [

@@ -80,7 +80,10 @@ export default function StaticWaveform({
           normalizedData = propWaveformData;
         } else if (file) {
           // Calculate from audio file
-          const audioUrl = await getCachedUrl(file.path);
+          const audioUrl = await getCachedUrl(file.path || file.key);
+          if (!audioUrl) {
+            throw new Error("Could not resolve audio URL from file");
+          }
           const response = await fetch(audioUrl);
           const arrayBuffer = await response.arrayBuffer();
           normalizedData = await calculateWaveformData(arrayBuffer, width);

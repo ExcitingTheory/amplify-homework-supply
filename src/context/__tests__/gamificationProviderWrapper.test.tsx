@@ -42,7 +42,7 @@ import { GamificationProviderWrapper } from '../gamificationProviderWrapper'
 function renderWithAuth(authValue: Record<string, any>) {
   return render(
     <AuthContext.Provider value={authValue as any}>
-      <GamificationProviderWrapper>
+      <GamificationProviderWrapper cohortId={undefined}>
         <div data-testid="child">Hello</div>
       </GamificationProviderWrapper>
     </AuthContext.Provider>,

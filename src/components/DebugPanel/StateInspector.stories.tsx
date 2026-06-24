@@ -15,11 +15,17 @@ export default meta;
 type Story = StoryObj<typeof StateInspector>;
 
 const mockSnapshot: StateSnapshot = {
-  timestamp: Date.now(),
+  timestamp: new Date().toISOString(),
+  version: '1.0.0',
   environment: {
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    viewport: '1920x1080',
+    screenSize: { width: 1920, height: 1080 },
+    viewport: { width: 1920, height: 1080 },
     url: 'http://localhost:3000/unit/test-unit',
+    platform: 'MacIntel',
+    language: 'en-US',
+    cookiesEnabled: true,
+    online: true,
   },
   localStorage: {
     'user-preferences': JSON.stringify({ theme: 'dark', language: 'en' }),
@@ -57,22 +63,23 @@ const mockSnapshot: StateSnapshot = {
     { timestamp: Date.now() - 1000, level: 'error', message: 'Failed to save', stack: 'Error: Network timeout' },
   ]),
   dataStore: {
-    models: [
-      { name: 'Unit', count: 15, syncStatus: 'synced' },
-      { name: 'Grade', count: 42, syncStatus: 'synced' },
-      { name: 'Word', count: 128, syncStatus: 'pending' },
+    units: [
+      { name: 'Unit 1', id: 'unit-1' },
+      { name: 'Unit 2', id: 'unit-2' },
     ],
+    words: Array.from({ length: 128 }, (_, i) => ({ id: `word-${i}`, word: `word${i}` })),
   },
+  contexts: {},
   performance: {
     memory: {
       usedJSHeapSize: 25000000,
       totalJSHeapSize: 50000000,
       jsHeapSizeLimit: 2000000000,
     },
-    navigation: {
-      loadTime: 1250,
+    navigation: null,
+    timing: {
       domContentLoaded: 850,
-      domComplete: 1100,
+      loadComplete: 1250,
     },
   },
   errors: [
@@ -81,20 +88,28 @@ const mockSnapshot: StateSnapshot = {
 };
 
 const emptySnapshot: StateSnapshot = {
-  timestamp: Date.now(),
+  timestamp: new Date().toISOString(),
+  version: '1.0.0',
   environment: {
     userAgent: 'Mozilla/5.0',
-    viewport: '1920x1080',
+    screenSize: { width: 1920, height: 1080 },
+    viewport: { width: 1920, height: 1080 },
     url: 'http://localhost:3000',
+    platform: 'MacIntel',
+    language: 'en-US',
+    cookiesEnabled: true,
+    online: true,
   },
   localStorage: {},
   sessionStorage: {},
   componentTree: JSON.stringify([]),
   logs: JSON.stringify([]),
-  dataStore: { models: [] },
+  dataStore: {},
+  contexts: {},
   performance: {
     memory: { usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0 },
-    navigation: { loadTime: 0, domContentLoaded: 0, domComplete: 0 },
+    navigation: null,
+    timing: { domContentLoaded: 0, loadComplete: 0 },
   },
   errors: [],
 };

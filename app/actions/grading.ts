@@ -16,8 +16,15 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject, generateText, Output } from "ai";
+import { z } from "zod";
 import outputs from "../../amplify_outputs.json";
+
+const GradeResultSchema = z.object({
+  answer: z.boolean(),
+  reason: z.string(),
+  score: z.number(),
+});
 
 /**
  * Validates that a URL is a safe S3 presigned URL from our storage bucket.
@@ -79,32 +86,23 @@ export async function gradeDefinition(params: {
   language?: string;
 }): Promise<{ answer: boolean; reason: string; score: number }> {
   const openai = getOpenAI();
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: openai("gpt-4o-mini"),
+    schema: GradeResultSchema,
     system:
-      "You are a skilled, encouraging tutor on an elearning platform. Grade student answers. Respond with JSON only.",
+      "You are a skilled, encouraging tutor on an elearning platform. Grade student answers.",
     prompt: `Grade this definition:
 Word: "${params.word}"
 Student's answer: "${params.definition}"
 Expected definition: "${params.expectedDefinition}"
 Language: ${params.language || "English"}
 
-Respond with: {"answer": true/false, "reason": "brief explanation", "score": 0-100}`,
+Set answer to true/false, reason to a brief explanation, and score to 0-100.`,
     temperature: 0.1,
     maxOutputTokens: 200,
   });
 
-  try {
-    const parsed = JSON.parse(text);
-    // Normalize field names in case model uses "correct"/"feedback" variants
-    return {
-      answer: parsed.answer ?? parsed.correct ?? false,
-      reason: parsed.reason ?? parsed.feedback ?? "",
-      score: parsed.score ?? 0,
-    };
-  } catch {
-    return { answer: false, reason: "Unable to grade response", score: 0 };
-  }
+  return object;
 }
 
 /**
@@ -118,31 +116,23 @@ export async function gradeShortAnswer(params: {
   rubric?: string;
 }): Promise<{ answer: boolean; reason: string; score: number }> {
   const openai = getOpenAI();
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: openai("gpt-4o-mini"),
+    schema: GradeResultSchema,
     system:
-      "You are a skilled, encouraging tutor on an elearning platform. Grade student answers fairly. Respond with JSON only.",
+      "You are a skilled, encouraging tutor on an elearning platform. Grade student answers fairly.",
     prompt: `Grade this short answer:
 Question: "${params.question}"
 Student's answer: "${params.answer}"
 ${params.expectedAnswer ? `Expected answer: "${params.expectedAnswer}"` : ""}
 ${params.rubric ? `Rubric: ${params.rubric}` : ""}
 
-Respond with: {"answer": true/false, "reason": "brief explanation", "score": 0-100}`,
+Set answer to true/false, reason to a brief explanation, and score to 0-100.`,
     temperature: 0.1,
     maxOutputTokens: 300,
   });
 
-  try {
-    const parsed = JSON.parse(text);
-    return {
-      answer: parsed.answer ?? parsed.correct ?? false,
-      reason: parsed.reason ?? parsed.feedback ?? "",
-      score: parsed.score ?? 0,
-    };
-  } catch {
-    return { answer: false, reason: "Unable to grade response", score: 0 };
-  }
+  return object;
 }
 
 /**
@@ -156,13 +146,21 @@ export async function gradeImage(params: {
 }) {
   const openai = getOpenAI();
   const safeImageUrl = validateAudioUrl(params.imageUrl);
-  const { text } = await generateText({
+  const ImageGradeSchema = z.object({
+    answer: z.boolean(),
+    reason: z.string(),
+    description: z.string(),
+    score: z.number(),
+  });
+
+  const { output } = await generateText({
     model: openai("gpt-4o"),
+    output: Output.object({ schema: ImageGradeSchema }),
     messages: [
       {
         role: "system",
         content:
-          "You are a skilled, encouraging tutor on an elearning platform. Describe what you see and grade if criteria provided. Respond with JSON only.",
+          "You are a skilled, encouraging tutor on an elearning platform. Describe what you see and grade if criteria provided.",
       },
       {
         role: "user",
@@ -174,8 +172,8 @@ export async function gradeImage(params: {
           {
             type: "text",
             text: params.question
-              ? `Question: "${params.question}"\n${params.expectedContent ? `Expected: "${params.expectedContent}"` : ""}\nDescribe the image and grade it. Respond with: {"answer": true/false, "reason": "brief explanation", "description": "...", "score": 0-100}`
-              : 'Describe this image in detail. Respond with: {"description": "detailed description"}',
+              ? `Question: "${params.question}"\n${params.expectedContent ? `Expected: "${params.expectedContent}"` : ""}\nDescribe the image and grade it.`
+              : "Describe this image in detail.",
           },
         ],
       },
@@ -184,22 +182,14 @@ export async function gradeImage(params: {
     maxOutputTokens: 500,
   });
 
-  try {
-    const parsed = JSON.parse(text);
-    return {
-      answer: parsed.answer ?? parsed.correct ?? false,
-      reason: parsed.reason ?? parsed.feedback ?? "",
-      description: parsed.description ?? "",
-      score: parsed.score ?? 0,
-    };
-  } catch {
-    return {
-      description: text,
+  return (
+    output ?? {
       answer: false,
       reason: "Unable to parse response",
+      description: "",
       score: 0,
-    };
-  }
+    }
+  );
 }
 
 /**
@@ -266,11 +256,12 @@ export async function transcribeAudio(params: {
     const openai = getOpenAI();
 
     const [gradeResult, moderationResult] = await Promise.allSettled([
-      generateText({
+      generateObject({
         model: openai("gpt-4o-mini"),
+        schema: GradeResultSchema,
         system:
-          "You are a skilled, encouraging tutor on an elearning platform. Compare the transcription to expected answer. Respond with JSON only.",
-        prompt: `Expected answer: "${params.expectedAnswer}"\nStudent said: "${transcript}"\n\nAre these equivalent? Respond with: {"answer": true/false, "reason": "brief explanation", "score": 0-100}`,
+          "You are a skilled, encouraging tutor on an elearning platform. Compare the transcription to expected answer.",
+        prompt: `Expected answer: "${params.expectedAnswer}"\nStudent said: "${transcript}"\n\nAre these equivalent? Set answer to true/false, reason to a brief explanation, and score to 0-100.`,
         temperature: 0.1,
         maxOutputTokens: 200,
       }),
@@ -299,16 +290,7 @@ export async function transcribeAudio(params: {
       score: 0,
     };
     if (gradeResult.status === "fulfilled") {
-      try {
-        const parsed = JSON.parse(gradeResult.value.text);
-        gradeData = {
-          answer: parsed.answer ?? parsed.correct ?? false,
-          reason: parsed.reason ?? parsed.feedback ?? "",
-          score: parsed.score ?? 0,
-        };
-      } catch {
-        // Keep default
-      }
+      gradeData = gradeResult.value.object;
     }
 
     // Parse moderation result
@@ -358,8 +340,16 @@ export async function verifySketchImage(params: {
   imageBase64: string;
 }) {
   const openai = getOpenAI();
-  const { text } = await generateText({
+
+  const SketchGradeSchema = z.object({
+    answer: z.boolean(),
+    reason: z.string(),
+    accuracy: z.number(),
+  });
+
+  const { output } = await generateText({
     model: openai("gpt-4o"),
+    output: Output.object({ schema: SketchGradeSchema }),
     messages: [
       {
         role: "user",
@@ -370,7 +360,7 @@ export async function verifySketchImage(params: {
           },
           {
             type: "text",
-            text: `The student was asked to draw: "${params.expected}". Grade their drawing. Respond ONLY with JSON: {"answer": true/false, "reason": "brief explanation", "accuracy": number 0-100}`,
+            text: `The student was asked to draw: "${params.expected}". Grade their drawing.`,
           },
         ],
       },
@@ -379,9 +369,7 @@ export async function verifySketchImage(params: {
     maxOutputTokens: 300,
   });
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { answer: false, reason: "Unable to verify image", accuracy: 0 };
-  }
+  return (
+    output ?? { answer: false, reason: "Unable to verify image", accuracy: 0 }
+  );
 }

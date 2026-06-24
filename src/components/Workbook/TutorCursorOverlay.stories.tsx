@@ -2,7 +2,7 @@ import React from 'react';
 import { TutorCursorOverlay } from './TutorCursorOverlay';
 import UnitContext from '../../context/unitContext';
 
-function withUnitContext(overrides = {}) {
+function withUnitContext(overrides: Record<string, any> = {}) {
   const awareness = {
     getStates: () => new Map(),
     on: () => {},
@@ -22,8 +22,8 @@ function withUnitContext(overrides = {}) {
     },
     ...overrides,
   };
-  return (Story) => (
-    <UnitContext.Provider value={base}>
+  return (Story: any) => (
+    <UnitContext.Provider value={base as any}>
       <Story />
     </UnitContext.Provider>
   );

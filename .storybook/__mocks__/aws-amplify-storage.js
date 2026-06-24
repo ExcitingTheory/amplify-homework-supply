@@ -5,6 +5,10 @@
  * data URIs and stored in memory so getUrl can return playable audio/image URLs.
  */
 
+// Base path for GitHub Pages deployment (e.g. /amplify-homework-supply/).
+// Ensures static assets resolve correctly when deployed under a subpath.
+const BASE_PATH = (typeof import.meta !== 'undefined' && import.meta.env?.STORYBOOK_BASE_PATH) || '/';
+
 // In-memory store for uploaded blob data URLs (keyed by storage path)
 const uploadedBlobUrls = new Map();
 
@@ -98,9 +102,14 @@ export const getUrl = async ({ key, path, options = {} }) => {
     return { url: { href: resolvedKey } };
   }
   
-  // For story-mock paths or /mocks/ paths, return as-is (real static files)
+  // For story-mock paths or /mocks/ paths, prepend base path for GitHub Pages
   if (resolvedKey?.includes('story-mocks/') || resolvedKey?.includes('/mocks/')) {
-    return { url: { href: resolvedKey } };
+    let href = resolvedKey;
+    // Prepend base path if not already present (avoids double-prefixing from Vite transform)
+    if (BASE_PATH !== '/' && href.startsWith('/') && !href.startsWith(BASE_PATH)) {
+      href = BASE_PATH + href.slice(1);
+    }
+    return { url: { href } };
   }
   
   // If it's a PDF without a known path, return a mock PDF blob URL

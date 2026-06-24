@@ -17,8 +17,12 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  useContext,
+  useMemo,
 } from "react";
 import { useTranslations } from "next-intl";
+import UnitContext from "../context/unitContext";
+import SectionContext from "../context/sectionContext";
 import {
   Box,
   Paper,
@@ -68,9 +72,17 @@ import { calculateWaveformData } from "../utils/calculateWaveformData";
 import getCachedUrl from "../utils/getCachedUrl";
 import { generateSpeech as generateSpeechAction } from "../../app/actions/generate";
 import { chatCompletion } from "../../app/actions/chat";
+import { buildVersionedKey } from "../utils/takeVersioning";
+import {
+  processAndUploadTake,
+  getProcessedPath,
+} from "../utils/processAndUploadTake";
+import { getAmplifyClient } from "../utils/amplifyClient";
 import AudioWaveformPlayer from "./Editor3/components/AudioWaveformPlayer";
 import ScreenplayEditor from "./RecordingStudio3/ScreenplayEditor";
 import HorizontalTimeline from "./RecordingStudio3/HorizontalTimeline";
+import AudioFilterPanel from "./RecordingStudio3/AudioFilterPanel";
+import TakeVersionHistory from "./RecordingStudio3/TakeVersionHistory";
 import {
   parseFountainToScriptData,
   scriptDataToFountain,
@@ -114,6 +126,31 @@ export default forwardRef(function RecordingStudio3(
 ) {
   const t = useTranslations("components");
 
+  // Course context for AI generation
+  const { currentUnit, dictionary } = useContext(UnitContext);
+  const { sections, assignments } = useContext(SectionContext);
+
+  const courseOutline = useMemo(() => {
+    if (!currentUnit?.id || !assignments?.length || !sections?.length)
+      return null;
+    const sectionIds = assignments
+      .filter((a) => a.unitID === currentUnit.id)
+      .map((a) => a.sectionID);
+    for (const sId of sectionIds) {
+      const section = sections.find((s) => s.id === sId);
+      if (section?.courseOutline) {
+        try {
+          return typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : section.courseOutline;
+        } catch {
+          /* skip */
+        }
+      }
+    }
+    return null;
+  }, [currentUnit?.id, assignments, sections]);
+
   // Script data state
   const [scriptData, setScriptData] = useState(
     initialScriptData || {
@@ -135,6 +172,7 @@ export default forwardRef(function RecordingStudio3(
   const [recordingMode, setRecordingMode] = useState("overdub"); // 'overdub', 'punch-in', 'replace'
   const [ttsQueue, setTtsQueue] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeFilters, setActiveFilters] = useState(new Set());
 
   // Fountain screenplay text — bidirectional sync with scriptData
   const [fountainText, setFountainText] = useState(() =>
@@ -157,6 +195,100 @@ export default forwardRef(function RecordingStudio3(
   const selectedSpeaker = selectedDialogue
     ? scriptData.speakers[selectedDialogue.speaker]
     : null;
+
+  // Persist filter changes to the active take's File record and re-process audio
+  const handleFiltersChange = useCallback(
+    async (newFilters) => {
+      setActiveFilters(newFilters);
+
+      // Find the active take for the selected dialogue
+      if (!selectedDialogue) return;
+      const takes = selectedDialogue.takes || [];
+      const activeTake =
+        takes[selectedDialogue.activeTakeIndex ?? takes.length - 1];
+      if (!activeTake?.fileId && !activeTake?.audioPath) return;
+
+      const filterArray = [...newFilters];
+
+      // Save filter settings to File.settings if we have a fileId
+      if (activeTake.fileId) {
+        try {
+          const client = getAmplifyClient();
+          const { data: fileRecord } = await client.models.File.get({
+            id: activeTake.fileId,
+          });
+          if (fileRecord) {
+            const existingSettings =
+              typeof fileRecord.settings === "string"
+                ? JSON.parse(fileRecord.settings)
+                : fileRecord.settings || {};
+            await client.models.File.update({
+              id: activeTake.fileId,
+              settings: JSON.stringify({
+                ...existingSettings,
+                audioFilters: filterArray,
+              }),
+              _version: fileRecord._version,
+            });
+          }
+        } catch (err) {
+          console.warn(
+            "[RecordingStudio3] Failed to save filter settings:",
+            err,
+          );
+        }
+      }
+
+      // Re-process audio from raw and upload processed copy
+      const rawPath = activeTake.audioPath;
+      if (rawPath && filterArray.length > 0) {
+        try {
+          await processAndUploadTake(rawPath, newFilters);
+          console.log(
+            "[RecordingStudio3] Re-processed take with filters:",
+            filterArray,
+          );
+        } catch (err) {
+          console.warn("[RecordingStudio3] Failed to process take:", err);
+        }
+      }
+    },
+    [selectedDialogue],
+  );
+
+  // Load saved filters from the active take's File record when selection changes
+  useEffect(() => {
+    if (!selectedDialogue) return;
+    const takes = selectedDialogue.takes || [];
+    const activeTake =
+      takes[selectedDialogue.activeTakeIndex ?? takes.length - 1];
+    if (!activeTake?.fileId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const client = getAmplifyClient();
+        const { data: fileRecord } = await client.models.File.get({
+          id: activeTake.fileId,
+        });
+        if (cancelled) return;
+        const settings =
+          typeof fileRecord?.settings === "string"
+            ? JSON.parse(fileRecord.settings)
+            : fileRecord?.settings;
+        if (settings?.audioFilters) {
+          setActiveFilters(new Set(settings.audioFilters));
+        } else {
+          setActiveFilters(new Set());
+        }
+      } catch {
+        // Silently skip — filters default to empty
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDialogue?.id, selectedDialogue?.activeTakeIndex]);
 
   // Check if track is locked
   const isTrackLocked = useCallback(
@@ -347,6 +479,7 @@ export default forwardRef(function RecordingStudio3(
     audioBlob,
     type = "human",
     cinematicMetadata = null,
+    existingTake = null, // Pass an existing take for re-record (version increment)
   ) => {
     if (!selectedDialogue) return;
 
@@ -354,14 +487,30 @@ export default forwardRef(function RecordingStudio3(
       // Calculate waveform
       const waveformData = await calculateWaveformData(audioBlob, 600);
 
+      // For re-records, reuse the existing slotId and increment version
+      const slotId =
+        existingTake?.id && typeof existingTake.id === "string"
+          ? existingTake.id
+          : crypto.randomUUID();
+      const version = existingTake?.version ? existingTake.version + 1 : 1;
+      const ext = type === "tts" ? "mp3" : "webm";
+
       // Upload to S3 if gradeId and nodeKey provided
       let audioPath = null;
+      let fileId = null;
       if (gradeId && nodeKey && identityId) {
+        const versionedKey = buildVersionedKey(
+          identityId,
+          selectedDialogue.id,
+          slotId,
+          version,
+          ext,
+        );
         const uploadResult = await uploadStudentSubmission({
           file: audioBlob,
           gradeId,
-          nodeKey: `${nodeKey}_dialogue_${selectedDialogue.id}`,
-          fileType: "mp3",
+          nodeKey: versionedKey,
+          fileType: ext,
           metadata: {
             dialogueId: selectedDialogue.id,
             speaker: selectedDialogue.speaker,
@@ -373,14 +522,28 @@ export default forwardRef(function RecordingStudio3(
           },
         });
         audioPath = uploadResult.path;
+        fileId = uploadResult.fileId || null;
       }
+
+      // Determine which processing was applied (for metadata/debugging)
+      const processingApplied =
+        type === "human"
+          ? [
+              ...(activeFilters.size > 0
+                ? activeFilters
+                : new Set(["derumble", "compress", "normalize"])),
+            ]
+          : [];
 
       // Create new take with file metadata and cinematic context
       const newTake = {
-        id: Date.now(),
+        id: slotId,
         type, // 'human' or 'tts'
+        version,
+        processingApplied, // Filter names applied before upload
         audioBlob: audioPath ? null : audioBlob, // Store blob if not uploaded
         audioPath, // S3 path if uploaded
+        fileId, // DynamoDB File record ID
         waveformData, // Waveform data for visualization
         duration: audioBlob.size ? 0 : 0, // Will be calculated from actual audio
         file: audioPath
@@ -394,6 +557,7 @@ export default forwardRef(function RecordingStudio3(
           : null,
         cinematicMetadata, // Store scene, direction, emotion context
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Add take to dialogue line
@@ -574,6 +738,33 @@ export default forwardRef(function RecordingStudio3(
     );
   };
 
+  // Rollback take to a previous version (restores audioPath without new S3 write)
+  const handleRollbackTake = useCallback(
+    async (dialogueId, slotId, versionKey) => {
+      updateScriptData(
+        {
+          ...scriptData,
+          dialogue: scriptData.dialogue.map((d) => {
+            if (d.id !== dialogueId) return d;
+            const updatedTakes = d.takes.map((take) => {
+              if (take.id !== slotId) return take;
+              return {
+                ...take,
+                audioPath: versionKey,
+                file: take.file ? { ...take.file, key: versionKey } : null,
+                updatedAt: new Date().toISOString(),
+              };
+            });
+            return { ...d, takes: updatedTakes };
+          }),
+        },
+        "TAKE_ROLLBACK",
+        { dialogueId, slotId, versionKey },
+      );
+    },
+    [scriptData, updateScriptData],
+  );
+
   // Export script as JSON
   const handleExportJSON = () => {
     const dataStr = JSON.stringify(scriptData, null, 2);
@@ -613,7 +804,7 @@ export default forwardRef(function RecordingStudio3(
     async (prompt) => {
       setIsGenerating(true);
       try {
-        const systemMessage = [
+        const systemParts = [
           "You are a screenplay writer. Output ONLY valid Fountain format text, no explanation.",
           "Fountain format rules:",
           '- Title page: "Title: ..." and "Date: ..." at the top, followed by a blank line',
@@ -623,7 +814,37 @@ export default forwardRef(function RecordingStudio3(
           "- Parentheticals: (emotion) between character name and dialogue",
           "- Notes: [[direction notes]] inside dialogue text",
           "- Blank line between each dialogue block",
-        ].join("\n");
+        ];
+
+        // Add course context for progression-aware dialogue
+        if (currentUnit) {
+          systemParts.push(
+            `\nCurrent Unit: ${currentUnit.name}${currentUnit.description ? ` — ${currentUnit.description}` : ""}`,
+          );
+        }
+        if (courseOutline && courseOutline.length > 0) {
+          systemParts.push("\nCourse progression:");
+          for (const entry of courseOutline) {
+            const marker = entry.unitId === currentUnit?.id ? " ← CURRENT" : "";
+            systemParts.push(
+              `  ${entry.number != null ? `${entry.number}. ` : "• "}${entry.name}${marker}`,
+            );
+          }
+        }
+        if (dictionary && Object.keys(dictionary).length > 0) {
+          const vocabList = Object.values(dictionary)
+            .filter((w) => w?.phrase)
+            .slice(0, 15)
+            .map(
+              (w) => `${w.phrase}${w.definition ? ` (${w.definition})` : ""}`,
+            )
+            .join(", ");
+          if (vocabList) {
+            systemParts.push(`\nUnit vocabulary to incorporate: ${vocabList}`);
+          }
+        }
+
+        const systemMessage = systemParts.join("\n");
 
         // Include current script as context if it exists
         const currentContext =
@@ -667,6 +888,9 @@ export default forwardRef(function RecordingStudio3(
       scriptData.dialogue.length,
       fountainText,
       updateScriptData,
+      currentUnit,
+      courseOutline,
+      dictionary,
       t,
     ],
   );
@@ -872,6 +1096,12 @@ export default forwardRef(function RecordingStudio3(
                     </Button>
                   </Stack>
 
+                  {/* Audio Filter Panel */}
+                  <AudioFilterPanel
+                    activeFilters={activeFilters}
+                    onFiltersChange={handleFiltersChange}
+                  />
+
                   {/* Takes list */}
                   {selectedDialogue.takes &&
                     selectedDialogue.takes.length > 0 && (
@@ -949,6 +1179,22 @@ export default forwardRef(function RecordingStudio3(
                                       take.createdAt,
                                     ).toLocaleTimeString()}
                                   </Typography>
+                                  <TakeVersionHistory
+                                    identityId={identityId}
+                                    dialogueId={selectedDialogue.id}
+                                    slotId={
+                                      typeof take.id === "string"
+                                        ? take.id
+                                        : null
+                                    }
+                                    currentVersion={take.version}
+                                    currentAudioPath={take.audioPath}
+                                    takeType={take.type}
+                                    onRestore={handleRollbackTake}
+                                    disabled={
+                                      readOnly || typeof take.id !== "string"
+                                    }
+                                  />
                                 </Stack>
                                 {(takeAudioUrl || take.file) && (
                                   <Box sx={{ mt: 0.5, pl: 5 }}>
@@ -956,6 +1202,7 @@ export default forwardRef(function RecordingStudio3(
                                       audioUrl={takeAudioUrl}
                                       file={take.file}
                                       waveformData={take.waveformData}
+                                      audioFilters={activeFilters}
                                       width={350}
                                       height={50}
                                       showDuration

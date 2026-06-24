@@ -180,7 +180,7 @@ export function LiveLeaderboard({
 
       {mode === "xp" && (
         <LeaderboardTable
-          entries={entries}
+          entries={entries as any}
           currentStudentId={currentUserId}
           topN={10}
         />

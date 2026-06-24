@@ -70,7 +70,7 @@ export class MeaningAssociationNode extends DecoratorNode {
 
   exportJSON() {
     return {
-      // ...super.exportJSON(),
+      ...super.exportJSON(),
       type: 'meaning-association',
       version: 1,
       wordIDs: [...this.__ids],

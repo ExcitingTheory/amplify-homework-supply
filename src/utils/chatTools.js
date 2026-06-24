@@ -1091,12 +1091,13 @@ export async function executeListUnits({ limit }) {
   try {
     const client = getAmplifyClient();
     const { data: units } = await client.models.Unit.list();
-    const result = limit ? units.slice(0, limit) : units;
+    const activeUnits = (units || []).filter(u => u != null && u.deletedAt == null);
+    const result = limit ? activeUnits.slice(0, limit) : activeUnits;
     
     return {
       success: true,
       count: result.length,
-      total: units.length,
+      total: activeUnits.length,
       units: result.map(u => ({
         id: u.id,
         name: u.name,

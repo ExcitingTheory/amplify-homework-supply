@@ -5,8 +5,8 @@
 
 import React from "react";
 import { expect } from "storybook/test";
-import { within, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { within, waitFor } from "storybook/test";
+import { userEvent } from "storybook/test";
 import RecordingStudio3 from "./RecordingStudio3";
 import FilesContext from "../context/fileContext";
 import { DemoBanner } from "../../.storybook/components/DemoBanner";
@@ -57,8 +57,8 @@ const mockFilesContext = {
   uploadFile: async (file) => {
     console.log("Mock upload:", file.name);
     return {
-      path: `protected/${file.name}`,
-      key: `protected/${file.name}`,
+      path: `/story-mocks/${file.name}`,
+      key: file.name,
     };
   },
 };
@@ -248,12 +248,14 @@ const mockScriptWithTakes = {
           id: Date.now() - 5000,
           type: "tts",
           audioBlob: null,
-          audioPath: "protected/narrator-take1.mp3",
+          audioPath:
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
           waveformData: generateMockWaveform(150),
           duration: 3.0,
           file: {
-            key: "protected/narrator-take1.mp3",
-            level: "protected",
+            key: "cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+            path: "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+            level: "public",
             identityId: "us-east-1:mock-identity-123",
             type: "audio/mpeg",
             size: 48000,
@@ -269,12 +271,14 @@ const mockScriptWithTakes = {
           id: Date.now() - 3000,
           type: "human",
           audioBlob: null,
-          audioPath: "protected/narrator-take2.mp3",
+          audioPath:
+            "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
           waveformData: generateMockWaveform(150),
           duration: 2.8,
           file: {
-            key: "protected/narrator-take2.mp3",
-            level: "protected",
+            key: "descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+            path: "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+            level: "public",
             identityId: "us-east-1:mock-identity-123",
             type: "audio/mpeg",
             size: 44800,
@@ -301,12 +305,13 @@ const mockScriptWithTakes = {
           id: Date.now() - 2000,
           type: "tts",
           audioBlob: null,
-          audioPath: "protected/character-take1.mp3",
+          audioPath: "/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3",
           waveformData: generateMockWaveform(120),
           duration: 2.5,
           file: {
-            key: "protected/character-take1.mp3",
-            level: "protected",
+            key: "sound-design-elements-sfx-ps-022-302865.mp3",
+            path: "/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3",
+            level: "public",
             identityId: "us-east-1:mock-identity-123",
             type: "audio/mpeg",
             size: 40000,

@@ -57,6 +57,7 @@ import { BADGE_REGISTRY, getAllBadgeTypes, getBadgeConfig } from './badgeRegistr
 import { XPTunerDialog, XPTunerConfig, XPTunerInline } from './XPTunerDialog'
 import type { XPMultiplierConfig } from './XPTunerDialog'
 import { AvatarUnlockEditor } from './AvatarUnlockEditor'
+import { ThemeUnlockEditor } from './ThemeUnlockEditor'
 import FaceIcon from '@mui/icons-material/Face'
 import TuneIcon from '@mui/icons-material/Tune'
 import LockIcon from '@mui/icons-material/Lock'
@@ -388,6 +389,34 @@ export function InstructorGamificationPanel({
               sectionName={sections.find((s) => s.id === selectedSectionId)?.name}
               onSave={(avatarUnlocks) => {
                 onSaveXPConfig({ ...xpConfig, avatarUnlocks })
+              }}
+            />
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* ---- Theme Unlock Editor ---- */}
+      {onSaveXPConfig && (
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <TuneIcon sx={{ mr: 1 }} />
+            <Typography fontWeight={600}>Theme Unlock Levels</Typography>
+            {xpConfig?.themeUnlocks?.unlocks?.length ? (
+              <Chip
+                label={`${xpConfig.themeUnlocks.unlocks.length} themes`}
+                size="small"
+                color="secondary"
+                variant="outlined"
+                sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+              />
+            ) : null}
+          </AccordionSummary>
+          <AccordionDetails>
+            <ThemeUnlockEditor
+              config={xpConfig?.themeUnlocks}
+              sectionName={sections.find((s) => s.id === selectedSectionId)?.name}
+              onSave={(themeUnlocks) => {
+                onSaveXPConfig({ ...xpConfig, themeUnlocks })
               }}
             />
           </AccordionDetails>
@@ -738,7 +767,7 @@ export function InstructorGamificationPanel({
       <Accordion defaultExpanded={false}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <EmojiEventsIcon sx={{ mr: 1 }} />
-          <Typography fontWeight={600}>
+          <Typography component="div" fontWeight={600}>
             Badges ({customBadges.length} custom, {badgeOverrides.length} modified)
             {badgesEnabled === false && (
               <Chip label="Disabled" size="small" color="warning" variant="outlined" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
@@ -755,6 +784,7 @@ export function InstructorGamificationPanel({
                     onChange={(_, checked) => onToggleBadges(checked)}
                   />
                 }
+                slotProps={{ typography: { component: 'div' } }}
                 label={
                   <Box>
                     <Typography variant="body2" fontWeight={600}>Badge Awarding</Typography>
@@ -782,7 +812,7 @@ export function InstructorGamificationPanel({
       <Accordion defaultExpanded={false}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <ReportProblemIcon sx={{ mr: 1, color: 'error.main' }} />
-          <Typography fontWeight={600}>
+          <Typography component="div" fontWeight={600}>
             Anti-Badges
             {antiBadgesEnabled === false && (
               <Chip label="Disabled" size="small" color="warning" variant="outlined" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
@@ -806,6 +836,7 @@ export function InstructorGamificationPanel({
                     onChange={(_, checked) => onToggleAntiBadges(checked)}
                   />
                 }
+                slotProps={{ typography: { component: 'div' } }}
                 label={
                   <Box>
                     <Typography variant="body2" fontWeight={600}>Anti-Badge Awarding</Typography>

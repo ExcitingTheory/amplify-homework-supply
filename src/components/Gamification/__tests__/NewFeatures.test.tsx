@@ -402,7 +402,7 @@ describe('InstructorGamificationPanel', () => {
     const onDeleteEasterEgg = vi.fn()
     render(
       <InstructorGamificationPanel
-        easterEggs={[{ id: 'e1', type: 'CLICK', message: 'Found the bug!', xpReward: 50 }]}
+        easterEggs={[{ id: 'e1', type: 'KEYWORD' as any, message: 'Found the bug!', xpReward: 50 }]}
         onDeleteEasterEgg={onDeleteEasterEgg}
       />,
     )

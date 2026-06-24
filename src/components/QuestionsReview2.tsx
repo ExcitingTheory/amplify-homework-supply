@@ -351,7 +351,7 @@ export function QuestionCard({
             {isExpanded && (
                 <Box sx={{ p: 2, pt: 1.5 }}>
                     <NestedQuestionField
-                        value={item.prompt}
+                        value={item.prompt || ''}
                         field="prompt"
                         itemIndex={index}
                         onSave={onUpdate}
@@ -375,7 +375,7 @@ export function QuestionCard({
                     )}
 
                     <NestedQuestionField
-                        value={item.answer}
+                        value={item.answer || ''}
                         field="answer"
                         itemIndex={index}
                         onSave={onUpdate}

@@ -571,7 +571,7 @@ describe('GamificationProvider', () => {
     })
 
     it('cleans up subscriptions on unmount', () => {
-      const unsubFns: vi.Mock[] = []
+      const unsubFns: ReturnType<typeof vi.fn>[] = []
       const makeModel = () => ({
         observeQuery: () => ({
           subscribe: (handlers: any) => {
@@ -786,7 +786,7 @@ describe('gamificationReducer', () => {
   it('handles all action types without throwing', async () => {
     const { gamificationReducer, initialState, actionTypes } = await import('../reducers/gamificationReducer')
 
-    const actionTests: Array<{ type: string; payload: any }> = [
+    const actionTests: Array<{ type: any; payload: any }> = [
       { type: actionTypes.SET_RAW_MODULES, payload: [{ id: '1' }] },
       { type: actionTypes.SET_RAW_PERSONAL_BESTS, payload: [] },
       { type: actionTypes.SET_STREAK, payload: { currentStreak: 5, longestStreak: 10, lastActivityDate: '2026-04-25', freezesRemaining: 1, freezesUsed: 0 } },

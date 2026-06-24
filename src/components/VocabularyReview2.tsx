@@ -421,7 +421,7 @@ export function VocabularyCard({
             {isExpanded && (
                 <Box sx={{ p: 2, pt: 1.5 }}>
                     <NestedVocabField
-                        value={item.word}
+                        value={item.word || ''}
                         field="word"
                         itemIndex={index}
                         onSave={onUpdate}
@@ -443,7 +443,7 @@ export function VocabularyCard({
                     )}
 
                     <NestedVocabField
-                        value={item.definition}
+                        value={item.definition || ''}
                         field="definition"
                         itemIndex={index}
                         onSave={onUpdate}

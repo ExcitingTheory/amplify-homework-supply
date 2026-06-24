@@ -44,15 +44,14 @@ export default {
 
 /**
  * Image with fileId + identityId — exercises the Phase 6 CDN path rewriting.
- * After publishUnit runs, `path` will point to `protected/units/images/{fileId}`
- * and `identityId` will be cleared to `""`.
+ * Uses a Storybook-hosted image for visual rendering.
  */
 export const WithFileId = {
   args: {
     fileId: "abc123-def456",
     identityId: "us-east-1:mock-identity-id-0001",
-    path: "protected/us-east-1:mock-identity-id-0001/abc123-def456",
-    src: "",
+    path: "/story-mocks/animals-10008941_1280.jpg",
+    src: "/story-mocks/animals-10008941_1280.jpg",
     altText: "A diagram of cell structure",
     nodeKey: "image-node-with-fileid",
     width: 600,
@@ -88,14 +87,14 @@ export const WithSrcOnly = {
 
 /**
  * Published image — simulates a node that has already been through publishUnit.
- * path is under protected/units/images/ and identityId is cleared.
+ * Uses a Storybook-hosted image for visual rendering.
  */
 export const PublishedPath = {
   args: {
     fileId: "abc123-def456",
     identityId: "",
-    path: "protected/units/images/abc123-def456",
-    src: "",
+    path: "/story-mocks/piano-10046998_1280.jpg",
+    src: "/story-mocks/piano-10046998_1280.jpg",
     altText: "Published cell structure diagram",
     nodeKey: "image-node-published",
     width: 600,

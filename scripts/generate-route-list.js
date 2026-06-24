@@ -24,8 +24,32 @@ const DEFAULT_OUTPUT = path.join(__dirname, '../cypress/fixtures/routes.json');
  * These are maintained manually since App Router uses page.tsx convention.
  */
 const APP_ROUTER_ROUTES = [
+  { route: '/[locale]/admin/analytics', file: 'app/[locale]/admin/analytics/page.tsx', isDynamic: true },
+  { route: '/[locale]/admin/archives', file: 'app/[locale]/admin/archives/page.jsx', isDynamic: true },
+  { route: '/[locale]/admin/moderation', file: 'app/[locale]/admin/moderation/page.tsx', isDynamic: true },
   { route: '/[locale]/admin/settings', file: 'app/[locale]/admin/settings/page.tsx', isDynamic: true },
+  { route: '/[locale]/admin/words', file: 'app/[locale]/admin/words/page.tsx', isDynamic: true },
+  { route: '/[locale]/instructor/grade/[id]', file: 'app/[locale]/instructor/grade/[id]/page.tsx', isDynamic: true },
+  { route: '/[locale]/leaderboard', file: 'app/[locale]/leaderboard/page.tsx', isDynamic: true },
+  { route: '/[locale]/offline', file: 'app/[locale]/offline/page.tsx', isDynamic: true },
+  { route: '/[locale]', file: 'app/[locale]/page.jsx', isDynamic: true },
+  { route: '/[locale]/privacy', file: 'app/[locale]/privacy/page.jsx', isDynamic: true },
+  { route: '/[locale]/profile/[username]', file: 'app/[locale]/profile/[username]/page.tsx', isDynamic: true },
+  { route: '/[locale]/profile/notifications', file: 'app/[locale]/profile/notifications/page.tsx', isDynamic: true },
+  { route: '/[locale]/profile', file: 'app/[locale]/profile/page.jsx', isDynamic: true },
+  { route: '/[locale]/recycle-bin', file: 'app/[locale]/recycle-bin/page.jsx', isDynamic: true },
+  { route: '/[locale]/review/[id]', file: 'app/[locale]/review/[id]/page.jsx', isDynamic: true },
+  { route: '/[locale]/section/[id]', file: 'app/[locale]/section/[id]/page.jsx', isDynamic: true },
+  { route: '/[locale]/section/[id]/settings/ai', file: 'app/[locale]/section/[id]/settings/ai/page.tsx', isDynamic: true },
   { route: '/[locale]/section/[id]/settings/gamification', file: 'app/[locale]/section/[id]/settings/gamification/page.tsx', isDynamic: true },
+  { route: '/[locale]/sections', file: 'app/[locale]/sections/page.jsx', isDynamic: true },
+  { route: '/[locale]/settings', file: 'app/[locale]/settings/page.jsx', isDynamic: true },
+  { route: '/[locale]/squad/[id]', file: 'app/[locale]/squad/[id]/page.jsx', isDynamic: true },
+  { route: '/[locale]/squads', file: 'app/[locale]/squads/page.jsx', isDynamic: true },
+  { route: '/[locale]/unit/[id]', file: 'app/[locale]/unit/[id]/page.tsx', isDynamic: true },
+  { route: '/[locale]/units', file: 'app/[locale]/units/page.jsx', isDynamic: true },
+  { route: '/[locale]/workbook/[id]', file: 'app/[locale]/workbook/[id]/page.tsx', isDynamic: true },
+  { route: '/[locale]/xp-history', file: 'app/[locale]/xp-history/page.jsx', isDynamic: true },
 ];
 
 /**
@@ -164,11 +188,19 @@ function main() {
     ? args[args.indexOf('--output') + 1]
     : DEFAULT_OUTPUT;
   
-  console.log('🔍 Scanning pages directory...');
-  console.log(`   Path: ${PAGES_DIR}`);
+  console.log('🔍 Scanning for routes...');
   
+  // Scan pages/ if it exists (legacy Pages Router), otherwise use App Router only
+  let pagesRoutes = [];
+  if (fs.existsSync(PAGES_DIR)) {
+    console.log(`   Pages dir: ${PAGES_DIR}`);
+    pagesRoutes = scanDirectory(PAGES_DIR);
+  } else {
+    console.log('   Pages dir: not found (App Router only)');
+  }
+
   // Scan all routes
-  const allRoutes = [...scanDirectory(PAGES_DIR), ...APP_ROUTER_ROUTES];
+  const allRoutes = [...pagesRoutes, ...APP_ROUTER_ROUTES];
   
   console.log(`\n✅ Found ${allRoutes.length} routes`);
   

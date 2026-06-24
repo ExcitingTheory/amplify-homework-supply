@@ -584,7 +584,7 @@ export function GamificationProvider({
       filter: { status: { eq: 'PUBLISHED' } },
     }).subscribe({
       next: ({ items }: any) => {
-        const valid = (items || []).filter((u: any) => u != null && u.id != null)
+        const valid = (items || []).filter((u: any) => u != null && u.id != null && u.deletedAt == null)
 
         // Version map guard
         const hasChanges = valid.some((item: any) => {

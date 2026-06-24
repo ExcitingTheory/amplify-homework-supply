@@ -146,7 +146,7 @@ export function GradeActions({ unit, grades: initialGrades, studentName, moderat
   const handleModerationAction = useCallback(async (action: string, targetGradeId: string) => {
     try {
       if (action === 'approve') {
-        await client.models.Grade.update({
+        await (client as any).models.Grade.update({
           id: targetGradeId,
           moderationStatus: 'approved',
           moderationCheckedAt: new Date().toISOString(),
@@ -154,7 +154,7 @@ export function GradeActions({ unit, grades: initialGrades, studentName, moderat
         setModeration(prev => ({ ...prev, status: 'approved', checkedAt: new Date().toISOString(), flags: prev?.flags }));
         setSnackbar({ open: true, message: 'Content approved', severity: 'success' });
       } else if (action === 'flag') {
-        await client.models.Grade.update({
+        await (client as any).models.Grade.update({
           id: targetGradeId,
           moderationStatus: 'flagged',
           moderationCheckedAt: new Date().toISOString(),
@@ -233,7 +233,7 @@ export function GradeActions({ unit, grades: initialGrades, studentName, moderat
             contentJson={typeof unit.data === 'string' ? unit.data : JSON.stringify(unit.data)}
             studentName={studentName}
             grades={grades}
-            moderation={moderation}
+            moderation={moderation as any}
             onModerationAction={handleModerationAction}
             maxHeight="75vh"
           />

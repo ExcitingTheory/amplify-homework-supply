@@ -39,6 +39,7 @@ import {
   AI_SUGGESTION_UUID 
 } from '../components/AIContentSuggestionNode';
 import UnitContext from '../../../context/unitContext';
+import SectionContext from '../../../context/sectionContext';
 
 
 
@@ -58,6 +59,32 @@ export default function AIContentCompletionPlugin() {
   const abortController = useRef(null);
   
   const { currentUnit } = useContext(UnitContext);
+  const { sections, assignments } = useContext(SectionContext);
+
+  // Derive course outline for the current unit's section(s)
+  const courseOutline = React.useMemo(() => {
+    if (!currentUnit?.id || !assignments?.length || !sections?.length) return null;
+
+    // Find sections that this unit is assigned to
+    const sectionIds = assignments
+      .filter(a => a.unitID === currentUnit.id)
+      .map(a => a.sectionID);
+
+    // Get course outline from the first section that has one
+    for (const sectionId of sectionIds) {
+      const section = sections.find(s => s.id === sectionId);
+      if (section?.courseOutline) {
+        try {
+          return typeof section.courseOutline === 'string'
+            ? JSON.parse(section.courseOutline)
+            : section.courseOutline;
+        } catch {
+          // Skip malformed outlines
+        }
+      }
+    }
+    return null;
+  }, [currentUnit?.id, assignments, sections]);
   
   // Clear suggestion node
   const clearSuggestion = useCallback(() => {
@@ -143,11 +170,29 @@ export default function AIContentCompletionPlugin() {
     }, { tag: 'skip-collab' });
     
     try {
+      // Derive a draft summary from current editor headings
+      let draftHeadings = [];
+      editor.getEditorState().read(() => {
+        const root = editor.getEditorState()._nodeMap;
+        if (root) {
+          root.forEach((node) => {
+            if (node.getType?.() === 'heading' && node.getTextContent?.()) {
+              draftHeadings.push(node.getTextContent().trim());
+            }
+          });
+        }
+      });
+
       const contextData = {
         unit: currentUnit ? {
+          id: currentUnit.id,
           name: currentUnit.name,
           description: currentUnit.description,
         } : null,
+        // Draft headings from current editor state (not persisted)
+        draftHeadings: draftHeadings.length > 0 ? draftHeadings : undefined,
+        // Course outline from section (published unit summaries)
+        courseOutline: courseOutline || undefined,
         ...context,
       };
 
@@ -219,7 +264,7 @@ export default function AIContentCompletionPlugin() {
         clearSuggestion();
       }
     }
-  }, [currentUnit, updateSuggestion, clearSuggestion, editor]);
+  }, [currentUnit, courseOutline, updateSuggestion, clearSuggestion, editor]);
   
   // Detect when to trigger suggestions
   useEffect(() => {

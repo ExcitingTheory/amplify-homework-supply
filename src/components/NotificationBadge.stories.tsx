@@ -25,10 +25,10 @@ function MockNotificationProvider({
         unseenCount,
         unseenByCategory,
         loading: false,
-        markSeen: () => {},
-        markInteracted: () => {},
-        markAllSeen: () => {},
-        deleteNotification: () => {},
+        markSeen: async () => {},
+        markInteracted: async () => {},
+        markAllSeen: async () => {},
+        deleteNotification: async () => {},
       }}
     >
       {children}

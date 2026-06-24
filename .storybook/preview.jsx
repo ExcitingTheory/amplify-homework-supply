@@ -19,6 +19,23 @@ if (typeof window !== "undefined") {
   // Adding global polyfill
   window.global = window;
 
+  // Polyfill vitest/chai expect context for Storybook dev server.
+  // Vitest 4.x's JestChaiExpect plugin calls getCustomEqualityTesters() which reads
+  // globalThis[Symbol.for("$$jest-matchers-object")].customEqualityTesters.
+  // In the vitest runner this is initialized by setupGlobalExpect(), but in the
+  // Storybook dev server UI (viewing interactions) that setup hasn't run.
+  const JEST_MATCHERS_OBJECT = Symbol.for("$$jest-matchers-object");
+  if (!globalThis[JEST_MATCHERS_OBJECT]) {
+    Object.defineProperty(globalThis, JEST_MATCHERS_OBJECT, {
+      configurable: true,
+      value: {
+        state: new WeakMap(),
+        matchers: Object.create(null),
+        customEqualityTesters: [],
+      },
+    });
+  }
+
   // Mock util module for pngjs which expects Node.js util
   if (!window.util) {
     window.util = {

@@ -44,6 +44,11 @@ const DictionaryProvider = ({ children }) => {
   const wordVersionMapRef = useRef({});
   const questionVersionMapRef = useRef({});
 
+  // Show deleted toggle state
+  const [showDeleted, setShowDeleted] = React.useState(false);
+  const [deletedWords, setDeletedWords] = React.useState([]);
+  const [deletedQuestions, setDeletedQuestions] = React.useState([]);
+
   // search words for a new filter value for the wordblock list
 
   // React.useEffect(() => {
@@ -227,9 +232,13 @@ const DictionaryProvider = ({ children }) => {
     }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
-        const validItems = (items || []).filter(
+        const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+        const validItems = allValid.filter((item) => item.deletedAt == null);
+        const deleted = allValid.filter((item) => item.deletedAt != null);
+
+        setDeletedWords(deleted);
 
         // Version map guard: skip if no item has a newer _version
         const hasChanges = validItems.some((item) => {
@@ -322,17 +331,14 @@ const DictionaryProvider = ({ children }) => {
         "identityId",
         "prompt",
         "answer",
-        "choices.*",
-        "audio.*",
-        "answerAudio.*",
-        "image",
-        "answerImage",
-        "type",
+        "choices",
+        "audio",
+        "answerAudio",
+        "thumbnail",
         "difficulty",
-        "points",
-        "tags.*",
         "embedding.*",
         "moderation.*",
+        "deletedAt",
         "_version",
         "_lastChangedAt",
         "_deleted",
@@ -342,9 +348,13 @@ const DictionaryProvider = ({ children }) => {
     }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
-        const validItems = (items || []).filter(
+        const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+        const validItems = allValid.filter((item) => item.deletedAt == null);
+        const deletedQ = allValid.filter((item) => item.deletedAt != null);
+
+        setDeletedQuestions(deletedQ);
 
         // Version map guard: skip if no item has a newer _version
         const hasChanges = validItems.some((item) => {
@@ -435,6 +445,10 @@ const DictionaryProvider = ({ children }) => {
       setSearching,
       bumpWordVersion,
       bumpQuestionVersion,
+      showDeleted,
+      setShowDeleted,
+      deletedWords,
+      deletedQuestions,
     }),
     [
       state.words,
@@ -450,6 +464,9 @@ const DictionaryProvider = ({ children }) => {
       setSearching,
       bumpWordVersion,
       bumpQuestionVersion,
+      showDeleted,
+      deletedWords,
+      deletedQuestions,
     ],
   );
 

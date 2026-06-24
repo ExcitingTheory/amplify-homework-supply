@@ -142,8 +142,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       setIsPageReady(false);
       return;
     }
+    if (isNavigating) {
+      setIsPageReady(false);
+      return;
+    }
     const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-    if (!isNavigating && iframe?.contentDocument?.readyState === 'complete') {
+    if (iframe?.contentDocument?.readyState === 'complete') {
       setIsPageReady(true);
       return;
     }
@@ -154,12 +158,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     };
     iframe?.addEventListener('load', handleLoad, { once: true });
     return () => iframe?.removeEventListener('load', handleLoad);
-  }, [isOpen, currentStepIndex]);
-
-  // When parent signals navigation start, immediately mark page as not ready
-  useEffect(() => {
-    if (isNavigating) setIsPageReady(false);
-  }, [isNavigating]);
+  }, [isOpen, currentStepIndex, isNavigating]);
 
   // Drag handlers — direct DOM manipulation for performance
   const handleDragStart = useCallback((e: React.MouseEvent) => {

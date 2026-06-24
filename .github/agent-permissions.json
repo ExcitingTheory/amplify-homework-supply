@@ -47,7 +47,13 @@
           "src/context/**",
           "src/utils/**",
           "pages/**",
-          "src/agent-skills/**"
+          "src/agent-skills/**",
+          "package.json",
+          "tsconfig.json",
+          "eslint.config.mjs",
+          "cypress.config.ts",
+          "vitest.config.ts",
+          "next.config.js"
         ],
         "excludePaths": [
           "src/amplifyconfiguration.json",
@@ -171,11 +177,7 @@
       "readOnly": {
         "paths": [
           "amplify.yml",
-          "amplify/backend.ts",
           "amplify/backend/api/**/schema.graphql",
-          "next.config.js",
-          "tsconfig.json",
-          "package.json",
           "package-lock.json",
           ".env*",
           "aws-exports.js",
@@ -216,7 +218,7 @@
           "description": "Can validate and update mock data freely"
         },
         
-        "storybook-validation": {
+        "storybook-audit": {
           "canCreate": true,
           "canModify": true,
           "canDelete": false,

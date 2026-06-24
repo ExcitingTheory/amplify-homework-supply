@@ -60,6 +60,11 @@ const FilesProvider = ({ children }) => {
   const fileVersionMapRef = React.useRef({});
   const documentVersionMapRef = React.useRef({});
 
+  // Show deleted toggle state
+  const [showDeleted, setShowDeleted] = React.useState(false);
+  const [deletedFiles, setDeletedFiles] = React.useState([]);
+  const [deletedDocuments, setDeletedDocuments] = React.useState([]);
+
   // Create vector store instance - shared across entire app (browser-only)
   const vectorStore = React.useRef(
     typeof window !== "undefined" && CourseVectorStore
@@ -444,9 +449,15 @@ const FilesProvider = ({ children }) => {
           ],
         }).subscribe({
           next: ({ items }) => {
-            const validItems = (items || []).filter(
+            const allValid = (items || []).filter(
               (item) => item != null && item.id != null,
             );
+            const validItems = allValid.filter(
+              (item) => item.deletedAt == null,
+            );
+            const deleted = allValid.filter((item) => item.deletedAt != null);
+
+            setDeletedFiles(deleted);
 
             // Version map guard: skip if no item has a newer _version
             const hasChanges = validItems.some((item) => {
@@ -568,9 +579,13 @@ const FilesProvider = ({ children }) => {
     }).subscribe({
       next: ({ items }) => {
         if (cancelled) return;
-        const validItems = (items || []).filter(
+        const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
+        const validItems = allValid.filter((item) => item.deletedAt == null);
+        const deletedDocs = allValid.filter((item) => item.deletedAt != null);
+
+        setDeletedDocuments(deletedDocs);
 
         // Version map guard: skip if no item has a newer _version
         const hasChanges = validItems.some((item) => {
@@ -668,6 +683,10 @@ const FilesProvider = ({ children }) => {
       vectorStoreReady: state.vectorStoreReady,
       bumpFileVersion,
       bumpDocumentVersion,
+      showDeleted,
+      setShowDeleted,
+      deletedFiles,
+      deletedDocuments,
     }),
     [
       state.audioFiles,
@@ -682,6 +701,9 @@ const FilesProvider = ({ children }) => {
       state.vectorStoreReady,
       bumpFileVersion,
       bumpDocumentVersion,
+      showDeleted,
+      deletedFiles,
+      deletedDocuments,
     ],
   );
 

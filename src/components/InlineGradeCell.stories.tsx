@@ -85,7 +85,7 @@ export const GradebookTable: Story = {
       { id: 'a3', unitID: 'u3', name: 'Kanji Basics' },
     ]
 
-    const grades = {
+    const grades: Record<string, Record<string, number>> = {
       s1: { u1: 92, u2: 78, u3: 88 },
       s2: { u1: 65, u2: 91, u3: 72 },
       s3: { u1: 45, u2: 58, u3: 33 },
@@ -112,7 +112,7 @@ export const GradebookTable: Story = {
                   <TableCell>{student.name}</TableCell>
                   {assignments.map((assignment) => {
                     const raw = grades[student.id]?.[assignment.unitID]
-                    const override = overrides[student.id]?.[assignment.unitID]
+                    const override = (overrides as Record<string, Record<string, { score: number }>>)[student.id]?.[assignment.unitID]
                     return (
                       <TableCell key={assignment.id} align="right">
                         <InlineGradeCell
@@ -122,7 +122,7 @@ export const GradebookTable: Story = {
                           sharedHistory={historyRef.current}
                           isOwner={true}
                           onOverride={(score) => {
-                            setOverrides((prev) => ({
+                            setOverrides((prev: Record<string, Record<string, { score: number; updatedAt: string }>>) => ({
                               ...prev,
                               [student.id]: {
                                 ...(prev[student.id] || {}),
@@ -131,7 +131,7 @@ export const GradebookTable: Story = {
                             }))
                           }}
                           onRemoveOverride={() => {
-                            setOverrides((prev) => {
+                            setOverrides((prev: Record<string, Record<string, { score: number; updatedAt: string }>>) => {
                               const next = { ...prev }
                               if (next[student.id]) {
                                 const s = { ...next[student.id] }

@@ -138,7 +138,7 @@ export const Default = {
 // ============================================================================
 
 export const TopicListDefault = {
-  render: (args) => <TopicList {...args} />,
+  render: (args: any) => <TopicList {...args} />,
   args: {
     topics: mockTopics,
     activeTopicId: null,
@@ -150,7 +150,7 @@ export const TopicListDefault = {
 }
 
 export const TopicListWithActive = {
-  render: (args) => <TopicList {...args} />,
+  render: (args: any) => <TopicList {...args} />,
   args: {
     topics: mockTopics,
     activeTopicId: 'topic-1',
@@ -162,7 +162,7 @@ export const TopicListWithActive = {
 }
 
 export const TopicListEmpty = {
-  render: (args) => <TopicList {...args} />,
+  render: (args: any) => <TopicList {...args} />,
   args: {
     topics: [],
     activeTopicId: null,
@@ -178,14 +178,14 @@ export const TopicListEmpty = {
 // ============================================================================
 
 export const ThreadViewWithMessages = {
-  render: (args) => (
+  render: (args: any) => (
     <div style={{ height: 400, display: 'flex', flexDirection: 'column' }}>
       <ThreadView {...args} />
     </div>
   ),
   args: {
     messages: mockMessages.filter((m) => m.parentId === null),
-    getReplies: (parentId) => mockMessages.filter((m) => m.parentId === parentId),
+    getReplies: (parentId: string) => mockMessages.filter((m) => m.parentId === parentId),
     onReact: fn(),
     onEdit: fn(),
     onDelete: fn(),
@@ -195,14 +195,14 @@ export const ThreadViewWithMessages = {
 }
 
 export const ThreadViewWithTyping = {
-  render: (args) => (
+  render: (args: any) => (
     <div style={{ height: 400, display: 'flex', flexDirection: 'column' }}>
       <ThreadView {...args} />
     </div>
   ),
   args: {
     messages: mockMessages.filter((m) => m.parentId === null),
-    getReplies: (parentId) => mockMessages.filter((m) => m.parentId === parentId),
+    getReplies: (parentId: string) => mockMessages.filter((m) => m.parentId === parentId),
     onReact: fn(),
     onEdit: fn(),
     onDelete: fn(),
@@ -212,7 +212,7 @@ export const ThreadViewWithTyping = {
 }
 
 export const ThreadViewEmpty = {
-  render: (args) => (
+  render: (args: any) => (
     <div style={{ height: 400, display: 'flex', flexDirection: 'column' }}>
       <ThreadView {...args} />
     </div>
@@ -233,7 +233,7 @@ export const ThreadViewEmpty = {
 // ============================================================================
 
 export const ComposerDefault = {
-  render: (args) => <MessageComposer {...args} />,
+  render: (args: any) => <MessageComposer {...args} />,
   args: {
     onSend: fn(),
     members: mockMembers,
@@ -242,7 +242,7 @@ export const ComposerDefault = {
 }
 
 export const ComposerWithReply = {
-  render: (args) => <MessageComposer {...args} />,
+  render: (args: any) => <MessageComposer {...args} />,
   args: {
     onSend: fn(),
     members: mockMembers,

@@ -13,8 +13,8 @@
 
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect } from 'storybook/test';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { within, waitFor } from 'storybook/test';
+import { userEvent } from 'storybook/test';
 import VocabularyReview2 from './VocabularyReview2';
 import { Box, Paper } from '@mui/material';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';

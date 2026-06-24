@@ -36,7 +36,7 @@ export default function ModerationBadge({ item, showDetails = false }) {
         categoryScores = flags.categoryScores;
       }
     } catch (e) {
-      console.error('Error parsing moderation flags:', e);
+      console.warn('Error parsing moderation flags:', e);
     }
   }
 
@@ -113,7 +113,7 @@ export function ModerationStatusIcon({ item }) {
           .map(([key]) => key.replace(/_/g, ' ').replace(/\//g, ' or '));
       }
     } catch (e) {
-      console.error('Error parsing moderation flags:', e);
+      console.warn('Error parsing moderation flags:', e);
     }
   }
 

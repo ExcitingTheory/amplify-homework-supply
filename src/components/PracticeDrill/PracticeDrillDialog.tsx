@@ -168,7 +168,7 @@ export default function PracticeDrillDialog({
       TransitionComponent={Transition}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 6 }}>
-        <Typography variant="h6" sx={{ flex: 1 }}>
+        <Typography variant="h6" component="span" sx={{ flex: 1 }}>
           {unitName ? `${t('practiceDrill.dialog.title', 'Practice')}: ${unitName}` : t('practiceDrill.dialog.title', 'Practice')}
         </Typography>
         <IconButton

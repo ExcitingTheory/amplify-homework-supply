@@ -1,0 +1,3124 @@
+{
+  "test": "instructor creates a unit for file management",
+  "file": "/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e/journeys/journey-07-instructor-recording.spec.ts",
+  "project": "chromium",
+  "status": "passed",
+  "retry": 0,
+  "metrics": {
+    "fcp": 2660,
+    "lcp": 3488,
+    "cls": 0.3237621711227629,
+    "inp": 176,
+    "navigation": {
+      "domContentLoaded": 0,
+      "loadEventEnd": 0,
+      "responseEnd": 0,
+      "domInteractive": 0
+    }
+  },
+  "console": {
+    "total": 121,
+    "errors": 12,
+    "warnings": 9,
+    "entries": [
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:33.523Z"
+      },
+      {
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:33.908Z"
+      },
+      {
+        "type": "log",
+        "text": "[AuthContext] User not authenticated - no tokens available",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:36.301Z"
+      },
+      {
+        "type": "log",
+        "text": "[MyAuth] User signed in, checking for return URL",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:38.130Z"
+      },
+      {
+        "type": "log",
+        "text": "[MyAuth] Redirecting to return URL: /units",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:38.130Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.172Z"
+      },
+      {
+        "type": "log",
+        "text": "[Units] Setting up Unit observeQuery for user: undefined",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.173Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.190Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.191Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.192Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Initializing tour system with 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.195Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Tour tasks data registered: 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.197Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Exposing tour methods to window for testing",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.198Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting up AssistantChat observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.201Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Waiting for subscription to initialize",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.204Z"
+      },
+      {
+        "type": "log",
+        "text": "[SettingsContext] Setting up Settings subscription for user: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.207Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Cleaning up subscriptions",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.212Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.213Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.215Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.216Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: false, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 0}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.221Z"
+      },
+      {
+        "type": "log",
+        "text": "[Units] Setting up Unit observeQuery for user: undefined",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.222Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.230Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.231Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.234Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Initializing tour system with 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.236Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Tour tasks data registered: 9 tasks",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.237Z"
+      },
+      {
+        "type": "log",
+        "text": "[TourContext] Exposing tour methods to window for testing",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.238Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting up AssistantChat observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.239Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Waiting for subscription to initialize",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.240Z"
+      },
+      {
+        "type": "log",
+        "text": "[SettingsContext] Setting up Settings subscription for user: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:39.242Z"
+      },
+      {
+        "type": "log",
+        "text": "newUnit {id: 986a9ba6-f8bd-4246-8df5-c0a84294b772, _version: null, _lastChangedAt: null, _deleted: null, owner: 64485468-a001-7056-9f7f-08bbcc1a9b71}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.586Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] AssistantChat initialized with 1 chats",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.636Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Setting initial chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.638Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Loading messages for chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43 count: 0",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.693Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] deepCloneMessages: returning empty array",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.694Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatContext] Chat exists and not archived, skipping creation",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.696Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:40.941Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] useEffect triggered {id: 986a9ba6-f8bd-4246-8df5-c0a84294b772, authLoading: false, hasUser: true, userSub: 64485468-a001-7056-9f7f-08bbcc1a9b71}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.645Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] Fetching unit data for id: 986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.646Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Initializing vector store from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.653Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] fetchFiles called",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.656Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] User authenticated: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.657Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Identity ID: us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.658Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] About to set up File observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.660Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] useEffect triggered {id: 986a9ba6-f8bd-4246-8df5-c0a84294b772, authLoading: false, hasUser: true, userSub: 64485468-a001-7056-9f7f-08bbcc1a9b71}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.672Z"
+      },
+      {
+        "type": "log",
+        "text": "[UnitContext] Fetching unit data for id: 986a9ba6-f8bd-4246-8df5-c0a84294b772",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.674Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Initializing vector store from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.677Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] fetchFiles called",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.681Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] User authenticated: 64485468-a001-7056-9f7f-08bbcc1a9b71",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.686Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Identity ID: us-east-1:b0eadde9-f02b-c9ae-ad23-044b00c16b1d",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.688Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] About to set up File observeQuery",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.691Z"
+      },
+      {
+        "type": "log",
+        "text": "filterWords {wordsCount: 0, filter: }",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:42.997Z"
+      },
+      {
+        "type": "warning",
+        "text": "[UnitContext] Subscription filter limit exceeded, using client-side filtering only",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.178Z"
+      },
+      {
+        "type": "log",
+        "text": "[VectorStoreDB] Loaded 0 total embeddings from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.186Z"
+      },
+      {
+        "type": "log",
+        "text": "[VectorStore] Loaded 0 embeddings from IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.186Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] No cached embeddings found in IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.186Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] No cached embeddings found in IndexedDB",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.186Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] File observeQuery update: 81 files",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.329Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population triggered {isInitialLoad: true, filesCount: 81, currentVectorStoreSize: 0, documentsCount: 0}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.335Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population complete - 0 total embeddings",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.336Z"
+      },
+      {
+        "type": "log",
+        "text": "[SectionContext] Section observeQuery update: 31",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.347Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:43.392Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population triggered {isInitialLoad: false, filesCount: 81, currentVectorStoreSize: 0, documentsCount: 4}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.427Z"
+      },
+      {
+        "type": "log",
+        "text": "[FilesContext] Vector store population complete - 0 total embeddings",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:43.428Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:44.127Z"
+      },
+      {
+        "type": "warning",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection error (further retries logged as debug): Event",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.127Z"
+      },
+      {
+        "type": "log",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection status: connecting",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.330Z"
+      },
+      {
+        "type": "log",
+        "text": "[useTabState] Initialized with: {leftTab: 4, rightTab: 5, leftOpen: false, rightOpen: false, leftWidth: 350} from URL: {} localStorage: null defaults: {defaultLeftTab: 4, defaultRightTab: 5}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.386Z"
+      },
+      {
+        "type": "log",
+        "text": "[useTabState] Initialized with: {leftTab: 4, rightTab: 5, leftOpen: false, rightOpen: false, leftWidth: 350} from URL: {} localStorage: null defaults: {defaultLeftTab: 4, defaultRightTab: 5}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.387Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.showDeletedItems` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at ShowDeletedToggle (https://localhost:3000/_next/static/chunks/src_components_0x9qp2x._.js:2350:14)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performWorkOnRootViaSchedulerTask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)\n    at MessagePort.performWorkUntilDeadline (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0.4_mz-._.js:2647:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:25:44.594Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.recordingStudioEnhancedModal.cancel` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at RecordingStudioEnhancedModal (https://localhost:3000/_next/static/chunks/src_components_0x9qp2x._.js:9706:14)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performWorkOnRootViaSchedulerTask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)\n    at MessagePort.performWorkUntilDeadline (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0.4_mz-._.js:2647:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:25:44.611Z"
+      },
+      {
+        "type": "error",
+        "text": "IntlError: MISSING_MESSAGE: Could not resolve `components.recordingStudioEnhancedModal.saveConversation` in messages for locale `en`.\n    at getFallbackFromErrorAndNotify (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3225:23)\n    at translateBaseFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3255:28)\n    at translateFn (https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js:3283:24)\n    at RecordingStudioEnhancedModal (https://localhost:3000/_next/static/chunks/src_components_0x9qp2x._.js:9792:15)\n    at Object.react_stack_bottom_frame (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)\n    at renderWithHooks (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)\n    at updateFunctionComponent (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)\n    at beginWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6691:24)\n    at runWithFiberInDEV (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)\n    at performUnitOfWork (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)\n    at workLoopSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)\n    at renderRootSync (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)\n    at performWorkOnRoot (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:186)\n    at performWorkOnRootViaSchedulerTask (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)\n    at MessagePort.performWorkUntilDeadline (https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0.4_mz-._.js:2647:64)",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 3771,
+          "columnNumber": 31
+        },
+        "timestamp": "2026-06-20T04:25:44.611Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Files received from context: 81 [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.791Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Upload useEffect triggered. filesToUpload: 0 uploadInProgress: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.792Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Skipping upload - no files or already in progress",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.793Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Loading messages for chat: d922e3e4-4f23-42c8-b1c6-e0c5fe54aa43 count: 0",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.794Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] deepCloneMessages: returning empty array",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.795Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.797Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.798Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.801Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.803Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save due to tags: [history-merge]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.815Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.816Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.818Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.819Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Files received from context: 81 [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.826Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Upload useEffect triggered. filesToUpload: 0 uploadInProgress: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.827Z"
+      },
+      {
+        "type": "log",
+        "text": "[FileManager2] Skipping upload - no files or already in progress",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.828Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Vector store search function registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.829Z"
+      },
+      {
+        "type": "log",
+        "text": "[ChatSidebar] Registered vector store search, isReady: false",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.830Z"
+      },
+      {
+        "type": "log",
+        "text": "[chatTools] Practice drill callback registered: true",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.831Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:44.835Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Cleaning up page context",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:45.159Z"
+      },
+      {
+        "type": "log",
+        "text": "[useChatPageContext] Registering page context: {hasUnit: true, filesCount: 0, dictionaryCount: 0, questionsCount: 0, sectionsCount: 31}",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:45.178Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:45.181Z"
+      },
+      {
+        "type": "log",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection status: connecting",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:45.595Z"
+      },
+      {
+        "type": "warning",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: WebSocket is closed before the connection is established.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18064,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:45.605Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save - no initial state loaded yet",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:45.612Z"
+      },
+      {
+        "type": "warning",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection error (further retries logged as debug): Event",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:46.124Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:46.124Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:46.204Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:46.224Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:46.239Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:46.324Z"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "location": {
+          "url": "https://amplify-amplifyhomeworksu-homeworksupplystoragebuc-be9hgdskmuef.s3.us-east-1.amazonaws.com/?list-type=2&encoding-type=url&max-keys=1000&prefix=private%2Fus-east-1%3Ab0eadde9-f02b-c9ae-ad23-044b00c16b1d%2Funits%2F986a9ba6-f8bd-4246-8df5-c0a84294b772%2Fyjs-snapshot.bin",
+          "lineNumber": 0,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:46.739Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:46.947Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:46.947Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:47.425Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:47.426Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:48.069Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:48.070Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save - no initial state loaded yet",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:48.424Z"
+      },
+      {
+        "type": "warning",
+        "text": "Invalid access: Add Yjs type to a document before reading data.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:48.426Z"
+      },
+      {
+        "type": "warning",
+        "text": "Invalid access: Add Yjs type to a document before reading data.",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:48.426Z"
+      },
+      {
+        "type": "log",
+        "text": "[Editor onChange] Skipping save - no initial state loaded yet",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:48.527Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/unit-986a9ba6-f8bd-4246-8df5-c0a84294b772' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:49.325Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] unit-986a9ba6-f8bd-4246-8df5-c0a84294b772 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:49.326Z"
+      },
+      {
+        "type": "warning",
+        "text": "The resource https://localhost:3000/_next/static/chunks/node_modules_%40xyflow_react_dist_style_0iupz4v.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+        "location": {
+          "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772",
+          "lineNumber": 0,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:49.741Z"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://4uzs3gpvla.execute-api.us-east-1.amazonaws.com/live/chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536' failed: Error during WebSocket handshake: Unexpected response code: 403",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+          "lineNumber": 18088,
+          "columnNumber": 0
+        },
+        "timestamp": "2026-06-20T04:25:49.981Z"
+      },
+      {
+        "type": "debug",
+        "text": "[YjsProvider] chat-section-e661852a-fa07-4c11-9598-76c7ac6ca536 connection retry failed",
+        "location": {
+          "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+          "lineNumber": 2930,
+          "columnNumber": 27
+        },
+        "timestamp": "2026-06-20T04:25:49.982Z"
+      }
+    ]
+  },
+  "network": {
+    "total": 209,
+    "failed": 0,
+    "httpErrors": 1,
+    "entries": [
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/units",
+        "status": 307,
+        "statusText": "Temporary Redirect",
+        "resourceType": "document",
+        "timestamp": "2026-06-20T04:25:33.088Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/?returnUrl=%2Funits",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "document",
+        "timestamp": "2026-06-20T04:25:33.210Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0e_3nnp._.css",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "stylesheet",
+        "timestamp": "2026-06-20T04:25:33.344Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0rx4rba._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.346Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40xyflow_react_dist_style_0iupz4v.css",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "stylesheet",
+        "timestamp": "2026-06-20T04:25:33.347Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.413Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0.4_mz-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.425Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_server_0bxku-~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.426Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_0ifwd0~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.433Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_04ue1eq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.445Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/instrumentation-client_ts_03sw2li._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.447Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0rqeker._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.459Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_layout_tsx_02s15n5._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.470Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_0553esy.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.474Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-_0yg8dr1._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.477Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_client_components_builtin_global-error_0~4-h6u.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.477Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_079ko4n._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.479Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.481Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_10_j6ae._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.490Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.491Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DebugPanel_092o0wd._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.710Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_PracticeDrill_0ippopa._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.713Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_MainToolbar_jsx_0qn2z~1._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.759Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_utils_092xz~-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.759Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Workbook_0vat2bt._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.760Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Gamification_10itoqm._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.788Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_01eg5sl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.788Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_nodes_0on4508._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.792Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_FileManager2_jsx_0tfr_ws._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.792Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_plugins_0sj2j1o._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.794Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_RecordingStudio3_0_5_wnl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.794Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_ChatSidebar_0oh-a53._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.795Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_MeaningAssociationExercise_13pax-6._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.797Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_ChatSidebar_jsx_0k7btpl._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.797Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_0v0nc0y._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.800Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0pw-gbk._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.801Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_context_0q85e0_._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.804Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_0gnbmhy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.805Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/amplify_outputs_json_%5Bjson%5D_cjs_0_4ky8h._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.807Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_system_esm_0t0zi7s._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.808Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_styles_085az2c._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.808Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_Slider_0p25e3e._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.812Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0x9qp2x._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.812Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_core_dist_esm_03.hnp4._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.820Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_icons-material_esm_12~iat2._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.820Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40popperjs_core_lib_0zj0l6r._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.824Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_storage_dist_esm_0f264bj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.824Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_data-schema_dist_esm_runtime_0fml.jf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.827Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_api-graphql_dist_esm_105gbhs._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.827Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_graphql_0oeikgq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.829Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/0lkd_%40aws-amplify_auth_dist_esm_0xci_fh._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.831Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_avataaars_lib_13q6pb0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.832Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lib0_0wm-_62._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.837Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_open-peeps_lib_0zs1atj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.837Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_notionists_lib_114dy6-._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.840Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_adventurer_lib_0lhvjt~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.840Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_yjs_dist_yjs_mjs_0ju1msx._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.842Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40ai-sdk_03dmk_n._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.858Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_12lluhf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.858Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_material_esm_10x9b1~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.859Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_react_0wlp43m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.864Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_zod_0slp6p4._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.864Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/0x1h_ai_dist_index_mjs_0r9dk1j._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.896Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_ai_dist_index_mjs_0ssrqvg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.907Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_hooks_03ix0ix._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.907Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_panel_0pzvjm.._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.910Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_cell_0yhmktp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.910Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_columnHeaders_08s3dvb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:33.958Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lexical_Lexical_dev_mjs_0n7xomq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.052Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_DataGrid_0de3dpp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.135Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_026_8nd._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.253Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_prismjs_0p18xue._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.253Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_table_LexicalTable_dev_mjs_0kf18jc._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.260Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_hooks_features_0_yb0yw._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.292Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_react-icons_lib_0mt5-rx._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.292Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_x-data-grid_esm_components_0eqomi3._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.297Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_framer-motion_dist_es_10zhgje._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.323Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_lodash_0chba7d._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.501Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_motion-dom_dist_es_0n_wqqr._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.501Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_xstate_es_0086qdy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.537Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_ui_dist_esm_05t9cyq._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.537Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40emotion_0g4~_u~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.537Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40aws-amplify_ui-react_dist_esm_0juyfjb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.543Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_0d1zczj._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.551Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_layout_tsx_0~4-h6u._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.560Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_06-yc7e._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.560Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40lexical_13c-bu8._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.560Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40dicebear_0572q93._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.562Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_page_jsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.563Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0kqddmy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.564Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0yjw1oe._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.564Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_0q53tss._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.564Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_12jpv7i._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.565Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_react-icons_gi_index_mjs_0hh8x~~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:34.661Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-worker-%5Bclient-fs%5D__next_static_chunks_12ee_mp._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:35.532Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/turbopack-src_workers_embeddingWorker_0b.aluy.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:25:35.542Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_workers_embeddingWorker_0u_uju3.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:25:35.555Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_workers_embeddingWorker_044tjm0.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "other",
+        "timestamp": "2026-06-20T04:25:35.558Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:25:36.037Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:36.053Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:25:36.114Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:36.300Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/api/vitals",
+        "status": 204,
+        "statusText": "No Content",
+        "resourceType": "ping",
+        "timestamp": "2026-06-20T04:25:37.342Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:37.496Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:38.123Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/units?_rsc=tdjna",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:38.182Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_units_loading_tsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:38.194Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_units_page_jsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:38.207Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_icons-material_esm_0~71c.z._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:38.207Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0kgqv9_._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:38.214Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-identity.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:38.503Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://cognito-idp.us-east-1.amazonaws.com/",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:38.879Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/_0kgqv9_._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.469Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_%40mui_icons-material_esm_0~71c.z._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.470Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_units_page_jsx_0e3hfkf._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.471Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_offline_0zv8k4m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.480Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_offline_SyncQueue_ts_0rmk.p0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.480Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_idb_build_index_0rmk.p0.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.499Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_idb_build_index_0gsx_v8.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:39.504Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.428Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.435Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.461Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.461Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.461Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.462Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.462Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.464Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.469Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.493Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.519Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.569Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.577Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.586Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.590Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.607Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.620Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.634Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.635Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.685Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/unit/986a9ba6-f8bd-4246-8df5-c0a84294b772?_rsc=1meor",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.688Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_loading_tsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:40.750Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.815Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:40.890Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_loading_tsx_0e3hfkf._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.132Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:41.141Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:41.244Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:41.422Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:41.470Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_TableComponent_jsx_00tjggy._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.958Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_UnitEditorClient_jsx_0raae4_._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.970Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0vl8try._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.975Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0en-atg._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.980Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.981Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Chat_06kw_71._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.981Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_page_tsx_0e3hfkf._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:41.986Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_13ijt_i._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.009Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_00wz9d.._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.021Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_components_TableComponent_jsx_00tjggy._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.079Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Editor3_00wz9d.._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.081Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_DictionaryEditor2_jsx_00~wd-~._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.081Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_Chat_06kw_71._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.083Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_components_0vl8try._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.083Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/src_0en-atg._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.083Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_UnitEditorClient_jsx_0raae4_._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.085Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_13ijt_i._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.085Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/app_%5Blocale%5D_unit_%5Bid%5D_page_tsx_0e3hfkf._.js",
+        "status": 304,
+        "statusText": "Not Modified",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.085Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:42.564Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:42.987Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:42.988Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:42.988Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_aws-amplify_dist_esm_storage_index_mjs_008_axb._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.991Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_0362a-m._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:42.991Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_pako_dist_pako_esm_mjs_0rmk.p0._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:43.164Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/chunks/node_modules_pako_dist_pako_esm_mjs_09ei-9a._.js",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "script",
+        "timestamp": "2026-06-20T04:25:43.165Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.196Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.208Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.230Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.231Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.259Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.280Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.338Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.348Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.349Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.375Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.379Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.397Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.421Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.425Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.472Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.511Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.544Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.545Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.724Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.727Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:43.770Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:44.025Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:44.197Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:44.369Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/_next/static/media/draggable-block-menu.11t8bgfarf0tw.svg",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "image",
+        "timestamp": "2026-06-20T04:25:45.649Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://localhost:3000/__nextjs_font/geist-latin.woff2",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "font",
+        "timestamp": "2026-06-20T04:25:46.159Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.159Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.168Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.169Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.170Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.212Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.240Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://localhost:3000/__nextjs_original-stack-frames",
+        "status": 200,
+        "statusText": "OK",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.324Z"
+      },
+      {
+        "phase": "response",
+        "method": "POST",
+        "url": "https://dhz3oxbtvncf7gyf5mrbivy7hq.appsync-api.us-east-1.amazonaws.com/graphql",
+        "status": 200,
+        "statusText": "",
+        "resourceType": "fetch",
+        "timestamp": "2026-06-20T04:25:46.480Z"
+      },
+      {
+        "phase": "response",
+        "method": "GET",
+        "url": "https://amplify-amplifyhomeworksu-homeworksupplystoragebuc-be9hgdskmuef.s3.us-east-1.amazonaws.com/?list-type=2&encoding-type=url&max-keys=1000&prefix=private%2Fus-east-1%3Ab0eadde9-f02b-c9ae-ad23-044b00c16b1d%2Funits%2F986a9ba6-f8bd-4246-8df5-c0a84294b772%2Fyjs-snapshot.bin",
+        "status": 403,
+        "statusText": "Forbidden",
+        "resourceType": "xhr",
+        "timestamp": "2026-06-20T04:25:46.739Z"
+      }
+    ]
+  }
+}

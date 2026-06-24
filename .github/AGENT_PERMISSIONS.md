@@ -198,7 +198,7 @@ Each agent skill has granular permissions:
 |-------|--------|--------|--------|--------------|
 | component-versioning | ✅ | ✅ | 🚫 | ⚠️ Required |
 | mock-data-validator | ✅ | ✅ | 🚫 | ✅ Not required |
-| storybook-validation | ✅ | ✅ | 🚫 | ✅ Not required |
+| storybook-audit | ✅ | ✅ | 🚫 | ✅ Not required |
 | semantic-file-search | 🚫 | 🚫 | 🚫 | ✅ Read-only |
 | extract-code-documentation | ✅ | ✅ | 🚫 | ✅ Not required |
 | multi-model-ai-translation | ✅ | ✅ | 🚫 | ✅ Not required |
@@ -212,7 +212,7 @@ Each agent skill has granular permissions:
 **Effect**: Simulates all operations without executing
 
 ```bash
-agent-cli --dry-run execute-skill storybook-validation
+agent-cli --dry-run execute-skill storybook-audit
 ```
 
 ### Read-Only Mode

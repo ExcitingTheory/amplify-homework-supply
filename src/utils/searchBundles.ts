@@ -142,6 +142,67 @@ export async function loadInstructorBundle(
   }
 }
 
+/**
+ * Load the platform-wide admin search bundle.
+ * Contains all instructors' content — only accessible by Admins.
+ */
+export async function loadPlatformBundle(): Promise<SearchBundle | null> {
+  const cacheKey = "platform:admin";
+  const cached = await getCached(cacheKey);
+
+  const path = "private/unit/search-index/platform.json";
+
+  try {
+    const result = await downloadData({ path }).result;
+    const text = await result.body.text();
+    const bundle: SearchBundle = JSON.parse(text);
+
+    if (cached && cached.version >= bundle.version) {
+      return cached;
+    }
+
+    await setCache(cacheKey, bundle);
+    return bundle;
+  } catch {
+    return cached;
+  }
+}
+
+/**
+ * Load search bundles for units shared with the current user.
+ * Fetches unit bundles for each collaborator-granted unit.
+ */
+export async function loadSharedBundles(
+  sharedUnits: Array<{ id: string; identityId: string }>,
+): Promise<SearchBundle | null> {
+  if (!sharedUnits || sharedUnits.length === 0) return null;
+
+  const allItems: BundleItem[] = [];
+
+  for (const unit of sharedUnits) {
+    if (!unit.identityId || !unit.id) continue;
+    try {
+      const bundle = await loadUnitBundle(unit.identityId, unit.id);
+      if (bundle?.items) {
+        allItems.push(...bundle.items);
+      }
+    } catch {
+      // Skip units whose bundles don't exist
+    }
+  }
+
+  if (allItems.length === 0) return null;
+
+  // Build a merged linear bundle for shared content
+  return {
+    version: Date.now(),
+    dimensions: allItems[0]?.embedding?.length || 512,
+    model: "text-embedding-3-small",
+    index: { strategy: "linear" },
+    items: allItems,
+  };
+}
+
 // --- Search ---
 
 function dotProduct(a: number[], b: number[]): number {

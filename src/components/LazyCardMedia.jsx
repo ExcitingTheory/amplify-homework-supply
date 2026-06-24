@@ -77,8 +77,8 @@ export default function LazyCardMedia({
       ref={containerRef}
       sx={{
         position: "relative",
-        width: 400,
-        alignSelf: "left",
+        width: "100%",
+        height: "100%",
         flexShrink: 0,
       }}
     >

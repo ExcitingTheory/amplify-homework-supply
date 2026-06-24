@@ -994,7 +994,7 @@ const UnitProvider = ({ children, id }) => {
 
       // Fetch full Word objects
       const _unitWordsWork = (_unitWords || [])
-        .filter((uw) => uw != null)
+        .filter((uw) => uw != null && uw.deletedAt == null)
         .map(async (uw) => {
           if (uw.wordID) {
             const { data } = await client.models.Word.get({ id: uw.wordID });
@@ -1005,7 +1005,7 @@ const UnitProvider = ({ children, id }) => {
 
       // Fetch full File objects
       const _unitFilesWork = (_unitFiles || [])
-        .filter((uf) => uf != null)
+        .filter((uf) => uf != null && uf.deletedAt == null)
         .map(async (uf) => {
           if (uf.fileID) {
             const { data } = await client.models.File.get({ id: uf.fileID });
@@ -1016,7 +1016,7 @@ const UnitProvider = ({ children, id }) => {
 
       // Fetch full Question objects
       const _unitQuestionsWork = (_unitQuestions || [])
-        .filter((uq) => uq != null)
+        .filter((uq) => uq != null && uq.deletedAt == null)
         .map(async (uq) => {
           if (uq.questionID) {
             const { data } = await client.models.Question.get({
@@ -1127,6 +1127,8 @@ const UnitProvider = ({ children, id }) => {
         next: async (response) => {
           const updatedUnit = response;
           if (!updatedUnit || !updatedUnit.id) return;
+          // Skip if unit was soft-deleted
+          if (updatedUnit.deletedAt != null) return;
           console.log(
             "[UnitContext] Unit updated via subscription, _version:",
             updatedUnit._version,

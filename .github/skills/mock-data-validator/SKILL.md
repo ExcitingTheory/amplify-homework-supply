@@ -58,7 +58,7 @@ type ChatSidebarProps = {
  * @param {Message[]} messages - Chat messages array
  * @param {function(string): void} onSend - Send message handler
  */
-export const ChatSidebar = ({ messages, onSend }) => { };
+export const ChatSidebar = ({ messages, onSend }) => {};
 ```
 
 ✅ **Extracts**: Types from JSDoc annotations
@@ -72,6 +72,7 @@ User: "Validate mock data for ChatSidebar"
 ```
 
 **Agent Response**:
+
 ```
 ✅ Mock data validation passed for ChatSidebar.tsx
 
@@ -89,6 +90,7 @@ Mock Data Structure:
 ### Common Issue: Message Format
 
 **❌ Legacy format (will break ChatSidebar)**:
+
 ```json
 {
   "id": "1",
@@ -98,13 +100,12 @@ Mock Data Structure:
 ```
 
 **✅ Current format (required)**:
+
 ```json
 {
   "id": "1",
   "role": "user",
-  "parts": [
-    { "type": "text", "text": "Hello" }
-  ]
+  "parts": [{ "type": "text", "text": "Hello" }]
 }
 ```
 
@@ -114,11 +115,11 @@ Mock Data Structure:
 **Tests**: [mock-data-validator.test.ts](./mock-data-validator.test.ts)
 
 ```typescript
-import { executeSkill } from '.github/skills/mock-data-validator/mock-data-validator';
+import { executeSkill } from ".github/skills/mock-data-validator/mock-data-validator";
 
 const result = await executeSkill({
-  componentPath: '/absolute/path/to/Component.tsx',
-  mockDataPath: '/absolute/path/to/mock-data.json'
+  componentPath: "/absolute/path/to/Component.tsx",
+  mockDataPath: "/absolute/path/to/mock-data.json",
 });
 ```
 
@@ -130,7 +131,7 @@ npm run test -- .github/skills/mock-data-validator/mock-data-validator.test.ts
 
 ## Related Skills
 
-- [storybook-validation](../storybook-validation/SKILL.md) - Full Storybook testing workflow
+- [storybook-audit](../storybook-audit/SKILL.md) - Full Storybook testing workflow
 - [semantic-file-search](../semantic-file-search/SKILL.md) - Find component and mock files
 
 ## Related Documentation

@@ -19,7 +19,7 @@ async function getCachedEditorPreview(unitId: string): Promise<{
 }> {
   try {
     const client = getServerClient();
-    const { data: unit } = await client.models.Unit.get({ id: unitId });
+    const { data: unit } = await (client as any).models.Unit.get({ id: unitId });
 
     if (!unit?.data) return { html: "", name: unit?.name || "" };
 

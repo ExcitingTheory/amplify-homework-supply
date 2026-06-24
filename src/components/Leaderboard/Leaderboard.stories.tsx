@@ -2,6 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { LeaderboardTable } from './LeaderboardTable'
 import { CompletionGrid } from './CompletionGrid'
+import type { AssignmentColumn, CompletionStatus } from './CompletionGrid'
 
 // =============================================================================
 // LeaderboardTable Stories
@@ -47,25 +48,31 @@ const completionMeta: Meta<typeof CompletionGrid> = {
 
 export const GridStory: StoryObj<typeof CompletionGrid> = {
   render: () => {
-    const assignments = ['Biology 101', 'French Basics', 'Earth Science', 'Math Review', 'History']
+    const assignments: AssignmentColumn[] = [
+      { id: 'bio101', title: 'Biology 101' },
+      { id: 'french', title: 'French Basics' },
+      { id: 'earth', title: 'Earth Science' },
+      { id: 'math', title: 'Math Review' },
+      { id: 'history', title: 'History' },
+    ]
     const students = [
       {
         studentId: 'alice',
         studentName: 'Alice',
-        completions: { 'Biology 101': true, 'French Basics': true, 'Earth Science': true, 'Math Review': false, 'History': true },
+        assignments: { 'bio101': 'completed' as CompletionStatus, 'french': 'completed' as CompletionStatus, 'earth': 'completed' as CompletionStatus, 'math': 'not_started' as CompletionStatus, 'history': 'completed' as CompletionStatus },
       },
       {
         studentId: 'bob',
         studentName: 'Bob',
-        completions: { 'Biology 101': true, 'French Basics': false, 'Earth Science': true, 'Math Review': true, 'History': false },
+        assignments: { 'bio101': 'completed' as CompletionStatus, 'french': 'not_started' as CompletionStatus, 'earth': 'completed' as CompletionStatus, 'math': 'completed' as CompletionStatus, 'history': 'not_started' as CompletionStatus },
       },
       {
         studentId: 'charlie',
         studentName: 'Charlie',
-        completions: { 'Biology 101': true, 'French Basics': true, 'Earth Science': false, 'Math Review': false, 'History': false },
+        assignments: { 'bio101': 'completed' as CompletionStatus, 'french': 'completed' as CompletionStatus, 'earth': 'not_started' as CompletionStatus, 'math': 'not_started' as CompletionStatus, 'history': 'not_started' as CompletionStatus },
       },
     ]
-    return <CompletionGrid assignments={assignments} students={students} />
+    return <CompletionGrid assignments={assignments} students={students} currentStudentId="alice" />
   },
   parameters: { ...completionMeta },
 }

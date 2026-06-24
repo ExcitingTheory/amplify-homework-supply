@@ -5,29 +5,29 @@ import { AIFeedbackSnackbar } from './AIFeedbackSnackbar';
 function createMockProvider(opts = {}) {
   const listeners = new Map();
   const feedbackMap = {
-    observe: (fn) => { listeners.set('feedback', fn); },
-    unobserve: (fn) => { listeners.delete('feedback'); },
+    observe: (fn: any) => { listeners.set('feedback', fn); },
+    unobserve: (fn: any) => { listeners.delete('feedback'); },
     get: () => undefined,
     toJSON: () => ({}),
   };
   return {
     awareness: {
-      on: (event, fn) => {
+      on: (event: any, fn: any) => {
         if (!listeners.has(event)) listeners.set(event, []);
         listeners.get(event).push(fn);
       },
-      off: (event, fn) => {
+      off: (event: any, fn: any) => {
         const fns = listeners.get(event) || [];
-        listeners.set(event, fns.filter(f => f !== fn));
+        listeners.set(event, fns.filter((f: any) => f !== fn));
       },
       getLocalState: () => ({}),
       getStates: () => new Map(),
     },
-    getMap: (name) => feedbackMap,
+    getMap: (name: any) => feedbackMap,
     // Simulate an AI feedback event after mount
-    _emitFeedback: (blockId) => {
+    _emitFeedback: (blockId: any) => {
       const fns = listeners.get('change') || [];
-      fns.forEach(fn => fn());
+      fns.forEach((fn: any) => fn());
     },
     ...opts,
   };

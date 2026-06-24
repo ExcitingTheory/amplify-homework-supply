@@ -226,6 +226,8 @@ export const ResultDropLearn = ({
           />
         )}
         <ListItemText
+          primaryTypographyProps={{ component: "div" }}
+          secondaryTypographyProps={{ component: "div" }}
           primary={
             <Box>
               <Box
@@ -332,6 +334,8 @@ export const AnswerDropLearn = ({
       {isMatched && matchedWord ? (
         // Show complete information when matched
         <ListItemText
+          primaryTypographyProps={{ component: "div" }}
+          secondaryTypographyProps={{ component: "div" }}
           primary={
             <Box>
               <Box
@@ -379,6 +383,7 @@ export const AnswerDropLearn = ({
       ) : (
         // Show only pronunciation/definition when not matched
         <ListItemText
+          secondaryTypographyProps={{ component: "div" }}
           primary={pronunciation}
           secondary={
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

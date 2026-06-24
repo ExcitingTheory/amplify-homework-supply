@@ -45,6 +45,7 @@ import {
 } from "./CustomAnswerPlugin";
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "./MeaningAssociationPlugin";
 import UnitContext from "../../../context/unitContext";
+import SectionContext from "../../../context/sectionContext";
 import { useSuggestions } from "../context/SuggestionContext";
 
 /**
@@ -290,6 +291,29 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   const AI_COOLDOWN_MS = 5000; // 5 second cooldown between automatic AI suggestions
 
   const { currentUnit, dictionary, questionBank } = useContext(UnitContext);
+  const { sections, assignments } = useContext(SectionContext);
+
+  // Derive course outline from section
+  const courseOutline = React.useMemo(() => {
+    if (!currentUnit?.id || !assignments?.length || !sections?.length)
+      return null;
+    const sectionIds = assignments
+      .filter((a) => a.unitID === currentUnit.id)
+      .map((a) => a.sectionID);
+    for (const sId of sectionIds) {
+      const section = sections.find((s) => s.id === sId);
+      if (section?.courseOutline) {
+        try {
+          return typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : section.courseOutline;
+        } catch {
+          /* skip */
+        }
+      }
+    }
+    return null;
+  }, [currentUnit?.id, assignments, sections]);
 
   // Fetch AI-powered suggestions from /suggest-blocks SSE endpoint
   const fetchAISuggestions = useCallback(
@@ -357,6 +381,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
               question: q.question,
               type: q.type,
             })),
+            courseOutline: courseOutline || undefined,
           }),
           signal: abortController.current.signal,
         });

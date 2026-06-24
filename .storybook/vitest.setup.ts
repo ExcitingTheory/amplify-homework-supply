@@ -3,6 +3,13 @@ import { setProjectAnnotations } from "@storybook/nextjs-vite";
 import * as projectAnnotations from "./preview";
 import { registerAuditHooks } from "./vitest-audit-hooks";
 
+// Pre-load PDF.js worker into main thread to prevent "Failed to resolve module
+// specifier 'pdf.worker.mjs'" errors. react-pdf sets workerSrc to the bare
+// specifier 'pdf.worker.mjs' which browsers cannot resolve via dynamic import().
+// Importing the worker here registers globalThis.pdfjsWorker.WorkerMessageHandler
+// so pdfjs uses it directly without attempting the unresolvable import.
+import "pdfjs-dist/build/pdf.worker.mjs";
+
 // Polyfill for Node.js modules needed by qrcode/pngjs in browser environment
 if (typeof window !== "undefined") {
   // @ts-ignore - Adding global polyfill

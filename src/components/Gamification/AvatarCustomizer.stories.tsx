@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React, { useState } from 'react'
 import { AvatarCustomizer } from './AvatarCustomizer'
-import type { AvatarOverrides } from './AvatarCustomizer'
+import type { AvatarOverrides } from './DiceBearAvatar'
 
 const meta: Meta<typeof AvatarCustomizer> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Avatar Customizer',

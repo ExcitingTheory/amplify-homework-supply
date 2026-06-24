@@ -18,8 +18,8 @@ function withUnitContext(stats = {}, overrides = {}) {
     },
     ...overrides,
   };
-  return (Story) => (
-    <UnitContext.Provider value={base}>
+  return (Story: any) => (
+    <UnitContext.Provider value={base as any}>
       <Story />
     </UnitContext.Provider>
   );

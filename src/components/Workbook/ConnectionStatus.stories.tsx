@@ -13,8 +13,8 @@ const baseContext = {
 };
 
 function withUnitContext(overrides = {}) {
-  return (Story) => (
-    <UnitContext.Provider value={{ ...baseContext, ...overrides }}>
+  return (Story: any) => (
+    <UnitContext.Provider value={{ ...baseContext, ...overrides } as any}>
       <Story />
     </UnitContext.Provider>
   );

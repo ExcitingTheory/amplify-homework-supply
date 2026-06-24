@@ -52,9 +52,9 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
 
   useChatPageContext({
     unit,
-    files: filesArray,
-    dictionary,
-    questions: questionBank,
+    files: filesArray as any,
+    dictionary: dictionary as any,
+    questions: questionBank as any,
   });
 
   const unitTimeLimitSeconds = unit?.timeLimitSeconds || 0;

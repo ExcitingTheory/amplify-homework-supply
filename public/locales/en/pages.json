@@ -124,6 +124,7 @@
     "showDraftAssignments": "Show Drafts",
     "applyCurve": "Apply Curve",
     "curveMethod": "Curve Method",
+    "noCurve": "No Curve",
     "scaleToTopMethod": "Scale to Top Score (100%)",
     "linearAdjustmentMethod": "Linear Adjustment (75% avg)",
     "curveDebugInfo": "Curve Debug:",
@@ -199,7 +200,16 @@
     "editUnit": "Edit Unit",
     "practice": "Practice",
     "myDrafts": "My Drafts",
-    "archivedUnits": "Archived Units"
+    "archivedUnits": "Archived Units",
+    "tabMyUnits": "My Units",
+    "tabSharedWithMe": "Shared With Me",
+    "tabCommunity": "Community",
+    "forkUnit": "Fork",
+    "forking": "Forking...",
+    "noSharedUnits": "No units have been shared with you yet",
+    "noCommunityUnits": "No community units available",
+    "forkSuccess": "Unit forked successfully",
+    "forkError": "Failed to fork unit"
   },
   "workbook": {
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",

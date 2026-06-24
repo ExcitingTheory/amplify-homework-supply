@@ -12,20 +12,24 @@ Your goal is to guide the user through a structured Storybook testing process th
 This workflow can be executed in two ways:
 
 ### 🤖 **Automated** (Recommended) - Agent Skill
-Use the [Storybook Validation Agent Skill](../skills/storybook-validation/SKILL.md):
+
+Use the [Storybook Audit Agent Skill](../skills/storybook-audit/SKILL.md):
+
 ```typescript
-const result = await executeSkill('storybook-validation', {
+npm run storybook:run:with-logs
   phases: [1, 2, 3, 4, 5, 6, 7],
   minSeverity: 'warning',
   visualRegression: true
 });
 ```
+
 - ✅ **Autonomous execution** of all 7 phases
 - ✅ **70 hours → 5 hours** (manual → automated)
 - ✅ **Structured output** with artifacts and reports
 - ✅ **See**: [Agent Skills Documentation](../../docs/AGENT_SKILLS.md)
 
 ### 📋 **Manual** (Detailed Control)
+
 Follow the step-by-step guide below for fine-grained control and learning.
 
 ---
@@ -33,6 +37,7 @@ Follow the step-by-step guide below for fine-grained control and learning.
 ## When to Use This Workflow
 
 Activate this workflow when the user:
+
 - Mentions "storybook testing", "validate stories", or "check storybook"
 - Reports stories not rendering or displaying incorrectly
 - Needs to validate mock data structures
@@ -58,23 +63,23 @@ This workflow consists of 7 iterative phases that ensure high-quality Storybook 
 
 ## Agent Skill Implementation Status
 
-The following phases can be automated using the [Storybook Validation Agent Skill](../skills/storybook-validation/SKILL.md):
+The following phases can be automated using the [Storybook Audit Agent Skill](../skills/storybook-audit/SKILL.md):
 
-| Phase | Automation Status | Manual Time | Automated Time | Notes |
-|-------|------------------|-------------|----------------|-------|
-| 1. Inventory | 🟢 Ready | 4-6 hours | 2-5 min | File search + export parsing |
-| 2. Mock Validation | 🟡 Scaffold | 6-8 hours | 2-5 min | Zod schemas needed |
-| 3. Mock Loading | 🟡 Scaffold | 4-6 hours | 1-3 min | Import path validation |
-| 4. Rendering | 🟡 Scaffold | 6-8 hours | 5-10 min | Requires Storybook startup |
-| 5. Deep Dives | 🟡 Scaffold | 8-10 hours | 3-7 min | Component-specific checks |
-| 6. Testing | 🟢 Ready | 6-8 hours | 2-5 min | Run existing test suites |
-| 7. Documentation | 🟡 Scaffold | 4-6 hours | 1-2 min | File generation |
+| Phase              | Automation Status | Manual Time | Automated Time | Notes                        |
+| ------------------ | ----------------- | ----------- | -------------- | ---------------------------- |
+| 1. Inventory       | 🟢 Ready          | 4-6 hours   | 2-5 min        | File search + export parsing |
+| 2. Mock Validation | 🟡 Scaffold       | 6-8 hours   | 2-5 min        | Zod schemas needed           |
+| 3. Mock Loading    | 🟡 Scaffold       | 4-6 hours   | 1-3 min        | Import path validation       |
+| 4. Rendering       | 🟡 Scaffold       | 6-8 hours   | 5-10 min       | Requires Storybook startup   |
+| 5. Deep Dives      | 🟡 Scaffold       | 8-10 hours  | 3-7 min        | Component-specific checks    |
+| 6. Testing         | 🟢 Ready          | 6-8 hours   | 2-5 min        | Run existing test suites     |
+| 7. Documentation   | 🟡 Scaffold       | 4-6 hours   | 1-2 min        | File generation              |
 
 **Legend**: 🟢 Fully implemented | 🟡 Scaffold exists, needs tool integration | 🔴 Not started
 
 **See**:
-- Implementation: [.github/skills/storybook-validation/storybook-validation.ts](../skills/storybook-validation/storybook-validation.ts)
-- Tests: [.github/skills/storybook-validation/storybook-validation.test.ts](../skills/storybook-validation/storybook-validation.test.ts)
+
+- Skill: [.github/skills/storybook-audit/SKILL.md](../skills/storybook-audit/SKILL.md)
 - Usage Guide: [docs/AGENT_SKILLS.md](../../docs/AGENT_SKILLS.md)
 
 ---
@@ -91,13 +96,15 @@ The following phases can be automated using the [Storybook Validation Agent Skil
 2. Find story exports: `grep_search` for `^export (const|default)` in `**/*.stories.*`
 
 **Create**: [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) with table:
+
 ```markdown
-| # | Component | File Path | Variants | Status | Notes |
-|---|-----------|-----------|----------|--------|-------|
-| 1 | ChatSidebar | src/components/ChatSidebar.stories.jsx | 7 | 🔍 | Not tested |
+| #   | Component   | File Path                              | Variants | Status | Notes      |
+| --- | ----------- | -------------------------------------- | -------- | ------ | ---------- |
+| 1   | ChatSidebar | src/components/ChatSidebar.stories.jsx | 7        | 🔍     | Not tested |
 ```
 
 **Status Legend**:
+
 - ✅ Renders correctly
 - ⚠️ Renders with warnings
 - ❌ Fails to render
@@ -114,6 +121,7 @@ The following phases can be automated using the [Storybook Validation Agent Skil
 3. List mock modules: `list_dir` on `.storybook/__mocks__/`
 
 **Add to [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md)**: Mock data table with:
+
 - Mock file name
 - Data structure (interface/type)
 - Used by which stories
@@ -137,6 +145,7 @@ The following phases can be automated using the [Storybook Validation Agent Skil
 6. Document errors in console/UI
 
 **Testing Process** for each story:
+
 - [ ] Visual Check: Does it render something?
 - [ ] Console Check: Any red errors?
 - [ ] Console Check: Any yellow warnings?
@@ -144,8 +153,10 @@ The following phases can be automated using the [Storybook Validation Agent Skil
 - [ ] Mark status in [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md)
 
 **Create**: [STORYBOOK_TESTING_RESULTS.md](../../docs/STORYBOOK_TESTING_RESULTS.md) with summary:
+
 ```markdown
 ## Executive Summary
+
 - ✅ Passed: XX story files (~XX%)
 - ⚠️ Warnings: XX story files (~XX%)
 - ❌ Failed: XX story files (~XX%)
@@ -165,6 +176,7 @@ The following phases can be automated using the [Storybook Validation Agent Skil
 **For Each Failed/Warning Story**:
 
 1. **Read component file** to find prop types:
+
    ```typescript
    interface ComponentProps {
      messages: Message[];
@@ -173,10 +185,9 @@ The following phases can be automated using the [Storybook Validation Agent Skil
    ```
 
 2. **Read mock data file**:
+
    ```javascript
-   export const mockMessages = [
-     { id: '1', role: 'user', content: 'Hello' }
-   ];
+   export const mockMessages = [{ id: "1", role: "user", content: "Hello" }];
    ```
 
 3. **Compare structures**:
@@ -191,14 +202,14 @@ The following phases can be automated using the [Storybook Validation Agent Skil
    - 🟢 OK: Structures match
 
 **Validation Script** (optional):
+
 ```typescript
 // scripts/validate-mock-data.ts
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('Mock Data Structure Validation', () => {
-  it('should match component prop types', () => {
+describe("Mock Data Structure Validation", () => {
+  it("should match component prop types", () => {
     // Compare mock to expected interface
-
   });
 });
 ```
@@ -212,6 +223,7 @@ describe('Mock Data Structure Validation', () => {
 1. Use `get_changed_files` to see modifications
 2. Use `grep_search` to find patterns in `src/**/*`
 3. Check git history:
+
 ```bash
 # View component history
 git log --oneline -- ${file}
@@ -221,10 +233,11 @@ git show <commit>:${file}
 ```
 
 **Capture Real Data** (in running app):
+
 ```javascript
 // Add to component temporarily
 useEffect(() => {
-  console.log('ACTUAL DATA STRUCTURE:', JSON.stringify(data, null, 2));
+  console.log("ACTUAL DATA STRUCTURE:", JSON.stringify(data, null, 2));
 }, [data]);
 ```
 
@@ -236,9 +249,10 @@ useEffect(() => {
 
 ### Step 2.3: Validate Mock Data in Story Contexts
 
-**Goal**: Ensure stories wrap components with correct context providers that supply necessary data but mocked any external API calls. Other methods are defined in more detail at [Storybook Mocking Modules Documentation](https://storybook.js.org/docs/writing-stories/mocking-data-and-modules/mocking-modules). 
+**Goal**: Ensure stories wrap components with correct context providers that supply necessary data but mocked any external API calls. Other methods are defined in more detail at [Storybook Mocking Modules Documentation](https://storybook.js.org/docs/writing-stories/mocking-data-and-modules/mocking-modules).
 
 **Check Each Story File**:
+
 ```typescript
 // Example validation
 export const Default = () => (
@@ -253,6 +267,7 @@ export const Default = () => (
 ```
 
 **Checklist per Story**:
+
 - [ ] All `useContext()` calls have corresponding providers
 - [ ] Provider values match expected structure
 - [ ] Provider values include all required fields
@@ -274,6 +289,7 @@ export const Default = () => (
 2. Verify mock files exist: `file_search` with `.storybook/__mocks__/ui-data/**/*.{json,js}`
 
 **Common Issues**:
+
 - Relative path errors: `../../__mocks__` vs `.storybook/__mocks__`
 - Missing exports: `import { mockData }` when file exports `default mockData`
 - Case sensitivity: `chatMessages.js` vs `ChatMessages.js`
@@ -294,10 +310,11 @@ export const Default = () => (
 4. Validate mock modules are imported
 
 **Test in Browser Console**:
+
 ```javascript
 // Check global mocks
-console.log('UnitContext:', window.__UNIT_CONTEXT__);
-console.log('AuthContext:', window.__AUTH_CONTEXT__);
+console.log("UnitContext:", window.__UNIT_CONTEXT__);
+console.log("AuthContext:", window.__AUTH_CONTEXT__);
 ```
 
 **Deliverable**: Validation of global mock setup
@@ -307,19 +324,21 @@ console.log('AuthContext:', window.__AUTH_CONTEXT__);
 **Goal**: Verify stories respond to mock data changes
 
 **For Interactive Stories**:
+
 ```typescript
 export const Interactive = () => {
   const [messages, setMessages] = useState(mockMessages);
-  
+
   const addMessage = (text: string) => {
     setMessages([...messages, { id: Date.now(), role: 'user', content: text }]);
   };
-  
+
   return <ChatSidebar messages={messages} onSend={addMessage} />;
 };
 ```
 
 **Test Cases**:
+
 - Click button → State updates → Component re-renders
 - Form submit → Data changes → UI reflects change
 - Context update → Consuming component updates
@@ -356,6 +375,7 @@ For layout issues, spacing problems, or visual inconsistencies, enable the box m
 3. **Or**: Console → `document.querySelector('selector')` → Hover in console output
 
 **Box Model Color Legend**:
+
 - 🔵 **Blue** = Content (actual element size)
 - 🟢 **Green** = Padding (space inside element)
 - 🟡 **Yellow** = Border (element border)
@@ -363,6 +383,7 @@ For layout issues, spacing problems, or visual inconsistencies, enable the box m
 - 🟣 **Purple** = Gap (flexbox/grid gaps)
 
 **When to Use**:
+
 - Comparing original vs. rewritten component layouts
 - Debugging unexpected spacing or alignment
 - Verifying responsive design breakpoints
@@ -370,6 +391,7 @@ For layout issues, spacing problems, or visual inconsistencies, enable the box m
 - Checking padding/margin consistency
 
 **Pro Tips**:
+
 - Take screenshots WITH overlay enabled to document layout issues
 - Compare overlays between original and new component versions
 - Use persistent overlay: Elements → Computed → Scroll to box model → Click segments
@@ -385,6 +407,7 @@ When reporting layout issues or requesting help, include the relevant portion of
 4. **Include in Report**: Paste in code block with language hint
 
 Example:
+
 ```html
 <div class="chat-container">
   <div class="chat-messages">
@@ -402,12 +425,14 @@ Example:
 ```
 
 **When to Provide DOM Tree**:
+
 - Debugging unexpected layout/spacing issues
 - Comparing original vs. rewritten component structure
 - Reporting rendering bugs with specific element context
 - Showing how component actually renders vs. expected structure
 
 **What to Include**:
+
 - Relevant parent containers (2-3 levels up)
 - The problematic element and its siblings
 - Child elements if layout issue involves nested content
@@ -416,6 +441,7 @@ Example:
 **Optional - Automated Visual Testing**:
 
 **Option A: Chromatic** (package installed, needs token):
+
 ```bash
 # Add to package.json scripts:
 # "chromatic": "chromatic --project-token=<your-token>"
@@ -424,12 +450,13 @@ npm run chromatic
 ```
 
 **Option B: Vitest + Playwright** (already available):
+
 ```typescript
 // test/storybook/visual-snapshots.test.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('ChatSidebar renders correctly', async ({ page }) => {
-  await page.goto('http://localhost:6007/?path=/story/chatsidebar--default');
+test("ChatSidebar renders correctly", async ({ page }) => {
+  await page.goto("http://localhost:6007/?path=/story/chatsidebar--default");
   await expect(page).toHaveScreenshot();
 });
 ```
@@ -443,6 +470,7 @@ test('ChatSidebar renders correctly', async ({ page }) => {
 **Check workspace issues** with `get_errors` (Problems panel)
 
 **Manual Process**:
+
 1. Open each story
 2. Check browser console for:
    - ❌ Errors (red) - Critical
@@ -451,6 +479,7 @@ test('ChatSidebar renders correctly', async ({ page }) => {
 3. Document error messages
 
 **Common Issues to Look For**:
+
 - `Cannot read property 'X' of undefined` → Missing mock data
 - `useContext() returned undefined` → Missing provider
 - `Invalid prop type` → Mock data type mismatch
@@ -463,11 +492,13 @@ test('ChatSidebar renders correctly', async ({ page }) => {
 **Goal**: Ensure mocked data doesn't break a11y
 
 **Setup** (if not already installed):
+
 ```bash
 npm install --save-dev @storybook/addon-a11y
 ```
 
 **Check**:
+
 1. Enable a11y addon panel in Storybook
 2. Review violations for each story
 3. Identify if violations are from:
@@ -488,13 +519,14 @@ For each critical component, perform deep validation:
 #### 5.1: ChatSidebar Validation (HIGH PRIORITY)
 
 **CRITICAL - Message Format**:
+
 ```typescript
 // Correct format (from @ai-sdk/react useChat hook)
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   parts: Array<{
-    type: 'text' | 'tool-*';
+    type: "text" | "tool-*";
     text?: string;
     toolCallId?: string;
     input?: object;
@@ -504,9 +536,9 @@ interface Message {
 
 // Extract text from parts array
 const text = message.parts
-  .filter(p => p.type === 'text')
-  .map(p => p.text)
-  .join('');
+  .filter((p) => p.type === "text")
+  .map((p) => p.text)
+  .join("");
 ```
 
 **Validation Steps**:
@@ -516,6 +548,7 @@ const text = message.parts
 3. Verify message structure uses `parts` array
 4. Check for changes with `get_changed_files`
 5. Compare to working version:
+
    ```bash
    git log --oneline -- ${workspaceFolder}/src/components/ChatSidebar.js
    git show HEAD:${workspaceFolder}/src/components/ChatSidebar.js
@@ -524,19 +557,21 @@ const text = message.parts
 6. Update mocks to match actual data structure
 
 **Files to Check**:
+
 - [ChatSidebar.js](../../src/components/ChatSidebar.js)
 - [ChatSidebar.stories.jsx](../../src/components/ChatSidebar.stories.jsx)
-- Mock files: [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) (chat-bot-2.*.json)
+- Mock files: [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/) (chat-bot-2.\*.json)
 
 #### 5.2: Editor3 Validation (HIGH PRIORITY)
 
 **Lexical State Structure**:
+
 ```typescript
 // Lexical editor state in Unit.data field
 interface EditorState {
   root: {
     children: Array<{
-      type: 'paragraph' | 'heading' | 'quiz' | 'answer';
+      type: "paragraph" | "heading" | "quiz" | "answer";
       children: Array<{ text: string }>;
       // ... other node properties
     }>;
@@ -545,6 +580,7 @@ interface EditorState {
 ```
 
 **Validation Steps**:
+
 1. Read [Editor3](../../src/components/Editor3/) and [Workbook](../../src/components/Editor3/Workbook.jsx) components
 2. Check how Lexical state is initialized
 3. Find or create mock Lexical state JSON
@@ -552,27 +588,30 @@ interface EditorState {
 5. Update story files with proper initial state
 
 **Files to Check**:
+
 - [Editor.stories.jsx](../../src/components/Editor3/Editor.stories.jsx)
 - [Workbook.stories.jsx](../../src/components/Editor3/Workbook.stories.jsx)
-- Create: Mock data in [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) (lexical-state-*.json)
+- Create: Mock data in [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/) (lexical-state-\*.json)
 
 #### 5.3: FileManager2 Validation (MEDIUM PRIORITY)
 
 **ParsedContent Structure**:
+
 ```typescript
 interface ParsedContent {
   id: string;
   fileID: string;
   text: string;
   vocabulary: Word[];
-  status: 'uploaded' | 'extracting' | 'analyzing' | 'completed';
+  status: "uploaded" | "extracting" | "analyzing" | "completed";
 }
 ```
 
 **Validation Steps**:
+
 1. Read [FileManager2](../../src/components/FileManager2/) component
 2. Check parsedContent data expectations
-3. Compare to mock data in [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) (file-details.json)
+3. Compare to mock data in [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/) (file-details.json)
 4. Update mock structure if needed
 
 #### 5.4: API Mock Response Validation
@@ -580,6 +619,7 @@ interface ParsedContent {
 **Issue**: `Cannot destructure property 'body'` errors
 
 **Expected Structure** (for Edge Runtime API responses):
+
 ```typescript
 // pages/api/chat.js expects StreamingTextResponse
 interface ChatResponse {
@@ -589,13 +629,15 @@ interface ChatResponse {
 ```
 
 **Validation Steps**:
+
 1. Check error in AI completion plugins
-2. Find API mock in [.storybook/__mocks__/](../../.storybook/__mocks__/) (chat-api.js or similar)
+2. Find API mock in [.storybook/**mocks**/](../../.storybook/__mocks__/) (chat-api.js or similar)
 3. Update response to match expected structure
 4. Test AI completion stories
 
 **Files to Check**:
-- [.storybook/__mocks__/](../../.storybook/__mocks__/) (chat-api.js)
+
+- [.storybook/**mocks**/](../../.storybook/__mocks__/) (chat-api.js)
 - [AIContentCompletionPlugin.js](../../src/components/Editor3/plugins/AIContentCompletionPlugin.js)
 - [BlockSuggestionPluginAI.stories.jsx](../../src/components/Editor3/plugins/BlockSuggestionPluginAI.stories.jsx)
 
@@ -608,22 +650,23 @@ interface ChatResponse {
 **Goal**: Automated checks for mock data structure
 
 **Setup**:
+
 ```typescript
 // test/storybook/validate-mocks.test.ts
-import { describe, it, expect } from 'vitest';
-import { mockMessages } from '${workspaceFolder}/.storybook/__mocks__/ui-data/chatMessages';
+import { describe, it, expect } from "vitest";
+import { mockMessages } from "${workspaceFolder}/.storybook/__mocks__/ui-data/chatMessages";
 
-describe('Mock Data Structure Validation', () => {
-  describe('Chat Messages', () => {
-    it('should have parts array format', () => {
-      expect(mockMessages[0]).toHaveProperty('parts');
+describe("Mock Data Structure Validation", () => {
+  describe("Chat Messages", () => {
+    it("should have parts array format", () => {
+      expect(mockMessages[0]).toHaveProperty("parts");
       expect(Array.isArray(mockMessages[0].parts)).toBe(true);
     });
 
-    it('should have text parts with correct structure', () => {
-      const textParts = mockMessages[0].parts.filter(p => p.type === 'text');
+    it("should have text parts with correct structure", () => {
+      const textParts = mockMessages[0].parts.filter((p) => p.type === "text");
       expect(textParts.length).toBeGreaterThan(0);
-      expect(textParts[0]).toHaveProperty('text');
+      expect(textParts[0]).toHaveProperty("text");
     });
   });
 
@@ -632,6 +675,7 @@ describe('Mock Data Structure Validation', () => {
 ```
 
 **Run tests**:
+
 ```bash
 npm run test -- validate-mocks
 ```
@@ -641,6 +685,7 @@ npm run test -- validate-mocks
 **Goal**: Automated rendering checks using existing tools
 
 **Using Vitest + Storybook Integration**:
+
 ```typescript
 // test/storybook/story-rendering.test.ts
 import { describe, it, expect } from 'vitest';
@@ -658,6 +703,7 @@ describe('Story Rendering Tests', () => {
 ```
 
 **Run tests**:
+
 ```bash
 npm run test
 # or for watch mode
@@ -669,6 +715,7 @@ npm run test:watch
 **Goal**: Run story validation on PRs
 
 **GitHub Actions** (example):
+
 ```yaml
 # .github/workflows/storybook-tests.yml
 name: Storybook Tests
@@ -695,6 +742,7 @@ jobs:
 **Create**: [STORYBOOK_MOCK_DATA_GUIDE.md](../../docs/STORYBOOK_MOCK_DATA_GUIDE.md)
 
 **Content**:
+
 ```markdown
 # Storybook Mock Data Guide
 
@@ -710,45 +758,48 @@ jobs:
 - **Always match runtime structure** - Don't invent/assume fields
 - **Use actual data when possible** - Copy from working components
 - **Check git history** - `git show HEAD:${file}`
-- **Verify mock data format in [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/)** - Source of truth
+- **Verify mock data format in [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/)** - Source of truth
 - **Include all required fields** - Check component prop types
 - **Preserve type information** - String vs Number matters
 
 ## Common Patterns
 
 ### Message Format (AI SDK)
+
 \`\`\`typescript
 // Correct: parts array format
 {
-  id: '1',
-  role: 'user',
-  parts: [
-    { type: 'text', text: 'Hello' }
-  ]
+id: '1',
+role: 'user',
+parts: [
+{ type: 'text', text: 'Hello' }
+]
 }
 \`\`\`
 
 ### Lexical Editor State
+
 \`\`\`typescript
 {
-  root: {
-    children: [
-      {
-        type: 'paragraph',
-        children: [{ text: 'Content here' }]
-      }
-    ]
-  }
+root: {
+children: [
+{
+type: 'paragraph',
+children: [{ text: 'Content here' }]
+}
+]
+}
 }
 \`\`\`
 
 ### Context Provider Values
+
 \`\`\`typescript
 export const mockUnitContext = {
-  currentUnit: { id: '1', name: 'Test Unit', data: '{}' },
-  session: { username: 'testuser' },
-  saveEditorContent: () => Promise.resolve(),
-  // ... all required fields
+currentUnit: { id: '1', name: 'Test Unit', data: '{}' },
+session: { username: 'testuser' },
+saveEditorContent: () => Promise.resolve(),
+// ... all required fields
 };
 \`\`\`
 ```
@@ -758,11 +809,13 @@ export const mockUnitContext = {
 **Goal**: Repair broken stories based on validation findings
 
 **Priority Order**:
+
 1. 🔴 P0 - Critical: Stories that don't render at all
 2. 🟡 P1 - High: Stories with console errors/warnings
 3. 🟢 P2 - Medium: Stories with minor issues
 
 **For Each Fix**:
+
 1. Read component to understand expectations
 2. Read current mock data
 3. Compare structures
@@ -770,6 +823,7 @@ export const mockUnitContext = {
 5. Test in Storybook
 6. Update [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) status
 7. **Run validation**:
+
 ```bash
 npm run typecheck && npm run test
 ```
@@ -777,6 +831,7 @@ npm run typecheck && npm run test
 ### Step 7.3: Update Documentation
 
 **Update Files**:
+
 - [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) - Mark all as ✅ or ⚠️
 - [STORYBOOK_TESTING_RESULTS.md](../../docs/STORYBOOK_TESTING_RESULTS.md) - Add "Fixed" section
 - Create [STORYBOOK_MOCK_DATA_GUIDE.md](../../docs/STORYBOOK_MOCK_DATA_GUIDE.md) - Best practices
@@ -787,44 +842,52 @@ npm run typecheck && npm run test
 ## Validation Checklist
 
 ### Before Starting
+
 - [ ] **Storybook runs without errors**: `npm run storybook`
 - [ ] **Build succeeds**: `npm run build-storybook`
 - [ ] **TypeScript compiles**: `npm run typecheck`
 
 ### After Phase 1
+
 - [ ] [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) created with all stories
 - [ ] [STORYBOOK_TESTING_CHECKLIST.md](../../docs/STORYBOOK_TESTING_CHECKLIST.md) created
 - [ ] [STORYBOOK_TESTING_RESULTS.md](../../docs/STORYBOOK_TESTING_RESULTS.md) created
 - [ ] All stories manually tested and statused
 
 ### After Phase 2
+
 - [ ] Mock data structures validated against components
 - [ ] Real runtime data captured for comparison
 - [ ] Context providers validated in all stories
 - [ ] Mismatches documented with severity
 
 ### After Phase 3
+
 - [ ] All import paths verified
 - [ ] Global mock setup validated
 - [ ] Data reactivity tested
 
 ### After Phase 4
+
 - [ ] Visual rendering validated (manual or automated)
 - [ ] Console errors cataloged
 - [ ] Accessibility issues documented
 
 ### After Phase 5
+
 - [ ] Critical components deep-dived (ChatSidebar, Editor, etc.)
 - [ ] Git history checked before modifying components
 - [ ] Mock data updated to match actual structures
 
 ### After Phase 6
+
 - [ ] Mock validation tests created
 - [ ] Story render tests created
 - [ ] **All tests passing**: `npm run test`
 - [ ] (Optional) CI/CD integration complete
 
 ### After Phase 7
+
 - [ ] All P0 issues fixed
 - [ ] [STORYBOOK_MOCK_DATA_GUIDE.md](../../docs/STORYBOOK_MOCK_DATA_GUIDE.md) created
 - [ ] Documentation updated
@@ -835,6 +898,7 @@ npm run typecheck && npm run test
 ## Commands Reference
 
 ### Storybook Commands
+
 ```bash
 # Start Storybook (background)
 npm run storybook
@@ -844,6 +908,7 @@ npm run build-storybook
 ```
 
 ### TypeScript & Testing
+
 ```bash
 # TypeScript validation
 npm run typecheck
@@ -854,16 +919,18 @@ npm run test
 # Run tests with coverage
 npm run test:coverage
 
-# Run tests in watch mode  
+# Run tests in watch mode
 npm run test:watch
 ```
 
 ### File Operations
+
 - Find story files: `file_search` with `src/**/*.stories.*`
 - Find mock data: `file_search` with `.storybook/__mocks__/ui-data/**/*`
 - Search patterns: `grep_search` in `src/**/*`
 
 ### Git Commands
+
 ```bash
 # Check git history
 git log --oneline -- ${file}
@@ -890,6 +957,7 @@ This Storybook testing workflow should be run:
 ## Quick Reference
 
 ### High Priority Stories (Test First)
+
 1. ChatSidebar - Message format critical
 2. Editor3 - Lexical state critical
 3. Workbook - Grade data critical
@@ -897,14 +965,16 @@ This Storybook testing workflow should be run:
 5. AI Completion Plugins - API mock structure
 
 ### Common Pitfalls
+
 - ❌ Don't modify components without checking git history
 - ❌ Don't assume data structure - capture from runtime
 - ❌ Don't create new subscriptions - use existing contexts
 - ✅ Always verify mock data matches actual runtime data
-- ✅ Check [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) as source of truth
+- ✅ Check [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/) as source of truth
 - ✅ Use parts array format for AI SDK messages
 
 ### Status Tracking
+
 - Update [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) as you test
 - Document issues in [STORYBOOK_TESTING_RESULTS.md](../../docs/STORYBOOK_TESTING_RESULTS.md)
 - Create fixes based on priority (P0 → P1 → P2)
@@ -912,6 +982,7 @@ This Storybook testing workflow should be run:
 ---
 
 **When complete, you should have**:
+
 - ✅ All stories rendering correctly
 - ✅ Mock data matching component expectations
 - ✅ Automated tests validating mock structures
@@ -924,14 +995,15 @@ This Storybook testing workflow should be run:
 
 After completing this workflow manually once:
 
-1. **Implement Agent Skill** - Use the scaffold in [.github/skills/storybook-validation/storybook-validation.ts](../skills/storybook-validation/storybook-validation.ts)
-2. **Add Tool Integration** - Connect to `file_search`, `grep_search`, `run_in_terminal`, etc.
-3. **Run Tests** - Validate with [.github/skills/storybook-validation/storybook-validation.test.ts](../skills/storybook-validation/storybook-validation.test.ts)
+1. **Run Storybook Audit** - `npm run storybook:run:with-logs`
+2. **Validate Mock Data** - `npm run storybook:validate-mocks`
+3. **Validate Components** - `npm run storybook:validate-components`
 4. **Automate CI** - Add to `.github/workflows/storybook-validation.yml`
 
 **Resources**:
+
 - [Agent Skills Overview](../../docs/AGENT_SKILLS.md)
-- [Storybook Validation Skill](../skills/storybook-validation/SKILL.md)
+- [Storybook Audit Skill](../skills/storybook-audit/SKILL.md)
 - [Semantic File Search Example](../skills/semantic-file-search/semantic-file-search.ts) - Reference implementation
 
 **Time Savings**: 70 hours manual → 5 hours automated (93% reduction) after one-time 76-hour setup investment.

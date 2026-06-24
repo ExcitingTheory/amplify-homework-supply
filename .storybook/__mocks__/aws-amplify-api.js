@@ -192,7 +192,7 @@ export const generateClient = () => ({
       return {
         data: {
           generateImageFile: {
-            path: `protected/images/generated-${Date.now()}.png`,
+            path: `/story-mocks/animals-10008941_1280.jpg`,
             mimeType: 'image/png',
             size: 250000,
             name: `generated-${variables.phrase?.slice(0, 20) || 'image'}.png`,
@@ -223,7 +223,7 @@ export const generateClient = () => ({
       return {
         data: {
           generateAudioFile: {
-            path: `protected/audio/generated-${Date.now()}.mp3`,
+            path: `/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3`,
             mimeType: 'audio/mpeg',
             size: 150000,
             name: `generated-${variables.phrase?.slice(0, 20) || 'audio'}.mp3`,

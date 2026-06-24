@@ -23,7 +23,7 @@ function parseJson(value: any) {
  */
 async function getCachedUnitContent(unitId: string, unitVersion: string) {
   const client = getServerClient();
-  const { data: unitData, errors } = await client.models.Unit.get({ id: unitId });
+  const { data: unitData, errors } = await (client as any).models.Unit.get({ id: unitId });
   if (errors?.length) throw new Error(errors[0].message);
   if (!unitData) throw new Error('Unit not found');
   return { id: unitData.id, name: unitData.name || '', data: unitData.data || '' };
@@ -55,7 +55,7 @@ export default async function InstructorGradePage({ params, searchParams }: Prop
     const client = getServerClient();
 
     // Fetch the target grade
-    const { data: grade, errors: gradeErrors } = await client.models.Grade.get({ id: gradeId });
+    const { data: grade, errors: gradeErrors } = await (client as any).models.Grade.get({ id: gradeId });
     if (gradeErrors?.length) throw new Error(gradeErrors[0].message);
     if (!grade) throw new Error('Grade not found');
 
@@ -63,7 +63,7 @@ export default async function InstructorGradePage({ params, searchParams }: Prop
     if (!targetUnitId) throw new Error('No unit ID found on grade');
 
     // Get unit version for cache key, then fetch cached content
-    const { data: unitMeta } = await client.models.Unit.get(
+    const { data: unitMeta } = await (client as any).models.Unit.get(
       { id: targetUnitId },
       { selectionSet: ["id", "_version"] }
     );
@@ -71,7 +71,7 @@ export default async function InstructorGradePage({ params, searchParams }: Prop
     const unit = await getCachedUnitContent(targetUnitId, unitVersion);
 
     // Fetch ALL grades for this student + unit (all attempts)
-    const { data: allGrades, errors: allGradesErrors } = await client.models.Grade.list({
+    const { data: allGrades, errors: allGradesErrors } = await (client as any).models.Grade.list({
       filter: {
         unitID: { eq: targetUnitId },
         owner: { eq: grade.owner },

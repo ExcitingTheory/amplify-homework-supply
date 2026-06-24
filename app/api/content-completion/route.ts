@@ -44,11 +44,30 @@ export async function POST(req: Request) {
     const openai = createOpenAI({ apiKey });
 
     // Build system message
-    let systemMessage = `You are an AI assistant helping to create educational content. Complete the given text naturally and pedagogically.`;
+    let systemMessage = `You are an AI assistant helping to create educational content. Complete the given text naturally and pedagogically. Your suggestions should fit within the progression of the course.`;
 
     if (context) {
-      if (context.unitName) {
-        systemMessage += `\n\nCurrent Unit: ${context.unitName}`;
+      if (context.unit?.name) {
+        systemMessage += `\n\nCurrent Unit: ${context.unit.name}`;
+        if (context.unit?.description) {
+          systemMessage += `\nUnit Description: ${context.unit.description}`;
+        }
+      }
+      if (context.courseOutline && Array.isArray(context.courseOutline)) {
+        systemMessage += `\n\nCourse Chapter Outline (for progression context):`;
+        for (const entry of context.courseOutline) {
+          const marker = entry.unitId === context.unit?.id ? " ← CURRENT" : "";
+          systemMessage += `\n  ${entry.number != null ? `${entry.number}. ` : "• "}${entry.name}${marker}`;
+          if (entry.summary) {
+            systemMessage += `\n    ${entry.summary.split("\n").join("\n    ")}`;
+          }
+        }
+      }
+      if (context.draftHeadings && context.draftHeadings.length > 0) {
+        systemMessage += `\n\nCurrent draft headings in this unit:`;
+        for (const heading of context.draftHeadings) {
+          systemMessage += `\n  • ${heading}`;
+        }
       }
       if (context.lastBlocks) {
         systemMessage += `\n\nRecent context: ${JSON.stringify(context.lastBlocks)}`;
@@ -67,7 +86,7 @@ export async function POST(req: Request) {
       maxRetries: 1,
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("[ContentCompletion Route] Error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

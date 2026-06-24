@@ -20,7 +20,7 @@ vi.mock('../context/gamificationContext', () => ({
     xpLogs: [],
     isLoading: false,
   }),
-  GamificationProvider: ({ children }) => children,
+  GamificationProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 import { vi } from 'vitest'

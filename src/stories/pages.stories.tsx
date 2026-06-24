@@ -25,7 +25,7 @@ import IndexPage from '../../app/[locale]/page.jsx';
 import SectionsPage from '../../app/[locale]/sections/page.jsx';
 import UnitsPage from '../../app/[locale]/units/page.jsx';
 import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
-import UnitDetailPage from '../../app/[locale]/unit/[id]/page.jsx';
+import UnitDetailPage from '../../app/[locale]/unit/[id]/page';
 import PeerReviewPage from '../../app/[locale]/review/[id]/page.jsx';
 // WorkbookPage is an async server component — import the client component directly
 import WorkbookClient from '../../app/[locale]/workbook/[id]/WorkbookClient';
@@ -103,7 +103,7 @@ export const Index: Story = {
       );
     },
   ],
-  render: () => <IndexPage />,
+  render: () => <IndexPage signOut={() => {}} user={{}} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
@@ -132,7 +132,7 @@ export const IndexNoSections: Story = {
       );
     },
   ],
-  render: () => <IndexPage />,
+  render: () => <IndexPage signOut={() => {}} user={{}} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'new-student', email: 'new.student@example.com' } },
@@ -161,7 +161,7 @@ export const IndexAssignments: Story = {
       );
     },
   ],
-  render: () => <IndexPage />,
+  render: () => <IndexPage signOut={() => {}} user={{}} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
@@ -376,7 +376,7 @@ export const UnitDetail: Story = {
       );
     },
   ],
-  render: () => <UnitDetailPage />,
+  render: () => <UnitDetailPage params={Promise.resolve({ id: 'unit-japanese-1', locale: 'en' })} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },

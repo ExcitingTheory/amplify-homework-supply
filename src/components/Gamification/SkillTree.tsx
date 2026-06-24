@@ -877,7 +877,7 @@ function SkillTreeInner({
 // ============================================================================
 
 export function SkillTree(props: SkillTreeProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const { compact: _compact, loading, ...rest } = props
 
   if (loading) {

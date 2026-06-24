@@ -19,10 +19,12 @@ export interface StreakShieldProps {
   freezesUsed?: number
   /** Size variant. Defaults to 'medium'. */
   size?: 'small' | 'medium'
+  /** When true, renders a zero-state indicator instead of returning null when there are no freezes. */
+  showEmpty?: boolean
 }
 
-export function StreakShield({ freezesRemaining, freezesUsed = 0, size = 'medium' }: StreakShieldProps) {
-  if (freezesRemaining <= 0 && freezesUsed <= 0) return null
+export function StreakShield({ freezesRemaining, freezesUsed = 0, size = 'medium', showEmpty = false }: StreakShieldProps) {
+  if (freezesRemaining <= 0 && freezesUsed <= 0 && !showEmpty) return null
 
   const isSmall = size === 'small'
 

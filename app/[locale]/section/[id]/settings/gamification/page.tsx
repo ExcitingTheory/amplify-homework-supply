@@ -84,14 +84,10 @@ interface CustomBadgeEntry {
 // Constants
 // ============================================================================
 
-const FEATURE_TOGGLES = [
-  { key: 'easterEggsEnabled', label: 'Easter Eggs', description: 'Allow students to discover hidden rewards' },
-  { key: 'groupChallengesEnabled', label: 'Group Challenges', description: 'Enable boss battles and team challenges' },
-  { key: 'squadsEnabled', label: 'Squads', description: 'Allow students to form squads' },
-  { key: 'skillTreesEnabled', label: 'Skill Trees', description: 'Enable skill progression trees' },
-  { key: 'streaksEnabled', label: 'Streaks', description: 'Track daily activity streaks' },
-  { key: 'collaborativePracticeEnabled', label: 'Collaborative Practice', description: 'Enable collaborative drill mode' },
-] as const
+import { GAMIFICATION_FEATURE_META } from '@/hooks/useGamificationFeatures'
+import type { GamificationFeatureKey } from '@/hooks/useGamificationFeatures'
+
+const FEATURE_TOGGLES = GAMIFICATION_FEATURE_META
 
 const DEFAULT_BADGE_TYPES = [
   'PERFECT_SCORE',
@@ -123,14 +119,20 @@ export default function GamificationSettingsPage() {
   const [sections, setSections] = useState<SectionOption[]>([])
   const [currentSection, setCurrentSection] = useState<SectionOption | null>(null)
 
-  // Feature toggles
-  const [features, setFeatures] = useState<Record<string, boolean>>({
-    easterEggsEnabled: true,
-    groupChallengesEnabled: true,
-    squadsEnabled: true,
-    skillTreesEnabled: true,
-    streaksEnabled: true,
-    collaborativePracticeEnabled: true,
+  // Feature toggles — null means "use platform default", true/false = explicit override
+  const [features, setFeatures] = useState<Record<string, boolean | null>>({
+    xpEnabled: null,
+    leaderboardEnabled: null,
+    badgesEnabled: null,
+    antiBadgesEnabled: null,
+    easterEggsEnabled: null,
+    groupChallengesEnabled: null,
+    squadsEnabled: null,
+    skillTreesEnabled: null,
+    streaksEnabled: null,
+    collaborativePracticeEnabled: null,
+    cosmeticsEnabled: null,
+    contentLocksEnabled: null,
   })
 
   // Badge configs
@@ -176,12 +178,18 @@ export default function GamificationSettingsPage() {
               : current.gamificationConfig
             setFeatures((prev) => ({
               ...prev,
-              easterEggsEnabled: cfg.easterEggsEnabled ?? true,
-              groupChallengesEnabled: cfg.groupChallengesEnabled ?? true,
-              squadsEnabled: cfg.squadsEnabled ?? true,
-              skillTreesEnabled: cfg.skillTreesEnabled ?? true,
-              streaksEnabled: cfg.streaksEnabled ?? true,
-              collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? true,
+              xpEnabled: cfg.xpEnabled ?? null,
+              leaderboardEnabled: cfg.leaderboardEnabled ?? null,
+              badgesEnabled: cfg.badgesEnabled ?? null,
+              antiBadgesEnabled: cfg.antiBadgesEnabled ?? null,
+              easterEggsEnabled: cfg.easterEggsEnabled ?? null,
+              groupChallengesEnabled: cfg.groupChallengesEnabled ?? null,
+              squadsEnabled: cfg.squadsEnabled ?? null,
+              skillTreesEnabled: cfg.skillTreesEnabled ?? null,
+              streaksEnabled: cfg.streaksEnabled ?? null,
+              collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? null,
+              cosmeticsEnabled: cfg.cosmeticsEnabled ?? null,
+              contentLocksEnabled: cfg.contentLocksEnabled ?? null,
             }))
             if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs)
             if (cfg.customBadges) setCustomBadges(cfg.customBadges)
@@ -194,9 +202,20 @@ export default function GamificationSettingsPage() {
     return () => sub.unsubscribe()
   }, [client, sectionId])
 
-  // Toggle a feature
+  // Toggle a feature — cycles: null (platform default) → true → false → null
   const toggleFeature = (key: string) => {
-    setFeatures((prev) => ({ ...prev, [key]: !prev[key] }))
+    setFeatures((prev) => {
+      const current = prev[key]
+      // null → true → false → null
+      if (current === null || current === undefined) return { ...prev, [key]: true }
+      if (current === true) return { ...prev, [key]: false }
+      return { ...prev, [key]: null }
+    })
+  }
+
+  // Explicitly set feature override or reset to platform default
+  const setFeatureOverride = (key: string, value: boolean | null) => {
+    setFeatures((prev) => ({ ...prev, [key]: value }))
   }
 
   // Toggle badge type
@@ -225,12 +244,18 @@ export default function GamificationSettingsPage() {
       ? JSON.parse(source.gamificationConfig)
       : source.gamificationConfig
     setFeatures({
-      easterEggsEnabled: cfg.easterEggsEnabled ?? true,
-      groupChallengesEnabled: cfg.groupChallengesEnabled ?? true,
-      squadsEnabled: cfg.squadsEnabled ?? true,
-      skillTreesEnabled: cfg.skillTreesEnabled ?? true,
-      streaksEnabled: cfg.streaksEnabled ?? true,
-      collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? true,
+      xpEnabled: cfg.xpEnabled ?? null,
+      leaderboardEnabled: cfg.leaderboardEnabled ?? null,
+      badgesEnabled: cfg.badgesEnabled ?? null,
+      antiBadgesEnabled: cfg.antiBadgesEnabled ?? null,
+      easterEggsEnabled: cfg.easterEggsEnabled ?? null,
+      groupChallengesEnabled: cfg.groupChallengesEnabled ?? null,
+      squadsEnabled: cfg.squadsEnabled ?? null,
+      skillTreesEnabled: cfg.skillTreesEnabled ?? null,
+      streaksEnabled: cfg.streaksEnabled ?? null,
+      collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? null,
+      cosmeticsEnabled: cfg.cosmeticsEnabled ?? null,
+      contentLocksEnabled: cfg.contentLocksEnabled ?? null,
     })
     if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs)
     if (cfg.customBadges) setCustomBadges(cfg.customBadges)
@@ -239,12 +264,17 @@ export default function GamificationSettingsPage() {
     setSnackbar('Settings copied successfully')
   }
 
-  // Save to section
+  // Save to section — only persist explicit overrides (non-null values)
   const handleSave = async () => {
     setSaving(true)
     try {
+      // Build config with only non-null feature overrides
+      const featureOverrides: Record<string, boolean> = {}
+      for (const [key, val] of Object.entries(features)) {
+        if (val != null) featureOverrides[key] = val
+      }
       const gamificationConfig = {
-        ...features,
+        ...featureOverrides,
         streakFreezesAllowed,
         badgeConfigs,
         customBadges,
@@ -316,26 +346,52 @@ export default function GamificationSettingsPage() {
         <Card variant="outlined">
           <CardContent>
             <Typography variant="h6" gutterBottom>Feature Toggles</Typography>
-            <Stack spacing={1}>
-              {FEATURE_TOGGLES.map(({ key, label, description }) => (
-                <FormControlLabel
-                  key={key}
-                  control={
-                    <Switch
-                      checked={features[key] ?? true}
-                      onChange={() => toggleFeature(key)}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body1">{label}</Typography>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Features use the platform default unless you explicitly override them here.
+              Data processing continues even when a feature is hidden, so toggling it back on restores full accuracy.
+            </Alert>
+            <Stack spacing={2}>
+              {FEATURE_TOGGLES.map(({ key, label, description, category }) => {
+                const value = features[key]
+                const isOverridden = value != null
+                return (
+                  <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body1">{label}</Typography>
+                        <Chip label={category} size="small" variant="outlined" />
+                        {!isOverridden && (
+                          <Chip label="Platform Default" size="small" color="default" />
+                        )}
+                        {isOverridden && (
+                          <Chip
+                            label={value ? 'Enabled' : 'Disabled'}
+                            size="small"
+                            color={value ? 'success' : 'error'}
+                          />
+                        )}
+                      </Stack>
                       <Typography variant="caption" color="text.secondary">
                         {description}
                       </Typography>
                     </Box>
-                  }
-                />
-              ))}
+                    <FormControl size="small" sx={{ minWidth: 160 }}>
+                      <Select
+                        value={value === null || value === undefined ? 'default' : value ? 'enabled' : 'disabled'}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          setFeatureOverride(key, v === 'default' ? null : v === 'enabled')
+                        }}
+                        size="small"
+                      >
+                        <MenuItem value="default">Platform Default</MenuItem>
+                        <MenuItem value="enabled">Enabled</MenuItem>
+                        <MenuItem value="disabled">Disabled</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )
+              })}
             </Stack>
           </CardContent>
         </Card>

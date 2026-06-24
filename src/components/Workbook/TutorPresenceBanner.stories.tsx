@@ -2,7 +2,7 @@ import React from 'react';
 import { TutorPresenceBanner } from './TutorPresenceBanner';
 import UnitContext from '../../context/unitContext';
 
-function withUnitContext(overrides = {}) {
+function withUnitContext(overrides: Record<string, any> = {}) {
   const base = {
     unit: { id: 'unit-1' },
     workbookEnabled: true,
@@ -17,8 +17,8 @@ function withUnitContext(overrides = {}) {
     },
     ...overrides,
   };
-  return (Story) => (
-    <UnitContext.Provider value={base}>
+  return (Story: any) => (
+    <UnitContext.Provider value={base as any}>
       <Story />
     </UnitContext.Provider>
   );

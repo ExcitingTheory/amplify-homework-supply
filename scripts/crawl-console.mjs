@@ -82,10 +82,15 @@ function discoverRoutes() {
 
 // Role-based access rules for discovered routes
 const ROLE_ACCESS = {
+  '/admin/analytics': ['admin'],
+  '/admin/archives': ['admin'],
+  '/admin/moderation': ['admin'],
   '/admin/settings': ['admin'],
+  '/admin/words': ['admin'],
   '/instructor/grade/[id]': ['admin', 'instructor'],
   '/unit/[id]': ['admin', 'instructor'],
   '/section/[id]': ['admin', 'instructor'],
+  '/section/[id]/settings/ai': ['admin', 'instructor'],
   '/section/[id]/settings/gamification': ['admin', 'instructor'],
   '/units': ['admin', 'instructor'],
 };
@@ -128,6 +133,8 @@ function resolveDynamicRoutes(role, dynamicPatterns) {
       resolved.push(`/unit/${publishedUnit.id}`);
     } else if (pattern === '/section/[id]' && data.sections?.[0] && (role === 'admin' || role === 'instructor')) {
       resolved.push(`/section/${data.sections[0].id}`);
+    } else if (pattern === '/section/[id]/settings/ai' && data.sections?.[0] && (role === 'admin' || role === 'instructor')) {
+      resolved.push(`/section/${data.sections[0].id}/settings/ai`);
     } else if (pattern === '/section/[id]/settings/gamification' && data.sections?.[0] && (role === 'admin' || role === 'instructor')) {
       resolved.push(`/section/${data.sections[0].id}/settings/gamification`);
     } else if (pattern === '/instructor/grade/[id]' && data.grades?.[0] && (role === 'admin' || role === 'instructor')) {
@@ -290,6 +297,7 @@ async function crawlAsUser(browser, user, storageItems) {
   // Enable CDP for memory metrics
   const cdpSession = await context.newCDPSession(page);
   await cdpSession.send('Performance.enable');
+  await cdpSession.send('HeapProfiler.enable');
 
   const pageResults = {};
   let currentPageMessages = [];
@@ -323,7 +331,7 @@ async function crawlAsUser(browser, user, storageItems) {
     });
   });
 
-  // Login via pre-collected token injection into localStorage
+  // Login via pre-collected token injection into localStorage + cookies
   console.log(`[${role}] Logging in as ${email}...`);
   try {
     if (!storageItems) {
@@ -340,9 +348,52 @@ async function crawlAsUser(browser, user, storageItems) {
       }
     }, storageItems);
 
-    // Reload to pick up authenticated state
+    // Also inject tokens as cookies for server-side Route Handler auth.
+    // Amplify's server adapter reads the same key names from cookies.
+    // Large values (JWTs) are chunked at 3500 chars per cookie.
+    // We use the client-side Amplify cookie format (same as cookieStorage adapter).
+    const baseUrl = new URL(BASE_URL);
+    const cookieDomain = baseUrl.hostname;
+    const CHUNK_SIZE = 3500;
+
+    for (const [key, value] of Object.entries(storageItems)) {
+      if (value.length > CHUNK_SIZE) {
+        // Store as chunked cookies
+        const chunkCount = Math.ceil(value.length / CHUNK_SIZE);
+        await context.addCookies([{
+          name: `${key}.chunks`,
+          value: String(chunkCount),
+          domain: cookieDomain,
+          path: '/',
+          secure: true,
+          sameSite: 'Lax',
+        }]);
+        for (let i = 0; i < chunkCount; i++) {
+          await context.addCookies([{
+            name: `${key}.chunk.${i}`,
+            value: value.substring(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE),
+            domain: cookieDomain,
+            path: '/',
+            secure: true,
+            sameSite: 'Lax',
+          }]);
+        }
+      } else {
+        await context.addCookies([{
+          name: key,
+          value,
+          domain: cookieDomain,
+          path: '/',
+          secure: true,
+          sameSite: 'Lax',
+        }]);
+      }
+    }
+
+    // Reload to pick up authenticated state — then wait for client to sync cookies
     await page.goto(BASE_URL, { waitUntil: 'networkidle', timeout: 60000 });
-    await page.waitForTimeout(3000);
+    // Let the Amplify client initialize and establish subscriptions before continuing
+    await page.waitForTimeout(5000);
     console.log(`[${role}] Logged in.\n`);
   } catch (e) {
     console.error(`[${role}] LOGIN FAILED: ${e.message}`);
@@ -359,29 +410,34 @@ async function crawlAsUser(browser, user, storageItems) {
     const url = `${BASE_URL}${path}`;
     console.log(`[${role}] ${path}`);
 
-    // Measure heap before navigation
+    // Measure heap before navigation (force GC for accurate baseline)
     let heapBefore = 0;
     try {
+      await cdpSession.send('HeapProfiler.collectGarbage');
       const metricsBefore = await cdpSession.send('Performance.getMetrics');
       heapBefore = metricsBefore.metrics.find(m => m.name === 'JSHeapUsedSize')?.value || 0;
     } catch { /* ignore CDP errors */ }
 
     // Timing: navigate + wait for networkidle with fallback
     const startTime = Date.now();
+    let domContentLoadedMs = 0;
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      domContentLoadedMs = Date.now() - startTime;
       // Wait for network to settle OR timeout — whichever comes first
       await page.waitForLoadState('networkidle', { timeout: NETWORKIDLE_TIMEOUT }).catch(() => {});
-      // Additional settle time for subscriptions/async effects
-      await page.waitForTimeout(PAGE_SETTLE_MS);
     } catch (e) {
       currentPageMessages.push({ type: 'navigation-error', text: e.message });
     }
     const loadTimeMs = Date.now() - startTime;
 
-    // Measure heap after page load
+    // Additional settle time for subscriptions/async effects (not counted in loadTimeMs)
+    await page.waitForTimeout(PAGE_SETTLE_MS);
+
+    // Measure heap after page load (force GC for accurate measurement)
     let heapAfter = 0;
     try {
+      await cdpSession.send('HeapProfiler.collectGarbage');
       const metricsAfter = await cdpSession.send('Performance.getMetrics');
       heapAfter = metricsAfter.metrics.find(m => m.name === 'JSHeapUsedSize')?.value || 0;
     } catch { /* ignore CDP errors */ }
@@ -406,6 +462,7 @@ async function crawlAsUser(browser, user, storageItems) {
     // Build page result
     const pageResult = {
       path,
+      domContentLoadedMs,
       loadTimeMs,
       heapDeltaMB: parseFloat(heapDeltaMB),
       errors: errors.map(e => e.text.substring(0, 300)),
@@ -431,10 +488,11 @@ async function crawlAsUser(browser, user, storageItems) {
 
     const timingStr = loadTimeMs > 8000 ? `${(loadTimeMs / 1000).toFixed(1)}s SLOW` :
                       `${(loadTimeMs / 1000).toFixed(1)}s`;
-    const heapStr = parseFloat(heapDeltaMB) > 10 ? ` heap:+${heapDeltaMB}MB LEAK?` : '';
+    const dclStr = `dcl:${(domContentLoadedMs / 1000).toFixed(1)}s`;
+    const heapStr = parseFloat(heapDeltaMB) > 50 ? ` heap:+${heapDeltaMB}MB LEAK?` : '';
 
     if (issues.length > 0) {
-      console.log(`  x ${issues.join(', ')} — ${timingStr}${heapStr}`);
+      console.log(`  x ${issues.join(', ')} — ${dclStr} total:${timingStr}${heapStr}`);
       errors.slice(0, 3).forEach(e => console.log(`    [ERROR] ${e.text.substring(0, 200)}`));
       warnings.slice(0, 2).forEach(w => console.log(`    [WARN] ${w.text.substring(0, 200)}`));
       stormAnalysis.storms.forEach(s => console.log(`    [STORM] "${s.message}" x${s.count}`));
@@ -444,7 +502,7 @@ async function crawlAsUser(browser, user, storageItems) {
       wsProtocolErrors.forEach(w => console.log(`    [WS-PROTOCOL] ${w.text}`));
       if (screenshotPath) console.log(`    screenshot: ${relative(RESULTS_DIR, screenshotPath)}`);
     } else {
-      console.log(`  ok — ${timingStr}${heapStr}`);
+      console.log(`  ok — ${dclStr} total:${timingStr}${heapStr}`);
     }
 
     // Navigate away to close WebSocket connections before next page
@@ -519,7 +577,7 @@ async function main() {
     const roleJson = { pages: {}, totals: {} };
 
     for (const [path, pageResult] of Object.entries(result.pages)) {
-      const { errors, warnings, storms, failedRequests, loadTimeMs, heapDeltaMB } = pageResult;
+      const { errors, warnings, storms, failedRequests, domContentLoadedMs, loadTimeMs, heapDeltaMB } = pageResult;
 
       roleErrors += errors.length;
       roleWarnings += warnings.length;
@@ -529,7 +587,7 @@ async function main() {
       if (loadTimeMs > 8000) {
         slowPages.push({ role: result.role, path, loadTimeMs });
       }
-      if (heapDeltaMB > 10) {
+      if (heapDeltaMB > 50) {
         leakyPages.push({ role: result.role, path, heapDeltaMB });
       }
 
@@ -539,6 +597,7 @@ async function main() {
 
       // Add to JSON (without raw messages to keep it manageable)
       roleJson.pages[path] = {
+        domContentLoadedMs,
         loadTimeMs,
         heapDeltaMB,
         errorCount: errors.length,

@@ -249,10 +249,12 @@ export async function advanceSkill(
 
 /**
  * Generate a skill tree from unit content using AI.
+ * Optionally accepts sectionId to provide course progression context.
  */
 export async function generateSkillTreeFromUnit(
   unitID: string,
   cohortId?: string,
+  sectionId?: string,
 ): Promise<GenerateSkillTreeResult | null> {
   const client = getServerClient();
 
@@ -260,6 +262,7 @@ export async function generateSkillTreeFromUnit(
     return await engineGenerateSkillTree(client, {
       unitID,
       cohortId: cohortId ?? undefined,
+      sectionId: sectionId ?? undefined,
     });
   } catch (err) {
     console.error("[gamification action] generateSkillTree error:", err);
@@ -302,17 +305,51 @@ export interface GenerateCampaignResult {
 /**
  * Generate a campaign narrative (setting + rhetorical stakes) using AI.
  * Replaces the client-side `generateCampaignNarrative` from gamificationActions.ts.
+ *
+ * When sectionId is provided, fetches the course outline to create
+ * thematically relevant narratives grounded in actual course content.
  */
 export async function generateCampaignNarrative(
   title: string,
+  sectionId?: string,
 ): Promise<GenerateCampaignResult | null> {
   try {
+    // Fetch section course outline for contextual narrative generation
+    let courseContext = "";
+    if (sectionId) {
+      try {
+        const client = getServerClient() as any;
+        const { data: section } = await client.models.Section.get(
+          { id: sectionId },
+          { selectionSet: ["id", "name", "courseOutline"] },
+        );
+        if (section?.courseOutline) {
+          const outline = Array.isArray(section.courseOutline)
+            ? section.courseOutline
+            : typeof section.courseOutline === "string"
+              ? JSON.parse(section.courseOutline)
+              : [];
+          if (outline.length > 0) {
+            const chapters = outline
+              .map(
+                (e: any) =>
+                  `${e.number != null ? `${e.number}. ` : ""}${e.name}`,
+              )
+              .join(", ");
+            courseContext = `\n\nThe course covers these topics: ${chapters}. Use these as thematic inspiration for the narrative world.`;
+          }
+        }
+      } catch {
+        // Non-fatal — generate without context
+      }
+    }
+
     const systemPrompt = `You are a creative writing assistant for an educational gamification platform. 
 Given a campaign title, generate two short pieces of narrative text:
 
 1. "setting" — A vivid description of the fictional world or scenario (2-3 sentences). This frames the learning journey as an adventure.
 2. "stakes" — Rhetorical, in-world consequences if students don't succeed (2-3 sentences). These are NOT real consequences — they are motivating story tension. Think video game narrative stakes.
-
+${courseContext}
 Respond ONLY with valid JSON: {"setting": "...", "stakes": "..."}
 Do not include any other text or markdown formatting.`;
 
@@ -397,10 +434,37 @@ export async function generateChallengeRecaps(params: {
   setting?: string;
   outcome?: string;
   squads: SquadPerformance[];
+  sectionId?: string;
 }): Promise<ChallengeRecapResult[]> {
-  const { challengeId, challengeTitle, setting, outcome, squads } = params;
+  const { challengeId, challengeTitle, setting, outcome, squads, sectionId } =
+    params;
 
   if (squads.length === 0) return [];
+
+  // Fetch course context for richer narratives
+  let courseThemes = "";
+  if (sectionId) {
+    try {
+      const client = getServerClient() as any;
+      const { data: section } = await client.models.Section.get(
+        { id: sectionId },
+        { selectionSet: ["id", "name", "courseOutline"] },
+      );
+      if (section?.courseOutline) {
+        const outline = Array.isArray(section.courseOutline)
+          ? section.courseOutline
+          : typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : [];
+        if (outline.length > 0) {
+          const topics = outline.map((e: any) => e.name).join(", ");
+          courseThemes = `\nThe class is studying: ${topics}. Weave subtle references to these topics into the recaps when natural.`;
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
 
   // Sort squads by XP for ranking
   const sorted = [...squads].sort((a, b) => b.xpContributed - a.xpContributed);
@@ -417,7 +481,7 @@ RULES:
 - The "rival" squad should be called out by name
 - Winners get triumphant recaps; losers get comedic consolation
 - Never be mean-spirited — always encouraging underneath the banter
-
+${courseThemes}
 Respond ONLY with valid JSON array: [{"squadId": "...", "recap": "...", "performance": "top|middle|bottom"}]`;
 
   const squadSummary = sorted

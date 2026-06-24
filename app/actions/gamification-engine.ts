@@ -2045,9 +2045,9 @@ function extractTextFromLexicalJSON(data: any): string {
 
 export async function engineGenerateSkillTree(
   client: any,
-  args: { unitID: string; cohortId?: string },
+  args: { unitID: string; cohortId?: string; sectionId?: string },
 ) {
-  const { unitID, cohortId } = args;
+  const { unitID, cohortId, sectionId } = args;
 
   const { data: unit } = await client.models.Unit.get({ id: unitID });
   if (!unit) throw new Error(`Unit not found: ${unitID}`);
@@ -2055,6 +2055,40 @@ export async function engineGenerateSkillTree(
   const lexicalData =
     typeof unit.data === "string" ? JSON.parse(unit.data) : unit.data;
   const unitText = extractTextFromLexicalJSON(lexicalData);
+
+  // Fetch course outline for progression context
+  let courseProgressionHint = "";
+  if (sectionId) {
+    try {
+      const { data: section } = await client.models.Section.get(
+        { id: sectionId },
+        { selectionSet: ["id", "courseOutline"] },
+      );
+      if (section?.courseOutline) {
+        const outline = Array.isArray(section.courseOutline)
+          ? section.courseOutline
+          : typeof section.courseOutline === "string"
+            ? JSON.parse(section.courseOutline)
+            : [];
+        if (outline.length > 0) {
+          const currentIdx = outline.findIndex((e: any) => e.unitId === unitID);
+          if (currentIdx >= 0) {
+            const neighbors: string[] = [];
+            if (currentIdx > 0)
+              neighbors.push(
+                `Previous unit: "${outline[currentIdx - 1].name}"`,
+              );
+            if (currentIdx < outline.length - 1)
+              neighbors.push(`Next unit: "${outline[currentIdx + 1].name}"`);
+            if (neighbors.length > 0)
+              courseProgressionHint = `\nCourse progression: ${neighbors.join(". ")}. Consider prerequisite skills from prior units and skills that prepare students for the next unit.`;
+          }
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
 
   // Fetch vocabulary
   const { data: unitWords } = await client.models.UnitWord.list({
@@ -2113,6 +2147,7 @@ export async function engineGenerateSkillTree(
   promptParts.push(`\n## Instructions
 Analyze the above lesson content and produce a skill tree with 4–10 skills.
 Each skill should be a discrete, assessable learning outcome with prerequisites.
+${courseProgressionHint}
 Return JSON: { "skills": [{ "title": "string", "description": "string", "prerequisites": ["title"], "xpReward": number }] }`);
 
   const content = await chatCompletion({

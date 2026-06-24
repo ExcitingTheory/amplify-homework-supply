@@ -38,6 +38,7 @@ const config: StorybookConfig = {
   env: (config) => ({
     ...config,
     NODE_ENV: "production",
+    STORYBOOK_BASE_PATH: process.env.STORYBOOK_BASE_PATH || "/",
   }),
 
   async viteFinal(config) {
@@ -118,6 +119,39 @@ const config: StorybookConfig = {
           source.endsWith("/plugins/CollaborationPlugin.tsx")
         ) {
           return collabMockPath;
+        }
+        return null;
+      },
+    });
+
+    // Mock all server actions (app/actions/*) to prevent OPENAI_API_KEY errors
+    const serverActionsMockPath = path.resolve(
+      __dirname,
+      "./__mocks__/server-actions.js",
+    );
+    config.plugins.push({
+      name: "mock-server-actions",
+      enforce: "pre",
+      resolveId(source, importer) {
+        if (!importer) return null;
+        // Match any import that resolves to app/actions/
+        if (
+          source.includes("app/actions/") ||
+          source.includes("/actions/drill") ||
+          source.includes("/actions/moderate") ||
+          source.includes("/actions/grading") ||
+          source.includes("/actions/generate") ||
+          source.includes("/actions/chat") ||
+          source.includes("/actions/feedback") ||
+          source.includes("/actions/jobs") ||
+          source.includes("/actions/section") ||
+          source.includes("/actions/gamification") ||
+          source.includes("/actions/embeddings") ||
+          source.includes("/actions/storage") ||
+          source.includes("/actions/peerReview") ||
+          source.includes("/actions/moderation-notify")
+        ) {
+          return serverActionsMockPath;
         }
         return null;
       },
@@ -505,6 +539,7 @@ const config: StorybookConfig = {
       "@emotion/react",
       "@emotion/styled",
       "react-pdf",
+      "pdfjs-dist/build/pdf.worker.mjs",
       "framer-motion",
       "@ai-sdk/react",
     );

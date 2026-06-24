@@ -97,7 +97,7 @@ export default function WordListMaintenancePage() {
       let nextToken: string | null = null;
 
       do {
-        const { data, nextToken: token } = await client.models.Word.list({
+        const { data, nextToken: token }: { data: any; nextToken: string | null } = await client.models.Word.list({
           limit: 500,
           nextToken,
           selectionSet: [

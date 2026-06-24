@@ -550,6 +550,62 @@ function Settings() {
           </Typography>
         </Card>
 
+        {/* Profile Visibility */}
+        <Card
+          sx={{
+            padding: "2rem 1rem",
+            margin: "1rem auto",
+            height: "fit-content",
+            maxWidth: "60rem",
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            Profile Visibility
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Choose what others can see on your profile page.
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings?.showBadgesOnProfile !== false}
+                onChange={(e) => {
+                  if (updateSettings) {
+                    updateSettings({ showBadgesOnProfile: e.target.checked });
+                  }
+                }}
+              />
+            }
+            label="Show badges on profile"
+          />
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ ml: 4, mb: 1 }}
+          >
+            Display your earned achievement badges on your public profile.
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings?.showAntiBadgesOnProfile === true}
+                onChange={(e) => {
+                  if (updateSettings) {
+                    updateSettings({
+                      showAntiBadgesOnProfile: e.target.checked,
+                    });
+                  }
+                }}
+              />
+            }
+            label="Show anti-badges on profile"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
+            Display anti-badges on your profile. These are humorous, not
+            punitive — show them off if you want!
+          </Typography>
+        </Card>
+
         {/* Cosmetic Customization */}
         <Card
           sx={{
@@ -565,7 +621,36 @@ function Settings() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {t("settings.customization.description")}
           </Typography>
-          <CosmeticSelector level={level?.level || 1} />
+          <CosmeticSelector
+            level={level?.level || 1}
+            selectedThemeId={
+              settings?.profileThemeId || settings?.editorTheme || "default"
+            }
+            onThemeSelect={(themeId) => {
+              if (updateSettings) {
+                updateSettings({ profileThemeId: themeId });
+              }
+            }}
+            customThemePalette={
+              settings?.customThemePalette
+                ? typeof settings.customThemePalette === "string"
+                  ? JSON.parse(settings.customThemePalette)
+                  : settings.customThemePalette
+                : null
+            }
+            onCustomPaletteSave={(palette) => {
+              if (updateSettings) {
+                updateSettings({
+                  profileThemeId: "custom",
+                  customThemePalette: JSON.stringify(palette),
+                });
+              }
+            }}
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Your selected theme will also be applied to your public profile
+            page.
+          </Typography>
         </Card>
 
         {/* Bot Avatar Customization */}
