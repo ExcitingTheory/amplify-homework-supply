@@ -23,7 +23,7 @@ import AddIcon from '@mui/icons-material/Add'
 
 import { NarrativeReader } from '../Editor3/NarrativeReader'
 import { SquadPostEditor } from './SquadPostEditor'
-import { DiceBearAvatar } from './DiceBearAvatar'
+import { AvatarDisplay } from './AvatarDisplay'
 
 // ============================================================================
 // Types
@@ -122,10 +122,9 @@ export function SquadPostFeed({
             <CardContent sx={{ pb: '16px !important' }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <DiceBearAvatar
+                  <AvatarDisplay
                     seed={post.authorId}
                     size={36}
-                    label={authorDisplayNames[post.authorId] || post.authorId}
                   />
                   <Box>
                     <Typography variant="h6" component="h3" gutterBottom>

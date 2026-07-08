@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { SkillTreePopupButton } from './SkillTreePopupButton';
 
 const meta: Meta<typeof SkillTreePopupButton> = {
-  title: '🎮 Gamification/SkillTreePopupButton',
+  title: '� Gamification/Skill Tree/Skill Tree Popup Button',
   component: SkillTreePopupButton,
   parameters: { layout: 'centered' },
 };

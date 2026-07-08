@@ -22,12 +22,17 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import CircularProgress from '@mui/material/CircularProgress'
+import Autocomplete from '@mui/material/Autocomplete'
+import Checkbox from '@mui/material/Checkbox'
 import SaveIcon from '@mui/icons-material/Save'
 import TimerIcon from '@mui/icons-material/Timer'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import ImageIcon from '@mui/icons-material/Image'
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import { generateImage } from '../../app/actions/generate'
 import getCachedUrl from '../utils/getCachedUrl'
+import { calculateFeasibility } from '../utils/chapterFeasibility'
 
 // ============================================================================
 // Types
@@ -44,6 +49,7 @@ export interface GroupChallengeEditorData {
   systemPromptSeed?: string
   active: boolean
   featuredImage?: string
+  linkedUnitIds?: string[]
 }
 
 export interface GroupChallengeEditorProps {
@@ -53,6 +59,8 @@ export interface GroupChallengeEditorProps {
   onSubmit: (data: GroupChallengeEditorData) => void
   /** Disable during submission */
   submitting?: boolean
+  /** Available units for linking (id + name pairs) */
+  availableUnits?: Array<{ id: string; name: string }>
 }
 
 // ============================================================================
@@ -78,6 +86,7 @@ export function GroupChallengeEditor({
   initialData,
   onSubmit,
   submitting = false,
+  availableUnits = [],
 }: GroupChallengeEditorProps) {
   const [title, setTitle] = useState(initialData?.title || '')
   const [targetXP, setTargetXP] = useState(initialData?.targetXP ?? 1000)
@@ -93,6 +102,7 @@ export function GroupChallengeEditor({
   const [featuredImageUrl, setFeaturedImageUrl] = useState('')
   const [imagePrompt, setImagePrompt] = useState('')
   const [imageGenerating, setImageGenerating] = useState(false)
+  const [linkedUnitIds, setLinkedUnitIds] = useState<string[]>(initialData?.linkedUnitIds || [])
 
   const currentXP = initialData?.currentXP ?? 0
   const progress = targetXP > 0 ? Math.min(100, (currentXP / targetXP) * 100) : 0
@@ -147,6 +157,7 @@ export function GroupChallengeEditor({
       systemPromptSeed: systemPromptSeed || undefined,
       active,
       featuredImage: featuredImage || undefined,
+      linkedUnitIds: linkedUnitIds.length > 0 ? linkedUnitIds : undefined,
     })
   }
 
@@ -281,6 +292,60 @@ export function GroupChallengeEditor({
             />
 
             {/* Featured Image Generation */}
+            <Divider>
+              <Chip label="Linked Units (Scoped XP)" icon={<EmojiEventsIcon />} />
+            </Divider>
+
+            {availableUnits.length > 0 && (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  Only XP earned from the selected units will count toward this chapter.
+                  Leave empty to count all XP in the section.
+                </Typography>
+                <Autocomplete
+                  multiple
+                  options={availableUnits}
+                  getOptionLabel={(opt) => opt.name}
+                  value={availableUnits.filter((u) => linkedUnitIds.includes(u.id))}
+                  onChange={(_, newValue) => setLinkedUnitIds(newValue.map((v) => v.id))}
+                  disableCloseOnSelect
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props} key={option.id}>
+                      <Checkbox
+                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                        checkedIcon={<CheckBoxIcon fontSize="small" />}
+                        checked={selected}
+                        sx={{ mr: 1 }}
+                      />
+                      {option.name}
+                    </li>
+                  )}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Linked Units" placeholder="Select units..." />
+                  )}
+                />
+                {linkedUnitIds.length > 0 && targetXP > 0 && (() => {
+                  const feasibility = calculateFeasibility(targetXP, linkedUnitIds.length, { bonusMultiplier })
+                  return (
+                    <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: feasibility.achievableWithoutDrills ? 'success.50' : feasibility.achievableWithinWeek ? 'warning.50' : 'error.50', border: '1px solid', borderColor: feasibility.achievableWithoutDrills ? 'success.main' : feasibility.achievableWithinWeek ? 'warning.main' : 'error.main' }}>
+                      <Typography variant="caption" fontWeight={600}>
+                        Feasibility: {feasibility.verdict.toUpperCase()}
+                      </Typography>
+                      <Typography variant="caption" display="block" color="text.secondary">
+                        One-time XP from linked units: ~{feasibility.oneTimeXPConservative}–{feasibility.oneTimeXPOptimistic} XP
+                        {feasibility.drillSessionsNeeded > 0 && ` · ~${feasibility.drillSessionsNeeded} extra drill sessions needed per student`}
+                      </Typography>
+                      {feasibility.warning && (
+                        <Typography variant="caption" color="error.main" display="block">
+                          {feasibility.warning}
+                        </Typography>
+                      )}
+                    </Box>
+                  )
+                })()}
+              </>
+            )}
+
             <Divider>
               <Chip label="Featured Image" icon={<ImageIcon />} />
             </Divider>

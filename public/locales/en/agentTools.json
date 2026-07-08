@@ -1,0 +1,46 @@
+{
+  "semanticSearch": {
+    "noIdentity": "No search index available — unit owner identity not resolved.",
+    "noIndex": "No search index available for the current context.",
+    "error": "Search failed. Try a different query."
+  },
+  "readFileContent": {
+    "noContent": "No extracted content available for this file.",
+    "error": "Failed to read file content."
+  },
+  "studentProgress": {
+    "noUnit": "No unit specified and no current unit context.",
+    "noGrades": "No grade records found for this unit.",
+    "error": "Failed to load progress data."
+  },
+  "courseOutline": {
+    "noSection": "No section context available.",
+    "noOutline": "No course outline available. Units may not have been published yet.",
+    "error": "Failed to load course outline."
+  },
+  "recallMemory": {
+    "noHistory": "No conversation history found for this context.",
+    "noMemory": "No conversation memory found.",
+    "error": "Failed to recall memory."
+  },
+  "updateMemory": {
+    "error": "Failed to update memory."
+  },
+  "recallConversations": {
+    "noHistory": "No past conversation history found.",
+    "noSummaries": "No conversation summaries available yet.",
+    "error": "Failed to recall past conversations."
+  },
+  "sectionAnalytics": {
+    "instructorOnly": "This tool is only available to instructors.",
+    "noSection": "No section specified and no current section context.",
+    "noAssignments": "No assignments found for this section.",
+    "noGrades": "No student grades recorded yet.",
+    "error": "Failed to load section analytics."
+  },
+  "studentList": {
+    "instructorOnly": "This tool is only available to instructors.",
+    "noSection": "No section specified.",
+    "error": "Failed to load student list."
+  }
+}

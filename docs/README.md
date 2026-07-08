@@ -87,10 +87,9 @@ No Lambda functions are called from UI code. Retained Lambdas (streakResetCron, 
 
 ## Feature Documentation
 
-- **[Custom AI Block](CUSTOM_AI_BLOCK.md)** — Instructor-customizable AI-graded Lexical editor block with security guardrails
+- **[Implemented Features](FEATURES.md)** — Custom themes, notifications, custom AI block, agent architecture, instructor visibility, soft delete, security hardening, celebration animations
 - **[Gamification](GAMIFICATION.md)** — XP, badges, streaks, boss battles, skill trees, content locks, squads
 - **[Layout Suggestions](LAYOUT_SUGGESTIONS.md)** — Data-driven block autocomplete from instructor usage patterns
-- **[Notification System](NOTIFICATION_SYSTEM.md)** — Real-time notifications with category filtering, badge counts, and Lambda utilities
 - **[Offline Experience](OFFLINE_EXPERIENCE.md)** — PWA with Serwist service worker caching; offline data planned
 
 **Optimistic Concurrency**: All contexts use `client.models.X.observeQuery()` with `_version` map refs and optimistic `_version+1` bumps before saves. No manual `onCreate`/`onUpdate`/`onDelete` subscriptions remain.
@@ -135,9 +134,11 @@ Server: `amplify/functions/yjsSync/botObserver.ts` handles bot streaming via Ope
 | Plan | Status | What Remains |
 |------|--------|--------------|
 | [Admin Bot](ADMIN_BOT_PLAN.md) | Not started | Atlas admin AI assistant — schema, Lambda, and UI |
-| [Custom Themes](CUSTOM_THEMES_PLAN.md) | Not started | Cosmetic palette swap for Midnight/Forest/Sunset/Aurora |
 | [Audio Processing](RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md) | Not started | ML noise suppression, filter panel, versioned takes |
 | [Unified Undo/Redo](UNIFIED_UNDO_REDO_PLAN.md) | Not started | Y.UndoManager across Editor3, DictionaryEditor2, QuestionEditor2, Workbook |
+| [Search Architecture](SEARCH_ARCHITECTURE.md) | Partial | S3 bundles + IVF implemented; global search bar not built |
+| [Learner Dashboard](LEARNER_DASHBOARD_UX_PLAN.md) | Mostly done | Phase 6.4 card completion check animation remaining |
+| [Course Context](COURSE_CONTEXT_SUMMARY_PLAN.md) | Schema done | Integration testing remaining |
 
 ## Support & Contact
 

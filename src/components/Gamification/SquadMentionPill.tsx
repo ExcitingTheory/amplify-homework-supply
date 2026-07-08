@@ -13,6 +13,7 @@ import Chip from '@mui/material/Chip'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
+import { sanitizeSvg } from '../../utils/sanitizeHtml'
 
 export interface SquadMentionPillProps {
   squadId: string
@@ -70,7 +71,7 @@ export function SquadMentionPill({
     >
       <Box
         component="span"
-        dangerouslySetInnerHTML={{ __html: crestSvg }}
+        dangerouslySetInnerHTML={{ __html: sanitizeSvg(crestSvg) }}
         sx={{ display: 'flex', width: '100%', height: '100%' }}
       />
     </Avatar>

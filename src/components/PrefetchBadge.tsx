@@ -13,12 +13,35 @@ export interface PrefetchBadgeProps {
   client?: any;
   /** Current username — needed for student memory prefetch */
   username?: string;
+  /** Optional section context to cache for offline navigation */
+  section?: {
+    id: string;
+    name: string;
+    description?: string;
+    code?: string;
+    owner?: string;
+    instructor?: string;
+    featuredImage?: string;
+    identityId?: string;
+    status?: string;
+  };
+  /** Optional assignment context to cache for offline navigation */
+  assignment?: {
+    id: string;
+    unitID: string;
+    sectionID: string;
+    unitName?: string;
+    dueDate?: string;
+    status?: string;
+    featuredImage?: string;
+    identityId?: string;
+  };
 }
 
 /**
  * Per-assignment badge: "Available offline ✓" / "Download for offline" / "Downloading…"
  */
-export default function PrefetchBadge({ unitId, client, username }: PrefetchBadgeProps) {
+export default function PrefetchBadge({ unitId, client, username, section, assignment }: PrefetchBadgeProps) {
   const [status, setStatus] = useState<'unknown' | 'none' | 'downloading' | 'complete' | 'error'>('unknown');
   const [progress, setProgress] = useState(0);
 
@@ -57,11 +80,11 @@ export default function PrefetchBadge({ unitId, client, username }: PrefetchBadg
         onProgress: (s) => setProgress(s.progress),
         onComplete: () => setStatus('complete'),
         onError: () => setStatus('error'),
-      });
+      }, { section, assignment });
     } catch {
       setStatus('error');
     }
-  }, [client, unitId, username]);
+  }, [client, unitId, username, section, assignment]);
 
   if (status === 'unknown') return null;
 

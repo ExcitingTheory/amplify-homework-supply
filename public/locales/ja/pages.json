@@ -148,5 +148,14 @@
     "timerInstructions": "これは時間制限のある練習問題です。スタートを押してタイマーを開始し、問題に答えてください。",
     "start": "開始",
     "loading": "読み込み中…"
+  },
+  "leaderboard": {
+    "title": "ランキング",
+    "heading": "総合ランキング",
+    "xpMode": "XP",
+    "completionMode": "完了",
+    "fastestMode": "最速",
+    "squadsMode": "チーム",
+    "empty": "まだランキングデータがありません。課題を完了してXPを獲得しましょう！"
   }
 }

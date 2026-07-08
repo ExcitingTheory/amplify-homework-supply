@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { fn } from 'storybook/test'
+import { fn, expect, userEvent, within } from 'storybook/test'
 import { SkillDetailPanel, type UnitProgress } from './SkillDetailPanel'
 import type { SkillNodeData } from './SkillTree'
 
@@ -41,6 +41,13 @@ export const InProgress: Story = {
     allSkills,
     totalXP: 340,
   },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The advance button text depends on skill status: IN_PROGRESS → "Mark Mastered" (or similar)
+    const advanceBtn = await canvas.findByRole('button', { name: /Mastered|Start|Advance|Mark/i })
+    await userEvent.click(advanceBtn)
+    await expect(args.onAdvance).toHaveBeenCalledWith('skill-1', expect.any(String))
+  },
 }
 
 export const Mastered: Story = {
@@ -59,5 +66,15 @@ export const Locked: Story = {
     onAdvance: fn(),
     onClose: fn(),
     allSkills,
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Advance button should not be visible for LOCKED skills
+    const advanceBtns = canvas.queryAllByRole('button', { name: /Mastered|Start|Advance/i })
+    await expect(advanceBtns).toHaveLength(0)
+    // Close button should be present
+    const closeBtn = await canvas.findByRole('button', { name: /Close/i })
+    await userEvent.click(closeBtn)
+    await expect(args.onClose).toHaveBeenCalled()
   },
 }

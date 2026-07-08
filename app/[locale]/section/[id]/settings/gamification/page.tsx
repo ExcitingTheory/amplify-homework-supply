@@ -279,11 +279,20 @@ export default function GamificationSettingsPage() {
         badgeConfigs,
         customBadges,
       }
-      await (client.models as any).Section.update({
+      // Write both the nested gamificationConfig AND the top-level toggle fields
+      // that the gamification engine reads (badgesEnabled, antiBadgesEnabled,
+      // leaderboardEnabled). This keeps both representations in sync.
+      const updatePayload: Record<string, any> = {
         id: sectionId,
         gamificationConfig,
         _version: (currentSection as any)?._version,
-      })
+      }
+      // Sync top-level fields the engine checks directly
+      if (features.badgesEnabled != null) updatePayload.badgesEnabled = features.badgesEnabled
+      if (features.antiBadgesEnabled != null) updatePayload.antiBadgesEnabled = features.antiBadgesEnabled
+      if (features.leaderboardEnabled != null) updatePayload.leaderboardEnabled = features.leaderboardEnabled
+
+      await (client.models as any).Section.update(updatePayload)
       setSnackbar('Settings saved!')
     } catch (err) {
       console.error('[GamificationSettings] Save error:', err)

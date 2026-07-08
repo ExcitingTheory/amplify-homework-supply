@@ -30,8 +30,8 @@
  *                                             Receives (missingLines) array. Parent or RS3 handles TTS.
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   AppBar,
@@ -49,7 +49,7 @@ import {
   Divider,
   Alert,
   Slide,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Close as CloseIcon,
   Save as SaveIcon,
@@ -58,9 +58,10 @@ import {
   Warning as WarningIcon,
   MusicNote as AudioIcon,
   RecordVoiceOver as TtsIcon,
-} from '@mui/icons-material';
-import { LinearProgress, Skeleton } from '@mui/material';
-import RecordingStudio3 from './RecordingStudio3';
+} from "@mui/icons-material";
+import { LinearProgress, Skeleton } from "@mui/material";
+import RecordingStudio3 from "./RecordingStudio3";
+import ConfirmDialog from "./ConfirmDialog";
 
 // Slide-up transition for fullscreen dialog
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -75,27 +76,37 @@ const Transition = React.forwardRef(function Transition(props, ref) {
  * @returns {{ totalTakes: number, linesSummary: Array, speakers: string[], hasUnsaved: boolean }}
  */
 function extractSaveSummary(scriptData, preset) {
-  const speakers = Object.values(scriptData.speakers || {}).map(s => s.name);
+  const speakers = Object.values(scriptData.speakers || {}).map((s) => s.name);
   const linesSummary = (scriptData.dialogue || []).map((line) => {
     const speaker = scriptData.speakers[line.speaker];
-    const activeTake = line.activeTakeIndex !== null && line.takes?.[line.activeTakeIndex];
+    const activeTake =
+      line.activeTakeIndex !== null && line.takes?.[line.activeTakeIndex];
     return {
       id: line.id,
-      speaker: speaker?.name || 'Unknown',
+      speaker: speaker?.name || "Unknown",
       text: line.text,
       hasTake: !!activeTake,
-      takeType: activeTake?.type || null,      // 'human' | 'tts' | null
+      takeType: activeTake?.type || null, // 'human' | 'tts' | null
       hasAudioPath: !!activeTake?.audioPath,
       totalTakes: line.takes?.length || 0,
     };
   });
 
   const totalTakes = linesSummary.reduce((sum, l) => sum + l.totalTakes, 0);
-  const linesWithActiveTake = linesSummary.filter(l => l.hasTake).length;
-  const linesWithoutTake = linesSummary.filter(l => !l.hasTake).length;
-  const linesWithTextButNoTake = linesSummary.filter(l => !l.hasTake && l.text);
+  const linesWithActiveTake = linesSummary.filter((l) => l.hasTake).length;
+  const linesWithoutTake = linesSummary.filter((l) => !l.hasTake).length;
+  const linesWithTextButNoTake = linesSummary.filter(
+    (l) => !l.hasTake && l.text,
+  );
 
-  return { totalTakes, linesSummary, speakers, linesWithActiveTake, linesWithoutTake, linesWithTextButNoTake };
+  return {
+    totalTakes,
+    linesSummary,
+    speakers,
+    linesWithActiveTake,
+    linesWithoutTake,
+    linesWithTextButNoTake,
+  };
 }
 
 /**
@@ -112,20 +123,28 @@ function extractSaveSummary(scriptData, preset) {
  *   - Full scriptData for File record (application/json)
  */
 function buildSavePayload(scriptData, preset) {
-  if (preset === 'word') {
-    const phraseLines = scriptData.dialogue.filter(d => d.speaker === 'phrase_track');
-    const defLines = scriptData.dialogue.filter(d => d.speaker === 'definition_track');
+  if (preset === "word") {
+    const phraseLines = scriptData.dialogue.filter(
+      (d) => d.speaker === "phrase_track",
+    );
+    const defLines = scriptData.dialogue.filter(
+      (d) => d.speaker === "definition_track",
+    );
 
     const extractActivePaths = (lines) =>
       lines
-        .filter(l => l.activeTakeIndex !== null && l.takes?.[l.activeTakeIndex]?.audioPath)
-        .map(l => ({
+        .filter(
+          (l) =>
+            l.activeTakeIndex !== null &&
+            l.takes?.[l.activeTakeIndex]?.audioPath,
+        )
+        .map((l) => ({
           audioPath: l.takes[l.activeTakeIndex].audioPath,
           waveformData: l.takes[l.activeTakeIndex].waveformData,
         }));
 
     return {
-      type: 'word',
+      type: "word",
       phraseAudio: extractActivePaths(phraseLines),
       definitionAudio: extractActivePaths(defLines),
       scriptData,
@@ -134,8 +153,11 @@ function buildSavePayload(scriptData, preset) {
 
   // conversation or question
   const audioFiles = scriptData.dialogue
-    .filter(l => l.activeTakeIndex !== null && l.takes?.[l.activeTakeIndex]?.audioPath)
-    .map(l => {
+    .filter(
+      (l) =>
+        l.activeTakeIndex !== null && l.takes?.[l.activeTakeIndex]?.audioPath,
+    )
+    .map((l) => {
       const take = l.takes[l.activeTakeIndex];
       const speaker = scriptData.speakers[l.speaker];
       return {
@@ -167,11 +189,12 @@ export default function RecordingStudio3Modal({
   identityId,
   readOnly = false,
 }) {
-  const t = useTranslations('components');
+  const t = useTranslations("components");
 
   // Track latest script state from RS3's reactive callbacks
   const scriptDataRef = useRef(initialScriptData);
   const [hasChanges, setHasChanges] = useState(false);
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
   // Confirmation preview state
   const [showPreview, setShowPreview] = useState(false);
@@ -207,15 +230,18 @@ export default function RecordingStudio3Modal({
   }, []);
 
   // Granular update callback — used for tracking recording state
-  const handleUpdateData = useCallback(({ type, payload, scriptData: newData }) => {
-    scriptDataRef.current = newData;
-    setHasChanges(true);
+  const handleUpdateData = useCallback(
+    ({ type, payload, scriptData: newData }) => {
+      scriptDataRef.current = newData;
+      setHasChanges(true);
 
-    // Track recording state for AppBar indicator
-    if (type === 'TAKE_ADDED') {
-      setIsRecording(false);
-    }
-  }, []);
+      // Track recording state for AppBar indicator
+      if (type === "TAKE_ADDED") {
+        setIsRecording(false);
+      }
+    },
+    [],
+  );
 
   // "Done" button → open confirmation preview
   const handleDoneClick = useCallback(() => {
@@ -232,7 +258,7 @@ export default function RecordingStudio3Modal({
       await onSave(payload);
       onClose();
     } catch (error) {
-      console.error('RecordingStudio3Modal save error:', error);
+      console.error("RecordingStudio3Modal save error:", error);
       setSaving(false);
     }
   }, [preset, onSave, onClose]);
@@ -249,15 +275,18 @@ export default function RecordingStudio3Modal({
 
     // Signal to RS3 via ref to trigger batch generation
     if (rs3Ref.current?.triggerBatchTTS) {
-      rs3Ref.current.triggerBatchTTS().then(() => {
-        setGeneratingTTS(false);
-        // Re-open preview with updated data
-        const summary = extractSaveSummary(scriptDataRef.current, preset);
-        setSaveSummary(summary);
-        setShowPreview(true);
-      }).catch(() => {
-        setGeneratingTTS(false);
-      });
+      rs3Ref.current
+        .triggerBatchTTS()
+        .then(() => {
+          setGeneratingTTS(false);
+          // Re-open preview with updated data
+          const summary = extractSaveSummary(scriptDataRef.current, preset);
+          setSaveSummary(summary);
+          setShowPreview(true);
+        })
+        .catch(() => {
+          setGeneratingTTS(false);
+        });
     } else {
       // Fallback: just go back to studio for manual batch TTS
       setGeneratingTTS(false);
@@ -267,213 +296,248 @@ export default function RecordingStudio3Modal({
   // Cancel with unsaved-changes guard
   const handleCancel = useCallback(() => {
     if (hasChanges) {
-      // Browser-level confirm for now — can upgrade to MUI Dialog later
-      const confirmed = window.confirm(t('recordingStudio3Modal.unsavedChanges'));
-      if (!confirmed) return;
+      setConfirmCancelOpen(true);
+      return;
     }
     onClose();
-  }, [hasChanges, onClose, t]);
+  }, [hasChanges, onClose]);
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleCancel}
-      fullScreen
-      TransitionComponent={Transition}
-    >
-      {/* AppBar with title, recording indicator, and action buttons */}
-      <AppBar sx={{ position: 'relative' }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={handleCancel}
-            aria-label={t('common.close')}
-          >
-            <CloseIcon />
-          </IconButton>
+    <>
+      <Dialog
+        open={open}
+        onClose={handleCancel}
+        fullScreen
+        TransitionComponent={Transition}
+      >
+        {/* AppBar with title, recording indicator, and action buttons */}
+        <AppBar sx={{ position: "relative" }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleCancel}
+              aria-label={t("common.close")}
+            >
+              <CloseIcon />
+            </IconButton>
 
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            {title}
-          </Typography>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              {title}
+            </Typography>
 
-          {isRecording && (
-            <Chip
-              icon={<WaveformIcon />}
-              label={t('recordingStudio3Modal.recording')}
-              color="error"
-              size="small"
-              sx={{ mr: 2 }}
+            {isRecording && (
+              <Chip
+                icon={<WaveformIcon />}
+                label={t("recordingStudio3Modal.recording")}
+                color="error"
+                size="small"
+                sx={{ mr: 2 }}
+              />
+            )}
+
+            <Button
+              autoFocus
+              color="inherit"
+              startIcon={<SaveIcon />}
+              onClick={handleDoneClick}
+              disabled={readOnly || saving}
+            >
+              {t("recordingStudio3Modal.done")}
+            </Button>
+          </Toolbar>
+        </AppBar>
+
+        {/* RS3 fills the remaining viewport */}
+        {!showPreview ? (
+          <Box sx={{ flex: 1, overflow: "hidden" }}>
+            <RecordingStudio3
+              ref={rs3Ref}
+              scriptData={initialScriptData}
+              onScriptChange={handleScriptChange}
+              onUpdateData={handleUpdateData}
+              lockedTracks={lockedTracks}
+              gradeId={gradeId}
+              nodeKey={nodeKey}
+              identityId={identityId}
+              readOnly={readOnly}
             />
-          )}
-
-          <Button
-            autoFocus
-            color="inherit"
-            startIcon={<SaveIcon />}
-            onClick={handleDoneClick}
-            disabled={readOnly || saving}
+          </Box>
+        ) : (
+          /* Confirmation preview panel */
+          <Box
+            sx={{ flex: 1, overflow: "auto", p: 3, maxWidth: 800, mx: "auto" }}
           >
-            {t('recordingStudio3Modal.done')}
-          </Button>
-        </Toolbar>
-      </AppBar>
+            <Typography variant="h5" gutterBottom>
+              {t("recordingStudio3Modal.confirmTitle")}
+            </Typography>
 
-      {/* RS3 fills the remaining viewport */}
-      {!showPreview ? (
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
-          <RecordingStudio3
-            ref={rs3Ref}
-            scriptData={initialScriptData}
-            onScriptChange={handleScriptChange}
-            onUpdateData={handleUpdateData}
-            lockedTracks={lockedTracks}
-            gradeId={gradeId}
-            nodeKey={nodeKey}
-            identityId={identityId}
-            readOnly={readOnly}
-          />
-        </Box>
-      ) : (
-        /* Confirmation preview panel */
-        <Box sx={{ flex: 1, overflow: 'auto', p: 3, maxWidth: 800, mx: 'auto' }}>
-          <Typography variant="h5" gutterBottom>
-            {t('recordingStudio3Modal.confirmTitle')}
-          </Typography>
-
-          {saveSummary && (
-            <Stack spacing={2}>
-              {/* Summary stats */}
-              <Stack direction="row" spacing={2}>
-                <Chip label={`${saveSummary.speakers.length} speakers`} />
-                <Chip label={`${saveSummary.totalTakes} total takes`} />
-                <Chip
-                  label={`${saveSummary.linesWithActiveTake} lines with audio`}
-                  color="success"
-                  variant="outlined"
-                />
-                {saveSummary.linesWithoutTake > 0 && (
+            {saveSummary && (
+              <Stack spacing={2}>
+                {/* Summary stats */}
+                <Stack direction="row" spacing={2}>
+                  <Chip label={`${saveSummary.speakers.length} speakers`} />
+                  <Chip label={`${saveSummary.totalTakes} total takes`} />
                   <Chip
-                    label={`${saveSummary.linesWithoutTake} lines without audio`}
-                    color="warning"
+                    label={`${saveSummary.linesWithActiveTake} lines with audio`}
+                    color="success"
                     variant="outlined"
                   />
+                  {saveSummary.linesWithoutTake > 0 && (
+                    <Chip
+                      label={`${saveSummary.linesWithoutTake} lines without audio`}
+                      color="warning"
+                      variant="outlined"
+                    />
+                  )}
+                </Stack>
+
+                {/* Warning for lines without takes — with Generate TTS offer */}
+                {saveSummary.linesWithoutTake > 0 && (
+                  <Alert
+                    severity="warning"
+                    icon={<WarningIcon />}
+                    action={
+                      saveSummary.linesWithTextButNoTake.length > 0 && (
+                        <Button
+                          color="warning"
+                          size="small"
+                          startIcon={generatingTTS ? null : <TtsIcon />}
+                          onClick={handleGenerateMissingTTS}
+                          disabled={generatingTTS || saving}
+                        >
+                          {generatingTTS
+                            ? t("recordingStudio3Modal.generatingTts")
+                            : t("recordingStudio3Modal.generateMissingTts", {
+                                count:
+                                  saveSummary.linesWithTextButNoTake.length,
+                              })}
+                        </Button>
+                      )
+                    }
+                  >
+                    {t("recordingStudio3Modal.missingTakesWarning", {
+                      count: saveSummary.linesWithoutTake,
+                    })}
+                  </Alert>
                 )}
+
+                {/* TTS generation progress */}
+                {generatingTTS && (
+                  <Box sx={{ width: "100%" }}>
+                    <LinearProgress />
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 0.5 }}
+                    >
+                      {t("recordingStudio3Modal.generatingTtsProgress")}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Per-line breakdown */}
+                <List>
+                  {saveSummary.linesSummary.map((line, index) => (
+                    <React.Fragment key={line.id}>
+                      <ListItem>
+                        <ListItemIcon>
+                          {line.hasTake ? (
+                            <CheckIcon color="success" />
+                          ) : (
+                            <WarningIcon color="warning" />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              alignItems="center"
+                            >
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {index + 1}.
+                              </Typography>
+                              <Chip label={line.speaker} size="small" />
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ flex: 1 }}
+                              >
+                                {line.text || "(empty)"}
+                              </Typography>
+                            </Stack>
+                          }
+                          secondary={
+                            line.hasTake
+                              ? `${line.takeType} recording • ${line.totalTakes} take(s)`
+                              : t("recordingStudio3Modal.noActiveTake")
+                          }
+                        />
+                      </ListItem>
+                      {index < saveSummary.linesSummary.length - 1 && (
+                        <Divider />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </List>
+
+                {/* Preset-specific info */}
+                {preset === "word" && (
+                  <Alert severity="info">
+                    {t("recordingStudio3Modal.wordSaveInfo")}
+                  </Alert>
+                )}
+                {preset === "conversation" && (
+                  <Alert severity="info">
+                    {t("recordingStudio3Modal.conversationSaveInfo")}
+                  </Alert>
+                )}
+
+                <Divider />
+
+                {/* Action buttons */}
+                <Stack direction="row" spacing={2} justifyContent="flex-end">
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowPreview(false)}
+                    disabled={saving}
+                  >
+                    {t("recordingStudio3Modal.backToStudio")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                    onClick={handleConfirmSave}
+                    disabled={saving}
+                  >
+                    {saving
+                      ? t("recordingStudio3Modal.saving")
+                      : t("recordingStudio3Modal.confirmSave")}
+                  </Button>
+                </Stack>
               </Stack>
-
-              {/* Warning for lines without takes — with Generate TTS offer */}
-              {saveSummary.linesWithoutTake > 0 && (
-                <Alert
-                  severity="warning"
-                  icon={<WarningIcon />}
-                  action={
-                    saveSummary.linesWithTextButNoTake.length > 0 && (
-                      <Button
-                        color="warning"
-                        size="small"
-                        startIcon={generatingTTS ? null : <TtsIcon />}
-                        onClick={handleGenerateMissingTTS}
-                        disabled={generatingTTS || saving}
-                      >
-                        {generatingTTS
-                          ? t('recordingStudio3Modal.generatingTts')
-                          : t('recordingStudio3Modal.generateMissingTts', {
-                              count: saveSummary.linesWithTextButNoTake.length,
-                            })}
-                      </Button>
-                    )
-                  }
-                >
-                  {t('recordingStudio3Modal.missingTakesWarning', {
-                    count: saveSummary.linesWithoutTake,
-                  })}
-                </Alert>
-              )}
-
-              {/* TTS generation progress */}
-              {generatingTTS && (
-                <Box sx={{ width: '100%' }}>
-                  <LinearProgress />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {t('recordingStudio3Modal.generatingTtsProgress')}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* Per-line breakdown */}
-              <List>
-                {saveSummary.linesSummary.map((line, index) => (
-                  <React.Fragment key={line.id}>
-                    <ListItem>
-                      <ListItemIcon>
-                        {line.hasTake ? (
-                          <CheckIcon color="success" />
-                        ) : (
-                          <WarningIcon color="warning" />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography variant="body2" color="text.secondary">
-                              {index + 1}.
-                            </Typography>
-                            <Chip label={line.speaker} size="small" />
-                            <Typography variant="body2" noWrap sx={{ flex: 1 }}>
-                              {line.text || '(empty)'}
-                            </Typography>
-                          </Stack>
-                        }
-                        secondary={
-                          line.hasTake
-                            ? `${line.takeType} recording • ${line.totalTakes} take(s)`
-                            : t('recordingStudio3Modal.noActiveTake')
-                        }
-                      />
-                    </ListItem>
-                    {index < saveSummary.linesSummary.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
-
-              {/* Preset-specific info */}
-              {preset === 'word' && (
-                <Alert severity="info">
-                  {t('recordingStudio3Modal.wordSaveInfo')}
-                </Alert>
-              )}
-              {preset === 'conversation' && (
-                <Alert severity="info">
-                  {t('recordingStudio3Modal.conversationSaveInfo')}
-                </Alert>
-              )}
-
-              <Divider />
-
-              {/* Action buttons */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button
-                  variant="outlined"
-                  onClick={() => setShowPreview(false)}
-                  disabled={saving}
-                >
-                  {t('recordingStudio3Modal.backToStudio')}
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleConfirmSave}
-                  disabled={saving}
-                >
-                  {saving
-                    ? t('recordingStudio3Modal.saving')
-                    : t('recordingStudio3Modal.confirmSave')}
-                </Button>
-              </Stack>
-            </Stack>
-          )}
-        </Box>
-      )}
-    </Dialog>
+            )}
+          </Box>
+        )}
+      </Dialog>
+      <ConfirmDialog
+        open={confirmCancelOpen}
+        title={
+          t("recordingStudio3Modal.unsavedChangesTitle") || "Unsaved Changes"
+        }
+        message={t("recordingStudio3Modal.unsavedChanges")}
+        confirmLabel={t("recordingStudio3Modal.discard") || "Discard"}
+        confirmColor="error"
+        onConfirm={() => {
+          setConfirmCancelOpen(false);
+          onClose();
+        }}
+        onCancel={() => setConfirmCancelOpen(false)}
+      />
+    </>
   );
 }

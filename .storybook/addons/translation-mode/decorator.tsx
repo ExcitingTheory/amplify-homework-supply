@@ -3,6 +3,7 @@ import type { Decorator } from '@storybook/nextjs-vite';
 import { addons, useGlobals } from 'storybook/preview-api';
 import { TranslationModeProvider, TranslationModeContext, TranslationModeType } from './contexts/TranslationModeContext';
 import { TranslationCaptureProvider, TranslationCaptureContext } from './contexts/TranslationCaptureContext';
+import { setTranslationOverride } from './utils/translationOverrides';
 
 /**
  * Decorator that wraps stories with translation mode functionality
@@ -67,6 +68,12 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
       });
     };
 
+    // Listen for live keystroke updates from the panel → update the override store
+    // so the story re-renders immediately without waiting for autosave.
+    const handleLiveUpdate = (data: { key: string; namespace: string; lang: string; value: string }) => {
+      setTranslationOverride(data.namespace, data.key, data.lang, data.value);
+    };
+
     // Listen for export events from the panel
     const handleExport = () => {
       // Note: This will capture the translations at the time of the export click
@@ -76,10 +83,16 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
     };
 
     channel.on('translation-mode/save', handleSave);
+    channel.on('translation-mode/live-update', handleLiveUpdate);
     channel.on('translation-mode/export', handleExport);
+
+    // Notify the panel that the preview has mounted/reloaded so it can
+    // re-push any in-session edits back into the override store.
+    channel.emit('translation-mode/preview-ready');
 
     return () => {
       channel.off('translation-mode/save', handleSave);
+      channel.off('translation-mode/live-update', handleLiveUpdate);
       channel.off('translation-mode/export', handleExport);
     };
   }, [updateTranslation]); // Only depend on updateTranslation (stable)

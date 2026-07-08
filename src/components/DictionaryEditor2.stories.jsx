@@ -71,7 +71,7 @@ function seedDictionaryData() {
 }
 
 export default {
-  title: "Content Management/Dictionary Editor",
+  title: "📁 Content Management/Dictionary Editor",
   component: DictionaryEditor2,
   parameters: {
     layout: "fullscreen",

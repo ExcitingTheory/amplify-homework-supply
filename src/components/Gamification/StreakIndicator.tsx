@@ -9,6 +9,7 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface StreakIndicatorProps {
   /** Current streak count in days. */
@@ -24,6 +25,7 @@ export function StreakIndicator({ currentStreak, size = 'medium', showEmpty = fa
 
   const isMilestone = currentStreak >= 7
   const isSmall = size === 'small'
+  const reducedMotion = useReducedMotion()
 
   return (
     <Box
@@ -33,11 +35,13 @@ export function StreakIndicator({ currentStreak, size = 'medium', showEmpty = fa
         gap: 0.5,
         ...(isMilestone && {
           filter: 'drop-shadow(0 0 6px rgba(255,152,0,0.6))',
-          animation: 'pulse 2s ease-in-out infinite',
-          '@keyframes pulse': {
-            '0%, 100%': { filter: 'drop-shadow(0 0 6px rgba(255,152,0,0.6))' },
-            '50%': { filter: 'drop-shadow(0 0 12px rgba(255,152,0,0.9))' },
-          },
+          ...(!reducedMotion && {
+            animation: 'pulse 2s ease-in-out infinite',
+            '@keyframes pulse': {
+              '0%, 100%': { filter: 'drop-shadow(0 0 6px rgba(255,152,0,0.6))' },
+              '50%': { filter: 'drop-shadow(0 0 12px rgba(255,152,0,0.9))' },
+            },
+          }),
         }),
       }}
     >

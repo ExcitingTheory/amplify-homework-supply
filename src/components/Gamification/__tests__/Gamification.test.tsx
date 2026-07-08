@@ -87,7 +87,7 @@ describe('XPToast', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText('+50 XP — Block completed')).toBeDefined()
+    expect(screen.getAllByText('+50 XP — Block completed').length).toBeGreaterThan(0)
   })
 
   it('does not render when closed', () => {

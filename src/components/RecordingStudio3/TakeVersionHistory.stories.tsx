@@ -27,7 +27,7 @@ vi.mock("../../utils/takeVersioning", () => ({
 }));
 
 const meta: Meta<typeof TakeVersionHistory> = {
-  title: "RecordingStudio3/TakeVersionHistory",
+  title: "🎙️ Recording Studio/Components/Take Version History",
   component: TakeVersionHistory,
   parameters: {
     layout: "padded",

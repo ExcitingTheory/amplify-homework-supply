@@ -72,13 +72,13 @@ function extractSemanticFeatures(text) {
 
 /**
  * Generate a deterministic mock embedding vector based on text content
- * Mimics text-embedding-3-small model (1536 dimensions)
+ * Mimics Xenova/all-MiniLM-L6-v2 model (384 dimensions)
  * 
  * @param {string} text - Text to generate embedding for
- * @param {number} [dimensions=1536] - Vector dimensions (default 1536)
+ * @param {number} [dimensions=384] - Vector dimensions (default 384)
  * @returns {number[]} Embedding vector
  */
-export function generateMockEmbedding(text, dimensions = 1536) {
+export function generateMockEmbedding(text, dimensions = 384) {
   if (!text || typeof text !== 'string') {
     throw new Error('Text must be a non-empty string');
   }
@@ -202,22 +202,22 @@ export function findSimilarItems(queryEmbedding, items, topK = 5) {
  * Generate mock embeddings for multiple texts (batch)
  * 
  * @param {string[]} texts - Array of texts
- * @param {number} [dimensions=1536] - Vector dimensions
+ * @param {number} [dimensions=384] - Vector dimensions
  * @returns {number[][]} Array of embedding vectors
  */
-export function generateMockEmbeddingsBatch(texts, dimensions = 1536) {
+export function generateMockEmbeddingsBatch(texts, dimensions = 384) {
   return texts.map(text => generateMockEmbedding(text, dimensions));
 }
 
 /**
- * Mock the OpenAI embedding API response format
+ * Mock the embedding API response format
  * 
  * @param {string|string[]} input - Single text or array of texts
- * @param {string} [model='text-embedding-3-small'] - Model name
- * @param {number} [dimensions=1536] - Vector dimensions
- * @returns {object} OpenAI-style response
+ * @param {string} [model='Xenova/all-MiniLM-L6-v2'] - Model name
+ * @param {number} [dimensions=384] - Vector dimensions
+ * @returns {object} API-style response
  */
-export function mockEmbeddingAPIResponse(input, model = 'text-embedding-3-small', dimensions = 1536) {
+export function mockEmbeddingAPIResponse(input, model = 'Xenova/all-MiniLM-L6-v2', dimensions = 384) {
   const texts = Array.isArray(input) ? input : [input];
   const embeddings = generateMockEmbeddingsBatch(texts, dimensions);
   

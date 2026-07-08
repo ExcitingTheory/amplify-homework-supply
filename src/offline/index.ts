@@ -18,6 +18,13 @@ export {
   getUnsyncedGrades,
   cacheStudentMemory,
   getCachedStudentMemory,
+  cacheSection,
+  getCachedSection,
+  getAllCachedSections,
+  cacheAssignment,
+  getCachedAssignment,
+  getCachedAssignmentsForSection,
+  getAllCachedAssignments,
   setPrefetchStatus,
   getPrefetchStatus,
   getAllPrefetchStatuses,
@@ -29,8 +36,10 @@ export {
   type CachedFile,
   type CachedGrade,
   type CachedStudentMemory,
+  type CachedSection,
+  type CachedAssignment,
   type PrefetchStatus,
-} from './OfflineDataStore';
+} from "./OfflineDataStore";
 
 // Sync queue
 export {
@@ -41,10 +50,10 @@ export {
   getAllPending,
   type SyncOperation,
   type SyncResult,
-} from './SyncQueue';
+} from "./SyncQueue";
 
 // Assignment prefetch
-export { prefetchAssignment } from './prefetchAssignment';
+export { prefetchAssignment } from "./prefetchAssignment";
 
 // Grade offline-aware save
 export {
@@ -52,13 +61,13 @@ export {
   getOfflineGrade,
   type SaveGradeParams,
   type SaveGradeResult,
-} from './saveGradeOffline';
+} from "./saveGradeOffline";
 
 // Conflict resolution
 export {
   resolveGradeConflict,
   syncGradeWithConflictResolution,
-} from './conflictResolution';
+} from "./conflictResolution";
 
 // On-device AI
 export {
@@ -68,10 +77,10 @@ export {
   type ChatMessage,
   type OfflineChatContext,
   type GradeResult,
-} from './OfflineChatEngine';
+} from "./OfflineChatEngine";
 
 // AI Router
-export { aiRouter, type GradeParams, type AIRouterConfig } from './AIRouter';
+export { aiRouter, type GradeParams, type AIRouterConfig } from "./AIRouter";
 
 // Model management
 export {
@@ -83,10 +92,23 @@ export {
   formatBytes,
   type StorageBudget,
   type ModelInfo,
-} from './ModelManager';
+} from "./ModelManager";
 
 // Grade reconciliation
 export {
   reconcileOfflineGrades,
   type ReconciliationResult,
-} from './reconcileGrades';
+} from "./reconcileGrades";
+
+// Offline search tools
+export {
+  offlineSemanticSearch,
+  offlineVocabLookup,
+  offlineGetProgress,
+  offlineGetContent,
+  augmentContextWithSearch,
+  executeOfflineTool,
+  OFFLINE_TOOL_DESCRIPTIONS,
+  type LocalSearchResult,
+  type OfflineToolResult,
+} from "./OfflineSearchTools";

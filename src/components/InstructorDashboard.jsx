@@ -26,7 +26,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RateReviewIcon from "@mui/icons-material/RateReview";
-import { DiceBearAvatar } from "./Gamification/DiceBearAvatar";
+import { AvatarDisplay } from "./Gamification/AvatarDisplay";
 import { SkillTreePopupButton } from "./SkillTreePopupButton";
 import { listSectionStudents } from "../../app/actions/section";
 import { formatLastFirst, getInitials } from "../utils/formatUserName";
@@ -731,7 +731,7 @@ export default function InstructorDashboard({ sections = [] }) {
                           <Chip
                             key={s.studentId}
                             avatar={
-                              <DiceBearAvatar
+                              <AvatarDisplay
                                 seed={s.studentId}
                                 size={20}
                                 style="simple"
@@ -793,15 +793,10 @@ export default function InstructorDashboard({ sections = [] }) {
                             >
                               {MEDAL[idx] || `#${idx + 1}`}
                             </Typography>
-                            <DiceBearAvatar
+                            <AvatarDisplay
                               seed={student.studentId}
                               size={28}
                               style="simple"
-                              label={formatLastFirst(
-                                sectionStudents[student.studentId] || {
-                                  id: student.studentId,
-                                },
-                              )}
                             />
                             <Typography
                               variant="body2"

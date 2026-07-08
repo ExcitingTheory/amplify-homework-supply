@@ -1,10 +1,15 @@
-import React, { useContext, useState, useRef, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useRef, useEffect, useCallback, useSyncExternalStore } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { addons } from 'storybook/preview-api';
 import { TranslationModeContext } from '../contexts/TranslationModeContext';
 import { TranslationCaptureContext } from '../contexts/TranslationCaptureContext';
 import { loadTranslation, loadMetadata, getTranslationValue } from '../utils/translationLoader';
+import {
+  subscribeTranslationOverrides,
+  getTranslationOverrideVersion,
+  getTranslationOverride,
+} from '../utils/translationOverrides';
 
 const NON_EN_LANGUAGES = ['ja', 'es', 'fr', 'zh', 'de'];
 
@@ -31,6 +36,11 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   const { captureTranslation, getTranslation } = useContext(TranslationCaptureContext);
   const [hover, setHover] = useState(false);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
+  // Subscribe to the panel override store so this overlay re-renders immediately
+  // when a translator edits this key, even if the parent doesn't use useTranslations.
+  // eslint-disable-next-line no-unused-vars
+  const _overrideVersion = useSyncExternalStore(subscribeTranslationOverrides, getTranslationOverrideVersion);
+  const panelOverride = getTranslationOverride(namespace, tKey, displayLanguage);
   const elementRef = useRef<HTMLDivElement>(null);
   // Track if we've already captured this translation to prevent duplicates
   const capturedRef = useRef(false);
@@ -148,7 +158,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   const translation = getTranslation(tKey, namespace);
 
   if (mode === 'off') {
-    return <>{translatedText || children}</>;
+    return <>{panelOverride ?? translatedText ?? children}</>;
   }
 
   const hasMissingTranslations = missingLanguages.length === NON_EN_LANGUAGES.length;
@@ -267,7 +277,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
           },
         }}
       >
-        {translatedText || children}
+        {panelOverride ?? translatedText ?? children}
       </Box>
     );
   }
@@ -298,7 +308,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
           transition: 'outline 0.2s ease-in-out',
         }}
       >
-        {translatedText || children}
+        {panelOverride ?? translatedText ?? children}
       </Box>
     </Tooltip>
   );

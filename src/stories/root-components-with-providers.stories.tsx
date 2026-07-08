@@ -23,7 +23,7 @@ import { FilesProvider } from '../context/fileContext';
 // ---------------------------------------------------------------------------
 
 const meta: Meta = {
-  title: '🧩 Components/Root (With Providers)',
+  title: '🧩 UI Components/App Primitives (With Providers)',
   parameters: {
     layout: 'fullscreen',
   },
@@ -61,7 +61,7 @@ export const AppShellDefault: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
     docs: { description: { story: 'Responsive shell with persistent sidebar on desktop, modal drawer on mobile.' } },
   },
@@ -104,7 +104,7 @@ export const GradeReviewDrawerOpen: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
   },
 };
@@ -154,7 +154,7 @@ export const CollaboratorManagerOwner: Story = {
     layout: 'centered',
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
   },
 };
@@ -184,7 +184,7 @@ export const CollaboratorManagerReadOnly: Story = {
     layout: 'centered',
     mockAuth: {
       user: { attributes: { sub: 'teacher-2', email: 'teacher2@example.com' } },
-      session: { username: 'teacher-2' },
+      session: { username: 'teacher-2', groups: ['Instructors'] },
     },
   },
 };
@@ -223,7 +223,7 @@ export const RecordingStudioEnhancedModalOpen: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
   },
 };

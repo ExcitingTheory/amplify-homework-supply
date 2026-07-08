@@ -11,6 +11,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { trace, SpanStatusCode } from "@opentelemetry/api";
+import { pipeline, env } from "@huggingface/transformers";
 import {
   EMBEDDING_DIMENSIONS,
   EMBEDDING_MODEL,
@@ -31,6 +32,7 @@ export interface AgentContext {
   identityId?: string;
   unitId?: string;
   sectionId?: string;
+  locale?: string;
   courseOutline?: Array<{
     unitId: string;
     name: string;
@@ -147,26 +149,66 @@ async function resolveSharedBundlePaths(ctx: AgentContext): Promise<string[]> {
 
 // --- Embedding Helper ---
 
-async function embedQuery(text: string, apiKey: string): Promise<number[]> {
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: EMBEDDING_MODEL,
-      input: text,
-      dimensions: EMBEDDING_DIMENSIONS,
-    }),
-  });
+// Singleton translation cache per locale
+const translationCache: Record<string, Record<string, any>> = {};
 
-  if (!response.ok) {
-    throw new Error(`Embeddings API error: ${response.statusText}`);
+/**
+ * Load agent tool translations for the given locale.
+ * Falls back to English if the locale file is unavailable.
+ */
+async function getAgentTranslations(
+  locale: string = "en",
+): Promise<(key: string) => string> {
+  if (!translationCache[locale]) {
+    try {
+      translationCache[locale] = (
+        await import(`../../../public/locales/${locale}/agentTools.json`)
+      ).default;
+    } catch {
+      if (locale !== "en") {
+        try {
+          translationCache[locale] = (
+            await import(`../../../public/locales/en/agentTools.json`)
+          ).default;
+        } catch {
+          translationCache[locale] = {};
+        }
+      } else {
+        translationCache[locale] = {};
+      }
+    }
   }
 
-  const data = await response.json();
-  return data.data[0].embedding;
+  const messages = translationCache[locale];
+
+  return (key: string): string => {
+    const parts = key.split(".");
+    let value: any = messages;
+    for (const part of parts) {
+      value = value?.[part];
+    }
+    return typeof value === "string" ? value : key;
+  };
+}
+
+// Singleton pipeline cached across requests in the same server instance
+let agentEmbeddingPipeline: any = null;
+
+async function getAgentEmbeddingPipeline() {
+  if (agentEmbeddingPipeline) return agentEmbeddingPipeline;
+  env.allowLocalModels = false;
+  agentEmbeddingPipeline = await pipeline(
+    "feature-extraction",
+    EMBEDDING_MODEL,
+    { dtype: "q8" },
+  );
+  return agentEmbeddingPipeline;
+}
+
+async function embedQuery(text: string, _apiKey: string): Promise<number[]> {
+  const pipe = await getAgentEmbeddingPipeline();
+  const output = await pipe(text, { pooling: "mean", normalize: true });
+  return Array.from(output.data as Float32Array).slice(0, EMBEDDING_DIMENSIONS);
 }
 
 // --- Tool Factories ---
@@ -199,14 +241,14 @@ export function createSemanticSearchTool(ctx: AgentContext, apiKey: string) {
       limit: number;
     }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const queryEmbedding = await embedQuery(query, apiKey);
         const identityId = await resolveIdentityId(ctx);
 
         if (!identityId) {
           return {
             results: [],
-            message:
-              "No search index available — unit owner identity not resolved.",
+            message: t("semanticSearch.noIdentity"),
           };
         }
 
@@ -241,7 +283,7 @@ export function createSemanticSearchTool(ctx: AgentContext, apiKey: string) {
         if (bundlePaths.length === 0) {
           return {
             results: [],
-            message: "No search index available for the current context.",
+            message: t("semanticSearch.noIndex"),
           };
         }
 
@@ -295,9 +337,10 @@ export function createSemanticSearchTool(ctx: AgentContext, apiKey: string) {
         };
       } catch (error: any) {
         console.error("[semantic_search] Error:", error);
+        const t = await getAgentTranslations(ctx.locale);
         return {
           results: [],
-          error: "Search failed. Try a different query.",
+          error: t("semanticSearch.error"),
         };
       }
     },
@@ -319,6 +362,7 @@ export function createReadFileContentTool(
     }),
     execute: async ({ fileId }: { fileId: string }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const { getServerClient } = await import("@/utils/amplifyServerClient");
         const client = getServerClient();
 
@@ -333,7 +377,7 @@ export function createReadFileContentTool(
         if (!parsedContents?.length) {
           return {
             content: null,
-            message: "No extracted content available for this file.",
+            message: t("readFileContent.noContent"),
           };
         }
 
@@ -370,7 +414,8 @@ export function createReadFileContentTool(
         return result;
       } catch (error: any) {
         console.error("[read_file_content] Error:", error);
-        return { content: null, error: "Failed to read file content." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { content: null, error: t("readFileContent.error") };
       }
     },
   });
@@ -400,6 +445,7 @@ export function createGetStudentProgressTool(ctx: AgentContext) {
       studentId?: string;
     }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         // Students can only see their own progress
         const isInstructor = ctx.groups.some(
           (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
@@ -409,7 +455,7 @@ export function createGetStudentProgressTool(ctx: AgentContext) {
         const targetUnitId = unitId || ctx.unitId;
 
         if (!targetUnitId) {
-          return { error: "No unit specified and no current unit context." };
+          return { error: t("studentProgress.noUnit") };
         }
 
         const { getServerClient } = await import("@/utils/amplifyServerClient");
@@ -427,7 +473,7 @@ export function createGetStudentProgressTool(ctx: AgentContext) {
           return {
             unitId: targetUnitId,
             hasAttempts: false,
-            message: "No grade records found for this unit.",
+            message: t("studentProgress.noGrades"),
           };
         }
 
@@ -460,7 +506,8 @@ export function createGetStudentProgressTool(ctx: AgentContext) {
         };
       } catch (error: any) {
         console.error("[get_student_progress] Error:", error);
-        return { error: "Failed to load progress data." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("studentProgress.error") };
       }
     },
   });
@@ -480,6 +527,7 @@ export function createGetCourseOutlineTool(ctx: AgentContext) {
     }),
     execute: async ({ sectionId }: { sectionId?: string }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const targetSectionId = sectionId || ctx.sectionId;
 
         if (!targetSectionId) {
@@ -494,7 +542,7 @@ export function createGetCourseOutlineTool(ctx: AgentContext) {
               })),
             };
           }
-          return { error: "No section context available." };
+          return { error: t("courseOutline.noSection") };
         }
 
         const { getServerClient } = await import("@/utils/amplifyServerClient");
@@ -512,8 +560,7 @@ export function createGetCourseOutlineTool(ctx: AgentContext) {
             sectionId: targetSectionId,
             sectionName: section?.name,
             outline: [],
-            message:
-              "No course outline available. Units may not have been published yet.",
+            message: t("courseOutline.noOutline"),
           };
         }
 
@@ -534,7 +581,8 @@ export function createGetCourseOutlineTool(ctx: AgentContext) {
         };
       } catch (error: any) {
         console.error("[get_course_outline] Error:", error);
-        return { error: "Failed to load course outline." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("courseOutline.error") };
       }
     },
   });
@@ -617,6 +665,7 @@ export function createRecallMemoryTool(ctx: AgentContext) {
     }),
     execute: async ({ unitId }: { unitId?: string }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const { getServerClient } = await import("@/utils/amplifyServerClient");
         const client = getServerClient();
 
@@ -640,7 +689,7 @@ export function createRecallMemoryTool(ctx: AgentContext) {
         if (!memories?.length) {
           return {
             hasMemory: false,
-            message: "No conversation history found for this context.",
+            message: t("recallMemory.noHistory"),
           };
         }
 
@@ -653,7 +702,7 @@ export function createRecallMemoryTool(ctx: AgentContext) {
         if (!memory) {
           return {
             hasMemory: false,
-            message: "No conversation memory found.",
+            message: t("recallMemory.noMemory"),
           };
         }
 
@@ -692,7 +741,8 @@ export function createRecallMemoryTool(ctx: AgentContext) {
         return result;
       } catch (error: any) {
         console.error("[recall_memory] Error:", error);
-        return { hasMemory: false, error: "Failed to recall memory." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { hasMemory: false, error: t("recallMemory.error") };
       }
     },
   });
@@ -852,7 +902,8 @@ export function createUpdateMemoryTool(ctx: AgentContext) {
         }
       } catch (error: any) {
         console.error("[update_memory] Error:", error);
-        return { success: false, error: "Failed to update memory." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { success: false, error: t("updateMemory.error") };
       }
     },
   });
@@ -880,6 +931,7 @@ export function createRecallConversationsTool(
     }),
     execute: async ({ query, limit }: { query: string; limit: number }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const { getServerClient } = await import("@/utils/amplifyServerClient");
         const client = getServerClient();
 
@@ -911,7 +963,7 @@ export function createRecallConversationsTool(
         if (!memories?.length) {
           return {
             conversations: [],
-            message: "No past conversation history found.",
+            message: t("recallConversations.noHistory"),
           };
         }
 
@@ -922,7 +974,7 @@ export function createRecallConversationsTool(
         if (!validMemories.length) {
           return {
             conversations: [],
-            message: "No conversation summaries available yet.",
+            message: t("recallConversations.noSummaries"),
           };
         }
 
@@ -1022,9 +1074,10 @@ export function createRecallConversationsTool(
         };
       } catch (error: any) {
         console.error("[recall_conversations] Error:", error);
+        const t = await getAgentTranslations(ctx.locale);
         return {
           conversations: [],
-          error: "Failed to recall past conversations.",
+          error: t("recallConversations.error"),
         };
       }
     },
@@ -1045,17 +1098,18 @@ export function createGetSectionAnalyticsTool(ctx: AgentContext) {
     }),
     execute: async ({ sectionId }: { sectionId?: string }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const isInstructor = ctx.groups.some(
           (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
         );
         if (!isInstructor) {
-          return { error: "This tool is only available to instructors." };
+          return { error: t("sectionAnalytics.instructorOnly") };
         }
 
         const targetSectionId = sectionId || ctx.sectionId;
         if (!targetSectionId) {
           return {
-            error: "No section specified and no current section context.",
+            error: t("sectionAnalytics.noSection"),
           };
         }
 
@@ -1077,7 +1131,7 @@ export function createGetSectionAnalyticsTool(ctx: AgentContext) {
         if (!validAssignments.length) {
           return {
             sectionId: targetSectionId,
-            message: "No assignments found for this section.",
+            message: t("sectionAnalytics.noAssignments"),
             totalAssignments: 0,
           };
         }
@@ -1103,7 +1157,7 @@ export function createGetSectionAnalyticsTool(ctx: AgentContext) {
             sectionId: targetSectionId,
             totalAssignments: validAssignments.length,
             totalGrades: 0,
-            message: "No student grades recorded yet.",
+            message: t("sectionAnalytics.noGrades"),
           };
         }
 
@@ -1161,7 +1215,8 @@ export function createGetSectionAnalyticsTool(ctx: AgentContext) {
         };
       } catch (error: any) {
         console.error("[get_section_analytics] Error:", error);
-        return { error: "Failed to load section analytics." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("sectionAnalytics.error") };
       }
     },
   });
@@ -1189,16 +1244,17 @@ export function createGetStudentListTool(ctx: AgentContext) {
       unitId?: string;
     }) => {
       try {
+        const t = await getAgentTranslations(ctx.locale);
         const isInstructor = ctx.groups.some(
           (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
         );
         if (!isInstructor) {
-          return { error: "This tool is only available to instructors." };
+          return { error: t("studentList.instructorOnly") };
         }
 
         const targetSectionId = sectionId || ctx.sectionId;
         if (!targetSectionId) {
-          return { error: "No section specified." };
+          return { error: t("studentList.noSection") };
         }
 
         const { getServerClient } = await import("@/utils/amplifyServerClient");
@@ -1282,7 +1338,8 @@ export function createGetStudentListTool(ctx: AgentContext) {
         };
       } catch (error: any) {
         console.error("[get_student_list] Error:", error);
-        return { error: "Failed to load student list." };
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("studentList.error") };
       }
     },
   });

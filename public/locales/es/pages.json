@@ -148,5 +148,14 @@
     "timerInstructions": "Este es un ejercicio con tiempo límite, presiona iniciar para comenzar el cronómetro y responder las preguntas.",
     "start": "Iniciar",
     "loading": "Cargando…"
+  },
+  "leaderboard": {
+    "title": "Tabla de clasificación",
+    "heading": "Clasificación general",
+    "xpMode": "XP",
+    "completionMode": "Completado",
+    "fastestMode": "Más rápido",
+    "squadsMode": "Grupos",
+    "empty": "Aún no hay datos de clasificación. ¡Completa tareas para ganar XP\\!"
   }
 }

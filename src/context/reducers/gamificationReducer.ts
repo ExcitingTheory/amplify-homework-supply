@@ -53,6 +53,12 @@ export interface GroupChallengeInfo {
   active: boolean;
   bonusMultiplier: number;
   progressPercent: number;
+  chapterOrder?: number;
+  setting?: string;
+  /** Stakes description for the campaign chapter */
+  stakes?: string;
+  /** Unit IDs whose XP contributes to this chapter. Empty = all section XP. */
+  linkedUnitIds?: string[];
   contributions?: Array<{
     studentId: string;
     xpContributed: number;
@@ -103,6 +109,8 @@ export interface LockStatus {
   /** Present when locked by linear progression */
   requiredPriorUnitId?: string;
   requiredPriorUnitName?: string;
+  /** Date-based unlock — content unlocks at this date regardless of progression */
+  unlockDate?: string;
 }
 
 // ============================================================================

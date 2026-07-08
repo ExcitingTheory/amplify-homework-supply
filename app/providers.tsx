@@ -135,7 +135,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   const pathname = usePathname();
 
   useGlobalChatShortcut();
@@ -145,7 +145,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     pathname?.startsWith('/workbook/') || pathname?.startsWith('/unit/');
 
   return (
-    <ThemeRegistry>
+    <ThemeRegistry nonce={nonce}>
       <DebugPanelProvider>
         <AuthProvider>
           <AuthGate>

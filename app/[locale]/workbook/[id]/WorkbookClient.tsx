@@ -21,6 +21,7 @@ import Typography from "@mui/material/Typography";
 import { Workbook } from "@/components/Editor3";
 import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
 import { SecretLinkIcon } from "@/components/Gamification/SecretLinkIcon";
+import { NarrativeContextBanner } from "@/components/Workbook/NarrativeContextBanner";
 import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
 import { UnitProvider } from "@/context/unitContext";
@@ -212,9 +213,10 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
       )}
 
       {(!needsTimer || (needsTimer && timerStarted)) && (
-        <Box data-tour="workbook-content">
+        <Box id="main-content" component="main" data-tour="workbook-content">
           {unit ? (
             <>
+              <NarrativeContextBanner unitId={unit.id} />
               <Workbook />
               <SecretLinkIcon unitId={unit?.id || ""} />
             </>

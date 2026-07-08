@@ -3,7 +3,7 @@ import { GutterAnnotations } from './GutterAnnotations';
 import type { WrongAnswerAnnotation, GradeAttempt } from './GradedWorkbookViewer';
 
 const meta: Meta<typeof GutterAnnotations> = {
-  title: '📝 Grading/GutterAnnotations',
+  title: '� Instructor Tools/Grading/Gutter Annotations',
   component: GutterAnnotations,
   parameters: { layout: 'padded' },
 };

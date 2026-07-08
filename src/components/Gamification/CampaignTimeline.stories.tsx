@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CampaignTimeline, type CampaignChapter } from './CampaignTimeline'
 
 const meta: Meta<typeof CampaignTimeline> = {
-  title: '🏆 Gamification/XP & Progress/Campaign Timeline',
+  title: '🏆 Gamification/XP & Progression/Campaign Timeline',
   component: CampaignTimeline,
 }
 export default meta

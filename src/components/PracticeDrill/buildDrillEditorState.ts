@@ -89,15 +89,19 @@ function buildQuizNode(block: PracticeDrillBlock) {
 /**
  * Build an answer node — matches AnswerNode.importJSON which reads
  * `serializedNode.wordIDs`, `.requestDefinition`, `.allowedInput`, `.promptMethod`.
+ *
+ * AnswerComponent expects:
+ *   allowedInput: string[] — e.g. ['text', 'audio', 'writing']
+ *   promptMethod: string[] — e.g. ['phrase', 'definition', 'audio']
  */
 function buildAnswerNode(block: PracticeDrillBlock) {
   return {
     type: 'answer',
     version: 1,
     wordIDs: [block.sourceItemId],
-    requestDefinition: true,
-    allowedInput: {},
-    promptMethod: [],
+    requestDefinition: 'definition',
+    allowedInput: ['text'],
+    promptMethod: ['phrase'],
   }
 }
 
@@ -146,15 +150,16 @@ function buildMeaningAssociationNode(
 
 /**
  * Build a custom-answer node — matches CustomAnswerNode.importJSON which reads
- * `serializedNode.ids`, `.allowedInput`, `.promptMethod`.
+ * `serializedNode.wordIDs`, `.promptMethod`, `.allowedInput`, `.format`.
  */
 function buildCustomAnswerNode(block: PracticeDrillBlock) {
   return {
     type: 'custom-answer',
     version: 1,
-    ids: [block.sourceItemId],
-    promptMethod: [],
-    allowedInput: [],
+    wordIDs: [block.sourceItemId],
+    promptMethod: 'word',
+    allowedInput: ['text'],
+    format: 'default',
   }
 }
 

@@ -11,6 +11,7 @@
 import React, { useId, useMemo } from 'react'
 import Box, { type BoxProps } from '@mui/material/Box'
 import { motion, type Variants, type HTMLMotionProps } from 'framer-motion'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 // Typed wrapper to avoid MUI Box + motion.div type conflicts
 const MotionBox = motion.create(Box) as React.FC<BoxProps & HTMLMotionProps<'div'>>
@@ -262,6 +263,11 @@ export function BadgeIcon({
 }: BadgeIconProps) {
   const gradientId = useId()
   const cleanGradientId = `badge-grad-${gradientId.replace(/:/g, '')}`
+  const reducedMotion = useReducedMotion()
+
+  // Suppress all animations when reduced motion is active
+  const effectiveAnimate = animate && !reducedMotion
+  const effectiveDrawIcon = drawIcon && !reducedMotion
 
   const config = configOverride ?? getBadgeConfig(badgeType ?? 'FIRST_SUBMISSION')
   const rarityEffect = RARITY_EFFECTS[config.rarity]
@@ -281,10 +287,10 @@ export function BadgeIcon({
 
   return (
     <MotionBox
-      variants={animate && earned ? containerVariants[mountAnim] : containerVariants.none}
-      initial={animate && earned ? 'hidden' : 'visible'}
+      variants={effectiveAnimate && earned ? containerVariants[mountAnim] : containerVariants.none}
+      initial={effectiveAnimate && earned ? 'hidden' : 'visible'}
       animate="visible"
-      whileHover={earned ? hoverVariants[hoverAnim] as any : undefined}
+      whileHover={earned && !reducedMotion ? hoverVariants[hoverAnim] as any : undefined}
       transition={{ delay: animationDelay }}
       onClick={onClick}
       sx={{
@@ -339,7 +345,7 @@ export function BadgeIcon({
             Icon={config.icon}
             color={config.iconColor}
             size={size}
-            draw={animate && drawIcon}
+            draw={effectiveAnimate && effectiveDrawIcon}
             scale={config.iconScale ?? 1}
             translate={config.iconTranslate ?? [0, 0]}
             animationDelay={animationDelay + 0.3}

@@ -118,7 +118,13 @@ test.describe
     const quizBlock = page.locator('[data-tour="quiz-block"]').first();
     await expect(quizBlock).toBeVisible({ timeout: 10_000 });
 
-    // Must have editable answer inputs
+    // Enter edit mode to access editable answer inputs
+    const editBtn = quizBlock.getByRole("button", { name: /edit/i });
+    await expect(editBtn).toBeVisible({ timeout: 5_000 });
+    await editBtn.click();
+    await page.waitForTimeout(1000);
+
+    // Must have editable answer inputs in edit mode
     const editableElements = quizBlock.locator(
       'input, textarea, [contenteditable="true"]',
     );

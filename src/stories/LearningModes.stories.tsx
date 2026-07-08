@@ -42,7 +42,7 @@ export const TutorialModeExample: StoryObj = {
       <Box sx={{ p: 2 }}>
         <TextField
           fullWidth
-          label="Enter a unit title"
+          label="Enter a demo item title"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           sx={{ mb: 2 }}
@@ -52,11 +52,11 @@ export const TutorialModeExample: StoryObj = {
           onClick={() => setSubmitted(true)}
           disabled={!value}
         >
-          Create Unit
+          Create Demo Item
         </Button>
         {submitted && (
           <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-            ✅ Unit "{value}" created! Great job!
+            ✅ Demo item "{value}" created! Great job!
           </Box>
         )}
       </Box>
@@ -70,18 +70,18 @@ export const TutorialModeExample: StoryObj = {
           <span style={{ color: '#666' }}>— Learn step-by-step with interactive guidance</span>
         </Box>
 
-        <h2>Creating Your First Unit</h2>
+        <h2>Create Your First Demo Item</h2>
         <p>
-          Units are the building blocks of your lessons. Follow the tutorial below to learn
-          how to create one.
+          This fictional example shows how tutorial mode can walk someone through
+          a simple action without relying on any real app workflow.
         </p>
 
         <TutorialStep
-          stepId="instructor-create-unit"
-          title="Create a Unit"
-          description="Practice creating a unit with the interactive demo below"
+          stepId="secret-documentation-explorer"
+          title="Create a Demo Item"
+          description="Practice completing a demo-only action with the interactive block below"
           demoComponent={DemoComponent}
-          quizStoryId="pages-units--default"
+          quizStoryId="🏠-getting-started-onboarding-task-completion-examples--auto-detect-task-completion"
           completionMode="manual"
         />
 
@@ -99,7 +99,7 @@ export const TutorialModeExample: StoryObj = {
 
 /**
  * Quiz Mode Example
- * Directs users to Application Pages to practice with the real app
+ * Shows quiz-mode behavior in a demo-only flow
  */
 export const QuizModeExample: StoryObj = {
   render: () => {
@@ -113,23 +113,23 @@ export const QuizModeExample: StoryObj = {
           <span style={{ color: '#666' }}>— Practice hands-on with minimal guidance</span>
         </Box>
 
-        <h2>Test Your Knowledge</h2>
+        <h2>Try the Demo Flow</h2>
         <p>
-          Practice creating a unit without step-by-step guidance. 
-          See if you can complete the task on your own!
+          Practice the same demo action with minimal guidance.
+          This is intentionally fictional and only demonstrates onboarding behavior.
         </p>
 
         {!completed ? (
           <Box sx={{ mt: 3, p: 3, border: '2px dashed #ccc', borderRadius: 2, textAlign: 'center' }}>
-            <h3>Create a Unit</h3>
-            <p style={{ color: '#666' }}>Navigate to the Units page and create your first unit.</p>
+            <h3>Complete Demo Task</h3>
+            <p style={{ color: '#666' }}>Open the demo completion story and trigger completion.</p>
             <Button
               variant="contained"
               color="primary"
               sx={{ mt: 2, mr: 2 }}
               onClick={() => {
                 // Simulate navigation
-                window.parent.location.href = '?path=/story/📄-pages-application-pages--units';
+                window.parent.location.href = '?path=/story/🏠-getting-started-onboarding-task-completion-examples--auto-detect-task-completion';
               }}
             >
               Start Task
@@ -165,28 +165,28 @@ export const MultipleTutorialSteps: StoryObj = {
   render: () => {
     return (
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <h1>Complete Onboarding Workflow</h1>
-        <p>Follow these steps to set up your first class:</p>
+        <h1>Complete Demo Onboarding Workflow</h1>
+        <p>Follow these fictional steps to see how multi-step onboarding behaves:</p>
 
         <TutorialStep
-          stepId="instructor-setup-class"
-          title="1. Create a Section"
-          description="Set up a class section for your students"
-          quizStoryId="pages-application-pages--sections"
+          stepId="secret-documentation-explorer"
+          title="1. Explore Docs"
+          description="Open a docs page and review how onboarding hints appear"
+          quizStoryId="🏠-getting-started-onboarding-task-completion-examples--display-onboarding-status"
         />
 
         <TutorialStep
-          stepId="instructor-create-unit"
-          title="2. Create a Unit"
-          description="Build your first learning module"
-          quizStoryId="pages-units--default"
+          stepId="secret-shortcut-evangelist"
+          title="2. Trigger an Interaction"
+          description="Perform a tracked interaction to simulate in-flow progress"
+          quizStoryId="🏠-getting-started-onboarding-task-completion-examples--event-emission-example"
         />
 
         <TutorialStep
-          stepId="instructor-create-assignment"
-          title="3. Create an Assignment"
-          description="Assign the unit to your section with a due date"
-          quizStoryId="pages-application-pages--section-detail"
+          stepId="secret-keyboard-master"
+          title="3. Finish the Challenge"
+          description="Complete a final demo challenge to close out the flow"
+          quizStoryId="🏠-getting-started-keyboard-shortcuts--default"
         />
 
         <div style={{ marginTop: '40px', padding: '20px', background: '#e3f2fd', borderRadius: '8px' }}>
@@ -209,16 +209,16 @@ export const AutoCompleteTutorial: StoryObj = {
   render: () => {
     return (
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <h2>Reading Documentation</h2>
+        <h2>Auto-Completion Demo</h2>
         <p>
-          Some steps complete automatically just by viewing them. This step will mark itself
-          as complete when you land on this page.
+          Some steps complete automatically by visiting a story.
+          This page demonstrates that behavior using a bonus demo task.
         </p>
 
         <TutorialStep
-          stepId="developer-explore-components"
-          title="Explore Component Documentation"
-          description="Browse the Storybook sidebar and understand the component library"
+          stepId="secret-documentation-explorer"
+          title="Explore Demo Documentation"
+          description="Browse this onboarding section and observe auto completion"
           completionMode="auto"
         />
 

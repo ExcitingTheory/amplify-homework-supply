@@ -88,14 +88,16 @@ function stripS3QueryParams(url: URL): string {
 function isS3MediaRequest(url: URL): boolean {
   const hostname = url.hostname;
   // CloudFront CDN domain is injected at build time via NEXT_PUBLIC_CDN_DOMAIN
-  const cdnDomain = (self as any).__CDN_DOMAIN__ ||
-    (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_CDN_DOMAIN) || '';
+  const cdnDomain =
+    (self as any).__CDN_DOMAIN__ ||
+    (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_CDN_DOMAIN) ||
+    "";
   return (
     hostname.includes(".s3.") ||
     hostname.includes("s3.amazonaws.com") ||
     hostname.includes(".s3-") ||
     hostname.endsWith(".amazonaws.com") ||
-    (cdnDomain !== '' && hostname === cdnDomain)
+    (cdnDomain !== "" && hostname === cdnDomain)
   );
 }
 
@@ -169,6 +171,79 @@ async function processSyncQueue(): Promise<void> {
 
 self.addEventListener("fetch", (event: FetchEvent) => {
   const url = new URL(event.request.url);
+
+  // For workbook navigation requests, try network first then redirect to
+  // offline workbook shell (which loads data from IndexedDB)
+  if (
+    event.request.mode === "navigate" &&
+    /\/workbook\/[a-f0-9-]+/.test(url.pathname)
+  ) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Extract unit ID from pathname like /en/workbook/uuid or /workbook/uuid
+        const match = url.pathname.match(/\/workbook\/([a-f0-9-]+)/);
+        const unitId = match?.[1] || "";
+        // Determine locale prefix from the URL
+        const localeMatch = url.pathname.match(/^\/([a-z]{2})\//);
+        const locale = localeMatch?.[1] || "en";
+        const offlineUrl = `/${locale}/workbook-offline?id=${unitId}`;
+        // Try the offline-workbook-shells cache first (populated by prefetch)
+        return caches
+          .open("offline-workbook-shells")
+          .then((cache) => cache.match(offlineUrl))
+          .then((cached) => {
+            if (cached) return cached;
+            // Fall back to default cache
+            return caches.match(offlineUrl);
+          })
+          .then((cached) => {
+            if (cached) return cached;
+            // Last resort: generic offline page
+            return caches.match("/offline").then(
+              (fallback) =>
+                fallback ||
+                new Response("Offline - workbook unavailable", {
+                  status: 503,
+                  headers: { "Content-Type": "text/plain" },
+                }),
+            );
+          });
+      }),
+    );
+    return;
+  }
+
+  // For other navigation requests (sections, section detail, home),
+  // check our offline-workbook-shells cache before falling back to /offline
+  if (
+    event.request.mode === "navigate" &&
+    (url.pathname.match(/^\/[a-z]{2}\/(sections|section\/)/) ||
+      /^\/[a-z]{2}\/?$/.test(url.pathname))
+  ) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches
+          .open("offline-workbook-shells")
+          .then((cache) => cache.match(url.pathname))
+          .then((cached) => {
+            if (cached) return cached;
+            return caches.match(url.pathname);
+          })
+          .then((cached) => {
+            if (cached) return cached;
+            return caches.match("/offline").then(
+              (fallback) =>
+                fallback ||
+                new Response("Offline", {
+                  status: 503,
+                  headers: { "Content-Type": "text/plain" },
+                }),
+            );
+          });
+      }),
+    );
+    return;
+  }
 
   // For S3 media, normalise the cache key by stripping query params
   if (isS3MediaRequest(url)) {

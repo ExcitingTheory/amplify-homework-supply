@@ -7,8 +7,9 @@
  * @module XPContext
  */
 
-import React, { createContext, useContext, useEffect, useReducer, useRef, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useReducer, useRef, useCallback, useMemo, useState } from 'react'
 import { XPToast } from '../components/Gamification/XPToast'
+import { LevelUpCelebration } from '../components/Gamification/LevelUpCelebration'
 import { calculateTotalXP, getLevelInfo, XPReason } from '../utils/xpCalculation'
 import type { StudentXPLog, LevelInfo } from '../utils/xpCalculation'
 
@@ -207,6 +208,22 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
   const totalXP = useMemo(() => calculateTotalXP(xpLogs), [xpLogs])
   const level = useMemo(() => getLevelInfo(totalXP), [totalXP])
 
+  // Track level-up transitions for screen reader announcement
+  const prevLevelRef = useRef(level.level)
+  const [levelUpAnnouncement, setLevelUpAnnouncement] = useState('')
+  const [showLevelUp, setShowLevelUp] = useState(false)
+  const [levelUpInfo, setLevelUpInfo] = useState<{ level: number; label: string }>({ level: 0, label: '' })
+  useEffect(() => {
+    if (level.level > prevLevelRef.current && prevLevelRef.current > 0) {
+      setLevelUpAnnouncement(`Level up! You are now level ${level.level}: ${level.label}`)
+      setLevelUpInfo({ level: level.level, label: level.label })
+      setShowLevelUp(true)
+      const t = setTimeout(() => setLevelUpAnnouncement(''), 5000)
+      return () => clearTimeout(t)
+    }
+    prevLevelRef.current = level.level
+  }, [level.level, level.label])
+
   const contextValue = useMemo<XPContextValue>(
     () => ({ totalXP, level, xpLogs, isLoading }),
     [totalXP, level, xpLogs, isLoading],
@@ -221,6 +238,20 @@ export function XPProvider({ client, studentId, children }: XPProviderProps) {
         xpReason={currentToast?.xpReason || ''}
         onClose={handleToastClose}
       />
+      <LevelUpCelebration
+        open={showLevelUp}
+        newLevel={levelUpInfo.level}
+        newLabel={levelUpInfo.label}
+        onClose={() => setShowLevelUp(false)}
+      />
+      {/* Screen reader announcement for level-up events */}
+      <span
+        aria-live="assertive"
+        aria-atomic="true"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+      >
+        {levelUpAnnouncement}
+      </span>
     </XPContext.Provider>
   )
 }

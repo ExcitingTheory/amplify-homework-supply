@@ -2,44 +2,53 @@
  * @fileoverview PracticeDrill module exports
  */
 
-export { default as PracticeDrillConfigPopup } from './PracticeDrillConfigPopup'
+export { default as PracticeDrillConfigPopup } from "./PracticeDrillConfigPopup";
 export type {
   DrillSourceConfig,
   CoverageSnapshot,
   DrillConfig,
   PracticeDrillConfigPopupProps,
-} from './PracticeDrillConfigPopup'
+} from "./PracticeDrillConfigPopup";
 
 export {
   buildFeedbackData,
   buildFeedbackMarkdown,
-} from './buildPracticeDrillFeedback'
+} from "./buildPracticeDrillFeedback";
 export type {
   BlockResult,
   PracticeDrillFeedbackData,
   PracticeSessionData,
   GeneratedBlock,
-} from './buildPracticeDrillFeedback'
+} from "./buildPracticeDrillFeedback";
 
-export { useDrillCoverage } from './useDrillCoverage'
+export { useDrillCoverage } from "./useDrillCoverage";
 
-export { default as PracticeDrillDialog } from './PracticeDrillDialog'
-export type { PracticeDrillDialogProps } from './PracticeDrillDialog'
+export { useDrillLibrary } from "./useDrillLibrary";
+export type { DrillLibraryEntry, DrillLibraryResult } from "./useDrillLibrary";
 
-export { default as PracticeDrillProgress } from './PracticeDrillProgress'
-export type { PracticeDrillProgressProps } from './PracticeDrillProgress'
+export { usePracticeDrill } from "./usePracticeDrill";
 
-export { default as JoinPracticeDialog } from './JoinPracticeDialog'
-export type { JoinPracticeDialogProps, JoinedSessionInfo } from './JoinPracticeDialog'
+export { default as PracticeDrillDialog } from "./PracticeDrillDialog";
+export type { PracticeDrillDialogProps } from "./PracticeDrillDialog";
 
-export { default as CollaborativePresenceBar } from './CollaborativePresenceBar'
-export type { CollaborativePresenceBarProps } from './CollaborativePresenceBar'
+export { default as PracticeDrillProgress } from "./PracticeDrillProgress";
+export type { PracticeDrillProgressProps } from "./PracticeDrillProgress";
 
-export { default as DrillGradeAdapter } from './DrillGradeAdapter'
-export type { DrillStats } from './DrillGradeAdapter'
+export { default as JoinPracticeDialog } from "./JoinPracticeDialog";
+export type {
+  JoinPracticeDialogProps,
+  JoinedSessionInfo,
+} from "./JoinPracticeDialog";
 
-export { usePracticeDrill } from './usePracticeDrill'
+export { default as CollaborativePresenceBar } from "./CollaborativePresenceBar";
+export type { CollaborativePresenceBarProps } from "./CollaborativePresenceBar";
+
+export { default as DrillGradeAdapter } from "./DrillGradeAdapter";
+export type { DrillStats } from "./DrillGradeAdapter";
 
 // --- Utilities ---
-export { buildDrillEditorState, extractDrillMetadata } from './buildDrillEditorState'
-export type { PracticeDrillBlock } from './buildDrillEditorState'
+export {
+  buildDrillEditorState,
+  extractDrillMetadata,
+} from "./buildDrillEditorState";
+export type { PracticeDrillBlock } from "./buildDrillEditorState";

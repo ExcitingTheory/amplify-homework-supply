@@ -10,8 +10,8 @@ export interface TaskCompletionCriteria {
   quizStoryId?: string;
   /** Legacy: Single story ID for both modes (deprecated) */
   storyId?: string;
-  /** Actions that must be performed (OR logic - any one completes the task) */
-  requiredActions?: string[];
+  /** Ordered data-tour element names the user must click in sequence — all steps required */
+  completionSequence?: string[];
   /** Sequence of actions that must be performed in order */
   requiredSequence?: string[];
   /** Custom completion function */
@@ -39,6 +39,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Click the "Create Section" button',
       "Fill in section details and save",
       "Copy the join code to share with students",
+      "Navigate to the Sections page to verify your class is listed",
+      "Confirm the section is visible and student-ready",
     ],
     persona: "instructor",
     category: "Getting Started",
@@ -47,7 +49,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--sections", // Tutorial: Sections page with create section UI
       quizStoryId: "📄-pages-application-pages--sections", // Quiz: Navigate to actual sections page
-      requiredActions: ["onClick", "onCreate"], // Any create/save action
+      completionSequence: ["create-section-button"], // Must click the Create Section button
     },
   },
   {
@@ -55,15 +57,17 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Create Your First Unit",
     description: "Build interactive learning content",
     instructions: [
+      "Review the unit creation overview and goals",
       "View the Units library overview",
       'Click the "Create Unit" button',
       "Use the rich text editor to add content",
       "Save your unit",
+      "Confirm your new unit appears in the Units list",
     ],
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--units", // Tutorial: Units page (no separate component)
       quizStoryId: "📄-pages-application-pages--units", // Quiz: Navigate to actual units page
-      requiredActions: ["onClick", "onCreate"], // Create button or save
+      completionSequence: ["create-unit-button"], // Must click the Create Unit button
     },
     persona: "instructor",
     category: "Content Creation",
@@ -80,11 +84,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Select "Multiple Choice Quiz" from the menu',
       "Configure the quiz question and answers",
       "Save the unit",
+      "Confirm the quiz block renders correctly in preview",
     ],
     completionCriteria: {
-      tutorialStoryId: "📚-creating-lessons-editor--kitchen-sink", // Tutorial: Kitchen sink editor with all block types
+      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink", // Tutorial: Kitchen sink editor with all block types
       quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Actual editor page
-      requiredActions: ["onSave", "onUpdate"], // Saving editor content
+      completionSequence: ["insert-button", "quiz-block"], // Step 1: open Insert menu; Step 2: click quiz block to add it
     },
     persona: "instructor",
     category: "Content Creation",
@@ -96,20 +101,22 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Add Vocabulary Words",
     description: "Build your class dictionary",
     instructions: [
+      "Review the Dictionary Editor overview and navigation",
       "Open the Dictionary Editor",
       'Click the "Add Word" button',
       "Fill in word details and pronunciation",
       "Upload or record audio",
       "Link the word to a unit",
+      "Confirm the word appears in your dictionary with audio",
     ],
     persona: "instructor",
     category: "Content Management",
     order: 4,
     estimatedTime: 360,
     completionCriteria: {
-      tutorialStoryId: "📁-managing-content-vocabulary-review--default", // Tutorial: Vocabulary review component
+      tutorialStoryId: "📁-content-management-vocabulary-review--default", // Tutorial: Vocabulary review component
       quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Unit detail with dictionary
-      requiredActions: ["onClick", "onCreate"], // Adding words
+      completionSequence: ["add-word-button", "word-form"], // Step 1: click Add Word; Step 2: interact with the word form
     },
   },
   {
@@ -117,20 +124,22 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Assign Work to Students",
     description: "Set up assignments with due dates",
     instructions: [
+      "Review the assignment workflow overview",
       "View the assignment creation dialog",
       'Click "Create Assignment"',
       "Select a unit to assign",
       "Set a due date and time",
       "Configure assignment settings",
+      "Confirm the assignment is visible to students",
     ],
     persona: "instructor",
     category: "Assignments",
     order: 5,
     estimatedTime: 240,
     completionCriteria: {
-      tutorialStoryId: "🧩-components-section-assigner--default", // Tutorial: Section assigner dialog component
+      tutorialStoryId: "🧩-ui-components-section-assigner--default", // Tutorial: Section assigner dialog component
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page
-      requiredActions: ["onClick", "onCreate"], // Creating assignment
+      completionSequence: ["unit-selector", "create-assignment-button"], // Step 1: select a unit; Step 2: click Create Assignment
     },
   },
   {
@@ -143,6 +152,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Browse the submissions list",
       "Open a grade to review details",
       "Leave feedback for the student",
+      "Confirm the feedback is saved and the grade is finalized",
     ],
     persona: "instructor",
     category: "Assessment",
@@ -151,7 +161,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--section-detail", // Tutorial: Section detail with grades tab
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page
-      requiredActions: ["onClick"], // Viewing grades
+      completionSequence: ["grades-tab"], // Must click the Grades tab
     },
   },
   {
@@ -164,6 +174,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Type a request in the chat input",
       "Review the AI response",
       'Click "Insert" to add content to your unit',
+      "Verify the AI-generated content appears in your unit editor",
     ],
     persona: "instructor",
     category: "AI Tools",
@@ -172,7 +183,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started", // Tutorial: Chat sidebar component
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Workbook with chat sidebar
-      requiredActions: ["onSubmit", "onSend"], // Sending chat message
+      completionSequence: ["chat-input"], // Must interact with the chat input to ask a question
     },
   },
   {
@@ -185,15 +196,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Browse the shortcuts reference page",
       "Watch the automated demo",
       "Practice common shortcuts in the editor",
+      "Confirm mastery by completing the interactive practice session",
     ],
     persona: "instructor",
     category: "Skills",
     order: 8,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: "help-keyboard-shortcut-trainer--default", // Tutorial: Keyboard shortcut trainer
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default", // Tutorial: Keyboard shortcut trainer
       quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Editor page for practicing
-      requiredActions: ["onClick", "onSave"], // Practicing shortcuts in editor
+      completionSequence: ["shortcuts-demo"], // Must interact with the keyboard shortcuts demo area
     },
   },
 
@@ -210,6 +222,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "View the Join Section dialog",
       "Enter the join code",
       "Click Submit to join",
+      "Confirm you can see your class's assignments and content",
     ],
     persona: "learner",
     category: "Getting Started",
@@ -218,7 +231,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--sections", // Tutorial: Sections page with join section dialog
       quizStoryId: "📄-pages-application-pages--sections", // Quiz: Navigate to sections page
-      requiredActions: ["onSubmit"], // Form submission of join code
+      completionSequence: ["join-section-button", "join-section-dialog"], // Step 1: click Join Section; Step 2: submit the join code dialog
     },
   },
   {
@@ -230,11 +243,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Click your section card",
       "View the Assignments section",
       "Click an assignment to open it",
+      "Confirm you can see the assignment details, due dates, and status",
     ],
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--section-detail", // Tutorial: Section page (no separate component)
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Navigate to section page
-      requiredActions: ["onClick"], // Viewing or clicking assignments
+      completionSequence: ["assignment-card", "view-workbook-button"], // Step 1: click an assignment card; Step 2: open the workbook
     },
     persona: "learner",
     category: "Coursework",
@@ -252,11 +266,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Answer quiz questions",
       "Record audio (if applicable)",
       "Review your score",
+      "Submit your completed work and verify your score is saved",
     ],
     completionCriteria: {
-      tutorialStoryId: "📚-creating-lessons-workbook--kitchen-sink", // Tutorial: Kitchen sink workbook with all block types
+      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink", // Tutorial: Kitchen sink workbook with all block types
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Actual workbook page
-      requiredActions: ["onSubmit"], // Submitting work
+      completionSequence: ["quiz-answers", "correct-checkbox"], // Step 1: open quiz answers; Step 2: click a correct answer checkbox
     },
     persona: "learner",
     category: "Coursework",
@@ -272,6 +287,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Open the My Work / Grades section",
       "Click a grade card to view details",
       "Review correct answers and feedback",
+      "Note areas for improvement to focus on in future assignments",
     ],
     persona: "learner",
     category: "Progress",
@@ -280,7 +296,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--section-detail", // Tutorial: Section detail page (has grades tab and feedback)
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page (has grades tab)
-      requiredActions: ["onClick"], // Clicking to view grade details
+      completionSequence: ["grades-tab", "grade-detail"], // Step 1: open Grades tab; Step 2: view a specific grade detail
     },
   },
   {
@@ -292,15 +308,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Browse the dictionary",
       "Click a vocabulary card",
       "Click Play to hear pronunciation",
+      "Continue exploring vocabulary to reinforce your learning",
     ],
     persona: "learner",
     category: "Practice",
     order: 5,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: "📁-managing-content-vocabulary-review--default", // Tutorial: Vocabulary review component
+      tutorialStoryId: "📁-content-management-vocabulary-review--default", // Tutorial: Vocabulary review component
       quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Unit detail page (has vocabulary)
-      requiredActions: ["onClick", "onPlay"], // Clicking words or playing audio
+      completionSequence: ["word-card", "play-audio"], // Step 1: click a vocabulary card; Step 2: play its audio pronunciation
     },
   },
   {
@@ -312,6 +329,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Click to open the chat sidebar",
       "Type a question in the chat input",
       "Review the AI response",
+      "Ask a follow-up question to deepen your understanding",
     ],
     persona: "learner",
     category: "Learning Support",
@@ -320,7 +338,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started", // Tutorial: Chat sidebar component
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Workbook with chat sidebar
-      requiredActions: ["onSubmit", "onSend"], // Sending chat message
+      completionSequence: ["chat-input"], // Must interact with chat input to prove they asked a question
     },
   },
   {
@@ -330,15 +348,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     instructions: [
       "View the Shortcuts overview",
       "Practice essential shortcuts",
+      "Confirm you can use the shortcuts in the workbook editor",
     ],
     persona: "learner",
     category: "Skills",
     order: 7,
     estimatedTime: 180,
     completionCriteria: {
-      tutorialStoryId: "📚-creating-lessons-workbook--kitchen-sink", // Tutorial: Kitchen sink workbook for practicing shortcuts
+      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink", // Tutorial: Kitchen sink workbook for practicing shortcuts
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Actual workbook page
-      requiredActions: ["onClick", "onSubmit"], // Practicing shortcuts in workbook
+      completionSequence: ["shortcuts-demo"], // Must interact with the keyboard shortcuts demo area
       customCheck: () => {
         // Check if user has used any keyboard shortcuts
         const shortcutUsed = localStorage.getItem("learner-shortcut-used");
@@ -364,9 +383,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 100,
     estimatedTime: 600,
     completionCriteria: {
-      tutorialStoryId: "help-keyboard-shortcut-trainer--default",
-      quizStoryId: "help-keyboard-shortcut-trainer--default",
-      requiredActions: ["onClick"], // Any interaction in the trainer
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      quizStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      // No requiredActions — customCheck is the sole criterion (all 20 shortcuts in localStorage)
       customCheck: () => {
         // All 20 shortcuts completed
         try {
@@ -396,8 +415,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 101,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: "help-keyboard-shortcut-trainer--default",
-      quizStoryId: "help-keyboard-shortcut-trainer--default",
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      quizStoryId: "🏠-getting-started-keyboard-shortcuts--default",
       customCheck: () => {
         // All 20 shortcuts completed in under 5 minutes
         try {
@@ -433,8 +452,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 102,
     estimatedTime: 420,
     completionCriteria: {
-      tutorialStoryId: "help-keyboard-shortcut-trainer--default",
-      quizStoryId: "help-keyboard-shortcut-trainer--default",
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      quizStoryId: "🏠-getting-started-keyboard-shortcuts--default",
       customCheck: () => {
         // All 8 individual achievements unlocked
         const requiredAchievements = [
@@ -477,9 +496,28 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 103,
     estimatedTime: 1800,
     completionCriteria: {
-      tutorialStoryId: "📚-creating-lessons-editor--kitchen-sink",
+      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
       quizStoryId: "📄-pages-application-pages--unit-detail",
-      requiredActions: ["onSave", "onUpdate"], // Using shortcuts while creating real content
+      completionSequence: ["editor-toolbar"], // Must use the editor toolbar to prove in-context shortcut knowledge
+    },
+  },
+
+  {
+    id: "secret-documentation-explorer",
+    title: "🔍 SECRET: Documentation Explorer",
+    description: "Explore the onboarding documentation and interactive examples",
+    instructions: [
+      "Browse the 🏠 Getting Started section in the Storybook sidebar",
+      "Open the Learning Modes or Task Completion Examples stories",
+      "Read through the interactive documentation",
+    ],
+    persona: "all",
+    category: "🎁 Extra Credit",
+    order: 104,
+    estimatedTime: 60,
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-onboarding-learning-modes--tutorial-mode-example",
+      quizStoryId: "🏠-getting-started-onboarding-task-completion-examples--auto-detect-task-completion",
     },
   },
 
@@ -504,7 +542,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--default",
       quizStoryId: "translation-mode-demo--editor-namespace",
-      requiredActions: ["onLanguageChange", "onClick"],
+      completionSequence: ["translation-demo-instructions"], // Must read the instructions that explain the language switcher
     },
   },
   {
@@ -527,7 +565,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--default",
       quizStoryId: "translation-mode-demo--auth-namespace",
-      requiredActions: ["onPanelOpen", "onClick"],
+      completionSequence: ["translation-auth-form"], // Must interact with the auth form to see its translation panel entries
     },
   },
   {
@@ -549,7 +587,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--editor-namespace",
       quizStoryId: "translation-mode-demo--auth-namespace",
-      requiredActions: ["onClick", "onSelect"],
+      completionSequence: ["translation-auth-form"], // Must explore the auth form to understand locale file structure
     },
   },
   {
@@ -572,7 +610,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--auth-namespace",
       quizStoryId: "translation-mode-demo--default",
-      requiredActions: ["onClick", "onSelect"],
+      completionSequence: ["translation-auth-buttons"], // Must click auth buttons to explore their translation metadata
     },
   },
   {
@@ -595,7 +633,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--default",
       quizStoryId: "translation-mode-demo--editor-namespace",
-      requiredActions: ["onLanguageChange", "onClick"],
+      completionSequence: ["translation-auth-buttons"], // Must click the auth buttons to verify RTL layout of directional UI
     },
   },
   {
@@ -617,7 +655,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "translation-mode-demo--default",
       quizStoryId: "translation-mode-demo--auth-namespace",
-      requiredActions: ["onClick", "onSelect"],
+      completionSequence: ["translation-password-reset"], // Must interact with password reset form which contains plural key examples
     },
   },
 ];

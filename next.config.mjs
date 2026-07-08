@@ -47,6 +47,24 @@ const nextConfig = {
   // Disable dev indicators to suppress Turbopack isrManifest HMR warnings
   devIndicators: false,
 
+  // Security headers applied to all routes.
+  // CSP is set per-request in proxy.ts (requires a per-request nonce).
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), geolocation=(), microphone=(self)' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        ],
+      },
+    ];
+  },
+
   // Environment variables exposed to the browser
   env: {
     NEXT_PUBLIC_YJS_WS_URL: getWebSocketUrl(),
@@ -77,7 +95,14 @@ const nextConfig = {
   },
 
   // Turbopack config
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      // Prevent onnxruntime-node (native Node addon) from being bundled into
+      // client chunks. @huggingface/transformers conditionally imports it, but
+      // Turbopack doesn't respect /* webpackIgnore: true */ dynamic import comments.
+      'onnxruntime-node': './src/stubs/onnxruntime-node.js',
+    },
+  },
 
   // Persist Turbopack compiler artifacts on disk for faster dev restarts
   experimental: {

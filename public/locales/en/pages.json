@@ -18,6 +18,9 @@
   },
   "index": {
     "title": "Homework Supply",
+    "greetingMorning": "Good morning, {name}",
+    "greetingAfternoon": "Good afternoon, {name}",
+    "greetingEvening": "Good evening, {name}",
     "assignments": "Assignments",
     "viewWorkbook": "View Workbook",
     "completedAssignments": "Completed Assignments",
@@ -38,6 +41,7 @@
     "heading": "Overall Leaderboard",
     "xpMode": "XP",
     "completionMode": "Completion",
+    "fastestMode": "Fastest",
     "squadsMode": "Squads",
     "empty": "No leaderboard data yet. Complete assignments to earn XP!"
   },

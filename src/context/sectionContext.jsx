@@ -36,16 +36,27 @@ function handleSubscriptionError(label, error) {
   const msg =
     error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
   if (!msg || msg === "{}" || msg === "{}") {
-    console.warn(`[SectionContext] ${label}: transient empty error (safe to ignore)`);
+    console.warn(
+      `[SectionContext] ${label}: transient empty error (safe to ignore)`,
+    );
     return;
   }
   console.error(`[SectionContext] ${label}:`, error);
 }
 
-const SectionProvider = ({ children, unitId }) => {
+const SectionProvider = ({ children, unitId, initialSections = [] }) => {
   // Get auth state from centralized context
   const { user, isLoading: authLoading } = React.useContext(AuthContext);
-  const [state, dispatch] = useReducer(sectionReducer, initialState);
+  const [state, dispatch] = useReducer(
+    sectionReducer,
+    initialSections.length > 0
+      ? {
+          ...initialState,
+          sections: initialSections,
+          sectionMap: Object.fromEntries(initialSections.map((s) => [s.id, s])),
+        }
+      : initialState,
+  );
   const sectionVersionMapRef = useRef({});
   const assignmentVersionMapRef = useRef({});
 
@@ -55,6 +66,37 @@ const SectionProvider = ({ children, unitId }) => {
 
   // Gate: don't subscribe until auth is fully resolved
   const authReady = !authLoading && !!user;
+
+  // Seed from IndexedDB cache when offline so pages render immediately
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || navigator.onLine) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const { getAllCachedSections, getAllCachedAssignments } =
+          await import("@/offline/OfflineDataStore");
+        const [cachedSections, cachedAssignments] = await Promise.all([
+          getAllCachedSections(),
+          getAllCachedAssignments(),
+        ]);
+        if (!mounted) return;
+        if (cachedSections.length > 0) {
+          dispatch({ type: actionTypes.SET_SECTIONS, payload: cachedSections });
+        }
+        if (cachedAssignments.length > 0) {
+          dispatch({
+            type: actionTypes.SET_ASSIGNMENTS,
+            payload: cachedAssignments,
+          });
+        }
+      } catch {
+        // IndexedDB not available — noop
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!authReady) return;

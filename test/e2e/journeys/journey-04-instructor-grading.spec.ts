@@ -91,6 +91,10 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
     await page
       .locator('[data-tour="section-form"] input[name="name"]')
       .fill(sectionName);
+    await page
+      .locator('[data-tour="section-form"] textarea[name="description"]')
+      .first()
+      .fill("Automated test section for grading journey");
 
     const submitBtn = page
       .locator('[data-tour="section-form"]')

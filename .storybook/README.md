@@ -76,6 +76,35 @@ Mock implementations are in `.storybook/__mocks__/` directory.
     └── seedData.js      # Helper functions for seeding mock data
 ```
 
+## Auth Mock — `mockAuth.session.groups`
+
+`AdminRouteGuard` reads `session?.groups` to determine access. The default mock session includes `groups: ['Admins', 'Instructors']` so admin pages render correctly by default. Stories that represent a specific role should override this explicitly via `parameters.mockAuth.session.groups`.
+
+### Groups by role
+
+| Role | groups value |
+|---|---|
+| Admin / Instructor | `['Admins', 'Instructors']` |
+| Instructor only | `['Instructors']` |
+| Student (enrolled) | `['section-jpn-101-learners']` (or whichever sections apply) |
+| Student (no sections) | `[]` |
+| Student (full) | `['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners']` |
+
+### Story coverage
+
+| File | Stories | groups override |
+|---|---|---|
+| `.storybook/docs/QuickTour-Student.stories.tsx` | `Step1_Dashboard`, `Step2_JoinSection`, `Step3_Workbook` | `['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners']` |
+| `src/stories/pages.stories.tsx` | `Index`, `IndexAssignments`, `Sections` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
+| | `SectionDetailStudent`, `Workbook`, `WorkbookTimedExercise`, `PeerReview` | `['section-jpn-101-learners']` |
+| | `IndexNoSections`, `SectionsEmptyState` | `[]` |
+| | `Units`, `UnitsEmptyState`, `SectionDetail`, `UnitDetail` | `['Instructors']` |
+| `src/stories/pages-additional.stories.tsx` | `Settings`, `Squads`, `SquadDetail`, `XPHistory`, `Leaderboard`, `Notifications`, `Drill`, `ProfilePublic` | `['section-jpn-101-learners']` |
+| | `AdminAnalytics`, `AdminArchives`, `AdminModeration`, `AdminSettings`, `AdminWords`, `RecycleBin`, `SectionAISettings`, `SectionGamificationSettings` | `['Admins', 'Instructors']` |
+| | `InstructorGrade` | `['Instructors']` |
+| `src/stories/root-components-with-providers.stories.tsx` | `AppShellDefault`, `RecordingStudioEnhancedModalOpen` | `['section-jpn-101-learners']` |
+| | `GradeReviewDrawerOpen`, `CollaboratorManagerOwner`, `CollaboratorManagerReadOnly` | `['Instructors']` |
+
 ## Learn More
 
 - [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction)

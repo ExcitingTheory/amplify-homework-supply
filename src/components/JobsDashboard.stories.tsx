@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import JobsDashboard from './JobsDashboard';
 
 const meta: Meta<typeof JobsDashboard> = {
-  title: '🛠️ Admin/JobsDashboard',
+  title: '🛠️ Admin/Jobs Dashboard',
   component: JobsDashboard,
   parameters: { layout: 'padded' },
 };

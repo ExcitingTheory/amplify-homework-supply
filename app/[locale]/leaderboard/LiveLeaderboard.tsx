@@ -11,10 +11,11 @@ import {
   Container,
 } from "@mui/material";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
-import GridOnIcon from "@mui/icons-material/GridOn";
+import TimerIcon from "@mui/icons-material/Timer";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
-import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
+import { FastestCompletionsTable } from "@/components/Leaderboard/FastestCompletionsTable";
+import type { FastestCompletionEntry } from "@/components/Leaderboard/FastestCompletionsTable";
 import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
 import { useSquad } from "@/context/gamificationContext";
 import {
@@ -30,6 +31,11 @@ interface LeaderboardEntry {
   level: number;
   currentStreak: number;
   completedAssignments: number;
+  onTimeSubmissions: number;
+  totalSubmissions: number;
+  reportCard?: {
+    timeStats?: { min: number; max: number; avg: number; count: number };
+  };
   avatarStyle?: string;
   avatarOverrides?: any;
   avatarSeed?: string;
@@ -46,7 +52,7 @@ export function LiveLeaderboard({
   initialEntries: LeaderboardEntry[];
 }) {
   const t = useTranslations("pages");
-  const [mode, setMode] = useState("completion");
+  const [mode, setMode] = useState("fastest");
   const [entries, setEntries] = useState<LeaderboardEntry[]>(initialEntries);
   const [currentUserId, setCurrentUserId] = useState("");
   const { squadLeaderboard, mySquad } = useSquad();
@@ -85,6 +91,10 @@ export function LiveLeaderboard({
             if (typeof parsedOverrides === "string") {
               try { parsedOverrides = JSON.parse(parsedOverrides); } catch { parsedOverrides = undefined; }
             }
+            let parsedReportCard = entry.reportCard;
+            if (typeof parsedReportCard === "string") {
+              try { parsedReportCard = JSON.parse(parsedReportCard); } catch { parsedReportCard = undefined; }
+            }
             byStudent.set(entry.studentId, {
               studentId: entry.studentId,
               studentName: entry.studentName || entry.studentId,
@@ -93,6 +103,9 @@ export function LiveLeaderboard({
               level: entry.level || 1,
               currentStreak: entry.currentStreak || 0,
               completedAssignments: entry.completedAssignments || 0,
+              onTimeSubmissions: entry.onTimeSubmissions || 0,
+              totalSubmissions: entry.totalSubmissions || 0,
+              reportCard: parsedReportCard || undefined,
               avatarStyle: entry.avatarStyle || undefined,
               avatarOverrides: parsedOverrides,
               avatarSeed: entry.avatarSeed || entry.studentId,
@@ -149,7 +162,7 @@ export function LiveLeaderboard({
         }}
       >
         <Typography variant="h4" component="h1">
-          {t("leaderboard.heading", "Overall Leaderboard")}
+          {t("leaderboard.heading")}
         </Typography>
         <ToggleButtonGroup
           value={mode}
@@ -157,23 +170,23 @@ export function LiveLeaderboard({
           onChange={handleModeChange}
           size="small"
         >
-          <ToggleButton value="xp" aria-label={t("leaderboard.xpMode", "XP")}>
+          <ToggleButton value="xp" aria-label={t("leaderboard.xpMode")}>
             <LeaderboardIcon sx={{ mr: 0.5 }} />
-            {t("leaderboard.xpMode", "XP")}
+            {t("leaderboard.xpMode")}
           </ToggleButton>
           <ToggleButton
-            value="completion"
-            aria-label={t("leaderboard.completionMode", "Completion")}
+            value="fastest"
+            aria-label={t("leaderboard.fastestMode")}
           >
-            <GridOnIcon sx={{ mr: 0.5 }} />
-            {t("leaderboard.completionMode", "Completion")}
+            <TimerIcon sx={{ mr: 0.5 }} />
+            {t("leaderboard.fastestMode")}
           </ToggleButton>
           <ToggleButton
             value="squads"
-            aria-label={t("leaderboard.squadsMode", "Squads")}
+            aria-label={t("leaderboard.squadsMode")}
           >
             <GroupsIcon sx={{ mr: 0.5 }} />
-            {t("leaderboard.squadsMode", "Squads")}
+            {t("leaderboard.squadsMode")}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -186,17 +199,23 @@ export function LiveLeaderboard({
         />
       )}
 
-      {mode === "completion" && entries.length > 0 && (
-        <CompletionGrid
-          assignments={[{ id: "overall", title: "Completed" }]}
-          students={entries.map((e) => ({
-            studentId: e.studentId,
-            studentName: e.studentName,
-            assignments: {
-              overall:
-                e.completedAssignments > 0 ? "completed" : "not_started",
-            },
-          }))}
+      {mode === "fastest" && entries.length > 0 && (
+        <FastestCompletionsTable
+          entries={entries
+            .filter((e) => e.reportCard?.timeStats && e.reportCard.timeStats.count > 0)
+            .map((e): FastestCompletionEntry => ({
+              studentId: e.studentId,
+              studentName: e.studentName,
+              avgTimeMs: e.reportCard?.timeStats?.avg || 0,
+              fastestTimeMs: e.reportCard?.timeStats?.min || 0,
+              completedCount: e.completedAssignments || 0,
+              onTimeCount: e.onTimeSubmissions || 0,
+              totalSubmissions: e.totalSubmissions || 0,
+              avatarStyle: e.avatarStyle as any,
+              avatarOverrides: e.avatarOverrides,
+              avatarSeed: e.avatarSeed,
+              avatarLoaded: e.avatarLoaded,
+            }))}
           currentStudentId={currentUserId}
         />
       )}
@@ -213,7 +232,7 @@ export function LiveLeaderboard({
           <Typography variant="h6" color="text.secondary">
             {t(
               "leaderboard.empty",
-              "No leaderboard data yet. Complete assignments to earn XP!",
+              { defaultValue: "No leaderboard data yet. Complete assignments to earn XP!" },
             )}
           </Typography>
         </Box>

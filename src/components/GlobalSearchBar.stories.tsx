@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import GlobalSearchBar from './GlobalSearchBar';
 
 const meta: Meta<typeof GlobalSearchBar> = {
-  title: '🔍 Navigation/GlobalSearchBar',
+  title: '🧩 UI Components/Global Search Bar',
   component: GlobalSearchBar,
   parameters: { layout: 'centered' },
 };

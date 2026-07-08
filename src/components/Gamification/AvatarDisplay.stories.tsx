@@ -5,7 +5,7 @@ import type { AvatarBorderEffect } from './AvatarDisplay'
 import Box from '@mui/material/Box'
 
 const meta: Meta<typeof AvatarDisplay> = {
-  title: '🏆 Gamification/Avatar/Avatar Display',
+  title: '🏆 Gamification/Avatars & Cosmetics/Avatar Display',
   component: AvatarDisplay,
   argTypes: {
     borderEffect: {

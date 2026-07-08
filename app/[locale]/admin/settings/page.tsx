@@ -14,6 +14,7 @@ import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapp
 import SectionContext from "@/context/sectionContext";
 import { SectionProvider } from "@/context/sectionContext";
 import { getAmplifyClient } from "@/utils/amplifyClient";
+import { serializeBattleStakes } from "@/utils/battleStakes";
 import { generateCampaignNarrative } from "../../../actions/gamification";
 import { useRouter, useParams, usePathname } from "next/navigation";
 
@@ -536,6 +537,7 @@ function GamificationAdmin() {
   const handleAddBoss = React.useCallback(
     async (bossData: any) => {
       try {
+        const stakes = serializeBattleStakes(bossData.stakes || "{}");
         await client.models.GroupChallenge.create({
           title: bossData.title,
           targetXP: bossData.targetXP,
@@ -545,7 +547,8 @@ function GamificationAdmin() {
           startDate: bossData.startDate || undefined,
           deadline: bossData.deadline || undefined,
           setting: bossData.setting || "",
-          stakes: bossData.stakes || "",
+          stakes,
+          linkedUnitIds: bossData.linkedUnitIds?.length ? bossData.linkedUnitIds : undefined,
           cohortId: selectedSectionId || "",
         } as any);
       } catch (err) {
@@ -561,6 +564,7 @@ function GamificationAdmin() {
   const handleEditBoss = React.useCallback(
     async (bossId: string, bossData: any) => {
       try {
+        const stakes = serializeBattleStakes(bossData.stakes || "{}");
         const existing = bossBattles.find((b) => b.id === bossId);
         await client.models.GroupChallenge.update({
           id: bossId,
@@ -570,8 +574,9 @@ function GamificationAdmin() {
           startDate: bossData.startDate || undefined,
           deadline: bossData.deadline || undefined,
           setting: bossData.setting || "",
-          stakes: bossData.stakes || "",
+          stakes,
           featuredImage: bossData.featuredImage || undefined,
+          linkedUnitIds: bossData.linkedUnitIds?.length ? bossData.linkedUnitIds : undefined,
           _version: existing?._version,
         } as any);
       } catch (err) {

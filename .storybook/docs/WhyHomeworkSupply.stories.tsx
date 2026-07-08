@@ -104,7 +104,7 @@ export const WhyHomeworkSupply: Story = {
             <Paper key={i} sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
               <CancelIcon sx={{ color: 'error.main', mt: 0.3, flexShrink: 0 }} />
               <Box sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ textDecoration: 'line-through', color: 'text.disabled' }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   {p.problem}
                 </Typography>
               </Box>

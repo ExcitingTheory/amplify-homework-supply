@@ -108,8 +108,8 @@ export default function CollaborativePresenceBar({
     >
       {/* Connection indicator */}
       <Tooltip title={isConnected
-        ? t('practiceDrill.collab.connected', 'Connected')
-        : t('practiceDrill.collab.disconnected', 'Disconnected')}
+        ? t('practiceDrill.collab.connected')
+        : t('practiceDrill.collab.disconnected')}
       >
         {isConnected
           ? <WifiIcon fontSize="small" color="success" />
@@ -150,7 +150,7 @@ export default function CollaborativePresenceBar({
 
       {/* Group accuracy */}
       {groupStats.totalParticipants > 0 && (
-        <Tooltip title={t('practiceDrill.collab.groupAccuracyTip', 'Average accuracy across all participants')}>
+        <Tooltip title={t('practiceDrill.collab.groupAccuracyTip')}>
           <Chip
             icon={<GroupsIcon />}
             size="small"
@@ -166,8 +166,8 @@ export default function CollaborativePresenceBar({
       {/* Room code */}
       <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <Tooltip title={copied
-          ? t('practiceDrill.collab.copied', 'Copied!')
-          : t('practiceDrill.collab.copyCode', 'Copy room code to share')}
+          ? t('practiceDrill.collab.copied')
+          : t('practiceDrill.collab.copyCode')}
         >
           <Chip
             icon={<ContentCopyIcon />}

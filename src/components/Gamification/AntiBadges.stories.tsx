@@ -21,7 +21,7 @@ import {
  * the very concept of gamifying homework.
  */
 const meta: Meta = {
-  title: 'Gamification/Anti-Badges',
+  title: '🏆 Gamification/Badges & Celebrations/Anti-Badges',
   parameters: {
     layout: 'padded',
   },

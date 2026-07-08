@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 // ============================================================================
 
 const glowMeta: Meta<typeof AvatarGlowRing> = {
-  title: 'Gamification/AvatarGlowRing',
+  title: '🏆 Gamification/Avatars & Cosmetics/Avatar Glow Ring',
   component: AvatarGlowRing,
   parameters: { layout: 'centered' },
 }

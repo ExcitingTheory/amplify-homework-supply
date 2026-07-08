@@ -213,10 +213,12 @@
   },
   "questionsReview": {
     "answer": "答案",
+    "collapse": "Collapse",
     "deselectAll": "取消全选",
     "enterAnswer": "输入答案...",
     "enterHint": "输入提示...",
     "enterQuestion": "输入问题...",
+    "expand": "Expand",
     "filteringBySearch": "按搜索筛选：\"{{searchTerm}}\"（{{count}} / {{total}} 项）",
     "from": "从",
     "hasAudio": "有音频",

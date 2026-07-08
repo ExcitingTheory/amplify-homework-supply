@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { AnimatedXPCounter } from './AnimatedXPCounter'
 
 const meta: Meta<typeof AnimatedXPCounter> = {
-  title: '🏆 Gamification/XP & Progress/Animated XP Counter',
+  title: '🏆 Gamification/XP & Progression/Animated XP Counter',
   component: AnimatedXPCounter,
 }
 export default meta

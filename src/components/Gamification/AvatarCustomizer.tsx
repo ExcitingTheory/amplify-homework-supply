@@ -432,7 +432,7 @@ export function AvatarCustomizer({
   const canCustomizeAccessories = level >= accessoriesLevel
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{ zIndex: (theme) => theme.zIndex.modal + 3 }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Customize Avatar
         <Tooltip title="Reset to random">

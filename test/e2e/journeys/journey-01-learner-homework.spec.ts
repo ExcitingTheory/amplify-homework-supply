@@ -68,6 +68,49 @@ test.describe
       timeout: 10_000,
     });
 
+    // Enter edit mode and add answers to the quiz
+    const quizBlock = page.locator('[data-tour="quiz-block"]').first();
+    const editBtn = quizBlock.getByRole("button", { name: /edit/i });
+    await expect(editBtn).toBeVisible({ timeout: 5_000 });
+    await editBtn.click();
+    await page.waitForTimeout(1000);
+
+    // Add two answer options by clicking the "Add Answer" placeholder
+    const addAnswerField = quizBlock.locator(
+      'input[placeholder*="Add Answer"], [placeholder*="Add Answer"]',
+    );
+    await expect(addAnswerField).toBeVisible({ timeout: 5_000 });
+    await addAnswerField.click();
+    await page.waitForTimeout(500);
+
+    // Fill first answer
+    const answerInputs = quizBlock.locator('input[type="text"], textarea');
+    const firstAnswer = answerInputs.last();
+    await firstAnswer.fill("Correct answer");
+    await page.waitForTimeout(500);
+
+    // Mark first answer as correct (toggle the switch)
+    // Use the MUI Switch parent span rather than the hidden input,
+    // and force:true to bypass overlapping MUI Stack layout.
+    const correctToggle = quizBlock.locator(".MuiSwitch-root").first();
+    if (await correctToggle.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await correctToggle.click({ force: true });
+      await page.waitForTimeout(300);
+    }
+
+    // Add second answer
+    await addAnswerField.click();
+    await page.waitForTimeout(500);
+    const secondAnswer = answerInputs.last();
+    await secondAnswer.fill("Wrong answer");
+    await page.waitForTimeout(500);
+
+    // Click "Done" to save the quiz
+    const doneBtn = quizBlock.getByRole("button", { name: /done/i });
+    await expect(doneBtn).toBeVisible({ timeout: 5_000 });
+    await doneBtn.click();
+    await page.waitForTimeout(1000);
+
     // Wait for auto-save
     await page.waitForTimeout(4000);
     await ctx.close();
@@ -97,6 +140,10 @@ test.describe
     await page
       .locator('[data-tour="section-form"] input[name="name"]')
       .fill(sectionName);
+    await page
+      .locator('[data-tour="section-form"] textarea[name="description"]')
+      .first()
+      .fill("Automated test section for homework journey");
 
     const submitBtn = page
       .locator('[data-tour="section-form"]')
@@ -165,7 +212,7 @@ test.describe
 
     const submitBtn = page
       .locator('[data-tour="join-section-dialog"]')
-      .getByRole("button", { name: /join/i });
+      .getByRole("button", { name: /add/i });
     await submitBtn.click();
 
     await expect(

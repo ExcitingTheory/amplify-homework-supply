@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Typography from '@mui/material/Typography'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface AnimatedXPCounterProps {
   /** Current total XP value to display. */
@@ -23,6 +24,7 @@ export function AnimatedXPCounter({
   duration = 800,
   variant = 'h6',
 }: AnimatedXPCounterProps) {
+  const reducedMotion = useReducedMotion()
   const [displayValue, setDisplayValue] = useState(targetValue)
   const previousRef = useRef(targetValue)
   const rafRef = useRef<number | null>(null)
@@ -32,6 +34,13 @@ export function AnimatedXPCounter({
     const diff = targetValue - startValue
 
     if (diff === 0) return
+
+    // Snap instantly when reduced motion is preferred
+    if (reducedMotion) {
+      setDisplayValue(targetValue)
+      previousRef.current = targetValue
+      return
+    }
 
     const startTime = performance.now()
 
@@ -57,7 +66,7 @@ export function AnimatedXPCounter({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [targetValue, duration])
+  }, [targetValue, duration, reducedMotion])
 
   return (
     <Typography

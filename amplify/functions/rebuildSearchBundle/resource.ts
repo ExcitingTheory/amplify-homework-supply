@@ -1,4 +1,4 @@
-import { defineFunction, secret } from "@aws-amplify/backend";
+import { defineFunction } from "@aws-amplify/backend";
 
 /**
  * Rebuild Search Bundle Lambda
@@ -11,12 +11,12 @@ import { defineFunction, secret } from "@aws-amplify/backend";
  *
  * Reads per-item embedding files from S3, optionally generates missing embeddings,
  * and writes optimized search bundles with IVF pre-indexing for n > 200 items.
+ *
+ * Uses Xenova/all-MiniLM-L6-v2 (384D) for embedding generation — runs locally
+ * in Lambda without external API dependencies.
  */
 export const rebuildSearchBundleHandler = defineFunction({
   timeoutSeconds: 900,
   memoryMB: 1024,
   resourceGroupName: "data",
-  environment: {
-    OPENAI_API_KEY: secret("OPENAI_API_KEY"),
-  },
 });

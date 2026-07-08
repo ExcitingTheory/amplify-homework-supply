@@ -43,7 +43,11 @@ import {
   ScanCommand,
   BatchWriteItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { AppSyncClient, ListDataSourcesCommand, ListGraphqlApisCommand } from "@aws-sdk/client-appsync";
+import {
+  AppSyncClient,
+  ListDataSourcesCommand,
+  ListGraphqlApisCommand,
+} from "@aws-sdk/client-appsync";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -63,7 +67,12 @@ const region = outputs.auth.aws_region;
 const cognitoClient = new CognitoIdentityProviderClient({ region });
 
 // Get the password from environment variable
-const password = process.env.TEST_USER_PASSWORD || "TempPassword123!";
+const password = process.env.TEST_USER_PASSWORD;
+if (!password) {
+  throw new Error(
+    "TEST_USER_PASSWORD env var is required. Run: npx ampx sandbox secret set TEST_USER_PASSWORD",
+  );
+}
 
 // Initialize the data client
 const client = generateClient<Schema>();
@@ -103,9 +112,7 @@ async function wipeAllData() {
   // amplify_outputs.json, guaranteeing we only touch the current sandbox's tables.
   const apiUrl = outputs.data?.url || "";
   if (!apiUrl) {
-    console.log(
-      "  ⚠️  No API URL in amplify_outputs.json — skipping wipe",
-    );
+    console.log("  ⚠️  No API URL in amplify_outputs.json — skipping wipe");
     return;
   }
 
@@ -119,7 +126,10 @@ async function wipeAllData() {
       new ListGraphqlApisCommand({ nextToken: apisNextToken, maxResults: 25 }),
     );
     for (const api of resp.graphqlApis || []) {
-      if (api.uris?.GRAPHQL && apiUrl.startsWith(api.uris.GRAPHQL.replace(/\/graphql$/, ""))) {
+      if (
+        api.uris?.GRAPHQL &&
+        apiUrl.startsWith(api.uris.GRAPHQL.replace(/\/graphql$/, ""))
+      ) {
         apiId = api.apiId || "";
         break;
       }
@@ -808,14 +818,14 @@ console.log(`✅ Uploaded unit content to S3`);
 console.log("\n🧮 Uploading seed embeddings to S3...");
 
 function makeFakeEmbedding(wordCount: number): object {
-  // Generate a deterministic 256-dim fake vector for seed data
-  const dims = 256;
+  // Generate a deterministic 384-dim fake vector for seed data
+  const dims = 384;
   const embedding = Array.from(
     { length: dims },
     (_, i) => Math.sin(i * 0.1 + wordCount) * 0.5,
   );
   return {
-    model: "text-embedding-3-small",
+    model: "Xenova/all-MiniLM-L6-v2",
     dimensions: dims,
     generatedAt: Date.now(),
     wordCount,
@@ -868,8 +878,8 @@ console.log(
 
 // Update embedding metadata on the model records
 const embeddingMeta = {
-  model: "text-embedding-3-small",
-  dimensions: 256,
+  model: "Xenova/all-MiniLM-L6-v2",
+  dimensions: 384,
   version: Date.now(),
   wordCount: 1,
   pageCount: 1,

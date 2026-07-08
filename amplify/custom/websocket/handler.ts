@@ -19,6 +19,15 @@ const ddb = DynamoDBDocumentClient.from(ddbClient);
 // API Gateway Management API client for sending messages to WebSocket clients
 let apiGatewayClient: ApiGatewayManagementApiClient | null = null;
 
+/**
+ * In-memory authorization cache keyed by connectionId.
+ *
+ * Avoids a DB round-trip on every Yjs sync message for already-authorized
+ * connections. Scoped to the Lambda execution context — warm instances
+ * benefit on all subsequent messages; cold starts re-verify once per connection.
+ */
+const connectionAuthCache = new Set<string>();
+
 interface WebSocketMessage {
   action: string;
   connectionId?: string;
@@ -64,6 +73,14 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (
   const routeKey = event.requestContext.routeKey;
   // Extract userId from Cognito claims if available
   const userId = event.requestContext?.authorizer?.claims?.sub || "anonymous";
+  // Extract Cognito groups for authorization checks
+  const userGroups: string[] = (() => {
+    const raw = event.requestContext?.authorizer?.claims?.["cognito:groups"];
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    // API Gateway may serialize groups as a comma-separated string
+    return typeof raw === "string" ? raw.split(",") : [];
+  })();
 
   // Initialize API Gateway Management API client with endpoint from event
   if (!apiGatewayClient) {
@@ -78,16 +95,27 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (
   try {
     switch (routeKey) {
       case "$connect":
-        // Connection established - but we don't know unitId yet
-        // Will be added on first message with unitId
+        // Reject unauthenticated connections before they join any room.
+        // Cognito JWT claims are validated by API Gateway before this Lambda
+        // is invoked; "anonymous" means the token was absent or the sub
+        // claim was missing from the authorizer context.
+        if (userId === "anonymous") {
+          console.warn(
+            `[Auth] Rejected anonymous WebSocket connection: ${connectionId}`,
+          );
+          return { statusCode: 401, body: "Unauthorized" };
+        }
         return { statusCode: 200, body: "Connected" };
 
       case "$disconnect":
+        // Evict from auth cache so stale entries don't accumulate in long-lived
+        // Lambda instances.
+        connectionAuthCache.delete(connectionId);
         return handleDisconnect(connectionId);
 
       case "$default":
         const message: WebSocketMessage = JSON.parse(event.body || "{}");
-        return await handleMessage(connectionId, message, userId);
+        return await handleMessage(connectionId, message, userId, userGroups);
 
       default:
         return { statusCode: 400, body: "Unknown route" };
@@ -161,6 +189,7 @@ async function handleMessage(
   connectionId: string,
   message: WebSocketMessage,
   userId: string,
+  userGroups: string[],
 ): Promise<any> {
   const { action, data, unitId } = message;
 
@@ -173,15 +202,10 @@ async function handleMessage(
   // Determine document type
   const isReview = isReviewRoom(unitId);
 
-  // For review rooms, validate that the user is authorized
-  if (isReview && action === "sync") {
-    const authorized = await authorizeReviewAccess(unitId, userId);
-    if (!authorized) {
-      console.warn(
-        `[Auth] Denied review room access for user ${userId} to ${unitId}`,
-      );
-      return { statusCode: 403, body: "Not authorized for this review room" };
-    }
+  // Authorize access to this room. The result is cached in-memory after the
+  // first check so subsequent Yjs sync messages don't incur a DB round-trip.
+  if (!(await authorizeRoomAccess(connectionId, unitId, userId, userGroups))) {
+    return { statusCode: 403, body: "Not authorized for this room" };
   }
 
   switch (action) {
@@ -311,7 +335,8 @@ async function handleMessage(
       await addConnection(connectionId, unitId, userId);
 
       const chatText = data?.text || data?.message || "";
-      const messageId = data?.messageId || `msg-${Date.now()}-${connectionId.slice(0, 8)}`;
+      const messageId =
+        data?.messageId || `msg-${Date.now()}-${connectionId.slice(0, 8)}`;
 
       // Broadcast the message to peers immediately (non-blocking moderation)
       const chatMessage = {
@@ -346,12 +371,17 @@ async function handleMessage(
 
       // Moderate text asynchronously — retract + notify if flagged
       if (chatText && chatText.length > 0 && isReview) {
-        moderateChatMessage(chatText, unitId, userId, messageId, allChatConnections).catch(
-          (err) =>
-            console.warn(
-              "[Moderation] Chat moderation failed (non-blocking):",
-              err,
-            ),
+        moderateChatMessage(
+          chatText,
+          unitId,
+          userId,
+          messageId,
+          allChatConnections,
+        ).catch((err) =>
+          console.warn(
+            "[Moderation] Chat moderation failed (non-blocking):",
+            err,
+          ),
         );
       }
 
@@ -455,12 +485,117 @@ async function sendToConnection(
 }
 
 /**
+ * Authorize a connection to access a document room.
+ *
+ * - Anonymous users are rejected at $connect; this is a belt-and-suspenders check.
+ * - For review rooms: validates owner/invitee membership via DynamoDB.
+ * - For regular collaboration rooms: validates the user is the unit owner,
+ *   an Admin/Instructor with write access, or a Learner enrolled in a section
+ *   that has the unit assigned (via readableGroups intersection).
+ *
+ * The result is stored in `connectionAuthCache` so the DynamoDB call only
+ * happens once per connection per Lambda execution context.
+ */
+async function authorizeRoomAccess(
+  connectionId: string,
+  unitId: string,
+  userId: string,
+  userGroups: string[] = [],
+): Promise<boolean> {
+  // Belt-and-suspenders: anonymous should have been blocked at $connect
+  if (userId === "anonymous") {
+    console.warn(`[Auth] Anonymous user attempted to join room ${unitId}`);
+    return false;
+  }
+
+  // Already verified in this Lambda execution — skip DB
+  if (connectionAuthCache.has(connectionId)) return true;
+
+  const authorized = isReviewRoom(unitId)
+    ? await authorizeReviewAccess(unitId, userId)
+    : await authorizeUnitRoomAccess(unitId, userId, userGroups);
+
+  if (authorized) {
+    connectionAuthCache.add(connectionId);
+  } else {
+    console.warn(`[Auth] Denied room access for user ${userId} to ${unitId}`);
+  }
+
+  return authorized;
+}
+
+/**
+ * Authorize a user for a regular (non-review) collaboration room.
+ *
+ * Validates that the user is:
+ * 1. An Admin (global access), OR
+ * 2. The unit owner (Instructor who created it), OR
+ * 3. An Instructor/Learner whose Cognito groups intersect with the unit's
+ *    readableGroups or writableGroups (meaning they're in a section with this unit assigned).
+ *
+ * Uses UNIT_TABLE_NAME to look up the unit's owner and group arrays.
+ */
+async function authorizeUnitRoomAccess(
+  unitId: string,
+  userId: string,
+  userGroups: string[],
+): Promise<boolean> {
+  // Admins always have access
+  if (userGroups.includes("Admins")) return true;
+
+  try {
+    const result = await ddb.send(
+      new QueryCommand({
+        TableName: process.env.UNIT_TABLE_NAME!,
+        KeyConditionExpression: "id = :id",
+        ExpressionAttributeValues: {
+          ":id": unitId,
+        },
+        ProjectionExpression: "#owner, readableGroups, writableGroups",
+        ExpressionAttributeNames: {
+          "#owner": "owner",
+        },
+      }),
+    );
+
+    const unit = result.Items?.[0];
+    if (!unit) {
+      console.warn(`[Auth] Unit ${unitId} not found`);
+      return false;
+    }
+
+    // Unit owner (Instructor who created it) always has access
+    if (unit.owner === userId) return true;
+
+    // Check if user's Cognito groups intersect with the unit's access groups.
+    // writableGroups = section instructors, readableGroups = section instructors + learners
+    const unitGroups: string[] = [
+      ...(unit.writableGroups || []),
+      ...(unit.readableGroups || []),
+    ];
+
+    if (unitGroups.length === 0) {
+      // Unit has no section groups assigned — not yet published to any section.
+      // Only the owner (checked above) should have access.
+      return false;
+    }
+
+    // Check intersection: does any of the user's groups match a unit group?
+    const hasAccess = userGroups.some((g) => unitGroups.includes(g));
+    return hasAccess;
+  } catch (error) {
+    console.error(`[Auth] Failed to authorize unit room access:`, error);
+    // Fail closed — deny on error
+    return false;
+  }
+}
+
+/**
  * Authorize a user for a review room.
  *
  * Validates that the user is either:
  * 1. The owner of the HomeworkRoom
  * 2. Listed in invitedUserIds
- * 3. An admin or instructor (via Cognito groups — handled by API Gateway authorizer)
  *
  * Uses the HOMEWORK_ROOM_TABLE_NAME env var to query HomeworkRoom by room ID.
  */
@@ -587,7 +722,9 @@ async function moderateChatMessage(
     }
   }
 
-  console.log(`[Moderation] Retract sent to ${connectionIds.length} peers for message ${messageId}`);
+  console.log(
+    `[Moderation] Retract sent to ${connectionIds.length} peers for message ${messageId}`,
+  );
 
   // 2. Notify section instructor(s) and admins
   const roomId = extractRoomId(docName);

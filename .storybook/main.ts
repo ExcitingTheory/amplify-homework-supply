@@ -25,6 +25,9 @@ const config: StorybookConfig = {
     path.resolve(__dirname, "addons/translation-mode/preset.js"),
   ],
   framework: getAbsolutePath("@storybook/nextjs-vite"),
+  features: {
+    experimentalRSC: true,
+  },
   staticDirs: [
     { from: "../public", to: "/" },
     { from: "../test/mocks", to: "/story-mocks" },
@@ -533,6 +536,8 @@ const config: StorybookConfig = {
       "@lexical/selection",
       "@lexical/markdown",
       "@mui/material",
+      "@mui/material/Fade",
+      "@mui/material/Collapse",
       "@mui/icons-material",
       "@mui/x-data-grid",
       "@mui/x-tree-view",

@@ -730,8 +730,6 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     console.log('[executeSearchContent] Calling generateEmbedding...');
     const result = await generateEmbeddingAction({
       content: query,
-      model: 'text-embedding-3-small',
-      dimensions: 512
     });
     const queryEmbedding = result.embedding;
 

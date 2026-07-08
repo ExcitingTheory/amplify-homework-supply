@@ -61,7 +61,9 @@ Amplify.configure(
       REST: {
         ...amplifyConfig.API?.REST,
         homeworkSupplyStreamApi: {
-          endpoint: ((amplifyOutputs.custom as any).STREAM_API.endpoint as string).replace(/\/$/, ''),
+          endpoint: (
+            (amplifyOutputs.custom as any).STREAM_API.endpoint as string
+          ).replace(/\/$/, ""),
           region: (amplifyOutputs.custom as any).STREAM_API.region,
         },
       },
@@ -749,8 +751,6 @@ describe("C. Lambda Handler Integration Tests", () => {
 
       const { data, errors } = await client.mutations.generateEmbedding({
         content: "Photosynthesis is the process plants use to make food",
-        model: "text-embedding-3-small",
-        dimensions: 1536,
       });
 
       expect(errors).toBeUndefined();
@@ -758,9 +758,9 @@ describe("C. Lambda Handler Integration Tests", () => {
       if (data) {
         expect(data.embedding).toBeDefined();
         expect(Array.isArray(data.embedding)).toBe(true);
-        expect(data.embedding.length).toBe(1536);
-        expect(data.model).toBe("text-embedding-3-small");
-        expect(data.dimensions).toBe(1536);
+        expect(data.embedding.length).toBe(384);
+        expect(data.model).toBe("Xenova/all-MiniLM-L6-v2");
+        expect(data.dimensions).toBe(384);
       }
     }, 30000);
 
@@ -769,13 +769,12 @@ describe("C. Lambda Handler Integration Tests", () => {
 
       const { data, errors } = await client.mutations.generateEmbedding({
         content: "Japanese vocabulary word",
-        model: "text-embedding-3-small",
       });
 
       expect(errors).toBeUndefined();
       expect(data).toBeDefined();
       if (data) {
-        expect(data.embedding.length).toBeGreaterThan(0);
+        expect(data.embedding.length).toBe(384);
       }
     }, 30000);
 
@@ -784,14 +783,12 @@ describe("C. Lambda Handler Integration Tests", () => {
 
       const { data, errors } = await client.mutations.generateEmbedding({
         content: "Test text for embedding",
-        model: "text-embedding-3-small",
-        dimensions: 1536,
       });
 
       expect(errors).toBeUndefined();
       expect(data).toBeDefined();
       if (data) {
-        expect(data.model).toBe("text-embedding-3-small");
+        expect(data.model).toBe("Xenova/all-MiniLM-L6-v2");
       }
     }, 30000);
 
@@ -816,15 +813,11 @@ describe("C. Lambda Handler Integration Tests", () => {
       const { data: embedding1, errors: err1 } =
         await client.mutations.generateEmbedding({
           content: "Japanese kanji characters",
-          model: "text-embedding-3-small",
-          dimensions: 1536,
         });
 
       const { data: embedding2, errors: err2 } =
         await client.mutations.generateEmbedding({
           content: "Kanji writing system in Japan",
-          model: "text-embedding-3-small",
-          dimensions: 1536,
         });
 
       expect(err1).toBeUndefined();

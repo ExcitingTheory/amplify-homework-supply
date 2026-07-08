@@ -9,6 +9,10 @@
  */
 
 import { chatCompletion } from "./chat";
+import {
+  type BattleStakes,
+  parseAndValidateBattleStakes,
+} from "@/utils/battleStakes";
 
 // ============================================================================
 // XP Amount Constants
@@ -2995,21 +2999,6 @@ const BADGE_RARITY_MAP_BATTLE: Record<string, string> = {
   EASTER_EGG_HUNTER: "legendary",
 };
 
-interface BattleStakesInput {
-  loseLevel?: boolean;
-  loseXP?: boolean;
-  xpLossAmount?: number;
-  loseStreakFreeze?: boolean;
-  resetStreak?: boolean;
-  loseBadge?: boolean;
-  loseBadgeByRarity?: boolean;
-  badgeRarityTarget?: string;
-  streakMissXPPenalty?: boolean;
-  streakMissXPPerDay?: number;
-  loseCosmetics?: boolean;
-  cosmeticPenaltyDays?: number;
-}
-
 const SCRAMBLE_BORDERS = [
   "dashed",
   "dotted",
@@ -3050,9 +3039,9 @@ export async function engineApplyBattleStakes(
   }
   const challenge = challengeData;
 
-  let stakes: BattleStakesInput;
+  let stakes: BattleStakes;
   try {
-    stakes = JSON.parse(challenge.stakes || "{}");
+    stakes = parseAndValidateBattleStakes(challenge.stakes || "{}");
   } catch {
     throw new Error("Invalid stakes JSON on challenge");
   }

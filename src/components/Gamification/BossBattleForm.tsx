@@ -22,56 +22,19 @@ import AddIcon from '@mui/icons-material/Add'
 import ImageIcon from '@mui/icons-material/Image'
 import { generateImage } from '../../../app/actions/generate'
 import getCachedUrl from '../../utils/getCachedUrl'
+import {
+  type BadgeRarity,
+  type BattleStakes,
+  DEFAULT_BATTLE_STAKES,
+  parseAndValidateBattleStakes,
+  serializeBattleStakes,
+} from '../../utils/battleStakes'
 
 // ============================================================================
 // Types
 // ============================================================================
 
-/** Badge rarity tiers (mapped from badge criteria difficulty) */
-export type BadgeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
-
-/** Preset consequence stakes for a boss battle failure */
-export interface BattleStakes {
-  /** Lose one level */
-  loseLevel: boolean
-  /** Lose XP points (amount configurable) */
-  loseXP: boolean
-  /** Amount of XP to lose (only applies when loseXP is true) */
-  xpLossAmount: number
-  /** Consume one streak freeze */
-  loseStreakFreeze: boolean
-  /** Reset current streak to 0 */
-  resetStreak: boolean
-  /** Lose the most recently earned badge */
-  loseBadge: boolean
-  /** Lose a badge of a specific rarity tier */
-  loseBadgeByRarity: boolean
-  /** Which rarity tier to target */
-  badgeRarityTarget: BadgeRarity
-  /** Each missed streak day costs XP */
-  streakMissXPPenalty: boolean
-  /** XP cost per missed streak day */
-  streakMissXPPerDay: number
-  /** Scramble cosmetic settings (name casing, border, flair) — not avatar color */
-  loseCosmetics: boolean
-  /** Duration in days for the cosmetic scramble */
-  cosmeticPenaltyDays: number
-}
-
-export const DEFAULT_STAKES: BattleStakes = {
-  loseLevel: false,
-  loseXP: false,
-  xpLossAmount: 50,
-  loseStreakFreeze: true,
-  resetStreak: false,
-  loseBadge: false,
-  loseBadgeByRarity: false,
-  badgeRarityTarget: 'common',
-  streakMissXPPenalty: false,
-  streakMissXPPerDay: 10,
-  loseCosmetics: false,
-  cosmeticPenaltyDays: 3,
-}
+export const DEFAULT_STAKES: BattleStakes = DEFAULT_BATTLE_STAKES
 
 export interface BossBattleFormData {
   title: string
@@ -108,10 +71,15 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
   const [setting, setSetting] = useState(initialValues?.setting || '')
   const [stakes, setStakes] = useState<BattleStakes>(() => {
     if (initialValues?.stakes) {
-      try { return { ...DEFAULT_STAKES, ...JSON.parse(initialValues.stakes) } } catch { /* ignore */ }
+      try {
+        return parseAndValidateBattleStakes(initialValues.stakes)
+      } catch {
+        // Fall back to defaults for legacy/invalid payloads.
+      }
     }
     return { ...DEFAULT_STAKES }
   })
+  const [stakesError, setStakesError] = useState('')
   const [featuredImage, setFeaturedImage] = useState(initialValues?.featuredImage || '')
   const [featuredImageUrl, setFeaturedImageUrl] = useState('')
   const [imagePrompt, setImagePrompt] = useState('')
@@ -138,12 +106,23 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
     'loseLevel' | 'loseXP' | 'loseStreakFreeze' | 'resetStreak' | 'loseBadge' |
     'loseBadgeByRarity' | 'streakMissXPPenalty' | 'loseCosmetics'
   >) => {
+    setStakesError('')
     setStakes((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!isValid) return
+
+    let serializedStakes = ''
+    try {
+      serializedStakes = serializeBattleStakes(stakes)
+      setStakesError('')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid stakes payload'
+      setStakesError(message)
+      return
+    }
 
     onSubmit({
       title: title.trim(),
@@ -152,7 +131,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
       deadline: deadline || undefined,
       bonusMultiplier,
       setting: setting.trim() || undefined,
-      stakes: JSON.stringify(stakes),
+      stakes: serializedStakes,
       featuredImage: featuredImage || undefined,
     })
 
@@ -420,6 +399,11 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
               />
             </Collapse>
           </Stack>
+          {stakesError && (
+            <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+              {stakesError}
+            </Typography>
+          )}
         </Box>
 
         {/* Featured Image Generation */}

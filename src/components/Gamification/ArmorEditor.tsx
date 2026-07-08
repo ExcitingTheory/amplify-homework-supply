@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl'
 import { CHARGES, CHARGE_VIEWBOX } from './armoriaCharges'
 import type { ChargeEntry } from './armoriaCharges'
 import { useArmorUndoRedo } from './useArmorUndoRedo'
+import { sanitizeSvg } from '../../utils/sanitizeHtml'
 import type { ArmorEditorSnapshot } from './useArmorUndoRedo'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -745,7 +746,7 @@ export function ArmorEditor({
             }}
           >
             <Box
-              dangerouslySetInnerHTML={{ __html: previewSvg }}
+              dangerouslySetInnerHTML={{ __html: sanitizeSvg(previewSvg) }}
               role="img"
               aria-label={t('armorEditor.shieldPreview')}
             />

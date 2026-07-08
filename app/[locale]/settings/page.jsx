@@ -550,6 +550,59 @@ function Settings() {
           </Typography>
         </Card>
 
+        {/* Accessibility */}
+        <Card
+          sx={{
+            padding: "2rem 1rem",
+            margin: "1rem auto",
+            height: "fit-content",
+            maxWidth: "60rem",
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            Accessibility
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            These settings apply across the entire app. The system-level
+            &ldquo;reduce motion&rdquo; preference from your device is always
+            respected automatically.
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings?.reducedMotion === true}
+                onChange={(e) => {
+                  if (updateSettings) {
+                    updateSettings({ reducedMotion: e.target.checked });
+                  }
+                }}
+              />
+            }
+            label="Reduced Motion"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mb: 1 }}>
+            Disable animations, transitions, and auto-playing effects
+            throughout the app. Useful for reducing distractions or if
+            motion causes discomfort.
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings?.highContrastMode === true}
+                onChange={(e) => {
+                  if (updateSettings) {
+                    updateSettings({ highContrastMode: e.target.checked });
+                  }
+                }}
+              />
+            }
+            label="High Contrast Mode"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
+            Increase contrast for text and UI elements to improve readability.
+          </Typography>
+        </Card>
+
         {/* Profile Visibility */}
         <Card
           sx={{

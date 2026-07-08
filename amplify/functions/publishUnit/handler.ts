@@ -515,8 +515,8 @@ async function rebuildSectionSearchBundles(
 
       // Load and merge unit bundles
       const mergedItems: any[] = [];
-      let dimensions = 512;
-      let model = "text-embedding-3-small";
+      let dimensions = 384;
+      let model = "Xenova/all-MiniLM-L6-v2";
 
       for (const uid of unitIds) {
         const bundleKey = `protected/${identityId}/search-index/unit/${uid}.json`;
@@ -593,8 +593,8 @@ async function rebuildSectionSearchBundles(
     );
     if (allUnitKeys.length > 0) {
       const allItems: any[] = [];
-      let dimensions = 512;
-      let model = "text-embedding-3-small";
+      let dimensions = 384;
+      let model = "Xenova/all-MiniLM-L6-v2";
 
       for (const key of allUnitKeys) {
         try {

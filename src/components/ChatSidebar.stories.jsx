@@ -38,9 +38,17 @@ export default {
     docs: {
       description: {
         component: `
-# AI Chat Assistant
+# AI Chat Assistants
 
-Your intelligent teaching assistant that helps you create better content, faster.
+There are two AI assistants, each tailored to a different role:
+
+**Kai — Student Tutor**
+Kai is patient and encouraging. Rather than giving answers directly, Kai asks guiding questions and offers hints to help students reach understanding on their own. Kai knows the current lesson, vocabulary list, and the student's progress.
+
+**Sage — Teaching Assistant**
+Sage helps instructors build and improve content. Sage can generate quiz questions, suggest vocabulary, analyse student performance, and insert content blocks directly into the lesson editor.
+
+---
 
 **What the AI can help with:**
 - 💡 **Content Ideas** - Get suggestions for lessons, activities, and exercises
@@ -60,11 +68,15 @@ Your intelligent teaching assistant that helps you create better content, faster
 4. Ask follow-up questions to dig deeper
 5. Use suggested actions when available
 
-**Example questions:**
+**Example questions (Sage — instructor):**
 - "Help me create a lesson about Japanese seasons"
-- "Translate 'good morning' to Japanese with pronunciation"
 - "Generate 5 quiz questions about hiragana"
-- "Explain the difference between は and が particles"
+- "Which students are struggling with particles?"
+
+**Example questions (Kai — student):**
+- "I don't understand this question, can you give me a hint?"
+- "What does this vocabulary word mean in context?"
+- "Can you explain the difference between は and が?"
         `,
       },
     },

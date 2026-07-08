@@ -58,10 +58,15 @@ export const storage = defineStorage({
     // Use for: personal/instructor materials, answer keys
     // Cross-user access (instructor reviewing student submissions) is mediated
     // by the getStudentSubmissionUrl Lambda, which validates section membership
-    // before generating a short-lived presigned/signed URL. No group-level
-    // bucket access is granted here — that would bypass the authorization check.
+    // before generating a short-lived presigned/signed URL.
+    // Note: groups added because Cognito group roles override the authenticated
+    // role, so allow.entity('identity') alone is insufficient for group members.
+    // The {entity_id} substitution still ensures per-user isolation.
     "private/{entity_id}/*": [
       allow.entity("identity").to(["read", "write", "delete"]),
+      allow
+        .groups(["Admins", "Instructors", "Moderators", "Learners"])
+        .to(["read", "write", "delete"]),
     ],
 
     // !! protected/units/* is intentionally NOT listed here !!

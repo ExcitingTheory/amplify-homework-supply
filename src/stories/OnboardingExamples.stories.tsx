@@ -42,20 +42,21 @@ export default meta;
  */
 export const AutoDetectTaskCompletion: StoryObj = {
   render: () => {
-    // This automatically marks the task as complete when the component mounts
-    useCompleteTask('instructor-setup-class', 'instructor');
+    // Completes the extra-credit Documentation Explorer task — not a real workflow task
+    useCompleteTask('secret-documentation-explorer');
 
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Alert severity="success" sx={{ mb: 3 }}>
-          ✓ Task marked as complete! Check the Onboarding panel.
+          ✓ Extra credit unlocked! Check the Onboarding panel for your bonus task.
         </Alert>
         <Card>
           <CardContent>
-            <Typography variant="h5">Set Up Your First Class</Typography>
+            <Typography variant="h5">Auto-Detect Task Completion</Typography>
             <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-              This screen represents the "Set Up Your First Class" workflow. Just by viewing this
-              story, the task has been marked as complete in the onboarding panel.
+              This story demonstrates how <code>useCompleteTask</code> automatically marks a task
+              complete when the component mounts. It awards the 🔍 Documentation Explorer extra
+              credit task rather than a real workflow task.
             </Typography>
           </CardContent>
         </Card>
@@ -70,7 +71,7 @@ export const AutoDetectTaskCompletion: StoryObj = {
  */
 export const ManualTaskTracking: StoryObj = {
   render: () => {
-    const { completeTask, startTask } = useTrackTask('learner-join-class', 'learner');
+    const { completeTask, startTask } = useTrackTask('secret-documentation-explorer', 'learner');
     const [started, setStarted] = useState(false);
     const [completed, setCompleted] = useState(false);
 
@@ -92,11 +93,11 @@ export const ManualTaskTracking: StoryObj = {
         <Card sx={{ mt: 2 }}>
           <CardContent>
             <Typography variant="h5" sx={{ mb: 2 }}>
-              Join Your First Class
+              Complete a Demo Bonus Task
             </Typography>
             <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-              This example demonstrates manual task tracking. Click "Start Task" to begin tracking,
-              then "Complete Task" when done.
+              This example demonstrates manual task tracking with a fictional onboarding task.
+              Click "Start Task" to begin tracking, then "Complete Task" when done.
             </Typography>
 
             <Stack direction="row" spacing={2}>
@@ -324,11 +325,11 @@ export const EventEmissionExample: StoryObj = {
             <CardContent>
               <Typography variant="h6">Event Monitor</Typography>
               <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-                Current Persona: {persona ? persona.toUpperCase() : 'None selected'}
+                Current Demo Persona: {persona ? persona.toUpperCase() : 'None selected'}
               </Typography>
 
               <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
-                {['instructor-setup-class', 'learner-join-class', 'developer-explore-components'].map(
+                {['secret-documentation-explorer', 'secret-shortcut-evangelist', 'secret-keyboard-master'].map(
                   (taskId) => (
                     <Button
                       key={taskId}
@@ -413,7 +414,7 @@ export const SpotlightIntegration: StoryObj = {
               <strong>📖 To Try It:</strong>
               <ol style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
                 <li>Open the <strong>Onboarding Panel</strong> (right sidebar)</li>
-                <li>Select a persona (Instructor, Learner, or Developer)</li>
+                <li>Select any persona (used only for demo state segmentation)</li>
                 <li>Click on any task to launch the spotlight tour</li>
                 <li>Follow the guided steps</li>
                 <li>Try switching between Tutorial (📖) and Quiz (🎯) modes</li>

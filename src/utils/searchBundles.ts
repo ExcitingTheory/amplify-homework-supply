@@ -12,7 +12,7 @@ import { downloadData } from "aws-amplify/storage";
 
 export interface BundleItem {
   id: string;
-  type: "unit" | "file" | "word" | "question";
+  type: "unit" | "file" | "word" | "question" | "section";
   title: string;
   embedding: number[];
   meta: {
@@ -46,6 +46,20 @@ export interface SearchResult {
   item: BundleItem;
   score: number;
 }
+
+interface HybridSearchConfig {
+  semanticWeight: number;
+  lexicalWeight: number;
+  titleExactBoost: number;
+  phraseBoost: number;
+}
+
+const DEFAULT_HYBRID_CONFIG: HybridSearchConfig = {
+  semanticWeight: 0.65,
+  lexicalWeight: 0.35,
+  titleExactBoost: 0.2,
+  phraseBoost: 0.1,
+};
 
 // --- IndexedDB Cache ---
 
@@ -196,8 +210,8 @@ export async function loadSharedBundles(
   // Build a merged linear bundle for shared content
   return {
     version: Date.now(),
-    dimensions: allItems[0]?.embedding?.length || 512,
-    model: "text-embedding-3-small",
+    dimensions: allItems[0]?.embedding?.length || 384,
+    model: "Xenova/all-MiniLM-L6-v2",
     index: { strategy: "linear" },
     items: allItems,
   };
@@ -221,21 +235,153 @@ function l2Normalize(v: number[]): number[] {
   return v.map((x) => x / norm);
 }
 
+function tokenize(text: string): string[] {
+  if (!text) return [];
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 2);
+}
+
+function getSearchText(item: BundleItem): string {
+  return `${item.title || ""} ${item.meta?.preview || ""}`.trim();
+}
+
+function buildTokenStats(
+  items: BundleItem[],
+  queryTokens: string[],
+): { df: Map<string, number>; avgDocLen: number } {
+  const df = new Map<string, number>();
+  const uniqueQueryTokens = Array.from(new Set(queryTokens));
+  let totalLen = 0;
+
+  for (const item of items) {
+    const docTokens = tokenize(getSearchText(item));
+    totalLen += docTokens.length;
+    if (uniqueQueryTokens.length === 0) continue;
+    const tokenSet = new Set(docTokens);
+    for (const token of uniqueQueryTokens) {
+      if (tokenSet.has(token)) {
+        df.set(token, (df.get(token) || 0) + 1);
+      }
+    }
+  }
+
+  return {
+    df,
+    avgDocLen: items.length > 0 ? totalLen / items.length : 0,
+  };
+}
+
+function lexicalScore(
+  item: BundleItem,
+  queryText: string,
+  queryTokens: string[],
+  df: Map<string, number>,
+  corpusSize: number,
+  avgDocLen: number,
+  config: HybridSearchConfig,
+): number {
+  if (queryTokens.length === 0 || corpusSize === 0) return 0;
+
+  const title = (item.title || "").toLowerCase();
+  const docText = getSearchText(item).toLowerCase();
+  const docTokens = tokenize(docText);
+  const tf = new Map<string, number>();
+  for (const token of docTokens) {
+    tf.set(token, (tf.get(token) || 0) + 1);
+  }
+
+  const k1 = 1.2;
+  const b = 0.75;
+  const docLen = Math.max(1, docTokens.length);
+  const avgLen = Math.max(1, avgDocLen);
+  let score = 0;
+
+  for (const token of queryTokens) {
+    const termFreq = tf.get(token) || 0;
+    if (termFreq === 0) continue;
+    const docFreq = df.get(token) || 0;
+    const idf = Math.log(1 + (corpusSize - docFreq + 0.5) / (docFreq + 0.5));
+    const denom = termFreq + k1 * (1 - b + (b * docLen) / avgLen);
+    score += idf * ((termFreq * (k1 + 1)) / denom);
+  }
+
+  const normalizedQuery = queryText.trim().toLowerCase();
+  if (normalizedQuery && title.includes(normalizedQuery)) {
+    score += config.titleExactBoost;
+  }
+  if (normalizedQuery && docText.includes(normalizedQuery)) {
+    score += config.phraseBoost;
+  }
+
+  return score;
+}
+
+function combineScores(
+  semantic: number,
+  lexical: number,
+  maxLexical: number,
+  config: HybridSearchConfig,
+): number {
+  const normalizedLexical = maxLexical > 0 ? lexical / maxLexical : 0;
+  return (
+    config.semanticWeight * Math.max(0, semantic) +
+    config.lexicalWeight * normalizedLexical
+  );
+}
+
+function hybridRank(
+  query: number[],
+  candidates: BundleItem[],
+  topK: number,
+  semanticThreshold: number,
+  queryText: string,
+): SearchResult[] {
+  const config = DEFAULT_HYBRID_CONFIG;
+  const queryTokens = tokenize(queryText);
+  const { df, avgDocLen } = buildTokenStats(candidates, queryTokens);
+
+  const scored = candidates.map((item) => {
+    const semantic = dotProduct(query, item.embedding);
+    const lexical = lexicalScore(
+      item,
+      queryText,
+      queryTokens,
+      df,
+      candidates.length,
+      avgDocLen,
+      config,
+    );
+    return { item, semantic, lexical };
+  });
+
+  const maxLexical = scored.reduce(
+    (max, s) => (s.lexical > max ? s.lexical : max),
+    0,
+  );
+
+  const results = scored
+    .filter((s) => s.semantic >= semanticThreshold || s.lexical > 0)
+    .map((s) => ({
+      item: s.item,
+      score: combineScores(s.semantic, s.lexical, maxLexical, config),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+
+  return results;
+}
+
 function linearSearch(
   query: number[],
   bundle: SearchBundle,
   topK: number,
   threshold: number,
+  queryText: string,
 ): SearchResult[] {
-  const results: SearchResult[] = [];
-  for (const item of bundle.items) {
-    const score = dotProduct(query, item.embedding);
-    if (score >= threshold) {
-      results.push({ item, score });
-    }
-  }
-  results.sort((a, b) => b.score - a.score);
-  return results.slice(0, topK);
+  return hybridRank(query, bundle.items, topK, threshold, queryText);
 }
 
 function ivfSearch(
@@ -243,6 +389,7 @@ function ivfSearch(
   bundle: SearchBundle,
   topK: number,
   threshold: number,
+  queryText: string,
 ): SearchResult[] {
   const index = bundle.index as IVFIndex;
 
@@ -257,16 +404,13 @@ function ivfSearch(
   );
 
   // Search only items in selected clusters
-  const results: SearchResult[] = [];
+  const candidates: BundleItem[] = [];
   for (let i = 0; i < bundle.items.length; i++) {
     if (!probeClusters.has(index.assignments[i])) continue;
-    const score = dotProduct(query, bundle.items[i].embedding);
-    if (score >= threshold) {
-      results.push({ item: bundle.items[i], score });
-    }
+    candidates.push(bundle.items[i]);
   }
-  results.sort((a, b) => b.score - a.score);
-  return results.slice(0, topK);
+
+  return hybridRank(query, candidates, topK, threshold, queryText);
 }
 
 /**
@@ -278,12 +422,13 @@ export function search(
   bundle: SearchBundle,
   topK = 10,
   threshold = 0.3,
+  queryText = "",
 ): SearchResult[] {
   const normalizedQuery = l2Normalize(query);
 
   if (!bundle.index || bundle.index.strategy === "linear") {
-    return linearSearch(normalizedQuery, bundle, topK, threshold);
+    return linearSearch(normalizedQuery, bundle, topK, threshold, queryText);
   }
 
-  return ivfSearch(normalizedQuery, bundle, topK, threshold);
+  return ivfSearch(normalizedQuery, bundle, topK, threshold, queryText);
 }

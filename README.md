@@ -1,103 +1,111 @@
-# Documentation Index
+# Homework Supply
 
-Welcome to the Homework Supply documentation! This directory contains comprehensive guides for developers working on our elearning platform.
+An interactive elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI. Instructors author rich multimedia lessons with a custom Lexical editor; students complete graded workbooks with real-time AI tutoring support.
 
-## 📚 Documentation Structure
+## Features
 
-### 🚀 Getting Started
-- **[Quick Start](./docs/QUICK_START.md)** - Essential links and communication channels
-- **[Onboarding Guide](./docs/ONBOARDING.md)** - Complete developer setup walkthrough
-- **[Storybook Onboarding](./docs/STORYBOOK_ONBOARDING.md)** - Adding components to Storybook
+### Rich Content Editor (Lexical)
+Custom block-based editor with graded quiz nodes, meaning-association exercises, audio/video embeds, and AI-powered content completion. Collaborative editing via Yjs with real-time presence.
 
-### 🔧 Technical Reference
-- **[API Documentation](./docs/API.md)** - Data models, Lambda functions, routes, and Gen 2 patterns
-- **[App Router Migration](./docs/APP_ROUTER_MIGRATION.md)** - Next.js App Router architecture and migration status
-- **[SSR & Performance](./docs/SSR_PERFORMANCE.md)** - Server-side rendering, React Compiler, Turbopack, View Transitions
-- **[CloudFront CDN](./docs/CLOUDFRONT_CDN.md)** - CDN architecture, signed cookies, image optimization
-- **[File Processing Pipeline](./docs/FILE_PROCESSING_PIPELINE.md)** - Fan-out upload architecture
-- **[Optimistic Concurrency](./docs/OPTIMISTIC_CONCURRENCY.md)** - `_version`-based conflict resolution
-- **[Search Architecture](./docs/SEARCH_ARCHITECTURE.md)** - Embeddings and semantic search
-- **[S3 Content Storage](./docs/S3_CONTENT_STORAGE_SPEC.md)** - Storage paths, versioning, and content lifecycle
-- **[S3 Embeddings](./docs/S3_EMBEDDINGS_SPEC.md)** - Embedding storage and retrieval
+### AI Agents — Kai & Sage
+Multi-step tool-calling agents (Vercel AI SDK) with semantic retrieval (RAG over S3 embedding bundles), persistent conversation memory, and streaming responses. Kai tutors students; Sage assists instructors with analytics and content generation.
 
-### 🎮 Features
-- **[Custom AI Block](./docs/CUSTOM_AI_BLOCK.md)** - Instructor-customizable AI-graded editor block
-- **[Gamification](./docs/GAMIFICATION.md)** - XP, badges, streaks, boss battles, skill trees
-- **[Notification System](./docs/NOTIFICATION_SYSTEM.md)** - Real-time notifications with categories and badges
-- **[Offline Experience](./docs/OFFLINE_EXPERIENCE.md)** - PWA with service worker and IndexedDB sync
-- **[Analytics](./docs/ANALYTICS_IMPLEMENTATION.md)** - Usage tracking and reporting
+### Custom AI-Graded Block
+Instructor-customizable exercises graded by OpenAI with security guardrails — immutable system prompt, input sanitization, output schema enforcement, and PII filtering. Supports text, audio, image, and drawing input modes.
 
-### 📋 Process Documentation
-- **[Contributing Guidelines](./CONTRIBUTING.md)** - Code standards and pull request process
-- **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community standards and behavior expectations
-- **[Security Policy](./SECURITY.md)** - Security reporting and best practices
+### Gamification
+XP leveling, 15 hardcoded + custom badges, anti-badges with redemption, skill trees linked to units, easter eggs (keyword/schedule/secret-link/achievement triggers), boss battles with stakes, campaign narratives, squad collaboration, content locks, and cosmetic unlocks. ([details](./docs/GAMIFICATION.md))
 
-### 📝 In-Progress Plans
-- **[Admin Bot](./docs/ADMIN_BOT_PLAN.md)** - "Atlas" AI admin assistant (not started)
-- **[Custom Themes](./docs/CUSTOM_THEMES_PLAN.md)** - Cosmetic editor themes (not started)
-- **[Audio Processing](./docs/RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md)** - ML noise suppression and filter panel (not started)
-- **[Unified Undo/Redo](./docs/UNIFIED_UNDO_REDO_PLAN.md)** - Cross-surface Yjs UndoManager (not started)
+### Real-Time Notifications
+In-app notification system with category tabs (assignment, collaboration, gamification, squad, system), badge counts, scheduled reminders via Lambda cron, and admin announcements.
 
-# 🔍 Document Maintenance
+### Offline PWA
+Serwist service worker with tiered caching (app shell, fonts, S3 media, API). IndexedDB sync queue for grade submissions, on-device embedding cache, and Yjs local persistence. ([details](./docs/OFFLINE_EXPERIENCE.md))
 
-## How to Update Documentation
-1. **Edit in place**: Make changes directly to markdown files
-2. **Update index**: Modify this file if adding new documents
-3. **Review process**: Get team review for major changes
+### Instructor Collaboration & Visibility
+Collaborator access grants between instructors (read/edit), community browse with fork, and section-scoped student work visibility.
 
-## 🆘 Getting Help
+### Course Context Summaries
+Typed `CourseOutlineEntry` arrays on sections with vocabulary/question/file counts, auto-generated on publish. Fed to typeahead, chatbots, practice drills, and RecordingStudio3. ([details](./docs/COURSE_CONTEXT_SUMMARY_PLAN.md))
 
-- **Search existing docs** - Use Cmd/Ctrl+F to search within files
-- **Check code** - Inline documentation in source files
-- **Ask the team** - Use Discord for quick clarification
-- **Improve the docs** - Submit PR with clarifications
+### Learner Dashboard
+Section-grouped assignment view with "Up Next" hero cards, inline campaign timelines, and nailed-it badges on completed work. ([details](./docs/LEARNER_DASHBOARD_UX_PLAN.md))
+
+### Soft Delete & Recycle Bin
+Soft delete with `deletedAt`/`deletedBy` fields on content models, cascading to join tables. Permanent delete archives to compressed S3; admin-only unarchive restores records.
+
+### File Processing & Storage
+Fan-out upload pipeline, S3 with CloudFront signed cookies, PDF analysis with vocabulary extraction, and audio/video transcription. ([details](./docs/FILE_PROCESSING_PIPELINE.md))
+
+### Search
+Semantic search over embeddings (text-embedding-3-small, 512D) with IVF clustering for large bundles, client-side IndexedDB cache. ([details](./docs/SEARCH_ARCHITECTURE.md))
 
 ---
 
-**Need help?** Check the [docs folder](./docs) or create an issue.
+## Outstanding Plans (Not Yet Implemented)
 
+| Feature | Status | Plan |
+|---------|--------|------|
+| **Admin Bot "Atlas"** — AI admin assistant with 25+ tools for user management, platform settings, announcements, and system health | Not started | [ADMIN_BOT_PLAN.md](./docs/ADMIN_BOT_PLAN.md) |
+| **Audio Filter Panel** — ML noise suppression (RNNoise) and EQ presets for RecordingStudio3 playback; pre-submission cleanup; versioned takes | Not started | [RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md](./docs/RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md) |
+| **Unified Undo/Redo** — Single Yjs UndoManager across Lexical body, dictionary, questions, and metadata on the unit detail page | Not started | [UNIFIED_UNDO_REDO_PLAN.md](./docs/UNIFIED_UNDO_REDO_PLAN.md) |
+| **Learner Dashboard Phase 6** — Card completion check animation | Phases 1–5 complete; level-up + chapter-unlock celebrations done | [LEARNER_DASHBOARD_UX_PLAN.md](./docs/LEARNER_DASHBOARD_UX_PLAN.md) |
+| **Offline AI & Data** — On-device LLM (WebLLM + Chrome AI) implemented; DynamoDB offline data cache and conflict resolution UI integration testing remaining | Core offline AI exists; integration testing needed | [OFFLINE_EXPERIENCE.md](./docs/OFFLINE_EXPERIENCE.md) |
+| **Course Context Testing** — End-to-end publish flow validation, token budget audit | Schema + frontend consumers + Lambda done; integration testing remaining | [COURSE_CONTEXT_SUMMARY_PLAN.md](./docs/COURSE_CONTEXT_SUMMARY_PLAN.md) |
 
-## 📬 Communication & Support
+### Completed Plans
 
-### Primary Contact
+All completed features are documented in [FEATURES.md](./docs/FEATURES.md): custom themes, instructor visibility & collaboration, soft delete & recycle bin, notification system, custom AI block, agent architecture, app security/platform hardening, searchable sections, AI badge designer, learner dashboard phases 1–5, celebration animations, and course context summary.
+
+---
+
+## Getting Started
+
+```bash
+npm run dev          # Next.js dev server (port 3000)
+npm run storybook    # Component development (port 6006)
+npx ampx sandbox     # Deploy Amplify backend locally
+```
+
+See [docs/ONBOARDING.md](./docs/ONBOARDING.md) for full setup and [docs/QUICK_START.md](./docs/QUICK_START.md) for essential links.
+
+## Testing
+
+```bash
+npm run journeys              # Playwright E2E user journeys
+npm run journeys:offline      # Offline-specific journeys
+npm run journeys:ui           # Interactive Playwright UI
+```
+
+Start the app first with `npm run dev` (or use `npm run journeys:wait-and-run`).
+
+## Documentation
+
+### Getting Started
+- [Quick Start](./docs/QUICK_START.md) — Links and communication channels
+- [Onboarding](./docs/ONBOARDING.md) — Developer setup
+- [Storybook Onboarding](./docs/STORYBOOK_ONBOARDING.md) — Adding components
+
+### Technical Reference
+- [API](./docs/API.md) — Data models, Lambda functions, routes
+- [App Router Migration](./docs/APP_ROUTER_MIGRATION.md) — Next.js architecture
+- [SSR & Performance](./docs/SSR_PERFORMANCE.md) — React Compiler, Turbopack, View Transitions
+- [CloudFront CDN](./docs/CLOUDFRONT_CDN.md) — Signed cookies, image optimization
+- [Optimistic Concurrency](./docs/OPTIMISTIC_CONCURRENCY.md) — `_version`-based conflict resolution
+- [S3 Content Storage](./docs/S3_CONTENT_STORAGE_SPEC.md) — Paths, versioning, lifecycle
+- [S3 Embeddings](./docs/S3_EMBEDDINGS_SPEC.md) — Embedding storage and retrieval
+
+### Process
+- [Contributing](./CONTRIBUTING.md) — Code standards and PR process
+- [Code of Conduct](./CODE_OF_CONDUCT.md) — Community standards
+- [Security](./SECURITY.md) — Reporting and best practices
+
+## Communication & Support
+
 - **Email**: [info@homework.supply.com](mailto:info@homework.supply.com)
 - **Discord**: [Join Discord](https://discord.gg/BNsTK6nvYw)
-
-### Getting Help
-- **Quick Questions**: Team chat (Discord) or email
-- **Detailed Issues**: Create a GitHub issue in the repository
 - **Bug Reports**: [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
-- **Security Issues**: info@homework.supply.com (see [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md))
-
-### Resources
 - **Storybook**: [Component Library](https://main--67e40f1917d7a8ef683541d7.chromatic.com)
-
-## Journey Tests (Playwright)
-
-Run full end-to-end user journeys (including role-based and offline coverage):
-
-```bash
-npm run journeys
-```
-
-Run only offline readiness and sync recovery journey:
-
-```bash
-npm run journeys:offline
-```
-
-Useful variants:
-
-```bash
-npm run journeys:ui
-npm run journeys:headed
-npm run journeys:wait-and-run
-```
-
-Notes:
-- Start the app first with `npm run dev` (or use `journeys:wait-and-run` if already booting).
-- Offline checks rely on Chromium offline emulation and service worker control.
-- Journey definitions and selector reference live in `docs/USER_JOURNEYS.md`.
 - Each journey test now writes a `journey-diagnostics.json` artifact with:
 	- Console logs (all levels)
 	- Network traffic summary (responses, failed requests, HTTP error counts)

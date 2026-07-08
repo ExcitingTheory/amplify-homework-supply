@@ -180,26 +180,11 @@ async function summarizeAndUpdateMemory(
 
     // Generate embedding for semantic memory recall
     let embedding: number[] | undefined;
+    // Generate embedding for memory retrieval using MiniLM
     try {
-      const embeddingResponse = await fetch(
-        "https://api.openai.com/v1/embeddings",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "text-embedding-3-small",
-            input: newSummary,
-            dimensions: 512,
-          }),
-        },
-      );
-      if (embeddingResponse.ok) {
-        const embResult = await embeddingResponse.json();
-        embedding = embResult.data?.[0]?.embedding;
-      }
+      const { generateEmbedding } = await import("../../actions/embeddings");
+      const embResult = await generateEmbedding({ content: newSummary });
+      embedding = embResult.embedding;
     } catch {
       // Non-fatal — continue without embedding
     }
@@ -236,8 +221,8 @@ async function summarizeAndUpdateMemory(
       };
       if (embedding) {
         updatePayload.embedding = JSON.stringify(embedding);
-        updatePayload.embeddingModel = "text-embedding-3-small";
-        updatePayload.embeddingDimensions = 512;
+        updatePayload.embeddingModel = "Xenova/all-MiniLM-L6-v2";
+        updatePayload.embeddingDimensions = 384;
       }
 
       await (client as any).models.AssistantChat.update(updatePayload);
@@ -251,8 +236,8 @@ async function summarizeAndUpdateMemory(
       };
       if (embedding) {
         createPayload.embedding = JSON.stringify(embedding);
-        createPayload.embeddingModel = "text-embedding-3-small";
-        createPayload.embeddingDimensions = 512;
+        createPayload.embeddingModel = "Xenova/all-MiniLM-L6-v2";
+        createPayload.embeddingDimensions = 384;
       }
 
       await (client as any).models.AssistantChat.create(createPayload);
@@ -640,6 +625,10 @@ export async function POST(req: Request) {
       identityId: context?.identityId,
       unitId: context?.unit?.id,
       sectionId: context?.sectionId,
+      locale:
+        context?.locale ||
+        req.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ||
+        "en",
       courseOutline: context?.courseOutline,
     };
 

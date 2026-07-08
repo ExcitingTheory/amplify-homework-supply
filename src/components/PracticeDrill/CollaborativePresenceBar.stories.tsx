@@ -3,7 +3,7 @@ import CollaborativePresenceBar from './CollaborativePresenceBar';
 import type { PracticeUser, GroupStats, ParticipantProgress } from '../../yjs/PracticeCollaborationProvider';
 
 const meta: Meta<typeof CollaborativePresenceBar> = {
-  title: '🎯 Practice Drill/CollaborativePresenceBar',
+  title: '🎯 Practice Drills/Components/Collaborative Presence Bar',
   component: CollaborativePresenceBar,
   parameters: { layout: 'padded' },
 };

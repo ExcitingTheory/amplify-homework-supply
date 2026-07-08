@@ -38,6 +38,8 @@ import { getSpotlightConfigForTask } from '../code/spotlight-configs';
 
 import './OnboardingPanel.css';
 
+const QUIZ_SIDEBAR_NAVIGATION_STORY_ID = '🏠-getting-started-onboarding-sidebar-navigation--sidebar-navigation';
+
 // Build MUI theme from Storybook's active theme
 function buildMuiTheme(isDark: boolean) {
   return createTheme({
@@ -134,6 +136,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const muiTheme = useMemo(() => buildMuiTheme(isDark), [isDark]);
   const emitter = getOnboardingEmitter();
   const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
+  const selectedPersonaRef = React.useRef<UserPersona | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [completionPercentage, setCompletionPercentage] = useState(0);
@@ -190,7 +193,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     const persona = emitter.getPersona();
     if (persona) {
       setSelectedPersona(persona);
-      const completed = emitter.getCompletedTasks(persona);
+      selectedPersonaRef.current = persona;
+      const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
       setCompletedTasks(new Set(completed.map((e) => e.taskId)));
       updateCompletionPercentage(persona);
     }
@@ -199,17 +203,44 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     const unsubscribe = emitter.on((event) => {
       if (event.type === 'persona-selected' && event.persona) {
         setSelectedPersona(event.persona);
-        const completed = emitter.getCompletedTasks(event.persona);
+        selectedPersonaRef.current = event.persona;
+        const completed = emitter.getCompletedTasks(event.persona, ONBOARDING_TASKS);
         setCompletedTasks(new Set(completed.map((e) => e.taskId)));
         updateCompletionPercentage(event.persona);
       } else if (event.type === 'task-completed' && event.persona) {
-        setCompletedTasks((prev) => new Set([...prev, event.taskId]));
+        // Only add to the set if this event belongs to the currently selected persona
+        if (event.persona === selectedPersonaRef.current) {
+          setCompletedTasks((prev) => new Set([...prev, event.taskId]));
+        } else {
+          // Cross-persona completion (e.g. secret discovered as different persona)
+          // Re-derive from emitter to pick up shared "all" tasks
+          const currentPersona = selectedPersonaRef.current;
+          if (currentPersona) {
+            const completed = emitter.getCompletedTasks(currentPersona, ONBOARDING_TASKS);
+            setCompletedTasks(new Set(completed.map((e) => e.taskId)));
+          }
+        }
         updateCompletionPercentage(event.persona);
       }
     });
 
     return unsubscribe;
   }, [emitter]);
+
+  // Collapse the bottom panel while a spotlight task is active so the preview
+  // stays fully visible. The SpotlightOverlay tooltip provides all step guidance.
+  // Restore the panel automatically when the spotlight closes.
+  const panelHiddenBySpotlight = React.useRef(false);
+  useEffect(() => {
+    if (!api?.togglePanel) return;
+    if (spotlightOpen) {
+      panelHiddenBySpotlight.current = true;
+      try { (api as any).togglePanel(false); } catch { /* ignore */ }
+    } else if (panelHiddenBySpotlight.current) {
+      panelHiddenBySpotlight.current = false;
+      try { (api as any).togglePanel(true); } catch { /* ignore */ }
+    }
+  }, [spotlightOpen, api]);
 
   const updateCompletionPercentage = (persona: UserPersona) => {
     const percentage = emitter.getCompletionPercentage(persona, ONBOARDING_TASKS);
@@ -218,6 +249,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
   const handlePersonaSelect = (persona: UserPersona) => {
     setSelectedPersona(persona);
+    selectedPersonaRef.current = persona;
     emitter.setPersona(persona);
   };
 
@@ -225,6 +257,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     if (window.confirm('Are you sure you want to reset all onboarding progress?')) {
       emitter.reset();
       setSelectedPersona(null);
+      selectedPersonaRef.current = null;
       setCompletedTasks(new Set());
       setCompletionPercentage(0);
       setTabValue(0);
@@ -422,8 +455,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     setSpotlightCurrentStep(0);
     setSpotlightOpen(true);
     
-    // Get the correct story ID based on the current mode
-    const storyId = getStoryIdForMode(task);
+    // Quiz mode always starts from the Sidebar Navigation guide.
+    // Tutorial mode opens the task's tutorial story directly.
+    const storyId = mode === 'quiz' ? QUIZ_SIDEBAR_NAVIGATION_STORY_ID : getStoryIdForMode(task);
     console.debug('📍 Story ID for', mode, 'mode:', storyId);
     
     if (storyId) {
@@ -453,10 +487,14 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   /**
-   * Handle completing the spotlight tour
-   * Does NOT auto-complete the task — the user must actually perform the task
+   * Handle completing the spotlight tour.
+    * Task completion is event-driven in both modes.
+    * Closing the spotlight never marks a task complete.
    */
   const handleSpotlightComplete = () => {
+    // Completing the spotlight tour does NOT mark the task as done.
+    // Tasks complete only when the user clicks the specific data-tour element
+    // that proves they understood the instructions (detected by task-completion.ts).
     setSpotlightOpen(false);
     setSpotlightCurrentStep(0);
     setActiveTask(null);
@@ -505,6 +543,27 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       iframeLoadCleanupRef.current = null;
     }
   };
+
+  // Close spotlight automatically when the active task is completed by events.
+  useEffect(() => {
+    const unsubscribe = emitter.on((event) => {
+      if (event.type !== 'task-completed') return;
+      if (!spotlightOpen || !activeTask || !selectedPersona) return;
+      if (event.taskId !== activeTask.id) return;
+      if (event.persona !== selectedPersona) return;
+
+      setSpotlightOpen(false);
+      setSpotlightCurrentStep(0);
+      setActiveTask(null);
+      setIsNavigating(false);
+      if (iframeLoadCleanupRef.current) {
+        iframeLoadCleanupRef.current();
+        iframeLoadCleanupRef.current = null;
+      }
+    });
+
+    return unsubscribe;
+  }, [emitter, spotlightOpen, activeTask, selectedPersona]);
 
   const renderContent = () => {
     if (!selectedPersona) {
@@ -558,6 +617,10 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     
     const persona = PERSONAS.find((p) => p.id === selectedPersona)!;
     const tasks = getTasksForPersona(selectedPersona);
+    const mainTasks = tasks.filter((t) => t.category !== '🎁 Extra Credit');
+    const secretTasks = tasks.filter((t) => t.category === '🎁 Extra Credit');
+    const completedMainCount = mainTasks.filter((t) => completedTasks.has(t.id)).length;
+    const completedSecretCount = secretTasks.filter((t) => completedTasks.has(t.id)).length;
     const tasksByCategory = getTasksByCategory(selectedPersona);
     const categories = Object.keys(tasksByCategory);
 
@@ -571,7 +634,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
               {persona.label} Onboarding
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              {completedTasks.size} of {tasks.length} tasks completed
+              {completedMainCount} of {mainTasks.length} tasks completed
             </Typography>
           </Box>
           <Tooltip title="Learning mode">
@@ -596,7 +659,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setSelectedPersona(null)}
+              onClick={() => {
+                emitter.clearPersona();
+                setSelectedPersona(null);
+                selectedPersonaRef.current = null;
+              }}
               sx={{ textTransform: 'none' }}
               ariaLabel={false}
             >
@@ -622,7 +689,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
               🎯 Quiz Mode Active
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-              Click on tasks below to navigate to interactive component stories. Each task will direct you to the specific Storybook story where you can practice. Complete actions to track progress automatically.
+              Click a task to open Sidebar Navigation first, then open the destination page story from there. Completion is tracked automatically by events.
             </Typography>
           </Box>
         )}
@@ -630,14 +697,14 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         {/* Quick Stats */}
         <Stack direction="row" spacing={1} sx={{ mb: 2, px: 2 }}>
           <Chip
-            label={`${completedTasks.size} Completed`}
+            label={`${completedMainCount} Completed`}
             icon={<CheckCircleIcon />}
             color="success"
             variant="outlined"
             size="small"
           />
           <Chip
-            label={`${tasks.length - completedTasks.size} Remaining`}
+            label={`${mainTasks.length - completedMainCount} Remaining`}
             icon={<CircleIcon />}
             color="default"
             variant="outlined"
@@ -647,7 +714,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
         {/* Task List */}
         <List sx={{ px: 2 }}>
-          {tasks.map((task: OnboardingTaskWithCriteria) => {
+          {mainTasks.map((task: OnboardingTaskWithCriteria) => {
                 const isCompleted = completedTasks.has(task.id);
                 const isExpanded = expandedTasks.has(task.id);
                 const storyLink = getStoryLink(task);
@@ -779,9 +846,37 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                               {/* Quiz Mode - Brief Reminder */}
                               {mode === 'quiz' && (
                                 <Box sx={{ mb: storyLink ? 1.5 : 0 }}>
-                                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.7rem', fontStyle: 'italic' }}>
-                                    💡 Remember: {task.description}
-                                  </Typography>
+                                  <Box
+                                    sx={{
+                                      p: 1,
+                                      backgroundColor: 'rgba(33, 150, 243, 0.08)',
+                                      borderRadius: 1,
+                                      borderLeft: '3px solid #2196F3',
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        fontWeight: 700,
+                                        color: 'text.primary',
+                                        display: 'block',
+                                        mb: 0.5,
+                                        fontSize: '0.7rem',
+                                      }}
+                                    >
+                                      🎯 Do this action:
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: 'text.secondary',
+                                        display: 'block',
+                                        fontSize: '0.7rem',
+                                      }}
+                                    >
+                                      {task.description}
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               )}
                               
@@ -789,7 +884,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                               {storyLink && (
                                 <Box sx={{ p: 1, backgroundColor: mode === 'tutorial' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(33, 150, 243, 0.1)', borderRadius: 1, borderLeft: mode === 'tutorial' ? '3px solid #4CAF50' : '3px solid #2196F3' }}>
                                   <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
-                                    {mode === 'quiz' ? '🎯 Try It Out:' : '📖 View Example:'}
+                                    {mode === 'quiz' ? '🧭 Start here:' : '📖 View Example:'}
                                   </Typography>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     <Link
@@ -797,7 +892,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                       variant="caption"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        const storyId = getStoryIdForMode(task);
+                                        const storyId = mode === 'quiz'
+                                          ? QUIZ_SIDEBAR_NAVIGATION_STORY_ID
+                                          : getStoryIdForMode(task);
                                         storyId && handleNavigateToStory(storyId);
                                       }}
                                       sx={{ 
@@ -814,13 +911,45 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                         }
                                       }}
                                     >
-                                      {mode === 'quiz' ? 'Open Interactive Demo' : 'See Documentation Example'}
+                                      {mode === 'quiz' ? 'Open Sidebar Navigation story' : 'See Documentation Example'}
                                       <LaunchIcon sx={{ fontSize: 12 }} />
                                     </Link>
                                   </Box>
+                                  {mode === 'quiz' && (
+                                    <Box sx={{ mt: 0.75 }}>
+                                      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.35 }}>
+                                        ➜ Then open this destination page:
+                                      </Typography>
+                                      <Link
+                                        component="button"
+                                        variant="caption"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const targetStoryId = getStoryIdForMode(task);
+                                          targetStoryId && handleNavigateToStory(targetStoryId);
+                                        }}
+                                        sx={{
+                                          color: '#1565C0',
+                                          textAlign: 'left',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: 0.5,
+                                          fontSize: '0.7rem',
+                                          fontWeight: 600,
+                                          pointerEvents: 'auto',
+                                          '&:hover': {
+                                            textDecoration: 'underline',
+                                          },
+                                        }}
+                                      >
+                                        Open task destination
+                                        <LaunchIcon sx={{ fontSize: 12 }} />
+                                      </Link>
+                                    </Box>
+                                  )}
                                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.65rem', fontStyle: 'italic' }}>
                                     {mode === 'quiz' 
-                                      ? 'Your actions in the story are tracked — progress updates automatically'
+                                      ? 'Use Sidebar Navigation to choose the target page. Task progress updates automatically from tracked actions.'
                                       : 'Follow along with the interactive example to learn how it works'
                                     }
                                   </Typography>
@@ -835,6 +964,74 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                 );
               })}
             </List>
+
+        {/* Secret Achievements */}
+        {secretTasks.length > 0 && (
+          <>
+            <Divider sx={{ my: 1, mx: 2 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
+                🎁 Secret Achievements ({completedSecretCount}/{secretTasks.length} discovered)
+              </Typography>
+            </Divider>
+            <List sx={{ px: 2 }}>
+              {secretTasks.map((task: OnboardingTaskWithCriteria) => {
+                const isCompleted = completedTasks.has(task.id);
+                return (
+                  <Card
+                    key={task.id}
+                    data-testid="secret-task-item"
+                    sx={{
+                      mb: 1.5,
+                      opacity: isCompleted ? 1 : 0.55,
+                      backgroundColor: isCompleted ? 'rgba(255, 193, 7, 0.08)' : 'transparent',
+                      cursor: 'default',
+                      transition: 'opacity 0.3s ease',
+                    }}
+                  >
+                    <CardContent sx={{ p: 1.5 }}>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                        <Checkbox
+                          checked={isCompleted}
+                          disabled
+                          size="small"
+                          sx={{ mt: 0.5, cursor: 'default', pointerEvents: 'none' }}
+                        />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 500,
+                              color: isCompleted ? 'text.primary' : 'text.disabled',
+                              textDecoration: isCompleted ? 'line-through' : 'none',
+                            }}
+                          >
+                            {isCompleted ? task.title : '🔒 Secret Achievement'}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'text.disabled', display: 'block', mt: 0.5, fontStyle: 'italic' }}
+                          >
+                            {isCompleted
+                              ? task.description
+                              : 'Discover this achievement through exploration'}
+                          </Typography>
+                          {isCompleted && (
+                            <Chip
+                              label="✨ Discovered!"
+                              size="small"
+                              color="warning"
+                              sx={{ mt: 0.5, height: 18, fontSize: '0.65rem' }}
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </List>
+          </>
+        )}
 
         {/* Reset Button */}
         <Divider sx={{ mb: 2, mx: 2 }} />

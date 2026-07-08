@@ -216,7 +216,7 @@ export default function PracticeDrillConfigPopup({
 
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('practiceDrill.config.subtitle', 'Choose what to practice:')}
+          {t('practiceDrill.config.subtitle')}
         </Typography>
 
         {/* Source toggles */}
@@ -248,10 +248,10 @@ export default function PracticeDrillConfigPopup({
                 </Box>
                 <Box>
                   <Typography variant="body1" fontWeight={500}>
-                    {t(row.labelKey, row.key)}
+                    {t(row.labelKey)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {t(row.descriptionKey, '')}
+                    {t(row.descriptionKey)}
                   </Typography>
                 </Box>
               </Box>
@@ -275,7 +275,7 @@ export default function PracticeDrillConfigPopup({
                   onChange={() => handleToggle(row.key)}
                   disabled={isDisabled}
                   inputProps={{
-                    'aria-label': t(row.labelKey, row.key),
+                    'aria-label': t(row.labelKey),
                   }}
                 />
               </Box>
@@ -305,12 +305,12 @@ export default function PracticeDrillConfigPopup({
         <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel id="drill-count-label">
-              {t('practiceDrill.config.questionCount', 'Number of questions')}
+              {t('practiceDrill.config.questionCount')}
             </InputLabel>
             <Select
               labelId="drill-count-label"
               value={count}
-              label={t('practiceDrill.config.questionCount', 'Number of questions')}
+              label={t('practiceDrill.config.questionCount')}
               onChange={(e) => setCount(Number(e.target.value))}
             >
               {COUNT_OPTIONS.map((n) => (
@@ -321,18 +321,18 @@ export default function PracticeDrillConfigPopup({
 
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel id="drill-type-label">
-              {t('practiceDrill.config.drillType', 'Drill type')}
+              {t('practiceDrill.config.drillType')}
             </InputLabel>
             <Select
               labelId="drill-type-label"
               value={drillType}
-              label={t('practiceDrill.config.drillType', 'Drill type')}
+              label={t('practiceDrill.config.drillType')}
               onChange={(e) => setDrillType(e.target.value)}
             >
-              <MenuItem value="mixed">{t('practiceDrill.config.mixed', 'Mixed')}</MenuItem>
-              <MenuItem value="vocabulary">{t('practiceDrill.config.vocabularyType', 'Vocabulary')}</MenuItem>
-              <MenuItem value="comprehension">{t('practiceDrill.config.comprehension', 'Comprehension')}</MenuItem>
-              <MenuItem value="review">{t('practiceDrill.config.review', 'Review mistakes')}</MenuItem>
+              <MenuItem value="mixed">{t('practiceDrill.config.mixed')}</MenuItem>
+              <MenuItem value="vocabulary">{t('practiceDrill.config.vocabularyType')}</MenuItem>
+              <MenuItem value="comprehension">{t('practiceDrill.config.comprehension')}</MenuItem>
+              <MenuItem value="review">{t('practiceDrill.config.review')}</MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -353,17 +353,17 @@ export default function PracticeDrillConfigPopup({
               <GroupsIcon color={collaborative ? 'primary' : 'action'} />
               <Box>
                 <Typography variant="body1" fontWeight={500}>
-                  {t('practiceDrill.config.studyTogether', 'Study Together')}
+                  {t('practiceDrill.config.studyTogether')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {t('practiceDrill.config.studyTogetherDesc', 'Practice with classmates in real-time. A room code will be created to share.')}
+                  {t('practiceDrill.config.studyTogetherDesc')}
                 </Typography>
               </Box>
             </Box>
             <Switch
               checked={collaborative}
               onChange={() => setCollaborative((prev) => !prev)}
-              inputProps={{ 'aria-label': t('practiceDrill.config.studyTogether', 'Study Together') }}
+              inputProps={{ 'aria-label': t('practiceDrill.config.studyTogether') }}
             />
           </Box>
 
@@ -371,12 +371,12 @@ export default function PracticeDrillConfigPopup({
             <Box sx={{ mt: 1.5, pl: 5 }}>
               <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel id="max-participants-label">
-                  {t('practiceDrill.config.maxParticipants', 'Max participants')}
+                  {t('practiceDrill.config.maxParticipants')}
                 </InputLabel>
                 <Select
                   labelId="max-participants-label"
                   value={maxParticipants}
-                  label={t('practiceDrill.config.maxParticipants', 'Max participants')}
+                  label={t('practiceDrill.config.maxParticipants')}
                   onChange={(e) => setMaxParticipants(Number(e.target.value))}
                 >
                   {[2, 3, 5, 8, 10].map((n) => (
@@ -391,14 +391,14 @@ export default function PracticeDrillConfigPopup({
         {/* Warning if no sources */}
         {!atLeastOneEnabled && (
           <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-            {t('practiceDrill.config.noSourcesWarning', 'Enable at least one content source to start practicing.')}
+            {t('practiceDrill.config.noSourcesWarning')}
           </Typography>
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {t('practiceDrill.config.cancel', 'Cancel')}
+          {t('practiceDrill.config.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -406,8 +406,8 @@ export default function PracticeDrillConfigPopup({
           disabled={!atLeastOneEnabled || loading}
         >
           {loading
-            ? t('practiceDrill.config.generating', 'Generating...')
-            : t('practiceDrill.config.start', 'Start Practice')}
+            ? t('practiceDrill.config.generating')
+            : t('practiceDrill.config.start')}
         </Button>
       </DialogActions>
     </Dialog>

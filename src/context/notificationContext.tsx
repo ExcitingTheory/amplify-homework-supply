@@ -235,9 +235,15 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
           );
           return;
         }
-        if (msg.includes("exceeds maximum value limit")) {
+        if (
+          msg === "{}" ||
+          msg === "undefined" ||
+          msg.includes("exceeds maximum value limit") ||
+          msg.includes("Not Authorized")
+        ) {
           console.warn(
-            "[NotificationContext] AppSync filter limit — using client filtering",
+            "[NotificationContext] Transient subscription error (safe to ignore):",
+            msg,
           );
           return;
         }

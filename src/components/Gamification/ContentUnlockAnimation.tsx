@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface ContentUnlockAnimationProps {
   /** Whether the unlock animation should play */
@@ -26,11 +27,22 @@ export function ContentUnlockAnimation({
   onComplete,
 }: ContentUnlockAnimationProps) {
   const [phase, setPhase] = useState<'idle' | 'shake' | 'open' | 'shimmer' | 'done'>('idle')
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (!show) {
       setPhase('idle')
       return
+    }
+
+    // Skip animation — go straight to done after a brief flash
+    if (reducedMotion) {
+      setPhase('open')
+      const t = setTimeout(() => {
+        setPhase('done')
+        onComplete?.()
+      }, 800)
+      return () => clearTimeout(t)
     }
 
     setPhase('shake')
@@ -47,7 +59,7 @@ export function ContentUnlockAnimation({
       clearTimeout(t2)
       clearTimeout(t3)
     }
-  }, [show, onComplete])
+  }, [show, onComplete, reducedMotion])
 
   if (phase === 'idle' || phase === 'done') return null
 
@@ -72,31 +84,35 @@ export function ContentUnlockAnimation({
       <Box
         sx={{
           fontSize: '4rem',
-          animation:
-            phase === 'shake'
-              ? 'unlockShake 0.5s ease-in-out'
-              : phase === 'open'
-                ? 'unlockOpen 0.5s ease-out forwards'
-                : phase === 'shimmer'
-                  ? 'unlockShimmer 1s ease-out forwards'
-                  : 'none',
-          '@keyframes unlockShake': {
-            '0%, 100%': { transform: 'rotate(0deg)' },
-            '20%': { transform: 'rotate(-10deg)' },
-            '40%': { transform: 'rotate(10deg)' },
-            '60%': { transform: 'rotate(-10deg)' },
-            '80%': { transform: 'rotate(10deg)' },
-          },
-          '@keyframes unlockOpen': {
-            '0%': { transform: 'scale(1)', opacity: 1 },
-            '50%': { transform: 'scale(1.3)', opacity: 1 },
-            '100%': { transform: 'scale(1.5)', opacity: 0.8 },
-          },
-          '@keyframes unlockShimmer': {
-            '0%': { transform: 'scale(1.5)', opacity: 0.8, filter: 'brightness(1)' },
-            '50%': { transform: 'scale(2)', opacity: 1, filter: 'brightness(2)' },
-            '100%': { transform: 'scale(1)', opacity: 0, filter: 'brightness(1)' },
-          },
+          ...(reducedMotion
+            ? {}
+            : {
+                animation:
+                  phase === 'shake'
+                    ? 'unlockShake 0.5s ease-in-out'
+                    : phase === 'open'
+                      ? 'unlockOpen 0.5s ease-out forwards'
+                      : phase === 'shimmer'
+                        ? 'unlockShimmer 1s ease-out forwards'
+                        : 'none',
+                '@keyframes unlockShake': {
+                  '0%, 100%': { transform: 'rotate(0deg)' },
+                  '20%': { transform: 'rotate(-10deg)' },
+                  '40%': { transform: 'rotate(10deg)' },
+                  '60%': { transform: 'rotate(-10deg)' },
+                  '80%': { transform: 'rotate(10deg)' },
+                },
+                '@keyframes unlockOpen': {
+                  '0%': { transform: 'scale(1)', opacity: 1 },
+                  '50%': { transform: 'scale(1.3)', opacity: 1 },
+                  '100%': { transform: 'scale(1.5)', opacity: 0.8 },
+                },
+                '@keyframes unlockShimmer': {
+                  '0%': { transform: 'scale(1.5)', opacity: 0.8, filter: 'brightness(1)' },
+                  '50%': { transform: 'scale(2)', opacity: 1, filter: 'brightness(2)' },
+                  '100%': { transform: 'scale(1)', opacity: 0, filter: 'brightness(1)' },
+                },
+              }),
         }}
       >
         <LockOpenIcon sx={{ fontSize: 'inherit', color: 'warning.main' }} />
@@ -110,11 +126,15 @@ export function ContentUnlockAnimation({
             fontWeight: 700,
             mt: 2,
             textAlign: 'center',
-            animation: 'fadeInUp 0.6s ease-out',
-            '@keyframes fadeInUp': {
-              '0%': { opacity: 0, transform: 'translateY(20px)' },
-              '100%': { opacity: 1, transform: 'translateY(0)' },
-            },
+            ...(reducedMotion
+              ? {}
+              : {
+                  animation: 'fadeInUp 0.6s ease-out',
+                  '@keyframes fadeInUp': {
+                    '0%': { opacity: 0, transform: 'translateY(20px)' },
+                    '100%': { opacity: 1, transform: 'translateY(0)' },
+                  },
+                }),
           }}
         >
           🔓 {title} Unlocked!

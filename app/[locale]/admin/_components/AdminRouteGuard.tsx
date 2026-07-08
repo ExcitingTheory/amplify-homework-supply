@@ -3,42 +3,23 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import AuthContext from "@/context/authContext";
 
-type AuthUser = {
-  signInUserSession?: {
-    accessToken?: { payload?: Record<string, unknown> };
-    idToken?: { payload?: Record<string, unknown> };
-  };
-  groups?: string[];
-};
-
-function getUserGroups(user?: AuthUser): string[] {
-  const accessGroups = user?.signInUserSession?.accessToken?.payload?.[
-    "cognito:groups"
-  ];
-  if (Array.isArray(accessGroups)) return accessGroups as string[];
-
-  const idGroups = user?.signInUserSession?.idToken?.payload?.["cognito:groups"];
-  if (Array.isArray(idGroups)) return idGroups as string[];
-
-  return Array.isArray(user?.groups) ? user.groups : [];
-}
-
-function canAccessAdminRoutes(user?: AuthUser): boolean {
-  const groups = getUserGroups(user);
+function canAccessAdminRoutes(groups: string[]): boolean {
   return groups.includes("Admins") || groups.includes("Instructors");
 }
 
 type AdminRouteGuardProps = {
-  user?: AuthUser;
   children: React.ReactNode;
 };
 
 export default function AdminRouteGuard({
-  user,
   children,
 }: AdminRouteGuardProps) {
-  if (!canAccessAdminRoutes(user)) {
+  const { session } = React.useContext(AuthContext);
+  const groups = session?.groups || [];
+
+  if (!canAccessAdminRoutes(groups)) {
     return (
       <Box sx={{ p: 4, maxWidth: 720, mx: "auto" }}>
         <Typography variant="h5" gutterBottom>

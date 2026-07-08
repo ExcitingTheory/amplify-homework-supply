@@ -46,6 +46,10 @@ test.describe.serial("Journey 5: Instructor — Create & Manage Sections", () =>
     await page
       .locator('[data-tour="section-form"] input[name="name"]')
       .fill(sectionName);
+    await page
+      .locator('[data-tour="section-form"] textarea[name="description"]')
+      .first()
+      .fill("Automated test section for sections journey");
 
     const submitBtn = page
       .locator('[data-tour="section-form"]')

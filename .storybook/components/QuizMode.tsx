@@ -299,15 +299,6 @@ export function QuizMode({
                   ))}
                 </div>
               )}
-
-              {requiredActions.length === 0 && (
-                <button
-                  className="quiz-button secondary"
-                  onClick={handleComplete}
-                >
-                  Mark as Complete
-                </button>
-              )}
             </div>
           </div>
         </div>

@@ -50,25 +50,6 @@ export function TutorialStep({
     }
   }, [stepId, currentPersona, emitter]);
 
-  const handleComplete = () => {
-    // Set default persona if none exists (for isolated Storybook usage)
-    if (!emitter.getPersona()) {
-      emitter.setPersona(currentPersona as UserPersona);
-    }
-
-    emitter.emit({
-      type: 'task-completed',
-      taskId: stepId,
-      persona: currentPersona as UserPersona,
-      timestamp: Date.now(),
-      metadata: {
-        mode: 'tutorial',
-        component: 'TutorialStep',
-      },
-    });
-    setCompleted(true);
-  };
-
   const handleTryQuiz = () => {
     if (!quizStoryId) return;
     
@@ -97,14 +78,11 @@ export function TutorialStep({
       )}
 
       <div className="tutorial-actions">
-        {!completed && completionMode === 'manual' && (
-          <button
-            className="tutorial-button primary"
-            onClick={handleComplete}
-          >
-            Mark as Complete
-          </button>
-        )}
+            {!completed && completionMode === 'manual' && (
+              <div className="completion-message">
+                Progress updates automatically when you complete the required interaction.
+              </div>
+            )}
 
         {quizStoryId && (
           <button

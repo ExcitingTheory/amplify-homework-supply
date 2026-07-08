@@ -11,6 +11,7 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { SquadCrest } from './SquadCrest'
+import { sanitizeSvg } from '../../utils/sanitizeHtml'
 
 export interface ArmoriaShieldProps {
   squadId: string
@@ -46,7 +47,7 @@ export function ArmoriaShield({
             height: size,
             '& svg': { width: '100%', height: '100%' },
           }}
-          dangerouslySetInnerHTML={{ __html: crestSvg }}
+          dangerouslySetInnerHTML={{ __html: sanitizeSvg(crestSvg) }}
           aria-label={`${squadName} coat of arms`}
           role="img"
         />

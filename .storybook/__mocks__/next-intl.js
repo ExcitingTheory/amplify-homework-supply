@@ -11,6 +11,11 @@ import React, { useSyncExternalStore, useContext, useRef } from 'react';
 import { TranslationModeContext } from '../addons/translation-mode/contexts/TranslationModeContext';
 import { TranslationCaptureContext } from '../addons/translation-mode/contexts/TranslationCaptureContext';
 import { TranslationOverlay } from '../addons/translation-mode/components/TranslationOverlay';
+import {
+  subscribeTranslationOverrides,
+  getTranslationOverrideVersion,
+  getTranslationOverride,
+} from '../addons/translation-mode/utils/translationOverrides';
 
 // Eagerly load ALL locale JSON files at build time
 const allLocaleModules = import.meta.glob('../../public/locales/**/*.json', { eager: true });
@@ -85,6 +90,10 @@ function interpolate(str, params) {
 export const useTranslations = (namespace) => {
   // Subscribe to locale changes so components re-render when language switches
   const locale = useSyncExternalStore(subscribe, getSnapshot);
+
+  // Subscribe to translation overrides so components re-render when the panel edits a key
+  // eslint-disable-next-line no-unused-vars
+  const _overrideVersion = useSyncExternalStore(subscribeTranslationOverrides, getTranslationOverrideVersion);
 
   // Translation mode integration
   let mode = 'off';
@@ -166,17 +175,28 @@ export const useTranslations = (namespace) => {
       result = key;
     }
 
+    // Apply live panel override for the current display locale (if any).
+    // This makes edits in the Translations panel reflect instantly in the story.
+    const panelOverride = getTranslationOverride(targetNs, resolveKey, locale);
+    if (panelOverride !== undefined) {
+      result = interpolate(panelOverride, params);
+    }
+
     // Translation mode: wrap in TranslationOverlay for highlight/edit modes
     if ((mode === 'highlight' || mode === 'edit') && typeof result === 'string') {
-      // Capture translation for the panel (only once per key)
+      // Capture translation for the panel (only once per key).
+      // Deferred via queueMicrotask to avoid calling setState during render,
+      // which triggers the "Cannot update a component while rendering" warning.
       const captureKey = `${targetNs}:${resolveKey}`;
       if (captureTranslation && !capturedKeys.current.has(captureKey)) {
         capturedKeys.current.add(captureKey);
-        captureTranslation({
-          key: resolveKey,
-          namespace: targetNs,
-          value: result,
-          usedIn: storyName ? [storyName] : undefined,
+        queueMicrotask(() => {
+          captureTranslation({
+            key: resolveKey,
+            namespace: targetNs,
+            value: result,
+            usedIn: storyName ? [storyName] : undefined,
+          });
         });
       }
 

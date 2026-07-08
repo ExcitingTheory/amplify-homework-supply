@@ -113,6 +113,7 @@ export default function UnitCompletedPlugin() {
       aria-describedby="modal-modal-description"
       sx={{
         overflow: "auto",
+        zIndex: (theme) => theme.zIndex.modal + 3,
       }}
       slotProps={{
         backdrop: {

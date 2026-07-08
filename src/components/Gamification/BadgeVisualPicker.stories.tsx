@@ -3,7 +3,7 @@ import { BadgeVisualPicker } from './BadgeVisualPicker'
 import { fn } from 'storybook/test'
 
 const meta: Meta<typeof BadgeVisualPicker> = {
-  title: 'Gamification/BadgeVisualPicker',
+  title: '🏆 Gamification/Instructor/Badge Visual Picker',
   component: BadgeVisualPicker,
   parameters: {
     layout: 'centered',

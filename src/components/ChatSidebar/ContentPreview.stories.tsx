@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { ContentPreview } from './ContentPreview';
 
 const meta: Meta<typeof ContentPreview> = {
-  title: '💬 Chat/ContentPreview',
+  title: '💬 AI Assistant/Components/Content Preview',
   component: ContentPreview,
   parameters: { layout: 'centered' },
 };

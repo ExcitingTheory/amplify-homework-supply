@@ -12,6 +12,7 @@ export interface CustomPaletteTokens {
   codeBlock: string;
   searchHighlight: string;
   subtleBorder: string;
+  heroCardGradient: string;
 }
 
 export interface ThemePaletteVariant {
@@ -43,6 +44,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#f6f8fa",
         searchHighlight: "#ffeb3b",
         subtleBorder: "#e0e0e0",
+        heroCardGradient:
+          "linear-gradient(135deg, rgba(21,101,192,0.92) 0%, rgba(13,71,161,0.97) 100%)",
       },
     },
     dark: {
@@ -59,6 +62,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#161b22",
         searchHighlight: "#b8860b",
         subtleBorder: "#333333",
+        heroCardGradient:
+          "linear-gradient(135deg, rgba(25,35,55,0.95) 0%, rgba(15,20,40,0.98) 100%)",
       },
     },
   },
@@ -75,6 +80,7 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#eceff1",
         searchHighlight: "#80deea",
         subtleBorder: "#b0bec5",
+        heroCardGradient: "linear-gradient(135deg, #006064 0%, #00363a 100%)",
       },
     },
     dark: {
@@ -90,6 +96,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#0f3460",
         searchHighlight: "#006064",
         subtleBorder: "#2a3a5e",
+        heroCardGradient:
+          "linear-gradient(135deg, #1a1a2e 0%, #0f3460 50%, #006064 100%)",
       },
     },
   },
@@ -106,6 +114,7 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#e8f5e9",
         searchHighlight: "#aed581",
         subtleBorder: "#c8e6c9",
+        heroCardGradient: "linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%)",
       },
     },
     dark: {
@@ -121,6 +130,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#1b3d1b",
         searchHighlight: "#33691e",
         subtleBorder: "#4a6a4a",
+        heroCardGradient:
+          "linear-gradient(135deg, #1b2d1b 0%, #2e7d32 50%, #1b5e20 100%)",
       },
     },
   },
@@ -137,6 +148,7 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#fbe9e7",
         searchHighlight: "#ffcc80",
         subtleBorder: "#ffccbc",
+        heroCardGradient: "linear-gradient(135deg, #e65100 0%, #bf360c 100%)",
       },
     },
     dark: {
@@ -152,6 +164,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#4e342e",
         searchHighlight: "#bf360c",
         subtleBorder: "#5d4037",
+        heroCardGradient:
+          "linear-gradient(135deg, #2d1b1b 0%, #bf360c 50%, #e65100 100%)",
       },
     },
   },
@@ -168,6 +182,7 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#ede7f6",
         searchHighlight: "#e1bee7",
         subtleBorder: "#ce93d8",
+        heroCardGradient: "linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)",
       },
     },
     dark: {
@@ -183,6 +198,8 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         codeBlock: "#1a237e",
         searchHighlight: "#4a148c",
         subtleBorder: "#311b92",
+        heroCardGradient:
+          "linear-gradient(135deg, #0d1b2a 0%, #4a148c 50%, #6a1b9a 100%)",
       },
     },
   },

@@ -107,7 +107,7 @@ export const Index: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: { navigation: { pathname: '/' } },
   },
@@ -136,7 +136,7 @@ export const IndexNoSections: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'new-student', email: 'new.student@example.com' } },
-      session: { username: 'new-student' },
+      session: { username: 'new-student', groups: [] },
     },
     nextjs: { navigation: { pathname: '/' } },
   },
@@ -165,7 +165,7 @@ export const IndexAssignments: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: { navigation: { pathname: '/' } },
   },
@@ -194,7 +194,7 @@ export const Units: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
     nextjs: { navigation: { pathname: '/units' } },
   },
@@ -219,7 +219,7 @@ export const UnitsEmptyState: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'new-teacher', email: 'new.teacher@example.com' } },
-      session: { username: 'new-teacher' },
+      session: { username: 'new-teacher', groups: ['Instructors'] },
     },
     nextjs: { navigation: { pathname: '/units' } },
   },
@@ -248,7 +248,7 @@ export const Sections: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: { navigation: { pathname: '/sections' } },
   },
@@ -273,7 +273,7 @@ export const SectionsEmptyState: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'new-student', email: 'new.student@example.com' } },
-      session: { username: 'new-student' },
+      session: { username: 'new-student', groups: [] },
     },
     nextjs: { navigation: { pathname: '/sections' } },
   },
@@ -306,7 +306,7 @@ export const SectionDetail: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
     nextjs: {
       appDirectory: true,
@@ -341,7 +341,7 @@ export const SectionDetailStudent: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
     nextjs: {
       appDirectory: true,
@@ -380,7 +380,7 @@ export const UnitDetail: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1' },
+      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
     nextjs: {
       appDirectory: true,
@@ -419,7 +419,7 @@ export const Workbook: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
     nextjs: {
       appDirectory: true,
@@ -454,7 +454,7 @@ export const WorkbookTimedExercise: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
     nextjs: {
       appDirectory: true,
@@ -493,7 +493,7 @@ export const PeerReview: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
     nextjs: {
       appDirectory: true,

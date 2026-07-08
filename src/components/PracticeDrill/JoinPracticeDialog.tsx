@@ -69,7 +69,7 @@ export default function JoinPracticeDialog({
 
   const handleJoin = useCallback(async () => {
     if (roomCode.length < 4) {
-      setError(t('practiceDrill.join.codeTooShort', 'Room code must be at least 4 characters'))
+      setError(t('practiceDrill.join.codeTooShort'))
       return
     }
 
@@ -93,7 +93,7 @@ export default function JoinPracticeDialog({
       )
 
       if (!activeSession) {
-        setError(t('practiceDrill.join.notFound', 'No active session found with that code'))
+        setError(t('practiceDrill.join.notFound'))
         setLoading(false)
         return
       }
@@ -128,7 +128,7 @@ export default function JoinPracticeDialog({
       setError(null)
     } catch (err: any) {
       console.error('[JoinPracticeDialog] Error:', err)
-      setError(err.message || t('practiceDrill.join.error', 'Failed to join session'))
+      setError(err.message || t('practiceDrill.join.error'))
     } finally {
       setLoading(false)
     }
@@ -153,25 +153,25 @@ export default function JoinPracticeDialog({
     >
       <DialogTitle id="join-practice-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <GroupsIcon color="primary" />
-        {t('practiceDrill.join.title', 'Join Study Session')}
+        {t('practiceDrill.join.title')}
       </DialogTitle>
 
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label={t('practiceDrill.join.tabCode', 'Enter Code')} />
-          <Tab label={t('practiceDrill.join.tabInvitations', 'Invitations')} />
+          <Tab label={t('practiceDrill.join.tabCode')} />
+          <Tab label={t('practiceDrill.join.tabInvitations')} />
         </Tabs>
 
         {tab === 0 && (
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('practiceDrill.join.description', 'Enter the room code shared by your study group to join their practice session.')}
+              {t('practiceDrill.join.description')}
             </Typography>
 
             <TextField
               autoFocus
               fullWidth
-              label={t('practiceDrill.join.codeLabel', 'Room Code')}
+              label={t('practiceDrill.join.codeLabel')}
               value={roomCode}
               onChange={handleRoomCodeChange}
               onKeyDown={handleKeyDown}
@@ -211,15 +211,15 @@ export default function JoinPracticeDialog({
                 setTab(0)
               }
             }}
-            joinLabel={t('practiceDrill.join.joinButton', 'Join Session')}
-            emptyMessage={t('practiceDrill.join.noInvitations', 'No pending practice invitations')}
+            joinLabel={t('practiceDrill.join.joinButton')}
+            emptyMessage={t('practiceDrill.join.noInvitations')}
           />
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {t('practiceDrill.join.cancel', 'Cancel')}
+          {t('practiceDrill.join.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -228,8 +228,8 @@ export default function JoinPracticeDialog({
           startIcon={loading ? <Skeleton variant="circular" width={16} height={16} /> : <GroupsIcon />}
         >
           {loading
-            ? t('practiceDrill.join.joining', 'Joining...')
-            : t('practiceDrill.join.joinButton', 'Join Session')}
+            ? t('practiceDrill.join.joining')
+            : t('practiceDrill.join.joinButton')}
         </Button>
       </DialogActions>
     </Dialog>

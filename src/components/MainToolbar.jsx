@@ -78,17 +78,14 @@ import { useAvatarConfig } from "../hooks/useAvatarConfig";
 import SyncStatusIndicator from "./SyncStatusIndicator";
 import { useXP, useProgress, useSquad } from "../context/gamificationContext";
 import AuthContext from "../context/authContext";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import RateReviewIcon from "@mui/icons-material/RateReview";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TuneIcon from "@mui/icons-material/Tune";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import JoinPracticeDialog from "./PracticeDrill/JoinPracticeDialog";
-import { JoinWorkbookDialog } from "./Workbook";
-import { JoinPeerReviewDialog } from "./PeerReview";
+import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
-import { useUnseenCount } from "../context/notificationContext";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import GlobalSearchBar from "./GlobalSearchBar";
+import { SearchProvider } from "../context/searchContext";
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -416,9 +413,7 @@ export default function MainToolbar({ children }) {
 
   const [openAddStudentToSection, setOpenAddStudentToSection] =
     React.useState(false);
-  const [openJoinStudyGroup, setOpenJoinStudyGroup] = React.useState(false);
-  const [openJoinWorkbook, setOpenJoinWorkbook] = React.useState(false);
-  const [openJoinPeerReview, setOpenJoinPeerReview] = React.useState(false);
+  const [openCollaboration, setOpenCollaboration] = React.useState(false);
 
   // Expandable nav state
   const [sectionsExpanded, setSectionsExpanded] = React.useState(false);
@@ -743,29 +738,36 @@ export default function MainToolbar({ children }) {
                     </ListItemButton>
                   </ListItem>
                   {isCurrent &&
-                    sectionHeadings.map((heading) => (
-                      <ListItem key={heading.id} disablePadding>
-                        <ListItemButton
-                          sx={{ pl: 6 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            document
-                              .getElementById(heading.id)
-                              ?.scrollIntoView({ behavior: "smooth" });
-                            if (!hasAppShell || !appShell.isDesktop) {
-                              setDrawerOpen(false);
-                            }
-                          }}
-                        >
-                          <ListItemText
-                            primary={heading.label}
-                            primaryTypographyProps={{
-                              variant: "caption",
+                    sectionHeadings
+                      .filter((heading) => {
+                        if (!isInstructorOrAdmin) {
+                          return heading.id !== "nav-section-students";
+                        }
+                        return true;
+                      })
+                      .map((heading) => (
+                        <ListItem key={heading.id} disablePadding>
+                          <ListItemButton
+                            sx={{ pl: 6 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              document
+                                .getElementById(heading.id)
+                                ?.scrollIntoView({ behavior: "smooth" });
+                              if (!hasAppShell || !appShell.isDesktop) {
+                                setDrawerOpen(false);
+                              }
                             }}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
+                          >
+                            <ListItemText
+                              primary={heading.label}
+                              primaryTypographyProps={{
+                                variant: "caption",
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
                 </React.Fragment>
               );
             })}
@@ -977,47 +979,15 @@ export default function MainToolbar({ children }) {
           <ListItemButton
             onClick={(e) => {
               e.stopPropagation();
-              setOpenJoinStudyGroup(true);
+              setOpenCollaboration(true);
             }}
           >
             <ListItemIcon sx={{ color: "text.primary" }}>
               <GroupsIcon />
             </ListItemIcon>
             <ListItemText
-              primary={tCommon("navigation.joinStudyGroup")}
-              secondary={tCommon("navigation.joinStudyGroupDesc")}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenJoinWorkbook(true);
-            }}
-          >
-            <ListItemIcon sx={{ color: "text.primary" }}>
-              <EditNoteIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={tCommon("navigation.joinWorkbook")}
-              secondary={tCommon("navigation.joinWorkbookDesc")}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenJoinPeerReview(true);
-            }}
-          >
-            <ListItemIcon sx={{ color: "text.primary" }}>
-              <RateReviewIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={tCommon("navigation.joinPeerReview")}
-              secondary={tCommon("navigation.joinPeerReviewDesc")}
+              primary={tCommon("navigation.collaboration")}
+              secondary={tCommon("navigation.collaborationDesc")}
             />
           </ListItemButton>
         </ListItem>
@@ -1054,6 +1024,9 @@ export default function MainToolbar({ children }) {
           ref={appShell.toolbarChildrenPortalRef}
           style={{ display: "contents" }}
         />
+        <SearchProvider>
+          <GlobalSearchBar />
+        </SearchProvider>
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />
@@ -1075,9 +1048,9 @@ export default function MainToolbar({ children }) {
         />
         <IconButton
           color="inherit"
-          aria-label={tCommon("mainToolbar.joinStudyGroup")}
-          data-tour="join-study-group-button"
-          onClick={() => setOpenJoinStudyGroup(true)}
+          aria-label={tCommon("mainToolbar.collaboration")}
+          data-tour="collaboration-button"
+          onClick={() => setOpenCollaboration(true)}
         >
           <NotificationBadge category="COLLABORATION">
             <GroupsIcon />
@@ -1254,13 +1227,12 @@ export default function MainToolbar({ children }) {
             </form>
           </Dialog>
 
-          {/* Join Study Group Dialog */}
-          <JoinPracticeDialog
-            open={openJoinStudyGroup}
-            onClose={() => setOpenJoinStudyGroup(false)}
-            onJoin={(sessionInfo) => {
-              setOpenJoinStudyGroup(false);
-              // Navigate to units page with join params
+          {/* Collaboration Dialog (Practice, Workbook, Peer Review) */}
+          <CollaborationDialog
+            open={openCollaboration}
+            onClose={() => setOpenCollaboration(false)}
+            onJoinPractice={(sessionInfo) => {
+              setOpenCollaboration(false);
               const params = new URLSearchParams({
                 joinSession: sessionInfo.sessionId,
                 joinRoom: sessionInfo.roomCode,
@@ -1268,24 +1240,12 @@ export default function MainToolbar({ children }) {
               });
               router.push(`/units?${params.toString()}`);
             }}
-          />
-
-          {/* Join Workbook Session Dialog */}
-          <JoinWorkbookDialog
-            open={openJoinWorkbook}
-            onClose={() => setOpenJoinWorkbook(false)}
-            onJoin={({ unitId }) => {
-              setOpenJoinWorkbook(false);
+            onJoinWorkbook={({ unitId }) => {
+              setOpenCollaboration(false);
               router.push(`/workbook/${unitId}`);
             }}
-          />
-
-          {/* Join Peer Review Dialog */}
-          <JoinPeerReviewDialog
-            open={openJoinPeerReview}
-            onClose={() => setOpenJoinPeerReview(false)}
-            onJoin={({ roomId }) => {
-              setOpenJoinPeerReview(false);
+            onJoinPeerReview={({ roomId }) => {
+              setOpenCollaboration(false);
               router.push(`/review/${roomId}`);
             }}
           />

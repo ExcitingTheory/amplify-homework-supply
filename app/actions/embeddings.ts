@@ -3,11 +3,24 @@
 /**
  * Embeddings Server Action
  *
- * Replaces the embeddings Lambda's generateEmbedding operation.
- * Generates text embeddings using OpenAI's text-embedding-3-small model.
+ * Generates text embeddings using Xenova/all-MiniLM-L6-v2 (384D).
+ * Unified with search bundles and offline model for consistent results.
  */
 
 import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from "./embedding-constants";
+import { pipeline, env } from "@huggingface/transformers";
+
+// Singleton pipeline cached across requests in the same server instance
+let embeddingPipeline: any = null;
+
+async function getEmbeddingPipeline() {
+  if (embeddingPipeline) return embeddingPipeline;
+  env.allowLocalModels = false;
+  embeddingPipeline = await pipeline("feature-extraction", EMBEDDING_MODEL, {
+    dtype: "q8",
+  });
+  return embeddingPipeline;
+}
 
 export async function generateEmbedding(params: {
   content: string;
@@ -19,37 +32,23 @@ export async function generateEmbedding(params: {
   dimensions: number;
   tokenCount: number;
 }> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
-
-  const model = params.model || EMBEDDING_MODEL;
   const dimensions = params.dimensions || EMBEDDING_DIMENSIONS;
 
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      input: params.content,
-      dimensions,
-    }),
+  const pipe = await getEmbeddingPipeline();
+  const output = await pipe(params.content, {
+    pooling: "mean",
+    normalize: true,
   });
-
-  if (!response.ok) {
-    throw new Error(`Embeddings API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  const result = data.data[0];
+  const embedding = Array.from(output.data as Float32Array).slice(
+    0,
+    dimensions,
+  );
 
   return {
-    embedding: result.embedding,
-    model: data.model,
-    dimensions,
-    tokenCount: data.usage?.total_tokens || 0,
+    embedding,
+    model: EMBEDDING_MODEL,
+    dimensions: embedding.length,
+    tokenCount: Math.ceil(params.content.length / 4),
   };
 }
 
@@ -171,6 +170,70 @@ export async function cancelDocumentAnalysis(fileId: string): Promise<{
     return { success: true, message: result?.message || "Analysis cancelled" };
   } catch (err: any) {
     console.error("[embeddings action] cancelDocumentAnalysis error:", err);
+    return { success: false, message: err?.message };
+  }
+}
+
+/**
+ * Store section metadata for embedding generation by the rebuildSearchBundle Lambda.
+ * Stores text at private/{identityId}/embeddings/section/{sectionId}.json
+ * without a pre-computed embedding. The Lambda generates the MiniLM 384D embedding
+ * at bundle build time using the stored text.
+ */
+export async function generateSectionEmbedding(
+  sectionId: string,
+  sectionName: string,
+  sectionDescription?: string,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const { uploadData } = await import("aws-amplify/storage");
+    const { runWithAmplifyServerContext } =
+      await import("@/utils/amplifyServerUtils");
+    const { fetchAuthSession } = await import("aws-amplify/auth/server");
+    const { cookies } = await import("next/headers");
+
+    // Get identity for the S3 path
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+
+    const identityId = session?.identityId;
+    if (!identityId) {
+      return { success: false, message: "No identity available" };
+    }
+
+    // Build searchable text from section name and description
+    const searchText = [sectionName, sectionDescription]
+      .filter(Boolean)
+      .join(" — ");
+
+    // Store text metadata — Lambda will generate the MiniLM embedding at build time
+    const embeddingData = {
+      model: "Xenova/all-MiniLM-L6-v2",
+      dimensions: 384,
+      generatedAt: Date.now(),
+      title: sectionName,
+      needsEmbedding: true,
+      wordCount: searchText.split(/\s+/).length,
+      pages: [
+        {
+          page: 0,
+          text: searchText.substring(0, 500),
+        },
+      ],
+    };
+
+    const path = `private/${identityId}/embeddings/section/${sectionId}.json`;
+    await uploadData({
+      path,
+      data: JSON.stringify(embeddingData),
+      options: { contentType: "application/json" },
+    }).result;
+
+    return { success: true, message: "Section metadata stored for indexing" };
+  } catch (err: any) {
+    console.error("[embeddings action] generateSectionEmbedding error:", err);
     return { success: false, message: err?.message };
   }
 }

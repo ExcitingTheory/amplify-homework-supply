@@ -60,60 +60,15 @@ export default function WorkbookSettings() {
       </Typography>
 
       <Box sx={{ mb: 3 }}>
-        <FormControlLabel
-          sx={{
-            maxWidth: '100%',
-            wordWrap: 'break-word',
-            '& .MuiFormControlLabel-label': {
-              whiteSpace: 'normal',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-            },
-          }}
-          control={
-            <Switch
-              checked={settings?.highContrastMode ?? false}
-              onChange={(e) => handleSettingChange('highContrastMode', e.target.checked)}
-              disabled={loadingSettings}
-            />
-          }
-          label={t('workbookSettings.highContrastMode')}
-        />
         <Typography
-          variant="caption"
-          display="block"
+          variant="body2"
           color="text.secondary"
-          sx={{ ml: 4, mb: 2 }}
+          sx={{ mb: 1 }}
         >
-          {t('workbookSettings.highContrastModeDescription')}
-        </Typography>
-
-        <FormControlLabel
-          sx={{
-            maxWidth: '100%',
-            wordWrap: 'break-word',
-            '& .MuiFormControlLabel-label': {
-              whiteSpace: 'normal',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-            },
-          }}
-          control={
-            <Switch
-              checked={settings?.reducedMotion ?? false}
-              onChange={(e) => handleSettingChange('reducedMotion', e.target.checked)}
-              disabled={loadingSettings}
-            />
-          }
-          label={t('workbookSettings.reducedMotion')}
-        />
-        <Typography
-          variant="caption"
-          display="block"
-          color="text.secondary"
-          sx={{ ml: 4, mb: 2 }}
-        >
-          {t('workbookSettings.reducedMotionDescription')}
+          Accessibility settings (reduced motion, high contrast) have moved to your{' '}
+          <a href="/settings" style={{ color: 'inherit', fontWeight: 600 }}>
+            global Settings page
+          </a>.
         </Typography>
       </Box>
 

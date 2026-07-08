@@ -68,7 +68,7 @@ export async function chatCompletion() { return { content: 'Mock response' }; }
 export async function summarizeFeedback() { return { summary: '', insights: [] }; }
 
 // --- app/actions/jobs ---
-export async function listJobs() { return { jobs: [], nextToken: null }; }
+export async function listJobs() { return []; }
 export async function retryJob() { return { success: true }; }
 export async function cancelJob() { return { success: true }; }
 
@@ -91,7 +91,7 @@ export async function generatePracticeDrill() {
 
 // --- app/actions/embeddings ---
 export async function generateEmbedding() {
-  return { embedding: new Array(512).fill(0), model: 'text-embedding-3-small', dimensions: 512, tokenCount: 10 };
+  return { embedding: new Array(384).fill(0), model: 'Xenova/all-MiniLM-L6-v2', dimensions: 384, tokenCount: 10 };
 }
 export async function generateUnitEmbeddings() { return { success: true }; }
 export async function generateFileEmbeddings() { return { success: true }; }

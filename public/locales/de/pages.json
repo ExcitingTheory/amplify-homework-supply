@@ -9,6 +9,9 @@
   },
   "index": {
     "title": "Hausaufgabenmaterial",
+    "greetingMorning": "Guten Morgen, {name}",
+    "greetingAfternoon": "Guten Tag, {name}",
+    "greetingEvening": "Guten Abend, {name}",
     "assignments": "Aufgaben",
     "viewWorkbook": "Arbeitsbuch anzeigen",
     "completedAssignments": "Abgeschlossene Aufgaben",
@@ -148,5 +151,14 @@
     "timerInstructions": "Dies ist eine zeitlich begrenzte Übung. Drücken Sie Start, um den Timer zu beginnen und die Fragen zu beantworten.",
     "start": "Starten",
     "loading": "Wird geladen…"
+  },
+  "leaderboard": {
+    "title": "Rangliste",
+    "heading": "Gesamtrangliste",
+    "xpMode": "XP",
+    "completionMode": "Abschluss",
+    "fastestMode": "Schnellste",
+    "squadsMode": "Squads",
+    "empty": "Noch keine Ranglisten-Daten. Schließe Aufgaben ab, um XP zu verdienen\\!"
   }
 }

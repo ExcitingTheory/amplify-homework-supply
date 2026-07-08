@@ -368,4 +368,116 @@ describe("WebSocket Collaboration Integration", () => {
     expect(received2.unitId).toBe(testUnitId);
     expect(received3.unitId).toBe(testUnitId);
   }, 25000);
+
+  // ── Authorization Boundary Tests (A6) ─────────────────────────────────────
+
+  describe("unauthorized access", () => {
+    it("rejects connection with no auth token (anonymous)", async () => {
+      // Connect without any token — should be rejected at $connect
+      const ws = new WebSocket(WS_URL);
+
+      const result = await new Promise<"closed" | "opened">((resolve) => {
+        const timeout = setTimeout(() => {
+          ws.close();
+          resolve("closed");
+        }, 5000);
+
+        ws.on("open", () => {
+          clearTimeout(timeout);
+          ws.close();
+          resolve("opened");
+        });
+
+        ws.on("error", () => {
+          clearTimeout(timeout);
+          resolve("closed");
+        });
+
+        ws.on("close", () => {
+          clearTimeout(timeout);
+          resolve("closed");
+        });
+      });
+
+      // The connection should have been rejected (not opened)
+      expect(result).toBe("closed");
+    }, 10000);
+
+    it("rejects connection with invalid token", async () => {
+      const ws = new WebSocket(`${WS_URL}?token=invalid-garbage-token`);
+
+      const result = await new Promise<"closed" | "opened">((resolve) => {
+        const timeout = setTimeout(() => {
+          ws.close();
+          resolve("closed");
+        }, 5000);
+
+        ws.on("open", () => {
+          clearTimeout(timeout);
+          ws.close();
+          resolve("opened");
+        });
+
+        ws.on("error", () => {
+          clearTimeout(timeout);
+          resolve("closed");
+        });
+
+        ws.on("close", () => {
+          clearTimeout(timeout);
+          resolve("closed");
+        });
+      });
+
+      expect(result).toBe("closed");
+    }, 10000);
+
+    it("denies access to a unit room the user is not authorized for", async () => {
+      // Connect student1 — they should not have access to an instructor's
+      // private unit that they have no assignment for.
+      const client = await connectClient("student1");
+      clients.push(client);
+
+      // Attempt to join a room for a unit that student1 is NOT enrolled in.
+      // The handler should either close the connection, send an error, or silently drop the join.
+      const fakeUnitId = `unauthorized-unit-${Date.now()}`;
+      client.ws.send(
+        JSON.stringify({
+          action: "sync",
+          unitId: fakeUnitId,
+          data: { initial: true },
+          userId: "student1",
+        }),
+      );
+
+      // Wait for an error response or connection close
+      const errorOrClose = await new Promise<"error" | "timeout" | "closed">(
+        (resolve) => {
+          const timeout = setTimeout(() => resolve("timeout"), 3000);
+
+          // Check for error message in responses
+          const checkInterval = setInterval(() => {
+            const errorMsg = client.messages.find(
+              (msg) =>
+                msg.error || msg.statusCode === 403 || msg.action === "error",
+            );
+            if (errorMsg) {
+              clearTimeout(timeout);
+              clearInterval(checkInterval);
+              resolve("error");
+            }
+          }, 100);
+
+          client.ws.on("close", () => {
+            clearTimeout(timeout);
+            clearInterval(checkInterval);
+            resolve("closed");
+          });
+        },
+      );
+
+      // Should get either an error message or connection closure — NOT timeout (which means silent accept)
+      expect(errorOrClose).not.toBe("timeout");
+    }, 10000);
+  });
 });

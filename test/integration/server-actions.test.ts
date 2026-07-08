@@ -408,53 +408,26 @@ describe("Server Actions Integration Tests", () => {
   // SA2. Embeddings (embeddings.ts)
   // ==========================================================================
   describe("SA2. Embeddings", () => {
-    it("generates embedding vector for text", async () => {
-      const mockEmbedding = Array.from({ length: 256 }, () => Math.random());
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
-            model: "text-embedding-3-small",
-            usage: { total_tokens: 5 },
-          }),
-      });
-
+    it("generates embedding vector for text using MiniLM", async () => {
       const result = await generateEmbedding({
         content: "Photosynthesis converts sunlight into energy",
-        dimensions: 256,
       });
 
-      expect(result.embedding).toHaveLength(256);
-      expect(result.model).toBe("text-embedding-3-small");
-      expect(result.dimensions).toBe(256);
-      expect(result.tokenCount).toBe(5);
+      expect(result.embedding).toHaveLength(384);
+      expect(result.model).toBe("Xenova/all-MiniLM-L6-v2");
+      expect(result.dimensions).toBe(384);
+      expect(result.tokenCount).toBeGreaterThan(0);
     });
 
-    it("uses default model and dimensions", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            data: [{ embedding: Array(512).fill(0.1) }],
-            model: "text-embedding-3-small",
-            usage: { total_tokens: 3 },
-          }),
-      });
+    it("uses default 384 dimensions", async () => {
+      const result = await generateEmbedding({ content: "test" });
 
-      await generateEmbedding({ content: "test" });
-
-      const fetchBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      expect(fetchBody.model).toBe("text-embedding-3-small");
+      expect(result.dimensions).toBe(384);
+      expect(result.model).toBe("Xenova/all-MiniLM-L6-v2");
     });
 
-    it("throws on API failure", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        statusText: "Unauthorized",
-      });
-
-      await expect(generateEmbedding({ content: "test" })).rejects.toThrow();
+    it("throws on empty content", async () => {
+      await expect(generateEmbedding({ content: "" })).rejects.toThrow();
     });
   });
 

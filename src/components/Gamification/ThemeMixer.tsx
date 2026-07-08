@@ -180,6 +180,7 @@ export function buildFullPaletteFromCustom(input: CustomThemePaletteInput) {
         codeBlock: lighten(input.backgroundDefault, 0.3),
         searchHighlight: input.accentColor,
         subtleBorder: darken(input.backgroundDefault, 0.15),
+        heroCardGradient: `linear-gradient(135deg, ${input.primaryMain} 0%, ${darken(input.primaryMain, 0.3)} 100%)`,
       },
     },
     dark: {
@@ -195,6 +196,7 @@ export function buildFullPaletteFromCustom(input: CustomThemePaletteInput) {
         codeBlock: darken(input.backgroundDefault, 0.9),
         searchHighlight: darken(input.accentColor, 0.5),
         subtleBorder: darken(input.backgroundDefault, 0.6),
+        heroCardGradient: `linear-gradient(135deg, ${darken(input.primaryMain, 0.6)} 0%, ${darken(input.primaryMain, 0.8)} 100%)`,
       },
     },
   }

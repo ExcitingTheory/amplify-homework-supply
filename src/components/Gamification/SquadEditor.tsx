@@ -60,6 +60,7 @@ import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
 import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
 import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
 import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
+import { sanitizeSvg } from '../../utils/sanitizeHtml'
 
 const SQUAD_DESCRIPTION_TOOLBAR_CONFIG: FloatingToolbarConfig = {
   textFormats: ['bold', 'italic', 'underline', 'strikethrough', 'code'],
@@ -371,7 +372,7 @@ export function SquadEditor({
                 '& svg': { width: 160, height: 160 },
               }}
             >
-              <Box dangerouslySetInnerHTML={{ __html: previewSvg }} />
+              <Box dangerouslySetInnerHTML={{ __html: sanitizeSvg(previewSvg) }} />
             </Box>
             {level >= 2 ? (
               <Button

@@ -213,10 +213,12 @@
   },
   "questionsReview": {
     "answer": "Respuesta",
+    "collapse": "Collapse",
     "deselectAll": "Deseleccionar todo",
     "enterAnswer": "Ingrese respuesta...",
     "enterHint": "Ingrese pista...",
     "enterQuestion": "Ingresa pregunta...",
+    "expand": "Expand",
     "filteringBySearch": "Filtrando por búsqueda: \"{{searchTerm}}\" ({{count}} de {{total}} elementos)",
     "from": "De",
     "hasAudio": "Tiene audio",

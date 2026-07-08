@@ -4,7 +4,7 @@ import { XPReason } from '../../utils/xpCalculation'
 import { fn } from 'storybook/test'
 
 const meta: Meta<typeof XPTunerDialog> = {
-  title: 'Gamification/XPTunerDialog',
+  title: '🏆 Gamification/Instructor/XP Tuner Dialog',
   component: XPTunerDialog,
   parameters: {
     layout: 'centered',

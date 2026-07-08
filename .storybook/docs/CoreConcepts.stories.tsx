@@ -111,11 +111,14 @@ export const UnitsAndLessons: Story = {
 
         <ConceptSection title="AI Integration">
           <Typography variant="body1" sx={{ mb: 2 }}>
-            AI is woven throughout the platform:
+            AI is woven throughout the platform, with two distinct personal assistants:
           </Typography>
           <Box component="ul" sx={{ pl: 3, '& li': { mb: 1.5 } }}>
             <li>
-              <Typography><strong>Chat Assistant</strong> — Context-aware AI that knows the current lesson, files, and vocabulary. Streams responses in real time.</Typography>
+              <Typography><strong>Kai (Student Tutor)</strong> — A patient, encouraging tutor that guides students toward understanding using hints and questions. Kai knows the current lesson, vocabulary, and the student's progress — but will never just give away the answer.</Typography>
+            </li>
+            <li>
+              <Typography><strong>Sage (Teaching Assistant)</strong> — An instructor-facing assistant that helps create and improve lesson content, generate questions, analyse student performance, and insert blocks directly into the editor.</Typography>
             </li>
             <li>
               <Typography><strong>Content Generation</strong> — Generates quiz questions, vocabulary, and lesson outlines from a prompt or uploaded document.</Typography>

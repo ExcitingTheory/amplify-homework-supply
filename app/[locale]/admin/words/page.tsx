@@ -33,6 +33,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { getAmplifyClient } from "@/utils/amplifyClient";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 // ============================================================================
 // Types
@@ -83,6 +84,7 @@ export default function WordListMaintenancePage() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const [deleting, setDeleting] = React.useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
 
   React.useEffect(() => {
     loadWords();
@@ -232,12 +234,7 @@ export default function WordListMaintenancePage() {
 
   async function handleBulkDelete() {
     if (selected.size === 0) return;
-    if (
-      !window.confirm(
-        `Delete ${selected.size} word(s)? This cannot be undone.`,
-      )
-    )
-      return;
+    setConfirmDeleteOpen(false);
 
     setDeleting(true);
     const client = getAmplifyClient() as any;
@@ -404,7 +401,7 @@ export default function WordListMaintenancePage() {
               color="error"
               size="small"
               startIcon={<DeleteIcon />}
-              onClick={handleBulkDelete}
+              onClick={() => setConfirmDeleteOpen(true)}
               disabled={deleting}
             >
               Delete {selected.size} selected
@@ -583,6 +580,15 @@ export default function WordListMaintenancePage() {
           </Alert>
         )}
       </Box>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Delete Words"
+        message={`Delete ${selected.size} word(s)? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        onConfirm={handleBulkDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </AdminRouteGuard>
   );
 }

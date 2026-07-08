@@ -165,9 +165,47 @@ export class TranslationExporter {
   }
 
   /**
+   * Download only the keys that were edited by merging them into the original
+   * locale files. One file is downloaded per namespace/language combination.
+   */
+  static async downloadEditedValues(
+    changedFullKeys: string[],
+    editedValues: Record<string, Record<string, string>>,
+    allTranslations: Map<string, { key: string; namespace: string }>,
+    loadTranslationFn: (lang: string, namespace: string) => Promise<Record<string, any> | null>
+  ): Promise<void> {
+    // filesMap key: `${namespace}\0${lang}` → merged file content
+    const filesMap = new Map<string, Record<string, any>>();
+
+    for (const fullKey of changedFullKeys) {
+      const t = allTranslations.get(fullKey);
+      if (!t) continue;
+      const values = editedValues[fullKey];
+      if (!values) continue;
+
+      for (const [lang, value] of Object.entries(values)) {
+        if (value == null) continue;
+        const fileKey = `${t.namespace}\0${lang}`;
+        if (!filesMap.has(fileKey)) {
+          const original = (await loadTranslationFn(lang, t.namespace)) ?? {};
+          filesMap.set(fileKey, JSON.parse(JSON.stringify(original)));
+        }
+        this.setNestedValue(filesMap.get(fileKey)!, t.key, value);
+      }
+    }
+
+    for (const [fileKey, content] of filesMap) {
+      const sep = fileKey.indexOf('\0');
+      const namespace = fileKey.slice(0, sep);
+      const lang = fileKey.slice(sep + 1);
+      this.downloadFile(`${namespace}.${lang}.json`, JSON.stringify(content, null, 2));
+    }
+  }
+
+  /**
    * Helper: Set nested value in object using dot notation
    */
-  private static setNestedValue(obj: Record<string, any>, path: string, value: any) {
+  static setNestedValue(obj: Record<string, any>, path: string, value: any) {
     const keys = path.split('.');
     let current = obj;
 

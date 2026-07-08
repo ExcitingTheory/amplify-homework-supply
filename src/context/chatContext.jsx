@@ -20,6 +20,14 @@ import React, {
 import { getAmplifyClient } from "../utils/amplifyClient";
 import AuthContext from "./authContext";
 import { chatReducer, initialState, actionTypes } from "./reducers/chatReducer";
+import {
+  buildChatSearchIndex,
+  createChatIndexCacheKey,
+  loadPersistedChatSearchIndex,
+  persistChatSearchIndex,
+  searchChatIndex,
+} from "../utils/chatSearchIndex";
+import { createChatSearchWorkerManager } from "../utils/chatSearchWorkerManager";
 
 /**
  * Chat Context interface
@@ -59,6 +67,13 @@ const ChatContext = createContext({
   // Chat messages (managed by useChat hook, but stored here for persistence)
   messages: [],
   setMessages: () => {},
+
+  // Fast local chat search over indexed messages
+  searchChatMessages: () => [],
+  searchChatMessagesAsync: async () => [],
+  chatSearchStats: {
+    indexedMessages: 0,
+  },
 });
 
 /**
@@ -95,6 +110,9 @@ export function ChatContextProvider({ children }) {
   // Show deleted toggle state
   const [showDeleted, setShowDeleted] = useState(false);
   const [deletedChats, setDeletedChats] = useState([]);
+  const chatSearchIndexRef = useRef(buildChatSearchIndex(state.messages || []));
+  const chatSearchKeyRef = useRef(null);
+  const chatSearchWorkerRef = useRef(null);
   // Use a ref to access current assistantChat inside subscription without causing re-subscribe
   const assistantChatRef = useRef(state.assistantChat);
   useEffect(() => {
@@ -370,6 +388,61 @@ export function ChatContextProvider({ children }) {
     [],
   );
 
+  // Initialize worker manager once.
+  useEffect(() => {
+    chatSearchWorkerRef.current =
+      createChatSearchWorkerManager(chatSearchIndexRef);
+
+    return () => {
+      chatSearchWorkerRef.current?.dispose();
+      chatSearchWorkerRef.current = null;
+    };
+  }, []);
+
+  // Rebuild/persist chat search index when chat or messages change.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncIndex() {
+      const cacheKey = createChatIndexCacheKey(
+        state.assistantChat?.id,
+        state.messages || [],
+      );
+
+      if (chatSearchKeyRef.current === cacheKey) return;
+
+      const persisted = await loadPersistedChatSearchIndex(cacheKey);
+      if (cancelled) return;
+
+      if (persisted) {
+        chatSearchIndexRef.current = persisted;
+      } else {
+        const rebuilt = buildChatSearchIndex(state.messages || []);
+        chatSearchIndexRef.current = rebuilt;
+        void persistChatSearchIndex(cacheKey, rebuilt);
+      }
+
+      chatSearchKeyRef.current = cacheKey;
+      void chatSearchWorkerRef.current?.build(state.messages || []);
+    }
+
+    syncIndex();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.assistantChat?.id, state.messages]);
+
+  const searchChatMessages = useCallback((query, options = {}) => {
+    return searchChatIndex(chatSearchIndexRef.current, query, options);
+  }, []);
+
+  const searchChatMessagesAsync = useCallback(async (query, options = {}) => {
+    return (
+      (await chatSearchWorkerRef.current?.search(query, options)) ||
+      searchChatIndex(chatSearchIndexRef.current, query, options)
+    );
+  }, []);
+
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
@@ -392,6 +465,11 @@ export function ChatContextProvider({ children }) {
       // Messages
       messages: state.messages,
       setMessages,
+      searchChatMessages,
+      searchChatMessagesAsync,
+      chatSearchStats: {
+        indexedMessages: chatSearchIndexRef.current.docs.size,
+      },
 
       // Show deleted
       showDeleted,
@@ -412,6 +490,8 @@ export function ChatContextProvider({ children }) {
       setIsChatOpen,
       setPageContext,
       setMessages,
+      searchChatMessages,
+      searchChatMessagesAsync,
       showDeleted,
       deletedChats,
     ],

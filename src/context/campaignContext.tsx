@@ -30,6 +30,11 @@ export interface GroupChallengeInfo {
   active: boolean
   bonusMultiplier: number
   progressPercent: number
+  /** Unit IDs whose XP contributes to this chapter. Empty = all section XP. */
+  linkedUnitIds?: string[]
+  chapterOrder?: number
+  setting?: string
+  stakes?: string
 }
 
 export interface CampaignContextValue {

@@ -9,6 +9,9 @@
   },
   "index": {
     "title": "作业资源",
+    "greetingMorning": "早上好，{name}",
+    "greetingAfternoon": "下午好，{name}",
+    "greetingEvening": "晚上好，{name}",
     "assignments": "作业",
     "viewWorkbook": "查看工作簿",
     "completedAssignments": "已完成的作业",
@@ -148,5 +151,14 @@
     "timerInstructions": "这是一个限时练习，请点击开始按钮启动计时器并回答问题。",
     "start": "开始",
     "loading": "加载中…"
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "heading": "总排行榜",
+    "xpMode": "XP",
+    "completionMode": "完成情况",
+    "fastestMode": "最快",
+    "squadsMode": "小队",
+    "empty": "暂无排行榜数据。完成作业以赚取XP！"
   }
 }

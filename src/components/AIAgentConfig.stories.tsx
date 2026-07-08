@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import { AIAgentConfig, type AIAgentConfigValues, type SectionAIConfigValues } from "./AIAgentConfig";
 
 const meta: Meta<typeof AIAgentConfig> = {
-  title: "Admin/AIAgentConfig",
+  title: "🛠️ Admin/AI Agent Config",
   component: AIAgentConfig,
   parameters: {
     layout: "padded",

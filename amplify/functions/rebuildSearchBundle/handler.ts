@@ -5,21 +5,24 @@ import {
   PutObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
+import { pipeline, env } from "@huggingface/transformers";
 
 const s3 = new S3Client({});
 const BUCKET = process.env.AMPLIFY_STORAGE_BUCKET_NAME || "";
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-const EMBEDDING_DIMENSIONS = 512;
-const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_DIMENSIONS = 384;
+const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 const IVF_THRESHOLD = 200;
 const HNSW_THRESHOLD = 5000;
+
+// Singleton embedding pipeline
+let embeddingPipeline: any = null;
 
 // --- Types ---
 
 interface BundleItem {
   id: string;
-  type: "unit" | "file" | "word" | "question";
+  type: "unit" | "file" | "word" | "question" | "section";
   title: string;
   embedding: number[];
   meta: {
@@ -399,28 +402,20 @@ async function listS3Prefix(prefix: string): Promise<string[]> {
 
 // --- Embedding Generation ---
 
-async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: EMBEDDING_MODEL,
-      input: text,
-      dimensions: EMBEDDING_DIMENSIONS,
-    }),
+async function getEmbeddingPipeline() {
+  if (embeddingPipeline) return embeddingPipeline;
+  // Disable local model loading — always fetch from HuggingFace Hub
+  env.allowLocalModels = false;
+  embeddingPipeline = await pipeline("feature-extraction", EMBEDDING_MODEL, {
+    dtype: "q8",
   });
+  return embeddingPipeline;
+}
 
-  if (!response.ok) {
-    throw new Error(
-      `OpenAI API error: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const data = await response.json();
-  return data.data[0].embedding;
+async function generateEmbedding(text: string): Promise<number[]> {
+  const pipe = await getEmbeddingPipeline();
+  const output = await pipe(text, { pooling: "mean", normalize: true });
+  return Array.from(output.data as Float32Array).slice(0, EMBEDDING_DIMENSIONS);
 }
 
 // --- Bundle Assembly ---
@@ -446,11 +441,21 @@ async function loadPerItemEmbeddings(
     const modelId = parts[1].replace(".json", "");
 
     for (const page of embeddingData.pages) {
+      // Generate embedding on the fly if item only has text (needsEmbedding flag)
+      let embedding = page.embedding;
+      if (!embedding && page.text && embeddingData.needsEmbedding) {
+        embedding = await generateEmbedding(page.text);
+        // Update the stored file with the generated embedding
+        page.embedding = embedding;
+        await writeS3JSON(key, embeddingData);
+      }
+      if (!embedding) continue; // Skip items with no text or embedding
+
       items.push({
         id: page.page > 0 ? `${modelId}-p${page.page}` : modelId,
         type,
         title: embeddingData.title || modelId,
-        embedding: page.embedding,
+        embedding,
         meta: {
           page: page.page > 0 ? page.page : undefined,
           unitId,
@@ -560,7 +565,6 @@ export const handler: Handler<LambdaEvent> = async (event) => {
   );
 
   if (!BUCKET) throw new Error("AMPLIFY_STORAGE_BUCKET_NAME not set");
-  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not set");
 
   let itemsProcessed = 0;
   let bundleSize = 0;

@@ -53,7 +53,7 @@ function ColorSchemeCookieSync() {
  * Since the theme uses CSS variables with InitColorSchemeScript in the
  * root layout, basic styles (bg, text) apply even before CssBaseline mounts.
  */
-export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
+export default function ThemeRegistry({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -61,7 +61,7 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
   }, []);
 
   const [{ cache, flush }] = React.useState(() => {
-    const cache = createCache({ key: 'css', prepend: true });
+    const cache = createCache({ key: 'css', prepend: true, ...(nonce ? { nonce } : {}) });
     cache.compat = true;
     const prevInsert = cache.insert;
     let inserted: string[] = [];
@@ -93,6 +93,7 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
       <style
         key={cache.key}
         data-emotion={`${cache.key} ${names.join(' ')}`}
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: styles }}
       />
     );

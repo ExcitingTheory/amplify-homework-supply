@@ -23,7 +23,7 @@ const TypedNavigationPrompt: React.FC<any> = NavigationPrompt;
 // ---------------------------------------------------------------------------
 
 const meta: Meta = {
-  title: '🧩 Components/Chat',
+  title: '💬 AI Assistant/Components/Chat Primitives',
   parameters: {
     layout: 'centered',
   },

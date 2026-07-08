@@ -22,6 +22,26 @@
 import React from 'react';
 import { convertRouteToStory } from '../code/route-map';
 
+function navigateToStory(storyPath) {
+  if (!storyPath || typeof window === 'undefined') return;
+
+  try {
+    if (window.parent && window.parent !== window) {
+      const currentUrl = new URL(window.parent.location.href);
+      const newUrl = new URL(currentUrl.origin + '/');
+      const params = new URLSearchParams(storyPath.replace('?', ''));
+      params.forEach((value, key) => {
+        newUrl.searchParams.set(key, value);
+      });
+      window.parent.location.href = newUrl.toString();
+    } else {
+      window.location.href = storyPath;
+    }
+  } catch (error) {
+    console.error('[Mock Navigation] Story navigation failed:', error);
+  }
+}
+
 // Shared state that can be configured per-story via decorator
 let currentNavigation = {
   pathname: '/',
@@ -50,23 +70,37 @@ export function setNavigationState(state) {
 export function useRouter() {
   const [, forceUpdate] = React.useState(0);
 
+  const resolveHref = (href) => {
+    if (typeof href === 'string') return href;
+    if (href && typeof href === 'object') {
+      const pathname = href.pathname || '/';
+      const query = href.query ? new URLSearchParams(href.query).toString() : '';
+      const hash = href.hash ? `#${href.hash}` : '';
+      return `${pathname}${query ? `?${query}` : ''}${hash}`;
+    }
+    return '/';
+  };
+
   return React.useMemo(() => ({
     push: (href, options) => {
       console.log('[Mock Navigation] push:', href, options);
       // Try to navigate to story if route maps to one
-      const storyPath = convertRouteToStory(href);
-      if (storyPath && typeof window !== 'undefined') {
-        const iframe = window.parent;
-        if (iframe) {
-          iframe.postMessage({ type: 'storybook-navigate', path: storyPath }, '*');
-        }
+      const resolvedHref = resolveHref(href);
+      const storyPath = convertRouteToStory(resolvedHref);
+      if (storyPath) {
+        navigateToStory(storyPath);
       }
-      currentNavigation.pathname = typeof href === 'string' ? href : href.toString();
+      currentNavigation.pathname = resolvedHref;
       forceUpdate(n => n + 1);
     },
     replace: (href, options) => {
       console.log('[Mock Navigation] replace:', href, options);
-      currentNavigation.pathname = typeof href === 'string' ? href : href.toString();
+      const resolvedHref = resolveHref(href);
+      const storyPath = convertRouteToStory(resolvedHref);
+      if (storyPath) {
+        navigateToStory(storyPath);
+      }
+      currentNavigation.pathname = resolvedHref;
       forceUpdate(n => n + 1);
     },
     refresh: () => {

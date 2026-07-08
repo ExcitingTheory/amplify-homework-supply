@@ -71,7 +71,7 @@ function seedQuestionData() {
 }
 
 export default {
-  title: "Content Management/Question Editor",
+  title: "📁 Content Management/Question Editor",
   component: QuestionEditor2,
   parameters: {
     layout: "fullscreen",

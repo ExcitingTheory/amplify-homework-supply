@@ -68,7 +68,10 @@ function getPathWithoutLocale(pathname: string): string {
 function detectLocale(request: NextRequest): string {
   // 1. Check cookie
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
-  if (cookieLocale && LOCALES.includes(cookieLocale as (typeof LOCALES)[number])) {
+  if (
+    cookieLocale &&
+    LOCALES.includes(cookieLocale as (typeof LOCALES)[number])
+  ) {
     return cookieLocale;
   }
 
@@ -101,6 +104,32 @@ export function proxy(request: NextRequest) {
   const pathnameLocale = getLocaleFromPathname(pathname);
   const pathWithoutLocale = getPathWithoutLocale(pathname);
 
+  // Generate a per-request CSP nonce
+  const nonce = crypto.randomUUID();
+
+  /**
+   * Build Content-Security-Policy with per-request nonce.
+   * Allows inline scripts/styles only if they carry the matching nonce.
+   */
+  // In development, React dev tools require eval() for callstack reconstruction.
+  const unsafeEval =
+    process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+
+  const cspHeader = [
+    `default-src 'self'`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${unsafeEval}`,
+    `style-src 'self' 'unsafe-inline'`,
+    `img-src 'self' blob: data: https://*.amazonaws.com https://*.cloudfront.net`,
+    `media-src 'self' blob: https://*.amazonaws.com https://*.cloudfront.net`,
+    `font-src 'self' data:`,
+    `connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com wss://*.amazonaws.com https://*.cloudfront.net https://api.openai.com wss://localhost:*`,
+    `frame-src 'none'`,
+    `object-src 'none'`,
+    `base-uri 'self'`,
+    `form-action 'self'`,
+    `frame-ancestors 'none'`,
+  ].join("; ");
+
   // If URL has the default locale prefix explicitly (e.g., /en/units),
   // redirect to the unprefixed version for clean URLs (localePrefix: 'as-needed')
   if (pathnameLocale === DEFAULT_LOCALE) {
@@ -120,7 +149,10 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set("x-nonce", nonce);
+    response.headers.set("Content-Security-Policy", cspHeader);
+    return response;
   }
 
   // No locale in URL — detect and handle
@@ -146,7 +178,10 @@ export function proxy(request: NextRequest) {
   // but the browser URL stays clean (no /en/ prefix)
   const rewriteUrl = new URL(`/${DEFAULT_LOCALE}${pathname}`, request.url);
   rewriteUrl.search = request.nextUrl.search;
-  return NextResponse.rewrite(rewriteUrl);
+  const rewriteResponse = NextResponse.rewrite(rewriteUrl);
+  rewriteResponse.headers.set("x-nonce", nonce);
+  rewriteResponse.headers.set("Content-Security-Policy", cspHeader);
+  return rewriteResponse;
 }
 
 function isPublicRoute(pathWithoutLocale: string): boolean {

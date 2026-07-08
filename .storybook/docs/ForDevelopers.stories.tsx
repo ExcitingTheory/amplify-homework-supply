@@ -172,7 +172,7 @@ export const GettingStarted: Story = {
           <Box component="ul" sx={{ pl: 3, '& li': { mb: 0.5 } }}>
             <li><Typography>Node.js 20+</Typography></li>
             <li><Typography>npm 9+</Typography></li>
-            <li><Typography>AWS CLI configured (for Amplify sandbox)</Typography></li>
+            <li><Typography>AWS CLI configured with SSO (for Amplify sandbox)</Typography></li>
             <li><Typography>Git</Typography></li>
           </Box>
         </Paper>
@@ -184,16 +184,20 @@ git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
 cd amplify-homework-supply
 npm install
 
+# Add environment variables
+echo "OPENAI_API_KEY=your_key_here" > .env.local
+
 # Start Storybook (no AWS needed)
 npm run storybook
 
 # Start Next.js dev server (requires Amplify sandbox)
-npx ampx sandbox       # Terminal 1: deploys cloud resources
-npm run dev            # Terminal 2: starts Next.js on port 3000
+npm run sandbox        # Terminal 1: deploys cloud resources + streams logs
+npm run dev            # Terminal 2: starts Next.js at https://localhost:3000
 
 # Run tests
 npm test               # Vitest unit tests
-npm run cypress:open   # E2E tests`}</pre>
+npm run test:storybook # Storybook render tests
+npm run cypress:open   # Cypress E2E tests`}</pre>
         </Paper>
 
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, mt: 4 }}>Development Scripts</Typography>
@@ -207,13 +211,16 @@ npm run cypress:open   # E2E tests`}</pre>
             </TableHead>
             <TableBody>
               {[
-                ['npm run dev', 'Next.js dev server (port 3000)'],
+                ['npm run dev', 'Next.js dev server (HTTPS, port 3000)'],
                 ['npm run storybook', 'Storybook dev (port 6006)'],
                 ['npm run build', 'Production Next.js build'],
                 ['npm run build-storybook', 'Static Storybook build'],
-                ['npm test', 'Run Vitest tests'],
+                ['npm test', 'Run Vitest unit tests'],
+                ['npm run test:storybook', 'Run Storybook render tests'],
                 ['npm run cypress:open', 'Open Cypress E2E runner'],
-                ['npx ampx sandbox', 'Deploy Amplify sandbox (cloud)'],
+                ['npm run lint', 'ESLint (zero warnings enforced)'],
+                ['npm run sandbox', 'Deploy Amplify sandbox with log streaming'],
+                ['npm run sandbox:with-logs', 'Amplify sandbox + save logs to file'],
               ].map(([cmd, desc]) => (
                 <TableRow key={cmd}>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{cmd}</TableCell>

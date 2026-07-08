@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import JoinPracticeDialog from './JoinPracticeDialog';
 
 const meta: Meta<typeof JoinPracticeDialog> = {
-  title: '🎯 Practice Drill/JoinPracticeDialog',
+  title: '🎯 Practice Drills/Components/Join Practice Dialog',
   component: JoinPracticeDialog,
   parameters: { layout: 'centered' },
 };

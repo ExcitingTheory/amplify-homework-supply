@@ -30,6 +30,7 @@ async function getCachedProfileData(routeUsername: string) {
   let showAntiBadgesOnProfile = false;
   let profileThemeId: string | null = null;
   let customThemePalette: any = null;
+  let nailedItBlocks: any[] = [];
 
   try {
     const client = getServerClient() as any;
@@ -108,7 +109,7 @@ async function getCachedProfileData(routeUsername: string) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const { data: xpLogs } = await client.models.StudentXPLog.list({
       filter: {
-        owner: { eq: routeUsername },
+        studentId: { eq: routeUsername },
         createdAt: { ge: startOfMonth },
       },
     });
@@ -120,11 +121,36 @@ async function getCachedProfileData(routeUsername: string) {
         if (log.createdAt) days.add(log.createdAt.slice(0, 10));
       });
     activeDays = Array.from(days);
+
+    // Build Nailed It wall entries from XP logs (legacy NailedIt model removed)
+    const { data: nailedItLogs } = await client.models.StudentXPLog.list({
+      filter: {
+        studentId: { eq: routeUsername },
+        reason: { eq: "NAILED_IT" },
+      },
+    });
+
+    nailedItBlocks = (nailedItLogs || [])
+      .filter((l: any) => l != null)
+      .sort((a: any, b: any) => {
+        const aTime = new Date(a.createdAt || 0).getTime();
+        const bTime = new Date(b.createdAt || 0).getTime();
+        return bTime - aTime;
+      })
+      .slice(0, 12)
+      .map((log: any, idx: number) => ({
+        id: log.id || `profile-nailed-it-${idx}`,
+        question: log.sourceId || "Workbook mastery moment",
+        nailedItReason:
+          "Excellent understanding demonstrated in a completed task.",
+        homeworkTitle: "Learner Workbook",
+        createdAt: log.createdAt || new Date().toISOString(),
+      }));
   } catch (err) {
     console.error("[Profile RSC] Data fetch error:", err);
   }
 
-  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName, showBadgesOnProfile, showAntiBadgesOnProfile, profileThemeId, customThemePalette };
+  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName, showBadgesOnProfile, showAntiBadgesOnProfile, profileThemeId, customThemePalette, nailedItBlocks };
 }
 
 export default async function ProfilePage({ params }: Props) {
@@ -143,6 +169,7 @@ export default async function ProfilePage({ params }: Props) {
     showAntiBadgesOnProfile,
     profileThemeId,
     customThemePalette,
+    nailedItBlocks,
   } = await getCachedProfileData(routeUsername);
 
   const isOwnProfile = false;
@@ -176,16 +203,17 @@ export default async function ProfilePage({ params }: Props) {
               mb: 2,
             }}
           >
-            {/* Avatar Card (square) */}
+            {/* Avatar Card */}
             <Card
               sx={{
                 padding: "2rem 1rem",
-                aspectRatio: "1",
+                paddingTop: "2.5rem",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 2,
+                overflow: "visible",
               }}
             >
               <AvatarSection isOwnProfile={isOwnProfile} profileUsername={routeUsername} streak={currentStreak} />
@@ -241,15 +269,15 @@ export default async function ProfilePage({ params }: Props) {
               <Typography variant="h5" gutterBottom>
                 {t("profile.badges" as any)}
               </Typography>
-              <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
+              <BadgeShelf earnedBadges={earnedBadges} />
             </Card>
           )}
 
           {/* Unlock Roadmap (live lock state — client component) */}
           <UnlockRoadmap />
 
-          {/* Nailed It Wall (live subscription — client component) */}
-          <NailedItSection profileUsername={routeUsername} />
+          {/* Nailed It Wall (from XP logs) */}
+          <NailedItSection nailedItBlocks={nailedItBlocks} />
         </Box>
       </GamificationProviderWrapper>
     </ProfileThemeWrapper>

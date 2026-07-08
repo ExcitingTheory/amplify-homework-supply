@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import MiniEditor from './MiniEditor'
 
 const meta: Meta<typeof MiniEditor> = {
-  title: 'Components/MiniEditor/MiniEditor',
+  title: '✏️ Lesson Editor/Components/Mini Editor',
   component: MiniEditor,
   parameters: {
     layout: 'padded',

@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import ArmorEditor, { renderShieldSvg } from '../../Gamification/ArmorEditor'
 import type { ArmorEditorConfig } from '../../Gamification/ArmorEditor'
 import { $isArmorEditorNode } from './ArmorEditorPlugin'
+import { sanitizeSvg } from '../../../utils/sanitizeHtml'
 
 interface ArmorEditorBlockProps {
   nodeKey: string
@@ -87,7 +88,7 @@ export default function ArmorEditorBlock({
         }}
       >
         <Box
-          dangerouslySetInnerHTML={{ __html: svgString }}
+          dangerouslySetInnerHTML={{ __html: sanitizeSvg(svgString) }}
           sx={{ '& svg': { width: 120, height: 120 } }}
         />
         {isEditable && (

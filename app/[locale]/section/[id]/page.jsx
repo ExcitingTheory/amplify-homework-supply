@@ -77,6 +77,12 @@ import {
 import { useRouter, useParams } from "next/navigation";
 import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
+import { useContentLock, useCampaign } from "@/context/gamificationContext";
+import { ContentLockCard } from "@/components/Gamification/ContentLockCard";
+import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
+import { GamificationQuickPanel } from "@/components/Section/GamificationQuickPanel";
+import { ChapterDetailPopover } from "@/components/Gamification/ChapterDetailPopover";
+import LockIcon from "@mui/icons-material/Lock";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -260,6 +266,9 @@ function SectionDetail({ user, signOut }) {
     gradeIds: [],
     currentIndex: 0,
   });
+  // Chapter detail popover state
+  const [chapterPopoverAnchor, setChapterPopoverAnchor] = React.useState(null);
+  const [chapterPopoverData, setChapterPopoverData] = React.useState(null);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
   const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
@@ -268,13 +277,17 @@ function SectionDetail({ user, signOut }) {
   // Student sort: "natural" (original order), "first" (first name A-Z), "last" (last name A-Z)
   const [studentSort, setStudentSort] = React.useState("natural");
 
-  const { id } = useParams();
+  const { id, locale } = useParams();
 
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
 
   const { session } = React.useContext(FilesContext);
+
+  // Content lock and campaign hooks for student progression view
+  const { isLocked, getLockStatus } = useContentLock();
+  const { activeChallenges, completedChallenges } = useCampaign();
 
   // Register page context with global chat
   useChatPageContext({
@@ -285,6 +298,31 @@ function SectionDetail({ user, signOut }) {
   React.useEffect(() => {
     setClientNow(new Date());
   }, []);
+
+  // Seed from IndexedDB cache when offline
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || navigator.onLine || !id) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const { getCachedSection, getCachedAssignmentsForSection } =
+          await import("@/offline/OfflineDataStore");
+        const [cachedSection, cachedAssignments] = await Promise.all([
+          getCachedSection(id),
+          getCachedAssignmentsForSection(id),
+        ]);
+        if (!mounted) return;
+        if (cachedSection) setSection(cachedSection);
+        if (cachedAssignments.length > 0)
+          setSectionAssignments(cachedAssignments);
+      } catch {
+        // IndexedDB not available — noop
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   // Fetch current user on mount
   useEffect(() => {
@@ -898,8 +936,26 @@ function SectionDetail({ user, signOut }) {
         );
       },
       error: (error) => {
-        if (error?.message?.includes("exceeds maximum value limit")) return;
-        if (error?.message?.includes("DuplicatedOperationError")) return;
+        const errorMessage =
+          error?.message ||
+          error?.errors?.[0]?.message ||
+          error?.error?.errors?.[0]?.message ||
+          "";
+
+        if (errorMessage.includes("exceeds maximum value limit")) return;
+        if (errorMessage.includes("DuplicatedOperationError")) return;
+        if (
+          !errorMessage &&
+          error &&
+          typeof error === "object" &&
+          Object.keys(error).length === 0
+        ) {
+          console.warn(
+            "[SectionDetail] HomeworkRoom subscription: transient empty error payload (safe to ignore)",
+          );
+          return;
+        }
+
         console.error(
           "[SectionDetail] HomeworkRoom subscription error:",
           error,
@@ -1259,39 +1315,115 @@ function SectionDetail({ user, signOut }) {
 
   return (
     <>
-      {/* Show skeleton while section data is loading */}
+      {/* Show skeleton while section data is loading — matches loading.tsx */}
       {!section && (
-        <Card
-          elevation={2}
-          sx={{
-            width: "90vw",
-            margin: "5rem auto",
-            maxWidth: "80rem",
-            borderRadius: 2,
-            borderLeft: "4px solid",
-            borderLeftColor: "primary.main",
-            p: 3,
-          }}
-        >
-          <Skeleton
-            variant="rectangular"
-            height={200}
-            sx={{ borderRadius: 1, mb: 2 }}
-          />
-          <Skeleton variant="text" width="40%" height={48} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="25%" height={32} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="60%" height={20} sx={{ mb: 3 }} />
-          <Skeleton
-            variant="rectangular"
-            height={120}
-            sx={{ borderRadius: 1, mb: 2 }}
-          />
-          <Skeleton
-            variant="rectangular"
-            height={200}
-            sx={{ borderRadius: 1 }}
-          />
-        </Card>
+        <Box>
+          {/* Section hero card */}
+          <Box
+            sx={{
+              width: "90vw",
+              maxWidth: "80rem",
+              margin: "5rem auto 2rem",
+              borderRadius: 2,
+              borderLeft: "4px solid",
+              borderLeftColor: "primary.main",
+              border: 1,
+              borderColor: "divider",
+              overflow: "hidden",
+            }}
+          >
+            {/* Featured image area */}
+            <Skeleton variant="rectangular" height={200} />
+            {/* Card content */}
+            <Box sx={{ p: 2 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}
+              >
+                <Skeleton variant="text" width="35%" height={32} />
+                <Skeleton
+                  variant="rectangular"
+                  width={100}
+                  height={24}
+                  sx={{ borderRadius: 0.5 }}
+                />
+              </Box>
+              <Skeleton variant="text" width="60%" height={20} />
+            </Box>
+          </Box>
+
+          {/* Students table */}
+          <Box sx={{ width: "90vw", maxWidth: "90vw", margin: "2rem auto" }}>
+            <Skeleton variant="text" width={120} height={28} sx={{ mb: 1 }} />
+            <Box
+              sx={{
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 1,
+                overflow: "hidden",
+              }}
+            >
+              {/* Table header */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  px: 2,
+                  py: 1.5,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  backgroundColor: "action.hover",
+                }}
+              >
+                <Skeleton variant="text" width="40%" height={20} />
+                <Skeleton variant="text" width="30%" height={20} />
+                <Skeleton variant="text" width="20%" height={20} />
+              </Box>
+              {/* Table rows */}
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: 1,
+                    borderColor: "divider",
+                  }}
+                >
+                  <Skeleton variant="text" width="40%" height={20} />
+                  <Skeleton variant="text" width="30%" height={20} />
+                  <Skeleton variant="text" width="20%" height={20} />
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Gradebook area */}
+          <Box sx={{ width: "90vw", maxWidth: "90vw", margin: "2rem auto" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+              <Skeleton variant="text" width={120} height={28} />
+              <Box sx={{ flexGrow: 1 }} />
+              <Skeleton
+                variant="rectangular"
+                width={60}
+                height={28}
+                sx={{ borderRadius: 1 }}
+              />
+              <Skeleton
+                variant="rectangular"
+                width={60}
+                height={28}
+                sx={{ borderRadius: 1 }}
+              />
+            </Box>
+            <Skeleton
+              variant="rectangular"
+              height={200}
+              sx={{ borderRadius: 1 }}
+            />
+          </Box>
+        </Box>
       )}
 
       {section && (
@@ -1523,6 +1655,16 @@ function SectionDetail({ user, signOut }) {
         <Button size="small">Learn More</Button>
       </CardActions> */}
         </Card>
+      )}
+
+      {/* Campaign progress panel — instructor only */}
+      {section && (isOwner || isTeacher) && !viewAsStudent && (
+        <Box
+          id="gamification-section"
+          sx={{ width: "90vw", maxWidth: "80rem", mx: "auto", mt: 2 }}
+        >
+          <GamificationQuickPanel sectionId={id} locale={locale} />
+        </Box>
       )}
 
       {Object.keys(sectionStudents).length > 0 &&
@@ -1782,167 +1924,299 @@ function SectionDetail({ user, signOut }) {
           </Box>
         )}
 
-        {/* Student View - Simple Two Column Table */}
+        {/* Student View - Assignments with lock progression + Chapters */}
         {(!isOwner || viewAsStudent) && (
-          <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-            <Table
-              aria-label={t("sectionDetail.gradebook")}
-              size="small"
-              sx={{ minWidth: 400 }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t("sectionDetail.assignmentHeader")}</TableCell>
-                  <TableCell align="right">
-                    {t("sectionDetail.gradeHeader")}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {visibleAssignments.map((assignment) => {
-                  const isDraft = assignment.status === "DRAFT";
-                  const isFuture =
-                    clientNow &&
-                    assignment.dueDate &&
-                    new Date(assignment.dueDate) > clientNow;
-                  const canHaveGrades = !isDraft && !isFuture;
+          <>
+            <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+              <Table
+                aria-label={t("sectionDetail.gradebook")}
+                size="small"
+                sx={{ minWidth: 400 }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t("sectionDetail.assignmentHeader")}</TableCell>
+                    <TableCell>
+                      {t("sectionDetail.chapterHeader", {
+                        defaultValue: "Chapter",
+                      })}
+                    </TableCell>
+                    <TableCell align="right">
+                      {t("sectionDetail.gradeHeader")}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {visibleAssignments.map((assignment) => {
+                    const isDraft = assignment.status === "DRAFT";
+                    const isFuture =
+                      clientNow &&
+                      assignment.dueDate &&
+                      new Date(assignment.dueDate) > clientNow;
+                    const canHaveGrades = !isDraft && !isFuture;
 
-                  const studentId = currentUser?.username;
-                  const rawHighest = canHaveGrades
-                    ? myGradeMap[assignment.unitID]?.highest?.accuracy
-                    : undefined;
-                  const grade =
-                    rawHighest !== undefined &&
-                    rawHighest !== null &&
-                    !isNaN(rawHighest)
-                      ? `${Math.round(rawHighest)}%`
-                      : "-";
+                    const locked = isLocked(assignment.unitID);
+                    const lockStatus = getLockStatus(assignment.unitID);
 
-                  return (
-                    <TableRow
-                      key={assignment.id}
-                      onClick={() =>
-                        setSelectedRow(
-                          selectedRow === assignment.id ? null : assignment.id,
-                        )
-                      }
-                      sx={{
-                        cursor: "pointer",
-                        backgroundColor:
-                          selectedRow === assignment.id
-                            ? "action.selected"
-                            : "transparent",
-                        "&:nth-of-type(odd)": {
-                          backgroundColor:
+                    const studentId = currentUser?.username;
+                    const rawHighest = canHaveGrades
+                      ? myGradeMap[assignment.unitID]?.highest?.accuracy
+                      : undefined;
+                    const grade =
+                      rawHighest !== undefined &&
+                      rawHighest !== null &&
+                      !isNaN(rawHighest)
+                        ? `${Math.round(rawHighest)}%`
+                        : "-";
+
+                    // Find which campaign chapter links to this unit
+                    const rowLinkedChapter = [
+                      ...(activeChallenges || []),
+                      ...(completedChallenges || []),
+                    ]
+                      .filter((c) => c.cohortId === id)
+                      .find(
+                        (c) =>
+                          Array.isArray(c.linkedUnitIds) &&
+                          c.linkedUnitIds.includes(assignment.unitID),
+                      );
+
+                    return (
+                      <TableRow
+                        key={assignment.id}
+                        onClick={() =>
+                          !locked &&
+                          setSelectedRow(
                             selectedRow === assignment.id
-                              ? "action.selected"
-                              : "action.hover",
-                        },
-                        "&:hover": {
-                          backgroundColor:
-                            selectedRow === assignment.id
-                              ? "action.selected"
-                              : "action.hover",
-                        },
-                        "& td": { backgroundColor: "inherit" },
-                        transition: "background-color 0.2s ease",
-                      }}
-                    >
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          {units[assignment.unitID]?.name}
-                          <PrefetchBadge unitId={assignment.unitID} />
-                        </Box>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: 0.5,
-                          }}
-                        >
-                          {grade}
-                          {canHaveGrades && (
-                            <Tooltip title="Open Workbook">
-                              <IconButton
-                                size="small"
-                                component="a"
-                                href={`/workbook/${assignment.unitID}`}
-                                onClick={(e) => e.stopPropagation()}
-                                sx={{ p: 0.25 }}
-                              >
-                                <MenuBookIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-
-                {/* Total Row */}
-                <TableRow
-                  sx={{
-                    backgroundColor: "action.hover",
-                    "& td": { backgroundColor: "inherit" },
-                  }}
-                >
-                  <TableCell sx={{ fontWeight: "bold" }}>
-                    {t("sectionDetail.totalAverage")}
-                  </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                    {(() => {
-                      let totalGrade = 0;
-                      let completedCount = 0;
-
-                      visibleAssignments.forEach((assignment) => {
-                        const isDraft = assignment.status === "DRAFT";
-                        const isFuture =
-                          clientNow &&
-                          assignment.dueDate &&
-                          new Date(assignment.dueDate) > clientNow;
-                        const canHaveGrades = !isDraft && !isFuture;
-
-                        if (canHaveGrades) {
-                          const grade =
-                            myGradeMap[assignment.unitID]?.highest?.accuracy;
-                          if (
-                            grade !== undefined &&
-                            grade !== null &&
-                            !isNaN(grade)
-                          ) {
-                            totalGrade += grade;
-                            completedCount++;
-                          }
+                              ? null
+                              : assignment.id,
+                          )
                         }
-                      });
+                        sx={{
+                          cursor: locked ? "not-allowed" : "pointer",
+                          opacity: locked ? 0.6 : 1,
+                          backgroundColor:
+                            selectedRow === assignment.id
+                              ? "action.selected"
+                              : "transparent",
+                          "&:nth-of-type(odd)": {
+                            backgroundColor:
+                              selectedRow === assignment.id
+                                ? "action.selected"
+                                : "action.hover",
+                          },
+                          "&:hover": {
+                            backgroundColor: locked
+                              ? "transparent"
+                              : selectedRow === assignment.id
+                                ? "action.selected"
+                                : "action.hover",
+                          },
+                          "& td": { backgroundColor: "inherit" },
+                          transition: "background-color 0.2s ease",
+                        }}
+                      >
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {locked && (
+                              <Tooltip
+                                title={
+                                  lockStatus?.unlockDate
+                                    ? `Unlocks on ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                                    : lockStatus?.requiredPriorUnitName
+                                      ? `Complete "${lockStatus.requiredPriorUnitName}" first`
+                                      : "Complete the previous assignment first"
+                                }
+                              >
+                                <LockIcon fontSize="small" color="action" />
+                              </Tooltip>
+                            )}
+                            {units[assignment.unitID]?.name}
+                            {!locked && (
+                              <PrefetchBadge
+                                unitId={assignment.unitID}
+                                client={client}
+                                username={currentUser?.username}
+                                section={section}
+                                assignment={assignment}
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          {rowLinkedChapter ? (
+                            <Chip
+                              label={
+                                rowLinkedChapter.chapterOrder != null
+                                  ? `Ch. ${rowLinkedChapter.chapterOrder}: ${rowLinkedChapter.title}`
+                                  : rowLinkedChapter.title
+                              }
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              clickable
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setChapterPopoverAnchor(e.currentTarget);
+                                setChapterPopoverData(rowLinkedChapter);
+                              }}
+                              sx={{
+                                fontSize: "0.7rem",
+                                height: 22,
+                                cursor: "pointer",
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="caption" color="text.disabled">
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              gap: 0.5,
+                            }}
+                          >
+                            {locked ? (
+                              <Chip
+                                size="small"
+                                label={
+                                  lockStatus?.unlockDate
+                                    ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                                    : "Locked"
+                                }
+                                color="default"
+                                variant="outlined"
+                                icon={<LockIcon />}
+                              />
+                            ) : (
+                              <>
+                                {grade}
+                                {canHaveGrades && (
+                                  <Tooltip title="Open Workbook">
+                                    <IconButton
+                                      size="small"
+                                      component="a"
+                                      href={`/workbook/${assignment.unitID}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      sx={{ p: 0.25 }}
+                                    >
+                                      <MenuBookIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </>
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
 
-                      const average =
-                        completedCount > 0
-                          ? Math.round(totalGrade / completedCount)
-                          : 0;
-                      const completion =
-                        visibleAssignments.length > 0
-                          ? Math.round(
-                              (completedCount / visibleAssignments.length) *
-                                100,
-                            )
-                          : 0;
+                  {/* Total Row */}
+                  <TableRow
+                    sx={{
+                      backgroundColor: "action.hover",
+                      "& td": { backgroundColor: "inherit" },
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("sectionDetail.totalAverage")}
+                    </TableCell>
+                    <TableCell />
+                    {/* Chapter column — no total */}
+                    <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                      {(() => {
+                        let totalGrade = 0;
+                        let completedCount = 0;
 
-                      return completedCount > 0
-                        ? `${average}% (${completion}% complete)`
-                        : "- (0% complete)";
-                    })()}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+                        visibleAssignments.forEach((assignment) => {
+                          const isDraft = assignment.status === "DRAFT";
+                          const isFuture =
+                            clientNow &&
+                            assignment.dueDate &&
+                            new Date(assignment.dueDate) > clientNow;
+                          const canHaveGrades = !isDraft && !isFuture;
+
+                          if (canHaveGrades) {
+                            const grade =
+                              myGradeMap[assignment.unitID]?.highest?.accuracy;
+                            if (
+                              grade !== undefined &&
+                              grade !== null &&
+                              !isNaN(grade)
+                            ) {
+                              totalGrade += grade;
+                              completedCount++;
+                            }
+                          }
+                        });
+
+                        const average =
+                          completedCount > 0
+                            ? Math.round(totalGrade / completedCount)
+                            : 0;
+                        const completion =
+                          visibleAssignments.length > 0
+                            ? Math.round(
+                                (completedCount / visibleAssignments.length) *
+                                  100,
+                              )
+                            : 0;
+
+                        return completedCount > 0
+                          ? `${average}% (${completion}% complete)`
+                          : "- (0% complete)";
+                      })()}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Campaign Chapters */}
+            {(() => {
+              const allChallenges = [
+                ...(activeChallenges || []),
+                ...(completedChallenges || []),
+              ];
+              const sectionChallenges = allChallenges.filter(
+                (ch) => ch.cohortId === id,
+              );
+              if (sectionChallenges.length === 0) return null;
+
+              const chapters = sectionChallenges
+                .sort((a, b) => (a.chapterOrder ?? 0) - (b.chapterOrder ?? 0))
+                .map((ch) => {
+                  const challengeLocked = isLocked(ch.id);
+                  return {
+                    id: ch.id,
+                    title: ch.title,
+                    setting: ch.setting || undefined,
+                    targetXP: ch.targetXP,
+                    currentXP: ch.currentXP || 0,
+                    // If locked by progression, override active to false so timeline shows lock icon
+                    active: challengeLocked ? false : ch.active,
+                  };
+                });
+
+              return (
+                <Box sx={{ mt: 3 }}>
+                  <CampaignTimeline chapters={chapters} />
+                </Box>
+              );
+            })()}
+          </>
         )}
 
         {/* Instructor View - Full Gradebook */}
@@ -2453,6 +2727,17 @@ function SectionDetail({ user, signOut }) {
 
             const workbookUrl = `/workbook/${assignment.unitID}`;
 
+            // Find which campaign chapter links to this unit
+            const allSectionChallenges = [
+              ...(activeChallenges || []),
+              ...(completedChallenges || []),
+            ].filter((c) => c.cohortId === id);
+            const linkedChapter = allSectionChallenges.find(
+              (c) =>
+                Array.isArray(c.linkedUnitIds) &&
+                c.linkedUnitIds.includes(assignment.unitID),
+            );
+
             return (
               <React.Fragment key={assignment.id || assignment.unitID}>
                 <Card
@@ -2492,6 +2777,26 @@ function SectionDetail({ user, signOut }) {
                       >
                         {itemSecondary}
                       </Typography>
+                      {linkedChapter && (
+                        <Chip
+                          label={
+                            linkedChapter.chapterOrder != null
+                              ? `Ch. ${linkedChapter.chapterOrder}: ${linkedChapter.title}`
+                              : linkedChapter.title
+                          }
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          icon={
+                            <span
+                              style={{ fontSize: "0.85rem", paddingLeft: 4 }}
+                            >
+                              📖
+                            </span>
+                          }
+                          sx={{ mt: 0.75, fontSize: "0.7rem", height: 22 }}
+                        />
+                      )}
                     </CardContent>
                     <Box
                       sx={{
@@ -2523,7 +2828,13 @@ function SectionDetail({ user, signOut }) {
                                 alt="Live from space album cover"
                               /> */}
                   {featuredImage && (
-                    <Box sx={{ maxWidth: "50%", flexShrink: 0, overflow: "hidden" }}>
+                    <Box
+                      sx={{
+                        maxWidth: "50%",
+                        flexShrink: 0,
+                        overflow: "hidden",
+                      }}
+                    >
                       <LazyCardMedia
                         s3Key={featuredImage}
                         identityId={identityId}
@@ -2642,6 +2953,16 @@ function SectionDetail({ user, signOut }) {
               : prev.studentName,
           }));
         }}
+      />
+
+      {/* Chapter Detail Popover */}
+      <ChapterDetailPopover
+        anchorEl={chapterPopoverAnchor}
+        onClose={() => {
+          setChapterPopoverAnchor(null);
+          setChapterPopoverData(null);
+        }}
+        chapter={chapterPopoverData}
       />
     </>
   );

@@ -21,6 +21,10 @@ export default async function LeaderboardPage() {
     for (const entry of (profiles || []).filter((p: any) => p != null)) {
       const existing = byStudent.get(entry.studentId);
       if (!existing || (entry.totalXP || 0) > existing.totalXP) {
+        let parsedReportCard = entry.reportCard;
+        if (typeof parsedReportCard === "string") {
+          try { parsedReportCard = JSON.parse(parsedReportCard); } catch { parsedReportCard = undefined; }
+        }
         byStudent.set(entry.studentId, {
           studentId: entry.studentId,
           studentName: entry.studentName || entry.studentId,
@@ -29,6 +33,9 @@ export default async function LeaderboardPage() {
           level: entry.level || 1,
           currentStreak: entry.currentStreak || 0,
           completedAssignments: entry.completedAssignments || 0,
+          onTimeSubmissions: entry.onTimeSubmissions || 0,
+          totalSubmissions: entry.totalSubmissions || 0,
+          reportCard: parsedReportCard || undefined,
         });
       }
     }

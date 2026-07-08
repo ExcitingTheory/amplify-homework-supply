@@ -9,6 +9,9 @@
   },
   "index": {
     "title": "Fournitures de devoirs",
+    "greetingMorning": "Bonjour, {name}",
+    "greetingAfternoon": "Bon après-midi, {name}",
+    "greetingEvening": "Bonsoir, {name}",
     "assignments": "Devoirs",
     "viewWorkbook": "Voir le cahier d'exercices",
     "completedAssignments": "Devoirs terminés",
@@ -148,5 +151,14 @@
     "timerInstructions": "Il s'agit d'un exercice chronométré, appuyez sur démarrer pour lancer le minuteur et répondre aux questions.",
     "start": "Démarrer",
     "loading": "Chargement…"
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "heading": "Classement général",
+    "xpMode": "XP",
+    "completionMode": "Complétion",
+    "fastestMode": "Le plus rapide",
+    "squadsMode": "Équipes",
+    "empty": "Pas encore de données de classement. Terminez des devoirs pour gagner des XP \\!"
   }
 }

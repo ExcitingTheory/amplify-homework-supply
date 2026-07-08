@@ -225,10 +225,12 @@
   },
   "questionsReview": {
     "answer": "Answer",
+    "collapse": "Collapse",
     "deselectAll": "Deselect All",
     "enterAnswer": "Enter answer...",
     "enterHint": "Enter hint...",
     "enterQuestion": "Enter question...",
+    "expand": "Expand",
     "filteringBySearch": "Filtering by search: \"{searchTerm}\" ({count} of {total} items)",
     "from": "From",
     "hasAudio": "Has audio",
@@ -410,6 +412,19 @@
       "grade": "grade"
     }
   },
+  "collaboration": {
+    "title": "Collaboration",
+    "tabInvitations": "Invitations",
+    "tabJoin": "Join by Code",
+    "typePractice": "Practice",
+    "typeWorkbook": "Workbook",
+    "typePeerReview": "Peer Review",
+    "joinButton": "Join",
+    "joining": "Joining...",
+    "noInvitations": "No pending collaboration invitations",
+    "emptyInput": "Please enter a code or link",
+    "error": "Failed to join session"
+  },
   "practiceDrill": {
     "config": {
       "title": "Practice: {unitName}",
@@ -429,10 +444,53 @@
       "vocabularyType": "Vocabulary",
       "comprehension": "Comprehension",
       "review": "Review mistakes",
+      "studyTogether": "Study Together",
+      "studyTogetherDesc": "Practice with classmates in real-time. A room code will be created to share.",
+      "maxParticipants": "Max participants",
       "noSourcesWarning": "Enable at least one content source to start practicing.",
       "cancel": "Cancel",
       "start": "Start Practice",
       "generating": "Generating..."
+    },
+    "library": {
+      "title": "Practice Drill",
+      "resumeTitle": "Continue where you left off",
+      "resumeLabel": "Resume ({completed}/{total} completed)",
+      "templatesTitle": "Drill library",
+      "generateNew": "Generate new drill"
+    },
+    "progress": {
+      "questions": "questions",
+      "xpTooltip": "Estimated XP for this drill",
+      "xpDiminishedTooltip": "XP reduced due to repeated attempts",
+      "streakTooltip": "Current streak: {count}"
+    },
+    "collab": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "participants": "{count} participants",
+      "groupAccuracyTip": "Average accuracy across all participants",
+      "groupAccuracy": "Group accuracy: {accuracy}%",
+      "copied": "Copied!",
+      "copyCode": "Copy room code to share",
+      "groupProgress": "Group progress"
+    },
+    "workbook": {
+      "noBlocks": "No drill blocks yet",
+      "label": "Practice drill workbook"
+    },
+    "dialog": {
+      "title": "Practice",
+      "titleWithUnit": "Practice: {unit}",
+      "close": "Close",
+      "retry": "Retry",
+      "back": "Back",
+      "generating": "Generating drill...",
+      "complete": "Drill Complete!",
+      "completeSummary": "You scored {accuracy}% and earned {xp} XP!",
+      "done": "Done",
+      "cancel": "Cancel",
+      "finish": "Finish & Earn XP"
     },
     "join": {
       "title": "Join Study Session",
@@ -440,6 +498,10 @@
       "tabInvitations": "Invitations",
       "description": "Enter the room code shared by your instructor or classmate to join their study session.",
       "codeLabel": "Room Code",
+      "codeTooShort": "Room code must be at least 4 characters",
+      "notFound": "No active session found with that code",
+      "full": "This session is full ({max} participants)",
+      "error": "Failed to join session",
       "cancel": "Cancel",
       "joinButton": "Join Session",
       "joining": "Joining...",
@@ -514,6 +576,8 @@
     "recording": "Recording",
     "saving": "Saving...",
     "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
+    "unsavedChangesTitle": "Unsaved Changes",
+    "discard": "Discard",
     "wordSaveInfo": "Audio will be saved to the Word model's audio and definitionAudio fields."
   },
   "sectionDetail": {

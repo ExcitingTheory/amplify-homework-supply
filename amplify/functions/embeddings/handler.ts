@@ -5,7 +5,7 @@
  * - generateEmbedding: Generate single embedding for content
  * - generateEmbeddings: Generate embeddings for document pages
  *
- * Reference: amplify/backend/function/generateEmbedding/
+ * Uses Xenova/all-MiniLM-L6-v2 (384D) for offline-compatible embeddings.
  */
 
 import type { Handler } from "aws-lambda";
@@ -14,17 +14,19 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import OpenAI from "openai";
+import { pipeline, env } from "@huggingface/transformers";
+
+const EMBEDDING_DIMENSIONS = 384;
+const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 
 // Configure Amplify at module level (before creating client)
-// Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
 Amplify.configure(
   {
     API: {
       GraphQL: {
         endpoint: process.env.API_ENDPOINT || "",
         region: process.env.AWS_REGION || "us-east-1",
-        defaultAuthMode: "iam", // Lambda uses IAM auth
+        defaultAuthMode: "iam",
       },
     },
   },
@@ -40,7 +42,8 @@ Amplify.configure(
   },
 );
 
-let openaiInstance: any = null;
+// Singleton embedding pipeline
+let embeddingPipeline: any = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
 function getDataClient() {
@@ -52,13 +55,19 @@ function getDataClient() {
   return dataClient;
 }
 
-async function getOpenAI(): Promise<any> {
-  if (!openaiInstance) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("OPENAI_API_KEY environment variable not set");
-    openaiInstance = new OpenAI({ apiKey });
-  }
-  return openaiInstance;
+async function getEmbeddingPipeline() {
+  if (embeddingPipeline) return embeddingPipeline;
+  env.allowLocalModels = false;
+  embeddingPipeline = await pipeline("feature-extraction", EMBEDDING_MODEL, {
+    dtype: "q8",
+  });
+  return embeddingPipeline;
+}
+
+async function generateEmbeddingVector(text: string): Promise<number[]> {
+  const pipe = await getEmbeddingPipeline();
+  const output = await pipe(text, { pooling: "mean", normalize: true });
+  return Array.from(output.data as Float32Array).slice(0, EMBEDDING_DIMENSIONS);
 }
 
 const s3 = new S3Client({});
@@ -144,34 +153,20 @@ export const handler: Handler = async (event: any, context: any) => {
 };
 
 async function handleGenerateEmbedding(args: any): Promise<any> {
-  const { content, model = "text-embedding-3-small", dimensions = 512 } = args;
-  const openai = await getOpenAI();
+  const { content } = args;
 
   try {
     if (!content || content.trim().length === 0) {
       throw new Error("Content cannot be empty");
     }
 
-    const estimatedTokens = Math.ceil(content.length / 4);
-    if (estimatedTokens > 8000) {
-      throw new Error(
-        `Content too long: ~${estimatedTokens} tokens (max 8000)`,
-      );
-    }
-
-    const response = await openai.embeddings.create({
-      model,
-      input: content,
-      dimensions,
-    });
-
-    const embedding = response.data[0]?.embedding || [];
+    const embedding = await generateEmbeddingVector(content);
 
     return {
       embedding,
-      model: response.model,
+      model: EMBEDDING_MODEL,
       dimensions: embedding.length,
-      tokenCount: response.usage?.prompt_tokens || 0,
+      tokenCount: Math.ceil(content.length / 4),
       error: null,
     };
   } catch (error) {
@@ -182,7 +177,6 @@ async function handleGenerateEmbedding(args: any): Promise<any> {
 
 async function handleGenerateEmbeddings(args: any): Promise<any> {
   const { fileID } = args;
-  const openai = await getOpenAI();
 
   try {
     console.log("[Generate Embeddings] Starting for fileID:", fileID);
@@ -320,22 +314,17 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       }
 
       try {
-        const response = await openai.embeddings.create({
-          model: "text-embedding-3-small",
-          input: page.text,
-          dimensions: 512,
-        });
+        const embedding = await generateEmbeddingVector(page.text);
 
-        const embedding = response.data[0]?.embedding || [];
         embeddedPages.push({
           page: page.page,
           type: page.type,
           text: page.text,
           sourceId: page.sourceId,
           embedding: JSON.stringify(embedding),
-          model: "text-embedding-3-small",
+          model: EMBEDDING_MODEL,
           dimensions: embedding.length,
-          tokenCount: response.usage?.prompt_tokens || 0,
+          tokenCount: Math.ceil(page.text.length / 4),
         });
 
         embeddingCount++;
@@ -383,8 +372,8 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
 
       if (identityId) {
         await saveEmbeddingToS3(identityId, "file", fileID, {
-          model: "text-embedding-3-small",
-          dimensions: 512,
+          model: EMBEDDING_MODEL,
+          dimensions: EMBEDDING_DIMENSIONS,
           generatedAt: Date.now(),
           wordCount: embeddedPages.reduce(
             (sum: number, p: any) => sum + (p.text?.split(/\s+/).length || 0),
@@ -416,8 +405,8 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
               input: {
                 id: fileID,
                 embedding: JSON.stringify({
-                  model: "text-embedding-3-small",
-                  dimensions: 512,
+                  model: EMBEDDING_MODEL,
+                  dimensions: EMBEDDING_DIMENSIONS,
                   version: Date.now(),
                   wordCount: embeddedPages.reduce(
                     (sum: number, p: any) =>

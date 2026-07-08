@@ -21,6 +21,8 @@ import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects'
 import SchoolIcon from '@mui/icons-material/School'
 import { DiceBearAvatar } from './DiceBearAvatar'
 import { AvatarGlowRing, isGlowActive } from './AvatarGlowRing'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { sanitizeSvg } from '../../utils/sanitizeHtml'
 import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
 import type { GlowRingConfig } from './AvatarGlowRing'
 import type { LevelInfo } from '../../utils/xpCalculation'
@@ -218,10 +220,15 @@ export function AvatarDisplay({
   guildName,
   guildId,
 }: AvatarDisplayProps) {
+  const reducedMotion = useReducedMotion()
   const showGlow = glowRing && isGlowActive(glowRing)
-  const effectGlow = getEffectGlowConfig(borderEffect, borderColor, borderColorSecondary)
-  const activeGlow = showGlow ? glowRing! : effectGlow
-  const borderStyles = activeGlow ? {} : BORDER_CONFIGS[borderEffect](borderColor, borderColorSecondary)
+  const effectGlow = reducedMotion ? null : getEffectGlowConfig(borderEffect, borderColor, borderColorSecondary)
+  const activeGlow = showGlow && !reducedMotion ? glowRing! : effectGlow
+  const rawBorderStyles = activeGlow ? {} : BORDER_CONFIGS[borderEffect](borderColor, borderColorSecondary)
+  // Strip animation props when reduced motion is active
+  const borderStyles = reducedMotion
+    ? Object.fromEntries(Object.entries(rawBorderStyles).filter(([k]) => !k.startsWith('animation') && !k.startsWith('@keyframes')))
+    : rawBorderStyles
   const hasGuildBadge = Boolean(guildCrestSvg || guildName)
   const guildBadgeSize = Math.max(18, Math.round(size * 0.3))
   const guildBgColor = hashToColor(guildId || guildName || seed)
@@ -294,7 +301,7 @@ export function AvatarDisplay({
               >
                 <Box
                   component="span"
-                  dangerouslySetInnerHTML={{ __html: guildCrestSvg }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeSvg(guildCrestSvg) }}
                   sx={{ display: 'flex', width: '100%', height: '100%' }}
                 />
               </Avatar>

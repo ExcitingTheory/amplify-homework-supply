@@ -1,10 +1,19 @@
-export { LeaderboardTable } from './LeaderboardTable'
-export type { LeaderboardTableProps, LeaderboardEntry } from './LeaderboardTable'
+export { LeaderboardTable } from "./LeaderboardTable";
+export type {
+  LeaderboardTableProps,
+  LeaderboardEntry,
+} from "./LeaderboardTable";
 
-export { CompletionGrid } from './CompletionGrid'
+export { FastestCompletionsTable } from "./FastestCompletionsTable";
+export type {
+  FastestCompletionsTableProps,
+  FastestCompletionEntry,
+} from "./FastestCompletionsTable";
+
+export { CompletionGrid } from "./CompletionGrid";
 export type {
   CompletionGridProps,
   CompletionStatus,
   AssignmentColumn,
   StudentRow,
-} from './CompletionGrid'
+} from "./CompletionGrid";

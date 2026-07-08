@@ -6,24 +6,42 @@ import { resolve } from "path";
 // Test Users
 // ---------------------------------------------------------------------------
 
+function requirePassword(envVar: string): string {
+  const value = process.env[envVar] || process.env.TEST_USER_PASSWORD;
+  if (!value)
+    throw new Error(
+      `${envVar} or TEST_USER_PASSWORD env var is required for E2E tests`,
+    );
+  return value;
+}
+
 export const ADMIN = {
-  username: process.env.ADMIN_USERNAME || "admin@example.com",
-  password: process.env.TEST_USER_PASSWORD || "TestPassword123!",
+  username:
+    process.env.ADMIN_USERNAME ||
+    process.env.CRAWL_ADMIN_USERNAME ||
+    "admin@example.com",
+  password: requirePassword("TEST_USER_PASSWORD"),
 };
 
 export const INSTRUCTOR = {
-  username: process.env.TEACHER_USERNAME || "instructor1@example.com",
-  password: process.env.TEST_USER_PASSWORD || "TestPassword123!",
+  username:
+    process.env.TEACHER_USERNAME ||
+    process.env.CRAWL_INSTRUCTOR_USERNAME ||
+    "instructor1@example.com",
+  password: requirePassword("TEST_USER_PASSWORD"),
 };
 
 export const STUDENT_1 = {
-  username: process.env.LEARNER_USERNAME || "student1@example.com",
-  password: process.env.TEST_USER_PASSWORD || "TestPassword123!",
+  username:
+    process.env.LEARNER_USERNAME ||
+    process.env.CRAWL_LEARNER_USERNAME ||
+    "student1@example.com",
+  password: requirePassword("TEST_USER_PASSWORD"),
 };
 
 export const STUDENT_2 = {
   username: "student2@example.com",
-  password: process.env.TEST_USER_PASSWORD || "TestPassword123!",
+  password: requirePassword("TEST_USER_PASSWORD"),
 };
 
 export type TestUser = { username: string; password: string };
@@ -106,7 +124,15 @@ export async function login(
   user: TestUser,
   targetPath = "/",
 ): Promise<void> {
-  await page.goto(targetPath, { timeout: 30_000 });
+  const loginPath =
+    targetPath && targetPath !== "/"
+      ? `/?returnUrl=${encodeURIComponent(targetPath)}`
+      : "/";
+
+  await page.goto(loginPath, {
+    timeout: 30_000,
+    waitUntil: "domcontentloaded",
+  });
 
   await page.waitForSelector('input[name="username"]', { timeout: 20_000 });
   await page.locator('input[name="username"]').fill(user.username);
@@ -115,6 +141,22 @@ export async function login(
 
   // #user-button in MainToolbar confirms login
   await page.waitForSelector("#user-button", { timeout: 30_000 });
+
+  // Amplify Authenticator should honor ?returnUrl, but keep a deterministic
+  // fallback for environments where this session key is not applied.
+  const currentPath = new URL(page.url()).pathname;
+  const wantsRoot = targetPath === "/";
+  const onTarget = wantsRoot
+    ? currentPath === "/" || currentPath.endsWith("/")
+    : currentPath.includes(targetPath);
+
+  if (!onTarget) {
+    await page.goto(targetPath, {
+      timeout: 30_000,
+      waitUntil: "domcontentloaded",
+    });
+  }
+
   await page.waitForTimeout(500);
 }
 

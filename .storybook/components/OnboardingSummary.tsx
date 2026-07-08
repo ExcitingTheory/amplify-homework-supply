@@ -44,7 +44,7 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
   const [persona, setPersona] = useState<UserPersona | null>(initialPersona);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(() => {
     if (initialPersona) {
-      const completed = emitter.getCompletedTasks(initialPersona);
+      const completed = emitter.getCompletedTasks(initialPersona, ONBOARDING_TASKS);
       return new Set(completed.map((e) => e.taskId));
     }
     return new Set();
@@ -60,7 +60,7 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
     const unsubscribe = emitter.on((event) => {
       if (event.type === 'persona-selected') {
         setPersona(event.persona);
-        const completed = emitter.getCompletedTasks(event.persona);
+        const completed = emitter.getCompletedTasks(event.persona, ONBOARDING_TASKS);
         setCompletedTasks(new Set(completed.map((e) => e.taskId)));
         const pct = emitter.getCompletionPercentage(event.persona, ONBOARDING_TASKS);
         setPercentage(pct);

@@ -211,7 +211,7 @@ export const Welcome: Story = {
                     View Tasks in the Onboarding Panel
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Click the <strong>"Onboarding"</strong> tab in the addon panel at the bottom of the screen 
+                    Click the <strong>"Onboarding"</strong> tab in the panel at the bottom of the screen 
                     to see your full task list, progress tracking, and interactive tutorials.
                   </Typography>
                 </Box>
@@ -235,13 +235,13 @@ export const Welcome: Story = {
                 </Box>
                 <Box>
                   <Typography variant="h6" sx={{ color: 'text.primary', mb: 0.5 }}>
-                    Explore Stories in the Sidebar
+                    Explore Examples in the Sidebar
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Browse the component stories in the sidebar menu. Try the{' '}
+                    Browse the interactive examples in the sidebar. Try the{' '}
                     <Link 
                       component="button" 
-                      onClick={linkTo('📚 Creating Lessons/Workbook', 'WorkbookWithContent')}
+                      onClick={linkTo('✏️ Lesson Editor/Workbook', 'WorkbookWithContent')}
                       sx={{ color: 'info.main', cursor: 'pointer' }}
                     >
                       📚 Creating Lessons
@@ -291,7 +291,7 @@ export const Welcome: Story = {
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Look for the <TranslateIcon sx={{ fontSize: 16, verticalAlign: 'middle', mx: 0.5 }} /> 
                     <strong>Globe icon</strong> in the toolbar at the top. Click it to switch languages 
-                    and see how components adapt to different locales (English, Japanese, Spanish, French, Chinese, German).
+                    and see how the app looks in different languages (English, Japanese, Spanish, French, Chinese, German).
                   </Typography>
                 </Box>
               </Box>
@@ -316,25 +316,25 @@ export const Welcome: Story = {
             <FeatureCard
               icon={<MenuBookIcon sx={{ fontSize: 36 }} />}
               title="Rich Lesson Editor"
-              description="Full Lexical-based editor with quizzes, meaning associations, custom answers, media embeds, drag-and-drop blocks, and live AI content suggestions."
-              chips={['Lexical', 'Quiz', 'Meaning Association', 'Answer Blocks', 'Custom Answer', 'Drag & Drop']}
-              storyLink={['📚 Creating Lessons/Editor Components', 'EditorOverview']}
+              description="A powerful editor with quizzes, matching exercises, fill-in-the-blank, media embeds, drag-and-drop blocks, and live AI content suggestions."
+              chips={['Quiz', 'Matching Exercises', 'Fill-in-the-Blank', 'Media Embeds', 'Drag & Drop', 'AI Suggestions']}
+              storyLink={['✏️ Lesson Editor/Editor Components', 'QuizDefault']}
               color="info.main"
             />
             <FeatureCard
               icon={<FolderIcon sx={{ fontSize: 36 }} />}
               title="File & Document Management"
               description="Upload PDFs, images, audio, and video. AI-powered PDF analysis extracts vocabulary, summaries, and learning objectives automatically."
-              chips={['S3 Storage', 'PDF Analysis', 'Vocabulary Extraction', 'Audio/Video']}
-              storyLink={['📁 Managing Content/File Manager', 'Default']}
+              chips={['Cloud Storage', 'PDF Analysis', 'Vocabulary Extraction', 'Audio/Video']}
+              storyLink={['📁 Content Management/File Manager', 'Default']}
               color="secondary.main"
             />
             <FeatureCard
               icon={<ExtensionIcon sx={{ fontSize: 36 }} />}
               title="Vocabulary & Question Banks"
-              description="Dedicated editors for vocabulary words (with pronunciation, ruby tags, audio) and question banks (multiple choice, short answer, with hints)."
-              chips={['Dictionary Editor', 'Question Editor', 'Ruby Tags', 'TTS Audio']}
-              storyLink={['📝 Editors/DictionaryEditor2', 'Default']}
+              description="Dedicated editors for vocabulary words (with pronunciation guides and audio) and question banks (multiple choice, short answer, with hints)."
+              chips={['Vocabulary Editor', 'Question Editor', 'Pronunciation Guides', 'Audio Playback']}
+              storyLink={['� Content Management/Dictionary Editor', 'Default']}
               color="success.main"
             />
           </Box>
@@ -346,26 +346,26 @@ export const Welcome: Story = {
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 2, mb: 4 }}>
             <FeatureCard
               icon={<ChatIcon sx={{ fontSize: 36 }} />}
-              title="AI Chat Assistant"
-              description="Context-aware AI tutor using GPT-4 with streaming responses, tool calls for content search, and block insertion directly into the editor."
-              chips={['GPT-4', 'Streaming', 'Tool Calls', 'Content-Aware', 'Block Insert']}
+              title="Two AI Assistants"
+              description="Kai is a personal tutor for students — patient, encouraging, and uses hints to guide rather than just giving answers. Sage is a teaching assistant for instructors — helps design lessons, generate content, and review student performance."
+              chips={['Kai (Student Tutor)', 'Sage (Teaching Assistant)', 'Real-time Responses', 'Lesson-Aware', 'Content Search', 'Insert into Editor']}
               storyLink={['💬 AI Assistant/Chat Sidebar', 'GettingStarted']}
               color="success.main"
             />
             <FeatureCard
               icon={<FitnessCenterIcon sx={{ fontSize: 36 }} />}
               title="Practice Drills"
-              description="AI generates fresh quiz variations from unit content. Reuses the full Workbook with diminishing-return XP to prevent farming."
-              chips={['AI-Generated', 'Workbook Reuse', 'XP Rewards', 'Drill Types']}
-              storyLink={['PracticeDrill/PracticeDrillDialog', 'Default']}
+              description="AI generates fresh quiz variations from your lesson content so students can keep practicing without memorising the same answers."
+              chips={['AI-Generated', 'Unlimited Practice', 'XP Rewards', 'Multiple Formats']}
+              storyLink={['🎯 Practice Drills/Dialog', 'Default']}
               color="warning.main"
             />
             <FeatureCard
               icon={<RecordVoiceOverIcon sx={{ fontSize: 36 }} />}
               title="Audio & Recording Studio"
-              description="Record audio with waveform visualization, AI-powered transcription via Whisper, and text-to-speech generation. Screenplay-based dialogue editor."
-              chips={['Whisper', 'TTS', 'Waveform', 'Screenplay Editor', 'Timeline']}
-              storyLink={['🎙️ Recording Audio/Recording Studio', 'StartFromScratch']}
+              description="Record audio with a visual waveform, automatic AI transcription, and text-to-speech voice generation. Includes a script-style dialogue editor."
+              chips={['AI Transcription', 'Text-to-Speech', 'Audio Visualization', 'Dialogue Editor', 'Timeline']}
+              storyLink={['🎙️ Recording Studio/Recording Studio', 'StartFromScratch']}
               color="warning.main"
             />
           </Box>
@@ -378,9 +378,9 @@ export const Welcome: Story = {
             <FeatureCard
               icon={<GroupsIcon sx={{ fontSize: 36 }} />}
               title="Real-Time Workbook"
-              description="Yjs-powered collaborative workbook with tutor cursor overlay, presence banners, AI feedback snackbars, connection status, and live progress tracking."
-              chips={['Yjs CRDT', 'WebSocket', 'Tutor Cursors', 'Presence', 'AI Feedback']}
-              storyLink={['📓 Workbook/WorkbookProgress', 'Detailed']}
+              description="Work on lessons together in real time. Students see tutor guidance live, receive instant AI feedback, and track their progress as they go."
+              chips={['Live Collaboration', 'Tutor Guidance', "Who's Online", 'Instant AI Feedback', 'Progress Tracking']}
+              storyLink={['📓 Workbook/Progress', 'Detailed']}
               color="info.main"
             />
             <FeatureCard
@@ -388,15 +388,15 @@ export const Welcome: Story = {
               title="Peer Review"
               description="Students review each other's work with structured feedback prompts, join-by-code rooms, real-time chat, and invitation management."
               chips={['Join by Code', 'Feedback Prompts', 'Chat', 'Invitations']}
-              storyLink={['PeerReview/PeerReviewChat', 'Default']}
+              storyLink={['🤝 Peer Review/Chat', 'ChatStory']}
               color="secondary.main"
             />
             <FeatureCard
               icon={<DashboardIcon sx={{ fontSize: 36 }} />}
               title="Instructor Dashboard"
-              description="Aggregate performance metrics across all sections with per-section leaderboards, student rankings, grade averages, and completion tracking."
+              description="See class performance at a glance — leaderboards, student rankings, grade averages, and completion rates across all your classes."
               chips={['Leaderboard', 'Grade Analytics', 'Section Stats', 'Progress Bars']}
-              storyLink={['📊 Instructor/InstructorDashboard', 'WithSections']}
+              storyLink={['📊 Instructor Tools/Dashboard', 'WithSections']}
               color="error.main"
             />
           </Box>
@@ -409,9 +409,9 @@ export const Welcome: Story = {
             <FeatureCard
               icon={<EmojiEventsIcon sx={{ fontSize: 36 }} />}
               title="XP, Levels & Badges"
-              description="Full progression system with animated XP toasts, level badges, streak calendars, skill trees, personal bests, and a 'Nailed It' celebration wall."
-              chips={['XP System', 'Levels', 'Streaks', 'Skill Tree', 'Badges', 'Celebrations']}
-              storyLink={['Gamification/LevelBadge', 'Default']}
+              description="Track progress with XP, level badges, daily streaks, skill trees, personal bests, and celebration moments for big achievements."
+              chips={['XP & Points', 'Levels', 'Streaks', 'Skill Tree', 'Badges', 'Celebrations']}
+              storyLink={['🏆 Gamification/XP & Progression/Level Badge', 'Beginner']}
               color="warning.main"
             />
             <FeatureCard
@@ -419,15 +419,15 @@ export const Welcome: Story = {
               title="Squads & Social"
               description="Squad system with custom crests, leaderboards, post feeds, group challenges, boss battles, and campaign missions for team-based learning."
               chips={['Squads', 'Crests', 'Challenges', 'Boss Battles', 'Campaigns']}
-              storyLink={['Gamification/SquadLeaderboard', 'Default']}
+              storyLink={['🏆 Gamification/Squads & Teams/Squad Leaderboard', 'Full']}
               color="error.main"
             />
             <FeatureCard
               icon={<PersonIcon sx={{ fontSize: 36 }} />}
               title="Avatar & Customization"
-              description="DiceBear-based avatars with armor editor, cosmetic selector, and style tiers unlocked by level. Heraldic shield crests for squads."
-              chips={['DiceBear', 'Armor', 'Cosmetics', 'Level-Gated', 'Shield Crests']}
-              storyLink={['Gamification/AvatarCustomizer', 'Default']}
+              description="Customizable avatars with armor, accessories, and cosmetics that unlock as you level up. Squads get unique emblems."
+              chips={['Avatars', 'Armor & Accessories', 'Cosmetics', 'Level Unlocks', 'Squad Emblems']}
+              storyLink={['🏆 Gamification/Avatars & Cosmetics/Avatar Customizer', 'Level2Colors']}
               color="info.main"
             />
           </Box>
@@ -439,25 +439,25 @@ export const Welcome: Story = {
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 2, mb: 4 }}>
             <FeatureCard
               icon={<LanguageIcon sx={{ fontSize: 36 }} />}
-              title="Internationalization"
-              description="Full i18n support with 6 languages (English, Chinese, Spanish, French, German, Japanese) across 12 namespaces. Live language switching in toolbar."
-              chips={['next-i18next', '6 Languages', '12 Namespaces', 'RTL Ready']}
+              title="Multiple Languages"
+              description="Supports 6 languages (English, Chinese, Spanish, French, German, Japanese). Switch languages instantly from the toolbar."
+              chips={['6 Languages', 'Live Switching', 'Right-to-Left Support', 'Full Coverage']}
               storyLink={['Translation Mode/Demo', 'Default']}
               color="secondary.main"
             />
             <FeatureCard
               icon={<WifiOffIcon sx={{ fontSize: 36 }} />}
               title="Offline Support"
-              description="Service worker caching, prefetch badges, sync status indicators, offline banners, and local storage management for uninterrupted learning."
-              chips={['Service Worker', 'IndexedDB', 'Sync Status', 'Prefetch']}
-              storyLink={['🔌 Offline/SyncStatusIndicator', 'AllSynced']}
+              description="Works without an internet connection. Content loads in advance, changes sync when you're back online, and clear indicators show your connection status."
+              chips={['Works Offline', 'Auto-Sync', 'Pre-loaded Content', 'Connection Status']}
+              storyLink={['🔌 Offline & Sync/Sync Status Indicator', 'AllSynced']}
               color="warning.main"
             />
             <FeatureCard
               icon={<DarkModeIcon sx={{ fontSize: 36 }} />}
               title="Dark Mode & Theming"
-              description="Full dark mode with CSS variable integration, system preference detection, and per-component color scheme synchronization."
-              chips={['MUI Theming', 'CSS Variables', 'System Preference', 'Auto-Sync']}
+              description="Full dark mode that follows your device settings automatically, with consistent styling throughout."
+              chips={['Dark Mode', 'Follows Device Settings', 'Consistent Styling', 'Instant Switch']}
               color="info.main"
             />
           </Box>
@@ -528,7 +528,7 @@ export const Welcome: Story = {
             <Button 
               variant="outlined" 
               size="small" 
-              onClick={linkTo('📚 Creating Lessons/Editor', 'EmptyEditorTextFormatting')}
+              onClick={linkTo('✏️ Lesson Editor/Editor', 'EmptyEditorTextFormatting')}
               sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Editor
@@ -536,7 +536,7 @@ export const Welcome: Story = {
             <Button 
               variant="outlined" 
               size="small" 
-              onClick={linkTo('📁 Managing Content/Vocabulary Review', 'Default')}
+              onClick={linkTo('📁 Content Management/Dictionary Editor', 'Default')}
               sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Vocabulary
@@ -544,7 +544,7 @@ export const Welcome: Story = {
             <Button 
               variant="outlined" 
               size="small" 
-              onClick={linkTo('📁 Managing Content/File Manager', 'Default')}
+              onClick={linkTo('📁 Content Management/File Manager', 'Default')}
               sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               File Manager

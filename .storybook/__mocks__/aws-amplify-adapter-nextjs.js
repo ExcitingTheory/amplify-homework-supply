@@ -4,7 +4,7 @@
  */
 
 export const createServerRunner = () => ({
-  runWithAmplifyServerContext: async (fn) => fn(),
+  runWithAmplifyServerContext: async ({ operation }) => operation({}),
 });
 
 export const generateServerClientUsingCookies = () => ({

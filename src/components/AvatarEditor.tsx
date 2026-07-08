@@ -15,7 +15,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import SettingsContext from '../context/settingsContext'
 import { useAvatarConfig } from '../hooks/useAvatarConfig'
 import { useXP } from '../context/gamificationContext'
-import { DiceBearAvatar } from './Gamification/DiceBearAvatar'
+import { AvatarDisplay } from './Gamification/AvatarDisplay'
 import { AvatarCustomizer } from './Gamification/AvatarCustomizer'
 import type { AvatarStyleTier, AvatarOverrides } from './Gamification/DiceBearAvatar'
 import type { GlowRingConfig } from './Gamification/AvatarGlowRing'
@@ -103,7 +103,7 @@ export function AvatarEditor({ seed, size = 128, level: levelProp, onSave, hideP
         !isLoaded ? (
           <Skeleton variant="circular" width={size} height={size} />
         ) : (
-          <DiceBearAvatar
+          <AvatarDisplay
             seed={avatarSeed}
             style={displayStyle}
             size={size}

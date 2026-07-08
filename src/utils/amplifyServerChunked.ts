@@ -40,9 +40,14 @@ export function getServerClient() {
  * Wraps Next.js cookies() function to support reading chunked cookie values.
  */
 function createChunkedCookiesWrapper(nextCookies: typeof cookies) {
+  // Eagerly invoke cookies() at call time (during the component render phase)
+  // so it is not deferred to after the prerender completes, which would cause
+  // a HANGING_PROMISE_REJECTION in Next.js 15+.
+  const cookieStorePromise = nextCookies();
+
   // Return a function that mimics the cookies() API
   const wrapper = async () => {
-    const cookieStore = await nextCookies();
+    const cookieStore = await cookieStorePromise;
 
     return {
       get(nameOrOptions: string | { name: string }) {

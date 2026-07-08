@@ -74,6 +74,10 @@ interface UsePracticeDrillReturn {
   error: string | null;
   /** Generate a new drill from the config */
   generateDrill: (unitId: string, config: DrillConfig) => Promise<void>;
+  /** Resume an existing incomplete session by loading its saved state */
+  resumeSession: (sessionId: string) => Promise<void>;
+  /** Start a drill from a completed session template (clones blocks into new session) */
+  replayTemplate: (templateSessionId: string, unitId: string) => Promise<void>;
   /** Submit an answer for a block */
   submitAnswer: (blockId: string, answer: BlockAnswer) => void;
   /** Mark session as complete and award XP */
@@ -162,11 +166,144 @@ export function usePracticeDrill(
           blocksCompleted: 0,
           complete: false,
           xpAwarded: 0,
-          metadata: (result as any)?.metadata,
+          metadata: {
+            unitId,
+            drillType: config.drillType,
+            sourcesEnabled: config.sources,
+            ...(result as any)?.metadata,
+          },
         });
       } catch (err: any) {
         console.error("[usePracticeDrill] Generation error:", err);
         setError(err.message || "Failed to generate drill");
+      } finally {
+        setGenerating(false);
+      }
+    },
+    [],
+  );
+
+  const resumeSession = useCallback(async (sessionId: string) => {
+    setGenerating(true);
+    setError(null);
+    try {
+      const client = getAmplifyClient();
+      const { data: record } = await client.models.PracticeSession.get({
+        id: sessionId,
+      });
+      if (!record) throw new Error("Session not found");
+
+      const blocks: PracticeDrillBlock[] = record.generatedContent
+        ? typeof record.generatedContent === "string"
+          ? JSON.parse(record.generatedContent)
+          : record.generatedContent
+        : [];
+      const answers: Record<string, BlockAnswer> = record.data
+        ? typeof record.data === "string"
+          ? JSON.parse(record.data)
+          : record.data
+        : {};
+
+      const completed = Object.values(answers).filter(
+        (a: any) => a?.complete,
+      ).length;
+      const accuracies = Object.values(answers)
+        .filter((a: any) => a?.complete && typeof a?.accuracy === "number")
+        .map((a: any) => a.accuracy);
+      const avgAccuracy =
+        accuracies.length > 0
+          ? Math.round(
+              accuracies.reduce((s, v) => s + v, 0) / accuracies.length,
+            )
+          : 0;
+
+      sessionIdRef.current = sessionId;
+      setSession({
+        id: sessionId,
+        blocks,
+        answers,
+        accuracy: avgAccuracy,
+        blocksCompleted: completed,
+        complete: record.complete || false,
+        xpAwarded: record.xpAwarded || 0,
+        metadata: {
+          unitId: record.unitID,
+          drillType: record.drillType,
+        },
+      });
+    } catch (err: any) {
+      console.error("[usePracticeDrill] Resume error:", err);
+      setError(err.message || "Failed to resume session");
+    } finally {
+      setGenerating(false);
+    }
+  }, []);
+
+  const replayTemplate = useCallback(
+    async (templateSessionId: string, unitId: string) => {
+      setGenerating(true);
+      setError(null);
+      try {
+        const client = getAmplifyClient();
+
+        // Load template blocks
+        const { data: template } = await client.models.PracticeSession.get({
+          id: templateSessionId,
+        });
+        if (!template) throw new Error("Template session not found");
+
+        const blocks: PracticeDrillBlock[] = template.generatedContent
+          ? typeof template.generatedContent === "string"
+            ? JSON.parse(template.generatedContent)
+            : template.generatedContent
+          : [];
+
+        if (blocks.length === 0) throw new Error("Template has no blocks");
+
+        // Create a new session record with cloned blocks
+        const { data: newRecord, errors: sessionErrors } =
+          await client.models.PracticeSession.create({
+            unitID: unitId,
+            drillType: template.drillType || "MIXED",
+            blockCount: blocks.length,
+            blocksCompleted: 0,
+            complete: false,
+            xpAwarded: 0,
+            generatedContent:
+              typeof template.generatedContent === "string"
+                ? template.generatedContent
+                : JSON.stringify(blocks),
+            sourcesEnabled: template.sourcesEnabled as any,
+            data: JSON.stringify({}),
+          });
+
+        if (sessionErrors?.length) {
+          console.error(
+            "[usePracticeDrill] Failed to create replay session:",
+            sessionErrors,
+          );
+        }
+
+        const sessionId = newRecord?.id || `local-${Date.now()}`;
+        sessionIdRef.current = sessionId;
+
+        setSession({
+          id: sessionId,
+          blocks,
+          answers: {},
+          accuracy: 0,
+          blocksCompleted: 0,
+          complete: false,
+          xpAwarded: 0,
+          metadata: {
+            unitId,
+            drillType: template.drillType,
+            templateSessionId,
+          },
+        });
+      } catch (err: any) {
+        console.error("[usePracticeDrill] Replay error:", err);
+        setError(err.message || "Failed to start from template");
       } finally {
         setGenerating(false);
       }
@@ -341,6 +478,8 @@ export function usePracticeDrill(
     saving,
     error,
     generateDrill,
+    resumeSession,
+    replayTemplate,
     submitAnswer,
     completeDrill,
     reset,

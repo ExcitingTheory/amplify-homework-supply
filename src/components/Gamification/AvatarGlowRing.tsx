@@ -12,6 +12,7 @@
 
 import React from 'react'
 import Box from '@mui/material/Box'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 // ============================================================================
 // Types
@@ -89,6 +90,7 @@ let glowIdCounter = 0
 export function AvatarGlowRing({ children, size, config }: AvatarGlowRingProps) {
   const active = isGlowActive(config)
   const idRef = React.useRef(++glowIdCounter)
+  const reducedMotion = useReducedMotion()
 
   if (!active) {
     // No ring — just render the avatar directly
@@ -138,11 +140,15 @@ export function AvatarGlowRing({ children, size, config }: AvatarGlowRingProps) 
           borderRadius: '50%',
           background: gradient,
           filter: `url(#${filterId})`,
-          animation: `avatarGlowSpin ${speed}s linear infinite`,
-          '@keyframes avatarGlowSpin': {
-            '0%': { transform: 'rotate(0deg)' },
-            '100%': { transform: 'rotate(360deg)' },
-          },
+          ...(reducedMotion
+            ? {}
+            : {
+                animation: `avatarGlowSpin ${speed}s linear infinite`,
+                '@keyframes avatarGlowSpin': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg)' },
+                },
+              }),
         }}
       />
 
@@ -153,11 +159,15 @@ export function AvatarGlowRing({ children, size, config }: AvatarGlowRingProps) 
           inset: -2,
           borderRadius: '50%',
           boxShadow: `0 0 ${size * 0.15}px ${glowColor}40, 0 0 ${size * 0.3}px ${glowColor}20`,
-          animation: `avatarGlowPulse ${speed * 0.75}s ease-in-out infinite alternate`,
-          '@keyframes avatarGlowPulse': {
-            '0%': { opacity: 0.6 },
-            '100%': { opacity: 1 },
-          },
+          ...(reducedMotion
+            ? {}
+            : {
+                animation: `avatarGlowPulse ${speed * 0.75}s ease-in-out infinite alternate`,
+                '@keyframes avatarGlowPulse': {
+                  '0%': { opacity: 0.6 },
+                  '100%': { opacity: 1 },
+                },
+              }),
         }}
       />
 

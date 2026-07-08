@@ -1,10 +1,10 @@
 
-// @ts-expect-error next-intl types mismatch under bundler resolution
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ViewTransition } from 'react';
+import { headers } from 'next/headers';
 import { routing } from '../../src/i18n/routing';
 import Providers from '../providers';
 
@@ -24,10 +24,12 @@ async function LocaleContent({
   locale: string;
 }) {
   const messages = await getMessages();
+  const headerStore = await headers();
+  const nonce = headerStore.get('x-nonce') || undefined;
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <Providers>
+      <Providers nonce={nonce}>
         <Suspense>
           <ViewTransition>{children}</ViewTransition>
         </Suspense>

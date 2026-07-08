@@ -26,6 +26,8 @@ import PracticeDrillProgress from './PracticeDrillProgress'
 import DrillGradeAdapter from './DrillGradeAdapter'
 import CollaborativePresenceBar from './CollaborativePresenceBar'
 import { Workbook } from '../Editor3/Workbook'
+import { DictionaryProvider } from '../../context/dictionaryContext'
+import { FilesProvider } from '../../context/fileContext'
 import { usePracticeDrill } from './usePracticeDrill'
 import { usePracticeCollaboration } from '../../yjs/practiceCollaborationHooks'
 import { previewXP } from '../../utils/practiceXPCalculator'
@@ -169,11 +171,11 @@ export default function PracticeDrillDialog({
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 6 }}>
         <Typography variant="h6" component="span" sx={{ flex: 1 }}>
-          {unitName ? `${t('practiceDrill.dialog.title', 'Practice')}: ${unitName}` : t('practiceDrill.dialog.title', 'Practice')}
+          {unitName ? `${t('practiceDrill.dialog.title')}: ${unitName}` : t('practiceDrill.dialog.title')}
         </Typography>
         <IconButton
           onClick={handleClose}
-          aria-label={t('practiceDrill.dialog.close', 'Close')}
+          aria-label={t('practiceDrill.dialog.close')}
           sx={{ position: 'absolute', right: 8, top: 8 }}
         >
           <CloseIcon />
@@ -216,7 +218,7 @@ export default function PracticeDrillDialog({
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
             <Button size="small" onClick={() => generateDrill(unitId, config)} sx={{ ml: 1 }}>
-              {t('practiceDrill.dialog.retry', 'Retry')}
+              {t('practiceDrill.dialog.retry')}
             </Button>
           </Alert>
         )}
@@ -229,7 +231,7 @@ export default function PracticeDrillDialog({
             sx={{ mb: 2 }}
           >
             <Typography variant="subtitle1" fontWeight={600}>
-              {t('practiceDrill.dialog.complete', 'Drill Complete!')}
+              {t('practiceDrill.dialog.complete')}
             </Typography>
             <Typography variant="body2">
               {t('practiceDrill.dialog.completeSummary', {
@@ -242,21 +244,25 @@ export default function PracticeDrillDialog({
 
         {/* Workbook — renders via existing Lexical graded block plugins */}
         {!generating && session.blocks.length > 0 && (
-          <DrillGradeAdapter
-            sessionId={session.id || ''}
-            blocks={session.blocks as import('./buildDrillEditorState').PracticeDrillBlock[]}
-            onGradeChange={(_data, stats) => handleStatsChange(stats)}
-          >
-            <Workbook />
-          </DrillGradeAdapter>
+          <FilesProvider>
+            <DictionaryProvider>
+              <DrillGradeAdapter
+                sessionId={session.id || ''}
+                blocks={session.blocks as import('./buildDrillEditorState').PracticeDrillBlock[]}
+                onGradeChange={(_data, stats) => handleStatsChange(stats)}
+              >
+                <Workbook />
+              </DrillGradeAdapter>
+            </DictionaryProvider>
+          </FilesProvider>
         )}
       </DialogContent>
 
       <DialogActions>
         <Button onClick={handleClose} color="inherit">
           {session.complete
-            ? t('practiceDrill.dialog.done', 'Done')
-            : t('practiceDrill.dialog.cancel', 'Cancel')}
+            ? t('practiceDrill.dialog.done')
+            : t('practiceDrill.dialog.cancel')}
         </Button>
         {!session.complete && allCompleted && (
           <Button
@@ -265,7 +271,7 @@ export default function PracticeDrillDialog({
             disabled={saving}
             startIcon={saving ? <Skeleton variant="circular" width={16} height={16} /> : <CheckCircleIcon />}
           >
-            {t('practiceDrill.dialog.finish', 'Finish & Earn XP')}
+            {t('practiceDrill.dialog.finish')}
           </Button>
         )}
       </DialogActions>

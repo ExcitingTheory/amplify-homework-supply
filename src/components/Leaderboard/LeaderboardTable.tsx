@@ -18,7 +18,7 @@ import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
 import Box from '@mui/material/Box'
-import { DiceBearAvatar } from '../Gamification/DiceBearAvatar'
+import { AvatarDisplay } from '../Gamification/AvatarDisplay'
 import type { AvatarStyleTier, AvatarOverrides } from '../Gamification/DiceBearAvatar'
 
 export interface LeaderboardEntry {
@@ -52,7 +52,7 @@ function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
     return <Skeleton variant="circular" width={24} height={24} />
   }
   return (
-    <DiceBearAvatar
+    <AvatarDisplay
       seed={entry.avatarSeed || entry.studentId}
       size={24}
       style={entry.avatarStyle || 'simple'}

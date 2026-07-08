@@ -47,6 +47,7 @@ import { SectionSelector, SectionOption } from './SectionSelector'
 import { SkillForm, SkillFormData, UnitOption } from './SkillForm'
 import { SkillTree, SkillNodeData } from './SkillTree'
 import { BossBattleForm, BossBattleFormData } from './BossBattleForm'
+import { GroupChallengeEditor, GroupChallengeEditorData } from '../GroupChallengeEditor'
 import { BossBattleProgress, Contributor } from './BossBattleProgress'
 import { EasterEggForm, EasterEggFormData, EasterEggTriggerType, BadgeOption } from './EasterEggForm'
 import { BadgeEditor, BadgeOverride, CustomBadge } from './BadgeEditor'
@@ -170,13 +171,13 @@ export interface InstructorGamificationPanelProps {
   onSaveCampaign?: (campaign: Omit<CampaignEntry, 'id'> & { id?: string }) => void
   onDeleteCampaign?: (campaignId: string) => void
   /** Generate campaign narrative via AI from a title prompt */
-  onGenerateCampaign?: (title: string) => Promise<{ setting: string; stakes: string } | null>
+  onGenerateCampaign?: (title: string) => Promise<{ setting: string } | null>
   onCreateSquad?: (name: string, cohortId: string) => void
   onDeleteSquad?: (squadId: string) => void
   onAddEasterEgg?: (egg: EasterEggFormData) => void
   onDeleteEasterEgg?: (eggId: string) => void
-  onAddBoss?: (boss: BossBattleFormData) => void
-  onEditBoss?: (bossId: string, boss: BossBattleFormData) => void
+  onAddBoss?: (boss: BossBattleFormData | GroupChallengeEditorData) => void
+  onEditBoss?: (bossId: string, boss: BossBattleFormData | GroupChallengeEditorData) => void
   onDeleteBoss?: (bossId: string) => void
   onToggleBossActive?: (bossId: string, active: boolean) => void
   /** Current badge overrides for hardcoded badges */
@@ -285,7 +286,6 @@ export function InstructorGamificationPanel({
   )
   const [campaignTitle, setCampaignTitle] = useState('')
   const [campaignSetting, setCampaignSetting] = useState('')
-  const [campaignStakes, setCampaignStakes] = useState('')
   const [campaignGenerating, setCampaignGenerating] = useState(false)
   const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null)
 
@@ -529,17 +529,6 @@ export function InstructorGamificationPanel({
               fullWidth
               helperText="The fictional world or scenario that frames the learning journey"
             />
-            <TextField
-              size="small"
-              label="Stakes (rhetorical consequences)"
-              value={campaignStakes}
-              onChange={(e) => setCampaignStakes(e.target.value)}
-              placeholder="What happens if the quest fails..."
-              multiline
-              rows={2}
-              fullWidth
-              helperText="In-world narrative tension — not real consequences, but motivating story stakes"
-            />
             <Stack direction="row" spacing={1}>
               <Button
                 variant="contained"
@@ -550,11 +539,9 @@ export function InstructorGamificationPanel({
                   onSaveCampaign?.({
                     title: campaignTitle.trim(),
                     setting: campaignSetting.trim() || undefined,
-                    stakes: campaignStakes.trim() || undefined,
                   })
                   setCampaignTitle('')
                   setCampaignSetting('')
-                  setCampaignStakes('')
                 }}
               >
                 Save Campaign
@@ -571,7 +558,6 @@ export function InstructorGamificationPanel({
                       const result = await onGenerateCampaign(campaignTitle.trim())
                       if (result) {
                         setCampaignSetting(result.setting)
-                        setCampaignStakes(result.stakes)
                       }
                     } finally {
                       setCampaignGenerating(false)
@@ -961,8 +947,8 @@ export function InstructorGamificationPanel({
           {editingBossId ? (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Editing: {bossBattles.find(b => b.id === editingBossId)?.title}</Typography>
-              <BossBattleForm
-                initialValues={(() => {
+              <GroupChallengeEditor
+                initialData={(() => {
                   const boss = bossBattles.find(b => b.id === editingBossId)
                   if (!boss) return undefined
                   return {
@@ -970,12 +956,14 @@ export function InstructorGamificationPanel({
                     targetXP: boss.targetXP,
                     startDate: boss.startDate,
                     deadline: boss.deadline,
-                    bonusMultiplier: boss.bonusMultiplier,
+                    bonusMultiplier: boss.bonusMultiplier ?? 1.5,
                     setting: boss.setting,
                     stakes: boss.stakes,
                     featuredImage: boss.featuredImage,
+                    active: boss.active,
                   }
                 })()}
+                availableUnits={availableUnits}
                 onSubmit={(data) => {
                   onEditBoss?.(editingBossId, data)
                   setEditingBossId(null)
@@ -986,7 +974,10 @@ export function InstructorGamificationPanel({
               </Button>
             </Box>
           ) : (
-            <BossBattleForm onSubmit={(data) => onAddBoss?.(data)} />
+            <GroupChallengeEditor
+              availableUnits={availableUnits}
+              onSubmit={(data) => onAddBoss?.(data)}
+            />
           )}
           {bossBattles.length > 0 && <Divider sx={{ my: 2 }} />}
           {bossBattles.map((boss) => (

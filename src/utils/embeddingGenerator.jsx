@@ -192,16 +192,21 @@ export function getEmbeddingCacheStats() {
 }
 
 /**
- * Generate embedding from text using backend Lambda with caching
+ * Generate embedding from text.
+ *
+ * Primary path: local model (Xenova/all-MiniLM-L6-v2, 384 dims) via @huggingface/transformers.
+ * Fallback: server action (for environments where local model can't load).
+ *
  * @param {string} text - Text to embed
  * @param {object} options - Embedding options
  * @returns {Promise<Array<number>>} Embedding vector
  */
 export async function generateEmbedding(text, options = {}) {
   const {
-    model = "text-embedding-3-small",
-    dimensions = 512,
-    skipCache = false, // Add option to bypass cache
+    model = "Xenova/all-MiniLM-L6-v2",
+    dimensions = 384,
+    skipCache = false,
+    forceServer = false, // Force use of server action (for bulk re-indexing)
   } = options;
 
   if (!text || text.trim().length === 0) {
@@ -217,9 +222,28 @@ export async function generateEmbedding(text, options = {}) {
     }
   }
 
+  // Try local model first (unless forceServer is set)
+  if (!forceServer) {
+    try {
+      const { embed } = await import("../offline/LocalEmbeddingModel");
+      const result = await embed(text);
+      const embedding = result.embedding;
+
+      // Cache the result
+      setCachedEmbedding(text, model, dimensions, embedding);
+      return embedding;
+    } catch (localErr) {
+      console.warn(
+        "[Embedding] Local model failed, falling back to server:",
+        localErr,
+      );
+    }
+  }
+
+  // Fallback: server action
   try {
     console.log(
-      "[Embedding] Generating new embedding for:",
+      "[Embedding] Generating via server for:",
       text.substring(0, 50),
     );
     const result = await generateEmbeddingAction({
@@ -303,8 +327,8 @@ export async function generateUnitEmbedding(unitId, options = {}) {
 
     // Save vector to S3 (private — owner only)
     await saveEmbedding(unit.identityId, "unit", unit.id, {
-      model: "text-embedding-3-small",
-      dimensions: 512,
+      model: "Xenova/all-MiniLM-L6-v2",
+      dimensions: 384,
       generatedAt: Date.now(),
       wordCount: extracted.totalWordCount,
       pages: [{ page: 0, embedding, text: extracted.text.substring(0, 200) }],
@@ -314,8 +338,8 @@ export async function generateUnitEmbedding(unitId, options = {}) {
     await amplifyClient.models.Unit.update({
       id: unit.id,
       embedding: {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         version: Date.now(),
         wordCount: extracted.totalWordCount,
         pageCount: 1,
@@ -384,8 +408,8 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
       "section",
       section.id,
       {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         generatedAt: Date.now(),
         wordCount: extracted.wordCount,
         pages: [{ page: 0, embedding, text: extracted.text.substring(0, 200) }],
@@ -396,8 +420,8 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
     await amplifyClient.models.Section.update({
       id: section.id,
       embedding: {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         version: Date.now(),
         wordCount: extracted.wordCount,
         pageCount: 1,
@@ -454,8 +478,8 @@ export async function generateWordEmbedding(wordId, options = {}) {
 
     // Save vector to S3
     await saveEmbedding(word.identityId || word.owner, "word", word.id, {
-      model: "text-embedding-3-small",
-      dimensions: 512,
+      model: "Xenova/all-MiniLM-L6-v2",
+      dimensions: 384,
       generatedAt: Date.now(),
       wordCount: text.split(/\s+/).length,
       pages: [{ page: 0, embedding, text: text.substring(0, 200) }],
@@ -465,8 +489,8 @@ export async function generateWordEmbedding(wordId, options = {}) {
     await amplifyClient.models.Word.update({
       id: word.id,
       embedding: {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         version: Date.now(),
         wordCount: text.split(/\s+/).length,
         pageCount: 1,
@@ -518,8 +542,8 @@ export async function generateQuestionEmbedding(questionId, options = {}) {
       "question",
       question.id,
       {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         generatedAt: Date.now(),
         wordCount: text.split(/\s+/).length,
         pages: [{ page: 0, embedding, text: text.substring(0, 200) }],
@@ -530,8 +554,8 @@ export async function generateQuestionEmbedding(questionId, options = {}) {
     await amplifyClient.models.Question.update({
       id: question.id,
       embedding: {
-        model: "text-embedding-3-small",
-        dimensions: 512,
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
         version: Date.now(),
         wordCount: text.split(/\s+/).length,
         pageCount: 1,

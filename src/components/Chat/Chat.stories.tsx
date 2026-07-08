@@ -111,7 +111,7 @@ const mockReplies = [mockMessages[2]] // msg-3 is a reply to msg-2
 // ============================================================================
 
 export default {
-  title: '💬 Chat/ChatPanel',
+  title: '💬 Collaborative Chat/Chat Panel',
   component: ChatPanel,
   parameters: {
     layout: 'fullscreen',

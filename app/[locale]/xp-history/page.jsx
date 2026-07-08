@@ -1,6 +1,3 @@
-"use client";
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -10,9 +7,11 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
-import MainToolbar from "@/components/MainToolbar";
-import { getAmplifyClient } from "@/utils/amplifyClient";
-import { fetchAuthSession } from "aws-amplify/auth";
+import { cookies } from "next/headers";
+import { fetchAuthSession } from "aws-amplify/auth/server";
+import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
+import { getServerClient } from "@/utils/amplifyServerClient";
+import { redirect } from "next/navigation";
 
 const XP_REASON_LABELS = {
   HOMEWORK_SUBMITTED: "Homework Submitted",
@@ -35,123 +34,115 @@ const XP_REASON_LABELS = {
   PRACTICE_DRILL_ACCURACY_BONUS: "Drill Accuracy Bonus",
 };
 
-function XPHistoryContent() {
-  const [logs, setLogs] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [totalXP, setTotalXP] = React.useState(0);
-  const client = React.useMemo(() => getAmplifyClient(), []);
+export default async function XPHistoryPage() {
+  // Auth check — get the current user's identity server-side
+  let username = null;
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+    username =
+      session?.tokens?.idToken?.payload?.["cognito:username"] ||
+      session?.tokens?.idToken?.payload?.sub;
+  } catch {
+    // Not authenticated
+  }
 
-  React.useEffect(() => {
-    async function fetchLogs() {
-      try {
-        const session = await fetchAuthSession();
-        const username =
-          session?.tokens?.idToken?.payload?.["cognito:username"] ||
-          session?.tokens?.idToken?.payload?.sub;
-        if (!username) return;
+  if (!username) {
+    redirect("/");
+  }
 
-        const { data } = await client.models.StudentXPLog.list({
-          filter: { studentId: { eq: username } },
-        });
-        const items = (data || [])
-          .filter((item) => item != null)
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          );
-        setLogs(items);
-        setTotalXP(items.reduce((sum, log) => sum + (log.xpAmount || 0), 0));
-      } catch (err) {
-        console.error("[XPHistory] Failed to fetch logs:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchLogs();
-  }, [client]);
+  // Fetch XP logs for the authenticated user
+  let logs = [];
+  let totalXP = 0;
 
-  if (loading) {
-    return (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography>Loading XP history...</Typography>
-      </Box>
-    );
+  try {
+    const client = getServerClient();
+    const { data } = await client.models.StudentXPLog.list({
+      filter: { studentId: { eq: username } },
+      limit: 200,
+    });
+    const items = (data || [])
+      .filter((item) => item != null)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    logs = items;
+    totalXP = items.reduce((sum, log) => sum + (log.xpAmount || 0), 0);
+  } catch (err) {
+    console.error("[XPHistory RSC] Failed to fetch logs:", err);
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          marginTop: "1rem",
-          padding: "1rem",
-          maxWidth: "60rem",
-          margin: "5rem auto 3rem",
-        }}
-      >
-        {/* Summary Card */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="h4" fontWeight={700} color="primary">
-              {totalXP.toLocaleString()} XP
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total earned from {logs.length} activities
-            </Typography>
-          </CardContent>
-        </Card>
+    <Box
+      sx={{
+        marginTop: "1rem",
+        padding: "1rem",
+        maxWidth: "60rem",
+        margin: "5rem auto 3rem",
+      }}
+    >
+      {/* Summary Card */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h4" fontWeight={700} color="primary">
+            {totalXP.toLocaleString()} XP
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Total earned from {logs.length} activities
+          </Typography>
+        </CardContent>
+      </Card>
 
-        {/* XP Log List */}
-        <Card>
-          <CardContent sx={{ p: 0 }}>
-            <List disablePadding>
-              {logs.map((log, index) => (
-                <React.Fragment key={log.id}>
-                  {index > 0 && <Divider />}
-                  <ListItem sx={{ py: 1.5 }}>
-                    <ListItemText
-                      primary={
-                        XP_REASON_LABELS[log.reason] || log.reason || "XP Award"
-                      }
-                      secondary={
-                        log.createdAt
-                          ? new Date(log.createdAt).toLocaleDateString(
-                              undefined,
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )
-                          : ""
-                      }
-                    />
-                    <Chip
-                      label={`+${log.xpAmount || 0} XP`}
-                      color="primary"
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </ListItem>
-                </React.Fragment>
-              ))}
-              {logs.length === 0 && (
-                <ListItem>
+      {/* XP Log List */}
+      <Card>
+        <CardContent sx={{ p: 0 }}>
+          <List disablePadding>
+            {logs.map((log, index) => (
+              <li key={log.id}>
+                {index > 0 && <Divider />}
+                <ListItem sx={{ py: 1.5 }}>
                   <ListItemText
-                    primary="No XP earned yet"
-                    secondary="Complete assignments and activities to earn XP!"
+                    primary={
+                      XP_REASON_LABELS[log.reason] || log.reason || "XP Award"
+                    }
+                    secondary={
+                      log.createdAt
+                        ? new Date(log.createdAt).toLocaleDateString(
+                            undefined,
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )
+                        : ""
+                    }
+                  />
+                  <Chip
+                    label={`+${log.xpAmount || 0} XP`}
+                    color="primary"
+                    size="small"
+                    sx={{ fontWeight: 600 }}
                   />
                 </ListItem>
-              )}
-            </List>
-          </CardContent>
-        </Card>
-      </Box>
-    </>
+              </li>
+            ))}
+            {logs.length === 0 && (
+              <ListItem>
+                <ListItemText
+                  primary="No XP earned yet"
+                  secondary="Complete assignments and activities to earn XP!"
+                />
+              </ListItem>
+            )}
+          </List>
+        </CardContent>
+      </Card>
+    </Box>
   );
-}
-
-export default function XPHistoryPage() {
-  return <XPHistoryContent />;
 }

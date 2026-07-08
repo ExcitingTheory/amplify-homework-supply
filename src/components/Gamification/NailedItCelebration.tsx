@@ -11,6 +11,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface NailedItCelebrationProps {
   open: boolean
@@ -23,8 +24,10 @@ export function NailedItCelebration({
   nailedItReason,
   onClose,
 }: NailedItCelebrationProps) {
+  const reducedMotion = useReducedMotion()
+
   useEffect(() => {
-    if (open) {
+    if (open && !reducedMotion) {
       // Dynamically import canvas-confetti to avoid SSR issues
       // @ts-expect-error — canvas-confetti has no type declarations
       import('canvas-confetti')
@@ -36,7 +39,7 @@ export function NailedItCelebration({
           // canvas-confetti not installed — skip silently
         })
     }
-  }, [open])
+  }, [open, reducedMotion])
 
   return (
     <Dialog open={open} maxWidth="xs" fullWidth onClose={onClose}>

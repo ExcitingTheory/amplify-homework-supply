@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { PeerReviewAssignmentDialog } from './PeerReviewAssignmentDialog';
 
 const meta: Meta<typeof PeerReviewAssignmentDialog> = {
-  title: '👥 Peer Review/PeerReviewAssignmentDialog',
+  title: '🤝 Peer Review/Assignment Dialog',
   component: PeerReviewAssignmentDialog,
   parameters: { layout: 'centered' },
 };

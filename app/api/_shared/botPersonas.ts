@@ -160,17 +160,15 @@ const PERSONAS: Record<BotPersona, PersonaConfig> = {
 /**
  * Resolve the bot persona based on user groups.
  * Instructors and Admins get Sage; everyone else gets Kai.
+ *
+ * Explicit override is only honoured for privileged callers — a Learner
+ * cannot self-escalate to Sage by supplying a persona in the request body.
  */
 export function resolvePersona(
   userGroups: string[] = [],
   explicit?: BotPersona,
 ): PersonaConfig {
-  // Allow explicit override (e.g., instructor choosing to talk to Kai)
-  if (explicit && PERSONAS[explicit]) {
-    return PERSONAS[explicit];
-  }
-
-  const isInstructor = userGroups.some(
+  const isPrivileged = userGroups.some(
     (g) =>
       g === "Instructors" ||
       g === "Admins" ||
@@ -179,7 +177,13 @@ export function resolvePersona(
       g.toLowerCase().includes("admin"),
   );
 
-  return isInstructor ? PERSONAS.sage : PERSONAS.kai;
+  // Allow explicit override only for privileged users (e.g., instructor choosing to talk to Kai).
+  // Unprivileged callers cannot escalate tool access by sending a persona override.
+  if (explicit && PERSONAS[explicit] && isPrivileged) {
+    return PERSONAS[explicit];
+  }
+
+  return isPrivileged ? PERSONAS.sage : PERSONAS.kai;
 }
 
 /**

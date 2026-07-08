@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import RecordingSettings from "./RecordingSettings";
 
 const meta: Meta<typeof RecordingSettings> = {
-  title: "RecordingStudio3/RecordingSettings",
+  title: "🎙️ Recording Studio/Components/Recording Settings",
   component: RecordingSettings,
   tags: ["autodocs"],
 };

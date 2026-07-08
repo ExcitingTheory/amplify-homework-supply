@@ -28,7 +28,7 @@ import GroupIcon from '@mui/icons-material/Group'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import StarIcon from '@mui/icons-material/Star'
 import { SquadCrest } from './SquadCrest'
-import { DiceBearAvatar } from './DiceBearAvatar'
+import { AvatarDisplay } from './AvatarDisplay'
 import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
 import { ArmoriaShield } from './ArmoriaShield'
 import { PixelSpriteMascot } from './PixelSpriteMascot'
@@ -172,7 +172,7 @@ export function SquadJoinPanel({
             {mySquadMembers.map((member) => (
               <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
                 <ListItemAvatar sx={{ minWidth: 36 }}>
-                  <DiceBearAvatar seed={member.studentId} size={32} label={member.displayName || member.studentId} style={member.avatarStyle} overrides={member.avatarOverrides} />
+                  <AvatarDisplay seed={member.studentId} size={32} style={member.avatarStyle} overrides={member.avatarOverrides} />
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.displayName || member.studentId}

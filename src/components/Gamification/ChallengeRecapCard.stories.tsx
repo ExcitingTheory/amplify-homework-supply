@@ -46,7 +46,7 @@ const mockRecaps = [
 ]
 
 const meta: Meta<typeof ChallengeRecapCard> = {
-  title: 'Gamification/ChallengeRecapCard',
+  title: '🏆 Gamification/Badges & Celebrations/Challenge Recap Card',
   component: ChallengeRecapCard,
   args: {
     challengeTitle: 'The Algorithm Dragon',

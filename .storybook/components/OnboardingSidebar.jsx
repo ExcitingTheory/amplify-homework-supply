@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -9,36 +9,36 @@ import {
   Stack,
   Tooltip,
   Typography,
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import PersonIcon from '@mui/icons-material/Person';
-import SchoolIcon from '@mui/icons-material/School';
-import TranslateIcon from '@mui/icons-material/Translate';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { getOnboardingEmitter } from '../code/onboarding-events';
-import { ONBOARDING_TASKS, getTasksForPersona } from '../code/onboarding-tasks';
-import './OnboardingSidebar.css';
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from "@mui/icons-material/School";
+import TranslateIcon from "@mui/icons-material/Translate";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { getOnboardingEmitter } from "../code/onboarding-events";
+import { ONBOARDING_TASKS, getTasksForPersona } from "../code/onboarding-tasks";
+import "./OnboardingSidebar.css";
 
 const PERSONAS = [
   {
-    id: 'instructor',
-    label: 'Instructor',
+    id: "instructor",
+    label: "Instructor",
     icon: <PersonIcon fontSize="small" />,
-    color: '#2196F3',
+    color: "#2196F3",
   },
   {
-    id: 'learner',
-    label: 'Learner',
+    id: "learner",
+    label: "Learner",
     icon: <SchoolIcon fontSize="small" />,
-    color: '#4CAF50',
+    color: "#4CAF50",
   },
   {
-    id: 'translator',
-    label: 'Translator',
+    id: "translator",
+    label: "Translator",
     icon: <TranslateIcon fontSize="small" />,
-    color: '#FF9800',
+    color: "#FF9800",
   },
 ];
 
@@ -56,22 +56,34 @@ const OnboardingSidebar = ({ api }) => {
     const persona = emitter.getPersona();
     if (persona) {
       setSelectedPersona(persona);
-      const completed = emitter.getCompletedTasks(persona);
+      const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
       setCompletedTasks(new Set(completed.map((e) => e.taskId)));
       updateCompletionPercentage(persona);
     }
 
     // Subscribe to events
     const unsubscribe = emitter.on((event) => {
-      if (event.type === 'persona-selected') {
+      if (event.type === "persona-selected") {
         setSelectedPersona(event.persona);
-        const completed = emitter.getCompletedTasks(event.persona);
+        const completed = emitter.getCompletedTasks(
+          event.persona,
+          ONBOARDING_TASKS,
+        );
         setCompletedTasks(new Set(completed.map((e) => e.taskId)));
         updateCompletionPercentage(event.persona);
         setExpanded(true); // Auto-expand on persona select
-      } else if (event.type === 'task-completed' && selectedPersona === event.persona) {
-        setCompletedTasks((prev) => new Set([...prev, event.taskId]));
-        updateCompletionPercentage(event.persona);
+      } else if (event.type === "task-completed") {
+        if (event.persona === selectedPersona) {
+          setCompletedTasks((prev) => new Set([...prev, event.taskId]));
+        } else if (selectedPersona) {
+          // Cross-persona completion — re-derive to pick up shared "all" tasks
+          const completed = emitter.getCompletedTasks(
+            selectedPersona,
+            ONBOARDING_TASKS,
+          );
+          setCompletedTasks(new Set(completed.map((e) => e.taskId)));
+        }
+        updateCompletionPercentage(selectedPersona || event.persona);
       }
     });
 
@@ -79,7 +91,10 @@ const OnboardingSidebar = ({ api }) => {
   }, [emitter, selectedPersona]);
 
   const updateCompletionPercentage = (persona) => {
-    const percentage = emitter.getCompletionPercentage(persona, ONBOARDING_TASKS);
+    const percentage = emitter.getCompletionPercentage(
+      persona,
+      ONBOARDING_TASKS,
+    );
     setCompletionPercentage(percentage);
   };
 
@@ -91,7 +106,7 @@ const OnboardingSidebar = ({ api }) => {
 
   const handleOpenPanel = () => {
     // Navigate to the onboarding panel
-    api.setSelectedPanel('storybook/addon-onboarding-custom/panel');
+    api.setSelectedPanel("storybook/addon-onboarding-custom/panel");
   };
 
   const persona = PERSONAS.find((p) => p.id === selectedPersona);
@@ -99,14 +114,19 @@ const OnboardingSidebar = ({ api }) => {
 
   if (!selectedPersona) {
     return (
-      <Box className="onboarding-sidebar" sx={{ bgcolor: theme.palette.background.paper }}>
+      <Box
+        className="onboarding-sidebar"
+        sx={{ bgcolor: theme.palette.background.paper }}
+      >
         <Box className="onboarding-role-header">
-          <Box className="onboarding-role-icon" sx={{ fontSize: '1.2rem' }}>📚</Box>
+          <Box className="onboarding-role-icon" sx={{ fontSize: "1.2rem" }}>
+            📚
+          </Box>
           <Typography
             component="span"
             sx={{
               fontWeight: 600,
-              fontSize: '0.875rem',
+              fontSize: "0.875rem",
               color: theme.palette.text.primary,
             }}
           >
@@ -119,25 +139,29 @@ const OnboardingSidebar = ({ api }) => {
               key={p.id}
               onClick={() => handlePersonaSelect(p.id)}
               sx={{
-                justifyContent: 'flex-start',
-                textTransform: 'none',
+                justifyContent: "flex-start",
+                textTransform: "none",
                 color: theme.palette.text.primary,
                 px: 1.5,
                 py: 1,
-                fontSize: '0.875rem',
-                bgcolor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
-                  : 'rgba(0, 0, 0, 0.03)',
-                borderRadius: '6px',
+                fontSize: "0.875rem",
+                bgcolor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.03)",
+                borderRadius: "6px",
                 border: `1px solid ${theme.palette.divider}`,
-                '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'rgba(0, 0, 0, 0.06)',
+                "&:hover": {
+                  bgcolor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.06)",
                   borderColor: p.color,
                 },
               }}
-              startIcon={<Box sx={{ color: p.color, display: 'flex' }}>{p.icon}</Box>}
+              startIcon={
+                <Box sx={{ color: p.color, display: "flex" }}>{p.icon}</Box>
+              }
               ariaLabel={false}
             >
               {p.label}
@@ -149,60 +173,71 @@ const OnboardingSidebar = ({ api }) => {
   }
 
   return (
-    <Box className="onboarding-sidebar" sx={{ bgcolor: theme.palette.background.paper }}>
+    <Box
+      className="onboarding-sidebar"
+      sx={{ bgcolor: theme.palette.background.paper }}
+    >
       {/* Persona Header */}
       <Box
         sx={{
           mb: 1,
-          cursor: 'pointer',
-          borderRadius: '6px',
+          cursor: "pointer",
+          borderRadius: "6px",
           p: 1.5,
-          bgcolor: theme.palette.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.03)'
-            : 'rgba(0, 0, 0, 0.02)',
-          '&:hover': {
-            bgcolor: theme.palette.mode === 'dark'
-              ? 'rgba(255, 255, 255, 0.08)'
-              : 'rgba(0, 0, 0, 0.05)',
+          bgcolor:
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.03)"
+              : "rgba(0, 0, 0, 0.02)",
+          "&:hover": {
+            bgcolor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.08)"
+                : "rgba(0, 0, 0, 0.05)",
           },
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ color: persona.color, display: 'flex' }}>{persona.icon}</Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ color: persona.color, display: "flex" }}>
+            {persona.icon}
+          </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="caption"
               sx={{
-                display: 'block',
+                display: "block",
                 fontWeight: 600,
-                fontSize: '0.7rem',
+                fontSize: "0.7rem",
                 color: theme.palette.text.secondary,
-                textTransform: 'uppercase',
+                textTransform: "uppercase",
               }}
             >
               {persona.label}
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                fontSize: '0.65rem', 
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: "0.65rem",
                 color: theme.palette.text.disabled,
               }}
             >
               {completionPercentage}% Complete
             </Typography>
           </Box>
-          <Button 
-            size="small" 
-            sx={{ 
-              p: 0, 
-              minWidth: 'auto',
-              color: 'inherit',
+          <Button
+            size="small"
+            sx={{
+              p: 0,
+              minWidth: "auto",
+              color: "inherit",
             }}
             ariaLabel="Toggle onboarding tasks"
           >
-            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+            {expanded ? (
+              <ExpandLessIcon fontSize="small" />
+            ) : (
+              <ExpandMoreIcon fontSize="small" />
+            )}
           </Button>
         </Box>
 
@@ -214,8 +249,8 @@ const OnboardingSidebar = ({ api }) => {
             mt: 1,
             height: 4,
             borderRadius: 2,
-            bgcolor: 'action.hover',
-            '& .MuiLinearProgress-bar': {
+            bgcolor: "action.hover",
+            "& .MuiLinearProgress-bar": {
               bgcolor: persona.color,
             },
           }}
@@ -233,9 +268,9 @@ const OnboardingSidebar = ({ api }) => {
               size="small"
               sx={{
                 height: 20,
-                fontSize: '0.65rem',
-                '& .MuiChip-icon': {
-                  fontSize: '0.8rem',
+                fontSize: "0.65rem",
+                "& .MuiChip-icon": {
+                  fontSize: "0.8rem",
                 },
               }}
               color="success"
@@ -246,7 +281,7 @@ const OnboardingSidebar = ({ api }) => {
               size="small"
               sx={{
                 height: 20,
-                fontSize: '0.65rem',
+                fontSize: "0.65rem",
               }}
               variant="outlined"
             />
@@ -260,13 +295,13 @@ const OnboardingSidebar = ({ api }) => {
               variant="contained"
               onClick={handleOpenPanel}
               sx={{
-                textTransform: 'none',
-                fontSize: '0.75rem',
+                textTransform: "none",
+                fontSize: "0.75rem",
                 py: 0.5,
                 bgcolor: persona.color,
-                '&:hover': {
+                "&:hover": {
                   bgcolor: persona.color,
-                  filter: 'brightness(0.9)',
+                  filter: "brightness(0.9)",
                 },
               }}
               ariaLabel={false}
@@ -282,8 +317,8 @@ const OnboardingSidebar = ({ api }) => {
                 emitter.reset();
               }}
               sx={{
-                textTransform: 'none',
-                fontSize: '0.75rem',
+                textTransform: "none",
+                fontSize: "0.75rem",
                 py: 0.5,
               }}
               ariaLabel={false}
@@ -298,11 +333,11 @@ const OnboardingSidebar = ({ api }) => {
               <Typography
                 variant="caption"
                 sx={{
-                  display: 'block',
+                  display: "block",
                   mb: 0.5,
                   fontWeight: 600,
-                  fontSize: '0.65rem',
-                  color: 'text.secondary',
+                  fontSize: "0.65rem",
+                  color: "text.secondary",
                 }}
               >
                 Next Steps
@@ -314,14 +349,14 @@ const OnboardingSidebar = ({ api }) => {
                   <Box
                     key={task.id}
                     sx={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
+                      display: "flex",
+                      alignItems: "flex-start",
                       gap: 0.5,
                       mb: 0.5,
                       p: 0.5,
                       borderRadius: 0.5,
-                      '&:hover': {
-                        bgcolor: 'action.hover',
+                      "&:hover": {
+                        bgcolor: "action.hover",
                       },
                     }}
                   >
@@ -329,7 +364,7 @@ const OnboardingSidebar = ({ api }) => {
                       sx={{
                         width: 6,
                         height: 6,
-                        borderRadius: '50%',
+                        borderRadius: "50%",
                         bgcolor: persona.color,
                         mt: 0.5,
                         flexShrink: 0,
@@ -338,9 +373,9 @@ const OnboardingSidebar = ({ api }) => {
                     <Typography
                       variant="caption"
                       sx={{
-                        fontSize: '0.65rem',
+                        fontSize: "0.65rem",
                         lineHeight: 1.3,
-                        color: 'text.secondary',
+                        color: "text.secondary",
                       }}
                     >
                       {task.title}
@@ -350,15 +385,20 @@ const OnboardingSidebar = ({ api }) => {
               {tasks.filter((t) => !completedTasks.has(t.id)).length === 0 && (
                 <Box
                   sx={{
-                    textAlign: 'center',
+                    textAlign: "center",
                     py: 1,
                     px: 1,
-                    bgcolor: 'success.light',
+                    bgcolor: "success.light",
                     borderRadius: 1,
                   }}
                 >
-                  <CheckCircleIcon sx={{ fontSize: '1.5rem', color: 'success.main', mb: 0.5 }} />
-                  <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1.5rem", color: "success.main", mb: 0.5 }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ display: "block", fontWeight: 600 }}
+                  >
                     All Done! 🎉
                   </Typography>
                 </Box>

@@ -52,7 +52,7 @@
       "title": "Add to Section"
     },
     "help": "Help",
-    "joinStudyGroup": "Join Study Group",
+    "collaboration": "Collaboration",
     "settings": {
       "colorMode": "Color mode",
       "darkMode": "Dark Mode",
@@ -67,12 +67,8 @@
     "grades": "Grades",
     "squads": "Squads",
     "home": "Home",
-    "joinPeerReview": "Join Peer Review",
-    "joinPeerReviewDesc": "Enter a review room code",
-    "joinStudyGroup": "Join Study Group",
-    "joinStudyGroupDesc": "Enter a room code",
-    "joinWorkbook": "Join Workbook Session",
-    "joinWorkbookDesc": "Enter a workbook link or ID",
+    "collaboration": "Collaboration",
+    "collaborationDesc": "Invitations & join sessions",
     "leaderboard": "Leaderboard",
     "notifications": "Notifications",
     "profile": "Profile",

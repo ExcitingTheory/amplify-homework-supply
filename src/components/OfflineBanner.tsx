@@ -53,19 +53,6 @@ export default function OfflineBanner() {
     }
   }, []);
 
-  // Track offline → online transitions (skip initial mount)
-  useEffect(() => {
-    if (!isOnline) {
-      wasOfflineRef.current = true;
-    } else if (wasOfflineRef.current) {
-      // Genuinely transitioned from offline → online
-      setJustReconnected(true);
-      wasOfflineRef.current = false;
-      const timer = setTimeout(() => setJustReconnected(false), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline]);
-
   const handleManualSync = useCallback(async () => {
     try {
       const { processQueue } = await import('../offline/SyncQueue');
@@ -85,6 +72,21 @@ export default function OfflineBanner() {
       // Sync failed — will retry
     }
   }, []);
+
+  // Track offline → online transitions and AUTO-SYNC
+  useEffect(() => {
+    if (!isOnline) {
+      wasOfflineRef.current = true;
+    } else if (wasOfflineRef.current) {
+      // Genuinely transitioned from offline → online — auto-sync
+      wasOfflineRef.current = false;
+      setJustReconnected(true);
+      const timer = setTimeout(() => setJustReconnected(false), 4000);
+      // Trigger automatic sync
+      handleManualSync();
+      return () => clearTimeout(timer);
+    }
+  }, [isOnline, handleManualSync]);
 
   // Offline banner
   if (!isOnline) {

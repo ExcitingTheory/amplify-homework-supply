@@ -13,6 +13,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { BadgeIcon } from './BadgeIcon'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface BadgeCoinFlipProps {
   open: boolean
@@ -34,14 +35,20 @@ export function BadgeCoinFlip({
   onClose,
 }: BadgeCoinFlipProps) {
   const [flipped, setFlipped] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (open) {
+      // Skip flip animation when reduced motion is active
+      if (reducedMotion) {
+        setFlipped(true)
+        return
+      }
       setFlipped(false)
       const timer = setTimeout(() => setFlipped(true), 100)
       return () => clearTimeout(timer)
     }
-  }, [open])
+  }, [open, reducedMotion])
 
   return (
     <Dialog open={open} maxWidth="xs" fullWidth onClose={onClose}>
@@ -59,8 +66,12 @@ export function BadgeCoinFlip({
               mx: 'auto',
               position: 'relative',
               transformStyle: 'preserve-3d',
-              transition: 'transform 0.8s ease-out',
-              transform: flipped ? 'rotateY(720deg)' : 'rotateY(0deg)',
+              ...(reducedMotion
+                ? {}
+                : {
+                    transition: 'transform 0.8s ease-out',
+                    transform: flipped ? 'rotateY(720deg)' : 'rotateY(0deg)',
+                  }),
             }}
           >
             {/* Front (coin) */}

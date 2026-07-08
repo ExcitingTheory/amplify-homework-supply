@@ -31,13 +31,13 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 
 const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!, $cohortId: String) {
   listStudentProfiles(filter: { studentId: { eq: $studentId }, cohortId: { eq: $cohortId } }) {
-    items { id studentId cohortId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId cohortId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
 const GET_SECTION_PROGRESS = `query GetSectionProgress($studentId: String!, $sectionId: String!) {
   listSectionProgresses(filter: { studentId: { eq: $studentId }, sectionId: { eq: $sectionId } }) {
-    items { id studentId sectionId totalXP level nailedItCount completedAssignments currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId sectionId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
@@ -69,7 +69,7 @@ const CREATE_NOTIFICATION = `mutation CreateNotification($input: CreateNotificat
 
 const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListActiveChallenges($cohortId: String!) {
   listGroupChallenges(filter: { cohortId: { eq: $cohortId }, active: { eq: true } }) {
-    items { id cohortId title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge contributions { studentId xpContributed contributedAt } _version }
+    items { id cohortId title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } _version }
   }
 }`;
 
@@ -399,6 +399,13 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         const newTotalSubmissions =
           (profile.totalSubmissions || 0) + submissionDelta;
 
+        // onTimeSubmissions: count ON_TIME_SUBMISSION in this batch
+        const onTimeDelta = records.filter(
+          (r) => r.reason === "ON_TIME_SUBMISSION",
+        ).length;
+        const newOnTimeSubmissions =
+          (profile.onTimeSubmissions || 0) + onTimeDelta;
+
         // maxFailedAttemptsOnSingleRef: track max 0-XP logs per referenceId
         let maxFailed = profile.maxFailedAttemptsOnSingleRef || 0;
         const failedInBatch = records.filter(
@@ -460,6 +467,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
               lastActivityDate: today,
               reasonCounts: JSON.stringify(reasonCounts),
               totalSubmissions: newTotalSubmissions,
+              onTimeSubmissions: newOnTimeSubmissions,
               maxFailedAttemptsOnSingleRef: maxFailed,
               recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
               activeDaysCount: newActiveDaysCount,
@@ -596,6 +604,8 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                     reasonCounts: JSON.stringify(spReasonCounts),
                     totalSubmissions:
                       (sectionProgress.totalSubmissions || 0) + submissionDelta,
+                    onTimeSubmissions:
+                      (sectionProgress.onTimeSubmissions || 0) + onTimeDelta,
                     maxFailedAttemptsOnSingleRef: spMaxFailed,
                     recentSubmissionTimestamps:
                       JSON.stringify(spRecentTimestamps),
@@ -645,6 +655,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                     level: sectionLevel,
                     nailedItCount: nailedItDelta,
                     completedAssignments: 0,
+                    onTimeSubmissions: onTimeDelta,
                     currentStreak: 0,
                     longestStreak: 0,
                     lastActivityDate: today,
@@ -686,15 +697,30 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 continue;
               }
 
+              // Scoped XP: if linkedUnitIds is populated, only credit XP from matching units
+              let creditableDelta = totalDelta;
+              if (
+                challenge.linkedUnitIds &&
+                challenge.linkedUnitIds.length > 0
+              ) {
+                creditableDelta = records
+                  .filter(
+                    (r: XPRecord) =>
+                      r.unitID && challenge.linkedUnitIds.includes(r.unitID),
+                  )
+                  .reduce((sum: number, r: XPRecord) => sum + r.xpAmount, 0);
+                if (creditableDelta <= 0) continue; // No XP from linked units — skip
+              }
+
               const oldChallengeXP = challenge.currentXP || 0;
-              const newChallengeXP = oldChallengeXP + totalDelta;
+              const newChallengeXP = oldChallengeXP + creditableDelta;
               const goalReached = newChallengeXP >= challenge.targetXP;
               const existingContributions = challenge.contributions || [];
               const updatedContributions = [
                 ...existingContributions,
                 {
                   studentId,
-                  xpContributed: totalDelta,
+                  xpContributed: creditableDelta,
                   contributedAt: new Date().toISOString(),
                 },
               ];

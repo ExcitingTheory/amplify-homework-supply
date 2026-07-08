@@ -34,6 +34,7 @@ import { Card, CardContent, Typography, Box, Chip } from "@mui/material";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import AudioWaveformPlayer from "../components/AudioWaveformPlayer";
 import getCachedUrl from "../../../utils/getCachedUrl";
+import { sanitizeInlineHtml } from "../../../utils/sanitizeHtml";
 
 /**
  * WordBlockComponent - Displays word information in a block.
@@ -158,7 +159,9 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
                         color: "text.secondary",
                       },
                     }}
-                    dangerouslySetInnerHTML={{ __html: word.rubyTags }}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeInlineHtml(word.rubyTags),
+                    }}
                   />
                 ) : (
                   <Typography

@@ -6,7 +6,6 @@ import { useXP, useContentLock, useSquad } from "@/context/gamificationContext";
 import { LevelBadge } from "@/components/Gamification/LevelBadge";
 import { AvatarDisplay } from "@/components/Gamification/AvatarDisplay";
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
-import { getAmplifyClient } from "@/utils/amplifyClient";
 import { Card, Typography, Box, LinearProgress, Chip } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
@@ -14,39 +13,14 @@ import { useTranslations } from "next-intl";
 import AuthContext from "@/context/authContext";
 
 /**
- * Live NailedIt subscription — must be client-side.
+ * NailedIt section rendered from server-provided data.
  */
-export function NailedItSection({ profileUsername }: { profileUsername: string }) {
+export function NailedItSection({
+  nailedItBlocks,
+}: {
+  nailedItBlocks: any[];
+}) {
   const t = useTranslations("pages");
-  const [nailedItBlocks, setNailedItBlocks] = React.useState<any[]>([]);
-
-  React.useEffect(() => {
-    if (!profileUsername) return;
-    const client = getAmplifyClient();
-
-    const sub = (client.models as any).NailedIt?.observeQuery?.({
-      filter: { owner: { eq: profileUsername } },
-    })?.subscribe?.({
-      next: ({ items }: any) => {
-        const valid = items.filter((i: any) => i != null && i.id != null);
-        setNailedItBlocks(
-          valid.map((n: any) => ({
-            id: n.id,
-            question: n.question || "",
-            nailedItReason: n.nailedItReason || "",
-            homeworkTitle: n.homeworkTitle || "",
-            createdAt: n.createdAt || new Date().toISOString(),
-          })),
-        );
-      },
-      error: (err: any) =>
-        console.error("[Profile] NailedIt subscription error:", err),
-    });
-
-    return () => {
-      sub?.unsubscribe?.();
-    };
-  }, [profileUsername]);
 
   return (
     <Card

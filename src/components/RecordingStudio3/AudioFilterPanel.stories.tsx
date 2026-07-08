@@ -3,7 +3,7 @@ import { useState } from "react";
 import AudioFilterPanel from "./AudioFilterPanel";
 
 const meta: Meta<typeof AudioFilterPanel> = {
-  title: "RecordingStudio3/AudioFilterPanel",
+  title: "🎙️ Recording Studio/Components/Audio Filter Panel",
   component: AudioFilterPanel,
   parameters: {
     layout: "padded",

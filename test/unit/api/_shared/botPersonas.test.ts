@@ -48,8 +48,24 @@ describe("botPersonas", () => {
       expect(persona.name).toBe("Sage");
     });
 
-    it("allows explicit persona override", () => {
+    it("allows explicit persona override for privileged users", () => {
       const persona = resolvePersona(["Instructors"], "kai");
+      expect(persona.name).toBe("Kai");
+    });
+
+    it("prevents learner from escalating to Sage via explicit override", () => {
+      // A Learner supplying "sage" in the request body must NOT receive Sage tools
+      const persona = resolvePersona(["Learners"], "sage");
+      expect(persona.name).toBe("Kai");
+    });
+
+    it("prevents unauthenticated caller from escalating to Sage", () => {
+      const persona = resolvePersona([], "sage");
+      expect(persona.name).toBe("Kai");
+    });
+
+    it("allows Moderators to use explicit override", () => {
+      const persona = resolvePersona(["Moderators"], "kai");
       expect(persona.name).toBe("Kai");
     });
   });

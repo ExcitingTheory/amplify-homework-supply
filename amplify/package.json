@@ -19,6 +19,7 @@
     "jszip": "^3.10.1",
     "mammoth": "^1.8.0",
     "openai": "^4.20.0",
+    "@huggingface/transformers": "^3.0.0",
     "pdfjs-dist": "^4.0.379",
     "xlsx": "^0.18.5"
   }

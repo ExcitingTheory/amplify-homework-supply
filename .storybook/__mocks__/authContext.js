@@ -23,6 +23,7 @@ const defaultMockUser = {
 const defaultMockSession = {
   identityId: 'us-east-1:mock-identity-123',
   username: 'mock-user-sub', // Must match user.attributes.sub for UnitContext
+  groups: ['Admins', 'Instructors'], // Required by AdminRouteGuard; override per story for student views
   idToken: {
     toString: () => 'mock-id-token',
   },

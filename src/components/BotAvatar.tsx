@@ -6,7 +6,7 @@
  */
 
 import React from 'react'
-import { DiceBearAvatar } from './Gamification/DiceBearAvatar'
+import { AvatarDisplay } from './Gamification/AvatarDisplay'
 import type { AvatarStyleTier, AvatarOverrides } from './Gamification/DiceBearAvatar'
 
 export interface BotAvatarProps {
@@ -25,11 +25,10 @@ const BOT_DEFAULTS: AvatarOverrides = {
 
 export function BotAvatar({ size = 28, style = 'simple', overrides }: BotAvatarProps) {
   return (
-    <DiceBearAvatar
+    <AvatarDisplay
       seed="homework-supply-bot"
       style={style}
       size={size}
-      label="AI Assistant"
       overrides={overrides || BOT_DEFAULTS}
     />
   )

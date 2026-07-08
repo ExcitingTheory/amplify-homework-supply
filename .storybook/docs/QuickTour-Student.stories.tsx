@@ -57,7 +57,7 @@ export const Step1_Dashboard: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: {
       navigation: { pathname: '/' },
@@ -101,7 +101,7 @@ export const Step2_JoinSection: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: {
       appDirectory: true,
@@ -149,7 +149,7 @@ export const Step3_Workbook: Story = {
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice' },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] },
     },
     nextjs: {
       appDirectory: true,

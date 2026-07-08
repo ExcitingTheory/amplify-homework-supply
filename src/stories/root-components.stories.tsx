@@ -29,7 +29,7 @@ const TypedToolbarScrollButton: React.FC<any> = ToolbarScrollButton;
 // ---------------------------------------------------------------------------
 
 const meta: Meta = {
-  title: '🧩 Components/Root',
+  title: '🧩 UI Components/App Primitives',
   parameters: {
     layout: 'centered',
   },

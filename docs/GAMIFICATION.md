@@ -191,6 +191,32 @@ Student collaborative groups with:
 
 ---
 
+## Celebration Animations
+
+Triggered automatically via context providers:
+
+| Component | Trigger | Location |
+|-----------|---------|----------|
+| `LevelUpCelebration` | XP gain causes level increase | Rendered by `xpContext.tsx` |
+| `ChapterUnlockCelebration` | Challenge transitions from active → completed | Rendered by `gamificationContext.tsx` |
+| `NailedItCelebration` | First "Nailed It" event per session | Rendered by `GamificationToastLayer` |
+| `ContentUnlockAnimation` | Content lock gate removed | Rendered by `GamificationToastLayer` |
+
+### Reduced Motion
+
+All animation components respect the `useReducedMotion()` hook (`src/hooks/useReducedMotion.ts`), which checks both:
+- OS-level `prefers-reduced-motion: reduce` media query
+- In-app "Reduced Motion" toggle in user settings
+
+When reduced motion is active:
+- **Confetti** is skipped entirely (no `canvas-confetti` import)
+- **Entrance keyframe animations** are replaced with instant renders (0ms transitions)
+- **AnimatedXPCounter** snaps to the final value without the tick-up animation
+- **ContentUnlockAnimation** flashes briefly then completes immediately
+- **AvatarGlowRing**, **StreakIndicator**, **BadgeIcon**, **CampaignTimeline** all suppress their pulsing/glow/shimmer effects
+
+---
+
 ## Cosmetic Unlocks
 
 Level-based cosmetic rewards:
@@ -225,6 +251,8 @@ Instructors can copy gamification configuration between sections:
 | `src/components/Gamification/CampaignTimeline.tsx` | Student campaign view |
 | `src/components/Gamification/BossBattleCard.tsx` | Student challenge card |
 | `src/components/Gamification/ContentLockCard.tsx` | Lock gate display |
+| `src/components/Gamification/LevelUpCelebration.tsx` | Level-up celebration (confetti + dialog) |
+| `src/components/Gamification/ChapterUnlockCelebration.tsx` | Chapter-complete celebration |
 | `src/components/Gamification/EasterEggLayer.tsx` | KEYWORD + SCHEDULE triggers |
 | `src/components/Gamification/SecretLinkIcon.tsx` | SECRET_LINK trigger |
 | `amplify/functions/gamification/handler.ts` | All gamification Lambda logic |
@@ -237,7 +265,8 @@ Instructors can copy gamification configuration between sections:
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Easter Egg badge picker | Not implemented | Form has no `badgeId` field |
-| AI Badge Designer | Not implemented | Chat-style generator not built |
+| AI Badge Designer | **Done** | Wired into BadgeEditor via "AI Generate" button |
 | Squad page challenges | Not implemented | `/squad/[id]` doesn't show active challenges |
 | BossBattle edit mode | Not implemented | Create-only, no edit for existing battles |
 | Boss Battle contributors | Not implemented | Can't see who contributed most XP |
+| Card completion check animation | Not implemented | Phase 6.4 remaining micro-animation |

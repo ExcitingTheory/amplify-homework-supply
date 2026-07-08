@@ -13,6 +13,7 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback, u
 import type { SkillNodeData, SkillStatus } from '../components/Gamification/SkillTree'
 import type { AvatarUnlockConfig } from '../components/Gamification/DiceBearAvatar'
 import { XPToast } from '../components/Gamification/XPToast'
+import { ChapterUnlockCelebration } from '../components/Gamification/ChapterUnlockCelebration'
 import { calculateMultipliedXP, getLevelInfoWithThresholds, XPReason } from '../utils/xpCalculation'
 import type { StudentXPLog, LevelInfo } from '../utils/xpCalculation'
 import {
@@ -311,6 +312,7 @@ export interface GamificationProviderProps {
   client: any
   studentId: string
   cohortId?: string
+  cohortIds?: string[]
   /** Optional map of moduleId → display name for progress rings */
   moduleNames?: Record<string, string>
   /** Set of badge types the student has earned */
@@ -328,6 +330,7 @@ export function GamificationProvider({
   client,
   studentId,
   cohortId,
+  cohortIds = [],
   moduleNames = {},
   earnedBadgeTypes = new Set(),
   moduleCompletionMap = {},
@@ -348,6 +351,18 @@ export function GamificationProvider({
   const skillVersionMapRef = useRef<Record<string, number>>({})
   const xpLogVersionMapRef = useRef<Record<string, number>>({})
   const unitLockVersionMapRef = useRef<Record<string, number>>({})
+
+  // Stabilize reference-identity of array/object/Set props whose default values
+  // (= [], = {}, = new Set()) create new instances on every render, which would
+  // cause useEffect/useMemo deps to always appear changed.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableCohortIds = useMemo(() => cohortIds, [cohortIds.join(',')])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableModuleNames = useMemo(() => moduleNames, [JSON.stringify(moduleNames)])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableEarnedBadgeTypes = useMemo(() => earnedBadgeTypes, [[...earnedBadgeTypes].sort().join(',')])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableModuleCompletionMap = useMemo(() => moduleCompletionMap, [JSON.stringify(moduleCompletionMap)])
 
   // Stable setter for selectedSkillId
   const setSelectedSkillId = useCallback(
@@ -456,15 +471,32 @@ export function GamificationProvider({
 
   // ── GroupChallenge subscription (includes campaign + contributions) ──
   useEffect(() => {
-    if (!client?.models?.GroupChallenge || !cohortId) {
+    if (!client?.models?.GroupChallenge) {
       dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })
       dispatch({ type: actionTypes.SET_CHALLENGES_LOADING, payload: false })
       return
     }
-    const filter = { cohortId: { eq: cohortId } }
+
+    const normalizedCohortIds = Array.from(new Set((stableCohortIds || []).filter(Boolean)))
+    const primaryCohortId = cohortId || normalizedCohortIds[0]
+    if (!primaryCohortId && normalizedCohortIds.length === 0) {
+      dispatch({ type: actionTypes.SET_CAMPAIGNS_LOADING, payload: false })
+      dispatch({ type: actionTypes.SET_CHALLENGES_LOADING, payload: false })
+      return
+    }
+
+    const cohortSet = new Set(
+      normalizedCohortIds.length > 0 ? normalizedCohortIds : [primaryCohortId],
+    )
+
+    const filter = cohortSet.size === 1
+      ? { cohortId: { eq: Array.from(cohortSet)[0] } }
+      : undefined
 
     const processData = (data: any[]) => {
-      const valid = (data || []).filter((i: any) => i != null && i.id != null)
+      const valid = (data || [])
+        .filter((i: any) => i != null && i.id != null)
+        .filter((i: any) => cohortSet.has(i.cohortId))
 
       // Version map guard
       const hasChanges = valid.some((item: any) => {
@@ -477,12 +509,27 @@ export function GamificationProvider({
       valid.forEach((item: any) => { challengeVersionMapRef.current[item.id] = item._version })
 
       dispatch({ type: actionTypes.SET_RAW_CHALLENGES, payload: valid })
-      // Extract campaign info from challenges (setting/stakes/systemPromptSeed)
-      const campaignChallenge = valid.find((c: any) => c.setting || c.stakes)
+      // Extract campaign info deterministically from ordered chapter data.
+      // Prefer the active chapter with the smallest chapterOrder.
+      // Fallback to the smallest chapterOrder overall, then first available.
+      const challengeWithNarrative = valid.filter(
+        (c: any) => c.setting || c.stakes,
+      )
+      const orderedNarrative = [...challengeWithNarrative].sort((a: any, b: any) => {
+        const aOrder = a.chapterOrder ?? Number.MAX_SAFE_INTEGER
+        const bOrder = b.chapterOrder ?? Number.MAX_SAFE_INTEGER
+        return aOrder - bOrder
+      })
+      const campaignChallenge =
+        orderedNarrative.find((c: any) => c.active !== false) ||
+        orderedNarrative[0] ||
+        valid[0]
       dispatch({ type: actionTypes.SET_RAW_CAMPAIGNS, payload: campaignChallenge ? [campaignChallenge] : [] })
     }
 
-    const subscription = client.models.GroupChallenge.observeQuery({ filter }).subscribe({
+    const subscription = client.models.GroupChallenge
+      .observeQuery(filter ? { filter } : undefined)
+      .subscribe({
       next: ({ items }: any) => { processData(items) },
       error: (err: any) => {
         const msg = err?.message || err?.errors?.[0]?.message || String(err)
@@ -491,7 +538,7 @@ export function GamificationProvider({
     })
 
     return () => subscription.unsubscribe()
-  }, [client, cohortId])
+  }, [client, cohortId, stableCohortIds])
 
   // ── Squad subscription (includes members) ───────────────────────
   useEffect(() => {
@@ -809,12 +856,12 @@ export function GamificationProvider({
     () =>
       state.rawModules.map((m: any) => ({
         moduleId: m.moduleId,
-        moduleName: moduleNames[m.moduleId] || m.moduleId,
+        moduleName: stableModuleNames[m.moduleId] || m.moduleId,
         completionPercent: m.completionPercent || 0,
         totalWorkbooks: m.totalWorkbooks || 0,
         completedWorkbooks: m.completedWorkbooks || 0,
       })),
-    [state.rawModules, moduleNames],
+    [state.rawModules, stableModuleNames],
   )
 
   const personalBests = useMemo<PersonalBest[]>(
@@ -888,6 +935,10 @@ export function GamificationProvider({
         deadline: ch.deadline,
         active: ch.active !== false,
         bonusMultiplier: ch.bonusMultiplier || 1.5,
+        chapterOrder: ch.chapterOrder,
+        setting: ch.setting,
+        stakes: ch.stakes,
+        linkedUnitIds: ch.linkedUnitIds || [],
         contributions: ch.contributions || [],
         progressPercent:
           ch.targetXP > 0
@@ -899,6 +950,48 @@ export function GamificationProvider({
     })
     return { activeChallenges: active, completedChallenges: completed }
   }, [state.rawChallenges])
+
+  // ── Chapter-unlock celebration detection ────────────────────────
+  const prevCompletedIdsRef = useRef<Set<string>>(new Set())
+  const [chapterCelebration, setChapterCelebration] = useState<{
+    open: boolean
+    title: string
+    order: number | null
+    nextTitle: string | null
+  }>({ open: false, title: '', order: null, nextTitle: null })
+
+  useEffect(() => {
+    if (completedChallenges.length === 0) return
+    const currentIds = new Set(completedChallenges.map((c) => c.id))
+    const prevIds = prevCompletedIdsRef.current
+
+    // Skip first mount — just record baseline
+    if (prevIds.size === 0) {
+      prevCompletedIdsRef.current = currentIds
+      return
+    }
+
+    // Find newly completed challenges
+    for (const ch of completedChallenges) {
+      if (!prevIds.has(ch.id)) {
+        // Find next chapter in sequence
+        const allSorted = [...activeChallenges, ...completedChallenges]
+          .sort((a, b) => (a.chapterOrder || 0) - (b.chapterOrder || 0))
+        const idx = allSorted.findIndex((c) => c.id === ch.id)
+        const next = idx >= 0 && idx < allSorted.length - 1 ? allSorted[idx + 1] : null
+
+        setChapterCelebration({
+          open: true,
+          title: ch.title,
+          order: ch.chapterOrder ?? null,
+          nextTitle: next?.title ?? null,
+        })
+        break // One celebration at a time
+      }
+    }
+
+    prevCompletedIdsRef.current = currentIds
+  }, [completedChallenges, activeChallenges])
 
   // ── Derived: Squad ──────────────────────────────────────────────
   const myMembership = useMemo<SquadMember | null>(() => {
@@ -1009,12 +1102,12 @@ export function GamificationProvider({
       }
       if (lock.requiredBadgeId) {
         status.requiredBadge = lock.requiredBadgeId
-        status.hasBadge = earnedBadgeTypes.has(lock.requiredBadgeId)
+        status.hasBadge = stableEarnedBadgeTypes.has(lock.requiredBadgeId)
         if (!status.hasBadge) isLockedVal = true
       }
       if (lock.requiredModuleCompletion != null && lock.requiredModuleCompletion > 0) {
         const requiredPercent = Math.round(lock.requiredModuleCompletion * 100)
-        const currentPercent = moduleCompletionMap[lock.contentId] || 0
+        const currentPercent = stableModuleCompletionMap[lock.contentId] || 0
         status.requiredCompletion = requiredPercent
         status.currentCompletion = currentPercent
         if (currentPercent < requiredPercent) isLockedVal = true
@@ -1022,7 +1115,7 @@ export function GamificationProvider({
       status.isLocked = isLockedVal
       return status
     })
-  }, [state.rawLocks, computedTotalXP, earnedBadgeTypes, moduleCompletionMap])
+  }, [state.rawLocks, computedTotalXP, stableEarnedBadgeTypes, stableModuleCompletionMap])
 
   // ── Derived: Linear Lock (sequential by due date) ───────────────
   const linearLocks = useMemo<LockStatus[]>(() => {
@@ -1036,6 +1129,7 @@ export function GamificationProvider({
         .map((g: any) => g.unitID),
     )
 
+    const now = new Date()
     const result: LockStatus[] = []
 
     for (const section of linearSections) {
@@ -1047,6 +1141,7 @@ export function GamificationProvider({
       if (sectionAssignments.length < 2) continue
 
       // First assignment is always unlocked; subsequent ones require prior completion
+      // OR their unlockDate has passed
       let blocked = false
       for (let i = 1; i < sectionAssignments.length; i++) {
         const prevAssignment = sectionAssignments[i - 1]
@@ -1057,17 +1152,58 @@ export function GamificationProvider({
         }
 
         if (blocked) {
-          result.push({
-            contentId: currentAssignment.unitID,
-            isLocked: true,
-            requiredPriorUnitId: prevAssignment.unitID,
-          })
+          // Check if date-based unlock overrides the linear lock
+          const unlockDate = currentAssignment.unlockDate
+          const unlockedByDate = unlockDate && new Date(unlockDate) <= now
+
+          if (!unlockedByDate) {
+            result.push({
+              contentId: currentAssignment.unitID,
+              isLocked: true,
+              requiredPriorUnitId: prevAssignment.unitID,
+              unlockDate: unlockDate || undefined,
+            })
+          }
+        }
+      }
+
+      // Also apply linear lock to challenges (chapters) in this section
+      const sectionChallenges = state.rawChallenges
+        .filter((c: any) => c.cohortId === section.id && c.chapterOrder != null)
+        .sort((a: any, b: any) => (a.chapterOrder || 0) - (b.chapterOrder || 0))
+
+      if (sectionChallenges.length >= 2) {
+        let challengeBlocked = false
+        for (let i = 1; i < sectionChallenges.length; i++) {
+          const prevChallenge = sectionChallenges[i - 1]
+          const currentChallenge = sectionChallenges[i]
+
+          // A challenge chapter is "complete" when currentXP >= targetXP or active === false
+          const prevComplete = !prevChallenge.active || (prevChallenge.currentXP || 0) >= prevChallenge.targetXP
+          if (!challengeBlocked && !prevComplete) {
+            challengeBlocked = true
+          }
+
+          if (challengeBlocked) {
+            const unlockDate = currentChallenge.unlockDate
+            const unlockedByDate = unlockDate && new Date(unlockDate) <= now
+
+            if (!unlockedByDate) {
+              result.push({
+                contentId: currentChallenge.id,
+                isLocked: true,
+                requiredPriorUnitId: prevChallenge.id,
+                requiredPriorUnitName: prevChallenge.title,
+                unlockDate: unlockDate || undefined,
+              })
+            }
+          }
         }
       }
     }
 
     return result
-  }, [state.rawSections, state.rawAssignments, state.rawGrades])
+  }, [state.rawSections, state.rawAssignments, state.rawGrades, state.rawChallenges])
 
   // ── Combined lock map (ContentLock + Linear Lock) ───────────────
   const lockMap = useMemo(() => {
@@ -1209,6 +1345,13 @@ export function GamificationProvider({
         xpAmount={currentToast?.xpAmount || 0}
         xpReason={currentToast?.xpReason || ''}
         onClose={handleToastClose}
+      />
+      <ChapterUnlockCelebration
+        open={chapterCelebration.open}
+        chapterTitle={chapterCelebration.title}
+        chapterOrder={chapterCelebration.order}
+        nextChapterTitle={chapterCelebration.nextTitle}
+        onClose={() => setChapterCelebration((prev) => ({ ...prev, open: false }))}
       />
     </GamificationContext.Provider>
   )

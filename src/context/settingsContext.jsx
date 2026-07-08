@@ -64,8 +64,9 @@ const SettingsProvider = ({ children }) => {
           (item) => item != null && item.id != null,
         );
         if (validItems.length === 0) {
-          // Create default settings
+          // Create default settings with _version: 1 for optimistic concurrency
           await client.models.Settings.create({
+            _version: 1,
             autoAnalyzeDocuments: true,
             documentAnalysisModel: "gpt-4",
             editorTheme: "auto",
@@ -95,7 +96,7 @@ const SettingsProvider = ({ children }) => {
 
           const settings = validItems[0];
 
-          // Version guard: only rerender if incoming version is greater than expected
+          // Version guard: only process if incoming version is strictly greater
           if (
             settings._version != null &&
             !(settings._version > settingsVersionRef.current)
@@ -251,7 +252,7 @@ const SettingsProvider = ({ children }) => {
         const client = getAmplifyClient();
         const { data: updated, errors } = await client.models.Settings.update({
           id: state.settings.id,
-          _version: state.settings._version,
+          _version: predictedNextVersion,
           ...updates,
         });
         if (errors?.length) {

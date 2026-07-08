@@ -5,6 +5,7 @@ import yaml from "js-yaml";
 import { moderateContent } from "../utils/moderateContent";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { saveDraftContent, loadContent } from "../utils/unitContentStorage";
+import { saveGradeOfflineAware } from "../offline/saveGradeOffline";
 import {
   awardXP,
   recordGradeCompletion,
@@ -411,38 +412,42 @@ const UnitProvider = ({ children, id }) => {
         // Save grade first, then kick off moderation (backend persists to record)
         let gradeId = state.grade?.id;
 
+        // Helper: persist grade via offline-aware path
+        const persistGrade = async (id) => {
+          const gradeParams = {
+            gradeId: id,
+            unitId: state.unit?.id || "",
+            sectionId,
+            data,
+            accuracy: unitAccuracy,
+            complete: unitIsComplete,
+            version: state.grade?._version,
+          };
+          await saveGradeOfflineAware(gradeParams, async (params) => {
+            const client = getAmplifyClient();
+            await client.models.Grade.update({
+              id: params.gradeId,
+              data: JSON.stringify(params.data),
+              accuracy: params.accuracy,
+              complete: params.complete,
+            });
+          });
+        };
+
         if (!state.grade) {
           const newGrade = await createGrade(unitAccuracy, unitIsComplete);
           if (newGrade && newGrade.id) {
             gradeId = newGrade.id;
-            const client = getAmplifyClient();
-            await client.models.Grade.update({
-              id: newGrade.id,
-              data: JSON.stringify(data),
-              accuracy: unitAccuracy,
-              complete: unitIsComplete,
-            });
+            await persistGrade(newGrade.id);
           }
         } else if (state.grade && state.grade.id) {
-          const client = getAmplifyClient();
-          await client.models.Grade.update({
-            id: state.grade.id,
-            data: JSON.stringify(data),
-            accuracy: unitAccuracy,
-            complete: unitIsComplete,
-          });
+          await persistGrade(state.grade.id);
         } else {
           console.error("Invalid grade object:", state.grade);
           const newGrade = await createGrade(unitAccuracy, unitIsComplete);
           if (newGrade && newGrade.id) {
             gradeId = newGrade.id;
-            const client = getAmplifyClient();
-            await client.models.Grade.update({
-              id: newGrade.id,
-              data: JSON.stringify(data),
-              accuracy: unitAccuracy,
-              complete: unitIsComplete,
-            });
+            await persistGrade(newGrade.id);
           }
         }
 
@@ -1371,6 +1376,18 @@ const UnitProvider = ({ children, id }) => {
       }
     }
 
+    // Capture editor thumbnail before any state changes (must happen while editor is mounted)
+    let thumbnailBlob = null;
+    if (status === "PUBLISHED") {
+      try {
+        const { captureEditorThumbnail } =
+          await import("@/utils/generateThumbnail");
+        thumbnailBlob = await captureEditorThumbnail();
+      } catch (err) {
+        console.warn("[handleStatusChange] Thumbnail capture failed:", err);
+      }
+    }
+
     beginSaving();
     // Optimistic version bump
     const predictedNextVersion = currentUnit._version + 1;
@@ -1394,6 +1411,40 @@ const UnitProvider = ({ children, id }) => {
         // media path rewriting, S3 writes, and DynamoDB update atomically.
         if (status === "PUBLISHED") {
           await client.mutations.publishUnit({ unitId: currentUnit.id });
+
+          // Upload thumbnail image to S3 and store the key on the Unit
+          if (thumbnailBlob) {
+            try {
+              const { saveThumbnail } =
+                await import("@/utils/unitContentStorage");
+              const thumbnailKey = await saveThumbnail(
+                currentUnit.id,
+                thumbnailBlob,
+              );
+              // Re-fetch current version after publishUnit mutation may have bumped it
+              const { data: freshUnit } = await client.models.Unit.get({
+                id: currentUnit.id,
+              });
+              if (freshUnit) {
+                await client.models.Unit.update({
+                  id: currentUnit.id,
+                  thumbnail: thumbnailKey,
+                  _version: freshUnit._version,
+                });
+                unitRef.current = {
+                  ...unitRef.current,
+                  thumbnail: thumbnailKey,
+                  _version: freshUnit._version + 1,
+                };
+                versionRef.current = freshUnit._version + 1;
+              }
+            } catch (err) {
+              console.warn(
+                "[handleStatusChange] Thumbnail upload failed:",
+                err,
+              );
+            }
+          }
         }
       }
     } catch (error) {

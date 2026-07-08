@@ -53,7 +53,7 @@ Open `.storybook/code/onboarding-tasks.ts` and add an entry to the `ONBOARDING_T
   order: 9,                                          // Sort order within persona
   estimatedTime: 480,                                // Seconds (shown as "~8 min")
   completionCriteria: {
-    tutorialStoryId: '🎙️-recording-audio-recording-studio--coffee-shop-dialogue',
+    tutorialStoryId: '🎙️-recording-studio-recording-studio--coffee-shop-dialogue',
     quizStoryId: '📄-pages-application-pages--unit-detail',
     requiredActions: ['onClick', 'onSave'],          // OR logic — any one triggers completion
   },

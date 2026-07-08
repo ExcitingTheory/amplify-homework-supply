@@ -1059,7 +1059,10 @@ const schema = a
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     UnitWord: a
       .model({
@@ -1093,7 +1096,10 @@ const schema = a
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     QuestionUnit: a
       .model({
@@ -1127,7 +1133,10 @@ const schema = a
         unit: a.belongsTo("Unit", ["unitID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     UnitDocument: a
       .model({
@@ -1161,7 +1170,10 @@ const schema = a
         document: a.belongsTo("Document", ["documentID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     QuestionFile: a
       .model({
@@ -1195,7 +1207,10 @@ const schema = a
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     WordFile: a
       .model({
@@ -1229,7 +1244,10 @@ const schema = a
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     QuestionWord: a
       .model({
@@ -1263,7 +1281,10 @@ const schema = a
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     DocumentWord: a
       .model({
@@ -1297,7 +1318,10 @@ const schema = a
         word: a.belongsTo("Word", ["wordID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     DocumentQuestion: a
       .model({
@@ -1331,7 +1355,10 @@ const schema = a
         question: a.belongsTo("Question", ["questionID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     AssistantChatFile: a
       .model({
@@ -1365,7 +1392,10 @@ const schema = a
         file: a.belongsTo("File", ["fileID"]),
         deletedAt: a.datetime(),
       })
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     // ========================================================================
     // COLLABORATION MODELS
@@ -1693,9 +1723,9 @@ const schema = a
         insights: a.json(), // [{topic, insight, confidence, updatedAt}]
         topicsDiscussed: a.json(), // [{topic, lastDiscussedAt, depth, wasResolved}]
         // Embedding for semantic memory recall
-        embedding: a.string(), // JSON-encoded 512d vector
-        embeddingModel: a.string(), // e.g. "text-embedding-3-small"
-        embeddingDimensions: a.integer(), // e.g. 512
+        embedding: a.string(), // JSON-encoded 384d vector
+        embeddingModel: a.string(), // e.g. "Xenova/all-MiniLM-L6-v2"
+        embeddingDimensions: a.integer(), // e.g. 384
         // Relationships
         chatFiles: a.hasMany("AssistantChatFile", ["chatID"]),
         // Soft delete
@@ -1705,7 +1735,10 @@ const schema = a
       .secondaryIndexes((index) => [
         index("unitID").sortKeys(["type"]).name("byUnit"),
       ])
-      .authorization((allow) => [allow.owner(), allow.group("Admins").to(["create", "read", "update", "delete"])]),
+      .authorization((allow) => [
+        allow.owner(),
+        allow.group("Admins").to(["create", "read", "update", "delete"]),
+      ]),
 
     // ========================================================================
     // USER & SETTINGS MODELS
@@ -1899,9 +1932,30 @@ const schema = a
 
     HomeworkRoom: a
       .model({
-        _version: a.integer(),
-        _lastChangedAt: a.timestamp(),
-        _deleted: a.boolean(),
+        _version: a
+          .integer()
+          .authorization((allow) => [
+            allow.owner().to(["read"]),
+            allow.group("Admins").to(["read"]),
+            allow.group("Instructors").to(["read"]),
+            allow.groupDefinedIn("peerGroup").to(["read"]),
+          ]),
+        _lastChangedAt: a
+          .timestamp()
+          .authorization((allow) => [
+            allow.owner().to(["read"]),
+            allow.group("Admins").to(["read"]),
+            allow.group("Instructors").to(["read"]),
+            allow.groupDefinedIn("peerGroup").to(["read"]),
+          ]),
+        _deleted: a
+          .boolean()
+          .authorization((allow) => [
+            allow.owner().to(["read"]),
+            allow.group("Admins").to(["read"]),
+            allow.group("Instructors").to(["read"]),
+            allow.groupDefinedIn("peerGroup").to(["read"]),
+          ]),
         owner: a
           .string()
           .authorization((allow) => [
@@ -2055,6 +2109,7 @@ const schema = a
         unitMemories: a.ref("UnitMemoryEntry").array(),
         // Leaderboard fields (was LeaderboardEntry)
         completedAssignments: a.integer(),
+        onTimeSubmissions: a.integer().default(0),
         nailedItCount: a.integer(),
         lastUpdated: a.datetime(),
         // Rollup counters — maintained by XP stream handler, eliminates log scans
@@ -2216,6 +2271,7 @@ const schema = a
         easterEggs: a.ref("EasterEggProfileEntry").array(),
         // Leaderboard position fields
         completedAssignments: a.integer().default(0),
+        onTimeSubmissions: a.integer().default(0),
         nailedItCount: a.integer().default(0),
         lastUpdated: a.datetime(),
         // Rollup counters — maintained by stream handler (same as StudentProfile)
@@ -2483,6 +2539,8 @@ const schema = a
         rewardBadge: a.string(), // badge type key to award on victory
         rewardCosmetic: a.string(), // cosmetic item key (title/border/flair)
         unlockContentId: a.id(), // Unit ID to unlock on victory
+        // Scoped XP: only XP from these units contributes to this chapter
+        linkedUnitIds: a.string().array(),
         // Embedded contributions (absorbed from GroupChallengeContribution)
         contributions: a.ref("ChallengeContribution").array(),
       })

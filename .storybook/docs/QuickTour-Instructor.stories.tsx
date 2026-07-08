@@ -108,7 +108,7 @@ export const Step2_UnitEditor: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/unit/unit-japanese-1',
-        params: { id: 'unit-japanese-1' },
+        segments: [['id', 'unit-japanese-1']],
       },
     },
   },

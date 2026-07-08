@@ -77,7 +77,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
   React.useEffect(() => {
     if (persona) {
       const tasks = getTasksForPersona(persona);
-      const completed = emitter.getCompletedTasks(persona);
+      const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
       const completedIds = new Set(completed.map(c => c.taskId));
       const incomplete = tasks.filter(t => !completedIds.has(t.id));
       
@@ -102,7 +102,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
         const pct = emitter.getCompletionPercentage(event.persona, ONBOARDING_TASKS);
         setPercentage(pct);
         const tasks = getTasksForPersona(event.persona);
-        const completed = emitter.getCompletedTasks(event.persona);
+        const completed = emitter.getCompletedTasks(event.persona, ONBOARDING_TASKS);
         const completedIds = new Set(completed.map(c => c.taskId));
         const incomplete = tasks.filter(t => !completedIds.has(t.id));
         
@@ -112,7 +112,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
       } else if (event.type === 'task-completed' && persona === event.persona) {
         const pct = emitter.getCompletionPercentage(persona, ONBOARDING_TASKS);
         setPercentage(pct);
-        const completed = emitter.getCompletedTasks(persona);
+        const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
         setCompletedCount(completed.length);
         
         const tasks = getTasksForPersona(persona);

@@ -4,7 +4,7 @@ import { AvatarUnlockEditor } from './AvatarUnlockEditor'
 import type { AvatarUnlockConfig } from './DiceBearAvatar'
 
 const meta: Meta<typeof AvatarUnlockEditor> = {
-  title: 'Gamification/AvatarUnlockEditor',
+  title: '🏆 Gamification/Instructor/Avatar Unlock Editor',
   component: AvatarUnlockEditor,
   parameters: {
     layout: 'centered',

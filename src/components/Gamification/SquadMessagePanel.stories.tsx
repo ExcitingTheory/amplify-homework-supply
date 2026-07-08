@@ -11,7 +11,7 @@ const mockSquads = [
 ]
 
 const meta: Meta<typeof SquadMessagePanel> = {
-  title: 'Gamification/SquadMessagePanel',
+  title: '🏆 Gamification/Squads & Teams/Squad Message Panel',
   component: SquadMessagePanel,
   args: {
     squads: mockSquads,

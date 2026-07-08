@@ -8,6 +8,9 @@
  */
 
 import { getServerClient } from "@/utils/amplifyServerClient";
+import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
+import { fetchAuthSession } from "aws-amplify/auth/server";
+import { cookies } from "next/headers";
 import { chatCompletion } from "./chat";
 import {
   engineAwardXP,
@@ -23,6 +26,137 @@ import {
   engineGenerateSkillTree,
   engineRebuildLeaderboard,
 } from "./gamification-engine";
+
+// ============================================================================
+// Caller Identity Guards
+// ============================================================================
+
+/**
+ * Resolve the authenticated caller's Cognito sub and groups from the
+ * current request's cookie-based session. Returns null if unauthenticated.
+ */
+async function getCallerSession(): Promise<{
+  sub: string;
+  groups: string[];
+} | null> {
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+    const idToken = session?.tokens?.idToken;
+    if (!idToken) return null;
+    const sub = idToken.payload?.sub as string;
+    const groups = (idToken.payload?.["cognito:groups"] as string[]) || [];
+    return { sub, groups };
+  } catch {
+    return null;
+  }
+}
+
+function isPrivilegedCaller(groups: string[]): boolean {
+  return groups.some(
+    (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
+  );
+}
+
+/**
+ * Check whether an instructor has the given student in one of their sections.
+ * Admins/Moderators are not section-scoped — they can act on any student.
+ */
+async function isStudentInCallerSection(
+  callerSub: string,
+  callerGroups: string[],
+  studentId: string,
+): Promise<boolean> {
+  // Admins and Moderators are global — no section restriction
+  if (callerGroups.includes("Admins") || callerGroups.includes("Moderators")) {
+    return true;
+  }
+
+  // Instructors: verify student has an assignment in a section they own
+  try {
+    const client = getServerClient() as any;
+
+    // Get sections owned by the instructor
+    const { data: sections } = await client.models.Section.list({
+      filter: { owner: { eq: callerSub } },
+      selectionSet: ["id"],
+      limit: 100,
+    });
+
+    if (!sections || sections.length === 0) return false;
+
+    const sectionIds = sections.map((s: any) => s.id);
+
+    // Check if the student has an assignment in any of those sections
+    for (const sectionId of sectionIds) {
+      const { data: assignments } = await client.models.Assignment.list({
+        filter: {
+          sectionID: { eq: sectionId },
+          owner: { eq: studentId },
+        },
+        selectionSet: ["id"],
+        limit: 1,
+      });
+      if (assignments && assignments.length > 0) return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.error("[gamification] Section membership check failed:", err);
+    // Fail closed — deny on error
+    return false;
+  }
+}
+
+/**
+ * Guard: verify the caller is either the student themselves or a privileged
+ * user (Instructor/Admin/Moderator). Instructors must also have the student
+ * in one of their sections. Logs a warning and returns false if not.
+ */
+async function assertCallerIsStudentOrPrivileged(
+  studentId: string,
+): Promise<boolean> {
+  const caller = await getCallerSession();
+  if (!caller) {
+    console.warn(
+      "[gamification] Unauthenticated action attempt for student",
+      studentId,
+    );
+    return false;
+  }
+  // Student acting on their own data — always allowed
+  if (caller.sub === studentId) {
+    return true;
+  }
+  // Non-privileged callers cannot act on other students
+  if (!isPrivilegedCaller(caller.groups)) {
+    console.warn(
+      "[gamification] Unauthorized action: caller",
+      caller.sub,
+      "attempted to modify records for student",
+      studentId,
+    );
+    return false;
+  }
+  // Privileged callers: verify section membership (Admins exempt)
+  const hasAccess = await isStudentInCallerSection(
+    caller.sub,
+    caller.groups,
+    studentId,
+  );
+  if (!hasAccess) {
+    console.warn(
+      "[gamification] Cross-section denied: instructor",
+      caller.sub,
+      "has no section containing student",
+      studentId,
+    );
+    return false;
+  }
+  return true;
+}
 
 // ============================================================================
 // Types
@@ -84,6 +218,8 @@ export async function awardXP(
   unitID?: string,
   accuracy?: number,
 ): Promise<AwardXPResult | null> {
+  if (!(await assertCallerIsStudentOrPrivileged(studentId))) return null;
+
   const client = getServerClient();
 
   let xpResult: AwardXPResult | null = null;
@@ -128,6 +264,10 @@ export async function recordGradeCompletion(
   submissionText?: string,
   cohortId?: string,
 ): Promise<GradeCompletionResult> {
+  if (!(await assertCallerIsStudentOrPrivileged(studentId))) {
+    return { xp: null, personalBest: null, easterEggs: null };
+  }
+
   const client = getServerClient();
 
   // 1. Award XP (blocking — core operation)
@@ -143,6 +283,37 @@ export async function recordGradeCompletion(
     });
   } catch (err) {
     console.error("[gamification action] awardXP error:", err);
+  }
+
+  // 1b. On-time bonus — check if submitted before Assignment.dueDate
+  if (cohortId && unitID) {
+    try {
+      const { data: assignmentData } = await (
+        client as any
+      ).models.Assignment.list({
+        filter: {
+          sectionID: { eq: cohortId },
+          unitID: { eq: unitID },
+        },
+        limit: 1,
+      });
+      const assignment = (assignmentData || [])[0];
+      if (assignment?.dueDate) {
+        const dueDate = new Date(assignment.dueDate);
+        if (new Date() <= dueDate) {
+          await engineAwardXP(client, {
+            studentId,
+            reason: "ON_TIME_SUBMISSION",
+            referenceId: `${referenceId}-ontime`,
+            cohortId,
+            unitID,
+            accuracy,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[gamification action] on-time check error:", err);
+    }
   }
 
   // 2. Check badges + update streak + squad XP (parallel)
@@ -199,6 +370,10 @@ export async function updateLearningMemory(
     sourceType?: string;
   },
 ): Promise<{ success: boolean }> {
+  if (!(await assertCallerIsStudentOrPrivileged(studentId))) {
+    return { success: false };
+  }
+
   const client = getServerClient();
 
   try {
@@ -233,6 +408,8 @@ export async function advanceSkill(
   skillId: string,
   newStatus: string,
 ): Promise<{ success?: boolean; error?: string; unlocked?: string[] } | null> {
+  if (!(await assertCallerIsStudentOrPrivileged(studentId))) return null;
+
   const client = getServerClient();
 
   try {
@@ -281,6 +458,8 @@ export async function discoverEasterEgg(
   message?: string;
   xpReward?: number;
 } | null> {
+  if (!(await assertCallerIsStudentOrPrivileged(studentId))) return null;
+
   const client = getServerClient();
 
   try {
@@ -299,7 +478,6 @@ export async function discoverEasterEgg(
 
 export interface GenerateCampaignResult {
   setting: string;
-  stakes: string;
 }
 
 /**
@@ -345,12 +523,9 @@ export async function generateCampaignNarrative(
     }
 
     const systemPrompt = `You are a creative writing assistant for an educational gamification platform. 
-Given a campaign title, generate two short pieces of narrative text:
-
-1. "setting" — A vivid description of the fictional world or scenario (2-3 sentences). This frames the learning journey as an adventure.
-2. "stakes" — Rhetorical, in-world consequences if students don't succeed (2-3 sentences). These are NOT real consequences — they are motivating story tension. Think video game narrative stakes.
+Given a campaign title, generate a vivid description of the fictional world or scenario (2-3 sentences). This frames the learning journey as an adventure.
 ${courseContext}
-Respond ONLY with valid JSON: {"setting": "...", "stakes": "..."}
+Respond ONLY with valid JSON: {"setting": "..."}
 Do not include any other text or markdown formatting.`;
 
     const text = await chatCompletion({
@@ -366,8 +541,8 @@ Do not include any other text or markdown formatting.`;
 
     if (!text) return null;
     const parsed = JSON.parse(text);
-    if (parsed?.setting && parsed?.stakes) {
-      return { setting: parsed.setting, stakes: parsed.stakes };
+    if (parsed?.setting) {
+      return { setting: parsed.setting };
     }
     return null;
   } catch (err) {

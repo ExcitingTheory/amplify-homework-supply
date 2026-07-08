@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 
 const meta: Meta<typeof SquadMentionPill> = {
-  title: 'Gamification/SquadMentionPill',
+  title: '🏆 Gamification/Squads & Teams/Squad Mention Pill',
   component: SquadMentionPill,
   args: {
     squadId: 'squad-alpha-001',

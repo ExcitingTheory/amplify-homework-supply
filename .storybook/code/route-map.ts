@@ -22,16 +22,80 @@ export const ROUTE_TO_STORY_MAP: Record<string, string> = {
   "/": "?path=/story/📄-pages-application-pages--index",
   "/units": "?path=/story/📄-pages-application-pages--units",
   "/sections": "?path=/story/📄-pages-application-pages--sections",
-  "/profile": "?path=/story/📄-pages-application-pages--profile",
-  "/profile/[username]": "?path=/story/📄-pages-application-pages--profile",
+  // Profile pages
+  "/profile": "?path=/story/📄-pages-application-pages--profile-public",
+  "/profile/[username]":
+    "?path=/story/📄-pages-application-pages--profile-public",
+  "/profile/notifications":
+    "?path=/story/📄-pages-application-pages--notifications",
   "/settings": "?path=/story/📄-pages-application-pages--settings",
+  "/leaderboard": "?path=/story/📄-pages-application-pages--leaderboard",
+  "/squads": "?path=/story/📄-pages-application-pages--squads",
+  "/squad/[id]": "?path=/story/📄-pages-application-pages--squad-detail",
+  "/xp-history": "?path=/story/📄-pages-application-pages--xphistory",
+  "/recycle-bin": "?path=/story/📄-pages-application-pages--recycle-bin",
+  "/admin/settings": "?path=/story/📄-pages-application-pages--admin-settings",
+  "/admin/analytics":
+    "?path=/story/📄-pages-application-pages--admin-analytics",
+  "/admin/archives": "?path=/story/📄-pages-application-pages--admin-archives",
+  "/admin/moderation":
+    "?path=/story/📄-pages-application-pages--admin-moderation",
+  "/admin/words": "?path=/story/📄-pages-application-pages--admin-words",
+  "/instructor/grade/[id]":
+    "?path=/story/📄-pages-application-pages--instructor-grade",
 
   // Dynamic routes - will need ID substitution
   "/unit/[id]": "?path=/story/📄-pages-application-pages--unit-detail",
   "/section/[id]": "?path=/story/📄-pages-application-pages--section-detail",
   "/workbook/[id]": "?path=/story/📄-pages-application-pages--workbook",
   "/review/[id]": "?path=/story/📄-pages-application-pages--peer-review",
+  // Feature routes
+  "/drill/[id]": "?path=/story/📄-pages-application-pages--drill",
+  "/offline": "?path=/story/📄-pages-application-pages--offline",
+  "/privacy": "?path=/story/📄-pages-application-pages--privacy",
+  "/section/[id]/settings/ai":
+    "?path=/story/📄-pages-application-pages--section-ai-settings",
+  "/section/[id]/settings/gamification":
+    "?path=/story/📄-pages-application-pages--section-gamification-settings",
 };
+
+function normalizeRoute(route: string): string {
+  let normalized = route || "/";
+
+  // Convert absolute URLs to pathname+search+hash.
+  if (/^https?:\/\//i.test(normalized)) {
+    try {
+      const url = new URL(normalized);
+      normalized = `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      // Keep original on parse failure.
+    }
+  }
+
+  // Drop query and hash for route matching.
+  normalized = normalized.split("#")[0].split("?")[0] || "/";
+
+  // Ensure leading slash.
+  if (!normalized.startsWith("/")) {
+    normalized = `/${normalized}`;
+  }
+
+  // Collapse duplicate slashes.
+  normalized = normalized.replace(/\/{2,}/g, "/");
+
+  // Remove locale prefix used by app/[locale] routes.
+  const localePrefix = normalized.match(/^\/(en|es|ja)(\/|$)/);
+  if (localePrefix) {
+    normalized = normalized.replace(/^\/(en|es|ja)/, "") || "/";
+  }
+
+  // Remove trailing slash except root.
+  if (normalized.length > 1 && normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  return normalized;
+}
 
 /**
  * Reverse mapping: Storybook story path to Next.js route
@@ -66,9 +130,11 @@ export function convertRouteToStory(
   route: string,
   params?: Record<string, string>,
 ): string | null {
+  const normalizedRoute = normalizeRoute(route);
+
   // Exact match first
-  if (ROUTE_TO_STORY_MAP[route]) {
-    return ROUTE_TO_STORY_MAP[route];
+  if (ROUTE_TO_STORY_MAP[normalizedRoute]) {
+    return ROUTE_TO_STORY_MAP[normalizedRoute];
   }
 
   // Try to match dynamic routes
@@ -76,7 +142,7 @@ export function convertRouteToStory(
     if (pattern.includes("[id]")) {
       // Extract ID from route
       const patternParts = pattern.split("/");
-      const routeParts = route.split("/");
+      const routeParts = normalizedRoute.split("/");
 
       if (patternParts.length === routeParts.length) {
         let matches = true;
@@ -104,7 +170,7 @@ export function convertRouteToStory(
     }
   }
 
-  console.warn("[Route Map] No story found for route:", route);
+  console.warn("[Route Map] No story found for route:", normalizedRoute);
   return null;
 }
 

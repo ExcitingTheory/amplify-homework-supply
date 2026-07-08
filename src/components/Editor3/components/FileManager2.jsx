@@ -3948,8 +3948,6 @@ export default function FileManager2() {
         // Generate embedding for the query
         const result = await generateEmbeddingAction({
           content: query,
-          model: "text-embedding-3-small",
-          dimensions: 512,
         });
         const queryEmbedding = result.embedding;
         console.log(

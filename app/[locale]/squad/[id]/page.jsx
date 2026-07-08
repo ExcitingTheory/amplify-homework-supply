@@ -11,7 +11,7 @@ import SportsKabaddiIcon from "@mui/icons-material/SportsKabaddi";
 import { SquadJoinPanel } from "@/components/Gamification/SquadJoinPanel";
 import { SquadEditor } from "@/components/Gamification/SquadEditor";
 import { ArmoriaShield } from "@/components/Gamification/ArmoriaShield";
-import { DiceBearAvatar } from "@/components/Gamification/DiceBearAvatar";
+import { AvatarDisplay } from "@/components/Gamification/AvatarDisplay";
 import { useSquad, useXP, useCampaign } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { SquadPostFeed } from "@/components/Gamification/SquadPostFeed";
@@ -19,6 +19,7 @@ import { getAmplifyClient } from "@/utils/amplifyClient";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
 import { useRouter, useParams } from "next/navigation";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import {
   trackSquadViewed,
   trackSquadJoined,
@@ -74,6 +75,7 @@ function SquadPage() {
   const [isInstructor, setIsInstructor] = React.useState(false);
   const [instructorSquad, setInstructorSquad] = React.useState(null);
   const [instructorMembers, setInstructorMembers] = React.useState([]);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
 
   // Check if the current user is an instructor of the squad's section
   React.useEffect(() => {
@@ -178,54 +180,50 @@ function SquadPage() {
     };
   }, [mySquad]);
 
-  const memberEntries = React.useMemo(
-    () => {
-      // Build a lookup from mySquad.members which has full avatar data
-      const avatarLookup = {};
-      if (mySquad?.members) {
-        for (const m of mySquad.members) {
-          if (m?.studentId) {
-            avatarLookup[m.studentId] = {
-              avatarSeed: m.avatarSeed || m.studentId,
-              avatarStyle: m.avatarStyle,
-              avatarOverrides: m.avatarOverrides,
-            };
-          }
+  const memberEntries = React.useMemo(() => {
+    // Build a lookup from mySquad.members which has full avatar data
+    const avatarLookup = {};
+    if (mySquad?.members) {
+      for (const m of mySquad.members) {
+        if (m?.studentId) {
+          avatarLookup[m.studentId] = {
+            avatarSeed: m.avatarSeed || m.studentId,
+            avatarStyle: m.avatarStyle,
+            avatarOverrides: m.avatarOverrides,
+          };
         }
       }
+    }
 
-      return squadMembers.map((m) => {
-        // For the current user, prefer local hook data (most up-to-date)
-        const avatar =
-          m.studentId === studentId
-            ? {
-                avatarSeed: myAvatarSeed || studentId,
-                avatarStyle: myAvatarStyle,
-                avatarOverrides: myAvatarOverrides,
-              }
-            : avatarLookup[m.studentId] || { avatarSeed: m.studentId };
+    return squadMembers.map((m) => {
+      // For the current user, prefer local hook data (most up-to-date)
+      const avatar =
+        m.studentId === studentId
+          ? {
+              avatarSeed: myAvatarSeed || studentId,
+              avatarStyle: myAvatarStyle,
+              avatarOverrides: myAvatarOverrides,
+            }
+          : avatarLookup[m.studentId] || { avatarSeed: m.studentId };
 
-        return {
-          id: m.id,
-          studentId: m.studentId,
-          displayName:
-            displayNameMap[m.studentId] || friendlyName(m.studentId),
-          role: m.role,
-          joinedAt: m.joinedAt,
-          ...avatar,
-        };
-      });
-    },
-    [
-      squadMembers,
-      mySquad?.members,
-      studentId,
-      displayNameMap,
-      myAvatarSeed,
-      myAvatarStyle,
-      myAvatarOverrides,
-    ],
-  );
+      return {
+        id: m.id,
+        studentId: m.studentId,
+        displayName: displayNameMap[m.studentId] || friendlyName(m.studentId),
+        role: m.role,
+        joinedAt: m.joinedAt,
+        ...avatar,
+      };
+    });
+  }, [
+    squadMembers,
+    mySquad?.members,
+    studentId,
+    displayNameMap,
+    myAvatarSeed,
+    myAvatarStyle,
+    myAvatarOverrides,
+  ]);
 
   const handleJoinSquad = React.useCallback(
     async (squadId) => {
@@ -379,14 +377,14 @@ function SquadPage() {
   );
 
   // Delete handler for the squad
-  const handleDeleteSquad = React.useCallback(async () => {
+  const handleDeleteSquad = React.useCallback(() => {
     if (!mySquad?.id) return;
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this squad? This cannot be undone.",
-      )
-    )
-      return;
+    setConfirmDeleteOpen(true);
+  }, [mySquad?.id]);
+
+  const confirmDeleteSquad = React.useCallback(async () => {
+    if (!mySquad?.id) return;
+    setConfirmDeleteOpen(false);
     try {
       const { data } = await client.models.Squad.get({ id: mySquad.id });
       await client.models.Squad.delete({
@@ -469,11 +467,7 @@ function SquadPage() {
                     gap: 0.5,
                   }}
                 >
-                  <DiceBearAvatar
-                    seed={member.studentId}
-                    size={64}
-                    label={friendlyName(member.studentId)}
-                  />
+                  <AvatarDisplay seed={member.studentId} size={64} />
                   <Typography variant="body2" noWrap sx={{ maxWidth: "100%" }}>
                     {friendlyName(member.studentId)}
                   </Typography>
@@ -604,10 +598,9 @@ function SquadPage() {
                   gap: 0.5,
                 }}
               >
-                <DiceBearAvatar
+                <AvatarDisplay
                   seed={member.avatarSeed || member.studentId}
                   size={64}
-                  label={member.displayName}
                   style={member.avatarStyle}
                   overrides={member.avatarOverrides}
                 />
@@ -721,6 +714,15 @@ function SquadPage() {
           />
         </Box>
       </Box>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Delete Squad"
+        message="Are you sure you want to delete this squad? This cannot be undone."
+        confirmLabel="Delete"
+        confirmColor="error"
+        onConfirm={confirmDeleteSquad}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </>
   );
 }

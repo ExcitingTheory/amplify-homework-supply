@@ -36,6 +36,8 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import { BadgeIcon } from './BadgeIcon'
 import { BADGE_REGISTRY, type BadgeVisualConfig } from './badgeRegistry'
 import { BadgeVisualPicker, resolveIcon } from './BadgeVisualPicker'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import AIBadgeDesigner from './AIBadgeDesigner'
 
 // ============================================================================
 // Constants — available XP events that can trigger badges
@@ -316,6 +318,7 @@ export function BadgeEditor({
   onDeleteCustomBadge,
 }: BadgeEditorProps) {
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showAIDesigner, setShowAIDesigner] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDescription, setNewDescription] = useState('')
   const [newEvent, setNewEvent] = useState('')
@@ -407,18 +410,54 @@ export function BadgeEditor({
         <Typography variant="subtitle2" fontWeight={600}>
           Custom Badges ({customBadges.length})
         </Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={() => setShowCreateForm(!showCreateForm)}
-        >
-          {showCreateForm ? 'Cancel' : 'New Badge'}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<AutoAwesomeIcon />}
+            onClick={() => { setShowAIDesigner(!showAIDesigner); setShowCreateForm(false) }}
+            color={showAIDesigner ? 'secondary' : 'inherit'}
+          >
+            {showAIDesigner ? 'Cancel AI' : 'AI Generate'}
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => { setShowCreateForm(!showCreateForm); setShowAIDesigner(false) }}
+          >
+            {showCreateForm ? 'Cancel' : 'New Badge'}
+          </Button>
+        </Stack>
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
         Create badges awarded when students reach a specific event count.
       </Typography>
+
+      <Collapse in={showAIDesigner}>
+        <Card variant="outlined" sx={{ mb: 2 }}>
+          <CardContent>
+            <AIBadgeDesigner
+              onAccept={(badge) => {
+                // AI designer returns name, description, rarity, visual
+                // We still need an event and threshold — use sensible defaults
+                onAddCustomBadge?.({
+                  name: badge.name,
+                  description: badge.description,
+                  rarity: badge.rarity,
+                  visual: badge.visual,
+                  event: 'HOMEWORK_SUBMITTED',
+                  threshold: 1,
+                })
+                setShowAIDesigner(false)
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              After generating, you can edit the trigger event and threshold in the badge list.
+            </Typography>
+          </CardContent>
+        </Card>
+      </Collapse>
 
       <Collapse in={showCreateForm}>
         <Card variant="outlined" sx={{ mb: 2 }}>

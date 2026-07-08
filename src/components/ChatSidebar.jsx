@@ -631,8 +631,13 @@ const ChatSidebar = ({ onClose }) => {
               const encoder = new TextEncoder();
               try {
                 const generator = aiRouter.chat(userMessages, {
-                  dictionary: contextData.dictionary,
-                  unit: contextData.unit,
+                  unitId: contextData.unit?.id || "",
+                  unitName: contextData.unit?.name || "",
+                  unitDescription: contextData.unit?.description || "",
+                  vocabulary: contextData.dictionary || [],
+                  questions: contextData.questionBank || [],
+                  studentMemory: contextData.studentMemory || "",
+                  gradeAccuracy: contextData.grade?.accuracy,
                 });
                 let fullText = "";
                 for await (const chunk of generator) {

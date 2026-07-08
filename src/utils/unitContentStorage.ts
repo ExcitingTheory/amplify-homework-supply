@@ -282,3 +282,25 @@ export async function loadModelYjsSnapshot(
     return null;
   }
 }
+
+/** S3 key for unit thumbnail image */
+function thumbnailKey(unitId: string): string {
+  return `protected/units/${unitId}/thumbnail.png`;
+}
+
+/**
+ * Upload a unit thumbnail image (PNG blob) to S3.
+ * Returns the S3 key for storing in Unit.thumbnail.
+ */
+export async function saveThumbnail(
+  unitId: string,
+  blob: Blob,
+): Promise<string> {
+  const key = thumbnailKey(unitId);
+  await uploadData({
+    path: key,
+    data: blob,
+    options: { contentType: "image/png" },
+  }).result;
+  return key;
+}

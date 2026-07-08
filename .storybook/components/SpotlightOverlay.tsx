@@ -533,6 +533,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
   const isLastStep = currentStep.isLast || currentStepIndex === steps.length - 1;
   const isFirstStep = currentStepIndex === 0;
+  const showSpotlightLayer = mode === 'tutorial';
 
   // Disable Next while the page is loading, navigating, or target element not found yet
   const isNextDisabled = isNavigating || !isPageReady || (!!currentStep.targetSelector && !targetRect);
@@ -540,8 +541,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
   return (
     <>
-      {/* Scrim + spotlight cutout — fixed over the full Storybook management UI */}
-      <Portal>
+      {/* Tutorial mode: scrim + spotlight cutout */}
+      {showSpotlightLayer && (
+        <Portal>
           <Box
             ref={overlayRef}
             data-testid="spotlight-overlay"
@@ -555,79 +557,69 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
               pointerEvents: 'none',
             }}
           >
-        {/* SVG mask for spotlight effect */}
-        <svg
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
-          }}
-        >
-          <defs>
-            <mask id="spotlight-mask">
-              {/* White background - visible area */}
-              <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              {/* Black spotlight - transparent area (viewport coordinates) */}
-              {targetRect && (
-                <rect
-                  x={targetRect.left - 8}
-                  y={targetRect.top - 8}
-                  width={targetRect.width + 16}
-                  height={targetRect.height + 16}
-                  rx="8"
-                  fill="black"
-                />
-              )}
-            </mask>
-          </defs>
-          {/* Semi-transparent overlay with mask */}
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="rgba(0, 0, 0, 0.6)"
-            mask="url(#spotlight-mask)"
-          />
-        </svg>
+            <svg
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+              }}
+            >
+              <defs>
+                <mask id="spotlight-mask">
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  {targetRect && (
+                    <rect
+                      x={targetRect.left - 8}
+                      y={targetRect.top - 8}
+                      width={targetRect.width + 16}
+                      height={targetRect.height + 16}
+                      rx="8"
+                      fill="black"
+                    />
+                  )}
+                </mask>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill="rgba(0, 0, 0, 0.6)"
+                mask="url(#spotlight-mask)"
+              />
+            </svg>
 
-        {/* Spotlight border highlight */}
-        {targetRect && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: targetRect.top - 8,
-              left: targetRect.left - 8,
-              width: targetRect.width + 16,
-              height: targetRect.height + 16,
-              border: '3px solid',
-              borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
-              borderRadius: '8px',
-              pointerEvents: 'none',
-              boxShadow: mode === 'tutorial' 
-                ? '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)'
-                : '0 0 0 4px rgba(33, 150, 243, 0.2), 0 0 20px rgba(33, 150, 243, 0.4)',
-              animation: 'pulse 2s ease-in-out infinite',
-              '@keyframes pulse': {
-                '0%, 100%': {
-                  boxShadow: mode === 'tutorial'
-                    ? '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)'
-                    : '0 0 0 4px rgba(33, 150, 243, 0.2), 0 0 20px rgba(33, 150, 243, 0.4)',
-                },
-                '50%': {
-                  boxShadow: mode === 'tutorial'
-                    ? '0 0 0 8px rgba(76, 175, 80, 0.1), 0 0 30px rgba(76, 175, 80, 0.6)'
-                    : '0 0 0 8px rgba(33, 150, 243, 0.1), 0 0 30px rgba(33, 150, 243, 0.6)',
-                },
-              },
-            }}
-          />
-        )}
-      </Box>
+            {targetRect && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: targetRect.top - 8,
+                  left: targetRect.left - 8,
+                  width: targetRect.width + 16,
+                  height: targetRect.height + 16,
+                  border: '3px solid',
+                  borderColor: '#4CAF50',
+                  borderRadius: '8px',
+                  pointerEvents: 'none',
+                  boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)',
+                  animation: 'pulse 2s ease-in-out infinite',
+                  '@keyframes pulse': {
+                    '0%, 100%': {
+                      boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)',
+                    },
+                    '50%': {
+                      boxShadow: '0 0 0 8px rgba(76, 175, 80, 0.1), 0 0 30px rgba(76, 175, 80, 0.6)',
+                    },
+                  },
+                }}
+              />
+            )}
+          </Box>
         </Portal>
+      )}
 
       {/* Tooltip/Coachmark — separate Portal to body, above everything */}
       <Portal>
@@ -731,7 +723,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
               {mode === 'quiz' && (
                 <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                    💡 Try to complete this task on your own. Click "Next" when you're ready to continue.
+                    💡 Use the hints and complete the task in the target page. Completion is detected automatically from your actions.
                   </Typography>
                 </Box>
               )}

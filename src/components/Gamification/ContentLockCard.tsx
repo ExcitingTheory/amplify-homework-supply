@@ -33,6 +33,8 @@ export interface ContentLockCardProps {
   requiredPriorUnitId?: string
   /** Display name of the prior unit (linear lock). */
   requiredPriorUnitName?: string
+  /** Date when content unlocks automatically. */
+  unlockDate?: string
   /** Children rendered when unlocked. */
   children?: React.ReactNode
 }
@@ -47,6 +49,7 @@ export function ContentLockCard({
   currentCompletion = 0,
   requiredPriorUnitId,
   requiredPriorUnitName,
+  unlockDate,
   children,
 }: ContentLockCardProps) {
   if (!isLocked) {
@@ -115,6 +118,12 @@ export function ContentLockCard({
         {requiredPriorUnitId && (
           <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
             🔗 Complete &ldquo;{requiredPriorUnitName || 'the previous unit'}&rdquo; first
+          </Typography>
+        )}
+
+        {unlockDate && (
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
+            📅 Unlocks on {new Date(unlockDate).toLocaleDateString()}
           </Typography>
         )}
       </CardContent>

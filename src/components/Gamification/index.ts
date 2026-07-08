@@ -109,6 +109,8 @@ export { SquadLeaderboard } from "./SquadLeaderboard";
 export type {
   SquadLeaderboardProps,
   SquadLeaderboardEntry,
+  SortField,
+  GroupBy,
 } from "./SquadLeaderboard";
 
 export { SquadJoinPanel } from "./SquadJoinPanel";
@@ -247,3 +249,9 @@ export type {
 
 export { ChallengeRecapCard } from "./ChallengeRecapCard";
 export type { ChallengeRecapCardProps, RecapEntry } from "./ChallengeRecapCard";
+
+export { LevelUpCelebration } from "./LevelUpCelebration";
+export type { LevelUpCelebrationProps } from "./LevelUpCelebration";
+
+export { ChapterUnlockCelebration } from "./ChapterUnlockCelebration";
+export type { ChapterUnlockCelebrationProps } from "./ChapterUnlockCelebration";

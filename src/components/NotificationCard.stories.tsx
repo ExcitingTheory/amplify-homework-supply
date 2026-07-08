@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import React from "react";
 import { Box } from "@mui/material";
 import NotificationCard from "./NotificationCard";
-import { action } from "storybook/actions";
+import { fn, expect, userEvent, within } from "storybook/test";
 
 const meta: Meta<typeof NotificationCard> = {
   title: "📬 Notifications/Notification Card",
@@ -24,11 +24,11 @@ const meta: Meta<typeof NotificationCard> = {
       </Box>
     ),
   ],
-  argTypes: {
-    onMarkSeen: { action: "markSeen" },
-    onMarkInteracted: { action: "markInteracted" },
-    onDelete: { action: "delete" },
-    onNavigate: { action: "navigate" },
+  args: {
+    onMarkSeen: fn(),
+    onMarkInteracted: fn(),
+    onDelete: fn(),
+    onNavigate: fn(),
   },
 };
 export default meta;
@@ -54,10 +54,15 @@ export const Unseen: Story = {
       seen: false,
       interacted: false,
     },
-    onMarkSeen: action("markSeen"),
-    onMarkInteracted: action("markInteracted"),
-    onDelete: action("delete"),
-    onNavigate: action("navigate"),
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Click the "View Badges" link button — this calls handleClick which marks
+    // the notification as seen and fires onNavigate
+    const linkBtn = await canvas.findByRole("button", { name: /View Badges/i });
+    await userEvent.click(linkBtn);
+    await expect(args.onMarkSeen).toHaveBeenCalledWith("n1");
+    await expect(args.onNavigate).toHaveBeenCalledWith("/profile/badges");
   },
 };
 
@@ -69,9 +74,9 @@ export const Seen: Story = {
       seen: true,
       interacted: false,
     },
-    onMarkSeen: action("markSeen"),
-    onDelete: action("delete"),
-    onNavigate: action("navigate"),
+    onMarkSeen: fn(),
+    onDelete: fn(),
+    onNavigate: fn(),
   },
 };
 
@@ -83,7 +88,7 @@ export const Interacted: Story = {
       seen: true,
       interacted: true,
     },
-    onDelete: action("delete"),
+    onDelete: fn(),
   },
 };
 
@@ -102,9 +107,9 @@ export const AssignmentDue: Story = {
       interacted: false,
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h ago
     },
-    onMarkSeen: action("markSeen"),
-    onDelete: action("delete"),
-    onNavigate: action("navigate"),
+    onMarkSeen: fn(),
+    onDelete: fn(),
+    onNavigate: fn(),
   },
 };
 
@@ -124,10 +129,10 @@ export const CollaborationInvite: Story = {
       interacted: false,
       createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 min ago
     },
-    onMarkSeen: action("markSeen"),
-    onMarkInteracted: action("markInteracted"),
-    onDelete: action("delete"),
-    onNavigate: action("navigate"),
+    onMarkSeen: fn(),
+    onMarkInteracted: fn(),
+    onDelete: fn(),
+    onNavigate: fn(),
   },
 };
 
@@ -147,8 +152,8 @@ export const SquadPost: Story = {
       interacted: false,
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     },
-    onDelete: action("delete"),
-    onNavigate: action("navigate"),
+    onDelete: fn(),
+    onNavigate: fn(),
   },
 };
 
@@ -168,8 +173,8 @@ export const SystemAnnouncement: Story = {
       interacted: false,
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
     },
-    onMarkSeen: action("markSeen"),
-    onDelete: action("delete"),
+    onMarkSeen: fn(),
+    onDelete: fn(),
   },
 };
 
@@ -183,8 +188,8 @@ export const NoBody: Story = {
       seen: false,
       interacted: false,
     },
-    onMarkSeen: action("markSeen"),
-    onDelete: action("delete"),
+    onMarkSeen: fn(),
+    onDelete: fn(),
   },
 };
 
@@ -209,9 +214,9 @@ export const AllCategories: Story = {
             seen: i % 2 === 0,
             interacted: i === 5,
           }}
-          onMarkSeen={action("markSeen")}
-          onDelete={action("delete")}
-          onNavigate={action("navigate")}
+          onMarkSeen={fn()}
+          onDelete={fn()}
+          onNavigate={fn()}
         />
       ))}
     </Box>

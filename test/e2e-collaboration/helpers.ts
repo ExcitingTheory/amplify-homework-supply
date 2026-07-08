@@ -11,17 +11,38 @@ import {
 
 export const INSTRUCTOR = {
   username: process.env.TEACHER_USERNAME || "instructor1@example.com",
-  password: process.env.TEACHER_PASSWORD || "TestPassword123!",
+  password:
+    process.env.TEACHER_PASSWORD ||
+    process.env.TEST_USER_PASSWORD ||
+    (() => {
+      throw new Error(
+        "TEACHER_PASSWORD or TEST_USER_PASSWORD env var required",
+      );
+    })(),
 };
 
 export const STUDENT_1 = {
   username: process.env.LEARNER_USERNAME || "student1@example.com",
-  password: process.env.LEARNER_PASSWORD || "TestPassword123!",
+  password:
+    process.env.LEARNER_PASSWORD ||
+    process.env.TEST_USER_PASSWORD ||
+    (() => {
+      throw new Error(
+        "LEARNER_PASSWORD or TEST_USER_PASSWORD env var required",
+      );
+    })(),
 };
 
 export const STUDENT_2 = {
   username: "student2@example.com",
-  password: process.env.LEARNER_PASSWORD || "TestPassword123!",
+  password:
+    process.env.LEARNER_PASSWORD ||
+    process.env.TEST_USER_PASSWORD ||
+    (() => {
+      throw new Error(
+        "LEARNER_PASSWORD or TEST_USER_PASSWORD env var required",
+      );
+    })(),
 };
 
 export type TestUser = { username: string; password: string };
