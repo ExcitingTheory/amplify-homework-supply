@@ -67,6 +67,7 @@ import { PrefetchButton } from "@/components/PrefetchButton";
 import { createPeerReviewRoom } from "../actions/peerReview";
 import AuthContext from "@/context/authContext";
 import { SectionPanel } from "@/components/Dashboard";
+import InstructorDashboard from "@/components/InstructorDashboard";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -191,13 +192,6 @@ function Index({
   const isInstructorOrAdmin = myGroups.some((g) =>
     ["Admins", "Moderators", "Instructors"].includes(g),
   );
-
-  // ── redirect instructors/admins to sections dashboard ─────────────────────
-  useEffect(() => {
-    if (isInstructorOrAdmin) {
-      router.replace("/sections");
-    }
-  }, [isInstructorOrAdmin, router]);
 
   // ── offline seed from IndexedDB ───────────────────────────────────────────
   useEffect(() => {
@@ -741,6 +735,14 @@ function Index({
           )}
         </Paper>
 
+        {/* ── INSTRUCTOR DASHBOARD ─────────────────────────────────── */}
+        {isInstructorOrAdmin && mySections.length > 0 && (
+          <InstructorDashboard sections={mySections} />
+        )}
+
+        {/* ── LEARNER CONTENT (hidden for instructors) ────────────── */}
+        {!isInstructorOrAdmin && (
+          <>
         {/* ── AI MEMORY PANEL ──────────────────────────────────────────── */}
         {parsedMemory &&
           (parsedMemory.demonstratedStrengths ||
@@ -1189,6 +1191,8 @@ function Index({
             </Box>
           )}
         </Box>
+        </>
+        )}
       </Box>
     </>
   );

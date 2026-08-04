@@ -30,7 +30,8 @@ function getWebSocketUrl() {
   } catch {
     // amplify_outputs.json not available (CI, first build, etc.)
   }
-  return 'ws://localhost:3001';
+  // Use wss:// for local dev since Next.js runs with --experimental-https
+  return 'wss://localhost:3001';
 }
 
 /** @type {import('next').NextConfig} */

@@ -29,8 +29,8 @@
     "crawl": "export $(cat .env.test | xargs) && node scripts/crawl-console.mjs",
     "crawl:with-logs": "export $(cat .env.test | xargs) && node scripts/crawl-console.mjs 2>&1 | tee test/results/crawl.log",
     "generate:routes": "node scripts/generate-route-list.js",
-    "dev": "next dev --experimental-https",
-    "dev:collab": "concurrently -n yjs,next -c blue,green \"tsx scripts/yjs-dev-server.ts\" \"NEXT_PUBLIC_YJS_WS_URL=wss://localhost:3001 next dev --experimental-https\"",
+    "dev": "concurrently -n yjs,next -c blue,green \"tsx scripts/yjs-dev-server.ts\" \"next dev --experimental-https\"",
+    "dev:collab": "concurrently -n yjs,next -c blue,green \"tsx scripts/yjs-dev-server.ts\" \"next dev --experimental-https\"",
     "dev:collab:with-logs": "concurrently -n yjs,next -c blue,green \"tsx scripts/yjs-dev-server.ts 2>&1 | tee test/logs/collab.log\" \"NEXT_PUBLIC_YJS_WS_URL=wss://localhost:3001 next dev --experimental-https 2>&1 | tee test/logs/next-dev.log\"",
     "dev:yjs": "tsx scripts/yjs-dev-server.ts",
     "dev:with-logs": "next dev --experimental-https 2>&1 | tee test/logs/next-dev.log",
@@ -77,7 +77,7 @@
     "typecheck:parallel": "concurrently -n src,gamification,pages,app \"tsc --noEmit --project config/tsconfig.build-src.json\" \"tsc --noEmit --project config/tsconfig.build-gamification.json\" \"tsc --noEmit --project config/tsconfig.build-pages.json\" \"tsc --noEmit --project config/tsconfig.build-app.json\"",
     "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN",
     "storybook:run": "NODE_OPTIONS='--experimental-import-meta-resolve' npx vitest --project=storybook --run",
-    "storybook:run:with-logs": "NODE_OPTIONS='--experimental-import-meta-resolve' npx vitest --project=storybook --run 2>&1 | tee test/logs/storybook-run.log; echo ''; echo '═══════════════════════════════════════════════════════════════'; echo '  AUDIT ISSUES (reprinted from above)'; echo '═══════════════════════════════════════════════════════════════'; grep -A30 'STORYBOOK AUDIT' test/logs/storybook-run.log 2>/dev/null || echo '  No audit issues found — all stories clean.'; echo ''",
+    "storybook:run:with-logs": "NODE_OPTIONS='--experimental-import-meta-resolve' npx vitest --project=storybook --run 2>&1 | tee test/logs/storybook-run.log; echo ''; echo '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550'; echo '  AUDIT ISSUES (reprinted from above)'; echo '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550'; grep -A30 'STORYBOOK AUDIT' test/logs/storybook-run.log 2>/dev/null || echo '  No audit issues found \u2014 all stories clean.'; echo ''",
     "storybook:clear": "rm -rf node_modules/.cache/storybook && rm -rf node_modules/.vite && echo \"Caches cleared\"",
     "storybook:report": "npm run test:storybook -- --run --reporter=verbose --reporter=json --outputFile=test/results/storybook.json",
     "storybook:inventory": "tsx scripts/generate-story-inventory.ts",
@@ -86,7 +86,8 @@
     "storybook:test": "npm run storybook:inventory && npm run storybook:validate-mocks && npm run storybook:validate-components && npm run typecheck",
     "clean:logs": "rm -rf test/logs/*.log && echo \"Logs cleaned\"",
     "clean:results": "rm -rf test/results/*.log test/results/*.json test/results/*.txt && echo \"Results cleaned\"",
-    "clean": "npm run clean:logs && npm run clean:results && rm -rf .next storybook-static node_modules/.cache/storybook node_modules/.vite && echo \"All caches cleaned\""
+    "clean": "npm run clean:logs && npm run clean:results && rm -rf .next storybook-static node_modules/.cache/storybook node_modules/.vite && echo \"All caches cleaned\"",
+    "dev:next-only": "next dev --experimental-https"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.7",
@@ -240,6 +241,7 @@
     "eslint-plugin-storybook": "~10.4.0",
     "glob": "^13.0.0",
     "happy-dom": "^20.4.0",
+    "jsdom": "^26.1.0",
     "known-css-properties": "^0.37.0",
     "patch-package": "^8.0.1",
     "pdf-to-img": "^4.5.0",

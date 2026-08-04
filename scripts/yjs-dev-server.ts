@@ -11,6 +11,10 @@
  * Usage: npx tsx scripts/yjs-dev-server.ts
  */
 
+// Load .env.local so OPENAI_API_KEY and other secrets are available
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env.local" });
+
 import { YjsWebSocketServer } from "../amplify/functions/yjsSync/index";
 import type {
   DualBotConfig,
