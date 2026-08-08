@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { fn, expect, userEvent, within } from "storybook/test";
 import { AIAgentConfig, type AIAgentConfigValues, type SectionAIConfigValues } from "./AIAgentConfig";
 
 const meta: Meta<typeof AIAgentConfig> = {
@@ -53,6 +53,15 @@ export const PlatformMode: Story = {
   args: {
     mode: "platform",
     values: defaultPlatformValues,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Accordion sections render — verify "Save Changes" button
+    const saveBtn = await canvas.findByRole("button", { name: /Save Changes/i });
+    expect(saveBtn).not.toBeDisabled();
+    await userEvent.click(saveBtn);
+    expect(args.onSave).toHaveBeenCalled();
   },
 };
 

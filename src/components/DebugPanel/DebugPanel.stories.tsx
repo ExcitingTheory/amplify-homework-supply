@@ -3,6 +3,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { fn, expect, userEvent, within } from 'storybook/test';
 import { DebugPanel } from './DebugPanel';
 import { useDebugPanel } from './useDebugPanel';
 import { Button, Box } from '@mui/material';
@@ -24,23 +25,13 @@ type Story = StoryObj<typeof DebugPanel>;
 export const Default: Story = {
   args: {
     open: true,
-    onClose: () => {},
+    onClose: fn(),
     defaultTab: 'components',
     position: 'right',
     width: 600,
   },
   decorators: [
     (Story) => {
-      // Initialize some test data in window globals
-      if (typeof window !== 'undefined') {
-        // Add some test logs
-        setTimeout(() => {
-          console.log('Test log message');
-          console.warn('Test warning message');
-          console.error('Test error message');
-        }, 100);
-      }
-      
       return (
         <Box sx={{ height: '100vh', p: 2 }}>
           <h1>Main Application Content</h1>
@@ -50,6 +41,25 @@ export const Default: Story = {
       );
     },
   ],
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Components tab is active by default
+    await canvas.findByRole('tab', { name: /Components/i });
+
+    // Switch to Logs tab
+    const logsTab = canvas.getByRole('tab', { name: /Logs/i });
+    await userEvent.click(logsTab);
+
+    // Switch to State tab
+    const stateTab = canvas.getByRole('tab', { name: /State/i });
+    await userEvent.click(stateTab);
+
+    // Click close button
+    const closeBtn = canvas.getByRole('button', { name: /close/i });
+    await userEvent.click(closeBtn);
+    expect(args.onClose).toHaveBeenCalled();
+  },
 };
 
 /**
@@ -58,10 +68,16 @@ export const Default: Story = {
 export const LogsTab: Story = {
   args: {
     open: true,
-    onClose: () => {},
+    onClose: fn(),
     defaultTab: 'logs',
     position: 'right',
     width: 600,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Logs tab is active
+    const logsTab = await canvas.findByRole('tab', { name: /Logs/i });
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
   },
 };
 
@@ -71,10 +87,16 @@ export const LogsTab: Story = {
 export const StateTab: Story = {
   args: {
     open: true,
-    onClose: () => {},
+    onClose: fn(),
     defaultTab: 'state',
     position: 'right',
     width: 600,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // State tab is active
+    const stateTab = await canvas.findByRole('tab', { name: /State/i });
+    expect(stateTab).toHaveAttribute('aria-selected', 'true');
   },
 };
 

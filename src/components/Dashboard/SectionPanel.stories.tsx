@@ -74,6 +74,22 @@ export const MixedProgress: Story = {
     sectionLevel: { level: 3 },
     defaultExpanded: true,
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Section name renders in accordion header
+    await canvas.findByText("Spanish 101 — Fall 2026");
+
+    // Assignment cards visible
+    await canvas.findByText("Chapter 3: Verb Conjugation");
+
+    // Click "Practice" button on a pending assignment
+    const practiceButtons = canvas.getAllByRole("button", { name: /Practice/i });
+    if (practiceButtons.length > 0) {
+      await userEvent.click(practiceButtons[0]);
+      expect(args.onOpenDrill).toHaveBeenCalled();
+    }
+  },
 };
 
 export const AllCompleted: Story = {
@@ -89,6 +105,16 @@ export const AllCompleted: Story = {
     sectionLevel: { level: 5 },
     defaultExpanded: true,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Japanese 201 — Spring 2026");
+
+    // "Completed (N)" toggle button — find specifically by button role
+    const completedBtn = await canvas.findByRole("button", { name: /Completed \(/i });
+    await userEvent.click(completedBtn);
+    // Assignment cards visible after expanding
+    await canvas.findByText(/Chapter 1: Greetings/);
+  },
 };
 
 export const AllPending: Story = {
@@ -98,6 +124,14 @@ export const AllPending: Story = {
     units,
     gradeMap: {},
     defaultExpanded: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("French 101 — Summer 2026");
+    // No "Completed (N)" toggle button for all-pending section
+    expect(canvas.queryByRole("button", { name: /Completed \(/i })).toBeNull();
+    // Pending assignments visible
+    await canvas.findByText("Chapter 3: Verb Conjugation");
   },
 };
 
@@ -136,6 +170,19 @@ export const Collapsed: Story = {
     ...MixedProgress.args,
     defaultExpanded: false,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Section name visible in header
+    await canvas.findByText("Spanish 101 — Fall 2026");
+
+    // Accordion starts collapsed — button has aria-expanded="false"
+    const header = canvas.getByRole("button", { name: /Spanish 101/i });
+    expect(header).toHaveAttribute("aria-expanded", "false");
+
+    // Click header to expand
+    await userEvent.click(header);
+    expect(header).toHaveAttribute("aria-expanded", "true");
+  },
 };
 
 export const SingleAssignment: Story = {
@@ -145,5 +192,10 @@ export const SingleAssignment: Story = {
     units,
     gradeMap: {},
     defaultExpanded: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("English Composition");
+    await canvas.findByText("Chapter 3: Verb Conjugation");
   },
 };
