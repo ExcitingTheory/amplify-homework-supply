@@ -70,8 +70,13 @@ test.describe("Unit Editor CRUD", () => {
     await editor.click();
     await editor.pressSequentially(testContent, { delay: 20 });
 
-    // Wait for autosave (2s debounce + buffer)
-    await page.waitForTimeout(4000);
+    // Wait for autosave
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
 
     // Reload and verify content persisted
     await page.reload();
@@ -121,7 +126,6 @@ test.describe("Unit Editor CRUD", () => {
 
     // Change to Archived (doesn't require name/description like Published does)
     await page.locator("#status-select").click();
-    await page.waitForTimeout(500);
     await page.locator('li[data-value="ARCHIVED"]').click();
 
     // Status should update to Archived
@@ -131,7 +135,6 @@ test.describe("Unit Editor CRUD", () => {
 
     // Change back to Draft
     await page.locator("#status-select").click();
-    await page.waitForTimeout(500);
     await page.locator('li[data-value="DRAFT"]').click();
 
     await expect(page.locator("#status-select")).toContainText(/draft/i, {
@@ -152,11 +155,9 @@ test.describe("Unit Editor CRUD", () => {
 
     // Files tab opens files panel
     await page.locator('[data-tour="files-tab"]').click();
-    await page.waitForTimeout(500);
 
     // Questions tab
     await page.locator('[data-tour="questions-tab"]').click();
-    await page.waitForTimeout(500);
 
     // Assignments tab opens assignment settings
     await page.locator('[data-tour="assignments-tab"]').click();

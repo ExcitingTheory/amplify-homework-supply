@@ -72,6 +72,8 @@ export function AnimatedXPCounter({
     <Typography
       variant={variant}
       fontWeight={700}
+      aria-live="polite"
+      aria-atomic="true"
       sx={{
         fontFeatureSettings: '"tnum"',
         fontVariantNumeric: 'tabular-nums',

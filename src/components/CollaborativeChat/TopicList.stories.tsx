@@ -4,7 +4,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { fn } from 'storybook/test'
+import { fn, expect, userEvent, within } from 'storybook/test'
 import TopicList from './TopicList'
 import type { ChatTopic, ChatUser, TopicScope } from './types'
 
@@ -97,6 +97,30 @@ export const SectionScope: Story = {
     currentScope: 'section',
     onlineUsers: mockOnlineUsers,
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // Pinned topic renders first
+    await canvas.findByText('#general')
+
+    // Click a different topic
+    const homeworkTopic = canvas.getByText('#homework-help')
+    await userEvent.click(homeworkTopic)
+    expect(args.onSelectTopic).toHaveBeenCalledWith('topic-2')
+
+    // Open create dialog
+    const addBtn = canvas.getByRole('button', { name: /Create topic/i })
+    await userEvent.click(addBtn)
+
+    // Dialog renders — find by its title text
+    await within(document.body).findByText('Create Topic')
+
+    // Type a new topic name and confirm with Enter
+    const nameInput = await within(document.body).findByLabelText('Topic name')
+    await userEvent.type(nameInput, 'new-discussion')
+    await userEvent.keyboard('{Enter}')
+    expect(args.onCreateTopic).toHaveBeenCalledWith('new-discussion', 'section')
+  },
 }
 
 export const UnitScope: Story = {
@@ -105,6 +129,14 @@ export const UnitScope: Story = {
     selectedTopicId: 'topic-3',
     currentScope: 'unit:unit-abc',
     onlineUsers: mockOnlineUsers,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    // Unit-scoped topics shown
+    await canvas.findByText('#unit-3-questions')
+    await canvas.findByText('#kanji-practice')
+    // Section-level #general also shown (cross-scope)
+    await canvas.findByText('#general')
   },
 }
 
@@ -115,6 +147,20 @@ export const EmptyTopics: Story = {
     currentScope: 'section',
     onlineUsers: [],
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // Create first topic via the + button
+    const addBtn = canvas.getByRole('button', { name: /Create topic/i })
+    await userEvent.click(addBtn)
+
+    // Dialog appears
+    await within(document.body).findByText('Create Topic')
+    const nameInput = await within(document.body).findByLabelText('Topic name')
+    await userEvent.type(nameInput, 'first-topic')
+    await userEvent.keyboard('{Enter}')
+    expect(args.onCreateTopic).toHaveBeenCalledWith('first-topic', 'section')
+  },
 }
 
 export const NoSelection: Story = {
@@ -123,5 +169,12 @@ export const NoSelection: Story = {
     selectedTopicId: null,
     currentScope: 'section',
     onlineUsers: mockOnlineUsers,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByText('#general')
+    // No item should have aria-selected="true"
+    const selectedItems = canvasElement.querySelectorAll('[aria-selected="true"]')
+    expect(selectedItems).toHaveLength(0)
   },
 }

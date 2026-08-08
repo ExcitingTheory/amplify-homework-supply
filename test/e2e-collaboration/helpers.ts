@@ -135,8 +135,6 @@ export async function loginOnPage(
   // Wait for auth to complete — #user-button in MainToolbar confirms login
   await page.waitForSelector("#user-button", { timeout: 30_000 });
 
-  // Brief wait to ensure Amplify has flushed tokens to storage
-  await page.waitForTimeout(500);
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +190,6 @@ export async function createUnit(page: Page, name?: string): Promise<string> {
   await page.waitForSelector('[data-lexical-editor="true"]', {
     timeout: 15_000,
   });
-  await page.waitForTimeout(2000);
 
   // Extract unit ID from URL
   const url = page.url();
@@ -205,12 +202,16 @@ export async function createUnit(page: Page, name?: string): Promise<string> {
     const titleEl = page.getByText("Untitled Unit");
     if (await titleEl.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await titleEl.click();
-      await page.waitForTimeout(500);
       const nameInput = page.locator("input:visible").first();
       await nameInput.clear();
       await nameInput.fill(name);
       await nameInput.blur();
-      await page.waitForTimeout(2000);
+      await page
+        .waitForResponse(
+          (resp) => resp.url().includes("graphql") && resp.status() === 200,
+          { timeout: 10_000 },
+        )
+        .catch(() => {});
     }
   }
 
@@ -226,9 +227,13 @@ export async function createUnit(page: Page, name?: string): Promise<string> {
  */
 export async function publishUnit(page: Page): Promise<void> {
   await page.locator("#status-select").click();
-  await page.waitForTimeout(500);
   await page.locator('li[data-value="PUBLISHED"]').click();
-  await page.waitForTimeout(2000);
+  await page
+    .waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 10_000 },
+    )
+    .catch(() => {});
 }
 
 /**
@@ -241,8 +246,13 @@ export async function saveUnit(page: Page): Promise<void> {
   const saveButton = page.locator(
     'button[title="Save now (automatic save happens 2 seconds after you stop typing)"]',
   );
-  await saveButton.click({ force: true });
-  await page.waitForTimeout(2000);
+  await saveButton.click();
+  await page
+    .waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 10_000 },
+    )
+    .catch(() => {});
 }
 
 /**
@@ -266,7 +276,6 @@ export async function addQuizBlock(page: Page): Promise<void> {
     .locator('ul[role="menu"] li')
     .filter({ hasText: /quiz|multiple choice/i });
   await quizItem.click();
-  await page.waitForTimeout(1000);
 
   // Verify quiz block appeared
   await expect(page.locator('[data-tour="quiz-block"]').first()).toBeVisible({
@@ -296,8 +305,6 @@ export async function createSection(
 
   await page.locator('[data-tour="create-section-button"]').click();
   await page.waitForSelector('[data-tour="section-form"]', { timeout: 10_000 });
-  // Brief pause to ensure dialog event handlers are attached after hydration
-  await page.waitForTimeout(500);
 
   // Fill the section form
   await page
@@ -370,7 +377,12 @@ export async function joinSection(page: Page, joinCode: string): Promise<void> {
     .click();
 
   // joinSection forces auth refresh + page reload
-  await page.waitForTimeout(5000);
+  await page
+    .waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 15_000 },
+    )
+    .catch(() => {});
   await page.waitForSelector("#user-button", { timeout: 20_000 });
 }
 
@@ -439,7 +451,6 @@ export async function handleTimerGate(page: Page): Promise<void> {
   const startButton = page.getByRole("button", { name: /start/i });
   if (await startButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await startButton.click();
-    await page.waitForTimeout(2000);
   }
 }
 
@@ -452,7 +463,6 @@ export async function handleTimerGate(page: Page): Promise<void> {
  */
 export async function openWorkbook(page: Page, unitId: string): Promise<void> {
   await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-  await page.waitForTimeout(3000);
   await handleTimerGate(page);
   await page.waitForSelector(
     '[data-tour="workbook-content"], [data-tour="workbook"]',
@@ -493,7 +503,9 @@ export async function joinPracticeDrill(
 
   // Click "Join Session" button
   await dialog.getByRole("button", { name: /join session/i }).click();
-  await page.waitForTimeout(5000);
+  await page.waitForSelector('[data-tour="workbook-content"], [data-tour="workbook"], [data-testid="practice-drill"]', {
+    timeout: 30_000,
+  }).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -509,7 +521,6 @@ export async function openJoinPeerReviewDialog(page: Page): Promise<void> {
   const menuButton = page.locator('button[aria-label="menu"]').first();
   if (await menuButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await menuButton.click();
-    await page.waitForTimeout(1000);
   }
 
   // Click "Join Peer Review" in the drawer

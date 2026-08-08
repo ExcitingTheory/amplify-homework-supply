@@ -56,7 +56,7 @@ export function LevelBadge({ level, showProgress = true, size = 'medium' }: Leve
 
   return (
     <Tooltip title={tooltipText} arrow>
-      <Box sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+      <Box aria-live="polite" aria-atomic="true" aria-label={tooltipText} sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
         <Chip
           icon={icon}
           label={`Lvl. ${level.level}`}

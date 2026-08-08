@@ -20,14 +20,38 @@ import QuizPlugin, { QuizNode } from "./QuizPlugin";
 import AnswerPlugin, { AnswerNode } from "./AnswerPlugin";
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Block Suggestion",
   component: BlockSuggestionPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "block-suggestion-story-unit",
+        name: "Block Suggestion Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "block-suggestion-story-unit",
     initializeMockData: false,
   },
 };
@@ -58,110 +82,87 @@ const Template = ({ editorState, instructions }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "Block Suggestion Demo",
-    description: "Demonstrates pedagogical block suggestions",
-    data: editorState
-      ? JSON.stringify(editorState)
-      : JSON.stringify({
-          root: {
-            children: [],
-            direction: "ltr",
-            format: "",
-            indent: 0,
-            type: "root",
-            version: 1,
-          },
-        }),
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <Box sx={{ p: 4, maxWidth: "900px", margin: "0 auto" }}>
-          <Typography variant="h4" gutterBottom>
-            Block Suggestion Plugin Demo
-          </Typography>
+    <LexicalComposer initialConfig={initialConfig}>
+      <Box sx={{ p: 4, maxWidth: "900px", margin: "0 auto" }}>
+        <Typography variant="h4" gutterBottom>
+          Block Suggestion Plugin Demo
+        </Typography>
 
-          {instructions && (
-            <Paper
-              sx={{
-                p: 2,
-                mb: 3,
-                bgcolor: "info.light",
-                color: "info.contrastText",
-              }}
-            >
-              <Typography variant="body2">
-                <strong>💡 How to test:</strong>
-                <br />
-                {instructions}
-              </Typography>
-            </Paper>
-          )}
-
+        {instructions && (
           <Paper
-            elevation={3}
             sx={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              minHeight: "500px",
-              p: 3,
+              p: 2,
+              mb: 3,
+              bgcolor: "info.light",
+              color: "info.contrastText",
             }}
           >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{
-                    outline: "none",
-                    minHeight: "450px",
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                  }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "24px",
-                    left: "24px",
-                    color: "#999",
-                    pointerEvents: "none",
-                  }}
-                >
-                  Start typing a heading, then press Enter on an empty line to
-                  see suggestions...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <QuizPlugin />
-            <AnswerPlugin />
-            <CustomAnswerPlugin />
-            <BlockSuggestionPlugin />
-          </Paper>
-
-          <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Keyboard shortcuts:</strong>
+            <Typography variant="body2">
+              <strong>💡 How to test:</strong>
               <br />
-              • ↑↓ Navigate suggestions
-              <br />
-              • Tab or Enter: Select suggestion
-              <br />
-              • Esc: Dismiss suggestions
-              <br />
+              {instructions}
             </Typography>
           </Paper>
-        </Box>
-      </LexicalComposer>
-    </UnitProvider>
+        )}
+
+        <Paper
+          elevation={3}
+          sx={{
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            minHeight: "500px",
+            p: 3,
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{
+                  outline: "none",
+                  minHeight: "450px",
+                  fontSize: "16px",
+                  lineHeight: "1.6",
+                }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "24px",
+                  left: "24px",
+                  color: "#999",
+                  pointerEvents: "none",
+                }}
+              >
+                Start typing a heading, then press Enter on an empty line to see
+                suggestions...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <QuizPlugin />
+          <AnswerPlugin />
+          <CustomAnswerPlugin />
+          <BlockSuggestionPlugin />
+        </Paper>
+
+        <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
+          <Typography variant="body2" color="text.secondary">
+            <strong>Keyboard shortcuts:</strong>
+            <br />
+            • ↑↓ Navigate suggestions
+            <br />
+            • Tab or Enter: Select suggestion
+            <br />
+            • Esc: Dismiss suggestions
+            <br />
+          </Typography>
+        </Paper>
+      </Box>
+    </LexicalComposer>
   );
 };
 

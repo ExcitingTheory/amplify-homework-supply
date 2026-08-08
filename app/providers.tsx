@@ -17,6 +17,7 @@ import DynamicThemeProvider from '../src/components/DynamicThemeProvider';
 import { NotificationProvider } from '../src/context/notificationContext';
 import { TourProvider } from '../src/context/tourContext';
 import { ChatContextProvider } from '../src/context/chatContext';
+import { SearchProvider } from '../src/context/searchContext';
 import { EasterEggLayer } from '../src/components/Gamification/EasterEggLayer';
 import GlobalChatButton from '../src/components/GlobalChatButton';
 import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
@@ -153,11 +154,13 @@ export default function Providers({ children, nonce }: { children: React.ReactNo
               <DynamicThemeProvider>
               <NotificationProvider>
               <ChatContextProvider>
+                <SearchProvider>
                 <TourProvider>
                   <AuthenticatedShell hideChatButton={hideChatButton}>
                     {children}
                   </AuthenticatedShell>
                 </TourProvider>
+                </SearchProvider>
               </ChatContextProvider>
               </NotificationProvider>
               </DynamicThemeProvider>

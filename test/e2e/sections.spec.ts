@@ -90,8 +90,9 @@ test.describe("Section Management", () => {
 
     // Log out instructor, log in as student
     await page.locator("#user-button").click();
-    await page.waitForTimeout(300);
-    await page.getByRole("menuitem", { name: /sign out|log out/i }).click();
+    const signOutBtn = page.getByRole("menuitem", { name: /sign out|log out/i });
+    await expect(signOutBtn).toBeVisible({ timeout: 5_000 });
+    await signOutBtn.click();
     await page.waitForSelector('input[name="username"]', { timeout: 15_000 });
 
     await login(page, STUDENT, "/sections");
@@ -109,7 +110,12 @@ test.describe("Section Management", () => {
       .click();
 
     // Wait for join to complete (auth refresh + page reload)
-    await page.waitForTimeout(5000);
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
     await page.waitForSelector("#user-button", { timeout: 20_000 });
 
     // Navigate to sections and verify the section appears

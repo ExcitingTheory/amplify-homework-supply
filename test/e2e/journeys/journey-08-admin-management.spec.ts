@@ -32,19 +32,20 @@ test.describe("Journey 8: Admin — Platform Management", () => {
       const heading = page.getByRole("heading");
       await expect(heading.first()).toBeVisible({ timeout: 10_000 });
 
-      const bodyText = await page.locator("body").textContent();
+      // Analytics MUST contain a visible metric element with numeric data
+      const metricLocator = page.locator(
+        '[data-testid*="metric"], [data-testid*="stat"], [data-testid*="count"], [class*="metric"], [class*="stat"]',
+      );
+      const hasMetricElements = await metricLocator.first().isVisible({ timeout: 5_000 }).catch(() => false);
 
-      // Analytics MUST contain numeric data
-      expect(bodyText).toMatch(/\d+/);
-
-      // Must have data visualization
-      const hasDataViz =
-        (await page
-          .locator("canvas, svg, table")
-          .first()
-          .isVisible({ timeout: 5_000 })
-          .catch(() => false)) || bodyText!.includes("%");
-      expect(hasDataViz).toBe(true);
+      if (hasMetricElements) {
+        const metricText = await metricLocator.first().textContent();
+        expect(metricText).toMatch(/\d+/);
+      } else {
+        // Fallback: check for data visualization components (canvas/svg/table)
+        const dataViz = page.locator("canvas, svg, table").first();
+        await expect(dataViz).toBeVisible({ timeout: 10_000 });
+      }
     });
 
     test("admin vocabulary management lets you create a word", async ({
@@ -54,32 +55,24 @@ test.describe("Journey 8: Admin — Platform Management", () => {
       await login(page, ADMIN);
       await navigateTo(page, "/admin/vocabulary");
 
-      // Must show vocabulary management UI
-      const bodyText = await page.locator("body").textContent();
-      const hasVocabUI =
-        bodyText!.toLowerCase().includes("vocabul") ||
-        bodyText!.toLowerCase().includes("word") ||
-        bodyText!.toLowerCase().includes("dictionary");
-      expect(hasVocabUI).toBe(true);
+      // Must show vocabulary management UI with a specific heading or control
+      const vocabHeading = page.locator(
+        'h1, h2, h3, [role="heading"]',
+      ).filter({ hasText: /vocabul|word|dictionary/i });
+      await expect(vocabHeading.first()).toBeVisible({ timeout: 10_000 });
 
       // Look for add/create button
       const addBtn = page.locator(
         'button:has-text("Add"), button:has-text("Create"), button:has-text("New")',
       );
-      if (
-        await addBtn
-          .first()
-          .isVisible({ timeout: 10_000 })
-          .catch(() => false)
-      ) {
-        await addBtn.first().click();
-        await page.waitForTimeout(2000);
+      await expect(addBtn.first()).toBeVisible({ timeout: 10_000 });
+      await addBtn.first().click();
 
-        // Form/dialog must open with input fields
-        const inputs = page.locator('input:not([type="hidden"]), textarea');
-        const inputCount = await inputs.count();
-        expect(inputCount).toBeGreaterThan(0);
-      }
+      // Form/dialog must open with input fields
+      const inputs = page.locator('input:not([type="hidden"]), textarea');
+      await expect(inputs.first()).toBeVisible({ timeout: 5_000 });
+      const inputCount = await inputs.count();
+      expect(inputCount).toBeGreaterThan(0);
     });
 
     test("admin settings page has interactive controls", async ({ page }) => {
@@ -125,42 +118,61 @@ test.describe("Journey 8: Admin — Platform Management", () => {
     test("student is blocked from /admin/analytics", async ({ page }) => {
       suppressKnownErrors(page);
       await login(page, STUDENT_1);
-      await page.goto("/admin/analytics", { timeout: 30_000 });
+
+      const response = await page.goto("/admin/analytics", { timeout: 30_000 });
       await waitForPageReady(page);
 
-      // Student must NOT see analytics data — should be redirected or blocked
+      const status = response?.status() ?? 0;
       const url = page.url();
       const bodyText = await page.locator("body").textContent();
 
-      const isBlocked =
-        !url.includes("/admin/analytics") || // redirected away
+      // 404 is NOT a valid authorization response — distinguish from 403/redirect
+      const isRedirected = !url.includes("/admin/analytics");
+      const isForbidden = status === 403 || status === 401;
+      const hasAuthMessage =
         bodyText!.toLowerCase().includes("unauthorized") ||
         bodyText!.toLowerCase().includes("forbidden") ||
         bodyText!.toLowerCase().includes("access denied") ||
         bodyText!.toLowerCase().includes("not authorized") ||
-        bodyText!.toLowerCase().includes("sign in") ||
-        bodyText!.toLowerCase().includes("404");
-      expect(isBlocked).toBe(true);
+        bodyText!.toLowerCase().includes("sign in");
+
+      expect(
+        isRedirected || isForbidden || hasAuthMessage,
+        `Expected redirect or 401/403, got status=${status} url=${url}`,
+      ).toBe(true);
+      // 404 should NOT be treated as authorization
+      if (status === 404) {
+        expect.soft(status, "Route returned 404 — this is a routing bug, not auth").not.toBe(404);
+      }
     });
 
     test("student is blocked from /admin/settings", async ({ page }) => {
       suppressKnownErrors(page);
       await login(page, STUDENT_1);
-      await page.goto("/admin/settings", { timeout: 30_000 });
+
+      const response = await page.goto("/admin/settings", { timeout: 30_000 });
       await waitForPageReady(page);
 
+      const status = response?.status() ?? 0;
       const url = page.url();
       const bodyText = await page.locator("body").textContent();
 
-      const isBlocked =
-        !url.includes("/admin/settings") ||
+      const isRedirected = !url.includes("/admin/settings");
+      const isForbidden = status === 403 || status === 401;
+      const hasAuthMessage =
         bodyText!.toLowerCase().includes("unauthorized") ||
         bodyText!.toLowerCase().includes("forbidden") ||
         bodyText!.toLowerCase().includes("access denied") ||
         bodyText!.toLowerCase().includes("not authorized") ||
-        bodyText!.toLowerCase().includes("sign in") ||
-        bodyText!.toLowerCase().includes("404");
-      expect(isBlocked).toBe(true);
+        bodyText!.toLowerCase().includes("sign in");
+
+      expect(
+        isRedirected || isForbidden || hasAuthMessage,
+        `Expected redirect or 401/403, got status=${status} url=${url}`,
+      ).toBe(true);
+      if (status === 404) {
+        expect.soft(status, "Route returned 404 — this is a routing bug, not auth").not.toBe(404);
+      }
     });
   });
 });

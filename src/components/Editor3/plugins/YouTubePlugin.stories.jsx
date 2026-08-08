@@ -21,14 +21,38 @@ import YouTubePlugin, {
   YouTubeNode,
 } from "./YouTubePlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Media/YouTube",
   component: YouTubePlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "youtube-plugin-story-unit",
+        name: "YouTube Plugin Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "youtube-plugin-story-unit",
     initializeMockData: false,
   },
 };
@@ -52,8 +76,6 @@ function InsertYouTubeButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
-  const unitId = "youtube-demo-editable";
-
   const initialConfig = {
     namespace: "YouTubePluginDemo",
     theme: LanguageEditorTheme,
@@ -73,61 +95,48 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "YouTube Plugin Demo",
-    description: "Demo for YouTube Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>YouTube Plugin - Editable Mode</h2>
-          {showInsertButton && <InsertYouTubeButton />}
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Enter text or insert a YouTube video...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <YouTubePlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>YouTube Plugin - Editable Mode</h2>
+        {showInsertButton && <InsertYouTubeButton />}
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Enter text or insert a YouTube video...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <YouTubePlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
-  const unitId = "youtube-demo-readonly";
-
   const initialConfig = {
     namespace: "YouTubePluginDemo",
     theme: LanguageEditorTheme,
@@ -147,43 +156,32 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "YouTube Plugin Demo (Read-Only)",
-    description: "Demo for YouTube Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>YouTube Plugin - Read-Only Mode</h2>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={null}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <YouTubePlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>YouTube Plugin - Read-Only Mode</h2>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+            backgroundColor: "#f5f5f5",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <YouTubePlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

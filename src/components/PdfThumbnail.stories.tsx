@@ -23,8 +23,9 @@ const meta: Meta<typeof PdfThumbnail> = {
 export default meta;
 type Story = StoryObj<typeof PdfThumbnail>;
 
-// Sample PDF URL (using a public PDF for demo)
-const SAMPLE_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+// Sample PDF served from Storybook's staticDirs (test/mocks → /story-mocks)
+// Using a local file avoids flaky behaviour when the external network is unavailable.
+const SAMPLE_PDF_URL = '/story-mocks/japanese-grammar-guide.pdf';
 
 /**
  * Default thumbnail with standard settings

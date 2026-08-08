@@ -1130,6 +1130,7 @@ This story runs through all available keyboard shortcuts automatically. Watch as
       },
     },
   },
+  tags: ["!test"], // 120s automation script — too slow/heavy for vitest browser tests
   play: async ({ canvasElement }) => {
     // Import the keyboard shortcuts script
     const { createKeyboardShortcutsPlay } =
@@ -1148,6 +1149,18 @@ This story runs through all available keyboard shortcuts automatically. Watch as
  */
 export const KeyboardShortcutsTextFormatting = {
   args: {},
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "keyboard-shortcuts-text-formatting-id",
+        name: "Text Formatting",
+        data: null,
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   render: () => <Editor />,
   parameters: {
     unitId: "keyboard-shortcuts-text-formatting-id",
@@ -1171,6 +1184,18 @@ export const KeyboardShortcutsTextFormatting = {
  */
 export const KeyboardShortcutsBlockTypes = {
   args: {},
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "keyboard-shortcuts-block-types-id",
+        name: "Block Types",
+        data: null,
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   render: () => <Editor />,
   parameters: {
     unitId: "keyboard-shortcuts-block-types-id",
@@ -1191,6 +1216,18 @@ export const KeyboardShortcutsBlockTypes = {
  */
 export const KeyboardShortcutsAlignment = {
   args: {},
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "keyboard-shortcuts-alignment-id",
+        name: "Alignment Test",
+        data: null,
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   render: () => <Editor />,
   parameters: {
     unitId: "keyboard-shortcuts-alignment-id",

@@ -34,47 +34,8 @@ const XP_REASON_LABELS = {
   PRACTICE_DRILL_ACCURACY_BONUS: "Drill Accuracy Bonus",
 };
 
-export default async function XPHistoryPage() {
-  // Auth check — get the current user's identity server-side
-  let username = null;
-  try {
-    const session = await runWithAmplifyServerContext({
-      nextServerContext: { cookies },
-      operation: (contextSpec) => fetchAuthSession(contextSpec),
-    });
-    username =
-      session?.tokens?.idToken?.payload?.["cognito:username"] ||
-      session?.tokens?.idToken?.payload?.sub;
-  } catch {
-    // Not authenticated
-  }
-
-  if (!username) {
-    redirect("/");
-  }
-
-  // Fetch XP logs for the authenticated user
-  let logs = [];
-  let totalXP = 0;
-
-  try {
-    const client = getServerClient();
-    const { data } = await client.models.StudentXPLog.list({
-      filter: { studentId: { eq: username } },
-      limit: 200,
-    });
-    const items = (data || [])
-      .filter((item) => item != null)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    logs = items;
-    totalXP = items.reduce((sum, log) => sum + (log.xpAmount || 0), 0);
-  } catch (err) {
-    console.error("[XPHistory RSC] Failed to fetch logs:", err);
-  }
-
+/** Client component — renderable in Storybook without server context. */
+export function XPHistoryContent({ logs = [], totalXP = 0 }) {
   return (
     <Box
       sx={{
@@ -145,4 +106,48 @@ export default async function XPHistoryPage() {
       </Card>
     </Box>
   );
+}
+
+export default async function XPHistoryPage() {
+  // Auth check — get the current user's identity server-side
+  let username = null;
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+    username =
+      session?.tokens?.idToken?.payload?.["cognito:username"] ||
+      session?.tokens?.idToken?.payload?.sub;
+  } catch {
+    // Not authenticated
+  }
+
+  if (!username) {
+    redirect("/");
+  }
+
+  // Fetch XP logs for the authenticated user
+  let logs = [];
+  let totalXP = 0;
+
+  try {
+    const client = getServerClient();
+    const { data } = await client.models.StudentXPLog.list({
+      filter: { studentId: { eq: username } },
+      limit: 200,
+    });
+    const items = (data || [])
+      .filter((item) => item != null)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    logs = items;
+    totalXP = items.reduce((sum, log) => sum + (log.xpAmount || 0), 0);
+  } catch (err) {
+    console.error("[XPHistory RSC] Failed to fetch logs:", err);
+  }
+
+  return <XPHistoryContent logs={logs} totalXP={totalXP} />;
 }

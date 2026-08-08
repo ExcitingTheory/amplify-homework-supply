@@ -310,6 +310,7 @@ export function CampaignSetupWizard({
                 }
                 sx={{ width: 130 }}
                 inputProps={{ min: 1, step: 1 }}
+                helperText="Display position — 1 is shown first"
               />
             </Box>
           </Box>

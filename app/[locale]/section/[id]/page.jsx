@@ -43,6 +43,7 @@ import {
   Skeleton,
   Chip,
   Tooltip,
+  Divider,
 } from "@mui/material";
 
 import EditNoteIcon from "@mui/icons-material/EditNote";
@@ -59,6 +60,7 @@ import {
 
 import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VideocamIcon from "@mui/icons-material/Videocam";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
@@ -282,6 +284,7 @@ function SectionDetail({ user, signOut }) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
+  const [coverVideoUrlInput, setCoverVideoUrlInput] = React.useState("");
 
   const { session } = React.useContext(FilesContext);
 
@@ -481,6 +484,34 @@ function SectionDetail({ user, signOut }) {
     setFileOperations(_fileOperations);
 
     setIsDragging(false);
+  };
+
+  const handleSaveSectionCoverVideo = async () => {
+    const url = coverVideoUrlInput.trim();
+    if (!url || !section?.id) return;
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        featuredVideo: url,
+        _version: section._version,
+      });
+      setCoverVideoUrlInput("");
+    } catch (error) {
+      console.error("Error saving section cover video:", error);
+    }
+  };
+
+  const handleRemoveSectionCoverVideo = async () => {
+    if (!section?.id) return;
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        featuredVideo: null,
+        _version: section._version,
+      });
+    } catch (error) {
+      console.error("Error removing section cover video:", error);
+    }
   };
 
   const handleClickOpen = () => {
@@ -1650,6 +1681,84 @@ function SectionDetail({ user, signOut }) {
               )}
             </Box>
           </CardContent>
+          {/* Cover Video — instructor only */}
+          {(isOwner || isTeacher) && !viewAsStudent && (
+            <Box sx={{ px: 2, pb: 2 }}>
+              <Divider sx={{ mb: 2 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 1,
+                }}
+              >
+                <Typography variant="h6">
+                  {t("sectionDetail.setCoverVideo")}
+                </Typography>
+                {section?.featuredVideo && (
+                  <IconButton
+                    size="small"
+                    title={t("sectionDetail.removeCoverVideo")}
+                    onClick={handleRemoveSectionCoverVideo}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+              {section?.featuredVideo ? (
+                <Box
+                  sx={{ width: "100%", borderRadius: 1, overflow: "hidden", mb: 1 }}
+                >
+                  <video
+                    src={section.featuredVideo}
+                    controls
+                    style={{ width: "100%", maxHeight: 200, display: "block" }}
+                  />
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    p: 2,
+                    border: "1px dashed currentColor",
+                    opacity: 0.6,
+                    borderRadius: 1,
+                    mb: 1,
+                  }}
+                >
+                  <VideocamIcon />
+                  <Typography variant="body2">
+                    {t("sectionDetail.noCoverVideo")}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  label={t("sectionDetail.coverVideoUrlLabel")}
+                  placeholder={t("sectionDetail.coverVideoUrlPlaceholder")}
+                  value={coverVideoUrlInput}
+                  onChange={(e) => setCoverVideoUrlInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveSectionCoverVideo();
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleSaveSectionCoverVideo}
+                  disabled={!coverVideoUrlInput.trim()}
+                  sx={{ whiteSpace: "nowrap", minWidth: "auto", flexShrink: 0 }}
+                >
+                  {t("sectionDetail.saveCoverVideo")}
+                </Button>
+              </Box>
+            </Box>
+          )}
           {/* <CardActions>
         <Button size="small">Share</Button>
         <Button size="small">Learn More</Button>

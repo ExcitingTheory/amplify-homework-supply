@@ -16,7 +16,7 @@ type AdminRouteGuardProps = {
 export default function AdminRouteGuard({
   children,
 }: AdminRouteGuardProps) {
-  const { session } = React.useContext(AuthContext);
+  const { session } = React.useContext(AuthContext) as { session?: { groups?: string[] } };
   const groups = session?.groups || [];
 
   if (!canAccessAdminRoutes(groups)) {

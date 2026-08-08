@@ -7,12 +7,15 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { within, waitFor, userEvent, expect } from 'storybook/test';
 import { Box } from '@mui/material';
 import { setMockUser } from '@storybook-mocks/aws-amplify-auth';
+import { clearMockData } from '@storybook-mocks/aws-amplify-data';
 import { seedIndexPageData } from '@storybook-mocks/index-page-examples';
+import { setNavigationState } from '@storybook-mocks/next-navigation';
+import { PathParamsContext } from 'next/dist/shared/lib/hooks-client-context.shared-runtime.js';
 import { FilesProvider } from '../../src/context/fileContext';
 
 // App Router pages — all marked 'use client', safe for Storybook.
 // Server action imports are aliased to mocks in .storybook/main.ts.
-import UnitsPage from '../../app/[locale]/units/page.jsx';
+import UnitsClient from '../../app/[locale]/units/UnitsClient.jsx';
 import UnitEditorClient from '../../app/[locale]/unit/[id]/UnitEditorClient.jsx';
 import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
 
@@ -39,20 +42,24 @@ type Story = StoryObj;
  */
 export const Step1_UnitsLibrary: Story = {
   name: '1. Units Library',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
         groups: ['Instructors'],
       });
+      setNavigationState({ pathname: '/units', params: {} });
       seedIndexPageData('instructor');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <UnitsPage />
+      <UnitsClient initialUnits={[]} />
     </Box>
   ),
   parameters: {
@@ -63,6 +70,8 @@ export const Step1_UnitsLibrary: Story = {
     nextjs: {
       navigation: { pathname: '/units' },
     },
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -83,20 +92,26 @@ export const Step1_UnitsLibrary: Story = {
  */
 export const Step2_UnitEditor: Story = {
   name: '2. Unit Editor',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
         groups: ['Instructors'],
       });
+      setNavigationState({ pathname: '/unit/unit-japanese-1', params: { id: 'unit-japanese-1' } });
       seedIndexPageData('instructor');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <UnitEditorClient />
+      <PathParamsContext.Provider value={{ id: 'unit-japanese-1', locale: 'en' }}>
+        <UnitEditorClient />
+      </PathParamsContext.Provider>
     </Box>
   ),
   parameters: {
@@ -111,6 +126,9 @@ export const Step2_UnitEditor: Story = {
         segments: [['id', 'unit-japanese-1']],
       },
     },
+    unitId: 'unit-japanese-1',
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -135,20 +153,26 @@ export const Step2_UnitEditor: Story = {
  */
 export const Step3_SectionGrades: Story = {
   name: '3. Section & Grades',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
         groups: ['Instructors'],
       });
+      setNavigationState({ pathname: '/section/section-jpn-101', params: { id: 'section-jpn-101' } });
       seedIndexPageData('instructor');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <SectionDetailPage />
+      <PathParamsContext.Provider value={{ id: 'section-jpn-101', locale: 'en' }}>
+        <SectionDetailPage />
+      </PathParamsContext.Provider>
     </Box>
   ),
   parameters: {
@@ -160,9 +184,11 @@ export const Step3_SectionGrades: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/section/section-jpn-101',
-        params: { id: 'section-jpn-101' },
+        segments: [['id', 'section-jpn-101']],
       },
     },
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);

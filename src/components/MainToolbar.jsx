@@ -85,7 +85,6 @@ import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import GlobalSearchBar from "./GlobalSearchBar";
-import { SearchProvider } from "../context/searchContext";
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -1024,9 +1023,7 @@ export default function MainToolbar({ children }) {
           ref={appShell.toolbarChildrenPortalRef}
           style={{ display: "contents" }}
         />
-        <SearchProvider>
-          <GlobalSearchBar />
-        </SearchProvider>
+        <GlobalSearchBar />
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
         <SyncStatusIndicator />

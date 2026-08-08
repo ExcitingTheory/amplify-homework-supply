@@ -72,7 +72,11 @@ if (typeof window !== "undefined") {
 }
 
 import React from "react";
-import { ThemeProvider, useColorScheme } from "@mui/material/styles";
+import {
+  ThemeProvider,
+  useColorScheme,
+  createTheme,
+} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import CircularProgress from "@mui/material/CircularProgress";
 import { fn } from "storybook/test";
@@ -87,7 +91,15 @@ import "../src/components/Editor3/components/LanguageEditorTheme.css";
 import "./storybook.css";
 
 // Import the app's shared theme (with cssVariables + colorSchemes)
-import theme from "../src/theme";
+import appTheme from "../src/theme";
+
+// Keep portal-based overlays inside the Storybook canvas
+const theme = createTheme(appTheme, {
+  components: {
+    MuiDialog: { defaultProps: { disablePortal: true } },
+    MuiDrawer: { defaultProps: { disablePortal: true } },
+  },
+});
 
 // Import action tracking
 import { createTrackableActions } from "./code/action-tracker";
@@ -119,7 +131,7 @@ import { mockChatAPI } from "./__mocks__/chat-api";
 
 // Import Next.js router mock
 import { RouterContext, createMockRouter } from "./__mocks__/next-router";
-import { setNavigationState } from "./__mocks__/next-navigation";
+import { setNavigationState } from "@storybook-mocks/next-navigation";
 
 // Import translation mode addon
 import { withTranslationMode } from "./addons/translation-mode";
@@ -1019,6 +1031,12 @@ const preview = {
 
       // Configure next/navigation mock state from story parameters
       const navParams = context?.parameters?.nextjs?.navigation || {};
+      console.log(
+        "[Preview] setNavigationState called, params:",
+        JSON.stringify(navParams.params),
+        "story:",
+        context?.name,
+      );
       setNavigationState({
         pathname: navParams.pathname || routerParams.pathname || "/",
         params: navParams.params || routerParams.query || {},

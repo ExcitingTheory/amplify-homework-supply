@@ -24,15 +24,50 @@ import WordBlockPlugin, {
   WordBlockNode,
 } from "./WordBlockPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  seedMockWords,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { DictionaryProvider } from "../../../context/dictionaryContext";
 
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Word Block",
   component: WordBlockPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockWords([
+        {
+          id: "sample-word-id",
+          phrase: "example",
+          pronunciation: "EK-sam-pl",
+          definition: "a thing representative of a group",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+      ]);
+      seedMockUnit({
+        id: "word-block-story-unit",
+        name: "WordBlock Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "word-block-story-unit",
     initializeMockData: false,
   },
 };
@@ -75,66 +110,46 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "WordBlock Story Unit",
-    data: {
-      root: {
-        children: [],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1,
-      },
-    },
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <h2>Word Block Plugin - Editable Mode</h2>
-            {showInsertButton && <InsertWordBlockButton />}
-            <div
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                minHeight: "400px",
-                padding: "20px",
-              }}
-            >
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{ outline: "none", minHeight: "350px" }}
-                  />
-                }
-                placeholder={
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      left: "20px",
-                      color: "#999",
-                    }}
-                  >
-                    Enter text or insert word blocks...
-                  </div>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <WordBlockPlugin />
-            </div>
+    <DictionaryProvider>
+      <LexicalComposer initialConfig={initialConfig}>
+        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+          <h2>Word Block Plugin - Editable Mode</h2>
+          {showInsertButton && <InsertWordBlockButton />}
+          <div
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              minHeight: "400px",
+              padding: "20px",
+            }}
+          >
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{ outline: "none", minHeight: "350px" }}
+                />
+              }
+              placeholder={
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    left: "20px",
+                    color: "#999",
+                  }}
+                >
+                  Enter text or insert word blocks...
+                </div>
+              }
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <WordBlockPlugin />
           </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
+        </div>
+      </LexicalComposer>
+    </DictionaryProvider>
   );
 };
 
@@ -158,54 +173,34 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "WordBlock Story Unit",
-    data: {
-      root: {
-        children: [],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1,
-      },
-    },
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <h2>Word Block Plugin - Read-Only Mode</h2>
-            <div
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                minHeight: "400px",
-                padding: "20px",
-                backgroundColor: "#f5f5f5",
-              }}
-            >
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{ outline: "none", minHeight: "350px" }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <WordBlockPlugin />
-            </div>
+    <DictionaryProvider>
+      <LexicalComposer initialConfig={initialConfig}>
+        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+          <h2>Word Block Plugin - Read-Only Mode</h2>
+          <div
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              minHeight: "400px",
+              padding: "20px",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{ outline: "none", minHeight: "350px" }}
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <WordBlockPlugin />
           </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
+        </div>
+      </LexicalComposer>
+    </DictionaryProvider>
   );
 };
 

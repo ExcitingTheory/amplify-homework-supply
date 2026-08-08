@@ -8,7 +8,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Button,
   Divider,
@@ -140,7 +139,7 @@ export default function StorageManagement() {
           </Stack>
           <List dense>
             {models.map((model) => (
-              <ListItem key={model.id}>
+              <ListItem key={model.id} sx={{ gap: 1 }}>
                 <ListItemText
                   primary={model.name}
                   secondary={
@@ -148,8 +147,10 @@ export default function StorageManagement() {
                       ? `${formatBytes(model.sizeBytes)} · ${model.ready ? 'Downloaded' : 'Not downloaded'}`
                       : 'Pre-installed — no download needed'
                   }
+                  sx={{ flex: 1, minWidth: 0 }}
+                  primaryTypographyProps={{ noWrap: true }}
                 />
-                <ListItemSecondaryAction>
+                <Box sx={{ flexShrink: 0 }}>
                   {model.backend === 'chrome-ai' ? (
                     <Chip
                       icon={<CheckCircle />}
@@ -176,7 +177,7 @@ export default function StorageManagement() {
                       Download
                     </Button>
                   )}
-                </ListItemSecondaryAction>
+                </Box>
               </ListItem>
             ))}
           </List>
@@ -205,20 +206,20 @@ export default function StorageManagement() {
           ) : (
             <List dense>
               {prefetchStatuses.map((status) => (
-                <ListItem key={status.unitId}>
+                <ListItem key={status.unitId} sx={{ gap: 1 }}>
                   <ListItemText
                     primary={`Unit: ${status.unitId.slice(0, 8)}...`}
                     secondary={`${status.status} · Last updated ${new Date(status.lastUpdated).toLocaleDateString()}`}
+                    sx={{ flex: 1, minWidth: 0 }}
+                    primaryTypographyProps={{ noWrap: true }}
                   />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      onClick={() => handleClearUnitCache(status.unitId)}
-                      title="Remove offline data"
-                    >
-                      <Delete />
-                    </IconButton>
-                  </ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleClearUnitCache(status.unitId)}
+                    title="Remove offline data"
+                  >
+                    <Delete />
+                  </IconButton>
                 </ListItem>
               ))}
             </List>

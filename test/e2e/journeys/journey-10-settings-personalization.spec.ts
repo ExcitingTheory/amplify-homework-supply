@@ -34,27 +34,24 @@ test.describe("Journey 10: Settings & Personalization", () => {
       const inputs = page.locator(
         'input:not([type="hidden"]), select, [role="combobox"]',
       );
-
-      const hasSwitches = await switches
-        .first()
-        .isVisible({ timeout: 10_000 })
-        .catch(() => false);
-      const hasInputs = await inputs
-        .first()
-        .isVisible({ timeout: 5_000 })
-        .catch(() => false);
-      expect(hasSwitches || hasInputs).toBe(true);
+      await expect(switches.first().or(inputs.first())).toBeVisible({
+        timeout: 10_000,
+      });
 
       // Toggle a switch if available
+      const hasSwitches = await switches.first().isVisible().catch(() => false);
       if (hasSwitches) {
         const firstSwitch = switches.first();
         const initialState = await firstSwitch.getAttribute("aria-checked");
         await firstSwitch.click();
-        await page.waitForTimeout(2000);
 
         // State must have changed
+        await expect(firstSwitch).not.toHaveAttribute(
+          "aria-checked",
+          initialState!,
+          { timeout: 5_000 },
+        );
         const newState = await firstSwitch.getAttribute("aria-checked");
-        expect(newState).not.toBe(initialState);
 
         // Reload and verify it persisted
         await page.reload({ timeout: 30_000 });
@@ -70,7 +67,6 @@ test.describe("Journey 10: Settings & Personalization", () => {
 
         // Toggle back to restore original state
         await reloadedSwitch.click();
-        await page.waitForTimeout(2000);
       }
     });
 
@@ -189,7 +185,7 @@ test.describe("Journey 10: Settings & Personalization", () => {
       const controlCount = await controls.count();
       expect(controlCount).toBeGreaterThan(0);
 
-      // Toggle a switch if available
+      // Toggle a switch if available and verify persistence
       const switches = page.locator('[role="switch"]');
       if (
         await switches
@@ -201,10 +197,26 @@ test.describe("Journey 10: Settings & Personalization", () => {
           .first()
           .getAttribute("aria-checked");
         await switches.first().click();
-        await page.waitForTimeout(2000);
 
+        await expect(switches.first()).not.toHaveAttribute(
+          "aria-checked",
+          initialState!,
+          { timeout: 5_000 },
+        );
         const newState = await switches.first().getAttribute("aria-checked");
-        expect(newState).not.toBe(initialState);
+
+        // Reload to verify persistence
+        await page.reload({ timeout: 30_000 });
+        await waitForPageReady(page);
+
+        const reloadedSwitch = page.locator('[role="switch"]').first();
+        await expect(reloadedSwitch).toBeVisible({ timeout: 10_000 });
+        const persistedState =
+          await reloadedSwitch.getAttribute("aria-checked");
+        expect(persistedState).toBe(newState);
+
+        // Toggle back to restore
+        await reloadedSwitch.click();
       }
     });
 

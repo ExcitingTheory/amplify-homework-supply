@@ -6,6 +6,9 @@ import {
   FormControlLabel,
   Divider,
   Skeleton,
+  TextField,
+  Button,
+  IconButton,
 } from "@mui/material";
 import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadData } from "aws-amplify/storage";
@@ -13,6 +16,8 @@ import UnitContext from "../../../context/unitContext";
 import SettingsContext from "../../../context/settingsContext";
 import { usePlatformSettings } from "../../../context/gamificationContext";
 import CameraIcon from "@mui/icons-material/Camera";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import DeleteIcon from "@mui/icons-material/Delete";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import { getResponsiveImageUrls } from "../../../utils/getResponsiveImageUrls";
 import FilesContext from "../../../context/fileContext";
@@ -108,7 +113,23 @@ export default function ConfigurationManager() {
   const [fileOperations, setFileOperations] = React.useState([]);
   const [inProgress, setInProgress] = React.useState(false);
 
-  const { unit } = React.useContext(UnitContext);
+  // Cover video state
+  const [isVideoDragging, setIsVideoDragging] = React.useState(false);
+  const [videoFilesToUpload, setVideoFilesToUpload] = React.useState([]);
+  const [videoInProgress, setVideoInProgress] = React.useState(false);
+  const [videoUrlInput, setVideoUrlInput] = React.useState("");
+  // Resolved playback URL for the cover video preview
+  const [coverVideoSrc, setCoverVideoSrc] = React.useState(null);
+  const [coverVideoTranscodeStatus, setCoverVideoTranscodeStatus] =
+    React.useState(null);
+
+  // UUID v4 pattern — used to distinguish stored File IDs from raw URLs
+  const isFileId = (val) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      val,
+    );
+
+  const { unit, files } = React.useContext(UnitContext);
 
   const {
     session: { identityId },
@@ -134,20 +155,15 @@ export default function ConfigurationManager() {
 
   React.useEffect(() => {
     const asyncFunc = async () => {
-      // when audio files change, upload them to S3
-      // and update the entry in the database
-
       if (filesToUpload.length === 0) {
         return;
       }
       let newFilename;
-      // show loading indicator
       setInProgress(true);
 
-      const fileKeys = await Promise.allSettled(
+      await Promise.allSettled(
         filesToUpload.map(async (fileInput) => {
           const { file } = fileInput;
-          console.log("file", file);
 
           if (file?.type?.includes("image")) {
             newFilename = `featured-images/${file.name}`;
@@ -159,19 +175,6 @@ export default function ConfigurationManager() {
             );
           }
 
-          // TODO - add support for featured video and featured audio
-          else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-            newFilename = `audio/${_uuid}-${file.name}`;
-            // Way to determine length of audio file?
-          } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
-            newFilename = `files/${_uuid}-${file.name}`;
-          }
-
-          console.log("uploading newFilename", newFilename);
-          console.log("uploading file", fileInput);
-          console.log("fileOperations", fileOperations);
-
-          // Gen 2 API requires full path with protection level prefix
           const s3Path = `protected/${identityId}/${newFilename}`;
 
           const uploadOperation = uploadData({
@@ -180,10 +183,6 @@ export default function ConfigurationManager() {
             options: {
               contentType: file.type,
               onProgress(progress) {
-                console.log(
-                  `Uploaded: ${progress.transferredBytes}/${progress.totalBytes}`,
-                );
-
                 setFileOperations((prev) => {
                   const newFileOperations = [...prev];
                   newFileOperations[fileInput.index].progress =
@@ -200,22 +199,16 @@ export default function ConfigurationManager() {
         }),
       );
 
-      // timeout to allow for S3? to update
       setTimeout(async () => {
         setFilesToUpload([]);
         setFileOperations([]);
 
-        // Hide loading indicator
-
         try {
-          // update the unit with the new file
           const client = getAmplifyClient();
           await client.models.Unit.update({
             id: unit.id,
             featuredImage: newFilename,
           });
-
-          console.log("updated unit", unit);
         } catch (error) {
           console.error(error);
         }
@@ -226,6 +219,108 @@ export default function ConfigurationManager() {
 
     asyncFunc();
   }, [filesToUpload]);
+
+  // Resolve cover video URL: File ID → signed URL, raw URL → as-is
+  React.useEffect(() => {
+    const val = unit?.featuredVideo;
+    if (!val) {
+      setCoverVideoSrc(null);
+      setCoverVideoTranscodeStatus(null);
+      return;
+    }
+
+    if (isFileId(val)) {
+      const file = files?.[val];
+      if (!file) return;
+      setCoverVideoTranscodeStatus(file.transcodeStatus ?? null);
+      // Prefer raw path for preview (HLS requires proxy + HLS.js)
+      const pathToResolve = file.path;
+      if (!pathToResolve) return;
+      let cancelled = false;
+      getCachedUrl(pathToResolve).then((url) => {
+        if (!cancelled && url) setCoverVideoSrc(url);
+      });
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      // Raw http(s) URL
+      setCoverVideoSrc(val);
+      setCoverVideoTranscodeStatus(null);
+    }
+  }, [unit?.featuredVideo, files]);
+
+  // Video upload effect — creates File record (pipeline trigger) then uploads to S3
+  React.useEffect(() => {
+    const asyncFunc = async () => {
+      if (videoFilesToUpload.length === 0) return;
+      setVideoInProgress(true);
+
+      try {
+        const file = videoFilesToUpload[0]?.file;
+        if (!file || !file.type.startsWith("video/")) {
+          throw new Error("Please upload a video file.");
+        }
+
+        const client = getAmplifyClient();
+        const s3Path = `protected/${identityId}/files/${file.name}`;
+
+        // 1. Create File record FIRST so the pipeline Lambda can find it
+        const { data: fileRecord, errors: fileErrors } =
+          await client.models.File.create({
+            name: file.name,
+            mimeType: file.type,
+            path: s3Path,
+            identityId,
+            size: file.size,
+            level: "PROTECTED",
+          });
+
+        if (fileErrors?.length || !fileRecord) {
+          throw new Error(
+            fileErrors?.[0]?.message ?? "Failed to create File record",
+          );
+        }
+
+        // 2. Link file to this unit (so it appears in the file manager)
+        if (unit?.id) {
+          await client.models.UnitFile.create({
+            unitID: unit.id,
+            fileID: fileRecord.id,
+          }).catch((err) =>
+            console.warn("[CoverVideo] UnitFile create error:", err),
+          );
+        }
+
+        // 3. Upload to S3 — EventBridge triggers MediaConvert pipeline automatically
+        await uploadData({
+          path: s3Path,
+          data: file,
+          options: {
+            contentType: file.type,
+            onProgress(progress) {
+              console.log(
+                `[CoverVideo] Upload: ${progress.transferredBytes}/${progress.totalBytes}`,
+              );
+            },
+          },
+        }).result;
+
+        // 4. Store File ID in unit.featuredVideo
+        await client.models.Unit.update({
+          id: unit.id,
+          featuredVideo: fileRecord.id,
+        });
+      } catch (error) {
+        console.error("[CoverVideo] Upload failed:", error);
+      } finally {
+        setVideoFilesToUpload([]);
+        setVideoInProgress(false);
+      }
+    };
+
+    asyncFunc();
+  }, [videoFilesToUpload]);
 
   const handleDragOver = (e) => {
     console.log("handleDragOver");
@@ -264,6 +359,56 @@ export default function ConfigurationManager() {
     setFileOperations(_fileOperations);
 
     setIsDragging(false);
+  };
+
+  const handleVideoDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsVideoDragging(true);
+  };
+
+  const handleVideoDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = Array.from(event.dataTransfer.files).filter((f) =>
+      f.type.startsWith("video/"),
+    );
+
+    if (files.length === 0) {
+      setIsVideoDragging(false);
+      return;
+    }
+
+    setVideoFilesToUpload(files.map((f, index) => ({ file: f, index })));
+    setIsVideoDragging(false);
+  };
+
+  const handleVideoUrlSave = async () => {
+    const url = videoUrlInput.trim();
+    if (!url) return;
+    try {
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: unit.id,
+        featuredVideo: url,
+      });
+      setVideoUrlInput("");
+    } catch (error) {
+      console.error("Error saving cover video URL:", error);
+    }
+  };
+
+  const handleRemoveCoverVideo = async () => {
+    try {
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: unit.id,
+        featuredVideo: null,
+      });
+    } catch (error) {
+      console.error("Error removing cover video:", error);
+    }
   };
 
   return (
@@ -474,6 +619,154 @@ export default function ConfigurationManager() {
             </Typography>
           </Box>
         )}
+      </div>
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* Cover Video Section */}
+      <div
+        style={{ position: "relative", width: "100%" }}
+        onDragOver={handleVideoDragOver}
+        onDrop={handleVideoDrop}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsVideoDragging(false);
+        }}
+      >
+        {(isVideoDragging || videoInProgress) && (
+          <div
+            style={{
+              color: "#000",
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              zIndex: 100,
+              backgroundColor: "rgb(255, 255, 255, 0.5)",
+              backdropFilter: "blur(3px)",
+              textAlign: "center",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {videoInProgress && t("configurationManager.uploadingVideo")}
+            {isVideoDragging && t("configurationManager.dragDropVideoPrompt")}
+          </div>
+        )}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 1,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              maxWidth: "100%",
+              whiteSpace: "normal",
+            }}
+          >
+            {t("configurationManager.setCoverVideo")}
+          </Typography>
+          {unit?.featuredVideo && (
+            <IconButton
+              size="small"
+              title={t("configurationManager.removeCoverVideo")}
+              onClick={handleRemoveCoverVideo}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+
+        {unit?.featuredVideo ? (
+          <Box sx={{ width: "100%", borderRadius: 1, overflow: "hidden" }}>
+            {coverVideoTranscodeStatus === "PROCESSING" ||
+            coverVideoTranscodeStatus === "PENDING" ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  p: 1,
+                  opacity: 0.7,
+                }}
+              >
+                <VideocamIcon fontSize="small" />
+                <Typography variant="caption">
+                  {t("configurationManager.uploadingVideo")}…
+                </Typography>
+              </Box>
+            ) : null}
+            {coverVideoSrc && (
+              <video
+                src={coverVideoSrc}
+                controls
+                style={{ width: "100%", maxHeight: 200, display: "block" }}
+              />
+            )}
+          </Box>
+        ) : (
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1rem",
+              border: "1px dashed #666",
+            }}
+          >
+            <VideocamIcon
+              sx={{ fontSize: "2rem", margin: "0.5rem auto", display: "block" }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                textAlign: "center",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                maxWidth: "100%",
+              }}
+            >
+              {t("configurationManager.noCoverVideo")}{" "}
+              {t("configurationManager.dragDropVideoPrompt")}
+            </Typography>
+          </Box>
+        )}
+
+        <Box sx={{ display: "flex", gap: 1, mt: 1, alignItems: "flex-start" }}>
+          <TextField
+            size="small"
+            fullWidth
+            label={t("configurationManager.coverVideoUrlLabel")}
+            placeholder={t("configurationManager.coverVideoUrlPlaceholder")}
+            value={videoUrlInput}
+            onChange={(e) => setVideoUrlInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleVideoUrlSave();
+            }}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleVideoUrlSave}
+            disabled={!videoUrlInput.trim()}
+            sx={{ whiteSpace: "nowrap", minWidth: "auto", flexShrink: 0 }}
+          >
+            Set
+          </Button>
+        </Box>
       </div>
     </Box>
   );

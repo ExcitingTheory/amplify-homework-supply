@@ -41,7 +41,6 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     // Type content with the vocabulary word
     const editor = page.locator('[data-lexical-editor="true"]').first();
@@ -51,18 +50,31 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
     );
 
     // Wait for auto-save
-    await page.waitForTimeout(4000);
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
+
+    // Publish the unit so students can access it
+    await page.locator("#status-select").click();
+    await page.locator('li[data-value="PUBLISHED"]').click();
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
 
     // Add the word to the dictionary
     const dictTab = page.locator('[data-tour="dictionary-tab"]');
     await expect(dictTab).toBeVisible({ timeout: 10_000 });
     await dictTab.click();
-    await page.waitForTimeout(2000);
 
     const addWordBtn = page.locator('[data-tour="add-word-button"]');
     await expect(addWordBtn).toBeVisible({ timeout: 10_000 });
     await addWordBtn.click();
-    await page.waitForTimeout(1000);
 
     const wordForm = page.locator('[data-tour="word-form"]');
     await expect(wordForm).toBeVisible({ timeout: 10_000 });
@@ -70,14 +82,18 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
     const wordInput = wordForm.locator("input").first();
     await wordInput.fill(testWord);
 
-    // Try to save
+    // Save the word
     const saveBtn = wordForm.getByRole("button", {
       name: /save|add|create|submit/i,
     });
-    if (await saveBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await saveBtn.click();
-      await page.waitForTimeout(3000);
-    }
+    await expect(saveBtn).toBeVisible({ timeout: 5_000 });
+    await saveBtn.click();
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
 
     await ctx.close();
   });
@@ -91,13 +107,12 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
     await login(page, STUDENT_1);
 
     await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-    await page.waitForTimeout(3000);
+    await waitForPageReady(page);
 
     // Handle timer gate
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     // Handle completion
@@ -108,7 +123,6 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
       const tryAgainBtn = page.getByRole("button", { name: /try again/i });
       if (await tryAgainBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await tryAgainBtn.click();
-        await page.waitForTimeout(3000);
       }
     }
 
@@ -135,7 +149,7 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
     if (!(await chatButton.isVisible({ timeout: 10_000 }).catch(() => false))) {
       // Chat not available — navigate to workbook where it might be
       await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-      await page.waitForTimeout(3000);
+      await waitForPageReady(page);
     }
 
     const chatBtn = page
@@ -146,7 +160,6 @@ test.describe.serial("Journey 9: Learner — Vocabulary & AI Practice", () => {
       return;
     }
     await chatBtn.click();
-    await page.waitForTimeout(1500);
 
     // Chat input must appear
     const chatInput = page

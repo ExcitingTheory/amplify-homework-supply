@@ -32,13 +32,15 @@ const LEARNER_TASKS: TaskSpec[] = [
     id: "learner-join-class",
     title: "Join Your First Class",
     completionCriteria: {
-      completionSequence: ["join-section-button", "join-section-dialog"],
+      tutorialStoryId: "📄-pages-application-pages--sections",
+      completionSequence: ["sections-page", "section-card"],
     },
   },
   {
     id: "learner-view-assignments",
     title: "View Your Assignments",
     completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
       completionSequence: ["assignment-card", "view-workbook-button"],
     },
   },
@@ -46,33 +48,41 @@ const LEARNER_TASKS: TaskSpec[] = [
     id: "learner-complete-assignment",
     title: "Complete an Assignment",
     completionCriteria: {
-      completionSequence: ["quiz-answers", "correct-checkbox"],
+      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink",
+      completionSequence: ["quiz-block", "quiz-answers"],
     },
   },
   {
     id: "learner-review-feedback",
     title: "Review Your Feedback",
     completionCriteria: {
-      completionSequence: ["grades-tab", "grade-detail"],
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
+      completionSequence: ["assignments-section", "assignment-card"],
     },
   },
   {
     id: "learner-practice-vocabulary",
     title: "Practice Vocabulary",
     completionCriteria: {
-      completionSequence: ["word-card", "play-audio"],
+      tutorialStoryId: "📁-content-management-vocabulary-review--default",
+      completionSequence: ["word-card"],
     },
   },
   {
     id: "learner-use-chat-help",
     title: "Get Help from AI Assistant",
-    completionCriteria: { completionSequence: ["chat-input"] },
+    completionCriteria: {
+      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
+      completionSequence: ["chat-input"],
+    },
   },
   {
     id: "learner-learn-shortcuts",
     title: "Learn Helpful Shortcuts",
-    // Has both completionSequence and customCheck; the sequence fires first
-    completionCriteria: { completionSequence: ["shortcuts-demo"] },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      completionSequence: ["shortcuts-demo"],
+    },
   },
   // ── "all" persona tasks (order 100–103) ───────────────────────────────────
   {
@@ -112,11 +122,14 @@ test.describe("Learner onboarding tour", () => {
 
     for (const task of LEARNER_TASKS.slice(0, 4)) {
       await expect(
-        page.locator('[data-testid="task-item"]').filter({ hasText: task.title })
+        page
+          .locator('[data-testid="task-item"]')
+          .filter({ hasText: task.title }),
       ).toBeVisible();
     }
 
-    const bar = page.getByRole("progressbar");
+    const panel = page.locator('[data-testid="onboarding-panel"]');
+    const bar = panel.getByRole("progressbar");
     await expect(bar).toHaveAttribute("aria-valuenow", "0");
   });
 
@@ -124,8 +137,14 @@ test.describe("Learner onboarding tour", () => {
     await openOnboardingPanel(page);
     await selectPersona(page, "learner");
 
-    for (let i = 0; i < LEARNER_TASKS.length; i++) {
-      await walkTaskTour(page, LEARNER_TASKS[i], "learner", i + 1);
+    // Secret tasks render as data-testid="secret-task-item" (not clickable) —
+    // only walk regular tasks which use data-testid="task-item"
+    const regularTasks = LEARNER_TASKS.filter(
+      (t) => !t.id.startsWith("secret-"),
+    );
+
+    for (let i = 0; i < regularTasks.length; i++) {
+      await walkTaskTour(page, regularTasks[i], "learner", i + 1);
     }
 
     await assertAllComplete(page);

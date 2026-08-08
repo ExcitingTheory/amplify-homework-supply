@@ -602,7 +602,6 @@ function Units({ initialUnits = [] }) {
                           margin: "1rem auto",
                           width: "90vw",
                           maxWidth: "80rem",
-                          height: 180,
                           borderRadius: 2,
                           borderLeft: "4px solid",
                           borderLeftColor: "text.primary",
@@ -738,7 +737,6 @@ function Units({ initialUnits = [] }) {
                             sx={{
                               maxWidth: "50%",
                               flexShrink: 0,
-                              maxHeight: 200,
                               overflow: "hidden",
                             }}
                           >
@@ -889,7 +887,6 @@ function Units({ initialUnits = [] }) {
                           sx={{
                             maxWidth: "50%",
                             flexShrink: 0,
-                            maxHeight: 200,
                             overflow: "hidden",
                           }}
                         >
@@ -929,7 +926,6 @@ function Units({ initialUnits = [] }) {
                         margin: "1rem auto",
                         width: "90vw",
                         maxWidth: "80rem",
-                        height: 180,
                         borderRadius: 2,
                         borderLeft: "4px solid",
                         borderLeftColor: "text.primary",
@@ -1041,7 +1037,6 @@ function Units({ initialUnits = [] }) {
                           sx={{
                             maxWidth: "50%",
                             flexShrink: 0,
-                            maxHeight: 200,
                             overflow: "hidden",
                           }}
                         >

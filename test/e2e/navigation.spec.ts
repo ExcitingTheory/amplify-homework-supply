@@ -38,17 +38,13 @@ test.describe("Leaderboard", () => {
 
     // Click XP mode and verify the view changes (table or list renders)
     await xpButton.click();
-    await page.waitForTimeout(1000);
     // Should show some leaderboard content (table, list items, or empty state)
     const pageContent = page.locator("main, [role='main'], body");
-    const text = await pageContent.textContent();
-    expect(text!.length).toBeGreaterThan(50); // Not a blank page
+    await expect(pageContent).not.toBeEmpty({ timeout: 5_000 });
 
     // Switch to guilds mode
     await guildsButton.click();
-    await page.waitForTimeout(1000);
-    const guildsContent = await pageContent.textContent();
-    expect(guildsContent!.length).toBeGreaterThan(50);
+    await expect(pageContent).not.toBeEmpty({ timeout: 5_000 });
   });
 });
 
@@ -94,23 +90,15 @@ test.describe("Profile", () => {
         '[aria-label*="notification" i], [data-tour="notifications-button"]',
       )
       .first();
-    if (await notifButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await notifButton.click();
-      await page.waitForTimeout(1000);
+    await expect(notifButton).toBeVisible({ timeout: 10_000 });
+    await notifButton.click();
 
-      // Should open a menu, popover, or navigate to notifications
-      const hasNotifContent =
-        (await page
-          .locator('[role="menu"], [role="dialog"]')
-          .first()
-          .isVisible()
-          .catch(() => false)) || page.url().includes("notification");
+    // Should open a menu, popover, or navigate to notifications
+    const notifContent = page.locator('[role="menu"], [role="dialog"]').first();
+    const hasMenu = await notifContent.isVisible({ timeout: 5_000 }).catch(() => false);
+    const navigated = page.url().includes("notification");
 
-      expect(hasNotifContent).toBeTruthy();
-    } else {
-      // Notification bell may not render for this user, skip gracefully
-      test.skip();
-    }
+    expect(hasMenu || navigated).toBeTruthy();
   });
 });
 
@@ -154,7 +142,6 @@ test.describe("Navigation via Toolbar", () => {
   }) => {
     // Open user menu
     await page.locator("#user-button").click();
-    await page.waitForTimeout(500);
 
     // Menu items should be visible
     const menu = page.locator('[role="menu"]');

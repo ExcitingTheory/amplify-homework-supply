@@ -1452,6 +1452,55 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
     ],
   },
 
+  {
+    taskId: "secret-documentation-explorer",
+    tutorialSteps: [
+      {
+        id: "intro",
+        title: "🔍 SECRET: Documentation Explorer",
+        description:
+          "Explore the onboarding documentation and interactive examples to unlock this achievement!",
+        tooltipPosition: "center",
+        actions: [
+          "Browse the 🏠 Getting Started section in the sidebar",
+          "Open the Learning Modes story",
+          "Read through the interactive documentation",
+        ],
+      },
+      {
+        id: "sidebar",
+        title: "Find the Getting Started Section",
+        description:
+          "The 🏠 Getting Started category in the Storybook sidebar contains all onboarding documentation.",
+        targetSelector: "#storybook-explorer-tree",
+        targetFrame: "manager",
+        tooltipPosition: "right",
+      },
+      {
+        id: "complete",
+        title: "🔍 DOCUMENTATION EXPLORER UNLOCKED!",
+        description: "You've explored the onboarding documentation!",
+        tooltipPosition: "center",
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: "challenge",
+        title: "🔍 Explorer Challenge",
+        description: "Open the Learning Modes story and read through it.",
+        tooltipPosition: "center",
+      },
+      {
+        id: "verify",
+        title: "Documentation Explored?",
+        description: "Complete when you've read the interactive examples.",
+        tooltipPosition: "center",
+        isLast: true,
+      },
+    ],
+  },
+
   // ============================================================
   // TRANSLATOR TASKS
   // ============================================================

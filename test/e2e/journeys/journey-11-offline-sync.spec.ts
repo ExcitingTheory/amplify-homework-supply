@@ -42,7 +42,6 @@ test.describe.serial("Journey 11: Offline Readiness & Sync Recovery", () => {
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
@@ -50,7 +49,13 @@ test.describe.serial("Journey 11: Offline Readiness & Sync Recovery", () => {
       `Offline test content - This should be cached by the service worker ${Date.now()}`,
     );
 
-    await page.waitForTimeout(4000);
+    // Wait for auto-save
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
     await ctx.close();
   });
 
@@ -91,13 +96,12 @@ test.describe.serial("Journey 11: Offline Readiness & Sync Recovery", () => {
     await login(page, STUDENT_1);
 
     await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-    await page.waitForTimeout(5000); // Let SW cache resources
+    await waitForPageReady(page);
 
     // Handle timer gate
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     // Content must have loaded online (confirms URL is valid)
@@ -190,11 +194,9 @@ test.describe.serial("Journey 11: Offline Readiness & Sync Recovery", () => {
 
     // Go offline
     await context.setOffline(true);
-    await page.waitForTimeout(3000);
 
     // Come back online
     await context.setOffline(false);
-    await page.waitForTimeout(2000);
 
     // Navigate to verify app works
     await page.goto("/", { timeout: 30_000 });

@@ -195,10 +195,15 @@ export const AnswerBlock = {
       success: true,
       action: "insert_editor_block",
       blockType: "answer",
-      blockData: ["word-1", "word-2", "word-3"],
+      blockData: {
+        wordIDs: ["word-1", "word-2", "word-3"],
+        requestDefinition: "definition",
+        allowedInput: ["text", "audio", "writing"],
+        promptMethod: ["text"],
+      },
       preview: {
         wordCount: 3,
-        mode: "translate",
+        mode: "definition",
         inputMethods: ["text", "audio", "writing"],
       },
       message: "Answer block ready to insert",
@@ -208,7 +213,7 @@ export const AnswerBlock = {
     docs: {
       description: {
         story:
-          "Answer input block where students can type, record audio, or write answers. Uses the actual AnswerComponent from the editor.",
+          "Answer input block showing 'Please define the following word(s):' prompt. Students can type, record audio, or write answers. Uses the actual AnswerComponent from the editor.",
       },
     },
   },
@@ -301,7 +306,11 @@ export const CustomAnswerBlock = {
       success: true,
       action: "insert_editor_block",
       blockType: "custom-answer",
-      blockData: ["q-1", "q-2"],
+      blockData: {
+        questionIDs: ["q-1", "q-2"],
+        allowedInput: ["text"],
+        promptMethod: ["text"],
+      },
       preview: {
         questionCount: 2,
         prompt: "Listen to the audio and type what you hear",
@@ -309,7 +318,7 @@ export const CustomAnswerBlock = {
         caseSensitive: false,
         allowMultipleAttempts: true,
         inputMethods: ["text"],
-        promptMethods: ["audio"],
+        promptMethods: ["text"],
       },
       message: "Custom answer block ready to insert",
     },
@@ -318,7 +327,7 @@ export const CustomAnswerBlock = {
     docs: {
       description: {
         story:
-          "Custom answer validation with audio prompts. Uses the actual CustomAnswerComponent from the editor.",
+          "Custom answer block showing 'Answer Questions' prompt. Uses the actual CustomAnswerComponent from the editor.",
       },
     },
   },

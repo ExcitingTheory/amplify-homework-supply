@@ -72,6 +72,8 @@ const FilesProvider = ({ children }) => {
       : null,
   ).current;
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
+  // True after instructor bundle populates vectorStore — skips the per-item loop
+  const bundleLoadedRef = React.useRef(false);
 
   // Early vector store initialization - load from IndexedDB on mount
   React.useEffect(() => {
@@ -112,10 +114,64 @@ const FilesProvider = ({ children }) => {
     }
   }, [vectorStore]);
 
-  // Populate vector store from files and documents
+  // For privileged users, load the pre-built instructor bundle instead of the per-item loop.
+  React.useEffect(() => {
+    if (authLoading || !session?.identityId) return;
+    if (!vectorStore) return;
+
+    const groups = session.groups || [];
+    const isPrivileged = groups.some((g) =>
+      ["Admins", "Moderators", "Instructors"].includes(g),
+    );
+    if (!isPrivileged) return;
+
+    let cancelled = false;
+
+    loadInstructorBundle(session.identityId)
+      .then((bundle) => {
+        if (cancelled || !bundle?.items?.length) return;
+
+        bundle.items
+          .filter((item) => item.type === "file")
+          .forEach((item) => {
+            const fileId = item.id.replace(/-p\d+$/, "");
+            vectorStore.add({
+              id: item.id,
+              documentId: fileId,
+              page: item.meta?.page ?? 0,
+              text: item.meta?.preview || item.title || "",
+              vector: item.embedding,
+              metadata: {
+                fileId,
+                page: item.meta?.page,
+                fileName: item.title,
+              },
+            });
+          });
+
+        bundleLoadedRef.current = true;
+        dispatch({ type: actionTypes.SET_VECTOR_STORE_READY, payload: true });
+        console.log(
+          `[FilesContext] Bundle loaded: ${bundle.items.length} items (strategy=${bundle.index.strategy})`,
+        );
+      })
+      .catch((error) => {
+        console.warn(
+          "[FilesContext] Bundle load failed, falling back to per-item loading:",
+          error,
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.identityId, session?.groups, authLoading, vectorStore]);
+
+  // Populate vector store from files and documents (learner path / bundle fallback)
   React.useEffect(() => {
     if (!vectorStore) return; // Guard for SSR
     if (state.myFiles.length === 0) return;
+    if (bundleLoadedRef.current) return; // Instructor path uses bundle
 
     const isInitialLoad = loadedVersions.current.size === 0;
     const processingDocuments = new Set();

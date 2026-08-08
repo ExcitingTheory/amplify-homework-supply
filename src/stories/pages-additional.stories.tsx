@@ -28,8 +28,8 @@ import SettingsPage from '../../app/[locale]/settings/page.jsx';
 import RecycleBinPage from '../../app/[locale]/recycle-bin/page.jsx';
 import SquadsPage from '../../app/[locale]/squads/page.jsx';
 import SquadDetailPage from '../../app/[locale]/squad/[id]/page.jsx';
-import XPHistoryPage from '../../app/[locale]/xp-history/page.jsx';
-import AdminAnalyticsPage from '../../app/[locale]/admin/analytics/page';
+import { XPHistoryContent } from '../../app/[locale]/xp-history/page.jsx';
+import AnalyticsClient from '../../app/[locale]/admin/analytics/AnalyticsClient';
 import AdminArchivesPage from '../../app/[locale]/admin/archives/page.jsx';
 import AdminModerationPage from '../../app/[locale]/admin/moderation/page';
 import AdminSettingsPage from '../../app/[locale]/admin/settings/page';
@@ -203,19 +203,7 @@ export const SquadDetail: Story = {
 // ---------------------------------------------------------------------------
 
 export const XPHistory: Story = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        userId: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
-      });
-      seedIndexPageData('student');
-      return <Story />;
-    },
-  ],
-  render: () => <XPHistoryPage />,
+  render: () => <XPHistoryContent logs={[]} totalXP={0} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
@@ -294,19 +282,7 @@ export const Notifications: Story = {
 // ---------------------------------------------------------------------------
 
 export const AdminAnalytics: Story = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: 'admin-1',
-        userId: 'admin-1',
-        attributes: { sub: 'admin-1', email: 'admin@example.com' },
-        groups: ['Admins', 'Instructors'],
-      });
-      seedIndexPageData('instructor');
-      return <Story />;
-    },
-  ],
-  render: () => <AdminAnalyticsPage />,
+  render: () => <AnalyticsClient initialSections={[]} />,
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'admin-1', email: 'admin@example.com' } },

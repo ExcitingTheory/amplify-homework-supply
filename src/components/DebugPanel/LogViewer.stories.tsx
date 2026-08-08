@@ -3,6 +3,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { expect, userEvent, within, fn } from 'storybook/test';
 import { LogViewer } from './LogViewer';
 import { LogEntry } from '../../utils/debug/DebugLogger';
 
@@ -108,32 +109,86 @@ const manyLogs: LogEntry[] = Array.from({ length: 200 }, (_, i) => ({
 export const Default: Story = {
   args: {
     logs: mockLogs,
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Verify initial log entries render
+    await canvas.findByText('Application initialized');
+
+    // Search for a specific log
+    const searchInput = canvas.getByPlaceholderText('Search logs...');
+    await userEvent.type(searchInput, 'audio');
+    await canvas.findByText('Failed to load audio file: audio-123.mp3');
+    // Other logs no longer shown
+    expect(canvas.queryByText('Application initialized')).toBeNull();
+
+    // Clear search
+    await userEvent.clear(searchInput);
+    await canvas.findByText('Application initialized');
+
+    // Filter by level using the select
+    const levelSelect = canvas.getByLabelText('Level');
+    await userEvent.click(levelSelect);
+    const warnOption = await within(document.body).findByRole('option', { name: /Warn/i });
+    await userEvent.click(warnOption);
+    await canvas.findByText('Slow query detected: DataStore.observeQuery took 1200ms');
+    expect(canvas.queryByText('Application initialized')).toBeNull();
+
+    // Click clear button
+    const clearBtn = canvas.getByRole('button');
+    await userEvent.click(clearBtn);
+    expect(args.onClear).toHaveBeenCalled();
   },
 };
 
 export const Empty: Story = {
   args: {
     logs: [],
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText('No logs captured yet');
   },
 };
 
 export const ErrorsOnly: Story = {
   args: {
     logs: errorLogs,
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // All three error messages visible
+    await canvas.findByText('TypeError: Cannot read property "id" of undefined');
+    await canvas.findByText('Network request failed: POST /api/save');
+    await canvas.findByText('Authentication token expired');
+    // Error count chip shown
+    const chips = canvasElement.querySelectorAll('.MuiChip-root');
+    expect(chips.length).toBeGreaterThan(0);
   },
 };
 
 export const ManyLogs: Story = {
   args: {
     logs: manyLogs,
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Count chip shows correct total
+    await canvas.findByText(/200 \/ 200 shown/);
+    // Search to narrow down
+    const searchInput = canvas.getByPlaceholderText('Search logs...');
+    await userEvent.type(searchInput, 'Processing');
+    const shownChip = await canvas.findByText(/\d+ \/ 200 shown/);
+    expect(shownChip).toBeInTheDocument();
   },
 };
 
@@ -175,8 +230,16 @@ export const WithStackTraces: Story = {
   at App (http://localhost:3000/pages/_app.js:22:10)`,
       },
     ],
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Both error messages render
+    await canvas.findByText('Unhandled Promise Rejection');
+    await canvas.findByText('React Error Boundary caught');
+    // Stack traces visible in the log entry
+    await canvas.findByText(/at fetch/);
   },
 };
 
@@ -190,7 +253,23 @@ export const MixedLevels: Story = {
       { timestamp: Date.now() - 2000, level: 'error' as const, message: 'Error: Operation failed', stack: 'Error stack...' },
       { timestamp: Date.now() - 1000, level: 'debug' as const, message: 'Debug: Cleanup executed', stack: null },
     ],
-    onClear: () => console.log('Clear logs'),
+    onClear: fn(),
     autoScroll: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // All levels render initially
+    await canvas.findByText('Debug: Component mounted');
+    await canvas.findByText('Warning: Performance issue');
+    await canvas.findByText('Error: Operation failed');
+
+    // Filter to warn level only
+    const levelSelect = canvas.getByLabelText('Level');
+    await userEvent.click(levelSelect);
+    const warnOption = await within(document.body).findByRole('option', { name: /Warn/i });
+    await userEvent.click(warnOption);
+    await canvas.findByText('Warning: Performance issue');
+    expect(canvas.queryByText('Debug: Component mounted')).toBeNull();
+    expect(canvas.queryByText('Error: Operation failed')).toBeNull();
   },
 };

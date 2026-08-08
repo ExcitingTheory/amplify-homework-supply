@@ -231,8 +231,6 @@ export function SquadLeaderboard({
       ))}
     </List>
   )
-    </List>
-  )
 }
 
 export default SquadLeaderboard

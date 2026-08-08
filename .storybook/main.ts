@@ -224,6 +224,19 @@ const config: StorybookConfig = {
         __dirname,
         "./__mocks__/amplifyClient.js",
       ),
+      // Mock server-side Amplify utilities — absolute paths avoid shadowing by the @/ catch-all alias
+      [path.resolve(__dirname, "../src/utils/amplifyServerClient")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
+      [path.resolve(__dirname, "../src/utils/amplifyServerClient.ts")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
+      [path.resolve(__dirname, "../src/utils/amplifyServerUtils")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
+      [path.resolve(__dirname, "../src/utils/amplifyServerUtils.ts")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
+      [path.resolve(__dirname, "../src/utils/amplifyServerChunked")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
+      [path.resolve(__dirname, "../src/utils/amplifyServerChunked.ts")]:
+        path.resolve(__dirname, "./__mocks__/amplifyServerClient.js"),
       "../utils/amplifyClient": path.resolve(
         __dirname,
         "./__mocks__/amplifyClient.js",
@@ -233,10 +246,9 @@ const config: StorybookConfig = {
         "./__mocks__/amplifyClient.js",
       ),
       // Mock next/navigation for App Router components
-      "next/navigation": path.resolve(
-        __dirname,
-        "./__mocks__/next-navigation.js",
-      ),
+      // NOTE: next/navigation is handled by vite-plugin-storybook-nextjs's alias.
+      // Our custom setNavigationState is still available via @storybook-mocks/next-navigation.
+      // "next/navigation": path.resolve(__dirname, "./__mocks__/next-navigation.js"),
       // Mock next/server for server-only imports (used by @aws-amplify/adapter-nextjs)
       "next/server": path.resolve(__dirname, "./__mocks__/next-server.js"),
       // Mock i18next to integrate with Translation Mode

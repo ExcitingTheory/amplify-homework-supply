@@ -20,14 +20,38 @@ import AutoLinkPlugin from "./AutoLinkPlugin";
 import YouTubePlugin from "./YouTubePlugin";
 import { YouTubeNode } from "./YouTubePlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Formatting/Floating Link Editor",
   component: FloatingLinkEditorPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "floating-link-story-unit",
+        name: "Floating Link Editor Plugin Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "floating-link-story-unit",
     initializeMockData: false,
   },
 };
@@ -37,7 +61,6 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
-  const unitId = "floating-link-demo-editable";
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
 
   const initialConfig = {
@@ -65,70 +88,59 @@ const EditableTemplate = ({ editorState }) => {
     }
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Floating Link Editor Plugin Demo",
-    description: "Demo for Floating Link Editor Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Floating Link Editor Plugin - Editable Mode</h2>
-          <p style={{ color: "#666", marginBottom: "10px" }}>
-            Type a URL to auto-link it, then click the link to see the floating
-            editor. For YouTube URLs, a YouTube icon button will appear to
-            convert the link to an embedded video.
-          </p>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-              position: "relative",
-            }}
-          >
-            <div ref={onRef}>
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{ outline: "none", minHeight: "350px" }}
-                  />
-                }
-                placeholder={
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      left: "20px",
-                      color: "#999",
-                    }}
-                  >
-                    Try typing: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-                  </div>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-            </div>
-            <HistoryPlugin />
-            <LinkPlugin />
-            <AutoLinkPlugin />
-            <YouTubePlugin />
-            {floatingAnchorElem && (
-              <FloatingLinkEditorPlugin
-                anchorElem={floatingAnchorElem}
-                isSidebarOpen={false}
-              />
-            )}
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Floating Link Editor Plugin - Editable Mode</h2>
+        <p style={{ color: "#666", marginBottom: "10px" }}>
+          Type a URL to auto-link it, then click the link to see the floating
+          editor. For YouTube URLs, a YouTube icon button will appear to convert
+          the link to an embedded video.
+        </p>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+            position: "relative",
+          }}
+        >
+          <div ref={onRef}>
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{ outline: "none", minHeight: "350px" }}
+                />
+              }
+              placeholder={
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    left: "20px",
+                    color: "#999",
+                  }}
+                >
+                  Try typing: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+                </div>
+              }
+              ErrorBoundary={LexicalErrorBoundary}
+            />
           </div>
+          <HistoryPlugin />
+          <LinkPlugin />
+          <AutoLinkPlugin />
+          <YouTubePlugin />
+          {floatingAnchorElem && (
+            <FloatingLinkEditorPlugin
+              anchorElem={floatingAnchorElem}
+              isSidebarOpen={false}
+            />
+          )}
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

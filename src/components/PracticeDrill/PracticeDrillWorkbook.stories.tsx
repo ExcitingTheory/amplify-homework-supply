@@ -2,10 +2,90 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import PracticeDrillWorkbook from './PracticeDrillWorkbook'
 import type { PracticeDrillWorkbookProps } from './PracticeDrillWorkbook'
+import {
+  seedMockUnit,
+  seedMockWords,
+  clearMockData,
+} from '../../../.storybook/__mocks__/aws-amplify-data'
+
+// Seeded words — IDs must match sourceItemId values in sampleBlocks below.
+// Phrases must also match pair.term values (case-insensitive) for the
+// meaning-association block's dictionary-resolution path in buildDrillEditorState.
+const workbookWords = [
+  {
+    id: 'word-1',
+    phrase: 'mitochondria',
+    pronunciation: 'my-tuh-KON-dree-uh',
+    definition: 'Organelle that produces energy for the cell',
+    owner: 'mock-user-sub',
+    _version: 1,
+  },
+  {
+    id: 'word-2',
+    phrase: 'la maison',
+    pronunciation: 'lah meh-ZON',
+    definition: 'the house',
+    owner: 'mock-user-sub',
+    _version: 1,
+  },
+  {
+    id: 'word-3',
+    phrase: 'Photosynthesis',
+    pronunciation: 'foh-toh-SIN-thuh-sis',
+    definition: 'Process of converting light to energy',
+    owner: 'mock-user-sub',
+    _version: 1,
+  },
+  {
+    id: 'word-4',
+    phrase: 'Respiration',
+    pronunciation: 'res-puh-RAY-shun',
+    definition: 'Process of converting glucose to ATP',
+    owner: 'mock-user-sub',
+    _version: 1,
+  },
+  {
+    id: 'word-5',
+    phrase: 'Osmosis',
+    pronunciation: 'oz-MOH-sis',
+    definition: 'Movement of water across a membrane',
+    owner: 'mock-user-sub',
+    _version: 1,
+  },
+]
 
 const meta: Meta<PracticeDrillWorkbookProps> = {
-  title: '🎯 Practice Drills/Workbook',
+  title: '\ud83c\udfaf Practice Drills/Workbook',
   component: PracticeDrillWorkbook,
+  loaders: [
+    async () => {
+      clearMockData()
+      seedMockWords(workbookWords)
+      seedMockUnit(
+        {
+          id: 'drill-workbook-story-unit',
+          name: 'Drill Workbook Story Unit',
+          data: JSON.stringify({
+            root: {
+              children: [],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          }),
+          _version: 1,
+          owner: 'mock-user-sub',
+        },
+        { words: workbookWords },
+      )
+    },
+  ],
+  parameters: {
+    unitId: 'drill-workbook-story-unit',
+    initializeMockData: false,
+  },
 }
 
 export default meta

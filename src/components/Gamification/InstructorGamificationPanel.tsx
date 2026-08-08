@@ -28,7 +28,6 @@ import CardContent from '@mui/material/CardContent'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import Divider from '@mui/material/Divider'
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -468,7 +467,7 @@ export function InstructorGamificationPanel({
           </Typography>
           <List dense>
             {skills.map((skill) => (
-              <ListItem key={skill.id} divider>
+              <ListItem key={skill.id} divider sx={{ gap: 1 }}>
                 <ListItemText
                   primary={skill.title}
                   secondaryTypographyProps={{ component: 'div' }}
@@ -485,12 +484,12 @@ export function InstructorGamificationPanel({
                       )}
                     </Stack>
                   }
+                  sx={{ flex: 1, minWidth: 0 }}
+                  primaryTypographyProps={{ noWrap: true }}
                 />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteSkill?.(skill.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
+                <IconButton edge="end" size="small" onClick={() => onDeleteSkill?.(skill.id)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               </ListItem>
             ))}
             {skills.length === 0 && (
@@ -688,13 +687,16 @@ export function InstructorGamificationPanel({
           </Stack>
           <List dense>
             {squads.map((g) => (
-              <ListItem key={g.id} divider>
-                <ListItemText primary={g.name} secondary={`${g.memberCount} members`} />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteSquad?.(g.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
+              <ListItem key={g.id} divider sx={{ gap: 1 }}>
+                <ListItemText
+                  primary={g.name}
+                  secondary={`${g.memberCount} members`}
+                  sx={{ flex: 1, minWidth: 0 }}
+                  primaryTypographyProps={{ noWrap: true }}
+                />
+                <IconButton edge="end" size="small" onClick={() => onDeleteSquad?.(g.id)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               </ListItem>
             ))}
             {squads.length === 0 && (
@@ -721,7 +723,7 @@ export function InstructorGamificationPanel({
           <Divider sx={{ my: 2 }} />
           <List dense>
             {easterEggs.map((egg) => (
-              <ListItem key={egg.id} divider>
+              <ListItem key={egg.id} divider sx={{ gap: 1 }}>
                 <ListItemText
                   primary={egg.message}
                   secondaryTypographyProps={{ component: 'div' }}
@@ -737,12 +739,12 @@ export function InstructorGamificationPanel({
                       )}
                     </Stack>
                   }
+                  sx={{ flex: 1, minWidth: 0 }}
+                  primaryTypographyProps={{ noWrap: true }}
                 />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" size="small" onClick={() => onDeleteEasterEgg?.(egg.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
+                <IconButton edge="end" size="small" onClick={() => onDeleteEasterEgg?.(egg.id)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               </ListItem>
             ))}
           </List>

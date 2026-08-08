@@ -535,8 +535,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const isFirstStep = currentStepIndex === 0;
   const showSpotlightLayer = mode === 'tutorial';
 
-  // Disable Next while the page is loading, navigating, or target element not found yet
-  const isNextDisabled = isNavigating || !isPageReady || (!!currentStep.targetSelector && !targetRect);
+  // Disable Next only while the page is loading/navigating — never block on missing targets.
+  // A missing target element shows an informational warning but does NOT prevent advancement.
+  const isNextDisabled = isNavigating || !isPageReady;
   const isLoading = isNavigating || !isPageReady;
 
   return (
@@ -625,6 +626,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       <Portal>
       <Card
         ref={tooltipRef}
+        data-testid="spotlight-tooltip"
         sx={{
           position: 'fixed',
           top: tooltipPosition.top,

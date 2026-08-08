@@ -58,7 +58,6 @@ test.describe
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     // Type unique content
     const editor = page.locator('[data-lexical-editor="true"]').first();
@@ -66,8 +65,11 @@ test.describe
     uniqueContent = `Persistence test ${Date.now()}`;
     await page.keyboard.type(uniqueContent);
 
-    // Wait for auto-save
-    await page.waitForTimeout(4000);
+    // Wait for auto-save via network
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 15_000 },
+    ).catch(() => {});
 
     // Verify content is present
     let editorText = await editor.textContent();
@@ -78,12 +80,10 @@ test.describe
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(3000);
 
     // Content MUST survive reload (DB save worked)
     const reloadedEditor = page.locator('[data-lexical-editor="true"]').first();
-    const reloadedText = await reloadedEditor.textContent();
-    expect(reloadedText).toContain(uniqueContent);
+    await expect(reloadedEditor).toContainText(uniqueContent, { timeout: 10_000 });
   });
 
   test("inserting a quiz block creates an interactive graded element", async ({
@@ -94,7 +94,6 @@ test.describe
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     // Open insert menu
     const insertButton = page.locator(
@@ -112,7 +111,6 @@ test.describe
       .filter({ hasText: /quiz|multiple choice/i });
     await expect(quizItem).toBeVisible({ timeout: 5_000 });
     await quizItem.click();
-    await page.waitForTimeout(2000);
 
     // Quiz block MUST appear
     const quizBlock = page.locator('[data-tour="quiz-block"]').first();
@@ -122,12 +120,12 @@ test.describe
     const editBtn = quizBlock.getByRole("button", { name: /edit/i });
     await expect(editBtn).toBeVisible({ timeout: 5_000 });
     await editBtn.click();
-    await page.waitForTimeout(1000);
 
     // Must have editable answer inputs in edit mode
     const editableElements = quizBlock.locator(
       'input, textarea, [contenteditable="true"]',
     );
+    await expect(editableElements.first()).toBeVisible({ timeout: 5_000 });
     const count = await editableElements.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -136,13 +134,11 @@ test.describe
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Click dictionary tab
     const dictTab = page.locator('[data-tour="dictionary-tab"]');
     await expect(dictTab).toBeVisible({ timeout: 10_000 });
     await dictTab.click();
-    await page.waitForTimeout(2000);
 
     // Dictionary panel must render with add-word button
     const addWordBtn = page.locator('[data-tour="add-word-button"]');
@@ -150,7 +146,6 @@ test.describe
 
     // Click it to verify the form opens
     await addWordBtn.click();
-    await page.waitForTimeout(1000);
 
     const wordForm = page.locator('[data-tour="word-form"]');
     await expect(wordForm).toBeVisible({ timeout: 10_000 });
@@ -160,28 +155,18 @@ test.describe
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Click files tab
     const filesTab = page.locator('[data-tour="files-tab"]');
     await expect(filesTab).toBeVisible({ timeout: 10_000 });
     await filesTab.click();
-    await page.waitForTimeout(2000);
 
     // Must have file upload capability (input[type=file] or drop zone)
     const uploadInput = page.locator('input[type="file"]');
     const dropZone = page.locator('[class*="dropzone"], [class*="upload"]');
-
-    const hasUpload = await uploadInput
-      .first()
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    const hasDropZone = await dropZone
-      .first()
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-
-    expect(hasUpload || hasDropZone).toBe(true);
+    await expect(uploadInput.first().or(dropZone.first())).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("assignments tab shows assignment creation interface", async ({
@@ -190,28 +175,18 @@ test.describe
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Click assignments tab
     const assignTab = page.locator('[data-tour="assignments-tab"]');
     await expect(assignTab).toBeVisible({ timeout: 10_000 });
     await assignTab.click();
-    await page.waitForTimeout(2000);
 
-    // Must show assignment configuration
+    // Must show assignment configuration or creation button
     const assignPanel = page.locator('[data-tour="assignment-settings"]');
     const createBtn = page.locator('[data-tour="create-assignment-button"]');
+    await expect(assignPanel.or(createBtn)).toBeVisible({ timeout: 10_000 });
 
-    const hasPanel = await assignPanel
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    const hasBtn = await createBtn
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-
-    expect(hasPanel || hasBtn).toBe(true);
-
-    if (hasPanel) {
+    if (await assignPanel.isVisible().catch(() => false)) {
       // Must have section selector and due date
       await expect(page.locator('[data-tour="unit-selector"]')).toBeVisible({
         timeout: 10_000,

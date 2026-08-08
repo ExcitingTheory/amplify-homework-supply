@@ -7,15 +7,16 @@ import DashboardClient from "./DashboardClient";
 export default async function DashboardPage() {
   // Auth check — if no session, render with empty data and let client-side
   // AuthGate handle showing the login form (no server redirect needed).
-  let username = null;
+  let username: string | null = null;
   try {
     const session = await runWithAmplifyServerContext({
       nextServerContext: { cookies },
       operation: (contextSpec) => fetchAuthSession(contextSpec),
     });
-    username =
+    username = (
       session?.tokens?.idToken?.payload?.["cognito:username"] ||
-      session?.tokens?.idToken?.payload?.sub;
+      session?.tokens?.idToken?.payload?.sub
+    ) as string | undefined ?? null;
   } catch {
     // Fall through — client handles auth
   }
@@ -49,6 +50,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      signOut={undefined}
+      user={undefined}
       initialSections={initialSections}
       initialAssignments={initialAssignments}
       initialGrades={initialGrades}

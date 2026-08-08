@@ -1,4 +1,51 @@
 /**
+ * Calculate drag card width based on the longest unbroken word across all phrases.
+ * Uses canvas text measurement for accuracy, with an SSR fallback.
+ * @param {string[]} phrases - Array of phrase strings
+ * @param {object} [options]
+ * @param {number} [options.maxWidth=200] - Maximum card width in px
+ * @param {number} [options.minWidth=80] - Minimum card width in px
+ * @param {number} [options.paddingPx=30] - Total horizontal padding + border in px
+ * @param {string} [options.font] - CSS font string for measurement
+ * @returns {number} Calculated card width in px
+ */
+export function calcCardWidth(phrases, options = {}) {
+  const {
+    maxWidth = 300,
+    minWidth = 80,
+    paddingPx = 30,
+    font = '500 19.2px Roboto, Helvetica, Arial, sans-serif',
+  } = options;
+
+  let longestWord = '';
+  for (const phrase of phrases) {
+    if (!phrase) continue;
+    const words = String(phrase).split(/\s+/);
+    for (const word of words) {
+      if (word.length > longestWord.length) {
+        longestWord = word;
+      }
+    }
+  }
+
+  if (!longestWord) return minWidth;
+
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = font;
+    const textWidth = ctx.measureText(longestWord).width;
+    // Scale up to compensate for web fonts being wider than canvas fallback font
+    const calculatedWidth = Math.ceil(textWidth * 1.5 + paddingPx);
+    return Math.min(Math.max(calculatedWidth, minWidth), maxWidth);
+  }
+
+  // SSR fallback: estimate ~10px per character
+  const estimated = longestWord.length * 10 + paddingPx;
+  return Math.min(Math.max(estimated, minWidth), maxWidth);
+}
+
+/**
  * Simple seeded random number generator (Mulberry32)
  * @param {number} seed - Seed value
  * @returns {function(): number} Random number generator function

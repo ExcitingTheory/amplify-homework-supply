@@ -7,7 +7,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { LinearProgressWithLabel, AnswerDrop, ResultCard } from ".";
 
 import DictionaryContext from "../../context/dictionaryContext";
-import { shuffle } from "./utils";
+import { shuffle, calcCardWidth } from "./utils";
 import { DragBox } from "./DragBox";
 
 export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
@@ -111,11 +111,24 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
     return shuffle([...answers], shuffleSeed + 2);
   }, [answers, shuffleSeed]);
 
+  // Calculate drag card width based on longest unbroken word
+  const cardWidth = React.useMemo(() => {
+    const phrases = answers.map((w) => w?.phrase).filter(Boolean);
+    return calcCardWidth(phrases);
+  }, [answers]);
+
+  const cardPanelWidth = cardWidth + 16;
+
   // Filter out matched cards from stable order — no reshuffling
   const easyVocab = shuffledDragOrder
     .filter((word) => !filterEasy.includes(word?.id))
     .map((word) => (
-      <DragBox answer={word.phrase} wordID={word.id} key={word.id} />
+      <DragBox
+        answer={word.phrase}
+        wordID={word.id}
+        key={word.id}
+        cardWidth={cardWidth}
+      />
     ));
 
   // Find the first unmatched word in the stable shuffled order
@@ -288,8 +301,7 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
     setShowCompletion(false);
   };
 
-  // Calculate min height based on drag card count: ~56px per row of cards (140px wide + margin),
-  // estimate ~3 cards per row in the sidebar. Minimum 300px.
+  // Calculate min height for mobile based on drag card count
   const allCardRows = Math.ceil(shuffledDragOrder.length / 2);
   const dropZoneMinHeight = Math.max(300, allCardRows * 56);
 
@@ -304,6 +316,7 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
         phrase={word?.phrase}
         passed={passed}
         audioPaths={word?.audio}
+        cardWidth={cardWidth}
       />
     );
   });
@@ -386,15 +399,16 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                 flex: { xs: "0 0 auto", sm: "1 1 0" },
                 minHeight: {
                   xs: `${dropZoneMinHeight}px`,
-                  sm: `${dropZoneMinHeight}px`,
                 },
-                maxWidth: { xs: "100%", sm: "66.666667%" },
+                aspectRatio: { sm: "1" },
+                alignSelf: { sm: "flex-start" },
+                maxWidth: "100%",
               }}
             >
               <Box
                 sx={{
                   height: "100%",
-                  minHeight: `${dropZoneMinHeight}px`,
+                  minHeight: { xs: `${dropZoneMinHeight}px`, sm: "unset" },
                   display: "flex",
                   borderRadius: "8px",
                   border: "1px dashed var(--mui-palette-divider)",
@@ -414,17 +428,17 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
               sx={{
                 minWidth: 0,
                 flex: { xs: "1 1 auto", sm: "0 0 auto" },
-                maxWidth: { xs: "100%", sm: "33.333333%" },
+                width: { sm: `${cardPanelWidth}px` },
+                maxWidth: { xs: "100%", sm: `${cardPanelWidth}px` },
               }}
             >
               <Box
                 sx={{
                   display: "flex",
-                  flexWrap: "wrap",
-                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  flexDirection: "column",
                   gap: 0,
                   height: { xs: "auto", sm: "100%" },
-                  minHeight: { xs: "auto", sm: `${dropZoneMinHeight}px` },
                   overflowY: "auto",
                   overflowX: "hidden",
                   padding: 0.5,
@@ -474,15 +488,16 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                 flex: { xs: "0 0 auto", sm: "1 1 0" },
                 minHeight: {
                   xs: `${dropZoneMinHeight}px`,
-                  sm: `${dropZoneMinHeight}px`,
                 },
-                maxWidth: { xs: "100%", sm: "66.666667%" },
+                aspectRatio: { sm: "1" },
+                alignSelf: { sm: "flex-start" },
+                maxWidth: "100%",
               }}
             >
               <Box
                 sx={{
                   height: "100%",
-                  minHeight: `${dropZoneMinHeight}px`,
+                  minHeight: { xs: `${dropZoneMinHeight}px`, sm: "unset" },
                   display: "flex",
                 }}
               >
@@ -501,17 +516,17 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
               sx={{
                 minWidth: 0,
                 flex: { xs: "1 1 auto", sm: "0 0 auto" },
-                maxWidth: { xs: "100%", sm: "33.333333%" },
+                width: { sm: `${cardPanelWidth}px` },
+                maxWidth: { xs: "100%", sm: `${cardPanelWidth}px` },
               }}
             >
               <Box
                 sx={{
                   display: "flex",
-                  flexWrap: "wrap",
-                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  flexDirection: "column",
                   gap: 0,
                   height: { xs: "auto", sm: "100%" },
-                  minHeight: { xs: "auto", sm: `${dropZoneMinHeight}px` },
                   maxHeight: { xs: "none", sm: "100%" },
                   overflowY: "auto",
                   overflowX: "hidden",

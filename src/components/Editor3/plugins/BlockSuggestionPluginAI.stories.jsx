@@ -30,14 +30,38 @@ import QuizPlugin, { QuizNode } from "./QuizPlugin";
 import AnswerPlugin, { AnswerNode } from "./AnswerPlugin";
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Block Suggestion (AI Mode)",
   component: BlockSuggestionPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "block-suggestion-ai-story-unit",
+        name: "AI Block Suggestion Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "block-suggestion-ai-story-unit",
     initializeMockData: false,
   },
 };
@@ -66,147 +90,123 @@ const Template = ({ editorState, instructions, title, useAI = true }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "AI Block Suggestion Demo",
-    description:
-      "Japanese language learning with AI-powered pedagogical guidance",
-    data: editorState
-      ? JSON.stringify(editorState)
-      : JSON.stringify({
-          root: {
-            children: [],
-            direction: "ltr",
-            format: "",
-            indent: 0,
-            type: "root",
-            version: 1,
-          },
-        }),
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer
-        initialConfig={initialConfig}
-        key={aiMode ? "ai" : "rules"}
-      >
-        <Box sx={{ p: 4, maxWidth: "1100px", margin: "0 auto" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
+    <LexicalComposer
+      initialConfig={initialConfig}
+      key={aiMode ? "ai" : "rules"}
+    >
+      <Box sx={{ p: 4, maxWidth: "1100px", margin: "0 auto" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h4">
+            {title || "AI-Powered Block Suggestions"}
+          </Typography>
+
+          <ToggleButtonGroup
+            value={aiMode ? "ai" : "rules"}
+            exclusive
+            onChange={(e, val) => val && setAiMode(val === "ai")}
+            size="small"
           >
-            <Typography variant="h4">
-              {title || "AI-Powered Block Suggestions"}
-            </Typography>
-
-            <ToggleButtonGroup
-              value={aiMode ? "ai" : "rules"}
-              exclusive
-              onChange={(e, val) => val && setAiMode(val === "ai")}
-              size="small"
-            >
-              <ToggleButton value="rules">💡 Rule-Based</ToggleButton>
-              <ToggleButton value="ai">🤖 AI-Powered</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-
-          <Alert severity={aiMode ? "success" : "info"} sx={{ mb: 3 }}>
-            <Typography variant="body2" component="div">
-              <strong>{aiMode ? "🤖 AI Mode:" : "💡 Rule-Based Mode:"}</strong>
-              <br />
-              {aiMode
-                ? "GPT-4 analyzes your lesson structure and provides pedagogically sound suggestions with reasoning."
-                : "Fast pattern-matching suggestions based on educational best practices."}
-              <br />
-              <br />
-              {instructions ||
-                "Click at an empty line to see suggestions based on your content structure."}
-            </Typography>
-          </Alert>
-
-          <Paper
-            elevation={3}
-            sx={{
-              border: "2px solid",
-              borderColor: aiMode ? "primary.main" : "divider",
-              borderRadius: "8px",
-              minHeight: "500px",
-              p: 3,
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{
-                    outline: "none",
-                    minHeight: "450px",
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                  }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "24px",
-                    left: "24px",
-                    color: "#999",
-                    pointerEvents: "none",
-                  }}
-                >
-                  Start writing content. Position cursor on empty line to see{" "}
-                  {aiMode ? "AI-powered" : "rule-based"} suggestions...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <QuizPlugin />
-            <AnswerPlugin />
-            <CustomAnswerPlugin />
-            <BlockSuggestionPlugin useAI={aiMode} />
-          </Paper>
-
-          <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
-            <Typography variant="body2" color="text.secondary">
-              <strong>💡 How it works:</strong>
-              <br />
-              {aiMode ? (
-                <>
-                  • AI analyzes all blocks in your lesson
-                  <br />
-                  • Suggests blocks with educational reasoning
-                  <br />
-                  • Considers scaffolding, active learning, and assessment
-                  principles
-                  <br />
-                  • Shows priority level (high/medium/low)
-                  <br />• Waits 500ms before calling API (debounced)
-                </>
-              ) : (
-                <>
-                  • Instantly suggests blocks based on previous block type
-                  <br />
-                  • Uses predefined pedagogical patterns
-                  <br />
-                  • No API calls - completely free and fast
-                  <br />• Great for quick authoring
-                </>
-              )}
-            </Typography>
-          </Paper>
+            <ToggleButton value="rules">💡 Rule-Based</ToggleButton>
+            <ToggleButton value="ai">🤖 AI-Powered</ToggleButton>
+          </ToggleButtonGroup>
         </Box>
-      </LexicalComposer>
-    </UnitProvider>
+
+        <Alert severity={aiMode ? "success" : "info"} sx={{ mb: 3 }}>
+          <Typography variant="body2" component="div">
+            <strong>{aiMode ? "🤖 AI Mode:" : "💡 Rule-Based Mode:"}</strong>
+            <br />
+            {aiMode
+              ? "GPT-4 analyzes your lesson structure and provides pedagogically sound suggestions with reasoning."
+              : "Fast pattern-matching suggestions based on educational best practices."}
+            <br />
+            <br />
+            {instructions ||
+              "Click at an empty line to see suggestions based on your content structure."}
+          </Typography>
+        </Alert>
+
+        <Paper
+          elevation={3}
+          sx={{
+            border: "2px solid",
+            borderColor: aiMode ? "primary.main" : "divider",
+            borderRadius: "8px",
+            minHeight: "500px",
+            p: 3,
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{
+                  outline: "none",
+                  minHeight: "450px",
+                  fontSize: "16px",
+                  lineHeight: "1.6",
+                }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "24px",
+                  left: "24px",
+                  color: "#999",
+                  pointerEvents: "none",
+                }}
+              >
+                Start writing content. Position cursor on empty line to see{" "}
+                {aiMode ? "AI-powered" : "rule-based"} suggestions...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <QuizPlugin />
+          <AnswerPlugin />
+          <CustomAnswerPlugin />
+          <BlockSuggestionPlugin useAI={aiMode} />
+        </Paper>
+
+        <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
+          <Typography variant="body2" color="text.secondary">
+            <strong>💡 How it works:</strong>
+            <br />
+            {aiMode ? (
+              <>
+                • AI analyzes all blocks in your lesson
+                <br />
+                • Suggests blocks with educational reasoning
+                <br />
+                • Considers scaffolding, active learning, and assessment
+                principles
+                <br />
+                • Shows priority level (high/medium/low)
+                <br />• Waits 500ms before calling API (debounced)
+              </>
+            ) : (
+              <>
+                • Instantly suggests blocks based on previous block type
+                <br />
+                • Uses predefined pedagogical patterns
+                <br />
+                • No API calls - completely free and fast
+                <br />• Great for quick authoring
+              </>
+            )}
+          </Typography>
+        </Paper>
+      </Box>
+    </LexicalComposer>
   );
 };
 

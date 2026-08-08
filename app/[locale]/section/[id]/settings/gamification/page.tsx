@@ -24,7 +24,7 @@ import Chip from '@mui/material/Chip'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
+import Tooltip from '@mui/material/Tooltip'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
@@ -43,14 +43,9 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { generateClient } from 'aws-amplify/data'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  HOLIDAY_BADGE_ICONS,
-  getIconsByHoliday,
-  getIconsByCulture,
-  getAllHolidays,
-  getAllCultures,
-  type HolidayBadgeIcon,
-} from '@/utils/holidayBadgeIcons'
+import { BadgeVisualPicker, resolveIcon } from '@/components/Gamification/BadgeVisualPicker'
+import { BadgeIcon } from '@/components/Gamification/BadgeIcon'
+import type { CustomBadgeVisual } from '@/components/Gamification/BadgeEditor'
 
 // ============================================================================
 // Types
@@ -73,6 +68,7 @@ interface CustomBadgeEntry {
   title: string
   description?: string
   icon?: string
+  visual?: CustomBadgeVisual
   shape?: string
   rarity?: string
   category?: string
@@ -84,7 +80,7 @@ interface CustomBadgeEntry {
 // Constants
 // ============================================================================
 
-import { GAMIFICATION_FEATURE_META } from '@/hooks/useGamificationFeatures'
+import { GAMIFICATION_FEATURE_META, HARDCODED_DEFAULTS } from '@/hooks/useGamificationFeatures'
 import type { GamificationFeatureKey } from '@/hooks/useGamificationFeatures'
 
 const FEATURE_TOGGLES = GAMIFICATION_FEATURE_META
@@ -104,6 +100,20 @@ const DEFAULT_BADGE_TYPES = [
 
 const BADGE_SHAPES = ['circle', 'hexagon', 'shield', 'diamond']
 const BADGE_RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+
+/** Unit label and tooltip shown next to the threshold override field for each badge type */
+const BADGE_THRESHOLD_META: Record<string, { unit: string; tooltip: string; defaultValue?: number }> = {
+  PERFECT_SCORE:    { unit: '%',    defaultValue: 100, tooltip: 'Minimum score percentage required (default: 100%)' },
+  STREAK_7:         { unit: 'days', defaultValue: 7,   tooltip: 'Consecutive days required for the streak badge (default: 7)' },
+  STREAK_30:        { unit: 'days', defaultValue: 30,  tooltip: 'Consecutive days required for the streak badge (default: 30)' },
+  FIRST_SUBMISSION: { unit: '—',                       tooltip: 'No threshold — awarded on first submission' },
+  SPEED_DEMON:      { unit: 'min',  defaultValue: 5,   tooltip: 'Maximum minutes allowed to complete an assignment (default: 5)' },
+  NIGHT_OWL:        { unit: 'hr',   defaultValue: 21,  tooltip: 'Submissions after this hour (24h) qualify, e.g. 21 = after 9 PM (default: 21)' },
+  EARLY_BIRD:       { unit: 'hr',   defaultValue: 8,   tooltip: 'Submissions before this hour (24h) qualify, e.g. 8 = before 8 AM (default: 8)' },
+  COMPLETIONIST:    { unit: '%',    defaultValue: 100, tooltip: 'Minimum completion percentage of all assignments (default: 100%)' },
+  HELPING_HAND:     { unit: '×',    defaultValue: 5,   tooltip: 'Number of peer assists required (default: 5)' },
+  COMEBACK_KID:     { unit: 'days', defaultValue: 7,   tooltip: 'Days of inactivity before a return counts as a comeback (default: 7)' },
+}
 
 // ============================================================================
 // Component
@@ -363,6 +373,8 @@ export default function GamificationSettingsPage() {
               {FEATURE_TOGGLES.map(({ key, label, description, category }) => {
                 const value = features[key]
                 const isOverridden = value != null
+                const platformDefault = HARDCODED_DEFAULTS[key as GamificationFeatureKey]
+                const defaultLabel = platformDefault ? 'Enabled' : 'Disabled'
                 return (
                   <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ flex: 1 }}>
@@ -370,7 +382,7 @@ export default function GamificationSettingsPage() {
                         <Typography variant="body1">{label}</Typography>
                         <Chip label={category} size="small" variant="outlined" />
                         {!isOverridden && (
-                          <Chip label="Platform Default" size="small" color="default" />
+                          <Chip label={`Default: ${defaultLabel}`} size="small" color="default" />
                         )}
                         {isOverridden && (
                           <Chip
@@ -393,7 +405,7 @@ export default function GamificationSettingsPage() {
                         }}
                         size="small"
                       >
-                        <MenuItem value="default">Platform Default</MenuItem>
+                        <MenuItem value="default">{defaultLabel} (default)</MenuItem>
                         <MenuItem value="enabled">Enabled</MenuItem>
                         <MenuItem value="disabled">Disabled</MenuItem>
                       </Select>
@@ -425,39 +437,63 @@ export default function GamificationSettingsPage() {
         <Card variant="outlined">
           <CardContent>
             <Typography variant="h6" gutterBottom>Badge Configuration</Typography>
-            <List dense>
-              {badgeConfigs.map((cfg) => (
-                <ListItem key={cfg.badgeType}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={cfg.enabled}
-                        onChange={() => toggleBadgeConfig(cfg.badgeType)}
-                        size="small"
+            <List dense disablePadding>
+              {badgeConfigs.map((cfg) => {
+                const meta = BADGE_THRESHOLD_META[cfg.badgeType]
+                const isFixed = meta?.unit === '—'
+                return (
+                  <ListItem
+                    key={cfg.badgeType}
+                    disableGutters
+                    sx={{ py: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <FormControlLabel
+                        sx={{ mr: 0, width: '100%' }}
+                        control={
+                          <Switch
+                            checked={cfg.enabled}
+                            onChange={() => toggleBadgeConfig(cfg.badgeType)}
+                            size="small"
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" noWrap>
+                            {cfg.badgeType.replace(/_/g, ' ')}
+                          </Typography>
+                        }
                       />
-                    }
-                    label={cfg.badgeType.replace(/_/g, ' ')}
-                  />
-                  <ListItemSecondaryAction>
-                    <TextField
-                      size="small"
-                      type="number"
-                      placeholder="Threshold"
-                      value={cfg.thresholdOverride ?? ''}
-                      onChange={(e) =>
-                        updateBadgeThreshold(
-                          cfg.badgeType,
-                          e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                      }
-                      sx={{ width: 100 }}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">#</InputAdornment>,
-                      }}
-                    />
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
+                    </Box>
+                    <Tooltip title={meta?.tooltip ?? 'Override the default threshold for this badge'} placement="left">
+                      <TextField
+                        size="small"
+                        type="number"
+                        label="Threshold"
+                        disabled={isFixed}
+                        value={isFixed ? '' : (cfg.thresholdOverride ?? '')}
+                        placeholder={meta?.defaultValue != null ? String(meta.defaultValue) : undefined}
+                        InputLabelProps={{ shrink: true }}
+                        onChange={(e) =>
+                          updateBadgeThreshold(
+                            cfg.badgeType,
+                            e.target.value ? parseInt(e.target.value) : undefined
+                          )
+                        }
+                        sx={{ width: 130, flexShrink: 0 }}
+                        InputProps={{
+                          endAdornment: meta ? (
+                            <InputAdornment position="end">
+                              <Typography variant="caption" color="text.secondary">
+                                {meta.unit}
+                              </Typography>
+                            </InputAdornment>
+                          ) : undefined,
+                        }}
+                      />
+                    </Tooltip>
+                  </ListItem>
+                )
+              })}
             </List>
           </CardContent>
         </Card>
@@ -490,14 +526,33 @@ export default function GamificationSettingsPage() {
                     sx={{ p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}
                   >
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <Typography fontSize={24}>{badge.icon || '🏅'}</Typography>
+                      {badge.visual ? (
+                        <BadgeIcon
+                          config={{
+                            icon: resolveIcon(badge.visual.iconName) || (() => null),
+                            name: badge.title,
+                            description: '',
+                            bgColor: badge.visual.bgColor,
+                            gradient: badge.visual.gradient,
+                            iconColor: badge.visual.iconColor,
+                            shape: badge.visual.shape,
+                            animation: badge.visual.animation,
+                            category: 'core',
+                            rarity: 'common',
+                          }}
+                          size={32}
+                          earned
+                        />
+                      ) : (
+                        <Typography fontSize={24}>{badge.icon || '🏅'}</Typography>
+                      )}
                       <Box>
                         <Typography variant="body2" fontWeight="bold">
                           {badge.title}
                           {badge.isAnti && <Chip label="Anti" size="small" color="error" sx={{ ml: 1 }} />}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {badge.rarity} • {badge.shape} • {badge.category || 'General'}
+                          {badge.rarity} • {badge.visual?.shape || badge.shape} • {badge.category || 'General'}
                         </Typography>
                       </Box>
                     </Stack>
@@ -575,16 +630,17 @@ function CustomBadgeCreatorDialog({
 }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [icon, setIcon] = useState('')
-  const [shape, setShape] = useState('circle')
+  const [visual, setVisual] = useState<CustomBadgeVisual>({
+    iconName: 'GiTrophy',
+    iconLib: 'gi',
+    shape: 'circle',
+    bgColor: '#4caf50',
+    iconColor: '#ffffff',
+    animation: 'draw',
+  })
   const [rarity, setRarity] = useState('common')
   const [category, setCategory] = useState('')
   const [isAnti, setIsAnti] = useState(false)
-  const [holidayFilter, setHolidayFilter] = useState('')
-
-  const filteredIcons = holidayFilter
-    ? getIconsByHoliday(holidayFilter)
-    : HOLIDAY_BADGE_ICONS
 
   const handleSubmit = () => {
     if (!title.trim()) return
@@ -592,8 +648,8 @@ function CustomBadgeCreatorDialog({
       id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       title,
       description: description || undefined,
-      icon: icon || '🏅',
-      shape,
+      visual,
+      shape: visual.shape,
       rarity,
       category: category || undefined,
       isAnti,
@@ -601,8 +657,14 @@ function CustomBadgeCreatorDialog({
     // Reset
     setTitle('')
     setDescription('')
-    setIcon('')
-    setShape('circle')
+    setVisual({
+      iconName: 'GiTrophy',
+      iconLib: 'gi',
+      shape: 'circle',
+      bgColor: '#4caf50',
+      iconColor: '#ffffff',
+      animation: 'draw',
+    })
     setRarity('common')
     setCategory('')
     setIsAnti(false)
@@ -631,50 +693,11 @@ function CustomBadgeCreatorDialog({
 
           {/* Icon picker */}
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              Icon {icon && <span>— Selected: {icon}</span>}
-            </Typography>
-            <FormControl size="small" sx={{ mb: 1, minWidth: 200 }}>
-              <InputLabel>Filter by holiday</InputLabel>
-              <Select
-                label="Filter by holiday"
-                value={holidayFilter}
-                onChange={(e) => setHolidayFilter(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                {getAllHolidays().map((h) => (
-                  <MenuItem key={h} value={h}>{h}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: 150, overflow: 'auto' }}>
-              {filteredIcons.map((ic) => (
-                <IconButton
-                  key={ic.id}
-                  onClick={() => setIcon(ic.emoji)}
-                  title={`${ic.label} (${ic.holiday})`}
-                  sx={{
-                    border: icon === ic.emoji ? 2 : 1,
-                    borderColor: icon === ic.emoji ? 'primary.main' : 'divider',
-                    borderRadius: 1,
-                    fontSize: 20,
-                  }}
-                >
-                  {ic.emoji}
-                </IconButton>
-              ))}
-            </Box>
+            <Typography variant="subtitle2" gutterBottom>Icon</Typography>
+            <BadgeVisualPicker value={visual} onChange={setVisual} />
           </Box>
 
           <Stack direction="row" spacing={2}>
-            <FormControl fullWidth>
-              <InputLabel>Shape</InputLabel>
-              <Select label="Shape" value={shape} onChange={(e) => setShape(e.target.value)}>
-                {BADGE_SHAPES.map((s) => (
-                  <MenuItem key={s} value={s}>{s}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
             <FormControl fullWidth>
               <InputLabel>Rarity</InputLabel>
               <Select label="Rarity" value={rarity} onChange={(e) => setRarity(e.target.value)}>

@@ -42,14 +42,12 @@ test.describe
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     // Type a unique unit name
     unitName = `HW Journey ${Date.now()}`;
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
     await page.keyboard.type(unitName);
-    await page.waitForTimeout(1000);
 
     // Insert quiz block
     const insertButton = page.locator(
@@ -62,7 +60,6 @@ test.describe
       .locator("li")
       .filter({ hasText: /quiz|multiple choice/i })
       .click();
-    await page.waitForTimeout(2000);
 
     await expect(page.locator('[data-tour="quiz-block"]').first()).toBeVisible({
       timeout: 10_000,
@@ -73,7 +70,6 @@ test.describe
     const editBtn = quizBlock.getByRole("button", { name: /edit/i });
     await expect(editBtn).toBeVisible({ timeout: 5_000 });
     await editBtn.click();
-    await page.waitForTimeout(1000);
 
     // Add two answer options by clicking the "Add Answer" placeholder
     const addAnswerField = quizBlock.locator(
@@ -81,38 +77,33 @@ test.describe
     );
     await expect(addAnswerField).toBeVisible({ timeout: 5_000 });
     await addAnswerField.click();
-    await page.waitForTimeout(500);
 
     // Fill first answer
     const answerInputs = quizBlock.locator('input[type="text"], textarea');
     const firstAnswer = answerInputs.last();
     await firstAnswer.fill("Correct answer");
-    await page.waitForTimeout(500);
 
     // Mark first answer as correct (toggle the switch)
-    // Use the MUI Switch parent span rather than the hidden input,
-    // and force:true to bypass overlapping MUI Stack layout.
     const correctToggle = quizBlock.locator(".MuiSwitch-root").first();
     if (await correctToggle.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await correctToggle.click({ force: true });
-      await page.waitForTimeout(300);
+      await correctToggle.click();
     }
 
     // Add second answer
     await addAnswerField.click();
-    await page.waitForTimeout(500);
     const secondAnswer = answerInputs.last();
     await secondAnswer.fill("Wrong answer");
-    await page.waitForTimeout(500);
 
     // Click "Done" to save the quiz
     const doneBtn = quizBlock.getByRole("button", { name: /done/i });
     await expect(doneBtn).toBeVisible({ timeout: 5_000 });
     await doneBtn.click();
-    await page.waitForTimeout(1000);
 
-    // Wait for auto-save
-    await page.waitForTimeout(4000);
+    // Wait for auto-save via network
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 15_000 },
+    ).catch(() => {});
     await ctx.close();
   });
 
@@ -164,25 +155,19 @@ test.describe
     // Navigate to unit editor and assign
     await page.goto(`/unit/${unitId}`, { timeout: 30_000 });
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     const assignTab = page.locator('[data-tour="assignments-tab"]');
     await expect(assignTab).toBeVisible({ timeout: 10_000 });
     await assignTab.click();
-    await page.waitForTimeout(2000);
 
-    // Assignment panel must be present
+    // Assignment panel or create button must be present
     const assignPanel = page.locator('[data-tour="assignment-settings"]');
     const createAssignBtn = page.locator(
       '[data-tour="create-assignment-button"]',
     );
-    const hasPanel = await assignPanel
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    const hasBtn = await createAssignBtn
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-    expect(hasPanel || hasBtn).toBe(true);
+    await expect(assignPanel.or(createAssignBtn)).toBeVisible({
+      timeout: 10_000,
+    });
 
     await ctx.close();
   });
@@ -277,13 +262,11 @@ test.describe
     await startBtn.click();
 
     await page.waitForURL(/\/workbook\//, { timeout: 15_000 });
-    await page.waitForTimeout(3000);
 
     // Handle timer gate
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     // Handle completion modal from prior runs
@@ -294,7 +277,6 @@ test.describe
       const tryAgainBtn = page.getByRole("button", { name: /try again/i });
       if (await tryAgainBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await tryAgainBtn.click();
-        await page.waitForTimeout(3000);
       }
     }
 
@@ -306,18 +288,27 @@ test.describe
     const quizBlock = page.locator('[data-tour="quiz-block"]').first();
     await expect(quizBlock).toBeVisible({ timeout: 15_000 });
 
+    // Verify quiz has answer options before interacting
+    const answerOptions = quizBlock.locator(
+      'input[type="checkbox"], [role="checkbox"]',
+    );
+    await expect(answerOptions.first()).toBeVisible({ timeout: 10_000 });
+
     // Click all answers to complete the quiz
     const unchecked = quizBlock.locator(
       'input[type="checkbox"]:not(:checked), [role="checkbox"][aria-checked="false"]',
     );
     const count = await unchecked.count();
+    expect(count).toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
       await unchecked.nth(i).click();
-      await page.waitForTimeout(500);
     }
 
-    // Wait for grade to be recorded
-    await page.waitForTimeout(3000);
+    // Wait for grade to be recorded via network response
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 10_000 },
+    ).catch(() => {});
   });
 
   test("after completing, dashboard shows completed assignment with accuracy", async ({

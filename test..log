@@ -1,0 +1,347 @@
+
+Running 11 tests using 1 worker
+
+  ✘   1 [chromium] › test/e2e-collaboration/assignment-workflow.spec.ts:37:7 › Assignment Workflow › instructor assigns unit, student sees it and opens workbook (36.8s)
+  ✘   2 [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:39:7 › Collaborative Chat › students can create topics and exchange messages in section chat (47.1s)
+  ✘   3 [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:204:7 › Collaborative Chat › @kai mention triggers bot response (24.3s)
+  ✘   4 [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:293:7 › Collaborative Chat › typing indicator shows when peer is typing (23.2s)
+  ✘   5 [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:372:7 › Collaborative Chat › reactions sync between users (23.6s)
+  ✘   6 [chromium] › test/e2e-collaboration/grading-workflow.spec.ts:40:7 › Grading Workflow › student answers quiz, instructor sees grade in gradebook (25.1s)
+  ✘   7 [chromium] › test/e2e-collaboration/group-practice-drill.spec.ts:44:7 › Group Practice Drill › student starts collaborative drill, second student joins via room code (28.3s)
+  ✘   8 [chromium] › test/e2e-collaboration/peer-review-room.spec.ts:44:7 › Peer Review Room › two students exchange messages in peer review chat (30.0s)
+  ✘   9 [chromium] › test/e2e-collaboration/section-join-code.spec.ts:33:7 › Section Join Code › instructor creates section, student joins, both see membership (28.9s)
+  ✘  10 [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:38:7 › Workbook Collaboration › student answers quiz while instructor views same workbook (28.0s)
+  ✘  11 [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:97:7 › Workbook Collaboration › instructor edits unit while student views workbook concurrently (33.1s)
+
+
+  1) [chromium] › test/e2e-collaboration/assignment-workflow.spec.ts:37:7 › Assignment Workflow › instructor assigns unit, student sees it and opens workbook 
+
+    TimeoutError: page.goto: Timeout 30000ms exceeded.
+    Call log:
+      - navigating to "https://localhost:3000/sections", waiting until "load"
+
+
+       at helpers.ts:127
+
+      125 |   url: string,
+      126 | ): Promise<void> {
+    > 127 |   await page.goto(url, { timeout: 30_000 });
+          |              ^
+      128 |
+      129 |   // Wait for the Amplify Authenticator form to appear
+      130 |   await page.waitForSelector('input[name="username"]', { timeout: 20_000 });
+        at loginOnPage (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:127:14)
+        at createUserSession (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:95:9)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/assignment-workflow.spec.ts:44:43
+
+    Error Context: test-results/assignment-workflow-Assign-07a21--sees-it-and-opens-workbook-chromium/error-context.md
+
+  2) [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:39:7 › Collaborative Chat › students can create topics and exchange messages in section chat 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="sections-page"]') to be visible
+
+
+       at helpers.ts:163
+
+      161 | export async function goToSections(page: Page): Promise<void> {
+      162 |   await page.goto("/sections");
+    > 163 |   await page.waitForSelector('[data-tour="sections-page"]', {
+          |              ^
+      164 |     timeout: 15_000,
+      165 |   });
+      166 |   // Wait for React hydration to complete before interacting
+        at goToSections (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:163:14)
+        at createSection (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:295:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/collaborative-chat.spec.ts:59:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/collaborative-chat-Collabo-165bb-ge-messages-in-section-chat-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/collaborative-chat-Collabo-165bb-ge-messages-in-section-chat-chromium/error-context.md
+
+  3) [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:204:7 › Collaborative Chat › @kai mention triggers bot response 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="sections-page"]') to be visible
+
+
+       at helpers.ts:163
+
+      161 | export async function goToSections(page: Page): Promise<void> {
+      162 |   await page.goto("/sections");
+    > 163 |   await page.waitForSelector('[data-tour="sections-page"]', {
+          |              ^
+      164 |     timeout: 15_000,
+      165 |   });
+      166 |   // Wait for React hydration to complete before interacting
+        at goToSections (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:163:14)
+        at createSection (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:295:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/collaborative-chat.spec.ts:217:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/collaborative-chat-Collabo-dd6e1-ntion-triggers-bot-response-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/collaborative-chat-Collabo-dd6e1-ntion-triggers-bot-response-chromium/error-context.md
+
+  4) [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:293:7 › Collaborative Chat › typing indicator shows when peer is typing 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="sections-page"]') to be visible
+
+
+       at helpers.ts:163
+
+      161 | export async function goToSections(page: Page): Promise<void> {
+      162 |   await page.goto("/sections");
+    > 163 |   await page.waitForSelector('[data-tour="sections-page"]', {
+          |              ^
+      164 |     timeout: 15_000,
+      165 |   });
+      166 |   // Wait for React hydration to complete before interacting
+        at goToSections (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:163:14)
+        at createSection (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:295:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/collaborative-chat.spec.ts:305:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/collaborative-chat-Collabo-d4545-r-shows-when-peer-is-typing-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/collaborative-chat-Collabo-d4545-r-shows-when-peer-is-typing-chromium/error-context.md
+
+  5) [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:372:7 › Collaborative Chat › reactions sync between users 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="sections-page"]') to be visible
+
+
+       at helpers.ts:163
+
+      161 | export async function goToSections(page: Page): Promise<void> {
+      162 |   await page.goto("/sections");
+    > 163 |   await page.waitForSelector('[data-tour="sections-page"]', {
+          |              ^
+      164 |     timeout: 15_000,
+      165 |   });
+      166 |   // Wait for React hydration to complete before interacting
+        at goToSections (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:163:14)
+        at createSection (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:295:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/collaborative-chat.spec.ts:385:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/collaborative-chat-Collabo-fcb37-eactions-sync-between-users-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/collaborative-chat-Collabo-fcb37-eactions-sync-between-users-chromium/error-context.md
+
+  6) [chromium] › test/e2e-collaboration/grading-workflow.spec.ts:40:7 › Grading Workflow › student answers quiz, instructor sees grade in gradebook 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="units-page"]') to be visible
+
+
+       at helpers.ts:151
+
+      149 | export async function goToUnits(page: Page): Promise<void> {
+      150 |   await page.goto("/units");
+    > 151 |   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+          |              ^
+      152 |   // Wait for React hydration to complete before interacting
+      153 |   await page
+      154 |     .waitForLoadState("networkidle", { timeout: 10_000 })
+        at goToUnits (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:151:14)
+        at createUnit (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:185:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/grading-workflow.spec.ts:53:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/grading-workflow-Grading-W-3dc37-tor-sees-grade-in-gradebook-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/grading-workflow-Grading-W-3dc37-tor-sees-grade-in-gradebook-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/grading-workflow-Grading-W-3dc37-tor-sees-grade-in-gradebook-chromium/error-context.md
+
+  7) [chromium] › test/e2e-collaboration/group-practice-drill.spec.ts:44:7 › Group Practice Drill › student starts collaborative drill, second student joins via room code 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="units-page"]') to be visible
+
+
+       at helpers.ts:151
+
+      149 | export async function goToUnits(page: Page): Promise<void> {
+      150 |   await page.goto("/units");
+    > 151 |   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+          |              ^
+      152 |   // Wait for React hydration to complete before interacting
+      153 |   await page
+      154 |     .waitForLoadState("networkidle", { timeout: 10_000 })
+        at goToUnits (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:151:14)
+        at createUnit (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:185:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/group-practice-drill.spec.ts:58:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/group-practice-drill-Group-881e0-student-joins-via-room-code-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/group-practice-drill-Group-881e0-student-joins-via-room-code-chromium/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/group-practice-drill-Group-881e0-student-joins-via-room-code-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/group-practice-drill-Group-881e0-student-joins-via-room-code-chromium/error-context.md
+
+  8) [chromium] › test/e2e-collaboration/peer-review-room.spec.ts:44:7 › Peer Review Room › two students exchange messages in peer review chat 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="units-page"]') to be visible
+
+
+       at helpers.ts:151
+
+      149 | export async function goToUnits(page: Page): Promise<void> {
+      150 |   await page.goto("/units");
+    > 151 |   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+          |              ^
+      152 |   // Wait for React hydration to complete before interacting
+      153 |   await page
+      154 |     .waitForLoadState("networkidle", { timeout: 10_000 })
+        at goToUnits (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:151:14)
+        at createUnit (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:185:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/peer-review-room.spec.ts:58:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/peer-review-room-Peer-Revi-7b28b-essages-in-peer-review-chat-chromium/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/peer-review-room-Peer-Revi-7b28b-essages-in-peer-review-chat-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/peer-review-room-Peer-Revi-7b28b-essages-in-peer-review-chat-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/peer-review-room-Peer-Revi-7b28b-essages-in-peer-review-chat-chromium/error-context.md
+
+  9) [chromium] › test/e2e-collaboration/section-join-code.spec.ts:33:7 › Section Join Code › instructor creates section, student joins, both see membership 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="sections-page"]') to be visible
+
+
+       at helpers.ts:163
+
+      161 | export async function goToSections(page: Page): Promise<void> {
+      162 |   await page.goto("/sections");
+    > 163 |   await page.waitForSelector('[data-tour="sections-page"]', {
+          |              ^
+      164 |     timeout: 15_000,
+      165 |   });
+      166 |   // Wait for React hydration to complete before interacting
+        at goToSections (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:163:14)
+        at createSection (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:295:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/section-join-code.spec.ts:46:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/section-join-code-Section--95c81-t-joins-both-see-membership-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/section-join-code-Section--95c81-t-joins-both-see-membership-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/section-join-code-Section--95c81-t-joins-both-see-membership-chromium/error-context.md
+
+  10) [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:38:7 › Workbook Collaboration › student answers quiz while instructor views same workbook 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="units-page"]') to be visible
+
+
+       at helpers.ts:151
+
+      149 | export async function goToUnits(page: Page): Promise<void> {
+      150 |   await page.goto("/units");
+    > 151 |   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+          |              ^
+      152 |   // Wait for React hydration to complete before interacting
+      153 |   await page
+      154 |     .waitForLoadState("networkidle", { timeout: 10_000 })
+        at goToUnits (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:151:14)
+        at createUnit (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:185:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/workbook-collaboration.spec.ts:51:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workbook-collaboration-Wor-3ea18-tructor-views-same-workbook-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workbook-collaboration-Wor-3ea18-tructor-views-same-workbook-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workbook-collaboration-Wor-3ea18-tructor-views-same-workbook-chromium/error-context.md
+
+  11) [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:97:7 › Workbook Collaboration › instructor edits unit while student views workbook concurrently 
+
+    TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tour="units-page"]') to be visible
+
+
+       at helpers.ts:151
+
+      149 | export async function goToUnits(page: Page): Promise<void> {
+      150 |   await page.goto("/units");
+    > 151 |   await page.waitForSelector('[data-tour="units-page"]', { timeout: 15_000 });
+          |              ^
+      152 |   // Wait for React hydration to complete before interacting
+      153 |   await page
+      154 |     .waitForLoadState("networkidle", { timeout: 10_000 })
+        at goToUnits (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:151:14)
+        at createUnit (/Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/helpers.ts:185:3)
+        at /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/test/e2e-collaboration/workbook-collaboration.spec.ts:109:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workbook-collaboration-Wor-486cd-views-workbook-concurrently-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workbook-collaboration-Wor-486cd-views-workbook-concurrently-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workbook-collaboration-Wor-486cd-views-workbook-concurrently-chromium/error-context.md
+
+  11 failed
+    [chromium] › test/e2e-collaboration/assignment-workflow.spec.ts:37:7 › Assignment Workflow › instructor assigns unit, student sees it and opens workbook 
+    [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:39:7 › Collaborative Chat › students can create topics and exchange messages in section chat 
+    [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:204:7 › Collaborative Chat › @kai mention triggers bot response 
+    [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:293:7 › Collaborative Chat › typing indicator shows when peer is typing 
+    [chromium] › test/e2e-collaboration/collaborative-chat.spec.ts:372:7 › Collaborative Chat › reactions sync between users 
+    [chromium] › test/e2e-collaboration/grading-workflow.spec.ts:40:7 › Grading Workflow › student answers quiz, instructor sees grade in gradebook 
+    [chromium] › test/e2e-collaboration/group-practice-drill.spec.ts:44:7 › Group Practice Drill › student starts collaborative drill, second student joins via room code 
+    [chromium] › test/e2e-collaboration/peer-review-room.spec.ts:44:7 › Peer Review Room › two students exchange messages in peer review chat 
+    [chromium] › test/e2e-collaboration/section-join-code.spec.ts:33:7 › Section Join Code › instructor creates section, student joins, both see membership 
+    [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:38:7 › Workbook Collaboration › student answers quiz while instructor views same workbook 
+    [chromium] › test/e2e-collaboration/workbook-collaboration.spec.ts:97:7 › Workbook Collaboration › instructor edits unit while student views workbook concurrently 
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report test/e2e-collaboration-report[39m
+[36m[39m

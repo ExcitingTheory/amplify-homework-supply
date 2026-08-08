@@ -888,17 +888,11 @@ export default React.memo(function CustomAnswerEditor({
           }}
           rows={rows}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 100]}
+          hideFooter
           checkboxSelection
-          rowSelectionModel={gridSelection}
-          onRowSelectionModelChange={(e) => {
-            console.log("onRowSelectionModelChange", e);
-            setGridSelection(e);
+          rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+          onRowSelectionModelChange={(model) => {
+            setGridSelection([...model.ids]);
           }}
         />
       )}

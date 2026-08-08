@@ -50,18 +50,11 @@ test.describe("Chat / AI Assistant", () => {
     // Wait for AI response — look for an assistant message bubble
     // The AI responds via real API, so give generous timeout
     const aiMessage = messages.locator('[data-tour="ai-message"]').first();
-    const hasAiResponse = await aiMessage
-      .isVisible({ timeout: 45_000 })
-      .catch(() => false);
+    await expect(aiMessage).toBeVisible({ timeout: 45_000 });
 
-    if (hasAiResponse) {
-      // Verify the response contains actual text (not empty)
-      const responseText = await aiMessage.textContent();
-      expect(responseText!.length).toBeGreaterThan(5);
-    } else {
-      // AI API may not be configured in test env — skip gracefully
-      test.skip();
-    }
+    // Verify the response contains actual text (not empty)
+    const responseText = await aiMessage.textContent();
+    expect(responseText!.length).toBeGreaterThan(5);
   });
 
   test("close and reopen drawer preserves conversation", async ({ page }) => {

@@ -635,6 +635,36 @@ const mockClient = {
 
   // Mock mutations for custom server-side operations
   mutations: {
+    createSectionGroup: async (input) => {
+      console.log('[Mock Data] createSectionGroup() called with:', input);
+      const sectionId = `mock-section-${Date.now()}`;
+      const mockSection = {
+        id: sectionId,
+        name: input?.name || 'Mock Section',
+        description: input?.description || '',
+        code: Math.random().toString(36).slice(2, 8).toUpperCase(),
+        owner: 'mock-user-sub',
+        _version: 1,
+        _lastChangedAt: Date.now(),
+        _deleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dataStores.Section.set(sectionId, mockSection);
+      return { data: JSON.stringify({ sectionId, name: input?.name || 'Mock Section' }), errors: null };
+    },
+    publishUnit: async (input) => {
+      console.log('[Mock Data] publishUnit() called with:', input);
+      return { data: JSON.stringify({ unitId: input?.unitId, status: 'PUBLISHED' }), errors: null };
+    },
+    processFileImage: async (input) => {
+      console.log('[Mock Data] processFileImage() called with:', input);
+      return { data: 'https://example.com/mock-thumbnail.jpg', errors: null };
+    },
+    processDocumentThumbnail: async (input) => {
+      console.log('[Mock Data] processDocumentThumbnail() called with:', input);
+      return { data: 'https://example.com/mock-doc-thumbnail.jpg', errors: null };
+    },
     addSelfToSection: async (input) => {
       console.log('[Mock Data] addSelfToSection() called with:', input);
       // Simulate a successful join for any code
@@ -1076,6 +1106,16 @@ export const clearMockData = () => {
   });
   
   console.log('[Mock Data] All data stores cleared');
+};
+
+/**
+ * Clear stale observeQuery subscriptions that were not unsubscribed (e.g. due to
+ * hard story resets in Storybook/Vitest browser mode). Safe to call in beforeEach.
+ */
+export const clearActiveSubscriptions = () => {
+  Object.keys(activeSubscriptions).forEach(model => {
+    activeSubscriptions[model] = [];
+  });
 };
 
 /**

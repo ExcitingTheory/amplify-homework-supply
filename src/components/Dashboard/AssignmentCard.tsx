@@ -126,13 +126,15 @@ export function AssignmentCard({
       component="article"
       aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct)}` : ""}`}
       data-tour={isCompleted ? "assignment-card-completed" : "assignment-card-pending"}
-      elevation={isUpNext ? 2 : 0}
+      elevation={0}
       sx={{
-        border: "1px solid",
-        borderColor: isUpNext ? "primary.main" : "divider",
+        // When nested inside UpNextCard, suppress the outer border and elevation
+        // (UpNextCard's own Card provides the highlighted outline treatment).
+        border: isUpNext ? "none" : "1px solid",
+        borderColor: isUpNext ? undefined : "divider",
         borderLeft: "4px solid",
         borderLeftColor,
-        borderRadius: 2,
+        borderRadius: isUpNext ? 0 : 2,
         display: "flex",
         overflow: "hidden",
         height: 140,
@@ -140,7 +142,7 @@ export function AssignmentCard({
         transition: justCompleted ? "none" : "box-shadow 0.2s",
         "&:hover": { boxShadow: locked ? 0 : 4 },
         ...(isUpNext && {
-          boxShadow: 3,
+          boxShadow: 0,
           bgcolor: "action.selected",
         }),
         ...(justCompleted && {

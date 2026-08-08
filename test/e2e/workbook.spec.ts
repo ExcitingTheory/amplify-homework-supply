@@ -19,15 +19,9 @@ test.describe("Student Workbook", () => {
   test("student can open section and see assignments", async ({ page }) => {
     // Student should see at least one section card
     const sectionCard = page.locator('[data-tour="section-card"]').first();
-    if (
-      !(await sectionCard.isVisible({ timeout: 15_000 }).catch(() => false))
-    ) {
-      test.skip(
-        undefined,
-        "No sections available for student — run section setup first",
-      );
-      return;
-    }
+    await expect(sectionCard).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Click through to section detail
     const sectionLink = sectionCard.locator('a[href*="/section/"]');
@@ -43,29 +37,13 @@ test.describe("Student Workbook", () => {
   test("student opens workbook and sees content", async ({ page }) => {
     // Navigate to first section
     const sectionCard = page.locator('[data-tour="section-card"]').first();
-    if (
-      !(await sectionCard.isVisible({ timeout: 15_000 }).catch(() => false))
-    ) {
-      test.skip(undefined, "No sections available for student");
-      return;
-    }
+    await expect(sectionCard).toBeVisible({ timeout: 15_000 });
     await sectionCard.locator('a[href*="/section/"]').click();
     await page.waitForURL(/\/section\/[a-f0-9-]+/, { timeout: 15_000 });
 
     // Click workbook button on first assignment
     const workbookBtn = page.locator('[data-tour="view-workbook-button"]');
-    if (
-      !(await workbookBtn
-        .first()
-        .isVisible({ timeout: 10_000 })
-        .catch(() => false))
-    ) {
-      test.skip(
-        undefined,
-        "No assignments with workbook links in this section",
-      );
-      return;
-    }
+    await expect(workbookBtn.first()).toBeVisible({ timeout: 10_000 });
     await workbookBtn.first().click();
     await page.waitForURL(/\/workbook\/[a-f0-9-]+/, { timeout: 20_000 });
 
@@ -73,7 +51,6 @@ test.describe("Student Workbook", () => {
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     // Workbook content should be visible
@@ -85,25 +62,12 @@ test.describe("Student Workbook", () => {
   test("student can answer quiz questions in workbook", async ({ page }) => {
     // Navigate to a workbook
     const sectionCard = page.locator('[data-tour="section-card"]').first();
-    if (
-      !(await sectionCard.isVisible({ timeout: 15_000 }).catch(() => false))
-    ) {
-      test.skip(undefined, "No sections available for student");
-      return;
-    }
+    await expect(sectionCard).toBeVisible({ timeout: 15_000 });
     await sectionCard.locator('a[href*="/section/"]').click();
     await page.waitForURL(/\/section\/[a-f0-9-]+/, { timeout: 15_000 });
 
     const workbookBtn = page.locator('[data-tour="view-workbook-button"]');
-    if (
-      !(await workbookBtn
-        .first()
-        .isVisible({ timeout: 10_000 })
-        .catch(() => false))
-    ) {
-      test.skip(undefined, "No assignments with workbook links");
-      return;
-    }
+    await expect(workbookBtn.first()).toBeVisible({ timeout: 10_000 });
     await workbookBtn.first().click();
     await page.waitForURL(/\/workbook\/[a-f0-9-]+/, { timeout: 20_000 });
 
@@ -111,21 +75,17 @@ test.describe("Student Workbook", () => {
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     await expect(
       page.locator('[data-tour="workbook-content"], [data-tour="workbook"]'),
     ).toBeVisible({ timeout: 15_000 });
 
-    // Find quiz blocks and answer them
+    // Find quiz blocks — must exist for this test to be meaningful
     const quizBlocks = page.locator('[data-tour="quiz-block"]');
+    await expect(quizBlocks.first()).toBeVisible({ timeout: 10_000 });
     const quizCount = await quizBlocks.count();
-
-    if (quizCount === 0) {
-      test.skip(undefined, "No quiz blocks in this workbook");
-      return;
-    }
+    expect(quizCount).toBeGreaterThan(0);
 
     // Click the first answer checkbox in each quiz block
     for (let i = 0; i < quizCount; i++) {
@@ -134,10 +94,8 @@ test.describe("Student Workbook", () => {
         .locator('[data-tour="quiz-answers"]')
         .first()
         .locator('input[type="checkbox"]');
-      if (await firstAnswer.isVisible().catch(() => false)) {
-        await firstAnswer.check();
-        await page.waitForTimeout(500);
-      }
+      await expect(firstAnswer).toBeVisible({ timeout: 5_000 });
+      await firstAnswer.check();
     }
 
     // After answering all quizzes, results modal may appear

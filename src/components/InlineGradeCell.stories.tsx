@@ -7,6 +7,7 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { fn, expect, userEvent, within } from 'storybook/test'
 import { InlineGradeCell, createEmptyHistoryState } from './InlineGradeCell'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material'
 
@@ -36,9 +37,29 @@ export const Default: Story = {
     overrideScore: undefined,
     sharedHistory,
     isOwner: true,
-    onOverride: (score) => console.log('Autosave override:', score),
-    onRemoveOverride: () => console.log('Remove override (field cleared)'),
-    onGradeClick: () => console.log('Navigate to grade review'),
+    onOverride: fn(),
+    onRemoveOverride: fn(),
+    onGradeClick: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // View mode: grade displayed as text
+    await canvas.findByText('85% (78%)')
+
+    // Click the grade to enter edit mode
+    const gradeSpan = canvas.getByText('85% (78%)')
+    await userEvent.click(gradeSpan)
+
+    // Edit field should now be visible
+    const editField = await canvas.findByRole('textbox', { name: /Grade override/i })
+    expect(editField).toBeInTheDocument()
+
+    // Type an override value
+    await userEvent.type(editField, '92')
+
+    // Tab away to trigger save (blur flush)
+    await userEvent.tab()
   },
 }
 
@@ -46,6 +67,31 @@ export const WithOverride: Story = {
   args: {
     ...Default.args,
     overrideScore: 92,
+    onOverride: fn(),
+    onRemoveOverride: fn(),
+    onGradeClick: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // Override shown in blue
+    await canvas.findByText('92%')
+
+    // Click to open editor
+    const gradeSpan = canvas.getByText('92%')
+    await userEvent.click(gradeSpan)
+
+    // Wait for edit mode: ContentEditable appears
+    const editField = await canvas.findByRole('textbox', { name: /Grade override/i })
+    expect(editField).toBeInTheDocument()
+
+    // Remove override button appears when editing && hasOverride
+    const removeBtn = await canvas.findByRole('button')
+    await userEvent.click(removeBtn)
+
+    // After removing, edit mode closes (setEditing(false) is called)
+    // View mode grade text reappears
+    await canvas.findByText('92%')
   },
 }
 
@@ -55,6 +101,17 @@ export const NoGrade: Story = {
     computedGrade: '— (—)',
     rawHighest: undefined,
     overrideScore: undefined,
+    onOverride: fn(),
+    onRemoveOverride: fn(),
+    onGradeClick: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Shows dash placeholder in view mode
+    await canvas.findByText('— (—)')
+    // Click to open edit mode
+    await userEvent.click(canvas.getByText('— (—)'))
+    await canvas.findByRole('textbox', { name: /Grade override/i })
   },
 }
 
@@ -62,6 +119,19 @@ export const StudentView: Story = {
   args: {
     ...Default.args,
     isOwner: false,
+    onOverride: fn(),
+    onRemoveOverride: fn(),
+    onGradeClick: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    // Grade visible in read-only mode
+    await canvas.findByText('85% (78%)')
+    // Clicking triggers navigation, not edit mode
+    await userEvent.click(canvas.getByText('85% (78%)'))
+    expect(args.onGradeClick).toHaveBeenCalled()
+    // No edit field in student view
+    expect(canvas.queryByRole('textbox', { name: /Grade override/i })).toBeNull()
   },
 }
 

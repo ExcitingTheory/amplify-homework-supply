@@ -176,6 +176,13 @@ export function RedemptionConditionForm({
                 InputProps={{ inputProps: { min: 1 } }}
                 sx={{ width: 100 }}
                 disabled={disabled}
+                helperText={
+                  typeConfig.value === 'EARN_XP' ? 'XP points' :
+                  typeConfig.value === 'LOGIN_STREAK' || typeConfig.value === 'BUILD_STREAK' ? 'days' :
+                  typeConfig.value === 'COMPLETE_DRILLS' ? 'drills' :
+                  typeConfig.value === 'ACTIVITY_COUNT' ? 'activities' :
+                  'submissions'
+                }
               />
             )}
             {typeConfig.fields.includes('percent') && (

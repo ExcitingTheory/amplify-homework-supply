@@ -7,7 +7,7 @@
  * @module PdfThumbnail
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -53,6 +53,46 @@ export default function PdfThumbnail({
     const [numPages, setNumPages] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Create an explicit PDFWorker instance so we can manage its lifecycle.
+    // Lazy initialisation during render ensures the worker exists before Document mounts.
+    const workerRef = useRef<pdfjs.PDFWorker | null>(null);
+    if (typeof window !== 'undefined' && workerRef.current === null) {
+        workerRef.current = new (pdfjs as any).PDFWorker();
+    }
+
+    // Stable options object — created once so Document never sees a changed reference.
+    const pdfOptionsRef = useRef<Record<string, unknown> | null>(null);
+    if (pdfOptionsRef.current === null) {
+        pdfOptionsRef.current = {
+            cMapUrl: '/cmaps/',
+            cMapPacked: true,
+            standardFontDataUrl: '/standard_fonts/',
+            ...(workerRef.current ? { worker: workerRef.current } : {}),
+        };
+    }
+
+    // useLayoutEffect cleanup runs synchronously during React's commit phase,
+    // BEFORE react-pdf Document's useEffect cleanup (which calls loadingTask.destroy()).
+    // By terminating the LoopbackPort here, the subsequent "Terminate" message from
+    // loadingTask.destroy() finds no listeners and is silently dropped — preventing the
+    // pdfjs "Worker was terminated" unhandled promise rejections.
+    useLayoutEffect(() => {
+        return () => {
+            const worker = workerRef.current;
+            if (worker) {
+                // LoopbackPort (fake worker used in browser tests) exposes terminate().
+                // Real Web Worker ports do not — the typeof guard makes this safe in prod.
+                const port = worker.port as any;
+                if (typeof port?.terminate === 'function') {
+                    port.terminate();
+                }
+                worker.destroy();
+                workerRef.current = null;
+                pdfOptionsRef.current = null;
+            }
+        };
+    }, []);
 
     const onDocumentLoadSuccess = ({ numPages: pages }: { numPages: number }) => {
         setNumPages(pages);
@@ -111,11 +151,7 @@ export default function PdfThumbnail({
                 file={url}
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={onDocumentLoadError}
-                options={{
-                    cMapUrl: '/cmaps/',
-                    cMapPacked: true,
-                    standardFontDataUrl: '/standard_fonts/',
-                }}
+                options={pdfOptionsRef.current ?? undefined}
                 loading={
                     <Paper
                         sx={{

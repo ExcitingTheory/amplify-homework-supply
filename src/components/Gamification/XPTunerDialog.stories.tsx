@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { XPTunerDialog } from './XPTunerDialog'
 import { XPReason } from '../../utils/xpCalculation'
-import { fn } from 'storybook/test'
+import { fn, expect, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof XPTunerDialog> = {
   title: '🏆 Gamification/Instructor/XP Tuner Dialog',
@@ -23,6 +23,29 @@ type Story = StoryObj<typeof XPTunerDialog>
 export const Default: Story = {
   args: {
     sectionName: 'Biology 101 — Fall 2026',
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    const doc = canvasElement.ownerDocument
+
+    // Dialog renders with section name
+    await body.findByText('Biology 101 — Fall 2026')
+
+    // XP Enabled toggle is on by default (first checkbox in dialog)
+    const enableSwitch = doc.querySelector('input[type="checkbox"]') as HTMLInputElement
+    expect(enableSwitch).not.toBeNull()
+    expect(enableSwitch.checked).toBe(true)
+
+    // Set a daily cap
+    const dailyCapInput = body.getByLabelText('Daily cap')
+    await userEvent.tripleClick(dailyCapInput)
+    await userEvent.keyboard('500')
+
+    // Click Save XP Settings
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const saveBtn = btns.find(b => b.textContent?.includes('Save'))!
+    await userEvent.click(saveBtn)
+    expect(args.onSave).toHaveBeenCalled()
   },
 }
 
@@ -55,6 +78,26 @@ export const WithCaps: Story = {
       weeklyCap: 800,
     },
   },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    const doc = canvasElement.ownerDocument
+    await body.findByText('Controlled Progression — History 301')
+
+    // Pre-filled daily cap value visible
+    const dailyCapInput = body.getByLabelText('Daily cap')
+    expect((dailyCapInput as HTMLInputElement).value).toBe('200')
+
+    // Edit weekly cap
+    const weeklyCapInput = body.getByLabelText('Weekly cap')
+    await userEvent.tripleClick(weeklyCapInput)
+    await userEvent.keyboard('1200')
+
+    // Click Save
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const saveBtn = btns.find(b => b.textContent?.includes('Save'))!
+    await userEvent.click(saveBtn)
+    expect(args.onSave).toHaveBeenCalled()
+  },
 }
 
 /** XP fully disabled */
@@ -64,6 +107,31 @@ export const XPDisabled: Story = {
     config: {
       enabled: false,
     },
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    const doc = canvasElement.ownerDocument
+    await body.findByText('No XP Section')
+
+    // XP toggle is off (first checkbox in dialog)
+    const enableSwitch = doc.querySelector('input[type="checkbox"]') as HTMLInputElement
+    expect(enableSwitch.checked).toBe(false)
+
+    // Warning banner visible
+    await body.findByText(/XP is disabled for this section/)
+
+    // Toggle XP on
+    await userEvent.click(enableSwitch)
+    expect(enableSwitch.checked).toBe(true)
+
+    // Warning should disappear
+    expect(body.queryByText(/XP is disabled for this section/)).toBeNull()
+
+    // Click Cancel
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const cancelBtn = btns.find(b => b.textContent?.includes('Cancel'))!
+    await userEvent.click(cancelBtn)
+    expect(args.onClose).toHaveBeenCalled()
   },
 }
 
@@ -77,6 +145,17 @@ export const DoubleXP: Story = {
       ) as Record<XPReason, number>,
       dailyCap: 500,
     },
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    const doc = canvasElement.ownerDocument
+    await body.findByText('Double XP Week — Math 201')
+    // Custom multiplier chip shows count (e.g. "N custom")
+    const customChips = await body.findAllByText(/custom/i)
+    expect(customChips.length).toBeGreaterThan(0)
+    // Save button is present (may be disabled until changes made)
+    const saveBtn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent?.includes('Save'))
+    expect(saveBtn).toBeTruthy()
   },
 }
 

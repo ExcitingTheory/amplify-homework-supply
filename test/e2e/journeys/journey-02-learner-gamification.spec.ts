@@ -43,7 +43,6 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
@@ -60,13 +59,43 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
       .locator("li")
       .filter({ hasText: /quiz|multiple choice/i })
       .click();
-    await page.waitForTimeout(2000);
 
     await expect(page.locator('[data-tour="quiz-block"]').first()).toBeVisible({
       timeout: 10_000,
     });
 
-    await page.waitForTimeout(4000);
+    // Configure quiz answers so students can interact
+    const quizBlock = page.locator('[data-tour="quiz-block"]').first();
+    const editBtn = quizBlock.getByRole("button", { name: /edit/i });
+    await expect(editBtn).toBeVisible({ timeout: 5_000 });
+    await editBtn.click();
+
+    const addAnswerField = quizBlock.locator(
+      'input[placeholder*="Add Answer"], [placeholder*="Add Answer"]',
+    );
+    await expect(addAnswerField).toBeVisible({ timeout: 5_000 });
+    await addAnswerField.click();
+
+    const answerInputs = quizBlock.locator('input[type="text"], textarea');
+    await answerInputs.last().fill("Correct answer");
+    const correctToggle = quizBlock.locator(".MuiSwitch-root").first();
+    if (await correctToggle.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await correctToggle.click();
+    }
+    await addAnswerField.click();
+    await answerInputs.last().fill("Wrong answer");
+
+    const doneBtn = quizBlock.getByRole("button", { name: /done/i });
+    await expect(doneBtn).toBeVisible({ timeout: 5_000 });
+    await doneBtn.click();
+
+    // Wait for auto-save
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
     await ctx.close();
   });
 
@@ -75,12 +104,11 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
     await login(page, STUDENT_1);
 
     await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-    await page.waitForTimeout(3000);
+    await waitForPageReady(page);
 
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     const completionModal = page.locator('[data-tour="results"]');
@@ -104,11 +132,16 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
       const count = await unchecked.count();
       for (let i = 0; i < count; i++) {
         await unchecked.nth(i).click();
-        await page.waitForTimeout(500);
       }
     }
 
-    await page.waitForTimeout(3000);
+    // Wait for submission
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
   });
 
   // ─── VERIFY: Dashboard gamification widgets ──────────────────────────
@@ -268,16 +301,25 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
     await login(page, STUDENT_1);
     await navigateTo(page, "/xp-history");
 
-    const bodyText = await page.locator("body").textContent();
-    expect(bodyText).toMatch(/\d+/);
+    // Must have a heading for the page
+    const heading = page.locator('h1, h2, h3, [role="heading"]');
+    await expect(heading.first()).toBeVisible({ timeout: 10_000 });
 
-    const hasXPContent =
-      bodyText!.toLowerCase().includes("xp") ||
-      bodyText!.toLowerCase().includes("streak") ||
-      bodyText!.toLowerCase().includes("quiz") ||
-      bodyText!.toLowerCase().includes("earned") ||
-      bodyText!.toLowerCase().includes("history");
-    expect(hasXPContent).toBe(true);
+    // Must show XP-related content (events, amounts, or empty state)
+    const xpContent = page.locator(
+      '[data-testid*="xp"], [data-testid*="history"], [class*="xp"], [class*="history"]',
+    );
+    const hasXPElements = await xpContent.first().isVisible({ timeout: 5_000 }).catch(() => false);
+
+    if (hasXPElements) {
+      // If XP elements exist, verify they contain numeric values
+      const text = await xpContent.first().textContent();
+      expect(text).toMatch(/\d+/);
+    } else {
+      // Accept empty state that explicitly says no history
+      const emptyState = page.getByText(/no.*history|no.*events|no.*xp|get started/i);
+      await expect(emptyState).toBeVisible({ timeout: 5_000 });
+    }
   });
 
   test("squads page renders squad interface", async ({ page }) => {
@@ -285,17 +327,22 @@ test.describe.serial("Journey 2: Learner — Gamification Dashboard", () => {
     await login(page, STUDENT_1);
     await navigateTo(page, "/squads");
 
-    const bodyText = await page.locator("body").textContent();
-    const hasSquadContent =
-      bodyText!.toLowerCase().includes("squad") ||
-      bodyText!.toLowerCase().includes("team") ||
-      bodyText!.toLowerCase().includes("join") ||
-      bodyText!.toLowerCase().includes("create") ||
-      (await page
-        .locator("table, [class*='card'], [class*='Card']")
-        .first()
-        .isVisible({ timeout: 5_000 })
-        .catch(() => false));
-    expect(hasSquadContent).toBe(true);
+    // Must have a heading
+    const heading = page.locator('h1, h2, h3, [role="heading"]');
+    await expect(heading.first()).toBeVisible({ timeout: 10_000 });
+
+    // Must show squad UI (cards, table, or explicit empty state)
+    const squadUI = page.locator(
+      "table, [class*='card'], [class*='Card'], [data-testid*='squad']",
+    );
+    const hasSquadUI = await squadUI.first().isVisible({ timeout: 5_000 }).catch(() => false);
+
+    if (!hasSquadUI) {
+      // Accept empty state with create/join action
+      const actionBtn = page.locator(
+        'button:has-text("Create"), button:has-text("Join"), a:has-text("Create"), a:has-text("Join")',
+      );
+      await expect(actionBtn.first()).toBeVisible({ timeout: 5_000 });
+    }
   });
 });

@@ -16,7 +16,6 @@ import Typography from '@mui/material/Typography'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import Chip from '@mui/material/Chip'
 import RateReviewIcon from '@mui/icons-material/RateReview'
 
@@ -77,29 +76,29 @@ export function PeerReviewInvitations({
         </Box>
         <List dense>
           {activeInvitations.map((invitation) => (
-            <ListItem key={invitation.id} divider>
+            <ListItem key={invitation.id} divider sx={{ gap: 1 }}>
               <ListItemText
                 primary={invitation.unitName || 'Homework'}
                 secondary={`From: ${invitation.ownerDisplayName || invitation.ownerId}`}
+                sx={{ flex: 1, minWidth: 0 }}
+                primaryTypographyProps={{ noWrap: true }}
               />
-              <ListItemSecondaryAction>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={statusLabels[invitation.status] || invitation.status}
-                    size="small"
-                    color={statusColors[invitation.status] || 'default'}
-                    variant="outlined"
-                  />
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => onJoinReview(invitation.id)}
-                    disabled={invitation.status === 'REVIEW_COMPLETE'}
-                  >
-                    Join Review
-                  </Button>
-                </Box>
-              </ListItemSecondaryAction>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                <Chip
+                  label={statusLabels[invitation.status] || invitation.status}
+                  size="small"
+                  color={statusColors[invitation.status] || 'default'}
+                  variant="outlined"
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => onJoinReview(invitation.id)}
+                  disabled={invitation.status === 'REVIEW_COMPLETE'}
+                >
+                  Join Review
+                </Button>
+              </Box>
             </ListItem>
           ))}
         </List>

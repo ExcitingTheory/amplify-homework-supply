@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -74,7 +73,7 @@ export default function NotificationInvitations({
   return (
     <List dense>
       {invitations.map((notification) => (
-        <ListItem key={notification.id} divider>
+        <ListItem key={notification.id} divider sx={{ gap: 1 }}>
           <ListItemText
             primary={notification.title}
             secondary={
@@ -97,24 +96,24 @@ export default function NotificationInvitations({
                 )}
               </Box>
             }
+            sx={{ flex: 1, minWidth: 0 }}
+            primaryTypographyProps={{ noWrap: true }}
           />
-          <ListItemSecondaryAction>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {!notification.seen && (
-                <Chip label="New" size="small" color="primary" />
-              )}
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => {
-                  markInteracted(notification.id);
-                  onJoin(notification);
-                }}
-              >
-                {joinLabel}
-              </Button>
-            </Box>
-          </ListItemSecondaryAction>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+            {!notification.seen && (
+              <Chip label="New" size="small" color="primary" />
+            )}
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => {
+                markInteracted(notification.id);
+                onJoin(notification);
+              }}
+            >
+              {joinLabel}
+            </Button>
+          </Box>
         </ListItem>
       ))}
     </List>

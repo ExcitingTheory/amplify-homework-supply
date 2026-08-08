@@ -16,15 +16,39 @@ import { Button } from "@mui/material";
 
 import UnitCompletedPlugin from "./UnitCompletedPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 import UnitContext from "../../../context/unitContext";
 
 export default {
   title: "✏️ Lesson Editor/Workflow/Unit Completed",
   component: UnitCompletedPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "unit-completed-story-unit",
+        name: "Advanced Japanese Vocabulary",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "unit-completed-story-unit",
     initializeMockData: false,
   },
 };
@@ -136,22 +160,7 @@ function DemoContent() {
 }
 
 const ControlledTemplate = () => {
-  const unitId = "unit-completed-demo";
-
-  seedMockUnit({
-    id: unitId,
-    name: "Advanced Japanese Vocabulary",
-    description: "Master essential Japanese vocabulary for daily conversation",
-    data: null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
-  return (
-    <UnitProvider id={unitId}>
-      <DemoContent />
-    </UnitProvider>
-  );
+  return <DemoContent />;
 };
 
 export const Interactive = {

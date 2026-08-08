@@ -4,7 +4,6 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Paper,
   Chip,
@@ -13,23 +12,25 @@ import {
   Tooltip,
   Alert,
   Skeleton,
-  Divider,
   Button,
-  Avatar,
 } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PeopleIcon from "@mui/icons-material/People";
-import AssignmentIcon from "@mui/icons-material/Assignment";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RateReviewIcon from "@mui/icons-material/RateReview";
+import FlagIcon from "@mui/icons-material/Flag";
+import BoltIcon from "@mui/icons-material/Bolt";
+import HistoryIcon from "@mui/icons-material/History";
+import GppBadIcon from "@mui/icons-material/GppBad";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
 import { SkillTreePopupButton } from "./SkillTreePopupButton";
 import { listSectionStudents } from "../../app/actions/section";
-import { formatLastFirst, getInitials } from "../utils/formatUserName";
+import { formatLastFirst } from "../utils/formatUserName";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function gradeColor(pct) {
@@ -58,10 +59,56 @@ function CopyableCode({ code }) {
   );
 }
 
-/**
- * InstructorDashboard displays aggregate performance metrics across all sections
- * and leaderboards for each section showing top-performing students.
- */
+function isRecentlyActive(dateStr) {
+  if (!dateStr) return false;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return new Date(dateStr).getTime() > sevenDaysAgo;
+}
+
+// ── Grade distribution helper ─────────────────────────────────────────────
+/** Stacked bar showing share of students in each grade band. */
+function GradeDistributionBar({ distribution }) {
+  const { a = 0, b = 0, c = 0, f = 0, total = 0 } = distribution;
+  if (total === 0) return null;
+  const bands = [
+    { key: "a", label: "A (90+)", count: a, color: "#66bb6a" },
+    { key: "b", label: "B (80–89)", count: b, color: "#42a5f5" },
+    { key: "c", label: "C (60–79)", count: c, color: "#ffa726" },
+    { key: "f", label: "F (<60)", count: f, color: "#ef5350" },
+  ].filter((band) => band.count > 0);
+
+  return (
+    <Tooltip
+      title={bands
+        .map((b) => `${b.label}: ${b.count} student${b.count !== 1 ? "s" : ""}`)
+        .join(" · ")}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          height: 8,
+          borderRadius: 4,
+          overflow: "hidden",
+          gap: "1px",
+          cursor: "default",
+        }}
+      >
+        {bands.map((band) => (
+          <Box
+            key={band.key}
+            sx={{
+              flex: band.count,
+              bgcolor: band.color,
+              minWidth: 4,
+            }}
+          />
+        ))}
+      </Box>
+    </Tooltip>
+  );
+}
+
+
 export default function InstructorDashboard({ sections = [] }) {
   const t = useTranslations("components");
   const client = getAmplifyClient();
@@ -69,47 +116,40 @@ export default function InstructorDashboard({ sections = [] }) {
   const [sectionStats, setSectionStats] = useState({});
   const [allGrades, setAllGrades] = useState([]);
   const [allAssignments, setAllAssignments] = useState([]);
+  const [flaggedGrades, setFlaggedGrades] = useState([]);
+  const [flaggedChats, setFlaggedChats] = useState([]);
   const [sectionStudents, setSectionStudents] = useState({});
   const [allUnits, setAllUnits] = useState({});
-  const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all grades for instructor's sections
+  // Fetch all completed grades (no assignment filter — section-based)
   useEffect(() => {
     if (sections.length === 0) {
       setLoading(false);
       return;
     }
 
-    const subscription = client.models.Grade.observeQuery({
-      filter: {
-        complete: { eq: true },
-      },
-    }).subscribe({
+    const subscription = client.models.Grade.observeQuery().subscribe({
       next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
         const validItems = items.filter(
           (item) => item != null && item.id != null,
         );
+        setAllGrades(validItems);
 
-        // Filter out grades without accuracy scores (client-side filtering)
-        const validGrades = validItems.filter(
-          (grade) => grade.accuracy != null,
+        // Extract moderation-flagged grades
+        const flagged = validItems.filter(
+          (g) =>
+            g.moderation?.status === "flagged" ||
+            g.moderation?.status === "pending",
         );
-        setAllGrades(validGrades);
+        setFlaggedGrades(flagged);
       },
       error: (err) => {
-        console.error("Grades subscription error:", err);
-        // Stop retrying on auth errors to prevent rate limiting
         if (
           err?.message?.includes("No current user") ||
-          err?.message?.includes("NoSignedUser") ||
-          err?.message?.includes("401") ||
-          err?.message?.includes("403")
+          err?.message?.includes("DuplicatedOperationError")
         ) {
-          console.warn(
-            "[InstructorDashboard] Auth error, stopping Grades subscription retries",
-          );
+          console.warn("[InstructorDashboard] Grade subscription:", err.message);
           subscription.unsubscribe();
         }
       },
@@ -118,40 +158,25 @@ export default function InstructorDashboard({ sections = [] }) {
     return () => subscription.unsubscribe();
   }, [sections.length]);
 
-  // Fetch all assignments for instructor's sections
+  // Fetch assignments for all instructor sections (for per-unit completion rates)
   useEffect(() => {
     if (sections.length === 0) return;
-
-    // Filter out null sections before mapping to IDs
     const validSections = sections.filter((s) => s != null && s.id != null);
     if (validSections.length === 0) return;
-
     const sectionIDs = validSections.map((s) => s.id);
 
     const subscription = client.models.Assignment.observeQuery({
-      filter: {
-        or: sectionIDs.map((id) => ({ sectionID: { eq: id } })),
-      },
+      filter: { or: sectionIDs.map((id) => ({ sectionID: { eq: id } })) },
     }).subscribe({
       next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(
-          (item) => item != null && item.id != null,
-        );
-        setAllAssignments(validItems);
+        setAllAssignments(items.filter((item) => item != null && item.id != null));
       },
       error: (err) => {
-        console.error("Assignments subscription error:", err);
-        // Stop retrying on auth errors to prevent rate limiting
         if (
           err?.message?.includes("No current user") ||
-          err?.message?.includes("NoSignedUser") ||
-          err?.message?.includes("401") ||
-          err?.message?.includes("403")
+          err?.message?.includes("DuplicatedOperationError")
         ) {
-          console.warn(
-            "[InstructorDashboard] Auth error, stopping Assignments subscription retries",
-          );
+          console.warn("[InstructorDashboard] Assignment subscription:", err.message);
           subscription.unsubscribe();
         }
       },
@@ -160,7 +185,34 @@ export default function InstructorDashboard({ sections = [] }) {
     return () => subscription.unsubscribe();
   }, [sections.length]);
 
-  // Fetch student name data for each section
+  // Fetch flagged chats
+  useEffect(() => {
+    if (sections.length === 0) return;
+
+    const subscription = client.models.AssistantChat.observeQuery({
+      filter: { moderationFlag: { eq: true } },
+    }).subscribe({
+      next: ({ items }) => {
+        const validItems = items.filter(
+          (item) => item != null && item.id != null,
+        );
+        setFlaggedChats(validItems);
+      },
+      error: (err) => {
+        if (
+          err?.message?.includes("DuplicatedOperationError") ||
+          err?.message?.includes("No current user")
+        ) {
+          console.warn("[InstructorDashboard] Chat subscription:", err.message);
+          subscription.unsubscribe();
+        }
+      },
+    });
+
+    return () => subscription.unsubscribe();
+  }, [sections.length]);
+
+  // Fetch student names
   useEffect(() => {
     if (sections.length === 0) return;
     const validSections = sections.filter(
@@ -183,7 +235,7 @@ export default function InstructorDashboard({ sections = [] }) {
     fetchStudentNames();
   }, [sections]);
 
-  // Fetch unit names for assignment display
+  // Fetch unit names
   useEffect(() => {
     if (sections.length === 0) return;
     const subscription = client.models.Unit.observeQuery().subscribe({
@@ -202,128 +254,140 @@ export default function InstructorDashboard({ sections = [] }) {
     return () => subscription.unsubscribe();
   }, [sections.length]);
 
-  // Calculate statistics for each section
+  // Calculate per-section analytics
   useEffect(() => {
-    if (sections.length === 0 || allGrades.length === 0) {
+    if (sections.length === 0) {
       setLoading(false);
       return;
     }
 
-    const calculateSectionStats = async () => {
-      const stats = {};
+    const stats = {};
+    const validSections = sections.filter((s) => s != null && s.id != null);
 
-      // Filter out null sections before iterating
-      const validSections = sections.filter((s) => s != null && s.id != null);
+    for (const section of validSections) {
+      // Grades for this section
+      const sectionGrades = allGrades.filter(
+        (g) => g.sectionID === section.id,
+      );
+      const completedGrades = sectionGrades.filter(
+        (g) => g.complete && g.accuracy != null,
+      );
 
-      for (const section of validSections) {
-        const sectionAssignments = allAssignments.filter(
-          (a) => a.sectionID === section.id,
+      // Per-student aggregation
+      const studentMap = {};
+      completedGrades.forEach((grade) => {
+        if (!studentMap[grade.owner]) {
+          studentMap[grade.owner] = { grades: [], lastActive: null };
+        }
+        studentMap[grade.owner].grades.push(grade);
+        const ts = grade._lastChangedAt || grade.createdAt;
+        if (
+          ts &&
+          (!studentMap[grade.owner].lastActive ||
+            ts > studentMap[grade.owner].lastActive)
+        ) {
+          studentMap[grade.owner].lastActive = ts;
+        }
+      });
+
+      const studentRankings = Object.entries(studentMap)
+        .map(([studentId, data]) => {
+          // Best grade per unit
+          const byUnit = {};
+          data.grades.forEach((g) => {
+            if (!byUnit[g.unitID] || g.accuracy > byUnit[g.unitID].accuracy) {
+              byUnit[g.unitID] = g;
+            }
+          });
+          const grades = Object.values(byUnit).map((g) => g.accuracy);
+          const average =
+            grades.length > 0
+              ? grades.reduce((sum, g) => sum + g, 0) / grades.length
+              : 0;
+          return {
+            studentId,
+            average,
+            unitsCompleted: grades.length,
+            lastActive: data.lastActive,
+          };
+        })
+        .sort((a, b) => b.average - a.average);
+
+      const activeThisWeek = studentRankings.filter((s) =>
+        isRecentlyActive(
+          s.lastActive ? new Date(s.lastActive).toISOString() : null,
+        ),
+      ).length;
+
+      // Recent completions (last 5 grades for this section)
+      const recentActivity = [...completedGrades]
+        .sort(
+          (a, b) =>
+            (b._lastChangedAt || 0) - (a._lastChangedAt || 0),
+        )
+        .slice(0, 5);
+
+      // Grade distribution buckets (per unique student's average)
+      const distribution = { a: 0, b: 0, c: 0, f: 0, total: studentRankings.length };
+      studentRankings.forEach(({ average }) => {
+        if (average >= 90) distribution.a++;
+        else if (average >= 80) distribution.b++;
+        else if (average >= 60) distribution.c++;
+        else distribution.f++;
+      });
+
+      // Per-unit completion: for each assignment in this section, how many unique
+      // students have a completed grade?
+      const sectionAssignments = allAssignments.filter(
+        (a) => a.sectionID === section.id,
+      );
+      const unitCompletion = sectionAssignments.map((assignment) => {
+        const submitters = new Set(
+          completedGrades
+            .filter((g) => g.unitID === assignment.unitID)
+            .map((g) => g.owner),
         );
-
-        // Get unique students who have submitted work in this section
-        const studentGradesMap = {};
-
-        allGrades.forEach((grade) => {
-          // Match by unitID + sectionID — Grade model has no assignmentID field
-          const assignment = sectionAssignments.find(
-            (a) => a.unitID === grade.unitID,
-          );
-          if (!assignment) return;
-          if (grade.sectionID && grade.sectionID !== section.id) return;
-
-          if (!studentGradesMap[grade.owner]) {
-            studentGradesMap[grade.owner] = {
-              totalGrade: 0,
-              count: 0,
-              completedAssignments: new Set(),
-              allGrades: [],
-            };
-          }
-
-          studentGradesMap[grade.owner].allGrades.push(grade);
-          studentGradesMap[grade.owner].completedAssignments.add(
-            assignment.unitID,
-          );
-        });
-
-        // Calculate student averages and rankings
-        const studentRankings = Object.entries(studentGradesMap).map(
-          ([studentId, data]) => {
-            // Group grades by assignment (unitID) and take highest
-            const gradesByAssignment = {};
-            data.allGrades.forEach((grade) => {
-              const assignment = sectionAssignments.find(
-                (a) => a.unitID === grade.unitID,
-              );
-              if (!assignment) return;
-
-              if (
-                !gradesByAssignment[assignment.unitID] ||
-                grade.accuracy > gradesByAssignment[assignment.unitID].accuracy
-              ) {
-                gradesByAssignment[assignment.unitID] = grade;
-              }
-            });
-
-            const grades = Object.values(gradesByAssignment).map(
-              (g) => g.accuracy,
-            );
-            const average =
-              grades.length > 0
-                ? grades.reduce((sum, g) => sum + g, 0) / grades.length
-                : 0;
-
-            const completion =
-              sectionAssignments.length > 0
-                ? (data.completedAssignments.size / sectionAssignments.length) *
-                  100
-                : 0;
-
-            return {
-              studentId,
-              average,
-              completion,
-              assignmentsCompleted: data.completedAssignments.size,
-              totalAssignments: sectionAssignments.length,
-            };
-          },
-        );
-
-        // Sort by average grade descending
-        studentRankings.sort((a, b) => b.average - a.average);
-
-        stats[section.id] = {
-          studentCount: studentRankings.length,
-          averageGrade:
-            studentRankings.length > 0
-              ? Math.round(
-                  studentRankings.reduce((sum, s) => sum + s.average, 0) /
-                    studentRankings.length,
-                )
-              : 0,
-          averageCompletion:
-            studentRankings.length > 0
-              ? Math.round(
-                  studentRankings.reduce((sum, s) => sum + s.completion, 0) /
-                    studentRankings.length,
-                )
-              : 0,
-          leaderboard: studentRankings.slice(0, 10), // Top 10
-          assignmentCount: sectionAssignments.length,
+        return {
+          assignmentId: assignment.id,
+          unitID: assignment.unitID,
+          dueDate: assignment.dueDate,
+          submittedCount: submitters.size,
+          totalStudents: studentRankings.length,
         };
-      }
+      });
 
-      setSectionStats(stats);
-      setLoading(false);
-    };
+      stats[section.id] = {
+        studentCount: studentRankings.length,
+        activeThisWeek,
+        averageGrade:
+          studentRankings.length > 0
+            ? Math.round(
+                studentRankings.reduce((sum, s) => sum + s.average, 0) /
+                  studentRankings.length,
+              )
+            : 0,
+        distribution,
+        unitCompletion,
+        leaderboard: studentRankings.slice(0, 10),
+        recentActivity,
+        flaggedCount: flaggedGrades.filter(
+          (g) => g.sectionID === section.id,
+        ).length,
+      };
+    }
 
-    calculateSectionStats();
-  }, [sections, allGrades, allAssignments]);
+    setSectionStats(stats);
+    setLoading(false);
+  }, [sections, allGrades, allAssignments, flaggedGrades]);
 
-  // Calculate aggregate stats
+  // Aggregate stats
   const aggregateStats = React.useMemo(() => {
     const totalStudents = Object.values(sectionStats).reduce(
       (sum, s) => sum + s.studentCount,
+      0,
+    );
+    const activeThisWeek = Object.values(sectionStats).reduce(
+      (sum, s) => sum + s.activeThisWeek,
       0,
     );
     const avgGrade =
@@ -335,22 +399,10 @@ export default function InstructorDashboard({ sections = [] }) {
             ) / Object.values(sectionStats).length,
           )
         : 0;
-    const avgCompletion =
-      Object.values(sectionStats).length > 0
-        ? Math.round(
-            Object.values(sectionStats).reduce(
-              (sum, s) => sum + s.averageCompletion,
-              0,
-            ) / Object.values(sectionStats).length,
-          )
-        : 0;
-    const totalAssignments = Object.values(sectionStats).reduce(
-      (sum, s) => sum + s.assignmentCount,
-      0,
-    );
+    const moderationAlerts = flaggedGrades.length + flaggedChats.length;
 
-    return { totalStudents, avgGrade, avgCompletion, totalAssignments };
-  }, [sectionStats]);
+    return { totalStudents, activeThisWeek, avgGrade, moderationAlerts };
+  }, [sectionStats, flaggedGrades, flaggedChats]);
 
   if (sections.length === 0) {
     return null;
@@ -401,9 +453,9 @@ export default function InstructorDashboard({ sections = [] }) {
               color: "#81c784",
             },
             {
-              icon: <AssignmentIcon />,
-              label: t("instructorDashboard.totalAssignments"),
-              value: aggregateStats.totalAssignments,
+              icon: <BoltIcon />,
+              label: "Active This Week",
+              value: aggregateStats.activeThisWeek,
               color: "#64b5f6",
             },
             {
@@ -418,10 +470,11 @@ export default function InstructorDashboard({ sections = [] }) {
                     : "#ef9a9a",
             },
             {
-              icon: <CheckCircleIcon />,
-              label: t("instructorDashboard.averageCompletion"),
-              value: `${aggregateStats.avgCompletion}%`,
-              color: aggregateStats.avgCompletion >= 80 ? "#a5d6a7" : "#fff176",
+              icon: <FlagIcon />,
+              label: "Moderation Alerts",
+              value: aggregateStats.moderationAlerts,
+              color:
+                aggregateStats.moderationAlerts > 0 ? "#ef9a9a" : "#a5d6a7",
             },
           ].map(({ icon, label, value, color }) => (
             <Box
@@ -461,6 +514,55 @@ export default function InstructorDashboard({ sections = [] }) {
         )}
       </Paper>
 
+      {/* ── MODERATION NOTICES ─────────────────────────────────────────── */}
+      {(flaggedGrades.length > 0 || flaggedChats.length > 0) && (
+        <Alert
+          severity="error"
+          icon={<GppBadIcon />}
+          sx={{ mb: 3, borderRadius: 3 }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+            Content flagged for review ({flaggedGrades.length + flaggedChats.length} item{flaggedGrades.length + flaggedChats.length !== 1 ? "s" : ""})
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {flaggedGrades.map((grade) => (
+              <Chip
+                key={grade.id}
+                icon={<GppBadIcon />}
+                avatar={
+                  <AvatarDisplay seed={grade.owner} size={20} style="simple" />
+                }
+                label={`${formatLastFirst(sectionStudents[grade.owner] || { id: grade.owner })} — ${allUnits[grade.unitID]?.name || "Submission"}`}
+                size="small"
+                color="error"
+                variant="outlined"
+                component="a"
+                href={`/section/${grade.sectionID}#grade-${grade.id}`}
+                clickable
+                sx={{ "& .MuiChip-icon": { order: -1 } }}
+              />
+            ))}
+            {flaggedChats.map((chat) => (
+              <Chip
+                key={chat.id}
+                icon={<ChatBubbleOutlineIcon />}
+                avatar={
+                  <AvatarDisplay seed={chat.owner} size={20} style="simple" />
+                }
+                label={`${formatLastFirst(sectionStudents[chat.owner] || { id: chat.owner })} — Chat session flagged`}
+                size="small"
+                color="error"
+                variant="outlined"
+                component="a"
+                href={chat.sectionID ? `/section/${chat.sectionID}` : "#"}
+                clickable
+                sx={{ "& .MuiChip-icon": { order: -1 } }}
+              />
+            ))}
+          </Stack>
+        </Alert>
+      )}
+
       {/* ── SECTION CARDS ──────────────────────────────────────────────── */}
       {loading ? (
         <Stack spacing={2}>
@@ -478,14 +580,14 @@ export default function InstructorDashboard({ sections = [] }) {
           {validSections.map((section) => {
             const stats = sectionStats[section.id] || {
               studentCount: 0,
+              activeThisWeek: 0,
               averageGrade: 0,
-              averageCompletion: 0,
+              distribution: { a: 0, b: 0, c: 0, f: 0, total: 0 },
+              unitCompletion: [],
               leaderboard: [],
-              assignmentCount: 0,
+              recentActivity: [],
+              flaggedCount: 0,
             };
-            const sectionAssignments = allAssignments.filter(
-              (a) => a.sectionID === section.id,
-            );
             const atRisk = stats.leaderboard.filter((s) => s.average < 60);
             const perfect = stats.leaderboard.filter((s) => s.average >= 90);
             const top5 = stats.leaderboard.slice(0, 5);
@@ -555,11 +657,20 @@ export default function InstructorDashboard({ sections = [] }) {
                       variant="outlined"
                     />
                     <Chip
-                      icon={<AssignmentIcon />}
-                      label={`${stats.assignmentCount} assignments`}
+                      icon={<BoltIcon />}
+                      label={`${stats.activeThisWeek} active`}
                       size="small"
+                      color="info"
                       variant="outlined"
                     />
+                    {stats.flaggedCount > 0 && (
+                      <Chip
+                        icon={<FlagIcon />}
+                        label={`${stats.flaggedCount} flagged`}
+                        size="small"
+                        color="error"
+                      />
+                    )}
                     {atRisk.length > 0 && (
                       <Chip
                         icon={<WarningAmberIcon />}
@@ -580,75 +691,69 @@ export default function InstructorDashboard({ sections = [] }) {
                 </Box>
 
                 <Box sx={{ p: 2.5 }}>
-                  {/* ── Progress bars ── */}
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: 2,
-                      mb: 2.5,
-                    }}
-                  >
-                    <Box>
-                      <Box
+                  {/* ── Avg Grade + distribution ── */}
+                  <Box sx={{ mb: 2.5 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 0.5,
+                      }}
+                    >
+                      <Typography variant="caption" color="text.secondary">
+                        Avg Grade
+                      </Typography>
+                      <Typography
+                        variant="caption"
                         sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 0.5,
+                          fontWeight: 700,
+                          color: `${gradeColor(stats.averageGrade)}.main`,
                         }}
                       >
-                        <Typography variant="caption" color="text.secondary">
-                          Avg Grade
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontWeight: 700,
-                            color: `${gradeColor(stats.averageGrade)}.main`,
-                          }}
-                        >
-                          {stats.averageGrade}%
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={stats.averageGrade}
-                        color={gradeColor(stats.averageGrade)}
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
+                        {stats.averageGrade}%
+                      </Typography>
                     </Box>
-                    <Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 0.5,
-                        }}
+                    <LinearProgress
+                      variant="determinate"
+                      value={stats.averageGrade}
+                      color={gradeColor(stats.averageGrade)}
+                      sx={{ height: 8, borderRadius: 4, mb: 0.75 }}
+                    />
+                    <GradeDistributionBar distribution={stats.distribution} />
+                    {stats.distribution.total > 0 && (
+                      <Stack
+                        direction="row"
+                        spacing={0.75}
+                        sx={{ mt: 0.5 }}
+                        flexWrap="wrap"
+                        useFlexGap
                       >
-                        <Typography variant="caption" color="text.secondary">
-                          Avg Completion
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontWeight: 700,
-                            color: `${gradeColor(stats.averageCompletion)}.main`,
-                          }}
-                        >
-                          {stats.averageCompletion}%
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={stats.averageCompletion}
-                        color={gradeColor(stats.averageCompletion)}
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
-                    </Box>
+                        {stats.distribution.a > 0 && (
+                          <Typography variant="caption" sx={{ color: "#66bb6a" }}>
+                            A: {stats.distribution.a}
+                          </Typography>
+                        )}
+                        {stats.distribution.b > 0 && (
+                          <Typography variant="caption" sx={{ color: "#42a5f5" }}>
+                            B: {stats.distribution.b}
+                          </Typography>
+                        )}
+                        {stats.distribution.c > 0 && (
+                          <Typography variant="caption" sx={{ color: "#ffa726" }}>
+                            C: {stats.distribution.c}
+                          </Typography>
+                        )}
+                        {stats.distribution.f > 0 && (
+                          <Typography variant="caption" sx={{ color: "#ef5350" }}>
+                            F: {stats.distribution.f}
+                          </Typography>
+                        )}
+                      </Stack>
+                    )}
                   </Box>
 
-                  {/* ── Assignment submission breakdown ── */}
-                  {sectionAssignments.length > 0 && (
+                  {/* ── Class progress by unit ── */}
+                  {stats.unitCompletion.length > 0 && (
                     <Box sx={{ mb: 2.5 }}>
                       <Typography
                         variant="caption"
@@ -657,55 +762,157 @@ export default function InstructorDashboard({ sections = [] }) {
                           fontWeight: 700,
                           textTransform: "uppercase",
                           letterSpacing: "0.05em",
-                          display: "block",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
                           mb: 1,
                         }}
                       >
-                        Assignment Submissions
+                        <AssignmentTurnedInIcon sx={{ fontSize: "0.85rem" }} />
+                        Class Progress by Unit
                       </Typography>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        flexWrap="wrap"
-                        useFlexGap
-                      >
-                        {sectionAssignments.map((assignment) => {
-                          const submitted = allGrades.filter(
-                            (g) =>
-                              g.unitID === assignment.unitID &&
-                              (!g.sectionID || g.sectionID === section.id) &&
-                              g.complete,
-                          ).length;
-                          const unitName =
-                            allUnits[assignment.unitID]?.name ||
-                            assignment.unitID.slice(0, 8);
+                      <Stack spacing={0.75}>
+                        {stats.unitCompletion.map((uc) => {
                           const pct =
-                            stats.studentCount > 0
+                            uc.totalStudents > 0
                               ? Math.round(
-                                  (submitted / stats.studentCount) * 100,
+                                  (uc.submittedCount / uc.totalStudents) * 100,
                                 )
                               : 0;
+                          const unitName =
+                            allUnits[uc.unitID]?.name ||
+                            uc.unitID?.slice(0, 8) ||
+                            "Unit";
                           return (
-                            <Tooltip
-                              key={assignment.id}
-                              title={`${unitName}: ${submitted}/${stats.studentCount} submitted (${pct}%)`}
-                            >
-                              <Chip
-                                label={`${unitName.slice(0, 18)}${unitName.length > 18 ? "…" : ""} · ${submitted}/${stats.studentCount}`}
-                                size="small"
+                            <Box key={uc.assignmentId}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  mb: 0.25,
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  noWrap
+                                  sx={{ maxWidth: "65%" }}
+                                >
+                                  {unitName}
+                                  {uc.dueDate && (
+                                    <Typography
+                                      component="span"
+                                      variant="caption"
+                                      color="text.disabled"
+                                      sx={{ ml: 0.5 }}
+                                    >
+                                      · due{" "}
+                                      {new Date(uc.dueDate).toLocaleDateString(
+                                        undefined,
+                                        { month: "short", day: "numeric" },
+                                      )}
+                                    </Typography>
+                                  )}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontWeight: 700,
+                                    color:
+                                      pct === 100
+                                        ? "success.main"
+                                        : pct >= 50
+                                          ? "warning.main"
+                                          : "text.secondary",
+                                  }}
+                                >
+                                  {uc.submittedCount}/{uc.totalStudents}
+                                </Typography>
+                              </Box>
+                              <LinearProgress
+                                variant="determinate"
+                                value={pct}
                                 color={
                                   pct === 100
                                     ? "success"
                                     : pct >= 50
                                       ? "warning"
-                                      : "default"
+                                      : "inherit"
                                 }
-                                variant={pct === 100 ? "filled" : "outlined"}
-                                sx={{ fontSize: "0.72rem" }}
+                                sx={{ height: 5, borderRadius: 3 }}
                               />
-                            </Tooltip>
+                            </Box>
                           );
                         })}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* ── Recent Activity ── */}
+                  {stats.recentActivity.length > 0 && (
+                    <Box sx={{ mb: 2.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          mb: 1,
+                        }}
+                      >
+                        <HistoryIcon sx={{ fontSize: "0.85rem" }} />
+                        Recent Activity
+                      </Typography>
+                      <Stack spacing={0.5}>
+                        {stats.recentActivity.map((grade) => (
+                          <Box
+                            key={grade.id}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              bgcolor: "action.hover",
+                            }}
+                          >
+                            <AvatarDisplay
+                              seed={grade.owner}
+                              size={22}
+                              style="simple"
+                            />
+                            <Typography
+                              variant="body2"
+                              sx={{ flex: 1 }}
+                              noWrap
+                            >
+                              {formatLastFirst(
+                                sectionStudents[grade.owner] || {
+                                  id: grade.owner,
+                                },
+                              )}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              noWrap
+                            >
+                              {allUnits[grade.unitID]?.name ||
+                                grade.unitID?.slice(0, 8)}
+                            </Typography>
+                            <Chip
+                              label={`${Math.round(grade.accuracy)}%`}
+                              size="small"
+                              color={gradeColor(grade.accuracy)}
+                              sx={{ fontWeight: 700, minWidth: 44 }}
+                            />
+                          </Box>
+                        ))}
                       </Stack>
                     </Box>
                   )}
@@ -820,17 +1027,8 @@ export default function InstructorDashboard({ sections = [] }) {
                               color="text.secondary"
                               sx={{ whiteSpace: "nowrap" }}
                             >
-                              {student.assignmentsCompleted}/
-                              {student.totalAssignments} done
+                              {student.unitsCompleted} units
                             </Typography>
-                            <Box sx={{ width: 48 }}>
-                              <LinearProgress
-                                variant="determinate"
-                                value={student.completion}
-                                color={gradeColor(student.completion)}
-                                sx={{ height: 5, borderRadius: 3 }}
-                              />
-                            </Box>
                           </Box>
                         ))}
                         {stats.leaderboard.length > 5 && (
@@ -910,7 +1108,4 @@ export default function InstructorDashboard({ sections = [] }) {
       )}
     </Box>
   );
-}
-{
-  /* Aggregate Statistics */
 }

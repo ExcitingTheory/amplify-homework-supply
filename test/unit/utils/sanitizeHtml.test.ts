@@ -3,6 +3,8 @@
  *
  * Validates that user-influenced markup cannot execute script payloads
  * through any of the sanitization helpers.
+ *
+ * @vitest-environment jsdom
  */
 import { describe, it, expect } from "vitest";
 import {

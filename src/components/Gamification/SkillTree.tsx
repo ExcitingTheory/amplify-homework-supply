@@ -17,6 +17,7 @@ import {
   type Node,
   type Edge,
   type NodeMouseHandler,
+  type OnNodeDrag,
   type Connection,
   type OnEdgesDelete,
   Position,
@@ -726,7 +727,7 @@ function SkillTreeInner({
   )
 
   // Node drag: propagate pull to connected nodes via physics
-  const handleNodeDragStart: NodeMouseHandler = useCallback(
+  const handleNodeDragStart: OnNodeDrag = useCallback(
     (_event, node) => {
       setIsDragging(true)
       onDragStart(node.id)
@@ -734,14 +735,14 @@ function SkillTreeInner({
     [onDragStart],
   )
 
-  const handleNodeDrag: NodeMouseHandler = useCallback(
+  const handleNodeDrag: OnNodeDrag = useCallback(
     (_event, node) => {
       onDragMove(node.id, node.position.x, node.position.y)
     },
     [onDragMove],
   )
 
-  const handleNodeDragStop: NodeMouseHandler = useCallback(
+  const handleNodeDragStop: OnNodeDrag = useCallback(
     (_event, node) => {
       setIsDragging(false)
       onDragStop(node.id)

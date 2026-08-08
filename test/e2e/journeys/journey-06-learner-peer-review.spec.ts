@@ -40,7 +40,6 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
@@ -57,9 +56,40 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
       .locator("li")
       .filter({ hasText: /quiz|multiple choice/i })
       .click();
-    await page.waitForTimeout(2000);
 
-    await page.waitForTimeout(4000);
+    // Configure quiz answers so students can interact
+    const quizBlock = page.locator('[data-tour="quiz-block"]').first();
+    await expect(quizBlock).toBeVisible({ timeout: 10_000 });
+    const editBtn = quizBlock.getByRole("button", { name: /edit/i });
+    await expect(editBtn).toBeVisible({ timeout: 5_000 });
+    await editBtn.click();
+
+    const addAnswerField = quizBlock.locator(
+      'input[placeholder*="Add Answer"], [placeholder*="Add Answer"]',
+    );
+    await expect(addAnswerField).toBeVisible({ timeout: 5_000 });
+    await addAnswerField.click();
+
+    const answerInputs = quizBlock.locator('input[type="text"], textarea');
+    await answerInputs.last().fill("Correct answer");
+    const correctToggle = quizBlock.locator(".MuiSwitch-root").first();
+    if (await correctToggle.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await correctToggle.click();
+    }
+    await addAnswerField.click();
+    await answerInputs.last().fill("Wrong answer");
+
+    const doneBtn = quizBlock.getByRole("button", { name: /done/i });
+    await expect(doneBtn).toBeVisible({ timeout: 5_000 });
+    await doneBtn.click();
+
+    // Wait for auto-save
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
     await ctx.close();
   });
 
@@ -68,19 +98,22 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     await login(page, STUDENT_1);
 
     await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-    await page.waitForTimeout(3000);
+    await waitForPageReady(page);
 
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
     const completionModal = page.locator('[data-tour="results"]');
     if (
       await completionModal.isVisible({ timeout: 5_000 }).catch(() => false)
     ) {
-      return; // Already completed
+      // Dismiss completion and retry
+      const tryAgainBtn = page.getByRole("button", { name: /try again/i });
+      if (await tryAgainBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await tryAgainBtn.click();
+      }
     }
 
     await expect(page.locator('[data-tour="workbook"]')).toBeVisible({
@@ -95,11 +128,16 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
       const count = await unchecked.count();
       for (let i = 0; i < count; i++) {
         await unchecked.nth(i).click();
-        await page.waitForTimeout(500);
       }
     }
 
-    await page.waitForTimeout(3000);
+    // Wait for submission
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
   });
 
   // ─── VERIFY: Dashboard social/AI features ────────────────────────────
@@ -115,22 +153,16 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     const peerReviewBtn = page.getByRole("button", {
       name: /Open for Peer Review/i,
     });
-    const hasReview = await peerReviewBtn
-      .first()
-      .isVisible({ timeout: 15_000 })
-      .catch(() => false);
 
     // Look for "Request Guidance" button
     const guidanceBtn = page.getByRole("button", {
       name: /Request Guidance/i,
     });
-    const hasGuidance = await guidanceBtn
-      .first()
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
 
     // At least one social action must be available
-    expect(hasReview || hasGuidance).toBe(true);
+    await expect(peerReviewBtn.first().or(guidanceBtn.first())).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("Open for Peer Review opens a dialog with room creation", async ({
@@ -154,7 +186,6 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     }
 
     await peerReviewBtn.first().click();
-    await page.waitForTimeout(1500);
 
     // Dialog must open
     const dialog = page.locator('[role="dialog"]');
@@ -197,16 +228,12 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     const strengths = page.getByText("Strengths");
     const focusAreas = page.getByText("Focus Areas");
 
-    const hasStrengths = await strengths
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-    const hasFocus = await focusAreas
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-
-    expect(hasStrengths || hasFocus).toBe(true);
+    await expect(strengths.or(focusAreas)).toBeVisible({ timeout: 5_000 });
 
     // If focus areas exist, "Practice my weak areas" button must be present
+    const hasFocus = await focusAreas
+      .isVisible({ timeout: 2_000 })
+      .catch(() => false);
     if (hasFocus) {
       const practiceBtn = page.getByRole("button", {
         name: /Practice my weak areas/i,
@@ -224,14 +251,14 @@ test.describe.serial("Journey 6: Learner — Peer Review & AI Memory", () => {
     await expect(notifButton).toBeVisible({ timeout: 10_000 });
 
     await notifButton.click();
-    await page.waitForTimeout(1500);
 
+    const notifPopover = page
+      .locator(
+        '[role="menu"], [role="dialog"], [class*="popover"], [class*="Popover"], [class*="drawer"]',
+      )
+      .first();
     const hasResponse =
-      (await page
-        .locator(
-          '[role="menu"], [role="dialog"], [class*="popover"], [class*="Popover"], [class*="drawer"]',
-        )
-        .first()
+      (await notifPopover
         .isVisible({ timeout: 5_000 })
         .catch(() => false)) || page.url().includes("notification");
     expect(hasResponse).toBe(true);

@@ -5,6 +5,7 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { fn, expect, userEvent, within } from 'storybook/test'
 import PracticeDrillConfigPopup from './PracticeDrillConfigPopup'
 import type { PracticeDrillConfigPopupProps } from './PracticeDrillConfigPopup'
 
@@ -14,9 +15,9 @@ const meta: Meta<typeof PracticeDrillConfigPopup> = {
   parameters: {
     layout: 'centered',
   },
-  argTypes: {
-    onStart: { action: 'onStart' },
-    onClose: { action: 'onClose' },
+  args: {
+    onStart: fn(),
+    onClose: fn(),
   },
 }
 
@@ -31,6 +32,21 @@ export const Default: Story = {
     questionCount: 12,
     textBlockCount: 5,
     documentCount: 3,
+  },
+  play: async ({ canvasElement, args }) => {
+    // Dialog content may render in document.body portal
+    const body = within(document.body)
+
+    // Verify title renders (confirms dialog is in body)
+    const titleEl = await body.findByText(/Biology: Cell Structure/)
+
+    // Use raw DOM to find buttons (dialog role may differ between MUI versions)
+    const doc = canvasElement.ownerDocument
+    const btns = Array.from(doc.querySelectorAll('button'))
+    expect(btns.length).toBeGreaterThan(0)
+    const startBtn = btns[btns.length - 1] // last button is "Start Practice"
+    await userEvent.click(startBtn)
+    expect(args.onStart).toHaveBeenCalled()
   },
 }
 
@@ -77,6 +93,21 @@ export const VocabularyOnly: Story = {
     textBlockCount: 0,
     documentCount: 0,
   },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    await body.findByText(/Japanese Grammar Guide/)
+
+    // Vocabulary source row should be present
+    await body.findByText(/Vocabulary/)
+
+    // Use raw DOM to find buttons and click Start Practice (last button)
+    const doc = canvasElement.ownerDocument
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const startBtn = btns[btns.length - 1]
+    expect(startBtn).not.toBeDisabled()
+    await userEvent.click(startBtn)
+    expect(args.onStart).toHaveBeenCalled()
+  },
 }
 
 export const NoContent: Story = {
@@ -87,6 +118,16 @@ export const NoContent: Story = {
     questionCount: 0,
     textBlockCount: 0,
     documentCount: 0,
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    await body.findByText(/Empty Unit/)
+
+    // Start button disabled with no content
+    const doc = canvasElement.ownerDocument
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const startBtn = btns[btns.length - 1]
+    expect(startBtn).toBeDisabled()
   },
 }
 

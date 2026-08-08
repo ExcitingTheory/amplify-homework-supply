@@ -47,7 +47,12 @@ test.describe("Settings Persistence", () => {
     if (optionCount > 1) {
       // Click second option (different from current)
       await options.nth(1).click();
-      await page.waitForTimeout(2000);
+      await page
+        .waitForResponse(
+          (resp) => resp.url().includes("graphql") && resp.status() === 200,
+          { timeout: 10_000 },
+        )
+        .catch(() => {});
 
       // Get new value
       const newValue = await localeSelect.inputValue().catch(() => null);
@@ -73,7 +78,12 @@ test.describe("Settings Persistence", () => {
           .filter({ hasText: new RegExp(currentValue, "i") })
           .first()
           .click();
-        await page.waitForTimeout(2000);
+        await page
+          .waitForResponse(
+            (resp) => resp.url().includes("graphql") && resp.status() === 200,
+            { timeout: 10_000 },
+          )
+          .catch(() => {});
       }
     }
   });

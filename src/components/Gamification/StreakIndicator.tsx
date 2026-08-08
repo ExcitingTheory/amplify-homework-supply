@@ -29,6 +29,9 @@ export function StreakIndicator({ currentStreak, size = 'medium', showEmpty = fa
 
   return (
     <Box
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={`${currentStreak} day streak`}
       sx={{
         display: 'inline-flex',
         alignItems: 'center',

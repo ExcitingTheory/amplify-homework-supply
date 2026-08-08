@@ -15,90 +15,121 @@ import AnswerPlugin, { AnswerNode } from "./AnswerPlugin";
 import {
   seedMockUnit,
   seedMockWords,
+  clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { AudioPlayerProvider } from "../context/AudioPlayerContext";
-import { UnitProvider } from "../../../context/unitContext";
-
-// Seed mock vocabulary words for all stories
-seedMockWords([
-  {
-    id: "vocab-word-1",
-    phrase: "こんにちは",
-    phonetic: "konnichiwa",
-    definition: "Hello",
-    audio: [
-      "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
-    ],
-    definitionAudio: [
-      "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
-    ],
-    identityId: "mock-identity-id",
-    _version: 1,
-    owner: "mock-user-sub",
-  },
-  {
-    id: "vocab-word-2",
-    phrase: "ありがとう",
-    phonetic: "arigatou",
-    definition: "Thank you",
-    audio: ["/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3"],
-    definitionAudio: [
-      "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
-    ],
-    identityId: "mock-identity-id",
-    _version: 1,
-    owner: "mock-user-sub",
-  },
-  {
-    id: "vocab-word-3",
-    phrase: "さようなら",
-    phonetic: "sayounara",
-    definition: "Goodbye",
-    audio: [
-      "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
-    ],
-    definitionAudio: [
-      "/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3",
-    ],
-    identityId: "mock-identity-id",
-    _version: 1,
-    owner: "mock-user-sub",
-  },
-  {
-    id: "vocab-word-4",
-    phrase: "犬",
-    phonetic: "inu",
-    definition: "Dog",
-    audio: [
-      "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
-    ],
-    definitionAudio: [
-      "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
-    ],
-    identityId: "mock-identity-id",
-    _version: 1,
-    owner: "mock-user-sub",
-  },
-  {
-    id: "vocab-word-5",
-    phrase: "猫",
-    phonetic: "neko",
-    definition: "Cat",
-    audio: ["/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3"],
-    definitionAudio: [
-      "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
-    ],
-    identityId: "mock-identity-id",
-    _version: 1,
-    owner: "mock-user-sub",
-  },
-]);
 
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Answer (Audio & Drawing)",
   component: AnswerPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockWords([
+        {
+          id: "vocab-word-1",
+          phrase: "こんにちは",
+          pronunciation: "konnichiwa",
+          definition: "Hello",
+          audio: [
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+          ],
+          definitionAudio: [
+            "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          ],
+          identityId: "mock-identity-id",
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        {
+          id: "vocab-word-2",
+          phrase: "ありがとう",
+          pronunciation: "arigatou",
+          definition: "Thank you",
+          audio: ["/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3"],
+          definitionAudio: [
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+          ],
+          identityId: "mock-identity-id",
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        {
+          id: "vocab-word-3",
+          phrase: "さようなら",
+          pronunciation: "sayounara",
+          definition: "Goodbye",
+          audio: [
+            "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          ],
+          definitionAudio: [
+            "/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3",
+          ],
+          identityId: "mock-identity-id",
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        {
+          id: "vocab-word-4",
+          phrase: "犬",
+          pronunciation: "inu",
+          definition: "Dog",
+          audio: [
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+          ],
+          definitionAudio: [
+            "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          ],
+          identityId: "mock-identity-id",
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        {
+          id: "vocab-word-5",
+          phrase: "猫",
+          pronunciation: "neko",
+          definition: "Cat",
+          audio: ["/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3"],
+          definitionAudio: [
+            "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+          ],
+          identityId: "mock-identity-id",
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+      ]);
+      seedMockUnit(
+        {
+          id: "mock-unit-id",
+          name: "Answer Audio Drawing Unit",
+          data: JSON.stringify({
+            root: {
+              children: [],
+              direction: "ltr",
+              format: "",
+              indent: 0,
+              type: "root",
+              version: 1,
+            },
+          }),
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        {
+          words: [
+            { id: "vocab-word-1" },
+            { id: "vocab-word-2" },
+            { id: "vocab-word-3" },
+            { id: "vocab-word-4" },
+            { id: "vocab-word-5" },
+          ],
+        },
+      );
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "mock-unit-id",
     initializeMockData: false,
     docs: {
       description: {
@@ -130,65 +161,44 @@ const ReadOnlyTemplate = ({ editorState, wordIDs = [] }) => {
     editable: false,
   };
 
-  // Use the preview's default unit ID
-  seedMockUnit({
-    id: "mock-unit-id",
-    name: "Answer Audio Drawing Unit",
-    data: {
-      root: {
-        children: [],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1,
-      },
-    },
-    wordIDs: wordIDs,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
     <AudioPlayerProvider>
-      <UnitProvider id="mock-unit-id">
-        <LexicalComposer initialConfig={initialConfig}>
+      <LexicalComposer initialConfig={initialConfig}>
+        <div
+          style={{
+            padding: "2rem",
+            maxWidth: "900px",
+            margin: "0 auto",
+            backgroundColor: "#f5f5f5",
+            minHeight: "100vh",
+          }}
+        >
           <div
             style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
               padding: "2rem",
-              maxWidth: "900px",
-              margin: "0 auto",
-              backgroundColor: "#f5f5f5",
-              minHeight: "100vh",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
           >
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "8px",
-                padding: "2rem",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }}
-            >
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{
-                      minHeight: "400px",
-                      outline: "none",
-                      padding: "1rem",
-                    }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <AnswerPlugin />
-            </div>
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{
+                    minHeight: "400px",
+                    outline: "none",
+                    padding: "1rem",
+                  }}
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <AnswerPlugin />
           </div>
-        </LexicalComposer>
-      </UnitProvider>
+        </div>
+      </LexicalComposer>
     </AudioPlayerProvider>
   );
 };

@@ -592,6 +592,7 @@ const schema = a
         writableGroups: a.string().array(),
         // Metadata
         featuredImage: a.string(),
+        featuredVideo: a.string(),
         thumbnail: a.string(),
         embedding: EmbeddingInfo,
         moderation: ModerationInfo,
@@ -764,6 +765,7 @@ const schema = a
         writableGroups: a.string().array(),
         // Metadata
         featuredImage: a.string(),
+        featuredVideo: a.string(),
         thumbnail: a.string(),
         backgroundColor: a.string(),
         embedding: EmbeddingInfo,

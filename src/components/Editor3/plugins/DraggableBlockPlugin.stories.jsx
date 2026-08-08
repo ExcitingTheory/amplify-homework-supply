@@ -17,16 +17,40 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import DraggableBlockPlugin from "./DraggableBlockPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { GutterProvider } from "../../../context/gutterContext";
 import "../theme.css";
 
 export default {
   title: "✏️ Lesson Editor/Interactions/Draggable Block",
   component: DraggableBlockPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "draggable-block-story-unit",
+        name: "DraggableBlock Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "draggable-block-story-unit",
     initializeMockData: false,
   },
 };
@@ -36,17 +60,7 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
-  const unitId = "draggable-block-demo";
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
-
-  seedMockUnit({
-    id: unitId,
-    name: "DraggableBlock Demo",
-    description: "Demo for DraggableBlockPlugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
 
   const initialConfig = {
     namespace: "DraggableBlockPluginDemo",
@@ -73,45 +87,43 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <UnitProvider id={unitId}>
-      <GutterProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <style jsx global>{`
-            .layout-container {
-              display: grid;
-            }
+    <GutterProvider>
+      <LexicalComposer initialConfig={initialConfig}>
+        <style jsx global>{`
+          .layout-container {
+            display: grid;
+          }
 
-            .layout-container > div {
-              margin: 0.25rem;
-              padding: 0.25rem;
-              border: 1px dashed #ccc;
-            }
-          `}</style>
-          <AutoFocusPlugin />
-          <RichTextPlugin
-            contentEditable={
-              <div className="editor" ref={onRef}>
-                <ContentEditable className="TableNode__contentEditable" />
-              </div>
-            }
-            placeholder={null}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <ListPlugin />
-          {!floatingAnchorElem ? null : (
-            <>
-              {/* <FloatingLinkEditorPlugin
+          .layout-container > div {
+            margin: 0.25rem;
+            padding: 0.25rem;
+            border: 1px dashed #ccc;
+          }
+        `}</style>
+        <AutoFocusPlugin />
+        <RichTextPlugin
+          contentEditable={
+            <div className="editor" ref={onRef}>
+              <ContentEditable className="TableNode__contentEditable" />
+            </div>
+          }
+          placeholder={null}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <ListPlugin />
+        {!floatingAnchorElem ? null : (
+          <>
+            {/* <FloatingLinkEditorPlugin
                   anchorElem={floatingAnchorElem}
                   isSidebarOpen={openTab}
                 /> */}
 
-              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-            </>
-          )}
-        </LexicalComposer>
-      </GutterProvider>
-    </UnitProvider>
+            <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+          </>
+        )}
+      </LexicalComposer>
+    </GutterProvider>
   );
 };
 

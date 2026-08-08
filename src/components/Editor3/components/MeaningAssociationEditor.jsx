@@ -130,7 +130,7 @@ export default function MeaningAssociationEditor({
   const [value, setValue] = React.useState(null);
   const [open, toggleOpen] = React.useState(false);
   // const [rows, setRows] = React.useState([]);
-  const [gridSelection, setGridSelection] = React.useState(new Set());
+  const [gridSelection, setGridSelection] = React.useState([]);
   const [dialogValue, setDialogValue] = React.useState({
     phrase: "",
     definition: "",
@@ -419,7 +419,7 @@ export default function MeaningAssociationEditor({
             />
           )}
         />
-        <ActionsMenu removeWordIDs={removeWordIDs} ids={[...gridSelection]} />
+        <ActionsMenu removeWordIDs={removeWordIDs} ids={gridSelection} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -511,16 +511,11 @@ export default function MeaningAssociationEditor({
           }}
           rows={rows}
           columns={getColumns(t)}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 100]}
+          hideFooter
           checkboxSelection
-          rowSelectionModel={gridSelection}
-          onRowSelectionModelChange={(newSelection) => {
-            setGridSelection(newSelection);
+          rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+          onRowSelectionModelChange={(model) => {
+            setGridSelection([...model.ids]);
           }}
         />
       )}

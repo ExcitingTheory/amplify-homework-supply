@@ -2,6 +2,7 @@ import * as a11yAddonAnnotations from "@storybook/addon-a11y/preview";
 import { setProjectAnnotations } from "@storybook/nextjs-vite";
 import * as projectAnnotations from "./preview";
 import { registerAuditHooks } from "./vitest-audit-hooks";
+import { clearActiveSubscriptions } from "./__mocks__/aws-amplify-data";
 
 // Pre-load PDF.js worker into main thread to prevent "Failed to resolve module
 // specifier 'pdf.worker.mjs'" errors. react-pdf sets workerSrc to the bare
@@ -62,3 +63,11 @@ setProjectAnnotations([a11yAddonAnnotations, projectAnnotations]);
 
 // Register audit hooks for console error, network failure, and HTTP error detection
 registerAuditHooks();
+
+// Clear stale observeQuery subscriptions before each story. When many stories run in
+// a single browser process, components that unmount without cleanup leave callback
+// closures in the mock's activeSubscriptions arrays. These prevent GC of old component
+// trees, causing memory to accumulate until the renderer crashes.
+beforeEach(() => {
+  clearActiveSubscriptions();
+});

@@ -47,7 +47,12 @@ test.describe("Dictionary CRUD", () => {
     await page.locator('[data-tour="word-form"] button[type="submit"]').click();
 
     // Wait for creation (mutation + subscription delivery)
-    await page.waitForTimeout(3000);
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
 
     // Verify word appears in the dictionary list
     await expect(page.getByText(testWord)).toBeVisible({ timeout: 10_000 });
@@ -87,7 +92,12 @@ test.describe("Dictionary CRUD", () => {
       .locator('[data-tour="word-form"] [name="definition"]')
       .fill("Insertable word");
     await page.locator('[data-tour="word-form"] button[type="submit"]').click();
-    await page.waitForTimeout(3000);
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
 
     // Now try to insert a word block via the editor toolbar
     await page.locator('button[aria-controls="insert-node-menu"]').click();
@@ -100,7 +110,6 @@ test.describe("Dictionary CRUD", () => {
       .filter({ hasText: /word|vocabulary/i });
     if (await wordItem.isVisible().catch(() => false)) {
       await wordItem.click();
-      await page.waitForTimeout(2000);
       // If word selection dialog appears, the insert mechanism works
     }
   });

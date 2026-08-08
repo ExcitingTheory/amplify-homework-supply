@@ -146,13 +146,6 @@ export function AIAgentConfig({
                 onChange={(e) => update("kaiModel", e.target.value || null)}
                 displayEmpty
               >
-                <MenuItem value="">
-                  <em>
-                    {mode === "section"
-                      ? "Use platform default"
-                      : "Use default model"}
-                  </em>
-                </MenuItem>
                 {AVAILABLE_MODELS.map((m) => (
                   <MenuItem key={m.id} value={m.id}>
                     {m.label} ({m.tier})
@@ -168,13 +161,6 @@ export function AIAgentConfig({
                 onChange={(e) => update("sageModel", e.target.value || null)}
                 displayEmpty
               >
-                <MenuItem value="">
-                  <em>
-                    {mode === "section"
-                      ? "Use platform default"
-                      : "Use default model"}
-                  </em>
-                </MenuItem>
                 {AVAILABLE_MODELS.map((m) => (
                   <MenuItem key={m.id} value={m.id}>
                     {m.label} ({m.tier})
@@ -448,6 +434,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                   <TextField
                     label="Sage System Prompt"
@@ -463,6 +450,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                 </Stack>
                 <Stack direction="row" spacing={2}>
@@ -480,6 +468,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 500, max: 16000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                   <TextField
                     label="Sage Tool Result"
@@ -495,6 +484,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 500, max: 16000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                 </Stack>
                 <Stack direction="row" spacing={2}>
@@ -512,6 +502,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                   <TextField
                     label="Sage Total Turn"
@@ -527,6 +518,7 @@ export function AIAgentConfig({
                     }
                     slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
                     placeholder="Use default"
+                    helperText="tokens"
                   />
                 </Stack>
               </>

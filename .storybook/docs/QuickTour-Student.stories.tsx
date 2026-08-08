@@ -7,11 +7,14 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { within, waitFor, userEvent, expect } from 'storybook/test';
 import { Box } from '@mui/material';
 import { setMockUser } from '@storybook-mocks/aws-amplify-auth';
+import { clearMockData } from '@storybook-mocks/aws-amplify-data';
 import { seedIndexPageData } from '@storybook-mocks/index-page-examples';
+import { setNavigationState } from '@storybook-mocks/next-navigation';
+import { PathParamsContext } from 'next/dist/shared/lib/hooks-client-context.shared-runtime.js';
 import { FilesProvider } from '../../src/context/fileContext';
 
 // App Router pages — all marked 'use client', safe for Storybook.
-import HomePage from '../../app/[locale]/page.jsx';
+import DashboardClient from '../../app/[locale]/DashboardClient.jsx';
 import SectionDetailPage from '../../app/[locale]/section/[id]/page.jsx';
 import WorkbookClient from '../../app/[locale]/workbook/[id]/WorkbookClient';
 
@@ -38,30 +41,40 @@ type Story = StoryObj;
  */
 export const Step1_Dashboard: Story = {
   name: '1. Student Dashboard',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
         groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
+      setNavigationState({ pathname: '/', params: {} });
       seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <HomePage user={{ username: 'student-alice-sub', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] }} />
+      <DashboardClient
+        initialSections={[]}
+        initialAssignments={[]}
+        initialGrades={[]}
+      />
     </Box>
   ),
   parameters: {
     mockAuth: {
       user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'] },
+      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'], idToken: { payload: { sub: 'student-alice-sub' }, toString: () => 'mock-id-token' } },
     },
     nextjs: {
       navigation: { pathname: '/' },
     },
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -82,20 +95,26 @@ export const Step1_Dashboard: Story = {
  */
 export const Step2_JoinSection: Story = {
   name: '2. Section & Assignments',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
         groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
+      setNavigationState({ pathname: '/section/section-jpn-101', params: { id: 'section-jpn-101' } });
       seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <SectionDetailPage />
+      <PathParamsContext.Provider value={{ id: 'section-jpn-101', locale: 'en' }}>
+        <SectionDetailPage />
+      </PathParamsContext.Provider>
     </Box>
   ),
   parameters: {
@@ -107,9 +126,11 @@ export const Step2_JoinSection: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/section/section-jpn-101',
-        params: { id: 'section-jpn-101' },
+        segments: [['id', 'section-jpn-101']],
       },
     },
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -130,20 +151,26 @@ export const Step2_JoinSection: Story = {
  */
 export const Step3_Workbook: Story = {
   name: '3. Workbook',
-  decorators: [
-    (Story: React.FC) => {
+  loaders: [
+    async () => {
+      clearMockData();
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
         groups: ['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners'],
       });
+      setNavigationState({ pathname: '/workbook/unit-japanese-1', params: { id: 'unit-japanese-1' } });
       seedIndexPageData('student');
-      return <FilesProvider><Story /></FilesProvider>;
     },
+  ],
+  decorators: [
+    (Story: React.FC) => <FilesProvider><Story /></FilesProvider>,
   ],
   render: () => (
     <Box>
-      <WorkbookClient />
+      <PathParamsContext.Provider value={{ id: 'unit-japanese-1', locale: 'en' }}>
+        <WorkbookClient />
+      </PathParamsContext.Provider>
     </Box>
   ),
   parameters: {
@@ -155,9 +182,12 @@ export const Step3_Workbook: Story = {
       appDirectory: true,
       navigation: {
         pathname: '/workbook/unit-japanese-1',
-        params: { id: 'unit-japanese-1' },
+        segments: [['id', 'unit-japanese-1']],
       },
     },
+    unitId: 'unit-japanese-1',
+    initializeMockData: false,
+    clearMockData: false,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);

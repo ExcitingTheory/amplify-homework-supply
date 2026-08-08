@@ -24,8 +24,10 @@ import MeaningAssociationPlugin, {
   MeaningAssociationNode,
 } from "./MeaningAssociationPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 import DictionaryContext from "../../../context/dictionaryContext";
 import { DndWrapper } from "../../MeaningAssociationExercise/DndWrapper";
 import {
@@ -37,8 +39,30 @@ import {
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Meaning Association",
   component: MeaningAssociationPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "meaning-association-story-unit",
+        name: "Meaning Association Plugin Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "meaning-association-story-unit",
     initializeMockData: false,
   },
 };
@@ -103,8 +127,8 @@ function InsertMeaningAssociationButton() {
 
   const handleClick = () => {
     editor.dispatchCommand(INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, [
-      "word1",
-      "word2",
+      "word-1",
+      "word-2",
     ]);
   };
 
@@ -116,8 +140,6 @@ function InsertMeaningAssociationButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
-  const unitId = "meaning-association-demo-editable";
-
   const initialConfig = {
     namespace: "MeaningAssociationPluginDemo",
     theme: LanguageEditorTheme,
@@ -137,67 +159,52 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Meaning Association Plugin Demo",
-    description: "Demo for Meaning Association Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <DictionaryContext.Provider value={mockDictionaryContext}>
-        <DndWrapper>
-          <LexicalComposer initialConfig={initialConfig}>
+    <DictionaryContext.Provider value={mockDictionaryContext}>
+      <DndWrapper>
+        <LexicalComposer initialConfig={initialConfig}>
+          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+            <h2>Meaning Association Plugin - Editable Mode</h2>
+            {showInsertButton && <InsertMeaningAssociationButton />}
             <div
-              style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                minHeight: "400px",
+                padding: "20px",
+              }}
             >
-              <h2>Meaning Association Plugin - Editable Mode</h2>
-              {showInsertButton && <InsertMeaningAssociationButton />}
-              <div
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  minHeight: "400px",
-                  padding: "20px",
-                }}
-              >
-                <RichTextPlugin
-                  contentEditable={
-                    <ContentEditable
-                      style={{ outline: "none", minHeight: "350px" }}
-                    />
-                  }
-                  placeholder={
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "20px",
-                        left: "20px",
-                        color: "#999",
-                      }}
-                    >
-                      Enter text or insert matching exercises...
-                    </div>
-                  }
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <MeaningAssociationPlugin />
-              </div>
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    style={{ outline: "none", minHeight: "350px" }}
+                  />
+                }
+                placeholder={
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "20px",
+                      left: "20px",
+                      color: "#999",
+                    }}
+                  >
+                    Enter text or insert matching exercises...
+                  </div>
+                }
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <HistoryPlugin />
+              <MeaningAssociationPlugin />
             </div>
-          </LexicalComposer>
-        </DndWrapper>
-      </DictionaryContext.Provider>
-    </UnitProvider>
+          </div>
+        </LexicalComposer>
+      </DndWrapper>
+    </DictionaryContext.Provider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
-  const unitId = "meaning-association-demo-readonly";
-
   const initialConfig = {
     namespace: "MeaningAssociationPluginDemo",
     theme: LanguageEditorTheme,
@@ -217,49 +224,36 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Meaning Association Plugin Demo (Read-Only)",
-    description: "Demo for Meaning Association Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <DictionaryContext.Provider value={mockDictionaryContext}>
-        <DndWrapper>
-          <LexicalComposer initialConfig={initialConfig}>
+    <DictionaryContext.Provider value={mockDictionaryContext}>
+      <DndWrapper>
+        <LexicalComposer initialConfig={initialConfig}>
+          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+            <h2>Meaning Association Plugin - Read-Only Mode</h2>
             <div
-              style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                minHeight: "400px",
+                padding: "20px",
+                backgroundColor: "#f5f5f5",
+              }}
             >
-              <h2>Meaning Association Plugin - Read-Only Mode</h2>
-              <div
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  minHeight: "400px",
-                  padding: "20px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <RichTextPlugin
-                  contentEditable={
-                    <ContentEditable
-                      style={{ outline: "none", minHeight: "350px" }}
-                    />
-                  }
-                  placeholder={null}
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
-                <MeaningAssociationPlugin />
-              </div>
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    style={{ outline: "none", minHeight: "350px" }}
+                  />
+                }
+                placeholder={null}
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <MeaningAssociationPlugin />
             </div>
-          </LexicalComposer>
-        </DndWrapper>
-      </DictionaryContext.Provider>
-    </UnitProvider>
+          </div>
+        </LexicalComposer>
+      </DndWrapper>
+    </DictionaryContext.Provider>
   );
 };
 

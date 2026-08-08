@@ -156,8 +156,6 @@ export async function login(
       waitUntil: "domcontentloaded",
     });
   }
-
-  await page.waitForTimeout(500);
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +194,9 @@ export async function waitForPageReady(page: Page): Promise<void> {
   await page
     .waitForLoadState("networkidle", { timeout: 10_000 })
     .catch(() => {});
-  await page.waitForTimeout(1000);
+  await page
+    .waitForLoadState("domcontentloaded", { timeout: 5_000 })
+    .catch(() => {});
 }
 
 export async function navigateTo(page: Page, path: string): Promise<void> {

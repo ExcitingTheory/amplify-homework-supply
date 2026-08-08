@@ -61,7 +61,7 @@ export interface UseGamificationFeaturesResult extends GamificationFeatureState 
 // Hardcoded defaults — used when neither section nor platform specifies a value
 // ============================================================================
 
-const HARDCODED_DEFAULTS: GamificationFeatureState = {
+export const HARDCODED_DEFAULTS: GamificationFeatureState = {
   xpEnabled: true,
   leaderboardEnabled: true,
   badgesEnabled: true,

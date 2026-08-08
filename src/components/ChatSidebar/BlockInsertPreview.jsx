@@ -4,17 +4,7 @@
  */
 
 import React from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Button, Paper, Chip, Divider } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import QuizIcon from "@mui/icons-material/Quiz";
@@ -94,7 +84,7 @@ const AnswerBlockPreview = ({ preview, blockData }) => (
     </Box>
     <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
       <Chip
-        label={`${preview?.wordCount || blockData?.length || 0} words`}
+        label={`${preview?.wordCount || blockData?.wordIDs?.length || 0} words`}
         size="small"
         color="primary"
         variant="outlined"
@@ -117,9 +107,13 @@ const AnswerBlockPreview = ({ preview, blockData }) => (
     </Box>
     <AnswerComponent
       nodeKey="preview-answer"
-      wordIDs={blockData || []}
-      allowedInput={preview?.inputMethods || ["text", "audio", "writing"]}
-      promptMethod={["text"]}
+      wordIDs={blockData?.wordIDs || []}
+      requestDefinition={blockData?.requestDefinition}
+      allowedInput={
+        blockData?.allowedInput ||
+        preview?.inputMethods || ["text", "audio", "writing"]
+      }
+      promptMethod={blockData?.promptMethod || ["text"]}
     />
   </Box>
 );
@@ -215,9 +209,13 @@ const CustomAnswerPreview = ({ preview, blockData }) => (
     </Box>
     <CustomAnswerComponent
       nodeKey="preview-custom-answer"
-      ids={blockData || []}
-      allowedInput={preview?.inputMethods || ["text"]}
-      promptMethod={preview?.promptMethods || ["text"]}
+      ids={blockData?.questionIDs || []}
+      allowedInput={
+        blockData?.allowedInput || preview?.inputMethods || ["text"]
+      }
+      promptMethod={
+        blockData?.promptMethod || preview?.promptMethods || ["text"]
+      }
     />
   </Box>
 );

@@ -17,6 +17,7 @@ import { createServerRunner } from "@aws-amplify/adapter-nextjs";
 import { generateServerClientUsingCookies } from "@aws-amplify/adapter-nextjs/data";
 import { cookies } from "next/headers";
 import outputs from "../../amplify_outputs.json";
+import type { Schema } from "../../amplify/data/resource";
 
 export const { runWithAmplifyServerContext } = createServerRunner({
   config: outputs,
@@ -30,7 +31,7 @@ export const { runWithAmplifyServerContext } = createServerRunner({
  */
 export function getServerClient() {
   const chunkedCookies = createChunkedCookiesWrapper(cookies);
-  return generateServerClientUsingCookies({
+  return generateServerClientUsingCookies<Schema>({
     config: outputs,
     cookies: chunkedCookies as typeof cookies,
   });

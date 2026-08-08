@@ -83,8 +83,24 @@ export async function notifyModerationFlagged() { return { success: true }; }
 export async function generatePracticeDrill() {
   return {
     blocks: [
-      { type: 'quiz', instruction: 'What is the powerhouse of the cell?', choices: [{ choice: 'Mitochondria', correct: true }, { choice: 'Nucleus', correct: false }, { choice: 'Ribosome', correct: false }] },
-      { type: 'answer', instruction: 'Define photosynthesis in your own words.', expectedAnswer: 'The process by which plants convert light energy into chemical energy.' },
+      {
+        type: 'quiz',
+        instruction: 'What is the powerhouse of the cell?',
+        sourceItemId: 'drill-question-1',
+        sourceType: 'question',
+        choices: [
+          { choice: 'Mitochondria', correct: true },
+          { choice: 'Nucleus', correct: false },
+          { choice: 'Ribosome', correct: false },
+        ],
+      },
+      {
+        type: 'answer',
+        instruction: 'Define photosynthesis in your own words.',
+        sourceItemId: 'drill-word-1',
+        sourceType: 'vocabulary',
+        expectedAnswer: 'The process by which plants convert light energy into chemical energy.',
+      },
     ],
   };
 }

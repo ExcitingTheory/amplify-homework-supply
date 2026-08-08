@@ -7,10 +7,11 @@ import QuestionBlockRo from "./QuizComponent"; // Actual export is QuestionBlock
 import AnswerComponent from "./AnswerComponent";
 import ImageComponent from "./ImageComponent";
 import MediaPlayerComponent from "./MediaPlayerComponent";
-import { UnitProvider } from "../../../context/unitContext";
 import {
   seedMockUnit,
   seedMockFiles,
+  seedMockWords,
+  clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { ImageNode } from "./ImageNode";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
@@ -217,39 +218,42 @@ All components integrate with the UnitContext for grading and data persistence.
 
 // Quiz Component Stories
 export const QuizDefault = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Quiz Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    return (
-      <UnitProvider id={unitId}>
-        <QuestionBlockRo
-          nodeKey="quiz-1"
-          data={[
-            { answer: "3", correct: false },
-            { answer: "4", correct: true },
-            { answer: "5", correct: false },
-            { answer: "6", correct: false },
-          ]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "quiz-default-story-unit",
+        name: "Quiz Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
+  render: () => (
+    <QuestionBlockRo
+      nodeKey="quiz-1"
+      data={[
+        { answer: "3", correct: false },
+        { answer: "4", correct: true },
+        { answer: "5", correct: false },
+        { answer: "6", correct: false },
+      ]}
+    />
+  ),
   parameters: {
+    unitId: "quiz-default-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -260,39 +264,42 @@ export const QuizDefault = {
 };
 
 export const QuizMultipleChoice = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Quiz Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    return (
-      <UnitProvider id={unitId}>
-        <QuestionBlockRo
-          nodeKey="quiz-2"
-          data={[
-            { answer: "Mercury", correct: true },
-            { answer: "Venus", correct: false },
-            { answer: "Earth", correct: false },
-            { answer: "Mars", correct: false },
-          ]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "quiz-multiple-choice-story-unit",
+        name: "Quiz Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
+  render: () => (
+    <QuestionBlockRo
+      nodeKey="quiz-2"
+      data={[
+        { answer: "Mercury", correct: true },
+        { answer: "Venus", correct: false },
+        { answer: "Earth", correct: false },
+        { answer: "Mars", correct: false },
+      ]}
+    />
+  ),
   parameters: {
+    unitId: "quiz-multiple-choice-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -303,83 +310,137 @@ export const QuizMultipleChoice = {
 };
 
 // Answer Component Stories
+// Pattern: story-level loaders seed data AFTER global clearMockData runs;
+// parameters.unitId tells the global decorator which UnitProvider to mount.
+// Do NOT wrap manually in UnitProvider — the global decorator in preview.jsx handles it.
 export const AnswerInput = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Answer Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
+  loaders: [
+    async () => {
+      clearMockData();
+      const words = [
+        {
+          id: "word-1",
+          phrase: "こんにちは",
+          pronunciation: "konnichiwa",
+          definition: "Hello / Good afternoon",
+          owner: "mock-user-sub",
+          _version: 1,
         },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    return (
-      <UnitProvider id={unitId}>
-        <AnswerComponent
-          nodeKey="answer-1"
-          customPrompt="Enter your response:"
-          wordIDs={["word-1"]}
-          allowedInput={["text", "audio", "writing"]}
-          promptMethod={["text"]}
-        />
-      </UnitProvider>
-    );
-  },
+        {
+          id: "word-2",
+          phrase: "ありがとう",
+          pronunciation: "arigatou",
+          definition: "Thank you",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+      ];
+      seedMockWords(words);
+      seedMockUnit(
+        {
+          id: "answer-input-story-unit",
+          name: "Answer Input Story Unit",
+          data: JSON.stringify({
+            root: {
+              children: [],
+              direction: "ltr",
+              format: "",
+              indent: 0,
+              type: "root",
+              version: 1,
+            },
+          }),
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        { words },
+      );
+    },
+  ],
+  render: () => (
+    <AnswerComponent
+      nodeKey="answer-1"
+      wordIDs={["word-1", "word-2"]}
+      requestDefinition="definition"
+      allowedInput={["text", "audio", "writing"]}
+      promptMethod={["text"]}
+    />
+  ),
   parameters: {
+    unitId: "answer-input-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
-          "Short answer input supporting text, audio recording, and handwriting. Students can respond in multiple formats.",
+          'Definition mode: shows "Please define the following word(s):" prompt. Students type, record, or write the definition for each word.',
       },
     },
   },
 };
 
 export const AnswerWithValue = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Answer Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
+  loaders: [
+    async () => {
+      clearMockData();
+      const words = [
+        {
+          id: "word-3",
+          phrase: "dog",
+          pronunciation: "dɒɡ",
+          definition:
+            "A domesticated carnivorous mammal kept as a pet or for work",
+          owner: "mock-user-sub",
+          _version: 1,
         },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    return (
-      <UnitProvider id={unitId}>
-        <AnswerComponent
-          nodeKey="answer-2"
-          customPrompt="What is the capital of Japan?"
-          wordIDs={["word-2"]}
-          allowedInput={["text"]}
-          promptMethod={["text"]}
-          requestDefinition={false}
-        />
-      </UnitProvider>
-    );
-  },
+        {
+          id: "word-4",
+          phrase: "cat",
+          pronunciation: "kæt",
+          definition: "A small domesticated carnivorous mammal with soft fur",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+      ];
+      seedMockWords(words);
+      seedMockUnit(
+        {
+          id: "answer-with-value-story-unit",
+          name: "Answer With Value Story Unit",
+          data: JSON.stringify({
+            root: {
+              children: [],
+              direction: "ltr",
+              format: "",
+              indent: 0,
+              type: "root",
+              version: 1,
+            },
+          }),
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        { words },
+      );
+    },
+  ],
+  render: () => (
+    <AnswerComponent
+      nodeKey="answer-2"
+      wordIDs={["word-3", "word-4"]}
+      allowedInput={["text"]}
+      promptMethod={["text"]}
+      requestDefinition={false}
+    />
+  ),
   parameters: {
+    unitId: "answer-with-value-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
-        story: "Text-only answer input with a custom question prompt.",
+        story:
+          'Translation mode: shows "Provide words that best match the following definition(s):" prompt. Students see each definition and provide the matching word.',
       },
     },
   },
@@ -387,45 +448,48 @@ export const AnswerWithValue = {
 
 // Image Component Stories
 export const ImageDefault = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Image Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-animals")]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
-            <ImageComponent
-              nodeKey="image-1"
-              src="/story-mocks/animals-10008941_1280.jpg"
-              altText="Wildlife animals in nature"
-              fileId="image-animals"
-              identityId="us-east-1:mock-identity"
-              width={640}
-              height={360}
-              resizable={false}
-            />
-          </Box>
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "image-default-story-unit",
+        name: "Image Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-animals")]);
+    },
+  ],
+  render: () => (
+    <WithLexical>
+      <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
+        <ImageComponent
+          nodeKey="image-1"
+          src="/story-mocks/animals-10008941_1280.jpg"
+          altText="Wildlife animals in nature"
+          fileId="image-animals"
+          identityId="us-east-1:mock-identity"
+          width={640}
+          height={360}
+          resizable={false}
+        />
+      </Box>
+    </WithLexical>
+  ),
   parameters: {
+    unitId: "image-default-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story: "Basic image node displaying wildlife animals.",
@@ -435,25 +499,29 @@ export const ImageDefault = {
 };
 
 export const ImageWithCaption = {
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "image-with-caption-story-unit",
+        name: "Image Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-piano")]);
+    },
+  ],
   render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Image Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-piano")]);
     const captionEditor = createEditor({
       namespace: "ImageCaption",
       theme: LanguageEditorTheme,
@@ -461,28 +529,29 @@ export const ImageWithCaption = {
       nodes: [AutoLinkNode, LinkNode],
     });
     return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
-            <ImageComponent
-              nodeKey="image-2"
-              src="/story-mocks/piano-10046998_1280.jpg"
-              altText="Piano keyboard"
-              fileId="image-piano"
-              identityId="us-east-1:mock-identity"
-              width={640}
-              height={360}
-              resizable={false}
-              showCaption={true}
-              caption={captionEditor}
-              captionsEnabled={true}
-            />
-          </Box>
-        </WithLexical>
-      </UnitProvider>
+      <WithLexical>
+        <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
+          <ImageComponent
+            nodeKey="image-2"
+            src="/story-mocks/piano-10046998_1280.jpg"
+            altText="Piano keyboard"
+            fileId="image-piano"
+            identityId="us-east-1:mock-identity"
+            width={640}
+            height={360}
+            resizable={false}
+            showCaption={true}
+            caption={captionEditor}
+            captionsEnabled={true}
+          />
+        </Box>
+      </WithLexical>
     );
   },
   parameters: {
+    unitId: "image-with-caption-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -493,45 +562,48 @@ export const ImageWithCaption = {
 };
 
 export const ImageSmall = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Image Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-meerkat")]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
-            <ImageComponent
-              nodeKey="image-3"
-              src="/story-mocks/meerkat-10071273_1280.png"
-              altText="Meerkat standing"
-              fileId="image-meerkat"
-              identityId="us-east-1:mock-identity"
-              width={320}
-              height={320}
-              resizable={false}
-            />
-          </Box>
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "image-small-story-unit",
+        name: "Image Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "image-meerkat")]);
+    },
+  ],
+  render: () => (
+    <WithLexical>
+      <Box sx={{ maxWidth: "100%", "& img": { display: "block" } }}>
+        <ImageComponent
+          nodeKey="image-3"
+          src="/story-mocks/meerkat-10071273_1280.png"
+          altText="Meerkat standing"
+          fileId="image-meerkat"
+          identityId="us-east-1:mock-identity"
+          width={320}
+          height={320}
+          resizable={false}
+        />
+      </Box>
+    </WithLexical>
+  ),
   parameters: {
+    unitId: "image-small-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -543,36 +615,38 @@ export const ImageSmall = {
 
 // Media Player Component Stories
 export const AudioPlayer = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Media Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    // Seed audio file
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1")]);
-    return (
-      <UnitProvider id={unitId}>
-        <MediaPlayerComponent
-          nodeKey="audio-player-1"
-          fileIDs={["audio-whoosh-1"]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "audio-player-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1")]);
+    },
+  ],
+  render: () => (
+    <MediaPlayerComponent
+      nodeKey="audio-player-1"
+      fileIDs={["audio-whoosh-1"]}
+    />
+  ),
   parameters: {
+    unitId: "audio-player-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -583,36 +657,38 @@ export const AudioPlayer = {
 };
 
 export const AudioPlayerLongWhoosh = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Media Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    // Seed audio file
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2")]);
-    return (
-      <UnitProvider id={unitId}>
-        <MediaPlayerComponent
-          nodeKey="audio-player-2"
-          fileIDs={["audio-whoosh-2"]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "audio-long-whoosh-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2")]);
+    },
+  ],
+  render: () => (
+    <MediaPlayerComponent
+      nodeKey="audio-player-2"
+      fileIDs={["audio-whoosh-2"]}
+    />
+  ),
   parameters: {
+    unitId: "audio-long-whoosh-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -623,36 +699,35 @@ export const AudioPlayerLongWhoosh = {
 };
 
 export const AudioPlayerSFX = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Media Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    // Seed audio file
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx")]);
-    return (
-      <UnitProvider id={unitId}>
-        <MediaPlayerComponent
-          nodeKey="audio-player-3"
-          fileIDs={["audio-sfx"]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "audio-sfx-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx")]);
+    },
+  ],
+  render: () => (
+    <MediaPlayerComponent nodeKey="audio-player-3" fileIDs={["audio-sfx"]} />
+  ),
   parameters: {
+    unitId: "audio-sfx-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -663,36 +738,35 @@ export const AudioPlayerSFX = {
 };
 
 export const VideoPlayerComponent = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Media Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    // Seed video file
-    seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "video-demo")]);
-    return (
-      <UnitProvider id={unitId}>
-        <MediaPlayerComponent
-          nodeKey="video-player-1"
-          fileIDs={["video-demo"]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "video-player-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "video-demo")]);
+    },
+  ],
+  render: () => (
+    <MediaPlayerComponent nodeKey="video-player-1" fileIDs={["video-demo"]} />
+  ),
   parameters: {
+    unitId: "video-player-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:
@@ -703,40 +777,42 @@ export const VideoPlayerComponent = {
 };
 
 export const AudioMultipleTracks = {
-  render: () => {
-    const unitId = "story-unit-id-" + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: "Media Story Unit",
-      data: {
-        root: {
-          children: [],
-          direction: "ltr",
-          format: "",
-          indent: 0,
-          type: "root",
-          version: 1,
-        },
-      },
-      _version: 1,
-      owner: "mock-user-sub",
-    });
-    // Seed multiple audio files
-    seedMockFiles([
-      MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1"),
-      MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2"),
-      MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx"),
-    ]);
-    return (
-      <UnitProvider id={unitId}>
-        <MediaPlayerComponent
-          nodeKey="audio-player-multi"
-          fileIDs={["audio-whoosh-1", "audio-whoosh-2", "audio-sfx"]}
-        />
-      </UnitProvider>
-    );
-  },
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "audio-multi-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockFiles([
+        MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1"),
+        MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2"),
+        MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx"),
+      ]);
+    },
+  ],
+  render: () => (
+    <MediaPlayerComponent
+      nodeKey="audio-player-multi"
+      fileIDs={["audio-whoosh-1", "audio-whoosh-2", "audio-sfx"]}
+    />
+  ),
   parameters: {
+    unitId: "audio-multi-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
     docs: {
       description: {
         story:

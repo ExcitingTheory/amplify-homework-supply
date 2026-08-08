@@ -49,6 +49,9 @@ let currentNavigation = {
   searchParams: new URLSearchParams(),
 };
 
+// Listeners for reactive updates via useSyncExternalStore
+const navigationListeners = new Set();
+
 /**
  * Configure navigation state for a story.
  * Called by the preview decorator before rendering.
@@ -61,6 +64,8 @@ export function setNavigationState(state) {
       ? state.searchParams
       : new URLSearchParams(state?.searchParams || {}),
   };
+  // Notify all reactive subscribers so components re-render with new params
+  navigationListeners.forEach(listener => listener());
 }
 
 /**
@@ -83,7 +88,6 @@ export function useRouter() {
 
   return React.useMemo(() => ({
     push: (href, options) => {
-      console.log('[Mock Navigation] push:', href, options);
       // Try to navigate to story if route maps to one
       const resolvedHref = resolveHref(href);
       const storyPath = convertRouteToStory(resolvedHref);
@@ -94,7 +98,6 @@ export function useRouter() {
       forceUpdate(n => n + 1);
     },
     replace: (href, options) => {
-      console.log('[Mock Navigation] replace:', href, options);
       const resolvedHref = resolveHref(href);
       const storyPath = convertRouteToStory(resolvedHref);
       if (storyPath) {
@@ -104,18 +107,11 @@ export function useRouter() {
       forceUpdate(n => n + 1);
     },
     refresh: () => {
-      console.log('[Mock Navigation] refresh');
       forceUpdate(n => n + 1);
     },
-    back: () => {
-      console.log('[Mock Navigation] back');
-    },
-    forward: () => {
-      console.log('[Mock Navigation] forward');
-    },
-    prefetch: (href) => {
-      console.log('[Mock Navigation] prefetch:', href);
-    },
+    back: () => {},
+    forward: () => {},
+    prefetch: () => {},
   }), []);
 }
 
@@ -124,23 +120,47 @@ export function useRouter() {
  * Returns the current pathname string
  */
 export function usePathname() {
-  return currentNavigation.pathname;
+  return React.useSyncExternalStore(
+    (callback) => {
+      navigationListeners.add(callback);
+      return () => navigationListeners.delete(callback);
+    },
+    () => currentNavigation.pathname,
+    () => currentNavigation.pathname,
+  );
 }
 
 /**
  * Mock useParams
  * Returns route parameters (e.g., { id: 'abc', locale: 'en' })
+ * Reactive: re-renders component when setNavigationState is called.
  */
 export function useParams() {
-  return currentNavigation.params;
+  const params = React.useSyncExternalStore(
+    (callback) => {
+      navigationListeners.add(callback);
+      return () => navigationListeners.delete(callback);
+    },
+    () => currentNavigation.params,
+    () => currentNavigation.params,
+  );
+  return params;
 }
 
 /**
  * Mock useSearchParams
  * Returns a read-only URLSearchParams instance
+ * Reactive: re-renders component when setNavigationState is called.
  */
 export function useSearchParams() {
-  return currentNavigation.searchParams;
+  return React.useSyncExternalStore(
+    (callback) => {
+      navigationListeners.add(callback);
+      return () => navigationListeners.delete(callback);
+    },
+    () => currentNavigation.searchParams,
+    () => currentNavigation.searchParams,
+  );
 }
 
 /**
@@ -161,17 +181,14 @@ export function useSelectedLayoutSegments() {
 /**
  * Mock redirect (throws to simulate server redirect)
  */
-export function redirect(url) {
-  console.log('[Mock Navigation] redirect:', url);
-  // In Storybook we just log — can't actually redirect
+export function redirect(_url) {
+  // In Storybook we just no-op
 }
 
 /**
  * Mock notFound
  */
-export function notFound() {
-  console.log('[Mock Navigation] notFound called');
-}
+export function notFound() {}
 
 /**
  * Mock Link component (next/link)

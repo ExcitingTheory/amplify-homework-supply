@@ -40,12 +40,10 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
     await page.keyboard.type(`Grading Test ${Date.now()}`);
-    await page.waitForTimeout(1000);
 
     // Insert quiz
     const insertButton = page.locator(
@@ -58,13 +56,41 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
       .locator("li")
       .filter({ hasText: /quiz|multiple choice/i })
       .click();
-    await page.waitForTimeout(2000);
 
     await expect(page.locator('[data-tour="quiz-block"]').first()).toBeVisible({
       timeout: 10_000,
     });
 
-    await page.waitForTimeout(4000);
+    // Configure quiz answers so students can interact
+    const quizBlock = page.locator('[data-tour="quiz-block"]').first();
+    const editBtn = quizBlock.getByRole("button", { name: /edit/i });
+    await expect(editBtn).toBeVisible({ timeout: 5_000 });
+    await editBtn.click();
+
+    const addAnswerField = quizBlock.locator(
+      'input[placeholder*="Add Answer"], [placeholder*="Add Answer"]',
+    );
+    await expect(addAnswerField).toBeVisible({ timeout: 5_000 });
+    await addAnswerField.click();
+
+    const answerInputs = quizBlock.locator('input[type="text"], textarea');
+    await answerInputs.last().fill("Correct answer");
+    const correctToggle = quizBlock.locator(".MuiSwitch-root").first();
+    if (await correctToggle.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await correctToggle.click();
+    }
+    await addAnswerField.click();
+    await answerInputs.last().fill("Wrong answer");
+
+    const doneBtn = quizBlock.getByRole("button", { name: /done/i });
+    await expect(doneBtn).toBeVisible({ timeout: 5_000 });
+    await doneBtn.click();
+
+    // Wait for auto-save
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 15_000 },
+    ).catch(() => {});
     await ctx.close();
   });
 
@@ -143,7 +169,7 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
 
     const submitBtn = page
       .locator('[data-tour="join-section-dialog"]')
-      .getByRole("button", { name: /join/i });
+      .getByRole("button", { name: /add/i });
     await submitBtn.click();
 
     await expect(
@@ -152,20 +178,21 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
 
     // Open workbook and answer quiz
     await page.goto(`/workbook/${unitId}`, { timeout: 30_000 });
-    await page.waitForTimeout(3000);
 
     const startButton = page.getByRole("button", { name: /start/i });
     if (await startButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await startButton.click();
-      await page.waitForTimeout(2000);
     }
 
+    // Handle completion modal from prior runs — dismiss and retry
     const completionModal = page.locator('[data-tour="results"]');
     if (
       await completionModal.isVisible({ timeout: 5_000 }).catch(() => false)
     ) {
-      // Already completed — grade exists
-      return;
+      const tryAgainBtn = page.getByRole("button", { name: /try again/i });
+      if (await tryAgainBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await tryAgainBtn.click();
+      }
     }
 
     await expect(page.locator('[data-tour="workbook"]')).toBeVisible({
@@ -174,18 +201,21 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
 
     // Answer all quiz questions
     const quizBlock = page.locator('[data-tour="quiz-block"]').first();
-    if (await quizBlock.isVisible({ timeout: 10_000 }).catch(() => false)) {
-      const unchecked = quizBlock.locator(
-        'input[type="checkbox"]:not(:checked), [role="checkbox"][aria-checked="false"]',
-      );
-      const count = await unchecked.count();
-      for (let i = 0; i < count; i++) {
-        await unchecked.nth(i).click();
-        await page.waitForTimeout(500);
-      }
+    await expect(quizBlock).toBeVisible({ timeout: 10_000 });
+
+    const unchecked = quizBlock.locator(
+      'input[type="checkbox"]:not(:checked), [role="checkbox"][aria-checked="false"]',
+    );
+    const count = await unchecked.count();
+    for (let i = 0; i < count; i++) {
+      await unchecked.nth(i).click();
     }
 
-    await page.waitForTimeout(3000);
+    // Wait for grade to be recorded
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 10_000 },
+    ).catch(() => {});
   });
 
   // ─── INSTRUCTOR: Verify grades appear ────────────────────────────────
@@ -222,25 +252,16 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Click grades tab
     const gradesTab = page.locator('[data-tour="grades-tab"]');
     await expect(gradesTab).toBeVisible({ timeout: 10_000 });
     await gradesTab.click();
-    await page.waitForTimeout(3000);
 
     // Grades list must show submission history
     const gradesList = page.locator('[data-tour="grades-list"]');
-    if (await gradesList.isVisible({ timeout: 10_000 }).catch(() => false)) {
-      const text = await gradesList.textContent();
-      expect(text!.length).toBeGreaterThan(5);
-    } else {
-      // Grade data must be visible somewhere in the panel
-      const bodyText = await page.locator("body").textContent();
-      expect(bodyText!.toLowerCase()).toMatch(
-        /grade|submission|student|accuracy/,
-      );
-    }
+    await expect(gradesList).toBeVisible({ timeout: 15_000 });
+    const text = await gradesList.textContent();
+    expect(text!.length).toBeGreaterThan(5);
   });
 });

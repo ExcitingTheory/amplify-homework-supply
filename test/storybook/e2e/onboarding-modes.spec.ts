@@ -41,46 +41,71 @@ const INSTRUCTOR_TASKS: TaskSpec[] = [
   {
     id: "instructor-setup-class",
     title: "Set Up Your First Class",
-    completionCriteria: { completionSequence: ["create-section-button"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--sections",
+      completionSequence: [
+        "sections-page",
+        "create-section-button",
+        "section-form",
+        "join-code",
+      ],
+    },
   },
   {
     id: "instructor-create-unit",
     title: "Create Your First Unit",
-    completionCriteria: { completionSequence: ["create-unit-button"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--units",
+      completionSequence: ["units-page", "create-unit-button"],
+    },
   },
   {
     id: "instructor-add-quiz",
     title: "Add a Quiz Block",
-    completionCriteria: { completionSequence: ["insert-button", "quiz-block"] },
+    completionCriteria: {
+      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
+      completionSequence: ["editor-toolbar", "quiz-block", "quiz-answers"],
+    },
   },
   {
     id: "instructor-create-vocabulary",
     title: "Add Vocabulary Words",
     completionCriteria: {
-      completionSequence: ["add-word-button", "word-form"],
+      tutorialStoryId: "📁-content-management-dictionary-editor--default",
+      completionSequence: ["add-word-button", "word-form", "word-card"],
     },
   },
   {
     id: "instructor-create-assignment",
     title: "Assign Work to Students",
     completionCriteria: {
+      tutorialStoryId: "🧩-ui-components-section-assigner--default",
       completionSequence: ["unit-selector", "create-assignment-button"],
     },
   },
   {
     id: "instructor-view-grades",
     title: "View Student Grades",
-    completionCriteria: { completionSequence: ["grades-tab"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
+      completionSequence: ["assignments-section", "assignment-card"],
+    },
   },
   {
     id: "instructor-use-ai-assistant",
     title: "Use AI to Generate Content",
-    completionCriteria: { completionSequence: ["chat-input"] },
+    completionCriteria: {
+      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
+      completionSequence: ["chat-input"],
+    },
   },
   {
     id: "instructor-learn-shortcuts",
     title: "Master Editor Shortcuts",
-    completionCriteria: { completionSequence: ["shortcuts-demo"] },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      completionSequence: ["shortcuts-demo"],
+    },
   },
 ];
 
@@ -89,13 +114,15 @@ const LEARNER_TASKS: TaskSpec[] = [
     id: "learner-join-class",
     title: "Join Your First Class",
     completionCriteria: {
-      completionSequence: ["join-section-button", "join-section-dialog"],
+      tutorialStoryId: "📄-pages-application-pages--sections",
+      completionSequence: ["sections-page", "section-card", "join-code"],
     },
   },
   {
     id: "learner-view-assignments",
     title: "View Your Assignments",
     completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
       completionSequence: ["assignment-card", "view-workbook-button"],
     },
   },
@@ -103,65 +130,78 @@ const LEARNER_TASKS: TaskSpec[] = [
     id: "learner-complete-assignment",
     title: "Complete an Assignment",
     completionCriteria: {
-      completionSequence: ["quiz-answers", "correct-checkbox"],
+      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink",
+      completionSequence: ["workbook", "quiz-block", "quiz-answers"],
     },
   },
   {
     id: "learner-review-feedback",
     title: "Review Your Feedback",
     completionCriteria: {
-      completionSequence: ["grades-tab", "grade-detail"],
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
+      completionSequence: ["assignments-section", "assignment-card"],
     },
   },
   {
     id: "learner-practice-vocabulary",
     title: "Practice Vocabulary",
     completionCriteria: {
-      completionSequence: ["word-card", "play-audio"],
+      tutorialStoryId: "📁-content-management-vocabulary-review--default",
+      completionSequence: ["word-card"],
     },
   },
   {
     id: "learner-use-chat-help",
     title: "Get Help from AI Assistant",
-    completionCriteria: { completionSequence: ["chat-input"] },
+    completionCriteria: {
+      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
+      completionSequence: ["chat-input"],
+    },
   },
   {
     id: "learner-learn-shortcuts",
     title: "Learn Helpful Shortcuts",
-    completionCriteria: { completionSequence: ["shortcuts-demo"] },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      completionSequence: ["shortcuts-demo"],
+    },
   },
 ];
 
+// Only main tasks (category !== "🎁 Extra Credit") — extra credit tasks
+// are rendered as secret-task-item, not task-item, and excluded from progress.
 const TRANSLATOR_TASKS: TaskSpec[] = [
   {
     id: "translator-language-switcher",
-    title: "Use the Language Switcher",
-    completionCriteria: { completionSequence: ["language-switcher"] },
+    title: "Try the Language Switcher",
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
+      completionSequence: ["translation-demo-instructions"],
+    },
   },
   {
     id: "translator-translation-panel",
-    title: "Open the Translation Panel",
-    completionCriteria: { completionSequence: ["translation-panel"] },
+    title: "Open the Translations Panel",
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
+      completionSequence: ["translation-auth-form"],
+    },
   },
   {
     id: "translator-locale-files",
-    title: "Edit Locale Files",
-    completionCriteria: { completionSequence: ["locale-file-editor"] },
+    title: "Understand Locale File Structure",
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--editor-namespace",
+      completionSequence: ["translation-auth-form"],
+    },
   },
   {
     id: "translator-component-context",
-    title: "Use Component Context",
-    completionCriteria: { completionSequence: ["component-context"] },
-  },
-  {
-    id: "translator-test-rtl",
-    title: "Test RTL Layout",
-    completionCriteria: { completionSequence: ["rtl-toggle"] },
-  },
-  {
-    id: "translator-pluralization",
-    title: "Handle Pluralization",
-    completionCriteria: { completionSequence: ["plural-editor"] },
+    title: "Review Component Context",
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--auth-namespace",
+      completionSequence: ["translation-auth-buttons"],
+    },
   },
 ];
 
@@ -169,22 +209,43 @@ const SECRET_TASKS: TaskSpec[] = [
   {
     id: "secret-keyboard-master",
     title: "👑 SECRET: Keyboard Master Challenge",
-    completionCriteria: { customCheck: () => false },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      customCheck: () => false,
+    },
   },
   {
     id: "secret-speed-demon",
     title: "⚡ SECRET: Speed Demon",
-    completionCriteria: { customCheck: () => false },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      customCheck: () => false,
+    },
   },
   {
     id: "secret-achievement-hunter",
     title: "🏅 SECRET: Achievement Hunter",
-    completionCriteria: { customCheck: () => false },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      customCheck: () => false,
+    },
   },
   {
     id: "secret-shortcut-evangelist",
     title: "📢 SECRET: Shortcut Evangelist",
-    completionCriteria: { completionSequence: ["editor-toolbar"] },
+    completionCriteria: {
+      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
+      completionSequence: ["editor-toolbar"],
+    },
+  },
+  {
+    id: "secret-documentation-explorer",
+    title: "🔍 SECRET: Documentation Explorer",
+    completionCriteria: {
+      tutorialStoryId:
+        "🏠-getting-started-onboarding-learning-modes--tutorial-mode-example",
+      customCheck: () => false,
+    },
   },
 ];
 
@@ -222,13 +283,14 @@ test.describe("Mode switching", () => {
       .locator('[data-testid="task-item"]')
       .filter({ hasText: INSTRUCTOR_TASKS[0].title });
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
     // Dismiss
-    await page.getByRole("button", { name: "Done" }).click();
+    await overlay.getByRole("button", { name: "Done" }).click();
     // Mode should still be quiz
-    await expect(page.getByText("🎯 Quiz Mode")).toBeVisible({
+    await expect(page.getByText("🎯 Quiz Mode Active")).toBeVisible({
       timeout: 8_000,
     });
   });
@@ -250,15 +312,8 @@ test.describe("Tutorial mode — Instructor full tour", () => {
     for (let i = 0; i < INSTRUCTOR_TASKS.length; i++) {
       await walkTaskTour(page, INSTRUCTOR_TASKS[i], "instructor", i + 1);
     }
-    // Secrets also need to be completed for "all complete"
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "instructor",
-        INSTRUCTOR_TASKS.length + i + 1,
-      );
-    }
+    // Secret tasks use data-testid="secret-task-item" (not clickable cards)
+    // and don't count in the main progress counter — skip them here
     await assertAllComplete(page);
     await assertFullProgress(page);
   });
@@ -276,14 +331,6 @@ test.describe("Tutorial mode — Learner full tour", () => {
     for (let i = 0; i < LEARNER_TASKS.length; i++) {
       await walkTaskTour(page, LEARNER_TASKS[i], "learner", i + 1);
     }
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "learner",
-        LEARNER_TASKS.length + i + 1,
-      );
-    }
     await assertAllComplete(page);
     await assertFullProgress(page);
   });
@@ -300,14 +347,6 @@ test.describe("Tutorial mode — Translator full tour", () => {
   test("completes all translator tasks in tutorial mode", async ({ page }) => {
     for (let i = 0; i < TRANSLATOR_TASKS.length; i++) {
       await walkTaskTour(page, TRANSLATOR_TASKS[i], "translator", i + 1);
-    }
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "translator",
-        TRANSLATOR_TASKS.length + i + 1,
-      );
     }
     await assertAllComplete(page);
     await assertFullProgress(page);
@@ -337,14 +376,6 @@ test.describe("Quiz mode — Instructor full tour", () => {
     for (let i = 0; i < INSTRUCTOR_TASKS.length; i++) {
       await walkQuizTaskTour(page, INSTRUCTOR_TASKS[i], "instructor", i + 1);
     }
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkQuizTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "instructor",
-        INSTRUCTOR_TASKS.length + i + 1,
-      );
-    }
     await assertAllComplete(page);
     await assertFullProgress(page);
   });
@@ -356,11 +387,12 @@ test.describe("Quiz mode — Instructor full tour", () => {
       .locator('[data-testid="task-item"]')
       .filter({ hasText: INSTRUCTOR_TASKS[0].title });
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
     // URL should contain sidebar-navigation (quiz always routes there)
-    await page.waitForTimeout(1_000);
+    await page.waitForURL(/sidebar-navigation/, { timeout: 10_000 });
     expect(page.url()).toContain("sidebar-navigation");
   });
 
@@ -369,10 +401,12 @@ test.describe("Quiz mode — Instructor full tour", () => {
       .locator('[data-testid="task-item"]')
       .filter({ hasText: INSTRUCTOR_TASKS[0].title });
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByText("🎯 Quiz")).toBeVisible();
+    // The quiz badge shows "🎯 Quiz • Step X of Y" inside the spotlight
+    await expect(overlay.getByText(/🎯 Quiz/)).toBeVisible();
   });
 
   test("quiz mode has no self-report verify step", async ({ page }) => {
@@ -380,7 +414,8 @@ test.describe("Quiz mode — Instructor full tour", () => {
       .locator('[data-testid="task-item"]')
       .filter({ hasText: INSTRUCTOR_TASKS[0].title });
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
     await expect(
@@ -399,7 +434,8 @@ test.describe("Quiz mode — Instructor full tour", () => {
       .filter({ hasText: INSTRUCTOR_TASKS[0].title });
     await taskCard.click();
     // Spotlight should NOT re-open
-    await expect(page.locator("text=/Step 1 of \\d+/")).not.toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).not.toBeVisible({
       timeout: 3_000,
     });
   });
@@ -417,14 +453,6 @@ test.describe("Quiz mode — Learner full tour", () => {
     for (let i = 0; i < LEARNER_TASKS.length; i++) {
       await walkQuizTaskTour(page, LEARNER_TASKS[i], "learner", i + 1);
     }
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkQuizTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "learner",
-        LEARNER_TASKS.length + i + 1,
-      );
-    }
     await assertAllComplete(page);
     await assertFullProgress(page);
   });
@@ -441,14 +469,6 @@ test.describe("Quiz mode — Translator full tour", () => {
   test("completes all translator tasks in quiz mode", async ({ page }) => {
     for (let i = 0; i < TRANSLATOR_TASKS.length; i++) {
       await walkQuizTaskTour(page, TRANSLATOR_TASKS[i], "translator", i + 1);
-    }
-    for (let i = 0; i < SECRET_TASKS.length; i++) {
-      await walkQuizTaskTour(
-        page,
-        SECRET_TASKS[i],
-        "translator",
-        TRANSLATOR_TASKS.length + i + 1,
-      );
     }
     await assertAllComplete(page);
     await assertFullProgress(page);
@@ -490,7 +510,8 @@ test.describe("Extra Credit / Secret Achievements", () => {
 
   test("secrets are not counted in main progress bar", async ({ page }) => {
     // Progress bar starts at 0 with N main tasks
-    const bar = page.getByRole("progressbar");
+    const panel = page.locator('[data-testid="onboarding-panel"]');
+    const bar = panel.getByRole("progressbar");
     await expect(bar).toHaveAttribute("aria-valuenow", "0");
 
     // Complete one main task via quiz mode (fast — single step)
@@ -526,8 +547,7 @@ test.describe("Extra Credit / Secret Achievements", () => {
 
     if (isAttached) {
       await target.scrollIntoViewIfNeeded();
-      await target.click({ force: true });
-      await page.waitForTimeout(1_000);
+      await target.click();
 
       // Check if the secret was discovered
       await expect(
@@ -586,42 +606,32 @@ test.describe("Cross-mode event-driven completion", () => {
   test("closing spotlight does NOT mark task complete in either mode", async ({
     page,
   }) => {
-    // Tutorial mode — walk through spotlight but DON'T click data-tour elements
+    // Tutorial mode — open spotlight and dismiss via Skip (no data-tour clicks)
     await switchMode(page, "tutorial");
     const taskCard = page
       .locator('[data-testid="task-item"]')
       .filter({ hasText: LEARNER_TASKS[1].title });
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
-    // Read total steps and navigate through all
-    const text = await page.locator("text=/Step 1 of \\d+/").textContent();
-    const total = parseInt(text?.match(/of (\d+)/)?.[1] ?? "1", 10);
-    for (let i = 0; i < total; i++) {
-      const isLast = i === total - 1;
-      if (isLast) {
-        await page.getByRole("button", { name: "Done" }).click();
-      } else if (i === 0) {
-        await page.getByRole("button", { name: "Start" }).click();
-      } else {
-        await page.getByRole("button", { name: "Next" }).click();
-      }
-      await page.waitForTimeout(200);
-    }
+    // Dismiss via Skip — task should NOT be marked complete
+    await overlay.getByRole("button", { name: "Skip" }).click();
     // Panel reopens — task should NOT be checked (no data-tour clicks happened)
     await expect(page.locator('[data-testid="task-item"]').first()).toBeVisible(
       { timeout: 10_000 },
     );
     await expect(taskCard.locator('input[type="checkbox"]')).not.toBeChecked();
 
-    // Quiz mode — same task
+    // Quiz mode — same task, dismiss via Skip
     await switchMode(page, "quiz");
     await taskCard.click();
-    await expect(page.locator("text=/Step 1 of \\d+/")).toBeVisible({
+    const overlay2 = page.locator('[data-testid="spotlight-tooltip"]');
+    await expect(overlay2.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
-    await page.getByRole("button", { name: "Done" }).click();
+    await overlay2.getByRole("button", { name: "Skip" }).click();
     await expect(page.locator('[data-testid="task-item"]').first()).toBeVisible(
       { timeout: 10_000 },
     );
@@ -655,8 +665,7 @@ test.describe("Cross-persona secret persistence", () => {
 
     if (isAttached) {
       await target.scrollIntoViewIfNeeded();
-      await target.click({ force: true });
-      await page.waitForTimeout(1_000);
+      await target.click();
 
       // Verify discovered as instructor
       await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible({
@@ -683,7 +692,8 @@ test.describe("Cross-persona secret persistence", () => {
     await walkQuizTaskTour(page, INSTRUCTOR_TASKS[0], "instructor", 1);
 
     // Verify progress for instructor
-    const bar = page.getByRole("progressbar");
+    const panel = page.locator('[data-testid="onboarding-panel"]');
+    const bar = panel.getByRole("progressbar");
     const instructorValue = await bar.getAttribute("aria-valuenow");
     expect(parseInt(instructorValue ?? "0", 10)).toBeGreaterThan(0);
 

@@ -77,14 +77,19 @@ test.describe("Workbook Collaboration", () => {
     ).toBeVisible({ timeout: 15_000 });
 
     // Student interacts with quiz while instructor has same workbook open
-    const quizAnswer = studentSession.page.locator(
-      '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
+    const quizLabel = studentSession.page.locator(
+      '[data-tour="quiz-answers"], [data-tour="quiz-block"] label',
     );
-    await expect(quizAnswer.first()).toBeVisible({ timeout: 10_000 });
-    await quizAnswer.first().check({ force: true });
+    await expect(quizLabel.first()).toBeVisible({ timeout: 10_000 });
+    await quizLabel.first().click();
 
     // Wait for the interaction to process
-    await studentSession.page.waitForTimeout(2000);
+    await studentSession.page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
 
     // Instructor's session should still be functional (no crash from concurrent access)
     await expect(

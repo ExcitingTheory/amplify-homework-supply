@@ -269,6 +269,14 @@ export function EasterEggEditor({
                   value={achievementValue}
                   onChange={(e) => setAchievementValue(e.target.value)}
                   sx={{ width: 100 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {achievementMetric === 'accuracy' ? '%' :
+                         achievementMetric === 'streak' ? 'days' : 'XP'}
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Stack>
             )}

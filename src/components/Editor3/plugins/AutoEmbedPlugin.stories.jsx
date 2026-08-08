@@ -18,14 +18,38 @@ import AutoEmbedPlugin from "./AutoEmbedPlugin";
 import YouTubePlugin, { YouTubeNode } from "./YouTubePlugin";
 import AutoLinkPlugin from "./AutoLinkPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Workflow/Auto Embed",
   component: AutoEmbedPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "auto-embed-story-unit",
+        name: "AutoEmbed Demo Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "auto-embed-story-unit",
     initializeMockData: false,
   },
 };
@@ -35,18 +59,6 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
-  const unitId = "autoembed-demo-unit";
-
-  // Seed mock unit data
-  seedMockUnit({
-    id: unitId,
-    name: "AutoEmbed Demo Unit",
-    description: "Demo for AutoEmbedPlugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   const initialConfig = {
     namespace: "AutoEmbedPluginDemo",
     theme: LanguageEditorTheme,
@@ -67,51 +79,49 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Auto Embed Plugin - Editable Mode</h2>
-          <p style={{ color: "#666", marginBottom: "10px" }}>
-            Type or paste a YouTube URL (e.g.,
-            https://www.youtube.com/watch?v=dQw4w9WgXcQ) to see auto-embed
-            suggestions appear!
-          </p>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Paste a YouTube URL to see auto-embed in action...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <AutoLinkPlugin />
-            <YouTubePlugin />
-            <AutoEmbedPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Auto Embed Plugin - Editable Mode</h2>
+        <p style={{ color: "#666", marginBottom: "10px" }}>
+          Type or paste a YouTube URL (e.g.,
+          https://www.youtube.com/watch?v=dQw4w9WgXcQ) to see auto-embed
+          suggestions appear!
+        </p>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Paste a YouTube URL to see auto-embed in action...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <AutoLinkPlugin />
+          <YouTubePlugin />
+          <AutoEmbedPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

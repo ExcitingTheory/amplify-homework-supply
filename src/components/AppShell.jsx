@@ -123,6 +123,8 @@ export default function AppShell({ children, toolbarChildren }) {
         sx={{
           display: "flex",
           marginTop: `${appBarHeight}px`,
+          position: "relative",
+          zIndex: 0,
         }}
       >
         <Box

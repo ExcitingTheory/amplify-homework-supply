@@ -101,8 +101,9 @@ test.describe("Group Practice Drill", () => {
     if (await collabLabel.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await collabLabel.click();
     } else {
-      // Fallback: click the last switch (collaborative mode)
-      await collaborativeToggle.check({ force: true });
+      // Fallback: click the parent label of the last switch
+      const switchLabel = configDialog.locator("label").last();
+      await switchLabel.click();
     }
 
     // Click "Start" button in config popup

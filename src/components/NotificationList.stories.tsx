@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import NotificationList from "./NotificationList";
 import NotificationContext from "../context/notificationContext";
 import { action } from "storybook/actions";
+import { expect, userEvent, within, fn } from "storybook/test";
 
 // ---------------------------------------------------------------------------
 // Mock Data
@@ -168,7 +169,26 @@ export const WithNotifications: Story = {
     ),
   ],
   args: {
-    onNavigate: action("navigate"),
+    onNavigate: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Verify notification content rendered
+    await canvas.findByText("You earned a badge!");
+    await canvas.findByText("Assignment due in 2 hours");
+
+    // Click "Assignments" category tab
+    const assignmentTab = canvas.getByRole('tab', { name: /Assignments/i });
+    await userEvent.click(assignmentTab);
+    // Only assignment notification visible
+    await canvas.findByText("Assignment due in 2 hours");
+    expect(canvas.queryByText("You earned a badge!")).toBeNull();
+
+    // Click back to All tab
+    const allTab = canvas.getByRole('tab', { name: /^All/i });
+    await userEvent.click(allTab);
+    await canvas.findByText("You earned a badge!");
   },
 };
 
@@ -182,7 +202,12 @@ export const Empty: Story = {
     ),
   ],
   args: {
-    onNavigate: action("navigate"),
+    onNavigate: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Empty state message shown
+    await canvas.findByText(/No notifications yet/i);
   },
 };
 
@@ -196,7 +221,13 @@ export const Loading: Story = {
     ),
   ],
   args: {
-    onNavigate: action("navigate"),
+    onNavigate: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Skeleton placeholders shown during load
+    const skeletons = canvasElement.querySelectorAll(".MuiSkeleton-root");
+    expect(skeletons.length).toBeGreaterThan(0);
   },
 };
 
@@ -215,7 +246,14 @@ export const AllSeen: Story = {
     ),
   ],
   args: {
-    onNavigate: action("navigate"),
+    onNavigate: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // "Mark all read" button NOT visible when all are already seen (unseenCount === 0)
+    expect(canvas.queryByRole("button", { name: /mark all/i })).toBeNull();
+    // Notification content still renders
+    await canvas.findByText("You earned a badge!");
   },
 };
 
@@ -233,6 +271,16 @@ export const SingleCategory: Story = {
     ),
   ],
   args: {
-    onNavigate: action("navigate"),
+    onNavigate: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Items for this category render
+    await canvas.findByText("You earned a badge!");
+    // Click the Gamification tab to filter
+    const gamTab = canvas.getByRole('tab', { name: /Gamification/i })
+    await userEvent.click(gamTab);
+    // Still shows the badge notification
+    await canvas.findByText("You earned a badge!");
   },
 };

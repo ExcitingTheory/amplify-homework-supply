@@ -149,7 +149,14 @@
     "pdfAnalysisSettings": "PDF Analysis Settings",
     "setFeaturedImage": "Set Featured Image",
     "uploadImagePrompt": "Upload Image",
-    "uploadingImage": "Uploading Image"
+    "uploadingImage": "Uploading Image",
+    "setCoverVideo": "Set Cover Video",
+    "noCoverVideo": "No cover video set.",
+    "coverVideoUrlPlaceholder": "Paste a video URL or leave blank to upload a file",
+    "coverVideoUrlLabel": "Video URL",
+    "dragDropVideoPrompt": "Drag and drop a video file here.",
+    "uploadingVideo": "Transcoding video",
+    "removeCoverVideo": "Remove Cover Video"
   },
   "tabsVerticalLeft": {
     "tabs": {

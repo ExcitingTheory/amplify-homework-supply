@@ -638,7 +638,6 @@ function Sections({ user }) {
                       sx={{
                         maxWidth: "50%",
                         flexShrink: 0,
-                        maxHeight: 200,
                         overflow: "hidden",
                       }}
                     >

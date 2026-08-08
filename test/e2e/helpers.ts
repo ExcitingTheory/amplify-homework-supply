@@ -48,7 +48,6 @@ export async function login(
   user: TestUser,
   targetPath = "/",
 ): Promise<void> {
-  const baseURL = page.context()._options?.baseURL || "https://localhost:3000";
   await page.goto(targetPath, { timeout: 30_000 });
 
   await page.waitForSelector('input[name="username"]', { timeout: 20_000 });
@@ -58,7 +57,6 @@ export async function login(
 
   // #user-button in MainToolbar confirms login
   await page.waitForSelector("#user-button", { timeout: 30_000 });
-  await page.waitForTimeout(500);
 }
 
 /**
@@ -66,9 +64,9 @@ export async function login(
  */
 export async function logout(page: Page): Promise<void> {
   await page.locator("#user-button").click();
-  await page.waitForTimeout(300);
 
   const signOutBtn = page.getByRole("menuitem", { name: /sign out|log out/i });
+  await expect(signOutBtn).toBeVisible({ timeout: 5_000 });
   await signOutBtn.click();
 
   // Verify we're back at the login screen

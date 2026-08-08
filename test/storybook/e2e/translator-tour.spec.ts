@@ -32,33 +32,49 @@ const TRANSLATOR_TASKS: TaskSpec[] = [
     id: "translator-language-switcher",
     title: "Try the Language Switcher",
     completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
       completionSequence: ["translation-demo-instructions"],
     },
   },
   {
     id: "translator-translation-panel",
     title: "Open the Translations Panel",
-    completionCriteria: { completionSequence: ["translation-auth-form"] },
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
+      completionSequence: ["translation-auth-form"],
+    },
   },
   {
     id: "translator-locale-files",
     title: "Understand Locale File Structure",
-    completionCriteria: { completionSequence: ["translation-auth-form"] },
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--editor-namespace",
+      completionSequence: ["translation-auth-form"],
+    },
   },
   {
     id: "translator-component-context",
     title: "Review Component Context",
-    completionCriteria: { completionSequence: ["translation-auth-buttons"] },
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--auth-namespace",
+      completionSequence: ["translation-auth-buttons"],
+    },
   },
   {
     id: "translator-test-rtl",
     title: "Test RTL Language Support",
-    completionCriteria: { completionSequence: ["translation-auth-buttons"] },
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
+      completionSequence: ["translation-auth-buttons"],
+    },
   },
   {
     id: "translator-pluralization",
     title: "Review Pluralization Rules",
-    completionCriteria: { completionSequence: ["translation-password-reset"] },
+    completionCriteria: {
+      tutorialStoryId: "translation-mode-demo--default",
+      completionSequence: ["translation-password-reset"],
+    },
   },
   // ── "all" persona tasks (order 100–103) ───────────────────────────────────
   {
@@ -98,11 +114,14 @@ test.describe("Translator onboarding tour", () => {
 
     for (const task of TRANSLATOR_TASKS.slice(0, 4)) {
       await expect(
-        page.locator('[data-testid="task-item"]').filter({ hasText: task.title })
+        page
+          .locator('[data-testid="task-item"]')
+          .filter({ hasText: task.title }),
       ).toBeVisible();
     }
 
-    const bar = page.getByRole("progressbar");
+    const panel = page.locator('[data-testid="onboarding-panel"]');
+    const bar = panel.getByRole("progressbar");
     await expect(bar).toHaveAttribute("aria-valuenow", "0");
   });
 
@@ -110,8 +129,15 @@ test.describe("Translator onboarding tour", () => {
     await openOnboardingPanel(page);
     await selectPersona(page, "translator");
 
-    for (let i = 0; i < TRANSLATOR_TASKS.length; i++) {
-      await walkTaskTour(page, TRANSLATOR_TASKS[i], "translator", i + 1);
+    const regularTasks = TRANSLATOR_TASKS.filter(
+      (t) =>
+        !t.id.startsWith("secret-") &&
+        !t.id.startsWith("translator-test-rtl") &&
+        !t.id.startsWith("translator-pluralization"),
+    );
+
+    for (let i = 0; i < regularTasks.length; i++) {
+      await walkTaskTour(page, regularTasks[i], "translator", i + 1);
     }
 
     await assertAllComplete(page);

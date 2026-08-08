@@ -76,11 +76,11 @@ test.describe("Peer Review Room", () => {
     await openWorkbook(student1Session.page, unitId);
 
     // Answer quiz to complete the workbook
-    const quizAnswer = student1Session.page.locator(
-      '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
+    const quizLabel = student1Session.page.locator(
+      '[data-tour="quiz-answers"], [data-tour="quiz-block"] label',
     );
-    await expect(quizAnswer.first()).toBeVisible({ timeout: 10_000 });
-    await quizAnswer.first().check({ force: true });
+    await expect(quizLabel.first()).toBeVisible({ timeout: 10_000 });
+    await quizLabel.first().click();
 
     // Wait for results to appear (workbook completion triggers results view)
     const resultsEl = student1Session.page.locator('[data-tour="results"]');

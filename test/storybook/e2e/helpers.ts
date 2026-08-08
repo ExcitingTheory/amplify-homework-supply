@@ -9,7 +9,7 @@
  *  - Asserting per-task and overall progress state
  */
 
-import { Page, expect, Frame } from "@playwright/test";
+import { Page, expect } from "@playwright/test";
 
 // ─── Types (inline to avoid importing browser-side code) ────────────────────
 
@@ -20,6 +20,8 @@ export interface TaskSpec {
   id: string;
   title: string;
   completionCriteria?: {
+    tutorialStoryId?: string;
+    quizStoryId?: string;
     completionSequence?: string[];
     customCheck?: () => boolean;
   };
@@ -38,7 +40,11 @@ const STORAGE_KEY = "storybook_onboarding_progress";
 export async function resetOnboarding(page: Page): Promise<void> {
   await page.goto("/");
   await page.waitForSelector("#storybook-explorer-tree", { timeout: 20_000 });
-  await page.evaluate((key) => localStorage.removeItem(key), STORAGE_KEY);
+  // Clear all localStorage to reset onboarding state and any stale Storybook settings
+  await page.evaluate(() => localStorage.clear());
+  // Reload to apply clean state with initialGlobals (viewport: responsive)
+  await page.reload();
+  await page.waitForSelector("#storybook-explorer-tree", { timeout: 20_000 });
 }
 
 /**
@@ -46,22 +52,29 @@ export async function resetOnboarding(page: Page): Promise<void> {
  * the "Onboarding" tab is selected in the bottom addon panel.
  */
 export async function openOnboardingPanel(page: Page): Promise<void> {
-  // The Welcome story triggers automatic panel open in the addon
-  await page.goto("/?path=/story/🏠-getting-started-welcome--welcome");
+  // Navigate to the Welcome story (auto-opens the Onboarding panel)
+  await page.goto("/?path=/story/🏠-getting-started-welcome--welcome", {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForSelector("#storybook-preview-iframe", { timeout: 15_000 });
 
-  // If the bottom panel is not open, toggle it with Storybook's keyboard shortcut
+  // Ensure addon panel is open via Storybook channel API
+  await page.evaluate(() => {
+    const ch = (window as any).__STORYBOOK_ADDONS_CHANNEL__;
+    if (ch) {
+      ch.emit("storybook/layout/set-layout", {
+        panelPosition: "bottom",
+        showPanel: true,
+      });
+    }
+  });
+
   const tab = page.getByRole("tab", { name: "Onboarding" });
-  const tabVisible = await tab.isVisible({ timeout: 3_000 }).catch(() => false);
-  if (!tabVisible) {
-    await page.keyboard.press("a"); // Storybook 'Show addons' shortcut
-    await expect(tab).toBeVisible({ timeout: 10_000 });
-  }
-
+  await expect(tab).toBeVisible({ timeout: 10_000 });
   await tab.click();
 
   // Confirm the panel content loaded (persona selection or task list).
-  // Use .first() because "Select your role" appears in both the sidebar widget
-  // and the panel subtitle — either match proves the panel is ready.
   await expect(
     page.getByText(/Select your role|tasks completed/).first(),
   ).toBeVisible({ timeout: 10_000 });
@@ -69,7 +82,8 @@ export async function openOnboardingPanel(page: Page): Promise<void> {
 
 /**
  * Click the persona card in the Onboarding panel.
- * Waits until the task list appears before returning.
+ * If a persona is already selected (task list visible), clicks "Change" first
+ * to return to persona selection. Waits until the task list appears before returning.
  */
 export async function selectPersona(
   page: Page,
@@ -81,12 +95,24 @@ export async function selectPersona(
     translator: "Translator",
   };
 
+  // If a persona is already selected, click "Change" to go back to selection
+  const changeBtn = page
+    .locator('[data-testid="onboarding-panel"]')
+    .getByRole("button", { name: "Change" });
+  if (await changeBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await changeBtn.click();
+    await expect(
+      page.getByText(/Select your role/).first(),
+    ).toBeVisible({ timeout: 5_000 });
+  }
+
   // The persona selection shows cards with the label + "Click to start onboarding"
-  await page
+  const card = page
     .locator('[class*="MuiCard"]')
     .filter({ hasText: labels[persona] })
-    .first()
-    .click();
+    .first();
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
 
   // Task list replaces the persona selection
   await expect(page.getByText(/\d+ of \d+ tasks completed/)).toBeVisible({
@@ -99,16 +125,11 @@ export async function selectPersona(
 /**
  * Walk through the full lifecycle of a single onboarding task:
  *
- * 1. Click the task card  →  SpotlightOverlay opens
- * 2. Step-through the overlay (Start → Next… → Done)
- *    - Each click waits for the button to be enabled (auto-handles page loading)
- *    - Asserts the step counter increments each time
- * 3. The overlay closes; the bottom panel reopens automatically
- * 4. Trigger completion inside the preview iframe:
- *    - completionSequence: click each [data-tour="…"] element in order
- *    - customCheck only (no sequence): inject completion via localStorage
- * 5. Assert: task checkbox checked + title has line-through
- * 6. Assert: "N of M tasks completed" counter matches expectedCompleted
+ * 1. Click the task card → SpotlightOverlay opens
+ * 2. Walk through ALL spotlight steps (Start → Next → … → Done)
+ * 3. Navigate to the correct story to find data-tour elements
+ * 4. Click each data-tour element with real Playwright clicks
+ * 5. Return to onboarding panel and verify task completion
  */
 export async function walkTaskTour(
   page: Page,
@@ -123,71 +144,65 @@ export async function walkTaskTour(
 
   await taskCard.click();
 
-  // ── 2. SpotlightOverlay appears ────────────────────────────────────────────
-  // Wait for "Step 1 of N" indicator
-  const stepIndicator = page.locator("text=/Step 1 of \\d+/");
-  await expect(stepIndicator).toBeVisible({ timeout: 10_000 });
+  // ── 2. Walk through every spotlight step ───────────────────────────────────
+  await walkAllSpotlightSteps(page);
 
-  // Read total steps from the indicator text
-  const indicatorText = await stepIndicator.textContent({ timeout: 5_000 });
-  const totalSteps = parseInt(indicatorText?.match(/of (\d+)/)?.[1] ?? "3", 10);
-
-  // ── 3. Navigate through steps ─────────────────────────────────────────────
-  for (let i = 0; i < totalSteps; i++) {
-    const isFirst = i === 0;
-    const isLast = i === totalSteps - 1;
-
-    // Assert step counter shows the right step number
-    await expect(
-      page.locator(`text=/Step ${i + 1} of ${totalSteps}/`),
-    ).toBeVisible({ timeout: 8_000 });
-
-    if (isLast) {
-      // "Done" button — clicking this closes the overlay
-      await page.getByRole("button", { name: "Done" }).click();
-    } else if (isFirst) {
-      // "Start" button — disabled until iframe is loaded
-      await page.getByRole("button", { name: "Start" }).click();
-    } else {
-      // "Next" button — disabled while navigating
-      await page.getByRole("button", { name: "Next" }).click();
-    }
-
-    await page.waitForTimeout(200); // brief UI settle
-  }
-
-  // ── 4. Panel reopens after overlay closes ─────────────────────────────────
-  // togglePanel(true) is called automatically when spotlightOpen → false
-  await expect(page.locator('[data-testid="task-item"]').first()).toBeVisible({
-    timeout: 10_000,
-  });
-
-  // ── 5. Trigger task completion ─────────────────────────────────────────────
+  // ── 3. Navigate to the task's story and trigger completion ─────────────────
   const sequence = task.completionCriteria?.completionSequence;
-  const hasCustomCheck = !!task.completionCriteria?.customCheck;
+  const storyId = task.completionCriteria?.tutorialStoryId;
 
   if (sequence && sequence.length > 0) {
+    // Ensure persona is persisted to localStorage before navigating
+    await page.evaluate(
+      ({ persona: p, key }) => {
+        const data = JSON.parse(localStorage.getItem(key) || "{}");
+        if (!data.currentPersona) {
+          data.currentPersona = p;
+          data.currentMode = data.currentMode || "tutorial";
+          data.completedTasks = data.completedTasks || [];
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+      },
+      { persona, key: STORAGE_KEY },
+    );
+
+    if (storyId) {
+      await page.goto(`/?path=/story/${storyId}`, {
+        waitUntil: "domcontentloaded",
+        timeout: 60_000,
+      });
+      await page.waitForSelector("#storybook-preview-iframe", {
+        timeout: 15_000,
+      });
+      // Wait for story render + task-completion listener init (requestIdleCallback)
+      await expect(
+        page
+          .frameLocator("#storybook-preview-iframe")
+          .locator(`[data-tour="${sequence[0]}"]`)
+          .first(),
+      ).toBeAttached({ timeout: 15_000 });
+    }
+
     await clickCompletionSequence(page, sequence);
-  } else if (hasCustomCheck) {
-    // No data-tour sequence: inject directly into localStorage from the iframe
-    // so the manager frame's storage-event listener fires
-    await injectCompletionViaIframe(page, task.id, persona);
   }
 
-  // ── 6. Assert task crossed off ────────────────────────────────────────────
-  // The Typography inside the task card gets text-decoration: line-through
-  await expect(taskCard.locator(`text=${task.title}`)).toHaveCSS(
+  // ── 4. Return to onboarding panel and verify ──────────────────────────────
+  await openOnboardingPanel(page);
+
+  const updatedTaskCard = page
+    .locator('[data-testid="task-item"]')
+    .filter({ hasText: task.title });
+
+  await expect(updatedTaskCard.locator(`text=${task.title}`)).toHaveCSS(
     "text-decoration",
     /line-through/,
     { timeout: 10_000 },
   );
 
-  // Checkbox should be checked
-  await expect(taskCard.locator('input[type="checkbox"]')).toBeChecked({
+  await expect(updatedTaskCard.locator('input[type="checkbox"]')).toBeChecked({
     timeout: 5_000,
   });
 
-  // ── 7. Assert progress counter ────────────────────────────────────────────
   await expect(
     page.getByText(new RegExp(`${expectedCompleted} of \\d+ tasks completed`)),
   ).toBeVisible({ timeout: 8_000 });
@@ -196,10 +211,43 @@ export async function walkTaskTour(
 // ─── Completion Helpers ──────────────────────────────────────────────────────
 
 /**
+ * Walk through ALL spotlight steps by clicking the primary action button:
+ * "Start" on step 1, "Next" on middle steps, "Done" on the last step.
+ * Verifies each step renders before advancing.
+ */
+async function walkAllSpotlightSteps(page: Page): Promise<void> {
+  const tooltip = page.locator('[data-testid="spotlight-tooltip"]');
+  await expect(tooltip.locator("text=/Step \\d+ of \\d+/")).toBeVisible({
+    timeout: 10_000,
+  });
+
+  // Extract total step count from "Step 1 of N"
+  const stepText = await tooltip
+    .locator("text=/Step \\d+ of \\d+/")
+    .textContent();
+  const totalSteps = parseInt(stepText?.match(/of (\d+)/)?.[1] ?? "1", 10);
+
+  for (let step = 1; step <= totalSteps; step++) {
+    // Verify current step indicator
+    await expect(
+      tooltip.getByText(`Step ${step} of ${totalSteps}`),
+    ).toBeVisible({ timeout: 5_000 });
+
+    // Click the primary button (Start / Next / Done)
+    const primaryBtn = tooltip.locator(
+      'button:has-text("Start"), button:has-text("Next"), button:has-text("Done")',
+    );
+    await expect(primaryBtn).toBeEnabled({ timeout: 10_000 });
+    await primaryBtn.click();
+  }
+
+  // Spotlight should be dismissed after clicking Done on the last step
+  await expect(tooltip).not.toBeVisible({ timeout: 5_000 });
+}
+
+/**
  * Click each data-tour element in the completionSequence inside the preview
- * iframe in order.  The initializeDomActionListeners() function (in preview.jsx)
- * detects these clicks and emits task-completed → persists to localStorage →
- * manager storage-event fires → panel updates.
+ * iframe using real Playwright clicks (scrolls into view, fires all event phases).
  */
 async function clickCompletionSequence(
   page: Page,
@@ -209,92 +257,10 @@ async function clickCompletionSequence(
 
   for (const tourId of sequence) {
     const target = preview.locator(`[data-tour="${tourId}"]`).first();
-    // Scroll into view then click; use force to handle pointer-events:none wrappers
-    await target.waitFor({ state: "attached", timeout: 10_000 });
+    await expect(target).toBeAttached({ timeout: 15_000 });
     await target.scrollIntoViewIfNeeded();
-    await target.click({ force: true, timeout: 10_000 });
-    await page.waitForTimeout(300); // let DOM listener process the click
+    await target.click();
   }
-}
-
-/**
- * For customCheck-only tasks: write the task-completed entry directly into
- * storybook_onboarding_progress localStorage from the PREVIEW IFRAME context.
- *
- * Writing from the iframe triggers a `storage` event in the manager frame
- * (same-origin, different browsing context). The manager emitter's
- * ensureStorageListener() picks this up and emits task-completed to the panel.
- */
-async function injectCompletionViaIframe(
-  page: Page,
-  taskId: string,
-  persona: Persona,
-): Promise<void> {
-  const frames = page.frames();
-  const previewFrame = frames.find(
-    (f) => f.url().includes("iframe") || f.url().includes("?id="),
-  ) as Frame | undefined;
-
-  if (!previewFrame) {
-    // Fallback: write from the main frame (no cross-frame storage event, but
-    // the panel can still read it on next render)
-    await page.evaluate(
-      ({ taskId, persona, key }) => {
-        const taskKey = `${persona}:${taskId}`;
-        const event = {
-          type: "task-completed",
-          taskId,
-          persona,
-          timestamp: Date.now(),
-          metadata: { injectedByE2ETest: true },
-        };
-        let data: { completedTasks?: [string, unknown][] };
-        try {
-          data = JSON.parse(localStorage.getItem(key) || "{}");
-        } catch {
-          data = {};
-        }
-        if (!Array.isArray(data.completedTasks)) data.completedTasks = [];
-        data.completedTasks = data.completedTasks.filter(
-          ([k]) => k !== taskKey,
-        );
-        data.completedTasks.push([taskKey, event]);
-        localStorage.setItem(key, JSON.stringify(data));
-      },
-      { taskId, persona, key: STORAGE_KEY },
-    );
-    // Reload the panel so it picks up the new state
-    await page.reload();
-    await openOnboardingPanel(page);
-    return;
-  }
-
-  await previewFrame.evaluate(
-    ({ taskId, persona, key }) => {
-      const taskKey = `${persona}:${taskId}`;
-      const event = {
-        type: "task-completed",
-        taskId,
-        persona,
-        timestamp: Date.now(),
-        metadata: { injectedByE2ETest: true },
-      };
-      let data: { completedTasks?: [string, unknown][] };
-      try {
-        data = JSON.parse(localStorage.getItem(key) || "{}");
-      } catch {
-        data = {};
-      }
-      if (!Array.isArray(data.completedTasks)) data.completedTasks = [];
-      data.completedTasks = data.completedTasks.filter(([k]) => k !== taskKey);
-      data.completedTasks.push([taskKey, event]);
-      localStorage.setItem(key, JSON.stringify(data));
-    },
-    { taskId, persona, key: STORAGE_KEY },
-  );
-
-  // Allow storage event to propagate to manager frame
-  await page.waitForTimeout(500);
 }
 
 // ─── Mode Switching ──────────────────────────────────────────────────────────
@@ -316,10 +282,17 @@ export async function switchMode(
     .filter({ hasText: new RegExp(`^${label}$`) })
     .first();
   await chip.click();
-  // Confirm mode indicator updated
-  await expect(
-    page.getByText(mode === "tutorial" ? "📖 Tutorial Mode" : "🎯 Quiz Mode"),
-  ).toBeVisible({ timeout: 5_000 });
+  // Confirm mode indicator updated — use specific text to avoid strict mode violations
+  // Quiz mode has two elements containing "🎯 Quiz Mode" so we use the more specific "Active" text
+  if (mode === "quiz") {
+    await expect(page.getByText("🎯 Quiz Mode Active")).toBeVisible({
+      timeout: 5_000,
+    });
+  } else {
+    await expect(page.getByText("📖 Tutorial Mode")).toBeVisible({
+      timeout: 5_000,
+    });
+  }
 }
 
 // ─── Quiz Mode Tour ──────────────────────────────────────────────────────────
@@ -327,19 +300,14 @@ export async function switchMode(
 /**
  * Walk through a single onboarding task in QUIZ mode:
  *
- * 1. Click the task card  →  SpotlightOverlay opens (single hint step)
- * 2. Dismiss the overlay (Done on the single step)
- * 3. The overlay closes; the panel reopens
- * 4. Trigger completion inside the preview iframe:
- *    - completionSequence: click each [data-tour="…"] element in order
- *    - customCheck only (no sequence): inject completion via localStorage
- * 5. Assert: task checkbox checked + title has line-through
- * 6. Assert: "N of M tasks completed" counter matches expectedCompleted
+ * 1. Click the task card → SpotlightOverlay opens (1–2 hint steps)
+ * 2. Walk through ALL spotlight steps (Start/Done)
+ * 3. Navigate to the task's story and click data-tour elements
+ * 4. Return to onboarding panel and verify completion
  *
- * Key differences from tutorial walkTaskTour:
- *   - Quiz spotlight has 1–2 steps max (normalizeQuizSteps strips verify steps)
- *   - No Start/Next multi-step flow — just Done
- *   - Story navigates to Sidebar Navigation first (not the task story)
+ * Quiz mode differs from tutorial only in that the spotlight has fewer steps
+ * and provides hints rather than guided walkthroughs. Completion is still
+ * event-driven via real data-tour clicks.
  */
 export async function walkQuizTaskTour(
   page: Page,
@@ -354,63 +322,64 @@ export async function walkQuizTaskTour(
 
   await taskCard.click();
 
-  // ── 2. SpotlightOverlay appears (quiz: minimal steps) ─────────────────────
-  const stepIndicator = page.locator("text=/Step 1 of \\d+/");
-  await expect(stepIndicator).toBeVisible({ timeout: 10_000 });
+  // ── 2. Walk through quiz spotlight steps (typically 1 step) ────────────────
+  await walkAllSpotlightSteps(page);
 
-  // Read total steps — quiz mode should be 1–2 steps max
-  const indicatorText = await stepIndicator.textContent({ timeout: 5_000 });
-  const totalSteps = parseInt(indicatorText?.match(/of (\d+)/)?.[1] ?? "1", 10);
-
-  // ── 3. Navigate through steps (quiz: typically just Done) ─────────────────
-  for (let i = 0; i < totalSteps; i++) {
-    const isLast = i === totalSteps - 1;
-
-    await expect(
-      page.locator(`text=/Step ${i + 1} of ${totalSteps}/`),
-    ).toBeVisible({ timeout: 8_000 });
-
-    if (isLast) {
-      await page.getByRole("button", { name: "Done" }).click();
-    } else {
-      // If there's more than 1 step, use Next (or Start for first)
-      const btn =
-        i === 0
-          ? page.getByRole("button", { name: "Start" })
-          : page.getByRole("button", { name: "Next" });
-      await btn.click();
-    }
-
-    await page.waitForTimeout(200);
-  }
-
-  // ── 4. Panel reopens after overlay closes ─────────────────────────────────
-  await expect(page.locator('[data-testid="task-item"]').first()).toBeVisible({
-    timeout: 10_000,
-  });
-
-  // ── 5. Trigger task completion ─────────────────────────────────────────────
+  // ── 3. Navigate to task story and trigger completion via real clicks ────────
   const sequence = task.completionCriteria?.completionSequence;
-  const hasCustomCheck = !!task.completionCriteria?.customCheck;
+  const storyId =
+    task.completionCriteria?.quizStoryId ||
+    task.completionCriteria?.tutorialStoryId;
 
-  if (sequence && sequence.length > 0) {
+  if (sequence && sequence.length > 0 && storyId) {
+    // Ensure persona is persisted before navigating
+    await page.evaluate(
+      ({ persona: p, key }) => {
+        const data = JSON.parse(localStorage.getItem(key) || "{}");
+        if (!data.currentPersona) {
+          data.currentPersona = p;
+          data.currentMode = "quiz";
+          data.completedTasks = data.completedTasks || [];
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+      },
+      { persona, key: STORAGE_KEY },
+    );
+
+    await page.goto(`/?path=/story/${storyId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await page.waitForSelector("#storybook-preview-iframe", {
+      timeout: 15_000,
+    });
+    await expect(
+      page
+        .frameLocator("#storybook-preview-iframe")
+        .locator(`[data-tour="${sequence[0]}"]`)
+        .first(),
+    ).toBeAttached({ timeout: 15_000 });
+
     await clickCompletionSequence(page, sequence);
-  } else if (hasCustomCheck) {
-    await injectCompletionViaIframe(page, task.id, persona);
   }
 
-  // ── 6. Assert task crossed off ────────────────────────────────────────────
-  await expect(taskCard.locator(`text=${task.title}`)).toHaveCSS(
+  // ── 4. Return to onboarding panel and verify ──────────────────────────────
+  await openOnboardingPanel(page);
+
+  const updatedTaskCard = page
+    .locator('[data-testid="task-item"]')
+    .filter({ hasText: task.title });
+
+  await expect(updatedTaskCard.locator(`text=${task.title}`)).toHaveCSS(
     "text-decoration",
     /line-through/,
     { timeout: 10_000 },
   );
 
-  await expect(taskCard.locator('input[type="checkbox"]')).toBeChecked({
+  await expect(updatedTaskCard.locator('input[type="checkbox"]')).toBeChecked({
     timeout: 5_000,
   });
 
-  // ── 7. Assert progress counter ────────────────────────────────────────────
   await expect(
     page.getByText(new RegExp(`${expectedCompleted} of \\d+ tasks completed`)),
   ).toBeVisible({ timeout: 8_000 });
@@ -422,7 +391,7 @@ export async function walkQuizTaskTour(
  * Assert the "All tasks completed!" banner is visible in the panel.
  */
 export async function assertAllComplete(page: Page): Promise<void> {
-  await expect(page.getByText("All tasks completed!")).toBeVisible({
+  await expect(page.getByText("0 Remaining")).toBeVisible({
     timeout: 10_000,
   });
 }
@@ -431,6 +400,7 @@ export async function assertAllComplete(page: Page): Promise<void> {
  * Assert the progress bar shows 100%.
  */
 export async function assertFullProgress(page: Page): Promise<void> {
-  const bar = page.getByRole("progressbar");
+  const panel = page.locator('[data-testid="onboarding-panel"]');
+  const bar = panel.getByRole("progressbar");
   await expect(bar).toHaveAttribute("aria-valuenow", "100", { timeout: 8_000 });
 }

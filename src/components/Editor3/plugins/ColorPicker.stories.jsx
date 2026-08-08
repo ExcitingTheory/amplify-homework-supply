@@ -19,14 +19,38 @@ import { Card, CardContent, Typography, Box } from "@mui/material";
 
 import ColorPicker from "./ColorPicker";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Formatting/Color Picker",
   component: ColorPicker,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "color-picker-story-unit",
+        name: "Color Picker Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "centered",
+    unitId: "color-picker-story-unit",
     initializeMockData: false,
   },
 };
@@ -37,125 +61,110 @@ const onError = (error) => {
 
 // Standalone ColorPicker demo without editor
 const StandaloneTemplate = () => {
-  const unitId = "colorpicker-demo-standalone";
   const [selectedColor, setSelectedColor] = useState("#4a90e2");
   const [previewText, setPreviewText] = useState("Sample Text");
 
-  seedMockUnit({
-    id: unitId,
-    name: "Color Picker Standalone Demo",
-    description: "Demo for Color Picker",
-    data: null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <div style={{ padding: "20px" }}>
-        <Typography variant="h4" gutterBottom>
-          Color Picker Component
-        </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
-          Select colors using basic color palette or custom HSV picker
-        </Typography>
+    <div style={{ padding: "20px" }}>
+      <Typography variant="h4" gutterBottom>
+        Color Picker Component
+      </Typography>
+      <Typography variant="body2" color="text.secondary" paragraph>
+        Select colors using basic color palette or custom HSV picker
+      </Typography>
 
-        <Box
-          sx={{
-            display: "flex",
-            gap: 3,
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-          }}
-        >
-          <Card sx={{ minWidth: 300 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Color Picker
+      <Box
+        sx={{
+          display: "flex",
+          gap: 3,
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+        }}
+      >
+        <Card sx={{ minWidth: 300 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Color Picker
+            </Typography>
+            <ColorPicker
+              editor={null}
+              color={selectedColor}
+              onChange={(newColor) => {
+                setSelectedColor(newColor);
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        <Card sx={{ minWidth: 300 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Preview
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Selected Color: {selectedColor}
               </Typography>
-              <ColorPicker
-                editor={null}
-                color={selectedColor}
-                onChange={(newColor) => {
-                  setSelectedColor(newColor);
-                }}
-              />
-            </CardContent>
-          </Card>
-
-          <Card sx={{ minWidth: 300 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Preview
-              </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Selected Color: {selectedColor}
-                </Typography>
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: 60,
-                    backgroundColor: selectedColor,
-                    borderRadius: 1,
-                    border: "1px solid #ccc",
-                    mb: 2,
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ mb: 2 }}>
-                <input
-                  type="text"
-                  value={previewText}
-                  onChange={(e) => setPreviewText(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                    fontSize: "14px",
-                  }}
-                  placeholder="Type text to preview..."
-                />
-              </Box>
-
               <Box
                 sx={{
-                  p: 2,
-                  backgroundColor: "#fff",
+                  width: "100%",
+                  height: 60,
+                  backgroundColor: selectedColor,
                   borderRadius: 1,
                   border: "1px solid #ccc",
-                  minHeight: 100,
+                  mb: 2,
                 }}
-              >
-                <Typography variant="h5" sx={{ color: selectedColor }}>
-                  {previewText}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{ color: selectedColor, mt: 1 }}
-                >
-                  The quick brown fox jumps over the lazy dog
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
+              />
+            </Box>
 
-        <Box sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
-          <Typography variant="body2">
-            <strong>Features:</strong>
-          </Typography>
-          <ul style={{ margin: "10px 0", paddingLeft: "20px" }}>
-            <li>15 predefined basic colors for quick selection</li>
-            <li>HSV saturation/value picker with visual feedback</li>
-            <li>Hue slider for full spectrum selection</li>
-            <li>Hexadecimal input for precise color values</li>
-            <li>Live color preview</li>
-          </ul>
-        </Box>
-      </div>
-    </UnitProvider>
+            <Box sx={{ mb: 2 }}>
+              <input
+                type="text"
+                value={previewText}
+                onChange={(e) => setPreviewText(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  marginBottom: "10px",
+                  fontSize: "14px",
+                }}
+                placeholder="Type text to preview..."
+              />
+            </Box>
+
+            <Box
+              sx={{
+                p: 2,
+                backgroundColor: "#fff",
+                borderRadius: 1,
+                border: "1px solid #ccc",
+                minHeight: 100,
+              }}
+            >
+              <Typography variant="h5" sx={{ color: selectedColor }}>
+                {previewText}
+              </Typography>
+              <Typography variant="body1" sx={{ color: selectedColor, mt: 1 }}>
+                The quick brown fox jumps over the lazy dog
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      <Box sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+        <Typography variant="body2">
+          <strong>Features:</strong>
+        </Typography>
+        <ul style={{ margin: "10px 0", paddingLeft: "20px" }}>
+          <li>15 predefined basic colors for quick selection</li>
+          <li>HSV saturation/value picker with visual feedback</li>
+          <li>Hue slider for full spectrum selection</li>
+          <li>Hexadecimal input for precise color values</li>
+          <li>Live color preview</li>
+        </ul>
+      </Box>
+    </div>
   );
 };
 
@@ -214,8 +223,6 @@ const EditorColorPickerPlugin = () => {
 };
 
 const EditorTemplate = ({ editorState }) => {
-  const unitId = "colorpicker-demo-editor";
-
   const initialConfig = {
     namespace: "ColorPickerEditorDemo",
     theme: LanguageEditorTheme,
@@ -234,62 +241,51 @@ const EditorTemplate = ({ editorState }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Color Picker Editor Demo",
-    description: "Demo for Color Picker in Editor",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px" }}>
-          <Typography variant="h4" gutterBottom>
-            Color Picker in Editor
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            Select text in the editor below, then use the color picker to change
-            its color
-          </Typography>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px" }}>
+        <Typography variant="h4" gutterBottom>
+          Color Picker in Editor
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Select text in the editor below, then use the color picker to change
+          its color
+        </Typography>
 
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "300px",
-              padding: "20px",
-              backgroundColor: "#fff",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "250px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Type some text and select it to change colors...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-          </div>
-
-          <EditorColorPickerPlugin />
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "300px",
+            padding: "20px",
+            backgroundColor: "#fff",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "250px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Type some text and select it to change colors...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+
+        <EditorColorPickerPlugin />
+      </div>
+    </LexicalComposer>
   );
 };
 

@@ -31,44 +31,66 @@ const INSTRUCTOR_TASKS: TaskSpec[] = [
   {
     id: "instructor-setup-class",
     title: "Set Up Your First Class",
-    completionCriteria: { completionSequence: ["create-section-button"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--sections",
+      completionSequence: ["create-section-button"],
+    },
   },
   {
     id: "instructor-create-unit",
     title: "Create Your First Unit",
-    completionCriteria: { completionSequence: ["create-unit-button"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--units",
+      completionSequence: ["create-unit-button"],
+    },
   },
   {
     id: "instructor-add-quiz",
     title: "Add a Quiz Block",
-    completionCriteria: { completionSequence: ["insert-button", "quiz-block"] },
+    completionCriteria: {
+      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
+      completionSequence: ["editor-toolbar", "quiz-block"],
+    },
   },
   {
     id: "instructor-create-vocabulary",
     title: "Add Vocabulary Words",
-    completionCriteria: { completionSequence: ["add-word-button", "word-form"] },
+    completionCriteria: {
+      tutorialStoryId: "📁-content-management-dictionary-editor--default",
+      completionSequence: ["add-word-button", "word-card"],
+    },
   },
   {
     id: "instructor-create-assignment",
     title: "Assign Work to Students",
     completionCriteria: {
+      tutorialStoryId: "🧩-ui-components-section-assigner--default",
       completionSequence: ["unit-selector", "create-assignment-button"],
     },
   },
   {
     id: "instructor-view-grades",
     title: "View Student Grades",
-    completionCriteria: { completionSequence: ["grades-tab"] },
+    completionCriteria: {
+      tutorialStoryId: "📄-pages-application-pages--section-detail",
+      completionSequence: ["assignments-section"],
+    },
   },
   {
     id: "instructor-use-ai-assistant",
     title: "Use AI to Generate Content",
-    completionCriteria: { completionSequence: ["chat-input"] },
+    completionCriteria: {
+      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
+      completionSequence: ["chat-input"],
+    },
   },
   {
     id: "instructor-learn-shortcuts",
     title: "Master Editor Shortcuts",
-    completionCriteria: { completionSequence: ["shortcuts-demo"] },
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
+      completionSequence: ["shortcuts-demo"],
+    },
   },
   // ── "all" persona tasks (order 100–103) ───────────────────────────────────
   {
@@ -110,12 +132,15 @@ test.describe("Instructor onboarding tour", () => {
     // All task cards should be visible (at least the first few)
     for (const task of INSTRUCTOR_TASKS.slice(0, 4)) {
       await expect(
-        page.locator('[data-testid="task-item"]').filter({ hasText: task.title })
+        page
+          .locator('[data-testid="task-item"]')
+          .filter({ hasText: task.title }),
       ).toBeVisible();
     }
 
     // Progress bar should start at 0
-    const bar = page.getByRole("progressbar");
+    const panel = page.locator('[data-testid="onboarding-panel"]');
+    const bar = panel.getByRole("progressbar");
     await expect(bar).toHaveAttribute("aria-valuenow", "0");
   });
 
@@ -123,12 +148,17 @@ test.describe("Instructor onboarding tour", () => {
     await openOnboardingPanel(page);
     await selectPersona(page, "instructor");
 
-    // Walk through every task in order, asserting progress after each one
-    for (let i = 0; i < INSTRUCTOR_TASKS.length; i++) {
-      await walkTaskTour(page, INSTRUCTOR_TASKS[i], "instructor", i + 1);
+    // Secret tasks render as data-testid="secret-task-item" (not clickable) —
+    // only walk regular tasks which use data-testid="task-item"
+    const regularTasks = INSTRUCTOR_TASKS.filter(
+      (t) => !t.id.startsWith("secret-"),
+    );
+
+    for (let i = 0; i < regularTasks.length; i++) {
+      await walkTaskTour(page, regularTasks[i], "instructor", i + 1);
     }
 
-    // Final state: all done
+    // Final state: all regular tasks done
     await assertAllComplete(page);
     await assertFullProgress(page);
   });

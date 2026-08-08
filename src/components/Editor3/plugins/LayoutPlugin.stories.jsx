@@ -23,14 +23,38 @@ import { LayoutPlugin, INSERT_LAYOUT_COMMAND } from "./LayoutPlugin";
 import { LayoutContainerNode } from "../components/LayoutContainerNode";
 import { LayoutItemNode } from "../components/LayoutItemNode";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Formatting/Layout",
   component: LayoutPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "layout-plugin-story-unit",
+        name: "Layout Plugin Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "layout-plugin-story-unit",
     initializeMockData: false,
   },
 };
@@ -54,8 +78,6 @@ function InsertLayoutButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
-  const unitId = "layout-demo-editable";
-
   const initialConfig = {
     namespace: "LayoutPluginDemo",
     theme: LanguageEditorTheme,
@@ -76,71 +98,58 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Layout Plugin Demo",
-    description: "Demo for Layout Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <style jsx global>{`
-          .layout-container {
-            display: grid;
-          }
-          .layout-container > div {
-            margin: 0.25rem;
-            padding: 0.25rem;
-            border: 1px dashed #ccc;
-          }
-        `}</style>
-        <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
-          <h2>Layout Plugin - Editable Mode</h2>
-          {showInsertButton && <InsertLayoutButton />}
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Enter text or create multi-column layouts...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <LayoutPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <style jsx global>{`
+        .layout-container {
+          display: grid;
+        }
+        .layout-container > div {
+          margin: 0.25rem;
+          padding: 0.25rem;
+          border: 1px dashed #ccc;
+        }
+      `}</style>
+      <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
+        <h2>Layout Plugin - Editable Mode</h2>
+        {showInsertButton && <InsertLayoutButton />}
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Enter text or create multi-column layouts...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <LayoutPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
-  const unitId = "layout-demo-readonly";
-
   const initialConfig = {
     namespace: "LayoutPluginDemo",
     theme: LanguageEditorTheme,
@@ -161,52 +170,41 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
-  seedMockUnit({
-    id: unitId,
-    name: "Layout Plugin Demo (Read-Only)",
-    description: "Demo for Layout Plugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <style jsx global>{`
-          .layout-container {
-            display: grid;
-          }
-          .layout-container > div {
-            margin: 0.25rem;
-            padding: 0.25rem;
-          }
-        `}</style>
-        <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
-          <h2>Layout Plugin - Read-Only Mode</h2>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={null}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <LayoutPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <style jsx global>{`
+        .layout-container {
+          display: grid;
+        }
+        .layout-container > div {
+          margin: 0.25rem;
+          padding: 0.25rem;
+        }
+      `}</style>
+      <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
+        <h2>Layout Plugin - Read-Only Mode</h2>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+            backgroundColor: "#f5f5f5",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <LayoutPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

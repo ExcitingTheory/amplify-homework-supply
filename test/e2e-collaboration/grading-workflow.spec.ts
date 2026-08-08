@@ -67,15 +67,20 @@ test.describe("Grading Workflow", () => {
     // Student: open workbook and answer quiz
     await openWorkbook(studentSession.page, unitId);
 
-    // Find and check a quiz answer
-    const quizAnswer = studentSession.page.locator(
-      '[data-tour="quiz-answers"] input[type="checkbox"], [data-tour="quiz-block"] input[type="checkbox"]',
+    // Find and click a quiz answer label (MUI Checkbox input is hidden)
+    const quizLabel = studentSession.page.locator(
+      '[data-tour="quiz-answers"], [data-tour="quiz-block"] label',
     );
-    await expect(quizAnswer.first()).toBeVisible({ timeout: 10_000 });
-    await quizAnswer.first().check({ force: true });
+    await expect(quizLabel.first()).toBeVisible({ timeout: 10_000 });
+    await quizLabel.first().click();
 
     // Wait for grade to be recorded (mutation + subscription propagation)
-    await studentSession.page.waitForTimeout(5000);
+    await studentSession.page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
 
     // Instructor: navigate to section detail to see gradebook
     await goToSections(instructorSession.page);

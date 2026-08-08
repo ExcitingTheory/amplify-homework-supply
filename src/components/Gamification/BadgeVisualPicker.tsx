@@ -11,6 +11,8 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import ButtonBase from '@mui/material/ButtonBase'
+import Button from '@mui/material/Button'
+import Collapse from '@mui/material/Collapse'
 import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
@@ -325,6 +327,7 @@ export interface BadgeVisualPickerProps {
 export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
   const [iconTab, setIconTab] = useState(0)
   const [iconSearch, setIconSearch] = useState('')
+  const [customGradientOpen, setCustomGradientOpen] = useState(false)
 
   const selectedIcon = useMemo(() => resolveIcon(value.iconName), [value.iconName])
 
@@ -363,7 +366,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
   return (
     <Box>
       {/* ---- Live Preview ---- */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider', position: 'sticky', top: 0, zIndex: 1 }}>
         <BadgeIcon config={previewConfig} size={72} earned animate />
         <Box>
           <Typography variant="caption" color="text.secondary">Live Preview</Typography>
@@ -541,6 +544,96 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
           )
         })}
       </Box>
+
+      {/* ---- Custom Gradient ---- */}
+      <Button
+        size="small"
+        variant={customGradientOpen ? 'contained' : 'outlined'}
+        onClick={() => setCustomGradientOpen((v) => !v)}
+        sx={{ mb: 1, fontSize: '0.7rem', textTransform: 'none' }}
+      >
+        {customGradientOpen ? 'Hide Custom Gradient' : 'Custom Gradient…'}
+      </Button>
+      <Collapse in={customGradientOpen}>
+        <Box sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1, mb: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <ToggleButtonGroup
+              value={value.gradient?.type ?? 'linear'}
+              exclusive
+              size="small"
+              onChange={(_, v) => {
+                if (!v) return
+                const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                handleChange({ gradient: { ...base, type: v } })
+              }}
+            >
+              <ToggleButton value="linear" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>Linear</ToggleButton>
+              <ToggleButton value="radial" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>Radial</ToggleButton>
+            </ToggleButtonGroup>
+            {(value.gradient?.type ?? 'linear') === 'linear' && (
+              <TextField
+                size="small"
+                label="Angle"
+                placeholder="135deg"
+                value={value.gradient?.angle ?? '135deg'}
+                onChange={(e) => {
+                  const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                  handleChange({ gradient: { ...base, angle: e.target.value } })
+                }}
+                sx={{ width: 100 }}
+              />
+            )}
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>Start</Typography>
+            <TextField
+              type="color"
+              size="small"
+              value={value.gradient?.stops[0]?.color ?? '#4caf50'}
+              onChange={(e) => {
+                const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                handleChange({ gradient: { ...base, stops: [{ color: e.target.value, position: base.stops[0]?.position ?? '0%' }, base.stops[1] ?? { color: '#1a237e', position: '100%' }] } })
+              }}
+              sx={{ width: 60 }}
+            />
+            <TextField
+              size="small"
+              label="Position"
+              placeholder="0%"
+              value={value.gradient?.stops[0]?.position ?? '0%'}
+              onChange={(e) => {
+                const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                handleChange({ gradient: { ...base, stops: [{ color: base.stops[0]?.color ?? '#4caf50', position: e.target.value }, base.stops[1] ?? { color: '#1a237e', position: '100%' }] } })
+              }}
+              sx={{ width: 80 }}
+            />
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>End</Typography>
+            <TextField
+              type="color"
+              size="small"
+              value={value.gradient?.stops[1]?.color ?? '#1a237e'}
+              onChange={(e) => {
+                const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                handleChange({ gradient: { ...base, stops: [base.stops[0] ?? { color: '#4caf50', position: '0%' }, { color: e.target.value, position: base.stops[1]?.position ?? '100%' }] } })
+              }}
+              sx={{ width: 60 }}
+            />
+            <TextField
+              size="small"
+              label="Position"
+              placeholder="100%"
+              value={value.gradient?.stops[1]?.position ?? '100%'}
+              onChange={(e) => {
+                const base = value.gradient ?? { type: 'linear' as const, angle: '135deg', stops: [{ color: '#4caf50', position: '0%' }, { color: '#1a237e', position: '100%' }] }
+                handleChange({ gradient: { ...base, stops: [base.stops[0] ?? { color: '#4caf50', position: '0%' }, { color: base.stops[1]?.color ?? '#1a237e', position: e.target.value }] } })
+              }}
+              sx={{ width: 80 }}
+            />
+          </Stack>
+        </Box>
+      </Collapse>
 
       {/* ---- Animation ---- */}
       <FormControl size="small" fullWidth sx={{ mb: 1 }}>

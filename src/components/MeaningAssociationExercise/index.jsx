@@ -122,7 +122,7 @@ export const PlayAudioButton = ({ audioPaths, size = "small" }) => {
 };
 
 /** Static card shown in completed state for Easy/Hard — shows the word with a check or X */
-export const ResultCard = ({ phrase, passed, audioPaths }) => {
+export const ResultCard = ({ phrase, passed, audioPaths, cardWidth = 140 }) => {
   return (
     <Box
       data-testid="result-card"
@@ -145,9 +145,9 @@ export const ResultCard = ({ phrase, passed, audioPaths }) => {
           ? "var(--mui-palette-success-dark, #2e7d32)"
           : "var(--mui-palette-error-dark, #c62828)",
         fontWeight: 500,
-        width: "140px",
-        minWidth: "140px",
-        maxWidth: "140px",
+        width: `${cardWidth}px`,
+        minWidth: `${cardWidth}px`,
+        maxWidth: `${cardWidth}px`,
         boxSizing: "border-box",
         flexShrink: 0,
         justifyContent: "center",

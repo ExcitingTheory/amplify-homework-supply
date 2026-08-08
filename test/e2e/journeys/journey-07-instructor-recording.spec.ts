@@ -36,13 +36,16 @@ test.describe
     await page.waitForSelector('[data-lexical-editor="true"]', {
       timeout: 15_000,
     });
-    await page.waitForTimeout(2000);
 
     const editor = page.locator('[data-lexical-editor="true"]').first();
     await editor.click();
     await page.keyboard.type(`File Mgmt Unit ${Date.now()}`);
 
-    await page.waitForTimeout(4000);
+    // Wait for auto-save
+    await page.waitForResponse(
+      (resp) => resp.url().includes("graphql") && resp.status() === 200,
+      { timeout: 15_000 },
+    ).catch(() => {});
   });
 
   test("files tab has functional upload input that accepts files", async ({
@@ -51,13 +54,11 @@ test.describe
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Open files tab
     const filesTab = page.locator('[data-tour="files-tab"]');
     await expect(filesTab).toBeVisible({ timeout: 10_000 });
     await filesTab.click();
-    await page.waitForTimeout(2000);
 
     // Must have upload input
     const uploadInput = page.locator('input[type="file"]').first();
@@ -71,75 +72,46 @@ test.describe
       buffer: testContent,
     });
 
-    // Wait for upload processing
-    await page.waitForTimeout(5000);
-
     // File should appear in the list after upload
-    const fileList = page.locator("body");
-    const bodyText = await fileList.textContent();
-    // The upload mechanism should show progress or the file name
-    const hasFileUI =
-      bodyText!.includes("e2e-test-file") ||
-      bodyText!.toLowerCase().includes("upload") ||
-      (await page
-        .locator('[class*="progress"], [role="progressbar"]')
-        .first()
-        .isVisible({ timeout: 5_000 })
-        .catch(() => false));
-    expect(hasFileUI).toBe(true);
+    await expect(page.getByText("e2e-test-file")).toBeVisible({ timeout: 15_000 });
   });
 
   test("questions tab shows question management UI", async ({ page }) => {
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Open questions tab
     const questionsTab = page.locator('[data-tour="questions-tab"]');
     await expect(questionsTab).toBeVisible({ timeout: 10_000 });
     await questionsTab.click();
-    await page.waitForTimeout(2000);
 
-    // Must show question management interface
-    // Look for add button, question list, or empty state
+    // Must show question management interface — add button or existing questions
     const addBtn = page.locator(
       'button:has-text("Add"), button:has-text("Create"), button:has-text("New")',
     );
     const questionList = page.locator(
       '[class*="question"], [data-tour*="question"]',
     );
-
-    const hasAddBtn = await addBtn
-      .first()
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    const hasQuestionList = await questionList
-      .first()
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-
-    // Either add button or existing questions must be present
-    expect(hasAddBtn || hasQuestionList).toBe(true);
+    await expect(addBtn.first().or(questionList.first())).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("instructor can add a vocabulary word to the unit", async ({ page }) => {
     suppressKnownErrors(page);
     await login(page, INSTRUCTOR, `/unit/${unitId}`);
     await page.waitForSelector('[data-tour="editor"]', { timeout: 30_000 });
-    await page.waitForTimeout(2000);
 
     // Open dictionary tab
     const dictTab = page.locator('[data-tour="dictionary-tab"]');
     await expect(dictTab).toBeVisible({ timeout: 10_000 });
     await dictTab.click();
-    await page.waitForTimeout(2000);
 
     // Click add word
     const addWordBtn = page.locator('[data-tour="add-word-button"]');
     await expect(addWordBtn).toBeVisible({ timeout: 10_000 });
     await addWordBtn.click();
-    await page.waitForTimeout(1000);
 
     // Word form must appear
     const wordForm = page.locator('[data-tour="word-form"]');
@@ -155,13 +127,10 @@ test.describe
     const saveBtn = wordForm.getByRole("button", {
       name: /save|add|create|submit/i,
     });
-    if (await saveBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await saveBtn.click();
-      await page.waitForTimeout(3000);
+    await expect(saveBtn).toBeVisible({ timeout: 5_000 });
+    await saveBtn.click();
 
-      // Word should appear in the dictionary list
-      const bodyText = await page.locator("body").textContent();
-      expect(bodyText).toContain(testWord);
-    }
+    // Word should appear in the dictionary list
+    await expect(page.getByText(testWord)).toBeVisible({ timeout: 10_000 });
   });
 });

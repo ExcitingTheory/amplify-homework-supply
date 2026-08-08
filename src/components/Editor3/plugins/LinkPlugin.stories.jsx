@@ -18,14 +18,38 @@ import { ClickableLinkPlugin as LexicalClickableLinkPlugin } from "@lexical/reac
 import LinkPlugin from "./LinkPlugin";
 import AutoLinkPlugin from "./AutoLinkPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Formatting/Link",
   component: LinkPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "link-plugin-story-unit",
+        name: "Link Plugin Demo",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "link-plugin-story-unit",
     initializeMockData: false,
   },
 };
@@ -35,17 +59,6 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
-  const unitId = "link-demo-unit-editable";
-
-  seedMockUnit({
-    id: unitId,
-    name: "Link Plugin Demo",
-    description: "Demo for LinkPlugin",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   const initialConfig = {
     namespace: "LinkPluginDemo",
     theme: LanguageEditorTheme,
@@ -65,64 +78,51 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Link Plugin - Editable Mode</h2>
-          <p style={{ color: "#666", marginBottom: "10px" }}>
-            Try typing a URL like https://example.com to see auto-linking in
-            action!
-          </p>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Enter text with URLs or email addresses...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <LinkPlugin />
-            <AutoLinkPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Link Plugin - Editable Mode</h2>
+        <p style={{ color: "#666", marginBottom: "10px" }}>
+          Try typing a URL like https://example.com to see auto-linking in
+          action!
+        </p>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Enter text with URLs or email addresses...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <LinkPlugin />
+          <AutoLinkPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
-  const unitId = "link-demo-unit-readonly";
-
-  seedMockUnit({
-    id: unitId,
-    name: "Link Plugin Demo ReadOnly",
-    description: "Demo for LinkPlugin readonly",
-    data: editorState || null,
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   const initialConfig = {
     namespace: "LinkPluginDemo",
     theme: LanguageEditorTheme,
@@ -142,37 +142,35 @@ const ReadOnlyTemplate = ({ editorState }) => {
   };
 
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Link Plugin - Read-Only Mode</h2>
-          <p style={{ color: "#666", marginBottom: "10px" }}>
-            Links are clickable in read-only mode.
-          </p>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={null}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <LinkPlugin />
-            <LexicalClickableLinkPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Link Plugin - Read-Only Mode</h2>
+        <p style={{ color: "#666", marginBottom: "10px" }}>
+          Links are clickable in read-only mode.
+        </p>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+            backgroundColor: "#f5f5f5",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <LinkPlugin />
+          <LexicalClickableLinkPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

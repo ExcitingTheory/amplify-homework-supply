@@ -1,15 +1,13 @@
 /**
  * Mock @aws-amplify/adapter-nextjs for Storybook
- * This is a server-side module that should not be used in the browser.
+ * Returns the in-memory mock data client so RSC pre-fetches read seeded data.
  */
+import { generateClient } from 'aws-amplify/data';
 
 export const createServerRunner = () => ({
   runWithAmplifyServerContext: async ({ operation }) => operation({}),
 });
 
-export const generateServerClientUsingCookies = () => ({
-  models: {},
-  graphql: () => Promise.resolve({ data: {} }),
-});
+export const generateServerClientUsingCookies = () => generateClient();
 
 export const createCookieStorageAdapterFromNextServerContext = () => ({});

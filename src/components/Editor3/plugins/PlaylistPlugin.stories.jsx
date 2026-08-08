@@ -21,14 +21,80 @@ import PlaylistPlugin, {
   PlaylistNode,
 } from "./PlaylistPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { UnitProvider } from "../../../context/unitContext";
-import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import {
+  seedMockUnit,
+  seedMockFiles,
+  clearMockData,
+} from "../../../../.storybook/__mocks__/aws-amplify-data";
 
 export default {
   title: "✏️ Lesson Editor/Media/Playlist",
   component: PlaylistPlugin,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockFiles([
+        {
+          id: "audio-1",
+          name: "Audio Track 1",
+          owner: "mock-user-id",
+          identityId: "us-east-1:mock-identity",
+          mimeType: "audio/mpeg",
+          level: "PUBLIC",
+          path: "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+          duration: 2.8,
+          size: 45678,
+          generated: false,
+          _version: 1,
+        },
+        {
+          id: "audio-2",
+          name: "Audio Track 2",
+          owner: "mock-user-id",
+          identityId: "us-east-1:mock-identity",
+          mimeType: "audio/mpeg",
+          level: "PUBLIC",
+          path: "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+          duration: 4.5,
+          size: 72345,
+          generated: false,
+          _version: 1,
+        },
+        {
+          id: "audio-3",
+          name: "Audio Track 3",
+          owner: "mock-user-id",
+          identityId: "us-east-1:mock-identity",
+          mimeType: "audio/mpeg",
+          level: "PUBLIC",
+          path: "/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3",
+          duration: 3.2,
+          size: 51234,
+          generated: false,
+          _version: 1,
+        },
+      ]);
+      seedMockUnit({
+        id: "playlist-story-unit",
+        name: "Playlist Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+    },
+  ],
   parameters: {
     layout: "fullscreen",
+    unitId: "playlist-story-unit",
     initializeMockData: false,
   },
 };
@@ -75,64 +141,44 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "Playlist Story Unit",
-    data: {
-      root: {
-        children: [],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1,
-      },
-    },
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Playlist Plugin - Editable Mode</h2>
-          {showInsertButton && <InsertPlaylistButton />}
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    color: "#999",
-                  }}
-                >
-                  Enter text or insert playlists...
-                </div>
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <PlaylistPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Playlist Plugin - Editable Mode</h2>
+        {showInsertButton && <InsertPlaylistButton />}
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "20px",
+                  color: "#999",
+                }}
+              >
+                Enter text or insert playlists...
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <PlaylistPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 
@@ -156,52 +202,32 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
-  const unitId = "story-unit-id-" + Math.random();
-  seedMockUnit({
-    id: unitId,
-    name: "Playlist Story Unit",
-    data: {
-      root: {
-        children: [],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1,
-      },
-    },
-    _version: 1,
-    owner: "mock-user-sub",
-  });
-
   return (
-    <UnitProvider id={unitId}>
-      <LexicalComposer initialConfig={initialConfig}>
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-          <h2>Playlist Plugin - Read-Only Mode</h2>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              minHeight: "400px",
-              padding: "20px",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  style={{ outline: "none", minHeight: "350px" }}
-                />
-              }
-              placeholder={null}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <PlaylistPlugin />
-          </div>
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <h2>Playlist Plugin - Read-Only Mode</h2>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            minHeight: "400px",
+            padding: "20px",
+            backgroundColor: "#f5f5f5",
+          }}
+        >
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                style={{ outline: "none", minHeight: "350px" }}
+              />
+            }
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <PlaylistPlugin />
         </div>
-      </LexicalComposer>
-    </UnitProvider>
+      </div>
+    </LexicalComposer>
   );
 };
 

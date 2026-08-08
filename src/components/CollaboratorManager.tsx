@@ -8,7 +8,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   Button,
   TextField,
   Dialog,
@@ -193,7 +192,7 @@ export default function CollaboratorManager({
       ) : (
         <List dense disablePadding>
           {collaborators.map((collab) => (
-            <ListItem key={collab.id} disableGutters sx={{ py: 0.5 }}>
+            <ListItem key={collab.id} disableGutters sx={{ py: 0.5, gap: 1 }}>
               <ListItemText
                 primary={collab.collaboratorId}
                 secondary={
@@ -205,18 +204,19 @@ export default function CollaboratorManager({
                     sx={{ height: 20, fontSize: "0.7rem" }}
                   />
                 }
+                sx={{ flex: 1, minWidth: 0 }}
+                primaryTypographyProps={{ noWrap: true }}
+                secondaryTypographyProps={{ component: 'div' }}
               />
               {(isOwnerOrAdmin || collab.collaboratorId === currentUsername) && (
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    size="small"
-                    onClick={() => handleRemoveCollaborator(collab)}
-                    aria-label={t("collaboratorManager.removeCollaborator", { name: collab.collaboratorId })}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  size="small"
+                  onClick={() => handleRemoveCollaborator(collab)}
+                  aria-label={t("collaboratorManager.removeCollaborator", { name: collab.collaboratorId })}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               )}
             </ListItem>
           ))}

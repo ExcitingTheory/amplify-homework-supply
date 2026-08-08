@@ -1,5 +1,9 @@
 import React from "react";
-import { seedMockWords, seedMockUnit } from "@storybook-mocks/aws-amplify-data";
+import {
+  seedMockWords,
+  seedMockUnit,
+  clearMockData,
+} from "@storybook-mocks/aws-amplify-data";
 import { TabProvider } from "../context/tabContext";
 import { DictionaryEditor2 } from "./DictionaryEditor2";
 
@@ -65,33 +69,22 @@ const tabContextValue = {
   scrollToItem: () => {},
 };
 
-function seedDictionaryData() {
-  seedMockUnit(mockUnit, { words: mockWords });
-  seedMockWords(mockWords);
-}
-
 export default {
   title: "📁 Content Management/Dictionary Editor",
   component: DictionaryEditor2,
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit(mockUnit, { words: mockWords });
+      seedMockWords(mockWords);
+    },
+  ],
   parameters: {
     layout: "fullscreen",
     nextRouter: { pathname: "/unit/unit-1", query: { id: "unit-1" } },
+    unitId: "unit-1",
+    initializeMockData: false,
   },
-  decorators: [
-    (Story) => {
-      seedDictionaryData();
-      return (
-        <TabProvider value={tabContextValue}>
-          <Story />
-        </TabProvider>
-      );
-    },
-  ],
-};
-
-export const Default = {};
-
-export const Empty = {
   decorators: [
     (Story) => (
       <TabProvider value={tabContextValue}>
@@ -99,7 +92,18 @@ export const Empty = {
       </TabProvider>
     ),
   ],
+};
+
+export const Default = {};
+
+export const Empty = {
+  loaders: [
+    async () => {
+      clearMockData();
+    },
+  ],
   parameters: {
+    unitId: "unit-1",
     initializeMockData: false,
   },
 };
