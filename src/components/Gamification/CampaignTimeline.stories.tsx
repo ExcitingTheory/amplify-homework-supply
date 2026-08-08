@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CampaignTimeline, type CampaignChapter } from './CampaignTimeline'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof CampaignTimeline> = {
   title: '🏆 Gamification/XP & Progression/Campaign Timeline',
@@ -18,10 +19,16 @@ const sampleChapters: CampaignChapter[] = [
 
 export const Default: Story = {
   args: { chapters: sampleChapters },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const AllComplete: Story = {
   args: {
     chapters: sampleChapters.map((c) => ({ ...c, currentXP: c.targetXP, active: false })),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

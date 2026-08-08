@@ -12,6 +12,7 @@
 import React from 'react';
 import SearchResults from './SearchResults';
 import { Box } from '@mui/material';
+import { expect } from 'storybook/test'
 
 export default {
     title: '💬 AI Assistant/Search Results',
@@ -215,7 +216,10 @@ export const AllResultTypes = {
         onInsertQuestion: (question) => console.log('Insert question:', question.prompt),
         onFocusItem: (type, id) => console.log('Focus item:', type, id),
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Only files
@@ -226,7 +230,10 @@ export const FilesOnly = {
         searchQuery: 'grammar',
         tabHandlers: mockTabHandlers,
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Only vocabulary
@@ -238,7 +245,10 @@ export const VocabularyOnly = {
         tabHandlers: mockTabHandlers,
         onInsertWord: (word) => console.log('Insert word:', word.phrase),
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Only questions
@@ -250,7 +260,10 @@ export const QuestionsOnly = {
         tabHandlers: mockTabHandlers,
         onInsertQuestion: (question) => console.log('Insert question:', question.prompt),
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Only sections
@@ -260,7 +273,10 @@ export const SectionsOnly = {
         searchQuery: 'JLPT',
         tabHandlers: mockTabHandlers,
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Only units
@@ -270,7 +286,10 @@ export const UnitsOnly = {
         searchQuery: 'particles',
         tabHandlers: mockTabHandlers,
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Loading state
@@ -280,7 +299,10 @@ export const LoadingState = {
         searchQuery: 'searching...',
         tabHandlers: mockTabHandlers,
         isLoading: true
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Empty state
@@ -290,7 +312,10 @@ export const EmptyState = {
         searchQuery: 'xyzabc123',
         tabHandlers: mockTabHandlers,
         isLoading: false
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // High relevance scores
@@ -314,7 +339,10 @@ export const HighRelevanceScores = {
                 story: 'All results have high relevance scores (≥80%).'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Low relevance scores
@@ -336,7 +364,10 @@ export const LowRelevanceScores = {
                 story: 'All results have low relevance scores (<60%).'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Large result set
@@ -385,7 +416,10 @@ export const LargeResultSet = {
                 story: 'Large result set to demonstrate collapsible sections and scrolling.'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Without unit ID (no link buttons)
@@ -405,7 +439,10 @@ export const WithoutUnitId = {
                 story: 'No unit ID provided, so "Add to unit" buttons are hidden.'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Minimal callbacks
@@ -422,7 +459,10 @@ export const MinimalCallbacks = {
                 story: 'Minimal setup with no callbacks - only basic display functionality.'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // In a constrained container
@@ -449,5 +489,8 @@ export const InConstrainedContainer = {
                 story: 'Demonstrates responsive behavior in a narrow container.'
             }
         }
-    }
+    },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

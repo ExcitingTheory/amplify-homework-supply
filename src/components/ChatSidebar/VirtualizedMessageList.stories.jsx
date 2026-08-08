@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { VirtualizedMessageList } from './VirtualizedMessageList';
+import { expect } from 'storybook/test'
 
 export default {
   title: '💬 AI Assistant/Components/Virtualized Message List',
@@ -290,3 +291,40 @@ LargMessages.parameters = {
     },
   },
 };
+
+
+Empty.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+FewMessages.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+ManyMessages.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+LargeConversation.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+WithToolCalls.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+StreamingMessage.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+CustomRendering.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+NoScrollButton.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+LargMessages.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}

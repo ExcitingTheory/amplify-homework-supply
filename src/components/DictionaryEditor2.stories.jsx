@@ -6,6 +6,7 @@ import {
 } from "@storybook-mocks/aws-amplify-data";
 import { TabProvider } from "../context/tabContext";
 import { DictionaryEditor2 } from "./DictionaryEditor2";
+import { expect } from 'storybook/test'
 
 const mockWords = [
   {
@@ -94,7 +95,10 @@ export default {
   ],
 };
 
-export const Default = {};
+export const Default = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};
 
 export const Empty = {
   loaders: [
@@ -105,5 +109,8 @@ export const Empty = {
   parameters: {
     unitId: "unit-1",
     initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

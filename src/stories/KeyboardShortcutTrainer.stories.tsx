@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import KeyboardShortcutTrainer from './KeyboardShortcutTrainer';
+import { expect } from 'storybook/test'
 
 /**
  * Interactive Keyboard Shortcut Trainer
@@ -65,4 +66,7 @@ type Story = StoryObj<typeof meta>;
  * Default trainer ready to use
  * Try pressing keyboard shortcuts to see them light up!
  */
-export const Default: Story = {};
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};

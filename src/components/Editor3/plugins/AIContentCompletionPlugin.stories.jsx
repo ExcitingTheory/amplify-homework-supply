@@ -25,6 +25,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Content Completion",
@@ -171,6 +172,9 @@ export const EmptyEditor = {
       instructions="Type a complete sentence about Japanese language learning and end with a period. The AI will suggest what comes next!"
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Partial explanation - AI completes it
@@ -231,6 +235,9 @@ export const PartialExplanation = {
       instructions="Click at the end of the paragraph and type another sentence (end with period). AI will suggest the next logical sentence based on the topic."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Mid-lesson content
@@ -328,7 +335,13 @@ export const MidLesson = {
       instructions="Position cursor at the end of the last paragraph. Type another sentence about を particle. Notice how AI understands the grammatical context and suggests relevant continuations."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
+
+// Testing streaming behavior
+
 
 // Testing streaming behavior
 export const StreamingDemo = {

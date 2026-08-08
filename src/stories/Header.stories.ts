@@ -28,6 +28,12 @@ export const LoggedIn: Story = {
       name: 'Jane Doe',
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
-export const LoggedOut: Story = {};
+export const LoggedOut: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};

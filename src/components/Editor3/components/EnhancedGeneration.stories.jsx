@@ -340,3 +340,24 @@ FeatureDocumentation.parameters = {
         },
     },
 };
+import { expect } from 'storybook/test'
+
+UnifiedImageGeneration.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+UnifiedAudioGeneration.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+ImageMaskEditorDemo.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+CompleteWorkflow.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+FeatureDocumentation.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}

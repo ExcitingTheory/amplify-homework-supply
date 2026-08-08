@@ -5,6 +5,7 @@
 import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import AIFeedbackWidget from './AIFeedbackWidget';
+import { expect } from 'storybook/test'
 
 export default {
   title: '💬 AI Assistant/AI Feedback Widget',
@@ -135,3 +136,28 @@ export const WithCallback = () => {
     </Box>
   );
 };
+
+
+ChatMessage.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+ContentCompletion.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+WithLabels.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+LargeButtons.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+InChatContext.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}
+
+WithCallback.play = async ({ canvasElement }) => {
+  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+}

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { WorkbookInviteShare } from './WorkbookInviteShare';
 import type { PresenceUser } from '../../yjs/workbookHooks';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof WorkbookInviteShare> = {
   title: '📓 Workbook/WorkbookInviteShare',
@@ -23,6 +24,9 @@ export const Connected: Story = {
     workbookId: 'workbook-abc-123',
     isConnected: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disconnected: Story = {
@@ -31,6 +35,9 @@ export const Disconnected: Story = {
     workbookId: 'workbook-abc-123',
     isConnected: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoParticipants: Story = {
@@ -38,6 +45,9 @@ export const NoParticipants: Story = {
     users: [],
     workbookId: 'workbook-solo-456',
     isConnected: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -53,5 +63,8 @@ export const ManyParticipants: Story = {
     })),
     workbookId: 'workbook-group-789',
     isConnected: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -110,6 +110,9 @@ export const WithMessages: Story = {
     typingUsers: [],
     topicName: '#homework-help',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithTypingIndicator: Story = {
@@ -119,6 +122,9 @@ export const WithTypingIndicator: Story = {
     typingUsers: mockTypingUsers,
     topicName: '#homework-help',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const EmptyThread: Story = {
@@ -127,6 +133,9 @@ export const EmptyThread: Story = {
     currentUserId: 'student1',
     typingUsers: [],
     topicName: '#general',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -159,5 +168,8 @@ export const BotConversation: Story = {
     currentUserId: 'student1',
     typingUsers: [],
     topicName: '#kanji-practice',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

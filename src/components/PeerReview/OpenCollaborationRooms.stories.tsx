@@ -8,6 +8,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { OpenCollaborationRooms } from './OpenCollaborationRooms'
 import type { OpenRoom } from './OpenCollaborationRooms'
+import { expect } from 'storybook/test'
 
 // ============================================================================
 // Mock data
@@ -99,6 +100,9 @@ export const InstructorView: Story = {
     onRandomAssign: async (unitId) => console.log('Random assign', unitId),
     onAwardTopReviewer: async (unitId) => console.log('Award top reviewer', unitId),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const StudentView: Story = {
@@ -113,6 +117,9 @@ export const StudentView: Story = {
     onAssignPeerReview: noop,
     onRandomAssign: noop,
     onAwardTopReviewer: noop,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -129,6 +136,9 @@ export const OnlyTutoringRooms: Story = {
     onRandomAssign: noop,
     onAwardTopReviewer: noop,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const EmptyRooms: Story = {
@@ -143,5 +153,8 @@ export const EmptyRooms: Story = {
     onAssignPeerReview: noop,
     onRandomAssign: noop,
     onAwardTopReviewer: noop,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

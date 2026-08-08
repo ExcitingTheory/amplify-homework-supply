@@ -5,6 +5,7 @@ import { CommentGutterIcon } from './CommentGutterIcon'
 import { BlockHistoryTimeline } from './BlockHistoryTimeline'
 import type { CommentThread } from '../../yjs/WorkbookCollaborationProvider'
 import type { HistoryEntry } from '../../yjs/WorkbookCollaborationProvider'
+import { expect } from 'storybook/test'
 
 // =============================================================================
 // CommentGutterIcon Stories
@@ -24,6 +25,9 @@ export const NoComments: GutterStory = {
     unresolvedCount: 0,
     onClick: () => console.log('open'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithComments: GutterStory = {
@@ -32,6 +36,9 @@ export const WithComments: GutterStory = {
     unresolvedCount: 3,
     onClick: () => console.log('open'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const AllResolved: GutterStory = {
@@ -39,6 +46,9 @@ export const AllResolved: GutterStory = {
     commentCount: 4,
     unresolvedCount: 0,
     onClick: () => console.log('open'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 

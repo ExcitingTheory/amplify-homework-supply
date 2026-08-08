@@ -6,6 +6,7 @@ import {
   seedMockUnit,
 } from "@storybook-mocks/aws-amplify-data";
 import InstructorDashboard from "./InstructorDashboard";
+import { expect } from 'storybook/test'
 
 const mockSections = [
   { id: "section-1", name: "Spanish 101 — Period 1", code: "SP101" },
@@ -159,6 +160,9 @@ export const WithSections = {
       return <Story />;
     },
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SingleSection = {
@@ -171,16 +175,25 @@ export const SingleSection = {
       return <Story />;
     },
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoSections = {
   args: {
     sections: [],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Loading = {
   args: {
     sections: mockSections,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

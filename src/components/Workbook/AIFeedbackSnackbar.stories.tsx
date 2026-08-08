@@ -1,5 +1,6 @@
 import React from 'react';
 import { AIFeedbackSnackbar } from './AIFeedbackSnackbar';
+import { expect } from 'storybook/test'
 
 // Minimal mock provider that emits awareness events
 function createMockProvider(opts = {}) {
@@ -49,11 +50,17 @@ export const Default = {
     provider: null,
     currentUsername: 'student-alice',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const WithProvider = {
   args: {
     provider: createMockProvider(),
     currentUsername: 'student-alice',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

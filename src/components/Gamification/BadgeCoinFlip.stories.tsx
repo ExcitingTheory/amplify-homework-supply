@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { BadgeCoinFlip } from './BadgeCoinFlip'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof BadgeCoinFlip> = {
   title: '🏆 Gamification/Badges & Celebrations/Badge Coin Flip',
@@ -18,6 +19,9 @@ export const Sharpshooter: Story = {
     badgeDescription: '3 perfect scores in a row',
     onClose: () => {},
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const FirstSteps: Story = {
@@ -27,5 +31,8 @@ export const FirstSteps: Story = {
     badgeName: 'First Steps',
     badgeDescription: 'Submitted your first assignment',
     onClose: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

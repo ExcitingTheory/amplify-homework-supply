@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Box } from '@mui/material';
 import SyncStatusIndicator from './SyncStatusIndicator';
+import { expect } from 'storybook/test'
 
 /**
  * SyncStatusIndicator shows a chip in the toolbar with the number of
@@ -35,6 +36,9 @@ type Story = StoryObj<typeof SyncStatusIndicator>;
  */
 export const AllSynced: Story = {
   name: 'All Synced (hidden)',
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -53,4 +57,7 @@ export const OfflineNoPending: Story = {
       return <Story />;
     },
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

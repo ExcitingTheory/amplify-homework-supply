@@ -22,6 +22,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/Formatting/Link",
@@ -295,12 +296,21 @@ export const EditableEmpty = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const EditableWithLinks = {
   render: () => <EditableTemplate editorState={sampleLinkState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ReadOnlyWithLinks = {
   render: () => <ReadOnlyTemplate editorState={sampleLinkState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

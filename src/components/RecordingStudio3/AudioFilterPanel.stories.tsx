@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import AudioFilterPanel from "./AudioFilterPanel";
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof AudioFilterPanel> = {
   title: "🎙️ Recording Studio/Components/Audio Filter Panel",
@@ -25,6 +26,9 @@ function AudioFilterPanelWrapper({ initialFilters = new Set<string>() }) {
 
 export const AllOff: Story = {
   render: () => <AudioFilterPanelWrapper />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SomeActive: Story = {
@@ -33,6 +37,9 @@ export const SomeActive: Story = {
       initialFilters={new Set(["derumble", "noisecancel"])}
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const AllActive: Story = {
@@ -41,4 +48,7 @@ export const AllActive: Story = {
       initialFilters={new Set(["derumble", "pop", "noisecancel", "compress", "presence"])}
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

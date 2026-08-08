@@ -1,6 +1,7 @@
 import React from "react";
 import { GlobalChatDrawer } from "./GlobalChatDrawer";
 import ChatContext from "../context/chatContext";
+import { expect } from 'storybook/test'
 
 export default {
   title: "🧩 UI Components/Global Chat Drawer",
@@ -11,7 +12,10 @@ export default {
 };
 
 // Default story with chat closed — drawer is hidden
-export const Closed = {};
+export const Closed = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};
 
 // Open drawer — override ChatContext to start with isChatOpen: true
 export const Open = {
@@ -31,6 +35,9 @@ export const Open = {
       </ChatContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NarrowWidth = {
@@ -53,4 +60,7 @@ export const NarrowWidth = {
       </ChatContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

@@ -48,11 +48,17 @@ export default meta
 type Story = StoryObj<typeof AvatarEditor>
 
 /** Default state — shows DiceBear avatar with customize button. */
-export const Default: Story = {}
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+}
 
 /** Level 1 — only Avataaars Neutral style available. */
 export const Level1: Story = {
   args: { level: 1, seed: 'student-newbie' },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Level 2 — Avataaars (detailed) style. */
@@ -67,6 +73,9 @@ export const Level2Detailed: Story = {
       </SettingsContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Level 3 — All styles unlocked including Toon Head. */
@@ -81,6 +90,9 @@ export const Level3ToonHead: Story = {
       </SettingsContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** With saved overrides — shows customized toon head. */
@@ -103,4 +115,7 @@ export const WithOverrides: Story = {
       </SettingsContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }

@@ -8,6 +8,7 @@ import { PeerReviewChat } from './PeerReviewChat'
 import { OpenPeerReviewButton } from './OpenPeerReviewButton'
 import JoinPeerReviewDialog from './JoinPeerReviewDialog'
 import { PeerReviewFeedbackPrompt } from './PeerReviewFeedbackPrompt'
+import { expect } from 'storybook/test'
 
 // =============================================================================
 // JoinByCode Stories
@@ -28,6 +29,9 @@ export const Default: JoinStory = {
       return { roomId: 'mock-room-id', message: `Joined room with code ${code}` }
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithError: JoinStory = {
@@ -36,6 +40,9 @@ export const WithError: JoinStory = {
       await new Promise((r) => setTimeout(r, 500))
       throw new Error('Room not found or code expired')
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 

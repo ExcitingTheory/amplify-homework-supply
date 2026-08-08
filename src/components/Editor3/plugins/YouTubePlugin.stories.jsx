@@ -25,6 +25,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/Media/YouTube",
@@ -260,12 +261,21 @@ const sampleYouTubeState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const EditableWithVideo = {
   render: () => <EditableTemplate editorState={sampleYouTubeState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ReadOnlyWithVideo = {
   render: () => <ReadOnlyTemplate editorState={sampleYouTubeState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

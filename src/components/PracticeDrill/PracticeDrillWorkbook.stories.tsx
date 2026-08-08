@@ -7,6 +7,7 @@ import {
   seedMockWords,
   clearMockData,
 } from '../../../.storybook/__mocks__/aws-amplify-data'
+import { expect } from 'storybook/test'
 
 // Seeded words — IDs must match sourceItemId values in sampleBlocks below.
 // Phrases must also match pair.term values (case-insensitive) for the
@@ -131,12 +132,18 @@ export const Default: Story = {
     sessionId: 'story-session-1',
     onStatsChange: (stats) => console.log('Stats:', stats),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Empty: Story = {
   args: {
     blocks: [],
     sessionId: 'story-session-4',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -154,5 +161,8 @@ export const WithDocumentRefs: Story = {
     ],
     sessionId: 'story-session-5',
     onStatsChange: (stats) => console.log('Stats:', stats),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

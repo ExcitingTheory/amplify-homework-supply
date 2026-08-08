@@ -40,12 +40,18 @@ export const MarkdownFormat: Story = {
     onCopy: fn(),
     showInsertButton: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Compact: Story = {
   args: {
     ...MarkdownFormat.args,
     compact: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -56,6 +62,9 @@ export const NoActions: Story = {
     generatedContent: '## Quiz\n\nWhat is the capital of France?\n\n- [ ] London\n- [x] Paris\n- [ ] Berlin',
     format: 'markdown',
     showInsertButton: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -69,6 +78,9 @@ export const HTMLFormat: Story = {
     onCopy: fn(),
     showInsertButton: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const LongContent: Story = {
@@ -81,5 +93,8 @@ export const LongContent: Story = {
     onRegenerate: fn(),
     onCopy: fn(),
     showInsertButton: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

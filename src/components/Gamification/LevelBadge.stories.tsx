@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { LevelBadge } from './LevelBadge'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof LevelBadge> = {
   title: '🏆 Gamification/XP & Progression/Level Badge',
@@ -14,11 +15,17 @@ export const Beginner: Story = {
   args: {
     level: { level: 1, label: 'Beginner', xpRequired: 0, xpForNextLevel: 150, progress: 33 },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Explorer: Story = {
   args: {
     level: { level: 2, label: 'Explorer', xpRequired: 150, xpForNextLevel: 400, progress: 60 },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -26,17 +33,26 @@ export const Practitioner: Story = {
   args: {
     level: { level: 3, label: 'Practitioner', xpRequired: 400, xpForNextLevel: 800, progress: 45 },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Contributor: Story = {
   args: {
     level: { level: 4, label: 'Contributor', xpRequired: 800, xpForNextLevel: 1500, progress: 20 },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Expert: Story = {
   args: {
     level: { level: 5, label: 'Expert', xpRequired: 1500, xpForNextLevel: 2500, progress: 80 },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -45,6 +61,9 @@ export const Master: Story = {
     level: { level: 6, label: 'Master', xpRequired: 2500, xpForNextLevel: null, progress: 100 },
     showProgress: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Small: Story = {
@@ -52,11 +71,17 @@ export const Small: Story = {
     level: { level: 3, label: 'Practitioner', xpRequired: 400, xpForNextLevel: 800, progress: 55 },
     size: 'small',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const NoProgress: Story = {
   args: {
     level: { level: 4, label: 'Contributor', xpRequired: 800, xpForNextLevel: 1500, progress: 70 },
     showProgress: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

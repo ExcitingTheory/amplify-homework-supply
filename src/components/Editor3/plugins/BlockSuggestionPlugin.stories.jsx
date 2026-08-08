@@ -24,6 +24,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Block Suggestion",
@@ -174,6 +175,9 @@ export const EmptyEditor = {
       instructions="1. Type '# Introduction' and press Enter twice. 2. You'll see suggestions for an explanation paragraph. 3. Type some text, press Enter twice, and see practice/quiz suggestions."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Editor with heading already - should suggest explanation
@@ -223,6 +227,9 @@ export const AfterHeading = {
       instructions="The cursor is positioned after a heading. Start typing or press Enter to see suggestion for adding an explanation."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Editor with explanation - should suggest practice/quiz
@@ -290,6 +297,9 @@ export const AfterExplanation = {
       instructions="After an explanation paragraph, the plugin suggests practice exercises or quizzes. Position cursor at the empty line and see the suggestions."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // Full workflow test
@@ -375,4 +385,7 @@ export const AfterQuiz = {
       instructions="After a quiz, the plugin suggests adding a summary or starting a new section. Click at the empty line to see suggestions."
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

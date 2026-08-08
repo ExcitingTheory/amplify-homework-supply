@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { GamificationToastLayer } from './GamificationToastLayer'
+import { expect } from 'storybook/test'
 
 // Mock the gamification context hooks
 const mockXPLogs = [
@@ -61,5 +62,8 @@ export const Idle: Story = {
   parameters: {
     // Skip rendering test since component requires context
     chromatic: { disableSnapshot: true },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

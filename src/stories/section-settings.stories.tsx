@@ -7,6 +7,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import SectionAISettingsPage from '../../app/[locale]/section/[id]/settings/ai/page';
 import GamificationSettingsPage from '../../app/[locale]/section/[id]/settings/gamification/page';
+import { expect } from 'storybook/test'
 
 const aiMeta: Meta<typeof SectionAISettingsPage> = {
   title: '📄 Pages/Section Settings/AI Settings',
@@ -26,7 +27,10 @@ const aiMeta: Meta<typeof SectionAISettingsPage> = {
 export default aiMeta;
 type AIStory = StoryObj<typeof SectionAISettingsPage>;
 
-export const AISettings: AIStory = {};
+export const AISettings: AIStory = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};
 
 // ─── Gamification Settings ─────────────────────────────────────────────
 

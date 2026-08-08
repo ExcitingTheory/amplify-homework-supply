@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { vi } from "vitest";
 import TakeVersionHistory from "./TakeVersionHistory";
+import { expect } from 'storybook/test'
 
 // Mock the listTakeVersions import
 vi.mock("../../utils/takeVersioning", () => ({
@@ -48,7 +49,10 @@ const meta: Meta<typeof TakeVersionHistory> = {
 export default meta;
 type Story = StoryObj<typeof TakeVersionHistory>;
 
-export const Default: Story = {};
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};
 
 export const SingleVersion: Story = {
   parameters: {
@@ -56,11 +60,17 @@ export const SingleVersion: Story = {
       versions: 1,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -68,5 +78,8 @@ export const NoSlotId: Story = {
   args: {
     slotId: null,
     disabled: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TutorPresenceBanner } from './TutorPresenceBanner';
 import UnitContext from '../../context/unitContext';
+import { expect } from 'storybook/test'
 
 function withUnitContext(overrides: Record<string, any> = {}) {
   const base = {
@@ -37,6 +38,9 @@ export default {
 
 export const TwoTutors = {
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SingleTutor = {
@@ -51,6 +55,9 @@ export const SingleTutor = {
       },
     }),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoTutors = {
@@ -63,8 +70,14 @@ export const NoTutors = {
       },
     }),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

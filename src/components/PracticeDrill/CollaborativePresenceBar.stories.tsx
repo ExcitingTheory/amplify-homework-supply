@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import CollaborativePresenceBar from './CollaborativePresenceBar';
 import type { PracticeUser, GroupStats, ParticipantProgress } from '../../yjs/PracticeCollaborationProvider';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof CollaborativePresenceBar> = {
   title: '🎯 Practice Drills/Components/Collaborative Presence Bar',
@@ -30,12 +31,18 @@ export const Connected: Story = {
     roomCode: 'ABCD-1234',
     isConnected: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disconnected: Story = {
   args: {
     ...Connected.args,
     isConnected: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -47,6 +54,9 @@ export const TwoParticipants: Story = {
     ownProgress: { ...mockOwnProgress, blocksCompleted: 2, blocksAttempted: 5 },
     roomCode: 'WXYZ-5678',
     isConnected: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -63,6 +73,9 @@ export const ManyParticipants: Story = {
     roomCode: 'MEGA-GROUP',
     isConnected: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const AllComplete: Story = {
@@ -73,5 +86,8 @@ export const AllComplete: Story = {
     ownProgress: { ...mockOwnProgress, blocksCompleted: 5, blocksAttempted: 5 },
     roomCode: 'DONE-1234',
     isConnected: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

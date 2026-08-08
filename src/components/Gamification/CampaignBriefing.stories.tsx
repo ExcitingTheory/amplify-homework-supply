@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CampaignBriefing } from './CampaignBriefing'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof CampaignBriefing> = {
   title: '🏆 Gamification/Squads & Teams/Campaign Briefing',
@@ -16,12 +17,18 @@ export const Default: Story = {
     stakes: 'If the compiler isn\'t fixed in time, all applications will crash — and civilization with them.',
     chapterText: 'Chapter 3: You\'ve reached the Memory Leak Caverns. The garbage collector has gone rogue. Debug the reference cycles to proceed.',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Loading: Story = {
   args: {
     title: '',
     isLoading: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -32,12 +39,18 @@ export const Compact: Story = {
     chapterText: 'Navigate the Memory Leak Caverns and fix the garbage collector.',
     compact: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SettingOnly: Story = {
   args: {
     title: 'Web Dev Quest',
     setting: 'Welcome to the Digital Frontier — a virtual world where every website is a kingdom and every bug is a dragon.',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -76,5 +89,8 @@ export const WithEmbeddedContent: Story = {
       },
     }),
     contentMaxHeight: 300,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

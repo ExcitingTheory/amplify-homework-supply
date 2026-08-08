@@ -19,6 +19,9 @@ export const Default: Story = {
     metadata: { speaker: 'Student', prompt: 'Read the following sentence aloud.' },
     stateRef: { current: null },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const WithMetadata: Story = {
@@ -30,6 +33,9 @@ export const WithMetadata: Story = {
       language: 'en-US',
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const MinimalProps: Story = {
@@ -37,5 +43,8 @@ export const MinimalProps: Story = {
     gradeId: 'grade-minimal',
     nodeKey: 'node-min',
     onRecordingComplete: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

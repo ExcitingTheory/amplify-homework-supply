@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { Avatar, AvatarGroup, Box, Tooltip, Typography } from '@mui/material'
+import { expect } from 'storybook/test'
 
 /**
  * Standalone rendering of WorkbookPresenceBar presentation.
@@ -67,11 +68,17 @@ const mockUsers: MockUser[] = [
 
 export const ThreeUsers: Story = {
   args: { users: mockUsers },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SingleUser: Story = {
   args: {
     users: [{ clientId: 1, username: 'alice', displayName: 'Alice', color: '#e91e63', isIdle: false }],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -82,6 +89,9 @@ export const WithIdleUsers: Story = {
       { clientId: 2, username: 'bob', displayName: 'Bob', color: '#2196f3', isIdle: true },
       { clientId: 3, username: 'charlie', displayName: 'Charlie', color: '#4caf50', isIdle: true },
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -98,8 +108,14 @@ export const Overflow: Story = {
     ],
     max: 5,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Empty: Story = {
   args: { users: [] },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }

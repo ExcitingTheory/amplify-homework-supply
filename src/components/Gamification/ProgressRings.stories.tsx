@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ProgressRings } from './ProgressRings'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof ProgressRings> = {
   title: '🏆 Gamification/XP & Progression/Progress Rings',
@@ -18,6 +19,9 @@ export const MultipleModules: Story = {
       { moduleId: 'm3', moduleName: 'Projects', completionPercent: 100, totalWorkbooks: 3, completedWorkbooks: 3 },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SingleModule: Story = {
@@ -26,8 +30,14 @@ export const SingleModule: Story = {
       { moduleId: 'm1', moduleName: 'Spanish Verbs', completionPercent: 50, totalWorkbooks: 6, completedWorkbooks: 3 },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Empty: Story = {
   args: { modules: [] },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }

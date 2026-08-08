@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ComponentTreeView } from './ComponentTreeView';
 import { ComponentMetadata } from '../../utils/debug/ComponentTreeStore';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof ComponentTreeView> = {
   title: '🛠️ Developer Tools/Debug Panel/Component Tree View',
@@ -113,17 +114,26 @@ export const Default: Story = {
   args: {
     tree: mockComponents,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const EmptyTree: Story = {
   args: {
     tree: [],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SingleComponent: Story = {
   args: {
     tree: [mockComponents[0]],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -132,6 +142,9 @@ export const WithSelection: Story = {
     tree: mockComponents,
     selectedId: 'editor-1',
     onSelectComponent: (component) => console.log('Selected:', component),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -191,6 +204,9 @@ export const ManyInstances: Story = {
       },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const HighRenderCount: Story = {
@@ -208,6 +224,9 @@ export const HighRenderCount: Story = {
       },
       ...mockComponents,
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -240,5 +259,8 @@ export const ComplexProps: Story = {
         children: [],
       },
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

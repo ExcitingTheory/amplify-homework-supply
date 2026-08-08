@@ -39,12 +39,18 @@ export const Default: Story = {
     units: mockUnits,
     onAssign: fn(),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SingleGrade: Story = {
   args: {
     ...Default.args,
     grades: [mockGrades[0]],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -63,11 +69,17 @@ export const ManyStudents: Story = {
       ]),
     ),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Closed: Story = {
   args: {
     ...Default.args,
     open: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

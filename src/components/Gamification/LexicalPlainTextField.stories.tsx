@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { LexicalPlainTextField } from './LexicalPlainTextField'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof LexicalPlainTextField> = {
   title: '🏆 Gamification/Inputs/Lexical Plain Text Field',
@@ -22,6 +23,9 @@ export const Default: Story = {
       />
     )
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Disabled: Story = {
@@ -33,6 +37,9 @@ export const Disabled: Story = {
       disabled
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Multiline: Story = {
@@ -47,5 +54,8 @@ export const Multiline: Story = {
         maxLength={200}
       />
     )
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

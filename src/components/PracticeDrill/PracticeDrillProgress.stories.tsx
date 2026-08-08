@@ -2,6 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import PracticeDrillProgress from './PracticeDrillProgress'
 import type { PracticeDrillProgressProps } from './PracticeDrillProgress'
+import { expect } from 'storybook/test'
 
 const meta: Meta<PracticeDrillProgressProps> = {
   title: '🎯 Practice Drills/Progress',
@@ -25,6 +26,9 @@ export const Default: Story = {
     xpEarned: 25,
     xpDiminished: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const HalfComplete: Story = {
@@ -34,6 +38,9 @@ export const HalfComplete: Story = {
     xpEarned: 30,
     xpDiminished: false,
     streakCount: 3,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -45,6 +52,9 @@ export const AllComplete: Story = {
     xpDiminished: false,
     streakCount: 7,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const DiminishedXP: Story = {
@@ -53,6 +63,9 @@ export const DiminishedXP: Story = {
     blockCount: 10,
     xpEarned: 8,
     xpDiminished: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -63,5 +76,8 @@ export const WithStreak: Story = {
     xpEarned: 0,
     xpDiminished: false,
     streakCount: 14,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

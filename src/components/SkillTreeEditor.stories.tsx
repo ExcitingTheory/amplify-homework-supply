@@ -31,7 +31,10 @@ export default meta
 type Story = StoryObj<typeof SkillTreeEditor>
 
 /** Default empty form — create mode */
-export const Default: Story = {}
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+}
 
 /** Editing an existing multi-unit skill */
 export const EditExisting: Story = {
@@ -45,6 +48,9 @@ export const EditExisting: Story = {
       prerequisites: ['s3'],
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** No units or skills available */
@@ -53,12 +59,18 @@ export const EmptySection: Story = {
     availableUnits: [],
     availableSkills: [],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Submitting state */
 export const Submitting: Story = {
   args: {
     submitting: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -72,5 +84,8 @@ export const HighAccuracy: Story = {
       xpReward: 500,
       prerequisites: [],
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

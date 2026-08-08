@@ -2,6 +2,7 @@ import React from "react";
 import AssignmentConfiguration from "./AssignmentConfiguration";
 import UnitContext from "../../../context/unitContext";
 import SectionContext from "../../../context/sectionContext";
+import { expect } from 'storybook/test'
 
 const mockUnit = {
   id: "unit-1",
@@ -66,14 +67,23 @@ export default {
 
 export const WithExistingAssignment = {
   decorators: [withContexts()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoAssignments = {
   decorators: [withContexts({}, { assignments: [] })],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoSections = {
   decorators: [
     withContexts({}, { sections: [], sectionMap: {}, assignments: [] }),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

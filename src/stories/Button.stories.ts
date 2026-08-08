@@ -30,11 +30,17 @@ export const Primary: Story = {
     primary: true,
     label: 'Button',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Secondary: Story = {
   args: {
     label: 'Button',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -43,11 +49,17 @@ export const Large: Story = {
     size: 'large',
     label: 'Button',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Small: Story = {
   args: {
     size: 'small',
     label: 'Button',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

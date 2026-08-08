@@ -23,16 +23,25 @@ const meta: Meta<typeof SquadMessagePanel> = {
 export default meta
 type Story = StoryObj<typeof SquadMessagePanel>
 
-export const Default: Story = {}
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+}
 
 export const TwoSquads: Story = {
   args: {
     squads: mockSquads.slice(0, 2),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
 export const Submitting: Story = {
   args: {
     submitting: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ArmoriaShield } from './ArmoriaShield'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof ArmoriaShield> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Armoria Shield',
@@ -20,6 +21,9 @@ export const FallbackInitials: Story = {
     armoriaUnlocked: false,
     size: 96,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const UnlockedNoDesign: Story = {
@@ -30,6 +34,9 @@ export const UnlockedNoDesign: Story = {
     armoriaUnlocked: true,
     size: 96,
     onEditCrest: () => alert('Open editor'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -47,6 +54,9 @@ export const CustomCrest: Story = {
     size: 96,
     onEditCrest: () => alert('Open editor'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const LargeSize: Story = {
@@ -56,5 +66,8 @@ export const LargeSize: Story = {
     crestSvg: sampleSvg,
     armoriaUnlocked: true,
     size: 160,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

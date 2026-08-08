@@ -9,6 +9,7 @@ import React from "react";
 import ModerationPanel from "./ModerationPanel";
 import { Box, Stack } from "@mui/material";
 import { DemoBanner } from "../../.storybook/components/DemoBanner";
+import { expect } from 'storybook/test'
 
 // Mock items with different moderation scenarios
 const mockFlaggedSingle = {
@@ -118,6 +119,9 @@ export const SingleCategoryFlagged = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const MultipleCategoriesFlagged = {
@@ -132,6 +136,9 @@ export const MultipleCategoriesFlagged = {
           "Panel with multiple flagged categories. Expand each to see descriptions.",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -148,6 +155,9 @@ export const LowConfidenceFlag = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ApprovedContent = {
@@ -163,6 +173,9 @@ export const ApprovedContent = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const UncheckedContent = {
@@ -176,6 +189,9 @@ export const UncheckedContent = {
         story: "Content not yet checked shows no panel.",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -192,6 +208,9 @@ export const CustomTitle = {
           "Custom title can be provided to match context (Unit, Grade, Question, etc.).",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 

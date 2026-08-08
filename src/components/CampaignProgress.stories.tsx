@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CampaignProgress } from './CampaignProgress'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof CampaignProgress> = {
   title: '🏆 Gamification/Student/Campaign Progress',
@@ -27,6 +28,9 @@ export const InProgress: Story = {
       { id: 'ch4', title: 'Final Battle', order: 4, completed: false, xpRequired: 2000 },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Completed campaign */
@@ -43,6 +47,9 @@ export const Completed: Story = {
       { id: 'ch3', title: 'Code Review', order: 3, completed: true },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Urgent — deadline soon */
@@ -57,6 +64,9 @@ export const UrgentDeadline: Story = {
     bonusMultiplier: 3.0,
     active: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** No chapters — simple progress bar only */
@@ -67,6 +77,9 @@ export const SimpleProgress: Story = {
     targetXP: 1000,
     deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
     active: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -85,5 +98,8 @@ export const EndedCampaign: Story = {
       { id: 'ch3', title: 'Testing', order: 3, completed: false },
       { id: 'ch4', title: 'Deployment', order: 4, completed: false },
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

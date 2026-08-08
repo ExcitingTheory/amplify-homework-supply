@@ -48,6 +48,9 @@ export const AuthFormSkeletonStory: Story = {
   parameters: {
     docs: { description: { story: 'Skeleton displayed while Cognito auth state is resolving for unauthenticated users.' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -61,6 +64,9 @@ export const AppSkeletonStory: Story = {
     layout: 'fullscreen',
     docs: { description: { story: 'Full-page skeleton shown during initial app hydration with drawer and toolbar placeholders.' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -70,11 +76,17 @@ export const AppSkeletonStory: Story = {
 export const BotAvatarDefault: Story = {
   name: 'BotAvatar / Default',
   render: () => <BotAvatar />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const BotAvatarLarge: Story = {
   name: 'BotAvatar / Large',
   render: () => <BotAvatar size={64} style="detailed" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -87,11 +99,17 @@ export const BotCustomizerTier0: Story = {
   parameters: {
     docs: { description: { story: 'No Bot Whisperer badges earned yet — all customizations locked.' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const BotCustomizerTier2: Story = {
   name: 'BotCustomizer / Tier 2',
   render: () => <BotCustomizer botWhispererTier={2} onChange={fn()} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const BotCustomizerTier4: Story = {
@@ -103,6 +121,9 @@ export const BotCustomizerTier4: Story = {
       initialConfig={{ style: 'toonhead', backgroundColor: 'ffd8b1' }}
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -124,6 +145,9 @@ export const CommunityUnitCardDefault: Story = {
     />
   ),
   parameters: { layout: 'padded' },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const CommunityUnitCardForking: Story = {
@@ -141,6 +165,9 @@ export const CommunityUnitCardForking: Story = {
     />
   ),
   parameters: { layout: 'padded' },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -162,6 +189,9 @@ export const LazyCardMediaStory: Story = {
   parameters: {
     docs: { description: { story: 'Lazy-loaded card image using IntersectionObserver. Loads presigned URL only when visible.' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -175,6 +205,9 @@ export const PrefetchButtonDefault: Story = {
       Go to Units
     </PrefetchButton>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const PrefetchButtonOutlined: Story = {
@@ -184,6 +217,9 @@ export const PrefetchButtonOutlined: Story = {
       View Sections
     </PrefetchButton>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -205,6 +241,9 @@ export const SharedUnitCardEdit: Story = {
     />
   ),
   parameters: { layout: 'padded' },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SharedUnitCardRead: Story = {
@@ -222,6 +261,9 @@ export const SharedUnitCardRead: Story = {
     />
   ),
   parameters: { layout: 'padded' },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -234,6 +276,9 @@ export const ShowDeletedToggleOff: Story = {
     const [show, setShow] = React.useState(false);
     return <ShowDeletedToggle showDeleted={show} setShowDeleted={setShow} />;
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ShowDeletedToggleOn: Story = {
@@ -241,6 +286,9 @@ export const ShowDeletedToggleOn: Story = {
   render: () => {
     const [show, setShow] = React.useState(true);
     return <ShowDeletedToggle showDeleted={show} setShowDeleted={setShow} />;
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -251,14 +299,23 @@ export const ShowDeletedToggleOn: Story = {
 export const ToolbarScrollButtonLeft: Story = {
   name: 'ToolbarScrollButton / Left',
   render: () => <TypedToolbarScrollButton direction="left" onClick={fn()} ariaLabel="Scroll left" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ToolbarScrollButtonRight: Story = {
   name: 'ToolbarScrollButton / Right',
   render: () => <TypedToolbarScrollButton direction="right" onClick={fn()} ariaLabel="Scroll right" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ToolbarScrollButtonDisabled: Story = {
   name: 'ToolbarScrollButton / Disabled',
   render: () => <TypedToolbarScrollButton direction="left" onClick={fn()} disabled ariaLabel="No more" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

@@ -39,16 +39,25 @@ type Story = StoryObj;
 export const MentionChipUser: Story = {
   name: 'MentionChip / User',
   render: () => <MentionChip name="Alice" onClick={fn()} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const MentionChipBot: Story = {
   name: 'MentionChip / Bot (Kai)',
   render: () => <MentionChip name="Kai" onClick={fn()} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const MentionChipNoClick: Story = {
   name: 'MentionChip / Non-clickable',
   render: () => <MentionChip name="Bob" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -73,6 +82,9 @@ export const MessageComposerDefault: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const MessageComposerWithReply: Story = {
@@ -88,6 +100,9 @@ export const MessageComposerWithReply: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -103,6 +118,9 @@ export const LexicalMessageRendererMarkdown: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const LexicalMessageRendererPlainText: Story = {
@@ -112,6 +130,9 @@ export const LexicalMessageRendererPlainText: Story = {
       <TypedLexicalMessageRenderer content="こんにちは！ How are you today?" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -125,6 +146,9 @@ export const NavigationPromptEditor: Story = {
       <TypedNavigationPrompt requiredContext="editorRef" unitId="unit-japanese-1" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NavigationPromptSections: Story = {
@@ -134,6 +158,9 @@ export const NavigationPromptSections: Story = {
       <TypedNavigationPrompt requiredContext="sections" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -168,6 +195,9 @@ export const RecordingScriptPreviewWord: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const RecordingScriptPreviewConversation: Story = {
@@ -195,4 +225,7 @@ export const RecordingScriptPreviewConversation: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

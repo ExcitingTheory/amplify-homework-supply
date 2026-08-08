@@ -1,6 +1,7 @@
 import React from "react";
 import FileMetadataComponent from "./FileMetadataComponent";
 import { Box } from "@mui/material";
+import { expect } from 'storybook/test'
 
 const mockPdfFile = {
   id: "file-1",
@@ -65,6 +66,9 @@ export const PdfWithParsedContent = {
     onFileNameUpdate: (name) => console.log("Filename updated:", name),
     onRemove: () => console.log("Removed"),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ImageFile = {
@@ -74,6 +78,9 @@ export const ImageFile = {
     parsedContent: null,
     onFileNameUpdate: (name) => console.log("Filename updated:", name),
     onRemove: () => console.log("Removed"),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -86,6 +93,9 @@ export const WithSearch = {
     onFileNameUpdate: () => {},
     onRemove: () => {},
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoParsedContent = {
@@ -95,5 +105,8 @@ export const NoParsedContent = {
     parsedContent: null,
     onFileNameUpdate: () => {},
     onRemove: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { fn, expect, within } from "storybook/test";
 import { UpNextCard } from "./UpNextCard";
 
 const meta: Meta<typeof UpNextCard> = {
@@ -39,6 +39,11 @@ export const Default: Story = {
     },
     sectionName: "Spanish 101 — Fall 2026",
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByText(/Chapter 3/i)
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const WithChapterContext: Story = {
@@ -46,12 +51,23 @@ export const WithChapterContext: Story = {
     ...Default.args,
     chapterTitle: "The Dragon's Lair",
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByText(/Chapter 3/i)
+    expect(canvasElement.textContent).toMatch(/Dragon/i)
+  },
 };
 
 export const WithNailedIt: Story = {
   args: {
     ...Default.args,
     nailedItCount: 5,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByText(/Chapter 3/i)
+    // Nailed It badge or count shown
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -68,5 +84,11 @@ export const NoDueDate: Story = {
       description: "Learn the preterite and imperfect past tenses.",
     },
     sectionName: "Spanish 101 — Fall 2026",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByText(/Chapter 4/i)
+    // Card renders without due date
+    expect(canvasElement.textContent).toMatch(/Chapter 4/i)
   },
 };

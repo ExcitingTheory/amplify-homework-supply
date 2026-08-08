@@ -1,6 +1,7 @@
 import React from 'react';
 import { TutorCursorOverlay } from './TutorCursorOverlay';
 import UnitContext from '../../context/unitContext';
+import { expect } from 'storybook/test'
 
 function withUnitContext(overrides: Record<string, any> = {}) {
   const awareness = {
@@ -42,8 +43,14 @@ export default {
 
 export const NoTutors = {
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

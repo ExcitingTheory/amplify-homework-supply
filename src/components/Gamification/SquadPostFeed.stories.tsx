@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { SquadPostFeed } from './SquadPostFeed'
+import { expect } from 'storybook/test'
 
 const SAMPLE_LEXICAL_JSON = JSON.stringify({
   root: {
@@ -115,6 +116,9 @@ export const WithPosts: Story = {
     onDelete: (id) => console.log('[Story] Delete:', id),
     isPublishing: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const EmptyFeed: Story = {
@@ -124,6 +128,9 @@ export const EmptyFeed: Story = {
     isMember: true,
     onPublish: (post) => console.log('[Story] Publish:', post),
     isPublishing: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -135,6 +142,9 @@ export const NonMemberView: Story = {
     onPublish: () => {},
     isPublishing: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Publishing: Story = {
@@ -144,5 +154,8 @@ export const Publishing: Story = {
     isMember: true,
     onPublish: () => {},
     isPublishing: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

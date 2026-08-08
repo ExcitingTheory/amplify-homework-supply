@@ -1,6 +1,7 @@
 import React from 'react';
 import { WorkbookProgress } from './WorkbookProgress';
 import UnitContext from '../../context/unitContext';
+import { expect } from 'storybook/test'
 
 function withUnitContext(stats = {}, overrides = {}) {
   const base = {
@@ -38,16 +39,25 @@ export default {
 
 export const Default = {
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Compact = {
   args: { variant: 'compact' },
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Detailed = {
   args: { variant: 'detailed' },
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Complete = {
@@ -55,6 +65,9 @@ export const Complete = {
   decorators: [
     withUnitContext({ completion: 100, accuracy: 92, totalBlocks: 8, completeBlocks: 8 }),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const JustStarted = {
@@ -62,8 +75,14 @@ export const JustStarted = {
   decorators: [
     withUnitContext({ completion: 10, accuracy: 0, totalBlocks: 10, completeBlocks: 1 }),
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({}, { workbookEnabled: false })],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

@@ -65,6 +65,9 @@ export const AppShellDefault: Story = {
     },
     docs: { description: { story: 'Responsive shell with persistent sidebar on desktop, modal drawer on mobile.' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -107,6 +110,9 @@ export const GradeReviewDrawerOpen: Story = {
       session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const GradeReviewDrawerClosed: Story = {
@@ -123,6 +129,9 @@ export const GradeReviewDrawerClosed: Story = {
       onNavigate={fn()}
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -157,6 +166,9 @@ export const CollaboratorManagerOwner: Story = {
       session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const CollaboratorManagerReadOnly: Story = {
@@ -186,6 +198,9 @@ export const CollaboratorManagerReadOnly: Story = {
       user: { attributes: { sub: 'teacher-2', email: 'teacher2@example.com' } },
       session: { username: 'teacher-2', groups: ['Instructors'] },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -226,6 +241,9 @@ export const RecordingStudioEnhancedModalOpen: Story = {
       session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const RecordingStudioEnhancedModalClosed: Story = {
@@ -237,4 +255,7 @@ export const RecordingStudioEnhancedModalClosed: Story = {
       onSave={fn()}
     />
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

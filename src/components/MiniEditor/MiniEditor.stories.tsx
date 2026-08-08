@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import MiniEditor from './MiniEditor'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof MiniEditor> = {
   title: '✏️ Lesson Editor/Components/Mini Editor',
@@ -109,6 +110,9 @@ export const ReadOnly: Story = {
     mode: 'readonly',
     content: sampleContent,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ReadOnlyCompact: Story = {
@@ -117,6 +121,9 @@ export const ReadOnlyCompact: Story = {
     mode: 'readonly',
     content: sampleContent,
     compact: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -127,6 +134,9 @@ export const ReadOnlyWithMaxHeight: Story = {
     content: sampleContent,
     maxHeight: 150,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ReadOnlyEmpty: Story = {
@@ -134,6 +144,9 @@ export const ReadOnlyEmpty: Story = {
   args: {
     mode: 'readonly',
     content: null,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -146,6 +159,9 @@ export const Editable: Story = {
     showBlockInserter: true,
     onChange: (json: any) => console.log('[MiniEditor] onChange:', json),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const EditableWithContent: Story = {
@@ -156,6 +172,9 @@ export const EditableWithContent: Story = {
     placeholder: 'Edit this content...',
     showBlockInserter: true,
     onChange: (json: any) => console.log('[MiniEditor] onChange:', json),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -173,6 +192,9 @@ export const ChatMode: Story = {
       alert(`Sent: ${text}`)
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ChatModeNoBlockInserter: Story = {
@@ -184,6 +206,9 @@ export const ChatModeNoBlockInserter: Story = {
     placeholder: 'Simple chat message...',
     showBlockInserter: false,
     onSubmit: (json: any, text: string) => console.log('Sent:', text),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -198,6 +223,9 @@ export const SquadDescription: Story = {
     maxHeight: 300,
     onChange: (json: any) => console.log('[Squad] Saved:', json),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const CampaignBriefing: Story = {
@@ -208,5 +236,8 @@ export const CampaignBriefing: Story = {
     placeholder: 'Write the campaign briefing...',
     showBlockInserter: true,
     onChange: (json: any) => console.log('[Campaign] Saved:', json),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

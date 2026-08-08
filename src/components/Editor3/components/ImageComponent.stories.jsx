@@ -3,6 +3,7 @@ import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { Box } from "@mui/material";
 import ImageComponent from "./ImageComponent";
 import { ImageNode } from "./ImageNode";
+import { expect } from 'storybook/test'
 
 /**
  * Minimal Lexical editor configuration required to render ImageComponent in isolation.
@@ -61,6 +62,9 @@ export const WithFileId = {
     showCaption: false,
     captionsEnabled: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -83,6 +87,9 @@ export const WithSrcOnly = {
     showCaption: false,
     captionsEnabled: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -103,5 +110,8 @@ export const PublishedPath = {
     resizable: false,
     showCaption: false,
     captionsEnabled: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

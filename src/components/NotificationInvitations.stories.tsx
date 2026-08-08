@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import NotificationInvitations from "./Notifications/NotificationInvitations";
 import NotificationContext from "../context/notificationContext";
 import { action } from "storybook/actions";
+import { expect } from 'storybook/test'
 
 // ---------------------------------------------------------------------------
 // Mock Data
@@ -141,6 +142,9 @@ export const PeerReviewInvites: Story = {
     joinLabel: "Join Review",
     emptyMessage: "No pending review invitations",
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const PracticeSessionInvites: Story = {
@@ -157,6 +161,9 @@ export const PracticeSessionInvites: Story = {
     onJoin: action("onJoin"),
     joinLabel: "Join Session",
     emptyMessage: "No pending session invitations",
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -175,6 +182,9 @@ export const WorkbookInvites: Story = {
     joinLabel: "Join Workbook",
     emptyMessage: "No pending workbook invitations",
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const AllCollaborationInvites: Story = {
@@ -190,6 +200,9 @@ export const AllCollaborationInvites: Story = {
     types: ["PEER_REVIEW_INVITE", "PRACTICE_SESSION_INVITE", "WORKBOOK_SESSION_INVITE"],
     onJoin: action("onJoin"),
     joinLabel: "Join",
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -207,6 +220,9 @@ export const EmptyState: Story = {
     onJoin: action("onJoin"),
     emptyMessage: "No pending review invitations",
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const LoadingState: Story = {
@@ -221,5 +237,8 @@ export const LoadingState: Story = {
   args: {
     types: ["PEER_REVIEW_INVITE"],
     onJoin: action("onJoin"),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

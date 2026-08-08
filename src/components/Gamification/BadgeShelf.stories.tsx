@@ -2,6 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { BadgeShelf } from './BadgeShelf'
 import type { EarnedBadge } from './BadgeShelf'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof BadgeShelf> = {
   title: '🏆 Gamification/Badges & Celebrations/Badge Shelf',
@@ -37,6 +38,9 @@ export const AllEarned: Story = {
   args: {
     earnedBadges: allBadges,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const PartiallyEarned: Story = {
@@ -47,17 +51,26 @@ export const PartiallyEarned: Story = {
       { badgeType: 'TEAM_PLAYER', awardedAt: '2025-02-01T08:00:00Z' },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Empty: Story = {
   args: {
     earnedBadges: [],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const TwoColumns: Story = {
   args: {
     earnedBadges: allBadges.slice(0, 4),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -69,6 +82,9 @@ export const EarnedOnly: Story = {
       { badgeType: 'TEAM_PLAYER', awardedAt: '2025-02-01T08:00:00Z' },
     ],
     earnedOnly: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -84,12 +100,18 @@ export const WithMultipliers: Story = {
     ],
     earnedOnly: true,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const EarnedOnlyEmpty: Story = {
   args: {
     earnedBadges: [],
     earnedOnly: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -106,5 +128,8 @@ export const AvatarProgression: Story = {
       { badgeType: 'BOT_WHISPERER_I', awardedAt: '2025-02-05T10:00:00Z' },
       { badgeType: 'BOT_WHISPERER_II', awardedAt: '2025-03-15T10:00:00Z' },
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

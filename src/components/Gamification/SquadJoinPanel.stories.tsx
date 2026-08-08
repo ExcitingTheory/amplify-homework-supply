@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 import { SquadJoinPanel } from './SquadJoinPanel'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof SquadJoinPanel> = {
   title: '🏆 Gamification/Squads & Teams/Squad Join Panel',
@@ -37,6 +38,9 @@ export const BrowseSquads: Story = {
     onLeaveSquad: () => console.log('Leave squad'),
     level: 3,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Already in a squad — viewing membership */
@@ -49,6 +53,9 @@ export const InSquad: Story = {
     onJoinSquad: (id) => console.log('Join squad:', id),
     onLeaveSquad: () => console.log('Leave squad'),
     level: 4,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -63,6 +70,9 @@ export const InSquadAsMember: Story = {
     onLeaveSquad: () => console.log('Leave squad'),
     level: 2,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** No squads available */
@@ -75,6 +85,9 @@ export const EmptyState: Story = {
     onJoinSquad: (id) => console.log('Join squad:', id),
     onLeaveSquad: () => console.log('Leave squad'),
     level: 1,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -89,5 +102,8 @@ export const Loading: Story = {
     onLeaveSquad: () => console.log('Leave squad'),
     isLoading: true,
     level: 3,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

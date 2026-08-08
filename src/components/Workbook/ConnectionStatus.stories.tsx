@@ -1,6 +1,7 @@
 import React from 'react';
 import { ConnectionStatus } from './ConnectionStatus';
 import UnitContext from '../../context/unitContext';
+import { expect } from 'storybook/test'
 
 const baseContext = {
   unit: { id: 'unit-1', name: 'Test Unit' },
@@ -33,18 +34,30 @@ export default {
 
 export const Connected = {
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ConnectedMedium = {
   args: { size: 'medium' },
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoLabel = {
   args: { showLabel: false },
   decorators: [withUnitContext()],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

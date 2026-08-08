@@ -2,6 +2,7 @@ import React from "react";
 import PermissionErrorOverlay from "./PermissionErrorOverlay";
 import { I18nextProvider } from "react-i18next";
 import i18n from "../../.storybook/i18next";
+import { expect } from 'storybook/test'
 
 export default {
   title: "🧩 UI Components/Permission Error Overlay",
@@ -32,6 +33,9 @@ export const UnitPermissionError = {
     resourceType: "unit",
     message: null,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -44,6 +48,9 @@ export const CustomMessage = {
     message:
       "You do not have permission to access this unit. Only the owner or instructors can view unpublished units.",
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -54,6 +61,9 @@ export const SectionPermissionError = {
     open: true,
     resourceType: "section",
     message: "You are not enrolled in this section.",
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -66,6 +76,9 @@ export const AssignmentPermissionError = {
     resourceType: "assignment",
     message: "This assignment is not available to you.",
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -76,6 +89,9 @@ export const ClosedState = {
     open: false,
     resourceType: "unit",
     message: null,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import TimelineCard from './TimelineCard';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof TimelineCard> = {
   title: '🎙️ Recording Studio/TimelineCard',
@@ -26,12 +27,18 @@ export const Default: Story = {
     width: 200,
     onClick: () => {},
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Selected: Story = {
   args: {
     ...Default.args,
     isSelected: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -44,6 +51,9 @@ export const LongText: Story = {
     width: 300,
     onClick: () => {},
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NarrowCard: Story = {
@@ -54,5 +64,8 @@ export const NarrowCard: Story = {
     left: 0,
     width: 80,
     onClick: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

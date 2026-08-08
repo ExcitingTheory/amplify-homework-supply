@@ -9,6 +9,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { GradedWorkbookViewer } from './GradedWorkbookViewer'
 import type { GradeAttempt, ModerationInfo } from './GradedWorkbookViewer'
+import { expect } from 'storybook/test'
 
 // ============================================================================
 // Mock Lexical content (minimal valid Lexical state)
@@ -270,6 +271,9 @@ export const MultipleAttempts: Story = {
     moderation: MOCK_MODERATION_APPROVED,
     maxHeight: '70vh',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const FlaggedContent: Story = {
@@ -279,6 +283,9 @@ export const FlaggedContent: Story = {
     grades: [MOCK_GRADES[0]],
     moderation: MOCK_MODERATION_FLAGGED,
     maxHeight: '70vh',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -290,6 +297,9 @@ export const PendingModeration: Story = {
     moderation: MOCK_MODERATION_PENDING,
     maxHeight: '70vh',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SingleAttemptHighScore: Story = {
@@ -299,6 +309,9 @@ export const SingleAttemptHighScore: Story = {
     grades: [MOCK_GRADES[0]], // Only the high-score attempt
     moderation: MOCK_MODERATION_APPROVED,
     maxHeight: '70vh',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -310,6 +323,9 @@ export const SingleAttemptLowScore: Story = {
     moderation: null,
     maxHeight: '70vh',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const NoModeration: Story = {
@@ -319,5 +335,8 @@ export const NoModeration: Story = {
     grades: MOCK_GRADES,
     moderation: null,
     maxHeight: '70vh',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

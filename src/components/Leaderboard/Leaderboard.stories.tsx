@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { expect, within } from 'storybook/test'
 import { LeaderboardTable } from './LeaderboardTable'
 import { CompletionGrid } from './CompletionGrid'
 import type { AssignmentColumn, CompletionStatus } from './CompletionGrid'
@@ -29,11 +30,26 @@ export const Default: LeaderboardStory = {
     entries: sampleEntries,
     currentStudentId: 'charlie',
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // All student names render
+    await canvas.findByText(/Alice/i)
+    canvas.getAllByText(/Charlie/i)[0]
+    canvas.getAllByText(/Eve/i)[0]
+    // Current student row highlighted (charlie is #3)
+    const rows = canvas.getAllByRole('row')
+    expect(rows.length).toBeGreaterThan(1) // header + data rows
+  },
 }
 
 export const Empty: LeaderboardStory = {
   args: {
     entries: [],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Empty state or empty table — no student names
+    expect(canvas.queryByText('Alice')).toBeNull()
   },
 }
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { StreakCalendar } from './StreakCalendar'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof StreakCalendar> = {
   title: '🏆 Gamification/Streaks/Streak Calendar',
@@ -20,10 +21,16 @@ function daysThisMonth(...days: number[]): Set<string> {
 
 export const Empty: Story = {
   args: { activeDays: new Set() },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const FewActiveDays: Story = {
   args: { activeDays: daysThisMonth(1, 3, 5, 8, 12) },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const MostDaysActive: Story = {
@@ -31,6 +38,9 @@ export const MostDaysActive: Story = {
     activeDays: daysThisMonth(
       1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 15,
     ),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -42,6 +52,9 @@ export const EveryDay: Story = {
       return daysThisMonth(...Array.from({ length: daysInMonth }, (_, i) => i + 1))
     })(),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SpecificMonth: Story = {
@@ -49,5 +62,8 @@ export const SpecificMonth: Story = {
     activeDays: new Set(['2025-12-01', '2025-12-10', '2025-12-24', '2025-12-25', '2025-12-31']),
     year: 2025,
     month: 12,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

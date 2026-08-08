@@ -27,6 +27,7 @@ import {
   MOCK_IMAGE_URL_2,
   MOCK_IMAGE_URL_3,
 } from "../../../../.storybook/__mocks__/media";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/Media/Images",
@@ -263,12 +264,21 @@ const sampleImageState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const EditableWithImage = {
   render: () => <EditableTemplate editorState={sampleImageState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ReadOnlyWithImage = {
   render: () => <ReadOnlyTemplate editorState={sampleImageState} />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

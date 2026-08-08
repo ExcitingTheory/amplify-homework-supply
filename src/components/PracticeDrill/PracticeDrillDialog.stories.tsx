@@ -7,6 +7,7 @@ import {
   seedMockWords,
   clearMockData,
 } from '../../../.storybook/__mocks__/aws-amplify-data'
+import { expect } from 'storybook/test'
 
 // Stable unit ID matching the args passed to PracticeDrillDialog
 const DRILL_UNIT_ID = 'unit-abc-123'
@@ -80,6 +81,9 @@ export const Default: Story = {
     config: defaultConfig,
     sessionsCompletedToday: 0,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const VocabularyOnly: Story = {
@@ -95,6 +99,9 @@ export const VocabularyOnly: Story = {
     },
     sessionsCompletedToday: 0,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const DiminishedXP: Story = {
@@ -105,6 +112,9 @@ export const DiminishedXP: Story = {
     unitName: 'Biology: Cell Structure',
     config: defaultConfig,
     sessionsCompletedToday: 3,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -121,6 +131,9 @@ export const ReviewDrill: Story = {
     },
     sessionsCompletedToday: 1,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Closed: Story = {
@@ -131,5 +144,8 @@ export const Closed: Story = {
     unitName: 'Biology: Cell Structure',
     config: defaultConfig,
     sessionsCompletedToday: 0,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

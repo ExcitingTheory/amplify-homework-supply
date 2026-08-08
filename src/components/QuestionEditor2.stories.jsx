@@ -5,6 +5,7 @@ import {
 } from "@storybook-mocks/aws-amplify-data";
 import { TabProvider } from "../context/tabContext";
 import { QuestionEditor2 } from "./QuestionEditor2";
+import { expect } from 'storybook/test'
 
 const mockQuestions = [
   {
@@ -89,7 +90,10 @@ export default {
   ],
 };
 
-export const Default = {};
+export const Default = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};
 
 export const Empty = {
   decorators: [
@@ -101,5 +105,8 @@ export const Empty = {
   ],
   parameters: {
     initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

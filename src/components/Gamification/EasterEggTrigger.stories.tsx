@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 import Box from '@mui/material/Box'
 import { HiddenEasterEgg } from './EasterEggTrigger'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof HiddenEasterEgg> = {
   title: '🏆 Gamification/Easter Eggs/Hidden Easter Egg',
@@ -21,11 +22,17 @@ export const Default: Story = {
       />
     </Box>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const AlreadyFound: Story = {
   args: {
     onFind: () => {},
     found: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

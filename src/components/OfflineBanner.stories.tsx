@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Box } from '@mui/material';
 import OfflineBanner from './OfflineBanner';
+import { expect } from 'storybook/test'
 
 /**
  * OfflineBanner shows a persistent Snackbar when the user goes offline,
@@ -37,6 +38,9 @@ type Story = StoryObj<typeof OfflineBanner>;
  */
 export const OnlineNoPending: Story = {
   name: 'Online (hidden)',
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -60,4 +64,7 @@ export const OfflineWarning: Story = {
       return <Story />;
     },
   ],
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

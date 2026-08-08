@@ -19,6 +19,9 @@ export const Default: Story = {
     onSave: fn(),
     sectionName: 'Spanish 101',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithCustomConfig: Story = {
@@ -35,6 +38,9 @@ export const WithCustomConfig: Story = {
     } satisfies AvatarUnlockConfig,
     onSave: fn(),
     sectionName: 'Biology AP',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -55,6 +61,9 @@ export const AllStylesUsed: Story = {
     } satisfies AvatarUnlockConfig,
     onSave: fn(),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const GlowDisabled: Story = {
@@ -69,5 +78,8 @@ export const GlowDisabled: Story = {
     } satisfies AvatarUnlockConfig,
     onSave: fn(),
     sectionName: 'Math 200',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { NarrativeReader } from './NarrativeReader'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof NarrativeReader> = {
   title: '✏️ Lesson Editor/Narrative Reader',
@@ -92,6 +93,9 @@ export const Default: Story = {
   args: {
     contentJson: sampleContentJson,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithMaxHeight: Story = {
@@ -100,11 +104,17 @@ export const WithMaxHeight: Story = {
     maxHeight: 200,
     ariaLabel: 'Scrollable narrative',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const CustomLabel: Story = {
   args: {
     contentJson: sampleContentJson,
     ariaLabel: 'Chapter 5: The Final Debug',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

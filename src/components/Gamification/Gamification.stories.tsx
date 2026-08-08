@@ -5,6 +5,7 @@ import { NailedItCelebration } from './NailedItCelebration'
 import { XPToast } from './XPToast'
 import { HomeworkXPSummary } from './HomeworkXPSummary'
 import { NailedItWall } from './NailedItWall'
+import { expect } from 'storybook/test'
 
 // =============================================================================
 // NailedItBadge Stories
@@ -20,11 +21,17 @@ type BadgeStory = StoryObj<typeof NailedItBadge>
 
 export const Default: BadgeStory = {
   args: {},
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const CustomSize: BadgeStory = {
   args: {
     size: 'medium',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 

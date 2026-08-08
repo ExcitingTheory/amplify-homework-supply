@@ -4,6 +4,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { DiceBearAvatar, getStyleTierStatus } from './DiceBearAvatar'
 import type { AvatarStyleTier } from './DiceBearAvatar'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof DiceBearAvatar> = {
   title: '🏆 Gamification/Avatars & Cosmetics/DiceBear Avatar',
@@ -15,6 +16,9 @@ type Story = StoryObj<typeof DiceBearAvatar>
 
 export const Default: Story = {
   args: { seed: 'student-123', size: 64 },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const AllStyles: Story = {
@@ -28,6 +32,9 @@ export const AllStyles: Story = {
       ))}
     </Stack>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const LockedVsUnlocked: Story = {
@@ -37,6 +44,9 @@ export const LockedVsUnlocked: Story = {
       <DiceBearAvatar seed="user-1" size={48} label="Locked" locked />
     </Stack>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const TierProgression: Story = {
@@ -53,6 +63,9 @@ export const TierProgression: Story = {
       </Stack>
     )
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const DifferentSeeds: Story = {
@@ -63,4 +76,7 @@ export const DifferentSeeds: Story = {
       ))}
     </Stack>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }

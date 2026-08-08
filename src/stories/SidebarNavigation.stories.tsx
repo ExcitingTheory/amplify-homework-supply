@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
 import { Box, Button, Card, CardContent, Stack, Typography, Divider } from '@mui/material';
+import { expect } from 'storybook/test'
 
 const QUIZ_DESTINATIONS: { label: string; storyId: string }[] = [
   { label: 'Dashboard', storyId: '📄-pages-application-pages--index' },
@@ -77,5 +78,8 @@ export const SidebarNavigation: Story = {
         </Card>
       </Box>
     );
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

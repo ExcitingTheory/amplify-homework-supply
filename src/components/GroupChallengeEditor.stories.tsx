@@ -14,7 +14,10 @@ export default meta
 type Story = StoryObj<typeof GroupChallengeEditor>
 
 /** Default empty form — create mode */
-export const Default: Story = {}
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+}
 
 /** Editing an existing challenge with progress */
 export const EditWithProgress: Story = {
@@ -32,6 +35,9 @@ export const EditWithProgress: Story = {
       active: true,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Challenge with expired deadline */
@@ -46,6 +52,9 @@ export const ExpiredDeadline: Story = {
       active: false,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Completed challenge */
@@ -59,11 +68,17 @@ export const CompletedChallenge: Story = {
       active: false,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Submitting state */
 export const Submitting: Story = {
   args: {
     submitting: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

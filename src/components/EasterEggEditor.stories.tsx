@@ -28,7 +28,10 @@ export default meta
 type Story = StoryObj<typeof EasterEggEditor>
 
 /** Default empty form — create mode */
-export const Default: Story = {}
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+}
 
 /** Editing an existing keyword egg */
 export const EditKeywordEgg: Story = {
@@ -40,6 +43,9 @@ export const EditKeywordEgg: Story = {
       revealMessage: 'You found the secret code!',
       active: true,
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -54,6 +60,9 @@ export const ScheduleTrigger: Story = {
       active: true,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Achievement trigger type */
@@ -66,6 +75,9 @@ export const AchievementTrigger: Story = {
       revealMessage: 'Amazing accuracy!',
       active: true,
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -80,11 +92,17 @@ export const InactiveEgg: Story = {
       active: false,
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Submitting state */
 export const Submitting: Story = {
   args: {
     submitting: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

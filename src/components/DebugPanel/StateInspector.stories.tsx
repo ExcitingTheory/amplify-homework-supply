@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { StateInspector } from './StateInspector';
 import { StateSnapshot } from '../../utils/debug/StateSnapshot';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof StateInspector> = {
   title: '🛠️ Developer Tools/Debug Panel/State Inspector',
@@ -120,6 +121,9 @@ export const Default: Story = {
     onRefresh: () => console.log('Refresh clicked'),
     onExport: (snapshot) => console.log('Export:', snapshot),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const EmptyState: Story = {
@@ -127,6 +131,9 @@ export const EmptyState: Story = {
     snapshot: emptySnapshot,
     onRefresh: () => console.log('Refresh clicked'),
     onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -142,6 +149,9 @@ export const WithErrors: Story = {
     },
     onRefresh: () => console.log('Refresh clicked'),
     onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -167,5 +177,8 @@ export const LargeDataSet: Story = {
     },
     onRefresh: () => console.log('Refresh clicked'),
     onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

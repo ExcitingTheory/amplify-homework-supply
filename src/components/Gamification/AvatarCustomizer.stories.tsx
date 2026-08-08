@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React, { useState } from 'react'
 import { AvatarCustomizer } from './AvatarCustomizer'
 import type { AvatarOverrides } from './DiceBearAvatar'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof AvatarCustomizer> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Avatar Customizer',
@@ -43,21 +44,33 @@ function AvatarCustomizerWrapper({ level, seed }: { level: number; seed: string 
 /** Level 2 — only color picker unlocked */
 export const Level2Colors: Story = {
   render: () => <AvatarCustomizerWrapper level={2} seed="student-alice" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Level 4 — colors + accessories */
 export const Level4Accessories: Story = {
   render: () => <AvatarCustomizerWrapper level={4} seed="student-bob" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Level 5 — full customizer */
 export const Level5Full: Story = {
   render: () => <AvatarCustomizerWrapper level={5} seed="student-charlie" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Level 1 — all sections locked */
 export const Level1AllLocked: Story = {
   render: () => <AvatarCustomizerWrapper level={1} seed="student-newbie" />,
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** With existing overrides pre-filled */
@@ -87,5 +100,8 @@ export const WithExistingOverrides: Story = {
         />
       </>
     )
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

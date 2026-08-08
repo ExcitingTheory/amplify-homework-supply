@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import StorageManagement from './StorageManagement';
+import { expect } from 'storybook/test'
 
 /**
  * StorageManagement is a settings panel showing offline storage usage,
@@ -25,4 +26,7 @@ type Story = StoryObj<typeof StorageManagement>;
  * Default state — loads real data from IndexedDB (which will be empty
  * in Storybook since no prefetch has occurred).
  */
-export const Default: Story = {};
+export const Default: Story = {  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
+};

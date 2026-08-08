@@ -26,6 +26,9 @@ export const Default: Story = {
     },
     onChange: fn(),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Shield with fire gradient */
@@ -49,6 +52,9 @@ export const FireShield: Story = {
     },
     onChange: fn(),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Diamond shape with cosmic gradient */
@@ -70,5 +76,8 @@ export const CosmicDiamond: Story = {
       animation: 'spin-in',
     },
     onChange: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

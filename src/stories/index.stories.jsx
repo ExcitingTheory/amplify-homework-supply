@@ -3,6 +3,7 @@ import Index from "../../app/[locale]/page.jsx";
 import { FilesProvider } from "../../src/context/fileContext";
 import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
+import { expect } from 'storybook/test'
 
 // Wrapper component to bridge Storybook args to Next.js page props
 // FilesProvider is added here for file context
@@ -82,6 +83,9 @@ export const StudentDashboard = {
     },
     signOut: () => console.log("Sign out clicked"),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -118,6 +122,9 @@ export const InstructorDashboard = {
     },
     signOut: () => console.log("Sign out clicked"),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -144,6 +151,9 @@ export const EmptyState = {
     },
     signOut: () => console.log("Sign out clicked"),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -153,5 +163,8 @@ export const Loading = {
   args: {
     user: null,
     signOut: () => console.log("Sign out clicked"),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

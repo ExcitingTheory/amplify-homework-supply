@@ -1,5 +1,6 @@
 import React from "react";
 import SafeHydrate from "./SafeHydrate";
+import { expect } from 'storybook/test'
 
 export default {
   title: "🧩 UI Components/Safe Hydrate",
@@ -24,6 +25,9 @@ export const Default = {
       </div>
     </SafeHydrate>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const WithComplexContent = {
@@ -46,4 +50,7 @@ export const WithComplexContent = {
       </div>
     </SafeHydrate>
   ),
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };

@@ -18,6 +18,7 @@ import {
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { AudioPlayerProvider } from "../context/AudioPlayerContext";
+import { expect } from 'storybook/test'
 
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Answer (Audio & Drawing)",
@@ -438,6 +439,9 @@ export const AudioPronunciation = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const DrawingVocabulary = {
@@ -454,6 +458,9 @@ export const DrawingVocabulary = {
           "Visual learning exercise where students draw what the word means. Shows definition as prompt, accepts drawings via Excalidraw with AI-powered image verification.",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -472,6 +479,9 @@ export const MultiModalVocabulary = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const ListeningComprehension = {
@@ -489,6 +499,9 @@ export const ListeningComprehension = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const DefinitionToDrawing = {
@@ -505,5 +518,8 @@ export const DefinitionToDrawing = {
           "Creative exercise where students read a definition and illustrate it. Combines reading comprehension with visual expression.",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ArmorEditor } from './ArmorEditor'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof ArmorEditor> = {
   title: '🏆 Gamification/Avatars & Cosmetics/Armor Editor',
@@ -21,6 +22,9 @@ export const Default: Story = {
     },
     onClose: () => console.log('Closed'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const WithInitialConfig: Story = {
@@ -40,6 +44,9 @@ export const WithInitialConfig: Story = {
     onSave: (config, svg, name, description) => console.log('Saved:', config, name, description),
     onClose: () => console.log('Closed'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const QuarteredShield: Story = {
@@ -58,6 +65,9 @@ export const QuarteredShield: Story = {
     },
     onSave: (config, svg, name, description) => console.log('Saved:', config, name, description),
     onClose: () => console.log('Closed'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -79,6 +89,9 @@ export const ChevronBand: Story = {
     onSave: (config, svg, name, description) => console.log('Saved:', config, name, description),
     onClose: () => console.log('Closed'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const SaltireCross: Story = {
@@ -96,6 +109,9 @@ export const SaltireCross: Story = {
     },
     onSave: (config, svg) => console.log('Saved:', config),
     onClose: () => console.log('Closed'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -115,6 +131,9 @@ export const BendWithBorder: Story = {
     onSave: (config, svg) => console.log('Saved:', config),
     onClose: () => console.log('Closed'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ChiefBand: Story = {
@@ -132,6 +151,9 @@ export const ChiefBand: Story = {
     },
     onSave: (config, svg) => console.log('Saved:', config),
     onClose: () => console.log('Closed'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -151,6 +173,9 @@ export const LargeCharge: Story = {
     },
     onSave: (config, svg) => console.log('Saved:', config),
     onClose: () => console.log('Closed'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -175,5 +200,8 @@ export const MultipleCharges: Story = {
     },
     onSave: (config, svg) => console.log('Saved:', config),
     onClose: () => console.log('Closed'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

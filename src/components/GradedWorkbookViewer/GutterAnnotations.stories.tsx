@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { GutterAnnotations } from './GutterAnnotations';
 import type { WrongAnswerAnnotation, GradeAttempt } from './GradedWorkbookViewer';
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof GutterAnnotations> = {
   title: '� Instructor Tools/Grading/Gutter Annotations',
@@ -38,6 +39,9 @@ export const MultipleBlocks: Story = {
     currentAttempt: 3,
     grades: mockGrades,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const SingleBlock: Story = {
@@ -48,6 +52,9 @@ export const SingleBlock: Story = {
     currentAttempt: 2,
     grades: mockGrades.slice(0, 2),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const NoWrongAnswers: Story = {
@@ -55,6 +62,9 @@ export const NoWrongAnswers: Story = {
     wrongAnswersByBlock: {},
     currentAttempt: 1,
     grades: [{ id: 'grade-perfect', attempt: 1, accuracy: 100, percentComplete: 100, complete: true, data: {}, createdAt: '2026-06-18T08:00:00Z', updatedAt: '2026-06-18T08:00:00Z' }],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -65,5 +75,8 @@ export const FirstAttempt: Story = {
     },
     currentAttempt: 1,
     grades: [mockGrades[0]],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -34,6 +34,7 @@ import WorkbookClient from '../../app/[locale]/workbook/[id]/WorkbookClient';
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
 import { FilesProvider } from '../../src/context/fileContext';
+import { expect } from 'storybook/test'
 
 const meta: Meta = {
   title: '📄 Pages/Application Pages',
@@ -111,6 +112,9 @@ export const Index: Story = {
     },
     nextjs: { navigation: { pathname: '/' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -139,6 +143,9 @@ export const IndexNoSections: Story = {
       session: { username: 'new-student', groups: [] },
     },
     nextjs: { navigation: { pathname: '/' } },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -169,6 +176,9 @@ export const IndexAssignments: Story = {
     },
     nextjs: { navigation: { pathname: '/' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -198,6 +208,9 @@ export const Units: Story = {
     },
     nextjs: { navigation: { pathname: '/units' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -222,6 +235,9 @@ export const UnitsEmptyState: Story = {
       session: { username: 'new-teacher', groups: ['Instructors'] },
     },
     nextjs: { navigation: { pathname: '/units' } },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -252,6 +268,9 @@ export const Sections: Story = {
     },
     nextjs: { navigation: { pathname: '/sections' } },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -276,6 +295,9 @@ export const SectionsEmptyState: Story = {
       session: { username: 'new-student', groups: [] },
     },
     nextjs: { navigation: { pathname: '/sections' } },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -316,6 +338,9 @@ export const SectionDetail: Story = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -350,6 +375,9 @@ export const SectionDetailStudent: Story = {
         segments: [['id', 'section-jpn-101']],
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -390,6 +418,9 @@ export const UnitDetail: Story = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -429,6 +460,9 @@ export const Workbook: Story = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 /**
@@ -463,6 +497,9 @@ export const WorkbookTimedExercise: Story = {
         segments: [['id', 'assignment-2']],
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -502,5 +539,8 @@ export const PeerReview: Story = {
         segments: [['id', 'assignment-1']],
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

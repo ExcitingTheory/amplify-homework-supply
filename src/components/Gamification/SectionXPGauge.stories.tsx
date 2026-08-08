@@ -2,6 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { SectionXPGauge } from './SectionXPGauge'
 import { action } from 'storybook/actions'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof SectionXPGauge> = {
   title: '🏆 Gamification/XP & Progression/Section XP Gauge',
@@ -23,6 +24,9 @@ export const FewUnits: Story = {
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ModerateUnits: Story = {
@@ -32,6 +36,9 @@ export const ModerateUnits: Story = {
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const ManyUnits: Story = {
@@ -40,6 +47,9 @@ export const ManyUnits: Story = {
     desiredMaxLevel: 6,
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -52,6 +62,9 @@ export const CustomLevelConfig: Story = {
     },
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }
 
@@ -68,6 +81,9 @@ export const WithMultipliers: Story = {
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const AllLevelsReachable: Story = {
@@ -80,6 +96,9 @@ export const AllLevelsReachable: Story = {
     showTuner: true,
     onApplyTuning: action('onApplyTuning'),
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const NoTuner: Story = {
@@ -87,5 +106,8 @@ export const NoTuner: Story = {
     unitCount: 5,
     desiredMaxLevel: 6,
     showTuner: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

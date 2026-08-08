@@ -24,12 +24,18 @@ export const Default: Story = {
     onRecordingComplete: fn(),
     embedded: false,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const Embedded: Story = {
   args: {
     ...Default.args,
     embedded: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };
 
@@ -38,5 +44,8 @@ export const WithFeedback: Story = {
     ...Default.args,
     feedback: 'Great pronunciation! Try emphasizing the second syllable.',
     isCorrect: true,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

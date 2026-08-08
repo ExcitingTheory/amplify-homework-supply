@@ -16,11 +16,17 @@ export const Default: Story = {
     sectionId: 'section-abc-123',
     label: 'View Skill Tree',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 };
 
 export const CustomLabel: Story = {
   args: {
     sectionId: 'section-xyz-456',
     label: 'Skills & Progress',
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 };

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { SquadEditor } from './SquadEditor'
 import type { ArmorEditorConfig } from './ArmorEditor'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof SquadEditor> = {
   title: '🏆 Gamification/Squads & Teams/Squad Editor',
@@ -44,6 +45,9 @@ export const NewSquad: Story = {
     onSave: (data) => console.log('Save:', data),
     autoSaveDelay: 1500,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Existing squad with custom crest */
@@ -55,6 +59,9 @@ export const ExistingSquad: Story = {
     onSave: (data) => console.log('Save:', data),
     autoSaveDelay: 1500,
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 /** Autosave disabled — manual save only */
@@ -65,5 +72,8 @@ export const ManualSaveOnly: Story = {
     crestConfig: null,
     onSave: (data) => console.log('Save:', data),
     autoSaveDelay: 0,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
   },
 }

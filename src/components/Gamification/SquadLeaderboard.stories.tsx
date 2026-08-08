@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { SquadLeaderboard } from './SquadLeaderboard'
+import { expect } from 'storybook/test'
 
 const meta: Meta<typeof SquadLeaderboard> = {
   title: '🏆 Gamification/Squads & Teams/Squad Leaderboard',
@@ -20,6 +21,9 @@ export const Full: Story = {
     ],
     mySquadId: 'g2',
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const NoHighlight: Story = {
@@ -29,8 +33,14 @@ export const NoHighlight: Story = {
       { id: 'g2', name: 'Beta', totalXP: 750, memberCount: 4 },
     ],
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
 
 export const Empty: Story = {
   args: { squads: [] },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  },
 }
