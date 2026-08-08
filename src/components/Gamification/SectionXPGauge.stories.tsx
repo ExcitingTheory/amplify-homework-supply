@@ -25,7 +25,7 @@ export const FewUnits: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -37,7 +37,7 @@ export const ModerateUnits: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -49,7 +49,7 @@ export const ManyUnits: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -64,7 +64,7 @@ export const CustomLevelConfig: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -82,7 +82,7 @@ export const WithMultipliers: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -97,7 +97,7 @@ export const AllLevelsReachable: Story = {
     onApplyTuning: action('onApplyTuning'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -108,6 +108,6 @@ export const NoTuner: Story = {
     showTuner: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

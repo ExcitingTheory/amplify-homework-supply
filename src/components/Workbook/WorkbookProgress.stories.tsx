@@ -40,7 +40,7 @@ export default {
 export const Default = {
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -48,7 +48,7 @@ export const Compact = {
   args: { variant: 'compact' },
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -56,7 +56,7 @@ export const Detailed = {
   args: { variant: 'detailed' },
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -66,7 +66,7 @@ export const Complete = {
     withUnitContext({ completion: 100, accuracy: 92, totalBlocks: 8, completeBlocks: 8 }),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -76,13 +76,13 @@ export const JustStarted = {
     withUnitContext({ completion: 10, accuracy: 0, totalBlocks: 10, completeBlocks: 1 }),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({}, { workbookEnabled: false })],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

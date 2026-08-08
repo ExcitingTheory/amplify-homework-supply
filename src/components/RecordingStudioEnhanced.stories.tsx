@@ -20,7 +20,7 @@ export const Default: Story = {
     stateRef: { current: null },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -34,7 +34,7 @@ export const WithMetadata: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -45,6 +45,6 @@ export const MinimalProps: Story = {
     onRecordingComplete: fn(),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

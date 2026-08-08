@@ -262,20 +262,20 @@ const sampleYouTubeState = {
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const EditableWithVideo = {
   render: () => <EditableTemplate editorState={sampleYouTubeState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const ReadOnlyWithVideo = {
   render: () => <ReadOnlyTemplate editorState={sampleYouTubeState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

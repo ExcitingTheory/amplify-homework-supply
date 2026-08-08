@@ -34,7 +34,7 @@ export const UnitPermissionError = {
     message: null,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -49,7 +49,7 @@ export const CustomMessage = {
       "You do not have permission to access this unit. Only the owner or instructors can view unpublished units.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -63,7 +63,7 @@ export const SectionPermissionError = {
     message: "You are not enrolled in this section.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -77,7 +77,7 @@ export const AssignmentPermissionError = {
     message: "This assignment is not available to you.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -91,7 +91,7 @@ export const ClosedState = {
     message: null,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 

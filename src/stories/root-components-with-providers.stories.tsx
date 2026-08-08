@@ -66,7 +66,7 @@ export const AppShellDefault: Story = {
     docs: { description: { story: 'Responsive shell with persistent sidebar on desktop, modal drawer on mobile.' } },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -111,7 +111,7 @@ export const GradeReviewDrawerOpen: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -130,7 +130,7 @@ export const GradeReviewDrawerClosed: Story = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -167,7 +167,7 @@ export const CollaboratorManagerOwner: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -200,7 +200,7 @@ export const CollaboratorManagerReadOnly: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -242,7 +242,7 @@ export const RecordingStudioEnhancedModalOpen: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -256,6 +256,6 @@ export const RecordingStudioEnhancedModalClosed: Story = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

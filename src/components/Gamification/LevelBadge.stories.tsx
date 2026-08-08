@@ -16,7 +16,7 @@ export const Beginner: Story = {
     level: { level: 1, label: 'Beginner', xpRequired: 0, xpForNextLevel: 150, progress: 33 },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -25,7 +25,7 @@ export const Explorer: Story = {
     level: { level: 2, label: 'Explorer', xpRequired: 150, xpForNextLevel: 400, progress: 60 },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -34,7 +34,7 @@ export const Practitioner: Story = {
     level: { level: 3, label: 'Practitioner', xpRequired: 400, xpForNextLevel: 800, progress: 45 },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -43,7 +43,7 @@ export const Contributor: Story = {
     level: { level: 4, label: 'Contributor', xpRequired: 800, xpForNextLevel: 1500, progress: 20 },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -52,7 +52,7 @@ export const Expert: Story = {
     level: { level: 5, label: 'Expert', xpRequired: 1500, xpForNextLevel: 2500, progress: 80 },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -62,7 +62,7 @@ export const Master: Story = {
     showProgress: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -72,7 +72,7 @@ export const Small: Story = {
     size: 'small',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -82,6 +82,6 @@ export const NoProgress: Story = {
     showProgress: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

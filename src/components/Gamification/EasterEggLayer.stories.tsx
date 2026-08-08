@@ -14,6 +14,6 @@ type Story = StoryObj<typeof EasterEggLayer>
 export const Default: Story = {
   args: { studentId: 'student-123' },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

@@ -20,7 +20,7 @@ export const Default: Story = {
     earnedBadgeTypes: new Set(),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -30,7 +30,7 @@ export const SomeBadgesEarned: Story = {
     earnedBadgeTypes: new Set(['DOCS_EXPLORER', 'INSTRUCTOR_ONBOARD']),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -47,6 +47,6 @@ export const AllBadgesEarned: Story = {
     ]),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

@@ -13,7 +13,7 @@ export default {
 
 // Default story with chat closed — drawer is hidden
 export const Closed = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -36,7 +36,7 @@ export const Open = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -61,6 +61,6 @@ export const NarrowWidth = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

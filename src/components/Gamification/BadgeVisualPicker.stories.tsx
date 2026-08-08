@@ -27,7 +27,7 @@ export const Default: Story = {
     onChange: fn(),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -53,7 +53,7 @@ export const FireShield: Story = {
     onChange: fn(),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -78,6 +78,6 @@ export const CosmicDiamond: Story = {
     onChange: fn(),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

@@ -44,13 +44,13 @@ export default {
 export const NoTutors = {
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

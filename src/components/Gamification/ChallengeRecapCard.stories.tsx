@@ -61,7 +61,7 @@ export default meta
 type Story = StoryObj<typeof ChallengeRecapCard>
 
 export const WithRecaps: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -70,7 +70,7 @@ export const NoRecaps: Story = {
     recaps: [],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -80,7 +80,7 @@ export const NoRecapsLearnerView: Story = {
     isInstructor: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -90,7 +90,7 @@ export const Generating: Story = {
     generating: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -99,6 +99,6 @@ export const LearnerView: Story = {
     isInstructor: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

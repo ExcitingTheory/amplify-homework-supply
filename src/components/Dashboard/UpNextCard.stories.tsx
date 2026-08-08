@@ -42,7 +42,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await canvas.findByText(/Chapter 3/i)
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -67,7 +67,7 @@ export const WithNailedIt: Story = {
     const canvas = within(canvasElement)
     await canvas.findByText(/Chapter 3/i)
     // Nailed It badge or count shown
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 

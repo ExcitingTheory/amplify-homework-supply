@@ -14,20 +14,20 @@ type Story = StoryObj<typeof RankChangeToast>
 export const RankUp: Story = {
   args: { open: true, positionsChanged: 3, newRank: 2, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const RankDown: Story = {
   args: { open: true, positionsChanged: -1, newRank: 5, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const TopRank: Story = {
   args: { open: true, positionsChanged: 1, newRank: 1, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

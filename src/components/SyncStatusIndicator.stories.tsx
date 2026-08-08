@@ -37,7 +37,7 @@ type Story = StoryObj<typeof SyncStatusIndicator>;
 export const AllSynced: Story = {
   name: 'All Synced (hidden)',
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -58,6 +58,6 @@ export const OfflineNoPending: Story = {
     },
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

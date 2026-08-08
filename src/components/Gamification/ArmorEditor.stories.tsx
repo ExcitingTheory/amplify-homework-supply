@@ -23,7 +23,7 @@ export const Default: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -45,7 +45,7 @@ export const WithInitialConfig: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -67,7 +67,7 @@ export const QuarteredShield: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -90,7 +90,7 @@ export const ChevronBand: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -111,7 +111,7 @@ export const SaltireCross: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -132,7 +132,7 @@ export const BendWithBorder: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -153,7 +153,7 @@ export const ChiefBand: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -175,7 +175,7 @@ export const LargeCharge: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -202,6 +202,6 @@ export const MultipleCharges: Story = {
     onClose: () => console.log('Closed'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

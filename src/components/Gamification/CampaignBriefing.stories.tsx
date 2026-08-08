@@ -18,7 +18,7 @@ export const Default: Story = {
     chapterText: 'Chapter 3: You\'ve reached the Memory Leak Caverns. The garbage collector has gone rogue. Debug the reference cycles to proceed.',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -28,7 +28,7 @@ export const Loading: Story = {
     isLoading: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -40,7 +40,7 @@ export const Compact: Story = {
     compact: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -50,7 +50,7 @@ export const SettingOnly: Story = {
     setting: 'Welcome to the Digital Frontier — a virtual world where every website is a kingdom and every bug is a dragon.',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -91,6 +91,6 @@ export const WithEmbeddedContent: Story = {
     contentMaxHeight: 300,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

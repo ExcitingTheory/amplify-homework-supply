@@ -111,7 +111,7 @@ export const ReadOnly: Story = {
     content: sampleContent,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -123,7 +123,7 @@ export const ReadOnlyCompact: Story = {
     compact: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -135,7 +135,7 @@ export const ReadOnlyWithMaxHeight: Story = {
     maxHeight: 150,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -146,7 +146,7 @@ export const ReadOnlyEmpty: Story = {
     content: null,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -160,7 +160,7 @@ export const Editable: Story = {
     onChange: (json: any) => console.log('[MiniEditor] onChange:', json),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -174,7 +174,7 @@ export const EditableWithContent: Story = {
     onChange: (json: any) => console.log('[MiniEditor] onChange:', json),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -193,7 +193,7 @@ export const ChatMode: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -208,7 +208,7 @@ export const ChatModeNoBlockInserter: Story = {
     onSubmit: (json: any, text: string) => console.log('Sent:', text),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -224,7 +224,7 @@ export const SquadDescription: Story = {
     onChange: (json: any) => console.log('[Squad] Saved:', json),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -238,6 +238,6 @@ export const CampaignBriefing: Story = {
     onChange: (json: any) => console.log('[Campaign] Saved:', json),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

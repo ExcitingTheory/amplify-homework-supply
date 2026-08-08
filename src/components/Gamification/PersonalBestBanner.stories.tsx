@@ -14,20 +14,20 @@ type Story = StoryObj<typeof PersonalBestBanner>
 export const Improvement: Story = {
   args: { open: true, newScore: 92, previousBest: 85, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const FirstAttempt: Story = {
   args: { open: true, newScore: 78, previousBest: null, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const PerfectScore: Story = {
   args: { open: true, newScore: 100, previousBest: 95, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

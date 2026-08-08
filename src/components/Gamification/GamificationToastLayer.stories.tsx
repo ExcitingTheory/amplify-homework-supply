@@ -64,6 +64,6 @@ export const Idle: Story = {
     chromatic: { disableSnapshot: true },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

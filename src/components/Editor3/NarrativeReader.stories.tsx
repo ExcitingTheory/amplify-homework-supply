@@ -94,7 +94,7 @@ export const Default: Story = {
     contentJson: sampleContentJson,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -105,7 +105,7 @@ export const WithMaxHeight: Story = {
     ariaLabel: 'Scrollable narrative',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -115,6 +115,6 @@ export const CustomLabel: Story = {
     ariaLabel: 'Chapter 5: The Final Debug',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

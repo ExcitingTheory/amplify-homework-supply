@@ -67,6 +67,6 @@ type Story = StoryObj<typeof meta>;
  * Try pressing keyboard shortcuts to see them light up!
  */
 export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

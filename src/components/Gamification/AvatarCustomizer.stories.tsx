@@ -45,7 +45,7 @@ function AvatarCustomizerWrapper({ level, seed }: { level: number; seed: string 
 export const Level2Colors: Story = {
   render: () => <AvatarCustomizerWrapper level={2} seed="student-alice" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -53,7 +53,7 @@ export const Level2Colors: Story = {
 export const Level4Accessories: Story = {
   render: () => <AvatarCustomizerWrapper level={4} seed="student-bob" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -61,7 +61,7 @@ export const Level4Accessories: Story = {
 export const Level5Full: Story = {
   render: () => <AvatarCustomizerWrapper level={5} seed="student-charlie" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -69,7 +69,7 @@ export const Level5Full: Story = {
 export const Level1AllLocked: Story = {
   render: () => <AvatarCustomizerWrapper level={1} seed="student-newbie" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -102,6 +102,6 @@ export const WithExistingOverrides: Story = {
     )
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

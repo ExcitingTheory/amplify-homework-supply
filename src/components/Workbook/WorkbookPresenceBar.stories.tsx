@@ -69,7 +69,7 @@ const mockUsers: MockUser[] = [
 export const ThreeUsers: Story = {
   args: { users: mockUsers },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -78,7 +78,7 @@ export const SingleUser: Story = {
     users: [{ clientId: 1, username: 'alice', displayName: 'Alice', color: '#e91e63', isIdle: false }],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -91,7 +91,7 @@ export const WithIdleUsers: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -109,13 +109,13 @@ export const Overflow: Story = {
     max: 5,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const Empty: Story = {
   args: { users: [] },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

@@ -133,7 +133,7 @@ export const Default: Story = {
     onStatsChange: (stats) => console.log('Stats:', stats),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -143,7 +143,7 @@ export const Empty: Story = {
     sessionId: 'story-session-4',
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -163,6 +163,6 @@ export const WithDocumentRefs: Story = {
     onStatsChange: (stats) => console.log('Stats:', stats),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

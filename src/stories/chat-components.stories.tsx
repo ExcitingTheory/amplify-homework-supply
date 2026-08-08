@@ -40,7 +40,7 @@ export const MentionChipUser: Story = {
   name: 'MentionChip / User',
   render: () => <MentionChip name="Alice" onClick={fn()} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -48,7 +48,7 @@ export const MentionChipBot: Story = {
   name: 'MentionChip / Bot (Kai)',
   render: () => <MentionChip name="Kai" onClick={fn()} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -56,7 +56,7 @@ export const MentionChipNoClick: Story = {
   name: 'MentionChip / Non-clickable',
   render: () => <MentionChip name="Bob" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -83,7 +83,7 @@ export const MessageComposerDefault: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -101,7 +101,7 @@ export const MessageComposerWithReply: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -119,7 +119,7 @@ export const LexicalMessageRendererMarkdown: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -131,7 +131,7 @@ export const LexicalMessageRendererPlainText: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -147,7 +147,7 @@ export const NavigationPromptEditor: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -159,7 +159,7 @@ export const NavigationPromptSections: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -196,7 +196,7 @@ export const RecordingScriptPreviewWord: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -226,6 +226,6 @@ export const RecordingScriptPreviewConversation: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

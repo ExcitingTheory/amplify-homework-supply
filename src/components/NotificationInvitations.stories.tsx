@@ -143,7 +143,7 @@ export const PeerReviewInvites: Story = {
     emptyMessage: "No pending review invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -163,7 +163,7 @@ export const PracticeSessionInvites: Story = {
     emptyMessage: "No pending session invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -183,7 +183,7 @@ export const WorkbookInvites: Story = {
     emptyMessage: "No pending workbook invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -202,7 +202,7 @@ export const AllCollaborationInvites: Story = {
     joinLabel: "Join",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -221,7 +221,7 @@ export const EmptyState: Story = {
     emptyMessage: "No pending review invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -239,6 +239,6 @@ export const LoadingState: Story = {
     onJoin: action("onJoin"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

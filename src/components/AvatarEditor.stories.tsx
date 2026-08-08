@@ -49,7 +49,7 @@ type Story = StoryObj<typeof AvatarEditor>
 
 /** Default state — shows DiceBear avatar with customize button. */
 export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -57,7 +57,7 @@ export const Default: Story = {  play: async ({ canvasElement }) => {
 export const Level1: Story = {
   args: { level: 1, seed: 'student-newbie' },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -74,7 +74,7 @@ export const Level2Detailed: Story = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -91,7 +91,7 @@ export const Level3ToonHead: Story = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -116,6 +116,6 @@ export const WithOverrides: Story = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

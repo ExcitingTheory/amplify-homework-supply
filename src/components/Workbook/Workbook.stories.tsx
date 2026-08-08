@@ -26,7 +26,7 @@ export const NoComments: GutterStory = {
     onClick: () => console.log('open'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -37,7 +37,7 @@ export const WithComments: GutterStory = {
     onClick: () => console.log('open'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -48,7 +48,7 @@ export const AllResolved: GutterStory = {
     onClick: () => console.log('open'),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 

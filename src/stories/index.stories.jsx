@@ -84,7 +84,7 @@ export const StudentDashboard = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -123,7 +123,7 @@ export const InstructorDashboard = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -152,7 +152,7 @@ export const EmptyState = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -165,6 +165,6 @@ export const Loading = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

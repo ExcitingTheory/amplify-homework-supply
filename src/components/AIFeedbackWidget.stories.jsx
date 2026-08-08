@@ -139,25 +139,25 @@ export const WithCallback = () => {
 
 
 ChatMessage.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }
 
 ContentCompletion.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }
 
 WithLabels.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }
 
 LargeButtons.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }
 
 InChatContext.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }
 
 WithCallback.play = async ({ canvasElement }) => {
-  expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
 }

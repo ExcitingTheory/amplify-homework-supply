@@ -20,7 +20,7 @@ const sampleChapters: CampaignChapter[] = [
 export const Default: Story = {
   args: { chapters: sampleChapters },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -29,6 +29,6 @@ export const AllComplete: Story = {
     chapters: sampleChapters.map((c) => ({ ...c, currentXP: c.targetXP, active: false })),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

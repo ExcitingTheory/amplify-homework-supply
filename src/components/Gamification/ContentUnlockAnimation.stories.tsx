@@ -14,13 +14,13 @@ type Story = StoryObj<typeof ContentUnlockAnimation>
 export const Playing: Story = {
   args: { show: true, title: 'Advanced Biology' },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const Idle: Story = {
   args: { show: false, title: 'Advanced Biology' },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

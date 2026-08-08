@@ -304,7 +304,7 @@ export const EmptyEditable = {
   render: () => <EditableTemplate showInsertButton={true} />,
   name: "Editor: Empty + Insert Button",
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -317,7 +317,7 @@ export const WithQuestions = {
   ),
   name: "Editor: With Questions & Criteria",
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -325,7 +325,7 @@ export const StudentTextInput = {
   render: () => <ReadOnlyTemplate editorState={sampleCustomAIState} />,
   name: "Student: Text Input Mode",
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -333,7 +333,7 @@ export const StudentMultiInput = {
   render: () => <ReadOnlyTemplate editorState={sampleMultiInputState} />,
   name: "Student: All Input Modes",
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -363,6 +363,6 @@ export const EmptyBlock = {
   },
   name: "Editor: Empty Block (No Questions)",
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

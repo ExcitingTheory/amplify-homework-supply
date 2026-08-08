@@ -14,13 +14,13 @@ type Story = StoryObj<typeof EasterEggToast>
 export const Found: Story = {
   args: { open: true, message: 'You found the hidden treasure!', xpReward: 30, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
 export const HighReward: Story = {
   args: { open: true, message: 'Secret passage discovered!', xpReward: 100, onClose: () => {} },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

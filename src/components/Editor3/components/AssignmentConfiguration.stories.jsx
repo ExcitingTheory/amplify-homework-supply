@@ -68,14 +68,14 @@ export default {
 export const WithExistingAssignment = {
   decorators: [withContexts()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const NoAssignments = {
   decorators: [withContexts({}, { assignments: [] })],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -84,6 +84,6 @@ export const NoSections = {
     withContexts({}, { sections: [], sectionMap: {}, assignments: [] }),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

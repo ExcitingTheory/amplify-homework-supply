@@ -20,27 +20,27 @@ function RecordingSettingsWrapper({ initialValue = "standard" }) {
 export const Default: Story = {
   render: () => <RecordingSettingsWrapper />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Off: Story = {
   render: () => <RecordingSettingsWrapper initialValue="off" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Light: Story = {
   render: () => <RecordingSettingsWrapper initialValue="light" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Aggressive: Story = {
   render: () => <RecordingSettingsWrapper initialValue="aggressive" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

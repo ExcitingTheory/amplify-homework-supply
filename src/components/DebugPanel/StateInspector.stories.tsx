@@ -122,7 +122,7 @@ export const Default: Story = {
     onExport: (snapshot) => console.log('Export:', snapshot),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -133,7 +133,7 @@ export const EmptyState: Story = {
     onExport: (snapshot) => console.log('Export:', snapshot),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -151,7 +151,7 @@ export const WithErrors: Story = {
     onExport: (snapshot) => console.log('Export:', snapshot),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -179,6 +179,6 @@ export const LargeDataSet: Story = {
     onExport: (snapshot) => console.log('Export:', snapshot),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

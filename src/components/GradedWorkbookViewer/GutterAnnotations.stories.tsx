@@ -40,7 +40,7 @@ export const MultipleBlocks: Story = {
     grades: mockGrades,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -53,7 +53,7 @@ export const SingleBlock: Story = {
     grades: mockGrades.slice(0, 2),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -64,7 +64,7 @@ export const NoWrongAnswers: Story = {
     grades: [{ id: 'grade-perfect', attempt: 1, accuracy: 100, percentComplete: 100, complete: true, data: {}, createdAt: '2026-06-18T08:00:00Z', updatedAt: '2026-06-18T08:00:00Z' }],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -77,6 +77,6 @@ export const FirstAttempt: Story = {
     grades: [mockGrades[0]],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };

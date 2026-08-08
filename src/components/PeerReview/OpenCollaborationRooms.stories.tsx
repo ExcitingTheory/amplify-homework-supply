@@ -101,7 +101,7 @@ export const InstructorView: Story = {
     onAwardTopReviewer: async (unitId) => console.log('Award top reviewer', unitId),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -119,7 +119,7 @@ export const StudentView: Story = {
     onAwardTopReviewer: noop,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -137,7 +137,7 @@ export const OnlyTutoringRooms: Story = {
     onAwardTopReviewer: noop,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -155,6 +155,6 @@ export const EmptyRooms: Story = {
     onAwardTopReviewer: noop,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

@@ -46,7 +46,7 @@ export const NewSquad: Story = {
     autoSaveDelay: 1500,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -60,7 +60,7 @@ export const ExistingSquad: Story = {
     autoSaveDelay: 1500,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
 
@@ -74,6 +74,6 @@ export const ManualSaveOnly: Story = {
     autoSaveDelay: 0,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

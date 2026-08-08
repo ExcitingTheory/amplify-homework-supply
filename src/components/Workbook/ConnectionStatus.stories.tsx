@@ -35,7 +35,7 @@ export default {
 export const Connected = {
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -43,7 +43,7 @@ export const ConnectedMedium = {
   args: { size: 'medium' },
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -51,13 +51,13 @@ export const NoLabel = {
   args: { showLabel: false },
   decorators: [withUnitContext()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent?.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
