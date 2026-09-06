@@ -18,7 +18,7 @@ import {
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { AudioPlayerProvider } from "../context/AudioPlayerContext";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Answer (Audio & Drawing)",
@@ -440,7 +440,9 @@ export const AudioPronunciation = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };
 
@@ -460,7 +462,9 @@ export const DrawingVocabulary = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };
 
@@ -480,7 +484,9 @@ export const MultiModalVocabulary = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };
 
@@ -500,7 +506,9 @@ export const ListeningComprehension = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };
 
@@ -520,6 +528,8 @@ export const DefinitionToDrawing = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };

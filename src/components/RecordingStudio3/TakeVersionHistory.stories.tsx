@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { vi } from "vitest";
 import TakeVersionHistory from "./TakeVersionHistory";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 // Mock the listTakeVersions import
 vi.mock("../../utils/takeVersioning", () => ({
@@ -49,8 +49,9 @@ const meta: Meta<typeof TakeVersionHistory> = {
 export default meta;
 type Story = StoryObj<typeof TakeVersionHistory>;
 
-export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.querySelector("button")).toBeTruthy();
   },
 };
 
@@ -61,7 +62,7 @@ export const SingleVersion: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("button")).toBeTruthy();
   },
 };
 
@@ -70,7 +71,9 @@ export const Disabled: Story = {
     disabled: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const btn = canvasElement.querySelector("button");
+    expect(btn).toBeTruthy();
+    expect(btn?.disabled).toBe(true);
   },
 };
 
@@ -80,6 +83,8 @@ export const NoSlotId: Story = {
     disabled: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const btn = canvasElement.querySelector("button");
+    expect(btn).toBeTruthy();
+    expect(btn?.disabled).toBe(true);
   },
 };

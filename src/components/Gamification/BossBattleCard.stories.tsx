@@ -1,101 +1,156 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, within } from 'storybook/test'
-import { BossBattleCard } from './BossBattleCard'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
+import { BossBattleCard } from "./BossBattleCard";
 
 const meta: Meta<typeof BossBattleCard> = {
-  title: '🏆 Gamification/Squads & Teams/Boss Battle Card',
+  title: "🏆 Gamification/Squads & Teams/Boss Battle Card",
   component: BossBattleCard,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof BossBattleCard>
+type Story = StoryObj<typeof BossBattleCard>;
 
 const defaultPhases = [
-  { id: 'p1', title: 'Core Questions', description: 'Answer fundamental algorithm questions', status: 'COMPLETED' as const, targetXP: 500, currentXP: 500 },
-  { id: 'p2', title: 'Code Review', description: 'Review and improve peer solutions', status: 'ACTIVE' as const, targetXP: 300, currentXP: 150, requiredRoles: ['Reviewer', 'Tester'] },
-  { id: 'p3', title: 'Final Challenge', description: 'Solve the optimization puzzle', status: 'LOCKED' as const, targetXP: 200, currentXP: 0 },
-]
+  {
+    id: "p1",
+    title: "Core Questions",
+    description: "Answer fundamental algorithm questions",
+    status: "COMPLETED" as const,
+    targetXP: 500,
+    currentXP: 500,
+  },
+  {
+    id: "p2",
+    title: "Code Review",
+    description: "Review and improve peer solutions",
+    status: "ACTIVE" as const,
+    targetXP: 300,
+    currentXP: 150,
+    requiredRoles: ["Reviewer", "Tester"],
+  },
+  {
+    id: "p3",
+    title: "Final Challenge",
+    description: "Solve the optimization puzzle",
+    status: "LOCKED" as const,
+    targetXP: 200,
+    currentXP: 0,
+  },
+];
 
 export const Active: Story = {
   args: {
-    title: 'The Algorithm Dragon',
-    narrative: 'A fearsome dragon guards the sorting algorithms. Only by mastering Big-O can your squad defeat it.',
+    title: "The Algorithm Dragon",
+    narrative:
+      "A fearsome dragon guards the sorting algorithms. Only by mastering Big-O can your squad defeat it.",
     phases: defaultPhases,
     totalHP: 1000,
     totalDamage: 650,
     active: true,
     bonusMultiplier: 2.0,
-    currentUserRole: 'Reviewer',
+    currentUserRole: "Reviewer",
     contributors: [
-      { userId: 'u1', displayName: 'Alice', xpContributed: 250 },
-      { userId: 'u2', displayName: 'Bob', xpContributed: 200 },
-      { userId: 'u3', displayName: 'Charlie', xpContributed: 150 },
-      { userId: 'u4', displayName: 'Diana', xpContributed: 50 },
+      { userId: "u1", displayName: "Alice", xpContributed: 250 },
+      { userId: "u2", displayName: "Bob", xpContributed: 200 },
+      { userId: "u3", displayName: "Charlie", xpContributed: 150 },
+      { userId: "u4", displayName: "Diana", xpContributed: 50 },
     ],
     deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
-}
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("The Algorithm Dragon")).toBeInTheDocument();
+    await expect(canvas.getByRole("progressbar")).toBeInTheDocument();
+    await expect(canvas.getByText("Core Questions")).toBeInTheDocument();
+  },
+};
 
 export const Defeated: Story = {
   args: {
-    title: 'The Memory Leak Hydra',
-    narrative: 'The hydra has been vanquished! All memory leaks have been plugged.',
-    phases: defaultPhases.map((p) => ({ ...p, status: 'COMPLETED' as const, currentXP: p.targetXP })),
+    title: "The Memory Leak Hydra",
+    narrative:
+      "The hydra has been vanquished! All memory leaks have been plugged.",
+    phases: defaultPhases.map((p) => ({
+      ...p,
+      status: "COMPLETED" as const,
+      currentXP: p.targetXP,
+    })),
     totalHP: 1000,
     totalDamage: 1000,
     active: true,
     bonusMultiplier: 2.0,
   },
-}
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("The Memory Leak Hydra")).toBeInTheDocument();
+    await expect(canvas.getByText(/vanquished/)).toBeInTheDocument();
+    await expect(canvas.getByRole("progressbar")).toBeInTheDocument();
+  },
+};
 
 export const SinglePhase: Story = {
   args: {
-    title: 'Sprint Challenge',
-    phases: [{ id: 'p1', title: 'Complete All Tasks', description: 'Submit all assignments', status: 'ACTIVE' as const, targetXP: 500, currentXP: 200 }],
+    title: "Sprint Challenge",
+    phases: [
+      {
+        id: "p1",
+        title: "Complete All Tasks",
+        description: "Submit all assignments",
+        status: "ACTIVE" as const,
+        targetXP: 500,
+        currentXP: 200,
+      },
+    ],
     totalHP: 500,
     totalDamage: 200,
     active: true,
   },
-}
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Sprint Challenge")).toBeInTheDocument();
+    await expect(canvas.getByText("Complete All Tasks")).toBeInTheDocument();
+    await expect(canvas.getByRole("progressbar")).toBeInTheDocument();
+  },
+};
 
 /** Interaction: verify multi-phase stepper, HP bar, and contributor display */
 export const ActiveInteraction: Story = {
   args: {
-    title: 'The Algorithm Dragon',
-    narrative: 'A fearsome dragon guards the sorting algorithms.',
+    title: "The Algorithm Dragon",
+    narrative: "A fearsome dragon guards the sorting algorithms.",
     phases: defaultPhases,
     totalHP: 1000,
     totalDamage: 650,
     active: true,
     bonusMultiplier: 2.0,
-    currentUserRole: 'Reviewer',
+    currentUserRole: "Reviewer",
     contributors: [
-      { userId: 'u1', displayName: 'Alice', xpContributed: 250 },
-      { userId: 'u2', displayName: 'Bob', xpContributed: 200 },
+      { userId: "u1", displayName: "Alice", xpContributed: 250 },
+      { userId: "u2", displayName: "Bob", xpContributed: 200 },
     ],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
     // Title is rendered
-    await expect(canvas.getByText('The Algorithm Dragon')).toBeInTheDocument()
+    await expect(canvas.getByText("The Algorithm Dragon")).toBeInTheDocument();
 
     // Narrative text is rendered
-    await expect(canvas.getByText(/fearsome dragon/)).toBeInTheDocument()
+    await expect(canvas.getByText(/fearsome dragon/)).toBeInTheDocument();
 
     // HP progress bar exists
-    const progressBar = canvas.getByRole('progressbar')
-    await expect(progressBar).toBeInTheDocument()
+    const progressBar = canvas.getByRole("progressbar");
+    await expect(progressBar).toBeInTheDocument();
 
     // Phase labels are in the stepper
-    await expect(canvas.getByText('Core Questions')).toBeInTheDocument()
-    await expect(canvas.getByText('Code Review')).toBeInTheDocument()
-    await expect(canvas.getByText('Final Challenge')).toBeInTheDocument()
+    await expect(canvas.getByText("Core Questions")).toBeInTheDocument();
+    await expect(canvas.getByText("Code Review")).toBeInTheDocument();
+    await expect(canvas.getByText("Final Challenge")).toBeInTheDocument();
 
     // Current phase detail shows active phase
-    await expect(canvas.getByText(/Review and improve/)).toBeInTheDocument()
+    await expect(canvas.getByText(/Review and improve/)).toBeInTheDocument();
 
     // Bonus multiplier chip
-    await expect(canvas.getByText(/2.*bonus/)).toBeInTheDocument()
+    await expect(canvas.getByText(/2.*bonus/)).toBeInTheDocument();
   },
-}
+};

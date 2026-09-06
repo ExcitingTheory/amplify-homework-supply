@@ -29,7 +29,7 @@ This workflow consists of 8 iterative steps that ensure high-quality TypeScript 
    - Example: `Phase1_Task1_Subtask1`, `Phase1_Task1_Subtask2`, `Phase2_Task1`, etc.
 5. Implement code with TypeScript compilation validation
 6. Add comprehensive unit tests
-7. **Run regression testing suite** (TypeScript, Storybook, Cypress, Unit tests)
+7. **Run regression testing suite** (TypeScript, Storybook, Playwright, Unit tests)
 8. Repeat until feature parity is achieved
 
 ---
@@ -64,7 +64,7 @@ This rule applies to:
 
 **Full regression testing is REQUIRED after completing each feature.**
 
-You **MUST** run the complete regression suite before proceeding to the next feature or phase. This includes TypeScript compilation, unit tests, Storybook build, and Cypress E2E tests. Do NOT proceed to the next feature or phase until ALL tests pass without errors.:
+You **MUST** run the complete regression suite before proceeding to the next feature or phase. This includes TypeScript compilation, unit tests, Storybook build, and Playwright browser tests. Do NOT proceed to the next feature or phase until ALL tests pass without errors.:
 
 ```bash
 # 1. TypeScript compilation (MUST pass with 0 errors)
@@ -76,8 +76,8 @@ npm run test -- --run
 # 3. Storybook build (MUST complete without errors)
 npm run build-storybook
 
-# 4. Cypress tests (MUST pass - run headless)
-npm run cypress:run
+# 4. Playwright browser tests (MUST pass - run headless)
+npm run e2e
 ```
 
 **Workflow Blocker**: If ANY test suite fails:
@@ -652,17 +652,17 @@ npm run build-storybook
 - Mock data structures are valid
 - All decorators and context providers work
 
-### 7.4: Cypress Tests (CLI - Headless)
+### 7.4: Playwright Browser Tests (CLI - Headless)
 
 ```bash
-# Run all Cypress E2E tests headlessly
-npm run cypress:run
+# Run all browser tests headlessly
+npm run e2e
 ```
 
 **Expected**: All tests pass. If tests fail:
 
-1. Review failure screenshots in `cypress/screenshots/`
-2. Check test videos in `cypress/videos/`
+1. Review failure screenshots in the Playwright test results directory
+2. Check test traces and videos in the Playwright test results directory
 3. Fix failing tests or implementation bugs
 4. Re-run until all pass
 
@@ -683,7 +683,7 @@ npm run cypress:run
    → FAIL: Fix Storybook build errors, retry
    → PASS: Continue
    ↓
-5. Run npm run cypress:run
+5. Run npm run e2e
    → FAIL: Fix E2E test failures, retry
    → PASS: Continue
    ↓
@@ -706,7 +706,7 @@ tsc --noEmit --project tsconfig.json && npm run test -- --run
 
 After completing a phase:
 
-1. **Run full regression testing suite** (Step 7) - TypeScript, Unit tests, Storybook build, Cypress
+1. **Run full regression testing suite** (Step 7) - TypeScript, Unit tests, Storybook build, Playwright
 2. **Check against [FEATURE_SPEC.md](../../docs/FEATURE_SPEC.md)**: Review if requirements are met
 3. **Check against [TESTING_GUIDE.md](../../docs/TESTING_GUIDE.md)**: Verify all test scenarios covered
 4. **Run coverage check**: `npm run test -- --run --coverage`
@@ -747,8 +747,8 @@ npm run test -- --run
 # 3. Storybook build
 npm run build-storybook
 
-# 4. Cypress E2E tests
-npm run cypress:run
+# 4. Playwright browser tests
+npm run e2e
 ```
 
 ### Optional Additional Checks:
@@ -773,7 +773,7 @@ Per-Phase:
      ↓
   4. npm run build-storybook
      ↓
-  5. npm run cypress:run
+   5. npm run e2e
      ↓
   6. All pass? → Next phase
 ```
@@ -808,9 +808,8 @@ npm run test -- --run --coverage # With coverage report
 npm run storybook                # Dev server (port 6006)
 npm run build-storybook          # CLI build (validates all stories)
 
-# Cypress E2E tests
-npm run cypress:run              # Headless (CLI)
-npm run cypress:open             # Interactive (development)
+# Playwright browser tests
+npm run e2e                       # Headless (CLI)
 
 # Linting
 npm run lint
@@ -832,8 +831,8 @@ npm run test -- --run
 # 3. Storybook build - MUST complete without errors
 npm run build-storybook
 
-# 4. Cypress E2E tests - MUST all pass
-npm run cypress:run
+# 4. Playwright browser tests - MUST all pass
+npm run e2e
 
 # 5. Coverage check (informational)
 npm run test -- --run --coverage
@@ -852,7 +851,7 @@ npm run test -- --run --coverage
   - [ ] TypeScript compilation: 0 errors
   - [ ] Unit tests (Vitest): All passing
   - [ ] Storybook build: Completes without errors
-  - [ ] Cypress E2E: All passing
+  - [ ] Playwright browser tests: All passing
 - [ ] All feature spec requirements met
 - [ ] All TODOs completed
 - [ ] Code coverage meets target
@@ -1077,7 +1076,7 @@ Before proceeding to next phase or marking feature complete:
 - [ ] `tsc --noEmit --project tsconfig.json` - 0 errors
 - [ ] `npm run test -- --run` - All unit tests pass
 - [ ] `npm run build-storybook` - Builds without errors
-- [ ] `npm run cypress:run` - All E2E tests pass
+- [ ] `npm run e2e` - All browser tests pass
 
 **Documentation**:
 

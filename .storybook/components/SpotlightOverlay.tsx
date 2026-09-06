@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Box,
   Button,
@@ -7,13 +7,12 @@ import {
   Stack,
   Typography,
   Portal,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import CheckIcon from '@mui/icons-material/Check';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import CheckIcon from "@mui/icons-material/Check";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 export interface SpotlightStep {
   /** ID of the step */
@@ -21,7 +20,7 @@ export interface SpotlightStep {
   /** CSS selector for the element to highlight */
   targetSelector?: string;
   /** Which frame to search for the target element: 'preview' (default) or 'manager' */
-  targetFrame?: 'preview' | 'manager';
+  targetFrame?: "preview" | "manager";
   /** Manual position if no target selector */
   targetPosition?: {
     top: number;
@@ -36,7 +35,7 @@ export interface SpotlightStep {
   /** Optional list of action items */
   actions?: string[];
   /** Position of the tooltip relative to the spotlight */
-  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  tooltipPosition?: "top" | "bottom" | "left" | "right" | "center";
   /** Whether this is the last step */
   isLast?: boolean;
   /** If true, the user can interact with the target element without auto-advancing the tour */
@@ -52,8 +51,6 @@ export interface SpotlightOverlayProps {
   onNext?: () => void;
   /** Callback when user clicks Skip */
   onSkip?: () => void;
-  /** Callback when user clicks Back (go to previous step) */
-  onBack?: () => void;
   /** Callback when user completes the flow */
   onComplete?: () => void;
   /** Callback when user closes the spotlight */
@@ -63,15 +60,15 @@ export interface SpotlightOverlayProps {
   /** Whether a page navigation is in progress (disables Next) */
   isNavigating?: boolean;
   /** Mode: tutorial (show steps) or quiz (minimal guidance) */
-  mode?: 'tutorial' | 'quiz';
+  mode?: "tutorial" | "quiz";
 }
 
 /**
  * SpotlightOverlay Component
- * 
+ *
  * Creates a guided tour overlay with a highlighted spotlight area,
  * dimmed background, and contextual tooltip instructions.
- * 
+ *
  * Features:
  * - Semi-transparent overlay (scrim) to dim non-focused areas
  * - Transparent "spotlight" hole to highlight target elements
@@ -86,17 +83,17 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   currentStepIndex = 0,
   onNext,
   onSkip,
-  onBack,
   onComplete,
   onClose,
   isOpen,
   isNavigating = false,
-  mode = 'tutorial',
+  mode = "tutorial",
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [iframeRect, setIframeRect] = useState<DOMRect | null>(null);
-  const [scrimContainer, setScrimContainer] = useState<HTMLElement | null>(null);
-  const [isPageReady, setIsPageReady] = useState(false);
+  const [scrimContainer, setScrimContainer] = useState<HTMLElement | null>(
+    null,
+  );
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
@@ -110,14 +107,16 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
   /** Measures the preview iframe and stores its rect + parent container in state */
   const updateIframeRect = useCallback(() => {
-    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    const iframe = document.querySelector(
+      "#storybook-preview-iframe",
+    ) as HTMLIFrameElement;
     if (iframe) {
       setIframeRect(iframe.getBoundingClientRect());
       // Use the iframe's parent as the scrim container so stacking stays within the preview area
       if (iframe.parentElement) {
         // Ensure the parent is a positioning context for the absolute scrim
-        if (getComputedStyle(iframe.parentElement).position === 'static') {
-          iframe.parentElement.style.position = 'relative';
+        if (getComputedStyle(iframe.parentElement).position === "static") {
+          iframe.parentElement.style.position = "relative";
         }
         setScrimContainer(iframe.parentElement);
       }
@@ -130,35 +129,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     dragCurrentRef.current = { x: 0, y: 0 };
     tooltipPositionedRef.current = false;
     if (tooltipRef.current) {
-      tooltipRef.current.style.transform = '';
+      tooltipRef.current.style.transform = "";
     }
   }, [currentStepIndex]);
-
-  // Track whether the preview iframe has fully loaded — gates the Next button.
-  // Checks readyState immediately on open/step-change; otherwise waits for the
-  // iframe's load event plus a short settle delay for React to mount inside it.
-  useEffect(() => {
-    if (!isOpen) {
-      setIsPageReady(false);
-      return;
-    }
-    if (isNavigating) {
-      setIsPageReady(false);
-      return;
-    }
-    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-    if (iframe?.contentDocument?.readyState === 'complete') {
-      setIsPageReady(true);
-      return;
-    }
-    setIsPageReady(false);
-    const handleLoad = () => {
-      // Extra settle time to let React components mount inside the iframe
-      setTimeout(() => setIsPageReady(true), 400);
-    };
-    iframe?.addEventListener('load', handleLoad, { once: true });
-    return () => iframe?.removeEventListener('load', handleLoad);
-  }, [isOpen, currentStepIndex, isNavigating]);
 
   // Drag handlers — direct DOM manipulation for performance
   const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -171,8 +144,10 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       offsetY: dragCurrentRef.current.y,
     };
     // Block iframe from stealing mousemove events during drag
-    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-    if (iframe) iframe.style.pointerEvents = 'none';
+    const iframe = document.querySelector(
+      "#storybook-preview-iframe",
+    ) as HTMLIFrameElement;
+    if (iframe) iframe.style.pointerEvents = "none";
   }, []);
 
   useEffect(() => {
@@ -191,20 +166,24 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       if (!isDraggingRef.current) return;
       isDraggingRef.current = false;
       // Restore iframe pointer events
-      const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-      if (iframe) iframe.style.pointerEvents = '';
+      const iframe = document.querySelector(
+        "#storybook-preview-iframe",
+      ) as HTMLIFrameElement;
+      if (iframe) iframe.style.pointerEvents = "";
       // Commit final position to React state so it survives re-renders
       setDragOffset({ ...dragCurrentRef.current });
     };
 
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('mouseup', handleDragEnd);
+    window.addEventListener("mousemove", handleDragMove);
+    window.addEventListener("mouseup", handleDragEnd);
     return () => {
-      window.removeEventListener('mousemove', handleDragMove);
-      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener("mousemove", handleDragMove);
+      window.removeEventListener("mouseup", handleDragEnd);
       // Ensure iframe pointer events are restored on cleanup
-      const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-      if (iframe) iframe.style.pointerEvents = '';
+      const iframe = document.querySelector(
+        "#storybook-preview-iframe",
+      ) as HTMLIFrameElement;
+      if (iframe) iframe.style.pointerEvents = "";
     };
   }, []);
 
@@ -223,13 +202,15 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
     if (currentStep.targetSelector) {
       // Determine which document to search based on targetFrame
-      const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+      const iframe = document.querySelector(
+        "#storybook-preview-iframe",
+      ) as HTMLIFrameElement;
       let targetDoc: Document;
       let targetElement: Element | null = null;
       let isManagerFrame = false;
 
       try {
-        if (currentStep.targetFrame === 'manager') {
+        if (currentStep.targetFrame === "manager") {
           // Search in the manager (parent) document
           targetDoc = document;
           targetElement = document.querySelector(currentStep.targetSelector);
@@ -242,10 +223,13 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         }
       } catch (e) {
         // Invalid CSS selector (e.g. Playwright-style :has-text()) — fall back to first selector
-        const firstSelector = currentStep.targetSelector.split(',')[0].trim();
-        console.debug('[SpotlightOverlay] Invalid selector, trying first part:', firstSelector);
+        const firstSelector = currentStep.targetSelector.split(",")[0].trim();
+        console.debug(
+          "[SpotlightOverlay] Invalid selector, trying first part:",
+          firstSelector,
+        );
         try {
-          if (currentStep.targetFrame === 'manager') {
+          if (currentStep.targetFrame === "manager") {
             targetElement = document.querySelector(firstSelector);
             isManagerFrame = true;
           } else {
@@ -255,70 +239,94 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           }
         } catch {
           // Still invalid — give up gracefully
-          console.debug('[SpotlightOverlay] All selectors invalid, centering');
+          console.debug("[SpotlightOverlay] All selectors invalid, centering");
         }
       }
 
-      console.debug('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector, 'in', isManagerFrame ? 'manager' : 'preview');
-      console.debug('[SpotlightOverlay] Element found:', !!targetElement);
+      console.debug(
+        "[SpotlightOverlay] Looking for selector:",
+        currentStep.targetSelector,
+        "in",
+        isManagerFrame ? "manager" : "preview",
+      );
+      console.debug("[SpotlightOverlay] Element found:", !!targetElement);
 
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
-        
+
         // Adjust for iframe offset only if element is in the preview iframe
         if (iframe && !isManagerFrame) {
           const ifrRect = iframe.getBoundingClientRect();
-          setTargetRect(new DOMRect(
-            rect.left + ifrRect.left,
-            rect.top + ifrRect.top,
-            rect.width,
-            rect.height
-          ));
-          console.debug('[SpotlightOverlay] Target rect (iframe-adjusted):', {
+          setTargetRect(
+            new DOMRect(
+              rect.left + ifrRect.left,
+              rect.top + ifrRect.top,
+              rect.width,
+              rect.height,
+            ),
+          );
+          console.debug("[SpotlightOverlay] Target rect (iframe-adjusted):", {
             left: rect.left + ifrRect.left,
             top: rect.top + ifrRect.top,
             width: rect.width,
-            height: rect.height
+            height: rect.height,
           });
         } else {
           setTargetRect(rect);
-          console.debug('[SpotlightOverlay] Target rect (manager):', {
+          console.debug("[SpotlightOverlay] Target rect (manager):", {
             left: rect.left,
             top: rect.top,
             width: rect.width,
-            height: rect.height
+            height: rect.height,
           });
         }
 
         // Attach click listener to advance tour when target element is clicked
-        // Skip for interactable steps so the user can interact without auto-advancing
-        if (!currentStep.interactable) {
-          const handleTargetClick = () => {
-            console.log('[SpotlightOverlay] 🎯 Target element clicked, advancing tour');
-            if (currentStep.isLast || currentStepIndex === steps.length - 1) {
-              onComplete?.();
-            } else {
-              onNext?.();
-            }
-          };
-          targetElement.addEventListener('click', handleTargetClick);
-          targetClickCleanupRef.current = () => {
-            targetElement.removeEventListener('click', handleTargetClick);
-          };
-        }
+        const handleTargetClick = (e: Event) => {
+          // For interactable steps, only advance on button/submit clicks — not form inputs
+          if (currentStep.interactable) {
+            const clicked = e.target as HTMLElement;
+            const tag = clicked.tagName.toLowerCase();
+            const isFormField =
+              tag === "input" || tag === "textarea" || tag === "select";
+            const isButton =
+              tag === "button" ||
+              clicked.closest('button, [role="button"], [type="submit"]');
+            if (isFormField || !isButton) return;
+          }
+          console.log(
+            "[SpotlightOverlay] 🎯 Target element clicked, advancing tour",
+          );
+          if (currentStep.isLast || currentStepIndex === steps.length - 1) {
+            onComplete?.();
+          } else {
+            onNext?.();
+          }
+        };
+        targetElement.addEventListener("click", handleTargetClick);
+        targetClickCleanupRef.current = () => {
+          targetElement.removeEventListener("click", handleTargetClick);
+        };
       } else {
         // Element not found - use center of screen
-        console.debug('[SpotlightOverlay] Target element not found, using center position');
+        console.debug(
+          "[SpotlightOverlay] Target element not found, using center position",
+        );
         setTargetRect(null);
       }
     } else if (currentStep.targetPosition) {
       // Use manual position
       const { top, left, width, height } = currentStep.targetPosition;
       setTargetRect(new DOMRect(left, top, width, height));
-      console.debug('[SpotlightOverlay] Using manual position:', currentStep.targetPosition);
+      console.debug(
+        "[SpotlightOverlay] Using manual position:",
+        currentStep.targetPosition,
+      );
     } else {
       // No target - center of screen
-      console.debug('[SpotlightOverlay] No target selector or position, centering');
+      console.debug(
+        "[SpotlightOverlay] No target selector or position, centering",
+      );
       setTargetRect(null);
     }
   };
@@ -336,11 +344,24 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     if (tooltipPositionedRef.current && !force) return;
 
     if (!targetRect) {
-      // Center of screen
-      setTooltipPosition({
-        top: window.innerHeight / 2 - 100,
-        left: window.innerWidth / 2 - 150,
-      });
+      // Center of screen — use the tooltip's actual measured size (it grows
+      // when the "Target Element Not Found" warning or instructions render),
+      // and clamp so the card — and its Next/Done button — never renders
+      // partially or fully outside the viewport.
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const tooltipEl = tooltipRef.current;
+      const tooltipWidth = tooltipEl?.offsetWidth || 320;
+      const tooltipHeight = tooltipEl?.offsetHeight || 200;
+      const top = Math.max(
+        10,
+        Math.min(vh / 2 - tooltipHeight / 2, vh - tooltipHeight - 10),
+      );
+      const left = Math.max(
+        10,
+        Math.min(vw / 2 - tooltipWidth / 2, vw - tooltipWidth - 10),
+      );
+      setTooltipPosition({ top, left });
       // Don't mark as positioned until we have a target (if one is expected)
       if (!currentStep.targetSelector) {
         tooltipPositionedRef.current = true;
@@ -385,17 +406,20 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       pos.left + tooltipWidth <= vw - 10;
 
     // Preferred side order based on the step's tooltipPosition
-    const preferred = currentStep.tooltipPosition || 'right';
+    const preferred = currentStep.tooltipPosition || "right";
     const sideOrder: string[] = {
-      right: ['right', 'left', 'bottom', 'top'],
-      left: ['left', 'right', 'bottom', 'top'],
-      bottom: ['bottom', 'top', 'right', 'left'],
-      top: ['top', 'bottom', 'right', 'left'],
-      center: ['right', 'bottom', 'left', 'top'],
+      right: ["right", "left", "bottom", "top"],
+      left: ["left", "right", "bottom", "top"],
+      bottom: ["bottom", "top", "right", "left"],
+      top: ["top", "bottom", "right", "left"],
+      center: ["right", "bottom", "left", "top"],
     }[preferred];
 
     // Pick the first side that fits, or fall back to the preferred side
-    let chosen = positions[preferred];
+    // ("center" isn't a key in `positions`, and no side may fit at all, so
+    // fall back to sideOrder[0] — always a valid `positions` key — instead
+    // of leaving `chosen` undefined and crashing on `chosen.top` below).
+    let chosen = positions[preferred] || positions[sideOrder[0]];
     for (const side of sideOrder) {
       if (fits(positions[side])) {
         chosen = positions[side];
@@ -432,10 +456,14 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     };
 
     // Listen to iframe load event - fires when new story is loaded
-    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-    
+    const iframe = document.querySelector(
+      "#storybook-preview-iframe",
+    ) as HTMLIFrameElement;
+
     const handleIframeLoad = () => {
-      console.log('[SpotlightOverlay] 🎬 Iframe loaded - story rendered, updating target position');
+      console.log(
+        "[SpotlightOverlay] 🎬 Iframe loaded - story rendered, updating target position",
+      );
       // Small delay to ensure DOM is fully ready
       setTimeout(() => {
         updateTargetPosition();
@@ -444,7 +472,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     };
 
     if (iframe) {
-      iframe.addEventListener('load', handleIframeLoad);
+      iframe.addEventListener("load", handleIframeLoad);
     }
 
     // Listen to Storybook's storyRendered event via postMessage
@@ -452,13 +480,18 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       // Check if message is from Storybook iframe
       if (event.source === iframe?.contentWindow) {
         const data = event.data;
-        
+
         // Storybook emits various events - look for story rendering completion
-        if (data?.type === 'storyRendered' || 
-            data?.event === 'storyRendered' ||
-            data?.eventName === 'storyRendered' ||
-            data?.name === 'storyRendered') {
-          console.log('[SpotlightOverlay] ✨ Story rendered event received:', data);
+        if (
+          data?.type === "storyRendered" ||
+          data?.event === "storyRendered" ||
+          data?.eventName === "storyRendered" ||
+          data?.name === "storyRendered"
+        ) {
+          console.log(
+            "[SpotlightOverlay] ✨ Story rendered event received:",
+            data,
+          );
           setTimeout(() => {
             updateTargetPosition();
             calculateTooltipPosition();
@@ -467,35 +500,45 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       }
     };
 
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
 
     // Retry finding target element after navigation as fallback
     // This handles edge cases where events might be missed
     const retryIntervals = [100, 300, 500, 1000, 2000];
     const retryTimeouts: NodeJS.Timeout[] = [];
-    
-    retryIntervals.forEach(delay => {
+
+    retryIntervals.forEach((delay) => {
       const timeout = setTimeout(() => {
-        console.debug('[SpotlightOverlay] ⏱️ Retry attempt after', delay, 'ms');
+        console.debug("[SpotlightOverlay] ⏱️ Retry attempt after", delay, "ms");
         updateTargetPosition();
         calculateTooltipPosition();
       }, delay);
       retryTimeouts.push(timeout);
     });
 
+    // Keep polling for target element until found (handles slow-loading pages)
+    let pollInterval: NodeJS.Timeout | null = null;
+    if (currentStep.targetSelector) {
+      pollInterval = setInterval(() => {
+        updateTargetPosition();
+        calculateTooltipPosition();
+      }, 1000);
+    }
+
     // Update on resize and scroll
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleUpdate, true);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleUpdate, true);
 
     if (iframe?.contentWindow) {
-      iframe.contentWindow.addEventListener('scroll', handleUpdate, true);
-      iframe.contentWindow.addEventListener('resize', handleResize);
+      iframe.contentWindow.addEventListener("scroll", handleUpdate, true);
+      iframe.contentWindow.addEventListener("resize", handleResize);
     }
 
     return () => {
       // Clear retry timeouts
-      retryTimeouts.forEach(timeout => clearTimeout(timeout));
-      
+      retryTimeouts.forEach((timeout) => clearTimeout(timeout));
+      if (pollInterval) clearInterval(pollInterval);
+
       // Clean up target click listener
       if (targetClickCleanupRef.current) {
         targetClickCleanupRef.current();
@@ -504,15 +547,15 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
       // Remove event listeners
       if (iframe) {
-        iframe.removeEventListener('load', handleIframeLoad);
+        iframe.removeEventListener("load", handleIframeLoad);
       }
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleUpdate, true);
-      
+      window.removeEventListener("message", handleMessage);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleUpdate, true);
+
       if (iframe?.contentWindow) {
-        iframe.contentWindow.removeEventListener('scroll', handleUpdate, true);
-        iframe.contentWindow.removeEventListener('resize', handleResize);
+        iframe.contentWindow.removeEventListener("scroll", handleUpdate, true);
+        iframe.contentWindow.removeEventListener("resize", handleResize);
       }
     };
   }, [isOpen, currentStep, currentStepIndex]);
@@ -531,14 +574,17 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     }
   };
 
-  const isLastStep = currentStep.isLast || currentStepIndex === steps.length - 1;
+  const isLastStep =
+    currentStep.isLast || currentStepIndex === steps.length - 1;
   const isFirstStep = currentStepIndex === 0;
-  const showSpotlightLayer = mode === 'tutorial';
-
-  // Disable Next only while the page is loading/navigating — never block on missing targets.
-  // A missing target element shows an informational warning but does NOT prevent advancement.
-  const isNextDisabled = isNavigating || !isPageReady;
-  const isLoading = isNavigating || !isPageReady;
+  const showSpotlightLayer = mode === "tutorial";
+  // Steps with a real target advance only by the user clicking that element
+  // in the app — no manual button. Only info-only steps (no target) get one.
+  const hasManualAdvance = !currentStep.targetSelector;
+  // Informational only — never gates advancement, just tells the user why
+  // the highlighted element isn't visible yet.
+  const isWaitingForTarget = !!currentStep.targetSelector && !targetRect;
+  const isLoading = isNavigating;
 
   return (
     <>
@@ -549,23 +595,23 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             ref={overlayRef}
             data-testid="spotlight-overlay"
             sx={{
-              position: 'fixed',
+              position: "fixed",
               top: 0,
               left: 0,
-              width: '100vw',
-              height: '100vh',
+              width: "100vw",
+              height: "100vh",
               zIndex: 9998,
-              pointerEvents: 'none',
+              pointerEvents: "none",
             }}
           >
             <svg
               style={{
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none',
+                width: "100%",
+                height: "100%",
+                pointerEvents: "none",
               }}
             >
               <defs>
@@ -596,23 +642,26 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             {targetRect && (
               <Box
                 sx={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: targetRect.top - 8,
                   left: targetRect.left - 8,
                   width: targetRect.width + 16,
                   height: targetRect.height + 16,
-                  border: '3px solid',
-                  borderColor: '#4CAF50',
-                  borderRadius: '8px',
-                  pointerEvents: 'none',
-                  boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)',
-                  animation: 'pulse 2s ease-in-out infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': {
-                      boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)',
+                  border: "3px solid",
+                  borderColor: "#4CAF50",
+                  borderRadius: "8px",
+                  pointerEvents: "none",
+                  boxShadow:
+                    "0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)",
+                  animation: "pulse 2s ease-in-out infinite",
+                  "@keyframes pulse": {
+                    "0%, 100%": {
+                      boxShadow:
+                        "0 0 0 4px rgba(76, 175, 80, 0.2), 0 0 20px rgba(76, 175, 80, 0.4)",
                     },
-                    '50%': {
-                      boxShadow: '0 0 0 8px rgba(76, 175, 80, 0.1), 0 0 30px rgba(76, 175, 80, 0.6)',
+                    "50%": {
+                      boxShadow:
+                        "0 0 0 8px rgba(76, 175, 80, 0.1), 0 0 30px rgba(76, 175, 80, 0.6)",
                     },
                   },
                 }}
@@ -624,95 +673,151 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
       {/* Tooltip/Coachmark — separate Portal to body, above everything */}
       <Portal>
-      <Card
-        ref={tooltipRef}
-        data-testid="spotlight-tooltip"
-        sx={{
-          position: 'fixed',
-          top: tooltipPosition.top,
-          left: tooltipPosition.left,
-          transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-          willChange: isDraggingRef.current ? 'transform' : 'auto',
-          width: 320,
-          maxWidth: 'calc(100vw - 20px)',
-          maxHeight: 'calc(100vh - 20px)',
-          overflow: 'auto',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-          borderLeft: '4px solid',
-          borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
-          zIndex: 10000,
-          pointerEvents: 'auto',
-        }}
-      >
-            <CardContent>
-              {/* Header – drag handle */}
-              <Box
-                onMouseDown={handleDragStart}
+        <Card
+          ref={tooltipRef}
+          data-testid="spotlight-tooltip"
+          sx={{
+            position: "fixed",
+            top: tooltipPosition.top,
+            left: tooltipPosition.left,
+            transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+            willChange: isDraggingRef.current ? "transform" : "auto",
+            width: 320,
+            maxWidth: "calc(100vw - 20px)",
+            maxHeight: "calc(100vh - 20px)",
+            overflow: "auto",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+            borderLeft: "4px solid",
+            borderColor: mode === "tutorial" ? "#4CAF50" : "#2196F3",
+            zIndex: 10000,
+            pointerEvents: "auto",
+          }}
+        >
+          <CardContent>
+            {/* Header – drag handle */}
+            <Box
+              onMouseDown={handleDragStart}
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                mb: 2,
+                cursor: "grab",
+                "&:active": { cursor: "grabbing" },
+                userSelect: "none",
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="overline"
+                  sx={{ color: "text.secondary", fontSize: "0.65rem" }}
+                >
+                  {mode === "tutorial" ? "📖 Tutorial" : "🎯 Quiz"} • Step{" "}
+                  {currentStepIndex + 1} of {steps.length}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                    color: mode === "tutorial" ? "#4CAF50" : "#2196F3",
+                  }}
+                >
+                  {currentStep.title}
+                </Typography>
+              </Box>
+              <Button
+                size="small"
+                onClick={onClose}
                 sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
+                  ml: 1,
+                  minWidth: "auto",
+                  color: "inherit",
+                  p: 0.5,
+                }}
+                aria-label="Close spotlight guide"
+              >
+                <CloseIcon fontSize="small" />
+              </Button>
+            </Box>
+
+            {/* Description */}
+            <Typography variant="body2" sx={{ mb: 2, color: "text.primary" }}>
+              {currentStep.description}
+            </Typography>
+
+            {/* Warning if page is loading or target element not found */}
+            {(isLoading || isWaitingForTarget) && (
+              <Box
+                sx={{
                   mb: 2,
-                  cursor: 'grab',
-                  '&:active': { cursor: 'grabbing' },
-                  userSelect: 'none',
+                  p: 1.5,
+                  backgroundColor: "rgba(255, 152, 0, 0.1)",
+                  borderRadius: 1,
+                  borderLeft: "3px solid #FF9800",
                 }}
               >
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="overline" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
-                    {mode === 'tutorial' ? '📖 Tutorial' : '🎯 Quiz'} • Step {currentStepIndex + 1} of {steps.length}
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', color: mode === 'tutorial' ? '#4CAF50' : '#2196F3' }}>
-                    {currentStep.title}
-                  </Typography>
-                </Box>
-                <Button 
-                  size="small" 
-                  onClick={onClose} 
-                  sx={{ 
-                    ml: 1, 
-                    minWidth: 'auto',
-                    color: 'inherit',
-                    p: 0.5,
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#F57C00",
+                    fontWeight: 600,
+                    display: "block",
+                    mb: 0.5,
                   }}
-                  aria-label="Close spotlight guide"
                 >
-                  <CloseIcon fontSize="small" />
-                </Button>
+                  {isLoading
+                    ? "⏳ Loading page..."
+                    : "⏳ Waiting for element..."}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: "0.7rem",
+                    display: "block",
+                  }}
+                >
+                  {isLoading
+                    ? "The story page is still loading."
+                    : "Waiting for this step's target to appear in the app — perform the action described above to continue."}
+                </Typography>
               </Box>
+            )}
 
-              {/* Description */}
-              <Typography variant="body2" sx={{ mb: 2, color: 'text.primary' }}>
-                {currentStep.description}
-              </Typography>
-
-              {/* Warning if page is loading or target element not found */}
-              {(isLoading || (currentStep.targetSelector && !targetRect)) && (
-                <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(255, 152, 0, 0.1)', borderRadius: 1, borderLeft: '3px solid #FF9800' }}>
-                  <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    {isLoading ? '⏳ Loading page...' : '⚠️ Target Element Not Found'}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}>
-                    {isLoading
-                      ? 'The story page is still loading. Next will be enabled once the page is fully ready.'
-                      : 'The component we\'re looking for hasn\'t loaded yet. The spotlight will keep trying to find it. Follow the instructions below to complete this step.'}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* Action items - Tutorial mode only */}
-              {mode === 'tutorial' && currentStep.actions && currentStep.actions.length > 0 && (
-                <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(76, 175, 80, 0.08)', borderRadius: 1 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 1, color: 'text.primary' }}>
+            {/* Action items - Tutorial mode only */}
+            {mode === "tutorial" &&
+              currentStep.actions &&
+              currentStep.actions.length > 0 && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    p: 1.5,
+                    backgroundColor: "rgba(76, 175, 80, 0.08)",
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 600,
+                      display: "block",
+                      mb: 1,
+                      color: "text.primary",
+                    }}
+                  >
                     Follow these steps:
                   </Typography>
-                  <Box component="ol" sx={{ m: 0, pl: 2, color: 'text.secondary' }}>
+                  <Box
+                    component="ol"
+                    sx={{ m: 0, pl: 2, color: "text.secondary" }}
+                  >
                     {currentStep.actions.map((action, idx) => (
-                      <Typography 
-                        key={idx} 
-                        component="li" 
-                        variant="caption" 
-                        sx={{ mb: 0.5, fontSize: '0.75rem' }}
+                      <Typography
+                        key={idx}
+                        component="li"
+                        variant="caption"
+                        sx={{ mb: 0.5, fontSize: "0.75rem" }}
                       >
                         {action}
                       </Typography>
@@ -721,61 +826,72 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                 </Box>
               )}
 
-              {/* Quiz mode hint */}
-              {mode === 'quiz' && (
-                <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                    💡 Use the hints and complete the task in the target page. Completion is detected automatically from your actions.
-                  </Typography>
-                </Box>
-              )}
+            {/* Quiz mode hint */}
+            {mode === "quiz" && (
+              <Box
+                sx={{
+                  mb: 2,
+                  p: 1.5,
+                  backgroundColor: "rgba(33, 150, 243, 0.08)",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: "0.75rem",
+                    fontStyle: "italic",
+                  }}
+                >
+                  💡 Use the hints and complete the task in the target page.
+                  Completion is detected automatically from your actions.
+                </Typography>
+              </Box>
+            )}
 
-              {/* Navigation buttons */}
-              <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                {/* Back button — disabled on first step */}
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={onBack}
-                  disabled={isFirstStep || !onBack}
-                  startIcon={<ArrowBackIcon />}
-                  sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
-                  aria-label="Go to previous step"
-                >
-                  Back
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={onSkip}
-                  startIcon={<SkipNextIcon />}
-                  sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
-                >
-                  Skip
-                </Button>
+            {/* Navigation buttons */}
+            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={onSkip}
+                startIcon={<SkipNextIcon />}
+                sx={{ textTransform: "none", minWidth: "auto", px: 1 }}
+              >
+                Skip Task
+              </Button>
+              {hasManualAdvance && (
                 <Button
                   variant="contained"
                   size="small"
                   onClick={handleNext}
-                  disabled={isNextDisabled}
-                  endIcon={isLoading ? undefined : isLastStep ? <CheckIcon /> : isFirstStep ? <PlayArrowIcon /> : <ArrowForwardIcon />}
-                  sx={{ 
-                    textTransform: 'none',
+                  endIcon={
+                    isLastStep ? (
+                      <CheckIcon />
+                    ) : isFirstStep ? (
+                      <PlayArrowIcon />
+                    ) : (
+                      <ArrowForwardIcon />
+                    )
+                  }
+                  sx={{
+                    textTransform: "none",
                     flex: 1,
-                    backgroundColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
-                    '&:hover': {
-                      backgroundColor: mode === 'tutorial' ? '#45a049' : '#1976D2',
-                    },
-                    '&.Mui-disabled': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                    backgroundColor:
+                      mode === "tutorial" ? "#4CAF50" : "#2196F3",
+                    "&:hover": {
+                      backgroundColor:
+                        mode === "tutorial" ? "#45a049" : "#1976D2",
                     },
                   }}
                 >
-                  {isLoading ? 'Loading...' : isLastStep ? 'Done' : isFirstStep ? 'Start' : 'Next'}
+                  {isLastStep ? "Done" : isFirstStep ? "Start" : "Continue"}
                 </Button>
-              </Stack>
-            </CardContent>
-          </Card>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
       </Portal>
     </>
   );

@@ -1,11 +1,11 @@
-import React from 'react';
-import { WorkbookProgress } from './WorkbookProgress';
-import UnitContext from '../../context/unitContext';
-import { expect } from 'storybook/test'
+import React from "react";
+import { WorkbookProgress } from "./WorkbookProgress";
+import UnitContext from "../../context/unitContext";
+import { expect, within } from "storybook/test";
 
 function withUnitContext(stats = {}, overrides = {}) {
   const base = {
-    unit: { id: 'unit-1' },
+    unit: { id: "unit-1" },
     workbookEnabled: true,
     workbook: {
       provider: { awareness: { getStates: () => new Map() } },
@@ -27,10 +27,10 @@ function withUnitContext(stats = {}, overrides = {}) {
 }
 
 export default {
-  title: '📓 Workbook/Progress',
+  title: "📓 Workbook/Progress",
   component: WorkbookProgress,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     disableUnitContext: true,
     disableSectionContext: true,
     disableDictionaryContext: true,
@@ -39,50 +39,65 @@ export default {
 
 export const Default = {
   decorators: [withUnitContext()],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
   },
 };
 
 export const Compact = {
-  args: { variant: 'compact' },
+  args: { variant: "compact" },
   decorators: [withUnitContext()],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/6\/10 complete/);
   },
 };
 
 export const Detailed = {
-  args: { variant: 'detailed' },
+  args: { variant: "detailed" },
   decorators: [withUnitContext()],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Progress");
+    await canvas.findByText("60%");
   },
 };
 
 export const Complete = {
-  args: { variant: 'detailed' },
+  args: { variant: "detailed" },
   decorators: [
-    withUnitContext({ completion: 100, accuracy: 92, totalBlocks: 8, completeBlocks: 8 }),
+    withUnitContext({
+      completion: 100,
+      accuracy: 92,
+      totalBlocks: 8,
+      completeBlocks: 8,
+    }),
   ],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("100%");
   },
 };
 
 export const JustStarted = {
-  args: { variant: 'detailed' },
+  args: { variant: "detailed" },
   decorators: [
-    withUnitContext({ completion: 10, accuracy: 0, totalBlocks: 10, completeBlocks: 1 }),
+    withUnitContext({
+      completion: 10,
+      accuracy: 0,
+      totalBlocks: 10,
+      completeBlocks: 1,
+    }),
   ],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("10%");
   },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({}, { workbookEnabled: false })],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(canvasElement.textContent?.trim()).toBe("");
   },
 };

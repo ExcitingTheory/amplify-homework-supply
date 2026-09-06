@@ -1,26 +1,26 @@
 /**
  * QuestionEditor2 Integration Tests
- * 
+ *
  * Tests the complete question management workflow including:
  * - Creating different question types (MC, short answer, etc.)
  * - Importing questions from documents
  * - Question preview and editing
  * - Audio/image attachments
  * - Question bank organization
- * 
+ *
  * Usage:
  *   npm test test/integration/question-editor.test.ts
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import QuestionsReview2 from '../../src/components/QuestionsReview2';
-import DictionaryContext from '../../src/context/dictionaryContext';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import QuestionsReview2 from "../../src/components/QuestionsReview2";
+import DictionaryContext from "../../src/context/dictionaryContext";
 
 // Mock Amplify modules
-vi.mock('aws-amplify/datastore', () => ({
+vi.mock("aws-amplify/datastore", () => ({
   DataStore: {
     observeQuery: vi.fn(),
     save: vi.fn(),
@@ -28,7 +28,7 @@ vi.mock('aws-amplify/datastore', () => ({
   },
 }));
 
-vi.mock('aws-amplify/storage', () => ({
+vi.mock("aws-amplify/storage", () => ({
   uploadData: vi.fn(),
   getUrl: vi.fn(),
 }));
@@ -40,18 +40,27 @@ const mockModels = {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    list: vi.fn(),
+    list: vi.fn().mockResolvedValue({ data: [] }),
+  },
+  QuestionUnit: {
+    create: vi.fn(),
+    list: vi.fn().mockResolvedValue({ data: [] }),
+  },
+  DocumentQuestion: {
+    create: vi.fn(),
+    list: vi.fn().mockResolvedValue({ data: [] }),
   },
   ParsedContent: {
+    update: vi.fn().mockResolvedValue({ data: { id: "parsed-1" } }),
     get: vi.fn().mockResolvedValue({
       data: {
-        id: 'parsed-1',
-        documentID: 'doc-1',
+        id: "parsed-1",
+        documentID: "doc-1",
         questionsJSON: JSON.stringify([
           {
-            prompt: 'What is kanji?',
-            answer: 'Chinese characters used in Japanese',
-            type: 'short_answer',
+            prompt: "What is kanji?",
+            answer: "Chinese characters used in Japanese",
+            type: "short_answer",
           },
         ]),
       },
@@ -59,13 +68,13 @@ const mockModels = {
     list: vi.fn().mockResolvedValue({
       data: [
         {
-          id: 'parsed-1',
-          documentID: 'doc-1',
+          id: "parsed-1",
+          documentID: "doc-1",
           questionsJSON: JSON.stringify([
             {
-              prompt: 'What is kanji?',
-              answer: 'Chinese characters used in Japanese',
-              type: 'short_answer',
+              prompt: "What is kanji?",
+              answer: "Chinese characters used in Japanese",
+              type: "short_answer",
             },
           ]),
         },
@@ -78,22 +87,22 @@ const mockModels = {
   Document: {
     get: vi.fn().mockResolvedValue({
       data: {
-        id: 'doc-1',
-        filename: 'lesson-1.pdf',
+        id: "doc-1",
+        filename: "lesson-1.pdf",
       },
     }),
   },
 };
 
-vi.mock('../../src/utils/amplifyClient', () => ({
+vi.mock("../../src/utils/amplifyClient", () => ({
   getAmplifyClient: vi.fn(() => ({ models: mockModels })),
 }));
 
-vi.mock('next-intl', () => ({
+vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-describe('QuestionEditor2 Integration Tests', () => {
+describe("QuestionEditor2 Integration Tests", () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
@@ -103,26 +112,30 @@ describe('QuestionEditor2 Integration Tests', () => {
     // Give elements real dimensions so @tanstack/react-virtual can calculate
     // visible items. happy-dom has no layout engine, so offsetHeight/offsetWidth
     // are 0 by default, which makes the virtualizer render 0 items.
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
       configurable: true,
-      get() { return 600; },
+      get() {
+        return 600;
+      },
     });
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
       configurable: true,
-      get() { return 800; },
+      get() {
+        return 800;
+      },
     });
     // Restore default mock implementations after clearAllMocks
     mockModels.ParsedContent.list.mockResolvedValue({
       data: [
         {
-          id: 'parsed-1',
-          documentID: 'doc-1',
+          id: "parsed-1",
+          documentID: "doc-1",
           questionsJSON: JSON.stringify([
             {
-              prompt: 'What is kanji?',
-              answer: 'Chinese characters used in Japanese',
-              type: 'short_answer',
-              hint: '',
+              prompt: "What is kanji?",
+              answer: "Chinese characters used in Japanese",
+              type: "short_answer",
+              hint: "",
             },
           ]),
         },
@@ -130,14 +143,14 @@ describe('QuestionEditor2 Integration Tests', () => {
     });
     mockModels.ParsedContent.get.mockResolvedValue({
       data: {
-        id: 'parsed-1',
-        documentID: 'doc-1',
+        id: "parsed-1",
+        documentID: "doc-1",
         questionsJSON: JSON.stringify([
           {
-            prompt: 'What is kanji?',
-            answer: 'Chinese characters used in Japanese',
-            type: 'short_answer',
-            hint: '',
+            prompt: "What is kanji?",
+            answer: "Chinese characters used in Japanese",
+            type: "short_answer",
+            hint: "",
           },
         ]),
       },
@@ -145,10 +158,25 @@ describe('QuestionEditor2 Integration Tests', () => {
     mockModels.ParsedContent.observeQuery.mockReturnValue({
       subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })),
     });
+    mockModels.Question.list.mockResolvedValue({ data: [] });
+    mockModels.Question.create.mockResolvedValue({
+      data: { id: "question-1", prompt: "What is kanji?" },
+    });
+    mockModels.QuestionUnit.list.mockResolvedValue({ data: [] });
+    mockModels.QuestionUnit.create.mockResolvedValue({
+      data: { id: "question-unit-1" },
+    });
+    mockModels.DocumentQuestion.list.mockResolvedValue({ data: [] });
+    mockModels.DocumentQuestion.create.mockResolvedValue({
+      data: { id: "document-question-1" },
+    });
+    mockModels.ParsedContent.update.mockResolvedValue({
+      data: { id: "parsed-1" },
+    });
     mockModels.Document.get.mockResolvedValue({
       data: {
-        id: 'doc-1',
-        filename: 'lesson-1.pdf',
+        id: "doc-1",
+        filename: "lesson-1.pdf",
       },
     });
   });
@@ -159,11 +187,11 @@ describe('QuestionEditor2 Integration Tests', () => {
 
   const renderQuestionEditor = (props = {}) => {
     const defaultProps = {
-      documentId: 'doc-1',
-      unitId: 'unit-1',
-      owner: 'testuser@example.com',
-      identityId: 'test-identity',
-      searchTerm: '',
+      documentId: "doc-1",
+      unitId: "unit-1",
+      owner: "testuser@example.com",
+      identityId: "test-identity",
+      searchTerm: "",
       onImportComplete: vi.fn(),
     };
 
@@ -175,7 +203,7 @@ describe('QuestionEditor2 Integration Tests', () => {
     return render(
       <DictionaryContext.Provider value={dictionaryValue as any}>
         <QuestionsReview2 {...defaultProps} {...props} />
-      </DictionaryContext.Provider>
+      </DictionaryContext.Provider>,
     );
   };
 
@@ -183,31 +211,35 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Question Display and Loading
   // ==========================================================================
 
-  it('loads and displays questions from document', async () => {
+  it("loads and displays questions from document", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
   });
 
-  it('shows loading state while fetching questions', async () => {
+  it("shows loading state while fetching questions", async () => {
     renderQuestionEditor();
 
     expect(screen.getByText(/questionsReview\.loading/)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.queryByText(/questionsReview\.loading/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/questionsReview\.loading/),
+      ).not.toBeInTheDocument();
     });
   });
 
-  it('shows empty state when no questions found', async () => {
+  it("shows empty state when no questions found", async () => {
     mockModels.ParsedContent.list.mockResolvedValue({ data: [] });
 
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText(/questionsReview\.noQuestions/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/questionsReview\.noQuestions/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -215,52 +247,68 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Creating Questions
   // ==========================================================================
 
-  it('creates a multiple choice question', async () => {
+  it("creates a multiple choice question", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Click on a question to edit
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Wait for expanded editors to appear (Lexical ContentEditable has role="textbox")
-    const promptEditor = await screen.findByRole('textbox', { name: /questionsReview\.questionPrompt/ });
+    const promptEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.questionPrompt/,
+    });
     expect(promptEditor).toBeInTheDocument();
 
     // Verify answer editor is also visible
-    const answerEditor = screen.getByRole('textbox', { name: /questionsReview\.answer/ });
+    const answerEditor = screen.getByRole("textbox", {
+      name: /questionsReview\.answer/,
+    });
     expect(answerEditor).toBeInTheDocument();
   });
 
-  it('creates a short answer question', async () => {
+  it("creates a short answer question", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+
     // Verify the question card is rendered
     expect(questionCard).toBeInTheDocument();
-    expect(within(questionCard as HTMLElement).getByText('What is kanji?')).toBeInTheDocument();
+    expect(
+      within(questionCard as HTMLElement).getByText("What is kanji?"),
+    ).toBeInTheDocument();
   });
 
-  it('adds a hint to a question', async () => {
+  it("adds a hint to a question", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Find hint editor (Lexical ContentEditable with role="textbox")
-    const hintEditor = await screen.findByRole('textbox', { name: /questionsReview\.hintOptional/ });
+    const hintEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.hintOptional/,
+    });
     expect(hintEditor).toBeInTheDocument();
   });
 
@@ -268,99 +316,123 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Editing Questions
   // ==========================================================================
 
-  it('edits question prompt with inline Lexical editor', async () => {
+  it("edits question prompt with inline Lexical editor", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Lexical ContentEditable has role="textbox" and aria-label from label prop
-    const promptEditor = await screen.findByRole('textbox', { name: /questionsReview\.questionPrompt/ });
+    const promptEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.questionPrompt/,
+    });
     expect(promptEditor).toBeInTheDocument();
     // Verify initial content is rendered
-    expect(promptEditor).toHaveTextContent('What is kanji?');
+    expect(promptEditor).toHaveTextContent("What is kanji?");
   });
 
-  it('supports undo/redo in question editor', async () => {
+  it("supports undo/redo in question editor", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Lexical ContentEditable renders with role="textbox"
-    const promptEditor = await screen.findByRole('textbox', { name: /questionsReview\.questionPrompt/ });
+    const promptEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.questionPrompt/,
+    });
     expect(promptEditor).toBeInTheDocument();
     // Verify initial content is present (undo/redo requires full DOM selection API)
-    expect(promptEditor).toHaveTextContent('What is kanji?');
+    expect(promptEditor).toHaveTextContent("What is kanji?");
   });
 
   // ==========================================================================
   // Media Attachments
   // ==========================================================================
 
-  it('attaches audio file to question', async () => {
-    const { uploadData } = await import('aws-amplify/storage');
+  it("attaches audio file to question", async () => {
+    const { uploadData } = await import("aws-amplify/storage");
     const mockUploadData = vi.mocked(uploadData);
     mockUploadData.mockReturnValue({
-      result: Promise.resolve({ path: 'public/audio/question-audio.mp3' }),
+      result: Promise.resolve({ path: "public/audio/question-audio.mp3" }),
       cancel: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      state: 'SUCCESS',
+      state: "SUCCESS",
     } as any);
 
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Verify expanded content is visible (Lexical ContentEditable has role="textbox")
-    const promptEditor = await screen.findByRole('textbox', { name: /questionsReview\.questionPrompt/ });
+    const promptEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.questionPrompt/,
+    });
     expect(promptEditor).toBeInTheDocument();
   });
 
-  it('attaches image to question', async () => {
-    const { uploadData } = await import('aws-amplify/storage');
+  it("attaches image to question", async () => {
+    const { uploadData } = await import("aws-amplify/storage");
     const mockUploadData = vi.mocked(uploadData);
     mockUploadData.mockReturnValue({
-      result: Promise.resolve({ path: 'public/images/question-image.jpg' }),
+      result: Promise.resolve({ path: "public/images/question-image.jpg" }),
       cancel: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-      state: 'SUCCESS',
+      state: "SUCCESS",
     } as any);
 
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Verify expanded answer field is visible (Lexical ContentEditable has role="textbox")
-    const answerEditor = await screen.findByRole('textbox', { name: /questionsReview\.answer/ });
+    const answerEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.answer/,
+    });
     expect(answerEditor).toBeInTheDocument();
   });
 
-  it('displays media badges for questions with attachments', async () => {
+  it("displays media badges for questions with attachments", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Check for audio badge — aria-label uses i18n key
@@ -380,8 +452,8 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Search and Filter
   // ==========================================================================
 
-  it('searches questions by prompt text', async () => {
-    renderQuestionEditor({ searchTerm: 'kanji' });
+  it("searches questions by prompt text", async () => {
+    renderQuestionEditor({ searchTerm: "kanji" });
 
     await waitFor(() => {
       expect(screen.getByText(/kanji/i)).toBeInTheDocument();
@@ -392,27 +464,27 @@ describe('QuestionEditor2 Integration Tests', () => {
     expect(highlightedText).toBeInTheDocument();
   });
 
-  it('filters questions by type', async () => {
+  it("filters questions by type", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Verify questions are listed
-    const items = screen.getAllByRole('listitem');
+    const items = screen.getAllByRole("listitem");
     expect(items.length).toBeGreaterThan(0);
   });
 
-  it('filters questions with audio', async () => {
+  it("filters questions with audio", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Verify the question list is populated
-    const questionCards = screen.getAllByRole('listitem');
+    const questionCards = screen.getAllByRole("listitem");
     expect(questionCards.length).toBeGreaterThan(0);
   });
 
@@ -420,15 +492,15 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Bulk Operations
   // ==========================================================================
 
-  it('selects multiple questions', async () => {
+  it("selects multiple questions", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // All items are auto-selected on load (no importedAt), so checkboxes start checked
-    const checkboxes = screen.getAllByRole('checkbox');
+    const checkboxes = screen.getAllByRole("checkbox");
     expect(checkboxes[0]).toBeChecked();
 
     // Clicking unchecks, then clicking again re-selects
@@ -443,50 +515,56 @@ describe('QuestionEditor2 Integration Tests', () => {
     });
   });
 
-  it('selects all questions', async () => {
+  it("selects all questions", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // All items are auto-selected (no importedAt), so button shows "deselectAll"
-    const deselectAllButton = screen.getByRole('button', { name: /questionsReview\.deselectAll/ });
+    const deselectAllButton = screen.getByRole("button", {
+      name: /questionsReview\.deselectAll/,
+    });
     await user.click(deselectAllButton);
 
     // After deselecting all, checkboxes should be unchecked
-    const checkboxes = screen.getAllByRole('checkbox');
+    const checkboxes = screen.getAllByRole("checkbox");
     await waitFor(() => {
-      checkboxes.forEach(checkbox => {
+      checkboxes.forEach((checkbox) => {
         expect(checkbox).not.toBeChecked();
       });
     });
 
     // Now button should show "selectAll"
-    const selectAllButton = screen.getByRole('button', { name: /questionsReview\.selectAll/ });
+    const selectAllButton = screen.getByRole("button", {
+      name: /questionsReview\.selectAll/,
+    });
     await user.click(selectAllButton);
 
     await waitFor(() => {
-      checkboxes.forEach(checkbox => {
+      checkboxes.forEach((checkbox) => {
         expect(checkbox).toBeChecked();
       });
     });
   });
 
-  it('deselects all questions', async () => {
+  it("deselects all questions", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // All items auto-selected, button shows "deselectAll"
-    const deselectAllButton = screen.getByRole('button', { name: /questionsReview\.deselectAll/ });
+    const deselectAllButton = screen.getByRole("button", {
+      name: /questionsReview\.deselectAll/,
+    });
     await user.click(deselectAllButton);
 
-    const checkboxes = screen.getAllByRole('checkbox');
+    const checkboxes = screen.getAllByRole("checkbox");
     await waitFor(() => {
-      checkboxes.forEach(checkbox => {
+      checkboxes.forEach((checkbox) => {
         expect(checkbox).not.toBeChecked();
       });
     });
@@ -496,16 +574,18 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Import to Question Bank
   // ==========================================================================
 
-  it('imports selected questions to question bank', async () => {
+  it("imports selected questions to question bank", async () => {
     const onImportComplete = vi.fn();
     renderQuestionEditor({ onImportComplete });
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Items are already auto-selected, so just click import
-    const importButton = screen.getByRole('button', { name: /questionsReview\.importToQuestionBank/ });
+    const importButton = screen.getByRole("button", {
+      name: /questionsReview\.importToQuestionBank/,
+    });
     await user.click(importButton);
 
     await waitFor(() => {
@@ -513,16 +593,16 @@ describe('QuestionEditor2 Integration Tests', () => {
         expect.objectContaining({
           success: true,
           imported: expect.any(Number),
-        })
+        }),
       );
     });
   });
 
-  it('shows import status for questions', async () => {
+  it("shows import status for questions", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // After import, should show imported badge
@@ -536,18 +616,18 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Virtual Scrolling
   // ==========================================================================
 
-  it('handles large question lists with virtual scrolling', async () => {
+  it("handles large question lists with virtual scrolling", async () => {
     const largeQuestionList = Array.from({ length: 500 }, (_, i) => ({
       prompt: `Question ${i}?`,
       answer: `Answer ${i}`,
-      type: 'short_answer',
+      type: "short_answer",
     }));
 
     mockModels.ParsedContent.list.mockResolvedValue({
       data: [
         {
-          id: 'parsed-1',
-          documentID: 'doc-1',
+          id: "parsed-1",
+          documentID: "doc-1",
           questionsJSON: JSON.stringify(largeQuestionList),
         },
       ],
@@ -556,11 +636,11 @@ describe('QuestionEditor2 Integration Tests', () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('Question 0?')).toBeInTheDocument();
+      expect(screen.getByText("Question 0?")).toBeInTheDocument();
     });
 
     // Should render only visible items (virtualizer limits based on viewport)
-    const visibleItems = screen.getAllByRole('listitem');
+    const visibleItems = screen.getAllByRole("listitem");
     expect(visibleItems.length).toBeLessThan(500);
   });
 
@@ -568,11 +648,11 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Document Source Tracking
   // ==========================================================================
 
-  it('displays source document information', async () => {
+  it("displays source document information", async () => {
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
     // Source document filename is rendered as a Chip inside the question card
@@ -583,16 +663,16 @@ describe('QuestionEditor2 Integration Tests', () => {
     });
   });
 
-  it('shows page numbers for questions from PDFs', async () => {
+  it("shows page numbers for questions from PDFs", async () => {
     mockModels.ParsedContent.list.mockResolvedValue({
       data: [
         {
-          id: 'parsed-1',
-          documentID: 'doc-1',
+          id: "parsed-1",
+          documentID: "doc-1",
           questionsJSON: JSON.stringify([
             {
-              prompt: 'What is kanji?',
-              answer: 'Chinese characters',
+              prompt: "What is kanji?",
+              answer: "Chinese characters",
               page: 5,
             },
           ]),
@@ -604,7 +684,7 @@ describe('QuestionEditor2 Integration Tests', () => {
 
     await waitFor(() => {
       // Page chip renders as "p.5"
-      expect(screen.getByText('p.5')).toBeInTheDocument();
+      expect(screen.getByText("p.5")).toBeInTheDocument();
     });
   });
 
@@ -612,20 +692,26 @@ describe('QuestionEditor2 Integration Tests', () => {
   // Error Handling
   // ==========================================================================
 
-  it('handles failed question updates gracefully', async () => {
-    mockModels.Question.update.mockRejectedValue(new Error('Network error'));
+  it("handles failed question updates gracefully", async () => {
+    mockModels.Question.update.mockRejectedValue(new Error("Network error"));
 
     renderQuestionEditor();
 
     await waitFor(() => {
-      expect(screen.getByText('What is kanji?')).toBeInTheDocument();
+      expect(screen.getByText("What is kanji?")).toBeInTheDocument();
     });
 
-    const questionCard = screen.getByText('What is kanji?').closest('li');
-    await user.click(within(questionCard as HTMLElement).getByRole('button', { name: /questionsReview\.expand/ }));
+    const questionCard = screen.getByText("What is kanji?").closest("li");
+    await user.click(
+      within(questionCard as HTMLElement).getByRole("button", {
+        name: /questionsReview\.expand/,
+      }),
+    );
 
     // Verify expanded editor appears (Lexical ContentEditable)
-    const promptEditor = await screen.findByRole('textbox', { name: /questionsReview\.questionPrompt/ });
+    const promptEditor = await screen.findByRole("textbox", {
+      name: /questionsReview\.questionPrompt/,
+    });
     expect(promptEditor).toBeInTheDocument();
     // The debounced auto-save mechanism is internal to Lexical onChange;
     // verifying the editor renders in the error mock context is sufficient

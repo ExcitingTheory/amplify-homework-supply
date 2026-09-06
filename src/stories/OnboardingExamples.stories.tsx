@@ -1,21 +1,21 @@
 /**
  * @fileoverview Storybook stories demonstrating onboarding task completion patterns
- * 
+ *
  * Interactive examples showing:
  * - Auto-detection of task completion
  * - Manual task tracking
  * - Multi-step task flows
  * - Progress indicators
  * - Persona-specific onboarding experiences
- * 
+ *
  * Uses custom hooks (useCompleteTask, useTrackTask) to manage onboarding state.
- * 
+ *
  * @module stories/OnboardingExamples.stories
  */
 
-import React from 'react';
-import { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { useState, useEffect } from 'react';
+import React from "react";
+import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -25,43 +25,122 @@ import {
   Stack,
   Typography,
   Alert,
-} from '@mui/material';
-import { getOnboardingEmitter } from '../../.storybook/code/onboarding-events';
-import { ONBOARDING_TASKS, getTasksForPersona } from '../../.storybook/code/onboarding-tasks';
-import { useCompleteTask, useTrackTask, useOnboardingStatus } from '../../.storybook/code/useOnboarding';
+} from "@mui/material";
+import { getOnboardingEmitter } from "../../.storybook/code/onboarding-events";
+import {
+  ONBOARDING_TASKS,
+  getTasksForPersona,
+} from "../../.storybook/code/onboarding-tasks";
+import {
+  useCompleteTask,
+  useTrackTask,
+} from "../../.storybook/code/useOnboarding";
 
 const meta: Meta = {
-  title: '🏠 Getting Started/Onboarding/Task Completion Examples',
+  title: "🏠 Getting Started/Onboarding/Task Completion Examples",
 };
 
 export default meta;
 
 /**
- * Example: Detect when user completes a task by reaching a screen
- * This story shows how useCompleteTask automatically marks tasks as complete
+ * Inner component that only mounts once a persona is available.
+ * Completes the extra-credit Documentation Explorer task on mount.
+ */
+function AutoDetectInner({ persona }: { persona: string }) {
+  const emitter = getOnboardingEmitter();
+  const [triggered, setTriggered] = useState(
+    emitter.isTaskCompleted("secret-documentation-explorer", persona as any),
+  );
+
+  useCompleteTask("secret-documentation-explorer");
+
+  useEffect(() => {
+    const unsubscribe = emitter.on((event) => {
+      if (
+        event.type === "task-completed" &&
+        event.taskId === "secret-documentation-explorer"
+      ) {
+        setTriggered(true);
+      }
+    });
+    return unsubscribe;
+  }, [emitter]);
+
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      {triggered ? (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          ✓ Extra credit unlocked! The 🔍 Documentation Explorer task was
+          auto-completed.
+        </Alert>
+      ) : (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Completing task for persona: {persona}...
+        </Alert>
+      )}
+      <Card>
+        <CardContent>
+          <Typography variant="h5">Auto-Detect Task Completion</Typography>
+          <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
+            This story demonstrates how <code>useCompleteTask</code>{" "}
+            automatically marks a task complete when the component mounts. It
+            awards the 🔍 Documentation Explorer extra credit task once a
+            persona is selected in the Onboarding panel.
+          </Typography>
+        </CardContent>
+      </Card>
+    </Container>
+  );
+}
+
+/**
+ * Example: Detect when user completes a task by reaching a screen.
+ * Waits for a persona to be selected before mounting the completion logic.
  */
 export const AutoDetectTaskCompletion: StoryObj = {
   render: () => {
-    // Completes the extra-credit Documentation Explorer task — not a real workflow task
-    useCompleteTask('secret-documentation-explorer');
+    const emitter = getOnboardingEmitter();
+    const [persona, setPersona] = useState<string | null>(emitter.getPersona());
 
-    return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="success" sx={{ mb: 3 }}>
-          ✓ Extra credit unlocked! Check the Onboarding panel for your bonus task.
-        </Alert>
-        <Card>
-          <CardContent>
-            <Typography variant="h5">Auto-Detect Task Completion</Typography>
-            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-              This story demonstrates how <code>useCompleteTask</code> automatically marks a task
-              complete when the component mounts. It awards the 🔍 Documentation Explorer extra
-              credit task rather than a real workflow task.
+    useEffect(() => {
+      const unsubscribe = emitter.on((event) => {
+        if (event.type === "persona-selected") {
+          setPersona(emitter.getPersona());
+        }
+      });
+      return unsubscribe;
+    }, [emitter]);
+
+    if (!persona) {
+      return (
+        <Container maxWidth="md" sx={{ py: 4 }}>
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+              Waiting for persona selection...
             </Typography>
-          </CardContent>
-        </Card>
-      </Container>
-    );
+            <Typography variant="body2">
+              Select a persona in the <strong>Onboarding</strong> panel (bottom
+              of the screen) to trigger the extra credit task.
+            </Typography>
+          </Alert>
+          <Card>
+            <CardContent>
+              <Typography variant="h5">Auto-Detect Task Completion</Typography>
+              <Typography
+                variant="body2"
+                sx={{ mt: 1, color: "text.secondary" }}
+              >
+                Once you select a persona, this component will mount and
+                automatically complete the 🔍 Documentation Explorer extra
+                credit task.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Container>
+      );
+    }
+
+    return <AutoDetectInner persona={persona} />;
   },
 };
 
@@ -71,7 +150,10 @@ export const AutoDetectTaskCompletion: StoryObj = {
  */
 export const ManualTaskTracking: StoryObj = {
   render: () => {
-    const { completeTask, startTask } = useTrackTask('secret-documentation-explorer', 'learner');
+    const { completeTask, startTask } = useTrackTask(
+      "secret-documentation-explorer",
+      "learner",
+    );
     const [started, setStarted] = useState(false);
     const [completed, setCompleted] = useState(false);
 
@@ -81,7 +163,7 @@ export const ManualTaskTracking: StoryObj = {
     };
 
     const handleComplete = () => {
-      completeTask({ method: 'manual_button_click' });
+      completeTask({ method: "manual_button_click" });
       setCompleted(true);
     };
 
@@ -95,16 +177,25 @@ export const ManualTaskTracking: StoryObj = {
             <Typography variant="h5" sx={{ mb: 2 }}>
               Complete a Demo Bonus Task
             </Typography>
-            <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-              This example demonstrates manual task tracking with a fictional onboarding task.
-              Click "Start Task" to begin tracking, then "Complete Task" when done.
+            <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+              This example demonstrates manual task tracking with a fictional
+              onboarding task. Click "Start Task" to begin tracking, then
+              "Complete Task" when done.
             </Typography>
 
             <Stack direction="row" spacing={2}>
-              <Button variant="outlined" onClick={handleStart} disabled={started}>
+              <Button
+                variant="outlined"
+                onClick={handleStart}
+                disabled={started}
+              >
                 Start Task
               </Button>
-              <Button variant="contained" onClick={handleComplete} disabled={!started || completed}>
+              <Button
+                variant="contained"
+                onClick={handleComplete}
+                disabled={!started || completed}
+              >
                 Complete Task
               </Button>
             </Stack>
@@ -121,47 +212,50 @@ export const ManualTaskTracking: StoryObj = {
  */
 export const DisplayOnboardingStatus: StoryObj = {
   render: () => {
-    const status = useOnboardingStatus();
-    const [stats, setStats] = useState<any>(null);
     const emitter = getOnboardingEmitter();
-    const personaRef = React.useRef(status.persona);
+    const [persona, setPersona] = useState<string | null>(emitter.getPersona());
+    const [stats, setStats] = useState<any>(null);
 
-    // Keep persona ref up to date
-    React.useEffect(() => {
-      personaRef.current = status.persona;
-    }, [status.persona]);
+    // Recalculate stats for current persona
+    const updateStats = React.useCallback(
+      (currentPersona: string | null) => {
+        if (currentPersona) {
+          const tasks = getTasksForPersona(currentPersona as any);
+          const completionPercentage = emitter.getCompletionPercentage(
+            currentPersona as any,
+            tasks,
+          );
+          const completedTasks = tasks.filter((t) =>
+            emitter.isTaskCompleted(t.id, currentPersona as any),
+          );
 
-    // Function to recalculate stats - uses ref to avoid dependency on status functions
-    const updateStats = React.useCallback(() => {
-      const currentPersona = personaRef.current;
-      if (currentPersona) {
-        const tasks = getTasksForPersona(currentPersona);
-        const completionPercentage = emitter.getCompletionPercentage(currentPersona, tasks);
-        const completedTasks = tasks.filter((t) => emitter.isTaskCompleted(t.id, currentPersona));
-        
-        setStats({
-          persona: currentPersona,
-          completionPercentage,
-          tasks,
-          completedTasks,
-        });
-      }
-    }, [emitter]); // Only depend on emitter which is stable
+          setStats({
+            persona: currentPersona,
+            completionPercentage,
+            tasks,
+            completedTasks,
+          });
+        } else {
+          setStats(null);
+        }
+      },
+      [emitter],
+    );
 
-    // Initial calculation when persona changes
+    // Subscribe to ALL events to detect persona changes and task completions
     useEffect(() => {
-      if (status.persona) {
-        updateStats();
-      } else {
-        setStats(null);
-      }
-    }, [status.persona, updateStats]);
+      // Initial calculation
+      const initial = emitter.getPersona();
+      setPersona(initial);
+      updateStats(initial);
 
-    // Subscribe to task completion events  
-    useEffect(() => {
       const unsubscribe = emitter.on((event) => {
-        if (event.type === 'task-completed' || event.type === 'persona-selected') {
-          updateStats();
+        if (event.type === "persona-selected") {
+          const newPersona = emitter.getPersona();
+          setPersona(newPersona);
+          updateStats(newPersona);
+        } else if (event.type === "task-completed") {
+          updateStats(emitter.getPersona());
         }
       });
       return unsubscribe;
@@ -170,28 +264,32 @@ export const DisplayOnboardingStatus: StoryObj = {
     if (!stats) {
       return (
         <Container maxWidth="md" sx={{ py: 4 }}>
-          <Alert 
-            severity="info" 
-            sx={{ 
+          <Alert
+            severity="info"
+            sx={{
               mb: 2,
-              '& .MuiAlert-message': { width: '100%' }
+              "& .MuiAlert-message": { width: "100%" },
             }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
               📍 Where to find the Onboarding Panel:
             </Typography>
             <Typography variant="body2" component="div">
-              👉 Look at the <strong>bottom of the screen</strong> for tabs like:
-              <Box component="span" sx={{ 
-                display: 'inline-block', 
-                mx: 1, 
-                px: 1, 
-                py: 0.5, 
-                bgcolor: 'primary.main', 
-                color: 'white', 
-                borderRadius: 1,
-                fontSize: '0.85rem'
-              }}>
+              👉 Look at the <strong>bottom of the screen</strong> for tabs
+              like:
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-block",
+                  mx: 1,
+                  px: 1,
+                  py: 0.5,
+                  bgcolor: "primary.main",
+                  color: "white",
+                  borderRadius: 1,
+                  fontSize: "0.85rem",
+                }}
+              >
                 Controls | Actions | <strong>Onboarding</strong>
               </Box>
             </Typography>
@@ -199,12 +297,14 @@ export const DisplayOnboardingStatus: StoryObj = {
               👉 Click the <strong>"Onboarding"</strong> tab to open the panel
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              👉 If you don't see it, press <kbd>A</kbd> to toggle the addon panel
+              👉 If you don't see it, press <kbd>A</kbd> to toggle the addon
+              panel
             </Typography>
           </Alert>
-          
+
           <Alert severity="warning">
-            No persona selected. Please select a persona in the Onboarding panel first.
+            No persona selected. Please select a persona in the Onboarding panel
+            first.
           </Alert>
         </Container>
       );
@@ -218,14 +318,16 @@ export const DisplayOnboardingStatus: StoryObj = {
               <Typography variant="h6">Your Onboarding Status</Typography>
               <Stack spacing={1} sx={{ mt: 2 }}>
                 <Typography>
-                  <strong>Role:</strong> {stats.persona.charAt(0).toUpperCase() + stats.persona.slice(1)}
+                  <strong>Role:</strong>{" "}
+                  {stats.persona.charAt(0).toUpperCase() +
+                    stats.persona.slice(1)}
                 </Typography>
                 <Typography>
                   <strong>Completion:</strong> {stats.completionPercentage}%
                 </Typography>
                 <Typography>
-                  <strong>Tasks Completed:</strong> {stats.completedTasks.length} /{' '}
-                  {stats.tasks.length}
+                  <strong>Tasks Completed:</strong>{" "}
+                  {stats.completedTasks.length} / {stats.tasks.length}
                 </Typography>
               </Stack>
             </CardContent>
@@ -243,18 +345,21 @@ export const DisplayOnboardingStatus: StoryObj = {
                       key={task.id}
                       sx={{
                         p: 1.5,
-                        bgcolor: 'success.light',
+                        bgcolor: "success.light",
                         borderRadius: 1,
-                        display: 'flex',
+                        display: "flex",
                         gap: 1,
                       }}
                     >
-                      <Typography sx={{ color: 'success.main' }}>✓</Typography>
+                      <Typography sx={{ color: "success.main" }}>✓</Typography>
                       <Box>
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {task.title}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "text.secondary" }}
+                        >
                           {task.description}
                         </Typography>
                       </Box>
@@ -262,7 +367,7 @@ export const DisplayOnboardingStatus: StoryObj = {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   No tasks completed yet. Complete tasks to see them here.
                 </Typography>
               )}
@@ -273,7 +378,8 @@ export const DisplayOnboardingStatus: StoryObj = {
             variant="outlined"
             color="error"
             onClick={() => {
-              status.reset();
+              emitter.reset();
+              setPersona(null);
               setStats(null);
             }}
           >
@@ -287,18 +393,26 @@ export const DisplayOnboardingStatus: StoryObj = {
 
 /**
  * Example: Event emission and listening
- * Shows how to emit custom events and listen for them
+ * Passively monitors all onboarding events from normal Storybook usage.
+ * Navigate to other stories, complete tasks, or select a persona to see events appear.
  */
 export const EventEmissionExample: StoryObj = {
   render: () => {
     const emitter = getOnboardingEmitter();
     const [events, setEvents] = useState<any[]>([]);
-    const [persona, setPersona] = useState<string | null>(null);
+    const [persona, setPersona] = useState<string | null>(emitter.getPersona());
 
     useEffect(() => {
       const unsubscribe = emitter.on((event) => {
-        console.log('[Onboarding Event]', event);
-        setEvents((prev) => [...prev, event].slice(-10)); // Keep last 10 events
+        console.log("[Onboarding Event]", event);
+        setEvents((prev) =>
+          [...prev, { ...event, _receivedAt: new Date().toISOString() }].slice(
+            -20,
+          ),
+        );
+        if (event.type === "persona-selected") {
+          setPersona(emitter.getPersona());
+        }
       });
 
       setPersona(emitter.getPersona());
@@ -306,73 +420,113 @@ export const EventEmissionExample: StoryObj = {
       return unsubscribe;
     }, [emitter]);
 
-    const handleEmitEvent = (taskId: string) => {
-      if (persona) {
-        emitter.emit({
-          type: 'task-completed',
-          taskId,
-          persona: persona as any,
-          timestamp: Date.now(),
-          metadata: { manual: true },
-        });
-      }
-    };
-
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Stack spacing={2}>
+          <Alert severity="info">
+            <Typography variant="body2">
+              <strong>How to use:</strong> Navigate to other stories, select a
+              persona in the Onboarding panel, or complete tasks — events will
+              appear below in real time. This monitor captures all onboarding
+              events across the entire Storybook session.
+            </Typography>
+          </Alert>
+
           <Card>
             <CardContent>
-              <Typography variant="h6">Event Monitor</Typography>
-              <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-                Current Demo Persona: {persona ? persona.toUpperCase() : 'None selected'}
+              <Typography variant="h6">Live Event Monitor</Typography>
+              <Typography
+                variant="body2"
+                sx={{ mt: 1, color: "text.secondary" }}
+              >
+                Current Persona:{" "}
+                {persona
+                  ? persona.toUpperCase()
+                  : "None — select one in the Onboarding panel"}
               </Typography>
-
-              <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
-                {['secret-documentation-explorer', 'secret-shortcut-evangelist', 'secret-keyboard-master'].map(
-                  (taskId) => (
-                    <Button
-                      key={taskId}
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleEmitEvent(taskId)}
-                      disabled={!persona}
-                    >
-                      Emit {taskId}
-                    </Button>
-                  )
-                )}
-              </Stack>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", mt: 0.5, color: "text.secondary" }}
+              >
+                {events.length} event{events.length !== 1 ? "s" : ""} captured
+                this session
+              </Typography>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 1 }}>
-                Recent Events (Last 10)
+                Event Log (Last 20)
               </Typography>
               <Box
                 sx={{
-                  bgcolor: '#f5f5f5',
+                  bgcolor: "grey.50",
                   p: 2,
                   borderRadius: 1,
-                  maxHeight: 300,
-                  overflow: 'auto',
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
+                  maxHeight: 400,
+                  overflow: "auto",
+                  fontFamily: "monospace",
+                  fontSize: "0.75rem",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
                 }}
               >
                 {events.length > 0 ? (
-                  events.map((event, index) => (
-                    <Box key={index} sx={{ mb: 1, pb: 1, borderBottom: '1px solid #e0e0e0' }}>
-                      {JSON.stringify(event, null, 2)}
+                  [...events].reverse().map((event, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        mb: 1,
+                        pb: 1,
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <Box sx={{ display: "flex", gap: 1, mb: 0.5 }}>
+                        <Box
+                          component="span"
+                          sx={{
+                            px: 0.5,
+                            borderRadius: 0.5,
+                            bgcolor:
+                              event.type === "task-completed"
+                                ? "success.light"
+                                : event.type === "persona-selected"
+                                  ? "info.light"
+                                  : "warning.light",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {event.type}
+                        </Box>
+                        <Box
+                          component="span"
+                          sx={{ color: "text.secondary", fontSize: "0.7rem" }}
+                        >
+                          {event._receivedAt}
+                        </Box>
+                      </Box>
+                      {JSON.stringify(
+                        {
+                          taskId: event.taskId,
+                          persona: event.persona,
+                          metadata: event.metadata,
+                        },
+                        null,
+                        2,
+                      )}
                     </Box>
                   ))
                 ) : (
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    No events yet. Emit events above or complete tasks to see them here.
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary" }}
+                  >
+                    No events yet. Try: selecting a persona in the Onboarding
+                    panel, navigating to the Auto-Detect story, or completing a
+                    task in another story.
                   </Typography>
                 )}
               </Box>
@@ -398,23 +552,29 @@ export const SpotlightIntegration: StoryObj = {
               Spotlight Overlay Demo
             </Typography>
             <Typography variant="body1" paragraph>
-              The spotlight overlay is integrated with the Onboarding Panel. When you click on any task in the panel, 
-              a guided tour opens with:
+              The spotlight overlay is integrated with the Onboarding Panel.
+              When you click on any task in the panel, a guided tour opens with:
             </Typography>
-            
+
             <Box component="ul" sx={{ mb: 2 }}>
               <li>Semi-transparent overlay that dims the background</li>
               <li>Highlighted spotlight on target UI elements</li>
               <li>Contextual tooltip with step-by-step instructions</li>
               <li>Navigation controls (Next, Skip, Complete)</li>
-              <li>Tutorial mode (detailed guidance) or Quiz mode (self-assessment)</li>
+              <li>
+                Tutorial mode (detailed guidance) or Quiz mode (self-assessment)
+              </li>
             </Box>
 
             <Alert severity="info" sx={{ mb: 3 }}>
               <strong>📖 To Try It:</strong>
-              <ol style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
-                <li>Open the <strong>Onboarding Panel</strong> (right sidebar)</li>
-                <li>Select any persona (used only for demo state segmentation)</li>
+              <ol style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
+                <li>
+                  Open the <strong>Onboarding Panel</strong> (right sidebar)
+                </li>
+                <li>
+                  Select any persona (used only for demo state segmentation)
+                </li>
                 <li>Click on any task to launch the spotlight tour</li>
                 <li>Follow the guided steps</li>
                 <li>Try switching between Tutorial (📖) and Quiz (🎯) modes</li>
@@ -426,7 +586,7 @@ export const SpotlightIntegration: StoryObj = {
                 <Typography variant="subtitle2" gutterBottom>
                   Features
                 </Typography>
-                <Box component="ul" sx={{ fontSize: '0.875rem', pl: 2 }}>
+                <Box component="ul" sx={{ fontSize: "0.875rem", pl: 2 }}>
                   <li>Automatic navigation to relevant stories</li>
                   <li>Responsive positioning</li>
                   <li>Keyboard navigation support</li>
@@ -434,25 +594,44 @@ export const SpotlightIntegration: StoryObj = {
                   <li>Event emission for analytics</li>
                 </Box>
               </Box>
-              
+
               <Box>
                 <Typography variant="subtitle2" gutterBottom>
                   Color Coding
                 </Typography>
-                <Box component="ul" sx={{ fontSize: '0.875rem', pl: 2 }}>
-                  <li><span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Green</span> - Tutorial Mode</li>
-                  <li><span style={{ color: '#2196F3', fontWeight: 'bold' }}>Blue</span> - Quiz Mode</li>
+                <Box component="ul" sx={{ fontSize: "0.875rem", pl: 2 }}>
+                  <li>
+                    <span style={{ color: "#4CAF50", fontWeight: "bold" }}>
+                      Green
+                    </span>{" "}
+                    - Tutorial Mode
+                  </li>
+                  <li>
+                    <span style={{ color: "#2196F3", fontWeight: "bold" }}>
+                      Blue
+                    </span>{" "}
+                    - Quiz Mode
+                  </li>
                   <li>Pulsing glow - Active highlight</li>
                 </Box>
               </Box>
             </Stack>
 
-            <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: 1 }}>
-              <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 'bold' }}>
+            <Box
+              sx={{ mt: 3, p: 2, bgcolor: "rgba(0,0,0,0.05)", borderRadius: 1 }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ display: "block", mb: 1, fontWeight: "bold" }}
+              >
                 Developer Info:
               </Typography>
-              <Typography variant="caption" component="pre" sx={{ fontSize: '0.7rem', overflow: 'auto' }}>
-{`// Component source
+              <Typography
+                variant="caption"
+                component="pre"
+                sx={{ fontSize: "0.7rem", overflow: "auto" }}
+              >
+                {`// Component source
 .storybook/components/SpotlightOverlay.tsx
 
 // Integration in OnboardingPanel
@@ -469,4 +648,3 @@ docs/SPOTLIGHT_QUICK_REFERENCE.md`}
     );
   },
 };
-

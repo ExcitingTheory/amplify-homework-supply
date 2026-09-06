@@ -69,7 +69,7 @@ function normalizeQuizSteps(
       tooltipPosition: primary.tooltipPosition ?? "center",
       description:
         primary.description ||
-        "Navigate to the suggested page and complete the task. Progress is detected automatically from your actions.",
+        "Complete the task on the page shown. Progress is detected automatically from your actions.",
     },
   ];
 }
@@ -88,7 +88,7 @@ function getDefaultSteps(
       description:
         mode === "tutorial"
           ? "Follow along with this guided tutorial to learn this feature."
-          : "Navigate to the suggested page and perform the task. Completion is detected automatically from your actions.",
+          : "Perform the task on the page shown. Completion is detected automatically from your actions.",
       tooltipPosition: "center",
     },
     {
@@ -106,11 +106,11 @@ function getDefaultSteps(
  */
 export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
   // ============================================================
-  // INSTRUCTOR TASKS
+  // GETTING STARTED (shown once, before any persona-specific task)
   // ============================================================
 
   {
-    taskId: "instructor-setup-class",
+    taskId: "getting-started-storybook-basics",
     tutorialSteps: [
       {
         id: "storybook-welcome",
@@ -128,13 +128,33 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       },
       {
         id: "storybook-canvas",
-        title: "Canvas & Docs",
+        title: "Toolbar & Preview",
         description:
-          "The Canvas tab shows a live, interactive preview. The Docs tab provides step-by-step instructions and context for each feature.",
-        targetSelector: 'button[id$="-tab-canvas"]',
+          "The main area shows a live, interactive preview of each component. Use the toolbar above to reload, zoom, measure, and toggle display options. Docs pages are separate entries in the sidebar.",
+        targetSelector: '[role="toolbar"]',
         targetFrame: "manager",
         tooltipPosition: "bottom",
+        isLast: true,
       },
+    ],
+    quizSteps: [
+      {
+        id: "challenge",
+        title: "🎯 Challenge: Explore Storybook",
+        description: "Click a story in the sidebar, then click the toolbar.",
+        tooltipPosition: "center",
+        isLast: true,
+      },
+    ],
+  },
+
+  // ============================================================
+  // INSTRUCTOR TASKS
+  // ============================================================
+
+  {
+    taskId: "instructor-setup-class",
+    tutorialSteps: [
       {
         id: "intro",
         title: "Set Up Your First Class",
@@ -142,7 +162,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           "Learn how to create a class section where students can join and access assignments.",
         tooltipPosition: "center",
         actions: [
-          "We'll navigate to the Sections page",
+          "You're on the Sections page",
           'Use the "Create Section" option',
           "Fill in class details",
           "Get a shareable join code",
@@ -173,6 +193,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: "Fill in your class information.",
         targetSelector: '[data-tour="section-form"], form',
         tooltipPosition: "right",
+        interactable: true,
         actions: [
           'Enter a descriptive name (e.g., "Japanese 101 - Fall 2026")',
           "Select grade level if applicable",
@@ -184,7 +205,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: "join-code",
         title: "Share Join Code",
         description: "Students use this code to join your class.",
-        targetSelector: '[data-tour="join-code"], [class*="joinCode"]',
+        targetSelector: '[data-tour="join-code"]',
         tooltipPosition: "left",
         actions: [
           "Copy the generated join code",
@@ -204,10 +225,9 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "challenge",
         title: "🎯 Challenge: Create a Class",
-        description: "Navigate to Sections and create a new class on your own.",
+        description: "Create a new class section on your own.",
         tooltipPosition: "center",
         actions: [
-          "Find the Sections page",
           "Click Create Section",
           "Fill in all required fields",
           "Save and get your join code",
@@ -234,7 +254,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           "Units are learning modules containing lessons, media, and assessments.",
         tooltipPosition: "center",
         actions: [
-          "Navigate to the Units page",
           "Create a new unit",
           "Add engaging content",
           "Save for future assignments",
@@ -343,8 +362,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: "quiz-block",
         title: "Quiz Block",
         description: "This is where you configure your question.",
-        targetSelector:
-          '[class*="QuizNode"], [class*="quiz-node"], [class*="quiz-block"]',
+        targetSelector: '[data-tour="quiz-block"]',
         tooltipPosition: "right",
         actions: [
           "Enter your question text",
@@ -417,6 +435,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: "Fill in all the information for this word.",
         targetSelector: '[data-tour="word-form"]',
         tooltipPosition: "right",
+        interactable: true,
         actions: [
           "Enter the Japanese word",
           "Add romanization (romaji)",
@@ -431,6 +450,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: "Help students learn correct pronunciation.",
         targetSelector: '[data-tour="audio-upload"], input[type="file"]',
         tooltipPosition: "left",
+        interactable: true,
       },
       {
         id: "link-unit",
@@ -578,6 +598,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: "Review individual responses and provide feedback.",
         targetSelector: '[data-tour="grade-detail"]',
         tooltipPosition: "left",
+        interactable: true,
         actions: [
           "See each question and answer",
           "View accuracy percentage",
@@ -603,7 +624,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "challenge",
         title: "🎯 Challenge: View Grades",
-        description: "Navigate to grades and review a submission.",
+        description: "Review a student submission.",
         tooltipPosition: "center",
       },
       {
@@ -636,8 +657,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "chat-sidebar",
         title: "AI Chat",
-        description: "Describe what you want to create.",
-        targetSelector: '[data-tour="chat-sidebar"]',
+        description: "Describe what you want to create, then send it.",
+        targetSelector: '[data-tour="chat-send"]',
         tooltipPosition: "left",
         actions: [
           'Type a request (e.g., "Create a quiz about Japanese greetings")',
@@ -787,29 +808,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
     taskId: "learner-join-class",
     tutorialSteps: [
       {
-        id: "storybook-welcome",
-        title: "Welcome to Storybook",
-        description:
-          "This is where you'll practice using the platform. The sidebar on the left has all the features organized by topic. Each story lets you try things out safely.",
-        targetSelector: "#storybook-explorer-tree",
-        targetFrame: "manager",
-        tooltipPosition: "right",
-        actions: [
-          "Browse stories by category in the sidebar",
-          "Click a story to see it in the Canvas",
-          "Follow along with the guided tutorials",
-        ],
-      },
-      {
-        id: "storybook-canvas",
-        title: "Canvas & Docs",
-        description:
-          "The Canvas tab shows a live, interactive preview you can click and explore. The Docs tab has written instructions.",
-        targetSelector: 'button[id$="-tab-canvas"]',
-        targetFrame: "manager",
-        tooltipPosition: "bottom",
-      },
-      {
         id: "intro",
         title: "Join Your Class",
         description:
@@ -923,7 +921,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "challenge",
         title: "🎯 Challenge: Find Assignments",
-        description: "Navigate to your section and view assignments.",
+        description: "View your assignments for this section.",
         tooltipPosition: "center",
       },
       {
@@ -975,6 +973,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           "Select answers for quiz questions and fill in any blanks.",
         targetSelector: '[data-tour="quiz-block"]',
         tooltipPosition: "right",
+        interactable: true,
       },
       {
         id: "record-audio",
@@ -1027,14 +1026,14 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: "grades-section",
         title: "My Work / Grades",
         description: "Access all your graded assignments.",
-        targetSelector: '[data-tour="my-grades"]',
+        targetSelector: '[data-tour="grades-tab"]',
         tooltipPosition: "bottom",
       },
       {
         id: "grade-card",
         title: "Your Grade",
         description: "See your score and accuracy.",
-        targetSelector: '[data-tour="grade-card"]',
+        targetSelector: '[data-tour="grade-detail"]',
         tooltipPosition: "left",
         actions: [
           "View overall accuracy percentage",
@@ -1154,9 +1153,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "chat-input",
         title: "Ask Your Question",
-        description: "Type anything you need help with.",
-        targetSelector:
-          '[data-tour="chat-input"], textarea, input[placeholder*="message"]',
+        description: "Type anything you need help with, then send it.",
+        targetSelector: '[data-tour="chat-send"]',
         tooltipPosition: "top",
         actions: [
           "Ask for translations",
@@ -1508,29 +1506,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
   {
     taskId: "translator-language-switcher",
     tutorialSteps: [
-      {
-        id: "storybook-welcome",
-        title: "Welcome to Storybook",
-        description:
-          "This is the translation workspace. The sidebar organizes all translatable components. Each story shows live previews with real locale data.",
-        targetSelector: "#storybook-explorer-tree",
-        targetFrame: "manager",
-        tooltipPosition: "right",
-        actions: [
-          "Browse translation-related stories in the sidebar",
-          "Use Canvas to preview translated UI",
-          "Use Docs for translation guidelines",
-        ],
-      },
-      {
-        id: "storybook-canvas",
-        title: "Canvas & Docs",
-        description:
-          "The Canvas shows live component previews. Switch languages in the toolbar to see translations in action. The Docs tab has locale file conventions.",
-        targetSelector: 'button[id$="-tab-canvas"]',
-        targetFrame: "manager",
-        tooltipPosition: "bottom",
-      },
       {
         id: "intro",
         title: "Language Switcher",

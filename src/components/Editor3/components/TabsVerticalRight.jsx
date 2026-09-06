@@ -11,8 +11,9 @@ import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import { useSuggestions } from "../context/SuggestionContext";
 
 import ChatSidebar from "../../ChatSidebar";
-import TableOfContents from "./TableOfContents";
+import { ChatPanel } from "../../CollaborativeChat";
 import BlockSuggestionMenu from "./BlockSuggestionMenu";
+import UnitContext from "../../../context/unitContext";
 
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 
@@ -21,7 +22,6 @@ import ChatIcon from "@mui/icons-material/Chat";
 import FolderIcon from "@mui/icons-material/Folder";
 import ConfigIcon from "@mui/icons-material/Settings";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
-import TocIcon from "@mui/icons-material/Toc";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import GradeIcon from "@mui/icons-material/Assessment";
 import ForumIcon from "@mui/icons-material/Forum";
@@ -89,6 +89,12 @@ export default function TabsVerticalRight({
     insertSuggestion,
     requestMoreSuggestions,
   } = useSuggestions();
+  const {
+    recentGrades = [],
+    sectionId,
+    session,
+    unit,
+  } = React.useContext(UnitContext) || {};
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   // Handler for when a suggestion is clicked
@@ -205,9 +211,6 @@ export default function TabsVerticalRight({
         }
       />
       <Box sx={{ flexGrow: 1, minWidth: 0, order: 1 }}>
-        <TabPanel value={value} index={1}>
-          <TableOfContents />
-        </TabPanel>
         <TabPanel value={value} index={5} overflowY="hidden">
           <ChatSidebar />
         </TabPanel>
@@ -243,17 +246,6 @@ export default function TabsVerticalRight({
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                display: "block",
-                mb: 2,
-                fontStyle: "italic",
-              }}
-            >
-              {t("tabsVerticalRight.comingSoon")}
-            </Typography>
             {/** Add unit suggestions list here in the future */}
             {/**  Add block suggestions list here */}
             <BlockSuggestionMenu
@@ -299,129 +291,80 @@ export default function TabsVerticalRight({
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 1, fontWeight: 500 }}
-            >
-              {t("tabsVerticalRight.instructorsLabel")}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mb: 2, pl: 2 }}
-            >
-              {t("tabsVerticalRight.instructorsDesc")}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 1, fontWeight: 500 }}
-            >
-              {t("tabsVerticalRight.learnersLabel")}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", pl: 2 }}
-            >
-              {t("tabsVerticalRight.learnersDesc")}
-            </Typography>
+            {recentGrades.length === 0 ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontStyle: "italic", textAlign: "center", mt: 2 }}
+              >
+                {t("tabsVerticalRight.noGrades", "No completed grades yet.")}
+              </Typography>
+            ) : (
+              recentGrades.map((g) => (
+                <Box
+                  key={g.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    p: 1.5,
+                    mb: 1,
+                    borderRadius: 1,
+                    bgcolor: "background.default",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {g.owner || t("tabsVerticalRight.anonymous", "Student")}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {g.createdAt
+                        ? new Date(g.createdAt).toLocaleDateString()
+                        : ""}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color:
+                        (g.accuracy || 0) >= 80
+                          ? "success.main"
+                          : (g.accuracy || 0) >= 60
+                            ? "warning.main"
+                            : "error.main",
+                    }}
+                  >
+                    {g.accuracy != null ? `${Math.round(g.accuracy)}%` : "—"}
+                  </Typography>
+                </Box>
+              ))
+            )}
           </Box>
         </TabPanel>
-        <TabPanel value={value} index={9}>
-          <Box
-            sx={{
-              p: 3,
-              background: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-              borderRadius: 2,
-              m: 2,
-              mb: 3,
-            }}
-          >
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                color: "text.primary",
-                fontWeight: 600,
+        <TabPanel value={value} index={9} overflowY="hidden">
+          {sectionId ? (
+            <ChatPanel
+              sectionId={sectionId}
+              user={{
+                username: session?.username || "",
+                displayName: session?.username || "",
               }}
-            >
-              <ForumIcon sx={{ fontSize: 28, color: "primary.main" }} />
-              {t("tabsVerticalRight.cohortChatHeading")}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "text.secondary", lineHeight: 1.6 }}
-            >
-              {t("tabsVerticalRight.cohortChatDesc")}
-            </Typography>
-          </Box>
-          <Box sx={{ px: 2 }}>
-            <Box
-              sx={{
-                mb: 2,
-                p: 2,
-                bgcolor: "background.default",
-                borderRadius: 1,
-                borderLeft: 3,
-                borderLeftColor: "primary.main",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}
-              >
-                {t("tabsVerticalRight.tagKaiLabel")}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: "block", pl: 3 }}
-              >
-                {t("tabsVerticalRight.tagKaiDesc")}
+              scopeContext={{ sectionId, unitId: unit?.id }}
+              height="100%"
+            />
+          ) : (
+            <Box sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                {t(
+                  "tabsVerticalRight.noSection",
+                  "Assign this unit to a section to enable cohort chat.",
+                )}
               </Typography>
             </Box>
-            <Box
-              sx={{
-                mb: 2,
-                p: 2,
-                bgcolor: "background.default",
-                borderRadius: 1,
-                borderLeft: "3px solid",
-                borderLeftColor: "warning.main",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}
-              >
-                {t("tabsVerticalRight.useTopicsLabel")}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: "block", pl: 3 }}
-              >
-                {t("tabsVerticalRight.useTopicsDesc")}
-              </Typography>
-            </Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                display: "block",
-                fontStyle: "italic",
-                textAlign: "center",
-                mt: 2,
-              }}
-            >
-              {t("tabsVerticalRight.shareInsights")}
-            </Typography>
-          </Box>
+          )}
         </TabPanel>
       </Box>
       <Tabs
@@ -461,12 +404,6 @@ export default function TabsVerticalRight({
           },
         }}
       >
-        <Tab
-          value={1}
-          onClick={() => handleTabClick(1)}
-          label={<TocIcon />}
-          {...a11yProps(t("tabsVerticalRight.tableOfContentsTab"))}
-        />
         <Tab
           value={5}
           onClick={() => handleTabClick(5)}

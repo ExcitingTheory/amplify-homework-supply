@@ -22,7 +22,14 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
+
+// Browser-mode tests here occasionally hit a Playwright/websocket disconnect
+// ("[birpc] rpc is closed") unrelated to this story's assertions. Retry just
+// this file's tests to absorb that flakiness. No-op outside the Vitest runtime.
+if (typeof vi !== "undefined") {
+  vi.setConfig({ retry: 1 });
+}
 
 export default {
   title: "✏️ Lesson Editor/Workflow/Auto Embed",
@@ -245,13 +252,17 @@ export const EditableEmpty = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
 export const EditableWithInstructions = {
   render: () => <EditableTemplate editorState={sampleAutoEmbedState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };

@@ -10,8 +10,6 @@ import { UnitProvider } from "@/context/unitContext";
 import UnitContext from "@/context/unitContext";
 import AuthContext from "@/context/authContext";
 import { SectionProvider } from "@/context/sectionContext";
-import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
-import { CampaignContextWidget } from "@/components/Editor/CampaignContextWidget";
 import { useParams } from "next/navigation";
 
 function UnitPageContent() {
@@ -38,9 +36,6 @@ function UnitPageContent() {
         message={permissionCheck.reason}
       />
       {permissionCheck.hasAccess && <Editor />}
-      {permissionCheck.hasAccess && unit?.id && (
-        <CampaignContextWidget unitId={unit.id} />
-      )}
     </>
   );
 }
@@ -63,7 +58,6 @@ function UnitPage() {
           <UnitProvider id={id}>
             <UnitPageContent />
           </UnitProvider>
-          <CollaborativeChatWrapper />
         </SectionProvider>
       </DictionaryProvider>
     </FilesProvider>

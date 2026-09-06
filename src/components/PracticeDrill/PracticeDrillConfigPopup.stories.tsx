@@ -65,6 +65,14 @@ export const WithCoverage: Story = {
       documents: { total: 2, covered: 1 },
     },
   },
+  play: async ({ canvasElement }) => {
+    const body = within(document.body)
+    await body.findByText(/French Seasons & Weather/)
+    // Coverage percentages shown — at least one percentage is visible
+    const coverageNums = Array.from(canvasElement.ownerDocument.body.querySelectorAll('*'))
+      .filter(el => /\d+%/.test(el.textContent || ''))
+    expect(coverageNums.length).toBeGreaterThan(0)
+  },
 }
 
 export const FullCoverage: Story = {
@@ -81,6 +89,13 @@ export const FullCoverage: Story = {
       text: { total: 3, covered: 3 },
       documents: { total: 0, covered: 0 },
     },
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(document.body)
+    await body.findByText(/Spanish AR Verbs/)
+    // 100% or full coverage state renders — just check page has coverage data
+    const allText = canvasElement.ownerDocument.body.textContent || ''
+    expect(allText).toMatch(/Vocabulary|coverage|100|complete/i)
   },
 }
 
@@ -141,6 +156,15 @@ export const Loading: Story = {
     documentCount: 3,
     loading: true,
   },
+  play: async ({ canvasElement }) => {
+    const body = within(document.body)
+    await body.findByText(/Biology: Cell Structure/)
+    // Loading state — start button disabled or spinner present
+    const doc = canvasElement.ownerDocument
+    const btns = Array.from(doc.querySelectorAll('button'))
+    const startBtn = btns[btns.length - 1]
+    expect(startBtn.disabled || doc.body.innerHTML.includes('progress') || doc.body.innerHTML.includes('loading')).toBe(true)
+  },
 }
 
 export const PreConfiguredFromChat: Story = {
@@ -158,5 +182,15 @@ export const PreConfiguredFromChat: Story = {
       documents: false,
     },
     initialDrillType: 'vocabulary',
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(document.body)
+    await body.findByText(/Water Cycle/)
+    // Vocabulary source should be pre-selected
+    const doc = canvasElement.ownerDocument
+    const checkboxes = Array.from(doc.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[]
+    // At least one checkbox is checked (the pre-configured vocabulary source)
+    const checkedBoxes = checkboxes.filter(cb => cb.checked)
+    expect(checkedBoxes.length).toBeGreaterThan(0)
   },
 }

@@ -91,13 +91,13 @@ function Sections({ user }) {
    */
   const t = useTranslations("pages");
   const { drawerOpen, drawerWidth, isDesktop } = useAppShell();
-  const { sections, refetchSections } = React.useContext(SectionContext);
+  const { sections, sectionsLoading, refetchSections } =
+    React.useContext(SectionContext);
   const [work, setIsWorking] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuSectionId, setMenuSectionId] = useState(null);
-  const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardSectionId, setWizardSectionId] = useState("");
   const [wizardSectionName, setWizardSectionName] = useState("");
@@ -106,16 +106,6 @@ function Sections({ user }) {
     message: "",
     severity: "error",
   });
-
-  // Mark sections as loaded once data arrives from subscription
-  React.useEffect(() => {
-    if (sections && sections.length > 0) {
-      setSectionsLoaded(true);
-    }
-    // Also mark loaded after a brief timeout to handle genuinely empty state
-    const timer = setTimeout(() => setSectionsLoaded(true), 2000);
-    return () => clearTimeout(timer);
-  }, [sections]);
 
   // Register page context with global chat
   useChatPageContext({
@@ -397,7 +387,7 @@ function Sections({ user }) {
             <InstructorDashboard sections={ownedSections} />
           )}
 
-          {!sectionsLoaded && sections.length === 0 && (
+          {sectionsLoading && sections.length === 0 && (
             <>
               {[0, 1, 2].map((i) => (
                 <Card
@@ -439,7 +429,7 @@ function Sections({ user }) {
             </>
           )}
 
-          {sectionsLoaded && sections.length === 0 && (
+          {!sectionsLoading && sections.length === 0 && (
             //embed url to create a new section
             <Card
               elevation={3}

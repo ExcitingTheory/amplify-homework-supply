@@ -1,19 +1,19 @@
-import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { LexicalPlainTextField } from './LexicalPlainTextField'
-import { expect } from 'storybook/test'
+import React, { useState } from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { LexicalPlainTextField } from "./LexicalPlainTextField";
+import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof LexicalPlainTextField> = {
-  title: '🏆 Gamification/Inputs/Lexical Plain Text Field',
+  title: "🏆 Gamification/Inputs/Lexical Plain Text Field",
   component: LexicalPlainTextField,
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof LexicalPlainTextField>
+type Story = StoryObj<typeof LexicalPlainTextField>;
 
 export const Default: Story = {
   render: () => {
-    const [value, setValue] = useState('Hello world')
+    const [value, setValue] = useState("Hello world");
     return (
       <LexicalPlainTextField
         value={value}
@@ -21,12 +21,13 @@ export const Default: Story = {
         label="Badge Title"
         placeholder="Enter badge title..."
       />
-    )
+    );
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText("Badge Title")).toBeInTheDocument();
   },
-}
+};
 
 export const Disabled: Story = {
   render: () => (
@@ -38,13 +39,14 @@ export const Disabled: Story = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText("Disabled")).toBeInTheDocument();
   },
-}
+};
 
 export const Multiline: Story = {
   render: () => {
-    const [value, setValue] = useState('Line 1\nLine 2')
+    const [value, setValue] = useState("Line 1\nLine 2");
     return (
       <LexicalPlainTextField
         value={value}
@@ -53,9 +55,10 @@ export const Multiline: Story = {
         multiline
         maxLength={200}
       />
-    )
+    );
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText("Description")).toBeInTheDocument();
   },
-}
+};

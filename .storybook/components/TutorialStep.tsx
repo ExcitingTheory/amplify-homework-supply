@@ -1,15 +1,15 @@
 /**
  * TutorialStep - Interactive tutorial component for onboarding
- * 
+ *
  * Displays next to Quick Start Guide sections with:
  * - Interactive demo component
  * - Step completion tracking
  * - "Try it yourself" CTA to quiz mode
  */
 
-import React, { useState } from 'react';
-import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
-import './TutorialStep.css';
+import React, { useState } from "react";
+import { getOnboardingEmitter, UserPersona } from "../code/onboarding-events";
+import "./TutorialStep.css";
 
 export interface TutorialStepProps {
   /** Unique ID for this step */
@@ -25,7 +25,7 @@ export interface TutorialStepProps {
   /** Persona this step is for (defaults to current) */
   persona?: UserPersona;
   /** Completion criteria - manual or auto */
-  completionMode?: 'manual' | 'auto';
+  completionMode?: "manual" | "auto";
 }
 
 export function TutorialStep({
@@ -35,24 +35,54 @@ export function TutorialStep({
   demoComponent,
   quizStoryId,
   persona,
-  completionMode = 'manual',
+  completionMode = "manual",
 }: TutorialStepProps) {
   const [completed, setCompleted] = useState(false);
+  const [activePersona, setActivePersona] = useState<string | null>(null);
   const emitter = getOnboardingEmitter();
-  
-  // Use provided persona, current persona, or default to 'instructor' for isolated stories
-  const currentPersona = persona || emitter.getPersona() || 'instructor';
+
+  // Resolve persona: explicit prop > emitter state; listen for changes
+  React.useEffect(() => {
+    setActivePersona(persona || emitter.getPersona());
+    const unsubscribe = emitter.on((event) => {
+      if (event.type === "persona-selected") {
+        setActivePersona(emitter.getPersona());
+      }
+    });
+    return unsubscribe;
+  }, [persona, emitter]);
 
   React.useEffect(() => {
-    if (currentPersona) {
-      const isCompleted = emitter.isTaskCompleted(stepId, currentPersona);
+    if (activePersona) {
+      const isCompleted = emitter.isTaskCompleted(
+        stepId,
+        activePersona as UserPersona,
+      );
       setCompleted(isCompleted);
     }
-  }, [stepId, currentPersona, emitter]);
+  }, [stepId, activePersona, emitter]);
+
+  // Auto-complete the task on mount when completionMode is 'auto'
+  React.useEffect(() => {
+    if (completionMode !== "auto" || !activePersona) return;
+    if (emitter.isTaskCompleted(stepId, activePersona as UserPersona)) return;
+
+    const timer = setTimeout(() => {
+      emitter.emit({
+        type: "task-completed",
+        taskId: stepId,
+        persona: activePersona as UserPersona,
+        timestamp: Date.now(),
+        metadata: { autoDetected: true },
+      });
+      setCompleted(true);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [stepId, activePersona, completionMode, emitter]);
 
   const handleTryQuiz = () => {
     if (!quizStoryId) return;
-    
+
     // Navigate to quiz mode story
     const quizUrl = `?path=/story/${quizStoryId}&onboardingMode=quiz&taskId=${stepId}`;
     window.parent.location.href = quizUrl;
@@ -61,9 +91,7 @@ export function TutorialStep({
   return (
     <div className="tutorial-step" data-completed={completed}>
       <div className="tutorial-step-header">
-        <div className="step-status">
-          {completed ? '✅' : '⭕'}
-        </div>
+        <div className="step-status">{completed ? "✅" : "⭕"}</div>
         <div className="step-title">
           <h4>{title}</h4>
           <p className="step-description">{description}</p>
@@ -78,18 +106,16 @@ export function TutorialStep({
       )}
 
       <div className="tutorial-actions">
-            {!completed && completionMode === 'manual' && (
-              <div className="completion-message">
-                Progress updates automatically when you complete the required interaction.
-              </div>
-            )}
+        {!completed && completionMode === "manual" && (
+          <div className="completion-message">
+            Progress updates automatically when you complete the required
+            interaction.
+          </div>
+        )}
 
         {quizStoryId && (
-          <button
-            className="tutorial-button secondary"
-            onClick={handleTryQuiz}
-          >
-            {completed ? 'Review in Quiz Mode' : 'Try it Yourself →'}
+          <button className="tutorial-button secondary" onClick={handleTryQuiz}>
+            {completed ? "Review in Quiz Mode" : "Try it Yourself →"}
           </button>
         )}
 

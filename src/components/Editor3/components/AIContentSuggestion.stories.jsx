@@ -1,7 +1,7 @@
 import React from "react";
 import AIContentSuggestion from "./AIContentSuggestion";
 import { Box } from "@mui/material";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Content Suggestion",
@@ -31,7 +31,7 @@ export const WithSuggestion = {
     onDismiss: () => console.log("Dismissed"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.firstChild).toBeTruthy();
   },
 };
 
@@ -44,7 +44,7 @@ export const Loading = {
     onDismiss: () => {},
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.firstChild).toBeTruthy();
   },
 };
 
@@ -57,6 +57,6 @@ export const ShortSuggestion = {
     onDismiss: () => console.log("Dismissed"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.firstChild).toBeTruthy();
   },
 };

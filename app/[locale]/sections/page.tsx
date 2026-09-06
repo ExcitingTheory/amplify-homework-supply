@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 import SectionsClient from "./SectionsClient";
 
 export default async function SectionsPage() {
-  // Auth check
   let username = null;
   try {
     const session = await runWithAmplifyServerContext({
@@ -17,20 +16,20 @@ export default async function SectionsPage() {
       session?.tokens?.idToken?.payload?.["cognito:username"] ||
       session?.tokens?.idToken?.payload?.sub;
   } catch {
-    // Fall through — client handles auth redirect
+    // Fall through
   }
 
   if (!username) {
     redirect("/?returnUrl=" + encodeURIComponent("/sections"));
   }
 
-  // Pre-fetch initial sections for faster first paint
-  let initialSections = [];
+  let initialSections: any = [];
   try {
     const client = getServerClient();
     const { data } = await client.models.Section.list({ limit: 100 });
-    // Strip lazy-load relationship functions (not serializable across RSC boundary)
-    initialSections = JSON.parse(JSON.stringify((data || []).filter((s) => s != null)));
+    initialSections = JSON.parse(
+      JSON.stringify((data || []).filter((s: unknown) => s != null)),
+    );
   } catch (err) {
     console.error("[Sections RSC] Pre-fetch error:", err);
   }

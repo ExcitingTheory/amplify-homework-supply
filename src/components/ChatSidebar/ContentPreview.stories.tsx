@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { fn } from 'storybook/test';
-import { ContentPreview } from './ContentPreview';
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn, expect, within, userEvent } from "storybook/test";
+import { ContentPreview } from "./ContentPreview";
 
 const meta: Meta<typeof ContentPreview> = {
-  title: '💬 AI Assistant/Components/Content Preview',
+  title: "💬 AI Assistant/Components/Content Preview",
   component: ContentPreview,
-  parameters: { layout: 'centered' },
+  parameters: { layout: "centered" },
 };
 
 export default meta;
@@ -31,17 +31,17 @@ This is a **practice exercise** about vocabulary.
 
 export const MarkdownFormat: Story = {
   args: {
-    contentType: 'lesson',
-    topic: 'Vocabulary Practice',
+    contentType: "lesson",
+    topic: "Vocabulary Practice",
     generatedContent: sampleMarkdown,
-    format: 'markdown',
+    format: "markdown",
     onInsert: fn(),
     onRegenerate: fn(),
     onCopy: fn(),
     showInsertButton: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent!.length).toBeGreaterThan(0);
   },
 };
 
@@ -51,50 +51,64 @@ export const Compact: Story = {
     compact: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent!.length).toBeGreaterThan(0);
   },
 };
 
 export const NoActions: Story = {
   args: {
-    contentType: 'quiz',
-    topic: 'Multiple Choice Quiz',
-    generatedContent: '## Quiz\n\nWhat is the capital of France?\n\n- [ ] London\n- [x] Paris\n- [ ] Berlin',
-    format: 'markdown',
+    contentType: "quiz",
+    topic: "Multiple Choice Quiz",
+    generatedContent:
+      "## Quiz\n\nWhat is the capital of France?\n\n- [ ] London\n- [x] Paris\n- [ ] Berlin",
+    format: "markdown",
     showInsertButton: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent!.length).toBeGreaterThan(0);
   },
 };
 
 export const HTMLFormat: Story = {
   args: {
-    contentType: 'explanation',
-    topic: 'Grammar Rules',
-    generatedContent: '<h2>Subject-Verb Agreement</h2><p>The subject and verb must agree in <strong>number</strong>.</p><ul><li>Singular subjects take singular verbs</li><li>Plural subjects take plural verbs</li></ul>',
-    format: 'html',
+    contentType: "explanation",
+    topic: "Grammar Rules",
+    generatedContent:
+      "<h2>Subject-Verb Agreement</h2><p>The subject and verb must agree in <strong>number</strong>.</p><ul><li>Singular subjects take singular verbs</li><li>Plural subjects take plural verbs</li></ul>",
+    format: "html",
     onInsert: fn(),
     onCopy: fn(),
     showInsertButton: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent!.length).toBeGreaterThan(0);
   },
 };
 
 export const LongContent: Story = {
   args: {
-    contentType: 'lesson',
-    topic: 'Extended Reading Passage',
-    generatedContent: Array(10).fill('This is a paragraph of generated content that demonstrates how the preview handles longer text. ').join('\n\n'),
-    format: 'markdown',
+    contentType: "lesson",
+    topic: "Extended Reading Passage",
+    generatedContent: Array(10)
+      .fill(
+        "This is a paragraph of generated content that demonstrates how the preview handles longer text. ",
+      )
+      .join("\n\n"),
+    format: "markdown",
     onInsert: fn(),
     onRegenerate: fn(),
     onCopy: fn(),
     showInsertButton: true,
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement, args }) => {
+    // Long content renders with scroll
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(200);
+    // Regenerate button fires callback
+    const buttons = Array.from(canvasElement.querySelectorAll("button"));
+    const regenBtn = buttons.find((b) => b.textContent?.match(/regenerate/i));
+    if (regenBtn) {
+      await userEvent.click(regenBtn);
+      expect(args.onRegenerate).toHaveBeenCalled();
+    }
   },
 };

@@ -1280,7 +1280,7 @@ function WordRowComponent({
   };
 
   return (
-    <Box ref={wordItemRef}>
+    <Box ref={wordItemRef} data-tour="word-card">
       <VocabularyCard
         item={vocabularyItem}
         index={index}
@@ -2092,7 +2092,12 @@ export function DictionaryEditor2() {
               rows={3}
               name="definition"
             />
-            <Button variant="contained" type="submit" sx={{ mt: 2 }}>
+            <Button
+              data-testid="word-save-button"
+              variant="contained"
+              type="submit"
+              sx={{ mt: 2 }}
+            >
               {t("dictionaryEditor.createWordButton")}
             </Button>
           </form>

@@ -234,6 +234,6 @@ For schema-only rollbacks, use the previous `amplify_outputs.json` commit and re
 | `journeys:offline` | No changes to offline store, sync queue, or IndexedDB code |
 | Chromatic review | No UI component changes (approve all without review) |
 | `test:performance` | No changes to concurrent data operations or Yjs collaboration |
-| Cypress legacy tests | Always — no e2e specs in `cypress/` directory |
+| Playwright browser tests | Always |
 | `test:integration` | No changes to Lambda functions or AppSync resolvers |
 | `storybook:validate-components` | CI step already has `|| true`; only block on explicit mock failures |

@@ -128,6 +128,7 @@ function SquadsPage() {
   return (
     <>
       <Box
+        data-tour="squads-page"
         sx={{
           padding: "1rem",
           maxWidth: "48rem",
@@ -147,6 +148,7 @@ function SquadsPage() {
           </Typography>
           {!mySquad && (
             <Button
+              data-testid="squads-action-button"
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => setCreateDialogOpen(true)}
@@ -225,9 +227,7 @@ function SquadsPage() {
             onChange={(_, val) => val && setGroupBy(val)}
             size="small"
           >
-            <ToggleButton value="none">
-              {t("squads.flat", "Flat")}
-            </ToggleButton>
+            <ToggleButton value="none">{t("squads.flat", "Flat")}</ToggleButton>
             <ToggleButton value="section">
               {t("squads.groupBySection", "By Section")}
             </ToggleButton>

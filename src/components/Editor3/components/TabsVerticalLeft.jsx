@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import ChatSidebar from "../../ChatSidebar";
 import TableOfContents from "./TableOfContents";
+import CampaignPanel from "./CampaignPanel";
 
 import DictionaryIcon from "@mui/icons-material/LibraryBooks";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -20,6 +21,7 @@ import ConfigIcon from "@mui/icons-material/Settings";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import TocIcon from "@mui/icons-material/Toc";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import { QuestionMarkOutlined } from "@mui/icons-material";
 
 import ConfigurationManager from "./ConfigurationManager";
@@ -244,9 +246,17 @@ export default function TabsVerticalLeft({
             {...a11yProps(t("tabsVerticalLeft.tabs.files"))}
           />
         </Tooltip>
-        {/* <Tab
-          onClick={() => handleTabClick(5)}
-          label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
+        <Tooltip
+          title={t("tabsVerticalLeft.tabs.campaign") || "Campaign"}
+          placement="right"
+        >
+          <Tab
+            onClick={() => handleTabClick(5)}
+            data-tour="campaign-tab"
+            label={<CampaignIcon />}
+            {...a11yProps(t("tabsVerticalLeft.tabs.campaign") || "Campaign")}
+          />
+        </Tooltip>
         <Tooltip
           title={t("tabsVerticalLeft.tabs.configuration")}
           placement="right"
@@ -277,9 +287,9 @@ export default function TabsVerticalLeft({
       <TabPanel value={value} index={4}>
         <FileManager2 />
       </TabPanel>
-      {/* <TabPanel value={value} index={5} overflowY='hidden'>
-        <ChatSidebar />
-      </TabPanel> */}
+      <TabPanel value={value} index={5}>
+        <CampaignPanel />
+      </TabPanel>
       <TabPanel value={value} index={6}>
         <ConfigurationManager />
       </TabPanel>

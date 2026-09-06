@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { VirtualizedMessageList } from './VirtualizedMessageList';
-import { expect } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 
 export default {
   title: '💬 AI Assistant/Components/Virtualized Message List',
@@ -294,37 +294,58 @@ LargMessages.parameters = {
 
 
 Empty.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  const canvas = within(canvasElement)
+  // Empty state renders — no messages present
+  expect(canvasElement.querySelector('[data-testid="message-list"]') !== null
+    || canvasElement.innerHTML.length > 0).toBe(true)
+  // No message bubbles
+  const msgs = canvasElement.querySelectorAll('[data-role="message"]')
+  expect(msgs.length).toBe(0)
 }
 
 FewMessages.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  const canvas = within(canvasElement)
+  // At least the first user message renders
+  await canvas.findByText(/User message 1/i)
 }
 
 ManyMessages.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  // Virtualized list renders container — verifies no crash with 100 messages
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
 }
 
 LargeConversation.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  // 500 messages — virtualization active; container renders without crash
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
 }
 
 WithToolCalls.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  // Container renders with tool-call messages — verify no crash
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
 }
 
 StreamingMessage.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  const canvas = within(canvasElement)
+  // Streaming message text renders
+  await canvas.findByText(/This is a streaming message/i)
 }
 
 CustomRendering.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  const canvas = within(canvasElement)
+  // Custom renderer shows message bubbles (role labels use emoji + text)
+  const allText = canvasElement.textContent || ''
+  expect(allText).toMatch(/You|Assistant|Message/)
 }
 
 NoScrollButton.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  // Messages render; no scroll-to-bottom button present
+  expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
+  const scrollBtn = canvasElement.querySelector('[data-testid="scroll-to-bottom"]')
+  expect(scrollBtn).toBeNull()
 }
 
 LargMessages.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  // Large markdown message renders — check for Japanese vocab text
+  const allText = canvasElement.textContent || ''
+  expect(allText.length).toBeGreaterThan(100)
 }

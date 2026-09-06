@@ -1,24 +1,20 @@
 /**
  * Tutor Cursor Overlay
- * 
+ *
  * Renders floating colored indicators showing which blocks
  * tutors are currently viewing in the workbook.
  */
 
-import React from 'react';
-import { Box, Avatar, Tooltip } from '@mui/material';
-import UnitContext from '../../context/unitContext';
-import { useTutorPresence } from '@/yjs/workbookHooks';
+import React from "react";
+import { Box, Avatar, Tooltip } from "@mui/material";
+import UnitContext from "../../context/unitContext";
+import { useTutorPresence } from "@/yjs/workbookHooks";
 
 export function TutorCursorOverlay() {
   const { workbook, workbookEnabled } = React.useContext(UnitContext);
 
   // Get all tutors with their cursor positions (no blockId filter = all tutors)
   const tutors = useTutorPresence(workbook?.provider ?? null);
-
-  if (!workbookEnabled || !workbook?.provider || tutors.length === 0) {
-    return null;
-  }
 
   // Group tutors by blockId
   const tutorsByBlock = React.useMemo(() => {
@@ -31,6 +27,10 @@ export function TutorCursorOverlay() {
     }
     return grouped;
   }, [tutors]);
+
+  if (!workbookEnabled || !workbook?.provider || tutors.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -55,7 +55,10 @@ function TutorBlockMarker({
   blockId: string;
   tutors: Array<{ displayName?: string; color?: string; clientId: number }>;
 }) {
-  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
+  const [position, setPosition] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const markerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -70,7 +73,7 @@ function TutorBlockMarker({
       }
 
       // Find the scrolling container (the .editor div)
-      const scrollContainer = el.closest('.editor');
+      const scrollContainer = el.closest(".editor");
       if (!scrollContainer) {
         setPosition(null);
         return;
@@ -88,17 +91,21 @@ function TutorBlockMarker({
     findBlockElement();
 
     // Re-position on scroll/resize
-    const scrollContainer = document.querySelector('.editor[data-tour="workbook"]');
+    const scrollContainer = document.querySelector(
+      '.editor[data-tour="workbook"]',
+    );
     if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', findBlockElement, { passive: true });
+      scrollContainer.addEventListener("scroll", findBlockElement, {
+        passive: true,
+      });
     }
-    window.addEventListener('resize', findBlockElement, { passive: true });
+    window.addEventListener("resize", findBlockElement, { passive: true });
 
     return () => {
       if (scrollContainer) {
-        scrollContainer.removeEventListener('scroll', findBlockElement);
+        scrollContainer.removeEventListener("scroll", findBlockElement);
       }
-      window.removeEventListener('resize', findBlockElement);
+      window.removeEventListener("resize", findBlockElement);
     };
   }, [blockId]);
 
@@ -108,21 +115,21 @@ function TutorBlockMarker({
     <Box
       ref={markerRef}
       sx={{
-        position: 'absolute',
+        position: "absolute",
         top: position.top,
         left: position.left,
         zIndex: 5,
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
         gap: 0.25,
-        transition: 'top 0.2s ease',
-        pointerEvents: 'auto',
+        transition: "top 0.2s ease",
+        pointerEvents: "auto",
       }}
     >
       {tutors.map((tutor) => (
         <Tooltip
           key={tutor.clientId}
-          title={tutor.displayName || 'Tutor'}
+          title={tutor.displayName || "Tutor"}
           placement="left"
           arrow
         >
@@ -130,14 +137,14 @@ function TutorBlockMarker({
             sx={{
               width: 24,
               height: 24,
-              fontSize: '0.7rem',
-              bgcolor: tutor.color || '#f59e0b',
-              border: '2px solid',
-              borderColor: 'background.paper',
-              cursor: 'default',
+              fontSize: "0.7rem",
+              bgcolor: tutor.color || "#f59e0b",
+              border: "2px solid",
+              borderColor: "background.paper",
+              cursor: "default",
             }}
           >
-            {(tutor.displayName?.[0] || 'T').toUpperCase()}
+            {(tutor.displayName?.[0] || "T").toUpperCase()}
           </Avatar>
         </Tooltip>
       ))}

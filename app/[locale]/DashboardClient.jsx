@@ -169,9 +169,15 @@ function Index({
     isLoaded,
     glowRing,
   } = useAvatarConfig();
-  const userId = authSession?.idToken?.payload?.sub || getUserId(user);
+  const userId =
+    authSession?.idToken?.payload?.sub ||
+    authSession?.username ||
+    authSession?.userId ||
+    user?.attributes?.sub ||
+    getUserId(user);
   const avatarSeed =
     authSession?.idToken?.payload?.sub ||
+    authSession?.username ||
     user?.attributes?.sub ||
     user?.userId ||
     user?.username ||
@@ -496,25 +502,24 @@ function Index({
           elevation={0}
           sx={{
             mb: 3,
-            borderRadius: 3,
+            borderRadius: 2,
             overflow: "hidden",
             border: "1px solid",
             borderColor: "divider",
             background: (theme) =>
-              theme.palette.custom?.heroCardGradient ||
-              (theme.palette.mode === "dark"
-                ? "linear-gradient(135deg, rgba(25,35,55,0.95) 0%, rgba(15,20,40,0.98) 100%)"
-                : "linear-gradient(135deg, rgba(21,101,192,0.92) 0%, rgba(13,71,161,0.97) 100%)"),
-            color: "#fff",
+              theme.palette.mode === "dark"
+                ? "rgba(25,118,210,0.12)"
+                : "rgba(63,81,181,0.08)",
+            color: (theme) =>
+              theme.palette.mode === "dark" ? "#e3f2fd" : "#1a237e",
           }}
         >
           <Box
             sx={{
               p: { xs: 2, sm: 3 },
-              display: "flex",
-              gap: 2,
-              flexWrap: "wrap",
-              alignItems: "center",
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "auto 1fr" },
+              gap: { xs: 2, sm: 2.5 },
             }}
           >
             {/* Avatar */}
@@ -544,10 +549,16 @@ function Index({
               )}
             </Box>
 
-            {/* XP + level */}
-            <Box sx={{ flex: 1, minWidth: 180 }}>
+            <Box sx={{ minWidth: 0 }}>
+              {/* Greeting and level */}
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  mb: urgentNextAssignment ? 1.5 : 0.75,
+                }}
               >
                 <Typography
                   variant="h6"
@@ -562,54 +573,95 @@ function Index({
                     label={`Lv. ${level.level} · ${level.label}`}
                     size="small"
                     sx={{
-                      bgcolor: "rgba(255,255,255,0.15)",
-                      color: "#fff",
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(25,118,210,0.3)"
+                          : "rgba(63,81,181,0.2)",
+                      color: "inherit",
                       fontWeight: 600,
                       fontSize: "0.7rem",
                     }}
                   />
                 )}
               </Box>
-              {/* Personalized context line: streak + next step (Phase 6.1) */}
-              {(streak?.currentStreak > 1 || urgentNextAssignment) && (
-                <Typography
-                  variant="caption"
+
+              {/* One dominant next step */}
+              {urgentNextAssignment ? (
+                <Box
                   sx={{
-                    color: "rgba(255,255,255,0.85)",
-                    display: "block",
-                    mb: 0.5,
+                    p: { xs: 1.5, sm: 2 },
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1.5,
+                    bgcolor: "background.paper",
+                    color: "text.primary",
+                    display: "flex",
+                    alignItems: { xs: "stretch", sm: "center" },
+                    gap: 1.5,
+                    flexDirection: { xs: "column", sm: "row" },
                   }}
                 >
-                  {streak?.currentStreak > 1 &&
-                    `🔥 ${streak.currentStreak}-day streak`}
-                  {streak?.currentStreak > 1 && urgentNextAssignment && " · "}
-                  {urgentNextAssignment && (
-                    <>
-                      Next:{" "}
-                      <strong>
-                        {units[urgentNextAssignment.unitID]?.name ||
-                          "assignment"}
-                      </strong>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="overline"
+                      color="primary.main"
+                      sx={{ fontWeight: 800, lineHeight: 1.2 }}
+                    >
+                      Today
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 700, lineHeight: 1.3 }}
+                    >
+                      {units[urgentNextAssignment.unitID]?.name ||
+                        "Next assignment"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
                       {sections.find(
                         (s) => s.id === urgentNextAssignment.sectionID,
-                      )?.name
-                        ? ` in ${sections.find((s) => s.id === urgentNextAssignment.sectionID)?.name}`
-                        : ""}
+                      )?.name || "Your next lesson"}
                       {urgentNextAssignment.dueDate
-                        ? `, due ${new Date(urgentNextAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                        ? ` · Due ${new Date(urgentNextAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
                         : ""}
-                    </>
-                  )}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() =>
+                      openDrill(
+                        urgentNextAssignment.unitID,
+                        units[urgentNextAssignment.unitID]?.name ||
+                          "Assignment",
+                      )
+                    }
+                    sx={{
+                      flexShrink: 0,
+                      alignSelf: { xs: "stretch", sm: "center" },
+                    }}
+                  >
+                    Start practice
+                  </Button>
+                </Box>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ color: "inherit", opacity: 0.8 }}
+                >
+                  You are caught up on your assignments.
                 </Typography>
               )}
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(255,255,255,0.7)", display: "block", mb: 1 }}
-              >
-                {totalXP?.toLocaleString() || 0} XP total (all sections)
-              </Typography>
+
+              {/* Level progress */}
               {level && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    mt: 1.5,
+                  }}
+                >
                   <LinearProgress
                     variant="determinate"
                     value={level.progress ?? level.progressPercent ?? 0}
@@ -617,14 +669,23 @@ function Index({
                       flex: 1,
                       height: 6,
                       borderRadius: 3,
-                      bgcolor: "rgba(255,255,255,0.2)",
-                      "& .MuiLinearProgress-bar": { bgcolor: "#fff" },
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.15)"
+                          : "rgba(63,81,181,0.15)",
+                      "& .MuiLinearProgress-bar": {
+                        bgcolor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.9)"
+                            : "rgba(63,81,181,0.8)",
+                      },
                     }}
                   />
                   <Typography
                     variant="caption"
                     sx={{
-                      color: "rgba(255,255,255,0.8)",
+                      color: "inherit",
+                      opacity: 0.9,
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -634,8 +695,19 @@ function Index({
               )}
             </Box>
 
-            {/* Stats row */}
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            {/* Supporting stats */}
+            <Box
+              sx={{
+                gridColumn: { xs: "1", sm: "2" },
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 2, sm: 3 },
+                flexWrap: "wrap",
+                pt: { xs: 0, sm: 0.5 },
+                borderTop: "1px solid",
+                borderColor: "divider",
+              }}
+            >
               <StreakIndicator
                 currentStreak={streak?.currentStreak || 0}
                 size="medium"
@@ -663,6 +735,12 @@ function Index({
                   color="success"
                 />
               )}
+              <Typography
+                variant="caption"
+                sx={{ color: "inherit", opacity: 0.75 }}
+              >
+                {totalXP?.toLocaleString() || 0} XP total
+              </Typography>
             </Box>
           </Box>
 
@@ -672,7 +750,8 @@ function Index({
               sx={{
                 px: { xs: 2, sm: 3 },
                 py: 1.5,
-                borderTop: "1px solid rgba(255,255,255,0.1)",
+                borderTop: "1px solid",
+                borderColor: "divider",
               }}
             >
               <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
@@ -690,10 +769,19 @@ function Index({
                 gap: 1.5,
                 px: 3,
                 py: 1.5,
-                bgcolor: "rgba(0,0,0,0.2)",
-                borderTop: "1px solid rgba(255,255,255,0.1)",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(25,118,210,0.2)"
+                    : "rgba(63,81,181,0.12)",
+                borderTop: "1px solid",
+                borderColor: "divider",
                 textDecoration: "none",
-                "&:hover": { bgcolor: "rgba(0,0,0,0.3)" },
+                "&:hover": {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(25,118,210,0.28)"
+                      : "rgba(63,81,181,0.18)",
+                },
               }}
             >
               <ArmoriaShield
@@ -706,13 +794,13 @@ function Index({
               <Box sx={{ flex: 1 }}>
                 <Typography
                   variant="caption"
-                  sx={{ color: "rgba(255,255,255,0.6)", display: "block" }}
+                  sx={{ color: "inherit", opacity: 0.7, display: "block" }}
                 >
                   Your Squad
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: "#fff", fontWeight: 600 }}
+                  sx={{ color: "inherit", fontWeight: 600 }}
                 >
                   {mySquad.name}
                 </Typography>
@@ -722,13 +810,16 @@ function Index({
                   label={`${(mySquad.totalXP || 0).toLocaleString()} XP`}
                   size="small"
                   sx={{
-                    bgcolor: "rgba(255,255,255,0.15)",
-                    color: "#fff",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(25,118,210,0.3)"
+                        : "rgba(63,81,181,0.2)",
+                    color: "inherit",
                     fontSize: "0.7rem",
                   }}
                 />
                 <ArrowForwardIcon
-                  sx={{ fontSize: "1rem", color: "rgba(255,255,255,0.6)" }}
+                  sx={{ fontSize: "1rem", color: "inherit", opacity: 0.6 }}
                 />
               </Box>
             </Box>
@@ -743,455 +834,471 @@ function Index({
         {/* ── LEARNER CONTENT (hidden for instructors) ────────────── */}
         {!isInstructorOrAdmin && (
           <>
-        {/* ── AI MEMORY PANEL ──────────────────────────────────────────── */}
-        {parsedMemory &&
-          (parsedMemory.demonstratedStrengths ||
-            parsedMemory.recurringMistakes) && (
-            <Paper
-              data-tour="dashboard-ai-memory"
-              elevation={0}
-              sx={{
-                mb: 3,
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                p: 2,
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                }}
-              >
-                <AutoFixHighIcon
-                  sx={{ fontSize: "1rem", color: "primary.main" }}
-                />
-                Your Learning Profile
-              </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 2,
-                }}
-              >
-                {parsedMemory.demonstratedStrengths && (
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      color="success.main"
-                      sx={{
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      Strengths
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, lineHeight: 1.6 }}
-                    >
-                      {parsedMemory.demonstratedStrengths.slice(0, 200)}
-                    </Typography>
-                  </Box>
-                )}
-                {parsedMemory.recurringMistakes && (
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      color="warning.main"
-                      sx={{
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      Focus Areas
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, lineHeight: 1.6 }}
-                    >
-                      {parsedMemory.recurringMistakes.slice(0, 200)}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-              {parsedMemory.recurringMistakes && (
-                <Box sx={{ mt: 2 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<AutoFixHighIcon />}
-                    onClick={() =>
-                      openDrill(
-                        sections[0]?.id || mySections[0]?.id || "",
-                        "Focus Areas Practice",
-                      )
-                    }
-                    sx={{
-                      borderRadius: 2,
-                      textTransform: "none",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Practice my weak areas
-                  </Button>
-                </Box>
-              )}
-            </Paper>
-          )}
-
-        {/* ── SECTION-GROUPED ASSIGNMENTS ──────────────────────────── */}
-        {sections.length > 0 && (
-          <Box
-            id="section-list"
-            component="nav"
-            aria-label="Your enrolled sections"
-            data-tour="dashboard-sections"
-            sx={{ mb: 4 }}
-          >
-            {/* Global "Up Next" banner — most urgent across all sections */}
-            {(() => {
-              const globalUpNext = allAssignments
-                .filter(
-                  (a) => !myGradeMap[a.unitID]?.length && !isLocked(a.unitID),
-                )
-                .sort((a, b) => {
-                  const aDate = a.dueDate
-                    ? new Date(a.dueDate).getTime()
-                    : Infinity;
-                  const bDate = b.dueDate
-                    ? new Date(b.dueDate).getTime()
-                    : Infinity;
-                  return aDate - bDate;
-                })[0];
-              if (!globalUpNext) return null;
-              const upNextSection = sections.find(
-                (s) => s.id === globalUpNext.sectionID,
-              );
-              const upNextUnit = units[globalUpNext.unitID];
-              return (
+            {/* ── AI MEMORY PANEL ──────────────────────────────────────────── */}
+            {parsedMemory &&
+              (parsedMemory.demonstratedStrengths ||
+                parsedMemory.recurringMistakes) && (
                 <Paper
+                  data-tour="dashboard-ai-memory"
                   elevation={0}
                   sx={{
                     mb: 3,
-                    p: 2,
-                    borderRadius: 2,
-                    border: "1px solid",
-                    borderColor: "primary.light",
-                    bgcolor: "primary.50",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    flexWrap: "wrap",
-                  }}
-                  role="status"
-                  aria-live="polite"
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 700, color: "primary.main" }}
-                  >
-                    Your next step:
-                  </Typography>
-                  <Typography variant="body2" sx={{ flex: 1 }}>
-                    {upNextUnit?.name || "Assignment"} in{" "}
-                    {upNextSection?.name || "your class"}
-                    {globalUpNext.dueDate &&
-                      ` — due ${new Date(globalUpNext.dueDate).toLocaleDateString()}`}
-                  </Typography>
-                  <PrefetchButton
-                    variant="contained"
-                    size="small"
-                    href={`/workbook/${globalUpNext.unitID}`}
-                    startIcon={<EditNoteIcon />}
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderRadius: 2,
-                    }}
-                  >
-                    Start
-                  </PrefetchButton>
-                </Paper>
-              );
-            })()}
-
-            {/* Section panels — ordered by nearest due date */}
-            {[...sections]
-              .sort((a, b) => {
-                const aNext =
-                  allAssignments
-                    .filter(
-                      (as) =>
-                        as.sectionID === a.id && !myGradeMap[as.unitID]?.length,
-                    )
-                    .map((as) =>
-                      as.dueDate ? new Date(as.dueDate).getTime() : Infinity,
-                    )
-                    .sort((x, y) => x - y)[0] || Infinity;
-                const bNext =
-                  allAssignments
-                    .filter(
-                      (as) =>
-                        as.sectionID === b.id && !myGradeMap[as.unitID]?.length,
-                    )
-                    .map((as) =>
-                      as.dueDate ? new Date(as.dueDate).getTime() : Infinity,
-                    )
-                    .sort((x, y) => x - y)[0] || Infinity;
-                return aNext - bNext;
-              })
-              .map((section, idx) => {
-                const sectionAssignments = allAssignments.filter(
-                  (a) => a.sectionID === section.id,
-                );
-                // Find active chapter for this section
-                const sectionChapter = (activeChallenges || []).find(
-                  (c) => c.cohortId === section.id,
-                );
-
-                return (
-                  <SectionPanel
-                    key={section.id}
-                    section={section}
-                    assignments={sectionAssignments}
-                    units={units}
-                    gradeMap={myGradeMap}
-                    activeChapterTitle={sectionChapter?.title || null}
-                    isLocked={isLocked}
-                    getLockStatus={getLockStatus}
-                    sectionLevel={sectionLevel}
-                    defaultExpanded={idx === 0}
-                    campaignTimeline={
-                      campaignChapters.length > 0 ? (
-                        <Box sx={{ mb: 2 }}>
-                          <CampaignTimeline
-                            chapters={campaignChapters}
-                            compact
-                          />
-                        </Box>
-                      ) : null
-                    }
-                    campaignBriefing={
-                      sectionChapter ? (
-                        <CampaignBriefing
-                          title={sectionChapter.title}
-                          setting={sectionChapter.setting}
-                          stakes={sectionChapter.stakes}
-                          compact
-                          collapsible
-                          defaultExpanded={false}
-                        />
-                      ) : null
-                    }
-                    onOpenDrill={openDrill}
-                    onRequestGuidance={async (referenceId, sectionID) => {
-                      try {
-                        const result = await createPeerReviewRoom(
-                          referenceId,
-                          [],
-                          sectionID,
-                          userId,
-                        );
-                        if (result?.success && result.roomId) {
-                          router.push(`/review/${result.roomId}`);
-                        }
-                      } catch (e) {
-                        console.error("[Index] guidance room error:", e);
-                      }
-                    }}
-                    onCreateReviewRoom={handleCreateReviewRoom}
-                    onRoomCreated={(roomId) => router.push(`/review/${roomId}`)}
-                  />
-                );
-              })}
-          </Box>
-        )}
-
-        {/* ── MY SECTIONS (instructor-owned) ──────────────────────────── */}
-        {mySections.length > 0 && (
-          <Box data-tour="dashboard-my-sections" sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <PeopleIcon color="primary" />
-              {t("index.mySections")}
-            </Typography>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, 1fr)",
-                  md: "repeat(3, 1fr)",
-                },
-                gap: 2,
-              }}
-            >
-              {mySections.map((section) => (
-                <Card
-                  key={section.id}
-                  component="a"
-                  href={`/section/${section.id}`}
-                  elevation={0}
-                  sx={{
+                    borderRadius: 3,
                     border: "1px solid",
                     borderColor: "divider",
-                    borderRadius: 2,
                     p: 2,
-                    textDecoration: "none",
-                    color: "inherit",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    transition: "box-shadow 0.2s, transform 0.2s",
-                    "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
                   }}
                 >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {section.name || t("index.untitledSection")}
-                  </Typography>
-                  {section.description && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ flex: 1, lineHeight: 1.5 }}
-                    >
-                      {section.description}
-                    </Typography>
-                  )}
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Chip
-                      label="Manage"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      icon={<PeopleIcon />}
-                      sx={{ fontWeight: 600, cursor: "pointer" }}
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1.5,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.75,
+                    }}
+                  >
+                    <AutoFixHighIcon
+                      sx={{ fontSize: "1rem", color: "primary.main" }}
                     />
+                    Your Learning Profile
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                      gap: 2,
+                    }}
+                  >
+                    {parsedMemory.demonstratedStrengths && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="success.main"
+                          sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Strengths
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.5, lineHeight: 1.6 }}
+                        >
+                          {parsedMemory.demonstratedStrengths.slice(0, 200)}
+                        </Typography>
+                      </Box>
+                    )}
+                    {parsedMemory.recurringMistakes && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="warning.main"
+                          sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Focus Areas
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.5, lineHeight: 1.6 }}
+                        >
+                          {parsedMemory.recurringMistakes.slice(0, 200)}
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
-                </Card>
-              ))}
-            </Box>
-          </Box>
-        )}
+                  {parsedMemory.recurringMistakes && (
+                    <Box sx={{ mt: 2 }}>
+                      <Button
+                        data-testid="practice-button"
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AutoFixHighIcon />}
+                        onClick={() =>
+                          openDrill(
+                            sections[0]?.id || mySections[0]?.id || "",
+                            "Focus Areas Practice",
+                          )
+                        }
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: "none",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Practice my weak areas
+                      </Button>
+                    </Box>
+                  )}
+                </Paper>
+              )}
 
-        {/* ── EMPTY STATE — join a section ─────────────────────────────── */}
-        {hasNoSections && (
-          <Paper
-            data-tour="dashboard-empty-state"
-            elevation={0}
-            sx={{
-              mb: 4,
-              borderRadius: 3,
-              border: "2px dashed",
-              borderColor: "divider",
-              p: { xs: 4, sm: 6 },
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <SchoolIcon sx={{ fontSize: 56, color: "text.disabled" }} />
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                {t("index.noSectionsYet")}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Enter a join code from your instructor to get started.
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              size="large"
-              href="/sections"
-              startIcon={<AddIcon />}
-              sx={{
-                textTransform: "none",
-                fontWeight: 700,
-                borderRadius: 2,
-                px: 4,
-              }}
-            >
-              {t("index.joinSection")}
-            </Button>
-          </Paper>
-        )}
+            {/* ── SECTION-GROUPED ASSIGNMENTS ──────────────────────────── */}
+            {sections.length > 0 && (
+              <Box
+                id="section-list"
+                component="nav"
+                aria-label="Your enrolled sections"
+                data-tour="dashboard-sections"
+                sx={{ mb: 4 }}
+              >
+                {/* Global "Up Next" banner — most urgent across all sections */}
+                {(() => {
+                  const globalUpNext = allAssignments
+                    .filter(
+                      (a) =>
+                        !myGradeMap[a.unitID]?.length && !isLocked(a.unitID),
+                    )
+                    .sort((a, b) => {
+                      const aDate = a.dueDate
+                        ? new Date(a.dueDate).getTime()
+                        : Infinity;
+                      const bDate = b.dueDate
+                        ? new Date(b.dueDate).getTime()
+                        : Infinity;
+                      return aDate - bDate;
+                    })[0];
+                  if (!globalUpNext) return null;
+                  const upNextSection = sections.find(
+                    (s) => s.id === globalUpNext.sectionID,
+                  );
+                  const upNextUnit = units[globalUpNext.unitID];
+                  return (
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        mb: 3,
+                        p: 2,
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "primary.light",
+                        bgcolor: "primary.50",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        flexWrap: "wrap",
+                      }}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 700, color: "primary.main" }}
+                      >
+                        Your next step:
+                      </Typography>
+                      <Typography variant="body2" sx={{ flex: 1 }}>
+                        {upNextUnit?.name || "Assignment"} in{" "}
+                        {upNextSection?.name || "your class"}
+                        {globalUpNext.dueDate &&
+                          ` — due ${new Date(globalUpNext.dueDate).toLocaleDateString()}`}
+                      </Typography>
+                      <PrefetchButton
+                        data-testid="dashboard-next-step"
+                        variant="contained"
+                        size="small"
+                        href={`/workbook/${globalUpNext.unitID}`}
+                        startIcon={<EditNoteIcon />}
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 600,
+                          borderRadius: 2,
+                        }}
+                      >
+                        Start
+                      </PrefetchButton>
+                    </Paper>
+                  );
+                })()}
 
-        {/* ── GAMIFICATION (boss battles & achievements) ─────────────── */}
-        <Box data-tour="dashboard-gamification" sx={{ mt: 2 }}>
-          {progressModules?.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <ProgressRings modules={progressModules} />
-            </Box>
-          )}
+                {/* Section panels — ordered by nearest due date */}
+                {[...sections]
+                  .sort((a, b) => {
+                    const aNext =
+                      allAssignments
+                        .filter(
+                          (as) =>
+                            as.sectionID === a.id &&
+                            !myGradeMap[as.unitID]?.length,
+                        )
+                        .map((as) =>
+                          as.dueDate
+                            ? new Date(as.dueDate).getTime()
+                            : Infinity,
+                        )
+                        .sort((x, y) => x - y)[0] || Infinity;
+                    const bNext =
+                      allAssignments
+                        .filter(
+                          (as) =>
+                            as.sectionID === b.id &&
+                            !myGradeMap[as.unitID]?.length,
+                        )
+                        .map((as) =>
+                          as.dueDate
+                            ? new Date(as.dueDate).getTime()
+                            : Infinity,
+                        )
+                        .sort((x, y) => x - y)[0] || Infinity;
+                    return aNext - bNext;
+                  })
+                  .map((section, idx) => {
+                    const sectionAssignments = allAssignments.filter(
+                      (a) => a.sectionID === section.id,
+                    );
+                    // Find active chapter for this section
+                    const sectionChapter = (activeChallenges || []).find(
+                      (c) => c.cohortId === section.id,
+                    );
 
-          {campaign && !sections.length && (
-            <Box sx={{ mb: 3 }}>
-              <CampaignBriefing
-                title={campaign.title}
-                setting={campaign.setting}
-                stakes={campaign.stakes}
-              />
-            </Box>
-          )}
+                    return (
+                      <SectionPanel
+                        key={section.id}
+                        section={section}
+                        assignments={sectionAssignments}
+                        units={units}
+                        gradeMap={myGradeMap}
+                        activeChapterTitle={sectionChapter?.title || null}
+                        isLocked={isLocked}
+                        getLockStatus={getLockStatus}
+                        sectionLevel={sectionLevel}
+                        defaultExpanded={idx === 0}
+                        campaignTimeline={
+                          campaignChapters.length > 0 ? (
+                            <Box sx={{ mb: 2 }}>
+                              <CampaignTimeline
+                                chapters={campaignChapters}
+                                compact
+                              />
+                            </Box>
+                          ) : null
+                        }
+                        campaignBriefing={
+                          sectionChapter ? (
+                            <CampaignBriefing
+                              title={sectionChapter.title}
+                              setting={sectionChapter.setting}
+                              stakes={sectionChapter.stakes}
+                              compact
+                              collapsible
+                              defaultExpanded={false}
+                            />
+                          ) : null
+                        }
+                        onOpenDrill={openDrill}
+                        onRequestGuidance={async (referenceId, sectionID) => {
+                          try {
+                            const result = await createPeerReviewRoom(
+                              referenceId,
+                              [],
+                              sectionID,
+                              userId,
+                            );
+                            if (result?.success && result.roomId) {
+                              router.push(`/review/${result.roomId}`);
+                            }
+                          } catch (e) {
+                            console.error("[Index] guidance room error:", e);
+                          }
+                        }}
+                        onCreateReviewRoom={handleCreateReviewRoom}
+                        onRoomCreated={(roomId) =>
+                          router.push(`/review/${roomId}`)
+                        }
+                      />
+                    );
+                  })}
+              </Box>
+            )}
 
-          {campaignChapters.length > 0 && !sections.length && (
-            <Box sx={{ mb: 3 }}>
-              <CampaignTimeline chapters={campaignChapters} />
-            </Box>
-          )}
+            {/* ── MY SECTIONS (instructor-owned) ──────────────────────────── */}
+            {mySections.length > 0 && (
+              <Box data-tour="dashboard-my-sections" sx={{ mb: 4 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <PeopleIcon color="primary" />
+                  {t("index.mySections")}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2, 1fr)",
+                      md: "repeat(3, 1fr)",
+                    },
+                    gap: 2,
+                  }}
+                >
+                  {mySections.map((section) => (
+                    <Card
+                      key={section.id}
+                      component="a"
+                      href={`/section/${section.id}`}
+                      elevation={0}
+                      sx={{
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 2,
+                        p: 2,
+                        textDecoration: "none",
+                        color: "inherit",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        transition: "box-shadow 0.2s, transform 0.2s",
+                        "&:hover": {
+                          boxShadow: 6,
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                        {section.name || t("index.untitledSection")}
+                      </Typography>
+                      {section.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ flex: 1, lineHeight: 1.5 }}
+                        >
+                          {section.description}
+                        </Typography>
+                      )}
+                      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Chip
+                          label="Manage"
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          icon={<PeopleIcon />}
+                          sx={{ fontWeight: 600, cursor: "pointer" }}
+                        />
+                      </Box>
+                    </Card>
+                  ))}
+                </Box>
+              </Box>
+            )}
 
-          {activeChallenges?.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              {activeChallenges.map((challenge) => (
-                <Box key={challenge.id} sx={{ mb: 2 }}>
-                  <BossBattleCard
-                    title={challenge.title}
-                    narrative={challenge.setting}
-                    totalHP={challenge.targetXP || 0}
-                    totalDamage={challenge.currentXP || 0}
-                    deadline={challenge.deadline}
-                    active={challenge.active}
-                    bonusMultiplier={challenge.bonusMultiplier}
-                    phases={[]}
-                    contributors={(challenge.contributions || []).map((c) => ({
-                      userId: c.studentId,
-                      displayName: c.studentId,
-                      xpContributed: c.xpContributed,
-                    }))}
+            {/* ── EMPTY STATE — join a section ─────────────────────────────── */}
+            {hasNoSections && (
+              <Paper
+                data-tour="dashboard-empty-state"
+                elevation={0}
+                sx={{
+                  mb: 4,
+                  borderRadius: 3,
+                  border: "2px dashed",
+                  borderColor: "divider",
+                  p: { xs: 4, sm: 6 },
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <SchoolIcon sx={{ fontSize: 56, color: "text.disabled" }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    {t("index.noSectionsYet")}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Enter a join code from your instructor to get started.
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  size="large"
+                  href="/sections"
+                  startIcon={<AddIcon />}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 700,
+                    borderRadius: 2,
+                    px: 4,
+                  }}
+                >
+                  {t("index.joinSection")}
+                </Button>
+              </Paper>
+            )}
+
+            {/* ── GAMIFICATION (boss battles & achievements) ─────────────── */}
+            <Box data-tour="dashboard-gamification" sx={{ mt: 2 }}>
+              {progressModules?.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <ProgressRings modules={progressModules} />
+                </Box>
+              )}
+
+              {campaign && !sections.length && (
+                <Box sx={{ mb: 3 }}>
+                  <CampaignBriefing
+                    title={campaign.title}
+                    setting={campaign.setting}
+                    stakes={campaign.stakes}
                   />
                 </Box>
-              ))}
-            </Box>
-          )}
+              )}
 
-          {xpNailedItBlocks?.length > 0 && !sections.length && (
-            <Box sx={{ mb: 3 }}>
-              <NailedItWall blocks={xpNailedItBlocks} />
+              {campaignChapters.length > 0 && !sections.length && (
+                <Box sx={{ mb: 3 }}>
+                  <CampaignTimeline chapters={campaignChapters} />
+                </Box>
+              )}
+
+              {activeChallenges?.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  {activeChallenges.map((challenge) => (
+                    <Box key={challenge.id} sx={{ mb: 2 }}>
+                      <BossBattleCard
+                        title={challenge.title}
+                        narrative={challenge.setting}
+                        totalHP={challenge.targetXP || 0}
+                        totalDamage={challenge.currentXP || 0}
+                        deadline={challenge.deadline}
+                        active={challenge.active}
+                        bonusMultiplier={challenge.bonusMultiplier}
+                        phases={[]}
+                        contributors={(challenge.contributions || []).map(
+                          (c) => ({
+                            userId: c.studentId,
+                            displayName: c.studentId,
+                            xpContributed: c.xpContributed,
+                          }),
+                        )}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              {xpNailedItBlocks?.length > 0 && !sections.length && (
+                <Box sx={{ mb: 3 }}>
+                  <NailedItWall blocks={xpNailedItBlocks} />
+                </Box>
+              )}
             </Box>
-          )}
-        </Box>
-        </>
+          </>
         )}
       </Box>
     </>

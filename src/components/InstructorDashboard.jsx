@@ -108,7 +108,6 @@ function GradeDistributionBar({ distribution }) {
   );
 }
 
-
 export default function InstructorDashboard({ sections = [] }) {
   const t = useTranslations("components");
   const client = getAmplifyClient();
@@ -149,7 +148,10 @@ export default function InstructorDashboard({ sections = [] }) {
           err?.message?.includes("No current user") ||
           err?.message?.includes("DuplicatedOperationError")
         ) {
-          console.warn("[InstructorDashboard] Grade subscription:", err.message);
+          console.warn(
+            "[InstructorDashboard] Grade subscription:",
+            err.message,
+          );
           subscription.unsubscribe();
         }
       },
@@ -169,14 +171,19 @@ export default function InstructorDashboard({ sections = [] }) {
       filter: { or: sectionIDs.map((id) => ({ sectionID: { eq: id } })) },
     }).subscribe({
       next: ({ items }) => {
-        setAllAssignments(items.filter((item) => item != null && item.id != null));
+        setAllAssignments(
+          items.filter((item) => item != null && item.id != null),
+        );
       },
       error: (err) => {
         if (
           err?.message?.includes("No current user") ||
           err?.message?.includes("DuplicatedOperationError")
         ) {
-          console.warn("[InstructorDashboard] Assignment subscription:", err.message);
+          console.warn(
+            "[InstructorDashboard] Assignment subscription:",
+            err.message,
+          );
           subscription.unsubscribe();
         }
       },
@@ -266,9 +273,7 @@ export default function InstructorDashboard({ sections = [] }) {
 
     for (const section of validSections) {
       // Grades for this section
-      const sectionGrades = allGrades.filter(
-        (g) => g.sectionID === section.id,
-      );
+      const sectionGrades = allGrades.filter((g) => g.sectionID === section.id);
       const completedGrades = sectionGrades.filter(
         (g) => g.complete && g.accuracy != null,
       );
@@ -321,14 +326,17 @@ export default function InstructorDashboard({ sections = [] }) {
 
       // Recent completions (last 5 grades for this section)
       const recentActivity = [...completedGrades]
-        .sort(
-          (a, b) =>
-            (b._lastChangedAt || 0) - (a._lastChangedAt || 0),
-        )
+        .sort((a, b) => (b._lastChangedAt || 0) - (a._lastChangedAt || 0))
         .slice(0, 5);
 
       // Grade distribution buckets (per unique student's average)
-      const distribution = { a: 0, b: 0, c: 0, f: 0, total: studentRankings.length };
+      const distribution = {
+        a: 0,
+        b: 0,
+        c: 0,
+        f: 0,
+        total: studentRankings.length,
+      };
       studentRankings.forEach(({ average }) => {
         if (average >= 90) distribution.a++;
         else if (average >= 80) distribution.b++;
@@ -370,9 +378,8 @@ export default function InstructorDashboard({ sections = [] }) {
         unitCompletion,
         leaderboard: studentRankings.slice(0, 10),
         recentActivity,
-        flaggedCount: flaggedGrades.filter(
-          (g) => g.sectionID === section.id,
-        ).length,
+        flaggedCount: flaggedGrades.filter((g) => g.sectionID === section.id)
+          .length,
       };
     }
 
@@ -421,27 +428,35 @@ export default function InstructorDashboard({ sections = [] }) {
         elevation={0}
         sx={{
           mb: 3,
-          borderRadius: 3,
+          borderRadius: 2,
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",
           background: (theme) =>
             theme.palette.mode === "dark"
-              ? "linear-gradient(135deg, rgba(30,50,30,0.95) 0%, rgba(10,30,20,0.98) 100%)"
-              : "linear-gradient(135deg, rgba(27,94,32,0.92) 0%, rgba(46,125,50,0.97) 100%)",
-          color: "#fff",
+              ? "rgba(25,118,210,0.12)"
+              : "rgba(56,142,60,0.08)",
+          color: (theme) =>
+            theme.palette.mode === "dark" ? "#e3f2fd" : "#1b5e20",
           p: { xs: 2, sm: 3 },
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <TrendingUpIcon />
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {t("instructorDashboard.overallPerformance")}
+            Class health
           </Typography>
           <Chip
             label={`${validSections.length} section${validSections.length !== 1 ? "s" : ""}`}
             size="small"
-            sx={{ bgcolor: "rgba(255,255,255,0.2)", color: "#fff", ml: "auto" }}
+            sx={{
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(25,118,210,0.3)"
+                  : "rgba(56,142,60,0.2)",
+              color: "inherit",
+              ml: "auto",
+            }}
           />
         </Box>
         <Box sx={{ display: "flex", gap: { xs: 2, sm: 4 }, flexWrap: "wrap" }}>
@@ -450,80 +465,95 @@ export default function InstructorDashboard({ sections = [] }) {
               icon: <PeopleIcon />,
               label: t("instructorDashboard.totalStudents"),
               value: aggregateStats.totalStudents,
-              color: "#81c784",
             },
             {
               icon: <BoltIcon />,
               label: "Active This Week",
               value: aggregateStats.activeThisWeek,
-              color: "#64b5f6",
             },
             {
               icon: <EmojiEventsIcon />,
               label: t("instructorDashboard.averageGrade"),
               value: `${aggregateStats.avgGrade}%`,
-              color:
-                aggregateStats.avgGrade >= 80
-                  ? "#a5d6a7"
-                  : aggregateStats.avgGrade >= 60
-                    ? "#fff176"
-                    : "#ef9a9a",
             },
             {
               icon: <FlagIcon />,
               label: "Moderation Alerts",
               value: aggregateStats.moderationAlerts,
-              color:
-                aggregateStats.moderationAlerts > 0 ? "#ef9a9a" : "#a5d6a7",
             },
-          ].map(({ icon, label, value, color }) => (
+          ].map(({ icon, label, value }) => (
             <Box
               key={label}
               sx={{ display: "flex", flexDirection: "column", minWidth: 80 }}
             >
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 0.5, color }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  color: "inherit",
+                }}
               >
                 {React.cloneElement(icon, { sx: { fontSize: "1rem" } })}
                 <Typography
                   variant="h5"
-                  sx={{ fontWeight: 800, lineHeight: 1, color }}
+                  sx={{ fontWeight: 800, lineHeight: 1, color: "inherit" }}
                 >
                   {value}
                 </Typography>
               </Box>
               <Typography
                 variant="caption"
-                sx={{ color: "rgba(255,255,255,0.7)", mt: 0.25 }}
+                sx={{ color: "inherit", opacity: 0.7, mt: 0.25 }}
               >
                 {label}
               </Typography>
             </Box>
           ))}
         </Box>
-        {globalAtRiskCount > 0 && (
-          <Box sx={{ mt: 2 }}>
+      </Paper>
+
+      {/* ── NEEDS ATTENTION ─────────────────────────────────────────────── */}
+      {(flaggedGrades.length > 0 ||
+        flaggedChats.length > 0 ||
+        globalAtRiskCount > 0) && (
+        <Alert
+          severity={
+            flaggedGrades.length > 0 || flaggedChats.length > 0
+              ? "error"
+              : "warning"
+          }
+          icon={
+            flaggedGrades.length > 0 || flaggedChats.length > 0 ? (
+              <GppBadIcon />
+            ) : (
+              <WarningAmberIcon />
+            )
+          }
+          sx={{ mb: 3, borderRadius: 2 }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+            Needs attention
+          </Typography>
+          {globalAtRiskCount > 0 && (
             <Chip
               icon={<WarningAmberIcon />}
               label={`${globalAtRiskCount} student${globalAtRiskCount !== 1 ? "s" : ""} at risk (avg < 60%)`}
               color="warning"
               size="small"
-              sx={{ fontWeight: 700 }}
+              sx={{
+                fontWeight: 700,
+                mb: flaggedGrades.length + flaggedChats.length ? 1 : 0,
+              }}
             />
-          </Box>
-        )}
-      </Paper>
-
-      {/* ── MODERATION NOTICES ─────────────────────────────────────────── */}
-      {(flaggedGrades.length > 0 || flaggedChats.length > 0) && (
-        <Alert
-          severity="error"
-          icon={<GppBadIcon />}
-          sx={{ mb: 3, borderRadius: 3 }}
-        >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-            Content flagged for review ({flaggedGrades.length + flaggedChats.length} item{flaggedGrades.length + flaggedChats.length !== 1 ? "s" : ""})
-          </Typography>
+          )}
+          {(flaggedGrades.length > 0 || flaggedChats.length > 0) && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Content flagged for review (
+              {flaggedGrades.length + flaggedChats.length} item
+              {flaggedGrades.length + flaggedChats.length !== 1 ? "s" : ""})
+            </Typography>
+          )}
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {flaggedGrades.map((grade) => (
               <Chip
@@ -729,22 +759,34 @@ export default function InstructorDashboard({ sections = [] }) {
                         useFlexGap
                       >
                         {stats.distribution.a > 0 && (
-                          <Typography variant="caption" sx={{ color: "#66bb6a" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#66bb6a" }}
+                          >
                             A: {stats.distribution.a}
                           </Typography>
                         )}
                         {stats.distribution.b > 0 && (
-                          <Typography variant="caption" sx={{ color: "#42a5f5" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#42a5f5" }}
+                          >
                             B: {stats.distribution.b}
                           </Typography>
                         )}
                         {stats.distribution.c > 0 && (
-                          <Typography variant="caption" sx={{ color: "#ffa726" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#ffa726" }}
+                          >
                             C: {stats.distribution.c}
                           </Typography>
                         )}
                         {stats.distribution.f > 0 && (
-                          <Typography variant="caption" sx={{ color: "#ef5350" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#ef5350" }}
+                          >
                             F: {stats.distribution.f}
                           </Typography>
                         )}
@@ -886,11 +928,7 @@ export default function InstructorDashboard({ sections = [] }) {
                               size={22}
                               style="simple"
                             />
-                            <Typography
-                              variant="body2"
-                              sx={{ flex: 1 }}
-                              noWrap
-                            >
+                            <Typography variant="body2" sx={{ flex: 1 }} noWrap>
                               {formatLastFirst(
                                 sectionStudents[grade.owner] || {
                                   id: grade.owner,

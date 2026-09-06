@@ -1,7 +1,7 @@
 import React from "react";
 import FileMetadataComponent from "./FileMetadataComponent";
 import { Box } from "@mui/material";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const mockPdfFile = {
   id: "file-1",
@@ -67,7 +67,8 @@ export const PdfWithParsedContent = {
     onRemove: () => console.log("Removed"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.getByText(/biology-cell-structure/)).toBeTruthy();
   },
 };
 
@@ -80,7 +81,8 @@ export const ImageFile = {
     onRemove: () => console.log("Removed"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.getByText(/cell-diagram/)).toBeTruthy();
   },
 };
 
@@ -94,7 +96,8 @@ export const WithSearch = {
     onRemove: () => {},
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.getByText(/biology-cell-structure/)).toBeTruthy();
   },
 };
 
@@ -107,6 +110,7 @@ export const NoParsedContent = {
     onRemove: () => {},
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.getByText(/biology-cell-structure/)).toBeTruthy();
   },
 };

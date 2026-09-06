@@ -1,15 +1,21 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { fn, expect, userEvent, within } from 'storybook/test';
-import GlobalSearchBar from './GlobalSearchBar';
-import SearchContext from '../context/searchContext';
-import type { SearchResult } from '../context/searchContext';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn, expect, userEvent, within } from "storybook/test";
+import GlobalSearchBar from "./GlobalSearchBar";
+import SearchContext from "../context/searchContext";
+import type { SearchResult } from "../context/searchContext";
 
 const mockResults: SearchResult[] = [
-  { type: 'unit', id: 'u1', title: 'Cell Biology Basics', score: 0.95 },
-  { type: 'word', id: 'w1', title: 'Photosynthesis', description: 'Process by which plants make food', score: 0.87 },
-  { type: 'file', id: 'f1', title: 'Chapter 3 Notes.pdf', score: 0.75 },
-  { type: 'question', id: 'q1', title: 'What is mitosis?', score: 0.68 },
+  { type: "unit", id: "u1", title: "Cell Biology Basics", score: 0.95 },
+  {
+    type: "word",
+    id: "w1",
+    title: "Photosynthesis",
+    description: "Process by which plants make food",
+    score: 0.87,
+  },
+  { type: "file", id: "f1", title: "Chapter 3 Notes.pdf", score: 0.75 },
+  { type: "question", id: "q1", title: "What is mitosis?", score: 0.68 },
 ];
 
 function MockSearchProvider({
@@ -21,14 +27,15 @@ function MockSearchProvider({
   results?: SearchResult[];
   searching?: boolean;
 }) {
-  const [query, setQuery] = React.useState('');
+  const [query, setQuery] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [currentResults, setCurrentResults] = React.useState<SearchResult[]>(results);
+  const [currentResults, setCurrentResults] =
+    React.useState<SearchResult[]>(results);
   const executeSearch = fn(async (q: string) => {
     setCurrentResults(q.length >= 2 ? results : []);
   });
   const clearSearch = fn(() => {
-    setQuery('');
+    setQuery("");
     setCurrentResults([]);
     setOpen(false);
   });
@@ -40,7 +47,10 @@ function MockSearchProvider({
         results: currentResults,
         searching,
         open,
-        setQuery: (q) => { setQuery(q); setOpen(q.length > 0); },
+        setQuery: (q) => {
+          setQuery(q);
+          setOpen(q.length > 0);
+        },
         executeSearch,
         clearSearch,
         setOpen,
@@ -52,9 +62,9 @@ function MockSearchProvider({
 }
 
 const meta: Meta<typeof GlobalSearchBar> = {
-  title: '🧩 UI Components/Global Search Bar',
+  title: "🧩 UI Components/Global Search Bar",
   component: GlobalSearchBar,
-  parameters: { layout: 'centered' },
+  parameters: { layout: "centered" },
 };
 
 export default meta;
@@ -72,19 +82,19 @@ export const Default: Story = {
     const canvas = within(canvasElement);
 
     // Search input is present
-    const searchInput = canvas.getByRole('textbox', { name: /global search/i });
+    const searchInput = canvas.getByRole("textbox", { name: /global search/i });
     expect(searchInput).toBeInTheDocument();
 
     // Type a search query
-    await userEvent.type(searchInput, 'cell{Enter}');
+    await userEvent.type(searchInput, "cell{Enter}");
 
     // Dropdown should open with results
-    await within(document.body).findByText('Cell Biology Basics');
+    await within(document.body).findByText("Cell Biology Basics");
   },
 };
 
 export const WithResults: Story = {
-  name: 'With Results',
+  name: "With Results",
   decorators: [
     (Story) => (
       <div style={{ width: 500 }}>
@@ -96,23 +106,30 @@ export const WithResults: Story = {
   ],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const searchInput = canvas.getByRole('textbox', { name: /global search/i });
+    const searchInput = canvas.getByRole("textbox", { name: /global search/i });
 
     // Type to trigger search
-    await userEvent.type(searchInput, 'biology{Enter}');
+    await userEvent.type(searchInput, "biology{Enter}");
 
     // Results appear grouped by type
-    await within(document.body).findByText('Cell Biology Basics');
+    await within(document.body).findByText("Cell Biology Basics");
 
     // Clear the search with Escape
-    await userEvent.keyboard('{Escape}');
+    await userEvent.keyboard("{Escape}");
   },
 };
 
 export const InToolbar: Story = {
   decorators: [
     (Story) => (
-      <div style={{ width: 400, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
+      <div
+        style={{
+          width: 400,
+          padding: 16,
+          background: "#f5f5f5",
+          borderRadius: 8,
+        }}
+      >
         <MockSearchProvider results={mockResults}>
           <Story />
         </MockSearchProvider>
@@ -121,8 +138,42 @@ export const InToolbar: Story = {
   ],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const searchInput = canvas.getByRole('textbox', { name: /global search/i });
-    await userEvent.type(searchInput, 'notes{Enter}');
-    await within(document.body).findByText('Chapter 3 Notes.pdf');
+    const searchInput = canvas.getByRole("textbox", { name: /global search/i });
+    await userEvent.type(searchInput, "notes{Enter}");
+    await within(document.body).findByText("Chapter 3 Notes.pdf");
+  },
+};
+
+export const Loading: Story = {
+  decorators: [
+    (Story) => (
+      <MockSearchProvider results={[]} searching={true}>
+        <Story />
+      </MockSearchProvider>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(
+      canvas.getByRole("textbox", { name: /global search/i }),
+    ).toBeInTheDocument();
+  },
+};
+
+export const Error: Story = {
+  decorators: [
+    (Story) => (
+      <MockSearchProvider results={[]}>
+        <Story />
+      </MockSearchProvider>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const searchInput = canvas.getByRole("textbox", { name: /global search/i });
+    await userEvent.type(searchInput, "nonexistent{Enter}");
+    const body = within(document.body);
+    const results = body.queryByText("Cell Biology Basics");
+    expect(results).toBeNull();
   },
 };

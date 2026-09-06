@@ -18,7 +18,10 @@ export default meta;
 
 type Story = StoryObj<typeof SectionPanel>;
 
-const units: Record<string, { id: string; name: string; description: string; difficulty?: string }> = {
+const units: Record<
+  string,
+  { id: string; name: string; description: string; difficulty?: string }
+> = {
   "unit-1": {
     id: "unit-1",
     name: "Chapter 1: Greetings",
@@ -52,21 +55,53 @@ const units: Record<string, { id: string; name: string; description: string; dif
 };
 
 const assignments = [
-  { id: "a1", unitID: "unit-1", sectionID: "s1", dueDate: new Date(Date.now() - 7 * 86400000).toISOString() },
-  { id: "a2", unitID: "unit-2", sectionID: "s1", dueDate: new Date(Date.now() - 3 * 86400000).toISOString() },
-  { id: "a3", unitID: "unit-3", sectionID: "s1", dueDate: new Date(Date.now() + 2 * 86400000).toISOString() },
-  { id: "a4", unitID: "unit-4", sectionID: "s1", dueDate: new Date(Date.now() + 5 * 86400000).toISOString() },
-  { id: "a5", unitID: "unit-5", sectionID: "s1", dueDate: new Date(Date.now() + 10 * 86400000).toISOString() },
+  {
+    id: "a1",
+    unitID: "unit-1",
+    sectionID: "s1",
+    dueDate: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: "a2",
+    unitID: "unit-2",
+    sectionID: "s1",
+    dueDate: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "a3",
+    unitID: "unit-3",
+    sectionID: "s1",
+    dueDate: new Date(Date.now() + 2 * 86400000).toISOString(),
+  },
+  {
+    id: "a4",
+    unitID: "unit-4",
+    sectionID: "s1",
+    dueDate: new Date(Date.now() + 5 * 86400000).toISOString(),
+  },
+  {
+    id: "a5",
+    unitID: "unit-5",
+    sectionID: "s1",
+    dueDate: new Date(Date.now() + 10 * 86400000).toISOString(),
+  },
 ];
 
-const gradeMap: Record<string, { id: string; accuracy: number; sectionID: string }[]> = {
+const gradeMap: Record<
+  string,
+  { id: string; accuracy: number; sectionID: string }[]
+> = {
   "unit-1": [{ id: "g1", accuracy: 92, sectionID: "s1" }],
   "unit-2": [{ id: "g2", accuracy: 78, sectionID: "s1" }],
 };
 
 export const MixedProgress: Story = {
   args: {
-    section: { id: "s1", name: "Spanish 101 — Fall 2026", description: "Prof. García" },
+    section: {
+      id: "s1",
+      name: "Spanish 101 — Fall 2026",
+      description: "Prof. García",
+    },
     assignments,
     units,
     gradeMap,
@@ -84,7 +119,9 @@ export const MixedProgress: Story = {
     await canvas.findByText("Chapter 3: Verb Conjugation");
 
     // Click "Practice" button on a pending assignment
-    const practiceButtons = canvas.getAllByRole("button", { name: /Practice/i });
+    const practiceButtons = canvas.getAllByRole("button", {
+      name: /Practice/i,
+    });
     if (practiceButtons.length > 0) {
       await userEvent.click(practiceButtons[0]);
       expect(args.onOpenDrill).toHaveBeenCalled();
@@ -110,7 +147,9 @@ export const AllCompleted: Story = {
     await canvas.findByText("Japanese 201 — Spring 2026");
 
     // "Completed (N)" toggle button — find specifically by button role
-    const completedBtn = await canvas.findByRole("button", { name: /Completed \(/i });
+    const completedBtn = await canvas.findByRole("button", {
+      name: /Completed \(/i,
+    });
     await userEvent.click(completedBtn);
     // Assignment cards visible after expanding
     await canvas.findByText(/Chapter 1: Greetings/);
@@ -151,6 +190,12 @@ export const WithLockedAssignments: Story = {
     },
     defaultExpanded: true,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Spanish 101 — Fall 2026");
+    const matches = await canvas.findAllByText(/Chapter 4: Past Tense/);
+    expect(matches.length).toBeGreaterThan(0);
+  },
 };
 
 export const WithCampaignContext: Story = {
@@ -159,9 +204,15 @@ export const WithCampaignContext: Story = {
     activeChapterTitle: "The Dragon's Lair",
     campaignBriefing: (
       <div style={{ padding: "8px 0", color: "#666", fontStyle: "italic" }}>
-        📖 &quot;The ancient texts reveal the conjugation patterns needed to unlock the sealed door...&quot;
+        📖 &quot;The ancient texts reveal the conjugation patterns needed to
+        unlock the sealed door...&quot;
       </div>
     ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Spanish 101 — Fall 2026");
+    await canvas.findByText(/The Dragon's Lair/);
   },
 };
 
@@ -198,4 +249,86 @@ export const SingleAssignment: Story = {
     await canvas.findByText("English Composition");
     await canvas.findByText("Chapter 3: Verb Conjugation");
   },
+};
+
+// ── Mobile Viewport Variants ──────────────────────────────────────────
+export const MobileViewport: Story = {
+  args: {
+    section: {
+      id: "s1",
+      name: "Spanish 101 — Fall 2026",
+      description: "Prof. García",
+    },
+    assignments,
+    units,
+    gradeMap,
+    nailedItByUnit: { "unit-1": 3, "unit-2": 1 },
+    sectionLevel: { level: 3 },
+    defaultExpanded: false,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "mobile1" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "375px", padding: "16px" }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const TabletViewport: Story = {
+  args: {
+    section: {
+      id: "s1",
+      name: "Spanish 101 — Fall 2026",
+      description: "Prof. García",
+    },
+    assignments,
+    units,
+    gradeMap,
+    nailedItByUnit: { "unit-1": 3, "unit-2": 1 },
+    sectionLevel: { level: 3 },
+    defaultExpanded: true,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "tablet" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "768px", padding: "20px" }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const DesktopViewport: Story = {
+  args: {
+    section: {
+      id: "s1",
+      name: "Spanish 101 — Fall 2026",
+      description: "Prof. García",
+    },
+    assignments,
+    units,
+    gradeMap,
+    nailedItByUnit: { "unit-1": 3, "unit-2": 1 },
+    sectionLevel: { level: 3 },
+    defaultExpanded: true,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "desktop" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "1200px", padding: "24px" }}>
+        <Story />
+      </div>
+    ),
+  ],
 };

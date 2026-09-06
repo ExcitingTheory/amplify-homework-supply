@@ -1,6 +1,6 @@
 import React from "react";
 import SafeHydrate from "./SafeHydrate";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 export default {
   title: "🧩 UI Components/Safe Hydrate",
@@ -26,7 +26,8 @@ export const Default = {
     </SafeHydrate>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("This content is safely hydrated");
   },
 };
 
@@ -51,6 +52,7 @@ export const WithComplexContent = {
     </SafeHydrate>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Complex Content");
   },
 };

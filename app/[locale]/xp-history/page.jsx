@@ -38,6 +38,7 @@ const XP_REASON_LABELS = {
 export function XPHistoryContent({ logs = [], totalXP = 0 }) {
   return (
     <Box
+      data-tour="xp-history-page"
       sx={{
         marginTop: "1rem",
         padding: "1rem",
@@ -60,7 +61,7 @@ export function XPHistoryContent({ logs = [], totalXP = 0 }) {
       {/* XP Log List */}
       <Card>
         <CardContent sx={{ p: 0 }}>
-          <List disablePadding>
+          <List disablePadding data-testid="xp-history-list">
             {logs.map((log, index) => (
               <li key={log.id}>
                 {index > 0 && <Divider />}

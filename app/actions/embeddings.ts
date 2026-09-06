@@ -32,6 +32,10 @@ export async function generateEmbedding(params: {
   dimensions: number;
   tokenCount: number;
 }> {
+  if (!params.content?.trim()) {
+    throw new Error("Content is required to generate an embedding");
+  }
+
   const dimensions = params.dimensions || EMBEDDING_DIMENSIONS;
 
   const pipe = await getEmbeddingPipeline();

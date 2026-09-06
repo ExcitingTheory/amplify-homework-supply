@@ -2,8 +2,8 @@
  * For Developers - Architecture, Data Models, and Setup
  * Technical documentation moved from docs/ folder into Storybook.
  */
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   Box,
   Typography,
@@ -17,13 +17,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@mui/material';
+} from "@mui/material";
 
 const meta: Meta = {
-  title: '🏠 Getting Started/For Developers',
-  tags: ['!autodocs'],
+  title: "🏠 Getting Started/For Developers",
+  tags: ["!autodocs"],
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: { disable: true },
   },
 };
@@ -32,15 +32,17 @@ type Story = StoryObj;
 
 export const Architecture: Story = {
   render: () => (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 6 }}>
       <Container maxWidth="md">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 4 }}>
           Architecture
         </Typography>
 
         {/* Stack */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Tech Stack</Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Tech Stack
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 4 }}>
           <Chip label="Next.js 16 (App Router)" />
           <Chip label="React 19" />
           <Chip label="AWS Amplify Gen 2" />
@@ -56,7 +58,17 @@ export const Architecture: Story = {
         </Box>
 
         {/* Architecture diagram as text */}
-        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.900', color: 'grey.100', fontFamily: 'monospace', fontSize: 12, overflow: 'auto' }}>
+        <Paper
+          sx={{
+            p: 3,
+            mb: 4,
+            bgcolor: "grey.900",
+            color: "grey.100",
+            fontFamily: "monospace",
+            fontSize: 12,
+            overflow: "auto",
+          }}
+        >
           <pre style={{ margin: 0 }}>{`
 ┌──────────────────────────────────────────────────────────────┐
 │                        Next.js Frontend                        │
@@ -85,8 +97,18 @@ export const Architecture: Story = {
         </Paper>
 
         {/* Key directories */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Project Structure</Typography>
-        <Paper sx={{ p: 2, mb: 4, fontFamily: 'monospace', fontSize: 13, overflow: 'auto' }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Project Structure
+        </Typography>
+        <Paper
+          sx={{
+            p: 2,
+            mb: 4,
+            fontFamily: "monospace",
+            fontSize: 13,
+            overflow: "auto",
+          }}
+        >
           <pre style={{ margin: 0 }}>{`
 app/                → Next.js App Router routes
   [locale]/         → i18n-prefixed pages
@@ -110,7 +132,9 @@ docs/               → Planning documents (architecture decisions)
         <Divider sx={{ my: 4 }} />
 
         {/* Auth Model */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Authentication & Authorization</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Authentication & Authorization
+        </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
           AWS Cognito manages users with group-based access control:
         </Typography>
@@ -118,8 +142,12 @@ docs/               → Planning documents (architecture decisions)
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell><strong>Group</strong></TableCell>
-                <TableCell><strong>Permissions</strong></TableCell>
+                <TableCell>
+                  <strong>Group</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Permissions</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -133,25 +161,62 @@ docs/               → Planning documents (architecture decisions)
               </TableRow>
               <TableRow>
                 <TableCell>Instructors</TableCell>
-                <TableCell>Create/manage own content, sections, assignments</TableCell>
+                <TableCell>
+                  Create/manage own content, sections, assignments
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Learners</TableCell>
-                <TableCell>Read published content, submit grades, join sections</TableCell>
+                <TableCell>
+                  Read published content, submit grades, join sections
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
 
         {/* Data patterns */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Key Patterns</Typography>
-        <Box component="ul" sx={{ pl: 3, '& li': { mb: 1.5 } }}>
-          <li><Typography><strong>Real-time sync</strong> — <code>client.models.Model.observeQuery()</code> for live updates via WebSocket</Typography></li>
-          <li><Typography><strong>One subscription per model</strong> — filter client-side, never duplicate subscriptions</Typography></li>
-          <li><Typography><strong>Context providers</strong> — shared state prevents subscription duplication across components</Typography></li>
-          <li><Typography><strong>Optimistic locking</strong> — pass <code>_version</code> on updates to prevent conflicts</Typography></li>
-          <li><Typography><strong>Lazy relationships</strong> — <code>await unit.words.toArray()</code> for ManyToMany joins</Typography></li>
-          <li><Typography><strong>JSON fields</strong> — <code>Unit.data</code> (Lexical), <code>Grade.data</code> (responses) stored as JSON strings</Typography></li>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Key Patterns
+        </Typography>
+        <Box component="ul" sx={{ pl: 3, "& li": { mb: 1.5 } }}>
+          <li>
+            <Typography>
+              <strong>Real-time sync</strong> —{" "}
+              <code>client.models.Model.observeQuery()</code> for live updates
+              via WebSocket
+            </Typography>
+          </li>
+          <li>
+            <Typography>
+              <strong>One subscription per model</strong> — filter client-side,
+              never duplicate subscriptions
+            </Typography>
+          </li>
+          <li>
+            <Typography>
+              <strong>Context providers</strong> — shared state prevents
+              subscription duplication across components
+            </Typography>
+          </li>
+          <li>
+            <Typography>
+              <strong>Optimistic locking</strong> — pass <code>_version</code>{" "}
+              on updates to prevent conflicts
+            </Typography>
+          </li>
+          <li>
+            <Typography>
+              <strong>Lazy relationships</strong> —{" "}
+              <code>await unit.words.toArray()</code> for ManyToMany joins
+            </Typography>
+          </li>
+          <li>
+            <Typography>
+              <strong>JSON fields</strong> — <code>Unit.data</code> (Lexical),{" "}
+              <code>Grade.data</code> (responses) stored as JSON strings
+            </Typography>
+          </li>
         </Box>
       </Container>
     </Box>
@@ -159,26 +224,49 @@ docs/               → Planning documents (architecture decisions)
 };
 
 export const GettingStarted: Story = {
-  name: 'Dev Setup',
+  name: "Dev Setup",
   render: () => (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 6 }}>
       <Container maxWidth="md">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 4 }}>
           Developer Setup
         </Typography>
 
         <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>Prerequisites</Typography>
-          <Box component="ul" sx={{ pl: 3, '& li': { mb: 0.5 } }}>
-            <li><Typography>Node.js 20+</Typography></li>
-            <li><Typography>npm 9+</Typography></li>
-            <li><Typography>AWS CLI configured with SSO (for Amplify sandbox)</Typography></li>
-            <li><Typography>Git</Typography></li>
+          <Typography variant="h6" gutterBottom>
+            Prerequisites
+          </Typography>
+          <Box component="ul" sx={{ pl: 3, "& li": { mb: 0.5 } }}>
+            <li>
+              <Typography>Node.js 20+</Typography>
+            </li>
+            <li>
+              <Typography>npm 9+</Typography>
+            </li>
+            <li>
+              <Typography>
+                AWS CLI configured with SSO (for Amplify sandbox)
+              </Typography>
+            </li>
+            <li>
+              <Typography>Git</Typography>
+            </li>
           </Box>
         </Paper>
 
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>Quick Start</Typography>
-        <Paper sx={{ p: 2, mb: 3, bgcolor: 'grey.900', color: 'grey.100', fontFamily: 'monospace', fontSize: 13 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Quick Start
+        </Typography>
+        <Paper
+          sx={{
+            p: 2,
+            mb: 3,
+            bgcolor: "grey.900",
+            color: "grey.100",
+            fontFamily: "monospace",
+            fontSize: 13,
+          }}
+        >
           <pre style={{ margin: 0 }}>{`# Clone and install
 git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
 cd amplify-homework-supply
@@ -197,33 +285,47 @@ npm run dev            # Terminal 2: starts Next.js at https://localhost:3000
 # Run tests
 npm test               # Vitest unit tests
 npm run test:storybook # Storybook render tests
-npm run cypress:open   # Cypress E2E tests`}</pre>
+npm run e2e            # Playwright browser tests`}</pre>
         </Paper>
 
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, mt: 4 }}>Development Scripts</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, mt: 4 }}>
+          Development Scripts
+        </Typography>
         <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell><strong>Command</strong></TableCell>
-                <TableCell><strong>Purpose</strong></TableCell>
+                <TableCell>
+                  <strong>Command</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Purpose</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {[
-                ['npm run dev', 'Next.js dev server (HTTPS, port 3000)'],
-                ['npm run storybook', 'Storybook dev (port 6006)'],
-                ['npm run build', 'Production Next.js build'],
-                ['npm run build-storybook', 'Static Storybook build'],
-                ['npm test', 'Run Vitest unit tests'],
-                ['npm run test:storybook', 'Run Storybook render tests'],
-                ['npm run cypress:open', 'Open Cypress E2E runner'],
-                ['npm run lint', 'ESLint (zero warnings enforced)'],
-                ['npm run sandbox', 'Deploy Amplify sandbox with log streaming'],
-                ['npm run sandbox:with-logs', 'Amplify sandbox + save logs to file'],
+                ["npm run dev", "Next.js dev server (HTTPS, port 3000)"],
+                ["npm run storybook", "Storybook dev (port 6006)"],
+                ["npm run build", "Production Next.js build"],
+                ["npm run build-storybook", "Static Storybook build"],
+                ["npm test", "Run Vitest unit tests"],
+                ["npm run test:storybook", "Run Storybook render tests"],
+                ["npm run e2e", "Run Playwright browser tests"],
+                ["npm run lint", "ESLint (zero warnings enforced)"],
+                [
+                  "npm run sandbox",
+                  "Deploy Amplify sandbox with log streaming",
+                ],
+                [
+                  "npm run sandbox:with-logs",
+                  "Amplify sandbox + save logs to file",
+                ],
               ].map(([cmd, desc]) => (
                 <TableRow key={cmd}>
-                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{cmd}</TableCell>
+                  <TableCell sx={{ fontFamily: "monospace", fontSize: 12 }}>
+                    {cmd}
+                  </TableCell>
                   <TableCell>{desc}</TableCell>
                 </TableRow>
               ))}

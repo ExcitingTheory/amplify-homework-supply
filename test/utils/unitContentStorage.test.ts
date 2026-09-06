@@ -31,13 +31,13 @@ describe("unitContentStorage", () => {
   });
 
   describe("saveDraftContent", () => {
-    it("uploads content to the correct private path", async () => {
+    it("uploads content to the correct protected path", async () => {
       mockUploadData.mockReturnValue({ result: Promise.resolve({}) });
 
       await saveDraftContent(TEST_IDENTITY_ID, TEST_UNIT_ID, '{"root":{}}');
 
       expect(mockUploadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
         data: '{"root":{}}',
         options: { contentType: "application/json" },
       });
@@ -45,14 +45,14 @@ describe("unitContentStorage", () => {
   });
 
   describe("saveYjsSnapshot", () => {
-    it("uploads binary data to the correct private path", async () => {
+    it("uploads binary data to the correct protected path", async () => {
       mockUploadData.mockReturnValue({ result: Promise.resolve({}) });
       const snapshot = new Uint8Array([1, 2, 3, 4]);
 
       await saveYjsSnapshot(TEST_IDENTITY_ID, TEST_UNIT_ID, snapshot);
 
       expect(mockUploadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
         data: expect.any(Blob),
         options: { contentType: "application/octet-stream" },
       });
@@ -66,7 +66,7 @@ describe("unitContentStorage", () => {
       mockList.mockResolvedValue({
         items: [
           {
-            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
+            path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
           },
         ],
       });
@@ -81,10 +81,10 @@ describe("unitContentStorage", () => {
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result).toEqual(testData);
       expect(mockList).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
       });
       expect(mockDownloadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/yjs-snapshot.bin`,
       });
     });
 
@@ -98,7 +98,7 @@ describe("unitContentStorage", () => {
   });
 
   describe("loadContent", () => {
-    it("loads draft from private path for instructors", async () => {
+    it("loads draft from protected path for instructors", async () => {
       mockDownloadData.mockReturnValue({
         result: Promise.resolve({
           body: { text: () => Promise.resolve('{"root":{}}') },
@@ -109,7 +109,7 @@ describe("unitContentStorage", () => {
 
       expect(result).toBe('{"root":{}}');
       expect(mockDownloadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
       });
     });
 
@@ -155,14 +155,14 @@ describe("unitContentStorage", () => {
 
       // Should download draft
       expect(mockDownloadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
       });
 
-      // Should upload only to history (private/) — published.json is written by the publishUnit Lambda
+      // Should upload only to history (protected/) — published.json is written by the publishUnit Lambda
       expect(mockUploadData).toHaveBeenCalledTimes(1);
       expect(mockUploadData).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v5.json`,
+          path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v5.json`,
           data: '{"root":{"children":[]}}',
         }),
       );
@@ -185,7 +185,7 @@ describe("unitContentStorage", () => {
 
       expect(result).toBe('{"version":3}');
       expect(mockDownloadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v3.json`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v3.json`,
       });
     });
 
@@ -217,7 +217,7 @@ describe("unitContentStorage", () => {
       expect(result).toBe(true);
       // Should upload restored content as draft
       expect(mockUploadData).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/draft.json`,
         data: '{"restored":true}',
         options: { contentType: "application/json" },
       });
@@ -239,16 +239,16 @@ describe("unitContentStorage", () => {
       mockList.mockResolvedValue({
         items: [
           {
-            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v1.json`,
+            path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v1.json`,
           },
           {
-            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v3.json`,
+            path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v3.json`,
           },
           {
-            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v2.json`,
+            path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v2.json`,
           },
           {
-            path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v10.json`,
+            path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/v10.json`,
           },
         ],
       });
@@ -257,7 +257,7 @@ describe("unitContentStorage", () => {
 
       expect(versions).toEqual([10, 3, 2, 1]);
       expect(mockList).toHaveBeenCalledWith({
-        path: `private/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/`,
+        path: `protected/${TEST_IDENTITY_ID}/units/${TEST_UNIT_ID}/history/`,
       });
     });
 

@@ -24,7 +24,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Block Suggestion",
@@ -176,7 +176,9 @@ export const EmptyEditor = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
@@ -228,7 +230,9 @@ export const AfterHeading = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.textContent).toContain("Japanese Greetings");
   },
 };
 
@@ -298,7 +302,9 @@ export const AfterExplanation = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.textContent).toContain("konnichiwa");
   },
 };
 
@@ -386,6 +392,8 @@ export const AfterQuiz = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.textContent).toContain("Japanese Numbers");
   },
 };

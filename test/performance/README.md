@@ -56,18 +56,11 @@ Comprehensive documentation for load testing strategy, including:
 - Execution plan
 - Monitoring and metrics
 
-### 5. Cypress Performance Tests
-Located at `cypress/e2e/performance-metrics.cy.ts`
-
-Tests real-world browser performance metrics:
-- Page load times
-- Core Web Vitals (LCP, FCP, CLS)
-- Time to Interactive (TTI)
-- Resource loading performance
-- Network performance
-
-**Run:**
+### 5. Browser Performance Tests
+Run browser performance checks with the Playwright test suite:
 ```bash
+npm run e2e
+```
 npm run test:performance:browser
 ```
 
@@ -110,7 +103,7 @@ npm run test:performance:browser
 # Unit tests (Vitest)
 npm run test:performance
 
-# Browser tests (Cypress)
+# Browser tests (Playwright)
 npm run test:performance:browser
 
 # All tests
@@ -129,8 +122,8 @@ npm test test/performance/yjs-collaboration.test.ts
 # DataStore sync only
 npm test test/performance/datastore-sync.test.ts
 
-# Cypress performance metrics
-npx cypress run --spec cypress/e2e/performance-metrics.cy.ts
+# Playwright performance metrics
+npm run e2e
 ```
 
 ## Interpreting Results
@@ -320,7 +313,7 @@ When adding new performance tests:
 ## Resources
 
 - [Vitest Documentation](https://vitest.dev/)
-- [Cypress Performance Testing](https://docs.cypress.io/guides/references/best-practices#Performance)
+- [Playwright Performance Testing](https://playwright.dev/docs/test-performance)
 - [k6 Documentation](https://k6.io/docs/)
 - [Web Performance Best Practices](https://web.dev/fast/)
 - [AWS Performance Testing](https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar)

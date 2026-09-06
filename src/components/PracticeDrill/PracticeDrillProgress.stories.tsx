@@ -1,23 +1,23 @@
-import React from 'react'
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import PracticeDrillProgress from './PracticeDrillProgress'
-import type { PracticeDrillProgressProps } from './PracticeDrillProgress'
-import { expect } from 'storybook/test'
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import PracticeDrillProgress from "./PracticeDrillProgress";
+import type { PracticeDrillProgressProps } from "./PracticeDrillProgress";
+import { expect, within } from "storybook/test";
 
 const meta: Meta<PracticeDrillProgressProps> = {
-  title: '🎯 Practice Drills/Progress',
+  title: "🎯 Practice Drills/Progress",
   component: PracticeDrillProgress,
   argTypes: {
-    blocksCompleted: { control: { type: 'range', min: 0, max: 20 } },
-    blockCount: { control: { type: 'range', min: 1, max: 20 } },
-    xpEarned: { control: { type: 'number' } },
-    xpDiminished: { control: 'boolean' },
-    streakCount: { control: { type: 'number' } },
+    blocksCompleted: { control: { type: "range", min: 0, max: 20 } },
+    blockCount: { control: { type: "range", min: 1, max: 20 } },
+    xpEarned: { control: { type: "number" } },
+    xpDiminished: { control: "boolean" },
+    streakCount: { control: { type: "number" } },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<PracticeDrillProgressProps>
+export default meta;
+type Story = StoryObj<PracticeDrillProgressProps>;
 
 export const Default: Story = {
   args: {
@@ -27,9 +27,11 @@ export const Default: Story = {
     xpDiminished: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
+    const canvas = within(canvasElement);
+    await canvas.findByText(/25/);
   },
-}
+};
 
 export const HalfComplete: Story = {
   args: {
@@ -40,9 +42,11 @@ export const HalfComplete: Story = {
     streakCount: 3,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
+    const canvas = within(canvasElement);
+    await canvas.findByText(/30/);
   },
-}
+};
 
 export const AllComplete: Story = {
   args: {
@@ -53,9 +57,11 @@ export const AllComplete: Story = {
     streakCount: 7,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
+    const canvas = within(canvasElement);
+    await canvas.findByText(/45/);
   },
-}
+};
 
 export const DiminishedXP: Story = {
   args: {
@@ -65,9 +71,11 @@ export const DiminishedXP: Story = {
     xpDiminished: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
+    const canvas = within(canvasElement);
+    await canvas.findByText(/8/);
   },
-}
+};
 
 export const WithStreak: Story = {
   args: {
@@ -78,6 +86,8 @@ export const WithStreak: Story = {
     streakCount: 14,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector(".MuiLinearProgress-root")).toBeTruthy();
+    const canvas = within(canvasElement);
+    await canvas.findByText(/14/);
   },
-}
+};

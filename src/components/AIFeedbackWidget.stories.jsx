@@ -2,16 +2,16 @@
  * @fileoverview Storybook stories for AIFeedbackWidget component
  */
 
-import React from 'react';
-import { Box, Paper, Typography } from '@mui/material';
-import AIFeedbackWidget from './AIFeedbackWidget';
-import { expect } from 'storybook/test'
+import React from "react";
+import { Box, Paper, Typography } from "@mui/material";
+import AIFeedbackWidget from "./AIFeedbackWidget";
+import { fn, expect, userEvent, within } from "storybook/test";
 
 export default {
-  title: '💬 AI Assistant/AI Feedback Widget',
+  title: "💬 AI Assistant/AI Feedback Widget",
   component: AIFeedbackWidget,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
 };
 
@@ -30,66 +30,67 @@ const Template = (args) => (
 // Default story - Chat message
 export const ChatMessage = Template.bind({});
 ChatMessage.args = {
-  contentType: 'CHAT_MESSAGE',
-  generatedContent: 'Sure! I can help you create a vocabulary list for Japanese greetings.',
-  model: 'gpt-4',
-  prompt: 'Create a vocabulary list for Japanese greetings',
-  messageId: 'msg-123',
-  size: 'small',
+  contentType: "CHAT_MESSAGE",
+  generatedContent:
+    "Sure! I can help you create a vocabulary list for Japanese greetings.",
+  model: "gpt-4",
+  prompt: "Create a vocabulary list for Japanese greetings",
+  messageId: "msg-123",
+  size: "small",
   showLabels: false,
 };
 
 // Content completion
 export const ContentCompletion = Template.bind({});
 ContentCompletion.args = {
-  contentType: 'CONTENT_COMPLETION',
-  generatedContent: 'The study of Japanese grammar reveals a complex system of particles that determine the grammatical relationships between words.',
-  model: 'gpt-4',
-  prompt: 'The study of Japanese grammar',
-  size: 'small',
+  contentType: "CONTENT_COMPLETION",
+  generatedContent:
+    "The study of Japanese grammar reveals a complex system of particles that determine the grammatical relationships between words.",
+  model: "gpt-4",
+  prompt: "The study of Japanese grammar",
+  size: "small",
   showLabels: true,
 };
 
 // With labels
 export const WithLabels = Template.bind({});
 WithLabels.args = {
-  contentType: 'CHAT_MESSAGE',
-  generatedContent: 'Here are the top 10 most common Japanese verbs...',
-  model: 'gpt-4',
-  size: 'medium',
+  contentType: "CHAT_MESSAGE",
+  generatedContent: "Here are the top 10 most common Japanese verbs...",
+  model: "gpt-4",
+  size: "medium",
   showLabels: true,
 };
 
 // Large buttons
 export const LargeButtons = Template.bind({});
 LargeButtons.args = {
-  contentType: 'DOCUMENT_ANALYSIS',
-  generatedContent: 'Extracted 150 vocabulary words from the document.',
-  model: 'gpt-4',
-  documentId: 'doc-456',
-  size: 'large',
+  contentType: "DOCUMENT_ANALYSIS",
+  generatedContent: "Extracted 150 vocabulary words from the document.",
+  model: "gpt-4",
+  documentId: "doc-456",
+  size: "large",
   showLabels: true,
 };
 
 // In a chat context
 export const InChatContext = () => (
-  <Box sx={{ maxWidth: 600, mx: 'auto' }}>
-    <Paper sx={{ p: 2, mb: 2, bgcolor: 'grey.100' }}>
+  <Box sx={{ maxWidth: 600, mx: "auto" }}>
+    <Paper sx={{ p: 2, mb: 2, bgcolor: "grey.100" }}>
       <Typography variant="body2" gutterBottom>
         User: How do I say "hello" in Japanese?
       </Typography>
     </Paper>
-    <Paper sx={{ p: 2, position: 'relative', pr: 6 }}>
+    <Paper sx={{ p: 2, position: "relative", pr: 6 }}>
       <Typography variant="body2" gutterBottom>
         Assistant: In Japanese, there are several ways to say "hello":
         <br />
         - こんにちは (Konnichiwa) - Standard greeting during the day
         <br />
         - おはよう (Ohayou) - Good morning
-        <br />
-        - こんばんは (Konbanwa) - Good evening
+        <br />- こんばんは (Konbanwa) - Good evening
       </Typography>
-      <Box sx={{ position: 'absolute', bottom: 8, right: 8 }}>
+      <Box sx={{ position: "absolute", bottom: 8, right: 8 }}>
         <AIFeedbackWidget
           contentType="CHAT_MESSAGE"
           generatedContent="In Japanese, there are several ways to say hello..."
@@ -107,7 +108,7 @@ export const WithCallback = () => {
   const [lastFeedback, setLastFeedback] = React.useState(null);
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 600, mx: "auto" }}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="body1" gutterBottom>
           AI-generated vocabulary definitions
@@ -121,12 +122,12 @@ export const WithCallback = () => {
             showLabels={true}
             onFeedbackSubmitted={(feedback) => {
               setLastFeedback(feedback);
-              console.log('Feedback submitted:', feedback);
+              console.log("Feedback submitted:", feedback);
             }}
           />
         </Box>
         {lastFeedback && (
-          <Paper sx={{ p: 2, bgcolor: 'success.light', mt: 2 }}>
+          <Paper sx={{ p: 2, bgcolor: "success.light", mt: 2 }}>
             <Typography variant="body2">
               ✓ Feedback submitted: {lastFeedback.feedbackType}
             </Typography>
@@ -137,27 +138,45 @@ export const WithCallback = () => {
   );
 };
 
-
 ChatMessage.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  const canvas = within(canvasElement);
+  const btns = await canvas.findAllByRole("button");
+  expect(btns.length).toBeGreaterThanOrEqual(2);
+  await userEvent.click(btns[0]);
+  expect(await canvas.findAllByRole("button")).toBeDefined();
+};
 
 ContentCompletion.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  expect(canvasElement.textContent.length).toBeGreaterThan(0);
+};
 
 WithLabels.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  const canvas = within(canvasElement);
+  // Both feedback buttons visible with labels
+  const btns = await canvas.findAllByRole("button");
+  expect(btns.length).toBeGreaterThanOrEqual(2);
+};
 
 LargeButtons.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  const canvas = within(canvasElement);
+  // Large variant renders with bigger buttons
+  const btns = await canvas.findAllByRole("button");
+  expect(btns.length).toBeGreaterThanOrEqual(2);
+};
 
 InChatContext.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  const canvas = within(canvasElement);
+  // Both messages render
+  await canvas.findByText(/How do I say/i);
+  await canvas.findByText(/Konnichiwa/i);
+};
 
 WithCallback.play = async ({ canvasElement }) => {
-  expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-}
+  const canvas = within(canvasElement);
+  // Feedback buttons exist — click first one to trigger callback
+  const btns = await canvas.findAllByRole("button");
+  expect(btns.length).toBeGreaterThanOrEqual(2);
+  await userEvent.click(btns[0]);
+  // After click the "Feedback submitted" banner should appear
+  await canvas.findByText(/Feedback submitted/i);
+};

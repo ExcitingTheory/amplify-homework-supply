@@ -349,7 +349,8 @@ function GenerateConversationModal({ editor }) {
       const client = getAmplifyClient();
 
       try {
-        const { fetchAuthSession, getCurrentUser } = await import("aws-amplify/auth");
+        const { fetchAuthSession, getCurrentUser } =
+          await import("aws-amplify/auth");
         const session = await fetchAuthSession();
         const resolvedIdentityId =
           session?.identityCredentials?.identityId || identityId;
@@ -360,7 +361,11 @@ function GenerateConversationModal({ editor }) {
 
         for (let trackIdx = 0; trackIdx < tracks.length; trackIdx++) {
           const track = tracks[trackIdx];
-          for (let clipIdx = 0; clipIdx < (track.clips || []).length; clipIdx++) {
+          for (
+            let clipIdx = 0;
+            clipIdx < (track.clips || []).length;
+            clipIdx++
+          ) {
             const clip = track.clips[clipIdx];
             if (!clip?.audioBlob) continue;
 
@@ -368,11 +373,14 @@ function GenerateConversationModal({ editor }) {
               [
                 "conversation",
                 unit?.name?.replace(/[^a-zA-Z0-9]/g, "-") || "audio",
-                track.name?.replace(/[^a-zA-Z0-9]/g, "-") || `track${trackIdx + 1}`,
+                track.name?.replace(/[^a-zA-Z0-9]/g, "-") ||
+                  `track${trackIdx + 1}`,
                 clip.id || clipIdx,
               ].join("-") + ".mp3";
 
-            const file = new File([clip.audioBlob], filename, { type: "audio/mpeg" });
+            const file = new File([clip.audioBlob], filename, {
+              type: "audio/mpeg",
+            });
             const s3Path = `protected/${resolvedIdentityId}/audio/${filename}`;
 
             const { uploadData } = await import("aws-amplify/storage");
@@ -399,7 +407,10 @@ function GenerateConversationModal({ editor }) {
                   unitID: unit.id,
                   fileID: fileRecord.id,
                 }).catch((err) =>
-                  console.warn("[GenerateConversationModal] UnitFile create error:", err),
+                  console.warn(
+                    "[GenerateConversationModal] UnitFile create error:",
+                    err,
+                  ),
                 );
               }
               if (track.prompt?.trim()) {
@@ -784,6 +795,7 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
       >
         {!editName && (
           <Typography
+            data-tour="unit-title"
             variant={isScrolled ? "body1" : "h6"}
             component="div"
             sx={{
@@ -806,6 +818,7 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
         )}
         {editName && (
           <TextField
+            data-testid="unit-name-input"
             size="small"
             variant="standard"
             fullWidth

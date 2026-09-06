@@ -251,9 +251,9 @@ Both modes share the same `requiredActions` — only the story they must occur o
 7. Confirm the task auto-completes (check appears, progress bar updates)
 8. Click **Reset Progress** and try in the other mode
 
-### Cypress E2E
+### Browser E2E
 
-Onboarding tests live in `cypress/e2e/onboarding-storybook.cy.ts`. Add a test case:
+Onboarding browser tests live with the Playwright journeys. Add a test case there:
 
 ```typescript
 it("should auto-complete instructor-record-audio task", () => {

@@ -227,6 +227,7 @@ function Settings() {
   return (
     <>
       <Box
+        data-tour="settings-page"
         sx={{
           marginTop: "1rem",
           marginBottom: "3rem",
@@ -533,6 +534,7 @@ function Settings() {
             {t("settings.privacy.heading")}
           </Typography>
           <FormControlLabel
+            data-testid="setting-leaderboard-opt-in"
             control={
               <Switch
                 checked={settings?.leaderboardOptIn !== false}
@@ -568,6 +570,7 @@ function Settings() {
             respected automatically.
           </Typography>
           <FormControlLabel
+            data-testid="setting-reduced-motion"
             control={
               <Switch
                 checked={settings?.reducedMotion === true}
@@ -580,12 +583,17 @@ function Settings() {
             }
             label="Reduced Motion"
           />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mb: 1 }}>
-            Disable animations, transitions, and auto-playing effects
-            throughout the app. Useful for reducing distractions or if
-            motion causes discomfort.
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ ml: 4, mb: 1 }}
+          >
+            Disable animations, transitions, and auto-playing effects throughout
+            the app. Useful for reducing distractions or if motion causes
+            discomfort.
           </Typography>
           <FormControlLabel
+            data-testid="setting-high-contrast"
             control={
               <Switch
                 checked={settings?.highContrastMode === true}
@@ -619,6 +627,7 @@ function Settings() {
             Choose what others can see on your profile page.
           </Typography>
           <FormControlLabel
+            data-testid="setting-show-badges"
             control={
               <Switch
                 checked={settings?.showBadgesOnProfile !== false}
@@ -639,6 +648,7 @@ function Settings() {
             Display your earned achievement badges on your public profile.
           </Typography>
           <FormControlLabel
+            data-testid="setting-show-anti-badges"
             control={
               <Switch
                 checked={settings?.showAntiBadgesOnProfile === true}

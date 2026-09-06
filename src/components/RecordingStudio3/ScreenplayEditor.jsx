@@ -139,7 +139,7 @@ export default function ScreenplayEditor({
       return fountainText;
     }
     return localTextRef.current;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [fountainText]);
 
   const handlePromptSubmit = useCallback(() => {

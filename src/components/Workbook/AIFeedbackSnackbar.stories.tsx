@@ -1,13 +1,17 @@
-import React from 'react';
-import { AIFeedbackSnackbar } from './AIFeedbackSnackbar';
-import { expect } from 'storybook/test'
+import React from "react";
+import { AIFeedbackSnackbar } from "./AIFeedbackSnackbar";
+import { expect, within } from "storybook/test";
 
 // Minimal mock provider that emits awareness events
 function createMockProvider(opts = {}) {
   const listeners = new Map();
   const feedbackMap = {
-    observe: (fn: any) => { listeners.set('feedback', fn); },
-    unobserve: (fn: any) => { listeners.delete('feedback'); },
+    observe: (fn: any) => {
+      listeners.set("feedback", fn);
+    },
+    unobserve: (fn: any) => {
+      listeners.delete("feedback");
+    },
     get: () => undefined,
     toJSON: () => ({}),
   };
@@ -19,7 +23,10 @@ function createMockProvider(opts = {}) {
       },
       off: (event: any, fn: any) => {
         const fns = listeners.get(event) || [];
-        listeners.set(event, fns.filter((f: any) => f !== fn));
+        listeners.set(
+          event,
+          fns.filter((f: any) => f !== fn),
+        );
       },
       getLocalState: () => ({}),
       getStates: () => new Map(),
@@ -27,7 +34,7 @@ function createMockProvider(opts = {}) {
     getMap: (name: any) => feedbackMap,
     // Simulate an AI feedback event after mount
     _emitFeedback: (blockId: any) => {
-      const fns = listeners.get('change') || [];
+      const fns = listeners.get("change") || [];
       fns.forEach((fn: any) => fn());
     },
     ...opts,
@@ -35,10 +42,10 @@ function createMockProvider(opts = {}) {
 }
 
 export default {
-  title: '📓 Workbook/AI Feedback Snackbar',
+  title: "📓 Workbook/AI Feedback Snackbar",
   component: AIFeedbackSnackbar,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     disableUnitContext: true,
     disableSectionContext: true,
     disableDictionaryContext: true,
@@ -48,19 +55,21 @@ export default {
 export const Default = {
   args: {
     provider: null,
-    currentUsername: 'student-alice',
+    currentUsername: "student-alice",
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const body = within(document.body);
+    expect(body.queryByRole("alert")).toBeNull();
   },
 };
 
 export const WithProvider = {
   args: {
     provider: createMockProvider(),
-    currentUsername: 'student-alice',
+    currentUsername: "student-alice",
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const body = within(document.body);
+    expect(body.queryByRole("alert")).toBeNull();
   },
 };

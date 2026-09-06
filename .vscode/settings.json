@@ -65,7 +65,6 @@
   "chat.tools.terminal.autoApprove": {
     "npm test": true,
     "npm run test": true,
-    "npx cypress": true,
     "npm run dev": true,
     "npm run build": true,
     "npm run storybook": true,

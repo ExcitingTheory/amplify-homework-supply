@@ -27,14 +27,31 @@ export interface OnboardingTaskWithCriteria extends OnboardingTask {
 }
 
 export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
+  // ============ GETTING STARTED (all personas) ============
+  {
+    id: "getting-started-storybook-basics",
+    title: "Get to Know Storybook",
+    description:
+      "Learn how to navigate this interactive training environment before diving into tasks",
+    instructions: [
+      "Browse stories by category in the sidebar",
+      "Use the toolbar to reload, zoom, measure, and toggle display options",
+    ],
+    persona: "all",
+    category: "Getting Started",
+    order: 0,
+    estimatedTime: 60,
+    completionCriteria: {
+      tutorialStoryId: "🏠-getting-started-welcome--welcome",
+      quizStoryId: "🏠-getting-started-welcome--welcome",
+    },
+  },
   // ============ INSTRUCTOR TASKS ============
   {
     id: "instructor-setup-class",
     title: "Set Up Your First Class",
     description: "Create a new class section for your students",
     instructions: [
-      "Browse the Storybook sidebar to find features",
-      "Switch between Canvas and Docs tabs",
       "View the Sections page overview",
       'Click the "Create Section" button',
       "Fill in section details and save",
@@ -49,7 +66,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--sections", // Tutorial: Sections page with create section UI
       quizStoryId: "📄-pages-application-pages--sections", // Quiz: Navigate to actual sections page
-      completionSequence: ["sections-page", "create-section-button", "section-form", "join-code"],
+      completionSequence: [
+        "sections-page",
+        "create-section-button",
+        "section-form",
+        "join-code",
+      ],
     },
   },
   {
@@ -139,7 +161,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "🧩-ui-components-section-assigner--default", // Tutorial: Section assigner dialog component
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page
-      completionSequence: ["unit-selector", "create-assignment-button"], // Step 1: select a unit; Step 2: click Create Assignment
+      completionSequence: [
+        "create-assignment-button",
+        "unit-selector",
+        "due-date-picker",
+        "assignment-settings",
+      ], // Step 1: open dialog; Step 2: select unit; Step 3: set due date; Step 4: configure settings
     },
   },
   {
@@ -183,7 +210,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started", // Tutorial: Chat sidebar component
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Workbook with chat sidebar
-      completionSequence: ["chat-input"], // Must interact with the chat input to ask a question
+      completionSequence: ["chat-send"], // Must click Send to prove they asked a question
     },
   },
   {
@@ -215,8 +242,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Join Your First Class",
     description: "Connect to your instructor's class section",
     instructions: [
-      "Browse the Storybook sidebar",
-      "Switch between Canvas and Docs tabs",
       "View the Join Class overview",
       'Click the "Join Section" button',
       "View the Join Section dialog",
@@ -296,7 +321,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--section-detail", // Tutorial: Section detail page (has grades tab and feedback)
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page (has grades tab)
-      completionSequence: ["assignments-section", "assignment-card"], // Step 1: open Assignments section; Step 2: view a specific assignment
+      completionSequence: ["grades-tab", "grade-detail"], // Step 1: open Grades tab; Step 2: open a specific grade's feedback
     },
   },
   {
@@ -338,7 +363,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started", // Tutorial: Chat sidebar component
       quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Workbook with chat sidebar
-      completionSequence: ["chat-input"], // Must interact with chat input to prove they asked a question
+      completionSequence: ["chat-send"], // Must click Send to prove they asked a question
     },
   },
   {
@@ -530,8 +555,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Try the Language Switcher",
     description: "Preview how UI text appears in each supported language",
     instructions: [
-      "Explore the Storybook sidebar to find translatable components",
-      "Use Canvas to preview translations, Docs for locale conventions",
       "Find the 🌐 Globe icon in the Storybook top toolbar",
       "Click it to open the language selector dropdown",
       "Switch between languages (ja, es, en) and observe how text changes",

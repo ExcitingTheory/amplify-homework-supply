@@ -60,6 +60,12 @@ const SectionProvider = ({ children, unitId, initialSections = [] }) => {
   const sectionVersionMapRef = useRef({});
   const assignmentVersionMapRef = useRef({});
 
+  // Real loading signal — false only once the Section observeQuery has
+  // actually responded at least once (not a hardcoded timeout guess).
+  const [sectionsLoading, setSectionsLoading] = React.useState(
+    initialSections.length === 0,
+  );
+
   // Show deleted toggle state
   const [showDeleted, setShowDeleted] = React.useState(false);
   const [deletedSections, setDeletedSections] = React.useState([]);
@@ -108,6 +114,7 @@ const SectionProvider = ({ children, unitId, initialSections = [] }) => {
     const subscription = client.models.Section.observeQuery().subscribe({
       next: ({ items }) => {
         if (cancelled) return;
+        setSectionsLoading(false);
         const allValid = (items || []).filter(
           (item) => item != null && item.id != null,
         );
@@ -141,7 +148,10 @@ const SectionProvider = ({ children, unitId, initialSections = [] }) => {
         );
         dispatch({ type: actionTypes.SET_SECTIONS, payload: validItems });
       },
-      error: (error) => handleSubscriptionError("Section observeQuery", error),
+      error: (error) => {
+        setSectionsLoading(false); // Don't leave the caller stuck on a skeleton forever
+        handleSubscriptionError("Section observeQuery", error);
+      },
     });
 
     return () => {
@@ -255,6 +265,7 @@ const SectionProvider = ({ children, unitId, initialSections = [] }) => {
       sections: state.sections,
       sectionMap: state.sectionMap,
       assignments: state.assignments,
+      sectionsLoading,
       refetchSections,
       bumpSectionVersion,
       bumpAssignmentVersion,
@@ -266,6 +277,7 @@ const SectionProvider = ({ children, unitId, initialSections = [] }) => {
       state.sections,
       state.sectionMap,
       state.assignments,
+      sectionsLoading,
       refetchSections,
       bumpSectionVersion,
       bumpAssignmentVersion,

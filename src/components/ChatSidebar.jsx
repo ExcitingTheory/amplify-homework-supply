@@ -951,14 +951,11 @@ const ChatSidebar = ({ onClose }) => {
     },
   });
 
-  // Validate hook result
-  if (!chatHookResult) {
+  // Validate hook result — flag only; the actual early-return JSX happens at
+  // the end of the component, after all hooks have been called unconditionally.
+  const chatInitFailed = !chatHookResult;
+  if (chatInitFailed) {
     console.error("[ChatSidebar] useChat returned null/undefined!");
-    return (
-      <Box sx={{ p: 2 }}>
-        <Alert severity="error">{t("chatSidebar.chatInitFailure")}</Alert>
-      </Box>
-    );
   }
 
   // Destructure all available functions from useChat API
@@ -1448,6 +1445,14 @@ const ChatSidebar = ({ onClose }) => {
 
   // Don't render until translations are ready to prevent hydration errors
   if (!ready) return null;
+
+  if (chatInitFailed) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Alert severity="error">{t("chatSidebar.chatInitFailure")}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -3345,6 +3350,7 @@ const ChatSidebar = ({ onClose }) => {
               variant="contained"
               aria-label={tCommon("actions.send")}
               disabled={isLoading || !assistantChat?.id || !user}
+              data-tour="chat-send"
               data-testid="chat-send"
               sx={{
                 minWidth: "auto",

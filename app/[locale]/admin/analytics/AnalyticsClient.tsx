@@ -79,7 +79,11 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <Card variant="outlined" sx={{ height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ height: "100%" }}
+      data-testid="analytics-stat-card"
+    >
       <CardContent>
         <Typography variant="caption" color="text.secondary" gutterBottom>
           {title}
@@ -105,7 +109,11 @@ function StatCard({
 // Main Analytics Dashboard
 // ============================================================================
 
-function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] }) {
+function AnalyticsDashboard({
+  initialSections = [],
+}: {
+  initialSections?: any[];
+}) {
   const [summaries, setSummaries] = React.useState<AnalyticsSummaryRecord[]>(
     [],
   );
@@ -148,15 +156,16 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
         } else {
           filter.sectionId = { eq: selectedSection };
         }
-        const { data: items } = await (client.models as any).AnalyticsSummary.list({
+        const { data: items } = await (
+          client.models as any
+        ).AnalyticsSummary.list({
           filter,
         });
         const valid = (items || []).filter(
           (item: any) => item != null,
         ) as AnalyticsSummaryRecord[];
-        valid.sort(
-          (a: AnalyticsSummaryRecord, b: AnalyticsSummaryRecord) =>
-            a.date.localeCompare(b.date),
+        valid.sort((a: AnalyticsSummaryRecord, b: AnalyticsSummaryRecord) =>
+          a.date.localeCompare(b.date),
         );
         setSummaries(valid);
       } catch (err) {
@@ -192,7 +201,8 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
         pageViews: acc.pageViews + (s.totalPageViews || 0),
         sessions: acc.sessions + (s.totalSessions || 0),
         sessionDuration:
-          acc.sessionDuration + (s.avgSessionDurationMs || 0) * (s.totalSessions || 1),
+          acc.sessionDuration +
+          (s.avgSessionDurationMs || 0) * (s.totalSessions || 1),
         engagedTime: acc.engagedTime + (s.totalEngagedTimeMs || 0),
         grades: acc.grades + (s.gradesSubmitted || 0),
         accuracySum:
@@ -222,11 +232,11 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
       dau: Math.round(sum.dau / days),
       pageViews: sum.pageViews,
       sessions: sum.sessions,
-      avgSession: sum.sessions ? Math.round(sum.sessionDuration / sum.sessions) : 0,
-      engagedTime: sum.engagedTime,
-      avgEngaged: sum.grades
-        ? Math.round(sum.engagedTime / sum.grades)
+      avgSession: sum.sessions
+        ? Math.round(sum.sessionDuration / sum.sessions)
         : 0,
+      engagedTime: sum.engagedTime,
+      avgEngaged: sum.grades ? Math.round(sum.engagedTime / sum.grades) : 0,
       grades: sum.grades,
       avgAccuracy: sum.grades
         ? Math.round((sum.accuracySum / sum.grades) * 10) / 10
@@ -239,7 +249,7 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
   }, [summaries]);
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+    <Box data-tour="analytics-page" sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
       <Box
         sx={{
           display: "flex",
@@ -402,6 +412,7 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
           <Card variant="outlined">
             <Box sx={{ overflowX: "auto" }}>
               <table
+                data-testid="analytics-daily-table"
                 style={{
                   width: "100%",
                   borderCollapse: "collapse",
@@ -474,10 +485,14 @@ function AnalyticsDashboard({ initialSections = [] }: { initialSections?: any[] 
 // Page wrapper with auth
 // ============================================================================
 
-export default function AnalyticsPage({ initialSections = [] }: { initialSections?: any[] }) {
+export default function AnalyticsPage({
+  initialSections = [],
+}: {
+  initialSections?: any[];
+}) {
   return (
-      <AdminRouteGuard>
-        <AnalyticsDashboard initialSections={initialSections} />
-      </AdminRouteGuard>
+    <AdminRouteGuard>
+      <AnalyticsDashboard initialSections={initialSections} />
+    </AdminRouteGuard>
   );
 }

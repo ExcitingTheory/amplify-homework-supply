@@ -22,7 +22,7 @@ import CustomAnswerPlugin, {
 } from "./CustomAnswerPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
 import { seedMockUnit } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/Content Blocks/Custom Answer",
@@ -258,20 +258,26 @@ const sampleCustomAnswerState = {
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
 export const EditableWithCustomAnswer = {
   render: () => <EditableTemplate editorState={sampleCustomAnswerState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
 export const ReadOnlyWithCustomAnswer = {
   render: () => <ReadOnlyTemplate editorState={sampleCustomAnswerState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };

@@ -95,10 +95,16 @@ Mock implementations are in `.storybook/__mocks__/` directory.
 | File | Stories | groups override |
 |---|---|---|
 | `.storybook/docs/QuickTour-Student.stories.tsx` | `Step1_Dashboard`, `Step2_JoinSection`, `Step3_Workbook` | `['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners']` |
-| `src/stories/pages.stories.tsx` | `Index`, `IndexAssignments`, `Sections` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
-| | `SectionDetailStudent`, `Workbook`, `WorkbookTimedExercise`, `PeerReview` | `['section-jpn-101-learners']` |
-| | `IndexNoSections`, `SectionsEmptyState` | `[]` |
-| | `Units`, `UnitsEmptyState`, `SectionDetail`, `UnitDetail` | `['Instructors']` |
+| `src/stories/pages-index.stories.tsx` | `Index`, `IndexAssignments` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
+| | `IndexNoSections` | `[]` |
+| `src/stories/pages-sections.stories.tsx` | `Sections` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
+| | `SectionsEmptyState` | `[]` |
+| `src/stories/pages-section-detail.stories.tsx` | `SectionDetailStudent` | `['section-jpn-101-learners']` |
+| | `SectionDetail` | `['Instructors']` |
+| `src/stories/pages-workbook.stories.tsx` | `Workbook`, `WorkbookTimedExercise` | `['section-jpn-101-learners']` |
+| `src/stories/pages-peer-review.stories.tsx` | `PeerReview` | `['section-jpn-101-learners']` |
+| `src/stories/pages-units.stories.tsx` | `Units`, `UnitsEmptyState` | `['Instructors']` |
+| `src/stories/pages-unit-detail.stories.tsx` | `UnitDetail` | `['Instructors']` |
 | `src/stories/pages-additional.stories.tsx` | `Settings`, `Squads`, `SquadDetail`, `XPHistory`, `Leaderboard`, `Notifications`, `Drill`, `ProfilePublic` | `['section-jpn-101-learners']` |
 | | `AdminAnalytics`, `AdminArchives`, `AdminModeration`, `AdminSettings`, `AdminWords`, `RecycleBin`, `SectionAISettings`, `SectionGamificationSettings` | `['Admins', 'Instructors']` |
 | | `InstructorGrade` | `['Instructors']` |

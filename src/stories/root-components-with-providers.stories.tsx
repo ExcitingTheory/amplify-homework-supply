@@ -5,27 +5,27 @@
  * @module stories/root-components-with-providers.stories
  */
 
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, fn, within } from "storybook/test";
 
-import AppShell from '../components/AppShell';
-import { GradeReviewDrawer } from '../components/GradeReviewDrawer';
-import RecordingStudioEnhancedModal from '../components/RecordingStudioEnhancedModal';
-import CollaboratorManager from '../components/CollaboratorManager';
+import AppShell from "../components/AppShell";
+import { GradeReviewDrawer } from "../components/GradeReviewDrawer";
+import RecordingStudioEnhancedModal from "../components/RecordingStudioEnhancedModal";
+import CollaboratorManager from "../components/CollaboratorManager";
 
-import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
-import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
-import { FilesProvider } from '../context/fileContext';
+import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
+import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
+import { FilesProvider } from "../context/fileContext";
 
 // ---------------------------------------------------------------------------
 // Meta
 // ---------------------------------------------------------------------------
 
 const meta: Meta = {
-  title: '🧩 UI Components/App Primitives (With Providers)',
+  title: "🧩 UI Components/App Primitives (With Providers)",
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
 };
 
@@ -37,16 +37,16 @@ type Story = StoryObj;
 // ---------------------------------------------------------------------------
 
 export const AppShellDefault: Story = {
-  name: 'AppShell / Default',
+  name: "AppShell / Default",
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'student-alice-sub',
-        userId: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
+        username: "student-alice-sub",
+        userId: "student-alice-sub",
+        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
+        groups: ["section-jpn-101-learners"],
       });
-      seedIndexPageData('student');
+      seedIndexPageData("student");
       return <Story />;
     },
   ],
@@ -60,13 +60,25 @@ export const AppShellDefault: Story = {
   ),
   parameters: {
     mockAuth: {
-      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
+      user: {
+        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
+      },
+      session: {
+        username: "student-alice-sub",
+        identityId: "identity-alice",
+        groups: ["section-jpn-101-learners"],
+      },
     },
-    docs: { description: { story: 'Responsive shell with persistent sidebar on desktop, modal drawer on mobile.' } },
+    docs: {
+      description: {
+        story:
+          "Responsive shell with persistent sidebar on desktop, modal drawer on mobile.",
+      },
+    },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Page Content");
   },
 };
 
@@ -75,16 +87,16 @@ export const AppShellDefault: Story = {
 // ---------------------------------------------------------------------------
 
 export const GradeReviewDrawerOpen: Story = {
-  name: 'GradeReviewDrawer / Open',
+  name: "GradeReviewDrawer / Open",
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'teacher-1',
-        userId: 'teacher-1',
-        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        groups: ['Instructors'],
+        username: "teacher-1",
+        userId: "teacher-1",
+        attributes: { sub: "teacher-1", email: "teacher@example.com" },
+        groups: ["Instructors"],
       });
-      seedIndexPageData('instructor');
+      seedIndexPageData("instructor");
       return (
         <FilesProvider>
           <Story />
@@ -99,24 +111,33 @@ export const GradeReviewDrawerOpen: Story = {
       gradeId="grade-alice-unit-1"
       unitId="unit-japanese-1"
       studentName="Alice Johnson"
-      gradeIds={['grade-alice-unit-1', 'grade-bob-unit-1', 'grade-carol-unit-1']}
+      gradeIds={[
+        "grade-alice-unit-1",
+        "grade-bob-unit-1",
+        "grade-carol-unit-1",
+      ]}
       currentIndex={0}
       onNavigate={fn()}
     />
   ),
   parameters: {
     mockAuth: {
-      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
+      user: { attributes: { sub: "teacher-1", email: "teacher@example.com" } },
+      session: {
+        username: "teacher-1",
+        identityId: "identity-teacher-1",
+        groups: ["Instructors"],
+      },
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Alice Johnson");
   },
 };
 
 export const GradeReviewDrawerClosed: Story = {
-  name: 'GradeReviewDrawer / Closed',
+  name: "GradeReviewDrawer / Closed",
   render: () => (
     <GradeReviewDrawer
       open={false}
@@ -130,7 +151,7 @@ export const GradeReviewDrawerClosed: Story = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector('[role="presentation"]')).toBeNull();
   },
 };
 
@@ -139,14 +160,14 @@ export const GradeReviewDrawerClosed: Story = {
 // ---------------------------------------------------------------------------
 
 export const CollaboratorManagerOwner: Story = {
-  name: 'CollaboratorManager / Owner View',
+  name: "CollaboratorManager / Owner View",
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'teacher-1',
-        userId: 'teacher-1',
-        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        groups: ['Instructors'],
+        username: "teacher-1",
+        userId: "teacher-1",
+        attributes: { sub: "teacher-1", email: "teacher@example.com" },
+        groups: ["Instructors"],
       });
       return <Story />;
     },
@@ -160,26 +181,30 @@ export const CollaboratorManagerOwner: Story = {
     />
   ),
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     mockAuth: {
-      user: { attributes: { sub: 'teacher-1', email: 'teacher@example.com' } },
-      session: { username: 'teacher-1', identityId: 'identity-teacher-1', groups: ['Instructors'] },
+      user: { attributes: { sub: "teacher-1", email: "teacher@example.com" } },
+      session: {
+        username: "teacher-1",
+        identityId: "identity-teacher-1",
+        groups: ["Instructors"],
+      },
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.children.length).toBeGreaterThan(0);
   },
 };
 
 export const CollaboratorManagerReadOnly: Story = {
-  name: 'CollaboratorManager / Read-Only (non-owner)',
+  name: "CollaboratorManager / Read-Only (non-owner)",
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'teacher-2',
-        userId: 'teacher-2',
-        attributes: { sub: 'teacher-2', email: 'teacher2@example.com' },
-        groups: ['Instructors'],
+        username: "teacher-2",
+        userId: "teacher-2",
+        attributes: { sub: "teacher-2", email: "teacher2@example.com" },
+        groups: ["Instructors"],
       });
       return <Story />;
     },
@@ -193,14 +218,14 @@ export const CollaboratorManagerReadOnly: Story = {
     />
   ),
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     mockAuth: {
-      user: { attributes: { sub: 'teacher-2', email: 'teacher2@example.com' } },
-      session: { username: 'teacher-2', groups: ['Instructors'] },
+      user: { attributes: { sub: "teacher-2", email: "teacher2@example.com" } },
+      session: { username: "teacher-2", groups: ["Instructors"] },
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.children.length).toBeGreaterThan(0);
   },
 };
 
@@ -209,14 +234,14 @@ export const CollaboratorManagerReadOnly: Story = {
 // ---------------------------------------------------------------------------
 
 export const RecordingStudioEnhancedModalOpen: Story = {
-  name: 'RecordingStudioEnhancedModal / Open',
+  name: "RecordingStudioEnhancedModal / Open",
   decorators: [
     (Story: React.FC) => {
       setMockUser({
-        username: 'student-alice-sub',
-        userId: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
+        username: "student-alice-sub",
+        userId: "student-alice-sub",
+        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
+        groups: ["section-jpn-101-learners"],
       });
       return (
         <FilesProvider>
@@ -237,25 +262,28 @@ export const RecordingStudioEnhancedModalOpen: Story = {
   ),
   parameters: {
     mockAuth: {
-      user: { attributes: { sub: 'student-alice-sub', email: 'alice@example.com' } },
-      session: { username: 'student-alice-sub', identityId: 'identity-alice', groups: ['section-jpn-101-learners'] },
+      user: {
+        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
+      },
+      session: {
+        username: "student-alice-sub",
+        identityId: "identity-alice",
+        groups: ["section-jpn-101-learners"],
+      },
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const body = within(document.body as HTMLElement);
+    await body.findByText("Record Audio Response");
   },
 };
 
 export const RecordingStudioEnhancedModalClosed: Story = {
-  name: 'RecordingStudioEnhancedModal / Closed',
+  name: "RecordingStudioEnhancedModal / Closed",
   render: () => (
-    <RecordingStudioEnhancedModal
-      open={false}
-      onClose={fn()}
-      onSave={fn()}
-    />
+    <RecordingStudioEnhancedModal open={false} onClose={fn()} onSave={fn()} />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector('[role="dialog"]')).toBeNull();
   },
 };

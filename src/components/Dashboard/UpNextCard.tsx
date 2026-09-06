@@ -2,6 +2,7 @@
 import React from "react";
 import { Box, Card, Chip, Typography } from "@mui/material";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import { DASHBOARD_TOKENS } from "./constants";
 import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
 
 interface UpNextCardProps {
@@ -10,6 +11,8 @@ interface UpNextCardProps {
   sectionName: string;
   chapterTitle?: string | null;
   lockStatus?: AssignmentCardProps["lockStatus"];
+  /** Grade info for a completed assignment — drives the completed/grade display */
+  latestGrade?: AssignmentCardProps["latestGrade"];
   nailedItCount?: number;
   onOpenDrill: AssignmentCardProps["onOpenDrill"];
   onRequestGuidance: AssignmentCardProps["onRequestGuidance"];
@@ -25,6 +28,7 @@ export function UpNextCard({
   sectionName,
   chapterTitle,
   lockStatus,
+  latestGrade,
   nailedItCount = 0,
   onOpenDrill,
   onRequestGuidance,
@@ -35,10 +39,12 @@ export function UpNextCard({
       aria-label={`Your next step in ${sectionName}`}
       elevation={0}
       sx={{
-        mb: 2,
-        borderRadius: 2,
+        mb: DASHBOARD_TOKENS.spacing.panelGap,
+        borderRadius: DASHBOARD_TOKENS.radius.card,
         border: "2px solid",
         borderColor: "primary.main",
+        borderLeft: `4px solid`,
+        borderLeftColor: "primary.main",
         overflow: "visible",
         position: "relative",
       }}
@@ -61,7 +67,7 @@ export function UpNextCard({
         />
       </Box>
 
-      <Box sx={{ pt: 1.5 }} aria-live="polite" aria-atomic="false">
+      <Box aria-live="polite" aria-atomic="false">
         {chapterTitle && (
           <Typography
             variant="caption"
@@ -77,6 +83,7 @@ export function UpNextCard({
           locked={false}
           lockStatus={lockStatus}
           isUpNext
+          latestGrade={latestGrade}
           nailedItCount={nailedItCount}
           onOpenDrill={onOpenDrill}
           onRequestGuidance={onRequestGuidance}

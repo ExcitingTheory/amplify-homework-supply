@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 /**
  * MessageInput — Chat message input with @mention autocomplete.
@@ -12,7 +12,13 @@
  * @module CollaborativeChat/MessageInput
  */
 
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   Box,
   TextField,
@@ -25,166 +31,183 @@ import {
   Avatar,
   Typography,
   Popper,
-} from '@mui/material'
-import SendIcon from '@mui/icons-material/Send'
-import SmartToyIcon from '@mui/icons-material/SmartToy'
-import CircleIcon from '@mui/icons-material/Circle'
-import type { MemberInfo } from './types'
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import CircleIcon from "@mui/icons-material/Circle";
+import type { MemberInfo } from "./types";
 
 export interface MessageInputProps {
-  onSend: (content: string) => void
-  onTypingChange?: (typing: boolean) => void
-  members?: MemberInfo[]
-  placeholder?: string
-  disabled?: boolean
-  replyingTo?: string | null
-  onCancelReply?: () => void
+  onSend: (content: string) => void;
+  onTypingChange?: (typing: boolean) => void;
+  members?: MemberInfo[];
+  placeholder?: string;
+  disabled?: boolean;
+  replyingTo?: string | null;
+  onCancelReply?: () => void;
 }
 
 export default function MessageInput({
   onSend,
   onTypingChange,
   members = [],
-  placeholder = 'Type a message...',
+  placeholder = "Type a message...",
   disabled = false,
   replyingTo,
   onCancelReply,
 }: MessageInputProps) {
-  const [text, setText] = useState('')
-  const [mentionQuery, setMentionQuery] = useState<string | null>(null)
-  const [mentionAnchor, setMentionAnchor] = useState<HTMLElement | null>(null)
-  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [text, setText] = useState("");
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionAnchor, setMentionAnchor] = useState<HTMLElement | null>(null);
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Compute mention suggestions (always include @kai at top)
   const mentionSuggestions = useMemo(() => {
-    if (mentionQuery === null) return []
-    const query = mentionQuery.toLowerCase()
-    const kaiBotEntry: MemberInfo = { username: 'kai', displayName: 'Kai (AI Assistant)', online: true }
-    const allMembers = [kaiBotEntry, ...members]
-    if (!query) return allMembers.slice(0, 8)
+    if (mentionQuery === null) return [];
+    const query = mentionQuery.toLowerCase();
+    const kaiBotEntry: MemberInfo = {
+      username: "kai",
+      displayName: "Kai (AI Assistant)",
+      online: true,
+    };
+    const allMembers = [kaiBotEntry, ...members];
+    if (!query) return allMembers.slice(0, 8);
     return allMembers
       .filter(
         (m) =>
           m.displayName.toLowerCase().includes(query) ||
-          m.username.toLowerCase().includes(query)
+          m.username.toLowerCase().includes(query),
       )
-      .slice(0, 8)
-  }, [mentionQuery, members])
+      .slice(0, 8);
+  }, [mentionQuery, members]);
 
   // Handle typing indicator
   const signalTyping = useCallback(() => {
-    onTypingChange?.(true)
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    onTypingChange?.(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      onTypingChange?.(false)
-    }, 2000)
-  }, [onTypingChange])
+      onTypingChange?.(false);
+    }, 2000);
+  }, [onTypingChange]);
 
   // Cleanup typing timeout
   useEffect(() => {
     return () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
-    }
-  }, [])
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, []);
 
   const handleSend = useCallback(() => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    onSend(trimmed)
-    setText('')
-    onTypingChange?.(false)
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
-  }, [text, onSend, onTypingChange])
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setText("");
+    onTypingChange?.(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+  }, [text, onSend, onTypingChange]);
 
   const insertMention = useCallback(
     (member: MemberInfo) => {
-      const mentionText = member.username === 'kai'
-        ? '@kai '
-        : member.displayName.includes(' ')
-          ? `@"${member.displayName}" `
-          : `@${member.username} `
+      const mentionText =
+        member.username === "kai"
+          ? "@kai "
+          : member.displayName.includes(" ")
+            ? `@"${member.displayName}" `
+            : `@${member.username} `;
 
       // Replace the @query portion in text
-      const atIndex = text.lastIndexOf('@')
+      const atIndex = text.lastIndexOf("@");
       if (atIndex !== -1) {
-        const before = text.slice(0, atIndex)
-        setText(before + mentionText)
+        const before = text.slice(0, atIndex);
+        setText(before + mentionText);
       } else {
-        setText(text + mentionText)
+        setText(text + mentionText);
       }
 
-      setMentionQuery(null)
-      setSelectedMentionIndex(0)
-      inputRef.current?.focus()
+      setMentionQuery(null);
+      setSelectedMentionIndex(0);
+      inputRef.current?.focus();
     },
-    [text]
-  )
+    [text],
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setText(value)
-    signalTyping()
+    const value = e.target.value;
+    setText(value);
+    signalTyping();
 
     // Detect @mention trigger
-    const cursorPos = e.target.selectionStart || value.length
-    const textBeforeCursor = value.slice(0, cursorPos)
-    const atMatch = textBeforeCursor.match(/@(\w*)$/)
+    const cursorPos = e.target.selectionStart || value.length;
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@(\w*)$/);
     if (atMatch) {
-      setMentionQuery(atMatch[1])
-      setMentionAnchor(e.target)
-      setSelectedMentionIndex(0)
+      setMentionQuery(atMatch[1]);
+      setMentionAnchor(e.target);
+      setSelectedMentionIndex(0);
     } else {
-      setMentionQuery(null)
+      setMentionQuery(null);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Mention navigation
     if (mentionQuery !== null && mentionSuggestions.length > 0) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        setSelectedMentionIndex((i) => Math.min(i + 1, mentionSuggestions.length - 1))
-        return
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedMentionIndex((i) =>
+          Math.min(i + 1, mentionSuggestions.length - 1),
+        );
+        return;
       }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setSelectedMentionIndex((i) => Math.max(i - 1, 0))
-        return
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedMentionIndex((i) => Math.max(i - 1, 0));
+        return;
       }
-      if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault()
-        insertMention(mentionSuggestions[selectedMentionIndex])
-        return
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(mentionSuggestions[selectedMentionIndex]);
+        return;
       }
-      if (e.key === 'Escape') {
-        setMentionQuery(null)
-        return
+      if (e.key === "Escape") {
+        setMentionQuery(null);
+        return;
       }
     }
 
     // Send on Enter (without Shift)
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
-  const mentionPopperOpen = mentionQuery !== null && mentionSuggestions.length > 0
+  const mentionPopperOpen =
+    mentionQuery !== null && mentionSuggestions.length > 0;
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: "relative" }}>
       {/* Reply indicator */}
       {replyingTo && (
-        <Box sx={{ px: 2, py: 0.5, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 0.5,
+            bgcolor: "action.hover",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <Typography variant="caption" color="text.secondary">
             Replying to message
           </Typography>
           <Typography
             variant="caption"
             color="primary"
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: "pointer" }}
             onClick={onCancelReply}
           >
             Cancel
@@ -193,9 +216,10 @@ export default function MessageInput({
       )}
 
       {/* Input */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, p: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1, p: 1 }}>
         <TextField
           inputRef={inputRef}
+          data-testid="chat-message-input"
           fullWidth
           multiline
           maxRows={4}
@@ -205,7 +229,7 @@ export default function MessageInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
         <IconButton
           color="primary"
@@ -224,7 +248,10 @@ export default function MessageInput({
         placement="top-start"
         sx={{ zIndex: 1300 }}
       >
-        <Paper elevation={4} sx={{ maxHeight: 240, overflow: 'auto', minWidth: 200 }}>
+        <Paper
+          elevation={4}
+          sx={{ maxHeight: 240, overflow: "auto", minWidth: 200 }}
+        >
           <List dense>
             {mentionSuggestions.map((member, index) => (
               <ListItemButton
@@ -234,8 +261,10 @@ export default function MessageInput({
                 dense
               >
                 <ListItemAvatar sx={{ minWidth: 36 }}>
-                  {member.username === 'kai' ? (
-                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
+                  {member.username === "kai" ? (
+                    <Avatar
+                      sx={{ width: 24, height: 24, bgcolor: "primary.main" }}
+                    >
                       <SmartToyIcon sx={{ fontSize: 14 }} />
                     </Avatar>
                   ) : (
@@ -246,12 +275,16 @@ export default function MessageInput({
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.displayName}
-                  secondary={member.username === 'kai' ? 'AI Bot' : `@${member.username}`}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                  secondaryTypographyProps={{ variant: 'caption' }}
+                  secondary={
+                    member.username === "kai" ? "AI Bot" : `@${member.username}`
+                  }
+                  primaryTypographyProps={{ variant: "body2" }}
+                  secondaryTypographyProps={{ variant: "caption" }}
                 />
                 {member.online && (
-                  <CircleIcon sx={{ fontSize: 8, color: 'success.main', ml: 1 }} />
+                  <CircleIcon
+                    sx={{ fontSize: 8, color: "success.main", ml: 1 }}
+                  />
                 )}
               </ListItemButton>
             ))}
@@ -259,5 +292,5 @@ export default function MessageInput({
         </Paper>
       </Popper>
     </Box>
-  )
+  );
 }

@@ -96,8 +96,7 @@ import appTheme from "../src/theme";
 // Keep portal-based overlays inside the Storybook canvas
 const theme = createTheme(appTheme, {
   components: {
-    MuiDialog: { defaultProps: { disablePortal: true } },
-    MuiDrawer: { defaultProps: { disablePortal: true } },
+    MuiModal: { defaultProps: { disablePortal: true } },
   },
 });
 

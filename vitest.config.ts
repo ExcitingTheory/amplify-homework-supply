@@ -139,7 +139,7 @@ export default defineConfig({
             "**/.amplify/**",
             "**/.next/**",
             "**/src/stories/index.stories.jsx", // Temporarily exclude - qrcode/pngjs browser issue
-            "**/src/stories/pages.stories.tsx", // Temporarily exclude - qrcode/pngjs browser issue
+            "**/src/stories/pages-*.stories.tsx", // Temporarily exclude - qrcode/pngjs browser issue (split from pages.stories.tsx)
           ],
           deps: {
             optimizer: {

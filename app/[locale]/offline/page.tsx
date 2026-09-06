@@ -1,9 +1,9 @@
 "use cache";
 
 import { cacheLife } from "next/cache";
-import { Box, Typography, Container } from '@mui/material';
-import { WifiOff } from '@mui/icons-material';
-import { RefreshButton } from './RefreshButton';
+import { Box, Typography, Container } from "@mui/material";
+import { WifiOff } from "@mui/icons-material";
+import { RefreshButton } from "./RefreshButton";
 
 /**
  * Offline fallback page shown by the service worker when a navigation
@@ -13,19 +13,19 @@ import { RefreshButton } from './RefreshButton';
 export default async function OfflinePage() {
   cacheLife("max");
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" data-tour="offline-page">
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '80vh',
-          textAlign: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "80vh",
+          textAlign: "center",
           gap: 3,
         }}
       >
-        <WifiOff sx={{ fontSize: 64, color: 'text.secondary' }} />
+        <WifiOff sx={{ fontSize: 64, color: "text.secondary" }} />
         <Typography variant="h4" component="h1">
           You&apos;re offline
         </Typography>

@@ -1,57 +1,60 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { fn } from 'storybook/test'
-import { SkillTreeEditor } from './SkillTreeEditor'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, fn, within } from "storybook/test";
+import { SkillTreeEditor } from "./SkillTreeEditor";
 
 const mockUnits = [
-  { id: 'u1', name: 'Intro to Variables' },
-  { id: 'u2', name: 'Functions & Scope' },
-  { id: 'u3', name: 'Async Programming' },
-  { id: 'u4', name: 'Error Handling' },
-  { id: 'u5', name: 'Data Structures' },
-  { id: 'u6', name: 'Design Patterns' },
-]
+  { id: "u1", name: "Intro to Variables" },
+  { id: "u2", name: "Functions & Scope" },
+  { id: "u3", name: "Async Programming" },
+  { id: "u4", name: "Error Handling" },
+  { id: "u5", name: "Data Structures" },
+  { id: "u6", name: "Design Patterns" },
+];
 
 const mockSkills = [
-  { id: 's1', title: 'Variables & Types' },
-  { id: 's2', title: 'Control Flow' },
-  { id: 's3', title: 'Functions Basics' },
-]
+  { id: "s1", title: "Variables & Types" },
+  { id: "s2", title: "Control Flow" },
+  { id: "s3", title: "Functions Basics" },
+];
 
 const meta: Meta<typeof SkillTreeEditor> = {
-  title: '🏆 Gamification/Instructor/Skill Tree Editor',
+  title: "🏆 Gamification/Instructor/Skill Tree Editor",
   component: SkillTreeEditor,
   args: {
     onSubmit: fn(),
     availableUnits: mockUnits,
     availableSkills: mockSkills,
   },
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof SkillTreeEditor>
+type Story = StoryObj<typeof SkillTreeEditor>;
 
 /** Default empty form — create mode */
-export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("button", { name: /create skill/i });
   },
-}
+};
 
 /** Editing an existing multi-unit skill */
 export const EditExisting: Story = {
   args: {
     initialData: {
-      title: 'Async Mastery',
-      description: 'Master all asynchronous programming concepts',
-      unitIds: ['u3', 'u4'],
+      title: "Async Mastery",
+      description: "Master all asynchronous programming concepts",
+      unitIds: ["u3", "u4"],
       minimumAccuracy: 80,
       xpReward: 200,
-      prerequisites: ['s3'],
+      prerequisites: ["s3"],
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByDisplayValue("Async Mastery");
   },
-}
+};
 
 /** No units or skills available */
 export const EmptySection: Story = {
@@ -60,9 +63,10 @@ export const EmptySection: Story = {
     availableSkills: [],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByRole("button", { name: /create skill/i });
   },
-}
+};
 
 /** Submitting state */
 export const Submitting: Story = {
@@ -70,22 +74,24 @@ export const Submitting: Story = {
     submitting: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByRole("button", { name: /create skill/i });
   },
-}
+};
 
 /** High accuracy requirement */
 export const HighAccuracy: Story = {
   args: {
     initialData: {
-      title: 'Perfectionist',
-      unitIds: ['u1', 'u2', 'u3', 'u4', 'u5'],
+      title: "Perfectionist",
+      unitIds: ["u1", "u2", "u3", "u4", "u5"],
       minimumAccuracy: 95,
       xpReward: 500,
       prerequisites: [],
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByDisplayValue("Perfectionist");
   },
-}
+};

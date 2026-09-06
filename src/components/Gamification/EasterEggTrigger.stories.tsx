@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 import Box from '@mui/material/Box'
 import { HiddenEasterEgg } from './EasterEggTrigger'
-import { expect } from 'storybook/test'
+import { expect, within, userEvent } from 'storybook/test'
 
 const meta: Meta<typeof HiddenEasterEgg> = {
   title: '🏆 Gamification/Easter Eggs/Hidden Easter Egg',
@@ -23,7 +23,8 @@ export const Default: Story = {
     </Box>
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Egg trigger element renders (may be a small icon or hidden area)
+    expect(canvasElement.querySelector('[style*="position"], button, [role="button"]')).not.toBeNull()
   },
 }
 
@@ -33,6 +34,7 @@ export const AlreadyFound: Story = {
     found: true,
   },
   play: async ({ canvasElement }) => {
+    // Already-found trigger is visually dimmed/disabled
     expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }

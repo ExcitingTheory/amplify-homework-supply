@@ -78,9 +78,12 @@ export function LiveLeaderboard({
 
     const subscription = client.models.StudentProfile.observeQuery().subscribe({
       next: ({ items }: any) => {
-        const valid = items.filter((item: any) => item != null && item.id != null);
+        const valid = items.filter(
+          (item: any) => item != null && item.id != null,
+        );
         // Skip if count hasn't changed (simple dedup for initial echo)
-        if (valid.length === lastCountRef.current && lastCountRef.current > 0) return;
+        if (valid.length === lastCountRef.current && lastCountRef.current > 0)
+          return;
         lastCountRef.current = valid.length;
 
         const byStudent = new Map<string, LeaderboardEntry>();
@@ -89,11 +92,19 @@ export function LiveLeaderboard({
           if (!existing || (entry.totalXP || 0) > existing.totalXP) {
             let parsedOverrides = entry.avatarOverrides;
             if (typeof parsedOverrides === "string") {
-              try { parsedOverrides = JSON.parse(parsedOverrides); } catch { parsedOverrides = undefined; }
+              try {
+                parsedOverrides = JSON.parse(parsedOverrides);
+              } catch {
+                parsedOverrides = undefined;
+              }
             }
             let parsedReportCard = entry.reportCard;
             if (typeof parsedReportCard === "string") {
-              try { parsedReportCard = JSON.parse(parsedReportCard); } catch { parsedReportCard = undefined; }
+              try {
+                parsedReportCard = JSON.parse(parsedReportCard);
+              } catch {
+                parsedReportCard = undefined;
+              }
             }
             byStudent.set(entry.studentId, {
               studentId: entry.studentId,
@@ -152,7 +163,7 @@ export function LiveLeaderboard({
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 3 }}>
+    <Container maxWidth="lg" sx={{ mt: 3 }} data-tour="leaderboard-page">
       <Box
         sx={{
           display: "flex",
@@ -181,10 +192,7 @@ export function LiveLeaderboard({
             <TimerIcon sx={{ mr: 0.5 }} />
             {t("leaderboard.fastestMode")}
           </ToggleButton>
-          <ToggleButton
-            value="squads"
-            aria-label={t("leaderboard.squadsMode")}
-          >
+          <ToggleButton value="squads" aria-label={t("leaderboard.squadsMode")}>
             <GroupsIcon sx={{ mr: 0.5 }} />
             {t("leaderboard.squadsMode")}
           </ToggleButton>
@@ -202,7 +210,10 @@ export function LiveLeaderboard({
       {mode === "fastest" && entries.length > 0 && (
         <FastestCompletionsTable
           entries={entries
-            .filter((e) => e.reportCard?.timeStats && e.reportCard.timeStats.count > 0)
+            .filter(
+              (e) =>
+                e.reportCard?.timeStats && e.reportCard.timeStats.count > 0,
+            )
             .map((e): FastestCompletionEntry => ({
               studentId: e.studentId,
               studentName: e.studentName,
@@ -221,19 +232,16 @@ export function LiveLeaderboard({
       )}
 
       {mode === "squads" && (
-        <SquadLeaderboard
-          squads={squadsWithMembers}
-          mySquadId={mySquad?.id}
-        />
+        <SquadLeaderboard squads={squadsWithMembers} mySquadId={mySquad?.id} />
       )}
 
       {entries.length === 0 && (
         <Box sx={{ textAlign: "center", py: 8 }}>
           <Typography variant="h6" color="text.secondary">
-            {t(
-              "leaderboard.empty",
-              { defaultValue: "No leaderboard data yet. Complete assignments to earn XP!" },
-            )}
+            {t("leaderboard.empty", {
+              defaultValue:
+                "No leaderboard data yet. Complete assignments to earn XP!",
+            })}
           </Typography>
         </Box>
       )}

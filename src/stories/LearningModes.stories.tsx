@@ -2,14 +2,14 @@
  * Example stories demonstrating Tutorial Mode and Quiz Mode
  */
 
-import React from 'react';
-import { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { Button, TextField, Box } from '@mui/material';
-import TutorialStep from '../../.storybook/components/TutorialStep';
-import QuizMode from '../../.storybook/components/QuizMode';
+import React from "react";
+import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Button, TextField, Box } from "@mui/material";
+import TutorialStep from "../../.storybook/components/TutorialStep";
+import QuizMode from "../../.storybook/components/QuizMode";
 
 const meta: Meta = {
-  title: '🏠 Getting Started/Onboarding/Learning Modes',
+  title: "🏠 Getting Started/Onboarding/Learning Modes",
   parameters: {
     docs: {
       description: {
@@ -35,7 +35,7 @@ export default meta;
  */
 export const TutorialModeExample: StoryObj = {
   render: () => {
-    const [value, setValue] = React.useState('');
+    const [value, setValue] = React.useState("");
     const [submitted, setSubmitted] = React.useState(false);
 
     const DemoComponent = (
@@ -55,26 +55,45 @@ export const TutorialModeExample: StoryObj = {
           Create Demo Item
         </Button>
         {submitted && (
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-            ✅ Demo item "{value}" created! Great job!
+          <Box sx={{ mt: 2, p: 2, bgcolor: "success.light", borderRadius: 1 }}>
+            ✅ Demo item &quot;{value}&quot; created! Great job!
           </Box>
         )}
       </Box>
     );
 
     return (
-      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <Box sx={{ mb: 3, p: 2, bgcolor: '#e3f2fd', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <span style={{ fontSize: '24px' }}>📖</span>
-          <span style={{ fontWeight: 'bold' }}>Tutorial Mode</span>
-          <span style={{ color: '#666' }}>— Learn step-by-step with interactive guidance</span>
+      <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>
+        <Box
+          sx={{
+            mb: 3,
+            p: 2,
+            bgcolor: "info.light",
+            borderRadius: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <span style={{ fontSize: "24px" }}>📖</span>
+          <Box
+            component="span"
+            sx={{ fontWeight: "bold", color: "text.primary" }}
+          >
+            Tutorial Mode
+          </Box>
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            — Learn step-by-step with interactive guidance
+          </Box>
         </Box>
 
-        <h2>Create Your First Demo Item</h2>
-        <p>
-          This fictional example shows how tutorial mode can walk someone through
-          a simple action without relying on any real app workflow.
-        </p>
+        <Box component="h2" sx={{ color: "text.primary" }}>
+          Create Your First Demo Item
+        </Box>
+        <Box component="p" sx={{ color: "text.secondary" }}>
+          This fictional example shows how tutorial mode can walk someone
+          through a simple action without relying on any real app workflow.
+        </Box>
 
         <TutorialStep
           stepId="secret-documentation-explorer"
@@ -85,14 +104,16 @@ export const TutorialModeExample: StoryObj = {
           completionMode="manual"
         />
 
-        <hr style={{ margin: '40px 0' }} />
+        <Box component="hr" sx={{ my: 5, borderColor: "divider" }} />
 
-        <h2>Next Steps</h2>
-        <p>
-          After completing the tutorial, try it yourself in quiz mode by clicking
-          the "Try it Yourself →" button above.
-        </p>
-      </div>
+        <Box component="h2" sx={{ color: "text.primary" }}>
+          Next Steps
+        </Box>
+        <Box component="p" sx={{ color: "text.secondary" }}>
+          After completing the tutorial, try it yourself in quiz mode by
+          clicking the &quot;Try it Yourself →&quot; button above.
+        </Box>
+      </Box>
     );
   },
 };
@@ -104,32 +125,64 @@ export const TutorialModeExample: StoryObj = {
 export const QuizModeExample: StoryObj = {
   render: () => {
     const [completed, setCompleted] = React.useState(false);
-    
+
     return (
-      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <Box sx={{ mb: 3, p: 2, bgcolor: '#fff3e0', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <span style={{ fontSize: '24px' }}>🎯</span>
-          <span style={{ fontWeight: 'bold' }}>Quiz Mode</span>
-          <span style={{ color: '#666' }}>— Practice hands-on with minimal guidance</span>
+      <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>
+        <Box
+          sx={{
+            mb: 3,
+            p: 2,
+            bgcolor: "warning.light",
+            borderRadius: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <span style={{ fontSize: "24px" }}>🎯</span>
+          <Box
+            component="span"
+            sx={{ fontWeight: "bold", color: "text.primary" }}
+          >
+            Quiz Mode
+          </Box>
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            — Practice hands-on with minimal guidance
+          </Box>
         </Box>
 
-        <h2>Try the Demo Flow</h2>
-        <p>
-          Practice the same demo action with minimal guidance.
-          This is intentionally fictional and only demonstrates onboarding behavior.
-        </p>
+        <Box component="h2" sx={{ color: "text.primary" }}>
+          Try the Demo Flow
+        </Box>
+        <Box component="p" sx={{ color: "text.secondary" }}>
+          Practice the same demo action with minimal guidance. This is
+          intentionally fictional and only demonstrates onboarding behavior.
+        </Box>
 
         {!completed ? (
-          <Box sx={{ mt: 3, p: 3, border: '2px dashed #ccc', borderRadius: 2, textAlign: 'center' }}>
-            <h3>Complete Demo Task</h3>
-            <p style={{ color: '#666' }}>Open the demo completion story and trigger completion.</p>
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              border: "2px dashed",
+              borderColor: "divider",
+              borderRadius: 2,
+              textAlign: "center",
+            }}
+          >
+            <Box component="h3" sx={{ color: "text.primary" }}>
+              Complete Demo Task
+            </Box>
+            <Box component="p" sx={{ color: "text.secondary" }}>
+              Open the demo completion story and trigger completion.
+            </Box>
             <Button
               variant="contained"
               color="primary"
               sx={{ mt: 2, mr: 2 }}
               onClick={() => {
-                // Simulate navigation
-                window.parent.location.href = '?path=/story/🏠-getting-started-onboarding-task-completion-examples--auto-detect-task-completion';
+                window.parent.location.href =
+                  "?path=/story/🏠-getting-started-onboarding-task-completion-examples--auto-detect-task-completion";
               }}
             >
               Start Task
@@ -143,17 +196,29 @@ export const QuizModeExample: StoryObj = {
             </Button>
           </Box>
         ) : (
-          <Box sx={{ mt: 3, p: 3, bgcolor: '#e8f5e9', borderRadius: 2, textAlign: 'center' }}>
-            <span style={{ fontSize: '48px' }}>✅</span>
-            <h3>Task Completed!</h3>
-            <p>Great job! You've successfully completed the quiz task.</p>
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              bgcolor: "success.light",
+              borderRadius: 2,
+              textAlign: "center",
+            }}
+          >
+            <span style={{ fontSize: "48px" }}>✅</span>
+            <Box component="h3" sx={{ color: "text.primary" }}>
+              Task Completed!
+            </Box>
+            <Box component="p" sx={{ color: "text.secondary" }}>
+              Great job! You&apos;ve successfully completed the quiz task.
+            </Box>
           </Box>
         )}
-      </div>
+      </Box>
     );
   },
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
 };
 
@@ -164,9 +229,13 @@ export const QuizModeExample: StoryObj = {
 export const MultipleTutorialSteps: StoryObj = {
   render: () => {
     return (
-      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <h1>Complete Demo Onboarding Workflow</h1>
-        <p>Follow these fictional steps to see how multi-step onboarding behaves:</p>
+      <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>
+        <Box component="h1" sx={{ color: "text.primary" }}>
+          Complete Demo Onboarding Workflow
+        </Box>
+        <Box component="p" sx={{ color: "text.secondary" }}>
+          Follow these fictional steps to see how multi-step onboarding behaves:
+        </Box>
 
         <TutorialStep
           stepId="secret-documentation-explorer"
@@ -189,14 +258,16 @@ export const MultipleTutorialSteps: StoryObj = {
           quizStoryId="🏠-getting-started-keyboard-shortcuts--default"
         />
 
-        <div style={{ marginTop: '40px', padding: '20px', background: '#e3f2fd', borderRadius: '8px' }}>
-          <h3>🎉 Ready to Practice?</h3>
-          <p>
-            Click the "Try it Yourself →" button on any step above to practice in quiz mode.
-            Your progress will be tracked automatically!
-          </p>
-        </div>
-      </div>
+        <Box sx={{ mt: 5, p: "20px", bgcolor: "info.light", borderRadius: 2 }}>
+          <Box component="h3" sx={{ color: "text.primary", mt: 0 }}>
+            🎉 Ready to Practice?
+          </Box>
+          <Box component="p" sx={{ color: "text.secondary", mb: 0 }}>
+            Click the &quot;Try it Yourself →&quot; button on any step above to
+            practice in quiz mode. Your progress will be tracked automatically!
+          </Box>
+        </Box>
+      </Box>
     );
   },
 };
@@ -208,12 +279,14 @@ export const MultipleTutorialSteps: StoryObj = {
 export const AutoCompleteTutorial: StoryObj = {
   render: () => {
     return (
-      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <h2>Auto-Completion Demo</h2>
-        <p>
-          Some steps complete automatically by visiting a story.
-          This page demonstrates that behavior using a bonus demo task.
-        </p>
+      <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>
+        <Box component="h2" sx={{ color: "text.primary" }}>
+          Auto-Completion Demo
+        </Box>
+        <Box component="p" sx={{ color: "text.secondary" }}>
+          Some steps complete automatically by visiting a story. This page
+          demonstrates that behavior using a bonus demo task.
+        </Box>
 
         <TutorialStep
           stepId="secret-documentation-explorer"
@@ -222,10 +295,11 @@ export const AutoCompleteTutorial: StoryObj = {
           completionMode="auto"
         />
 
-        <p style={{ marginTop: '20px', color: '#666' }}>
-          Check the Onboarding panel - this task should already be marked complete!
-        </p>
-      </div>
+        <Box component="p" sx={{ mt: "20px", color: "text.secondary" }}>
+          Check the Onboarding panel - this task should already be marked
+          complete!
+        </Box>
+      </Box>
     );
   },
 };

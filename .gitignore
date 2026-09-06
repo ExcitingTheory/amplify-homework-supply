@@ -41,7 +41,6 @@ test/test-results/*
 
 amplify/mock-api-resources
 
-cypress/screenshots
 
 
 .env
@@ -128,3 +127,4 @@ amplifyconfiguration*
 !next-env.d.ts
 tsconfig.tsbuildinfo
 test/certificates
+test/journeys-report/

@@ -5034,6 +5034,9 @@ export default function FileManager2() {
                             <div
                               key={item.id}
                               data-index={virtualRow.index}
+                              {...(item.type === "file" && {
+                                "data-testid": "file-list-item",
+                              })}
                               ref={virtualizer.measureElement}
                               style={{
                                 position: "absolute",
@@ -5177,6 +5180,7 @@ export default function FileManager2() {
               {/* File Upload Input */}
               <input
                 id="file-upload-input"
+                data-testid="file-upload-input"
                 type="file"
                 multiple
                 accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx,.fountain,.odt,.ods,.odp,.imscc,.epub,.gift,.qti.xml"

@@ -7,58 +7,61 @@
  * @module LeaderboardTable
  */
 
-import React from 'react'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import Typography from '@mui/material/Typography'
-import Skeleton from '@mui/material/Skeleton'
-import Box from '@mui/material/Box'
-import { AvatarDisplay } from '../Gamification/AvatarDisplay'
-import type { AvatarStyleTier, AvatarOverrides } from '../Gamification/DiceBearAvatar'
+import React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
+import { AvatarDisplay } from "../Gamification/AvatarDisplay";
+import type {
+  AvatarStyleTier,
+  AvatarOverrides,
+} from "../Gamification/DiceBearAvatar";
 
 export interface LeaderboardEntry {
-  studentId: string
-  studentName: string
-  avatarColor: string
-  totalXP: number
-  level: number
-  currentStreak: number
+  studentId: string;
+  studentName: string;
+  avatarColor: string;
+  totalXP: number;
+  level: number;
+  currentStreak: number;
   /** DiceBear style tier from the student's saved config. When undefined, avatar is not yet loaded. */
-  avatarStyle?: AvatarStyleTier
+  avatarStyle?: AvatarStyleTier;
   /** DiceBear overrides from the student's saved config. */
-  avatarOverrides?: AvatarOverrides
+  avatarOverrides?: AvatarOverrides;
   /** Seed string for DiceBear generation. Falls back to studentId. */
-  avatarSeed?: string
+  avatarSeed?: string;
   /** Whether this entry's avatar config has been resolved (true = render avatar, false/undefined = show placeholder). */
-  avatarLoaded?: boolean
+  avatarLoaded?: boolean;
 }
 
 export interface LeaderboardTableProps {
-  entries: LeaderboardEntry[]
-  currentStudentId: string
+  entries: LeaderboardEntry[];
+  currentStudentId: string;
   /** Number of top rows to always show. Defaults to 5. */
-  topN?: number
+  topN?: number;
 }
 
-const MEDALS = ['🥇', '🥈', '🥉']
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
   if (!entry.avatarLoaded) {
-    return <Skeleton variant="circular" width={24} height={24} />
+    return <Skeleton variant="circular" width={24} height={24} />;
   }
   return (
     <AvatarDisplay
       seed={entry.avatarSeed || entry.studentId}
       size={24}
-      style={entry.avatarStyle || 'simple'}
+      style={entry.avatarStyle || "simple"}
       overrides={entry.avatarOverrides}
     />
-  )
+  );
 }
 
 export function LeaderboardTable({
@@ -66,18 +69,22 @@ export function LeaderboardTable({
   currentStudentId,
   topN = 5,
 }: LeaderboardTableProps) {
-  const sorted = [...entries].sort((a, b) => b.totalXP - a.totalXP)
+  const sorted = [...entries].sort((a, b) => b.totalXP - a.totalXP);
   const currentIndex = sorted.findIndex(
     (e) => e.studentId === currentStudentId,
-  )
+  );
 
   // Determine which rows to show
-  const topRows = sorted.slice(0, topN)
-  const showGap = currentIndex >= topN
-  const currentRow = showGap ? sorted[currentIndex] : null
+  const topRows = sorted.slice(0, topN);
+  const showGap = currentIndex >= topN;
+  const currentRow = showGap ? sorted[currentIndex] : null;
 
   return (
-    <TableContainer component={Paper} variant="outlined">
+    <TableContainer
+      component={Paper}
+      variant="outlined"
+      data-testid="leaderboard-table"
+    >
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -90,38 +97,39 @@ export function LeaderboardTable({
         </TableHead>
         <TableBody>
           {topRows.map((entry, index) => {
-            const isCurrentUser = entry.studentId === currentStudentId
-            const rank = index + 1
+            const isCurrentUser = entry.studentId === currentStudentId;
+            const rank = index + 1;
             return (
               <TableRow
                 key={entry.studentId}
                 sx={{
                   backgroundColor: isCurrentUser
-                    ? 'action.selected'
+                    ? "action.selected"
                     : undefined,
                   fontWeight: isCurrentUser ? 700 : 400,
                 }}
               >
+                <TableCell>{index < 3 ? MEDALS[index] : rank}</TableCell>
                 <TableCell>
-                  {index < 3 ? MEDALS[index] : rank}
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <StudentAvatar entry={entry} />
-                    <Typography variant="body2" fontWeight={isCurrentUser ? 700 : 400}>
-                      {isCurrentUser ? `${entry.studentName} (You)` : entry.studentName}
+                    <Typography
+                      variant="body2"
+                      fontWeight={isCurrentUser ? 700 : 400}
+                    >
+                      {isCurrentUser
+                        ? `${entry.studentName} (You)`
+                        : entry.studentName}
                     </Typography>
                   </Box>
                 </TableCell>
                 <TableCell align="right">{entry.totalXP}</TableCell>
                 <TableCell align="right">{entry.level}</TableCell>
                 <TableCell align="right">
-                  {entry.currentStreak > 0
-                    ? `🔥 ${entry.currentStreak}d`
-                    : '—'}
+                  {entry.currentStreak > 0 ? `🔥 ${entry.currentStreak}d` : "—"}
                 </TableCell>
               </TableRow>
-            )
+            );
           })}
 
           {showGap && currentRow && (
@@ -133,12 +141,10 @@ export function LeaderboardTable({
                   </Typography>
                 </TableCell>
               </TableRow>
-              <TableRow
-                sx={{ backgroundColor: 'action.selected' }}
-              >
+              <TableRow sx={{ backgroundColor: "action.selected" }}>
                 <TableCell>{currentIndex + 1}</TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <StudentAvatar entry={currentRow} />
                     <Typography variant="body2" fontWeight={700}>
                       {currentRow.studentName} (You)
@@ -150,7 +156,7 @@ export function LeaderboardTable({
                 <TableCell align="right">
                   {currentRow.currentStreak > 0
                     ? `🔥 ${currentRow.currentStreak}d`
-                    : '—'}
+                    : "—"}
                 </TableCell>
               </TableRow>
             </>
@@ -158,7 +164,7 @@ export function LeaderboardTable({
         </TableBody>
       </Table>
     </TableContainer>
-  )
+  );
 }
 
-export default LeaderboardTable
+export default LeaderboardTable;

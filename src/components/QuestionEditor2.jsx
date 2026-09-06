@@ -1082,7 +1082,6 @@ export function QuestionEditor2() {
 
   const handleCreateQuestion = async (event) => {
     event.preventDefault();
-    const { unit } = React.useContext(UnitContext) || {};
 
     if (!unit?.id) {
       console.error("No unit context available");

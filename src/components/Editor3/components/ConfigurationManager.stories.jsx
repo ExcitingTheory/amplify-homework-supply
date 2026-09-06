@@ -3,7 +3,7 @@ import ConfigurationManager from "./ConfigurationManager";
 import UnitContext from "../../../context/unitContext";
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const mockUnit = {
   id: "unit-1",
@@ -49,7 +49,7 @@ export default {
 export const Default = {
   decorators: [withContexts()],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.firstChild).toBeTruthy();
   },
 };
 
@@ -62,6 +62,6 @@ export const WithFeaturedImage = {
     }),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.firstChild).toBeTruthy();
   },
 };

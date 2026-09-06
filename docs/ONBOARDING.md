@@ -140,7 +140,7 @@ npm run dev
 npm run build
 
 # Run tests
-npm run cypress:open
+npm run e2e
 
 # Deploy backend changes
 npm run build:amplify:dev
@@ -162,14 +162,11 @@ OPENAI_API_KEY=your_api_key_here
 
 ## 🧪 Testing
 
-### Cypress E2E Testing
+### Browser Testing
 
 ```bash
-# Open Cypress test runner
-npm run cypress:open
-
-# Run tests headlessly
-npx cypress run
+# Run Playwright browser tests
+npm run e2e
 ```
 
 Current test coverage is limited - expanding test coverage is a priority item.

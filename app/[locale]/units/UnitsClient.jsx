@@ -258,6 +258,7 @@ function Units({ initialUnits = [] }) {
       router.push(`/unit/${response.data.id}`);
     } catch (errors) {
       console.error(errors);
+    } finally {
       setIsWorking(false);
     }
   }

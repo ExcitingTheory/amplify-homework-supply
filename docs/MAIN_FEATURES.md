@@ -206,7 +206,7 @@ flowchart LR
 - **Vercel AI SDK** — streaming chat with `useChat` hook and tool call support
 - **Material UI** component library
 - **Storybook** component development with mocked AWS services and mock data in `.storybook/__mocks__/`
-- **Cypress E2E** tests, **Vitest** unit/integration tests, **Playwright** browser tests
+- **Playwright** browser tests and **Vitest** unit/integration tests
 - **TypeScript migration in progress** — `allowJs: true`, new files as `.tsx`
 - **Agent permissions system** — file-operation gating with audit logs (`scripts/agent-cli.ts`, `.github/agent-permissions.json`)
 

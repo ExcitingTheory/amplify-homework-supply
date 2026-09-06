@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Playwright configuration for multi-user collaboration E2E tests.
  *
  * These tests use multiple BrowserContexts to simulate simultaneous users —
- * something Cypress fundamentally cannot do. Each test can have an instructor
+ * something that requires a full browser session. Each test can have an instructor
  * and a student (or two students) interacting with the app at the same time,
  * verifying real-time collaboration features like Yjs sync, presence, and chat.
  *

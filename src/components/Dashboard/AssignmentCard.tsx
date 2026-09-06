@@ -19,6 +19,7 @@ import { PrefetchButton } from "@/components/PrefetchButton";
 import PrefetchBadge from "@/components/PrefetchBadge";
 import { OpenPeerReviewButton } from "@/components/PeerReview/OpenPeerReviewButton";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { DASHBOARD_TOKENS } from "./constants";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -62,10 +63,7 @@ export interface AssignmentCardProps {
   /** Nailed-it count for this unit */
   nailedItCount?: number;
   onOpenDrill: (unitId: string, unitName: string) => void;
-  onRequestGuidance: (
-    referenceId: string,
-    sectionID: string,
-  ) => Promise<void>;
+  onRequestGuidance: (referenceId: string, sectionID: string) => Promise<void>;
   onCreateReviewRoom?: (
     gradeId: string,
     invitedUserIds: string[],
@@ -125,16 +123,17 @@ export function AssignmentCard({
     <Card
       component="article"
       aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct)}` : ""}`}
-      data-tour={isCompleted ? "assignment-card-completed" : "assignment-card-pending"}
+      data-tour={
+        isCompleted ? "assignment-card-completed" : "assignment-card-pending"
+      }
       elevation={0}
       sx={{
         // When nested inside UpNextCard, suppress the outer border and elevation
         // (UpNextCard's own Card provides the highlighted outline treatment).
         border: isUpNext ? "none" : "1px solid",
         borderColor: isUpNext ? undefined : "divider",
-        borderLeft: "4px solid",
-        borderLeftColor,
-        borderRadius: isUpNext ? 0 : 2,
+        ...(isUpNext ? {} : { borderLeft: "4px solid", borderLeftColor }),
+        borderRadius: isUpNext ? 0 : DASHBOARD_TOKENS.radius.card,
         display: "flex",
         overflow: "hidden",
         height: 140,
@@ -186,7 +185,13 @@ export function AssignmentCard({
             <Tooltip title={`Difficulty: ${unit.difficulty}`}>
               <Box
                 aria-label={`Difficulty: ${unit.difficulty}`}
-                sx={{ display: "flex", gap: "3px", alignItems: "center", flexShrink: 0 }}
+                sx={{
+                  display: "flex",
+                  gap: "3px",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  opacity: 0.65,
+                }}
               >
                 {[1, 2, 3].map((dot) => (
                   <Box
@@ -195,20 +200,24 @@ export function AssignmentCard({
                       width: 7,
                       height: 7,
                       borderRadius: "50%",
-                      bgcolor: dot <= ({ easy: 1, medium: 2, hard: 3 }[unit.difficulty!] ?? 0)
-                        ? unit.difficulty === "easy"
-                          ? "success.main"
-                          : unit.difficulty === "medium"
-                            ? "warning.main"
-                            : "error.main"
-                        : "action.disabled",
+                      bgcolor:
+                        dot <=
+                        ({ easy: 1, medium: 2, hard: 3 }[unit.difficulty!] ?? 0)
+                          ? unit.difficulty === "easy"
+                            ? "success.main"
+                            : unit.difficulty === "medium"
+                              ? "warning.main"
+                              : "error.main"
+                          : "action.disabled",
                     }}
                   />
                 ))}
               </Box>
             </Tooltip>
           )}
-          <PrefetchBadge unitId={assignment.unitID} />
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <PrefetchBadge unitId={assignment.unitID} />
+          </Box>
           {isCompleted && (
             <Chip
               label={`${pct}% · ${gradeLabel(pct)}`}

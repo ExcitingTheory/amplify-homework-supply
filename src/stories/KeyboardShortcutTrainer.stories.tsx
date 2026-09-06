@@ -1,24 +1,24 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import KeyboardShortcutTrainer from './KeyboardShortcutTrainer';
-import { expect } from 'storybook/test'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import KeyboardShortcutTrainer from "./KeyboardShortcutTrainer";
+import { expect, within } from "storybook/test";
 
 /**
  * Interactive Keyboard Shortcut Trainer
- * 
+ *
  * Gamified training component that teaches users keyboard shortcuts through practice.
  * Features:
  * - Real-time shortcut detection
  * - Progress tracking by category
  * - Achievement system with tiers
  * - Visual feedback when shortcuts are performed correctly
- * 
+ *
  * Used in the Help → Keyboard Shortcuts documentation page.
  */
 const meta = {
-  title: '🏠 Getting Started/Keyboard Shortcuts',
+  title: "🏠 Getting Started/Keyboard Shortcuts",
   component: KeyboardShortcutTrainer,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -66,7 +66,9 @@ type Story = StoryObj<typeof meta>;
  * Default trainer ready to use
  * Try pressing keyboard shortcuts to see them light up!
  */
-export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Keyboard Shortcut Challenge/);
   },
 };

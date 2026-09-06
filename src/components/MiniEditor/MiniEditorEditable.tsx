@@ -67,7 +67,7 @@ import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
 
 import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
 import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
-import BlockInserterPlugin from './BlockInserterPlugin'
+import BlockInserterPlugin, { GUTTER_WIDTH } from './BlockInserterPlugin'
 import type { MiniEditorEditableProps, MentionSuggestion } from './types'
 
 // ─── Chat Submit Plugin ───────────────────────────────────────────────────────
@@ -183,7 +183,10 @@ export default function MiniEditorEditable({
     [namespace],
   )
 
-  const padding = compact ? '0.25rem 0.5rem' : '0.75rem 1rem'
+  const basePadY = compact ? '0.25rem' : '0.75rem'
+  const basePadX = compact ? '0.5rem' : '1rem'
+  const gutterPadLeft = showBlockInserter ? `calc(${basePadX} + ${GUTTER_WIDTH}px)` : basePadX
+  const padding = `${basePadY} ${basePadX} ${basePadY} ${gutterPadLeft}`
 
   // Debounced onChange handler
   const handleChange = useCallback(

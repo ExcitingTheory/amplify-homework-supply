@@ -3,7 +3,7 @@ import Index from "../../app/[locale]/page.jsx";
 import { FilesProvider } from "../../src/context/fileContext";
 import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
 
 // Wrapper component to bridge Storybook args to Next.js page props
 // FilesProvider is added here for file context
@@ -52,6 +52,21 @@ export default {
  * - Japanese 102 - Advanced
  */
 export const StudentDashboard = {
+  parameters: {
+    mockAuth: {
+      user: {
+        attributes: {
+          sub: "student-alice-sub",
+          email: "alice@example.com",
+        },
+      },
+      session: {
+        username: "student-alice-sub",
+        identityId: "identity-alice",
+        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
+      },
+    },
+  },
   decorators: [
     (Story, { args }) => {
       // Set mock auth user for any components that call getCurrentUser
@@ -84,7 +99,7 @@ export const StudentDashboard = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
   },
 };
 
@@ -97,6 +112,21 @@ export const StudentDashboard = {
  * - Links to edit units
  */
 export const InstructorDashboard = {
+  parameters: {
+    mockAuth: {
+      user: {
+        attributes: {
+          sub: "teacher-1",
+          email: "teacher@example.com",
+        },
+      },
+      session: {
+        username: "teacher-1",
+        identityId: "identity-teacher-1",
+        groups: ["Instructors"],
+      },
+    },
+  },
   decorators: [
     (Story, { args }) => {
       setMockUser({
@@ -106,7 +136,7 @@ export const InstructorDashboard = {
           sub: "teacher-1",
           email: "teacher@example.com",
         },
-        groups: [],
+        groups: ["Instructors"],
       });
       seedIndexPageData("instructor");
       return <Story {...args} />;
@@ -115,15 +145,17 @@ export const InstructorDashboard = {
   args: {
     user: {
       username: "teacher-1",
+      userId: "teacher-1",
       attributes: {
         email: "teacher@example.com",
         sub: "teacher-1",
       },
+      groups: ["Instructors"],
     },
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
   },
 };
 
@@ -135,6 +167,21 @@ export const InstructorDashboard = {
  * - No assignments
  */
 export const EmptyState = {
+  parameters: {
+    mockAuth: {
+      user: {
+        attributes: {
+          sub: "new-student",
+          email: "new.student@example.com",
+        },
+      },
+      session: {
+        username: "new-student",
+        identityId: "identity-new-student",
+        groups: [],
+      },
+    },
+  },
   decorators: [
     (Story, { args }) => {
       seedIndexPageData("empty");
@@ -144,6 +191,7 @@ export const EmptyState = {
   args: {
     user: {
       username: "new-student",
+      userId: "new-student",
       attributes: {
         email: "new.student@example.com",
         sub: "new-student",
@@ -152,7 +200,7 @@ export const EmptyState = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
   },
 };
 
@@ -165,6 +213,6 @@ export const Loading = {
     signOut: () => console.log("Sign out clicked"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
   },
 };

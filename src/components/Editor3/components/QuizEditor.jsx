@@ -1,460 +1,469 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import ClearIcon from '@mui/icons-material/Clear';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import Stack from '@mui/material/Stack';
-import { useTranslations } from 'next-intl';
+import React, { useState, useRef, useEffect, useContext } from "react";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+import Switch from "@mui/material/Switch";
+import Card from "@mui/material/Card";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import ClearIcon from "@mui/icons-material/Clear";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import Stack from "@mui/material/Stack";
+import { useTranslations } from "next-intl";
 // import { GutterContext } from '../context/gutterContext';
-import SortableAnswers from '../../SortableAnswers';
-import UnitContext from '../../../context/unitContext';
-import { $isQuizNode } from '../plugins/QuizPlugin';
+import SortableAnswers from "../../SortableAnswers";
+import UnitContext from "../../../context/unitContext";
+import { $isQuizNode } from "../plugins/QuizPlugin";
 
 import {
-    $getNodeByKey,
-    $getSelection,
-    $isNodeSelection,
-    CLICK_COMMAND,
-    COMMAND_PRIORITY_LOW,
-    KEY_BACKSPACE_COMMAND,
-    KEY_DELETE_COMMAND,
-    KEY_ESCAPE_COMMAND,
-} from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
-import { mergeRegister } from '@lexical/utils';
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+  KEY_ESCAPE_COMMAND,
+} from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
+import { mergeRegister } from "@lexical/utils";
 
+const QuizEditor = ({ className, nodeKey, data }) => {
+  const t = useTranslations("editor.blocks");
+  const [editMode, setEditMode] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [grade, setGrade] = useState(0.0);
+  const [attemptedAnswers, setAttemptedAnswers] = useState({});
+  const [correct, setCorrect] = useState({});
+  //   const questionValue = useRef(data);
+  const [questionValue, _setQuestionValue] = useState(data);
+  const [invalidQuestion, setInvalidQuestion] = useState(false);
+  const [verifiedAnswers, setVerifiedAnswers] = useState({});
 
-const QuizEditor = ({
-    className,
-    nodeKey,
-    data,
-}) => {
-    const t = useTranslations('editor.blocks');
-    const [editMode, setEditMode] = useState(false);
-    const [isLocked, setIsLocked] = useState(false);
-    const [grade, setGrade] = useState(0.0);
-    const [attemptedAnswers, setAttemptedAnswers] = useState({});
-    const [correct, setCorrect] = useState({});
-    //   const questionValue = useRef(data);
-    const [questionValue, _setQuestionValue] = useState(data);
-    const [invalidQuestion, setInvalidQuestion] = useState(false);
-    const [verifiedAnswers, setVerifiedAnswers] = useState({});
+  const [editor] = useLexicalComposerContext();
+  const quizRef = useRef(null);
+  const { grade: contextGrade, saveGrade } = useContext(UnitContext);
+  const [isSelected, setSelected, clearSelection] =
+    useLexicalNodeSelection(nodeKey);
 
-    const [editor] = useLexicalComposerContext();
-    const quizRef = useRef(null);
-    const { grade: contextGrade, saveGrade } = useContext(UnitContext);
-    const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+  const onDelete = React.useCallback(
+    (payload) => {
+      if (isSelected && $isNodeSelection($getSelection())) {
+        const event = payload;
+        event.preventDefault();
+        const node = $getNodeByKey(nodeKey);
+        if ($isQuizNode(node)) {
+          node.remove();
+        }
+      }
+      return false;
+    },
+    [isSelected, nodeKey],
+  );
 
-    const onDelete = React.useCallback(
+  const onEscape = React.useCallback(
+    (payload) => {
+      if (isSelected) {
+        const event = payload;
+        event.preventDefault();
+        clearSelection();
+        return true;
+      }
+      return false;
+    },
+    [isSelected, clearSelection],
+  );
+
+  const setQuestionValue = (data) => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isQuizNode(node)) {
+        node.saveData(data);
+      }
+    });
+  };
+
+  useEffect(() => {
+    _setQuestionValue(data);
+  }, [data]);
+
+  useEffect(() => {
+    const unregister = mergeRegister(
+      editor.registerCommand(
+        CLICK_COMMAND,
         (payload) => {
-            if (isSelected && $isNodeSelection($getSelection())) {
-                const event = payload;
-                event.preventDefault();
-                const node = $getNodeByKey(nodeKey);
-                if ($isQuizNode(node)) {
-                    node.remove();
-                }
+          const event = payload;
+          if (quizRef.current && quizRef.current.contains(event.target)) {
+            // Let interactive form elements (Switch, Checkbox, Button, etc.) handle their own clicks.
+            // Use closest() to walk up the DOM — MUI Switch renders <span> elements
+            // (thumb, track) that don't have interactive tags/roles on the direct target.
+            if (
+              event.target.closest(
+                'input, button, textarea, [role="checkbox"], [role="switch"], [role="button"], label',
+              )
+            ) {
+              return false;
             }
-            return false;
+            event.preventDefault();
+            if (event.shiftKey) {
+              setSelected(!isSelected);
+            } else {
+              clearSelection();
+              setSelected(true);
+            }
+            return true;
+          }
+          return false;
         },
-        [isSelected, nodeKey],
-    );
-
-    const onEscape = React.useCallback(
-        (payload) => {
-            if (isSelected) {
-                const event = payload;
-                event.preventDefault();
-                clearSelection();
-                return true;
-            }
-            return false;
-        },
-        [isSelected, clearSelection],
-    );
-
-    const setQuestionValue = (data) => {
-        editor.update(() => {
-            const node = $getNodeByKey(nodeKey);
-            if ($isQuizNode(node)) {
-                node.saveData(data);
-            }
-        });
-    };
-
-
-
-    useEffect(() => {
-        _setQuestionValue(data);
-    }, [data]);
-
-    useEffect(() => {
-        const unregister = mergeRegister(
-            editor.registerCommand(
-                CLICK_COMMAND,
-                (payload) => {
-                    const event = payload;
-                    if (quizRef.current && quizRef.current.contains(event.target)) {
-                        // Let interactive form elements (Switch, Checkbox, Button, etc.) handle their own clicks.
-                        // Use closest() to walk up the DOM — MUI Switch renders <span> elements
-                        // (thumb, track) that don't have interactive tags/roles on the direct target.
-                        if (event.target.closest('input, button, textarea, [role="checkbox"], [role="switch"], [role="button"], label')) {
-                            return false;
-                        }
-                        event.preventDefault();
-                        if (event.shiftKey) {
-                            setSelected(!isSelected);
-                        } else {
-                            clearSelection();
-                            setSelected(true);
-                        }
-                        return true;
-                    }
-                    return false;
-                },
-                COMMAND_PRIORITY_LOW,
-            ),
-            editor.registerCommand(
-                KEY_DELETE_COMMAND,
-                onDelete,
-                COMMAND_PRIORITY_LOW,
-            ),
-            editor.registerCommand(
-                KEY_BACKSPACE_COMMAND,
-                onDelete,
-                COMMAND_PRIORITY_LOW,
-            ),
-            editor.registerCommand(
-                KEY_ESCAPE_COMMAND,
-                onEscape,
-                COMMAND_PRIORITY_LOW,
-            ),
-        );
-        return () => {
-            unregister();
-        };
-    }, [
-        clearSelection,
-        editor,
-        isSelected,
-        nodeKey,
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_DELETE_COMMAND,
         onDelete,
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_BACKSPACE_COMMAND,
+        onDelete,
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
         onEscape,
-        setSelected,
-    ]);
-
-    useEffect(() => {
-        // Restore progress from UnitContext if nodeKey is provided
-        if (nodeKey && contextGrade) {
-            const inProgress = contextGrade?.data?.[nodeKey] || {};
-            if (inProgress.attemptedAnswers || inProgress.verifiedAnswers) {
-                setAttemptedAnswers(inProgress.attemptedAnswers || {});
-                setVerifiedAnswers(inProgress.verifiedAnswers || {});
-                setGrade(inProgress.accuracy || 0);
-                setIsLocked(inProgress.complete || false);
-            }
-        }
-    }, [nodeKey, contextGrade]);
-
-
-
-    const onClick = () => {
-        if (editMode) {
-            return;
-        }
-
-        setEditMode(true);
-        startEdit();
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+    return () => {
+      unregister();
     };
+  }, [
+    clearSelection,
+    editor,
+    isSelected,
+    nodeKey,
+    onDelete,
+    onEscape,
+    setSelected,
+  ]);
 
-    const onValueChange = (evt) => {
-        let value = evt.target.value;
-        let invalid = false;
-        setInvalidQuestion(invalid);
-        _setQuestionValue(value);
-        setQuestionValue(value);
-    };
+  useEffect(() => {
+    // Restore progress from UnitContext if nodeKey is provided
+    if (nodeKey && contextGrade) {
+      const inProgress = contextGrade?.data?.[nodeKey] || {};
+      if (inProgress.attemptedAnswers || inProgress.verifiedAnswers) {
+        setAttemptedAnswers(inProgress.attemptedAnswers || {});
+        setVerifiedAnswers(inProgress.verifiedAnswers || {});
+        setGrade(inProgress.accuracy || 0);
+        setIsLocked(inProgress.complete || false);
+      }
+    }
+  }, [nodeKey, contextGrade]);
 
-    const onCorrectChange = (evt, id) => {
-        let checked = evt.target.checked;
-        let tmp = JSON.parse(JSON.stringify(questionValue));
-        tmp[id].correct = checked;
-        _setQuestionValue(tmp);
-        setQuestionValue(tmp);
-    };
-
-    const onQuestionChange = (evt, id) => {
-        let value = evt.target.value;
-        let tmp = JSON.parse(JSON.stringify(questionValue));
-        tmp[id].answer = value;
-        _setQuestionValue(tmp);
-        setQuestionValue(tmp);
-    };
-
-    const gradeAnswer = async (e, thisKey, thisAnswer, questionContent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const { correct: isCorrect } = thisAnswer;
-        const isChecked = e.target.checked;
-
-        let _verifiedAnswers = { ...verifiedAnswers };
-        let _attemptedAnswers = { ...attemptedAnswers };
-        let _isLocked = isLocked;
-        let _grade = grade;
-        let _correct = {};
-
-        if (!_verifiedAnswers) {
-            _verifiedAnswers = {};
-        }
-        if (!_attemptedAnswers) {
-            _attemptedAnswers = {};
-        }
-
-        questionContent.forEach((question, questionKey) => {
-            if (question.correct === true) {
-                _correct[questionKey] = question;
-            }
-        });
-
-        _attemptedAnswers[thisKey] = thisAnswer;
-
-        if (isCorrect === true && isChecked === true) {
-            _verifiedAnswers[thisKey] = thisAnswer;
-        } else if (isCorrect === true && isChecked === false) {
-            delete _verifiedAnswers[thisKey];
-            delete _attemptedAnswers[thisKey];
-        } else if (isCorrect === false && isChecked === false) {
-            delete _attemptedAnswers[thisKey];
-        }
-
-        const correctArr = Object.entries(_correct);
-        const verifiedArr = Object.entries(_verifiedAnswers);
-        const attemptedArr = Object.entries(_attemptedAnswers);
-
-        _grade = Math.floor((verifiedArr.length / correctArr.length) * 100);
-        let thisExerciseComplete = false;
-
-        if (attemptedArr.length === correctArr.length) {
-            _isLocked = true;
-        }
-
-        if (verifiedArr.length === correctArr.length) {
-            _isLocked = true;
-            thisExerciseComplete = true;
-        }
-
-        // Save completion tracking to UnitContext
-        if (nodeKey && saveGrade) {
-            try {
-                let savedGradeCopy = JSON.parse(JSON.stringify(contextGrade?.data || {}));
-
-                savedGradeCopy[nodeKey] = {
-                    accuracy: _grade,
-                    attemptedAnswers: _attemptedAnswers,
-                    verifiedAnswers: _verifiedAnswers,
-                    complete: thisExerciseComplete,
-                    percentComplete: Math.floor((attemptedArr.length / correctArr.length) * 100)
-                };
-
-                await saveGrade(savedGradeCopy);
-            } catch (error) {
-                console.error("Failed to save grade progress for QuizEditor:", error);
-                // Continue with local state update even if save fails
-            }
-        }
-
-        setAttemptedAnswers(_attemptedAnswers);
-        setVerifiedAnswers(_verifiedAnswers);
-        setIsLocked(_isLocked);
-        setCorrect(_correct);
-        setGrade(_grade);
-    };
-
-    const onQuestionReorder = (answers) => {
-        _setQuestionValue(answers);
-        setQuestionValue(answers);
-    };
-
-    const onQuestionDelete = (id) => {
-        let tmp = JSON.parse(JSON.stringify(questionValue));
-        tmp.splice(id, 1);
-        _setQuestionValue(tmp);
-        setQuestionValue(tmp);
-    };
-
-    const onAddQuestion = (evt) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-        let tmp = JSON.parse(JSON.stringify(questionValue));
-
-        const nextId = tmp.length + 1;
-        tmp.push({
-            id: `id-${nextId}`,
-            answer: "",
-            correct: false
-        });
-
-        setQuestionValue(tmp);
-    };
-
-    const save = () => {
-        setQuestionValue(questionValue);
-        setInvalidQuestion(false);
-        setEditMode(false);
-    };
-
-    const reset = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setAttemptedAnswers({});
-        setVerifiedAnswers({});
-        setIsLocked(false);
-        setGrade(0.0);
-    };
-
-    const remove = () => {
-        console.log('remove')
-    };
-
-    const startEdit = () => {
-        console.log('startEdit')
-    };
-
-    let checkboxes = [];
-
-    if (questionValue && questionValue.length > 0) {
-        checkboxes = questionValue.map((data, key) => {
-            let _attemptedAnswers = attemptedAnswers || {}
-            if (!_attemptedAnswers) {
-                _attemptedAnswers = {};
-            }
-            let checked = false;
-            if (_attemptedAnswers[key]) {
-                checked = true;
-            }
-            return (
-                <FormControlLabel
-                    key={key}
-                    control={<Checkbox checked={checked} disabled={isLocked} onClick={(e) => { gradeAnswer(e, key, data, questionValue) }} />}
-                    label={data.answer}
-                />
-            );
-        });
+  const onClick = () => {
+    if (editMode) {
+      return;
     }
 
+    setEditMode(true);
+    startEdit();
+  };
 
+  const onValueChange = (evt) => {
+    let value = evt.target.value;
+    let invalid = false;
+    setInvalidQuestion(invalid);
+    _setQuestionValue(value);
+    setQuestionValue(value);
+  };
 
-    return (
-        <div 
-            ref={quizRef}
-            className={className}
-            data-tour="quiz-block"
-            contentEditable={false} 
-            readOnly
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                marginBottom: '2rem',
-                border: isSelected ? '2px solid var(--mui-palette-primary-main, #1976d2)' : '1px solid transparent',
-                borderRadius: '4px',
-                padding: '8px',
-                cursor: 'pointer',
-            }}
-        >
-            <style global jsx>{`
-        figure[data-block=true] {
+  const onCorrectChange = (evt, id) => {
+    let checked = evt.target.checked;
+    let tmp = JSON.parse(JSON.stringify(questionValue));
+    tmp[id].correct = checked;
+    _setQuestionValue(tmp);
+    setQuestionValue(tmp);
+  };
+
+  const onQuestionChange = (evt, id) => {
+    let value = evt.target.value;
+    let tmp = JSON.parse(JSON.stringify(questionValue));
+    tmp[id].answer = value;
+    _setQuestionValue(tmp);
+    setQuestionValue(tmp);
+  };
+
+  const gradeAnswer = async (e, thisKey, thisAnswer, questionContent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const { correct: isCorrect } = thisAnswer;
+    const isChecked = e.target.checked;
+
+    let _verifiedAnswers = { ...verifiedAnswers };
+    let _attemptedAnswers = { ...attemptedAnswers };
+    let _isLocked = isLocked;
+    let _grade = grade;
+    let _correct = {};
+
+    if (!_verifiedAnswers) {
+      _verifiedAnswers = {};
+    }
+    if (!_attemptedAnswers) {
+      _attemptedAnswers = {};
+    }
+
+    questionContent.forEach((question, questionKey) => {
+      if (question.correct === true) {
+        _correct[questionKey] = question;
+      }
+    });
+
+    _attemptedAnswers[thisKey] = thisAnswer;
+
+    if (isCorrect === true && isChecked === true) {
+      _verifiedAnswers[thisKey] = thisAnswer;
+    } else if (isCorrect === true && isChecked === false) {
+      delete _verifiedAnswers[thisKey];
+      delete _attemptedAnswers[thisKey];
+    } else if (isCorrect === false && isChecked === false) {
+      delete _attemptedAnswers[thisKey];
+    }
+
+    const correctArr = Object.entries(_correct);
+    const verifiedArr = Object.entries(_verifiedAnswers);
+    const attemptedArr = Object.entries(_attemptedAnswers);
+
+    _grade = Math.floor((verifiedArr.length / correctArr.length) * 100);
+    let thisExerciseComplete = false;
+
+    if (attemptedArr.length === correctArr.length) {
+      _isLocked = true;
+    }
+
+    if (verifiedArr.length === correctArr.length) {
+      _isLocked = true;
+      thisExerciseComplete = true;
+    }
+
+    // Save completion tracking to UnitContext
+    if (nodeKey && saveGrade) {
+      try {
+        let savedGradeCopy = JSON.parse(
+          JSON.stringify(contextGrade?.data || {}),
+        );
+
+        savedGradeCopy[nodeKey] = {
+          accuracy: _grade,
+          attemptedAnswers: _attemptedAnswers,
+          verifiedAnswers: _verifiedAnswers,
+          complete: thisExerciseComplete,
+          percentComplete: Math.floor(
+            (attemptedArr.length / correctArr.length) * 100,
+          ),
+        };
+
+        await saveGrade(savedGradeCopy);
+      } catch (error) {
+        console.error("Failed to save grade progress for QuizEditor:", error);
+        // Continue with local state update even if save fails
+      }
+    }
+
+    setAttemptedAnswers(_attemptedAnswers);
+    setVerifiedAnswers(_verifiedAnswers);
+    setIsLocked(_isLocked);
+    setCorrect(_correct);
+    setGrade(_grade);
+  };
+
+  const onQuestionReorder = (answers) => {
+    _setQuestionValue(answers);
+    setQuestionValue(answers);
+  };
+
+  const onQuestionDelete = (id) => {
+    let tmp = JSON.parse(JSON.stringify(questionValue));
+    tmp.splice(id, 1);
+    _setQuestionValue(tmp);
+    setQuestionValue(tmp);
+  };
+
+  const onAddQuestion = (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+    let tmp = JSON.parse(JSON.stringify(questionValue));
+
+    const nextId = tmp.length + 1;
+    tmp.push({
+      id: `id-${nextId}`,
+      answer: "",
+      correct: false,
+    });
+
+    setQuestionValue(tmp);
+  };
+
+  const save = () => {
+    setQuestionValue(questionValue);
+    setInvalidQuestion(false);
+    setEditMode(false);
+  };
+
+  const reset = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAttemptedAnswers({});
+    setVerifiedAnswers({});
+    setIsLocked(false);
+    setGrade(0.0);
+  };
+
+  const remove = () => {
+    console.log("remove");
+  };
+
+  const startEdit = () => {
+    console.log("startEdit");
+  };
+
+  let checkboxes = [];
+
+  if (questionValue && questionValue.length > 0) {
+    checkboxes = questionValue.map((data, key) => {
+      let _attemptedAnswers = attemptedAnswers || {};
+      if (!_attemptedAnswers) {
+        _attemptedAnswers = {};
+      }
+      let checked = false;
+      if (_attemptedAnswers[key]) {
+        checked = true;
+      }
+      return (
+        <FormControlLabel
+          key={key}
+          data-testid="quiz-answer-option"
+          control={
+            <Checkbox
+              checked={checked}
+              disabled={isLocked}
+              onClick={(e) => {
+                gradeAnswer(e, key, data, questionValue);
+              }}
+            />
+          }
+          label={data.answer}
+        />
+      );
+    });
+  }
+
+  return (
+    <div
+      ref={quizRef}
+      className={className}
+      data-tour="quiz-block"
+      contentEditable={false}
+      readOnly
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        marginBottom: "2rem",
+        border: isSelected
+          ? "2px solid var(--mui-palette-primary-main, #1976d2)"
+          : "1px solid transparent",
+        borderRadius: "4px",
+        padding: "8px",
+        cursor: "pointer",
+      }}
+    >
+      <style global jsx>{`
+        figure[data-block="true"] {
           margin: 0;
         }
       `}</style>
-            {!editMode &&
-                <>
-                    <Card elevation={2} sx={{
-                        flexGrow: 1,
-                        width: '100%',
-                        maxWidth: '900px',
-                }}>
-                        <Toolbar>
-                            <Button
-                                size='small'
-                                onClick={onClick}
-                            >
-                                {t('quizEditor.edit')}
-                            </Button>
-                            <Box sx={{ flexGrow: 1 }}></Box>
-                            <Button
-                                size='small'
-                                onClick={reset}
-                            >
-                                {t('quizEditor.reset')}
-                            </Button>
-                            <Box>
-                                {t('quizEditor.gradeDisplay', { score: grade })}
-                            </Box>
-                        </Toolbar>
-                    </Card>
-                    <FormGroup>
-                        {checkboxes}
-                    </FormGroup>
-                </>
-            }
-            {editMode &&
-                <>
-                    <Card elevation={3} sx={{ flexGrow: 1, marginBottom: '1rem' }}>
-                        <Toolbar>
-                            <Button
-                                size='small'
-                                disabled={invalidQuestion}
-                                onClick={save}
-                            >
-                                {invalidQuestion ? t('quizEditor.invalid') : t('quizEditor.done')}
-                            </Button>
-                            <Box sx={{ flexGrow: 1 }}></Box>
-                            {/* <Button
+      {!editMode && (
+        <>
+          <Card
+            elevation={2}
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              maxWidth: "900px",
+            }}
+          >
+            <Toolbar>
+              <Button
+                data-testid="quiz-edit-toggle"
+                size="small"
+                onClick={onClick}
+              >
+                {t("quizEditor.edit")}
+              </Button>
+              <Box sx={{ flexGrow: 1 }}></Box>
+              <Button size="small" onClick={reset}>
+                {t("quizEditor.reset")}
+              </Button>
+              <Box>{t("quizEditor.gradeDisplay", { score: grade })}</Box>
+            </Toolbar>
+          </Card>
+          <FormGroup>{checkboxes}</FormGroup>
+        </>
+      )}
+      {editMode && (
+        <>
+          <Card elevation={3} sx={{ flexGrow: 1, marginBottom: "1rem" }}>
+            <Toolbar>
+              <Button
+                data-testid="quiz-edit-toggle"
+                size="small"
+                disabled={invalidQuestion}
+                onClick={save}
+              >
+                {invalidQuestion
+                  ? t("quizEditor.invalid")
+                  : t("quizEditor.done")}
+              </Button>
+              <Box sx={{ flexGrow: 1 }}></Box>
+              {/* <Button
                                 size='small'
                                 onClick={remove}
                             >
                                 Remove
                             </Button> */}
-                        </Toolbar>
-                    </Card>
-                    <SortableAnswers
-                        answers={questionValue}
-                        onQuestionChange={onQuestionChange}
-                        onCorrectChange={onCorrectChange}
-                        onQuestionDelete={onQuestionDelete}
-                        onQuestionReorder={onQuestionReorder}
-                    />
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        alignItems="center"
-                        border="thin solid"
-                        borderColor="divider"
-                        padding="0.5rem"
-                        margin="0.5rem"
-                        maxWidth="40rem"
-                    >
-                        <DragIndicatorIcon />
-                        <TextField
-                            placeholder={t('quizEditor.addAnswer')}
-                            onClick={onAddQuestion}
-                            fullWidth
-                        />
-                    </Stack>
-                </>
-            }
-        </div>
-    );
+            </Toolbar>
+          </Card>
+          <SortableAnswers
+            answers={questionValue}
+            onQuestionChange={onQuestionChange}
+            onCorrectChange={onCorrectChange}
+            onQuestionDelete={onQuestionDelete}
+            onQuestionReorder={onQuestionReorder}
+          />
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            border="thin solid"
+            borderColor="divider"
+            padding="0.5rem"
+            margin="0.5rem"
+            maxWidth="40rem"
+          >
+            <DragIndicatorIcon />
+            <TextField
+              data-testid="quiz-add-answer"
+              placeholder={t("quizEditor.addAnswer")}
+              onClick={onAddQuestion}
+              fullWidth
+            />
+          </Stack>
+        </>
+      )}
+    </div>
+  );
 };
-
 
 export default QuizEditor;

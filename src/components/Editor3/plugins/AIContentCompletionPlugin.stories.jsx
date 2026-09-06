@@ -25,7 +25,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Content Completion",
@@ -173,7 +173,9 @@ export const EmptyEditor = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
@@ -236,7 +238,9 @@ export const PartialExplanation = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.textContent).toContain("Hiragana");
   },
 };
 
@@ -336,12 +340,13 @@ export const MidLesson = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.textContent).toContain("Particles");
   },
 };
 
 // Testing streaming behavior
-
 
 // Testing streaming behavior
 export const StreamingDemo = {
@@ -368,5 +373,35 @@ export const StreamingDemo = {
         />
       </Box>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Streaming AI Suggestions Demo/);
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+  },
+};
+
+export const AIUnavailable = {
+  loaders: [
+    async () => {
+      clearMockData();
+    },
+  ],
+  parameters: {
+    unitId: "ai-completion-story-unit",
+    initializeMockData: false,
+  },
+  render: () => (
+    <Template
+      editorState={null}
+      title="AI Completion Unavailable"
+      instructions="This story simulates a scenario where no unit data is seeded. The AI completion plugin has no context to generate suggestions, so typing will not trigger any AI completions."
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };

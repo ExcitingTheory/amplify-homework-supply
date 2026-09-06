@@ -46,12 +46,15 @@ export const Pending: Story = {
     unit: baseUnit,
   },
   play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText("Chapter 3: Verb Conjugation")
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
     // Practice button triggers onOpenDrill
-    const practiceBtn = canvas.getByRole("button", { name: /Practice/i })
-    await userEvent.click(practiceBtn)
-    expect(args.onOpenDrill).toHaveBeenCalledWith("unit-1", "Chapter 3: Verb Conjugation")
+    const practiceBtn = canvas.getByRole("button", { name: /Practice/i });
+    await userEvent.click(practiceBtn);
+    expect(args.onOpenDrill).toHaveBeenCalledWith(
+      "unit-1",
+      "Chapter 3: Verb Conjugation",
+    );
   },
 };
 
@@ -64,10 +67,10 @@ export const Overdue: Story = {
     unit: baseUnit,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText("Chapter 3: Verb Conjugation")
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
     // Overdue styling indicator exists
-    await canvas.findByText(/overdue|late|ago/i)
+    await canvas.findByText(/overdue|late|ago/i);
   },
 };
 
@@ -79,10 +82,10 @@ export const Completed: Story = {
     nailedItCount: 3,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText("Chapter 3: Verb Conjugation")
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
     // Grade percentage shown
-    await canvas.findByText(/92/)
+    await canvas.findByText(/92/);
   },
 };
 
@@ -93,9 +96,9 @@ export const CompletedLowScore: Story = {
     latestGrade: { id: "grade-1", accuracy: 55, sectionID: "section-1" },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText("Chapter 3: Verb Conjugation")
-    await canvas.findByText(/55/)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
+    await canvas.findByText(/55/);
   },
 };
 
@@ -107,10 +110,12 @@ export const Locked: Story = {
     lockStatus: { requiredPriorUnitName: "Chapter 2: Basic Vocabulary" },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText(/Chapter 3/i)
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Chapter 3/i);
     // Lock status info in textContent
-    expect(canvasElement.textContent).toMatch(/Chapter 2|Basic Vocabulary|locked/i)
+    expect(canvasElement.textContent).toMatch(
+      /Chapter 2|Basic Vocabulary|locked/i,
+    );
   },
 };
 
@@ -124,9 +129,9 @@ export const LockedWithDate: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText(/Chapter 3/i)
-    expect(canvasElement.textContent?.toLowerCase()).toMatch(/unlock|lock/)
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Chapter 3/i);
+    expect(canvasElement.textContent?.toLowerCase()).toMatch(/unlock|lock/);
   },
 };
 
@@ -140,10 +145,10 @@ export const UpNext: Story = {
     isUpNext: true,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText(/Chapter 3/i)
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Chapter 3/i);
     // "Up Next" badge — text may be in a chip spanning multiple elements
-    expect(canvasElement.textContent).toMatch(/Chapter 3/i)
+    expect(canvasElement.textContent).toMatch(/Chapter 3/i);
   },
 };
 
@@ -153,10 +158,10 @@ export const EasyDifficulty: Story = {
     unit: { ...baseUnit, difficulty: "easy" },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText(/Chapter 3/i)
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Chapter 3/i);
     // Difficulty badge may span multiple elements
-    expect(canvasElement.textContent).toMatch(/Chapter 3/i)
+    expect(canvasElement.textContent).toMatch(/Chapter 3/i);
   },
 };
 
@@ -166,8 +171,72 @@ export const HardDifficulty: Story = {
     unit: { ...baseUnit, difficulty: "hard" },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await canvas.findByText(/Chapter 3/i)
-    expect(canvasElement.textContent).toMatch(/Chapter 3/i)
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Chapter 3/i);
+    expect(canvasElement.textContent).toMatch(/Chapter 3/i);
   },
+};
+
+// ── Mobile Viewport Variants ──────────────────────────────────────────
+export const MobileViewport: Story = {
+  args: {
+    assignment: {
+      ...baseAssignment,
+      dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+    },
+    unit: baseUnit,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "mobile1" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "375px", padding: "16px" }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const TabletViewport: Story = {
+  args: {
+    assignment: {
+      ...baseAssignment,
+      dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+    },
+    unit: baseUnit,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "tablet" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "768px", padding: "20px" }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const DesktopViewport: Story = {
+  args: {
+    assignment: {
+      ...baseAssignment,
+      dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+    },
+    unit: baseUnit,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "desktop" },
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", maxWidth: "1200px", padding: "24px" }}>
+        <Story />
+      </div>
+    ),
+  ],
 };

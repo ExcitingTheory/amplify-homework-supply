@@ -1,16 +1,16 @@
-import React from 'react'
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { UserAvatar } from './UserAvatar'
-import SettingsContext from '../context/settingsContext'
-import { expect } from 'storybook/test'
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { UserAvatar } from "./UserAvatar";
+import SettingsContext from "../context/settingsContext";
+import { expect, within } from "storybook/test";
 
 const mockSettingsProvider = (avatarUrl?: string) => ({
   settings: avatarUrl ? { metadata: { avatarUrl } } : { metadata: {} },
   updateSettings: async () => {},
-})
+});
 
 const meta: Meta<typeof UserAvatar> = {
-  title: '🧩 UI Components/User Avatar',
+  title: "🧩 UI Components/User Avatar",
   component: UserAvatar,
   decorators: [
     (Story) => (
@@ -19,71 +19,71 @@ const meta: Meta<typeof UserAvatar> = {
       </SettingsContext.Provider>
     ),
   ],
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof UserAvatar>
+type Story = StoryObj<typeof UserAvatar>;
 
 export const Default: Story = {
   args: { size: 64 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const Small: Story = {
   args: { size: 32 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const Large: Story = {
   args: { size: 96 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const WithStreak: Story = {
   args: { size: 64, streak: 5 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const StreakMilestone: Story = {
   args: { size: 64, streak: 14 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const LargeWithStreak: Story = {
   args: { size: 96, streak: 7 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const SmallWithStreak: Story = {
   args: { size: 32, streak: 3 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const ZeroStreak: Story = {
   args: { size: 64, streak: 0 },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};
 
 export const WithExternalSrc: Story = {
   args: {
     size: 64,
-    src: 'https://i.pravatar.cc/128?img=12',
+    src: "https://i.pravatar.cc/128?img=12",
     streak: 10,
   },
   decorators: [
@@ -94,6 +94,6 @@ export const WithExternalSrc: Story = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
-}
+};

@@ -19,16 +19,28 @@ import { cookies } from "next/headers";
 import outputs from "../../amplify_outputs.json";
 import type { Schema } from "../../amplify/data/resource";
 
-export const { runWithAmplifyServerContext } = createServerRunner({
-  config: outputs,
-});
+const { runWithAmplifyServerContext: _baseRunWithAmplifyServerContext } =
+  createServerRunner({ config: outputs });
 
 /**
- * Server-side Amplify Data Client that works with chunked cookies.
- *
- * We provide a custom cookies() wrapper that intercepts get() calls
- * and reassembles chunked values.
+ * Wraps the base server runner so fetchAuthSession (and other operations)
+ * can read chunked Cognito cookies. Without this, users with large idTokens
+ * (many Cognito groups) appear unauthenticated on the server.
  */
+export function runWithAmplifyServerContext<Result>(args: {
+  nextServerContext: { cookies: typeof cookies };
+  operation: (contextSpec: any) => Promise<Result>;
+}): Promise<Result> {
+  return _baseRunWithAmplifyServerContext({
+    nextServerContext: {
+      cookies: createChunkedCookiesWrapper(
+        args.nextServerContext.cookies,
+      ) as typeof cookies,
+    },
+    operation: args.operation,
+  });
+}
+
 export function getServerClient() {
   const chunkedCookies = createChunkedCookiesWrapper(cookies);
   return generateServerClientUsingCookies<Schema>({

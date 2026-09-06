@@ -27,7 +27,7 @@ import {
   MOCK_IMAGE_URL_2,
   MOCK_IMAGE_URL_3,
 } from "../../../../.storybook/__mocks__/media";
-import { expect } from 'storybook/test'
+import { expect } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/Media/Images",
@@ -265,20 +265,26 @@ const sampleImageState = {
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
 export const EditableWithImage = {
   render: () => <EditableTemplate editorState={sampleImageState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("true");
   },
 };
 
 export const ReadOnlyWithImage = {
   render: () => <ReadOnlyTemplate editorState={sampleImageState} />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const editor = canvasElement.querySelector("[contenteditable]");
+    expect(editor).not.toBeNull();
+    expect(editor.getAttribute("contenteditable")).toBe("false");
   },
 };

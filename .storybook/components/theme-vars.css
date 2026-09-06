@@ -1,5 +1,6 @@
 /* Shared CSS custom properties for Storybook addon components */
-/* Light mode defaults; dark mode overridden via prefers-color-scheme */
+/* Light mode defaults; dark mode overridden via data-mui-color-scheme (preview)
+   and prefers-color-scheme (manager frame). */
 
 :root {
   /* Surfaces */
@@ -40,42 +41,67 @@
   --sb-accent-green-fill-light: #51cf66;
 
   /* Cards */
-  --sb-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --sb-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --sb-card-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Dark mode for preview iframe (Storybook toolbar controls this attribute) */
+[data-mui-color-scheme="dark"] {
+  --sb-bg-primary: #1e1e1e;
+  --sb-bg-secondary: #2a2a2a;
+  --sb-bg-tertiary: #333;
+  --sb-bg-input: #2a2a2a;
+
+  --sb-text-primary: #e0e0e0;
+  --sb-text-secondary: #aaa;
+  --sb-text-muted: #888;
+  --sb-text-heading: #f0f0f0;
+  --sb-text-code: #e0e0e0;
+
+  --sb-border: #444;
+  --sb-border-light: #3a3a3a;
+  --sb-border-input: #555;
+  --sb-border-disabled: #555;
+
+  --sb-kbd-bg: #2a2a2a;
+  --sb-kbd-border: #555;
+  --sb-kbd-shadow: rgba(0, 0, 0, 0.3);
+
+  --sb-accent-blue-light: rgba(33, 150, 243, 0.15);
+  --sb-accent-blue-bg: rgba(33, 150, 243, 0.2);
+  --sb-accent-green-light: rgba(76, 175, 80, 0.15);
+
+  --sb-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --sb-card-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Fallback for manager frame (addon panels) which don't have data-mui-color-scheme */
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* Surfaces */
+  :root:not([data-mui-color-scheme]) {
     --sb-bg-primary: #1e1e1e;
     --sb-bg-secondary: #2a2a2a;
     --sb-bg-tertiary: #333;
     --sb-bg-input: #2a2a2a;
 
-    /* Text */
     --sb-text-primary: #e0e0e0;
     --sb-text-secondary: #aaa;
     --sb-text-muted: #888;
     --sb-text-heading: #f0f0f0;
     --sb-text-code: #e0e0e0;
 
-    /* Borders */
     --sb-border: #444;
     --sb-border-light: #3a3a3a;
     --sb-border-input: #555;
     --sb-border-disabled: #555;
 
-    /* Key / kbd */
     --sb-kbd-bg: #2a2a2a;
     --sb-kbd-border: #555;
     --sb-kbd-shadow: rgba(0, 0, 0, 0.3);
 
-    /* Accent light backgrounds adjust for dark */
     --sb-accent-blue-light: rgba(33, 150, 243, 0.15);
     --sb-accent-blue-bg: rgba(33, 150, 243, 0.2);
     --sb-accent-green-light: rgba(76, 175, 80, 0.15);
 
-    /* Cards */
     --sb-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
     --sb-card-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   }

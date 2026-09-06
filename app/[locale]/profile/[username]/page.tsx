@@ -6,7 +6,11 @@ import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { StreakCalendar } from "@/components/Gamification/StreakCalendar";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { StreakShield } from "@/components/Gamification/StreakShield";
-import { NailedItSection, AvatarSection, UnlockRoadmap } from "./ProfileClientSections";
+import {
+  NailedItSection,
+  AvatarSection,
+  UnlockRoadmap,
+} from "./ProfileClientSections";
 import ProfileThemeWrapper from "./ProfileThemeWrapper";
 
 interface Props {
@@ -18,7 +22,6 @@ interface Props {
  * Revalidation handled by Next.js route-level caching and revalidateTag.
  */
 async function getCachedProfileData(routeUsername: string) {
-
   let earnedBadges: any[] = [];
   let activeDays: string[] = [];
   let progressModules: any[] = [];
@@ -70,7 +73,9 @@ async function getCachedProfileData(routeUsername: string) {
     const { data: settingsList } = await client.models.Settings.list({
       filter: { owner: { eq: routeUsername } },
     });
-    const userSettings = (settingsList || []).filter((s: any) => s != null)?.[0];
+    const userSettings = (settingsList || []).filter(
+      (s: any) => s != null,
+    )?.[0];
     if (userSettings) {
       showBadgesOnProfile = userSettings.showBadgesOnProfile !== false;
       showAntiBadgesOnProfile = userSettings.showAntiBadgesOnProfile === true;
@@ -89,8 +94,8 @@ async function getCachedProfileData(routeUsername: string) {
       const unitIds = progressModules.map((m: any) => m.moduleId);
       const unitResults = await Promise.all(
         unitIds.map((id: string) =>
-          client.models.Unit.get({ id }).catch(() => ({ data: null }))
-        )
+          client.models.Unit.get({ id }).catch(() => ({ data: null })),
+        ),
       );
       const nameMap: Record<string, string> = {};
       unitResults.forEach((res: any) => {
@@ -106,7 +111,11 @@ async function getCachedProfileData(routeUsername: string) {
 
     // Fetch XP logs for activity calendar (current month)
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const startOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+    ).toISOString();
     const { data: xpLogs } = await client.models.StudentXPLog.list({
       filter: {
         studentId: { eq: routeUsername },
@@ -150,7 +159,20 @@ async function getCachedProfileData(routeUsername: string) {
     console.error("[Profile RSC] Data fetch error:", err);
   }
 
-  return { earnedBadges, activeDays, progressModules, currentStreak, freezesRemaining, freezesUsed, displayName, showBadgesOnProfile, showAntiBadgesOnProfile, profileThemeId, customThemePalette, nailedItBlocks };
+  return {
+    earnedBadges,
+    activeDays,
+    progressModules,
+    currentStreak,
+    freezesRemaining,
+    freezesUsed,
+    displayName,
+    showBadgesOnProfile,
+    showAntiBadgesOnProfile,
+    profileThemeId,
+    customThemePalette,
+    nailedItBlocks,
+  };
 }
 
 export default async function ProfilePage({ params }: Props) {
@@ -176,15 +198,19 @@ export default async function ProfilePage({ params }: Props) {
 
   // Parse custom palette if it's a JSON string
   const parsedCustomPalette = customThemePalette
-    ? typeof customThemePalette === 'string'
+    ? typeof customThemePalette === "string"
       ? JSON.parse(customThemePalette)
       : customThemePalette
     : null;
 
   return (
-    <ProfileThemeWrapper themeId={profileThemeId} customPalette={parsedCustomPalette}>
+    <ProfileThemeWrapper
+      themeId={profileThemeId}
+      customPalette={parsedCustomPalette}
+    >
       <GamificationProviderWrapper cohortId={undefined as any}>
         <Box
+          data-tour="profile-page"
           sx={{
             marginTop: "1rem",
             px: 2,
@@ -216,7 +242,11 @@ export default async function ProfilePage({ params }: Props) {
                 overflow: "visible",
               }}
             >
-              <AvatarSection isOwnProfile={isOwnProfile} profileUsername={routeUsername} streak={currentStreak} />
+              <AvatarSection
+                isOwnProfile={isOwnProfile}
+                profileUsername={routeUsername}
+                streak={currentStreak}
+              />
               <Typography variant="h5">{displayName}</Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <StreakShield

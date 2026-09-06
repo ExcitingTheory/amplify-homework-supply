@@ -1,8 +1,7 @@
 import { defineBackend } from "@aws-amplify/backend";
 import * as cdk from "aws-cdk-lib";
-import { Stack, Aspects, IAspect } from "aws-cdk-lib";
-import { IConstruct } from "constructs";
-import { CfnResolver, CfnDataSource } from "aws-cdk-lib/aws-appsync";
+import { Stack } from "aws-cdk-lib";
+
 import {
   RestApi,
   LambdaIntegration,
@@ -39,7 +38,12 @@ import {
 } from "./custom/websocket/resource";
 import { MediaConvertConstruct } from "./custom/mediaConvert/resource";
 import { MediaCDNConstruct } from "./custom/mediaCDN/resource";
+import {
+  computeModelComponents,
+  modelNameFromStackId,
+} from "./custom/dataStackWaveOrder/resource";
 import { CfKeyRotationConstruct } from "./custom/cfKeyRotation/resource";
+import { ApplySyncConfigConstruct } from "./custom/applySyncConfig/resource";
 import { gamificationHandler } from "./functions/gamification/resource";
 import { peerReviewAIHandler } from "./functions/peerReviewAI/resource";
 import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/resource";
@@ -52,62 +56,6 @@ import { rebuildNgramIndexHandler } from "./functions/rebuildNgramIndex/resource
 import { collaboratorHandler } from "./functions/collaborator/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
-
-/**
- * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
- * This enables _version, _lastChangedAt, and _deleted fields for optimistic concurrency control
- */
-class AppSyncConflictDetectionAspect implements IAspect {
-  private dynamoDbDataSources = new Set<string>();
-
-  visit(node: IConstruct): void {
-    // First pass: collect all DynamoDB data source logical IDs
-    if (node instanceof CfnDataSource) {
-      const dataSource = node as CfnDataSource;
-      if (dataSource.type === "AMAZON_DYNAMODB") {
-        const logicalId = Stack.of(node).getLogicalId(dataSource);
-        this.dynamoDbDataSources.add(logicalId);
-
-        // Enable versioning on DynamoDB data source using property override
-        // This preserves existing properties like awsRegion and tableName
-        dataSource.addPropertyOverride("DynamoDBConfig.Versioned", true);
-        console.log(
-          `[ConflictDetectionAspect] Enabled versioning on data source: ${logicalId}`,
-        );
-      }
-    }
-
-    // Second pass: configure resolvers that use DynamoDB data sources
-    if (node instanceof CfnResolver) {
-      const resolver = node as CfnResolver;
-
-      // Check resolver properties without using names
-      // Only apply to resolvers that have:
-      // 1. A dataSourceName (not a pipeline or local resolver)
-      // 2. typeName is Mutation or Query (not a field resolver, not Subscription)
-      // 3. No code/runtime property (those indicate Lambda resolvers)
-
-      const hasDataSource =
-        resolver.dataSourceName !== undefined &&
-        resolver.dataSourceName !== null;
-      const isOperation =
-        resolver.typeName === "Mutation" || resolver.typeName === "Query";
-      const isNotLambda = !resolver.code && !resolver.runtime;
-      const isNotPipeline = !resolver.pipelineConfig;
-
-      if (hasDataSource && isOperation && isNotLambda && isNotPipeline) {
-        // Apply syncConfig for conflict detection
-        resolver.syncConfig = {
-          conflictDetection: "VERSION",
-          conflictHandler: "AUTOMERGE",
-        };
-        console.log(
-          `[ConflictDetectionAspect] Applied syncConfig to: ${resolver.typeName}.${resolver.fieldName}`,
-        );
-      }
-    }
-  }
-}
 
 /**
  * @see https://docs.amplify.aws/gen2/build-a-backend/ to learn how to build backends with Amplify.
@@ -144,15 +92,53 @@ export const backend = defineBackend({
   collaboratorHandler,
 });
 
-// Enable conflict detection and resolution for AppSync API
-// This enables _version, _lastChangedAt, and _deleted fields per AWS AppSync documentation
-// https://docs.aws.amazon.com/appsync/latest/devguide/conflict-detection-and-sync.html
-
-// Apply Aspect to configure both data sources and resolvers
-// The Aspect uses construct properties (not names) to determine which resolvers to configure
 const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
-Aspects.of(dataStack).add(new AppSyncConflictDetectionAspect());
-console.log("[Amplify Backend] Applied ConflictDetectionAspect to data stack");
+const apiId = backend.data.resources.cfnResources.cfnGraphqlApi.attrApiId;
+
+// Throttle concurrent nested-stack creation to avoid AppSync 429 rate limits,
+// without risking circular dependencies: only chain nested stacks whose
+// models fall in different relation-graph connected components (see
+// computeModelComponents). CDK never infers a cross-stack dependency
+// between such models, so an artificial dependency between them can never
+// conflict with one it infers automatically from a real relation.
+const dataNestedStacks = dataStack.node
+  .findAll()
+  .filter(
+    (c): c is cdk.NestedStack =>
+      cdk.NestedStack.isNestedStack(c) && c.nestedStackParent === dataStack,
+  );
+
+// Generalizes the isolated-model throttle to the FULL model graph: two
+// stacks are only ever chained together if their models fall in different
+// connected components (no relation path between them at all), which makes
+// it impossible for the artificial edge to conflict with a real CDK-
+// inferred cross-stack dependency in either direction.
+const modelComponents = computeModelComponents();
+const modeledStacks = dataNestedStacks
+  .filter((s) => modelNameFromStackId(s.node.id) !== null)
+  .sort((a, b) => a.node.path.localeCompare(b.node.path));
+
+const WAVE_SIZE = 2;
+for (let i = WAVE_SIZE; i < modeledStacks.length; i++) {
+  const currentModel = modelNameFromStackId(modeledStacks[i].node.id)!;
+  const priorModel = modelNameFromStackId(
+    modeledStacks[i - WAVE_SIZE].node.id,
+  )!;
+  if (modelComponents.get(currentModel) !== modelComponents.get(priorModel)) {
+    modeledStacks[i].addDependency(modeledStacks[i - WAVE_SIZE]);
+  }
+}
+
+// Conflict detection applied post-deployment by Custom Resource with rate-limited batching
+const syncConfigCR = new ApplySyncConfigConstruct(
+  dataStack,
+  "ApplySyncConfig",
+  {
+    apiId,
+    region: dataStack.region,
+  },
+);
+syncConfigCR.node.addDependency(backend.data.resources.graphqlApi);
 
 // Grant Cognito permissions to section handler via IAM policy (not via auth.access() to avoid circular dependency)
 const cognitoPolicy = new Policy(

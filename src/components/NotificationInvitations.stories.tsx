@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import NotificationInvitations from "./Notifications/NotificationInvitations";
 import NotificationContext from "../context/notificationContext";
 import { action } from "storybook/actions";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 // ---------------------------------------------------------------------------
 // Mock Data
@@ -117,7 +117,14 @@ const meta: Meta<typeof NotificationInvitations> = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <Box sx={{ maxWidth: 500, border: 1, borderColor: "divider", borderRadius: 1 }}>
+      <Box
+        sx={{
+          maxWidth: 500,
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 1,
+        }}
+      >
         <Story />
       </Box>
     ),
@@ -143,7 +150,7 @@ export const PeerReviewInvites: Story = {
     emptyMessage: "No pending review invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0);
   },
 };
 
@@ -163,7 +170,8 @@ export const PracticeSessionInvites: Story = {
     emptyMessage: "No pending session invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Join Session");
   },
 };
 
@@ -183,7 +191,8 @@ export const WorkbookInvites: Story = {
     emptyMessage: "No pending workbook invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Join Workbook");
   },
 };
 
@@ -197,12 +206,16 @@ export const AllCollaborationInvites: Story = {
     ),
   ],
   args: {
-    types: ["PEER_REVIEW_INVITE", "PRACTICE_SESSION_INVITE", "WORKBOOK_SESSION_INVITE"],
+    types: [
+      "PEER_REVIEW_INVITE",
+      "PRACTICE_SESSION_INVITE",
+      "WORKBOOK_SESSION_INVITE",
+    ],
     onJoin: action("onJoin"),
     joinLabel: "Join",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.textContent?.length).toBeGreaterThan(0);
   },
 };
 
@@ -221,7 +234,8 @@ export const EmptyState: Story = {
     emptyMessage: "No pending review invitations",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("No pending review invitations");
   },
 };
 
@@ -239,6 +253,6 @@ export const LoadingState: Story = {
     onJoin: action("onJoin"),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.children.length).toBeGreaterThan(0);
   },
 };

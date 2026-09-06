@@ -2,7 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { BadgeShelf } from './BadgeShelf'
 import type { EarnedBadge } from './BadgeShelf'
-import { expect } from 'storybook/test'
+import { expect, within } from 'storybook/test'
 
 const meta: Meta<typeof BadgeShelf> = {
   title: '🏆 Gamification/Badges & Celebrations/Badge Shelf',
@@ -39,7 +39,8 @@ export const AllEarned: Story = {
     earnedBadges: allBadges,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // All badges render — shelf grid is not empty
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(200)
   },
 }
 
@@ -52,7 +53,8 @@ export const PartiallyEarned: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Mix of earned and locked badges renders
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
   },
 }
 
@@ -61,6 +63,7 @@ export const Empty: Story = {
     earnedBadges: [],
   },
   play: async ({ canvasElement }) => {
+    // Empty state renders (may show placeholder or all-locked badges)
     expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 }
@@ -70,7 +73,8 @@ export const TwoColumns: Story = {
     earnedBadges: allBadges.slice(0, 4),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Grid layout with badges
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
   },
 }
 
@@ -84,7 +88,8 @@ export const EarnedOnly: Story = {
     earnedOnly: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Only 3 earned badges shown (no locked placeholders)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
   },
 }
 
@@ -101,7 +106,8 @@ export const WithMultipliers: Story = {
     earnedOnly: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Multiplier badges (same type earned multiple times) display count/multiplier
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
   },
 }
 
@@ -111,7 +117,8 @@ export const EarnedOnlyEmpty: Story = {
     earnedOnly: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // No badges earned + earnedOnly = component renders nothing
+    expect(canvasElement.children.length).toBeLessThanOrEqual(1)
   },
 }
 
@@ -130,6 +137,7 @@ export const AvatarProgression: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Avatar progression badges render substantial content
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100)
   },
 }

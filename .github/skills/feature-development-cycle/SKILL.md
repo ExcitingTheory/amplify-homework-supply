@@ -222,8 +222,8 @@ Brief description of testing approach and priorities.
 
 ## 6. E2E Tests (Browser Automation)
 
-**Location:** `cypress/e2e/`
-**Framework:** Cypress
+**Location:** `test/e2e/`
+**Framework:** Playwright
 
 | Test ID | Description   | User Flow | File   | Status         |
 | ------- | ------------- | --------- | ------ | -------------- |
@@ -284,7 +284,7 @@ This is a manual-ish crawl of the new/changed pages in a real browser to catch r
 ## Test Data Requirements
 
 - Mock data files needed
-- Fixtures for Cypress
+- Browser-test fixtures
 - Storybook mock data in `.storybook/__mocks__/ui-data/`
 
 ## Coverage Goals
@@ -343,7 +343,7 @@ Work through the TODO list, implementing features and writing tests as you go.
   npm run storybook -- --ci --smoke-test
 
   # E2E tests
-  npx cypress run --spec {spec-file}
+   npx playwright test {spec-file}
   ```
 
 - If a test fails, fix before moving to next TODO
@@ -407,7 +407,7 @@ When you believe a feature (or significant portion) is complete, create an audit
 
 1. Ran `npx vitest run` — {result}
 2. Ran `npm run storybook -- --ci` — {result}
-3. Ran `npx cypress run` — {result}
+3. Ran `npx playwright test` — {result}
 4. Manual review of {X} — {result}
 
 ## Decision
@@ -497,7 +497,7 @@ docs/REAL_TIME_COLLABORATION_AUDIT.md
 This skill integrates with the project's existing patterns:
 
 - **Storybook mocks** → `.storybook/__mocks__/ui-data/` for mock data
-- **Cypress fixtures** → `cypress/fixtures/` for E2E test data
+- **Playwright fixtures** → `test/e2e/` for E2E test data
 - **Vitest config** → `vitest.config.ts` and `vitest.workspace.ts`
 - **Agent permissions** → Check `.github/agent-permissions.json` before modifying production code
 - **Contexts** → Use existing React contexts rather than creating new subscriptions
@@ -521,11 +521,8 @@ npm run storybook
 # Storybook build (CI check)
 npx storybook build --ci
 
-# Cypress interactive
-npm run cypress:open
-
-# Cypress headless
-npx cypress run --spec cypress/e2e/{spec}.cy.ts
+# Playwright headless
+npx playwright test test/e2e/{spec}.spec.ts
 
 # Coverage report
 npx vitest run --coverage

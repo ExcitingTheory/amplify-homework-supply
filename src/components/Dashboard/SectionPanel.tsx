@@ -19,6 +19,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
+import { DASHBOARD_TOKENS } from "./constants";
 import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
 import { UpNextCard } from "./UpNextCard";
 
@@ -42,15 +43,32 @@ export interface SectionPanelProps {
     description?: string;
   };
   assignments: SectionAssignment[];
-  units: Record<string, { id?: string; name?: string; description?: string; thumbnail?: string; featuredImage?: string; identityId?: string; difficulty?: string } | undefined>;
-  gradeMap: Record<string, { id: string; accuracy?: number; sectionID?: string }[]>;
+  units: Record<
+    string,
+    | {
+        id?: string;
+        name?: string;
+        description?: string;
+        thumbnail?: string;
+        featuredImage?: string;
+        identityId?: string;
+        difficulty?: string;
+      }
+    | undefined
+  >;
+  gradeMap: Record<
+    string,
+    { id: string; accuracy?: number; sectionID?: string }[]
+  >;
   /** XP-based nailed-it counts per unit */
   nailedItByUnit?: Record<string, number>;
   /** Active campaign chapter title for this section */
   activeChapterTitle?: string | null;
   /** Content lock check */
   isLocked: (unitId: string) => boolean;
-  getLockStatus: (unitId: string) => { unlockDate?: string; requiredPriorUnitName?: string } | null;
+  getLockStatus: (
+    unitId: string,
+  ) => { unlockDate?: string; requiredPriorUnitName?: string } | null;
   /** Section-level XP info */
   sectionLevel?: { level: number } | null;
   /** Whether this section panel should start expanded */
@@ -61,7 +79,10 @@ export interface SectionPanelProps {
   campaignBriefing?: React.ReactNode;
   onOpenDrill: (unitId: string, unitName: string) => void;
   onRequestGuidance: (referenceId: string, sectionID: string) => Promise<void>;
-  onCreateReviewRoom?: (gradeId: string, invitedUserIds: string[]) => Promise<string>;
+  onCreateReviewRoom?: (
+    gradeId: string,
+    invitedUserIds: string[],
+  ) => Promise<string>;
   onRoomCreated?: (roomId: string) => void;
 }
 
@@ -91,9 +112,12 @@ export function SectionPanel({
     (_: React.SyntheticEvent, isExpanded: boolean) => {
       if (isExpanded) {
         // On next tick, after accordion animation, move focus to UpNext card
-        setTimeout(() => {
-          upNextRef.current?.focus();
-        }, reducedMotion ? 0 : 280);
+        setTimeout(
+          () => {
+            upNextRef.current?.focus();
+          },
+          reducedMotion ? 0 : 280,
+        );
       }
     },
     [reducedMotion],
@@ -118,6 +142,7 @@ export function SectionPanel({
   // Up-next: first non-locked pending assignment
   const upNext = pending.find((a) => !isLocked(a.unitID));
   const remainingPending = pending.filter((a) => a.id !== upNext?.id);
+  const nextDueAssignment = pending.find((assignment) => assignment.dueDate);
 
   // Stats
   const completionPct = assignments.length
@@ -179,8 +204,27 @@ export function SectionPanel({
               {section.description}
             </Typography>
           )}
+          {nextDueAssignment && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.25 }}
+            >
+              Next: {units[nextDueAssignment.unitID]?.name || "Assignment"}
+              {nextDueAssignment.dueDate
+                ? ` · Due ${new Date(nextDueAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                : ""}
+            </Typography>
+          )}
         </Box>
         <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+          <Chip
+            label={`${completionPct}%`}
+            size="small"
+            color={completionPct === 100 ? "success" : "primary"}
+            variant={completionPct === 0 ? "outlined" : "filled"}
+            sx={{ fontWeight: 700 }}
+          />
           {pending.length > 0 && (
             <Chip
               label={`${pending.length} pending`}
@@ -224,7 +268,11 @@ export function SectionPanel({
               color={completionPct === 100 ? "success" : "primary"}
               aria-label={`${completionPct}% complete`}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ whiteSpace: "nowrap" }}
+            >
               {completionPct}%
             </Typography>
           </Box>
@@ -239,13 +287,12 @@ export function SectionPanel({
             aria-live="polite"
           >
             {completed.length === assignments.length
-              ? `All ${assignments.length} assignment${assignments.length !== 1 ? 's' : ''} completed in ${section.name || 'this section'}.`
-              : `${completed.length} of ${assignments.length} completed in ${section.name || 'this section'}.${
+              ? `All ${assignments.length} assignment${assignments.length !== 1 ? "s" : ""} completed in ${section.name || "this section"}.`
+              : `${completed.length} of ${assignments.length} completed in ${section.name || "this section"}.${
                   upNext
-                    ? ` Next: ${units[upNext.unitID]?.name || 'next assignment'}${upNext.dueDate ? `, due ${new Date(upNext.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''}.`
-                    : ''
-                }`
-            }
+                    ? ` Next: ${units[upNext.unitID]?.name || "next assignment"}${upNext.dueDate ? `, due ${new Date(upNext.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : ""}.`
+                    : ""
+                }`}
           </Typography>
         )}
 
@@ -257,7 +304,7 @@ export function SectionPanel({
 
         {/* Up Next hero */}
         {upNext && (
-          <Box ref={upNextRef} tabIndex={-1} sx={{ outline: 'none' }}>
+          <Box ref={upNextRef} tabIndex={-1} sx={{ outline: "none" }}>
             <UpNextCard
               assignment={upNext}
               unit={units[upNext.unitID]}

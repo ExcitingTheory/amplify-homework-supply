@@ -36,3 +36,19 @@
 .onboarding-panel .MuiCard-root:hover {
   box-shadow: var(--sb-card-hover-shadow);
 }
+
+/* Momentary highlight when scrolled to from the sidebar summary widget */
+@keyframes onboarding-task-highlight-flash {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 0 2px #60a5fa;
+  }
+}
+
+.onboarding-panel .onboarding-task-highlight {
+  animation: onboarding-task-highlight-flash 1.4s ease-in-out;
+}

@@ -9,7 +9,7 @@ import React from "react";
 import ModerationPanel from "./ModerationPanel";
 import { Box, Stack } from "@mui/material";
 import { DemoBanner } from "../../.storybook/components/DemoBanner";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 // Mock items with different moderation scenarios
 const mockFlaggedSingle = {
@@ -120,7 +120,8 @@ export const SingleCategoryFlagged = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Content Moderation");
   },
 };
 
@@ -138,7 +139,8 @@ export const MultipleCategoriesFlagged = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Student Submission Requires Review");
   },
 };
 
@@ -156,7 +158,8 @@ export const LowConfidenceFlag = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Content Moderation");
   },
 };
 
@@ -174,7 +177,8 @@ export const ApprovedContent = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.queryByText("Content Moderation")).toBeNull();
   },
 };
 
@@ -191,7 +195,8 @@ export const UncheckedContent = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvas.queryByText("Content Moderation")).toBeNull();
   },
 };
 
@@ -210,7 +215,8 @@ export const CustomTitle = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Unit Content Flagged for Review");
   },
 };
 
@@ -235,6 +241,13 @@ InstructorReviewWorkflow.parameters = {
   },
 };
 
+InstructorReviewWorkflow.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await canvas.findByText("Student Submission #1");
+  await canvas.findByText("Student Submission #2");
+  await canvas.findByText("Student Submission #3");
+};
+
 // Edge cases
 export const MalformedFlags = () => {
   const itemWithBadJSON = {
@@ -253,4 +266,8 @@ MalformedFlags.parameters = {
       story: "Gracefully handles malformed moderation data (returns null).",
     },
   },
+};
+
+MalformedFlags.play = async ({ canvasElement }) => {
+  expect(canvasElement).toBeTruthy();
 };

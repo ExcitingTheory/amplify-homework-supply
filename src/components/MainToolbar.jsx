@@ -1066,6 +1066,7 @@ export default function MainToolbar({ children }) {
         <IconButton
           color="inherit"
           aria-label="Notifications"
+          data-tour="notification-bell"
           onClick={() => router.push("/profile/notifications")}
         >
           <NotificationBadge>
@@ -1118,6 +1119,7 @@ export default function MainToolbar({ children }) {
           {/* Mobile or without AppShell: SwipeableDrawer */}
           {!(hasAppShell && appShell.isDesktop) && (
             <SwipeableDrawer
+              data-tour="nav-drawer"
               anchor={anchor}
               open={isDrawerOpen}
               onClose={toggleDrawer(anchor, false)}

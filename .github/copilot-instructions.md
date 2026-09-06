@@ -86,7 +86,7 @@ npm run storybook    # Component development (port 6006)
 3. After schema changes, restart Next.js dev server
 4. Types auto-generated in `amplify_outputs.json`
 
-**Testing**: Cypress E2E tests in `cypress/e2e/`. Run with `npm run cypress:open`.
+**Testing**: Playwright browser tests in `test/e2e/`. Run with `npm run e2e`.
 
 ## Code Conventions
 
@@ -356,7 +356,7 @@ Use MCP servers intentionally based on task type. See [.github/prompts/mcp-tool-
 - **Browser/UI verification**: Prefer `microsoft/playwright-mcp` for end-to-end interaction checks and reproducible UI validation.
 - **Frontend runtime debugging**: Prefer `io.github.ChromeDevTools/chrome-devtools-mcp` for console/network/perf inspection in rendered pages.
 - **Next.js diagnostics**: Prefer `io.github.vercel/next-devtools-mcp` for Next.js-specific runtime, route, and app diagnostics.
-- **Framework/library docs**: Prefer `io.github.upstash/context7` for authoritative docs lookup (Next.js, Amplify Gen 2, Storybook, Lexical, MUI, Cypress, Vitest).
+- **Framework/library docs**: Prefer `io.github.upstash/context7` for authoritative docs lookup (Next.js, Amplify Gen 2, Storybook, Lexical, MUI, Playwright, Vitest).
 
 Selection rules:
 

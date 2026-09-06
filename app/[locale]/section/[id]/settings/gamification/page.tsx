@@ -6,128 +6,187 @@
  *
  * @module section/[id]/settings/gamification
  */
-'use client'
+"use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import Tooltip from '@mui/material/Tooltip'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import InputAdornment from '@mui/material/InputAdornment'
-import IconButton from '@mui/material/IconButton'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Grid from '@mui/material/Grid'
-import Snackbar from '@mui/material/Snackbar'
-import SaveIcon from '@mui/icons-material/Save'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { generateClient } from 'aws-amplify/data'
-import { useParams, useRouter } from 'next/navigation'
-import { BadgeVisualPicker, resolveIcon } from '@/components/Gamification/BadgeVisualPicker'
-import { BadgeIcon } from '@/components/Gamification/BadgeIcon'
-import type { CustomBadgeVisual } from '@/components/Gamification/BadgeEditor'
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Tooltip from "@mui/material/Tooltip";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Grid from "@mui/material/Grid";
+import Snackbar from "@mui/material/Snackbar";
+import SaveIcon from "@mui/icons-material/Save";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { generateClient } from "aws-amplify/data";
+import { useParams, useRouter } from "next/navigation";
+import {
+  BadgeVisualPicker,
+  resolveIcon,
+} from "@/components/Gamification/BadgeVisualPicker";
+import { BadgeIcon } from "@/components/Gamification/BadgeIcon";
+import type { CustomBadgeVisual } from "@/components/Gamification/BadgeEditor";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface SectionOption {
-  id: string
-  name: string
-  gamificationConfig?: any
+  id: string;
+  name: string;
+  gamificationConfig?: any;
 }
 
 interface BadgeConfigEntry {
-  badgeType: string
-  enabled: boolean
-  thresholdOverride?: number
+  badgeType: string;
+  enabled: boolean;
+  thresholdOverride?: number;
 }
 
 interface CustomBadgeEntry {
-  id: string
-  title: string
-  description?: string
-  icon?: string
-  visual?: CustomBadgeVisual
-  shape?: string
-  rarity?: string
-  category?: string
-  criteria?: any
-  isAnti?: boolean
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  visual?: CustomBadgeVisual;
+  shape?: string;
+  rarity?: string;
+  category?: string;
+  criteria?: any;
+  isAnti?: boolean;
 }
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-import { GAMIFICATION_FEATURE_META, HARDCODED_DEFAULTS } from '@/hooks/useGamificationFeatures'
-import type { GamificationFeatureKey } from '@/hooks/useGamificationFeatures'
+import {
+  GAMIFICATION_FEATURE_META,
+  HARDCODED_DEFAULTS,
+} from "@/hooks/useGamificationFeatures";
+import type { GamificationFeatureKey } from "@/hooks/useGamificationFeatures";
 
-const FEATURE_TOGGLES = GAMIFICATION_FEATURE_META
+const FEATURE_TOGGLES = GAMIFICATION_FEATURE_META;
 
 const DEFAULT_BADGE_TYPES = [
-  'PERFECT_SCORE',
-  'STREAK_7',
-  'STREAK_30',
-  'FIRST_SUBMISSION',
-  'SPEED_DEMON',
-  'NIGHT_OWL',
-  'EARLY_BIRD',
-  'COMPLETIONIST',
-  'HELPING_HAND',
-  'COMEBACK_KID',
-]
+  "PERFECT_SCORE",
+  "STREAK_7",
+  "STREAK_30",
+  "FIRST_SUBMISSION",
+  "SPEED_DEMON",
+  "NIGHT_OWL",
+  "EARLY_BIRD",
+  "COMPLETIONIST",
+  "HELPING_HAND",
+  "COMEBACK_KID",
+];
 
-const BADGE_SHAPES = ['circle', 'hexagon', 'shield', 'diamond']
-const BADGE_RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+const BADGE_SHAPES = ["circle", "hexagon", "shield", "diamond"];
+const BADGE_RARITIES = ["common", "uncommon", "rare", "epic", "legendary"];
 
 /** Unit label and tooltip shown next to the threshold override field for each badge type */
-const BADGE_THRESHOLD_META: Record<string, { unit: string; tooltip: string; defaultValue?: number }> = {
-  PERFECT_SCORE:    { unit: '%',    defaultValue: 100, tooltip: 'Minimum score percentage required (default: 100%)' },
-  STREAK_7:         { unit: 'days', defaultValue: 7,   tooltip: 'Consecutive days required for the streak badge (default: 7)' },
-  STREAK_30:        { unit: 'days', defaultValue: 30,  tooltip: 'Consecutive days required for the streak badge (default: 30)' },
-  FIRST_SUBMISSION: { unit: '—',                       tooltip: 'No threshold — awarded on first submission' },
-  SPEED_DEMON:      { unit: 'min',  defaultValue: 5,   tooltip: 'Maximum minutes allowed to complete an assignment (default: 5)' },
-  NIGHT_OWL:        { unit: 'hr',   defaultValue: 21,  tooltip: 'Submissions after this hour (24h) qualify, e.g. 21 = after 9 PM (default: 21)' },
-  EARLY_BIRD:       { unit: 'hr',   defaultValue: 8,   tooltip: 'Submissions before this hour (24h) qualify, e.g. 8 = before 8 AM (default: 8)' },
-  COMPLETIONIST:    { unit: '%',    defaultValue: 100, tooltip: 'Minimum completion percentage of all assignments (default: 100%)' },
-  HELPING_HAND:     { unit: '×',    defaultValue: 5,   tooltip: 'Number of peer assists required (default: 5)' },
-  COMEBACK_KID:     { unit: 'days', defaultValue: 7,   tooltip: 'Days of inactivity before a return counts as a comeback (default: 7)' },
-}
+const BADGE_THRESHOLD_META: Record<
+  string,
+  { unit: string; tooltip: string; defaultValue?: number }
+> = {
+  PERFECT_SCORE: {
+    unit: "%",
+    defaultValue: 100,
+    tooltip: "Minimum score percentage required (default: 100%)",
+  },
+  STREAK_7: {
+    unit: "days",
+    defaultValue: 7,
+    tooltip: "Consecutive days required for the streak badge (default: 7)",
+  },
+  STREAK_30: {
+    unit: "days",
+    defaultValue: 30,
+    tooltip: "Consecutive days required for the streak badge (default: 30)",
+  },
+  FIRST_SUBMISSION: {
+    unit: "—",
+    tooltip: "No threshold — awarded on first submission",
+  },
+  SPEED_DEMON: {
+    unit: "min",
+    defaultValue: 5,
+    tooltip: "Maximum minutes allowed to complete an assignment (default: 5)",
+  },
+  NIGHT_OWL: {
+    unit: "hr",
+    defaultValue: 21,
+    tooltip:
+      "Submissions after this hour (24h) qualify, e.g. 21 = after 9 PM (default: 21)",
+  },
+  EARLY_BIRD: {
+    unit: "hr",
+    defaultValue: 8,
+    tooltip:
+      "Submissions before this hour (24h) qualify, e.g. 8 = before 8 AM (default: 8)",
+  },
+  COMPLETIONIST: {
+    unit: "%",
+    defaultValue: 100,
+    tooltip: "Minimum completion percentage of all assignments (default: 100%)",
+  },
+  HELPING_HAND: {
+    unit: "×",
+    defaultValue: 5,
+    tooltip: "Number of peer assists required (default: 5)",
+  },
+  COMEBACK_KID: {
+    unit: "days",
+    defaultValue: 7,
+    tooltip:
+      "Days of inactivity before a return counts as a comeback (default: 7)",
+  },
+};
 
 // ============================================================================
 // Component
 // ============================================================================
 
 export default function GamificationSettingsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const sectionId = params.id as string
-  const client = useMemo(() => generateClient(), [])
+  const params = useParams();
+  const router = useRouter();
+  const sectionId = params.id as string;
+  const client = useMemo(() => generateClient(), []);
 
   // Section data
-  const [sections, setSections] = useState<SectionOption[]>([])
-  const [currentSection, setCurrentSection] = useState<SectionOption | null>(null)
+  const [sections, setSections] = useState<SectionOption[]>([]);
+  const [currentSection, setCurrentSection] = useState<SectionOption | null>(
+    null,
+  );
 
   // Feature toggles — null means "use platform default", true/false = explicit override
   const [features, setFeatures] = useState<Record<string, boolean | null>>({
@@ -143,49 +202,52 @@ export default function GamificationSettingsPage() {
     collaborativePracticeEnabled: null,
     cosmeticsEnabled: null,
     contentLocksEnabled: null,
-  })
+  });
 
   // Badge configs
   const [badgeConfigs, setBadgeConfigs] = useState<BadgeConfigEntry[]>(
-    DEFAULT_BADGE_TYPES.map((t) => ({ badgeType: t, enabled: true }))
-  )
+    DEFAULT_BADGE_TYPES.map((t) => ({ badgeType: t, enabled: true })),
+  );
 
   // Custom badges
-  const [customBadges, setCustomBadges] = useState<CustomBadgeEntry[]>([])
-  const [showBadgeCreator, setShowBadgeCreator] = useState(false)
+  const [customBadges, setCustomBadges] = useState<CustomBadgeEntry[]>([]);
+  const [showBadgeCreator, setShowBadgeCreator] = useState(false);
 
   // Streak settings
-  const [streakFreezesAllowed, setStreakFreezesAllowed] = useState(3)
+  const [streakFreezesAllowed, setStreakFreezesAllowed] = useState(3);
 
   // UI state
-  const [saving, setSaving] = useState(false)
-  const [snackbar, setSnackbar] = useState('')
-  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
-  const initialLoadRef = useRef(false)
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [saving, setSaving] = useState(false);
+  const [snackbar, setSnackbar] = useState("");
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const initialLoadRef = useRef(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load sections for the instructor
   useEffect(() => {
     const sub = (client.models as any).Section.observeQuery().subscribe({
       next: ({ items }: any) => {
-        const valid = items.filter((s: any) => s != null && !s._deleted)
-        setSections(valid.map((s: any) => ({
-          id: s.id,
-          name: s.name || s.id,
-          gamificationConfig: s.gamificationConfig,
-        })))
-        const current = valid.find((s: any) => s.id === sectionId)
+        const valid = items.filter((s: any) => s != null && !s._deleted);
+        setSections(
+          valid.map((s: any) => ({
+            id: s.id,
+            name: s.name || s.id,
+            gamificationConfig: s.gamificationConfig,
+          })),
+        );
+        const current = valid.find((s: any) => s.id === sectionId);
         if (current) {
           setCurrentSection({
             id: current.id,
             name: current.name || current.id,
             gamificationConfig: current.gamificationConfig,
-          })
+          });
           // Hydrate state from existing config
           if (current.gamificationConfig) {
-            const cfg = typeof current.gamificationConfig === 'string'
-              ? JSON.parse(current.gamificationConfig)
-              : current.gamificationConfig
+            const cfg =
+              typeof current.gamificationConfig === "string"
+                ? JSON.parse(current.gamificationConfig)
+                : current.gamificationConfig;
             setFeatures((prev) => ({
               ...prev,
               xpEnabled: cfg.xpEnabled ?? null,
@@ -197,62 +259,70 @@ export default function GamificationSettingsPage() {
               squadsEnabled: cfg.squadsEnabled ?? null,
               skillTreesEnabled: cfg.skillTreesEnabled ?? null,
               streaksEnabled: cfg.streaksEnabled ?? null,
-              collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? null,
+              collaborativePracticeEnabled:
+                cfg.collaborativePracticeEnabled ?? null,
               cosmeticsEnabled: cfg.cosmeticsEnabled ?? null,
               contentLocksEnabled: cfg.contentLocksEnabled ?? null,
-            }))
-            if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs)
-            if (cfg.customBadges) setCustomBadges(cfg.customBadges)
-            if (cfg.streakFreezesAllowed != null) setStreakFreezesAllowed(cfg.streakFreezesAllowed)
+            }));
+            if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs);
+            if (cfg.customBadges) setCustomBadges(cfg.customBadges);
+            if (cfg.streakFreezesAllowed != null)
+              setStreakFreezesAllowed(cfg.streakFreezesAllowed);
           }
         }
       },
-      error: (err: any) => console.warn('[GamificationSettings] Section sub error:', err),
-    })
-    return () => sub.unsubscribe()
-  }, [client, sectionId])
+      error: (err: any) =>
+        console.warn("[GamificationSettings] Section sub error:", err),
+    });
+    return () => sub.unsubscribe();
+  }, [client, sectionId]);
 
   // Toggle a feature — cycles: null (platform default) → true → false → null
   const toggleFeature = (key: string) => {
     setFeatures((prev) => {
-      const current = prev[key]
+      const current = prev[key];
       // null → true → false → null
-      if (current === null || current === undefined) return { ...prev, [key]: true }
-      if (current === true) return { ...prev, [key]: false }
-      return { ...prev, [key]: null }
-    })
-  }
+      if (current === null || current === undefined)
+        return { ...prev, [key]: true };
+      if (current === true) return { ...prev, [key]: false };
+      return { ...prev, [key]: null };
+    });
+  };
 
   // Explicitly set feature override or reset to platform default
   const setFeatureOverride = (key: string, value: boolean | null) => {
-    setFeatures((prev) => ({ ...prev, [key]: value }))
-  }
+    setFeatures((prev) => ({ ...prev, [key]: value }));
+  };
 
   // Toggle badge type
   const toggleBadgeConfig = (badgeType: string) => {
     setBadgeConfigs((prev) =>
       prev.map((b) =>
-        b.badgeType === badgeType ? { ...b, enabled: !b.enabled } : b
-      )
-    )
-  }
+        b.badgeType === badgeType ? { ...b, enabled: !b.enabled } : b,
+      ),
+    );
+  };
 
   // Update badge threshold
-  const updateBadgeThreshold = (badgeType: string, value: number | undefined) => {
+  const updateBadgeThreshold = (
+    badgeType: string,
+    value: number | undefined,
+  ) => {
     setBadgeConfigs((prev) =>
       prev.map((b) =>
-        b.badgeType === badgeType ? { ...b, thresholdOverride: value } : b
-      )
-    )
-  }
+        b.badgeType === badgeType ? { ...b, thresholdOverride: value } : b,
+      ),
+    );
+  };
 
   // Copy settings from another section
   const copyFromSection = (sourceId: string) => {
-    const source = sections.find((s) => s.id === sourceId)
-    if (!source?.gamificationConfig) return
-    const cfg = typeof source.gamificationConfig === 'string'
-      ? JSON.parse(source.gamificationConfig)
-      : source.gamificationConfig
+    const source = sections.find((s) => s.id === sourceId);
+    if (!source?.gamificationConfig) return;
+    const cfg =
+      typeof source.gamificationConfig === "string"
+        ? JSON.parse(source.gamificationConfig)
+        : source.gamificationConfig;
     setFeatures({
       xpEnabled: cfg.xpEnabled ?? null,
       leaderboardEnabled: cfg.leaderboardEnabled ?? null,
@@ -266,29 +336,30 @@ export default function GamificationSettingsPage() {
       collaborativePracticeEnabled: cfg.collaborativePracticeEnabled ?? null,
       cosmeticsEnabled: cfg.cosmeticsEnabled ?? null,
       contentLocksEnabled: cfg.contentLocksEnabled ?? null,
-    })
-    if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs)
-    if (cfg.customBadges) setCustomBadges(cfg.customBadges)
-    if (cfg.streakFreezesAllowed != null) setStreakFreezesAllowed(cfg.streakFreezesAllowed)
-    setCopyDialogOpen(false)
-    setSnackbar('Settings copied successfully')
-  }
+    });
+    if (cfg.badgeConfigs) setBadgeConfigs(cfg.badgeConfigs);
+    if (cfg.customBadges) setCustomBadges(cfg.customBadges);
+    if (cfg.streakFreezesAllowed != null)
+      setStreakFreezesAllowed(cfg.streakFreezesAllowed);
+    setCopyDialogOpen(false);
+    setSnackbar("Settings copied successfully");
+  };
 
   // Save to section — only persist explicit overrides (non-null values)
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
       // Build config with only non-null feature overrides
-      const featureOverrides: Record<string, boolean> = {}
+      const featureOverrides: Record<string, boolean> = {};
       for (const [key, val] of Object.entries(features)) {
-        if (val != null) featureOverrides[key] = val
+        if (val != null) featureOverrides[key] = val;
       }
       const gamificationConfig = {
         ...featureOverrides,
         streakFreezesAllowed,
         badgeConfigs,
         customBadges,
-      }
+      };
       // Write both the nested gamificationConfig AND the top-level toggle fields
       // that the gamification engine reads (badgesEnabled, antiBadgesEnabled,
       // leaderboardEnabled). This keeps both representations in sync.
@@ -296,54 +367,60 @@ export default function GamificationSettingsPage() {
         id: sectionId,
         gamificationConfig,
         _version: (currentSection as any)?._version,
-      }
+      };
       // Sync top-level fields the engine checks directly
-      if (features.badgesEnabled != null) updatePayload.badgesEnabled = features.badgesEnabled
-      if (features.antiBadgesEnabled != null) updatePayload.antiBadgesEnabled = features.antiBadgesEnabled
-      if (features.leaderboardEnabled != null) updatePayload.leaderboardEnabled = features.leaderboardEnabled
+      if (features.badgesEnabled != null)
+        updatePayload.badgesEnabled = features.badgesEnabled;
+      if (features.antiBadgesEnabled != null)
+        updatePayload.antiBadgesEnabled = features.antiBadgesEnabled;
+      if (features.leaderboardEnabled != null)
+        updatePayload.leaderboardEnabled = features.leaderboardEnabled;
 
-      await (client.models as any).Section.update(updatePayload)
-      setSnackbar('Settings saved!')
+      await (client.models as any).Section.update(updatePayload);
+      setSnackbar("Settings saved!");
     } catch (err) {
-      console.error('[GamificationSettings] Save error:', err)
-      setSnackbar('Error saving settings')
+      console.error("[GamificationSettings] Save error:", err);
+      setSnackbar("Error saving settings");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   // Debounced auto-save: triggers 1.5s after any setting change
   useEffect(() => {
     // Skip auto-save on initial hydration
     if (!initialLoadRef.current) {
-      if (currentSection) initialLoadRef.current = true
-      return
+      if (currentSection) initialLoadRef.current = true;
+      return;
     }
-    if (!currentSection) return
+    if (!currentSection) return;
 
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => {
-      handleSave()
-    }, 1500)
+      handleSave();
+    }, 1500);
 
     return () => {
-      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
-    }
-  }, [features, streakFreezesAllowed, badgeConfigs, customBadges])
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [features, streakFreezesAllowed, badgeConfigs, customBadges]);
 
   // Add custom badge
   const addCustomBadge = (badge: CustomBadgeEntry) => {
-    setCustomBadges((prev) => [...prev, badge])
-    setShowBadgeCreator(false)
-  }
+    setCustomBadges((prev) => [...prev, badge]);
+    setShowBadgeCreator(false);
+  };
 
   // Remove custom badge
   const removeCustomBadge = (id: string) => {
-    setCustomBadges((prev) => prev.filter((b) => b.id !== id))
-  }
+    setCustomBadges((prev) => prev.filter((b) => b.id !== id));
+  };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+    <Box
+      data-testid="section-gamification-settings"
+      sx={{ maxWidth: 800, mx: "auto", p: 3 }}
+    >
       <Stack spacing={3}>
         <Typography variant="h4">Gamification Settings</Typography>
         <Typography variant="body2" color="text.secondary">
@@ -364,31 +441,46 @@ export default function GamificationSettingsPage() {
         {/* Feature Toggles */}
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>Feature Toggles</Typography>
+            <Typography variant="h6" gutterBottom>
+              Feature Toggles
+            </Typography>
             <Alert severity="info" sx={{ mb: 2 }}>
-              Features use the platform default unless you explicitly override them here.
-              Data processing continues even when a feature is hidden, so toggling it back on restores full accuracy.
+              Features use the platform default unless you explicitly override
+              them here. Data processing continues even when a feature is
+              hidden, so toggling it back on restores full accuracy.
             </Alert>
             <Stack spacing={2}>
               {FEATURE_TOGGLES.map(({ key, label, description, category }) => {
-                const value = features[key]
-                const isOverridden = value != null
-                const platformDefault = HARDCODED_DEFAULTS[key as GamificationFeatureKey]
-                const defaultLabel = platformDefault ? 'Enabled' : 'Disabled'
+                const value = features[key];
+                const isOverridden = value != null;
+                const platformDefault =
+                  HARDCODED_DEFAULTS[key as GamificationFeatureKey];
+                const defaultLabel = platformDefault ? "Enabled" : "Disabled";
                 return (
-                  <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    key={key}
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
                     <Box sx={{ flex: 1 }}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Typography variant="body1">{label}</Typography>
-                        <Chip label={category} size="small" variant="outlined" />
+                        <Chip
+                          label={category}
+                          size="small"
+                          variant="outlined"
+                        />
                         {!isOverridden && (
-                          <Chip label={`Default: ${defaultLabel}`} size="small" color="default" />
+                          <Chip
+                            label={`Default: ${defaultLabel}`}
+                            size="small"
+                            color="default"
+                          />
                         )}
                         {isOverridden && (
                           <Chip
-                            label={value ? 'Enabled' : 'Disabled'}
+                            label={value ? "Enabled" : "Disabled"}
                             size="small"
-                            color={value ? 'success' : 'error'}
+                            color={value ? "success" : "error"}
                           />
                         )}
                       </Stack>
@@ -398,20 +490,31 @@ export default function GamificationSettingsPage() {
                     </Box>
                     <FormControl size="small" sx={{ minWidth: 160 }}>
                       <Select
-                        value={value === null || value === undefined ? 'default' : value ? 'enabled' : 'disabled'}
+                        value={
+                          value === null || value === undefined
+                            ? "default"
+                            : value
+                              ? "enabled"
+                              : "disabled"
+                        }
                         onChange={(e) => {
-                          const v = e.target.value
-                          setFeatureOverride(key, v === 'default' ? null : v === 'enabled')
+                          const v = e.target.value;
+                          setFeatureOverride(
+                            key,
+                            v === "default" ? null : v === "enabled",
+                          );
                         }}
                         size="small"
                       >
-                        <MenuItem value="default">{defaultLabel} (default)</MenuItem>
+                        <MenuItem value="default">
+                          {defaultLabel} (default)
+                        </MenuItem>
                         <MenuItem value="enabled">Enabled</MenuItem>
                         <MenuItem value="disabled">Disabled</MenuItem>
                       </Select>
                     </FormControl>
                   </Box>
-                )
+                );
               })}
             </Stack>
           </CardContent>
@@ -420,12 +523,18 @@ export default function GamificationSettingsPage() {
         {/* Streak Settings */}
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>Streak Settings</Typography>
+            <Typography variant="h6" gutterBottom>
+              Streak Settings
+            </Typography>
             <TextField
               label="Streak Freezes Allowed"
               type="number"
               value={streakFreezesAllowed}
-              onChange={(e) => setStreakFreezesAllowed(Math.max(0, parseInt(e.target.value) || 0))}
+              onChange={(e) =>
+                setStreakFreezesAllowed(
+                  Math.max(0, parseInt(e.target.value) || 0),
+                )
+              }
               inputProps={{ min: 0 }}
               helperText="Maximum number of streak freezes students can use"
               fullWidth
@@ -436,20 +545,27 @@ export default function GamificationSettingsPage() {
         {/* Badge Config Editor */}
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>Badge Configuration</Typography>
+            <Typography variant="h6" gutterBottom>
+              Badge Configuration
+            </Typography>
             <List dense disablePadding>
               {badgeConfigs.map((cfg) => {
-                const meta = BADGE_THRESHOLD_META[cfg.badgeType]
-                const isFixed = meta?.unit === '—'
+                const meta = BADGE_THRESHOLD_META[cfg.badgeType];
+                const isFixed = meta?.unit === "—";
                 return (
                   <ListItem
                     key={cfg.badgeType}
                     disableGutters
-                    sx={{ py: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}
+                    sx={{
+                      py: 0.5,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
                   >
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <FormControlLabel
-                        sx={{ mr: 0, width: '100%' }}
+                        sx={{ mr: 0, width: "100%" }}
                         control={
                           <Switch
                             checked={cfg.enabled}
@@ -459,31 +575,46 @@ export default function GamificationSettingsPage() {
                         }
                         label={
                           <Typography variant="body2" noWrap>
-                            {cfg.badgeType.replace(/_/g, ' ')}
+                            {cfg.badgeType.replace(/_/g, " ")}
                           </Typography>
                         }
                       />
                     </Box>
-                    <Tooltip title={meta?.tooltip ?? 'Override the default threshold for this badge'} placement="left">
+                    <Tooltip
+                      title={
+                        meta?.tooltip ??
+                        "Override the default threshold for this badge"
+                      }
+                      placement="left"
+                    >
                       <TextField
                         size="small"
                         type="number"
                         label="Threshold"
                         disabled={isFixed}
-                        value={isFixed ? '' : (cfg.thresholdOverride ?? '')}
-                        placeholder={meta?.defaultValue != null ? String(meta.defaultValue) : undefined}
+                        value={isFixed ? "" : (cfg.thresholdOverride ?? "")}
+                        placeholder={
+                          meta?.defaultValue != null
+                            ? String(meta.defaultValue)
+                            : undefined
+                        }
                         InputLabelProps={{ shrink: true }}
                         onChange={(e) =>
                           updateBadgeThreshold(
                             cfg.badgeType,
-                            e.target.value ? parseInt(e.target.value) : undefined
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
                           )
                         }
                         sx={{ width: 130, flexShrink: 0 }}
                         InputProps={{
                           endAdornment: meta ? (
                             <InputAdornment position="end">
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {meta.unit}
                               </Typography>
                             </InputAdornment>
@@ -492,7 +623,7 @@ export default function GamificationSettingsPage() {
                       />
                     </Tooltip>
                   </ListItem>
-                )
+                );
               })}
             </List>
           </CardContent>
@@ -501,7 +632,12 @@ export default function GamificationSettingsPage() {
         {/* Custom Badges */}
         <Card variant="outlined">
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
               <Typography variant="h6">Custom Badges</Typography>
               <Button
                 startIcon={<AddIcon />}
@@ -523,40 +659,60 @@ export default function GamificationSettingsPage() {
                     direction="row"
                     justifyContent="space-between"
                     alignItems="center"
-                    sx={{ p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}
+                    sx={{
+                      p: 1,
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                    }}
                   >
                     <Stack direction="row" spacing={1} alignItems="center">
                       {badge.visual ? (
                         <BadgeIcon
                           config={{
-                            icon: resolveIcon(badge.visual.iconName) || (() => null),
+                            icon:
+                              resolveIcon(badge.visual.iconName) ||
+                              (() => null),
                             name: badge.title,
-                            description: '',
+                            description: "",
                             bgColor: badge.visual.bgColor,
                             gradient: badge.visual.gradient,
                             iconColor: badge.visual.iconColor,
                             shape: badge.visual.shape,
                             animation: badge.visual.animation,
-                            category: 'core',
-                            rarity: 'common',
+                            category: "core",
+                            rarity: "common",
                           }}
                           size={32}
                           earned
                         />
                       ) : (
-                        <Typography fontSize={24}>{badge.icon || '🏅'}</Typography>
+                        <Typography fontSize={24}>
+                          {badge.icon || "🏅"}
+                        </Typography>
                       )}
                       <Box>
                         <Typography variant="body2" fontWeight="bold">
                           {badge.title}
-                          {badge.isAnti && <Chip label="Anti" size="small" color="error" sx={{ ml: 1 }} />}
+                          {badge.isAnti && (
+                            <Chip
+                              label="Anti"
+                              size="small"
+                              color="error"
+                              sx={{ ml: 1 }}
+                            />
+                          )}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {badge.rarity} • {badge.visual?.shape || badge.shape} • {badge.category || 'General'}
+                          {badge.rarity} • {badge.visual?.shape || badge.shape}{" "}
+                          • {badge.category || "General"}
                         </Typography>
                       </Box>
                     </Stack>
-                    <IconButton size="small" onClick={() => removeCustomBadge(badge.id)}>
+                    <IconButton
+                      size="small"
+                      onClick={() => removeCustomBadge(badge.id)}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Stack>
@@ -574,7 +730,7 @@ export default function GamificationSettingsPage() {
           onClick={handleSave}
           disabled={saving}
         >
-          {saving ? 'Saving...' : 'Save Settings'}
+          {saving ? "Saving..." : "Save Settings"}
         </Button>
       </Stack>
 
@@ -586,7 +742,11 @@ export default function GamificationSettingsPage() {
             {sections
               .filter((s) => s.id !== sectionId)
               .map((s) => (
-                <Button key={s.id} variant="outlined" onClick={() => copyFromSection(s.id)}>
+                <Button
+                  key={s.id}
+                  variant="outlined"
+                  onClick={() => copyFromSection(s.id)}
+                >
                   {s.name}
                 </Button>
               ))}
@@ -608,11 +768,11 @@ export default function GamificationSettingsPage() {
       <Snackbar
         open={!!snackbar}
         autoHideDuration={3000}
-        onClose={() => setSnackbar('')}
+        onClose={() => setSnackbar("")}
         message={snackbar}
       />
     </Box>
-  )
+  );
 }
 
 // ============================================================================
@@ -624,26 +784,26 @@ function CustomBadgeCreatorDialog({
   onClose,
   onSubmit,
 }: {
-  open: boolean
-  onClose: () => void
-  onSubmit: (badge: CustomBadgeEntry) => void
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (badge: CustomBadgeEntry) => void;
 }) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [visual, setVisual] = useState<CustomBadgeVisual>({
-    iconName: 'GiTrophy',
-    iconLib: 'gi',
-    shape: 'circle',
-    bgColor: '#4caf50',
-    iconColor: '#ffffff',
-    animation: 'draw',
-  })
-  const [rarity, setRarity] = useState('common')
-  const [category, setCategory] = useState('')
-  const [isAnti, setIsAnti] = useState(false)
+    iconName: "GiTrophy",
+    iconLib: "gi",
+    shape: "circle",
+    bgColor: "#4caf50",
+    iconColor: "#ffffff",
+    animation: "draw",
+  });
+  const [rarity, setRarity] = useState("common");
+  const [category, setCategory] = useState("");
+  const [isAnti, setIsAnti] = useState(false);
 
   const handleSubmit = () => {
-    if (!title.trim()) return
+    if (!title.trim()) return;
     onSubmit({
       id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       title,
@@ -653,22 +813,22 @@ function CustomBadgeCreatorDialog({
       rarity,
       category: category || undefined,
       isAnti,
-    })
+    });
     // Reset
-    setTitle('')
-    setDescription('')
+    setTitle("");
+    setDescription("");
     setVisual({
-      iconName: 'GiTrophy',
-      iconLib: 'gi',
-      shape: 'circle',
-      bgColor: '#4caf50',
-      iconColor: '#ffffff',
-      animation: 'draw',
-    })
-    setRarity('common')
-    setCategory('')
-    setIsAnti(false)
-  }
+      iconName: "GiTrophy",
+      iconLib: "gi",
+      shape: "circle",
+      bgColor: "#4caf50",
+      iconColor: "#ffffff",
+      animation: "draw",
+    });
+    setRarity("common");
+    setCategory("");
+    setIsAnti(false);
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -693,16 +853,24 @@ function CustomBadgeCreatorDialog({
 
           {/* Icon picker */}
           <Box>
-            <Typography variant="subtitle2" gutterBottom>Icon</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              Icon
+            </Typography>
             <BadgeVisualPicker value={visual} onChange={setVisual} />
           </Box>
 
           <Stack direction="row" spacing={2}>
             <FormControl fullWidth>
               <InputLabel>Rarity</InputLabel>
-              <Select label="Rarity" value={rarity} onChange={(e) => setRarity(e.target.value)}>
+              <Select
+                label="Rarity"
+                value={rarity}
+                onChange={(e) => setRarity(e.target.value)}
+              >
                 {BADGE_RARITIES.map((r) => (
-                  <MenuItem key={r} value={r}>{r}</MenuItem>
+                  <MenuItem key={r} value={r}>
+                    {r}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -716,17 +884,26 @@ function CustomBadgeCreatorDialog({
           />
 
           <FormControlLabel
-            control={<Switch checked={isAnti} onChange={(e) => setIsAnti(e.target.checked)} />}
+            control={
+              <Switch
+                checked={isAnti}
+                onChange={(e) => setIsAnti(e.target.checked)}
+              />
+            }
             label="Anti-Badge (penalty badge)"
           />
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!title.trim()}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={!title.trim()}
+        >
           Create Badge
         </Button>
       </DialogActions>
     </Dialog>
-  )
+  );
 }

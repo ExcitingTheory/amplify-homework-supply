@@ -6,7 +6,7 @@ import {
 } from "@storybook-mocks/aws-amplify-data";
 import { TabProvider } from "../context/tabContext";
 import { DictionaryEditor2 } from "./DictionaryEditor2";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const mockWords = [
   {
@@ -95,8 +95,10 @@ export default {
   ],
 };
 
-export const Default = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("hablar");
   },
 };
 
@@ -111,6 +113,115 @@ export const Empty = {
     initializeMockData: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.children.length).toBeGreaterThan(0);
+  },
+};
+
+const csvImportedWords = [
+  {
+    id: "csv-1",
+    phrase: "bonjour",
+    definition: "hello, good morning",
+    pronunciation: "bohn-ZHOOR",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-2",
+    phrase: "merci",
+    definition: "thank you",
+    pronunciation: "mair-SEE",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-3",
+    phrase: "au revoir",
+    definition: "goodbye",
+    pronunciation: "oh ruh-VWAR",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-4",
+    phrase: "s'il vous plaît",
+    definition: "please",
+    pronunciation: "seel voo PLEH",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-5",
+    phrase: "excusez-moi",
+    definition: "excuse me",
+    pronunciation: "ex-kew-zay-MWAH",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-6",
+    phrase: "oui",
+    definition: "yes",
+    pronunciation: "WEE",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-7",
+    phrase: "non",
+    definition: "no",
+    pronunciation: "NOHN",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-8",
+    phrase: "comment allez-vous",
+    definition: "how are you (formal)",
+    pronunciation: "koh-MAHN tah-lay VOO",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-9",
+    phrase: "je ne comprends pas",
+    definition: "I don't understand",
+    pronunciation: "zhuh nuh kohn-PRAHN pah",
+    owner: "mock-user",
+    _version: 1,
+  },
+  {
+    id: "csv-10",
+    phrase: "parlez-vous anglais",
+    definition: "do you speak English",
+    pronunciation: "par-lay VOO ahn-GLEH",
+    owner: "mock-user",
+    _version: 1,
+  },
+];
+
+const csvImportUnit = {
+  id: "unit-csv",
+  name: "French Basics (CSV Import)",
+  description: "Vocabulary imported from CSV file",
+  owner: "mock-user",
+  _version: 1,
+};
+
+export const BulkImported = {
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit(csvImportUnit, { words: csvImportedWords });
+      seedMockWords(csvImportedWords);
+    },
+  ],
+  parameters: {
+    unitId: "unit-csv",
+    initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("bonjour");
   },
 };

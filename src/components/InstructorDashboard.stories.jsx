@@ -6,7 +6,6 @@ import {
   seedMockUnit,
 } from "@storybook-mocks/aws-amplify-data";
 import InstructorDashboard from "./InstructorDashboard";
-import { expect } from 'storybook/test'
 
 const mockSections = [
   { id: "section-1", name: "Spanish 101 — Period 1", code: "SP101" },
@@ -41,13 +40,48 @@ const mockUnits = [
 ];
 
 const mockAssignments = [
-  { id: "assign-1", sectionID: "section-1", unitID: "unit-1", dueDate: "2026-04-15" },
-  { id: "assign-2", sectionID: "section-1", unitID: "unit-2", dueDate: "2026-04-22" },
-  { id: "assign-3", sectionID: "section-1", unitID: "unit-3", dueDate: "2026-04-29" },
-  { id: "assign-4", sectionID: "section-2", unitID: "unit-1", dueDate: "2026-04-15" },
-  { id: "assign-5", sectionID: "section-2", unitID: "unit-2", dueDate: "2026-04-22" },
-  { id: "assign-6", sectionID: "section-3", unitID: "unit-4", dueDate: "2026-05-01" },
-  { id: "assign-7", sectionID: "section-3", unitID: "unit-5", dueDate: "2026-05-08" },
+  {
+    id: "assign-1",
+    sectionID: "section-1",
+    unitID: "unit-1",
+    dueDate: "2026-04-15",
+  },
+  {
+    id: "assign-2",
+    sectionID: "section-1",
+    unitID: "unit-2",
+    dueDate: "2026-04-22",
+  },
+  {
+    id: "assign-3",
+    sectionID: "section-1",
+    unitID: "unit-3",
+    dueDate: "2026-04-29",
+  },
+  {
+    id: "assign-4",
+    sectionID: "section-2",
+    unitID: "unit-1",
+    dueDate: "2026-04-15",
+  },
+  {
+    id: "assign-5",
+    sectionID: "section-2",
+    unitID: "unit-2",
+    dueDate: "2026-04-22",
+  },
+  {
+    id: "assign-6",
+    sectionID: "section-3",
+    unitID: "unit-4",
+    dueDate: "2026-05-01",
+  },
+  {
+    id: "assign-7",
+    sectionID: "section-3",
+    unitID: "unit-5",
+    dueDate: "2026-05-08",
+  },
 ];
 
 function buildMockGrades() {
@@ -160,9 +194,6 @@ export const WithSections = {
       return <Story />;
     },
   ],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-  },
 };
 
 export const SingleSection = {
@@ -175,17 +206,11 @@ export const SingleSection = {
       return <Story />;
     },
   ],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
-  },
 };
 
 export const NoSections = {
   args: {
     sections: [],
-  },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
   },
 };
 
@@ -193,7 +218,105 @@ export const Loading = {
   args: {
     sections: mockSections,
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+};
+
+// ── Mobile Viewport Variants ──────────────────────────────────────────
+export const MobileViewport = {
+  args: {
+    sections: mockSections,
   },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "mobile1" },
+  },
+  decorators: [
+    (Story) => {
+      seedData();
+      return (
+        <div style={{ width: "100%", maxWidth: "375px", margin: "0 auto" }}>
+          <Story />
+        </div>
+      );
+    },
+  ],
+};
+
+export const TabletViewport = {
+  args: {
+    sections: mockSections,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "tablet" },
+  },
+  decorators: [
+    (Story) => {
+      seedData();
+      return (
+        <div style={{ width: "100%", maxWidth: "768px", margin: "0 auto" }}>
+          <Story />
+        </div>
+      );
+    },
+  ],
+};
+
+export const DesktopViewport = {
+  args: {
+    sections: mockSections,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "desktop" },
+  },
+  decorators: [
+    (Story) => {
+      seedData();
+      return (
+        <div style={{ width: "100%", maxWidth: "1400px", margin: "0 auto" }}>
+          <Story />
+        </div>
+      );
+    },
+  ],
+};
+
+export const MultiSectionMobile = {
+  args: {
+    sections: mockSections,
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "mobile1" },
+  },
+  decorators: [
+    (Story) => {
+      seedData();
+      return (
+        <div style={{ width: "100%", maxWidth: "375px", margin: "0 auto" }}>
+          <Story />
+        </div>
+      );
+    },
+  ],
+};
+
+export const SingleSectionMobile = {
+  args: {
+    sections: [mockSections[0]],
+  },
+  parameters: {
+    layout: "fullscreen",
+    viewport: { defaultViewport: "mobile1" },
+  },
+  decorators: [
+    (Story) => {
+      seedData();
+      return (
+        <div style={{ width: "100%", maxWidth: "375px", margin: "0 auto" }}>
+          <Story />
+        </div>
+      );
+    },
+  ],
 };

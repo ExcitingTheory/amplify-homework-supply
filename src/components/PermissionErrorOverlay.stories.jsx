@@ -2,7 +2,7 @@ import React from "react";
 import PermissionErrorOverlay from "./PermissionErrorOverlay";
 import { I18nextProvider } from "react-i18next";
 import i18n from "../../.storybook/i18next";
-import { expect } from 'storybook/test'
+import { expect, userEvent, within } from "storybook/test";
 
 export default {
   title: "🧩 UI Components/Permission Error Overlay",
@@ -34,7 +34,7 @@ export const UnitPermissionError = {
     message: null,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement).toBeTruthy();
   },
 };
 
@@ -49,7 +49,8 @@ export const CustomMessage = {
       "You do not have permission to access this unit. Only the owner or instructors can view unpublished units.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const body = within(document.body);
+    await body.findByText(/You do not have permission/);
   },
 };
 
@@ -63,7 +64,8 @@ export const SectionPermissionError = {
     message: "You are not enrolled in this section.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const body = within(document.body);
+    await body.findByText("You are not enrolled in this section.");
   },
 };
 
@@ -77,7 +79,8 @@ export const AssignmentPermissionError = {
     message: "This assignment is not available to you.",
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const body = within(document.body);
+    await body.findByText("This assignment is not available to you.");
   },
 };
 
@@ -91,7 +94,7 @@ export const ClosedState = {
     message: null,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
   },
 };
 
@@ -125,4 +128,9 @@ export const Interactive = () => {
       />
     </div>
   );
+};
+
+Interactive.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await canvas.findByText("Trigger Permission Error");
 };

@@ -225,4 +225,17 @@ export const GradebookTable: Story = {
       </Box>
     )
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // All student rows render
+    await canvas.findByText('Yuki Tanaka')
+    await canvas.findByText('Maria Chen')
+    await canvas.findByText('Jordan Smith')
+    // All assignment columns render
+    await canvas.findByText('Japanese Greetings')
+    await canvas.findByText('Verb Conjugation')
+    // Grade cell content is present in the page
+    const allText = canvasElement.textContent || ''
+    expect(allText).toMatch(/\d+/)
+  },
 }

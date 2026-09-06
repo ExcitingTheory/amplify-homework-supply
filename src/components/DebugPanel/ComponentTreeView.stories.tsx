@@ -2,13 +2,13 @@
  * Storybook stories for ComponentTreeView component
  */
 
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { ComponentTreeView } from './ComponentTreeView';
-import { ComponentMetadata } from '../../utils/debug/ComponentTreeStore';
-import { expect } from 'storybook/test'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { ComponentTreeView } from "./ComponentTreeView";
+import { ComponentMetadata } from "../../utils/debug/ComponentTreeStore";
+import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof ComponentTreeView> = {
-  title: '🛠️ Developer Tools/Debug Panel/Component Tree View',
+  title: "🛠️ Developer Tools/Debug Panel/Component Tree View",
   component: ComponentTreeView,
 };
 
@@ -19,28 +19,28 @@ const now = Date.now();
 
 const mockComponents: ComponentMetadata[] = [
   {
-    id: 'editor-1',
-    name: 'Editor3',
+    id: "editor-1",
+    name: "Editor3",
     props: {
-      unitId: 'unit-123',
+      unitId: "unit-123",
       readOnly: false,
-      placeholder: 'Start typing...',
+      placeholder: "Start typing...",
     },
     state: {
-      editorState: '[Lexical EditorState]',
+      editorState: "[Lexical EditorState]",
       isSaving: false,
       lastSaved: now - 30000,
     },
     mountTime: now - 60000,
     renderCount: 5,
     lastRenderTime: now - 1000,
-    children: ['toolbar-1', 'toolbar-2'],
+    children: ["toolbar-1", "toolbar-2"],
   },
   {
-    id: 'toolbar-1',
-    name: 'ToolbarPlugin',
+    id: "toolbar-1",
+    name: "ToolbarPlugin",
     props: {
-      editor: '[Lexical Editor Instance]',
+      editor: "[Lexical Editor Instance]",
       showAdvanced: true,
     },
     state: {},
@@ -50,10 +50,10 @@ const mockComponents: ComponentMetadata[] = [
     children: [],
   },
   {
-    id: 'toolbar-2',
-    name: 'ToolbarPlugin',
+    id: "toolbar-2",
+    name: "ToolbarPlugin",
     props: {
-      editor: '[Lexical Editor Instance]',
+      editor: "[Lexical Editor Instance]",
       showAdvanced: false,
     },
     state: {},
@@ -63,28 +63,28 @@ const mockComponents: ComponentMetadata[] = [
     children: [],
   },
   {
-    id: 'unit-context-1',
-    name: 'UnitContext',
+    id: "unit-context-1",
+    name: "UnitContext",
     props: {},
     state: {
-      currentUnit: { id: 'unit-123', name: 'Test Unit' },
+      currentUnit: { id: "unit-123", name: "Test Unit" },
       isLoading: false,
-      words: '[Array of 15 words]',
+      words: "[Array of 15 words]",
     },
     mountTime: now - 62000,
     renderCount: 3,
     lastRenderTime: now - 2000,
-    children: ['editor-1', 'chat-1'],
+    children: ["editor-1", "chat-1"],
   },
   {
-    id: 'chat-1',
-    name: 'ChatSidebar',
+    id: "chat-1",
+    name: "ChatSidebar",
     props: {
-      unitId: 'unit-123',
-      position: 'right',
+      unitId: "unit-123",
+      position: "right",
     },
     state: {
-      messages: '[Array of messages]',
+      messages: "[Array of messages]",
       isStreaming: false,
     },
     mountTime: now - 55000,
@@ -93,10 +93,10 @@ const mockComponents: ComponentMetadata[] = [
     children: [],
   },
   {
-    id: 'grade-view-1',
-    name: 'WorkbookGradeView',
+    id: "grade-view-1",
+    name: "WorkbookGradeView",
     props: {
-      gradeId: 'grade-456',
+      gradeId: "grade-456",
       readOnly: true,
     },
     state: {
@@ -115,7 +115,11 @@ export const Default: Story = {
     tree: mockComponents,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const editors = await canvas.findAllByText("Editor3");
+    expect(editors.length).toBeGreaterThan(0);
+    const chats = await canvas.findAllByText("ChatSidebar");
+    expect(chats.length).toBeGreaterThan(0);
   },
 };
 
@@ -124,7 +128,9 @@ export const EmptyTree: Story = {
     tree: [],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(
+      canvasElement.querySelectorAll(".MuiListItemButton-root").length,
+    ).toBe(0);
   },
 };
 
@@ -133,18 +139,23 @@ export const SingleComponent: Story = {
     tree: [mockComponents[0]],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const items = await canvas.findAllByText("Editor3");
+    expect(items.length).toBeGreaterThan(0);
   },
 };
 
 export const WithSelection: Story = {
   args: {
     tree: mockComponents,
-    selectedId: 'editor-1',
-    onSelectComponent: (component) => console.log('Selected:', component),
+    selectedId: "editor-1",
+    onSelectComponent: (component) => console.log("Selected:", component),
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const items = await canvas.findAllByText("Editor3");
+    expect(items.length).toBeGreaterThan(0);
+    expect(canvasElement.querySelector(".Mui-selected")).toBeTruthy();
   },
 };
 
@@ -153,8 +164,8 @@ export const ManyInstances: Story = {
     tree: [
       ...mockComponents,
       {
-        id: 'list-item-1',
-        name: 'ListItem',
+        id: "list-item-1",
+        name: "ListItem",
         props: { index: 0 },
         state: {},
         mountTime: now - 40000,
@@ -163,8 +174,8 @@ export const ManyInstances: Story = {
         children: [],
       },
       {
-        id: 'list-item-2',
-        name: 'ListItem',
+        id: "list-item-2",
+        name: "ListItem",
         props: { index: 1 },
         state: {},
         mountTime: now - 39000,
@@ -173,8 +184,8 @@ export const ManyInstances: Story = {
         children: [],
       },
       {
-        id: 'list-item-3',
-        name: 'ListItem',
+        id: "list-item-3",
+        name: "ListItem",
         props: { index: 2 },
         state: {},
         mountTime: now - 38000,
@@ -183,8 +194,8 @@ export const ManyInstances: Story = {
         children: [],
       },
       {
-        id: 'list-item-4',
-        name: 'ListItem',
+        id: "list-item-4",
+        name: "ListItem",
         props: { index: 3 },
         state: {},
         mountTime: now - 37000,
@@ -193,8 +204,8 @@ export const ManyInstances: Story = {
         children: [],
       },
       {
-        id: 'list-item-5',
-        name: 'ListItem',
+        id: "list-item-5",
+        name: "ListItem",
         props: { index: 4 },
         state: {},
         mountTime: now - 36000,
@@ -205,7 +216,9 @@ export const ManyInstances: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const items = await canvas.findAllByText("ListItem");
+    expect(items.length).toBeGreaterThan(0);
   },
 };
 
@@ -213,9 +226,9 @@ export const HighRenderCount: Story = {
   args: {
     tree: [
       {
-        id: 'inefficient-component',
-        name: 'InefficientComponent',
-        props: { data: '[Large Dataset]' },
+        id: "inefficient-component",
+        name: "InefficientComponent",
+        props: { data: "[Large Dataset]" },
         state: { lastUpdate: now },
         mountTime: now - 120000,
         renderCount: 247,
@@ -226,7 +239,9 @@ export const HighRenderCount: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const items = await canvas.findAllByText("InefficientComponent");
+    expect(items.length).toBeGreaterThan(0);
   },
 };
 
@@ -234,24 +249,24 @@ export const ComplexProps: Story = {
   args: {
     tree: [
       {
-        id: 'complex-1',
-        name: 'ComplexComponent',
+        id: "complex-1",
+        name: "ComplexComponent",
         props: {
           config: {
             nested: {
               deeply: {
-                structured: 'data',
+                structured: "data",
                 array: [1, 2, 3, 4, 5],
                 boolean: true,
               },
             },
           },
-          callbacks: '[Function handlers]',
-          refs: '[React Refs]',
+          callbacks: "[Function handlers]",
+          refs: "[React Refs]",
         },
         state: {
           cache: new Map(),
-          history: '[Array of 100 items]',
+          history: "[Array of 100 items]",
         },
         mountTime: now - 30000,
         renderCount: 8,
@@ -261,6 +276,8 @@ export const ComplexProps: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const items = await canvas.findAllByText("ComplexComponent");
+    expect(items.length).toBeGreaterThan(0);
   },
 };

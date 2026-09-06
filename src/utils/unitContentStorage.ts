@@ -3,7 +3,7 @@ import { extractTextFromLexical } from "./extractTextFromLexical";
 
 /** S3 key helpers — require identityId (from Unit.identityId) */
 function draftKey(identityId: string, unitId: string): string {
-  return `private/${identityId}/units/${unitId}/draft.json`;
+  return `protected/${identityId}/units/${unitId}/draft.json`;
 }
 /**
  * Phase 6: published content lives under the type-scoped CDN path.
@@ -14,14 +14,14 @@ function publishedKey(unitId: string): string {
   return `protected/units/${unitId}/published.json`;
 }
 function yjsSnapshotKey(identityId: string, unitId: string): string {
-  return `private/${identityId}/units/${unitId}/yjs-snapshot.bin`;
+  return `protected/${identityId}/units/${unitId}/yjs-snapshot.bin`;
 }
 function historyKey(
   identityId: string,
   unitId: string,
   version: number,
 ): string {
-  return `private/${identityId}/units/${unitId}/history/v${version}.json`;
+  return `protected/${identityId}/units/${unitId}/history/v${version}.json`;
 }
 
 function plainTextKey(identityId: string, unitId: string): string {
@@ -219,7 +219,7 @@ export async function listVersionHistory(
   unitId: string,
 ): Promise<number[]> {
   try {
-    const prefix = `private/${identityId}/units/${unitId}/history/`;
+    const prefix = `protected/${identityId}/units/${unitId}/history/`;
     const result = await list({ path: prefix });
     const versions = result.items
       .map((item) => {

@@ -290,6 +290,9 @@ class OnboardingEventEmitter {
   private clearLocalStorage(): void {
     try {
       localStorage.removeItem("storybook_onboarding_progress");
+      localStorage.removeItem("keyboard-trainer-completed");
+      localStorage.removeItem("keyboard-trainer-achievements");
+      localStorage.removeItem("keyboard-trainer-start");
     } catch {
       // localStorage might be unavailable
     }

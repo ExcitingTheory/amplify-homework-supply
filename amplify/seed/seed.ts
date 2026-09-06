@@ -794,8 +794,9 @@ const unitContentMap: Record<number, string> = {
 for (const [idx, content] of Object.entries(unitContentMap)) {
   const unit = units[Number(idx)];
   if (unit) {
+    // Must match paths in src/utils/unitContentStorage.ts
     const draftPath = `protected/${instructor1IdentityId}/units/${unit.id}/draft.json`;
-    const publishedPath = `protected/${instructor1IdentityId}/units/${unit.id}/published.json`;
+    const publishedPath = `protected/units/${unit.id}/published.json`;
     await Promise.all([
       uploadData({
         path: draftPath,

@@ -54,7 +54,7 @@ export default function UnitCompletedPlugin() {
   const { totalXP, xpLogs } = useXP();
   const { assignments } = useContext(SectionContext) || { assignments: [] };
 
-  const retryEnabled = unit?.retryEnabled === true;
+  const retryEnabled = unit?.retryEnabled !== false;
   // Most recent completed grade for peer review
   const latestCompletedGrade = recentGrades[0];
 

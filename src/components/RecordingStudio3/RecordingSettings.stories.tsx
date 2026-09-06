@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import React, { useState } from "react";
 import RecordingSettings from "./RecordingSettings";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof RecordingSettings> = {
   title: "🎙️ Recording Studio/Components/Recording Settings",
@@ -20,27 +20,35 @@ function RecordingSettingsWrapper({ initialValue = "standard" }) {
 export const Default: Story = {
   render: () => <RecordingSettingsWrapper />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvasElement.querySelector(".MuiSlider-root")).toBeTruthy();
+    await canvas.findByText("Standard");
   },
 };
 
 export const Off: Story = {
   render: () => <RecordingSettingsWrapper initialValue="off" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvasElement.querySelector(".MuiSlider-root")).toBeTruthy();
+    await canvas.findByText("Off");
   },
 };
 
 export const Light: Story = {
   render: () => <RecordingSettingsWrapper initialValue="light" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvasElement.querySelector(".MuiSlider-root")).toBeTruthy();
+    await canvas.findByText("Light");
   },
 };
 
 export const Aggressive: Story = {
   render: () => <RecordingSettingsWrapper initialValue="aggressive" />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    expect(canvasElement.querySelector(".MuiSlider-root")).toBeTruthy();
+    await canvas.findByText("Aggressive");
   },
 };

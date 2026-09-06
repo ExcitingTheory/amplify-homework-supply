@@ -31,6 +31,27 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
+vi.mock("aws-amplify/auth/server", () => ({
+  fetchAuthSession: vi.fn(async () => ({
+    tokens: {
+      idToken: {
+        payload: { sub: "student-1", "cognito:groups": ["Learners"] },
+      },
+    },
+  })),
+}));
+
+vi.mock("@/utils/amplifyServerUtils", () => ({
+  runWithAmplifyServerContext: vi.fn(({ operation }: any) => operation({})),
+}));
+
+vi.mock("@huggingface/transformers", () => ({
+  env: { allowLocalModels: false },
+  pipeline: vi.fn(async () => async () => ({
+    data: new Float32Array(384).fill(0.01),
+  })),
+}));
+
 // Mock the amplifyServerClient
 const mockCreate = vi.fn();
 const mockUpdate = vi.fn();
@@ -46,6 +67,7 @@ const mockModels: Record<string, any> = {
   Question: { get: mockGet, list: mockList },
   UnitWord: { list: mockList },
   UnitQuestion: { list: mockList },
+  QuestionUnit: { list: mockList },
   XPTransaction: { create: mockCreate, list: mockList },
   PersonalBest: { create: mockCreate, get: mockGet, update: mockUpdate },
   EasterEgg: { create: mockCreate, get: mockGet, list: mockList },
@@ -132,6 +154,8 @@ const mockGenerateObject = vi.fn();
 vi.mock("ai", () => ({
   generateText: (...args: any[]) => mockGenerateText(...args),
   generateObject: (...args: any[]) => mockGenerateObject(...args),
+  stepCountIs: (count: number) => ({ type: "step-count", count }),
+  tool: (definition: any) => definition,
   Output: {
     object: (opts: any) => ({ type: "object", ...opts }),
   },

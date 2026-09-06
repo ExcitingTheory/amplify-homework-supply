@@ -35,7 +35,7 @@ export default function AssignmentConfiguration() {
   const [selectedSections, setSelectedSections] = React.useState([]);
   const [dueDate, setDueDate] = React.useState("");
   const [retryEnabled, setRetryEnabled] = React.useState(
-    unit?.retryEnabled || false,
+    unit?.retryEnabled !== false,
   );
   const lastWrittenVersionRef = React.useRef(0);
 
@@ -43,7 +43,7 @@ export default function AssignmentConfiguration() {
     // Skip sync until context catches up to the version we wrote
     if (unit?._version < lastWrittenVersionRef.current) return;
     lastWrittenVersionRef.current = 0;
-    setRetryEnabled(unit?.retryEnabled || false);
+    setRetryEnabled(unit?.retryEnabled !== false);
   }, [unit?.retryEnabled, unit?._version]);
 
   const handleRetryToggle = async (event) => {

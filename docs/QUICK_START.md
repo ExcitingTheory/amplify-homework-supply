@@ -57,7 +57,7 @@ Storybook runs at `http://localhost:6006`. Mocks are pre-configured — no AWS n
 | `npm run test:unit` | Run unit tests (vitest) |
 | `npm run test:integration` | Run integration tests |
 | `npm run test:storybook` | Run Storybook render tests |
-| `npm run cypress:open` | Cypress E2E test runner |
+| `npm run e2e` | Playwright browser tests |
 | `npm run sandbox:with-logs` | Amplify sandbox with logging |
 | `npm run typecheck` | TypeScript type checking |
 | `npm run lint` | ESLint |
@@ -79,7 +79,7 @@ npm run test:integration
 npm run test:storybook
 
 # E2E (requires dev server + sandbox running)
-npm run cypress:open
+npm run e2e
 ```
 
 ## Collaborative Editing (Yjs)

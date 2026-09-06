@@ -228,7 +228,7 @@ After each context migration:
 2. Verify own saves don't cause visible flicker/rerender
 3. Check React DevTools profiler for reduced render count
 4. Ensure error handling (DuplicatedOperationError, AppSync limits) still works
-5. Run existing Vitest and Cypress tests for the affected context
+5. Run existing Vitest and Playwright tests for the affected context
 
 ## Notes
 

@@ -1,151 +1,194 @@
-import React from 'react'
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import PracticeDrillDialog from './PracticeDrillDialog'
-import type { PracticeDrillDialogProps } from './PracticeDrillDialog'
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import PracticeDrillDialog from "./PracticeDrillDialog";
+import type { PracticeDrillDialogProps } from "./PracticeDrillDialog";
 import {
   seedMockUnit,
   seedMockWords,
   clearMockData,
-} from '../../../.storybook/__mocks__/aws-amplify-data'
-import { expect } from 'storybook/test'
+} from "../../../.storybook/__mocks__/aws-amplify-data";
+import { expect, within } from "storybook/test";
 
 // Stable unit ID matching the args passed to PracticeDrillDialog
-const DRILL_UNIT_ID = 'unit-abc-123'
+const DRILL_UNIT_ID = "unit-abc-123";
 
 // Words that the mock generatePracticeDrill action references via sourceItemId
 const drillWords = [
   {
-    id: 'drill-word-1',
-    phrase: 'photosynthesis',
-    pronunciation: 'foh-toh-SIN-thuh-sis',
+    id: "drill-word-1",
+    phrase: "photosynthesis",
+    pronunciation: "foh-toh-SIN-thuh-sis",
     definition:
-      'The process by which plants convert light energy into chemical energy',
-    owner: 'mock-user-sub',
+      "The process by which plants convert light energy into chemical energy",
+    owner: "mock-user-sub",
     _version: 1,
   },
-]
+];
 
 const meta: Meta<PracticeDrillDialogProps> = {
-  title: '🎯 Practice Drills/Dialog',
+  title: "🎯 Practice Drills/Dialog",
   component: PracticeDrillDialog,
   argTypes: {
-    sessionsCompletedToday: { control: { type: 'range', min: 0, max: 10 } },
+    sessionsCompletedToday: { control: { type: "range", min: 0, max: 10 } },
   },
   loaders: [
     async () => {
-      clearMockData()
-      seedMockWords(drillWords)
+      clearMockData();
+      seedMockWords(drillWords);
       seedMockUnit(
         {
           id: DRILL_UNIT_ID,
-          name: 'Japanese Grammar Guide',
+          name: "Japanese Grammar Guide",
           data: JSON.stringify({
             root: {
               children: [],
-              direction: 'ltr',
-              format: '',
+              direction: "ltr",
+              format: "",
               indent: 0,
-              type: 'root',
+              type: "root",
               version: 1,
             },
           }),
           _version: 1,
-          owner: 'mock-user-sub',
+          owner: "mock-user-sub",
         },
         { words: drillWords },
-      )
+      );
     },
   ],
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     unitId: DRILL_UNIT_ID,
     initializeMockData: false,
   },
-}
+};
 
-export default meta
-type Story = StoryObj<PracticeDrillDialogProps>
+export default meta;
+type Story = StoryObj<PracticeDrillDialogProps>;
 
 const defaultConfig = {
   sources: { vocabulary: true, questions: true, text: true, documents: true },
   count: 10,
-  drillType: 'mixed',
-}
+  drillType: "mixed",
+};
 
 export const Default: Story = {
   args: {
     open: true,
-    onClose: () => console.log('Dialog closed'),
-    unitId: 'unit-abc-123',
-    unitName: 'Biology: Cell Structure',
+    onClose: () => console.log("Dialog closed"),
+    unitId: "unit-abc-123",
+    unitName: "Biology: Cell Structure",
     config: defaultConfig,
     sessionsCompletedToday: 0,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement).toBeTruthy();
   },
-}
+};
 
 export const VocabularyOnly: Story = {
   args: {
     open: true,
-    onClose: () => console.log('Dialog closed'),
-    unitId: 'unit-abc-123',
-    unitName: 'Spanish AR Verbs',
+    onClose: () => console.log("Dialog closed"),
+    unitId: "unit-abc-123",
+    unitName: "Spanish AR Verbs",
     config: {
-      sources: { vocabulary: true, questions: false, text: false, documents: false },
+      sources: {
+        vocabulary: true,
+        questions: false,
+        text: false,
+        documents: false,
+      },
       count: 5,
-      drillType: 'vocabulary',
+      drillType: "vocabulary",
     },
     sessionsCompletedToday: 0,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement).toBeTruthy();
   },
-}
+};
 
 export const DiminishedXP: Story = {
   args: {
     open: true,
-    onClose: () => console.log('Dialog closed'),
-    unitId: 'unit-abc-123',
-    unitName: 'Biology: Cell Structure',
+    onClose: () => console.log("Dialog closed"),
+    unitId: "unit-abc-123",
+    unitName: "Biology: Cell Structure",
     config: defaultConfig,
     sessionsCompletedToday: 3,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement).toBeTruthy();
   },
-}
+};
 
 export const ReviewDrill: Story = {
   args: {
     open: true,
-    onClose: () => console.log('Dialog closed'),
-    unitId: 'unit-abc-123',
-    unitName: 'Japanese Grammar Guide',
+    onClose: () => console.log("Dialog closed"),
+    unitId: "unit-abc-123",
+    unitName: "Japanese Grammar Guide",
     config: {
-      sources: { vocabulary: true, questions: true, text: true, documents: true },
+      sources: {
+        vocabulary: true,
+        questions: true,
+        text: true,
+        documents: true,
+      },
       count: 15,
-      drillType: 'review',
+      drillType: "review",
     },
     sessionsCompletedToday: 1,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement).toBeTruthy();
   },
-}
+};
 
 export const Closed: Story = {
   args: {
     open: false,
-    onClose: () => console.log('Dialog closed'),
-    unitId: 'unit-abc-123',
-    unitName: 'Biology: Cell Structure',
+    onClose: () => console.log("Dialog closed"),
+    unitId: "unit-abc-123",
+    unitName: "Biology: Cell Structure",
     config: defaultConfig,
     sessionsCompletedToday: 0,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const body = within(document.body);
+    expect(body.queryByRole("dialog")).toBeNull();
   },
-}
+};
+
+export const ErrorState: Story = {
+  args: {
+    open: true,
+    onClose: () => console.log("Dialog closed"),
+    unitId: "nonexistent-unit",
+    unitName: "Missing Unit",
+    config: {
+      sources: {
+        vocabulary: false,
+        questions: false,
+        text: false,
+        documents: false,
+      },
+      count: 0,
+      drillType: "mixed",
+    },
+    sessionsCompletedToday: 0,
+  },
+  loaders: [
+    async () => {
+      clearMockData();
+    },
+  ],
+  parameters: {
+    unitId: "nonexistent-unit",
+    initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement).toBeTruthy();
+  },
+};

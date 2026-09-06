@@ -35,7 +35,6 @@
     "node_modules",
     "amplify",
     "scripts",
-    "cypress",
     ".storybook",
     ".github",
     "**/*.stories.ts",

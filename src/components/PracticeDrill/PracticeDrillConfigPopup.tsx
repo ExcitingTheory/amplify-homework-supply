@@ -5,7 +5,7 @@
  * All switches default to ON. At least one source must be enabled.
  */
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -22,54 +22,54 @@ import {
   FormControl,
   InputLabel,
   Chip,
-} from '@mui/material'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import QuizIcon from '@mui/icons-material/Quiz'
-import TextSnippetIcon from '@mui/icons-material/TextSnippet'
-import DescriptionIcon from '@mui/icons-material/Description'
-import GroupsIcon from '@mui/icons-material/Groups'
-import { useTranslations } from 'next-intl'
+} from "@mui/material";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import QuizIcon from "@mui/icons-material/Quiz";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import DescriptionIcon from "@mui/icons-material/Description";
+import GroupsIcon from "@mui/icons-material/Groups";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface DrillSourceConfig {
-  vocabulary: boolean
-  questions: boolean
-  text: boolean
-  documents: boolean
+  vocabulary: boolean;
+  questions: boolean;
+  text: boolean;
+  documents: boolean;
 }
 
 export interface CoverageSnapshot {
-  vocabulary: { total: number; covered: number }
-  questions: { total: number; covered: number }
-  text: { total: number; covered: number }
-  documents: { total: number; covered: number }
+  vocabulary: { total: number; covered: number };
+  questions: { total: number; covered: number };
+  text: { total: number; covered: number };
+  documents: { total: number; covered: number };
 }
 
 export interface DrillConfig {
-  sources: DrillSourceConfig
-  count: number
-  drillType: string
-  collaborative?: boolean
-  roomCode?: string
-  maxParticipants?: number
+  sources: DrillSourceConfig;
+  count: number;
+  drillType: string;
+  collaborative?: boolean;
+  roomCode?: string;
+  maxParticipants?: number;
 }
 
 export interface PracticeDrillConfigPopupProps {
-  open: boolean
-  onClose: () => void
-  onStart: (config: DrillConfig) => void
-  unitName: string
-  vocabularyCount: number
-  questionCount: number
-  textBlockCount: number
-  documentCount: number
-  coverageSnapshot?: CoverageSnapshot
-  initialSources?: Partial<DrillSourceConfig>
-  initialDrillType?: string
-  loading?: boolean
+  open: boolean;
+  onClose: () => void;
+  onStart: (config: DrillConfig) => void;
+  unitName: string;
+  vocabularyCount: number;
+  questionCount: number;
+  textBlockCount: number;
+  documentCount: number;
+  coverageSnapshot?: CoverageSnapshot;
+  initialSources?: Partial<DrillSourceConfig>;
+  initialDrillType?: string;
+  loading?: boolean;
 }
 
 // ============================================================================
@@ -77,45 +77,45 @@ export interface PracticeDrillConfigPopupProps {
 // ============================================================================
 
 interface SourceRowConfig {
-  key: keyof DrillSourceConfig
-  icon: React.ReactNode
-  labelKey: string
-  descriptionKey: string
-  countSuffix: string
+  key: keyof DrillSourceConfig;
+  icon: React.ReactNode;
+  labelKey: string;
+  descriptionKey: string;
+  countSuffix: string;
 }
 
 const SOURCE_ROWS: SourceRowConfig[] = [
   {
-    key: 'vocabulary',
+    key: "vocabulary",
     icon: <MenuBookIcon />,
-    labelKey: 'practiceDrill.config.vocabulary',
-    descriptionKey: 'practiceDrill.config.vocabularyDesc',
-    countSuffix: 'w',
+    labelKey: "practiceDrill.config.vocabulary",
+    descriptionKey: "practiceDrill.config.vocabularyDesc",
+    countSuffix: "w",
   },
   {
-    key: 'questions',
+    key: "questions",
     icon: <QuizIcon />,
-    labelKey: 'practiceDrill.config.questions',
-    descriptionKey: 'practiceDrill.config.questionsDesc',
-    countSuffix: 'q',
+    labelKey: "practiceDrill.config.questions",
+    descriptionKey: "practiceDrill.config.questionsDesc",
+    countSuffix: "q",
   },
   {
-    key: 'text',
+    key: "text",
     icon: <TextSnippetIcon />,
-    labelKey: 'practiceDrill.config.text',
-    descriptionKey: 'practiceDrill.config.textDesc',
-    countSuffix: 'b',
+    labelKey: "practiceDrill.config.text",
+    descriptionKey: "practiceDrill.config.textDesc",
+    countSuffix: "b",
   },
   {
-    key: 'documents',
+    key: "documents",
     icon: <DescriptionIcon />,
-    labelKey: 'practiceDrill.config.documents',
-    descriptionKey: 'practiceDrill.config.documentsDesc',
-    countSuffix: 'd',
+    labelKey: "practiceDrill.config.documents",
+    descriptionKey: "practiceDrill.config.documentsDesc",
+    countSuffix: "d",
   },
-]
+];
 
-const COUNT_OPTIONS = [5, 10, 15, 20]
+const COUNT_OPTIONS = [5, 10, 15, 20];
 
 // ============================================================================
 // Component
@@ -135,7 +135,7 @@ export default function PracticeDrillConfigPopup({
   initialDrillType,
   loading = false,
 }: PracticeDrillConfigPopupProps) {
-  const t = useTranslations('components')
+  const t = useTranslations("components");
 
   // Source counts map
   const sourceCounts: Record<keyof DrillSourceConfig, number> = useMemo(
@@ -146,7 +146,7 @@ export default function PracticeDrillConfigPopup({
       documents: documentCount,
     }),
     [vocabularyCount, questionCount, textBlockCount, documentCount],
-  )
+  );
 
   // Source toggles — default all to ON, disable those with 0 items
   const [sources, setSources] = useState<DrillSourceConfig>(() => ({
@@ -154,12 +154,12 @@ export default function PracticeDrillConfigPopup({
     questions: initialSources?.questions ?? questionCount > 0,
     text: initialSources?.text ?? textBlockCount > 0,
     documents: initialSources?.documents ?? documentCount > 0,
-  }))
+  }));
 
-  const [count, setCount] = useState(10)
-  const [drillType, setDrillType] = useState(initialDrillType ?? 'mixed')
-  const [collaborative, setCollaborative] = useState(false)
-  const [maxParticipants, setMaxParticipants] = useState(5)
+  const [count, setCount] = useState(10);
+  const [drillType, setDrillType] = useState(initialDrillType ?? "mixed");
+  const [collaborative, setCollaborative] = useState(false);
+  const [maxParticipants, setMaxParticipants] = useState(5);
 
   // Reset state when dialog opens
   React.useEffect(() => {
@@ -169,38 +169,56 @@ export default function PracticeDrillConfigPopup({
         questions: initialSources?.questions ?? questionCount > 0,
         text: initialSources?.text ?? textBlockCount > 0,
         documents: initialSources?.documents ?? documentCount > 0,
-      })
-      setCount(10)
-      setDrillType(initialDrillType ?? 'mixed')
-      setCollaborative(false)
-      setMaxParticipants(5)
+      });
+      setCount(10);
+      setDrillType(initialDrillType ?? "mixed");
+      setCollaborative(false);
+      setMaxParticipants(5);
     }
-  }, [open, vocabularyCount, questionCount, textBlockCount, documentCount, initialSources, initialDrillType])
+  }, [
+    open,
+    vocabularyCount,
+    questionCount,
+    textBlockCount,
+    documentCount,
+    initialSources,
+    initialDrillType,
+  ]);
 
   const handleToggle = (key: keyof DrillSourceConfig) => {
-    if (sourceCounts[key] === 0) return
-    setSources((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+    if (sourceCounts[key] === 0) return;
+    setSources((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-  const atLeastOneEnabled = Object.values(sources).some(Boolean)
+  const atLeastOneEnabled = Object.values(sources).some(Boolean);
 
   // Coverage calculation
   const coverageTotals = useMemo(() => {
-    if (!coverageSnapshot) return null
-    let total = 0
-    let covered = 0
+    if (!coverageSnapshot) return null;
+    let total = 0;
+    let covered = 0;
     for (const key of Object.keys(sources) as (keyof DrillSourceConfig)[]) {
       if (sources[key] && coverageSnapshot[key]) {
-        total += coverageSnapshot[key].total
-        covered += coverageSnapshot[key].covered
+        total += coverageSnapshot[key].total;
+        covered += coverageSnapshot[key].covered;
       }
     }
-    return { total, covered, percent: total > 0 ? Math.round((covered / total) * 100) : 0 }
-  }, [sources, coverageSnapshot])
+    return {
+      total,
+      covered,
+      percent: total > 0 ? Math.round((covered / total) * 100) : 0,
+    };
+  }, [sources, coverageSnapshot]);
 
   const handleStart = () => {
-    onStart({ sources, count, drillType, collaborative, maxParticipants: collaborative ? maxParticipants : undefined })
-  }
+    onStart({
+      sources,
+      count,
+      drillType,
+      collaborative,
+      maxParticipants: collaborative ? maxParticipants : undefined,
+    });
+  };
 
   return (
     <Dialog
@@ -211,39 +229,48 @@ export default function PracticeDrillConfigPopup({
       aria-labelledby="practice-drill-config-title"
     >
       <DialogTitle id="practice-drill-config-title">
-        {t('practiceDrill.config.title', { unitName })}
+        {t("practiceDrill.config.title", { unitName })}
       </DialogTitle>
 
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('practiceDrill.config.subtitle')}
+          {t("practiceDrill.config.subtitle")}
         </Typography>
 
         {/* Source toggles */}
         {SOURCE_ROWS.map((row) => {
-          const itemCount = sourceCounts[row.key]
-          const isDisabled = itemCount === 0
-          const isEnabled = sources[row.key]
-          const coverage = coverageSnapshot?.[row.key]
+          const itemCount = sourceCounts[row.key];
+          const isDisabled = itemCount === 0;
+          const isEnabled = sources[row.key];
+          const coverage = coverageSnapshot?.[row.key];
 
           return (
             <Box
               key={row.key}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 p: 1.5,
                 mb: 1,
                 borderRadius: 1,
-                border: '1px solid',
-                borderColor: isEnabled ? 'primary.main' : 'divider',
+                border: "1px solid",
+                borderColor: isEnabled ? "primary.main" : "divider",
                 opacity: isDisabled ? 0.5 : 1,
-                bgcolor: isEnabled ? 'action.selected' : 'transparent',
+                bgcolor: isEnabled ? "action.selected" : "transparent",
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                <Box sx={{ color: isEnabled ? 'primary.main' : 'text.secondary' }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  flex: 1,
+                }}
+              >
+                <Box
+                  sx={{ color: isEnabled ? "primary.main" : "text.secondary" }}
+                >
                   {row.icon}
                 </Box>
                 <Box>
@@ -256,12 +283,16 @@ export default function PracticeDrillConfigPopup({
                 </Box>
               </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {coverage && (
                   <Chip
                     size="small"
                     label={`${coverage.covered}/${coverage.total}`}
-                    color={coverage.covered === coverage.total ? 'success' : 'default'}
+                    color={
+                      coverage.covered === coverage.total
+                        ? "success"
+                        : "default"
+                    }
                     variant="outlined"
                   />
                 )}
@@ -275,19 +306,19 @@ export default function PracticeDrillConfigPopup({
                   onChange={() => handleToggle(row.key)}
                   disabled={isDisabled}
                   inputProps={{
-                    'aria-label': t(row.labelKey),
+                    "aria-label": t(row.labelKey),
                   }}
                 />
               </Box>
             </Box>
-          )
+          );
         })}
 
         {/* Coverage progress */}
         {coverageTotals && coverageTotals.total > 0 && (
           <Box sx={{ mt: 2, mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              {t('practiceDrill.config.coverage', {
+              {t("practiceDrill.config.coverage", {
                 covered: coverageTotals.covered,
                 total: coverageTotals.total,
                 percent: coverageTotals.percent,
@@ -302,37 +333,47 @@ export default function PracticeDrillConfigPopup({
         )}
 
         {/* Question count selector */}
-        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+        <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel id="drill-count-label">
-              {t('practiceDrill.config.questionCount')}
+              {t("practiceDrill.config.questionCount")}
             </InputLabel>
             <Select
               labelId="drill-count-label"
               value={count}
-              label={t('practiceDrill.config.questionCount')}
+              label={t("practiceDrill.config.questionCount")}
               onChange={(e) => setCount(Number(e.target.value))}
             >
               {COUNT_OPTIONS.map((n) => (
-                <MenuItem key={n} value={n}>{n}</MenuItem>
+                <MenuItem key={n} value={n}>
+                  {n}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel id="drill-type-label">
-              {t('practiceDrill.config.drillType')}
+              {t("practiceDrill.config.drillType")}
             </InputLabel>
             <Select
               labelId="drill-type-label"
               value={drillType}
-              label={t('practiceDrill.config.drillType')}
+              label={t("practiceDrill.config.drillType")}
               onChange={(e) => setDrillType(e.target.value)}
             >
-              <MenuItem value="mixed">{t('practiceDrill.config.mixed')}</MenuItem>
-              <MenuItem value="vocabulary">{t('practiceDrill.config.vocabularyType')}</MenuItem>
-              <MenuItem value="comprehension">{t('practiceDrill.config.comprehension')}</MenuItem>
-              <MenuItem value="review">{t('practiceDrill.config.review')}</MenuItem>
+              <MenuItem value="mixed">
+                {t("practiceDrill.config.mixed")}
+              </MenuItem>
+              <MenuItem value="vocabulary">
+                {t("practiceDrill.config.vocabularyType")}
+              </MenuItem>
+              <MenuItem value="comprehension">
+                {t("practiceDrill.config.comprehension")}
+              </MenuItem>
+              <MenuItem value="review">
+                {t("practiceDrill.config.review")}
+              </MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -343,27 +384,36 @@ export default function PracticeDrillConfigPopup({
             mt: 2,
             p: 1.5,
             borderRadius: 1,
-            border: '1px solid',
-            borderColor: collaborative ? 'primary.main' : 'divider',
-            bgcolor: collaborative ? 'action.selected' : 'transparent',
+            border: "1px solid",
+            borderColor: collaborative ? "primary.main" : "divider",
+            bgcolor: collaborative ? "action.selected" : "transparent",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <GroupsIcon color={collaborative ? 'primary' : 'action'} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <GroupsIcon color={collaborative ? "primary" : "action"} />
               <Box>
                 <Typography variant="body1" fontWeight={500}>
-                  {t('practiceDrill.config.studyTogether')}
+                  {t("practiceDrill.config.studyTogether")}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {t('practiceDrill.config.studyTogetherDesc')}
+                  {t("practiceDrill.config.studyTogetherDesc")}
                 </Typography>
               </Box>
             </Box>
             <Switch
+              data-testid="collaborative-toggle"
               checked={collaborative}
               onChange={() => setCollaborative((prev) => !prev)}
-              inputProps={{ 'aria-label': t('practiceDrill.config.studyTogether') }}
+              inputProps={{
+                "aria-label": t("practiceDrill.config.studyTogether"),
+              }}
             />
           </Box>
 
@@ -371,16 +421,18 @@ export default function PracticeDrillConfigPopup({
             <Box sx={{ mt: 1.5, pl: 5 }}>
               <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel id="max-participants-label">
-                  {t('practiceDrill.config.maxParticipants')}
+                  {t("practiceDrill.config.maxParticipants")}
                 </InputLabel>
                 <Select
                   labelId="max-participants-label"
                   value={maxParticipants}
-                  label={t('practiceDrill.config.maxParticipants')}
+                  label={t("practiceDrill.config.maxParticipants")}
                   onChange={(e) => setMaxParticipants(Number(e.target.value))}
                 >
                   {[2, 3, 5, 8, 10].map((n) => (
-                    <MenuItem key={n} value={n}>{n}</MenuItem>
+                    <MenuItem key={n} value={n}>
+                      {n}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -391,14 +443,14 @@ export default function PracticeDrillConfigPopup({
         {/* Warning if no sources */}
         {!atLeastOneEnabled && (
           <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-            {t('practiceDrill.config.noSourcesWarning')}
+            {t("practiceDrill.config.noSourcesWarning")}
           </Typography>
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {t('practiceDrill.config.cancel')}
+          {t("practiceDrill.config.cancel")}
         </Button>
         <Button
           variant="contained"
@@ -406,10 +458,10 @@ export default function PracticeDrillConfigPopup({
           disabled={!atLeastOneEnabled || loading}
         >
           {loading
-            ? t('practiceDrill.config.generating')
-            : t('practiceDrill.config.start')}
+            ? t("practiceDrill.config.generating")
+            : t("practiceDrill.config.start")}
         </Button>
       </DialogActions>
     </Dialog>
-  )
+  );
 }

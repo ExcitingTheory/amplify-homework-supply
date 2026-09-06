@@ -1,50 +1,55 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { fn } from 'storybook/test'
-import { GroupChallengeEditor } from './GroupChallengeEditor'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, fn, within } from "storybook/test";
+import { GroupChallengeEditor } from "./GroupChallengeEditor";
 
 const meta: Meta<typeof GroupChallengeEditor> = {
-  title: '🏆 Gamification/Instructor/Group Challenge Editor',
+  title: "🏆 Gamification/Instructor/Group Challenge Editor",
   component: GroupChallengeEditor,
   args: {
     onSubmit: fn(),
   },
-}
-export default meta
+};
+export default meta;
 
-type Story = StoryObj<typeof GroupChallengeEditor>
+type Story = StoryObj<typeof GroupChallengeEditor>;
 
 /** Default empty form — create mode */
-export const Default: Story = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const buttons = await canvas.findAllByRole("button");
+    expect(buttons.length).toBeGreaterThan(0);
   },
-}
+};
 
 /** Editing an existing challenge with progress */
 export const EditWithProgress: Story = {
   args: {
     initialData: {
-      title: 'The Algorithm Dragon',
+      title: "The Algorithm Dragon",
       targetXP: 2000,
       currentXP: 1350,
       deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
       startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       bonusMultiplier: 2.0,
-      setting: 'A world where bugs rule the codebase and only teamwork can defeat them.',
-      stakes: 'If the dragon wins, everyone loses a streak freeze!',
-      systemPromptSeed: 'You are a narrator for an epic coding quest.',
+      setting:
+        "A world where bugs rule the codebase and only teamwork can defeat them.",
+      stakes: "If the dragon wins, everyone loses a streak freeze!",
+      systemPromptSeed: "You are a narrator for an epic coding quest.",
       active: true,
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByDisplayValue("The Algorithm Dragon");
   },
-}
+};
 
 /** Challenge with expired deadline */
 export const ExpiredDeadline: Story = {
   args: {
     initialData: {
-      title: 'The Legacy Refactor',
+      title: "The Legacy Refactor",
       targetXP: 5000,
       currentXP: 4200,
       deadline: new Date(Date.now() - 1000).toISOString(),
@@ -53,15 +58,16 @@ export const ExpiredDeadline: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByDisplayValue("The Legacy Refactor");
   },
-}
+};
 
 /** Completed challenge */
 export const CompletedChallenge: Story = {
   args: {
     initialData: {
-      title: 'Sprint to Victory',
+      title: "Sprint to Victory",
       targetXP: 1000,
       currentXP: 1200,
       bonusMultiplier: 1.5,
@@ -69,9 +75,10 @@ export const CompletedChallenge: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByDisplayValue("Sprint to Victory");
   },
-}
+};
 
 /** Submitting state */
 export const Submitting: Story = {
@@ -79,6 +86,8 @@ export const Submitting: Story = {
     submitting: true,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    const buttons = await canvas.findAllByRole("button");
+    expect(buttons.length).toBeGreaterThan(0);
   },
-}
+};

@@ -74,6 +74,17 @@ export const PlatformBudgetEnforcementOff: Story = {
       enforceTokenBudget: false,
     },
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Form renders — at least one field is visible
+    const saveBtn = await canvas.findByRole("button", { name: /Save Changes/i });
+    expect(saveBtn).toBeInTheDocument();
+    // Budget enforcement is off — verify the toggle/checkbox reflects that
+    const doc = canvasElement.ownerDocument;
+    const checkboxes = Array.from(doc.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
+    // At least one checkbox exists in the form
+    expect(checkboxes.length).toBeGreaterThan(0);
+  },
 };
 
 export const PlatformCustomModels: Story = {
@@ -89,6 +100,14 @@ export const PlatformCustomModels: Story = {
       sageTemperature: 0.9,
     },
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Form renders with custom model names present
+    const saveBtn = await canvas.findByRole("button", { name: /Save Changes/i });
+    expect(saveBtn).toBeInTheDocument();
+    // At least one model selector or text containing the custom model name
+    expect(canvasElement.innerHTML).toContain("gpt-4.1");
+  },
 };
 
 export const PlatformSaving: Story = {
@@ -97,6 +116,21 @@ export const PlatformSaving: Story = {
     mode: "platform",
     values: defaultPlatformValues,
     saving: true,
+  },
+  play: async ({ canvasElement }) => {
+    // When saving=true, the component renders a loading state
+    // (Save button may be disabled, hidden, or replaced by a spinner)
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(100);
+    // Verify no crash — form renders in some state
+    const allBtns = Array.from(canvasElement.querySelectorAll('button'));
+    // Either the save button is disabled, or there are no save buttons at all (spinner)
+    const saveBtn = allBtns.find(b => b.textContent?.includes('Save'));
+    if (saveBtn) {
+      expect(saveBtn.hasAttribute('disabled') || saveBtn.getAttribute('aria-disabled') === 'true').toBe(true);
+    }
+    // No crash — confirm page is rendered with content
+    const inputs = canvasElement.querySelectorAll('input, select, textarea');
+    expect(inputs.length).toBeGreaterThan(0);
   },
 };
 
@@ -121,6 +155,12 @@ export const SectionMode: Story = {
       totalTurnBudget: null,
       enforceTokenBudget: true,
     } as SectionAIConfigValues as AIAgentConfigValues,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Section mode renders a save button
+    const saveBtn = await canvas.findByRole("button", { name: /Save/i });
+    expect(saveBtn).toBeInTheDocument();
   },
 };
 
@@ -148,6 +188,13 @@ export const SectionWithOverrides: Story = {
       enforceTokenBudget: true,
     } as SectionAIConfigValues as AIAgentConfigValues,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Pre-filled override values render in the form
+    await canvas.findByRole("button", { name: /Save/i });
+    // Custom model text is present in the rendered form
+    expect(canvasElement.innerHTML).toContain("gpt-4.1-mini");
+  },
 };
 
 export const EmptyValues: Story = {
@@ -155,5 +202,11 @@ export const EmptyValues: Story = {
   args: {
     mode: "platform",
     values: {},
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Form renders without crashing on empty values
+    const saveBtn = await canvas.findByRole("button", { name: /Save/i });
+    expect(saveBtn).toBeInTheDocument();
   },
 };

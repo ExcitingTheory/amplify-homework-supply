@@ -743,7 +743,7 @@ export const handler: Handler = async (event) => {
     throw new Error("Unit.identityId is required for publishing");
 
   // 2. Read draft from S3
-  const draftKey = `private/${identityId}/units/${unitId}/draft.json`;
+  const draftKey = `protected/${identityId}/units/${unitId}/draft.json`;
   let draftJson: string;
   try {
     draftJson = await readS3Object(draftKey);

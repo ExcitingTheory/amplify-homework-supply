@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 import UnitsClient from "./UnitsClient";
 
 export default async function UnitsPage() {
-  // Auth check
   let username = null;
   try {
     const session = await runWithAmplifyServerContext({
@@ -17,20 +16,20 @@ export default async function UnitsPage() {
       session?.tokens?.idToken?.payload?.["cognito:username"] ||
       session?.tokens?.idToken?.payload?.sub;
   } catch {
-    // Fall through — client handles auth redirect
+    // Fall through
   }
 
   if (!username) {
     redirect("/?returnUrl=" + encodeURIComponent("/units"));
   }
 
-  // Pre-fetch initial units for faster first paint
-  let initialUnits = [];
+  let initialUnits: any = [];
   try {
     const client = getServerClient();
     const { data } = await client.models.Unit.list({ limit: 200 });
-    // Strip lazy-load relationship functions (not serializable across RSC boundary)
-    initialUnits = JSON.parse(JSON.stringify((data || []).filter((u) => u != null)));
+    initialUnits = JSON.parse(
+      JSON.stringify((data || []).filter((u: unknown) => u != null)),
+    );
   } catch (err) {
     console.error("[Units RSC] Pre-fetch error:", err);
   }

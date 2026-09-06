@@ -1,7 +1,7 @@
-import React from 'react';
-import { TutorCursorOverlay } from './TutorCursorOverlay';
-import UnitContext from '../../context/unitContext';
-import { expect } from 'storybook/test'
+import React from "react";
+import { TutorCursorOverlay } from "./TutorCursorOverlay";
+import UnitContext from "../../context/unitContext";
+import { expect } from "storybook/test";
 
 function withUnitContext(overrides: Record<string, any> = {}) {
   const awareness = {
@@ -11,7 +11,7 @@ function withUnitContext(overrides: Record<string, any> = {}) {
     clientID: 0,
   };
   const base = {
-    unit: { id: 'unit-1' },
+    unit: { id: "unit-1" },
     workbookEnabled: true,
     workbook: {
       provider: {
@@ -31,10 +31,10 @@ function withUnitContext(overrides: Record<string, any> = {}) {
 }
 
 export default {
-  title: '📓 Workbook/Tutor Cursor Overlay',
+  title: "📓 Workbook/Tutor Cursor Overlay",
   component: TutorCursorOverlay,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
     disableUnitContext: true,
     disableSectionContext: true,
     disableDictionaryContext: true,
@@ -43,14 +43,14 @@ export default {
 
 export const NoTutors = {
   decorators: [withUnitContext()],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(canvasElement.textContent?.trim()).toBe("");
   },
 };
 
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(canvasElement.textContent?.trim()).toBe("");
   },
 };

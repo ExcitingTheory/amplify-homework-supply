@@ -51,13 +51,7 @@
           ]
         },
         "jsx-components": {
-          "exclude": [
-            "Icon",
-            "IconButton",
-            "SvgIcon",
-            "MenuItem",
-            "Option"
-          ]
+          "exclude": ["Icon", "IconButton", "SvgIcon", "MenuItem", "Option"]
         },
         "ignore": [
           "^\\s*$",
@@ -141,13 +135,24 @@
   },
   "overrides": [
     {
-      "files": ["*.stories.jsx", "*.stories.tsx", "*.test.js", "*.test.jsx", "*.test.ts", "*.test.tsx", "*.spec.js", "*.spec.jsx", "*.spec.ts", "*.spec.tsx"],
+      "files": [
+        "*.stories.jsx",
+        "*.stories.tsx",
+        "*.test.js",
+        "*.test.jsx",
+        "*.test.ts",
+        "*.test.tsx",
+        "*.spec.js",
+        "*.spec.jsx",
+        "*.spec.ts",
+        "*.spec.tsx"
+      ],
       "rules": {
         "i18next/no-literal-string": "off"
       }
     },
     {
-      "files": ["amplify/**/*", "cypress/**/*", ".storybook/**/*"],
+      "files": ["amplify/**/*", ".storybook/**/*"],
       "rules": {
         "i18next/no-literal-string": "off"
       }

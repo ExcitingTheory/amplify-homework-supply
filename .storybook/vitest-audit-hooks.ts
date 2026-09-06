@@ -74,6 +74,8 @@ const KNOWN_SAFE_PATTERNS = [
   "Cannot read properties of null (reading 'ensure')",
   // Image component with empty src in test environment
   'An empty string ("") was passed to the',
+  // Web worker cannot load Vite env in test environment
+  "importScripts",
 ];
 
 const SAFE_URL_PATTERNS = [

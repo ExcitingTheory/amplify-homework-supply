@@ -1,6 +1,6 @@
 import React from "react";
 import { GlobalChatButton } from "./GlobalChatButton";
-import { expect } from 'storybook/test'
+import { expect, within, fn, userEvent } from "storybook/test";
 
 export default {
   title: "🧩 UI Components/Global Chat Button",
@@ -10,8 +10,11 @@ export default {
   },
 };
 
-export const Default = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default = {
+  play: async ({ canvasElement }) => {
+    // Button renders
+    const button = canvasElement.querySelector('button, [role="button"]');
+    expect(button).not.toBeNull();
   },
 };
 
@@ -20,7 +23,9 @@ export const WithUnreadBadge = {
     unreadCount: 3,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    // Badge shows count
+    await canvas.findByText("3");
   },
 };
 
@@ -29,7 +34,8 @@ export const ManyUnread = {
     unreadCount: 150,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Overflow badge shows 99+
+    expect(canvasElement.textContent).toMatch(/99\+|150/);
   },
 };
 
@@ -38,6 +44,8 @@ export const Hidden = {
     show: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    // Button not visible when show=false
+    const button = canvasElement.querySelector('button, [role="button"]');
+    expect(button).toBeNull();
   },
 };

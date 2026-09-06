@@ -39,7 +39,10 @@ test.describe("Journey 10: Settings & Personalization", () => {
       });
 
       // Toggle a switch if available
-      const hasSwitches = await switches.first().isVisible().catch(() => false);
+      const hasSwitches = await switches
+        .first()
+        .isVisible()
+        .catch(() => false);
       if (hasSwitches) {
         const firstSwitch = switches.first();
         const initialState = await firstSwitch.getAttribute("aria-checked");
@@ -153,6 +156,9 @@ test.describe("Journey 10: Settings & Personalization", () => {
       await page
         .locator('[data-tour="section-form"] input[name="name"]')
         .fill(sectionName);
+      await page
+        .locator('[data-tour="section-form"] textarea[name="description"]')
+        .fill("Test section for settings personalization");
 
       const submitBtn = page
         .locator('[data-tour="section-form"]')

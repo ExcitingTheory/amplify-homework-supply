@@ -5,7 +5,7 @@ import {
 } from "@storybook-mocks/aws-amplify-data";
 import { TabProvider } from "../context/tabContext";
 import { QuestionEditor2 } from "./QuestionEditor2";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const mockQuestions = [
   {
@@ -90,8 +90,10 @@ export default {
   ],
 };
 
-export const Default = {  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+export const Default = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/hablar/);
   },
 };
 
@@ -107,6 +109,6 @@ export const Empty = {
     initializeMockData: false,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    expect(canvasElement.children.length).toBeGreaterThan(0);
   },
 };

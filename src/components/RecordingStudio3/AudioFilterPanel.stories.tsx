@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import AudioFilterPanel from "./AudioFilterPanel";
-import { expect } from 'storybook/test'
+import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof AudioFilterPanel> = {
   title: "🎙️ Recording Studio/Components/Audio Filter Panel",
@@ -27,7 +27,10 @@ function AudioFilterPanelWrapper({ initialFilters = new Set<string>() }) {
 export const AllOff: Story = {
   render: () => <AudioFilterPanelWrapper />,
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("De-rumble");
+    await canvas.findByText("Pop filter");
+    await canvas.findByText("Noise cancel");
   },
 };
 
@@ -38,17 +41,24 @@ export const SomeActive: Story = {
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("De-rumble");
+    await canvas.findByText("Noise cancel");
   },
 };
 
 export const AllActive: Story = {
   render: () => (
     <AudioFilterPanelWrapper
-      initialFilters={new Set(["derumble", "pop", "noisecancel", "compress", "presence"])}
+      initialFilters={
+        new Set(["derumble", "pop", "noisecancel", "compress", "presence"])
+      }
     />
   ),
   play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0)
+    const canvas = within(canvasElement);
+    await canvas.findByText("Compress");
+    await canvas.findByText("Presence");
+    expect(canvasElement.querySelectorAll(".MuiChip-root").length).toBe(5);
   },
 };
