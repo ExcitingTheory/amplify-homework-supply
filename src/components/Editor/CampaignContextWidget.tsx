@@ -38,7 +38,7 @@ const client = generateClient();
 interface ChapterReference {
   challengeId: string;
   challengeTitle: string;
-  cohortId: string;
+  sectionID: string;
   setting?: string | null;
   active: boolean;
   chapterOrder?: number | null;
@@ -85,7 +85,7 @@ export function CampaignContextWidget({
           .map((c: any) => ({
             challengeId: c.id,
             challengeTitle: c.title,
-            cohortId: c.cohortId,
+            sectionID: c.sectionID,
             setting: c.setting,
             active: c.active !== false,
             chapterOrder: c.chapterOrder,
@@ -273,7 +273,7 @@ export function CampaignContextWidget({
                       startIcon={<OpenInNewIcon fontSize="small" />}
                       onClick={() =>
                         router.push(
-                          `/${locale}/section/${ch.cohortId}/settings/gamification`,
+                          `/${locale}/section/${ch.sectionID}/settings/gamification`,
                         )
                       }
                       sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}

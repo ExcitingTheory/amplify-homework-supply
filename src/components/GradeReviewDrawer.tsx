@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { getAmplifyClient } from '@/utils/amplifyClient';
+import React, { useState, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { getCurrentUser } from "aws-amplify/auth";
+import { getAmplifyClient } from "@/utils/amplifyClient";
 import {
   Drawer,
   Box,
@@ -16,14 +17,15 @@ import {
   DialogContentText,
   DialogActions,
   Alert,
+  Chip,
   Snackbar,
   Skeleton,
   Tooltip,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { GradedWorkbookViewer } from '@/components/GradedWorkbookViewer';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { GradedWorkbookViewer } from "@/components/GradedWorkbookViewer";
 
 interface GradeRecord {
   id: string;
@@ -48,7 +50,7 @@ interface GradeReviewDrawerProps {
 
 function parseJson(value: any) {
   if (!value) return null;
-  if (typeof value === 'object') return value;
+  if (typeof value === "object") return value;
   try {
     return JSON.parse(value);
   } catch {
@@ -66,17 +68,26 @@ export function GradeReviewDrawer({
   currentIndex,
   onNavigate,
 }: GradeReviewDrawerProps) {
-  const t = useTranslations('pages');
+  const t = useTranslations("pages");
   const client = getAmplifyClient();
 
   const [loading, setLoading] = useState(false);
-  const [unit, setUnit] = useState<{ id: string; name: string; data: string } | null>(null);
+  const [unit, setUnit] = useState<{
+    id: string;
+    name: string;
+    data: string;
+  } | null>(null);
   const [grades, setGrades] = useState<any[]>([]);
+  const [lateAssignment, setLateAssignment] = useState<any>(null);
   const [moderation, setModeration] = useState<any>(null);
   const [overrideOpen, setOverrideOpen] = useState(false);
-  const [overrideScore, setOverrideScore] = useState('');
+  const [overrideScore, setOverrideScore] = useState("");
   const [overrideSaving, setOverrideSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
 
   const hasPrev = gradeIds.length > 0 && currentIndex > 0;
   const hasNext = gradeIds.length > 0 && currentIndex < gradeIds.length - 1;
@@ -105,7 +116,37 @@ export function GradeReviewDrawer({
           return;
         }
 
-        setUnit({ id: unitData.id, name: unitData.name || '', data: unitData.data || '' });
+        const { data: assignmentItems } = await client.models.Assignment.list({
+          filter: { unitID: { eq: unitId! } },
+        });
+        const matchingAssignment = (assignmentItems || []).find(
+          (assignment: any) =>
+            assignment?.sectionID === grade.sectionID &&
+            (!assignment.studentID || assignment.studentID === grade.owner),
+        );
+        setLateAssignment(matchingAssignment || null);
+
+        // Mark reviewed on first open — instructor action queue signal
+        if (!grade.reviewedAt) {
+          getCurrentUser()
+            .then(({ username }) =>
+              client.models.Grade.update({
+                id: grade.id,
+                reviewedAt: new Date().toISOString(),
+                reviewedBy: username,
+                _version: grade._version ?? 1,
+              }),
+            )
+            .catch((err) =>
+              console.warn("[GradeReviewDrawer] Failed to mark reviewed:", err),
+            );
+        }
+
+        setUnit({
+          id: unitData.id,
+          name: unitData.name || "",
+          data: unitData.data || "",
+        });
 
         // Fetch all grades for this student + unit
         const listFilter: any = { unitID: { eq: unitId! } };
@@ -120,7 +161,10 @@ export function GradeReviewDrawer({
 
         const sortedGrades = (allGrades || [])
           .filter((g: any) => g != null && g.id != null)
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )
           .map((g: any, index: number, arr: any[]) => ({
             id: g.id,
             attempt: arr.length - index,
@@ -139,42 +183,67 @@ export function GradeReviewDrawer({
         setGrades(sortedGrades);
 
         const latest = sortedGrades[0];
-        setModeration(latest ? { status: latest.moderationStatus, flags: latest.moderationFlags, checkedAt: latest.moderationCheckedAt } : null);
+        setModeration(
+          latest
+            ? {
+                status: latest.moderationStatus,
+                flags: latest.moderationFlags,
+                checkedAt: latest.moderationCheckedAt,
+              }
+            : null,
+        );
       } catch (err) {
-        console.error('[GradeReviewDrawer] Load error:', err);
+        console.error("[GradeReviewDrawer] Load error:", err);
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     loadGradeData();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [gradeId, unitId, open]);
 
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
       if (overrideOpen) return;
-      if (e.key === 'ArrowLeft' && hasPrev) { e.preventDefault(); onNavigate(currentIndex - 1); }
-      else if (e.key === 'ArrowRight' && hasNext) { e.preventDefault(); onNavigate(currentIndex + 1); }
-      else if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      if (e.key === "ArrowLeft" && hasPrev) {
+        e.preventDefault();
+        onNavigate(currentIndex - 1);
+      } else if (e.key === "ArrowRight" && hasNext) {
+        e.preventDefault();
+        onNavigate(currentIndex + 1);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, hasPrev, hasNext, currentIndex, onNavigate, onClose, overrideOpen]);
 
   const handleOverrideSave = async () => {
     const score = parseFloat(overrideScore);
     if (isNaN(score) || score < 0 || score > 100) {
-      setSnackbar({ open: true, message: 'Score must be between 0 and 100', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: "Score must be between 0 and 100",
+        severity: "error",
+      });
       return;
     }
     setOverrideSaving(true);
     try {
       const targetGrade = grades[0];
-      if (!targetGrade) throw new Error('No grade to override');
+      if (!targetGrade) throw new Error("No grade to override");
       const { errors } = await client.models.Grade.update({
         id: targetGrade.id,
         accuracy: score,
@@ -182,13 +251,51 @@ export function GradeReviewDrawer({
         complete: true,
       });
       if (errors?.length) throw new Error(errors[0].message);
-      setGrades(prev => prev.map((g, i) => i === 0 ? { ...g, accuracy: score, complete: true, percentComplete: 100 } : g));
-      setSnackbar({ open: true, message: `Grade updated to ${score}%`, severity: 'success' });
+      setGrades((prev) =>
+        prev.map((g, i) =>
+          i === 0
+            ? { ...g, accuracy: score, complete: true, percentComplete: 100 }
+            : g,
+        ),
+      );
+      setSnackbar({
+        open: true,
+        message: `Grade updated to ${score}%`,
+        severity: "success",
+      });
       setOverrideOpen(false);
     } catch (err: any) {
-      setSnackbar({ open: true, message: 'Failed to save grade override', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: "Failed to save grade override",
+        severity: "error",
+      });
     } finally {
       setOverrideSaving(false);
+    }
+  };
+
+  const updateLateStatus = async (lateStatus: "KEPT" | "DROPPED") => {
+    if (!lateAssignment) return;
+    try {
+      const { data, errors } = await client.models.Assignment.update({
+        id: lateAssignment.id,
+        _version: lateAssignment._version,
+        lateStatus,
+      });
+      if (errors?.length) throw new Error(errors[0].message);
+      setLateAssignment(data || { ...lateAssignment, lateStatus });
+      setSnackbar({
+        open: true,
+        message: lateStatus === "KEPT" ? "Late submission kept" : "Late submission dropped",
+        severity: "success",
+      });
+    } catch {
+      setSnackbar({
+        open: true,
+        message: "Failed to update late submission",
+        severity: "error",
+      });
     }
   };
 
@@ -198,17 +305,34 @@ export function GradeReviewDrawer({
         anchor="right"
         open={open}
         onClose={onClose}
-        sx={{ '& .MuiDrawer-paper': { width: { xs: '100%', md: '650px' }, maxWidth: '100vw' } }}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: { xs: "100%", md: "650px" },
+            maxWidth: "100vw",
+          },
+        }}
       >
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            p: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
           <IconButton onClick={onClose} size="small" sx={{ mr: 1 }}>
             <CloseIcon />
           </IconButton>
           {gradeIds.length > 1 && (
             <Tooltip title="Previous (←)">
               <span>
-                <IconButton onClick={() => onNavigate(currentIndex - 1)} disabled={!hasPrev} size="small">
+                <IconButton
+                  onClick={() => onNavigate(currentIndex - 1)}
+                  disabled={!hasPrev}
+                  size="small"
+                >
                   <NavigateBeforeIcon />
                 </IconButton>
               </span>
@@ -217,7 +341,11 @@ export function GradeReviewDrawer({
           <Typography variant="h6" sx={{ flexGrow: 1, mx: 1 }} noWrap>
             {studentName}
             {gradeIds.length > 1 && (
-              <Typography component="span" variant="body2" sx={{ ml: 1, opacity: 0.7 }}>
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ ml: 1, opacity: 0.7 }}
+              >
                 ({currentIndex + 1}/{gradeIds.length})
               </Typography>
             )}
@@ -225,28 +353,73 @@ export function GradeReviewDrawer({
           {gradeIds.length > 1 && (
             <Tooltip title="Next (→)">
               <span>
-                <IconButton onClick={() => onNavigate(currentIndex + 1)} disabled={!hasNext} size="small">
+                <IconButton
+                  onClick={() => onNavigate(currentIndex + 1)}
+                  disabled={!hasNext}
+                  size="small"
+                >
                   <NavigateNextIcon />
                 </IconButton>
               </span>
             </Tooltip>
           )}
-          <Button variant="outlined" size="small" onClick={() => { setOverrideScore(grades[0]?.accuracy?.toString() || ''); setOverrideOpen(true); }} disabled={grades.length === 0}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setOverrideScore(grades[0]?.accuracy?.toString() || "");
+              setOverrideOpen(true);
+            }}
+            disabled={grades.length === 0}
+          >
             Override
           </Button>
+          {lateAssignment?.lateStatus && (
+            <Chip
+              label={`Late: ${lateAssignment.lateStatus}`}
+              color={lateAssignment.lateStatus === "DROPPED" ? "default" : "warning"}
+              size="small"
+            />
+          )}
         </Box>
 
         {/* Content */}
-        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+          {lateAssignment?.lateStatus === "PENDING" && (
+            <Alert
+              severity="warning"
+              sx={{ mb: 2 }}
+              action={
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button color="inherit" size="small" onClick={() => updateLateStatus("KEPT")}>
+                    Keep
+                  </Button>
+                  <Button color="inherit" size="small" onClick={() => updateLateStatus("DROPPED")}>
+                    Drop
+                  </Button>
+                </Box>
+              }
+            >
+              Late submission requires review.
+            </Alert>
+          )}
           {loading ? (
             <Box>
-              <Skeleton variant="rectangular" height={200} sx={{ mb: 2, borderRadius: 1 }} />
+              <Skeleton
+                variant="rectangular"
+                height={200}
+                sx={{ mb: 2, borderRadius: 1 }}
+              />
               <Skeleton variant="text" width="60%" />
               <Skeleton variant="text" width="40%" />
             </Box>
           ) : grades.length > 0 && unit ? (
             <GradedWorkbookViewer
-              contentJson={typeof unit.data === 'string' ? unit.data : JSON.stringify(unit.data)}
+              contentJson={
+                typeof unit.data === "string"
+                  ? unit.data
+                  : JSON.stringify(unit.data)
+              }
               studentName={studentName}
               grades={grades}
               moderation={moderation}
@@ -264,8 +437,14 @@ export function GradeReviewDrawer({
         <DialogTitle>Override Grade</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Student: <strong>{studentName}</strong><br />
-            Current: <strong>{grades[0]?.accuracy != null ? `${Math.round(grades[0].accuracy)}%` : '—'}</strong>
+            Student: <strong>{studentName}</strong>
+            <br />
+            Current:{" "}
+            <strong>
+              {grades[0]?.accuracy != null
+                ? `${Math.round(grades[0].accuracy)}%`
+                : "—"}
+            </strong>
           </DialogContentText>
           <TextField
             autoFocus
@@ -280,15 +459,33 @@ export function GradeReviewDrawer({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOverrideOpen(false)} disabled={overrideSaving}>Cancel</Button>
-          <Button onClick={handleOverrideSave} variant="contained" disabled={overrideSaving}>
-            {overrideSaving ? 'Saving...' : 'Save'}
+          <Button
+            onClick={() => setOverrideOpen(false)}
+            disabled={overrideSaving}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleOverrideSave}
+            variant="contained"
+            disabled={overrideSaving}
+          >
+            {overrideSaving ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>{snackbar.message}</Alert>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
     </>
   );

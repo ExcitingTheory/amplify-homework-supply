@@ -12,7 +12,8 @@ import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import { useTheme } from "@mui/material/styles";
 import MainToolbar from "./MainToolbar";
-import { AppShellContext, DRAWER_WIDTH } from "./AppShellContext";
+import { AppShellContext, DRAWER_WIDTH, RAIL_WIDTH } from "./AppShellContext";
+import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
 export {
   AppShellContext,
@@ -64,6 +65,46 @@ export default function AppShell({ children, toolbarChildren }) {
   const toolbarChildrenPortalRef = React.useRef(null);
   const [appBarHeight, setAppBarHeight] = React.useState(48);
 
+  // Collapsed (icon-only rail) state — persisted across reloads.
+  const [collapsed, setCollapsedState] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("appShell.navCollapsed") === "true";
+    }
+    return false;
+  });
+  const setCollapsed = React.useCallback((value) => {
+    setCollapsedState((prev) => {
+      const next = typeof value === "function" ? value(prev) : value;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("appShell.navCollapsed", String(next));
+      }
+      return next;
+    });
+  }, []);
+
+  // Hidden state — nav behaves like mobile (temporary overlay), content full width.
+  const [hidden, setHiddenState] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("appShell.navHidden") === "true";
+    }
+    return false;
+  });
+  const setHidden = React.useCallback((value) => {
+    setHiddenState((prev) => {
+      const next = typeof value === "function" ? value(prev) : value;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("appShell.navHidden", String(next));
+      }
+      return next;
+    });
+  }, []);
+
+  const effectiveDrawerWidth = hidden
+    ? 0
+    : collapsed
+      ? RAIL_WIDTH
+      : DRAWER_WIDTH;
+
   // Measure actual AppBar height (changes when secondary toolbar is present)
   React.useEffect(() => {
     if (!appBarRef.current) return;
@@ -81,25 +122,40 @@ export default function AppShell({ children, toolbarChildren }) {
   // Sync drawer state when breakpoint changes
   React.useEffect(() => {
     if (isDesktop) {
-      setDrawerOpen(true);
+      setDrawerOpen(!hidden);
     } else {
       setDrawerOpen(false);
     }
-  }, [isDesktop]);
+  }, [isDesktop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const contextValue = React.useMemo(
     () => ({
       drawerOpen,
       setDrawerOpen,
       isDesktop,
-      drawerWidth: DRAWER_WIDTH,
+      drawerWidth: effectiveDrawerWidth,
+      railWidth: RAIL_WIDTH,
+      collapsed,
+      setCollapsed,
+      hidden,
+      setHidden,
       toolbarContent,
       setToolbarContent,
       appBarHeight,
       toolbarPortalRef,
       toolbarChildrenPortalRef,
     }),
-    [drawerOpen, isDesktop, toolbarContent, appBarHeight],
+    [
+      drawerOpen,
+      isDesktop,
+      effectiveDrawerWidth,
+      collapsed,
+      setCollapsed,
+      hidden,
+      setHidden,
+      toolbarContent,
+      appBarHeight,
+    ],
   );
 
   return (
@@ -110,8 +166,9 @@ export default function AppShell({ children, toolbarChildren }) {
         color="default"
         sx={{
           backgroundColor: "custom.glassNavbar",
-          backdropFilter: "blur(8px)",
-          zIndex: (theme) => theme.zIndex.modal + 2,
+          backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+          zIndex: (theme) => theme.zIndex.modal + 6,
+          isolation: "isolate",
         }}
       >
         <MainToolbar>{toolbarChildren}</MainToolbar>
@@ -137,8 +194,8 @@ export default function AppShell({ children, toolbarChildren }) {
             }),
             ...(isDesktop &&
               drawerOpen && {
-                marginLeft: `${DRAWER_WIDTH}px`,
-                width: `calc(100% - ${DRAWER_WIDTH}px)`,
+                marginLeft: `${effectiveDrawerWidth}px`,
+                width: `calc(100% - ${effectiveDrawerWidth}px)`,
                 transition: theme.transitions.create(["margin", "width"], {
                   easing: theme.transitions.easing.easeOut,
                   duration: theme.transitions.duration.enteringScreen,

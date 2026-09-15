@@ -1,8 +1,8 @@
 # Offline Student Experience
 
-> **Status**: Partial — Service worker and PWA implemented; offline data/AI planned
+> **Status**: Completed — Service worker, PWA, IndexedDB offline data cache, sync queue, WebLLM/Chrome AI, and UI conflict resolution dialogues implemented
 
-PWA with Serwist service worker for caching. Offline data cache, sync queue, and on-device LLM are planned features.
+PWA with Serwist service worker for caching, IndexedDB offline data store (`OfflineDataStore.ts`), persistent sync queue (`SyncQueue.ts`), on-device LLM/AI router (`OfflineChatEngine.ts`, `AIRouter.ts`), and conflict resolution UI (`ConflictResolutionDialog.tsx`).
 
 ---
 
@@ -19,10 +19,11 @@ PWA with Serwist service worker for caching. Offline data cache, sync queue, and
 | API cache | ✅ NetworkFirst with fallback |
 | Yjs local persistence | ✅ `y-indexeddb` persists CRDT state across reloads |
 | Embedding cache | ✅ `VectorStoreDB` in IndexedDB |
-| Offline data cache (DynamoDB) | ❌ Planned |
-| Grade submission queue | ❌ Planned |
-| AI chat offline (on-device LLM) | ❌ Planned |
-| AI grading offline | ❌ Planned |
+| Offline data cache (DynamoDB) | ✅ `src/offline/OfflineDataStore.ts` |
+| Grade submission queue | ✅ `src/offline/SyncQueue.ts` & `src/offline/saveGradeOffline.ts` |
+| AI chat offline (on-device LLM) | ✅ `src/offline/OfflineChatEngine.ts` & `AIRouter.ts` |
+| AI grading offline | ✅ `src/offline/reconcileGrades.ts` |
+| UI Conflict Resolution Dialogue | ✅ `src/components/ConflictResolutionDialog.tsx` & `SyncStatusIndicator.tsx` |
 
 ---
 
@@ -325,12 +326,13 @@ Since grades use `_version` for optimistic locking:
 4. Log conflict for instructor review
 
 ### Deliverables
-- [ ] `SyncQueue` class with IndexedDB persistence
-- [ ] Offline-aware `saveGrade` wrapper
-- [ ] Background Sync registration
-- [ ] Conflict resolution strategy for `_version` mismatches
-- [ ] UI: "X changes pending sync" indicator + manual retry button
-- [ ] Sync status per grade (synced / pending / error)
+- [x] `SyncQueue` class with IndexedDB persistence
+- [x] Offline-aware `saveGrade` wrapper
+- [x] Background Sync registration
+- [x] Conflict resolution strategy for `_version` mismatches
+- [x] UI: "X changes pending sync" indicator + manual retry button
+- [x] Sync status per grade (synced / pending / error)
+- [x] UI Conflict Resolution dialogue (`ConflictResolutionDialog.tsx`)
 
 ---
 

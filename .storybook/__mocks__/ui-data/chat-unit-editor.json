@@ -1,0 +1,591 @@
+[
+  {
+    "id": "unit-ed-msg-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Search our content library for Japanese greetings and etiquette materials to build a new lesson."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I'll search your materials for content related to Japanese greetings and etiquette."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_search_greetings_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_search_greetings_001",
+        "state": "output-available",
+        "input": {
+          "query": "Japanese greetings etiquette",
+          "type": "all",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "Japanese greetings etiquette",
+          "results": [
+            {
+              "type": "word",
+              "id": "word-ohayou",
+              "similarity": 0.96,
+              "phrase": "おはようございます",
+              "phonetic": "ohayou gozaimasu",
+              "definition": "Good morning (polite)"
+            },
+            {
+              "type": "word",
+              "id": "word-konnichiwa",
+              "similarity": 0.94,
+              "phrase": "こんにちは",
+              "phonetic": "konnichiwa",
+              "definition": "Hello / Good afternoon"
+            },
+            {
+              "type": "word",
+              "id": "word-arigatou",
+              "similarity": 0.91,
+              "phrase": "ありがとうございます",
+              "phonetic": "arigatou gozaimasu",
+              "definition": "Thank you (polite)"
+            },
+            {
+              "type": "question",
+              "id": "q-greet-001",
+              "similarity": 0.87,
+              "prompt": "When is 'konbanwa' appropriately used?",
+              "answer": "In the evening or after sunset."
+            },
+            {
+              "type": "file",
+              "id": "file-etiquette-guide",
+              "similarity": 0.83,
+              "name": "Japanese_Etiquette_Overview.pdf",
+              "description": "Comprehensive guide to bowing angles, formal vs casual greetings, and daily manners"
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "I found 5 relevant resources in your library, including core greeting vocabulary, practice questions, and the Japanese Etiquette guide PDF. Let's create an introductory lesson block first."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Generate an introductory lesson block explaining greeting etiquette in Japan."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_content_block",
+        "toolCallId": "call_content_etiquette_001"
+      },
+      {
+        "type": "text",
+        "text": "I'll generate a structured lesson block explaining essential Japanese greeting customs and formality levels."
+      },
+      {
+        "type": "tool-insert_content_block",
+        "toolCallId": "call_content_etiquette_001",
+        "state": "output-available",
+        "input": {
+          "contentType": "lesson",
+          "topic": "Japanese Greeting Etiquette & Formality",
+          "instructions": "Explain the significance of greetings (aisatsu) in Japanese culture, time-of-day conventions, and formal vs casual usage."
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "content",
+          "blockData": {
+            "root": {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Daily Japanese Greetings (挨拶 - Aisatsu)",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "heading",
+                  "version": 1,
+                  "tag": "h2"
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "In Japanese society, greetings (aisatsu) are fundamental to showing respect, establishing harmony, and maintaining positive social relationships. Choosing the right greeting depends on both the time of day and the social relationship between speakers.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "Key Time-of-Day Greetings",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "heading",
+                  "version": 1,
+                  "tag": "h3"
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "おはようございます (Ohayou gozaimasu)",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Polite morning greeting used until approximately 10:30 AM. Among close peers, simply おはよう (ohayou) is common.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "こんにちは (Konnichiwa)",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Standard midday greeting used from late morning through late afternoon.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                },
+                {
+                  "children": [
+                    {
+                      "detail": 0,
+                      "format": 1,
+                      "mode": "normal",
+                      "style": "",
+                      "text": "こんばんは (Konbanwa)",
+                      "type": "text",
+                      "version": 1
+                    },
+                    {
+                      "detail": 0,
+                      "format": 0,
+                      "mode": "normal",
+                      "style": "",
+                      "text": " — Evening greeting used after dark.",
+                      "type": "text",
+                      "version": 1
+                    }
+                  ],
+                  "direction": "ltr",
+                  "format": "",
+                  "indent": 0,
+                  "type": "paragraph",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "type": "root",
+              "version": 1
+            }
+          },
+          "preview": {
+            "title": "Daily Japanese Greetings (挨拶 - Aisatsu)",
+            "contentType": "lesson",
+            "nodeCount": 6,
+            "excerpt": "Introduction to cultural aisatsu customs, formal vs casual distinctions, and time-based greetings."
+          },
+          "message": "Lesson content block ready to insert"
+        }
+      },
+      {
+        "type": "text",
+        "text": "I've created the introductory content block. Click \"Insert into Editor\" to place it in the unit."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-5",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Create a drag-and-drop matching exercise for these greeting terms."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-6",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_meaning_association",
+        "toolCallId": "call_meaning_greetings_002"
+      },
+      {
+        "type": "text",
+        "text": "I'll create a meaning association matching exercise connecting Japanese greetings with their English meanings."
+      },
+      {
+        "type": "tool-insert_meaning_association",
+        "toolCallId": "call_meaning_greetings_002",
+        "state": "output-available",
+        "input": {
+          "wordIDs": [
+            "word-ohayou",
+            "word-konnichiwa",
+            "word-konbanwa",
+            "word-sayounara",
+            "word-arigatou"
+          ],
+          "enabledModes": ["learn", "easy", "hard"]
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "meaning-association",
+          "blockData": [
+            "word-ohayou",
+            "word-konnichiwa",
+            "word-konbanwa",
+            "word-sayounara",
+            "word-arigatou"
+          ],
+          "preview": {
+            "wordCount": 5,
+            "instructions": "Match each Japanese greeting phrase with its English meaning",
+            "modes": ["learn", "easy", "hard"]
+          },
+          "message": "Meaning association block ready to insert"
+        }
+      },
+      {
+        "type": "text",
+        "text": "Done! Students can practice matching greetings across Learn (flashcards), Easy (drag & drop), and Hard (timed challenge) modes."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-7",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Add a 3-question quiz testing when to use each greeting."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-8",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_quiz",
+        "toolCallId": "call_quiz_greetings_002"
+      },
+      {
+        "type": "text",
+        "text": "I'll create an interactive quiz with multiple choice questions on greeting scenarios."
+      },
+      {
+        "type": "tool-insert_quiz",
+        "toolCallId": "call_quiz_greetings_002",
+        "state": "output-available",
+        "input": {
+          "topic": "Japanese greeting scenarios",
+          "count": 3,
+          "questionType": "multiple_choice",
+          "difficulty": "beginner"
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "quiz",
+          "blockData": [
+            {
+              "id": "gq1-a",
+              "answer": "こんにちは (konnichiwa)",
+              "question": "Which greeting is used when meeting someone at 2:00 PM?",
+              "correct": true
+            },
+            {
+              "id": "gq1-b",
+              "answer": "おはようございます (ohayou gozaimasu)",
+              "question": "Which greeting is used when meeting someone at 2:00 PM?",
+              "correct": false
+            },
+            {
+              "id": "gq1-c",
+              "answer": "こんばんは (konbanwa)",
+              "question": "Which greeting is used when meeting someone at 2:00 PM?",
+              "correct": false
+            },
+            {
+              "id": "gq1-d",
+              "answer": "おやすみなさい (oyasuminasai)",
+              "question": "Which greeting is used when meeting someone at 2:00 PM?",
+              "correct": false
+            },
+            {
+              "id": "gq2-a",
+              "answer": "おはよう (ohayou)",
+              "question": "Which is the CASUAL form of 'good morning' used with close friends?",
+              "correct": true
+            },
+            {
+              "id": "gq2-b",
+              "answer": "おはようございます (ohayou gozaimasu)",
+              "question": "Which is the CASUAL form of 'good morning' used with close friends?",
+              "correct": false
+            },
+            {
+              "id": "gq2-c",
+              "answer": "さようなら (sayounara)",
+              "question": "Which is the CASUAL form of 'good morning' used with close friends?",
+              "correct": false
+            },
+            {
+              "id": "gq2-d",
+              "answer": "こんにちは (konnichiwa)",
+              "question": "Which is the CASUAL form of 'good morning' used with close friends?",
+              "correct": false
+            },
+            {
+              "id": "gq3-a",
+              "answer": "ありがとうございます (arigatou gozaimasu)",
+              "question": "How do you politely say 'thank you' to a teacher or supervisor?",
+              "correct": true
+            },
+            {
+              "id": "gq3-b",
+              "answer": "ありがとう (arigatou)",
+              "question": "How do you politely say 'thank you' to a teacher or supervisor?",
+              "correct": false
+            },
+            {
+              "id": "gq3-c",
+              "answer": "どうも (doumo)",
+              "question": "How do you politely say 'thank you' to a teacher or supervisor?",
+              "correct": false
+            },
+            {
+              "id": "gq3-d",
+              "answer": "じゃあね (jaa ne)",
+              "question": "How do you politely say 'thank you' to a teacher or supervisor?",
+              "correct": false
+            }
+          ],
+          "preview": {
+            "title": "Greeting Context & Formality Quiz",
+            "questionCount": 3,
+            "totalPoints": 3,
+            "questions": [
+              {
+                "prompt": "Which greeting is used when meeting someone at 2:00 PM?",
+                "type": "multiple_choice"
+              },
+              {
+                "prompt": "Which is the CASUAL form of 'good morning' used with close friends?",
+                "type": "multiple_choice"
+              },
+              {
+                "prompt": "How do you politely say 'thank you' to a teacher or supervisor?",
+                "type": "multiple_choice"
+              }
+            ]
+          },
+          "message": "Quiz block ready to insert"
+        }
+      },
+      {
+        "type": "text",
+        "text": "The quiz block is ready! It includes 3 multiple-choice scenario questions with immediate automated grading."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-9",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Add a translation answer block where students type and record greetings."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-10",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_answer_block",
+        "toolCallId": "call_answer_greetings_002"
+      },
+      {
+        "type": "text",
+        "text": "I'll create an answer block supporting text, audio recording, and handwriting modes."
+      },
+      {
+        "type": "tool-insert_answer_block",
+        "toolCallId": "call_answer_greetings_002",
+        "state": "output-available",
+        "input": {
+          "wordIDs": ["word-ohayou", "word-konnichiwa", "word-sayounara"],
+          "mode": "translate",
+          "allowedInput": ["text", "audio", "writing"]
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "answer",
+          "blockData": ["word-ohayou", "word-konnichiwa", "word-sayounara"],
+          "preview": {
+            "wordCount": 3,
+            "mode": "translate",
+            "inputMethods": ["text", "audio", "writing"]
+          },
+          "message": "Answer block ready to insert"
+        }
+      },
+      {
+        "type": "text",
+        "text": "Created! Students can translate おはようございます, こんにちは, and さようなら using keyboard, microphone, or stylus drawing."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-11",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Finally, add a listening comprehension exercise using audio prompts."
+      }
+    ]
+  },
+  {
+    "id": "unit-ed-msg-12",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "insert_custom_answer",
+        "toolCallId": "call_custom_listen_002"
+      },
+      {
+        "type": "text",
+        "text": "I'll create a custom answer block with audio prompts where students listen and transcribe what they hear."
+      },
+      {
+        "type": "tool-insert_custom_answer",
+        "toolCallId": "call_custom_listen_002",
+        "state": "output-available",
+        "input": {
+          "questionIDs": ["q-listen-1", "q-listen-2"],
+          "allowedInput": ["text"],
+          "promptMethod": ["audio"]
+        },
+        "output": {
+          "success": true,
+          "action": "insert_editor_block",
+          "blockType": "custom-answer",
+          "blockData": ["q-listen-1", "q-listen-2"],
+          "preview": {
+            "questionCount": 2,
+            "prompt": "Listen to the audio clip and type what you hear in hiragana",
+            "answerCount": 2,
+            "caseSensitive": false,
+            "allowMultipleAttempts": true,
+            "inputMethods": ["text"],
+            "promptMethods": ["audio"]
+          },
+          "message": "Custom answer block ready to insert"
+        }
+      },
+      {
+        "type": "text",
+        "text": "All 5 block types are now generated and ready for your lesson:\n1. 📖 **Content Block** — Introduction & cultural aisatsu etiquette\n2. 🔗 **Meaning Association** — 5-word matching with 3 difficulty modes\n3. ❓ **Quiz Block** — 3 situational multiple-choice questions\n4. ✍️ **Answer Block** — Multimodal translation (text/audio/drawing)\n5. 🎧 **Custom Answer** — Audio transcription listening drill\n\nClick \"Insert into Editor\" on each block to assemble your unit!"
+      }
+    ]
+  }
+]

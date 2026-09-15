@@ -65,6 +65,16 @@ const contentWrapperStyle: React.CSSProperties = {
 };
 
 // Enhanced sidebar widget without MUI dependencies
+
+// `getCompletionPercentage` excludes "🎁 Extra Credit" (secret) tasks from its
+// numerator/denominator. totalCount/completedCount below must use the same
+// filtered set, otherwise "X/Y completed" and "Z%" show contradictory numbers.
+function getMainTasks(persona: UserPersona): OnboardingTaskWithCriteria[] {
+  return getTasksForPersona(persona).filter(
+    (t) => t.category !== "🎁 Extra Credit",
+  );
+}
+
 const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
   const emitter = getOnboardingEmitter();
   const theme = useTheme();
@@ -84,16 +94,21 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
   // "0/0 completed" or "All tasks completed!" empty-state before the
   // mount effect below corrects it a tick later.
   const [completedCount, setCompletedCount] = React.useState(() =>
-    persona ? emitter.getCompletedTasks(persona, ONBOARDING_TASKS).length : 0,
+    persona
+      ? emitter
+          .getCompletedTasks(persona, ONBOARDING_TASKS)
+          .filter((c) => getMainTasks(persona).some((t) => t.id === c.taskId))
+          .length
+      : 0,
   );
   const [totalCount, setTotalCount] = React.useState(() =>
-    persona ? getTasksForPersona(persona).length : 0,
+    persona ? getMainTasks(persona).length : 0,
   );
   const [nextTasks, setNextTasks] = React.useState<
     OnboardingTaskWithCriteria[]
   >(() => {
     if (!persona) return [];
-    const tasks = getTasksForPersona(persona);
+    const tasks = getMainTasks(persona);
     const completedIds = new Set(
       emitter.getCompletedTasks(persona, ONBOARDING_TASKS).map((c) => c.taskId),
     );
@@ -102,8 +117,10 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
 
   React.useEffect(() => {
     if (persona) {
-      const tasks = getTasksForPersona(persona);
-      const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
+      const tasks = getMainTasks(persona);
+      const completed = emitter
+        .getCompletedTasks(persona, ONBOARDING_TASKS)
+        .filter((c) => tasks.some((t) => t.id === c.taskId));
       const completedIds = new Set(completed.map((c) => c.taskId));
       const incomplete = tasks.filter((t) => !completedIds.has(t.id));
 
@@ -131,11 +148,10 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
           ONBOARDING_TASKS,
         );
         setPercentage(pct);
-        const tasks = getTasksForPersona(event.persona);
-        const completed = emitter.getCompletedTasks(
-          event.persona,
-          ONBOARDING_TASKS,
-        );
+        const tasks = getMainTasks(event.persona);
+        const completed = emitter
+          .getCompletedTasks(event.persona, ONBOARDING_TASKS)
+          .filter((c) => tasks.some((t) => t.id === c.taskId));
         const completedIds = new Set(completed.map((c) => c.taskId));
         const incomplete = tasks.filter((t) => !completedIds.has(t.id));
 
@@ -145,7 +161,9 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
       } else if (event.type === "task-completed" && persona === event.persona) {
         const pct = emitter.getCompletionPercentage(persona, ONBOARDING_TASKS);
         setPercentage(pct);
-        const completed = emitter.getCompletedTasks(persona, ONBOARDING_TASKS);
+        const completed = emitter
+          .getCompletedTasks(persona, ONBOARDING_TASKS)
+          .filter((c) => getMainTasks(persona).some((t) => t.id === c.taskId));
         setCompletedCount(completed.length);
 
         // `nextTasks` only ever holds incomplete tasks, so a task that just
@@ -154,11 +172,10 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
         // (the completed task renders its checkmark via isTaskCompleted
         // below) and swap in the real next-incomplete list after a beat.
         const timeoutId = setTimeout(() => {
-          const tasks = getTasksForPersona(persona);
-          const stillCompleted = emitter.getCompletedTasks(
-            persona,
-            ONBOARDING_TASKS,
-          );
+          const tasks = getMainTasks(persona);
+          const stillCompleted = emitter
+            .getCompletedTasks(persona, ONBOARDING_TASKS)
+            .filter((c) => tasks.some((t) => t.id === c.taskId));
           const completedIds = new Set(stillCompleted.map((c) => c.taskId));
           const incomplete = tasks.filter((t) => !completedIds.has(t.id));
           setNextTasks(incomplete.slice(0, 3));

@@ -11,6 +11,7 @@ import {
   Cors,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { CfnDataSource } from "aws-cdk-lib/aws-appsync";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
@@ -118,7 +119,11 @@ const modeledStacks = dataNestedStacks
   .filter((s) => modelNameFromStackId(s.node.id) !== null)
   .sort((a, b) => a.node.path.localeCompare(b.node.path));
 
-const WAVE_SIZE = 2;
+// The large schema is still exceeding the AppSync control-plane burst budget.
+// Keep the safe cross-component-only rule, but default to a much stricter
+// cadence so the stack creates in a near-serial stream instead of a broad
+// wave that triggers the 429s.
+const WAVE_SIZE = Math.max(1, Number(process.env.AMPLIFY_MODEL_WAVE_SIZE || 1));
 for (let i = WAVE_SIZE; i < modeledStacks.length; i++) {
   const currentModel = modelNameFromStackId(modeledStacks[i].node.id)!;
   const priorModel = modelNameFromStackId(
@@ -126,6 +131,132 @@ for (let i = WAVE_SIZE; i < modeledStacks.length; i++) {
   )!;
   if (modelComponents.get(currentModel) !== modelComponents.get(priorModel)) {
     modeledStacks[i].addDependency(modeledStacks[i - WAVE_SIZE]);
+  }
+}
+
+// Nested-stack-level throttling above isn't enough on its own — AppSync
+// itself rate-limits (429s) the individual CreateResolver/CreateFunction
+// control-plane calls when hundreds fire concurrently within a short
+// window (observed Sept 2026: dozens of AWS::AppSync::Resolver and
+// AWS::AppSync::FunctionConfiguration resources hitting CREATE_IN_PROGRESS
+// in the same second). Apply the identical cross-component-only wave
+// throttle one level deeper, directly to these two resource types, since
+// they're what's actually being throttled by the AppSync API. Keep the
+// default at a strict one-step serialization so the create burst is spread
+// out as much as possible without creating circular dependency conflicts.
+function findOwningModel(resource: cdk.CfnResource): string | null {
+  for (const scope of resource.node.scopes) {
+    if (dataNestedStacks.includes(scope as cdk.NestedStack)) {
+      return modelNameFromStackId(scope.node.id);
+    }
+  }
+  return null;
+}
+
+function findOwningStack(resource: cdk.CfnResource): cdk.NestedStack | null {
+  for (const scope of resource.node.scopes) {
+    if (dataNestedStacks.includes(scope as cdk.NestedStack)) {
+      return scope as cdk.NestedStack;
+    }
+  }
+  return null;
+}
+
+const appSyncControlPlaneResources = dataStack.node
+  .findAll()
+  .filter(
+    (c): c is cdk.CfnResource =>
+      cdk.CfnResource.isCfnResource(c) &&
+      (c.cfnResourceType === "AWS::AppSync::Resolver" ||
+        c.cfnResourceType === "AWS::AppSync::FunctionConfiguration"),
+  )
+  .map((resource) => ({ resource, modelName: findOwningModel(resource) }))
+  .filter(
+    (entry): entry is { resource: cdk.CfnResource; modelName: string } =>
+      entry.modelName !== null,
+  )
+  .sort((a, b) => a.resource.node.path.localeCompare(b.resource.node.path));
+
+const RESOLVER_WAVE_SIZE = Math.max(
+  1,
+  Number(process.env.AMPLIFY_RESOLVER_WAVE_SIZE || 1),
+);
+for (let i = RESOLVER_WAVE_SIZE; i < appSyncControlPlaneResources.length; i++) {
+  const current = appSyncControlPlaneResources[i];
+  const prior = appSyncControlPlaneResources[i - RESOLVER_WAVE_SIZE];
+  if (
+    modelComponents.get(current.modelName) !==
+    modelComponents.get(prior.modelName)
+  ) {
+    current.resource.addDependency(prior.resource);
+  }
+}
+
+// The cross-component wave throttle above can only chain resources whose
+// owning models fall in DIFFERENT relation components — so a single model's
+// own resolvers/functions (all in one component, one nested stack) are never
+// throttled against each other and previously fired every CreateResolver/
+// CreateFunction call for that model concurrently (e.g. AssistantChat's
+// `owner` + `embedding` field resolvers, Document's `writableGroups`
+// resolver, etc. all hitting the AppSync control plane in the same instant —
+// the exact resources still 429ing). Serialize same-typed control-plane
+// resources WITHIN each nested stack so each stack contributes at most one
+// in-flight create at a time instead of ~N. This is the safest possible
+// lever against the 429s: it adds NO cross-stack edges (cannot conflict with
+// the relation-inferred nested-stack dependencies CDK creates) and only
+// chains resources of the SAME type (Resolver↔Resolver, Function↔Function),
+// which never depend on one another, so it is provably acyclic.
+const INTRA_STACK_WAVE_SIZE = Math.max(
+  1,
+  Number(process.env.AMPLIFY_INTRA_STACK_WAVE_SIZE || 1),
+);
+const intraStackGroups = new Map<string, cdk.CfnResource[]>();
+for (const { resource } of appSyncControlPlaneResources) {
+  const stack = findOwningStack(resource);
+  if (!stack) continue;
+  const key = `${stack.node.path}::${resource.cfnResourceType}`;
+  const group = intraStackGroups.get(key);
+  if (group) {
+    group.push(resource);
+  } else {
+    intraStackGroups.set(key, [resource]);
+  }
+}
+for (const group of intraStackGroups.values()) {
+  group.sort((a, b) => a.node.path.localeCompare(b.node.path));
+  for (let i = INTRA_STACK_WAVE_SIZE; i < group.length; i++) {
+    group[i].addDependency(group[i - INTRA_STACK_WAVE_SIZE]);
+  }
+}
+
+// The shared NONE_DS AppSync data source (used by pipeline "init"/auth
+// FunctionConfigurations that don't hit a real backend) lives directly on
+// the core data stack, but is referenced by name — not Ref/GetAtt — from
+// FunctionConfiguration resources scattered across nearly every per-model
+// nested stack. CDK can't infer a delete-order dependency from a plain
+// string reference, so CloudFormation can attempt to delete NONE_DS while a
+// sibling nested stack still has an in-flight FunctionConfiguration
+// pointing at it, causing a recurring DELETE_FAILED: "Data source is still
+// in use by functions: [...]" (observed repeatedly Sept 2026). Force every
+// nested stack that owns an AppSync Resolver/FunctionConfiguration to
+// depend on NONE_DS so CloudFormation always tears those stacks down FIRST
+// (reverse dependency order on delete) before removing NONE_DS itself.
+const noneDataSource = dataStack.node
+  .findAll()
+  .find(
+    (c): c is CfnDataSource =>
+      c instanceof CfnDataSource && c.name === "NONE_DS",
+  );
+// Skip if absent (e.g. a reduced-model bootstrap phase never created it) —
+// with no NONE_DS, there's nothing for a FunctionConfiguration to reference.
+if (noneDataSource) {
+  const stacksOwningAppSyncFunctions = new Set(
+    appSyncControlPlaneResources
+      .map(({ resource }) => findOwningStack(resource))
+      .filter((s): s is cdk.NestedStack => s !== null),
+  );
+  for (const stack of stacksOwningAppSyncFunctions) {
+    stack.nestedStackResource?.addDependency(noneDataSource);
   }
 }
 
@@ -980,47 +1111,66 @@ backend.addOutput({
  *
  * Uses custom CDK construct for WebSocket infrastructure
  * Created on data stack since websocketHandler is also on data stack
+ *
+ * Requires Unit/HomeworkRoom/Section/Notification tables to exist, which
+ * isn't guaranteed during an early bootstrap phase (see
+ * filterSchemaForBootstrapPhase above) — skip wiring until a phase that
+ * includes all of them (always true for the final, unfiltered deploy).
  */
-const websocketApi = new WebSocketApiConstruct(dataStack, "WebSocketApi", {
-  unitTable: backend.data.resources.tables["Unit"],
-  homeworkRoomTable: backend.data.resources.tables["HomeworkRoom"],
-  sectionTable: backend.data.resources.tables["Section"],
-  notificationTable: backend.data.resources.tables["Notification"],
-  websocketLambda: backend.websocketHandler.resources.lambda,
-});
+const unitTableForWebsocket = backend.data.resources.tables["Unit"];
+const homeworkRoomTableForWebsocket =
+  backend.data.resources.tables["HomeworkRoom"];
+const sectionTableForWebsocket = backend.data.resources.tables["Section"];
+const notificationTableForWebsocket =
+  backend.data.resources.tables["Notification"];
 
-// Set environment variables for Lambda
-backend.websocketHandler.addEnvironment(
-  "CONNECTIONS_TABLE_NAME",
-  websocketApi.connectionsTable.tableName,
-);
-backend.websocketHandler.addEnvironment(
-  "UNIT_TABLE_NAME",
-  backend.data.resources.tables["Unit"].tableName,
-);
-backend.websocketHandler.addEnvironment(
-  "HOMEWORK_ROOM_TABLE_NAME",
-  backend.data.resources.tables["HomeworkRoom"].tableName,
-);
-backend.websocketHandler.addEnvironment(
-  "SECTION_TABLE_NAME",
-  backend.data.resources.tables["Section"].tableName,
-);
-backend.websocketHandler.addEnvironment(
-  "NOTIFICATION_TABLE_NAME",
-  backend.data.resources.tables["Notification"].tableName,
-);
+if (
+  unitTableForWebsocket &&
+  homeworkRoomTableForWebsocket &&
+  sectionTableForWebsocket &&
+  notificationTableForWebsocket
+) {
+  const websocketApi = new WebSocketApiConstruct(dataStack, "WebSocketApi", {
+    unitTable: unitTableForWebsocket,
+    homeworkRoomTable: homeworkRoomTableForWebsocket,
+    sectionTable: sectionTableForWebsocket,
+    notificationTable: notificationTableForWebsocket,
+    websocketLambda: backend.websocketHandler.resources.lambda,
+  });
 
-// Export WebSocket endpoint using CFN intrinsic functions to construct URL at deploy time
-backend.addOutput({
-  custom: {
-    WEBSOCKET_API: {
-      apiId: websocketApi.api.apiId,
-      stageName: websocketApi.stage.stageName,
-      region: Stack.of(websocketApi).region,
+  // Set environment variables for Lambda
+  backend.websocketHandler.addEnvironment(
+    "CONNECTIONS_TABLE_NAME",
+    websocketApi.connectionsTable.tableName,
+  );
+  backend.websocketHandler.addEnvironment(
+    "UNIT_TABLE_NAME",
+    unitTableForWebsocket.tableName,
+  );
+  backend.websocketHandler.addEnvironment(
+    "HOMEWORK_ROOM_TABLE_NAME",
+    homeworkRoomTableForWebsocket.tableName,
+  );
+  backend.websocketHandler.addEnvironment(
+    "SECTION_TABLE_NAME",
+    sectionTableForWebsocket.tableName,
+  );
+  backend.websocketHandler.addEnvironment(
+    "NOTIFICATION_TABLE_NAME",
+    notificationTableForWebsocket.tableName,
+  );
+
+  // Export WebSocket endpoint using CFN intrinsic functions to construct URL at deploy time
+  backend.addOutput({
+    custom: {
+      WEBSOCKET_API: {
+        apiId: websocketApi.api.apiId,
+        stageName: websocketApi.stage.stageName,
+        region: Stack.of(websocketApi).region,
+      },
     },
-  },
-});
+  });
+}
 
 // ==========================================================================
 // Gamification Handler — IAM + env config
@@ -1077,27 +1227,31 @@ backend.leaderboardStreamHandler.resources.lambda.role?.attachInlinePolicy(
 );
 
 // Connect DynamoDB Stream from StudentXPLog table to the leaderboard stream handler
+// (StudentXPLog may not exist yet during an early bootstrap phase — see
+// filterSchemaForBootstrapPhase above — skip until it's actually deployed).
 const studentXPLogTable = backend.data.resources.tables["StudentXPLog"];
-const leaderboardStreamLambda =
-  backend.leaderboardStreamHandler.resources.lambda;
+if (studentXPLogTable) {
+  const leaderboardStreamLambda =
+    backend.leaderboardStreamHandler.resources.lambda;
 
-leaderboardStreamLambda.addEventSource(
-  new DynamoEventSource(studentXPLogTable, {
-    startingPosition: lambda.StartingPosition.TRIM_HORIZON,
-    batchSize: 25,
-    maxBatchingWindow: cdk.Duration.seconds(10), // Wait up to 10s to batch records
-    retryAttempts: 3,
-    bisectBatchOnError: true,
-    filters: [
-      lambda.FilterCriteria.filter({
-        eventName: lambda.FilterRule.isEqual("INSERT"),
-      }),
-    ],
-  }),
-);
+  leaderboardStreamLambda.addEventSource(
+    new DynamoEventSource(studentXPLogTable, {
+      startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+      batchSize: 25,
+      maxBatchingWindow: cdk.Duration.seconds(10), // Wait up to 10s to batch records
+      retryAttempts: 3,
+      bisectBatchOnError: true,
+      filters: [
+        lambda.FilterCriteria.filter({
+          eventName: lambda.FilterRule.isEqual("INSERT"),
+        }),
+      ],
+    }),
+  );
 
-// Grant the stream handler read access to the StudentXPLog table stream
-studentXPLogTable.grantStreamRead(leaderboardStreamLambda);
+  // Grant the stream handler read access to the StudentXPLog table stream
+  studentXPLogTable.grantStreamRead(leaderboardStreamLambda);
+}
 
 // ==========================================================================
 // Peer Review AI Handler — IAM + env config

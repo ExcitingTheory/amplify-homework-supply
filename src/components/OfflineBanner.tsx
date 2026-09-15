@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Snackbar, Alert, Button, Slide } from '@mui/material';
-import { WifiOff, CloudSync } from '@mui/icons-material';
-import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Snackbar, Alert, Button, Slide } from "@mui/material";
+import { WifiOff, CloudSync } from "@mui/icons-material";
+import { useNetworkStatus } from "../hooks/useNetworkStatus";
 
 /**
  * Persistent offline banner displayed at the top of the app when the user
@@ -19,27 +19,43 @@ export default function OfflineBanner() {
   // Listen for SW messages: sync queue count updates AND Background Sync triggers
   useEffect(() => {
     const handler = async (event: MessageEvent) => {
-      if (event.data?.type === 'SYNC_QUEUE_COUNT') {
+      if (event.data?.type === "SYNC_QUEUE_COUNT") {
         setPendingCount(event.data.count ?? 0);
       }
-      if (event.data?.type === 'PROCESS_SYNC_QUEUE') {
+      if (event.data?.type === "PROCESS_SYNC_QUEUE") {
         try {
-          const { processQueue } = await import('../offline/SyncQueue');
-          const result = await processQueue(async (model, operation, payload) => {
-            const { generateClient } = await import('aws-amplify/data');
-            const client = generateClient() as any;
-            if (operation === 'update') {
-              await client.models[model].update(payload);
-            } else if (operation === 'create') {
-              await client.models[model].create(payload);
-            } else if (operation === 'delete') {
-              await client.models[model].delete(payload);
-            }
-          });
+          const { processQueue } = await import("../offline/SyncQueue");
+          const { syncGradeWithConflictResolution } =
+            await import("../offline/conflictResolution");
+          const result = await processQueue(
+            async (model, operation, payload) => {
+              const { generateClient } = await import("aws-amplify/data");
+              const client = generateClient() as any;
+              if (model === "Grade" && operation === "update" && payload.id) {
+                const gradeData = payload.data
+                  ? typeof payload.data === "string"
+                    ? JSON.parse(payload.data)
+                    : payload.data
+                  : {};
+                await syncGradeWithConflictResolution(
+                  client,
+                  payload.id as string,
+                  gradeData,
+                  payload._version as number | undefined,
+                );
+              } else if (operation === "update") {
+                await client.models[model].update(payload);
+              } else if (operation === "create") {
+                await client.models[model].create(payload);
+              } else if (operation === "delete") {
+                await client.models[model].delete(payload);
+              }
+            },
+          );
           setPendingCount(result.remaining);
           // Notify SW that sync is complete
           navigator.serviceWorker?.controller?.postMessage({
-            type: 'SYNC_COMPLETE',
+            type: "SYNC_COMPLETE",
             result,
           });
         } catch {
@@ -47,23 +63,38 @@ export default function OfflineBanner() {
         }
       }
     };
-    if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
-      navigator.serviceWorker.addEventListener('message', handler);
-      return () => navigator.serviceWorker.removeEventListener('message', handler);
+    if (typeof navigator !== "undefined" && navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener("message", handler);
+      return () =>
+        navigator.serviceWorker.removeEventListener("message", handler);
     }
   }, []);
 
   const handleManualSync = useCallback(async () => {
     try {
-      const { processQueue } = await import('../offline/SyncQueue');
+      const { processQueue } = await import("../offline/SyncQueue");
+      const { syncGradeWithConflictResolution } =
+        await import("../offline/conflictResolution");
       const result = await processQueue(async (model, operation, payload) => {
-        const { generateClient } = await import('aws-amplify/data');
+        const { generateClient } = await import("aws-amplify/data");
         const client = generateClient() as any;
-        if (operation === 'update') {
+        if (model === "Grade" && operation === "update" && payload.id) {
+          const gradeData = payload.data
+            ? typeof payload.data === "string"
+              ? JSON.parse(payload.data)
+              : payload.data
+            : {};
+          await syncGradeWithConflictResolution(
+            client,
+            payload.id as string,
+            gradeData,
+            payload._version as number | undefined,
+          );
+        } else if (operation === "update") {
           await client.models[model].update(payload);
-        } else if (operation === 'create') {
+        } else if (operation === "create") {
           await client.models[model].create(payload);
-        } else if (operation === 'delete') {
+        } else if (operation === "delete") {
           await client.models[model].delete(payload);
         }
       });
@@ -93,7 +124,7 @@ export default function OfflineBanner() {
     return (
       <Snackbar
         open
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         TransitionComponent={Slide}
       >
         <Alert
@@ -101,12 +132,18 @@ export default function OfflineBanner() {
           icon={<WifiOff />}
           action={
             pendingCount > 0 ? (
-              <Button color="inherit" size="small" startIcon={<CloudSync />}>
+              <Button
+                color="inherit"
+                size="small"
+                startIcon={<CloudSync />}
+                onClick={handleManualSync}
+                aria-label={`Sync ${pendingCount} pending changes`}
+              >
                 {pendingCount} pending
               </Button>
             ) : undefined
           }
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           You&apos;re offline — your work is saved locally
         </Alert>
@@ -121,7 +158,7 @@ export default function OfflineBanner() {
         open
         autoHideDuration={4000}
         onClose={() => setJustReconnected(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         TransitionComponent={Slide}
       >
         <Alert
@@ -132,7 +169,7 @@ export default function OfflineBanner() {
               Sync now
             </Button>
           }
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           Back online — syncing {pendingCount} pending changes
         </Alert>

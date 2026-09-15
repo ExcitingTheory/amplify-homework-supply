@@ -108,16 +108,17 @@ function LinearProgressWithLabel({ value }) {
   );
 }
 
-export default function AnswerComponent({
+export function AnswerView({
   className,
-  format,
   nodeKey,
-  // setFileIDs,
   wordIDs,
   requestDefinition,
   customPrompt,
   allowedInput,
   promptMethod,
+  dictionary,
+  grade,
+  saveGrade,
 }) {
   const t = useTranslations("workbook");
 
@@ -176,11 +177,6 @@ export default function AnswerComponent({
       setCurrentPromptMethod(promptMethod[0]);
     }
   }, [JSON.stringify(promptMethod)]);
-
-  const { dictionary, grade, saveGrade, workbook } =
-    React.useContext(UnitContext);
-
-  const { studentMemory, contentContext } = useVerifyContext();
 
   // Reset local state when grade changes (e.g., new grade after unit completion)
   const gradeIdRef = useRef(grade?.id);
@@ -247,85 +243,112 @@ export default function AnswerComponent({
     }
   }, [feedback, wordIDs, saveGrade, nodeKey, grade]);
 
-  const blockGradeData = grade?.data?.[nodeKey];
-  const nailedIt = blockGradeData?.nailedIt === true;
+  return (
+    <div className={className}>
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          {thisPrompt}
+        </Typography>
+      </Box>
 
+      <ToggleButtonGroup
+        exclusive
+        value={currentInputMethod}
+        onChange={handleInputChange}
+        aria-label={t("answerComponent.inputMethodSelector")}
+      >
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("text")}
+          value="text"
+          aria-label={t("answerComponent.inputMethods.text")}
+        >
+          {t("answerComponent.inputMethods.text")}
+        </ToggleButton>
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("audio")}
+          value="audio"
+          aria-label={t("answerComponent.inputMethods.audio")}
+        >
+          {t("answerComponent.inputMethods.audio")}
+        </ToggleButton>
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("writing")}
+          value="writing"
+          aria-label={t("answerComponent.inputMethods.writing")}
+        >
+          {t("answerComponent.inputMethods.writing")}
+        </ToggleButton>
+      </ToggleButtonGroup>
+
+      {/**
+       * Progress bar to show the user how many questions they have answered correctly
+       */}
+      <Box>
+        <LinearProgressWithLabel value={progress} />
+      </Box>
+      {!requestDefinition &&
+        ByDefinitionWordList(
+          wordIDs,
+          dictionary,
+          feedback,
+          setAnswers,
+          answers,
+          setFeedback,
+          currentInputMethod,
+          currentPromptMethod,
+          grade,
+          nodeKey,
+          t,
+          sharedHistoryState.current,
+        )}
+      {requestDefinition &&
+        ByWordList(
+          wordIDs,
+          feedback,
+          dictionary,
+          answers,
+          setAnswers,
+          setFeedback,
+          currentInputMethod,
+          currentPromptMethod,
+          grade,
+          nodeKey,
+          t,
+          saveGrade,
+          sharedHistoryState.current,
+        )}
+    </div>
+  );
+}
+
+export default function AnswerComponent({
+  className,
+  format,
+  nodeKey,
+  wordIDs,
+  requestDefinition,
+  customPrompt,
+  allowedInput,
+  promptMethod,
+}) {
+  const { dictionary, grade, saveGrade } = React.useContext(UnitContext);
+  // Keep verify-context hook for parity (memory/personalization side effects).
+  useVerifyContext();
+  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
   return (
     <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <div className={className}>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {thisPrompt}
-          </Typography>
-        </Box>
-
-        <ToggleButtonGroup
-          exclusive
-          value={currentInputMethod}
-          onChange={handleInputChange}
-          aria-label={t("answerComponent.inputMethodSelector")}
-        >
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("text")}
-            value="text"
-            aria-label={t("answerComponent.inputMethods.text")}
-          >
-            {t("answerComponent.inputMethods.text")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("audio")}
-            value="audio"
-            aria-label={t("answerComponent.inputMethods.audio")}
-          >
-            {t("answerComponent.inputMethods.audio")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("writing")}
-            value="writing"
-            aria-label={t("answerComponent.inputMethods.writing")}
-          >
-            {t("answerComponent.inputMethods.writing")}
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        {/**
-         * Progress bar to show the user how many questions they have answered correctly
-         */}
-        <Box>
-          <LinearProgressWithLabel value={progress} />
-        </Box>
-        {!requestDefinition &&
-          ByDefinitionWordList(
-            wordIDs,
-            dictionary,
-            feedback,
-            setAnswers,
-            answers,
-            setFeedback,
-            currentInputMethod,
-            currentPromptMethod,
-            grade,
-            nodeKey,
-            t,
-            sharedHistoryState.current,
-          )}
-        {requestDefinition &&
-          ByWordList(
-            wordIDs,
-            feedback,
-            dictionary,
-            answers,
-            setAnswers,
-            setFeedback,
-            currentInputMethod,
-            currentPromptMethod,
-            grade,
-            nodeKey,
-            t,
-            saveGrade,
-            sharedHistoryState.current,
-          )}
-      </div>
+      <AnswerView
+        className={className}
+        nodeKey={nodeKey}
+        wordIDs={wordIDs}
+        requestDefinition={requestDefinition}
+        customPrompt={customPrompt}
+        allowedInput={allowedInput}
+        promptMethod={promptMethod}
+        dictionary={dictionary}
+        grade={grade}
+        saveGrade={saveGrade}
+      />
     </WorkbookBlockEnhancements>
   );
 }
@@ -411,9 +434,7 @@ function ByWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -513,9 +534,7 @@ function ByWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -628,9 +647,7 @@ function ByWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -640,7 +657,9 @@ function ByWordList(
                 </Box>
               )}
 
-              <Suspense fallback={<Typography variant="body2">Loading...</Typography>}>
+              <Suspense
+                fallback={<Typography variant="body2">Loading...</Typography>}
+              >
                 <SketchPad
                   expect={dictionary[wordId]?.definition}
                   excalidrawData={{}}
@@ -748,9 +767,7 @@ function ByDefinitionWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -851,9 +868,7 @@ function ByDefinitionWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -960,9 +975,7 @@ function ByDefinitionWordList(
                     borderRadius: 1,
                     p: 1,
                     my: 1,
-                    bgcolor: isCorrect
-                      ? "success.light"
-                      : "error.light",
+                    bgcolor: isCorrect ? "success.light" : "error.light",
                     opacity: 0.9,
                   }}
                 >
@@ -972,7 +985,9 @@ function ByDefinitionWordList(
                 </Box>
               )}
 
-              <Suspense fallback={<Typography variant="body2">Loading...</Typography>}>
+              <Suspense
+                fallback={<Typography variant="body2">Loading...</Typography>}
+              >
                 <SketchPad
                   expect={dictionary[wordId]?.definition}
                   excalidrawData={{}}

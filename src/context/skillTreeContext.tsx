@@ -45,14 +45,14 @@ export interface SkillTreeProviderProps {
   client: any
   studentId: string
   /** Optional cohort filter */
-  cohortId?: string
+  sectionID?: string
   children: React.ReactNode
 }
 
 export function SkillTreeProvider({
   client,
   studentId,
-  cohortId,
+  sectionID,
   children,
 }: SkillTreeProviderProps) {
   const [skills, setSkills] = useState<any[]>([])
@@ -69,7 +69,7 @@ export function SkillTreeProvider({
     }
 
     const sub = client.models.Skill.observeQuery(
-      cohortId ? { filter: { cohortId: { eq: cohortId } } } : undefined,
+      sectionID ? { filter: { sectionID: { eq: sectionID } } } : undefined,
     ).subscribe({
       next: ({ items }: { items: any[] }) => {
         const valid = items.filter((i: any) => i != null && i.id != null)
@@ -88,7 +88,7 @@ export function SkillTreeProvider({
     })
 
     return () => sub.unsubscribe()
-  }, [client, cohortId])
+  }, [client, sectionID])
 
   // Subscribe to StudentSkillProgress for this student
   useEffect(() => {

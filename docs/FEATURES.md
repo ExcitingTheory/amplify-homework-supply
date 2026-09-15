@@ -48,6 +48,18 @@ A guided recording tool where instructors create conversational content by follo
 
 Hearing an instructor's own voice makes lessons feel more personal and engaging — and that effect is proven to improve retention compared to reading text alone.
 
+### Flexible Assignment Timing & Reusable Presets
+
+Instructors can set start-and-end availability windows for assignments using smart timing presets (start of class, end of class, end of day, end of week) or save their own custom timing patterns. Reusable patterns apply seamlessly across all sections taught by the instructor.
+
+Automating assignment scheduling eliminates repetitive date-picking and ensures homework windows align with real class schedules.
+
+### Differentiated Direct-to-Student Assignments
+
+Assignments can be dispatched to an entire class section or targeted directly to an individual student for accommodations, make-up work, or personalized extension activities.
+
+Targeting individual students within class rosters ensures every learner gets the right level of support without cluttering everyone else's dashboards.
+
 ---
 
 ## The Student Experience
@@ -214,6 +226,18 @@ Personalization creates a sense of ownership, and earning cosmetic rewards adds 
 
 ## Behind the Scenes (Infrastructure)
 
+### S3 Content Storage & Version History
+
+Lesson rich-text and document contents are saved directly to S3 object storage with automated version snapshots and plain-text extraction on publication. Lightweight metadata in the database points to S3 assets, ensuring zero document-size limits and lightning-fast queries.
+
+Storing large documents in dedicated object storage keeps database queries snappy and provides a dependable revision history for every lesson.
+
+### Optimistic Concurrency & Real-Time Sync Protection
+
+Every database record carries version tracking counters with strict client-side synchronization guards. Concurrent edits across multiple devices or instructors are safely reconciled without stale overwrites or infinite echo loops.
+
+Instructors and students can work simultaneously across devices with complete confidence that updates won't overwrite each other.
+
 ### Automatic File Processing
 
 When instructors upload files, the system automatically processes them in the background — creating thumbnails for images, extracting text from PDFs, generating subtitles for videos, and preparing everything for fast delivery. No manual steps required.
@@ -283,6 +307,12 @@ A platform used by students — often minors — has to be hardened against comm
 Instructors review student submissions in a read-only view with margin annotations showing which answers were wrong, inline grade editing, keyboard navigation between students, and a timeline showing how the student's answers changed over time.
 
 Efficient grading tools save instructors hours per week, and the answer history helps surface patterns that a single snapshot never would.
+
+### Late Submission Management & Action Queue
+
+When students complete assignments after the due date, submissions are automatically flagged for review. Instructors can choose with a single click to Keep the late submission (granting normal credit) or Drop it (excluding it from gradebook averages and curves without deleting student progress).
+
+Instructors maintain full pedagogical discretion over late work policies while keeping grading calculations completely accurate and fair.
 
 ### Guided Walkthroughs
 

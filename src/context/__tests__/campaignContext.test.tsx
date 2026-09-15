@@ -57,7 +57,7 @@ describe('CampaignContext', () => {
   it('shows no campaign when none exists', () => {
     const client = createMockClient([], [])
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -72,7 +72,7 @@ describe('CampaignContext', () => {
       [
         {
           id: 'camp-1',
-          cohortId: 'c1',
+          sectionID: 'c1',
           title: 'Water Cycle Quest',
           setting: 'Ocean',
           stakes: 'Save the fish!',
@@ -83,7 +83,7 @@ describe('CampaignContext', () => {
     )
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -96,14 +96,14 @@ describe('CampaignContext', () => {
     const client = createMockClient(
       [],
       [
-        { id: 'ch-1', cohortId: 'c1', title: 'Week 1', targetXP: 1000, currentXP: 750, active: true, bonusMultiplier: 2 },
-        { id: 'ch-2', cohortId: 'c1', title: 'Week 2', targetXP: 500, currentXP: 500, active: false, bonusMultiplier: 1.5 },
-        { id: 'ch-3', cohortId: 'c1', title: 'Week 3', targetXP: 2000, currentXP: 0, active: true },
+        { id: 'ch-1', sectionID: 'c1', title: 'Week 1', targetXP: 1000, currentXP: 750, active: true, bonusMultiplier: 2 },
+        { id: 'ch-2', sectionID: 'c1', title: 'Week 2', targetXP: 500, currentXP: 500, active: false, bonusMultiplier: 1.5 },
+        { id: 'ch-3', sectionID: 'c1', title: 'Week 3', targetXP: 2000, currentXP: 0, active: true },
       ],
     )
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -119,14 +119,14 @@ describe('CampaignContext', () => {
     const client = createMockClient(
       [],
       [
-        { id: 'ch-1', cohortId: 'c1', title: 'Full', targetXP: 100, currentXP: 200, active: true },
-        { id: 'ch-2', cohortId: 'c1', title: 'Zero Target', targetXP: 0, currentXP: 50, active: true },
-        { id: 'ch-3', cohortId: 'c1', title: 'Half', targetXP: 200, currentXP: 100, active: true },
+        { id: 'ch-1', sectionID: 'c1', title: 'Full', targetXP: 100, currentXP: 200, active: true },
+        { id: 'ch-2', sectionID: 'c1', title: 'Zero Target', targetXP: 0, currentXP: 50, active: true },
+        { id: 'ch-3', sectionID: 'c1', title: 'Half', targetXP: 200, currentXP: 100, active: true },
       ],
     )
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -142,11 +142,11 @@ describe('CampaignContext', () => {
   it('handles missing currentXP (defaults to 0)', () => {
     const client = createMockClient(
       [],
-      [{ id: 'ch-1', cohortId: 'c1', title: 'New', targetXP: 500, active: true }],
+      [{ id: 'ch-1', sectionID: 'c1', title: 'New', targetXP: 500, active: true }],
     )
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -178,7 +178,7 @@ describe('CampaignContext', () => {
     }
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -191,12 +191,12 @@ describe('CampaignContext', () => {
 
   it('filters out null items', () => {
     const client = createMockClient(
-      [null as any, { id: 'camp-1', cohortId: 'c1', title: 'Valid' }],
-      [{ id: null } as any, { id: 'ch-1', cohortId: 'c1', title: 'Good', targetXP: 100, currentXP: 50, active: true }],
+      [null as any, { id: 'camp-1', sectionID: 'c1', title: 'Valid' }],
+      [{ id: null } as any, { id: 'ch-1', sectionID: 'c1', title: 'Good', targetXP: 100, currentXP: 50, active: true }],
     )
 
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -208,7 +208,7 @@ describe('CampaignContext', () => {
   it('handles missing client models gracefully', () => {
     const client = { models: {} }
     render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )
@@ -241,7 +241,7 @@ describe('CampaignContext', () => {
     }
 
     const { unmount } = render(
-      <CampaignProvider client={client} cohortId="c1">
+      <CampaignProvider client={client} sectionID="c1">
         <TestConsumer />
       </CampaignProvider>,
     )

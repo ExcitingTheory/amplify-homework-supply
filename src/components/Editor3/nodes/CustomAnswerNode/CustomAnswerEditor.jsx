@@ -1,7 +1,12 @@
 import * as React from "react";
+import { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { Skeleton, Box } from "@mui/material";
 
-import { DataGrid } from "@mui/x-data-grid";
+// Lazy-load DataGrid only when CustomAnswerEditor is rendered (authoring only)
+const DataGrid = lazy(() =>
+  import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
+);
 
 import {
   IconButton,
@@ -14,8 +19,6 @@ import {
   DialogContentText,
   DialogActions,
   Typography,
-  Box,
-  Skeleton,
 } from "@mui/material";
 
 import TextareaAutosize from "@mui/material/TextareaAutosize";
@@ -882,19 +885,25 @@ export default React.memo(function CustomAnswerEditor({
         </div>
       )}
       {rows?.length > 0 && (
-        <DataGrid
-          sx={{
-            marginTop: "0.5rem",
-          }}
-          rows={rows}
-          columns={columns}
-          hideFooter
-          checkboxSelection
-          rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
-          onRowSelectionModelChange={(model) => {
-            setGridSelection([...model.ids]);
-          }}
-        />
+        <Suspense
+          fallback={
+            <Skeleton variant="rectangular" width="100%" height={300} />
+          }
+        >
+          <DataGrid
+            sx={{
+              marginTop: "0.5rem",
+            }}
+            rows={rows}
+            columns={columns}
+            hideFooter
+            checkboxSelection
+            rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+            onRowSelectionModelChange={(model) => {
+              setGridSelection([...model.ids]);
+            }}
+          />
+        </Suspense>
       )}
     </div>
   );

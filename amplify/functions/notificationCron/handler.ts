@@ -47,7 +47,7 @@ const LIST_STUDENT_PROFILES = `query ListStudentProfiles($limit: Int, $nextToken
 const LIST_CHALLENGES = `query ListGroupChallenges($limit: Int, $nextToken: String) {
   listGroupChallenges(limit: $limit, nextToken: $nextToken) {
     items {
-      id title cohortId deadline active
+      id title sectionID deadline active
     }
     nextToken
   }
@@ -56,7 +56,7 @@ const LIST_CHALLENGES = `query ListGroupChallenges($limit: Int, $nextToken: Stri
 const LIST_SQUADS = `query ListSquads($limit: Int, $nextToken: String) {
   listSquads(limit: $limit, nextToken: $nextToken) {
     items {
-      id cohortId members { studentId }
+      id sectionID members { studentId }
     }
     nextToken
   }
@@ -224,18 +224,18 @@ export const handler: Handler = async () => {
       return deadlineDate > now && deadlineDate <= in24h;
     });
 
-    // Fetch all squads once to look up members by cohortId
+    // Fetch all squads once to look up members by sectionID
     const allSquads = endingSoon.length
       ? await paginateQuery<any>(client, LIST_SQUADS)
       : [];
 
     for (const challenge of endingSoon) {
       // Find squads in the same cohort and collect their members
-      const cohortSquads = allSquads.filter(
-        (g) => g.cohortId === challenge.cohortId,
+      const sectionSquads = allSquads.filter(
+        (g) => g.sectionID === challenge.sectionID,
       );
       const memberIds = new Set<string>();
-      for (const squad of cohortSquads) {
+      for (const squad of sectionSquads) {
         for (const member of squad.members || []) {
           if (member?.studentId) memberIds.add(member.studentId);
         }

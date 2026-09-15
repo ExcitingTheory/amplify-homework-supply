@@ -4,7 +4,7 @@
  * Orchestrates the full drill lifecycle via usePracticeDrill.
  */
 
-import React, { useCallback, useState, useContext } from 'react'
+import React, { useCallback, useState, useContext } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,22 +17,22 @@ import {
   Skeleton,
   Alert,
   Slide,
-} from '@mui/material'
-import type { TransitionProps } from '@mui/material/transitions'
-import CloseIcon from '@mui/icons-material/Close'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { useTranslations } from 'next-intl'
-import PracticeDrillProgress from './PracticeDrillProgress'
-import DrillGradeAdapter from './DrillGradeAdapter'
-import CollaborativePresenceBar from './CollaborativePresenceBar'
-import { Workbook } from '../Editor3/Workbook'
-import { DictionaryProvider } from '../../context/dictionaryContext'
-import { FilesProvider } from '../../context/fileContext'
-import { usePracticeDrill } from './usePracticeDrill'
-import { usePracticeCollaboration } from '../../yjs/practiceCollaborationHooks'
-import { previewXP } from '../../utils/practiceXPCalculator'
-import type { DrillConfig } from './PracticeDrillConfigPopup'
-import type { DrillStats } from './DrillGradeAdapter'
+} from "@mui/material";
+import type { TransitionProps } from "@mui/material/transitions";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useTranslations } from "next-intl";
+import PracticeDrillProgress from "./PracticeDrillProgress";
+import DrillGradeAdapter from "./DrillGradeAdapter";
+import CollaborativePresenceBar from "./CollaborativePresenceBar";
+import { Workbook } from "../Editor3/Workbook";
+import { DictionaryProvider } from "../../context/dictionaryContext";
+import { FilesProvider } from "../../context/fileContext";
+import { usePracticeDrill } from "./usePracticeDrill";
+import { usePracticeCollaboration } from "../../yjs/practiceCollaborationHooks";
+import { previewXP } from "../../utils/practiceXPCalculator";
+import type { DrillConfig } from "./PracticeDrillConfigPopup";
+import type { DrillStats } from "./DrillGradeAdapter";
 
 // ============================================================================
 // Transition
@@ -42,28 +42,28 @@ const Transition = React.forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
-  return <Slide direction="up" ref={ref} {...props} />
-})
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface PracticeDrillDialogProps {
-  open: boolean
-  onClose: () => void
-  unitId: string
-  unitName?: string
-  config: DrillConfig
-  sessionsCompletedToday?: number
+  open: boolean;
+  onClose: () => void;
+  unitId: string;
+  unitName?: string;
+  config: DrillConfig;
+  sessionsCompletedToday?: number;
   /** Username of the current user (required for collaborative mode) */
-  username?: string
+  username?: string;
   /** Display name of the current user */
-  displayName?: string
+  displayName?: string;
   /** Pre-existing session ID for joining collaborative sessions */
-  joinSessionId?: string
+  joinSessionId?: string;
   /** Room code when joining an existing session */
-  joinRoomCode?: string
+  joinRoomCode?: string;
 }
 
 // ============================================================================
@@ -74,15 +74,15 @@ export default function PracticeDrillDialog({
   open,
   onClose,
   unitId,
-  unitName = '',
+  unitName = "",
   config,
   sessionsCompletedToday = 0,
-  username = '',
-  displayName = '',
+  username = "",
+  displayName = "",
   joinSessionId,
   joinRoomCode,
 }: PracticeDrillDialogProps) {
-  const t = useTranslations('components')
+  const t = useTranslations("components");
   const {
     session,
     generating,
@@ -91,17 +91,17 @@ export default function PracticeDrillDialog({
     generateDrill,
     completeDrill,
     reset,
-  } = usePracticeDrill(unitName)
+  } = usePracticeDrill(unitName);
 
   const [drillStats, setDrillStats] = useState<DrillStats>({
     blocksCompleted: 0,
     accuracy: 0,
     complete: false,
-  })
-  const [roomCode, setRoomCode] = useState(joinRoomCode || '')
+  });
+  const [roomCode, setRoomCode] = useState(joinRoomCode || "");
 
-  const isCollaborative = config.collaborative === true || !!joinSessionId
-  const effectiveSessionId = joinSessionId || session.id || ''
+  const isCollaborative = config.collaborative === true || !!joinSessionId;
+  const effectiveSessionId = joinSessionId || session.id || "";
 
   // Collaborative hook — only active when in collaborative mode with a session
   const collab = usePracticeCollaboration(
@@ -111,56 +111,72 @@ export default function PracticeDrillDialog({
           user: { username, displayName: displayName || username },
         }
       : null,
-  )
+  );
 
   // Start generation when dialog opens with blocks not yet loaded
   React.useEffect(() => {
-    if (open && session.blocks.length === 0 && !generating && !error && !joinSessionId) {
-      generateDrill(unitId, config)
+    if (
+      open &&
+      session.blocks.length === 0 &&
+      !generating &&
+      !error &&
+      !joinSessionId
+    ) {
+      generateDrill(unitId, config);
     }
-  }, [open, session.blocks.length, generating, error, generateDrill, unitId, config, joinSessionId])
+  }, [
+    open,
+    session.blocks.length,
+    generating,
+    error,
+    generateDrill,
+    unitId,
+    config,
+    joinSessionId,
+  ]);
 
   // Generate room code for new collaborative sessions
   React.useEffect(() => {
     if (isCollaborative && session.id && !roomCode) {
-      const code = session.id.slice(0, 6).toUpperCase()
-      setRoomCode(code)
+      const code = session.id.slice(0, 6).toUpperCase();
+      setRoomCode(code);
       // Update PracticeSession record with roomCode and collaborative flag
       const client = (async () => {
         try {
-          const { getAmplifyClient } = await import('../../utils/amplifyClient')
-          const c = getAmplifyClient()
+          const { getAmplifyClient } =
+            await import("../../utils/amplifyClient");
+          const c = getAmplifyClient();
           await c.models.PracticeSession.update({
             id: session.id!,
             collaborative: true,
             roomCode: code,
             maxParticipants: config.maxParticipants || 5,
             participantIds: JSON.stringify([username]),
-          })
+          });
         } catch (err) {
-          console.error('[PracticeDrillDialog] Failed to set room code:', err)
+          console.error("[PracticeDrillDialog] Failed to set room code:", err);
         }
-      })()
+      })();
     }
-  }, [isCollaborative, session.id, roomCode, config.maxParticipants, username])
+  }, [isCollaborative, session.id, roomCode, config.maxParticipants, username]);
 
   const handleClose = useCallback(() => {
-    reset()
-    setDrillStats({ blocksCompleted: 0, accuracy: 0, complete: false })
-    setRoomCode('')
-    onClose()
-  }, [reset, onClose])
+    reset();
+    setDrillStats({ blocksCompleted: 0, accuracy: 0, complete: false });
+    setRoomCode("");
+    onClose();
+  }, [reset, onClose]);
 
   const handleComplete = useCallback(async () => {
-    await completeDrill()
-  }, [completeDrill])
+    await completeDrill();
+  }, [completeDrill]);
 
   const handleStatsChange = useCallback((stats: DrillStats) => {
-    setDrillStats(stats)
-  }, [])
+    setDrillStats(stats);
+  }, []);
 
-  const xpPreview = previewXP(sessionsCompletedToday, drillStats.accuracy)
-  const allCompleted = drillStats.complete && session.blocks.length > 0
+  const xpPreview = previewXP(sessionsCompletedToday, drillStats.accuracy);
+  const allCompleted = drillStats.complete && session.blocks.length > 0;
 
   return (
     <Dialog
@@ -169,14 +185,18 @@ export default function PracticeDrillDialog({
       fullScreen
       TransitionComponent={Transition}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 6 }}>
+      <DialogTitle
+        sx={{ display: "flex", alignItems: "center", gap: 1, pr: 6 }}
+      >
         <Typography variant="h6" component="span" sx={{ flex: 1 }}>
-          {unitName ? `${t('practiceDrill.dialog.title')}: ${unitName}` : t('practiceDrill.dialog.title')}
+          {unitName
+            ? `${t("practiceDrill.dialog.title")}: ${unitName}`
+            : t("practiceDrill.dialog.title")}
         </Typography>
         <IconButton
           onClick={handleClose}
-          aria-label={t('practiceDrill.dialog.close')}
-          sx={{ position: 'absolute', right: 8, top: 8 }}
+          aria-label={t("practiceDrill.dialog.close")}
+          sx={{ position: "absolute", right: 8, top: 8 }}
         >
           <CloseIcon />
         </IconButton>
@@ -207,7 +227,15 @@ export default function PracticeDrillDialog({
       <DialogContent dividers>
         {/* Loading state */}
         {generating && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8, gap: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              py: 8,
+              gap: 2,
+            }}
+          >
             <Skeleton variant="circular" width={48} height={48} />
             <Skeleton variant="text" width={240} height={24} />
           </Box>
@@ -217,24 +245,24 @@ export default function PracticeDrillDialog({
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
-            <Button size="small" onClick={() => generateDrill(unitId, config)} sx={{ ml: 1 }}>
-              {t('practiceDrill.dialog.retry')}
+            <Button
+              size="small"
+              onClick={() => generateDrill(unitId, config)}
+              sx={{ ml: 1 }}
+            >
+              {t("practiceDrill.dialog.retry")}
             </Button>
           </Alert>
         )}
 
         {/* Completion state */}
         {session.complete && (
-          <Alert
-            severity="success"
-            icon={<CheckCircleIcon />}
-            sx={{ mb: 2 }}
-          >
+          <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" fontWeight={600}>
-              {t('practiceDrill.dialog.complete')}
+              {t("practiceDrill.dialog.complete")}
             </Typography>
             <Typography variant="body2">
-              {t('practiceDrill.dialog.completeSummary', {
+              {t("practiceDrill.dialog.completeSummary", {
                 accuracy: drillStats.accuracy,
                 xp: session.xpAwarded,
               })}
@@ -247,8 +275,10 @@ export default function PracticeDrillDialog({
           <FilesProvider>
             <DictionaryProvider>
               <DrillGradeAdapter
-                sessionId={session.id || ''}
-                blocks={session.blocks as import('./buildDrillEditorState').PracticeDrillBlock[]}
+                sessionId={session.id || ""}
+                blocks={
+                  session.blocks as import("./buildDrillEditorState").PracticeDrillBlock[]
+                }
                 onGradeChange={(_data, stats) => handleStatsChange(stats)}
               >
                 <Workbook />
@@ -258,23 +288,34 @@ export default function PracticeDrillDialog({
         )}
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={handleClose} color="inherit">
+      <DialogActions sx={{ px: 2, pb: 2, gap: 1, justifyContent: "flex-end" }}>
+        <Button
+          onClick={handleClose}
+          color="inherit"
+          aria-label={session.complete ? "Return to workbook" : "Cancel drill"}
+        >
           {session.complete
-            ? t('practiceDrill.dialog.done')
-            : t('practiceDrill.dialog.cancel')}
+            ? t("practiceDrill.dialog.done")
+            : t("practiceDrill.dialog.cancel")}
         </Button>
         {!session.complete && allCompleted && (
           <Button
             variant="contained"
             onClick={handleComplete}
             disabled={saving}
-            startIcon={saving ? <Skeleton variant="circular" width={16} height={16} /> : <CheckCircleIcon />}
+            startIcon={
+              saving ? (
+                <Skeleton variant="circular" width={16} height={16} />
+              ) : (
+                <CheckCircleIcon />
+              )
+            }
+            aria-label="Finish practice drill and show results"
           >
-            {t('practiceDrill.dialog.finish')}
+            {t("practiceDrill.dialog.finish")}
           </Button>
         )}
       </DialogActions>
     </Dialog>
-  )
+  );
 }

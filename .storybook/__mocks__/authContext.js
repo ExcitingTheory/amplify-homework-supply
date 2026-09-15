@@ -9,6 +9,13 @@
 import React from "react";
 import ProductionAuthContext from "../../src/context/authContext";
 
+const MOCK_DEBUG =
+  typeof process !== "undefined" &&
+  process.env?.STORYBOOK_MOCK_DEBUG === "true";
+const mockLog = (...args) => {
+  if (MOCK_DEBUG) console.log(...args);
+};
+
 /**
  * Mock user for Storybook - can be customized per story
  */
@@ -34,7 +41,7 @@ const defaultMockSession = {
 const AuthContext = ProductionAuthContext;
 
 // Debug: verify this mock module is being loaded
-console.log(
+mockLog(
   "[MOCK authContext.js] Module loaded - Re-exporting production AuthContext",
 );
 
@@ -103,7 +110,7 @@ const MockAuthProvider = ({
     [user, session, isLoading, error],
   );
 
-  console.log("[Mock AuthContext] Providing auth:", value);
+  mockLog("[Mock AuthContext] Providing auth:", value);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

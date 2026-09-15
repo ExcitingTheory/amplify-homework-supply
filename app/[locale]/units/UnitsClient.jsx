@@ -12,9 +12,9 @@ import {
   Skeleton,
   Tabs,
   Tab,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import AppShell from "@/components/AppShell";
 
 import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
@@ -45,6 +45,8 @@ import {
   listCommunityUnits,
 } from "../../actions/collaborator";
 import { forkUnit } from "../../actions/forkUnit";
+import { getAsyncContentState } from "@/utils/asyncContentState";
+import { trackEvent, AnalyticsEvents } from "@/utils/analytics";
 
 function Units({ initialUnits = [] }) {
   const t = useTranslations("pages");
@@ -92,9 +94,24 @@ function Units({ initialUnits = [] }) {
   const [activeTab, setActiveTab] = useState(0);
   const [sharedUnits, setSharedUnits] = useState([]);
   const [sharedLoaded, setSharedLoaded] = useState(false);
+  const [sharedError, setSharedError] = useState("");
   const [communityUnits, setCommunityUnits] = useState([]);
   const [communityLoaded, setCommunityLoaded] = useState(false);
+  const [communityError, setCommunityError] = useState("");
   const [forking, setForking] = useState(false);
+  const [forkError, setForkError] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  const sharedState = getAsyncContentState({
+    loaded: sharedLoaded,
+    error: sharedError,
+    items: sharedUnits,
+  });
+  const communityState = getAsyncContentState({
+    loaded: communityLoaded,
+    error: communityError,
+    items: communityUnits,
+  });
 
   const [work, setIsWorking] = useState(false);
   const router = useRouter();
@@ -238,10 +255,10 @@ function Units({ initialUnits = [] }) {
   async function createUnit(event) {
     setIsWorking(true);
     event.preventDefault();
-
-    const { identityId } = await fetchAuthSession();
+    setCreateError("");
 
     try {
+      const { identityId } = await fetchAuthSession();
       const client = getAmplifyClient();
       const response = await client.models.Unit.create({
         name: "",
@@ -258,6 +275,9 @@ function Units({ initialUnits = [] }) {
       router.push(`/unit/${response.data.id}`);
     } catch (errors) {
       console.error(errors);
+      setCreateError(
+        errors?.message || "Unable to create a unit. Please try again.",
+      );
     } finally {
       setIsWorking(false);
     }
@@ -270,10 +290,15 @@ function Units({ initialUnits = [] }) {
     let cancelled = false;
 
     async function loadShared() {
+      setSharedError("");
       const result = await listSharedWithMe(user.username);
       if (cancelled) return;
       if (result.success) {
         setSharedUnits(result.data || []);
+        setSharedError("");
+      } else {
+        setSharedUnits([]);
+        setSharedError(result.error || "Unable to load shared units.");
       }
       setSharedLoaded(true);
     }
@@ -290,10 +315,15 @@ function Units({ initialUnits = [] }) {
     let cancelled = false;
 
     async function loadCommunity() {
+      setCommunityError("");
       const result = await listCommunityUnits(user.username);
       if (cancelled) return;
       if (result.success) {
         setCommunityUnits(result.data || []);
+        setCommunityError("");
+      } else {
+        setCommunityUnits([]);
+        setCommunityError(result.error || "Unable to load community units.");
       }
       setCommunityLoaded(true);
     }
@@ -306,16 +336,28 @@ function Units({ initialUnits = [] }) {
   // Fork handler for community tab
   async function handleForkUnit(unitId) {
     setForking(true);
+    setForkError("");
     try {
       const { identityId } = await fetchAuthSession();
       const result = await forkUnit(unitId, user.username, identityId);
       if (result.success && result.unitId) {
+        trackEvent(AnalyticsEvents.ENGAGED_TIME_UPDATE, {
+          action: "fork_unit",
+          unitId,
+          forkedUnitId: result.unitId,
+        });
         router.push(`/unit/${result.unitId}`);
       } else {
         console.error("[Units] Fork failed:", result.error);
+        setForkError(
+          result.error || "Unable to copy this unit. Please try again.",
+        );
       }
     } catch (err) {
       console.error("[Units] Fork error:", err);
+      setForkError(
+        err?.message || "Unable to copy this unit. Please try again.",
+      );
     }
     setForking(false);
   }
@@ -330,6 +372,16 @@ function Units({ initialUnits = [] }) {
           }
         }
       >
+        {forkError && (
+          <Alert severity="error" sx={{ maxWidth: "80rem", mx: "auto", my: 2 }}>
+            {forkError}
+          </Alert>
+        )}
+        {createError && (
+          <Alert severity="error" sx={{ maxWidth: "80rem", mx: "auto", my: 2 }}>
+            {createError}
+          </Alert>
+        )}
         <div
           style={{
             margin: "0",
@@ -365,10 +417,22 @@ function Units({ initialUnits = [] }) {
         </div>
 
         {/* Instructor/Admin Tab Bar */}
-        <Box sx={{ width: "90vw", maxWidth: "80rem", margin: "0 auto" }}>
+        <Box
+          sx={{
+            width: "calc(100% - 2rem)",
+            maxWidth: "80rem",
+            margin: "0 auto",
+          }}
+        >
           <Tabs
             value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
+            onChange={(_, newValue) => {
+              setActiveTab(newValue);
+              trackEvent(AnalyticsEvents.ENGAGED_TIME_UPDATE, {
+                action: "switch_units_tab",
+                tab: String(newValue),
+              });
+            }}
             sx={{ mb: 1 }}
           >
             <Tab label={t("units.tabMyUnits")} />
@@ -387,16 +451,38 @@ function Units({ initialUnits = [] }) {
               margin: "1rem auto",
             }}
           >
-            {!sharedLoaded ? (
+            {sharedState === "loading" ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
                 <Skeleton
                   variant="rounded"
-                  width="90vw"
+                  width="100%"
                   height={180}
                   sx={{ maxWidth: "80rem" }}
                 />
               </Box>
-            ) : sharedUnits.length === 0 ? (
+            ) : sharedState === "error" ? (
+              <Box sx={{ maxWidth: "80rem", margin: "0 auto", px: 2, py: 4 }}>
+                <Alert
+                  severity="error"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        setSharedLoaded(false);
+                        setSharedUnits([]);
+                        setSharedError("");
+                      }}
+                      aria-label="Retry loading shared units"
+                    >
+                      Retry
+                    </Button>
+                  }
+                >
+                  {sharedError}
+                </Alert>
+              </Box>
+            ) : sharedState === "success-empty" ? (
               <Typography
                 variant="body1"
                 color="text.secondary"
@@ -426,16 +512,38 @@ function Units({ initialUnits = [] }) {
               margin: "1rem auto",
             }}
           >
-            {!communityLoaded ? (
+            {communityState === "loading" ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
                 <Skeleton
                   variant="rounded"
-                  width="90vw"
+                  width="100%"
                   height={180}
                   sx={{ maxWidth: "80rem" }}
                 />
               </Box>
-            ) : communityUnits.length === 0 ? (
+            ) : communityState === "error" ? (
+              <Box sx={{ maxWidth: "80rem", margin: "0 auto", px: 2, py: 4 }}>
+                <Alert
+                  severity="error"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        setCommunityLoaded(false);
+                        setCommunityUnits([]);
+                        setCommunityError("");
+                      }}
+                      aria-label="Retry loading community units"
+                    >
+                      Retry
+                    </Button>
+                  }
+                >
+                  {communityError}
+                </Alert>
+              </Box>
+            ) : communityState === "success-empty" ? (
               <Typography
                 variant="body1"
                 color="text.secondary"

@@ -28,7 +28,15 @@ import {
   seedMockWords,
   seedMockQuestions,
 } from "@storybook-mocks/aws-amplify-data";
-import { allChatData } from "@storybook-mocks/chatDataLoader";
+import {
+  allChatData,
+  unitEditorChatData,
+  dashboardChatData,
+  sectionsChatData,
+  workbookChatData,
+  recordingStudioChatData,
+  dictionarySearchChatData,
+} from "@storybook-mocks/chatDataLoader";
 
 export default {
   title: "💬 AI Assistant/Chat Sidebar",
@@ -2566,6 +2574,383 @@ Demonstrates **multiple tools working together** to accomplish a complex task.
 - create_unit, update_unit, list_units
 - create_assignment, delete_assignment
 - create_vocabulary_word, create_question
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+// ============================================================================
+// PAGE-SPECIFIC CHAT CONVERSATION MOCKS WITH BLOCKS AND TOOL CALLS
+// ============================================================================
+
+const seedComprehensiveVocabulary = () => {
+  seedMockWords([
+    {
+      id: "word-ohayou",
+      phrase: "おはようございます",
+      phonetic: "ohayou gozaimasu",
+      definition: "Good morning (polite)",
+      owner: "mock-user",
+    },
+    {
+      id: "word-konnichiwa",
+      phrase: "こんにちは",
+      phonetic: "konnichiwa",
+      definition: "Hello / Good afternoon",
+      owner: "mock-user",
+    },
+    {
+      id: "word-konbanwa",
+      phrase: "こんばんは",
+      phonetic: "konbanwa",
+      definition: "Good evening",
+      owner: "mock-user",
+    },
+    {
+      id: "word-sayounara",
+      phrase: "さようなら",
+      phonetic: "sayounara",
+      definition: "Goodbye",
+      owner: "mock-user",
+    },
+    {
+      id: "word-arigatou",
+      phrase: "ありがとうございます",
+      phonetic: "arigatou gozaimasu",
+      definition: "Thank you (polite)",
+      owner: "mock-user",
+    },
+    {
+      id: "word-aka",
+      phrase: "赤",
+      phonetic: "aka",
+      definition: "red",
+      owner: "mock-user",
+    },
+    {
+      id: "word-ao",
+      phrase: "青",
+      phonetic: "ao",
+      definition: "blue",
+      owner: "mock-user",
+    },
+    {
+      id: "word-midori",
+      phrase: "緑",
+      phonetic: "midori",
+      definition: "green",
+      owner: "mock-user",
+    },
+    {
+      id: "word-kiiro",
+      phrase: "黄色",
+      phonetic: "kiiro",
+      definition: "yellow",
+      owner: "mock-user",
+    },
+    {
+      id: "word-itadakimasu",
+      phrase: "いただきます",
+      phonetic: "itadakimasu",
+      definition: "Expression before eating ('I humbly receive')",
+      owner: "mock-user",
+    },
+    {
+      id: "word-gochisousama",
+      phrase: "ごちそうさまでした",
+      phonetic: "gochisousama deshita",
+      definition: "Expression after finishing a meal",
+      owner: "mock-user",
+    },
+    {
+      id: "word-oishii",
+      phrase: "美味しい",
+      phonetic: "oishii",
+      definition: "Delicious / tasty",
+      owner: "mock-user",
+    },
+  ]);
+
+  seedMockQuestions([
+    {
+      id: "q-listen-1",
+      prompt: "Listen to the audio clip and type what you hear in hiragana",
+      answer: "おはよう",
+      phonetic: "ohayou",
+      audioKey:
+        "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      owner: "mock-user",
+    },
+    {
+      id: "q-listen-2",
+      prompt: "Listen to the audio clip and type what you hear in hiragana",
+      answer: "おやすみ",
+      phonetic: "oyasumi",
+      audioKey:
+        "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+      owner: "mock-user",
+    },
+    {
+      id: "q-greet-001",
+      prompt: "When is 'konbanwa' appropriately used?",
+      answer: "In the evening or after sunset.",
+      owner: "mock-user",
+    },
+    {
+      id: "q-itadakimasu-001",
+      prompt: "When should you say 'いただきます' (itadakimasu)?",
+      answer: "Immediately before beginning a meal.",
+      owner: "mock-user",
+    },
+  ]);
+};
+
+export const PageUnitEditor = {
+  name: "📄 Page Mock / Unit Editor (All Blocks & Search)",
+  decorators: [
+    (Story) => {
+      seedComprehensiveVocabulary();
+      seedMockAssistantChats([unitEditorChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /Daily Japanese Greetings|Aisatsu|Matching|Quiz|Answer/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 📝 Unit Editor Full Conversation Mock
+
+Demonstrates a complete multi-turn curriculum creation session in the Unit Editor page:
+- 🔍 **search_content**: Semantic vector search finding greetings, audio, and PDF guides.
+- 📖 **insert_content_block**: Formatted Lexical rich text lesson introduction explaining aisatsu etiquette.
+- 🔗 **insert_meaning_association**: 5-word matching block with Learn, Easy, and Hard difficulty modes.
+- ❓ **insert_quiz**: 3-question situational multiple-choice quiz with automatic grading.
+- ✍️ **insert_answer_block**: Multimodal translation practice with keyboard, audio, and drawing.
+- 🎧 **insert_custom_answer**: Audio transcription listening exercise.
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const PageDashboard = {
+  name: "📊 Page Mock / Dashboard (Tours & Performance)",
+  decorators: [
+    (Story) => {
+      seedMockAssistantChats([dashboardChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /Japanese 101|accuracy|tour|Instructor/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 📊 Dashboard Full Conversation Mock
+
+Demonstrates AI assistant interaction on the Instructor Dashboard:
+- 📋 **list_sections**: Aggregates active section metrics, average accuracy, and pending submissions.
+- 🚀 **start_tour**: Launches the guided interactive walkthrough for assignment workflows.
+- 💡 **Executive Advice**: Generates prioritized daily tasks based on real student performance.
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const PageSectionsManagement = {
+  name: "👥 Page Mock / Sections & Assignment Management",
+  decorators: [
+    (Story) => {
+      seedMockAssistantChats([sectionsChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /Summer Intensive|JP102-SUMMER26|Assignment/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 👥 Sections & Course Management Mock
+
+Demonstrates automated administrative workflows:
+- ➕ **create_section**: Creates new class section and generates student join codes.
+- 📅 **create_assignment**: Links units to sections with ISO due dates and notifications.
+- 📜 **list_sections**: Verifies active courses and assignment lineups.
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const PageWorkbookLearner = {
+  name: "🎓 Page Mock / Workbook (Student Tutor Kai)",
+  decorators: [
+    (Story) => {
+      seedMockAssistantChats([workbookChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /topic|subject|accuracy|drill/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 🎓 Workbook / Student Tutor Mock
+
+Demonstrates student interactions with the **Kai** AI persona:
+- 💡 **Socratic Tutoring**: Guides students toward grammatical concepts (e.g. は vs が) without giving direct answers away.
+- 📈 **get_student_progress**: Checks live completion percentage and accuracy.
+- 🎯 **start_practice_drill**: Launches an adaptive 5-question review drill popup in the workbook.
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const PageRecordingStudio = {
+  name: "🎙️ Page Mock / Recording Studio (Dialogue & Audio Scripts)",
+  decorators: [
+    (Story) => {
+      seedMockAssistantChats([recordingStudioChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /Ramen Shop|いらっしゃいませ|Server|Customer/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 🎙️ Recording Studio 3 Full Conversation Mock
+
+Demonstrates audio production workflows:
+- 🗣️ **generate_recording_script (conversation preset)**: Generates multi-speaker dialogue tracks with Japanese text, romaji phonetics, and English translation cues.
+- 🔤 **generate_recording_script (word preset)**: Generates pronunciation tracks for dictionary vocabulary words.
+- 🎛️ **RecordingScriptPreview**: Live interactive preview with "Create Record" and "Open in Studio" actions.
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const PageDictionaryAndSearch = {
+  name: "📚 Page Mock / Dictionary & Semantic Search",
+  decorators: [
+    (Story) => {
+      seedComprehensiveVocabulary();
+      seedMockAssistantChats([dictionarySearchChatData]);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(
+      () => {
+        expect(canvasElement.textContent).toMatch(
+          /いただきます|itadakimasu|dining/i,
+        );
+      },
+      { timeout: 10000 },
+    );
+  },
+  parameters: {
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+### 📚 Dictionary, Question Bank & Semantic Search Mock
+
+Demonstrates content creation and discovery:
+- 📖 **create_vocabulary_word**: Adds words with phonetics, definitions, and unit associations.
+- ❓ **create_question**: Adds practice questions with prompt and answer fields.
+- 🔍 **search_content**: Executes semantic search across files, vocabulary words, and question banks.
         `,
       },
     },

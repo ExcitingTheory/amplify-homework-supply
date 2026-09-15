@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
@@ -105,6 +106,7 @@ export function AIAgentConfig({
   saving,
   mode,
 }: AIAgentConfigProps) {
+  const t = useTranslations("components.aiAgentConfig");
   const update = (key: string, value: any) => {
     onChange({ ...values, [key]: value });
   };
@@ -112,21 +114,21 @@ export function AIAgentConfig({
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        AI Agent Configuration
+        {t("title")}
       </Typography>
 
       {/* Model Selection */}
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">Model Selection</Typography>
+          <Typography variant="subtitle1">{t("modelSelection")}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2}>
             {mode === "platform" && (
               <FormControl fullWidth size="small">
-                <InputLabel>Default Model</InputLabel>
+                <InputLabel>{t("defaultModel")}</InputLabel>
                 <Select
-                  label="Default Model"
+                  label={t("defaultModel")}
                   value={values.defaultAIModel || "gpt-4o"}
                   onChange={(e) => update("defaultAIModel", e.target.value)}
                 >
@@ -139,9 +141,9 @@ export function AIAgentConfig({
               </FormControl>
             )}
             <FormControl fullWidth size="small">
-              <InputLabel>Kai Model</InputLabel>
+              <InputLabel>{t("kaiModel")}</InputLabel>
               <Select
-                label="Kai Model"
+                label={t("kaiModel")}
                 value={values.kaiModel || ""}
                 onChange={(e) => update("kaiModel", e.target.value || null)}
                 displayEmpty
@@ -154,9 +156,9 @@ export function AIAgentConfig({
               </Select>
             </FormControl>
             <FormControl fullWidth size="small">
-              <InputLabel>Sage Model</InputLabel>
+              <InputLabel>{t("sageModel")}</InputLabel>
               <Select
-                label="Sage Model"
+                label={t("sageModel")}
                 value={values.sageModel || ""}
                 onChange={(e) => update("sageModel", e.target.value || null)}
                 displayEmpty
@@ -175,13 +177,13 @@ export function AIAgentConfig({
       {/* Behavior Tuning */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">Behavior Tuning</Typography>
+          <Typography variant="subtitle1">{t("behaviorTuning")}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Box>
               <Typography variant="body2" gutterBottom>
-                Kai Temperature: {values.kaiTemperature ?? 0.7}
+                {t("kaiTemperatureLabel")} {values.kaiTemperature ?? 0.7}
               </Typography>
               <Slider
                 value={values.kaiTemperature ?? 0.7}
@@ -199,7 +201,7 @@ export function AIAgentConfig({
             </Box>
             <Box>
               <Typography variant="body2" gutterBottom>
-                Sage Temperature: {values.sageTemperature ?? 0.7}
+                {t("sageTemperatureLabel")} {values.sageTemperature ?? 0.7}
               </Typography>
               <Slider
                 value={values.sageTemperature ?? 0.7}
@@ -216,7 +218,7 @@ export function AIAgentConfig({
               />
             </Box>
             <TextField
-              label="Kai Max Tokens"
+              label={t("kaiMaxTokensLabel")}
               type="number"
               size="small"
               value={values.kaiMaxTokens ?? 2000}
@@ -229,7 +231,7 @@ export function AIAgentConfig({
               slotProps={{ htmlInput: { min: 100, max: 8000 } }}
             />
             <TextField
-              label="Sage Max Tokens"
+              label={t("sageMaxTokensLabel")}
               type="number"
               size="small"
               value={values.sageMaxTokens ?? 4000}
@@ -242,7 +244,7 @@ export function AIAgentConfig({
               slotProps={{ htmlInput: { min: 100, max: 8000 } }}
             />
             <TextField
-              label="Max Agent Steps"
+              label={t("maxAgentStepsLabel")}
               type="number"
               size="small"
               value={values.agentMaxSteps ?? 5}
@@ -253,7 +255,7 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 1, max: 10 } }}
-              helperText="Maximum tool-calling rounds per conversation turn"
+              helperText={t("maxAgentStepsHint")}
             />
           </Stack>
         </AccordionDetails>
@@ -262,13 +264,13 @@ export function AIAgentConfig({
       {/* Search Tuning */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">Search Tuning</Typography>
+          <Typography variant="subtitle1">{t("searchTuning")}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Box>
               <Typography variant="body2" gutterBottom>
-                Similarity Threshold: {values.searchThreshold ?? 0.3}
+                {t("similarityThresholdLabel")} {values.searchThreshold ?? 0.3}
               </Typography>
               <Slider
                 value={values.searchThreshold ?? 0.3}
@@ -286,7 +288,7 @@ export function AIAgentConfig({
             </Box>
             {mode === "platform" && (
               <TextField
-                label="Default Result Limit"
+                label={t("defaultResultLimitLabel")}
                 type="number"
                 size="small"
                 value={values.searchDefaultLimit ?? 5}
@@ -306,7 +308,7 @@ export function AIAgentConfig({
       {/* Memory */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">Conversation Memory</Typography>
+          <Typography variant="subtitle1">{t("conversationMemory")}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2}>
@@ -317,13 +319,13 @@ export function AIAgentConfig({
                   onChange={(e) => update("memoryEnabled", e.target.checked)}
                 />
               }
-              label="Enable conversation memory"
+              label={t("enableConversationMemory")}
             />
             {mode === "platform" && (
               <FormControl fullWidth size="small">
-                <InputLabel>Summarization Model</InputLabel>
+                <InputLabel>{t("summarizationModelLabel")}</InputLabel>
                 <Select
-                  label="Summarization Model"
+                  label={t("summarizationModelLabel")}
                   value={values.memorySummarizationModel || "gpt-4o-mini"}
                   onChange={(e) =>
                     update("memorySummarizationModel", e.target.value)
@@ -344,14 +346,12 @@ export function AIAgentConfig({
       {/* Token Budgets */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">Token Budgets</Typography>
+          <Typography variant="subtitle1">{t("tokenBudgets")}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Typography variant="body2" color="text.secondary">
-              Control how many tokens are allocated to each part of an agent
-              turn. Lower budgets reduce cost; higher budgets allow richer
-              context.
+              {t("tokenBudgetsDescription")}
             </Typography>
             <FormControlLabel
               control={
@@ -362,15 +362,17 @@ export function AIAgentConfig({
                   }
                 />
               }
-              label="Enforce token budgets"
+              label={t("enforceTokenBudget")}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: -2 }}>
-              When enabled, the agent will truncate system prompts and tool
-              results to their budget limits, and abort multi-step turns that
-              exceed the total turn budget.
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: -2 }}
+            >
+              {t("enforceTokenBudgetNote")}
             </Typography>
             <TextField
-              label="System Prompt Budget"
+              label={t("systemPromptBudgetLabel")}
               type="number"
               size="small"
               value={values.systemPromptBudget ?? 2000}
@@ -381,10 +383,10 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-              helperText="Max tokens for Tier 1 context in system prompt (default: 2000)"
+              helperText={t("systemPromptBudgetHint")}
             />
             <TextField
-              label="Tool Result Budget"
+              label={t("toolResultBudgetLabel")}
               type="number"
               size="small"
               value={values.toolResultBudget ?? 4000}
@@ -395,10 +397,10 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 500, max: 16000 } }}
-              helperText="Max tokens per tool result returned to model (default: 4000)"
+              helperText={t("toolResultBudgetHint")}
             />
             <TextField
-              label="Total Turn Budget"
+              label={t("totalTurnBudgetLabel")}
               type="number"
               size="small"
               value={values.totalTurnBudget ?? 16000}
@@ -409,19 +411,16 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
-              helperText="Max total tokens consumed per agent turn across all steps (default: 16000)"
+              helperText={t("totalTurnBudgetHint")}
             />
             {mode === "platform" && (
               <>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ mt: 1, fontWeight: 600 }}
-                >
-                  Per-Persona Overrides
+                <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600 }}>
+                  {t("perPersonaOverrides")}
                 </Typography>
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label="Kai System Prompt"
+                    label={t("kaiSystemPromptLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -433,11 +432,11 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("useDefaultPlaceholder")}
+                    helperText={t("tokensUnit")}
                   />
                   <TextField
-                    label="Sage System Prompt"
+                    label={t("sageSystemPromptLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -449,13 +448,13 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("useDefaultPlaceholder")}
+                    helperText={t("tokensUnit")}
                   />
                 </Stack>
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label="Kai Tool Result"
+                    label={t("kaiToolResultLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -467,11 +466,11 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 16000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("useDefaultPlaceholder")}
+                    helperText={t("tokensUnit")}
                   />
                   <TextField
-                    label="Sage Tool Result"
+                    label={t("sageToolResultLabel")}
                     type="number"
                     size="small"
                     fullWidth

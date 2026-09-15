@@ -221,6 +221,8 @@ function MockChatPanel() {
 const meta: Meta = {
   title: "💬 Collaborative Chat/ChatPanel",
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "fullscreen",
   },
   decorators: [

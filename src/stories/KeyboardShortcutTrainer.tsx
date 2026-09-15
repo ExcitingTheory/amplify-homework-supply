@@ -320,6 +320,30 @@ export const KeyboardShortcutTrainer: React.FC = () => {
 
       setActiveShortcut(shortcut.id);
 
+      // Onboarding tasks require actually performing a shortcut (not just
+      // clicking/scrolling the demo area) — emit once, on the first real
+      // completion, so `requiredSequence: ["shortcut-performed"]` can gate on it.
+      if (completedShortcuts.size === 0) {
+        try {
+          const emitter = getOnboardingEmitter();
+          const persona = emitter.getPersona();
+          if (persona) {
+            const storyId =
+              new URLSearchParams(window.location.search).get("id") ||
+              "unknown";
+            emitter.emit({
+              type: "action-performed",
+              actionName: "shortcut-performed",
+              persona,
+              timestamp: Date.now(),
+              storyId,
+            } as any);
+          }
+        } catch (error) {
+          console.error("Failed to emit shortcut-performed action:", error);
+        }
+      }
+
       setTimeout(() => {
         setCompletedShortcuts((prev) => {
           const newSet = new Set(prev);

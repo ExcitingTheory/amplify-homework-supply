@@ -224,7 +224,7 @@ describe("gamification handler — checkBadges", () => {
     const result = await handler(
       {
         fieldName: "checkBadges",
-        arguments: { studentId: "s1", cohortId: "section-1" },
+        arguments: { studentId: "s1", sectionID: "section-1" },
       },
       {} as any,
       vi.fn(),
@@ -284,7 +284,7 @@ describe("gamification handler — checkBadges", () => {
     const result = await handler(
       {
         fieldName: "checkBadges",
-        arguments: { studentId: "s1", cohortId: "section-1" },
+        arguments: { studentId: "s1", sectionID: "section-1" },
       },
       {} as any,
       vi.fn(),

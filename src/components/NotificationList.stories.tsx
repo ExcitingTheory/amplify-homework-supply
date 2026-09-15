@@ -138,6 +138,8 @@ const meta: Meta<typeof NotificationList> = {
   title: "📬 Notifications/Notification List",
   component: NotificationList,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
     docs: {
       description: {
@@ -146,10 +148,17 @@ const meta: Meta<typeof NotificationList> = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
-      <Box sx={{ maxWidth: 600, border: 1, borderColor: "divider", borderRadius: 1 }}>
+      <Box
+        sx={{
+          maxWidth: 600,
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 1,
+        }}
+      >
         <Story />
       </Box>
     ),
@@ -179,14 +188,14 @@ export const WithNotifications: Story = {
     await canvas.findByText("Assignment due in 2 hours");
 
     // Click "Assignments" category tab
-    const assignmentTab = canvas.getByRole('tab', { name: /Assignments/i });
+    const assignmentTab = canvas.getByRole("tab", { name: /Assignments/i });
     await userEvent.click(assignmentTab);
     // Only assignment notification visible
     await canvas.findByText("Assignment due in 2 hours");
     expect(canvas.queryByText("You earned a badge!")).toBeNull();
 
     // Click back to All tab
-    const allTab = canvas.getByRole('tab', { name: /^All/i });
+    const allTab = canvas.getByRole("tab", { name: /^All/i });
     await userEvent.click(allTab);
     await canvas.findByText("You earned a badge!");
   },
@@ -278,7 +287,7 @@ export const SingleCategory: Story = {
     // Items for this category render
     await canvas.findByText("You earned a badge!");
     // Click the Gamification tab to filter
-    const gamTab = canvas.getByRole('tab', { name: /Gamification/i })
+    const gamTab = canvas.getByRole("tab", { name: /Gamification/i });
     await userEvent.click(gamTab);
     // Still shows the badge notification
     await canvas.findByText("You earned a badge!");

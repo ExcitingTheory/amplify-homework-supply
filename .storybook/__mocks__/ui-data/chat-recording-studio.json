@@ -1,0 +1,161 @@
+[
+  {
+    "id": "rs-msg-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Generate a multi-track dialogue script for ordering food at a Tokyo ramen shop."
+      }
+    ]
+  },
+  {
+    "id": "rs-msg-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I'll generate a complete 2-speaker conversation script with native Japanese lines, romanized phonetics, and English translation cues."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "generate_recording_script",
+        "toolCallId": "call_rs_script_001"
+      },
+      {
+        "type": "tool-generate_recording_script",
+        "toolCallId": "call_rs_script_001",
+        "state": "output-available",
+        "input": {
+          "preset": "conversation",
+          "scenario": "Ordering ramen at a counter shop",
+          "speakers": ["Customer", "Server"],
+          "difficulty": "beginner-intermediate"
+        },
+        "output": {
+          "success": true,
+          "preset": "conversation",
+          "scriptData": {
+            "metadata": {
+              "title": "Ordering at a Ramen Shop (ラーメン屋にて)",
+              "preset": "conversation",
+              "tempo": "moderate",
+              "targetDuration": "30s"
+            },
+            "tracks": [
+              {
+                "label": "Server (店員)",
+                "text": "いらっしゃいませ！何名様ですか？",
+                "phonetic": "Irasshaimase! Nan-mei sama desu ka?",
+                "translation": "Welcome! How many people in your party?",
+                "voice": "native-female"
+              },
+              {
+                "label": "Customer (客)",
+                "text": "一人です。豚骨ラーメンを一つお願いします。",
+                "phonetic": "Hitori desu. Tonkotsu raamen o hitotsu onegaishimasu.",
+                "translation": "Just one. One tonkotsu ramen please.",
+                "voice": "learner-male"
+              },
+              {
+                "label": "Server (店員)",
+                "text": "かしこまりました。麺の硬さはいかがなさいますか？",
+                "phonetic": "Kashikomarimashita. Men no katasa wa ikaga nasaimasu ka?",
+                "translation": "Certainly. How would you like the firmness of your noodles?",
+                "voice": "native-female"
+              },
+              {
+                "label": "Customer (客)",
+                "text": "硬めでお願いします。",
+                "phonetic": "Katame de onegaishimasu.",
+                "translation": "Firm noodles, please.",
+                "voice": "learner-male"
+              }
+            ]
+          },
+          "lockedTracks": [0, 2],
+          "preview": {
+            "trackCount": 4,
+            "preset": "conversation",
+            "estimatedDuration": "25s",
+            "speakers": ["Server (Native)", "Customer (Learner)"]
+          },
+          "warnings": []
+        }
+      },
+      {
+        "type": "text",
+        "text": "I've created the dialogue recording script with 4 sequential tracks. Click \"Open in Studio\" below to record or customize the audio tracks directly in Recording Studio 3!"
+      }
+    ]
+  },
+  {
+    "id": "rs-msg-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Also create a single vocabulary pronunciation script for 'いらっしゃいませ'."
+      }
+    ]
+  },
+  {
+    "id": "rs-msg-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "generate_recording_script",
+        "toolCallId": "call_rs_word_002"
+      },
+      {
+        "type": "tool-generate_recording_script",
+        "toolCallId": "call_rs_word_002",
+        "state": "output-available",
+        "input": {
+          "preset": "word",
+          "word": "いらっしゃいませ",
+          "phonetic": "irasshaimase",
+          "definition": "Welcome (used in shops and restaurants)"
+        },
+        "output": {
+          "success": true,
+          "preset": "word",
+          "scriptData": {
+            "metadata": {
+              "title": "いらっしゃいませ — Welcome",
+              "preset": "word"
+            },
+            "word": "いらっしゃいませ",
+            "phonetic": "irasshaimase",
+            "definition": "Welcome / Please come in (formal greeting in retail and hospitality)",
+            "tracks": [
+              {
+                "label": "Native Pronunciation",
+                "text": "いらっしゃいませ。",
+                "voice": "native-tokyo",
+                "phonetic": "irasshaimase"
+              }
+            ]
+          },
+          "lockedTracks": [0],
+          "wordData": {
+            "phrase": "いらっしゃいませ",
+            "phonetic": "irasshaimase",
+            "definition": "Welcome / Please come in (hospitality greeting)"
+          },
+          "preview": {
+            "trackCount": 1,
+            "preset": "word",
+            "estimatedDuration": "3s"
+          },
+          "warnings": []
+        }
+      },
+      {
+        "type": "text",
+        "text": "Vocabulary recording script ready! You can save it as a new Word entry in your dictionary or open Recording Studio 3 to capture your pronunciation."
+      }
+    ]
+  }
+]

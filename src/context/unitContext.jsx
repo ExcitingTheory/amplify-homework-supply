@@ -14,6 +14,8 @@ import {
 import { summarizeFeedback as summarizeFeedbackAction } from "../../app/actions/feedback";
 import AuthContext from "../context/authContext";
 import { useWorkbookCollaboration } from "../yjs/workbookHooks";
+import { trackWorkbookStarted, trackGradeSubmitted } from "../utils/analytics";
+import { getAssignmentWindowState } from "../utils/assignmentTiming";
 import {
   unitReducer,
   initialState as unitInitialState,
@@ -40,6 +42,9 @@ const UnitProvider = ({ children, id }) => {
 
   const [state, dispatch] = useReducer(unitReducer, unitInitialState);
   const [sectionId, setSectionId] = React.useState(undefined);
+  const [assignmentRecord, setAssignmentRecord] = React.useState(undefined);
+  const [assignmentWindowReady, setAssignmentWindowReady] =
+    React.useState(false);
   const savingCountRef = useRef(0);
 
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
@@ -196,12 +201,14 @@ const UnitProvider = ({ children, id }) => {
     }
   }, [user]);
 
-  // Derive sectionId from Assignment record (server-authoritative, not URL)
+  // Derive sectionId + assignment availability window from the Assignment
+  // record (server-authoritative, not URL).
   React.useEffect(() => {
     if (!id || authLoading || !user) return;
 
     let cancelled = false;
     const client = getAmplifyClient();
+    setAssignmentWindowReady(false);
 
     async function lookupAssignment() {
       try {
@@ -209,20 +216,24 @@ const UnitProvider = ({ children, id }) => {
           filter: { unitID: { eq: id } },
         });
         if (cancelled) return;
-        // Use the first assignment that matches this unit for the current user
-        const assignment = (assignments || []).find(
-          (a) => a != null && a.sectionID,
-        );
-        if (assignment?.sectionID) {
-          setSectionId(assignment.sectionID);
+        // First assignment matching this unit for the current user; prefer one
+        // carrying a sectionID for section-scoped features.
+        const valid = (assignments || []).filter((a) => a != null);
+        const matched = valid.find((a) => a.sectionID) || valid[0] || null;
+        setAssignmentRecord(matched);
+        if (matched?.sectionID) {
+          setSectionId(matched.sectionID);
         }
       } catch (err) {
         if (!cancelled) {
+          setAssignmentRecord(null);
           console.warn(
             "[UnitContext] Failed to look up Assignment for sectionId:",
             err,
           );
         }
+      } finally {
+        if (!cancelled) setAssignmentWindowReady(true);
       }
     }
 
@@ -293,6 +304,8 @@ const UnitProvider = ({ children, id }) => {
       }
 
       dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
+
+      trackWorkbookStarted(id, sectionId || undefined);
 
       // Award XP for submitting homework (first time only — dedup by gradeId)
       awardXP(
@@ -378,6 +391,19 @@ const UnitProvider = ({ children, id }) => {
 
   const saveGrade = React.useCallback(
     async (data) => {
+      const assignment = assignmentRecord || null;
+      const assignmentLateWindow = assignment?.availableUntil
+        ? new Date(assignment.availableUntil)
+        : assignment?.dueDate
+          ? new Date(assignment.dueDate)
+          : null;
+      const shouldRequestLateReview =
+        assignmentLateWindow &&
+        new Date() > assignmentLateWindow &&
+        assignment?.allowLateCompletion !== false &&
+        assignment?.lateStatus !== "DROPPED" &&
+        assignment?.lateStatus !== "KEPT";
+
       // let _grade = grade
 
       // Count the total number of expected questions to later compare to the number expected in the unit
@@ -451,6 +477,22 @@ const UnitProvider = ({ children, id }) => {
           }
         }
 
+        if (shouldRequestLateReview && assignment?.id) {
+          try {
+            const client = getAmplifyClient();
+            await client.models.Assignment.update({
+              id: assignment.id,
+              lateStatus: "PENDING",
+              _version: assignment._version,
+            });
+          } catch (error) {
+            console.warn(
+              "[UnitContext] Failed to flag late assignment for instructor review:",
+              error,
+            );
+          }
+        }
+
         // Moderate async — backend fetches _version and writes to Grade.moderation
         if (gradeId) {
           moderateContent(data, {
@@ -470,6 +512,13 @@ const UnitProvider = ({ children, id }) => {
             }
           });
         }
+
+        if (gradeId && unitIsComplete) {
+          trackGradeSubmitted(id, gradeId, unitAccuracy ?? 0, {
+            sectionId: sectionId || undefined,
+          });
+        }
+
         if (unitIsComplete && !timeLimitSeconds) {
           dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
           // Award XP + badges + streak + personal best via batched Server Action
@@ -511,7 +560,7 @@ const UnitProvider = ({ children, id }) => {
               .evaluateSkillsForUnit({
                 studentId: currentUsername,
                 unitId: id,
-                cohortId: sectionId || undefined,
+                sectionID: sectionId || undefined,
               })
               .catch((err) =>
                 console.warn("[unitContext] Skill evaluation:", err),
@@ -570,7 +619,13 @@ const UnitProvider = ({ children, id }) => {
         throw error;
       }
     },
-    [rubricLength, state.grade, createGrade, timeLimitSeconds],
+    [
+      rubricLength,
+      state.grade,
+      createGrade,
+      timeLimitSeconds,
+      assignmentRecord,
+    ],
   );
 
   React.useEffect(() => {
@@ -1612,6 +1667,12 @@ const UnitProvider = ({ children, id }) => {
     [],
   );
 
+  // Assignment availability window for the workbook gate (open/locked/closed).
+  const assignmentWindowState = React.useMemo(
+    () => getAssignmentWindowState(assignmentRecord || {}),
+    [assignmentRecord],
+  );
+
   const contextValue = React.useMemo(
     () => ({
       unit: state.unit,
@@ -1622,6 +1683,9 @@ const UnitProvider = ({ children, id }) => {
       dictionary: state.dictionary,
       files: state.files,
       questionBank: state.questionBank,
+      assignmentWindowState,
+      assignmentWindowReady,
+      assignment: assignmentRecord,
       playlistUrls: state.playlistUrls,
       description,
       editorStateRef,
@@ -1672,6 +1736,9 @@ const UnitProvider = ({ children, id }) => {
       state.dictionary,
       state.files,
       state.questionBank,
+      assignmentWindowState,
+      assignmentWindowReady,
+      assignmentRecord,
       state.playlistUrls,
       description,
       state.finishedQuestions,

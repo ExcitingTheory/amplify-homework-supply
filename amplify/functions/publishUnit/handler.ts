@@ -437,12 +437,14 @@ async function rebuildSectionCourseOutlines(
       }
 
       // 4. Update section courseOutline
+      // Section.courseOutline is a typed [CourseOutlineEntry] field — pass the
+      // object array directly; AppSync rejects a stringified value here.
       const { errors: sectionErrors } = (await client.graphql({
         query: UPDATE_SECTION,
         variables: {
           input: {
             id: sectionId,
-            courseOutline: JSON.stringify(outline),
+            courseOutline: outline,
             _version: section._version,
           },
         },

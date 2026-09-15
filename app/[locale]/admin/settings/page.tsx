@@ -48,9 +48,9 @@ function GamificationAdmin() {
 
   // --- Section selection with URL persistence ---
   const { sections } = React.useContext(SectionContext) as { sections: any[] };
-  const [selectedSectionId, setSelectedSectionId] = React.useState<string | null>(
-    () => (params.section as string) || null,
-  );
+  const [selectedSectionId, setSelectedSectionId] = React.useState<
+    string | null
+  >(() => (params.section as string) || null);
 
   // Update URL when section changes
   const handleSectionChange = React.useCallback(
@@ -88,7 +88,9 @@ function GamificationAdmin() {
   const [platformSettingsRecord, setPlatformSettingsRecord] =
     React.useState<any>(null);
   const [linearLockEnabled, setLinearLockEnabled] = React.useState(false);
-  const [unitLockRequirements, setUnitLockRequirements] = React.useState<Record<string, any>>({});
+  const [unitLockRequirements, setUnitLockRequirements] = React.useState<
+    Record<string, any>
+  >({});
   const [availableUnits, setAvailableUnits] = React.useState<any[]>([]);
   const [availableBadges, setAvailableBadges] = React.useState<any[]>([]);
 
@@ -135,7 +137,9 @@ function GamificationAdmin() {
       next: ({ items }) => {
         const valid = items.filter((b) => b != null && !b._deleted);
         const filtered = selectedSectionId
-          ? valid.filter((b) => !b.cohortId || b.cohortId === selectedSectionId)
+          ? valid.filter(
+              (b) => !b.sectionID || b.sectionID === selectedSectionId,
+            )
           : valid;
         setAvailableBadges(
           filtered.map((b) => ({ id: b.id, title: b.title || b.id })),
@@ -211,16 +215,18 @@ function GamificationAdmin() {
     const sub = client.models.EasterEgg.observeQuery().subscribe({
       next: ({ items }) => {
         const valid = items.filter((item) => item != null && !item._deleted);
-        // Client-side section filter (cohortId may not exist on all eggs yet)
+        // Client-side section filter
         const filtered = selectedSectionId
           ? valid.filter(
-              (egg) => !egg.cohortId || egg.cohortId === selectedSectionId,
+              (egg) => !egg.sectionID || egg.sectionID === selectedSectionId,
             )
           : valid;
         setEasterEggs(
           filtered.map((egg) => ({
             id: egg.id,
-            type: (SCHEMA_TO_TRIGGER_TYPE as any)[egg.trigger as string] || egg.trigger,
+            type:
+              (SCHEMA_TO_TRIGGER_TYPE as any)[egg.trigger as string] ||
+              egg.trigger,
             message: egg.revealMessage || "",
             xpReward: egg.xpReward || 0,
             keyword:
@@ -252,7 +258,7 @@ function GamificationAdmin() {
       next: ({ items }) => {
         const valid = items.filter((item) => item != null && !item._deleted);
         const filtered = selectedSectionId
-          ? valid.filter((boss) => boss.cohortId === selectedSectionId)
+          ? valid.filter((boss) => boss.sectionID === selectedSectionId)
           : valid;
         setBossBattles(
           filtered.map((boss) => ({
@@ -357,7 +363,7 @@ function GamificationAdmin() {
           title: skill.title,
           description: skill.description || "",
           xpReward: skill.xpReward || 0,
-          cohortId: selectedSectionId || undefined,
+          sectionID: selectedSectionId || undefined,
         });
       } catch (err) {
         console.error("[GamificationAdmin] Failed to create Skill:", err);
@@ -381,25 +387,26 @@ function GamificationAdmin() {
     [client],
   );
 
-  const handleSaveCampaign = React.useCallback(
-    async (campaignData: any) => {
-      // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
-      console.warn("[GamificationAdmin] handleSaveCampaign called but Campaign model no longer exists. Use GroupChallenge instead.");
-    },
-    [],
-  );
+  const handleSaveCampaign = React.useCallback(async (campaignData: any) => {
+    // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
+    console.warn(
+      "[GamificationAdmin] handleSaveCampaign called but Campaign model no longer exists. Use GroupChallenge instead.",
+    );
+  }, []);
 
-  const handleDeleteCampaign = React.useCallback(
-    async (campaignId: string) => {
-      // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
-      console.warn("[GamificationAdmin] handleDeleteCampaign called but Campaign model no longer exists. Use GroupChallenge instead.");
-    },
-    [],
-  );
+  const handleDeleteCampaign = React.useCallback(async (campaignId: string) => {
+    // Campaign model was removed — campaigns are now GroupChallenge records with chapterOrder
+    console.warn(
+      "[GamificationAdmin] handleDeleteCampaign called but Campaign model no longer exists. Use GroupChallenge instead.",
+    );
+  }, []);
 
-  const handleGenerateCampaign = React.useCallback(async (title: string) => {
-    return generateCampaignNarrative(title, selectedSectionId || undefined);
-  }, [selectedSectionId]);
+  const handleGenerateCampaign = React.useCallback(
+    async (title: string) => {
+      return generateCampaignNarrative(title, selectedSectionId || undefined);
+    },
+    [selectedSectionId],
+  );
 
   // --- Badge customization handlers ---
   const handleBadgeOverrideChange = React.useCallback((override: any) => {
@@ -433,11 +440,11 @@ function GamificationAdmin() {
   }, []);
 
   const handleCreateSquad = React.useCallback(
-    async (name: string, cohortId: string) => {
+    async (name: string, sectionID: string) => {
       try {
         await client.models.Squad.create({
           name,
-          cohortId,
+          sectionID,
           totalXP: 0,
         });
       } catch (err) {
@@ -491,7 +498,7 @@ function GamificationAdmin() {
           xpReward: egg.xpReward || 50,
           revealMessage: egg.message,
           active: true,
-          cohortId: selectedSectionId || undefined,
+          sectionID: selectedSectionId || undefined,
           badgeId: egg.badgeId || undefined,
         });
       } catch (err) {
@@ -548,8 +555,10 @@ function GamificationAdmin() {
           deadline: bossData.deadline || undefined,
           setting: bossData.setting || "",
           stakes,
-          linkedUnitIds: bossData.linkedUnitIds?.length ? bossData.linkedUnitIds : undefined,
-          cohortId: selectedSectionId || "",
+          linkedUnitIds: bossData.linkedUnitIds?.length
+            ? bossData.linkedUnitIds
+            : undefined,
+          sectionID: selectedSectionId || "",
         } as any);
       } catch (err) {
         console.error(
@@ -576,7 +585,9 @@ function GamificationAdmin() {
           setting: bossData.setting || "",
           stakes,
           featuredImage: bossData.featuredImage || undefined,
-          linkedUnitIds: bossData.linkedUnitIds?.length ? bossData.linkedUnitIds : undefined,
+          linkedUnitIds: bossData.linkedUnitIds?.length
+            ? bossData.linkedUnitIds
+            : undefined,
           _version: existing?._version,
         } as any);
       } catch (err) {
@@ -716,7 +727,7 @@ function GamificationAdmin() {
       try {
         // 1. Copy Skills (reset progress, keep structure)
         const { data: sourceSkills } = await client.models.Skill.list({
-          filter: { cohortId: { eq: sourceSectionId } },
+          filter: { sectionID: { eq: sourceSectionId } },
         });
         for (const skill of sourceSkills || []) {
           await client.models.Skill.create({
@@ -724,7 +735,7 @@ function GamificationAdmin() {
             description: skill.description,
             prerequisites: skill.prerequisites,
             xpReward: skill.xpReward,
-            cohortId: selectedSectionId,
+            sectionID: selectedSectionId,
             unitIds: skill.unitIds || [],
             minimumAccuracy: skill.minimumAccuracy || 70,
           });
@@ -732,7 +743,7 @@ function GamificationAdmin() {
 
         // 2. Copy Easter Eggs (reset discoveries)
         const { data: sourceEggs } = await client.models.EasterEgg.list({
-          filter: { cohortId: { eq: sourceSectionId } },
+          filter: { sectionID: { eq: sourceSectionId } },
         });
         for (const egg of sourceEggs || []) {
           await client.models.EasterEgg.create({
@@ -742,7 +753,7 @@ function GamificationAdmin() {
             badgeId: egg.badgeId,
             revealMessage: egg.revealMessage,
             active: true,
-            cohortId: selectedSectionId,
+            sectionID: selectedSectionId,
             discoveries: [],
           });
         }
@@ -750,7 +761,7 @@ function GamificationAdmin() {
         // 3. Copy Group Challenges (reset currentXP and contributions)
         const { data: sourceChallenges } =
           await client.models.GroupChallenge.list({
-            filter: { cohortId: { eq: sourceSectionId } },
+            filter: { sectionID: { eq: sourceSectionId } },
           });
         for (const challenge of sourceChallenges || []) {
           await client.models.GroupChallenge.create({
@@ -764,7 +775,7 @@ function GamificationAdmin() {
             stakes: challenge.stakes,
             systemPromptSeed: challenge.systemPromptSeed,
             chapterOrder: challenge.chapterOrder,
-            cohortId: selectedSectionId,
+            sectionID: selectedSectionId,
             contributions: [],
           });
         }
@@ -878,10 +889,8 @@ function AdminAIConfig({
         platformSettings.memorySummarizationModel || "gpt-4o-mini",
       kaiEnabled: platformSettings.kaiEnabled ?? true,
       sageEnabled: platformSettings.sageEnabled ?? true,
-      kaiSystemPromptOverride:
-        platformSettings.kaiSystemPromptOverride || "",
-      sageSystemPromptOverride:
-        platformSettings.sageSystemPromptOverride || "",
+      kaiSystemPromptOverride: platformSettings.kaiSystemPromptOverride || "",
+      sageSystemPromptOverride: platformSettings.sageSystemPromptOverride || "",
       systemPromptBudget: platformSettings.systemPromptBudget ?? null,
       toolResultBudget: platformSettings.toolResultBudget ?? null,
       totalTurnBudget: platformSettings.totalTurnBudget ?? null,
@@ -933,8 +942,7 @@ function AdminAIConfig({
       updatePayload.kaiEnabled = values.kaiEnabled ?? true;
       updatePayload.sageEnabled = values.sageEnabled ?? true;
       if (values.kaiSystemPromptOverride)
-        updatePayload.kaiSystemPromptOverride =
-          values.kaiSystemPromptOverride;
+        updatePayload.kaiSystemPromptOverride = values.kaiSystemPromptOverride;
       if (values.sageSystemPromptOverride)
         updatePayload.sageSystemPromptOverride =
           values.sageSystemPromptOverride;
@@ -987,12 +995,12 @@ function AdminAIConfig({
 
 export default function WrappedPage() {
   return (
-      <AdminRouteGuard>
-        <SectionProvider unitId={undefined as any}>
-          <GamificationProviderWrapper cohortId={undefined as any}>
-            <GamificationAdmin />
-          </GamificationProviderWrapper>
-        </SectionProvider>
-      </AdminRouteGuard>
+    <AdminRouteGuard>
+      <SectionProvider unitId={undefined as any}>
+        <GamificationProviderWrapper sectionID={undefined as any}>
+          <GamificationAdmin />
+        </GamificationProviderWrapper>
+      </SectionProvider>
+    </AdminRouteGuard>
   );
 }

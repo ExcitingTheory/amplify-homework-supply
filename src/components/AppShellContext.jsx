@@ -2,6 +2,8 @@
 import * as React from "react";
 
 const DRAWER_WIDTH = 280;
+/** Width of the collapsed icon-only rail. */
+const RAIL_WIDTH = 72;
 
 /**
  * Context to allow MainToolbar to control the drawer open state.
@@ -12,6 +14,11 @@ export const AppShellContext = React.createContext({
   setDrawerOpen: undefined,
   isDesktop: undefined,
   drawerWidth: DRAWER_WIDTH,
+  railWidth: RAIL_WIDTH,
+  collapsed: false,
+  setCollapsed: undefined,
+  hidden: false,
+  setHidden: undefined,
   toolbarContent: null,
   setToolbarContent: undefined,
   appBarHeight: 48,
@@ -42,4 +49,4 @@ export function useSecondaryToolbar(content) {
   }, [content, setToolbarContent]);
 }
 
-export { DRAWER_WIDTH };
+export { DRAWER_WIDTH, RAIL_WIDTH };

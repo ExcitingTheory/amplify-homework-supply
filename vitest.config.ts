@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
+import { optimizeDepsInclude } from "./.storybook/optimize-deps";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -287,22 +288,24 @@ export default defineConfig({
           mainFields: ["module", "jsnext:main", "jsnext", "main"],
         },
         optimizeDeps: {
+          // Shared, complete pre-bundle list (generated from Vite's optimize
+          // metadata) so browser tests don't trigger re-optimization mid-run.
+          // Regenerate with: node scripts/generate-optimize-deps.mjs
           include: [
-            "@mui/material",
-            "@mui/icons-material",
-            "react-beautiful-dnd",
+            // `vitest` / `@vitest/*` are provided by the browser test runtime
+            // (esbuild marks them external), so they must NOT appear as optimize
+            // entry points here — otherwise dependency optimization fails with
+            // "The entry point 'vitest' cannot be marked as external".
+            ...optimizeDepsInclude.filter(
+              (dep) =>
+                dep !== "vitest" &&
+                !dep.startsWith("vitest/") &&
+                !dep.startsWith("@vitest/"),
+            ),
+            // Test-only deps not present in the Storybook browse graph
             "lodash",
-            "@lexical/rich-text",
-            "@lexical/list",
-            "@lexical/code",
-            "@lexical/link",
-            "@lexical/table",
-            "@lexical/hashtag",
-            "@lexical/markdown",
-            "lexical",
             "zod",
             "@ai-sdk/openai",
-            "ai",
           ],
           exclude: [
             "qrcode", // Exclude qrcode to prevent Node.js module issues in browser

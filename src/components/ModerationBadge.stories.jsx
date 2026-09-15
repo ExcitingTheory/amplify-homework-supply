@@ -8,6 +8,7 @@
 import React from "react";
 import ModerationBadge, { ModerationStatusIcon } from "./ModerationBadge";
 import { Box, Paper, Typography, Stack } from "@mui/material";
+import { expect, within } from "storybook/test";
 import { DemoBanner } from "../../.storybook/components/DemoBanner";
 
 // Mock items with different moderation states
@@ -98,6 +99,10 @@ export const ApprovedContent = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    // Approved + no details → nothing rendered
+    expect(canvasElement.querySelector(".MuiChip-colorSuccess")).toBeNull();
+  },
 };
 
 export const ApprovedWithDetails = {
@@ -113,6 +118,9 @@ export const ApprovedWithDetails = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.querySelector(".MuiChip-colorSuccess")).not.toBeNull();
+  },
 };
 
 export const FlaggedSingleCategory = {
@@ -126,6 +134,9 @@ export const FlaggedSingleCategory = {
         story: "Flagged content shows a warning badge. Hover to see details.",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.querySelector(".MuiChip-colorWarning")).not.toBeNull();
   },
 };
 
@@ -141,6 +152,9 @@ export const FlaggedWithDetails = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.querySelector(".MuiChip-colorWarning")).not.toBeNull();
+  },
 };
 
 export const FlaggedMultipleCategories = {
@@ -155,6 +169,9 @@ export const FlaggedMultipleCategories = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.querySelector(".MuiChip-colorWarning")).not.toBeNull();
+  },
 };
 
 export const UncheckedContent = {
@@ -168,6 +185,11 @@ export const UncheckedContent = {
         story: "Content not yet checked shows nothing (null state).",
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    // Unchecked (no moderationCheckedAt) renders nothing
+    expect(canvasElement.querySelector(".MuiChip-colorWarning")).toBeNull();
+    expect(canvasElement.querySelector(".MuiChip-colorSuccess")).toBeNull();
   },
 };
 
@@ -189,6 +211,15 @@ IconOnly.parameters = {
         "Icon-only variant for compact layouts. Only shows for flagged content.",
     },
   },
+};
+
+IconOnly.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await canvas.findByText("Flagged:");
+  // Warning icon renders only for the flagged item
+  expect(
+    canvasElement.querySelector('[data-testid="WarningIcon"]'),
+  ).not.toBeNull();
 };
 
 // List demonstration
@@ -223,4 +254,10 @@ InContentList.parameters = {
         "Example of moderation badges in a content list (grades, units, etc.).",
     },
   },
+};
+
+InContentList.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await canvas.findByText("Lesson 1: Introduction");
+  await canvas.findByText("Student Submission A");
 };

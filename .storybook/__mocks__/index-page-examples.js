@@ -670,7 +670,7 @@ export const mockStudentProfiles = [
   {
     id: 'profile-alice',
     studentId: 'student-alice-sub',
-    cohortId: 'section-jpn-101',
+    sectionID: 'section-jpn-101',
     studentName: 'Alice Johnson',
     totalXP: 450,
     level: 3,
@@ -686,7 +686,7 @@ export const mockStudentProfiles = [
   {
     id: 'profile-bob',
     studentId: 'student-bob-sub',
-    cohortId: 'section-jpn-101',
+    sectionID: 'section-jpn-101',
     studentName: 'Bob Smith',
     totalXP: 320,
     level: 2,
@@ -702,7 +702,7 @@ export const mockStudentProfiles = [
   {
     id: 'profile-carol',
     studentId: 'student-carol-sub',
-    cohortId: 'section-jpn-101',
+    sectionID: 'section-jpn-101',
     studentName: 'Carol Davis',
     totalXP: 280,
     level: 2,
@@ -718,7 +718,7 @@ export const mockStudentProfiles = [
   {
     id: 'profile-dave',
     studentId: 'student-dave-sub',
-    cohortId: 'section-jpn-101',
+    sectionID: 'section-jpn-101',
     studentName: 'Dave Wilson',
     totalXP: 380,
     level: 2,

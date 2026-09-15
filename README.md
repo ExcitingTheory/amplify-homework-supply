@@ -34,6 +34,15 @@ Section-grouped assignment view with "Up Next" hero cards, inline campaign timel
 ### Soft Delete & Recycle Bin
 Soft delete with `deletedAt`/`deletedBy` fields on content models, cascading to join tables. Permanent delete archives to compressed S3; admin-only unarchive restores records.
 
+### Assignment Timing & Late Submission Workflow
+Instructor-saved reusable `TimingPattern` presets (beginning/end of class, end of day, end of week), hard start/end access windows, direct-to-student differentiated assignments, and an instructor late-review queue with Keep/Drop actions. ([details](./docs/ASSIGNMENT_MANAGEMENT_PLAN.md))
+
+### S3 Content Storage & Publishing
+Unit body content stored in S3 object storage with version snapshots and automatic plain-text extraction on publish, keeping DynamoDB records lightweight. ([details](./docs/S3_CONTENT_STORAGE_SPEC.md))
+
+### Intelligent Layout Suggestions
+N-gram based and AI-contextual block suggestion system predicting next lesson blocks based on instructor habits and course structure. ([details](./docs/LAYOUT_SUGGESTIONS.md))
+
 ### File Processing & Storage
 Fan-out upload pipeline, S3 with CloudFront signed cookies, PDF analysis with vocabulary extraction, and audio/video transcription. ([details](./docs/FILE_PROCESSING_PIPELINE.md))
 
@@ -47,15 +56,16 @@ Semantic search over embeddings (text-embedding-3-small, 512D) with IVF clusteri
 | Feature | Status | Plan |
 |---------|--------|------|
 | **Admin Bot "Atlas"** — AI admin assistant with 25+ tools for user management, platform settings, announcements, and system health | Not started | [ADMIN_BOT_PLAN.md](./docs/ADMIN_BOT_PLAN.md) |
-| **Audio Filter Panel** — ML noise suppression (RNNoise) and EQ presets for RecordingStudio3 playback; pre-submission cleanup; versioned takes | Not started | [RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md](./docs/RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md) |
-| **Unified Undo/Redo** — Single Yjs UndoManager across Lexical body, dictionary, questions, and metadata on the unit detail page | Not started | [UNIFIED_UNDO_REDO_PLAN.md](./docs/UNIFIED_UNDO_REDO_PLAN.md) |
+| **Audio Filter Panel** — ML noise suppression (RNNoise worklet ready) and EQ presets for RecordingStudio3 playback; pre-submission cleanup UI; versioned takes | Worklet built; UI wiring remaining | [RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md](./docs/RECORDING_STUDIO3_AUDIO_PROCESSING_PLAN.md) |
+| **Unified Undo/Redo** — Single Yjs UndoManager across Lexical body, dictionary, questions, and metadata on the unit detail page | Design complete; Editor3 integration pending | [UNIFIED_UNDO_REDO_PLAN.md](./docs/UNIFIED_UNDO_REDO_PLAN.md) |
+| **Load Time Optimization** — Bundle analyzer integration, dynamic imports for heavy components (DiceBear, ChatSidebar) | Analysis complete; optimizations in progress | [LOAD_TIME_OPTIMIZATION_PLAN.md](./docs/LOAD_TIME_OPTIMIZATION_PLAN.md) |
 | **Learner Dashboard Phase 6** — Card completion check animation | Phases 1–5 complete; level-up + chapter-unlock celebrations done | [LEARNER_DASHBOARD_UX_PLAN.md](./docs/LEARNER_DASHBOARD_UX_PLAN.md) |
 | **Offline AI & Data** — On-device LLM (WebLLM + Chrome AI) implemented; DynamoDB offline data cache and conflict resolution UI integration testing remaining | Core offline AI exists; integration testing needed | [OFFLINE_EXPERIENCE.md](./docs/OFFLINE_EXPERIENCE.md) |
 | **Course Context Testing** — End-to-end publish flow validation, token budget audit | Schema + frontend consumers + Lambda done; integration testing remaining | [COURSE_CONTEXT_SUMMARY_PLAN.md](./docs/COURSE_CONTEXT_SUMMARY_PLAN.md) |
 
 ### Completed Plans
 
-All completed features are documented in [FEATURES.md](./docs/FEATURES.md): custom themes, instructor visibility & collaboration, soft delete & recycle bin, notification system, custom AI block, agent architecture, app security/platform hardening, searchable sections, AI badge designer, learner dashboard phases 1–5, celebration animations, and course context summary.
+All completed features are documented in [FEATURES.md](./docs/FEATURES.md): custom themes, instructor visibility & collaboration, soft delete & recycle bin, notification system, custom AI block, agent architecture, app security/platform hardening, searchable sections, AI badge designer, learner dashboard phases 1–5, celebration animations, course context summary, assignment timing patterns & late submission workflows, S3 content storage, smart layout suggestions, and optimistic concurrency.
 
 ---
 
@@ -94,6 +104,7 @@ Start the app first with `npm run dev` (or use `npm run journeys:wait-and-run`).
 - [Optimistic Concurrency](./docs/OPTIMISTIC_CONCURRENCY.md) — `_version`-based conflict resolution
 - [S3 Content Storage](./docs/S3_CONTENT_STORAGE_SPEC.md) — Paths, versioning, lifecycle
 - [S3 Embeddings](./docs/S3_EMBEDDINGS_SPEC.md) — Embedding storage and retrieval
+- [Amplify Deploy Sequencing](./docs/AMPLIFY_DEPLOY_SEQUENCE.md) — AppSync 429 throttle knobs for large-schema sandbox deploys
 
 ### Process
 - [Contributing](./CONTRIBUTING.md) — Code standards and PR process

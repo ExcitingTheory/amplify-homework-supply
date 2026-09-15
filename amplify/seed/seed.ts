@@ -2068,7 +2068,7 @@ try {
 }
 
 // Use section IDs as cohort IDs for consistency
-const cohortId = sections[0].id;
+const sectionID = sections[0].id;
 
 // ========================================================================
 // SECTION 14: Student XP Logs
@@ -2089,7 +2089,7 @@ const xpLogsResponse = await Promise.all([
     xpAmount: 50,
     reason: "HOMEWORK_SUBMITTED",
     referenceId: grades[0]?.id,
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   client.models.StudentXPLog.create({
@@ -2097,7 +2097,7 @@ const xpLogsResponse = await Promise.all([
     xpAmount: 100,
     reason: "ALL_BLOCKS_COMPLETED",
     referenceId: grades[0]?.id,
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   client.models.StudentXPLog.create({
@@ -2105,35 +2105,35 @@ const xpLogsResponse = await Promise.all([
     xpAmount: 25,
     reason: "ON_TIME_SUBMISSION",
     referenceId: grades[0]?.id,
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   client.models.StudentXPLog.create({
     studentId: student1OwnerSub,
     xpAmount: 75,
     reason: "STREAK_3DAY",
-    cohortId,
+    sectionID,
   }),
   client.models.StudentXPLog.create({
     studentId: student1OwnerSub,
     xpAmount: 150,
     reason: "PERFECT_SCORE",
     referenceId: grades[0]?.id,
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   client.models.StudentXPLog.create({
     studentId: student1OwnerSub,
     xpAmount: 30,
     reason: "NAILED_IT",
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   client.models.StudentXPLog.create({
     studentId: student1OwnerSub,
     xpAmount: 40,
     reason: "PEER_REVIEW_GIVEN",
-    cohortId,
+    sectionID,
   }),
 ]);
 
@@ -2149,7 +2149,7 @@ console.log(
 
 const student1ProfileResponse = await client.models.StudentProfile.create({
   studentId: student1OwnerSub,
-  cohortId,
+  sectionID,
   studentName: "Johnson, Emma",
   totalXP: 520,
   level: 5,
@@ -2164,26 +2164,26 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
     {
       badgeType: "FIRST_SUBMISSION",
       awardedAt: daysAgo(12),
-      cohortId,
+      sectionID,
       unitID: units[0].id,
     },
-    { badgeType: "CONSISTENT", awardedAt: daysAgo(5), cohortId },
+    { badgeType: "CONSISTENT", awardedAt: daysAgo(5), sectionID },
     {
       badgeType: "QUICK_DRAW",
       awardedAt: daysAgo(3),
-      cohortId,
+      sectionID,
       unitID: units[0].id,
     },
     {
       badgeType: "PERFECTIONIST",
       awardedAt: daysAgo(1),
-      cohortId,
+      sectionID,
       unitID: units[0].id,
     },
     {
       badgeType: "BUG_SQUASHER_INITIATE",
       awardedAt: daysAgo(9),
-      cohortId,
+      sectionID,
       sourceId: "chapter-1-bug-wars",
     },
   ] as any,
@@ -2244,7 +2244,7 @@ console.log("✅ Created student1 profile");
 await Promise.all([
   client.models.StudentProfile.create({
     studentId: "seed-student-3",
-    cohortId,
+    sectionID,
     studentName: "Martinez, Alex",
     totalXP: 350,
     level: 4,
@@ -2256,7 +2256,7 @@ await Promise.all([
   }),
   client.models.StudentProfile.create({
     studentId: "seed-student-4",
-    cohortId,
+    sectionID,
     studentName: "Lee, Jordan",
     totalXP: 440,
     level: 4,
@@ -2268,7 +2268,7 @@ await Promise.all([
   }),
   client.models.StudentProfile.create({
     studentId: "seed-student-5",
-    cohortId,
+    sectionID,
     studentName: "Rivera, Sam",
     totalXP: 95,
     level: 1,
@@ -2290,7 +2290,7 @@ console.log("\n⚔️  Creating squads...");
 const squadsResponse = await Promise.all([
   client.models.Squad.create({
     name: "Dragon Scholars",
-    cohortId,
+    sectionID,
     totalXP: 870,
     description: "Knowledge is our treasure hoard",
     crestSvg:
@@ -2332,7 +2332,7 @@ const squadsResponse = await Promise.all([
   }),
   client.models.Squad.create({
     name: "Phoenix Writers",
-    cohortId,
+    sectionID,
     totalXP: 620,
     description: "From ashes we create masterpieces",
     crestSvg:
@@ -2364,7 +2364,7 @@ console.log(
 
 // Create a sample SquadMessage (instructor broadcast)
 await client.models.SquadMessage.create({
-  cohortId,
+  sectionID,
   recipientSquadIds: [squads[0]?.id, squads[1]?.id].filter(Boolean),
   template:
     "⚔️ {{SQUAD_NAME}}, your rival {{SQUAD_RIVAL}} is gaining on you! Chapter 2 is heating up — every XP counts.",
@@ -2397,7 +2397,7 @@ const rootSkillsResponse = await Promise.all([
     description: "Master foundational vocabulary words",
     prerequisites: JSON.stringify([]),
     xpReward: 50,
-    cohortId,
+    sectionID,
   }),
 ]);
 
@@ -2411,21 +2411,21 @@ const midSkillsResponse = await Promise.all([
     description: "Understand written passages and extract meaning",
     prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 75,
-    cohortId,
+    sectionID,
   }),
   client.models.Skill.create({
     title: "Grammar Patterns",
     description: "Recognize and apply grammar rules",
     prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 100,
-    cohortId,
+    sectionID,
   }),
   client.models.Skill.create({
     title: "Listening & Speaking",
     description: "Audio comprehension and pronunciation",
     prerequisites: JSON.stringify([vocabSkill.id]),
     xpReward: 100,
-    cohortId,
+    sectionID,
   }),
 ]);
 
@@ -2441,21 +2441,21 @@ const topSkillsResponse = await Promise.all([
     description: "Write complex answers and short essays",
     prerequisites: JSON.stringify([readingSkill.id, grammarSkill.id]),
     xpReward: 150,
-    cohortId,
+    sectionID,
   }),
   client.models.Skill.create({
     title: "Oral Presentation",
     description: "Deliver spoken presentations with proper grammar",
     prerequisites: JSON.stringify([grammarSkill.id, listeningSkill.id]),
     xpReward: 150,
-    cohortId,
+    sectionID,
   }),
   client.models.Skill.create({
     title: "Critical Analysis",
     description: "Analyze texts and construct arguments",
     prerequisites: JSON.stringify([readingSkill.id]),
     xpReward: 125,
-    cohortId,
+    sectionID,
   }),
 ]);
 
@@ -2475,7 +2475,7 @@ const capstoneResponse = await Promise.all([
       analysisSkill.id,
     ]),
     xpReward: 250,
-    cohortId,
+    sectionID,
   }),
 ]);
 
@@ -2537,13 +2537,13 @@ await Promise.all([
       {
         badgeType: "FIRST_SUBMISSION",
         awardedAt: daysAgo(12),
-        cohortId,
+        sectionID,
         unitID: units[0].id,
       },
       {
         badgeType: "PERFECTIONIST",
         awardedAt: daysAgo(1),
-        cohortId,
+        sectionID,
         unitID: units[0].id,
       },
     ] as any,
@@ -2576,7 +2576,7 @@ await Promise.all([
       {
         badgeType: "FIRST_SUBMISSION",
         awardedAt: daysAgo(8),
-        cohortId,
+        sectionID,
         unitID: units[1].id,
       },
     ] as any,
@@ -2621,7 +2621,7 @@ campaignDeadline.setDate(campaignDeadline.getDate() + 28);
 
 // Chapter 1: The Awakening (completed)
 const ch1Response = await client.models.GroupChallenge.create({
-  cohortId,
+  sectionID,
   title: "Chapter 1: The Awakening",
   targetXP: 500,
   currentXP: 500,
@@ -2674,7 +2674,7 @@ const ch1Response = await client.models.GroupChallenge.create({
 
 // Chapter 2: The Dependency Dungeon (active, in progress)
 const ch2Response = await client.models.GroupChallenge.create({
-  cohortId,
+  sectionID,
   title: "Chapter 2: The Dependency Dungeon",
   targetXP: 800,
   currentXP: 340,
@@ -2722,7 +2722,7 @@ const ch2Response = await client.models.GroupChallenge.create({
 
 // Chapter 3: The Merge Conflict Colosseum (locked, upcoming)
 const ch3Response = await client.models.GroupChallenge.create({
-  cohortId,
+  sectionID,
   title: "Chapter 3: The Merge Conflict Colosseum",
   targetXP: 1200,
   currentXP: 0,
@@ -2760,7 +2760,7 @@ const ch3Response = await client.models.GroupChallenge.create({
 
 // Chapter 4: The Final Deploy — Boss Battle (locked, finale)
 const ch4Response = await client.models.GroupChallenge.create({
-  cohortId,
+  sectionID,
   title: "Chapter 4: The Final Deploy",
   targetXP: 2000,
   currentXP: 0,
@@ -3063,7 +3063,7 @@ const badgesResponse = await Promise.all([
     rarity: "common",
     category: "Achievement",
     criteria: JSON.stringify({ type: "FIRST_SUBMISSION", count: 1 }),
-    cohortId,
+    sectionID,
     autoEvaluate: true,
   }),
   client.models.Badge.create({
@@ -3074,7 +3074,7 @@ const badgesResponse = await Promise.all([
     rarity: "rare",
     category: "Excellence",
     criteria: JSON.stringify({ type: "PERFECT_SCORE", accuracy: 100 }),
-    cohortId,
+    sectionID,
     autoEvaluate: true,
   }),
   client.models.Badge.create({
@@ -3085,7 +3085,7 @@ const badgesResponse = await Promise.all([
     rarity: "uncommon",
     category: "Consistency",
     criteria: JSON.stringify({ type: "STREAK_7", days: 7 }),
-    cohortId,
+    sectionID,
     autoEvaluate: true,
   }),
   client.models.Badge.create({
@@ -3096,7 +3096,7 @@ const badgesResponse = await Promise.all([
     rarity: "epic",
     category: "Speed",
     criteria: JSON.stringify({ type: "SPEED_DEMON", maxSeconds: 60 }),
-    cohortId,
+    sectionID,
     autoEvaluate: true,
   }),
   client.models.Badge.create({
@@ -3110,7 +3110,7 @@ const badgesResponse = await Promise.all([
       type: "BUG_SQUASHER_INITIATE",
       challengeChapter: 1,
     }),
-    cohortId,
+    sectionID,
     autoEvaluate: false,
   }),
   client.models.Badge.create({
@@ -3121,7 +3121,7 @@ const badgesResponse = await Promise.all([
     rarity: "rare",
     category: "Achievement",
     criteria: JSON.stringify({ type: "COMPLETIONIST", allAssignments: true }),
-    cohortId,
+    sectionID,
     autoEvaluate: true,
   }),
 ]);
@@ -3512,13 +3512,13 @@ await Promise.all([
     studentId: student2OwnerSub,
     xpAmount: 50,
     reason: "HOMEWORK_SUBMITTED",
-    cohortId,
+    sectionID,
     unitID: units[0].id,
   }),
   // Create StudentProfile with aggregated data (badges, streak, progress, skillProgress)
   client.models.StudentProfile.create({
     studentId: student2OwnerSub,
-    cohortId,
+    sectionID,
     studentName: "Chen, Liam",
     totalXP: 50,
     level: 1,
@@ -3528,7 +3528,7 @@ await Promise.all([
     freezesRemaining: 0,
     freezesUsed: 0,
     badges: [
-      { badgeType: "FIRST_SUBMISSION", awardedAt: daysAgo(8), cohortId },
+      { badgeType: "FIRST_SUBMISSION", awardedAt: daysAgo(8), sectionID },
     ] as any,
     moduleProgress: [
       {

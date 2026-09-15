@@ -20,9 +20,11 @@ import {
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
 import { FilesProvider } from "../../src/context/fileContext";
 import { expect } from "storybook/test";
+import { withAppShell } from "./withAppShell";
 
 const meta: Meta = {
   title: "📄 Pages/Application Pages",
+  decorators: [withAppShell],
   parameters: {
     layout: "fullscreen",
     disableUnitContext: true,

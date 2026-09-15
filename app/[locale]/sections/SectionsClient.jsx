@@ -38,13 +38,16 @@ import {
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-import AppShell from "@/components/AppShell";
 import { useAppShell } from "@/components/AppShellContext";
 import LazyCardMedia from "@/components/LazyCardMedia";
 import InstructorDashboard from "@/components/InstructorDashboard";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CampaignSetupWizard } from "@/components/Gamification/CampaignSetupWizard";
+import { AssignmentComposer } from "@/components/AssignmentComposer";
+import { CadenceCopyDialog } from "@/components/CadenceCopyDialog";
+import UnitContext from "@/context/unitContext";
 
 function getUserGroups(user) {
   return (
@@ -106,6 +109,11 @@ function Sections({ user }) {
     message: "",
     severity: "error",
   });
+
+  // Quick assign modal state (Item 3 - section card quick action)
+  const [quickAssignSection, setQuickAssignSection] = useState(null);
+  const [cadenceCopyOpen, setCadenceCopyOpen] = useState(false);
+  const { units: allUnits = [] } = React.useContext(UnitContext) || {};
 
   // Register page context with global chat
   useChatPageContext({
@@ -594,6 +602,7 @@ function Sections({ user }) {
                       sx={{
                         display: "flex",
                         alignItems: "center",
+                        gap: 1,
                         pl: 2,
                         pb: 1.5,
                       }}
@@ -621,6 +630,41 @@ function Sections({ user }) {
                       >
                         {t("sections.viewSection")}
                       </Button>
+
+                      {(isInstructor || section.owner === userId) && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={work}
+                            onClick={() => setQuickAssignSection(section)}
+                            startIcon={<AddIcon />}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                              px: 3,
+                              py: 1,
+                              borderRadius: 2,
+                              boxShadow: 2,
+                            }}
+                          >
+                            {t("sections.assignUnit", "Assign Unit")}
+                          </Button>
+                          {canViewInstructorDashboard && (
+                            <Button
+                              variant="outlined"
+                              startIcon={<ContentCopyIcon />}
+                              onClick={() => setCadenceCopyOpen(true)}
+                              sx={{
+                                textTransform: "none",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Copy cadence
+                            </Button>
+                          )}
+                        </>
+                      )}
                     </Box>
                   </Box>
                   {section?.featuredImage && (
@@ -701,6 +745,22 @@ function Sections({ user }) {
           onCreated={() => setWizardOpen(false)}
         />
       )}
+
+      {/* Quick assign modal — shown when instructor clicks "Assign Unit" on section card (Item 3) */}
+      <AssignmentComposer
+        open={!!quickAssignSection}
+        onClose={() => setQuickAssignSection(null)}
+        units={allUnits}
+        sections={quickAssignSection ? [quickAssignSection] : []}
+        selectedSectionIds={quickAssignSection ? [quickAssignSection.id] : []}
+        onSuccess={() => setQuickAssignSection(null)}
+      />
+      <CadenceCopyDialog
+        open={cadenceCopyOpen}
+        onClose={() => setCadenceCopyOpen(false)}
+        sections={ownedSections}
+        units={allUnits}
+      />
     </>
   );
 }

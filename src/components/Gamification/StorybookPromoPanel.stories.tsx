@@ -7,6 +7,8 @@ const meta: Meta<typeof StorybookPromoPanel> = {
   title: "🏆 Gamification/Instructor/Storybook Promo Panel",
   component: StorybookPromoPanel,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "centered",
   },
 };

@@ -38,6 +38,7 @@ import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 import ImageIcon from "@mui/icons-material/Image";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import ForumIcon from "@mui/icons-material/Forum";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import QuizIcon from "@mui/icons-material/Quiz";
 import SpellcheckIcon from "@mui/icons-material/Spellcheck";
@@ -71,6 +72,7 @@ import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/react/LexicalHorizontal
 import { INSERT_IMAGE_COMMAND } from "../Editor3/plugins/ImagesPlugin";
 import { INSERT_YOUTUBE_COMMAND } from "../Editor3/plugins/YouTubePlugin";
 import { INSERT_PLAYLIST_COMMAND } from "../Editor3/plugins/PlaylistPlugin";
+import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "../Editor3/plugins/ConversationPlaylistPlugin";
 import { INSERT_PDF_COMMAND } from "../Editor3/plugins/PdfViewerPlugin";
 import { INSERT_QUIZ_COMMAND } from "../Editor3/plugins/QuizPlugin";
 import { INSERT_ANSWER_BLOCK_COMMAND } from "../Editor3/plugins/AnswerPlugin";
@@ -183,6 +185,14 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
     needsConfig: true,
   },
   {
+    type: "conversationPlaylist",
+    label: "Conversation Playlist",
+    description: "Dialogue audio with transcript",
+    icon: "forum",
+    category: "media",
+    needsConfig: true,
+  },
+  {
     type: "pdf",
     label: "PDF Viewer",
     description: "Embed a PDF document",
@@ -262,6 +272,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   image: <ImageIcon fontSize="small" />,
   youtube: <YouTubeIcon fontSize="small" />,
   music: <MusicNoteIcon fontSize="small" />,
+  forum: <ForumIcon fontSize="small" />,
   pdf: <PictureAsPdfIcon fontSize="small" />,
   quiz: <QuizIcon fontSize="small" />,
   spellcheck: <SpellcheckIcon fontSize="small" />,
@@ -756,6 +767,9 @@ function dispatchBlockCommand(editor: any, blockType: string) {
       break;
     case "playlist":
       editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, undefined);
+      break;
+    case "conversationPlaylist":
+      editor.dispatchCommand(INSERT_CONVERSATION_PLAYLIST_COMMAND, undefined);
       break;
     case "pdf":
       editor.dispatchCommand(INSERT_PDF_COMMAND, undefined);

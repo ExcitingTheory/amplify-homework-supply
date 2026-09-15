@@ -382,7 +382,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
         data: JSON.stringify({
           generated: true,
           unitID: "unit-1",
-          cohortId: "unit-unit-1",
+          sectionID: "unit-unit-1",
           skillCount: 3,
           skills: [
             {
@@ -410,11 +410,11 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
       );
       expect(mockMutations.generateSkillTree).toHaveBeenCalledWith({
         unitID: "unit-1",
-        cohortId: null,
+        sectionID: null,
       });
     });
 
-    it("passes cohortId when provided", async () => {
+    it("passes sectionID when provided", async () => {
       mockMutations.generateSkillTree = vi.fn().mockResolvedValue({
         data: { generated: true, skillCount: 1, skills: [] },
         errors: null,
@@ -426,7 +426,7 @@ describe.skip("gamificationActions (legacy — module moved to app/actions/gamif
 
       expect(mockMutations.generateSkillTree).toHaveBeenCalledWith({
         unitID: "unit-1",
-        cohortId: "cohort-abc",
+        sectionID: "cohort-abc",
       });
     });
 

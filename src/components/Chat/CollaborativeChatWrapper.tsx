@@ -5,15 +5,16 @@
  * Place it inside any page that has SectionProvider to enable collaborative chat.
  */
 
-'use client'
+"use client";
 
-import React, { useContext, useMemo } from 'react'
-import { usePathname, useParams } from 'next/navigation'
-import AuthContext from '../../context/authContext'
-import SectionContext from '../../context/sectionContext'
-import { ChatPanel } from './ChatPanel'
-import { TopicScope, ChatUser } from '../../yjs/ChatCollaborationProvider'
-import { MemberInfo } from '../../utils/chatMentions'
+import React, { useContext, useMemo, useState, useEffect } from "react";
+import { usePathname, useParams } from "next/navigation";
+import AuthContext from "../../context/authContext";
+import SectionContext from "../../context/sectionContext";
+import { ChatPanel } from "./ChatPanel";
+import { TopicScope, ChatUser } from "../../yjs/ChatCollaborationProvider";
+import { MemberInfo } from "../../utils/chatMentions";
+import { onOpenDiscussion } from "../../utils/chatDiscussBus";
 
 // ============================================================================
 // Types
@@ -21,13 +22,19 @@ import { MemberInfo } from '../../utils/chatMentions'
 
 export interface CollaborativeChatWrapperProps {
   /** Override room type (defaults to auto-detect from route) */
-  roomType?: 'section' | 'squad'
+  roomType?: "section" | "squad";
   /** Override room ID */
-  roomId?: string
+  roomId?: string;
   /** Override scope */
-  scope?: TopicScope
+  scope?: TopicScope;
   /** Override members list for @mention autocomplete */
-  members?: MemberInfo[]
+  members?: MemberInfo[];
+}
+
+interface DiscussionEventDetail {
+  sectionID?: string;
+  scope?: TopicScope | string;
+  topicName?: string | null;
 }
 
 // ============================================================================
@@ -40,56 +47,81 @@ export function CollaborativeChatWrapper({
   scope: scopeProp,
   members: membersProp,
 }: CollaborativeChatWrapperProps = {}) {
-  const pathname = usePathname()
-  const params = useParams()
-  const { user } = useContext(AuthContext) as any
-  const { sections } = useContext(SectionContext) as any
+  const pathname = usePathname();
+  const params = useParams();
+  const { user } = useContext(AuthContext) as any;
+  const { sections } = useContext(SectionContext) as any;
+
+  // Discuss-button overrides — set when another component calls openDiscussion()
+  const [discussOverride, setDiscussOverride] = useState<{
+    sectionID?: string;
+    scope?: TopicScope;
+    topicName?: string | null;
+  } | null>(null);
+  const [forceOpenSignal, setForceOpenSignal] = useState(0);
+
+  useEffect(
+    () =>
+      onOpenDiscussion((detail: DiscussionEventDetail) => {
+        setDiscussOverride({
+          sectionID: detail.sectionID,
+          scope: detail.scope as TopicScope | undefined,
+          topicName: detail.topicName,
+        });
+        setForceOpenSignal((s) => s + 1);
+      }),
+    [],
+  );
 
   // Build ChatUser from auth context
   const chatUser: ChatUser | null = useMemo(() => {
-    if (!user?.attributes?.sub) return null
+    if (!user?.attributes?.sub) return null;
     return {
       username: user.attributes.sub,
       displayName:
         user.attributes?.name ||
         user.attributes?.preferred_username ||
         user.username ||
-        'Anonymous',
-      role: user.attributes?.['custom:role'] || 'learner',
-    }
-  }, [user])
+        "Anonymous",
+      role: user.attributes?.["custom:role"] || "learner",
+    };
+  }, [user]);
 
   // Auto-detect scope from route
   const detectedScope: TopicScope = useMemo(() => {
-    if (scopeProp) return scopeProp
-    const id = params?.id as string | undefined
-    if (pathname?.includes('/unit/') && id) return `unit:${id}` as TopicScope
-    if (pathname?.includes('/workbook/') && id) return `workbook:${id}` as TopicScope
-    if (pathname?.includes('/squad')) return 'squad' as TopicScope
-    return 'section' as TopicScope
-  }, [pathname, params, scopeProp])
+    if (discussOverride?.scope) return discussOverride.scope;
+    if (scopeProp) return scopeProp;
+    const id = params?.id as string | undefined;
+    if (pathname?.includes("/unit/") && id) return `unit:${id}` as TopicScope;
+    if (pathname?.includes("/workbook/") && id)
+      return `workbook:${id}` as TopicScope;
+    if (pathname?.includes("/squad")) return "squad" as TopicScope;
+    return "section" as TopicScope;
+  }, [pathname, params, scopeProp, discussOverride]);
 
   // Auto-detect room type and ID
-  const roomType: 'section' | 'squad' = roomTypeProp || (detectedScope === 'squad' ? 'squad' : 'section')
+  const roomType: "section" | "squad" =
+    roomTypeProp || (detectedScope === "squad" ? "squad" : "section");
 
   const roomId = useMemo(() => {
-    if (roomIdProp) return roomIdProp
+    if (discussOverride?.sectionID) return discussOverride.sectionID;
+    if (roomIdProp) return roomIdProp;
     // Use the first section ID as the default room
-    if (roomType === 'section' && sections?.length > 0) {
-      return sections[0].id
+    if (roomType === "section" && sections?.length > 0) {
+      return sections[0].id;
     }
-    return null
-  }, [roomIdProp, roomType, sections])
+    return null;
+  }, [roomIdProp, roomType, sections, discussOverride]);
 
   // Build members list from section data (simplified — expand as needed)
   const members: MemberInfo[] = useMemo(() => {
-    if (membersProp) return membersProp
+    if (membersProp) return membersProp;
     // For now return empty — will be populated from section membership data
-    return []
-  }, [membersProp])
+    return [];
+  }, [membersProp]);
 
-  // Don't render if we can't identify the user or room
-  if (!chatUser || !roomId) return null
+  // Don't render if we can't identify the user (room may arrive later via a Discuss action)
+  if (!chatUser) return null;
 
   return (
     <ChatPanel
@@ -98,6 +130,8 @@ export function CollaborativeChatWrapper({
       user={chatUser}
       scope={detectedScope}
       members={members}
+      forceOpenSignal={forceOpenSignal}
+      pendingTopicName={discussOverride?.topicName}
     />
-  )
+  );
 }

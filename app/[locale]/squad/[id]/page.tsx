@@ -31,14 +31,14 @@ export default async function SquadPage({ params }: SquadPageProps) {
     redirect("/?returnUrl=" + encodeURIComponent(`/squad/${id}`));
   }
 
-  let initialCohortId: string | undefined;
+  let initialSectionID: string | undefined;
   try {
     const client = getServerClient();
     const { data } = await (client as any).models.Squad.get({ id });
-    initialCohortId = data?.cohortId || undefined;
+    initialSectionID = data?.sectionID || undefined;
   } catch (err) {
     console.error("[Squad RSC] Pre-fetch error:", err);
   }
 
-  return <SquadDetailClient initialCohortId={initialCohortId} />;
+  return <SquadDetailClient initialSectionID={initialSectionID} />;
 }

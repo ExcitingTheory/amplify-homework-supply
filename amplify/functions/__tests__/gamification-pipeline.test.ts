@@ -11,8 +11,8 @@
  * - checkBadges: uses getOrCreateStudentProfile (listStudentProfileByStudentId) + listStudentXPLogByStudentId
  * - updateStreak: uses getOrCreateStudentProfile + updateStudentProfile
  * - checkPersonalBest: uses getOrCreateStudentProfile (reads personalBests JSON) + updateStudentProfile
- * - updateSquadXP: uses getOrCreateStudentProfile (reads cohortId) + listSquadByCohortId + updateSquad
- * - contributeToChallenge: listGroupChallengeByCohortId + updateGroupChallenge (contributions array)
+ * - updateSquadXP: uses getOrCreateStudentProfile (reads sectionID) + listSquadBySectionID + updateSquad
+ * - contributeToChallenge: listGroupChallengeBySectionID + updateGroupChallenge (contributions array)
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -47,7 +47,7 @@ const baseProfile = (overrides: Record<string, any> = {}) => ({
   personalBests: "[]",
   moduleProgress: "[]",
   activeDebuffs: "[]",
-  cohortId: "cohort-1",
+  sectionID: "cohort-1",
   freezesRemaining: 0,
   freezesUsed: 0,
   lastActivityDate: null,
@@ -69,7 +69,7 @@ describe("gamification handler — full XP pipeline integration", () => {
     const { handler } = await import("../gamification/handler");
 
     // =====================================================================
-    // Step 1: awardXP — no cohortId so no getSection/profile needed
+    // Step 1: awardXP — no sectionID so no getSection/profile needed
     // Sequence: listStudentXPLogByStudentId (dedup) → createStudentXPLog
     // =====================================================================
     mockGraphql.mockImplementation(({ query }: any) => {
@@ -231,8 +231,8 @@ describe("gamification handler — full XP pipeline integration", () => {
     );
 
     // =====================================================================
-    // Step 5: updateSquadXP — getOrCreateStudentProfile (get cohortId)
-    // → listSquadByCohortId (check members) → updateSquad → contributeToChallenge
+    // Step 5: updateSquadXP — getOrCreateStudentProfile (get sectionID)
+    // → listSquadBySectionID (check members) → updateSquad → contributeToChallenge
     // =====================================================================
     mockGraphql.mockReset();
     mockGraphql.mockImplementation(({ query }: any) => {
@@ -240,19 +240,19 @@ describe("gamification handler — full XP pipeline integration", () => {
         return Promise.resolve({
           data: {
             listStudentProfileByStudentId: {
-              items: [baseProfile({ cohortId: "c1" })],
+              items: [baseProfile({ sectionID: "c1" })],
             },
           },
         });
       }
-      if (query?.includes("listSquadByCohortId")) {
+      if (query?.includes("listSquadBySectionID")) {
         return Promise.resolve({
           data: {
-            listSquadByCohortId: {
+            listSquadBySectionID: {
               items: [
                 {
                   id: "squad-1",
-                  cohortId: "c1",
+                  sectionID: "c1",
                   totalXP: 200,
                   members: [{ studentId: "student-1", role: "MEMBER" }],
                   _version: 3,
@@ -267,9 +267,9 @@ describe("gamification handler — full XP pipeline integration", () => {
           data: { updateSquad: { id: "squad-1", totalXP: 250, _version: 4 } },
         });
       }
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
-          data: { listGroupChallengeByCohortId: { items: [] } },
+          data: { listGroupChallengeBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -292,18 +292,18 @@ describe("gamification handler — full XP pipeline integration", () => {
     );
 
     // =====================================================================
-    // Step 6: contributeToChallenge — listGroupChallengeByCohortId → updateGroupChallenge
+    // Step 6: contributeToChallenge — listGroupChallengeBySectionID → updateGroupChallenge
     // =====================================================================
     mockGraphql.mockReset();
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
           data: {
-            listGroupChallengeByCohortId: {
+            listGroupChallengeBySectionID: {
               items: [
                 {
                   id: "ch-1",
-                  cohortId: "c1",
+                  sectionID: "c1",
                   currentXP: 100,
                   targetXP: 500,
                   active: true,
@@ -330,7 +330,7 @@ describe("gamification handler — full XP pipeline integration", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "c1",
+          sectionID: "c1",
           xpContributed: 50,
         },
       },
@@ -402,9 +402,9 @@ describe("gamification handler — full XP pipeline integration", () => {
           data: { listStudentProfileByStudentId: { items: [baseProfile()] } },
         });
       }
-      if (query?.includes("listSquadByCohortId")) {
+      if (query?.includes("listSquadBySectionID")) {
         return Promise.resolve({
-          data: { listSquadByCohortId: { items: [] } },
+          data: { listSquadBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -427,9 +427,9 @@ describe("gamification handler — full XP pipeline integration", () => {
     const { handler } = await import("../gamification/handler");
 
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
-          data: { listGroupChallengeByCohortId: { items: [] } },
+          data: { listGroupChallengeBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -440,7 +440,7 @@ describe("gamification handler — full XP pipeline integration", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "c1",
+          sectionID: "c1",
           xpContributed: 50,
         },
       },

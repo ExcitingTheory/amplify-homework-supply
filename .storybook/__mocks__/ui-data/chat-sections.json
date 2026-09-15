@@ -1,0 +1,140 @@
+[
+  {
+    "id": "sec-mgmt-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Create a new section called 'Summer Intensive Japanese 102' for beginner students."
+      }
+    ]
+  },
+  {
+    "id": "sec-mgmt-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I'll create the section and generate a student join code."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "create_section",
+        "toolCallId": "call_sec_create_001"
+      },
+      {
+        "type": "tool-create_section",
+        "toolCallId": "call_sec_create_001",
+        "state": "output-available",
+        "input": {
+          "name": "Summer Intensive Japanese 102",
+          "description": "Accelerated summer course covering basic grammar, katakana, and conversational phrases",
+          "learner": "summer2026-jp102"
+        },
+        "output": {
+          "success": true,
+          "sectionId": "section-summer-102",
+          "name": "Summer Intensive Japanese 102",
+          "joinCode": "JP102-SUMMER26",
+          "message": "Section created with join code JP102-SUMMER26 and Cognito learner groups"
+        }
+      },
+      {
+        "type": "text",
+        "text": "✅ Created **Summer Intensive Japanese 102**!\n- **Join Code**: `JP102-SUMMER26`\n- **Student Roster Group**: `summer2026-jp102`\n\nStudents can use this code to enroll immediately. Would you like to assign an initial unit to this section?"
+      }
+    ]
+  },
+  {
+    "id": "sec-mgmt-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Assign unit 'Katakana & Restaurant Vocabulary' to this section due next Friday at 5:00 PM."
+      }
+    ]
+  },
+  {
+    "id": "sec-mgmt-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "create_assignment",
+        "toolCallId": "call_assign_create_001"
+      },
+      {
+        "type": "tool-create_assignment",
+        "toolCallId": "call_assign_create_001",
+        "state": "output-available",
+        "input": {
+          "unitId": "unit-katakana-102",
+          "sectionId": "section-summer-102",
+          "dueDate": "2026-07-24T17:00:00.000Z",
+          "learner": "summer2026-jp102"
+        },
+        "output": {
+          "success": true,
+          "assignmentId": "assign-katakana-summer",
+          "unitName": "Katakana & Restaurant Vocabulary",
+          "dueDate": "2026-07-24T17:00:00.000Z",
+          "message": "Unit assigned to Summer Intensive Japanese 102 with due date July 24, 2026 at 5:00 PM"
+        }
+      },
+      {
+        "type": "text",
+        "text": "✅ **Assignment Published!**\n- **Unit**: Katakana & Restaurant Vocabulary\n- **Section**: Summer Intensive Japanese 102\n- **Due Date**: Friday, July 24, 2026 at 5:00 PM UTC\n\nAll enrolled learners will see this unit in their active workbook tasks."
+      }
+    ]
+  },
+  {
+    "id": "sec-mgmt-5",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "List all my sections so I can verify the active course lineup."
+      }
+    ]
+  },
+  {
+    "id": "sec-mgmt-6",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "list_sections",
+        "toolCallId": "call_sec_list_002"
+      },
+      {
+        "type": "tool-list_sections",
+        "toolCallId": "call_sec_list_002",
+        "state": "output-available",
+        "input": {},
+        "output": {
+          "success": true,
+          "count": 2,
+          "sections": [
+            {
+              "id": "section-summer-102",
+              "name": "Summer Intensive Japanese 102",
+              "joinCode": "JP102-SUMMER26",
+              "assignmentsCount": 1
+            },
+            {
+              "id": "section-spring-101",
+              "name": "Spring 2026 Japanese 101",
+              "joinCode": "JP101-S26",
+              "assignmentsCount": 4
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "Here are your active sections:\n1. 🌴 **Summer Intensive Japanese 102** (Join Code: `JP102-SUMMER26`) — 1 active assignment\n2. 🌸 **Spring 2026 Japanese 101** (Join Code: `JP101-S26`) — 4 active assignments"
+      }
+    ]
+  }
+]

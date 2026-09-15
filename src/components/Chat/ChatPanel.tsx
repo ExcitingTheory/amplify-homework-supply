@@ -5,7 +5,8 @@
  * ChatCollaborationProvider based on the current section/squad context.
  */
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Drawer,
@@ -14,15 +15,20 @@ import {
   Badge,
   useMediaQuery,
   useTheme,
-} from '@mui/material'
-import ForumIcon from '@mui/icons-material/Forum'
-import CloseIcon from '@mui/icons-material/Close'
-import { useChatRoom, useChatTopics, useChatThread, useChatPresence } from '../../yjs/chatHooks'
-import { TopicScope, ChatUser } from '../../yjs/ChatCollaborationProvider'
-import { TopicList } from './TopicList'
-import { ThreadView } from './ThreadView'
-import { MessageComposer } from './MessageComposer'
-import { MemberInfo } from '../../utils/chatMentions'
+} from "@mui/material";
+import ForumIcon from "@mui/icons-material/Forum";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  useChatRoom,
+  useChatTopics,
+  useChatThread,
+  useChatPresence,
+} from "../../yjs/chatHooks";
+import { TopicScope, ChatUser } from "../../yjs/ChatCollaborationProvider";
+import { TopicList } from "./TopicList";
+import { ThreadView } from "./ThreadView";
+import { MessageComposer } from "./MessageComposer";
+import { MemberInfo } from "../../utils/chatMentions";
 
 // ============================================================================
 // Types
@@ -30,17 +36,21 @@ import { MemberInfo } from '../../utils/chatMentions'
 
 export interface ChatPanelProps {
   /** 'section' or 'squad' */
-  roomType: 'section' | 'squad'
+  roomType: "section" | "squad";
   /** Section or squad ID */
-  roomId: string
+  roomId: string;
   /** Current user info */
-  user: ChatUser
+  user: ChatUser;
   /** Current topic scope based on page context */
-  scope?: TopicScope
+  scope?: TopicScope;
   /** Members list for @mention autocomplete */
-  members?: MemberInfo[]
+  members?: MemberInfo[];
   /** WebSocket URL override */
-  wsUrl?: string
+  wsUrl?: string;
+  /** Incrementing counter — any change forces the drawer open (external trigger) */
+  forceOpenSignal?: number;
+  /** Topic name to select/create once the drawer is forced open */
+  pendingTopicName?: string | null;
 }
 
 // ============================================================================
@@ -54,22 +64,28 @@ export function ChatPanel({
   scope,
   members = [],
   wsUrl,
+  forceOpenSignal,
+  pendingTopicName,
 }: ChatPanelProps) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const t = useTranslations("components.chatPanel");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [open, setOpen] = useState(false)
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(null)
+  const [open, setOpen] = useState(false);
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
 
   // Connect to the Yjs chat room
   const { provider, isConnected } = useChatRoom(
     roomId
       ? { roomType, roomId, user, wsUrl, connect: true, persistence: true }
       : null,
-  )
+  );
 
   // Topics filtered by current scope
-  const { topics, createTopic, pinTopic, archiveTopic } = useChatTopics(provider, scope)
+  const { topics, createTopic, pinTopic, archiveTopic } = useChatTopics(
+    provider,
+    scope,
+  );
 
   // Active thread messages
   const {
@@ -79,88 +95,121 @@ export function ChatPanel({
     deleteMessage,
     addReaction,
     getReplies,
-  } = useChatThread(provider, activeTopicId)
+  } = useChatThread(provider, activeTopicId);
 
   // Presence info
-  const { onlineUsers, typingUsers } = useChatPresence(provider, activeTopicId)
+  const { onlineUsers, typingUsers } = useChatPresence(provider, activeTopicId);
 
   // Default scope for new topics
-  const defaultScope = scope || (roomType === 'squad' ? 'squad' : 'section') as TopicScope
+  const defaultScope =
+    scope || ((roomType === "squad" ? "squad" : "section") as TopicScope);
 
   const activeTopic = useMemo(
     () => topics.find((t) => t.id === activeTopicId) || null,
     [topics, activeTopicId],
-  )
+  );
 
   const handleCreateTopic = (name: string) => {
-    const topic = createTopic(name, defaultScope)
-    if (topic) setActiveTopicId(topic.id)
-  }
+    const topic = createTopic(name, defaultScope);
+    if (topic) setActiveTopicId(topic.id);
+  };
 
   const handleSendMessage = (content: string, parentId?: string) => {
-    sendMessage(content, parentId)
-  }
+    sendMessage(content, parentId);
+  };
 
-  const drawerWidth = isMobile ? '100%' : 420
+  // External trigger (e.g. a "Discuss" button elsewhere) forces the drawer open
+  const lastForceOpenSignal = useRef(forceOpenSignal);
+  useEffect(() => {
+    if (
+      forceOpenSignal !== undefined &&
+      forceOpenSignal !== lastForceOpenSignal.current
+    ) {
+      lastForceOpenSignal.current = forceOpenSignal;
+      setOpen(true);
+    }
+  }, [forceOpenSignal]);
+
+  // Select or create the requested topic once the drawer is open and topics are loaded
+  const lastHandledTopicName = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      !open ||
+      !pendingTopicName ||
+      pendingTopicName === lastHandledTopicName.current
+    )
+      return;
+    const existing = topics.find((topic) => topic.name === pendingTopicName);
+    if (existing) {
+      setActiveTopicId(existing.id);
+      lastHandledTopicName.current = pendingTopicName;
+    } else if (provider) {
+      const topic = createTopic(pendingTopicName, defaultScope);
+      if (topic) {
+        setActiveTopicId(topic.id);
+        lastHandledTopicName.current = pendingTopicName;
+      }
+    }
+  }, [open, pendingTopicName, topics, provider, createTopic, defaultScope]);
+
+  const drawerWidth = isMobile ? "100%" : 420;
 
   return (
     <>
-      {/* Floating action button to open chat */}
-      <IconButton
-        onClick={() => setOpen(true)}
-        data-testid="collaborative-chat-button"
-        sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          width: 56,
-          height: 56,
-          '&:hover': { bgcolor: 'primary.dark' },
-          zIndex: theme.zIndex.fab,
-        }}
-      >
-        <Badge
-          color="success"
-          variant="dot"
-          invisible={!isConnected}
+      {/* Floating action button to open chat — hidden until a room is known */}
+      {roomId && (
+        <IconButton
+          onClick={() => setOpen(true)}
+          data-testid="collaborative-chat-button"
+          sx={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            width: 56,
+            height: 56,
+            "&:hover": { bgcolor: "primary.dark" },
+            zIndex: theme.zIndex.fab,
+          }}
         >
-          <ForumIcon />
-        </Badge>
-      </IconButton>
+          <Badge color="success" variant="dot" invisible={!isConnected}>
+            <ForumIcon />
+          </Badge>
+        </IconButton>
+      )}
 
       {/* Chat drawer */}
       <Drawer
         anchor="right"
         open={open}
         onClose={() => setOpen(false)}
-        variant={isMobile ? 'temporary' : 'persistent'}
+        variant={isMobile ? "temporary" : "persistent"}
         sx={{
-          '& .MuiDrawer-paper': {
+          "& .MuiDrawer-paper": {
             width: drawerWidth,
-            maxWidth: '100vw',
+            maxWidth: "100vw",
           },
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Header */}
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               p: 2,
               borderBottom: 1,
-              borderColor: 'divider',
+              borderColor: "divider",
             }}
           >
             <Typography variant="h6">
-              {activeTopic ? activeTopic.name : 'Chat'}
+              {activeTopic ? activeTopic.name : t("defaultTitle")}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="caption" color="text.secondary">
-                {onlineUsers.length} online
+                {t("onlineCount", { count: onlineUsers.length })}
               </Typography>
               <IconButton size="small" onClick={() => setOpen(false)}>
                 <CloseIcon />
@@ -169,15 +218,15 @@ export function ChatPanel({
           </Box>
 
           {/* Content area */}
-          <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
             {/* Topic list (left panel on desktop, full view when no topic selected on mobile) */}
             {(!activeTopicId || !isMobile) && (
               <Box
                 sx={{
-                  width: activeTopicId ? 180 : '100%',
+                  width: activeTopicId ? 180 : "100%",
                   borderRight: activeTopicId ? 1 : 0,
-                  borderColor: 'divider',
-                  overflow: 'auto',
+                  borderColor: "divider",
+                  overflow: "auto",
                 }}
               >
                 <TopicList
@@ -193,11 +242,21 @@ export function ChatPanel({
 
             {/* Thread view + composer */}
             {activeTopicId && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              >
                 {isMobile && (
-                  <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
-                    <IconButton size="small" onClick={() => setActiveTopicId(null)}>
-                      ← Topics
+                  <Box sx={{ p: 1, borderBottom: 1, borderColor: "divider" }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setActiveTopicId(null)}
+                    >
+                      {t("backButton")}
                     </IconButton>
                   </Box>
                 )}
@@ -223,5 +282,5 @@ export function ChatPanel({
         </Box>
       </Drawer>
     </>
-  )
+  );
 }

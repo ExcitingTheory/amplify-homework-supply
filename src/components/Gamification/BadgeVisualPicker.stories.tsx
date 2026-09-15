@@ -6,6 +6,8 @@ const meta: Meta<typeof BadgeVisualPicker> = {
   title: "🏆 Gamification/Instructor/Badge Visual Picker",
   component: BadgeVisualPicker,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "centered",
   },
 };

@@ -149,6 +149,13 @@ npm run build:amplify:dev
 npm run lint
 ```
 
+> **Large-schema sandbox deploys:** a from-scratch `npx ampx sandbox` can hit AppSync
+> `429 Too Many Requests` throttling while creating resolvers/functions. The deploy logic
+> in [amplify/backend.ts](../amplify/backend.ts) throttles this and exposes three knobs —
+> `AMPLIFY_MODEL_WAVE_SIZE`, `AMPLIFY_RESOLVER_WAVE_SIZE`, and `AMPLIFY_INTRA_STACK_WAVE_SIZE`
+> (all default `1`). See [AMPLIFY_DEPLOY_SEQUENCE.md](./AMPLIFY_DEPLOY_SEQUENCE.md) for the
+> full procedure and safety rules.
+
 ### 3. Environment Variables
 
 Create a `.env.local` file (will be gitignored):

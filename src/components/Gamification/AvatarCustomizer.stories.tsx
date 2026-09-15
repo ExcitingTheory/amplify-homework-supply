@@ -8,6 +8,8 @@ const meta: Meta<typeof AvatarCustomizer> = {
   title: "🏆 Gamification/Avatars & Cosmetics/Avatar Customizer",
   component: AvatarCustomizer,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "centered",
   },
   argTypes: {

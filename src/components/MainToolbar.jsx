@@ -34,12 +34,14 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Tooltip from "@mui/material/Tooltip";
 import BatteryUnknownIcon from "@mui/icons-material/BatteryUnknown";
 import HomeIcon from "@mui/icons-material/Home";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PeopleIcon from "@mui/icons-material/People";
+import ClassIcon from "@mui/icons-material/Class";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import GroupsIcon from "@mui/icons-material/Groups";
+import HandshakeIcon from "@mui/icons-material/Handshake";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -69,6 +71,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Help, Settings } from "@mui/icons-material";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { joinSection } from "../../app/actions/section";
+import { trackEvent, AnalyticsEvents } from "../utils/analytics";
 import { useColorMode } from "../hooks/useColorMode";
 import { LevelBadge } from "./Gamification/LevelBadge";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
@@ -78,6 +81,7 @@ import { useAvatarConfig } from "../hooks/useAvatarConfig";
 import SyncStatusIndicator from "./SyncStatusIndicator";
 import { useXP, useProgress, useSquad } from "../context/gamificationContext";
 import AuthContext from "../context/authContext";
+import { SEMANTIC_THEME } from "../themes/semanticTheme";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TuneIcon from "@mui/icons-material/Tune";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -376,6 +380,7 @@ export default function MainToolbar({ children }) {
   const appShell = React.useContext(AppShellContext);
   const hasAppShell =
     appShell.isDesktop !== undefined && appShell.setDrawerOpen !== undefined;
+  const appBarOffset = hasAppShell ? appShell.appBarHeight || 48 : 64;
 
   const [localDrawerState, setLocalDrawerState] = React.useState({
     left: false,
@@ -396,6 +401,74 @@ export default function MainToolbar({ children }) {
     [hasAppShell, appShell],
   );
 
+  // Drag handle for the desktop nav rail: drag right -> full, middle -> icon
+  // rail, far left -> hidden (mobile-style temporary overlay). Snaps by pointer X.
+  const RAIL_SNAP_X = 160;
+  const HIDE_SNAP_X = 24;
+  const navDraggingRef = React.useRef(false);
+
+  // Snap the nav to hidden / rail / full based on the pointer's X position.
+  const applyNavSnap = React.useCallback(
+    (x) => {
+      if (x < HIDE_SNAP_X) {
+        appShell.setHidden?.(true);
+        setDrawerOpen(false);
+      } else if (x < RAIL_SNAP_X) {
+        appShell.setHidden?.(false);
+        appShell.setCollapsed?.(true);
+        setDrawerOpen(true);
+      } else {
+        appShell.setHidden?.(false);
+        appShell.setCollapsed?.(false);
+        setDrawerOpen(true);
+      }
+    },
+    [appShell, setDrawerOpen],
+  );
+
+  // Keep the latest snap handler in a ref so window listeners attached at drag
+  // start always see current state setters without re-binding.
+  const applyNavSnapRef = React.useRef(applyNavSnap);
+  React.useEffect(() => {
+    applyNavSnapRef.current = applyNavSnap;
+  }, [applyNavSnap]);
+
+  // Use document-level listeners rather than pointer capture: the handle lives
+  // in a portal whose position and mount condition change mid-drag, which drops
+  // pointer capture. Window listeners keep the drag alive and let us suppress
+  // text selection for the duration.
+  const handleNavHandleDown = React.useCallback(
+    (e) => {
+      if (!hasAppShell || !appShell.isDesktop) return;
+      if (typeof document === "undefined") return;
+      e.preventDefault();
+      navDraggingRef.current = true;
+
+      const prevUserSelect = document.body.style.userSelect;
+      const prevCursor = document.body.style.cursor;
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "col-resize";
+
+      const onMove = (ev) => {
+        if (!navDraggingRef.current) return;
+        applyNavSnapRef.current(ev.clientX);
+      };
+      const onUp = () => {
+        navDraggingRef.current = false;
+        document.body.style.userSelect = prevUserSelect;
+        document.body.style.cursor = prevCursor;
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+      };
+
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      window.addEventListener("pointercancel", onUp);
+    },
+    [hasAppShell, appShell.isDesktop],
+  );
+
   const [state, setState] = React.useState({
     // top: false,
     left: false,
@@ -406,6 +479,9 @@ export default function MainToolbar({ children }) {
   const router = useRouter();
   const currentPathname = usePathname();
   const currentSearchParams = useSearchParams();
+  const usesContextualToolbarSearch =
+    currentPathname?.includes("/workbook/") ||
+    currentPathname?.includes("/unit/");
 
   const [work, setIsWorking] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
@@ -585,6 +661,10 @@ export default function MainToolbar({ children }) {
         throw new Error(response.error || "Server Action returned failure");
       }
       joinedSectionId = response.sectionId;
+      trackEvent(AnalyticsEvents.ENGAGED_TIME_UPDATE, {
+        action: "join_section",
+        ...(joinedSectionId && { sectionId: joinedSectionId }),
+      });
     } catch (errors) {
       console.error(errors);
       //   throw new Error(errors[0].message)
@@ -669,33 +749,36 @@ export default function MainToolbar({ children }) {
         </ListItem>
 
         {/* Sections — expandable nav with sub-items */}
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <IconButton
-              edge="end"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSectionsExpanded(!sectionsExpanded);
-              }}
-              sx={{ color: "text.primary" }}
-              aria-label={
-                sectionsExpanded ? "collapse sections" : "expand sections"
-              }
-            >
-              {sectionsExpanded ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          }
-        >
-          <ListItemButton component="a" href="/sections">
+        <ListItem disablePadding sx={{ gap: 0 }}>
+          <ListItemButton
+            component="a"
+            href="/sections"
+            sx={{ flex: 1, minWidth: 0 }}
+          >
             <ListItemIcon sx={{ color: "text.primary" }}>
               <NotificationBadge category="ASSIGNMENT">
-                <PeopleIcon />
+                <ClassIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.sections")} />
+            <ListItemText
+              primary={tCommon("navigation.sections")}
+              primaryTypographyProps={{ noWrap: true }}
+            />
           </ListItemButton>
+          <IconButton
+            edge="end"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSectionsExpanded(!sectionsExpanded);
+            }}
+            sx={{ color: "text.primary", flexShrink: 0, mr: 0.5 }}
+            aria-label={
+              sectionsExpanded ? "collapse sections" : "expand sections"
+            }
+          >
+            {sectionsExpanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
         </ListItem>
         <Collapse
           in={sectionsExpanded}
@@ -775,29 +858,32 @@ export default function MainToolbar({ children }) {
 
         {/* Units — expandable nav with published/draft grouping (instructors only) */}
         {isInstructorOrAdmin && (
-          <ListItem
-            disablePadding
-            secondaryAction={
-              <IconButton
-                edge="end"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setUnitsExpanded(!unitsExpanded);
-                }}
-                sx={{ color: "text.primary" }}
-                aria-label={unitsExpanded ? "collapse units" : "expand units"}
-              >
-                {unitsExpanded ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
-            }
-          >
-            <ListItemButton component="a" href="/units">
+          <ListItem disablePadding sx={{ gap: 0 }}>
+            <ListItemButton
+              component="a"
+              href="/units"
+              sx={{ flex: 1, minWidth: 0 }}
+            >
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <MenuBookIcon />
               </ListItemIcon>
-              <ListItemText primary={tCommon("navigation.units")} />
+              <ListItemText
+                primary={tCommon("navigation.units")}
+                primaryTypographyProps={{ noWrap: true }}
+              />
             </ListItemButton>
+            <IconButton
+              edge="end"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setUnitsExpanded(!unitsExpanded);
+              }}
+              sx={{ color: "text.primary", flexShrink: 0, mr: 0.5 }}
+              aria-label={unitsExpanded ? "collapse units" : "expand units"}
+            >
+              {unitsExpanded ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
           </ListItem>
         )}
         {isInstructorOrAdmin && (
@@ -974,6 +1060,50 @@ export default function MainToolbar({ children }) {
       </List>
       <Divider />
       <List sx={{ color: "text.primary" }}>
+        <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
+          <ListItemButton component="a" href="/profile">
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <UserIcon />
+            </ListItemIcon>
+            <ListItemText primary={tCommon("navigation.profile")} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
+          <ListItemButton component="a" href="/profile/notifications">
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <NotificationBadge>
+                <NotificationsIcon />
+              </NotificationBadge>
+            </ListItemIcon>
+            <ListItemText
+              primary={tCommon("navigation.notifications", "Notifications")}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
+          <ListItemButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenAddStudentToSection(true);
+              setDrawerOpen(false);
+            }}
+          >
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <NotificationBadge category="ASSIGNMENT">
+                <PersonAddIcon />
+              </NotificationBadge>
+            </ListItemIcon>
+            <ListItemText primary={tCommon("mainToolbar.addToSection.title")} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
+          <ListItemButton component="a" href="/settings">
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <SettingsBrightnessIcon />
+            </ListItemIcon>
+            <ListItemText primary={tCommon("navigation.settings")} />
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding>
           <ListItemButton
             onClick={(e) => {
@@ -982,13 +1112,144 @@ export default function MainToolbar({ children }) {
             }}
           >
             <ListItemIcon sx={{ color: "text.primary" }}>
-              <GroupsIcon />
+              <HandshakeIcon />
             </ListItemIcon>
             <ListItemText
               primary={tCommon("navigation.collaboration")}
               secondary={tCommon("navigation.collaborationDesc")}
             />
           </ListItemButton>
+        </ListItem>
+      </List>
+    </>
+  );
+
+  // Collapsed icon-only rail — shows tooltips ("popup names") on hover.
+  const railItemSx = {
+    justifyContent: "center",
+    px: 0,
+    minHeight: 48,
+    "& .MuiListItemIcon-root": { minWidth: 0, justifyContent: "center" },
+  };
+  const railNavContent = (
+    <>
+      <List sx={{ color: "text.primary" }}>
+        <ListItem disablePadding>
+          <Tooltip title={tCommon("navigation.home")} placement="right" arrow>
+            <ListItemButton component="a" href="/" sx={railItemSx}>
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <HomeIcon />
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
+        <ListItem disablePadding>
+          <Tooltip
+            title={tCommon("navigation.sections")}
+            placement="right"
+            arrow
+          >
+            <ListItemButton component="a" href="/sections" sx={railItemSx}>
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <NotificationBadge category="ASSIGNMENT">
+                  <ClassIcon />
+                </NotificationBadge>
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip
+              title={tCommon("navigation.units")}
+              placement="right"
+              arrow
+            >
+              <ListItemButton component="a" href="/units" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <MenuBookIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        <ListItem disablePadding>
+          <Tooltip
+            title={tCommon("navigation.leaderboard")}
+            placement="right"
+            arrow
+          >
+            <ListItemButton component="a" href="/leaderboard" sx={railItemSx}>
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <NotificationBadge category="GAMIFICATION">
+                  <LeaderboardIcon />
+                </NotificationBadge>
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
+        <ListItem disablePadding>
+          <Tooltip title={tCommon("navigation.squads")} placement="right" arrow>
+            <ListItemButton component="a" href="/squads" sx={railItemSx}>
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <NotificationBadge category="SQUAD">
+                  <GroupsIcon />
+                </NotificationBadge>
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip
+              title={tCommon("navigation.gamification")}
+              placement="right"
+              arrow
+            >
+              <ListItemButton
+                component="a"
+                href="/admin/settings"
+                sx={railItemSx}
+              >
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <TuneIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Recycle Bin" placement="right" arrow>
+              <ListItemButton component="a" href="/recycle-bin" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <DeleteOutlineIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+      </List>
+      <Divider />
+      <List sx={{ color: "text.primary" }}>
+        <ListItem disablePadding>
+          <Tooltip
+            title={tCommon("navigation.collaboration")}
+            placement="right"
+            arrow
+          >
+            <ListItemButton
+              sx={railItemSx}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenCollaboration(true);
+              }}
+            >
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <HandshakeIcon />
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
         </ListItem>
       </List>
     </>
@@ -1023,34 +1284,37 @@ export default function MainToolbar({ children }) {
           ref={appShell.toolbarChildrenPortalRef}
           style={{ display: "contents" }}
         />
-        <GlobalSearchBar />
+        {!usesContextualToolbarSearch && <GlobalSearchBar />}
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
-        <SyncStatusIndicator />
-        <StreakIndicator
-          currentStreak={streak?.currentStreak || 0}
-          size="small"
-          showEmpty={!isInstructorOrAdmin}
-        />
-        <StreakShield
-          freezesRemaining={streak?.freezesRemaining || 0}
-          freezesUsed={streak?.freezesUsed || 0}
-          size="small"
-          showEmpty={!isInstructorOrAdmin}
-        />
-        <LevelBadge
-          level={currentSearchParams.get("sectionId") ? sectionLevel : level}
-          showProgress
-          size="small"
-        />
+        <Box sx={{ display: { xs: "none", md: "contents" } }}>
+          <SyncStatusIndicator />
+          <StreakIndicator
+            currentStreak={streak?.currentStreak || 0}
+            size="small"
+            showEmpty={!isInstructorOrAdmin}
+          />
+          <StreakShield
+            freezesRemaining={streak?.freezesRemaining || 0}
+            freezesUsed={streak?.freezesUsed || 0}
+            size="small"
+            showEmpty={!isInstructorOrAdmin}
+          />
+          <LevelBadge
+            level={currentSearchParams.get("sectionId") ? sectionLevel : level}
+            showProgress
+            size="small"
+          />
+        </Box>
         <IconButton
           color="inherit"
           aria-label={tCommon("mainToolbar.collaboration")}
           data-tour="collaboration-button"
           onClick={() => setOpenCollaboration(true)}
+          sx={{ display: { xs: "none", md: "inline-flex" } }}
         >
           <NotificationBadge category="COLLABORATION">
-            <GroupsIcon />
+            <HandshakeIcon />
           </NotificationBadge>
         </IconButton>
         <IconButton
@@ -1058,6 +1322,7 @@ export default function MainToolbar({ children }) {
           aria-label={tCommon("mainToolbar.addToSection.title")}
           data-tour="join-section-button"
           onClick={() => setOpenAddStudentToSection(true)}
+          sx={{ display: { xs: "none", md: "inline-flex" } }}
         >
           <NotificationBadge category="ASSIGNMENT">
             <PersonAddIcon />
@@ -1068,6 +1333,7 @@ export default function MainToolbar({ children }) {
           aria-label="Notifications"
           data-tour="notification-bell"
           onClick={() => router.push("/profile/notifications")}
+          sx={{ display: { xs: "none", md: "inline-flex" } }}
         >
           <NotificationBadge>
             <NotificationsIcon />
@@ -1081,7 +1347,9 @@ export default function MainToolbar({ children }) {
          */}
         {/* <HelpMenu />
          <SettingsMenu /> */}
-        <UserMenu />
+        <Box sx={{ display: { xs: "none", md: "block" } }}>
+          <UserMenu />
+        </Box>
 
         {/**
          * Dropdown for the user.
@@ -1092,6 +1360,7 @@ export default function MainToolbar({ children }) {
           {/* Desktop with AppShell: persistent sidebar as fixed Box portaled to body */}
           {hasAppShell &&
             appShell.isDesktop &&
+            !appShell.hidden &&
             isDrawerOpen &&
             typeof document !== "undefined" &&
             createPortal(
@@ -1103,21 +1372,98 @@ export default function MainToolbar({ children }) {
                   width: appShell.drawerWidth,
                   height: `calc(100% - ${appShell.appBarHeight || 48}px)`,
                   overflowY: "auto",
-                  backdropFilter: "blur(7px)",
+                  overflowX: "hidden",
+                  backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+                  WebkitBackdropFilter: SEMANTIC_THEME.surface.appBarBlur,
                   backgroundColor: "custom.glassNavbar",
                   borderRight: "1px solid",
                   borderColor: "divider",
                   zIndex: (theme) => theme.zIndex.modal + 1,
+                  transition: (theme) =>
+                    theme.transitions.create("width", {
+                      easing: theme.transitions.easing.sharp,
+                      duration: theme.transitions.duration.enteringScreen,
+                    }),
                 }}
                 role="presentation"
               >
-                {drawerNavContent}
+                {appShell.collapsed ? railNavContent : drawerNavContent}
               </Box>,
               document.body,
             )}
 
-          {/* Mobile or without AppShell: SwipeableDrawer */}
-          {!(hasAppShell && appShell.isDesktop) && (
+          {/* Desktop drag handle: right = full, middle = icon rail, far left = mobile mode.
+              Always rendered on desktop so the nav can always be grabbed and restored,
+              including from the hidden state (where it sits at the screen's left edge). */}
+          {hasAppShell &&
+            appShell.isDesktop &&
+            typeof document !== "undefined" &&
+            createPortal(
+              <Box
+                role="separator"
+                aria-orientation="vertical"
+                aria-label={
+                  appShell.hidden
+                    ? "Show navigation"
+                    : appShell.collapsed
+                      ? "Expand navigation"
+                      : "Collapse navigation"
+                }
+                onPointerDown={handleNavHandleDown}
+                onDoubleClick={() => {
+                  if (appShell.hidden) {
+                    appShell.setHidden?.(false);
+                    setDrawerOpen(true);
+                  } else {
+                    appShell.setCollapsed?.(!appShell.collapsed);
+                  }
+                }}
+                sx={{
+                  position: "fixed",
+                  top: `${appShell.appBarHeight || 48}px`,
+                  // Track the *visible* nav width so toggling the drawer (e.g. the
+                  // hamburger) moves the handle to the edge instead of stranding it.
+                  // Offset by half the hit-area width so the grip stays centered on the edge.
+                  left: `${Math.max(0, (isDrawerOpen ? appShell.drawerWidth : 0) - 12)}px`,
+                  width: 24,
+                  height: `calc(100% - ${appShell.appBarHeight || 48}px)`,
+                  cursor: "col-resize",
+                  touchAction: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: (theme) => theme.zIndex.modal + 2,
+                  transition: (theme) =>
+                    theme.transitions.create("left", {
+                      easing: theme.transitions.easing.sharp,
+                      duration: theme.transitions.duration.enteringScreen,
+                    }),
+                  "&:hover .nav-drag-grip": {
+                    opacity: 1,
+                    backgroundColor: "primary.main",
+                  },
+                }}
+              >
+                <Box
+                  className="nav-drag-grip"
+                  sx={{
+                    width: 3,
+                    height: "100%",
+                    borderRadius: 0,
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? SEMANTIC_THEME.surface.darkDragHandle
+                        : SEMANTIC_THEME.surface.lightDragHandle,
+                    opacity: 1,
+                    transition: "opacity 0.2s ease, background-color 0.2s ease",
+                  }}
+                />
+              </Box>,
+              document.body,
+            )}
+
+          {/* Mobile, no AppShell, or desktop "hidden" mode: SwipeableDrawer */}
+          {(!(hasAppShell && appShell.isDesktop) || appShell.hidden) && (
             <SwipeableDrawer
               data-tour="nav-drawer"
               anchor={anchor}
@@ -1125,8 +1471,7 @@ export default function MainToolbar({ children }) {
               onClose={toggleDrawer(anchor, false)}
               onOpen={toggleDrawer(anchor, true)}
               sx={{
-                marginTop: "4rem",
-                zIndex: (theme) => theme.zIndex.drawer + 3,
+                zIndex: (theme) => theme.zIndex.modal + 7,
               }}
               ModalProps={{
                 keepMounted: true,
@@ -1134,15 +1479,30 @@ export default function MainToolbar({ children }) {
               slotProps={{
                 backdrop: {
                   sx: {
-                    backgroundColor: "transparent",
-                    backdropFilter: "blur(4px)",
+                    top: 0,
+                    bottom: 0,
+                    height: "100dvh",
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? SEMANTIC_THEME.surface.darkDrawerBackdrop
+                        : SEMANTIC_THEME.surface.lightDrawerBackdrop,
+                    backdropFilter: `${SEMANTIC_THEME.surface.overlayBlur} saturate(1.15)`,
+                    WebkitBackdropFilter: `${SEMANTIC_THEME.surface.overlayBlur} saturate(1.15)`,
                   },
                 },
               }}
               PaperProps={{
                 sx: {
-                  backdropFilter: "blur(7px)",
-                  backgroundColor: "custom.glassNavbar",
+                  top: 0,
+                  height: "100dvh",
+                  maxHeight: "100dvh",
+                  overflow: "hidden",
+                  backdropFilter: SEMANTIC_THEME.surface.overlayBlur,
+                  WebkitBackdropFilter: SEMANTIC_THEME.surface.overlayBlur,
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? SEMANTIC_THEME.surface.darkDrawer
+                      : SEMANTIC_THEME.surface.lightDrawer,
                   backgroundImage: "none",
                   borderRight: "1px solid",
                   borderColor: "divider",
@@ -1151,13 +1511,36 @@ export default function MainToolbar({ children }) {
             >
               <Box
                 sx={{
-                  marginTop: "4rem",
                   width: 250,
+                  height: "100%",
+                  boxSizing: "border-box",
+                  overflowY: "auto",
+                  overflowX: "hidden",
                 }}
                 role="presentation"
                 onClick={toggleDrawer(anchor, false)}
                 onKeyDown={toggleDrawer(anchor, false)}
               >
+                <Box
+                  sx={{
+                    height: `${appBarOffset}px`,
+                    display: "flex",
+                    alignItems: "center",
+                    px: 1,
+                    boxSizing: "border-box",
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label={tEditorAuth("mainToolbar.menuAttribute")}
+                    onClick={toggleDrawer(anchor, false)}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
                 {drawerNavContent}
               </Box>
             </SwipeableDrawer>
@@ -1175,8 +1558,8 @@ export default function MainToolbar({ children }) {
             slotProps={{
               backdrop: {
                 sx: {
-                  //Your style here....
-                  backdropFilter: "blur(1px)",
+                  backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+                  WebkitBackdropFilter: SEMANTIC_THEME.surface.appBarBlur,
                 },
               },
             }}

@@ -32,222 +32,20 @@ import {
   type Persona,
   type OnboardingMode,
 } from "./helpers";
+import { getTasksForPersona } from "../../../.storybook/code/onboarding-tasks";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// TASK CATALOGUES (mirrors spotlight-configs.ts)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const INSTRUCTOR_TASKS: TaskSpec[] = [
-  {
-    id: "instructor-setup-class",
-    title: "Set Up Your First Class",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--sections",
-      completionSequence: [
-        "sections-page",
-        "create-section-button",
-        "section-form",
-        "join-code",
-      ],
-    },
-  },
-  {
-    id: "instructor-create-unit",
-    title: "Create Your First Unit",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--units",
-      completionSequence: ["units-page", "create-unit-button"],
-    },
-  },
-  {
-    id: "instructor-add-quiz",
-    title: "Add a Quiz Block",
-    completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
-      completionSequence: ["editor-toolbar", "quiz-block", "quiz-answers"],
-    },
-  },
-  {
-    id: "instructor-create-vocabulary",
-    title: "Add Vocabulary Words",
-    completionCriteria: {
-      tutorialStoryId: "📁-content-management-dictionary-editor--default",
-      completionSequence: ["add-word-button", "word-form", "word-card"],
-    },
-  },
-  {
-    id: "instructor-create-assignment",
-    title: "Assign Work to Students",
-    completionCriteria: {
-      tutorialStoryId: "🧩-ui-components-section-assigner--default",
-      completionSequence: ["unit-selector", "create-assignment-button"],
-    },
-  },
-  {
-    id: "instructor-view-grades",
-    title: "View Student Grades",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignments-section", "assignment-card"],
-    },
-  },
-  {
-    id: "instructor-use-ai-assistant",
-    title: "Use AI to Generate Content",
-    completionCriteria: {
-      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
-      completionSequence: ["chat-input"],
-    },
-  },
-  {
-    id: "instructor-learn-shortcuts",
-    title: "Master Editor Shortcuts",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      completionSequence: ["shortcuts-demo"],
-    },
-  },
-];
-
-const LEARNER_TASKS: TaskSpec[] = [
-  {
-    id: "learner-join-class",
-    title: "Join Your First Class",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--sections",
-      completionSequence: ["sections-page", "section-card", "join-code"],
-    },
-  },
-  {
-    id: "learner-view-assignments",
-    title: "View Your Assignments",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignment-card", "view-workbook-button"],
-    },
-  },
-  {
-    id: "learner-complete-assignment",
-    title: "Complete an Assignment",
-    completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink",
-      completionSequence: ["workbook", "quiz-block", "quiz-answers"],
-    },
-  },
-  {
-    id: "learner-review-feedback",
-    title: "Review Your Feedback",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignments-section", "assignment-card"],
-    },
-  },
-  {
-    id: "learner-practice-vocabulary",
-    title: "Practice Vocabulary",
-    completionCriteria: {
-      tutorialStoryId: "📁-content-management-vocabulary-review--default",
-      completionSequence: ["word-card"],
-    },
-  },
-  {
-    id: "learner-use-chat-help",
-    title: "Get Help from AI Assistant",
-    completionCriteria: {
-      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
-      completionSequence: ["chat-input"],
-    },
-  },
-  {
-    id: "learner-learn-shortcuts",
-    title: "Learn Helpful Shortcuts",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      completionSequence: ["shortcuts-demo"],
-    },
-  },
-];
-
-// Only main tasks (category !== "🎁 Extra Credit") — extra credit tasks
-// are rendered as secret-task-item, not task-item, and excluded from progress.
-const TRANSLATOR_TASKS: TaskSpec[] = [
-  {
-    id: "translator-language-switcher",
-    title: "Try the Language Switcher",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-demo-instructions"],
-    },
-  },
-  {
-    id: "translator-translation-panel",
-    title: "Open the Translations Panel",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-auth-form"],
-    },
-  },
-  {
-    id: "translator-locale-files",
-    title: "Understand Locale File Structure",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--editor-namespace",
-      completionSequence: ["translation-auth-form"],
-    },
-  },
-  {
-    id: "translator-component-context",
-    title: "Review Component Context",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--auth-namespace",
-      completionSequence: ["translation-auth-buttons"],
-    },
-  },
-];
-
-const SECRET_TASKS: TaskSpec[] = [
-  {
-    id: "secret-keyboard-master",
-    title: "👑 SECRET: Keyboard Master Challenge",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      customCheck: () => false,
-    },
-  },
-  {
-    id: "secret-speed-demon",
-    title: "⚡ SECRET: Speed Demon",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      customCheck: () => false,
-    },
-  },
-  {
-    id: "secret-achievement-hunter",
-    title: "🏅 SECRET: Achievement Hunter",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      customCheck: () => false,
-    },
-  },
-  {
-    id: "secret-shortcut-evangelist",
-    title: "📢 SECRET: Shortcut Evangelist",
-    completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
-      completionSequence: ["editor-toolbar"],
-    },
-  },
-  {
-    id: "secret-documentation-explorer",
-    title: "🔍 SECRET: Documentation Explorer",
-    completionCriteria: {
-      tutorialStoryId:
-        "🏠-getting-started-onboarding-learning-modes--tutorial-mode-example",
-      customCheck: () => false,
-    },
-  },
-];
+const INSTRUCTOR_TASKS = getTasksForPersona("instructor").filter(
+  (task) => !task.id.startsWith("secret-"),
+);
+const LEARNER_TASKS = getTasksForPersona("learner").filter(
+  (task) => !task.id.startsWith("secret-"),
+);
+const TRANSLATOR_TASKS = getTasksForPersona("translator").filter(
+  (task) => !task.id.startsWith("secret-"),
+);
+const SECRET_TASKS = getTasksForPersona("instructor").filter((task) =>
+  task.id.startsWith("secret-"),
+);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MODE SWITCHING
@@ -380,7 +178,7 @@ test.describe("Quiz mode — Instructor full tour", () => {
     await assertFullProgress(page);
   });
 
-  test("quiz spotlight navigates to Sidebar Navigation story", async ({
+  test("quiz spotlight navigates to the task's configured story", async ({
     page,
   }) => {
     const taskCard = page
@@ -391,9 +189,9 @@ test.describe("Quiz mode — Instructor full tour", () => {
     await expect(overlay.locator("text=/Step 1 of \\d+/")).toBeVisible({
       timeout: 10_000,
     });
-    // URL should contain sidebar-navigation (quiz always routes there)
-    await page.waitForURL(/sidebar-navigation/, { timeout: 10_000 });
-    expect(page.url()).toContain("sidebar-navigation");
+    const storyId = INSTRUCTOR_TASKS[0].completionCriteria?.quizStoryId;
+    expect(storyId).toBeTruthy();
+    await expect(page).toHaveURL(new RegExp(encodeURIComponent(storyId!)));
   });
 
   test("quiz spotlight shows quiz badge", async ({ page }) => {
@@ -529,34 +327,27 @@ test.describe("Extra Credit / Secret Achievements", () => {
   test("completing a secret via data-tour reveals title and chip", async ({
     page,
   }) => {
-    // The "secret-shortcut-evangelist" has completionSequence: ["editor-toolbar"]
-    // Complete all main tasks first (secrets are below), or directly trigger via
-    // the completion sequence in the appropriate story iframe.
+    // The secret's configured completion target lives in the editor story.
+    // Navigate there in the real browser, then perform the actual toolbar click.
     await switchMode(page, "tutorial");
-
-    // Walk the secret task directly (it appears in the panel's secret section)
-    // Secret tasks are clickable even if hidden — the handler should still work
-    // Actually, secret tasks use data-testid="secret-task-item" and are NOT clickable
-    // They complete via event detection. Let's trigger the data-tour click in iframe.
+    await page.goto("/?path=/story/✏️-lesson-editor-editor--kitchen-sink", {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await page.waitForSelector("#storybook-preview-iframe", {
+      timeout: 15_000,
+    });
     const preview = page.frameLocator("#storybook-preview-iframe");
     const target = preview.locator('[data-tour="editor-toolbar"]').first();
-    const isAttached = await target
-      .waitFor({ state: "attached", timeout: 5_000 })
-      .then(() => true)
-      .catch(() => false);
+    await expect(target).toBeAttached({ timeout: 15_000 });
+    await target.scrollIntoViewIfNeeded();
+    await target.click();
 
-    if (isAttached) {
-      await target.scrollIntoViewIfNeeded();
-      await target.click();
-
-      // Check if the secret was discovered
-      await expect(
-        page.getByText("📢 SECRET: Shortcut Evangelist"),
-      ).toBeVisible({ timeout: 8_000 });
-      await expect(page.getByText("✨ Discovered!").first()).toBeVisible();
-      // Counter should update
-      await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible();
-    }
+    await expect(page.getByText("📢 SECRET: Shortcut Evangelist")).toBeVisible({
+      timeout: 8_000,
+    });
+    await expect(page.getByText("✨ Discovered!").first()).toBeVisible();
+    await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible();
   });
 });
 
@@ -655,31 +446,28 @@ test.describe("Cross-persona secret persistence", () => {
     await selectPersona(page, "instructor");
     await switchMode(page, "tutorial");
 
-    // Trigger a secret completion via data-tour in iframe
+    // Trigger a secret completion via a real click in its configured story.
+    await page.goto("/?path=/story/✏️-lesson-editor-editor--kitchen-sink", {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await page.waitForSelector("#storybook-preview-iframe", {
+      timeout: 15_000,
+    });
     const preview = page.frameLocator("#storybook-preview-iframe");
     const target = preview.locator('[data-tour="editor-toolbar"]').first();
-    const isAttached = await target
-      .waitFor({ state: "attached", timeout: 5_000 })
-      .then(() => true)
-      .catch(() => false);
+    await expect(target).toBeAttached({ timeout: 15_000 });
+    await target.scrollIntoViewIfNeeded();
+    await target.click();
 
-    if (isAttached) {
-      await target.scrollIntoViewIfNeeded();
-      await target.click();
+    await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible({
+      timeout: 8_000,
+    });
 
-      // Verify discovered as instructor
-      await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible({
-        timeout: 8_000,
-      });
-
-      // Switch to learner persona
-      await selectPersona(page, "learner");
-
-      // The same secret should still show as discovered
-      await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible({
-        timeout: 5_000,
-      });
-    }
+    await selectPersona(page, "learner");
+    await expect(page.getByText(/1\/\d+ discovered/)).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test("persona-specific completions do NOT leak across personas", async ({

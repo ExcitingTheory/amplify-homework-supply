@@ -87,7 +87,7 @@ The learner dashboard suffers from **information overload without structure**. A
 
 ### 2.1 Add `linkedUnitIds` to GroupChallenge
 
-**Current data gap**: `GroupChallenge` has `cohortId` and `targetXP` but no way to scope which units contribute XP to that chapter. Currently ALL XP in a section flows into ALL active challenges equally.
+**Current data gap**: `GroupChallenge` has `sectionID` and `targetXP` but no way to scope which units contribute XP to that chapter. Currently ALL XP in a section flows into ALL active challenges equally.
 
 **Schema change** (requires permission):
 ```typescript
@@ -366,7 +366,7 @@ When a section has no pending assignments:
 
 ### 6.4 Transition micro-animations
 
-- Card completion: satisfying check animation (respects reduced-motion) — **not yet implemented**
+- Card completion: satisfying check animation (respects reduced-motion) — **Done** (`AssignmentCard.tsx` `cardComplete` glow + `checkPop` chip animation, gated on `useReducedMotion`)
 - Chapter unlock: brief celebration with narrative reveal — **Done** (`ChapterUnlockCelebration.tsx`, respects `useReducedMotion`)
 - Level up: full-screen celebration (dismissible, skippable) — **Done** (`LevelUpCelebration.tsx`, respects `useReducedMotion`)
 
@@ -395,7 +395,7 @@ When a section has no pending assignments:
    - The `unlockContentId: a.id()` field already handles "what unlocks when complete"
    - Additive nullable field, no migration needed
 
-2. **No `linkedAssignmentIds` needed** — Assignments already have `unitID` + `sectionID`, and challenges have `cohortId` (= sectionID). The dashboard can derive "which assignments belong to which chapter" by matching `assignment.unitID ∈ challenge.linkedUnitIds`.
+2. **No `linkedAssignmentIds` needed** — Assignments already have `unitID` + `sectionID`, and challenges have `sectionID`. The dashboard can derive "which assignments belong to which chapter" by matching `assignment.unitID ∈ challenge.linkedUnitIds`.
 
 3. **Unit** — Consider `estimatedMinutes: a.integer()` for time estimates on cards (optional, low priority)
 

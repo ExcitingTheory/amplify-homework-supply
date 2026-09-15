@@ -1,11 +1,50 @@
 # Storybook Interaction Audit
 
 > Generated: 2026-08-06  
-> Updated: 2026-08-11  
+> Updated: 2026-09-12 (re-run + gap-closing in progress)  
 > Goal: Every meaningful user interaction covered exactly once across `play:` functions.  
-> Status: **~400 stories across ~118 files. 168 files now have `play:` functions. 12 files have partial coverage (~30 stories still missing play functions). All editor, gamification, chat, dashboard, peer-review, practice-drill, recording, workbook, and debug panel categories have substantial coverage.**
+> Status: **1007 stories across 210 `.stories.*` files under `src/`. 818 stories (81.2%) define a `play:` function. 165 files are fully covered, 37 have partial coverage, and 8 have no `play:` at all. Gap-closing is underway — up from 71.9% at the start of this session.**
 >
-> ### Quality Gate Results (2026-08-11)
+> ### How to re-run this audit
+>
+> The per-file coverage is computed by a standalone read-only script:
+>
+> ```bash
+> node scripts/audit-story-play.mjs
+> ```
+>
+> It globs every `src/**/*.stories.*`, counts CSF3 named-export stories vs. how many define a `play:` function. **It detects both CSF3 (`play:` inside the story object) and CSF2 (`StoryName.play = ...` assignment) patterns** — the latter is common in older `.jsx` stories. The tables below are the output of the 2026-09-12 run.
+>
+> ### Coverage snapshot — 2026-09-12
+>
+> | Metric | Value |
+> |---|---|
+> | Story files (≥1 story) | 210 |
+> | Total stories | 1007 |
+> | Stories with `play:` | 818 (81.2%) |
+> | Fully covered files | 165 |
+> | Partial files (some stories missing `play:`) | 37 |
+> | Zero-coverage files (no `play:`) | 8 |
+>
+> **Closed this session (all verified passing via `vitest --project=storybook`):**
+> ToolCallPreview 8, ModerationBadge 8, NotificationBadge 4, PrefetchBadge 2, AvatarDisplay 10, BadgeIcon 10, AvatarGlowRing 8, PixelSpriteMascot 6, SquadMentionPill 6, AntiBadges 4, Chat/Chat 10, SearchHighlightPlugin 3, ColorPicker 3, DraggableBlockPlugin 2, UnitCompletedPlugin 1, MetadataEditor 9, LearningModes 4, OnboardingExamples 5.
+>
+> _18 files, 103 new play functions, all green._
+>
+> **Remaining 8 zero-coverage files — deferred (render-fragile in the vitest browser runner):**
+> - `ConflictResolutionDialog.stories.tsx` (2) — story throws `sb-errordisplay` on render (pre-existing bug).
+> - `PdfThumbnail.stories.tsx` (11), `Editor3/components/PdfViewerComponent.stories.jsx` (2) — react-pdf worker/canvas is flaky headless.
+> - `stories/pages-additional.stories.tsx` (19) — full App Router pages; heavy context, high render-failure risk.
+> - `InstructorDashboard.stories.jsx` (9) — dashboard needs many seeded contexts.
+> - `Editor3/components/EditorComponents.stories.jsx` (12) — audio/video/image editor blocks need media contexts.
+> - `Editor3/components/FileManager2.stories.jsx` (4) — uses `React.use()` Suspense + virtualized list.
+> - `ChatSidebar/BlockInsertPreview.stories.jsx` (6) — renders live Lexical editor blocks.
+>
+> These need per-story care (or a story/component fix) rather than a blanket smoke play.
+>
+> > **Note:** Many remaining "missing" stories are intentionally display-only variants (responsive `MobileViewport`/`TabletViewport`/`DesktopViewport` renders, icon/badge showcases, documentation stories). These are counted as gaps by the script but do not all require interaction tests — see the annotated tables below.
+>
+> ### Quality Gate Results (from 2026-08-11 run — NOT re-run on 2026-09-12)
 >
 > | Step | Command | Result |
 > |---|---|---|
@@ -46,6 +85,10 @@
 12. [Summary Statistics](#summary-statistics)
 13. [Top Priority Files](#top-priority-files)
 14. [Mock Data Gaps](#mock-data-gaps)
+
+---
+
+> ⚠️ **The per-category tables in sections 1–11 below reflect the original 2026-08-06 snapshot and are partially stale** — many stories marked ❌ have since been covered. The authoritative current state is the [Summary Statistics](#summary-statistics), [Remaining Partial Coverage](#remaining-partial-coverage-has-play-but-some-stories-missing), and [Zero Coverage](#zero-coverage-no-play-at-all) sections, regenerated on 2026-09-12 via `node scripts/audit-story-play.mjs`.
 
 ---
 
@@ -1565,62 +1608,136 @@
 
 ## Summary Statistics
 
-| Category | Files | Approx. Stories | Files with `play:` | Coverage |
-|---|---|---|---|---|
-| Editor (Editor3) | 19 | ~60 | 19 | **~97%** (1 file partial) |
-| Gamification | 36 | ~110 | 36 | **~95%** (2 files partial) |
-| Chat | 10 | ~35 | 10 | **100%** |
-| Dashboard | 5 | ~22 | 5 | **~95%** (2 files partial) |
-| Peer Review | 3 | ~16 | 3 | **~80%** (1 file partial) |
-| Practice Drill | 6 | ~22 | 6 | **100%** |
-| Recording Studio | 6 | ~18 | 6 | **100%** |
-| Workbook | 9 | ~35 | 9 | **~95%** (1 file partial) |
-| Debug Panel | 4 | ~22 | 4 | **~95%** (1 file partial) |
-| Utility / Other | 20 | ~60 | 20 | **~95%** (3 files partial) |
-| **TOTAL** | **~118** | **~400** | **~118** | **~92%** |
+> Computed by `node scripts/audit-story-play.mjs` on 2026-09-12. Counts every CSF3 named-export story under `src/**/*.stories.*`.
+
+| Metric | Value |
+|---|---|
+| Story files (≥1 story) | **206** |
+| Total stories | **996** |
+| Stories with `play:` | **692 (69.5%)** |
+| Fully covered files | **141** |
+| Partial files | **36** |
+| Zero-coverage files | **29** |
+
+> The earlier "~118 files / ~400 stories / ~92%" figures are superseded. The file count nearly doubled as new component families were added; interaction coverage did not keep pace, so headline coverage is now ~70%.
 
 ---
 
 ## Top Priority Files
 
-Ranked by interaction density and user impact. Previously top priority — now mostly completed.
+Ranked by interaction density and user impact. All previously-flagged top-priority files remain covered.
 
 | # | File | Status | Notes |
 |---|---|---|---|
-| 1 | `InlineGradeCell.stories.tsx` | ✅ Done (5/5) | |
+| 1 | `InlineGradeCell.stories.tsx` | ✅ Done | |
 | 2 | `GlobalSearchBar.stories.tsx` | ✅ Done | |
 | 3 | `NotificationList.stories.tsx` | ✅ Done | |
-| 4 | `CollaborativeChat/MessageInput.stories.tsx` | ✅ Done (4/4) | |
-| 5 | `CollaborativeChat/TopicList.stories.tsx` | ✅ Done (4/4) | |
-| 6 | `DebugPanel/LogViewer.stories.tsx` | ⚠️ Partial (6/7) | 1 story missing play |
-| 7 | `Gamification/XPTunerDialog.stories.tsx` | ⚠️ Partial (7/8) | 1 story missing play |
-| 8 | `Gamification/RedemptionConditionForm.stories.tsx` | ✅ Done (3/3) | |
-| 9 | `PracticeDrill/PracticeDrillConfigPopup.stories.tsx` | ✅ Done (7/7) | |
-| 10 | `Workbook/JoinWorkbookDialog.stories.tsx` | ✅ Done (2/2) | |
-| 11 | `AIAgentConfig.stories.tsx` | ✅ Done (7/7) | |
-| 12 | `SortableAnswers.stories.jsx` | ✅ Done (3/3) | |
-| 13 | `Gamification/SquadPostEditor.stories.tsx` | ✅ Done (3/3) | |
-| 14 | `PeerReview/OpenCollaborationRooms.stories.tsx` | ✅ Done (4/4) | |
-| 15 | `MiniEditor/MiniEditor.stories.tsx` | ✅ Done (10/10) | |
-| 16 | `DebugPanel/DebugPanel.stories.tsx` | ✅ Done (6/6) | |
-| 17 | `stories/KeyboardShortcutTrainer.stories.tsx` | ✅ Done (1/1) | |
+| 4 | `CollaborativeChat/MessageInput.stories.tsx` | ✅ Done | |
+| 5 | `CollaborativeChat/TopicList.stories.tsx` | ✅ Done | |
+| 6 | `Gamification/XPTunerDialog.stories.tsx` | ✅ Done (8/8) | now fully covered |
+| 7 | `Gamification/RedemptionConditionForm.stories.tsx` | ✅ Done | |
+| 8 | `PracticeDrill/PracticeDrillConfigPopup.stories.tsx` | ✅ Done | |
+| 9 | `Workbook/JoinWorkbookDialog.stories.tsx` | ✅ Done | |
+| 10 | `AIAgentConfig.stories.tsx` | ✅ Done | |
+| 11 | `SortableAnswers.stories.jsx` | ✅ Done | |
+| 12 | `Gamification/SquadPostEditor.stories.tsx` | ✅ Done | |
+| 13 | `PeerReview/OpenCollaborationRooms.stories.tsx` | ✅ Done | |
+| 14 | `MiniEditor/MiniEditor.stories.tsx` | ✅ Done | |
+| 15 | `DebugPanel/DebugPanel.stories.tsx` | ✅ Done | |
+| 16 | `DebugPanel/LogViewer.stories.tsx` | ✅ Done | now fully covered |
+| 17 | `stories/KeyboardShortcutTrainer.stories.tsx` | ✅ Done | |
 
-### Remaining Partial Coverage
+### New top-priority gaps (interaction-heavy, zero `play:`)
 
-| # | File | Coverage | Missing |
+These are the highest-impact regressions/new files — interactive components shipped with no interaction coverage.
+
+| File | Coverage | Why it matters |
+|---|---|---|
+| `Chat/Chat.stories.tsx` | 0/10 | Topic list, thread view, composer, mention chips — core chat surface |
+| `ChatSidebar/VirtualizedMessageList.stories.jsx` | 0/9 | Scroll-to-bottom, tool-call expansion, streaming |
+| `ChatSidebar/ToolCallPreview.stories.tsx` | 0/8 | Pending/executing/error tool states |
+| `ChatSidebar/BlockInsertPreview.stories.jsx` | 0/6 | Insert-block previews |
+| `InstructorDashboard.stories.jsx` | 0/9 | Section expand, student drill-down, moderation filter |
+| `Editor3/components/MetadataEditor.stories.tsx` | 0/9 | Auto-save, field edits |
+| `Editor3/components/EnhancedGeneration.stories.jsx` | 0/5 | Image/audio generation workflow |
+| `AIFeedbackWidget.stories.jsx` | 0/6 | Thumbs up/down feedback submission |
+
+### Remaining Partial Coverage (has `play:` but some stories missing)
+
+| # | File | Coverage | Missing stories |
 |---|---|---|---|
-| 1 | `PeerReview/PeerReview.stories.tsx` | 2/11 | 9 stories |
-| 2 | `Gamification/Gamification.stories.tsx` | 2/6 | 4 stories |
-| 3 | `Workbook/Workbook.stories.tsx` | 3/7 | 4 stories |
-| 4 | `Gamification/BossBattleCard.stories.tsx` | 1/4 | 3 stories |
-| 5 | `Dashboard/SectionPanel.stories.tsx` | 5/7 | 2 stories |
-| 6 | `ModerationPanel.stories.jsx` | 6/8 | 2 stories |
-| 7 | `Editor3/plugins/AIContentCompletionPlugin.stories.jsx` | 3/4 | 1 story |
-| 8 | `Gamification/XPTunerDialog.stories.tsx` | 7/8 | 1 story |
-| 9 | `DebugPanel/LogViewer.stories.tsx` | 6/7 | 1 story |
-| 10 | `Leaderboard/Leaderboard.stories.tsx` | 2/3 | 1 story |
-| 11 | `PermissionErrorOverlay.stories.jsx` | 5/6 | 1 story |
-| 12 | `section-settings.stories.tsx` | 1/2 | 1 story |
+| 1 | `NotificationCard.stories.tsx` | 1/9 | Seen, Interacted, AssignmentDue, CollaborationInvite, SquadPost, SystemAnnouncement, NoBody, AllCategories |
+| 2 | `QuestionsReview2.stories.tsx` | 5/13 | ComprehensionQuestions, MixedDifficulty, AlreadyImported, MinimalData, NoQuestions, WithSummariesExpanded, Playground, BadgeShowcase |
+| 3 | `Gamification/SectionSelector.stories.tsx` | 2/9 | Default, WithSelection, Empty, SingleSection, ManySections, Loading, Disabled |
+| 4 | `Gamification/BossBattleProgress.stories.tsx` | 2/8 | HalfProgress, NearlyComplete, Completed, Expired, Inactive, Minimal |
+| 5 | `ChatSidebar.stories.jsx` | 9/14 | ConversationHistory, ToolCallSearch, ToolCallCreateUnit, ToolCallGenerateContent, ToolCallMultiStep |
+| 6 | `Gamification/SkillTree.stories.tsx` | 2/7 | Default, AllMastered, AllLocked, Empty, WithGenerate |
+| 7 | `Editor3/Workbook.stories.jsx` | 1/5 | EmptyWorkbook, WorkbookWithContent, WorkbookWithProgress, DataPluginDemo |
+| 8 | `Editor3/plugins/BlockSuggestionPluginAI.stories.jsx` | 1/5 | AfterExplanation, ComplexLessonStructure, AfterQuiz, EmptyLesson |
+| 9 | `Gamification/SkillForm.stories.tsx` | 1/5 | Default, WithoutGenerate, EmptySection, Submitting |
+| 10 | `VocabularyReview2.stories.tsx` | 4/8 | AlreadyImported, NoVocabulary, WithSummariesExpanded, Playground |
+| 11 | `Gamification/ThemeMixer.stories.tsx` | 1/4 | Default, WithCustomPalette, WarmPalette |
+| 12 | `MeaningAssociationExercise/MeaningAssociation.stories.jsx` | 6/9 | EasyExerciseCompleted, HardExerciseCompleted, LearnExerciseCompleted |
+| 13 | `RecordingStudio3/HorizontalTimeline.stories.tsx` | 1/4 | ThreeSpeakers, EmptyTimeline, RecordingState |
+| 14 | `RecordingStudio3/ScreenplayEditor.stories.tsx` | 1/4 | Empty, AIGenerating, ReadOnly |
+| 15 | `RecordingStudio3Modal.stories.jsx` | 5/8 | ConfirmationPreview, Closed, Interactive |
+| 16 | `Editor3/Editor.stories.jsx` | 7/9 | EditorWithContent, KitchenSink |
+| 17 | `Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx` | 5/7 | LanguagePronunciation, FeatureDocumentation |
+| 18 | `Gamification/BossBattleForm.stories.tsx` | 2/4 | Default, Submitting |
+| 19 | `Gamification/CosmeticSelector.stories.tsx` | 1/3 | SelectorLevel3, SelectorLevel5 |
+| 20 | `Gamification/InstructorGamificationPanel.stories.tsx` | 1/3 | Empty, WithData |
+| 21 | `Gamification/ThemeUnlockEditor.stories.tsx` | 1/3 | Default, CustomConfig |
+| 22 | `ModerationPanel.stories.jsx` | 6/8 | InstructorReviewWorkflow, MalformedFlags |
+| 23 | `QuestionBlock.stories.jsx` | 1/3 | TrueFalse, ManyAnswers |
+| 24 | `RecordingStudio3.stories.jsx` | 8/10 | StartFromScratch, Interactive |
+| 25 | `SectionAssigner.stories.jsx` | 1/3 | Closed, NoSections |
+| 26 | `CollaborativeChat/ChatPanel.stories.tsx` | 1/2 | FullDemo |
+| 27 | `Editor3/plugins/AutocompletePlugin.stories.jsx` | 1/2 | EditableEmpty |
+| 28 | `Gamification/BadgeEditor.stories.tsx` | 1/2 | WithCustomBadges |
+| 29 | `Gamification/EasterEggForm.stories.tsx` | 1/2 | Submitting |
+| 30 | `Gamification/SkillDetailPanel.stories.tsx` | 2/3 | Mastered |
+| 31 | `PermissionErrorOverlay.stories.jsx` | 5/6 | Interactive |
+| 32 | `stories/Page.stories.ts` | 1/2 | LoggedOut |
+| — | `Dashboard/AssignmentCard.stories.tsx` | 11/14 | Mobile/Tablet/DesktopViewport — display-only, `play:` optional |
+| — | `Dashboard/SectionPanel.stories.tsx` | 7/10 | Mobile/Tablet/DesktopViewport — display-only, `play:` optional |
+| — | `Dashboard/UpNextCard.stories.tsx` | 4/7 | Mobile/Tablet/DesktopViewport — display-only, `play:` optional |
+| — | `stories/Button.stories.ts` | 4/5 | Storybook boilerplate — `play:` optional |
+
+### Zero Coverage (no `play:` at all)
+
+Ordered by story count. Media/viewer, avatar/badge showcase, and icon-only files are largely display-only (marked _display_); the rest are interaction candidates.
+
+| File | Stories | Type |
+|---|---|---|
+| `stories/pages-additional.stories.tsx` | 19 | page render smoke tests |
+| `Editor3/components/EditorComponents.stories.jsx` | 12 | quiz/answer/image/audio blocks — **interactive** |
+| `Editor3/components/AudioWaveformPlayer.stories.jsx` | 11 | play/record controls — **interactive** |
+| `PdfThumbnail.stories.tsx` | 11 | thumbnail render — _display_ (Clickable/LoadingState/ErrorState interactive) |
+| `Chat/Chat.stories.tsx` | 10 | chat surfaces — **interactive** |
+| `Gamification/AvatarDisplay.stories.tsx` | 10 | avatar render — _display_ |
+| `Gamification/BadgeIcon.stories.tsx` | 10 | badge render — _display_ |
+| `ChatSidebar/VirtualizedMessageList.stories.jsx` | 9 | scroll/tool-calls — **interactive** |
+| `Editor3/components/MetadataEditor.stories.tsx` | 9 | auto-save/edits — **interactive** |
+| `InstructorDashboard.stories.jsx` | 9 | expand/drill-down — **interactive** |
+| `ChatSidebar/ToolCallPreview.stories.tsx` | 8 | tool states — **interactive** |
+| `Gamification/AvatarGlowRing.stories.tsx` | 8 | glow render — _display_ |
+| `ModerationBadge.stories.jsx` | 8 | badge render — _display_ |
+| `AIFeedbackWidget.stories.jsx` | 6 | feedback submit — **interactive** |
+| `ChatSidebar/BlockInsertPreview.stories.jsx` | 6 | insert previews — **interactive** |
+| `Gamification/PixelSpriteMascot.stories.tsx` | 6 | mascot render — _display_ |
+| `Gamification/SquadMentionPill.stories.tsx` | 6 | pill render — _display_ (Clickable interactive) |
+| `Editor3/components/EnhancedGeneration.stories.jsx` | 5 | generation workflow — **interactive** |
+| `stories/OnboardingExamples.stories.tsx` | 5 | onboarding flows — **interactive** |
+| `Editor3/components/FileManager2.stories.jsx` | 4 | file list/expand — **interactive** |
+| `Gamification/AntiBadges.stories.tsx` | 4 | badge render — _display_ |
+| `NotificationBadge.stories.tsx` | 4 | badge count — _display_ |
+| `stories/LearningModes.stories.tsx` | 4 | tutorial/quiz modes — **interactive** |
+| `Editor3/plugins/ColorPicker.stories.jsx` | 3 | color pick — **interactive** |
+| `Editor3/plugins/SearchHighlightPlugin.stories.jsx` | 3 | search highlight — **interactive** |
+| `Editor3/components/PdfViewerComponent.stories.jsx` | 2 | pdf render — _display_ |
+| `Editor3/plugins/DraggableBlockPlugin.stories.jsx` | 2 | drag blocks — **interactive** |
+| `PrefetchBadge.stories.tsx` | 2 | badge state — _display_ |
+| `Editor3/plugins/UnitCompletedPlugin.stories.jsx` | 1 | completion trigger — **interactive** |
 
 ---
 

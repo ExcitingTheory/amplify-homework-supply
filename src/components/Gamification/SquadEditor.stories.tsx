@@ -7,6 +7,8 @@ const meta: Meta<typeof SquadEditor> = {
   title: "🏆 Gamification/Squads & Teams/Squad Editor",
   component: SquadEditor,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
 };

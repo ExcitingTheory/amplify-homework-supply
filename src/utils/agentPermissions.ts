@@ -386,7 +386,7 @@ export class AgentPermissions {
       if (!Array.isArray(commands)) continue;
 
       for (const blockedCmd of commands) {
-        if (command.includes(blockedCmd)) {
+        if (this.commandMatchesBlockedPattern(command, blockedCmd)) {
           return {
             allowed: false,
             reason: `Blocked command (${category}): ${blockedCmd}`,
@@ -400,7 +400,7 @@ export class AgentPermissions {
       // Check if command contains any blocked sub-commands for this category
       if (config.blocked) {
         for (const blockedCmd of config.blocked) {
-          if (command.includes(blockedCmd)) {
+          if (this.commandMatchesBlockedPattern(command, blockedCmd)) {
             return {
               allowed: false,
               reason: `Blocked ${category} command: ${blockedCmd}`,
@@ -423,6 +423,23 @@ export class AgentPermissions {
       allowed: false,
       reason: `Command not in allowed list. Check agent-permissions.json to add it.`,
     };
+  }
+
+  private commandMatchesBlockedPattern(
+    command: string,
+    blockedPattern: string,
+  ): boolean {
+    if (blockedPattern.includes(" ")) {
+      return command.includes(blockedPattern);
+    }
+
+    const tokens: string[] = command.match(/[^\s;&|()]+/g) || [];
+
+    if (blockedPattern.endsWith("-")) {
+      return tokens.some((token) => token.startsWith(blockedPattern));
+    }
+
+    return tokens.includes(blockedPattern);
   }
 
   /**

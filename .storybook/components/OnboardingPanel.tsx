@@ -412,7 +412,12 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       iframeLoadCleanupRef.current = null;
     }
 
-    // Listen for iframe load to clear the navigating state
+    // Listen for iframe load to clear the navigating state. This only fires
+    // for a hard navigation (iframe src actually changes) — Storybook's
+    // normal api.selectStory() SPA transition swaps the rendered story over
+    // the existing channel without reloading the iframe document, so "load"
+    // never fires and this alone left the "Loading page..." banner up for
+    // the full 5s fallback below on every single navigation.
     const iframe = document.querySelector(
       "#storybook-preview-iframe",
     ) as HTMLIFrameElement;
@@ -426,10 +431,35 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         iframe.removeEventListener("load", handleLoad);
     }
 
-    // Fallback timeout in case load event doesn't fire
+    // Also listen for Storybook's storyRendered postMessage — the real signal
+    // for the common SPA-navigation case, same heuristic SpotlightOverlay
+    // already uses to detect when the destination story has actually painted.
+    const handleStoryRenderedMessage = (event: MessageEvent) => {
+      if (event.source !== iframe?.contentWindow) return;
+      const data = event.data;
+      if (
+        data?.type === "storyRendered" ||
+        data?.event === "storyRendered" ||
+        data?.eventName === "storyRendered" ||
+        data?.name === "storyRendered"
+      ) {
+        console.debug("✅ storyRendered message received after navigation");
+        setIsNavigating(false);
+      }
+    };
+    window.addEventListener("message", handleStoryRenderedMessage);
+    const prevMessageCleanup = iframeLoadCleanupRef.current;
+    iframeLoadCleanupRef.current = () => {
+      window.removeEventListener("message", handleStoryRenderedMessage);
+      prevMessageCleanup?.();
+    };
+
+    // Fallback timeout in case neither signal fires (last resort only —
+    // shortened from 5s since the message listener above normally clears
+    // this within a couple hundred ms).
     const fallbackTimeout = setTimeout(() => {
       setIsNavigating(false);
-    }, 5000);
+    }, 1500);
     const prevCleanup = iframeLoadCleanupRef.current;
     iframeLoadCleanupRef.current = () => {
       clearTimeout(fallbackTimeout);

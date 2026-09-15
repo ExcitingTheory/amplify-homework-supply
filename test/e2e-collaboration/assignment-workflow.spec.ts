@@ -99,4 +99,62 @@ test.describe("Assignment Workflow", () => {
       studentSession.page.locator('[data-tour="quiz-block"]').first(),
     ).toBeVisible({ timeout: 10_000 });
   });
+
+  test("instructor creates a section inline while assigning a unit", async ({
+    browser,
+  }) => {
+    const baseURL = test.info().project.use.baseURL || "https://localhost:3000";
+    instructorSession = await createUserSession(
+      browser,
+      INSTRUCTOR,
+      baseURL,
+      "/units",
+    );
+
+    const unitId = await createUnit(
+      instructorSession.page,
+      `Inline Assignment ${Date.now()}`,
+    );
+    await publishUnit(instructorSession.page);
+    await saveUnit(instructorSession.page);
+
+    await instructorSession.page.goto(`/unit/${unitId}`);
+    await instructorSession.page
+      .locator('[data-tour="editor"]')
+      .waitFor({ timeout: 30_000 });
+    await instructorSession.page
+      .locator('[data-tour="assignments-tab"]')
+      .click();
+    await instructorSession.page
+      .locator('[data-tour="assignment-settings"]')
+      .waitFor({ timeout: 10_000 });
+
+    const sectionName = `Inline Section ${Date.now()}`;
+    await instructorSession.page
+      .getByLabel("New section name")
+      .fill(sectionName);
+    await instructorSession.page
+      .getByRole("button", { name: "Create section" })
+      .click();
+
+    await expect(
+      instructorSession.page.getByText("Section created.", { exact: false }),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(
+      instructorSession.page
+        .locator('[data-tour="unit-selector"]')
+        .getByText(sectionName),
+    ).toBeVisible({ timeout: 10_000 });
+
+    const assignButton = instructorSession.page.getByRole("button", {
+      name: /Assign to 1 section/i,
+    });
+    await expect(assignButton).toBeVisible({ timeout: 5_000 });
+    await assignButton.click();
+    await expect(
+      instructorSession.page
+        .locator('[data-tour="assignment-settings"] li')
+        .filter({ hasText: sectionName }),
+    ).toBeVisible({ timeout: 15_000 });
+  });
 });

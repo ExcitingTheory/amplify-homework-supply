@@ -7,7 +7,7 @@
  * 3) handleRebuildLeaderboard:
  *    a) getSection (leaderboardEnabled check)
  *    b) listGradeBySectionID
- *    c) listStudentXPLogByCohortId
+ *    c) listStudentXPLogBySectionID
  *    d) per student: getOrCreateStudentProfile + updateStudentProfile
  * 4) UPDATE_SECTION (clear lock, stamp completion)
  *
@@ -96,10 +96,10 @@ describe("gamification handler — rebuildLeaderboard", () => {
           },
         });
       }
-      if (query?.includes("listStudentXPLogByCohortId")) {
+      if (query?.includes("listStudentXPLogBySectionID")) {
         return Promise.resolve({
           data: {
-            listStudentXPLogByCohortId: {
+            listStudentXPLogBySectionID: {
               items: [
                 {
                   id: "xp1",
@@ -148,7 +148,7 @@ describe("gamification handler — rebuildLeaderboard", () => {
     await handler(
       {
         fieldName: "rebuildLeaderboard",
-        arguments: { cohortId: "sec1" },
+        arguments: { sectionID: "sec1" },
       },
       {} as any,
       vi.fn(),
@@ -196,7 +196,7 @@ describe("gamification handler — rebuildLeaderboard", () => {
     await handler(
       {
         fieldName: "rebuildLeaderboard",
-        arguments: { cohortId: "sec1" },
+        arguments: { sectionID: "sec1" },
       },
       {} as any,
       vi.fn(),

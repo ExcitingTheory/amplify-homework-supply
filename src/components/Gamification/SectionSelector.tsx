@@ -1,7 +1,7 @@
 /**
  * SectionSelector — Dropdown selector for instructor's sections.
  * Used at the top of the gamification admin page to scope all queries/mutations
- * by the selected section (cohortId).
+ * by the selected section (sectionID).
  *
  * @module SectionSelector
  */

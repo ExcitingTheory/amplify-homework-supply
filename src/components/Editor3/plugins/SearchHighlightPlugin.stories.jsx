@@ -7,6 +7,7 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { MarkNode } from "@lexical/mark";
 import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
 import { Box, TextField, Typography } from "@mui/material";
+import { expect, within, userEvent, waitFor } from "storybook/test";
 import SearchHighlightPlugin from "./SearchHighlightPlugin";
 
 export default {
@@ -174,5 +175,25 @@ export const CaseInsensitive = () => {
         </LexicalComposer>
       </Box>
     </Box>
+  );
+};
+
+Default.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await canvas.findByText(/quick brown fox/);
+  await userEvent.type(canvas.getByLabelText("Search Term"), "fox");
+  // Reactive caption confirms the search term propagated
+  await canvas.findByText(/Highlighting:/);
+};
+
+WithMultipleMatches.play = async ({ canvasElement }) => {
+  await waitFor(() =>
+    expect(canvasElement.querySelector(".search-highlight")).not.toBeNull(),
+  );
+};
+
+CaseInsensitive.play = async ({ canvasElement }) => {
+  await waitFor(() =>
+    expect(canvasElement.querySelector(".search-highlight")).not.toBeNull(),
   );
 };

@@ -19,93 +19,12 @@ import {
   walkTaskTour,
   assertAllComplete,
   assertFullProgress,
-  type TaskSpec,
 } from "./helpers";
+import { getTasksForPersona } from "../../../.storybook/code/onboarding-tasks";
 
-// ─── Learner task catalogue ──────────────────────────────────────────────────
-// Mirrors ONBOARDING_TASKS for persona="learner" plus persona="all",
-// sorted by order asc.
-
-const LEARNER_TASKS: TaskSpec[] = [
-  // ── learner tasks (order 1–7) ─────────────────────────────────────────────
-  {
-    id: "learner-join-class",
-    title: "Join Your First Class",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--sections",
-      completionSequence: ["sections-page", "section-card"],
-    },
-  },
-  {
-    id: "learner-view-assignments",
-    title: "View Your Assignments",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignment-card", "view-workbook-button"],
-    },
-  },
-  {
-    id: "learner-complete-assignment",
-    title: "Complete an Assignment",
-    completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-workbook--kitchen-sink",
-      completionSequence: ["quiz-block", "quiz-answers"],
-    },
-  },
-  {
-    id: "learner-review-feedback",
-    title: "Review Your Feedback",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignments-section", "assignment-card"],
-    },
-  },
-  {
-    id: "learner-practice-vocabulary",
-    title: "Practice Vocabulary",
-    completionCriteria: {
-      tutorialStoryId: "📁-content-management-vocabulary-review--default",
-      completionSequence: ["word-card"],
-    },
-  },
-  {
-    id: "learner-use-chat-help",
-    title: "Get Help from AI Assistant",
-    completionCriteria: {
-      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
-      completionSequence: ["chat-input"],
-    },
-  },
-  {
-    id: "learner-learn-shortcuts",
-    title: "Learn Helpful Shortcuts",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      completionSequence: ["shortcuts-demo"],
-    },
-  },
-  // ── "all" persona tasks (order 100–103) ───────────────────────────────────
-  {
-    id: "secret-keyboard-master",
-    title: "👑 SECRET: Keyboard Master Challenge",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-speed-demon",
-    title: "⚡ SECRET: Speed Demon",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-achievement-hunter",
-    title: "🏅 SECRET: Achievement Hunter",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-shortcut-evangelist",
-    title: "📢 SECRET: Shortcut Evangelist",
-    completionCriteria: { completionSequence: ["editor-toolbar"] },
-  },
-];
+// Imported directly from the real source (not hand-duplicated) so this test
+// can never silently drift from the actual app's onboarding config.
+const LEARNER_TASKS = getTasksForPersona("learner");
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 

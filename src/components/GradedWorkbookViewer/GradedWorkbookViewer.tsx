@@ -8,8 +8,8 @@
  * @module GradedWorkbookViewer
  */
 
-import * as React from 'react'
-import { useMemo } from 'react'
+import * as React from "react";
+import { useMemo } from "react";
 import {
   Box,
   Paper,
@@ -25,46 +25,51 @@ import {
   Tooltip,
   LinearProgress,
   IconButton,
-} from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
-import ShieldIcon from '@mui/icons-material/Shield'
-import HistoryIcon from '@mui/icons-material/History'
-import CloseIcon from '@mui/icons-material/Close'
-import { LexicalComposer } from '@lexical/react/LexicalComposer'
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
-import { ContentEditable } from '@lexical/react/LexicalContentEditable'
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
-import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
-import { ClickableLinkPlugin as LexicalClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin'
-import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin'
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin'
-import { ListPlugin } from '@lexical/react/LexicalListPlugin'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
-import { TablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import ShieldIcon from "@mui/icons-material/Shield";
+import HistoryIcon from "@mui/icons-material/History";
+import CloseIcon from "@mui/icons-material/Close";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
+import { ClickableLinkPlugin as LexicalClickableLinkPlugin } from "@lexical/react/LexicalClickableLinkPlugin";
+import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
+import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 
-import { AudioPlayerProvider } from '../Editor3/context/AudioPlayerContext'
-import { AutocompleteProvider } from '../Editor3/context/SharedAutocompleteContext'
-import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper'
-import LanguageEditorTheme from '../Editor3/config/LanguageEditorTheme'
+import { AudioPlayerProvider } from "../Editor3/context/AudioPlayerContext";
+import { AutocompleteProvider } from "../Editor3/context/SharedAutocompleteContext";
+import { DndWrapper } from "../MeaningAssociationExercise/DndWrapper";
+import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
 
-import YouTubePlugin from '../Editor3/plugins/YouTubePlugin'
-import WordBlockPlugin from '../Editor3/plugins/WordBlockPlugin'
-import QuizPlugin from '../Editor3/plugins/QuizPlugin'
-import MeaningAssociationPlugin from '../Editor3/plugins/MeaningAssociationPlugin'
-import PlaylistPlugin from '../Editor3/plugins/PlaylistPlugin'
-import PdfViewerPlugin from '../Editor3/plugins/PdfViewerPlugin'
-import ImagesPlugin from '../Editor3/plugins/ImagesPlugin'
-import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
-import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
+import YouTubePlugin from "../Editor3/plugins/YouTubePlugin";
+import WordBlockPlugin from "../Editor3/plugins/WordBlockPlugin";
+import QuizPlugin from "../Editor3/plugins/QuizPlugin";
+import MeaningAssociationPlugin from "../Editor3/plugins/MeaningAssociationPlugin";
+import PlaylistPlugin from "../Editor3/plugins/PlaylistPlugin";
+import PdfViewerPlugin from "../Editor3/plugins/PdfViewerPlugin";
+import ImagesPlugin from "../Editor3/plugins/ImagesPlugin";
+import AnswerPlugin from "../Editor3/plugins/AnswerPlugin";
+import CustomAnswerPlugin from "../Editor3/plugins/CustomAnswerPlugin";
 
-import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
-import { GradedWorkbookStatePlugin } from './GradedWorkbookStatePlugin'
-import { GutterAnnotations } from './GutterAnnotations'
-import { ModerationPanel } from './ModerationPanel'
+import {
+  EditorNodes,
+  ALL_TRANSFORMERS,
+  onError,
+} from "../Editor3/editorConfig";
+import { GradedWorkbookStatePlugin } from "./GradedWorkbookStatePlugin";
+import { GutterAnnotations } from "./GutterAnnotations";
+import { ModerationPanel } from "./ModerationPanel";
+import { getGradeCompletionLabel } from "../../utils/gradeTiming";
 
 // ============================================================================
 // Types
@@ -72,89 +77,100 @@ import { ModerationPanel } from './ModerationPanel'
 
 /** A single quiz question response */
 export interface QuizResponse {
-  selected: string
-  correct: boolean
+  selected: string;
+  correct: boolean;
 }
 
 /** Block-level grade data for a quiz block */
 export interface QuizBlockData {
-  complete: boolean
-  accuracy: number
-  responses: Record<string, QuizResponse>
+  complete: boolean;
+  accuracy: number;
+  responses: Record<string, QuizResponse>;
 }
 
 /** Block-level grade data for a meaning-association block */
 export interface MeaningAssocBlockData {
-  complete: boolean
-  accuracy: number
-  matches: Record<string, string>
+  complete: boolean;
+  accuracy: number;
+  matches: Record<string, string>;
 }
 
 /** Block-level grade data for a custom-answer block */
 export interface CustomAnswerBlockData {
-  complete: boolean
-  accuracy: number
-  userAnswer: string | null
-  feedback?: string
-  audioFileId?: string
-  drawingFileId?: string
+  complete: boolean;
+  accuracy: number;
+  userAnswer: string | null;
+  feedback?: string;
+  audioFileId?: string;
+  drawingFileId?: string;
 }
 
 /** Block-level grade data for an answer (vocab) block */
 export interface AnswerBlockData {
-  complete: boolean
-  accuracy: number
-  responses: Record<string, {
-    textAnswer?: string
-    audioAnswer?: string
-    audioFileId?: string
-    accuracy?: number
-  }>
+  complete: boolean;
+  accuracy: number;
+  responses: Record<
+    string,
+    {
+      textAnswer?: string;
+      audioAnswer?: string;
+      audioFileId?: string;
+      accuracy?: number;
+    }
+  >;
 }
 
 /** Union of all block data types */
-export type GradeBlockData = QuizBlockData | MeaningAssocBlockData | CustomAnswerBlockData | AnswerBlockData
+export type GradeBlockData =
+  | QuizBlockData
+  | MeaningAssocBlockData
+  | CustomAnswerBlockData
+  | AnswerBlockData;
 
 /** A single grade attempt */
 export interface GradeAttempt {
-  id: string
-  attempt?: number
-  accuracy: number
-  percentComplete: number
-  complete: boolean
-  data: Record<string, GradeBlockData>
+  id: string;
+  attempt?: number;
+  accuracy: number;
+  percentComplete: number;
+  complete: boolean;
+  timerStarted?: boolean | null;
+  data: Record<string, GradeBlockData>;
   feedback?: {
-    overall?: string
-    blockFeedback?: Record<string, string>
-    instructorNotes?: string
-  }
-  moderationStatus?: string | null
-  moderationFlags?: Record<string, any> | null
-  moderationCheckedAt?: string | null
-  createdAt: string
-  updatedAt: string
+    overall?: string;
+    blockFeedback?: Record<string, string>;
+    instructorNotes?: string;
+  };
+  moderationStatus?: string | null;
+  moderationFlags?: Record<string, any> | null;
+  moderationCheckedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** Moderation info */
 export interface ModerationInfo {
-  status: 'pending' | 'approved' | 'flagged' | null
-  flags?: Record<string, any> | null
-  checkedAt?: string | null
+  status: "pending" | "approved" | "flagged" | null;
+  flags?: Record<string, any> | null;
+  checkedAt?: string | null;
 }
 
 export interface GradedWorkbookViewerProps {
   /** Serialized Lexical JSON content of the unit (Unit.data) */
-  contentJson: string
+  contentJson: string;
   /** The student's name for display */
-  studentName: string
+  studentName: string;
   /** All grade attempts for this student/unit (sorted newest first) */
-  grades: GradeAttempt[]
+  grades: GradeAttempt[];
   /** Moderation info (from latest grade or standalone) */
-  moderation?: ModerationInfo | null
+  moderation?: ModerationInfo | null;
   /** Callback when instructor triggers a moderation action */
-  onModerationAction?: (action: 'approve' | 'flag' | 'recheck', gradeId: string) => void
+  onModerationAction?: (
+    action: "approve" | "flag" | "recheck",
+    gradeId: string,
+  ) => void;
   /** Optional max height for the workbook content area */
-  maxHeight?: string | number
+  maxHeight?: string | number;
 }
 
 // ============================================================================
@@ -169,109 +185,118 @@ export function GradedWorkbookViewer({
   onModerationAction,
   maxHeight,
 }: GradedWorkbookViewerProps) {
-  const [selectedAttempt, setSelectedAttempt] = React.useState(0)
-  const [gutterWidth, setGutterWidth] = React.useState(320)
-  const isDraggingRef = React.useRef(false)
-  const startXRef = React.useRef(0)
-  const startWidthRef = React.useRef(320)
+  const [selectedAttempt, setSelectedAttempt] = React.useState(0);
+  const [gutterWidth, setGutterWidth] = React.useState(320);
+  const isDraggingRef = React.useRef(false);
+  const startXRef = React.useRef(0);
+  const startWidthRef = React.useRef(320);
 
-  const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
-    isDraggingRef.current = true
-    startXRef.current = e.clientX
-    startWidthRef.current = gutterWidth
-    e.preventDefault()
+  const handleMouseDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      isDraggingRef.current = true;
+      startXRef.current = e.clientX;
+      startWidthRef.current = gutterWidth;
+      e.preventDefault();
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!isDraggingRef.current) return
-      const delta = startXRef.current - moveEvent.clientX
-      const newWidth = Math.max(200, Math.min(600, startWidthRef.current + delta))
-      setGutterWidth(newWidth)
-    }
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (!isDraggingRef.current) return;
+        const delta = startXRef.current - moveEvent.clientX;
+        const newWidth = Math.max(
+          200,
+          Math.min(600, startWidthRef.current + delta),
+        );
+        setGutterWidth(newWidth);
+      };
 
-    const handleMouseUp = () => {
-      isDraggingRef.current = false
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
+      const handleMouseUp = () => {
+        isDraggingRef.current = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
 
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-  }, [gutterWidth])
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [gutterWidth],
+  );
 
-  const currentGrade = grades[selectedAttempt]
+  const currentGrade = grades[selectedAttempt];
 
   // Collect wrong answers across all attempts for gutter annotations
   const wrongAnswersByBlock = useMemo(() => {
-    const result: Record<string, WrongAnswerAnnotation[]> = {}
+    const result: Record<string, WrongAnswerAnnotation[]> = {};
 
     grades.forEach((grade, attemptIndex) => {
-      if (!grade.data) return
-      const gradeData = typeof grade.data === 'string' ? JSON.parse(grade.data) : grade.data
-      const attemptNum = grade.attempt || grades.length - attemptIndex
+      if (!grade.data) return;
+      const gradeData =
+        typeof grade.data === "string" ? JSON.parse(grade.data) : grade.data;
+      const attemptNum = grade.attempt || grades.length - attemptIndex;
 
       Object.entries(gradeData).forEach(([blockId, blockData]) => {
-        if (!result[blockId]) result[blockId] = []
-        if (typeof blockData !== 'object' || blockData === null) return
+        if (!result[blockId]) result[blockId] = [];
+        if (typeof blockData !== "object" || blockData === null) return;
 
         // Quiz blocks
-        if ('responses' in blockData && 'accuracy' in blockData) {
-          const quizData = blockData as QuizBlockData
-          Object.entries(quizData.responses).forEach(([questionId, response]) => {
-            if (!response.correct) {
-              result[blockId].push({
-                blockId,
-                questionId,
-                attemptNumber: attemptNum,
-                wrongAnswer: response.selected,
-                type: 'quiz',
-                timestamp: grade.createdAt,
-              })
-            }
-          })
+        if ("responses" in blockData && "accuracy" in blockData) {
+          const quizData = blockData as QuizBlockData;
+          Object.entries(quizData.responses).forEach(
+            ([questionId, response]) => {
+              if (!response.correct) {
+                result[blockId].push({
+                  blockId,
+                  questionId,
+                  attemptNumber: attemptNum,
+                  wrongAnswer: response.selected,
+                  type: "quiz",
+                  timestamp: grade.createdAt,
+                });
+              }
+            },
+          );
         }
 
         // Meaning-association blocks — accuracy < 100 means some were wrong
-        if ('matches' in blockData && !('responses' in blockData)) {
-          const maData = blockData as MeaningAssocBlockData
+        if ("matches" in blockData && !("responses" in blockData)) {
+          const maData = blockData as MeaningAssocBlockData;
           if (maData.accuracy < 100) {
             result[blockId].push({
               blockId,
               attemptNumber: attemptNum,
-              type: 'meaning-association',
+              type: "meaning-association",
               accuracy: maData.accuracy,
               timestamp: grade.createdAt,
-            })
+            });
           }
         }
 
         // Custom-answer blocks — accuracy < 100 or has feedback indicating issues
-        if ('userAnswer' in blockData) {
-          const caData = blockData as CustomAnswerBlockData
+        if ("userAnswer" in blockData) {
+          const caData = blockData as CustomAnswerBlockData;
           if (caData.accuracy < 100 && caData.userAnswer) {
             result[blockId].push({
               blockId,
               attemptNumber: attemptNum,
               wrongAnswer: caData.userAnswer,
               feedback: caData.feedback,
-              type: 'custom-answer',
+              type: "custom-answer",
               accuracy: caData.accuracy,
               timestamp: grade.createdAt,
-            })
+            });
           }
         }
-      })
-    })
+      });
+    });
 
-    return result
-  }, [grades])
+    return result;
+  }, [grades]);
 
   const initialConfig = useMemo(
     () => ({
-      namespace: 'GradedWorkbookViewer',
+      namespace: "GradedWorkbookViewer",
       theme: LanguageEditorTheme,
       onError,
       editable: false,
@@ -279,27 +304,49 @@ export function GradedWorkbookViewer({
       nodes: [...EditorNodes],
     }),
     [],
-  )
+  );
 
-  const overallAccuracy = currentGrade?.accuracy ?? 0
-  const accuracyColor = overallAccuracy >= 80 ? 'success' : overallAccuracy >= 60 ? 'warning' : 'error'
+  const overallAccuracy = currentGrade?.accuracy ?? 0;
+  const accuracyColor =
+    overallAccuracy >= 80
+      ? "success"
+      : overallAccuracy >= 60
+        ? "warning"
+        : "error";
+  const currentCompletionLabel = getGradeCompletionLabel(currentGrade);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Header */}
       <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+          gap={1}
+        >
           <Box>
             <Typography variant="h6" component="h2">
               {studentName}&apos;s Workbook
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {grades.length} attempt{grades.length !== 1 ? 's' : ''} &middot; Latest: {currentGrade?.complete ? 'Complete' : 'In Progress'}
+              {grades.length} attempt{grades.length !== 1 ? "s" : ""} &middot;
+              Latest: {currentGrade?.complete ? "Complete" : "In Progress"}
+              {currentCompletionLabel
+                ? ` &middot; ${currentCompletionLabel}`
+                : ""}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
             <Chip
-              icon={overallAccuracy >= 80 ? <CheckCircleOutlineIcon /> : <ErrorOutlineIcon />}
+              icon={
+                overallAccuracy >= 80 ? (
+                  <CheckCircleOutlineIcon />
+                ) : (
+                  <ErrorOutlineIcon />
+                )
+              }
               label={`${Math.round(overallAccuracy)}% Accuracy`}
               color={accuracyColor}
               variant="outlined"
@@ -311,7 +358,7 @@ export function GradedWorkbookViewer({
                 size="small"
               />
             )}
-            {moderation && moderation.status === 'flagged' && (
+            {moderation && moderation.status === "flagged" && (
               <Chip
                 icon={<WarningAmberIcon />}
                 label="Content Flagged"
@@ -333,10 +380,10 @@ export function GradedWorkbookViewer({
               {grades.map((grade, index) => (
                 <Chip
                   key={grade.id}
-                  label={`#${grade.attempt || grades.length - index} — ${Math.round(grade.accuracy)}%`}
+                  label={`#${grade.attempt || grades.length - index} — ${Math.round(grade.accuracy)}%${getGradeCompletionLabel(grade) ? ` — ${getGradeCompletionLabel(grade)}` : ""}`}
                   size="small"
-                  color={index === selectedAttempt ? 'primary' : 'default'}
-                  variant={index === selectedAttempt ? 'filled' : 'outlined'}
+                  color={index === selectedAttempt ? "primary" : "default"}
+                  variant={index === selectedAttempt ? "filled" : "outlined"}
                   onClick={() => setSelectedAttempt(index)}
                 />
               ))}
@@ -349,22 +396,22 @@ export function GradedWorkbookViewer({
       {moderation && (
         <ModerationPanel
           moderation={moderation}
-          gradeId={currentGrade?.id || ''}
+          gradeId={currentGrade?.id || ""}
           onAction={onModerationAction}
         />
       )}
 
       {/* Main content area: Lexical workbook + gutter */}
-      <Box sx={{ display: 'flex', flex: 1, minHeight: 0, gap: 2 }}>
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0, gap: 2 }}>
         {/* Workbook content */}
         <Paper
           elevation={0}
           variant="outlined"
           sx={{
             flex: 1,
-            overflow: 'auto',
-            maxHeight: maxHeight || '70vh',
-            position: 'relative',
+            overflow: "auto",
+            maxHeight: maxHeight || "70vh",
+            position: "relative",
           }}
         >
           <DndWrapper>
@@ -395,10 +442,10 @@ export function GradedWorkbookViewer({
                       <ContentEditable
                         aria-label={`${studentName}'s graded workbook`}
                         style={{
-                          width: '100%',
-                          padding: '1.5rem',
-                          outline: 'none',
-                          minHeight: '400px',
+                          width: "100%",
+                          padding: "1.5rem",
+                          outline: "none",
+                          minHeight: "400px",
                         }}
                       />
                     }
@@ -417,14 +464,14 @@ export function GradedWorkbookViewer({
           sx={{
             width: 8,
             flexShrink: 0,
-            cursor: 'col-resize',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            cursor: "col-resize",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             borderRadius: 1,
-            transition: 'background-color 0.15s',
-            '&:hover': { backgroundColor: 'action.hover' },
-            '&:active': { backgroundColor: 'action.selected' },
+            transition: "background-color 0.15s",
+            "&:hover": { backgroundColor: "action.hover" },
+            "&:active": { backgroundColor: "action.selected" },
           }}
         >
           <Box
@@ -432,13 +479,20 @@ export function GradedWorkbookViewer({
               width: 4,
               height: 32,
               borderRadius: 2,
-              backgroundColor: 'divider',
+              backgroundColor: "divider",
             }}
           />
         </Box>
 
         {/* Gutter annotations sidebar */}
-        <Box sx={{ width: gutterWidth, flexShrink: 0, overflow: 'auto', maxHeight: maxHeight || '70vh' }}>
+        <Box
+          sx={{
+            width: gutterWidth,
+            flexShrink: 0,
+            overflow: "auto",
+            maxHeight: maxHeight || "70vh",
+          }}
+        >
           <GutterAnnotations
             wrongAnswersByBlock={wrongAnswersByBlock}
             currentAttempt={selectedAttempt}
@@ -451,7 +505,8 @@ export function GradedWorkbookViewer({
       {currentGrade?.feedback && (
         <Paper elevation={0} variant="outlined" sx={{ mt: 2, p: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
-            Feedback — Attempt #{currentGrade.attempt || grades.length - selectedAttempt}
+            Feedback — Attempt #
+            {currentGrade.attempt || grades.length - selectedAttempt}
           </Typography>
           {currentGrade.feedback.overall && (
             <Typography variant="body2" sx={{ mb: 1 }}>
@@ -467,7 +522,7 @@ export function GradedWorkbookViewer({
         </Paper>
       )}
     </Box>
-  )
+  );
 }
 
 // ============================================================================
@@ -475,14 +530,14 @@ export function GradedWorkbookViewer({
 // ============================================================================
 
 export interface WrongAnswerAnnotation {
-  blockId: string
-  questionId?: string
-  attemptNumber: number
-  wrongAnswer?: string
-  feedback?: string
-  type: 'quiz' | 'meaning-association' | 'custom-answer' | 'answer'
-  accuracy?: number
-  timestamp: string
+  blockId: string;
+  questionId?: string;
+  attemptNumber: number;
+  wrongAnswer?: string;
+  feedback?: string;
+  type: "quiz" | "meaning-association" | "custom-answer" | "answer";
+  accuracy?: number;
+  timestamp: string;
 }
 
-export default GradedWorkbookViewer
+export default GradedWorkbookViewer;

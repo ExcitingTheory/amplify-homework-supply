@@ -23,7 +23,7 @@ import {
 interface ChapterReference {
   id: string;
   title: string;
-  cohortId: string;
+  sectionID: string;
   setting?: string | null;
   stakes?: string | null;
   systemPromptSeed?: string | null;
@@ -55,7 +55,7 @@ export default function CampaignPanel() {
   const [saving, setSaving] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [createCohortId, setCreateCohortId] = useState<string>("");
+  const [createSectionID, setCreateSectionID] = useState<string>("");
 
   const unitId = unit?.id;
 
@@ -69,7 +69,7 @@ export default function CampaignPanel() {
         .map((c: any) => ({
           id: c.id,
           title: c.title,
-          cohortId: c.cohortId,
+          sectionID: c.sectionID,
           setting: c.setting,
           stakes: c.stakes,
           systemPromptSeed: c.systemPromptSeed,
@@ -139,16 +139,16 @@ export default function CampaignPanel() {
   };
 
   const handleCreateChapter = async (data: GroupChallengeEditorData) => {
-    if (!unitId || !createCohortId) return;
+    if (!unitId || !createSectionID) return;
     setSaving(true);
     try {
       await (client.models as any).GroupChallenge.create({
         ...data,
-        cohortId: createCohortId,
+        sectionID: createSectionID,
         linkedUnitIds: [unitId],
       });
       setShowCreate(false);
-      setCreateCohortId("");
+      setCreateSectionID("");
       await fetchChapters();
     } catch (err) {
       console.error("[CampaignPanel] Failed to create chapter:", err);
@@ -294,7 +294,7 @@ export default function CampaignPanel() {
                       editingChapterId === ch.id ? null : ch.id,
                     )
                   }
-                  sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}
+                  sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
                   {editingChapterId === ch.id ? "Close" : "Edit"}
                 </Button>
@@ -304,7 +304,7 @@ export default function CampaignPanel() {
                   startIcon={<LinkOffIcon fontSize="small" />}
                   onClick={() => handleRemoveFromChapter(ch)}
                   disabled={saving}
-                  sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}
+                  sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
                   Unlink
                 </Button>
@@ -369,7 +369,6 @@ export default function CampaignPanel() {
             startIcon={<AddIcon />}
             onClick={handleAddToChapter}
             disabled={!selectedChapter || saving}
-            sx={{ textTransform: "none" }}
           >
             {saving ? "Saving…" : "Link unit to chapter"}
           </Button>
@@ -384,7 +383,6 @@ export default function CampaignPanel() {
           variant="outlined"
           startIcon={<AddIcon />}
           onClick={() => setShowCreate(true)}
-          sx={{ textTransform: "none" }}
         >
           Create new chapter
         </Button>
@@ -404,7 +402,7 @@ export default function CampaignPanel() {
             <Button
               size="small"
               onClick={() => setShowCreate(false)}
-              sx={{ textTransform: "none", fontSize: "0.7rem" }}
+              sx={{ fontSize: "0.7rem" }}
             >
               Cancel
             </Button>
@@ -415,8 +413,10 @@ export default function CampaignPanel() {
               size="small"
               options={sections}
               getOptionLabel={(s: any) => s.name || s.id}
-              value={sections.find((s: any) => s.id === createCohortId) || null}
-              onChange={(_e, v: any) => setCreateCohortId(v?.id || "")}
+              value={
+                sections.find((s: any) => s.id === createSectionID) || null
+              }
+              onChange={(_e, v: any) => setCreateSectionID(v?.id || "")}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -428,7 +428,7 @@ export default function CampaignPanel() {
             />
           )}
 
-          {createCohortId && (
+          {createSectionID && (
             <GroupChallengeEditor
               onSubmit={handleCreateChapter}
               submitting={saving}
@@ -436,7 +436,7 @@ export default function CampaignPanel() {
             />
           )}
 
-          {!createCohortId && sections && sections.length > 0 && (
+          {!createSectionID && sections && sections.length > 0 && (
             <Typography variant="caption" color="text.secondary">
               Select a section to create a chapter in.
             </Typography>

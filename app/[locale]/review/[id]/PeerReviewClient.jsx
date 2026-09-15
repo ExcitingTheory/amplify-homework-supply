@@ -16,6 +16,11 @@ import { PeerReviewChat } from "@/components/PeerReview";
 import { PeerReviewFeedbackPrompt } from "@/components/PeerReview/PeerReviewFeedbackPrompt";
 import { usePeerReviewRoom } from "@/yjs/peerReviewHooks";
 import { getAmplifyClient } from "@/utils/amplifyClient";
+import {
+  trackPeerReviewSubmitted,
+  trackChatMessageSent,
+  trackChatToolUsed,
+} from "@/utils/analytics";
 import { awardXP } from "../../../actions/gamification";
 import {
   handleAIMention as handleAIMentionAction,
@@ -124,6 +129,12 @@ function PeerReviewContent() {
       if (isOwner) {
         setShowFeedbackPrompt(true);
       }
+
+      trackPeerReviewSubmitted(roomId, {
+        gradeId: room?.gradeId || undefined,
+        sectionId: room?.sectionID || undefined,
+        participantCount: (peerReview.peers?.length || 0) + 1,
+      });
     } catch (err) {
       console.error("[PeerReview] Error closing review:", err);
     } finally {
@@ -140,6 +151,7 @@ function PeerReviewContent() {
 
   const handleAIMention = async (message, chatHistory) => {
     if (!roomId) return;
+    trackChatToolUsed(roomId, "peer_review_ai", room?.sectionID || undefined);
     try {
       const result = await handleAIMentionAction(roomId, message, chatHistory);
       // Insert AI response as an AI_SUGGESTION message
@@ -239,7 +251,14 @@ function PeerReviewContent() {
             messages={peerReview.messages}
             typingPeers={peerReview.typingPeers}
             isClosed={isClosed}
-            onSendMessage={(content) => peerReview.sendMessage(content)}
+            onSendMessage={(content) => {
+              trackChatMessageSent(
+                roomId,
+                room?.sectionID || undefined,
+                content?.length,
+              );
+              peerReview.sendMessage(content);
+            }}
             onTyping={peerReview.setTyping}
             currentUsername={session?.username || ""}
             onAIMention={handleAIMention}

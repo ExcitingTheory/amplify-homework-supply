@@ -25,13 +25,49 @@
   overflow-wrap: break-word;
 }
 
-/* Light text for user messages */
+/* User messages sit on a solid gradient bubble; override the same tokens used
+   below so headings, quotes, links, and code keep distinct, readable colors
+   instead of forcing every descendant to white. */
 :global(.user) .messageRenderer {
-  color: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.78);
+  --link-color: #d6e4ff;
+  --code-bg: rgba(0, 0, 0, 0.25);
+  --code-border: rgba(255, 255, 255, 0.25);
+  --code-inline-bg: rgba(255, 255, 255, 0.18);
+  --quote-border: rgba(255, 255, 255, 0.4);
+  --divider-color: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary);
 }
 
-:global(.user) .messageRenderer * {
-  color: #ffffff !important;
+:global(.user) .messageRenderer :global(.chat-code-comment) {
+  color: rgba(255, 255, 255, 0.65);
+}
+:global(.user) .messageRenderer :global(.chat-code-keyword),
+:global(.user) .messageRenderer :global(.chat-code-operator) {
+  color: #ffb4c1;
+}
+:global(.user) .messageRenderer :global(.chat-code-string) {
+  color: #d6e4ff;
+}
+:global(.user) .messageRenderer :global(.chat-code-number),
+:global(.user) .messageRenderer :global(.chat-code-property),
+:global(.user) .messageRenderer :global(.chat-code-boolean) {
+  color: #a9d1ff;
+}
+:global(.user) .messageRenderer :global(.chat-code-function),
+:global(.user) .messageRenderer :global(.chat-code-class-name),
+:global(.user) .messageRenderer :global(.chat-code-attr) {
+  color: #e0c3ff;
+}
+:global(.user) .messageRenderer :global(.chat-code-punctuation) {
+  color: rgba(255, 255, 255, 0.9);
+}
+:global(.user) .messageRenderer :global(.chat-code-tag) {
+  color: #b8f0c0;
+}
+:global(.user) .messageRenderer :global(.chat-code-variable) {
+  color: #ffd0a1;
 }
 
 .contentEditable {

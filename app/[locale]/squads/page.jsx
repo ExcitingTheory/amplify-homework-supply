@@ -29,6 +29,7 @@ import { SectionProvider } from "@/context/sectionContext";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { getCurrentUser } from "aws-amplify/auth";
+import { trackSquadJoined } from "@/utils/analytics";
 import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
 import { useRouter } from "next/navigation";
 
@@ -76,7 +77,7 @@ function SquadsPage() {
   const enrichedSquads = React.useMemo(() => {
     return squadLeaderboard.map((squad) => ({
       ...squad,
-      sectionName: sectionNameMap.get(squad.cohortId) || squad.cohortId || "",
+      sectionName: sectionNameMap.get(squad.sectionID) || squad.sectionID || "",
     }));
   }, [squadLeaderboard, sectionNameMap]);
 
@@ -102,7 +103,7 @@ function SquadsPage() {
 
       const { data: squad } = await client.models.Squad.create({
         name: "New Squad",
-        cohortId: selectedSection.id,
+        sectionID: selectedSection.id,
         totalXP: 0,
         members: [
           { studentId, role: "LEADER", joinedAt: new Date().toISOString() },
@@ -110,6 +111,7 @@ function SquadsPage() {
       });
 
       if (squad?.id) {
+        trackSquadJoined(squad.id, selectedSection.id);
         router.push(`/squad/${squad.id}`);
       }
     } catch (err) {

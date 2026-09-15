@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Non-destructive agent CLI permissions configuration",
   "lastUpdated": "2026-03-14",
-  
+
   "permissions": {
     "fileOperations": {
       "read": {
@@ -19,7 +19,7 @@
         ],
         "description": "Allow reading all files except sensitive credentials"
       },
-      
+
       "write": {
         "allowed": true,
         "requiresConfirmation": false,
@@ -33,34 +33,37 @@
           ".storybook/__mocks__/**",
           "test/**",
           "cypress/fixtures/**",
+          "scripts/**",
           "public/locales/**/*.json",
           ".translation-cache/**"
         ],
         "description": "Allow writing tests, stories, docs, mocks, and translations without confirmation"
       },
-      
+
       "writeRestricted": {
         "allowed": true,
         "requiresConfirmation": true,
         "allowedPaths": [
-          "src/components/**",
-          "src/context/**",
-          "src/utils/**",
+          "app",
+          "app/**",
+          "src",
+          ".github/agent-permissions.json",
+          "src/**",
+          "pages",
           "pages/**",
+          "amplify",
+          "amplify/**",
           "src/agent-skills/**",
           "tsconfig.json",
           "eslint.config.mjs",
           "cypress.config.ts",
           "vitest.config.ts"
         ],
-        "excludePaths": [
-          "src/amplifyconfiguration.json",
-          "src/aws-exports.js"
-        ],
+        "excludePaths": ["src/amplifyconfiguration.json", "src/aws-exports.js"],
         "maxFileSize": 1048576,
         "description": "Allow writing production code with confirmation, max 1MB per file"
       },
-      
+
       "delete": {
         "allowed": false,
         "requiresConfirmation": true,
@@ -71,83 +74,169 @@
         ],
         "description": "Block deletes by default, allow only test files and docs with confirmation"
       },
-      
+
       "rename": {
         "allowed": false,
         "requiresConfirmation": true,
         "description": "Require confirmation for all file renames"
       }
     },
-    
+
     "terminalCommands": {
       "allowed": {
         "npm": {
-          "commands": ["test", "run test", "run test:watch", "run storybook", "run lint", "run type-check"],
-          "blocked": ["install", "uninstall", "update", "publish"],
-          "description": "Allow test and dev commands, block package modifications"
+          "commands": [
+            "test",
+            "run test",
+            "run test:watch",
+            "run",
+            "run storybook",
+            "run lint",
+            "run type-check",
+            "install",
+            "uninstall",
+            "update"
+          ],
+          "blocked": ["publish"],
+          "description": "Allow test, development, and local package-management commands"
         },
-        
+
         "git": {
-          "commands": ["status", "diff", "log", "show", "branch", "blame", "grep"],
-          "blocked": ["push", "pull", "fetch", "reset", "rebase", "commit", "add", "rm", "checkout", "merge"],
+          "commands": [
+            "status",
+            "diff",
+            "log",
+            "show",
+            "branch",
+            "blame",
+            "grep"
+          ],
+          "blocked": [
+            "push",
+            "pull",
+            "fetch",
+            "reset",
+            "rebase",
+            "commit",
+            "add",
+            "rm",
+            "checkout",
+            "merge"
+          ],
           "description": "Allow read-only git commands, block all write operations"
         },
-        
+
         "amplify": {
           "commands": ["status", "console"],
           "blocked": ["push", "pull", "delete", "remove", "init", "env remove"],
           "description": "Allow status checks only, block all infrastructure changes"
         },
-        
+
+        "aws": {
+          "commands": [
+            "aws sts get-caller-identity",
+            "aws cloudformation list-stacks",
+            "aws cloudformation describe-stacks",
+            "aws cloudformation describe-stack-events",
+            "aws cloudformation describe-stack-resources",
+            "aws cloudformation wait stack-delete-complete --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498",
+            "aws cloudformation delete-stack --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498",
+            "aws cloudformation delete-stack --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498-data7552DF31-13XNAY5FW87Q1",
+            "aws appsync list-graphql-apis",
+            "aws appsync list-functions",
+            "aws appsync list-resolvers",
+            "aws appsync get-graphql-api",
+            "aws appsync delete-function",
+            "aws appsync delete-resolver",
+            "aws appsync delete-data-source",
+            "aws appsync delete-graphql-api"
+          ],
+          "blocked": [
+            "cancel-",
+            "continue-update-rollback",
+            "create-",
+            "deploy",
+            "put-",
+            "remove-",
+            "set-",
+            "update-"
+          ],
+          "description": "Allow read-only AWS inspection commands for deploy diagnostics"
+        },
+
         "readOnly": {
-          "commands": ["cat", "ls", "find", "grep", "head", "tail", "wc", "which", "pwd", "echo"],
+          "commands": [
+            "cat",
+            "ls",
+            "find",
+            "grep",
+            "head",
+            "tail",
+            "wc",
+            "which",
+            "pwd",
+            "echo"
+          ],
           "description": "Common read-only shell commands"
         },
-        
+
         "analysis": {
-          "commands": ["eslint", "tsc", "prettier --check"],
+          "commands": ["eslint", "tsc", "prettier --check", "node --check"],
           "blocked": ["prettier --write"],
           "description": "Allow analysis tools in check mode only"
         },
-        
+
         "testing": {
           "commands": ["npx cypress run", "npx cypress open"],
           "description": "Allow running Cypress E2E tests"
         }
       },
-      
+
       "blocked": {
-        "dangerous": ["rm", "rmdir", "del", "sudo", "chmod", "chown", "kill", "pkill"],
+        "dangerous": [
+          "rm",
+          "rmdir",
+          "del",
+          "sudo",
+          "chmod",
+          "chown",
+          "kill",
+          "pkill"
+        ],
         "network": ["curl", "wget", "ssh", "scp", "rsync"],
-        "packageManagers": ["npm install", "yarn add", "pnpm add", "brew install"],
-        "description": "Dangerous operations that could cause data loss or security issues"
+        "packageManagers": [
+          "npm uninstall",
+          "yarn add",
+          "pnpm add",
+          "brew install"
+        ]
       }
     },
-    
+
     "dataStoreOperations": {
       "query": {
         "allowed": true,
         "description": "Allow querying DataStore"
       },
-      
+
       "save": {
         "allowed": false,
         "requiresConfirmation": true,
         "description": "Block DataStore saves by default"
       },
-      
+
       "delete": {
         "allowed": false,
         "requiresConfirmation": true,
         "description": "Block DataStore deletes"
       },
-      
+
       "clear": {
         "allowed": false,
         "description": "Never allow clearing DataStore"
       }
     },
-    
+
     "schemaChanges": {
       "graphql": {
         "allowed": false,
@@ -155,13 +244,13 @@
         "paths": ["amplify/backend/api/**/schema.graphql"],
         "description": "Block GraphQL schema changes - require manual review"
       },
-      
+
       "dataModels": {
         "allowed": false,
         "paths": ["src/models/**"],
         "description": "Never modify generated models - regenerate via amplify push"
       },
-      
+
       "types": {
         "allowed": true,
         "requiresConfirmation": false,
@@ -170,7 +259,7 @@
         "description": "Allow TypeScript type definitions except generated models"
       }
     },
-    
+
     "configurationFiles": {
       "readOnly": {
         "paths": [
@@ -186,8 +275,9 @@
         ],
         "description": "Critical config files - read-only by default"
       },
-      
+
       "modifiable": {
+        "allowed": true,
         "paths": [
           "cypress.config.ts",
           "vitest.config.ts",
@@ -199,7 +289,7 @@
         "description": "Test/dev config files - modifiable with confirmation"
       }
     },
-    
+
     "agentSkills": {
       "allowed": true,
       "skillPermissions": {
@@ -210,7 +300,7 @@
           "requiresConfirmation": true,
           "description": "Can create/modify versioned components with confirmation"
         },
-        
+
         "mock-data-validator": {
           "canCreate": true,
           "canModify": true,
@@ -218,7 +308,7 @@
           "requiresConfirmation": false,
           "description": "Can validate and update mock data freely"
         },
-        
+
         "storybook-audit": {
           "canCreate": true,
           "canModify": true,
@@ -226,7 +316,7 @@
           "requiresConfirmation": false,
           "description": "Can run validation and create stories"
         },
-        
+
         "semantic-file-search": {
           "canCreate": false,
           "canModify": false,
@@ -234,7 +324,7 @@
           "requiresConfirmation": false,
           "description": "Read-only search operations"
         },
-        
+
         "extract-code-documentation": {
           "canCreate": true,
           "canModify": true,
@@ -242,7 +332,7 @@
           "requiresConfirmation": false,
           "description": "Can extract and create documentation"
         },
-        
+
         "multi-model-ai-translation": {
           "canCreate": true,
           "canModify": true,
@@ -253,24 +343,24 @@
       }
     }
   },
-  
+
   "safeModes": {
     "dryRun": {
       "enabled": false,
       "description": "When enabled, simulate all write operations without executing"
     },
-    
+
     "confirmAll": {
       "enabled": false,
       "description": "Require confirmation for every file operation"
     },
-    
+
     "readOnly": {
       "enabled": false,
       "description": "Block all write operations, allow only reads"
     }
   },
-  
+
   "logging": {
     "enabled": true,
     "logPath": ".github/logs/agent-operations.log",
@@ -278,41 +368,41 @@
     "logOperations": ["write", "delete", "rename", "terminal"],
     "description": "Log all significant agent operations for audit trail"
   },
-  
+
   "validation": {
     "preCommitChecks": {
       "enabled": true,
       "checks": ["typescript", "eslint", "tests"],
       "description": "Run validation before allowing git operations"
     },
-    
+
     "fileSize": {
       "maxSingleFile": 1048576,
       "maxTotalBatch": 10485760,
       "description": "Limit file sizes - 1MB per file, 10MB per batch"
     },
-    
+
     "batchOperations": {
       "maxFilesPerBatch": 50,
       "requiresConfirmation": true,
       "description": "Limit batch operations and require confirmation"
     }
   },
-  
+
   "exemptions": {
     "users": [],
     "skills": ["semantic-file-search"],
     "paths": [],
     "description": "Exemptions from permission checks"
   },
-  
+
   "notifications": {
     "onBlockedOperation": {
       "enabled": true,
       "method": "console",
       "description": "Notify when operation is blocked"
     },
-    
+
     "onConfirmationRequired": {
       "enabled": true,
       "method": "prompt",

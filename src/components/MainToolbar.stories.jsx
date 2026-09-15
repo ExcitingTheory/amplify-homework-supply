@@ -26,7 +26,7 @@ Wrap page content with the MainToolbar component to add navigation.
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
 };
 
 export const FullToolbar = {

@@ -1,18 +1,11 @@
-import { readFileSync } from 'fs';
-import createNextIntlPlugin from 'next-intl/plugin';
-import withSerwistInit from '@serwist/next';
+import { readFileSync } from "fs";
+import createNextIntlPlugin from "next-intl/plugin";
+import withBundleAnalyzerInit from "@next/bundle-analyzer";
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-const withSerwist = withSerwistInit({
-  swSrc: 'src/sw.ts',
-  swDest: 'public/sw.js',
-  disable: process.env.NODE_ENV === 'development',
-  cacheOnNavigation: true,
-  register: true,
-  reloadOnOnline: true,
-  scope: '/',
-  swUrl: '/sw.js',
+const withBundleAnalyzer = withBundleAnalyzerInit({
+  enabled: process.env.ANALYZE === "true",
 });
 
 // Derive WebSocket URL from amplify_outputs.json at build time
@@ -22,7 +15,7 @@ function getWebSocketUrl() {
     return process.env.NEXT_PUBLIC_YJS_WS_URL;
   }
   try {
-    const outputs = JSON.parse(readFileSync('./amplify_outputs.json', 'utf-8'));
+    const outputs = JSON.parse(readFileSync("./amplify_outputs.json", "utf-8"));
     const wsConfig = outputs?.custom?.WEBSOCKET_API;
     if (wsConfig?.apiId && wsConfig?.stageName && wsConfig?.region) {
       return `wss://${wsConfig.apiId}.execute-api.${wsConfig.region}.amazonaws.com/${wsConfig.stageName}`;
@@ -31,13 +24,13 @@ function getWebSocketUrl() {
     // amplify_outputs.json not available (CI, first build, etc.)
   }
   // Use wss:// for local dev since Next.js runs with --experimental-https
-  return 'wss://localhost:3001';
+  return "wss://localhost:3001";
 }
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@mui/x-data-grid'],
+  transpilePackages: ["@mui/x-data-grid"],
 
   // React Compiler: automatic memoization of all components
   reactCompiler: true,
@@ -53,14 +46,20 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), geolocation=(), microphone=(self)' },
-          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), geolocation=(), microphone=(self)",
+          },
+          { key: "X-DNS-Prefetch-Control", value: "on" },
         ],
       },
     ];
@@ -69,17 +68,18 @@ const nextConfig = {
   // Environment variables exposed to the browser
   env: {
     NEXT_PUBLIC_YJS_WS_URL: getWebSocketUrl(),
-    NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION: process.env.NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION || 'true',
+    NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION:
+      process.env.NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION || "true",
     // CloudFront CDN domain — populated from amplify_outputs.json during build.
     // Leave empty for local dev; getCachedUrl and cdnImageLoader fall back gracefully.
-    NEXT_PUBLIC_CDN_DOMAIN: process.env.NEXT_PUBLIC_CDN_DOMAIN || '',
+    NEXT_PUBLIC_CDN_DOMAIN: process.env.NEXT_PUBLIC_CDN_DOMAIN || "",
   },
 
   // Reduce build output size for Amplify deployment
   productionBrowserSourceMaps: false,
 
   // Use standalone output for smaller deployments
-  output: 'standalone',
+  output: "standalone",
 
   // Skip TypeScript type checking during build to avoid OOM
   typescript: {
@@ -91,8 +91,8 @@ const nextConfig = {
   // width requests to the nearest pre-generated variant (small/medium/large.webp).
   // Falls back gracefully when NEXT_PUBLIC_CDN_DOMAIN is not set (local dev).
   images: {
-    loader: 'custom',
-    loaderFile: './src/utils/cdnImageLoader.js',
+    loader: "custom",
+    loaderFile: "./src/utils/cdnImageLoader.js",
   },
 
   // Turbopack config
@@ -101,14 +101,21 @@ const nextConfig = {
       // Prevent onnxruntime-node (native Node addon) from being bundled into
       // client chunks. @huggingface/transformers conditionally imports it, but
       // Turbopack doesn't respect /* webpackIgnore: true */ dynamic import comments.
-      'onnxruntime-node': './src/stubs/onnxruntime-node.js',
+      "onnxruntime-node": "./src/stubs/onnxruntime-node.js",
     },
   },
 
   // Persist Turbopack compiler artifacts on disk for faster dev restarts
+  // Optimize barrel imports to tree-shake unused exports from large packages
   experimental: {
     turbopackFileSystemCacheForDev: true,
+    optimizePackageImports: [
+      "@mui/material",
+      "@mui/icons-material",
+      "react-icons",
+      "@dicebear/core",
+    ],
   },
 };
 
-export default withSerwist(withNextIntl(nextConfig));
+export default withBundleAnalyzer(withNextIntl(nextConfig));

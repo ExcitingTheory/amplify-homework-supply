@@ -6,7 +6,11 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof RecordingSettings> = {
   title: "🎙️ Recording Studio/Components/Recording Settings",
   component: RecordingSettings,
-  tags: ["autodocs"],
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
+  tags: ["!autodocs"],
 };
 
 export default meta;

@@ -153,7 +153,12 @@
     "rubyTagsStep4": "4. Klicken Sie auf Speichern, um die Ruby-Tags anzuwenden",
     "pronunciationLabel": "Aussprache (zuerst auswählen):",
     "phraseLabel": "\"Phrase (zweite auswählen):\"",
-    "rubyTagPreview": "Vorschau des Ruby-Tags:"
+    "rubyTagPreview": "Vorschau des Ruby-Tags:",
+    "title": "Wörterbuch-Editor",
+    "step1": "1. Wählen Sie den Text im Aussprachefeld (oben) aus und anschließend den passenden Text im Phrasenfeld (unten) aus",
+    "step2": "2. Die ausgewählten Abschnitte werden gepaart und in die Ruby-Tag-Vorschau verschoben",
+    "step3": "3. Fahren Sie mit der Auswahl von Paaren fort, bis beide Felder leer sind",
+    "step4": "4. Klicken Sie auf Speichern, um die Ruby-Tags anzuwenden"
   },
   "recordingStudio3": {
     "addSpeakerFirst": "Bitte fügen Sie zuerst einen Sprecher hinzu",
@@ -234,5 +239,147 @@
     "embeddingStale": "Einbettung veraltet",
     "embeddingFresh": "Einbettung aktuell",
     "error": "Fehler: {{message}}"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Sage-Modell",
+    "behaviorTuning": "Verhaltensoptimierung",
+    "kaiTemperatureLabel": "Kai-Temperatur:",
+    "sageTemperatureLabel": "Sage-Temperatur:",
+    "kaiMaxTokensLabel": "Kai-Max-Tokens",
+    "sageMaxTokensLabel": "Sage-Max-Tokens",
+    "maxAgentStepsLabel": "Max. Agentenschritte",
+    "maxAgentStepsHint": "Maximale Anzahl an Tool-Aufrufen pro Gesprächsrunde",
+    "searchTuning": "Suchoptimierung",
+    "similarityThresholdLabel": "Ähnlichkeitsschwelle:",
+    "defaultResultLimitLabel": "Standard-Ergebnislimit",
+    "conversationMemory": "Gesprächsspeicher",
+    "enableConversationMemory": "Gesprächsspeicher aktivieren",
+    "summarizationModelLabel": "Zusammenfassungsmodell",
+    "tokenBudgets": "Token-Budgets",
+    "tokenBudgetsDescription": "Steuert, wie viele Tokens jeder Teil eines Agenten-Durchlaufs erhält. Niedrigere Budgets senken Kosten; höhere Budgets erlauben reichhaltigeren Kontext.",
+    "enforceTokenBudget": "Token-Budgets erzwingen",
+    "enforceTokenBudgetNote": "Wenn aktiviert, kürzt der Agent Systemprompts und Tool-Ergebnisse auf die Budgetgrenzen und bricht mehrstufige Durchläufe ab, wenn das Gesamttoken-Budget überschritten wird.",
+    "systemPromptBudgetLabel": "Budget für Systemprompt",
+    "systemPromptBudgetHint": "Max. Tokens für Kontext der Stufe 1 im Systemprompt (Standard: 2000)",
+    "toolResultBudgetLabel": "Budget für Tool-Ergebnisse",
+    "toolResultBudgetHint": "Max. Tokens pro Tool-Ergebnis, das an das Modell zurückgegeben wird (Standard: 4000)",
+    "totalTurnBudgetLabel": "Gesamtsaldo pro Runde",
+    "totalTurnBudgetHint": "Max. Gesamt-Tokens pro Agentenrunde über alle Schritte hinweg (Standard: 16000)",
+    "perPersonaOverrides": "Personenbezogene Überschreibungen",
+    "kaiSystemPromptLabel": "Kai-Systemprompt",
+    "tokensUnit": "Tokens",
+    "useDefaultPlaceholder": "Standard verwenden",
+    "sageSystemPromptLabel": "Sage-Systemprompt",
+    "kaiToolResultLabel": "Kai-Tool-Ergebnis",
+    "sageToolResultLabel": "Sage-Tool-Ergebnis"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "sky": "Himmel",
+      "mint": "Minze",
+      "lavender": "Lavendel",
+      "peach": "Pfirsich",
+      "rose": "Rose",
+      "gold": "Gold"
+    },
+    "styles": {
+      "simple": "Einfach",
+      "detailed": "Detailliert",
+      "toon": "Toon"
+    },
+    "lockedMessage": "Verdienen Sie das Abzeichen Bot Whisperer I, um Ihren KI-Assistenten anzupassen.",
+    "previewTitle": "Ihr KI-Assistent",
+    "styleLabel": "Stil",
+    "backgroundColorLabel": "Hintergrundfarbe"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "Aus Klasse kopieren",
+    "copyToClasses": "In Klassen kopieren",
+    "firstMeetingDate": "Datum des ersten Treffens",
+    "weeksLabel": "Wochen",
+    "weeklyMeetingLabel": "Wöchentlicher Termin",
+    "weeklyMeetingHint": "1 = erster, 2 = zweiter, 0 = letzter",
+    "loadingCadence": "Quell-Taktung wird geladen...",
+    "noAssignments": "Die Quellklasse hat keine datierten Aufgaben zum Kopieren.",
+    "missingMetadata": "der Quellauftrag fehlt an Kadenz-Metadaten und kann nicht kopiert werden.",
+    "close": "Schließen",
+    "copyCadence": "Kadenz kopieren",
+    "copying": "Wird kopiert..."
+  },
+  "assignmentCard": {
+    "excellent": "Ausgezeichnet",
+    "good": "Gut",
+    "fair": "Ausreichend",
+    "needsWork": "Verbesserungsbedarf",
+    "noDueDate": "Kein Fälligkeitsdatum",
+    "overdue": "Überfällig",
+    "dueSoon": "Bald fällig",
+    "due": "Fällig",
+    "locked": "Gesperrt",
+    "opensAt": "Öffnet {date}",
+    "late": "Verspätet",
+    "dropped": "Vom Dozenten entfernt",
+    "difficulty": "Schwierigkeit: {level}",
+    "review": "Bewerten",
+    "startWorkbook": "Starten",
+    "practice": "Üben",
+    "discuss": "Diskutieren",
+    "joinReview": "Bewertung beitreten",
+    "requestGuidance": "Anleitung anfragen",
+    "requestGuidanceTooltip": "Erstellen Sie einen Raum und teilen Sie den Code mit Ihrem Lehrenden, um persönliche Anleitung zu erhalten"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "Avatar anpassen"
+  },
+  "campaignProgress": {
+    "ended": "Beendet",
+    "endedChip": "Beendet",
+    "bonus": "Bonus",
+    "chapterProgression": "Kapitel-Fortschritt",
+    "completion": "Abschluss"
+  },
+  "chatPanel": {
+    "defaultTitle": "Chat",
+    "topicsLabel": "Themen",
+    "backButton": "Zurück",
+    "onlineCount": "{count} online"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "Nachricht eingeben... (@kai für KI)",
+    "replyingTo": "Antwort auf {name}"
+  },
+  "threadView": {
+    "emptyState": "Noch keine Nachrichten. Starten Sie die Unterhaltung!",
+    "replyCount": {
+      "singular": "Antwort",
+      "plural": "Antworten"
+    },
+    "typingIndicator": "{names} {count, plural, one {schreibt} other {schreiben}}...",
+    "edited": "(bearbeitet)",
+    "justNow": "gerade eben",
+    "minutesAgo": "vor {minutes} Min.",
+    "hoursAgo": "vor {hours} Std."
+  },
+  "topicList": {
+    "header": "Themen",
+    "newTopicPlaceholder": "#neues-thema",
+    "emptyState": "Noch keine Themen. Erstellen Sie eines, um zu chatten."
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "Timer-Frage hinzufügen",
+    "timerDescription": "Timer-Konfiguration für zeitgesteuerte Aufgaben",
+    "retryToggle": "Wiederholungsversuche der Schüler zulassen",
+    "publishFirstAlert": "Hinweis: Bitte veröffentlichen Sie zuerst die Einheit, um Aufgaben zu erstellen",
+    "meetingCalendar": "Fälligkeitsdatum",
+    "meetingDayHint": "Punkte markieren die Treffen der Section.",
+    "tomorrow": "Morgen",
+    "nextClass": "Nächster Kurs",
+    "friday": "Nächsten Freitag",
+    "createSectionLabel": "Neue Section erstellen",
+    "undoSnackbar": "Aufgaben erstellt. {count} Aufgabe{plural} erstellt."
   }
 }

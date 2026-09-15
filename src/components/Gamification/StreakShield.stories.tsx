@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof StreakShield> = {
   title: "🏆 Gamification/Streaks/Streak Shield",
   component: StreakShield,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

@@ -1,0 +1,132 @@
+[
+  {
+    "id": "wb-msg-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Kai, I'm stuck on question 2 in this workbook. Is the answer は or が for '誰____来ましたか'?"
+      }
+    ]
+  },
+  {
+    "id": "wb-msg-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Great question! Let's break this down together without spoiling the answer 😊.\n\nRemember the general rule:\n- **は (wa)** marks the known *topic* of the sentence (\"Speaking of X...\").\n- **が (ga)** marks the *subject* when the subject is the new or unknown piece of information.\n\nIn your question, **誰 (dare)** means *who* (unknown). When question words like *who*, *what*, or *which* are the subject doing the action, which particle points directly to that unknown subject?"
+      }
+    ]
+  },
+  {
+    "id": "wb-msg-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Ah! So question words like 誰 use が! How am I doing overall on this unit?"
+      }
+    ]
+  },
+  {
+    "id": "wb-msg-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Spot on! 🎉 Exactly right. Let me look up your current progress on this unit."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "get_student_progress",
+        "toolCallId": "call_progress_001"
+      },
+      {
+        "type": "tool-get_student_progress",
+        "toolCallId": "call_progress_001",
+        "state": "output-available",
+        "input": {
+          "unitId": "unit-particles-101"
+        },
+        "output": {
+          "success": true,
+          "unitId": "unit-particles-101",
+          "hasAttempts": true,
+          "totalAttempts": 2,
+          "completedBlocks": 4,
+          "totalBlocks": 5,
+          "percentComplete": 80,
+          "accuracy": 92.5,
+          "currentAttempt": {
+            "complete": false,
+            "accuracy": 92.5,
+            "percentComplete": 80
+          },
+          "message": "Student progress retrieved successfully"
+        }
+      },
+      {
+        "type": "text",
+        "text": "You're doing fantastic! You're at **80% completion** with **92.5% accuracy** on this unit. You only have the final listening exercise left!"
+      }
+    ]
+  },
+  {
+    "id": "wb-msg-5",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Can we do a quick 5-question review drill on particles before I finish?"
+      }
+    ]
+  },
+  {
+    "id": "wb-msg-6",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "start_practice_drill",
+        "toolCallId": "call_drill_001"
+      },
+      {
+        "type": "tool-start_practice_drill",
+        "toolCallId": "call_drill_001",
+        "state": "output-available",
+        "input": {
+          "drillType": "review",
+          "count": 5,
+          "sources": {
+            "vocabulary": true,
+            "questions": true,
+            "text": true,
+            "documents": false
+          }
+        },
+        "output": {
+          "success": true,
+          "action": "start_practice_drill",
+          "drillConfig": {
+            "title": "Particle Mastery Flash Drill",
+            "drillType": "review",
+            "questionCount": 5,
+            "timeLimitSeconds": 180,
+            "focus": [
+              "は vs が",
+              "を object marker",
+              "に destination",
+              "で location of action"
+            ]
+          },
+          "message": "Practice drill launched in student workbook overlay"
+        }
+      },
+      {
+        "type": "text",
+        "text": "🎯 I've launched your **5-question Particle Review Drill**! Answer the questions in the popup to earn bonus XP and lock in your knowledge."
+      }
+    ]
+  }
+]

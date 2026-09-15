@@ -5,6 +5,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof ArmoriaShield> = {
   title: "🏆 Gamification/Avatars & Cosmetics/Armoria Shield",
   component: ArmoriaShield,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
   argTypes: {
     size: { control: { type: "range", min: 40, max: 200 } },
   },

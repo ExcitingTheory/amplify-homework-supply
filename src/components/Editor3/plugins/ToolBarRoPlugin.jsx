@@ -9,7 +9,7 @@
 import * as React from "react";
 import { useEffect, useContext, useState } from "react";
 import { createPortal } from "react-dom";
-import { Box, Toolbar, Typography, Chip, Stack } from "@mui/material";
+import { Box, Toolbar, Typography, Chip, Stack, Popover } from "@mui/material";
 import { useTranslations } from "next-intl";
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
@@ -31,8 +31,93 @@ export const IS_APPLE =
 
 import { $isAtNodeEnd } from "@lexical/selection";
 import UnitContext from "../../../context/unitContext";
+import SectionContext from "../../../context/sectionContext";
+import {
+  getStudentAccommodation,
+  getEffectiveTimeAllowance,
+} from "../../../utils/accommodations";
 import { useXP } from "../../../context/gamificationContext";
 import { StreakIndicator } from "../../Gamification/StreakIndicator";
+import GlobalSearchBar from "../../GlobalSearchBar";
+import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
+
+const workbookChipSx = {
+  borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+};
+
+function OverflowRevealText({ text, variant, component = "div", sx }) {
+  const containerRef = React.useRef(null);
+  const textRef = React.useRef(null);
+  const [isClipped, setIsClipped] = React.useState(false);
+  const [marqueeDistance, setMarqueeDistance] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  React.useEffect(() => {
+    const measure = () => {
+      const container = containerRef.current;
+      const textElement = textRef.current;
+      if (!container || !textElement) return;
+
+      const overflow = textElement.scrollWidth - container.clientWidth;
+      setIsClipped(overflow > 1);
+      setMarqueeDistance(Math.max(0, overflow + 12));
+    };
+
+    measure();
+    const resizeObserver = new ResizeObserver(measure);
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
+    if (textRef.current) resizeObserver.observe(textRef.current);
+    return () => resizeObserver.disconnect();
+  }, [text]);
+
+  const handleClick = (event) => {
+    if (isClipped) setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <Typography
+        ref={containerRef}
+        variant={variant}
+        component={component}
+        onClick={handleClick}
+        aria-haspopup={isClipped ? "dialog" : undefined}
+        sx={{
+          ...sx,
+          cursor: isClipped ? "pointer" : "default",
+          "&:hover .overflow-reveal-text": isClipped
+            ? { transform: `translateX(-${marqueeDistance}px)` }
+            : undefined,
+        }}
+      >
+        <Box
+          className="overflow-reveal-text"
+          component="span"
+          ref={textRef}
+          sx={{
+            display: "inline-block",
+            maxWidth: "none",
+            transition: isClipped
+              ? `transform ${Math.min(6, Math.max(1.6, marqueeDistance / 42))}s linear`
+              : undefined,
+            willChange: isClipped ? "transform" : undefined,
+          }}
+        >
+          {text}
+        </Box>
+      </Typography>
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <Typography sx={{ p: 1.5, maxWidth: 360 }}>{text}</Typography>
+      </Popover>
+    </>
+  );
+}
 
 /**
  * @param {number} countDown
@@ -71,9 +156,18 @@ const formatTime = (countDown) => {
  * Display a countdown timer. Input is a timestamp and a number of seconds.
  */
 const TimeLeft = React.memo(() => {
-  const { grade, unit } = useContext(UnitContext);
+  const { grade, unit, sectionId, session } = useContext(UnitContext);
+  const { sectionMap } = useContext(SectionContext);
 
-  const timeLimitSeconds = unit?.timeLimitSeconds || 0;
+  const baseTimeLimitSeconds = unit?.timeLimitSeconds || 0;
+  // Apply this learner's timed-allowance accommodation (e.g. 1.5× time).
+  const accommodation = getStudentAccommodation(
+    sectionMap?.[sectionId]?.accommodations,
+    session?.username,
+  );
+  const timeLimitSeconds =
+    getEffectiveTimeAllowance(baseTimeLimitSeconds, accommodation) ||
+    baseTimeLimitSeconds;
   const timerStartedAt = grade?.createdAt;
 
   const [countDown, setCountDown] = useState(timeLimitSeconds * 1000);
@@ -82,16 +176,11 @@ const TimeLeft = React.memo(() => {
     if (!timerStartedAt) {
       setCountDown(timeLimitSeconds * 1000);
     } else if (timeLimitSeconds > 0 && timerStartedAt) {
-      const [hours, minutes, seconds] = formatTime(timeLimitSeconds * 1000); //Convert to milliseconds
-      let targetDate = new Date(timerStartedAt);
-
-      targetDate.setMinutes(targetDate.getMinutes() + minutes); // timestamp
-      targetDate.setSeconds(targetDate.getSeconds() + seconds); // timestamp
-
-      const countDownDate = new Date(targetDate).getTime();
+      // Add the full allowance in one go (avoids the h/m/s truncation bug).
+      const countDownDate =
+        new Date(timerStartedAt).getTime() + timeLimitSeconds * 1000;
 
       const interval = setInterval(() => {
-        console.log("TimeLeft.interval");
         const timeRemaining = countDownDate - new Date().getTime();
         if (timeRemaining <= 0) {
           setCountDown(0);
@@ -126,6 +215,7 @@ const TimeLeft = React.memo(() => {
           label={timeString}
           color={chipColor}
           sx={{
+            ...workbookChipSx,
             "& .MuiChip-icon": {
               display: { xs: "none", sm: "inline-flex" },
             },
@@ -160,7 +250,8 @@ export default function ToolBarRoPlugin({
 }) {
   const t = useTranslations("workbook");
   const { unit, finishedQuestions, rubric } = React.useContext(UnitContext);
-  const { toolbarChildrenPortalRef, appBarHeight } = useAppShell();
+  const { toolbarPortalRef, toolbarChildrenPortalRef, appBarHeight } =
+    useAppShell();
   const { xpLogs } = useXP();
   // Derive current streak from XP logs (latest streak entry)
   const currentStreak = React.useMemo(() => {
@@ -196,7 +287,7 @@ export default function ToolBarRoPlugin({
           min-width: 1rem;
         }
       `}</style>
-      {toolbarChildrenPortalRef?.current &&
+      {toolbarPortalRef?.current &&
         createPortal(
           <Box
             ref={firstAppBarRef}
@@ -210,51 +301,30 @@ export default function ToolBarRoPlugin({
             <Box
               sx={{
                 flexGrow: 1,
-                margin: isScrolled ? "0.5rem 1rem" : "1rem",
+                margin: isScrolled ? "0.5rem 1rem" : "0.5rem 1rem",
                 transition: "all 0.3s ease",
                 display: "flex",
-                alignItems: isScrolled ? "center" : "flex-start",
-                flexDirection: isScrolled ? "row" : "column",
-                gap: isScrolled ? 2 : 0,
+                alignItems: "center",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 1,
                 width: "100%",
                 maxWidth: "100%",
                 overflow: "hidden",
                 boxSizing: "border-box",
               }}
             >
-              <Box sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden" }}>
-                <title>{name}</title>
-                <Typography
-                  variant={isScrolled ? "body1" : "h6"}
-                  component="div"
-                  sx={{
-                    flexGrow: 1,
-                    transition: "all 0.3s ease",
-                    fontWeight: isScrolled ? 500 : 400,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {name || t("toolBarRoPlugin.untitledUnit")}
-                </Typography>
-
-                {!isScrolled && (
-                  <Typography
-                    variant="p"
-                    component="div"
-                    sx={{
-                      flexGrow: 1,
-                      transition: "opacity 0.3s ease",
-                      display: { xs: "none", sm: "block" },
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {description || t("toolBarRoPlugin.noDescription")}
-                  </Typography>
-                )}
+              <Box
+                sx={{
+                  flex: { xs: "0 0 auto", sm: "1 1 18rem" },
+                  width: { xs: "100%", sm: "auto" },
+                  minWidth: 0,
+                  display: "block",
+                  "& .MuiBox-root": {
+                    maxWidth: { xs: "none", sm: 400 },
+                  },
+                }}
+              >
+                <GlobalSearchBar />
               </Box>
 
               <Box
@@ -263,6 +333,7 @@ export default function ToolBarRoPlugin({
                   alignItems: "center",
                   flexShrink: 0,
                   minWidth: 0,
+                  width: { xs: "100%", sm: "auto" },
                 }}
               >
                 {showLeftArrow && (
@@ -281,6 +352,7 @@ export default function ToolBarRoPlugin({
                     alignItems: "center",
                     flex: 1,
                     minWidth: 0,
+                    maxWidth: "100%",
                     overflowX: "hidden",
                     scrollSnapType: "x mandatory",
                     scrollbarWidth: "none",
@@ -315,6 +387,7 @@ export default function ToolBarRoPlugin({
                     }
                     variant="outlined"
                     size={isScrolled ? "small" : "medium"}
+                    sx={workbookChipSx}
                   />
                 </Stack>
                 {showRightArrow && (
@@ -327,6 +400,43 @@ export default function ToolBarRoPlugin({
                 )}
               </Box>
             </Box>
+          </Box>,
+          toolbarPortalRef.current,
+        )}
+      {toolbarChildrenPortalRef?.current &&
+        createPortal(
+          <Box
+            sx={{
+              mx: 1,
+              overflow: "hidden",
+              minWidth: 0,
+            }}
+          >
+            <title>{name}</title>
+            <OverflowRevealText
+              text={name || t("toolBarRoPlugin.untitledUnit")}
+              variant="body1"
+              component="div"
+              sx={{
+                fontWeight: 600,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            />
+            <OverflowRevealText
+              text={description || t("toolBarRoPlugin.noDescription")}
+              variant="caption"
+              component="div"
+              sx={{
+                display: "block",
+                color: "text.secondary",
+                lineHeight: 1.15,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            />
           </Box>,
           toolbarChildrenPortalRef.current,
         )}

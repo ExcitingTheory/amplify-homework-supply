@@ -3,7 +3,14 @@
  * Used in Storybook to provide a fully functional Gen2 client without requiring Amplify configuration
  */
 
-import { generateClient } from 'aws-amplify/data';
+import { generateClient } from "aws-amplify/data";
+
+const MOCK_DEBUG =
+  typeof process !== "undefined" &&
+  process.env?.STORYBOOK_MOCK_DEBUG === "true";
+const mockLog = (...args) => {
+  if (MOCK_DEBUG) console.log(...args);
+};
 
 /**
  * Get or create the mock Amplify Gen 2 GraphQL client
@@ -11,7 +18,9 @@ import { generateClient } from 'aws-amplify/data';
  */
 export const getAmplifyClient = () => {
   const client = generateClient();
-  console.log('[Mock amplifyClient] getAmplifyClient() called - returning mock client');
+  mockLog(
+    "[Mock amplifyClient] getAmplifyClient() called - returning mock client",
+  );
   return client;
 };
 
@@ -19,7 +28,7 @@ export const getAmplifyClient = () => {
  * Reset the client singleton (for testing)
  */
 export const resetAmplifyClient = () => {
-  console.log('[Mock amplifyClient] resetAmplifyClient() called');
+  console.log("[Mock amplifyClient] resetAmplifyClient() called");
   // No-op in mock - each call to getAmplifyClient returns the same mock
 };
 

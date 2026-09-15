@@ -135,7 +135,12 @@ export function CampaignSetupWizard({
   React.useEffect(() => {
     if (open) {
       setActiveStep(0);
-      setConfig({ title: "", setting: "", targetXP: DEFAULT_TARGET_XP, chapterOrder: 1 });
+      setConfig({
+        title: "",
+        setting: "",
+        targetXP: DEFAULT_TARGET_XP,
+        chapterOrder: 1,
+      });
       setAiError(null);
       setSaveError(null);
     }
@@ -169,15 +174,18 @@ export function CampaignSetupWizard({
     setSaving(true);
     setSaveError(null);
     try {
-      const { data, errors } = await (client.models as any).GroupChallenge.create({
-        cohortId: sectionId,
+      const { data, errors } = await (
+        client.models as any
+      ).GroupChallenge.create({
+        sectionID: sectionId,
         title: config.title.trim(),
         setting: config.setting.trim() || undefined,
         targetXP: config.targetXP,
         chapterOrder: config.chapterOrder,
         active: true,
       });
-      if (errors?.length) throw new Error(errors[0]?.message || "Create failed");
+      if (errors?.length)
+        throw new Error(errors[0]?.message || "Create failed");
       onCreated?.(data.id);
       onClose();
     } catch (err: any) {
@@ -240,15 +248,11 @@ export function CampaignSetupWizard({
             <Button
               variant="outlined"
               startIcon={
-                aiLoading ? (
-                  <CircularProgress size={16} />
-                ) : (
-                  <AutoAwesomeIcon />
-                )
+                aiLoading ? <CircularProgress size={16} /> : <AutoAwesomeIcon />
               }
               onClick={handleAiSuggest}
               disabled={aiLoading}
-              sx={{ alignSelf: "flex-start", textTransform: "none" }}
+              sx={{ alignSelf: "flex-start" }}
             >
               {aiLoading ? "Generating…" : "AI Suggest narrative"}
             </Button>
@@ -358,7 +362,11 @@ export function CampaignSetupWizard({
               </Box>
             </Box>
             {saveError && (
-              <Typography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+              <Typography
+                variant="caption"
+                color="error"
+                sx={{ mt: 1, display: "block" }}
+              >
                 {saveError}
               </Typography>
             )}
@@ -397,7 +405,11 @@ export function CampaignSetupWizard({
         )}
         {activeStep === 2 && (
           <>
-            <Button onClick={() => setActiveStep(1)} color="inherit" disabled={saving}>
+            <Button
+              onClick={() => setActiveStep(1)}
+              color="inherit"
+              disabled={saving}
+            >
               Back
             </Button>
             <Button

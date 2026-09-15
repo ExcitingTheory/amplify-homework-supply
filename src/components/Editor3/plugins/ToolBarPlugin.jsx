@@ -1183,6 +1183,7 @@ const InsertNodeDropDown = ({
   return (
     <>
       <Button
+        data-tour="insert-button"
         aria-controls="insert-node-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}

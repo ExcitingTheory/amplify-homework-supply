@@ -195,3 +195,15 @@ No dynamic unit hint is shown. `EasterEggForm.tsx` (line 309) _does_ handle this
 | 11 | `src/components/Gamification/RedemptionConditionForm.tsx` | "Count" field: dynamic `helperText` derived from condition type | ✅ |
 | 12 | `src/components/Editor3/components/FileManager2.jsx` | Removed unused `ListItemSecondaryAction` import | ✅ |
 | 13 | `src/components/CollaboratorManager.tsx` | Raw Cognito ID as primary label — layout fixed; display-name fallback is a separate data-layer concern | ℹ️ noted |
+
+### Category A2 — `secondaryAction` prop overlap (modern MUI equivalent)
+
+`ListItem`'s `secondaryAction` prop renders the same absolutely-positioned (`position: absolute; right`) element as the deprecated `ListItemSecondaryAction`, so long primary text (or a 2-icon action group wider than the built-in 48px inset) collides the same way. Fixed with the canonical flex-row pattern: `secondaryAction` removed, the action moved to a `flexShrink: 0` sibling, and `ListItemText`/`ListItemButton` given `flex: 1, minWidth: 0` with `noWrap` primary text.
+
+| # | Component | Issue | Fixed |
+|---|---|---|---|
+| 14 | `src/components/Chat/TopicList.tsx` | Topic name (user-generated) vs pin `IconButton` — converted to flex row, `noWrap` primary/secondary | ✅ |
+| 15 | `src/components/MainToolbar.jsx` | Sections & Units nav items vs expand/collapse chevron — converted both to flex rows, `noWrap` labels | ✅ |
+| 16 | `src/components/RecordingStudio3.jsx` | Take row vs delete `IconButton` — delete moved inline into the take controls `Stack` (`ml: auto`), removing the vertically-centered floating action on the column list item | ✅ |
+| 17 | `app/[locale]/admin/archives/page.jsx` | Record ID + `Chip` vs 2-icon action group (Preview/Unarchive) — action moved to `flexShrink: 0` sibling, `ListItemText` `flex: 1, minWidth: 0` | ✅ |
+| 18 | `app/[locale]/recycle-bin/page.jsx` | Item name + `Chip` vs 2-icon action group (Restore/Delete) — action moved to `flexShrink: 0` sibling, `ListItemText` `flex: 1, minWidth: 0` | ✅ |

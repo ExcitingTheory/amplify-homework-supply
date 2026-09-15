@@ -1,23 +1,24 @@
 /**
  * Connection Status Indicator
- * 
+ *
  * Shows the real-time collaboration connection status.
  * Clicking copies a join code that tutors can use to connect.
  */
 
-import React from 'react';
-import { Chip, Snackbar, Tooltip } from '@mui/material';
-import { Wifi, WifiOff, Sync } from '@mui/icons-material';
-import UnitContext from '../../context/unitContext';
+import React from "react";
+import { Chip, Snackbar, Tooltip } from "@mui/material";
+import { Wifi, WifiOff, Sync } from "@mui/icons-material";
+import UnitContext from "../../context/unitContext";
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
 
 /**
  * Derive a short 6-char uppercase join code from a grade ID.
  * Deterministic: same gradeId always produces the same code.
  */
 function deriveJoinCode(gradeId: string): string {
-  if (!gradeId) return '';
+  if (!gradeId) return "";
   // Use last 6 alphanumeric chars of the ID, uppercased
-  const alphanumeric = gradeId.replace(/[^a-zA-Z0-9]/g, '');
+  const alphanumeric = gradeId.replace(/[^a-zA-Z0-9]/g, "");
   return alphanumeric.slice(-6).toUpperCase();
 }
 
@@ -26,8 +27,8 @@ export interface ConnectionStatusProps {
    * Size of the status chip
    * @default 'small'
    */
-  size?: 'small' | 'medium';
-  
+  size?: "small" | "medium";
+
   /**
    * Show label text or just icon
    * @default true
@@ -35,9 +36,9 @@ export interface ConnectionStatusProps {
   showLabel?: boolean;
 }
 
-export function ConnectionStatus({ 
-  size = 'small', 
-  showLabel = true 
+export function ConnectionStatus({
+  size = "small",
+  showLabel = true,
 }: ConnectionStatusProps) {
   const { workbook, workbookEnabled, grade } = React.useContext(UnitContext);
   const [snackOpen, setSnackOpen] = React.useState(false);
@@ -61,14 +62,13 @@ export function ConnectionStatus({
   }
 
   const chipSx = {
-    '& .MuiChip-icon': { fontSize: size === 'small' ? 16 : 20 },
-    minWidth: showLabel ? 'auto' : '32px',
-    cursor: 'pointer',
+    borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+    "& .MuiChip-icon": { fontSize: size === "small" ? 16 : 20 },
+    minWidth: showLabel ? "auto" : "32px",
+    cursor: "pointer",
   };
 
-  const tooltipTitle = joinCode 
-    ? `Join code: ${joinCode} — click to copy` 
-    : '';
+  const tooltipTitle = joinCode ? `Join code: ${joinCode} — click to copy` : "";
 
   // Offline state
   if (!workbook.isConnected) {
@@ -77,7 +77,7 @@ export function ConnectionStatus({
         <Tooltip title={tooltipTitle} arrow>
           <Chip
             icon={<WifiOff />}
-            label={showLabel ? 'Offline' : undefined}
+            label={showLabel ? "Offline" : undefined}
             variant="outlined"
             size={size}
             onClick={handleClick}
@@ -103,15 +103,15 @@ export function ConnectionStatus({
             icon={
               <Sync
                 sx={{
-                  animation: 'spin 1s linear infinite',
-                  '@keyframes spin': {
-                    '0%': { transform: 'rotate(0deg)' },
-                    '100%': { transform: 'rotate(360deg)' },
+                  animation: "spin 1s linear infinite",
+                  "@keyframes spin": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(360deg)" },
                   },
                 }}
               />
             }
-            label={showLabel ? 'Syncing...' : undefined}
+            label={showLabel ? "Syncing..." : undefined}
             variant="outlined"
             size={size}
             onClick={handleClick}
@@ -134,7 +134,7 @@ export function ConnectionStatus({
       <Tooltip title={tooltipTitle} arrow>
         <Chip
           icon={<Wifi />}
-          label={showLabel ? 'Connected' : undefined}
+          label={showLabel ? "Connected" : undefined}
           variant="outlined"
           size={size}
           onClick={handleClick}

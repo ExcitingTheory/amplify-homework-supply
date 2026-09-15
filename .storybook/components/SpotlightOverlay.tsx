@@ -102,7 +102,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const overlayRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const targetClickCleanupRef = useRef<(() => void) | null>(null);
+  const boundTargetElementRef = useRef<Element | null>(null);
   const tooltipPositionedRef = useRef(false);
+  const scrollRafRef = useRef<number | null>(null);
   const currentStep = steps[currentStepIndex];
 
   /** Measures the preview iframe and stores its rect + parent container in state */
@@ -194,12 +196,6 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const updateTargetPosition = () => {
     if (!currentStep) return;
 
-    // Clean up previous target click listener
-    if (targetClickCleanupRef.current) {
-      targetClickCleanupRef.current();
-      targetClickCleanupRef.current = null;
-    }
-
     if (currentStep.targetSelector) {
       // Determine which document to search based on targetFrame
       const iframe = document.querySelector(
@@ -281,37 +277,53 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           });
         }
 
-        // Attach click listener to advance tour when target element is clicked
-        const handleTargetClick = (e: Event) => {
-          // For interactable steps, only advance on button/submit clicks — not form inputs
-          if (currentStep.interactable) {
-            const clicked = e.target as HTMLElement;
-            const tag = clicked.tagName.toLowerCase();
-            const isFormField =
-              tag === "input" || tag === "textarea" || tag === "select";
-            const isButton =
-              tag === "button" ||
-              clicked.closest('button, [role="button"], [type="submit"]');
-            if (isFormField || !isButton) return;
+        // Attach click listener to advance tour when target element is clicked.
+        // Only rebind when the element itself changed (not on every scroll-
+        // driven position recompute) — tearing down and recreating a native
+        // listener every frame during a scroll gesture was part of what made
+        // tracking feel laggy.
+        if (boundTargetElementRef.current !== targetElement) {
+          if (targetClickCleanupRef.current) {
+            targetClickCleanupRef.current();
+            targetClickCleanupRef.current = null;
           }
-          console.log(
-            "[SpotlightOverlay] 🎯 Target element clicked, advancing tour",
-          );
-          if (currentStep.isLast || currentStepIndex === steps.length - 1) {
-            onComplete?.();
-          } else {
-            onNext?.();
-          }
-        };
-        targetElement.addEventListener("click", handleTargetClick);
-        targetClickCleanupRef.current = () => {
-          targetElement.removeEventListener("click", handleTargetClick);
-        };
+          const handleTargetClick = (e: Event) => {
+            // For interactable steps, only advance on button/submit clicks — not form inputs
+            if (currentStep.interactable) {
+              const clicked = e.target as HTMLElement;
+              const tag = clicked.tagName.toLowerCase();
+              const isFormField =
+                tag === "input" || tag === "textarea" || tag === "select";
+              const isButton =
+                tag === "button" ||
+                clicked.closest('button, [role="button"], [type="submit"]');
+              if (isFormField || !isButton) return;
+            }
+            console.log(
+              "[SpotlightOverlay] 🎯 Target element clicked, advancing tour",
+            );
+            if (currentStep.isLast || currentStepIndex === steps.length - 1) {
+              onComplete?.();
+            } else {
+              onNext?.();
+            }
+          };
+          targetElement.addEventListener("click", handleTargetClick);
+          boundTargetElementRef.current = targetElement;
+          targetClickCleanupRef.current = () => {
+            targetElement.removeEventListener("click", handleTargetClick);
+            boundTargetElementRef.current = null;
+          };
+        }
       } else {
         // Element not found - use center of screen
         console.debug(
           "[SpotlightOverlay] Target element not found, using center position",
         );
+        if (targetClickCleanupRef.current) {
+          targetClickCleanupRef.current();
+          targetClickCleanupRef.current = null;
+        }
         setTargetRect(null);
       }
     } else if (currentStep.targetPosition) {
@@ -443,9 +455,19 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     calculateTooltipPosition();
 
     const handleUpdate = () => {
-      updateIframeRect();
-      updateTargetPosition();
-      // Don't recalculate tooltip position on scroll — only the spotlight hole tracks the element
+      // Scroll fires far more often than the display can repaint, and each
+      // update does querySelector + getBoundingClientRect + a React state
+      // update — running that synchronously per raw scroll event is what
+      // made the spotlight hole lag/stutter behind the actual scroll
+      // position instead of tracking it smoothly. Collapse bursts of scroll
+      // events into a single update per animation frame instead.
+      if (scrollRafRef.current != null) return;
+      scrollRafRef.current = requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        updateIframeRect();
+        updateTargetPosition();
+        // Don't recalculate tooltip position on scroll — only the spotlight hole tracks the element
+      });
     };
 
     const handleResize = () => {
@@ -538,6 +560,10 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       // Clear retry timeouts
       retryTimeouts.forEach((timeout) => clearTimeout(timeout));
       if (pollInterval) clearInterval(pollInterval);
+      if (scrollRafRef.current != null) {
+        cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
 
       // Clean up target click listener
       if (targetClickCleanupRef.current) {

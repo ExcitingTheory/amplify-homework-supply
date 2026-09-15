@@ -89,6 +89,8 @@ const meta: Meta<typeof ThreadView> = {
   title: "💬 Collaborative Chat/ThreadView",
   component: ThreadView,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
   args: {

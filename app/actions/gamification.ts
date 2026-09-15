@@ -183,7 +183,7 @@ export interface GenerateSkillTreeResult {
   generated: boolean;
   reason?: string;
   unitID?: string;
-  cohortId?: string;
+  sectionID?: string;
   skillCount?: number;
   skills?: Array<{
     id: string;
@@ -214,7 +214,7 @@ export async function awardXP(
   studentId: string,
   reason: string,
   referenceId?: string,
-  cohortId?: string,
+  sectionID?: string,
   unitID?: string,
   accuracy?: number,
 ): Promise<AwardXPResult | null> {
@@ -228,7 +228,7 @@ export async function awardXP(
       studentId,
       reason,
       referenceId: referenceId ?? undefined,
-      cohortId: cohortId ?? undefined,
+      sectionID: sectionID ?? undefined,
       unitID: unitID ?? undefined,
       accuracy: accuracy ?? undefined,
     });
@@ -239,7 +239,7 @@ export async function awardXP(
 
   // Fire-and-forget: badges, streak, squad XP
   Promise.allSettled([
-    engineCheckBadges(client, { studentId, cohortId: cohortId ?? undefined }),
+    engineCheckBadges(client, { studentId, sectionID: sectionID ?? undefined }),
     engineUpdateStreak(client, { studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
       ? engineUpdateSquadXP(client, { studentId, xpAmount: xpResult.xpAmount })
@@ -262,7 +262,7 @@ export async function recordGradeCompletion(
   accuracy: number,
   referenceId: string,
   submissionText?: string,
-  cohortId?: string,
+  sectionID?: string,
 ): Promise<GradeCompletionResult> {
   if (!(await assertCallerIsStudentOrPrivileged(studentId))) {
     return { xp: null, personalBest: null, easterEggs: null };
@@ -277,7 +277,7 @@ export async function recordGradeCompletion(
       studentId,
       reason: "HOMEWORK_SUBMITTED",
       referenceId,
-      cohortId: cohortId ?? undefined,
+      sectionID: sectionID ?? undefined,
       unitID,
       accuracy,
     });
@@ -286,13 +286,13 @@ export async function recordGradeCompletion(
   }
 
   // 1b. On-time bonus — check if submitted before Assignment.dueDate
-  if (cohortId && unitID) {
+  if (sectionID && unitID) {
     try {
       const { data: assignmentData } = await (
         client as any
       ).models.Assignment.list({
         filter: {
-          sectionID: { eq: cohortId },
+          sectionID: { eq: sectionID },
           unitID: { eq: unitID },
         },
         limit: 1,
@@ -305,7 +305,7 @@ export async function recordGradeCompletion(
             studentId,
             reason: "ON_TIME_SUBMISSION",
             referenceId: `${referenceId}-ontime`,
-            cohortId,
+            sectionID,
             unitID,
             accuracy,
           });
@@ -318,7 +318,7 @@ export async function recordGradeCompletion(
 
   // 2. Check badges + update streak + squad XP (parallel)
   await Promise.allSettled([
-    engineCheckBadges(client, { studentId, cohortId: cohortId ?? undefined }),
+    engineCheckBadges(client, { studentId, sectionID: sectionID ?? undefined }),
     engineUpdateStreak(client, { studentId }),
     xpResult && !xpResult.alreadyAwarded && xpResult.xpAmount > 0
       ? engineUpdateSquadXP(client, { studentId, xpAmount: xpResult.xpAmount })
@@ -426,20 +426,18 @@ export async function advanceSkill(
 
 /**
  * Generate a skill tree from unit content using AI.
- * Optionally accepts sectionId to provide course progression context.
+ * Optionally accepts sectionID to provide course progression context.
  */
 export async function generateSkillTreeFromUnit(
   unitID: string,
-  cohortId?: string,
-  sectionId?: string,
+  sectionID?: string,
 ): Promise<GenerateSkillTreeResult | null> {
   const client = getServerClient();
 
   try {
     return await engineGenerateSkillTree(client, {
       unitID,
-      cohortId: cohortId ?? undefined,
-      sectionId: sectionId ?? undefined,
+      sectionID: sectionID ?? undefined,
     });
   } catch (err) {
     console.error("[gamification action] generateSkillTree error:", err);
@@ -562,13 +560,13 @@ Do not include any other text or markdown formatting.`;
  * Triggers a leaderboard rebuild for a cohort (section).
  * Fire-and-forget — rebuilds StudentProfile leaderboard fields.
  */
-export async function rebuildLeaderboard(cohortId: string): Promise<void> {
-  if (!cohortId) return;
+export async function rebuildLeaderboard(sectionID: string): Promise<void> {
+  if (!sectionID) return;
 
   const client = getServerClient();
 
   try {
-    await engineRebuildLeaderboard(client, { cohortId });
+    await engineRebuildLeaderboard(client, { sectionID });
   } catch (err) {
     console.warn("[gamification action] rebuildLeaderboard error:", err);
   }

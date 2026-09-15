@@ -7,18 +7,22 @@
  * @module AvatarEditor
  */
 
-import React, { useState, useCallback, useRef } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Skeleton from '@mui/material/Skeleton'
-import EditIcon from '@mui/icons-material/Edit'
-import SettingsContext from '../context/settingsContext'
-import { useAvatarConfig } from '../hooks/useAvatarConfig'
-import { useXP } from '../context/gamificationContext'
-import { AvatarDisplay } from './Gamification/AvatarDisplay'
-import { AvatarCustomizer } from './Gamification/AvatarCustomizer'
-import type { AvatarStyleTier, AvatarOverrides } from './Gamification/DiceBearAvatar'
-import type { GlowRingConfig } from './Gamification/AvatarGlowRing'
+import React, { useState, useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Skeleton from "@mui/material/Skeleton";
+import EditIcon from "@mui/icons-material/Edit";
+import SettingsContext from "../context/settingsContext";
+import { useAvatarConfig } from "../hooks/useAvatarConfig";
+import { useXP } from "../context/gamificationContext";
+import { AvatarDisplay } from "./Gamification/AvatarDisplay";
+import { AvatarCustomizer } from "./Gamification/AvatarCustomizer";
+import type {
+  AvatarStyleTier,
+  AvatarOverrides,
+} from "./Gamification/DiceBearAvatar";
+import type { GlowRingConfig } from "./Gamification/AvatarGlowRing";
 
 // ---------------------------------------------------------------------------
 // Component
@@ -26,81 +30,122 @@ import type { GlowRingConfig } from './Gamification/AvatarGlowRing'
 
 export interface AvatarEditorProps {
   /** Avatar seed (defaults to session username from settings) */
-  seed?: string
+  seed?: string;
   /** Display size in pixels */
-  size?: number
+  size?: number;
   /** Override level (defaults to useXP level) */
-  level?: number
+  level?: number;
   /** Called after a successful save */
-  onSave?: (overrides: AvatarOverrides, style: AvatarStyleTier) => void
+  onSave?: (overrides: AvatarOverrides, style: AvatarStyleTier) => void;
   /** When true, hides the avatar preview and only renders the Customize button + dialog */
-  hidePreview?: boolean
+  hidePreview?: boolean;
 }
 
-export function AvatarEditor({ seed, size = 128, level: levelProp, onSave, hidePreview = false }: AvatarEditorProps) {
-  const { settings, updateSettings } = React.useContext(SettingsContext) || {}
-  const { style: currentStyle, overrides: savedOverrides, seed: configSeed, isLoaded, glowRing } = useAvatarConfig()
-  const { level: xpLevel, avatarUnlockConfig } = useXP()
-  const numericLevel = levelProp ?? xpLevel?.level ?? 1
+export function AvatarEditor({
+  seed,
+  size = 128,
+  level: levelProp,
+  onSave,
+  hidePreview = false,
+}: AvatarEditorProps) {
+  const t = useTranslations("components.avatarEditor");
+  const { settings, updateSettings } = React.useContext(SettingsContext) || {};
+  const {
+    style: currentStyle,
+    overrides: savedOverrides,
+    seed: configSeed,
+    isLoaded,
+    glowRing,
+  } = useAvatarConfig();
+  const { level: xpLevel, avatarUnlockConfig } = useXP();
+  const numericLevel = levelProp ?? xpLevel?.level ?? 1;
 
-  const [customizerOpen, setCustomizerOpen] = useState(false)
+  const [customizerOpen, setCustomizerOpen] = useState(false);
 
   // Use a ref for metadata to avoid stale closures — settings can change
   // between when the customizer opens and when the user clicks Save
-  const rawMetadata = settings?.metadata
-  const metadataRef = useRef<Record<string, unknown>>({})
-  metadataRef.current = typeof rawMetadata === 'string'
-    ? (() => { try { return JSON.parse(rawMetadata) } catch { return {} } })()
-    : (rawMetadata || {}) as Record<string, unknown>
+  const rawMetadata = settings?.metadata;
+  const metadataRef = useRef<Record<string, unknown>>({});
+  metadataRef.current =
+    typeof rawMetadata === "string"
+      ? (() => {
+          try {
+            return JSON.parse(rawMetadata);
+          } catch {
+            return {};
+          }
+        })()
+      : ((rawMetadata || {}) as Record<string, unknown>);
 
-  const avatarSeed = seed || configSeed || 'student'
+  const avatarSeed = seed || configSeed || "student";
 
   // Local optimistic state — used immediately after save so user sees their
   // configured avatar without waiting for the round-trip subscription
-  const [localOverrides, setLocalOverrides] = useState<AvatarOverrides | null>(null)
-  const [localStyle, setLocalStyle] = useState<AvatarStyleTier | null>(null)
+  const [localOverrides, setLocalOverrides] = useState<AvatarOverrides | null>(
+    null,
+  );
+  const [localStyle, setLocalStyle] = useState<AvatarStyleTier | null>(null);
 
   // Reset local state when settings propagate from backend
   React.useEffect(() => {
-    if (localOverrides && savedOverrides && JSON.stringify(localOverrides) === JSON.stringify(savedOverrides)) {
-      setLocalOverrides(null)
-      setLocalStyle(null)
+    if (
+      localOverrides &&
+      savedOverrides &&
+      JSON.stringify(localOverrides) === JSON.stringify(savedOverrides)
+    ) {
+      setLocalOverrides(null);
+      setLocalStyle(null);
     }
-  }, [savedOverrides, localOverrides])
+  }, [savedOverrides, localOverrides]);
 
-  const displayStyle = localStyle || currentStyle
-  const displayOverrides = localOverrides || savedOverrides
+  const displayStyle = localStyle || currentStyle;
+  const displayOverrides = localOverrides || savedOverrides;
 
-  const handleSave = useCallback(async (overrides: AvatarOverrides, style: AvatarStyleTier, glowRingUpdate?: GlowRingConfig | null) => {
-    // Optimistic update — show the new avatar immediately
-    setLocalOverrides(overrides)
-    setLocalStyle(style)
+  const handleSave = useCallback(
+    async (
+      overrides: AvatarOverrides,
+      style: AvatarStyleTier,
+      glowRingUpdate?: GlowRingConfig | null,
+    ) => {
+      // Optimistic update — show the new avatar immediately
+      setLocalOverrides(overrides);
+      setLocalStyle(style);
 
-    if (updateSettings) {
-      try {
-        const metaUpdate: Record<string, unknown> = {
-          ...metadataRef.current,
-          avatarStyle: style,
-          avatarOverrides: overrides,
+      if (updateSettings) {
+        try {
+          const metaUpdate: Record<string, unknown> = {
+            ...metadataRef.current,
+            avatarStyle: style,
+            avatarOverrides: overrides,
+          };
+          if (glowRingUpdate !== undefined) {
+            metaUpdate.glowRing = glowRingUpdate;
+          }
+          await updateSettings({ metadata: metaUpdate });
+        } catch (err) {
+          console.error("[AvatarEditor] save error:", err);
+          // Revert optimistic update on failure
+          setLocalOverrides(null);
+          setLocalStyle(null);
         }
-        if (glowRingUpdate !== undefined) {
-          metaUpdate.glowRing = glowRingUpdate
-        }
-        await updateSettings({ metadata: metaUpdate })
-      } catch (err) {
-        console.error('[AvatarEditor] save error:', err)
-        // Revert optimistic update on failure
-        setLocalOverrides(null)
-        setLocalStyle(null)
       }
-    }
-    onSave?.(overrides, style)
-  }, [updateSettings, onSave])
+      onSave?.(overrides, style);
+    },
+    [updateSettings, onSave],
+  );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, py: 2 }}>
-      {!hidePreview && (
-        !isLoaded ? (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1.5,
+        py: 2,
+      }}
+    >
+      {!hidePreview &&
+        (!isLoaded ? (
           <Skeleton variant="circular" width={size} height={size} />
         ) : (
           <AvatarDisplay
@@ -111,15 +156,14 @@ export function AvatarEditor({ seed, size = 128, level: levelProp, onSave, hideP
             glowRing={glowRing}
             onClick={() => setCustomizerOpen(true)}
           />
-        )
-      )}
+        ))}
       <Button
         variant="outlined"
         size="small"
         startIcon={<EditIcon />}
         onClick={() => setCustomizerOpen(true)}
       >
-        Customize Avatar
+        {t("customizeAvatar")}
       </Button>
       <AvatarCustomizer
         open={customizerOpen}
@@ -133,7 +177,7 @@ export function AvatarEditor({ seed, size = 128, level: levelProp, onSave, hideP
         avatarUnlockConfig={avatarUnlockConfig}
       />
     </Box>
-  )
+  );
 }
 
-export default AvatarEditor
+export default AvatarEditor;

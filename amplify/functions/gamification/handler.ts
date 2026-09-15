@@ -48,18 +48,18 @@ async function getUnitContentFromS3(unitId: string): Promise<string | null> {
 // ============================================================================
 
 const CREATE_XP_LOG = `mutation CreateStudentXPLog($input: CreateStudentXPLogInput!) {
-  createStudentXPLog(input: $input) { id studentId xpAmount accuracy reason referenceId cohortId unitID _version _lastChangedAt _deleted }
+  createStudentXPLog(input: $input) { id studentId xpAmount accuracy reason referenceId sectionID unitID _version _lastChangedAt _deleted }
 }`;
 
 const LIST_XP_LOGS_BY_STUDENT = `query ListXPLogsByStudent($studentId: String!) {
   listStudentXPLogByStudentId(studentId: $studentId) {
-    items { id studentId xpAmount accuracy reason referenceId cohortId unitID createdAt _version _lastChangedAt _deleted }
+    items { id studentId xpAmount accuracy reason referenceId sectionID unitID createdAt _version _lastChangedAt _deleted }
   }
 }`;
 
-const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
-  listStudentXPLogByCohortId(cohortId: $cohortId) {
-    items { id studentId xpAmount accuracy reason referenceId cohortId unitID createdAt _version _lastChangedAt _deleted }
+const LIST_XP_LOGS_BY_SECTION = `query ListXPLogsBySection($sectionID: String!) {
+  listStudentXPLogBySectionID(sectionID: $sectionID) {
+    items { id studentId xpAmount accuracy reason referenceId sectionID unitID createdAt _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -72,30 +72,30 @@ const LIST_XP_LOGS_BY_COHORT = `query ListXPLogsByCohort($cohortId: String!) {
 // Easter egg queries/mutations
 const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
   listEasterEggs(filter: { active: { eq: true } }) {
-    items { id trigger triggerValue xpReward badgeId revealMessage active cohortId discoveries _version _lastChangedAt _deleted }
+    items { id trigger triggerValue xpReward badgeId revealMessage active sectionID discoveries _version _lastChangedAt _deleted }
   }
 }`;
 
 // Squad queries/mutations (SquadMembership model removed - members embedded in Squad.members)
 
 const GET_SQUAD = `query GetSquad($id: ID!) {
-  getSquad(id: $id) { id name cohortId totalXP members _version _lastChangedAt _deleted }
+  getSquad(id: $id) { id name sectionID totalXP members _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_SQUAD = `mutation UpdateSquad($input: UpdateSquadInput!) {
   updateSquad(input: $input) { id name totalXP members _version _lastChangedAt _deleted }
 }`;
 
-const LIST_SQUADS_BY_COHORT = `query ListSquadsByCohort($cohortId: String!) {
-  listSquadByCohortId(cohortId: $cohortId) {
-    items { id name cohortId totalXP members _version _lastChangedAt _deleted }
+const LIST_SQUADS_BY_SECTION = `query ListSquadsBySection($sectionID: String!) {
+  listSquadBySectionID(sectionID: $sectionID) {
+    items { id name sectionID totalXP members _version _lastChangedAt _deleted }
   }
 }`;
 
 // Group challenge queries/mutations
-const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListChallengesByCohort($cohortId: String!) {
-  listGroupChallengeByCohortId(cohortId: $cohortId) {
-    items { id cohortId title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId contributions _version _lastChangedAt _deleted }
+const LIST_ACTIVE_CHALLENGES_BY_SECTION = `query ListChallengesBySection($sectionID: String!) {
+  listGroupChallengeBySectionID(sectionID: $sectionID) {
+    items { id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId contributions _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -148,9 +148,9 @@ const UPDATE_UNIT_MEMORY = `mutation UpdateStudentMemory($input: UpdateStudentMe
     accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
 }`;
 
-const LIST_XP_LOGS_FOR_COHORT = `query ListXPLogsByCohortId($cohortId: String!) {
-  listStudentXPLogByCohortId(cohortId: $cohortId) {
-    items { id studentId xpAmount reason cohortId _version _lastChangedAt _deleted }
+const LIST_XP_LOGS_FOR_SECTION = `query ListXPLogsBySectionID($sectionID: String!) {
+  listStudentXPLogBySectionID(sectionID: $sectionID) {
+    items { id studentId xpAmount reason sectionID _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -199,14 +199,14 @@ const LIST_UNIT_DOCUMENTS = `query ListUnitDocuments($unitID: String!) {
   }
 }`;
 
-const LIST_SKILLS_BY_COHORT = `query ListSkillsByCohort($cohortId: String!) {
-  listSkillByCohort(cohortId: $cohortId) {
+const LIST_SKILLS_BY_SECTION = `query ListSkillsBySection($sectionID: String!) {
+  listSkillBySectionID(sectionID: $sectionID) {
     items { id title description prerequisites xpReward unitIds minimumAccuracy _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_SKILL = `mutation CreateSkill($input: CreateSkillInput!) {
-  createSkill(input: $input) { id title description prerequisites xpReward cohortId _version _lastChangedAt _deleted }
+  createSkill(input: $input) { id title description prerequisites xpReward sectionID _version _lastChangedAt _deleted }
 }`;
 
 const DELETE_SKILL = `mutation DeleteSkill($input: DeleteSkillInput!) {
@@ -217,7 +217,7 @@ const DELETE_SKILL = `mutation DeleteSkill($input: DeleteSkillInput!) {
 const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!) {
   listStudentProfileByStudentId(studentId: $studentId) {
     items {
-      id studentId cohortId studentName totalXP level
+      id studentId sectionID studentName totalXP level
       currentStreak longestStreak lastActivityDate freezesRemaining freezesUsed
       badges moduleProgress personalBests skillProgress unitMemories activeDebuffs cosmeticRewards
       completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
@@ -237,10 +237,10 @@ const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStud
 // StudentSkillProgress removed - skill progress now on StudentProfile.skillProgress
 
 // StudentProfile list by cohort (for leaderboard rebuild)
-const LIST_PROFILES_BY_COHORT = `query ListProfilesByCohort($cohortId: String!) {
-  listStudentProfileByCohortId(cohortId: $cohortId) {
+const LIST_PROFILES_BY_SECTION = `query ListProfilesBySection($sectionID: String!) {
+  listStudentProfileBySectionID(sectionID: $sectionID) {
     items {
-      id studentId cohortId studentName totalXP level
+      id studentId sectionID studentName totalXP level
       currentStreak longestStreak completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
   }
 }`;
@@ -262,15 +262,15 @@ const LIST_GRADES_BY_OWNER = `query ListGradesByOwner($owner: String!, $filter: 
 }`;
 
 // Badge model queries
-const LIST_BADGES_BY_COHORT = `query ListBadgesByCohort($cohortId: String!) {
-  listBadgeByCohort(cohortId: $cohortId) {
-    items { id title description icon shape rarity category criteria cohortId autoEvaluate _version _lastChangedAt _deleted }
+const LIST_BADGES_BY_SECTION = `query ListBadgesBySection($sectionID: String!) {
+  listBadgeBySectionID(sectionID: $sectionID) {
+    items { id title description icon shape rarity category criteria sectionID autoEvaluate _version _lastChangedAt _deleted }
   }
 }`;
 
 const LIST_ALL_BADGES = `query ListAllBadges {
   listBadges(filter: { autoEvaluate: { eq: true } }) {
-    items { id title description icon shape rarity category criteria cohortId autoEvaluate _version _lastChangedAt _deleted }
+    items { id title description icon shape rarity category criteria sectionID autoEvaluate _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -910,13 +910,13 @@ const LEADERBOARD_LOCK_STALE_MS = 60_000; // 60 seconds — ignore lock if older
  */
 async function maybeRebuildLeaderboard(
   gqlClient: any,
-  cohortId: string,
+  sectionID: string,
 ): Promise<void> {
   let sectionVersion = 1;
   try {
     const { data } = await gqlClient.graphql({
       query: GET_SECTION,
-      variables: { id: cohortId },
+      variables: { id: sectionID },
     });
     const section = data?.getSection;
     if (!section) return;
@@ -945,7 +945,7 @@ async function maybeRebuildLeaderboard(
       query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
       variables: {
         input: {
-          id: cohortId,
+          id: sectionID,
           leaderboardUpdateInProgressAt: new Date(now).toISOString(),
           _version: sectionVersion,
         },
@@ -953,14 +953,14 @@ async function maybeRebuildLeaderboard(
     });
 
     // Perform rebuild
-    await handleRebuildLeaderboard(gqlClient, { cohortId });
+    await handleRebuildLeaderboard(gqlClient, { sectionID });
 
     // Success — stamp completion time and clear lock
     await gqlClient.graphql({
       query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
       variables: {
         input: {
-          id: cohortId,
+          id: sectionID,
           leaderboardRebuiltAt: new Date().toISOString(),
           leaderboardUpdateInProgressAt: null,
           _version: sectionVersion + 1,
@@ -974,7 +974,7 @@ async function maybeRebuildLeaderboard(
         query: UPDATE_SECTION_LEADERBOARD_TIMESTAMP,
         variables: {
           input: {
-            id: cohortId,
+            id: sectionID,
             leaderboardUpdateInProgressAt: null,
             _version: sectionVersion + 1,
           },
@@ -984,7 +984,7 @@ async function maybeRebuildLeaderboard(
       // Best-effort cleanup — lock will become stale and be ignored after 60s
     }
     console.warn(
-      `[gamification] maybeRebuildLeaderboard(${cohortId}) failed:`,
+      `[gamification] maybeRebuildLeaderboard(${sectionID}) failed:`,
       err,
     );
   }
@@ -1005,7 +1005,7 @@ export const handler: Handler = async (event) => {
       case "checkBadges":
         return await handleCheckBadges(gqlClient, args);
       case "checkBadgesBatch": {
-        // entries: Array<{ studentId, cohortId?, unitID?, totalXP?, level?, profileId?, profileVersion?, badges? }>
+        // entries: Array<{ studentId, sectionID?, unitID?, totalXP?, level?, profileId?, profileVersion?, badges? }>
         // Pre-fetched data from the stream handler reduces lookups
         const entries =
           typeof args.entries === "string"
@@ -1026,7 +1026,7 @@ export const handler: Handler = async (event) => {
       case "updateStreak":
         return await handleUpdateStreak(gqlClient, args);
       case "rebuildLeaderboard":
-        return await maybeRebuildLeaderboard(gqlClient, args.cohortId);
+        return await maybeRebuildLeaderboard(gqlClient, args.sectionID);
       case "upsertStudentMemory":
         return await handleUpdateStudentMemory(gqlClient, args);
       case "bootstrapStudentMemory":
@@ -1076,7 +1076,7 @@ async function handleAwardXP(
     studentId: string;
     reason: string;
     referenceId?: string;
-    cohortId?: string;
+    sectionID?: string;
     unitID?: string;
     accuracy?: number;
     overrideAmount?: number;
@@ -1087,7 +1087,7 @@ async function handleAwardXP(
     studentId,
     reason,
     referenceId,
-    cohortId,
+    sectionID,
     unitID,
     accuracy,
     overrideAmount,
@@ -1107,11 +1107,11 @@ async function handleAwardXP(
       levelScaling?: number;
     };
   } = {};
-  if (cohortId) {
+  if (sectionID) {
     try {
       const { data: sectionData } = await gqlClient.graphql({
         query: GET_SECTION,
-        variables: { id: cohortId },
+        variables: { id: sectionID },
       });
       const rawConfig = sectionData?.getSection?.xpConfig;
       if (rawConfig) {
@@ -1134,12 +1134,12 @@ async function handleAwardXP(
   }
 
   // Apply active debuff XP multipliers from anti-badges
-  if (cohortId) {
+  if (sectionID) {
     try {
       const profile = await getOrCreateStudentProfile(
         gqlClient,
         studentId,
-        cohortId,
+        sectionID,
       );
       const activeDebuffs = getActiveDebuffs(profile);
       for (const debuff of activeDebuffs) {
@@ -1197,7 +1197,7 @@ async function handleAwardXP(
       .filter(
         (l: any) =>
           l.createdAt?.startsWith(todayStr) &&
-          (!cohortId || l.cohortId === cohortId),
+          (!sectionID || l.sectionID === sectionID),
       )
       .reduce((s: number, l: any) => s + l.xpAmount, 0);
     if (todayXP >= xpConfig.dailyCap) {
@@ -1221,7 +1221,8 @@ async function handleAwardXP(
     const weekXP = allLogs
       .filter(
         (l: any) =>
-          l.createdAt >= weekStartISO && (!cohortId || l.cohortId === cohortId),
+          l.createdAt >= weekStartISO &&
+          (!sectionID || l.sectionID === sectionID),
       )
       .reduce((s: number, l: any) => s + l.xpAmount, 0);
     if (weekXP >= xpConfig.weeklyCap) {
@@ -1250,7 +1251,7 @@ async function handleAwardXP(
         reason,
         accuracy: accuracy != null ? accuracy : null,
         referenceId: referenceId || null,
-        cohortId: cohortId || null,
+        sectionID: sectionID || null,
         unitID: unitID || null,
       },
     },
@@ -1369,13 +1370,13 @@ interface PreFetchedBadgeData {
 
 async function handleCheckBadges(
   gqlClient: any,
-  args: { studentId: string; cohortId?: string; unitID?: string },
+  args: { studentId: string; sectionID?: string; unitID?: string },
   preFetched?: PreFetchedBadgeData,
 ) {
-  const { studentId, cohortId, unitID } = args;
+  const { studentId, sectionID, unitID } = args;
 
   // Get effective gamification config (cached, merges global + section)
-  const effectiveConfig = await getEffectiveConfig(gqlClient, cohortId);
+  const effectiveConfig = await getEffectiveConfig(gqlClient, sectionID);
 
   // If all badges are disabled for this section, skip awarding entirely
   if (!effectiveConfig.badgesEnabled) {
@@ -1456,7 +1457,7 @@ async function handleCheckBadges(
             badges: preFetched.badges || "[]",
             _version: preFetched.profileVersion ?? 1,
           })
-        : getOrCreateStudentProfile(gqlClient, studentId, cohortId),
+        : getOrCreateStudentProfile(gqlClient, studentId, sectionID),
     ]);
     const xpResult = xpSettled.status === "fulfilled" ? xpSettled.value : null;
     const fetchedProfile =
@@ -1505,7 +1506,7 @@ async function handleCheckBadges(
       // Badge already earned — increment count
       existing.count = (existing.count || 1) + 1;
       existing.awardedAt = new Date().toISOString();
-      if (cohortId) existing.cohortId = cohortId;
+      if (sectionID) existing.sectionID = sectionID;
       if (unitID) existing.unitID = unitID;
       updatedBadges.push(criteria.badgeType);
     } else {
@@ -1513,7 +1514,7 @@ async function handleCheckBadges(
       const newBadge = {
         badgeType: criteria.badgeType,
         awardedAt: new Date().toISOString(),
-        cohortId: cohortId || null,
+        sectionID: sectionID || null,
         unitID: unitID || null,
         count: 1,
       };
@@ -1526,7 +1527,7 @@ async function handleCheckBadges(
   // ---- Check DB-based Badge model criteria (custom instructor badges) ----
   // Also evaluate custom badges from effective config (global + section merged)
   try {
-    const dbBadges = await fetchAutoEvaluateBadges(gqlClient, cohortId);
+    const dbBadges = await fetchAutoEvaluateBadges(gqlClient, sectionID);
     // Add any custom badges from effective config that aren't already in DB
     const dbBadgeIds = new Set(dbBadges.map((b: any) => b.id));
     for (const configBadge of effectiveConfig.customBadges) {
@@ -1535,7 +1536,7 @@ async function handleCheckBadges(
           id: configBadge.id,
           title: configBadge.title,
           criteria: configBadge.criteria,
-          cohortId: cohortId || null,
+          sectionID: sectionID || null,
           autoEvaluate: true,
         });
       }
@@ -1581,7 +1582,7 @@ async function handleCheckBadges(
           badgeType: badge.id, // Use Badge model ID as badgeType
           sourceId: badge.id,
           awardedAt: new Date().toISOString(),
-          cohortId: badge.cohortId || cohortId || null,
+          sectionID: badge.sectionID || sectionID || null,
           count: 1,
         };
         existingBadges.push(newBadge);
@@ -1616,7 +1617,7 @@ async function handleCheckBadges(
         // Anti-badge already earned — increment count, refresh debuff
         existing.count = (existing.count || 1) + 1;
         existing.awardedAt = new Date().toISOString();
-        if (cohortId) existing.cohortId = cohortId;
+        if (sectionID) existing.sectionID = sectionID;
         // Refresh debuff duration
         refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
       } else {
@@ -1624,7 +1625,7 @@ async function handleCheckBadges(
         const antiBadge = {
           badgeType: criteria.badgeType,
           awardedAt: new Date().toISOString(),
-          cohortId: cohortId || null,
+          sectionID: sectionID || null,
           unitID: unitID || null,
           count: 1,
           isAnti: true,
@@ -1930,14 +1931,14 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
 
 async function handleRebuildLeaderboard(
   gqlClient: any,
-  args: { cohortId: string },
+  args: { sectionID: string },
 ) {
-  const { cohortId } = args;
+  const { sectionID } = args;
 
   // Check if leaderboard is enabled for this section
   const { data: sectionResult } = await gqlClient.graphql({
     query: GET_SECTION,
-    variables: { id: cohortId },
+    variables: { id: sectionID },
   });
   const section = sectionResult?.getSection;
   if (section?.leaderboardEnabled === false) {
@@ -1947,7 +1948,7 @@ async function handleRebuildLeaderboard(
   // Get all grades for this section to find student IDs
   const { data: gradesResult } = await gqlClient.graphql({
     query: LIST_GRADES_BY_SECTION,
-    variables: { sectionID: cohortId },
+    variables: { sectionID: sectionID },
   });
   const grades = gradesResult?.listGradeBySectionID?.items || [];
 
@@ -1957,16 +1958,16 @@ async function handleRebuildLeaderboard(
   ] as string[];
 
   // Fetch all XP logs for this cohort in one query
-  const { data: cohortXpResult } = await gqlClient.graphql({
-    query: LIST_XP_LOGS_FOR_COHORT,
-    variables: { cohortId },
+  const { data: sectionXpResult } = await gqlClient.graphql({
+    query: LIST_XP_LOGS_FOR_SECTION,
+    variables: { sectionID },
   });
-  const allCohortXpLogs =
-    cohortXpResult?.listStudentXPLogByCohortId?.items || [];
+  const allSectionXpLogs =
+    sectionXpResult?.listStudentXPLogBySectionID?.items || [];
 
   // Group XP logs by studentId
   const xpLogsByStudent = new Map<string, any[]>();
-  for (const log of allCohortXpLogs) {
+  for (const log of allSectionXpLogs) {
     if (!log?.studentId) continue;
     const existing = xpLogsByStudent.get(log.studentId) || [];
     existing.push(log);
@@ -2027,7 +2028,7 @@ async function handleRebuildLeaderboard(
       const profile = await getOrCreateStudentProfile(
         gqlClient,
         studentId,
-        cohortId,
+        sectionID,
       );
       const avatarConfig = avatarByStudent.get(studentId);
       await gqlClient.graphql({
@@ -2065,10 +2066,10 @@ async function handleRebuildLeaderboard(
   // Sync avatar data onto Squad.members for denormalized display
   try {
     const { data: squadsResult } = await gqlClient.graphql({
-      query: LIST_SQUADS_BY_COHORT,
-      variables: { cohortId },
+      query: LIST_SQUADS_BY_SECTION,
+      variables: { sectionID },
     });
-    const squads = (squadsResult?.listSquadByCohortId?.items || []).filter(
+    const squads = (squadsResult?.listSquadBySectionID?.items || []).filter(
       (g: any) => g != null,
     );
 
@@ -3151,18 +3152,18 @@ async function handleUpdateSquadXP(
 ) {
   const { studentId, xpAmount } = args;
 
-  // Find squad(s) this student belongs to via StudentProfile.cohortId + Squad.members
+  // Find squad(s) this student belongs to via StudentProfile.sectionID + Squad.members
   const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const cohortId = profile.cohortId;
-  if (!cohortId) {
+  const sectionID = profile.sectionID;
+  if (!sectionID) {
     return { updated: false, reason: "Student has no cohort" };
   }
 
   const { data: squadsResult } = await gqlClient.graphql({
-    query: LIST_SQUADS_BY_COHORT,
-    variables: { cohortId },
+    query: LIST_SQUADS_BY_SECTION,
+    variables: { sectionID },
   });
-  const allSquads = (squadsResult?.listSquadByCohortId?.items || []).filter(
+  const allSquads = (squadsResult?.listSquadBySectionID?.items || []).filter(
     (g: any) => g != null,
   );
 
@@ -3198,7 +3199,7 @@ async function handleUpdateSquadXP(
     try {
       await handleContributeToChallenge(gqlClient, {
         studentId,
-        cohortId: squad.cohortId,
+        sectionID: squad.sectionID,
         xpContributed: xpAmount,
       });
     } catch (err) {
@@ -3215,17 +3216,17 @@ async function handleUpdateSquadXP(
 
 async function handleContributeToChallenge(
   gqlClient: any,
-  args: { studentId: string; cohortId: string; xpContributed: number },
+  args: { studentId: string; sectionID: string; xpContributed: number },
 ) {
-  const { studentId, cohortId, xpContributed } = args;
+  const { studentId, sectionID, xpContributed } = args;
 
   // Find active challenges for this cohort
   const { data: challengeResult } = await gqlClient.graphql({
-    query: LIST_ACTIVE_CHALLENGES_BY_COHORT,
-    variables: { cohortId },
+    query: LIST_ACTIVE_CHALLENGES_BY_SECTION,
+    variables: { sectionID },
   });
   const challenges = (
-    challengeResult?.listGroupChallengeByCohortId?.items || []
+    challengeResult?.listGroupChallengeBySectionID?.items || []
   ).filter((c: any) => c != null && c.active === true);
 
   if (challenges.length === 0) {
@@ -3291,7 +3292,7 @@ async function handleContributeToChallenge(
               studentId: contributorId,
               reason: "SQUAD_CHALLENGE_BONUS",
               referenceId: `challenge-${challenge.id}`,
-              cohortId,
+              sectionID,
               overrideAmount: finalRewardXP,
             },
             null,
@@ -3322,7 +3323,7 @@ async function handleContributeToChallenge(
                 contributorId,
                 challenge.rewardBadge,
                 challenge.id,
-                cohortId,
+                sectionID,
               );
             } catch (badgeErr) {
               console.error(
@@ -3401,16 +3402,16 @@ async function handleAdvanceSkillProgress(
   if (newStatus === "MASTERED") {
     // Get the skill's cohort to find all skills in this tree
     const { data: skillResult } = await gqlClient.graphql({
-      query: `query GetSkill($id: ID!) { getSkill(id: $id) { id cohortId _version _lastChangedAt _deleted } }`,
+      query: `query GetSkill($id: ID!) { getSkill(id: $id) { id sectionID _version _lastChangedAt _deleted } }`,
       variables: { id: skillId },
     });
-    const cohortId = skillResult?.getSkill?.cohortId;
-    if (cohortId) {
+    const sectionID = skillResult?.getSkill?.sectionID;
+    if (sectionID) {
       const { data: skillsResult } = await gqlClient.graphql({
-        query: LIST_SKILLS_BY_COHORT,
-        variables: { cohortId },
+        query: LIST_SKILLS_BY_SECTION,
+        variables: { sectionID },
       });
-      const allSkills = skillsResult?.listSkillByCohort?.items || [];
+      const allSkills = skillsResult?.listSkillBySectionID?.items || [];
 
       // Find skills that have this skillId as a prerequisite
       for (const skill of allSkills) {
@@ -3472,24 +3473,24 @@ async function handleAdvanceSkillProgress(
 
 async function handleEvaluateSkillsForUnit(
   gqlClient: any,
-  args: { studentId: string; unitId: string; cohortId?: string },
+  args: { studentId: string; unitId: string; sectionID?: string },
 ) {
-  const { studentId, unitId, cohortId } = args;
+  const { studentId, unitId, sectionID } = args;
 
-  // Determine the effective cohortId(s) to check
-  const cohortIds = cohortId
-    ? [cohortId, `unit-${unitId}`]
+  // Determine the effective sectionID(s) to check
+  const sectionIDs = sectionID
+    ? [sectionID, `unit-${unitId}`]
     : [`unit-${unitId}`];
 
   // Fetch all skills from relevant cohorts
   let allSkills: any[] = [];
-  for (const cid of cohortIds) {
+  for (const cid of sectionIDs) {
     try {
       const { data: skillsResult } = await gqlClient.graphql({
-        query: LIST_SKILLS_BY_COHORT,
-        variables: { cohortId: cid },
+        query: LIST_SKILLS_BY_SECTION,
+        variables: { sectionID: cid },
       });
-      const items = (skillsResult?.listSkillByCohort?.items || []).filter(
+      const items = (skillsResult?.listSkillBySectionID?.items || []).filter(
         (s: any) => s != null,
       );
       allSkills.push(...items);
@@ -3634,11 +3635,11 @@ async function handleEvaluateSkillsForUnit(
 
 /**
  * Fetches Badge records from DB that have autoEvaluate=true.
- * Includes both global badges (no cohortId) and section-specific badges.
+ * Includes both global badges (no sectionID) and section-specific badges.
  */
 async function fetchAutoEvaluateBadges(
   gqlClient: any,
-  cohortId?: string,
+  sectionID?: string,
 ): Promise<any[]> {
   const badges: any[] = [];
 
@@ -3655,14 +3656,14 @@ async function fetchAutoEvaluateBadges(
     console.warn("[gamification] fetchAutoEvaluateBadges error:", err);
   }
 
-  // If cohortId provided, also fetch cohort-specific badges
-  if (cohortId) {
+  // If sectionID provided, also fetch cohort-specific badges
+  if (sectionID) {
     try {
-      const { data: cohortResult } = await gqlClient.graphql({
-        query: LIST_BADGES_BY_COHORT,
-        variables: { cohortId },
+      const { data: sectionResult } = await gqlClient.graphql({
+        query: LIST_BADGES_BY_SECTION,
+        variables: { sectionID },
       });
-      const items = (cohortResult?.listBadgeByCohort?.items || []).filter(
+      const items = (sectionResult?.listBadgeBySectionID?.items || []).filter(
         (b: any) => b != null && b.autoEvaluate,
       );
       // Deduplicate by ID
@@ -3681,7 +3682,7 @@ async function fetchAutoEvaluateBadges(
 async function getOrCreateStudentProfile(
   gqlClient: any,
   studentId: string,
-  cohortId?: string,
+  sectionID?: string,
 ): Promise<any> {
   const { data: profileResult } = await gqlClient.graphql({
     query: GET_STUDENT_PROFILE,
@@ -3696,7 +3697,7 @@ async function getOrCreateStudentProfile(
     variables: {
       input: {
         studentId,
-        cohortId: cohortId || null,
+        sectionID: sectionID || null,
         totalXP: 0,
         level: 1,
         currentStreak: 0,
@@ -3815,7 +3816,7 @@ async function grantChallengeBadge(
   studentId: string,
   badgeType: string,
   challengeId: string,
-  cohortId: string,
+  sectionID: string,
 ): Promise<void> {
   const profile = await getOrCreateStudentProfile(gqlClient, studentId);
   if (!profile) return;
@@ -3833,7 +3834,7 @@ async function grantChallengeBadge(
     badgeType,
     sourceId: `challenge-${challengeId}`,
     awardedAt: new Date().toISOString(),
-    cohortId,
+    sectionID,
   };
 
   const updatedBadges = [...existingBadges, newBadge];
@@ -3926,9 +3927,9 @@ async function getOpenAI(): Promise<any> {
 
 async function handleGenerateSkillTree(
   gqlClient: any,
-  args: { unitID: string; cohortId?: string },
+  args: { unitID: string; sectionID?: string },
 ) {
-  const { unitID, cohortId } = args;
+  const { unitID, sectionID } = args;
 
   // 1. Fetch unit content
   const { data: unitResult } = await gqlClient.graphql({
@@ -4038,14 +4039,14 @@ async function handleGenerateSkillTree(
   }
 
   // 7. Delete existing skills for this cohort+unit pattern (optional cleanup)
-  const effectiveCohortId = cohortId || `unit-${unitID}`;
+  const effectiveSectionID = sectionID || `unit-${unitID}`;
 
   try {
     const { data: existingResult } = await gqlClient.graphql({
-      query: LIST_SKILLS_BY_COHORT,
-      variables: { cohortId: effectiveCohortId },
+      query: LIST_SKILLS_BY_SECTION,
+      variables: { sectionID: effectiveSectionID },
     });
-    const existing = (existingResult?.listSkillByCohort?.items || []).filter(
+    const existing = (existingResult?.listSkillBySectionID?.items || []).filter(
       (s: any) => s != null,
     );
     for (const skill of existing) {
@@ -4071,7 +4072,7 @@ async function handleGenerateSkillTree(
           description: def.description || null,
           prerequisites: JSON.stringify([]), // placeholder — updated in second pass
           xpReward: def.xpReward || 25,
-          cohortId: effectiveCohortId,
+          sectionID: effectiveSectionID,
           unitIds: [unitID],
           minimumAccuracy: 70,
         },
@@ -4109,7 +4110,7 @@ async function handleGenerateSkillTree(
   return {
     generated: true,
     unitID,
-    cohortId: effectiveCohortId,
+    sectionID: effectiveSectionID,
     skillCount: createdSkills.length,
     skills: createdSkills.map((s) => ({
       id: s.id,
@@ -4458,21 +4459,24 @@ const SCRAMBLE_NAME_EFFECTS = [
 
 async function handleApplyBattleStakes(
   gqlClient: any,
-  args: { challengeId: string; cohortId: string },
+  args: { challengeId: string; sectionID: string },
 ) {
-  const { challengeId, cohortId } = args;
+  const { challengeId, sectionID } = args;
 
   // Fetch the challenge to get stakes
   const { data: challengeResult } = await gqlClient.graphql({
-    query: LIST_ACTIVE_CHALLENGES_BY_COHORT,
-    variables: { cohortId },
+    query: LIST_ACTIVE_CHALLENGES_BY_SECTION,
+    variables: { sectionID },
   });
-  const challenges = challengeResult?.listGroupChallengeByCohortId?.items || [];
+  const challenges =
+    challengeResult?.listGroupChallengeBySectionID?.items || [];
   const challenge = challenges.find(
     (c: any) => c.id === challengeId && !c._deleted,
   );
   if (!challenge) {
-    throw new Error(`Challenge ${challengeId} not found in cohort ${cohortId}`);
+    throw new Error(
+      `Challenge ${challengeId} not found in cohort ${sectionID}`,
+    );
   }
 
   // Parse stakes JSON
@@ -4490,11 +4494,11 @@ async function handleApplyBattleStakes(
 
   // Fetch all student profiles in this cohort
   const { data: profilesResult } = await gqlClient.graphql({
-    query: LIST_PROFILES_BY_COHORT,
-    variables: { cohortId },
+    query: LIST_PROFILES_BY_SECTION,
+    variables: { sectionID },
   });
   const profiles =
-    profilesResult?.listStudentProfileByCohortId?.items?.filter(
+    profilesResult?.listStudentProfileBySectionID?.items?.filter(
       (p: any) => p && !p._deleted,
     ) || [];
 
@@ -4690,7 +4694,7 @@ async function handleApplyBattleStakes(
   return {
     applied: true,
     challengeId,
-    cohortId,
+    sectionID,
     studentsAffected: results.length,
     results,
   };

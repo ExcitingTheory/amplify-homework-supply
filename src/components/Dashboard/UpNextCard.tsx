@@ -14,6 +14,7 @@ interface UpNextCardProps {
   /** Grade info for a completed assignment — drives the completed/grade display */
   latestGrade?: AssignmentCardProps["latestGrade"];
   nailedItCount?: number;
+  accommodation?: AssignmentCardProps["accommodation"];
   onOpenDrill: AssignmentCardProps["onOpenDrill"];
   onRequestGuidance: AssignmentCardProps["onRequestGuidance"];
 }
@@ -30,6 +31,7 @@ export function UpNextCard({
   lockStatus,
   latestGrade,
   nailedItCount = 0,
+  accommodation,
   onOpenDrill,
   onRequestGuidance,
 }: UpNextCardProps) {
@@ -85,6 +87,7 @@ export function UpNextCard({
           isUpNext
           latestGrade={latestGrade}
           nailedItCount={nailedItCount}
+          accommodation={accommodation}
           onOpenDrill={onOpenDrill}
           onRequestGuidance={onRequestGuidance}
         />

@@ -11,7 +11,7 @@ Unified search across all content types — one search bar in the app header, on
 ```mermaid
 graph TB
     subgraph "Search Query"
-        Q[User query] --> E[generateEmbedding<br/>text-embedding-3-small 512D]
+        Q[User query] --> E[generateEmbedding<br/>MiniLM 384D]
         E --> VS[VectorStoreDB<br/>IndexedDB cache]
     end
 
@@ -31,17 +31,19 @@ graph TB
     VS --> |"IVF search<br/>(n>200) or linear"| R[Ranked results]
 ```
 
-## Current State (June 2026)
+## Current State (September 2026)
 
-| What | Status |
-|------|--------|
-| S3 embeddings migration | ✅ Complete — `embeddingStorage.ts`, schema updated |
-| FileManager semantic search | ⚠️ Broken — `performSemanticSearch` calls `performSimpleTextSearch`, never the vector store |
-| Chat `executeSearchContent` | ⚠️ Partial — files use vector store, words/questions use keyword-only; missing units |
-| Embedding dimensions | ❌ Inconsistent — FileManager generates 1536D, `executeSearchContent` fallback generates 512D |
-| Unit plain text | ❌ Missing — not written to S3 on publish; full-text search on unit body not possible |
-| Global search bar | ❌ Not built — search only in FileManager and Chat |
-| Sections searchable | ❌ Not implemented |
+| What | Status | Notes |
+|------|--------|-------|
+| S3 embeddings migration | ✅ Complete | `src/utils/embeddingStorage.ts`, DynamoDB metadata-only pointers |
+| FileManager semantic search | ✅ Complete | `performVectorSearch` wired in `FileManager2.jsx` with fallback; seeds from `useSearchParams().get('q')` |
+| Chat `executeSearchContent` | ✅ Complete | Vector store for files; keyword + vector fallback for words, questions, and units; pagination with `listAll` |
+| Embedding dimensions | ✅ Unified | 384D (`Xenova/all-MiniLM-L6-v2`) exported in `app/actions/embedding-constants.ts` |
+| Unit plain text on publish | ✅ Complete | `plain.txt` written to S3 on publish via `extractTextFromLexical.ts` in `unitContentStorage.ts` |
+| Global search bar | ✅ Complete | `<GlobalSearchBar>` in `MainToolbar.jsx`, backed by `SearchContext` in `app/providers.tsx` |
+| Sections searchable | ✅ Complete | `searchContext.tsx` handles section queries and `chatStream` tool schema supports sections |
+| Role-scoped search bundles & IVF | ✅ Complete | `searchBundles.ts` client utility + `rebuildSearchBundle` Lambda with k-means IVF indexing |
+| Admin reindex CLI | ✅ Complete | `scripts/rebuild-search-bundles.ts` fan-out trigger script |
 
 ---
 
@@ -88,7 +90,7 @@ interface BundleItem {
   id: string;               // DynamoDB record ID
   type: 'unit' | 'file' | 'word' | 'question';
   text: string;             // Short text snippet for keyword fallback + display
-  embedding: number[];      // 512D vector
+  embedding: number[];      // 384D vector
   meta: {
     name?: string;          // filename, phrase, unit name
     mimeType?: string;      // files only
@@ -122,7 +124,7 @@ IVF fits this use case: the Lambda already re-runs when content changes, has amp
 #### How it works
 
 **Lambda (build time):**
-1. Collect all 512D vectors for the bundle
+1. Collect all 384D vectors for the bundle
 2. **Decide strategy**: if `n > IVF_THRESHOLD` (currently 200), run k-means; otherwise set `strategy: 'linear'` and skip clustering
    - Breakeven: IVF overhead (K centroid dot products + cluster filter) costs more than a straight linear scan when K ≈ n/4. Empirically, n=200 → K=15 clusters averaging 13 items each — linear scan wins below this point
    - The Lambda knows n at build time; the client never needs to re-derive this
@@ -151,7 +153,7 @@ interface SearchBundle {
     // IVF-only fields (omitted when strategy === 'linear')
     k?: number;                  // number of clusters
     nProbe?: number;             // recommended probe count (Lambda-tuned per bundle)
-    centroids?: number[][];      // k × 512 (f32)
+    centroids?: number[][];      // k × 384 (f32)
     assignments?: number[];      // items[i] → cluster index
   };
 }
@@ -238,16 +240,16 @@ export function search(
 }
 ```
 
-### 3. Single Embedding Dimension: 512
+### 3. Single Embedding Dimension: 384
 
-All new embeddings use **512 dimensions** from `text-embedding-3-small`. This is the dimension already stored on DynamoDB model records. 1536D was only ever used in `FileManager2.performVectorSearch` — those items need to be regenerated.
+All new embeddings use **384 dimensions** from `Xenova/all-MiniLM-L6-v2` (`MiniLM`). This enables browser-local, offline-compatible search. Any legacy 1536D or 512D vectors are regenerated at 384D.
 
-**Enforcement**: Export a single constant:
+**Enforcement**: Export constants in `app/actions/embedding-constants.ts`:
 
 ```typescript
-// app/actions/embeddings.ts
-export const EMBEDDING_DIMENSIONS = 512;
-export const EMBEDDING_MODEL = 'text-embedding-3-small';
+// app/actions/embedding-constants.ts
+export const EMBEDDING_DIMENSIONS = 384;
+export const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 ```
 
 Every callsite imports this. No hardcoded numbers.
@@ -256,7 +258,7 @@ Every callsite imports this. No hardcoded numbers.
 
 Remove the two parallel search paths in `executeSearchContent`. The single path:
 
-1. Generate query embedding (512D)
+1. Generate query embedding (384D)
 2. Load target embeddings from S3 via `loadEmbedding()` (cached in IndexedDB / `CourseVectorStore`)
 3. Cosine similarity in worker
 4. Keyword fallback for items without embeddings (score = TF-IDF, not hardcoded 0.7)
@@ -280,7 +282,7 @@ publishContent()
 
 rebuildSearchBundle Lambda
   → reads plain.txt (one S3 GET — no DynamoDB Section queries, no Lexical parsing)
-  → calls OpenAI text-embedding-3-small (512D)
+  → generates 384D embedding (MiniLM)
   → saves vector to private/{identityId}/embeddings/unit/{unitId}.json
   → updates Unit.embedding metadata in DynamoDB (model, dimensions, version, wordCount)
   → assembles search bundle from all per-item embeddings
@@ -331,11 +333,11 @@ Per-item embedding files remain as the write target (Lambda saves there after ge
 
 ### 1.1 `EMBEDDING_DIMENSIONS` constant
 
-**File**: `app/actions/embeddings.ts`
+**File**: `app/actions/embedding-constants.ts`
 
-Export `EMBEDDING_DIMENSIONS = 512` and `EMBEDDING_MODEL = 'text-embedding-3-small'`. Replace all hardcoded values in:
-- `FileManager2.performVectorSearch` (currently 1536)
-- `executeSearchContent` fallback (currently 512 — already correct)
+Export `EMBEDDING_DIMENSIONS = 384` and `EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2'`. Replace all hardcoded values in:
+- `FileManager2.performVectorSearch`
+- `executeSearchContent` fallback
 - `generateEmbedding` calls everywhere
 
 Any embeddings stored at 1536D should be regenerated; `EmbeddingInfo.dimensions` on the DynamoDB record is the source of truth for detecting stale vectors.
@@ -569,25 +571,25 @@ All downstream highlighting (`FileRowComponent`, `SelectedFileDetailsPanel`) con
 
 ---
 
-## Files to Create / Modify
+## Implementation Summary
 
-| File | Action | Summary |
-|------|--------|---------|
-| `app/actions/embeddings.ts` | Modify | Export `EMBEDDING_DIMENSIONS`, `EMBEDDING_MODEL` constants |
-| `src/utils/extractTextFromLexical.ts` | **Create** | Move `extractTextFromLexicalJSON` from gamification-engine.ts here |
-| `src/utils/unitContentStorage.ts` | Modify | Write `plain.txt` on publish |
-| `src/utils/searchBundles.ts` | **Create** | `loadUnitBundle()`, `loadInstructorBundle()`, `ivfSearch()`, `linearSearch()` — IndexedDB version check + S3 fallback; ANN probe count configurable |
-| `amplify/functions/rebuildSearchBundle/` | **Create** | Lambda: reads `plain.txt` → generates embedding → saves per-item file; assembles `SearchBundle` **with IVF index** (k-means, K = √n, 20 iterations); writes to `search-index/unit/{unitId}.json` or `search-index/instructor.json`. Triggered by unit publish + file/word/question updates, **and by direct Lambda invocation from the admin reindex script** |
-| `scripts/rebuild-search-bundles.ts` | **Create** | Admin CLI: pages all Unit/File/Word/Question records via DynamoDB, groups by `owner` (identityId), fans out one Lambda invocation per instructor identity; shows per-identity progress and final summary. Usage: `npm run search:reindex` |
-| `src/context/fileContext.jsx` | Modify | Replace per-item S3 load loop with `loadUnitBundle()` (learner) or `loadInstructorBundle()` (instructor) |
-| `src/utils/chatTools.js` | Modify | Add `units` type, fix pagination, fix keyword score, remove 1536D |
-| `src/components/Editor3/components/FileManager2.jsx` | Modify | Wire `performVectorSearch` to semantic mode, read `?q=` from URL |
-| `src/context/searchContext.tsx` | **Create** | Global search state |
-| `src/components/GlobalSearchBar.tsx` | **Create** | Header search component |
-| `src/components/MainToolbar.jsx` | Modify | Add `<GlobalSearchBar>` |
-| `app/providers.tsx` | Modify | Wrap with `SearchContext.Provider` |
-| `amplify/functions/chatStream/handler.ts` | Modify | Add `units`, `sections` to type enum |
-| `src/utils/embeddingGenerator.jsx` | Modify | Demote `generateUnitEmbedding` to manual/force path only; add note that publish→Lambda is now the primary embedding trigger |
+| File | Status | Implementation Details |
+|------|--------|------------------------|
+| `app/actions/embedding-constants.ts` | ✅ Done | Exports `EMBEDDING_DIMENSIONS = 384` & `EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2'` |
+| `src/utils/extractTextFromLexical.ts` | ✅ Done | Shared utility extracting plain text from Lexical node trees |
+| `src/utils/unitContentStorage.ts` | ✅ Done | Writes `plain.txt` to S3 on every `publishContent()` |
+| `src/utils/searchBundles.ts` | ✅ Done | Client bundle loader with IndexedDB caching, IVF search, and hybrid scoring |
+| `amplify/functions/rebuildSearchBundle/` | ✅ Done | Lambda: reads `plain.txt` → generates 384D vector → assembles bundle with k-means IVF index (K = ⌈√n⌉, 20 iterations) |
+| `scripts/rebuild-search-bundles.ts` | ✅ Done | Admin CLI: invokes `rebuildSearchBundle` with `--force` or per-user flags |
+| `src/context/fileContext.jsx` | ✅ Done | Loads instructor bundle on mount and initializes vector store |
+| `src/utils/chatTools.js` | ✅ Done | Vector store integration for files, hybrid search for words/questions/units, paginated queries |
+| `src/components/Editor3/components/FileManager2.jsx` | ✅ Done | `performVectorSearch` connected to semantic search; `searchParams.get('q')` URL initialization |
+| `src/context/searchContext.tsx` | ✅ Done | Global search provider with query parsing (type, role, author filters) and bundle search |
+| `src/components/GlobalSearchBar.tsx` | ✅ Done | Header search input with popper dropdown, keyboard navigation, and grouped type results |
+| `src/components/MainToolbar.jsx` | ✅ Done | Renders `<GlobalSearchBar>` in navigation bar |
+| `app/providers.tsx` | ✅ Done | Wraps app tree in `<SearchProvider>` |
+| `amplify/functions/chatStream/handler.ts` | ✅ Done | `search_content` tool schema includes `"units"` and `"sections"` |
+| `src/utils/embeddingGenerator.jsx` | ✅ Done | Demoted client `generateUnitEmbedding` to manual/admin fallback with publish Lambda note |
 
 ---
 

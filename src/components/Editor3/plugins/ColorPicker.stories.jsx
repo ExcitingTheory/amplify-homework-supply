@@ -16,6 +16,7 @@ import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeNode, CodeHighlightNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { Card, CardContent, Typography, Box } from "@mui/material";
+import { within } from "storybook/test";
 
 import ColorPicker from "./ColorPicker";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
@@ -403,12 +404,21 @@ const sampleColorfulText = {
 
 export const Standalone = {
   render: () => <StandaloneTemplate />,
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Color Picker Component");
+  },
 };
 
 export const EditorIntegration = {
   render: () => <EditorTemplate editorState={null} />,
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Color Picker in Editor");
+  },
 };
 
 export const EditorWithColorfulText = {
   render: () => <EditorTemplate editorState={sampleColorfulText} />,
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Color Picker in Editor");
+  },
 };

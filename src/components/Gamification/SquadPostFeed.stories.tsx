@@ -132,6 +132,8 @@ const meta: Meta<typeof SquadPostFeed> = {
   title: "🏆 Gamification/Squads & Teams/Squad Post Feed",
   component: SquadPostFeed,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
 };

@@ -618,7 +618,7 @@ function refreshDebuff(
 async function getOrCreateStudentProfile(
   client: any,
   studentId: string,
-  cohortId?: string,
+  sectionID?: string,
 ): Promise<any> {
   const { data: profiles } = await client.models.StudentProfile.list({
     filter: { studentId: { eq: studentId } },
@@ -627,7 +627,7 @@ async function getOrCreateStudentProfile(
 
   const { data: created } = await client.models.StudentProfile.create({
     studentId,
-    cohortId: cohortId || null,
+    sectionID: sectionID || null,
     totalXP: 0,
     level: 1,
     currentStreak: 0,
@@ -648,7 +648,7 @@ export async function engineAwardXP(
     studentId: string;
     reason: string;
     referenceId?: string;
-    cohortId?: string;
+    sectionID?: string;
     unitID?: string;
     accuracy?: number;
     overrideAmount?: number;
@@ -658,7 +658,7 @@ export async function engineAwardXP(
     studentId,
     reason,
     referenceId,
-    cohortId,
+    sectionID,
     unitID,
     accuracy,
     overrideAmount,
@@ -678,10 +678,10 @@ export async function engineAwardXP(
       levelScaling?: number;
     };
   } = {};
-  if (cohortId) {
+  if (sectionID) {
     try {
       const { data: section } = await client.models.Section.get({
-        id: cohortId,
+        id: sectionID,
       });
       if (section?.xpConfig) {
         xpConfig =
@@ -705,12 +705,12 @@ export async function engineAwardXP(
   }
 
   // Apply active debuff XP multipliers
-  if (cohortId) {
+  if (sectionID) {
     try {
       const profile = await getOrCreateStudentProfile(
         client,
         studentId,
-        cohortId,
+        sectionID,
       );
       const activeDebuffs = getActiveDebuffs(profile);
       for (const debuff of activeDebuffs) {
@@ -766,7 +766,7 @@ export async function engineAwardXP(
       .filter(
         (l: any) =>
           l.createdAt?.startsWith(todayStr) &&
-          (!cohortId || l.cohortId === cohortId),
+          (!sectionID || l.sectionID === sectionID),
       )
       .reduce((s: number, l: any) => s + l.xpAmount, 0);
     if (todayXP >= xpConfig.dailyCap) {
@@ -789,7 +789,8 @@ export async function engineAwardXP(
     const weekXP = validLogs
       .filter(
         (l: any) =>
-          l.createdAt >= weekStartISO && (!cohortId || l.cohortId === cohortId),
+          l.createdAt >= weekStartISO &&
+          (!sectionID || l.sectionID === sectionID),
       )
       .reduce((s: number, l: any) => s + l.xpAmount, 0);
     if (weekXP >= xpConfig.weeklyCap) {
@@ -810,7 +811,7 @@ export async function engineAwardXP(
     reason,
     accuracy: accuracy != null ? accuracy : null,
     referenceId: referenceId || null,
-    cohortId: cohortId || null,
+    sectionID: sectionID || null,
     unitID: unitID || null,
   });
 
@@ -829,17 +830,17 @@ export async function engineAwardXP(
 
 export async function engineCheckBadges(
   client: any,
-  args: { studentId: string; cohortId?: string; unitID?: string },
+  args: { studentId: string; sectionID?: string; unitID?: string },
 ) {
-  const { studentId, cohortId, unitID } = args;
+  const { studentId, sectionID, unitID } = args;
 
   // Check section settings
   let badgesEnabled = true;
   let antiBadgesEnabled = true;
-  if (cohortId) {
+  if (sectionID) {
     try {
       const { data: section } = await client.models.Section.get({
-        id: cohortId,
+        id: sectionID,
       });
       if (section?.badgesEnabled === false) badgesEnabled = false;
       if (section?.antiBadgesEnabled === false) antiBadgesEnabled = false;
@@ -863,7 +864,7 @@ export async function engineCheckBadges(
   });
   const validLogs = (xpLogs || []).filter((l: any) => l != null);
 
-  const profile = await getOrCreateStudentProfile(client, studentId, cohortId);
+  const profile = await getOrCreateStudentProfile(client, studentId, sectionID);
 
   const existingBadges: any[] = (() => {
     try {
@@ -906,14 +907,14 @@ export async function engineCheckBadges(
     if (existing) {
       existing.count = (existing.count || 1) + 1;
       existing.awardedAt = new Date().toISOString();
-      if (cohortId) existing.cohortId = cohortId;
+      if (sectionID) existing.sectionID = sectionID;
       if (unitID) existing.unitID = unitID;
       updatedBadges.push(criteria.badgeType);
     } else {
       const newBadge = {
         badgeType: criteria.badgeType,
         awardedAt: new Date().toISOString(),
-        cohortId: cohortId || null,
+        sectionID: sectionID || null,
         unitID: unitID || null,
         count: 1,
       };
@@ -944,13 +945,13 @@ export async function engineCheckBadges(
       if (existing) {
         existing.count = (existing.count || 1) + 1;
         existing.awardedAt = new Date().toISOString();
-        if (cohortId) existing.cohortId = cohortId;
+        if (sectionID) existing.sectionID = sectionID;
         refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
       } else {
         const antiBadge = {
           badgeType: criteria.badgeType,
           awardedAt: new Date().toISOString(),
-          cohortId: cohortId || null,
+          sectionID: sectionID || null,
           unitID: unitID || null,
           count: 1,
           isAnti: true,
@@ -1477,13 +1478,13 @@ export async function engineUpdateSquadXP(
   const { studentId, xpAmount } = args;
 
   const profile = await getOrCreateStudentProfile(client, studentId);
-  const cohortId = profile.cohortId;
-  if (!cohortId) {
+  const sectionID = profile.sectionID;
+  if (!sectionID) {
     return { updated: false, reason: "Student has no cohort" };
   }
 
   const { data: allSquads } = await client.models.Squad.list({
-    filter: { cohortId: { eq: cohortId } },
+    filter: { sectionID: { eq: sectionID } },
   });
   const validSquads = (allSquads || []).filter((g: any) => g != null);
 
@@ -1507,7 +1508,7 @@ export async function engineUpdateSquadXP(
     });
     updatedSquads.push(squad.id);
     // Challenge rollup happens automatically via the DynamoDB Stream on any
-    // StudentXPLog entry that carries cohortId. No explicit call needed here.
+    // StudentXPLog entry that carries sectionID. No explicit call needed here.
   }
 
   return { updated: true, squads: updatedSquads };
@@ -1519,17 +1520,17 @@ export async function engineUpdateSquadXP(
 // Students CANNOT write to GroupChallenge records (read-only auth rule).
 // GroupChallenge.currentXP is updated exclusively by the leaderboardStream
 // Lambda (IAM credentials) which triggers on every StudentXPLog INSERT that
-// carries a cohortId. Any XP log created with cohortId set will automatically
+// carries a sectionID. Any XP log created with sectionID set will automatically
 // roll up into active challenges for that cohort.
 //
-// This function is kept for API compatibility with callers that pass cohortId
+// This function is kept for API compatibility with callers that pass sectionID
 // explicitly. The actual contribution signal is the XP log from the student's
-// original action (e.g. HOMEWORK_SUBMITTED) with cohortId set.
+// original action (e.g. HOMEWORK_SUBMITTED) with sectionID set.
 // ============================================================================
 
 export async function engineContributeToChallenge(
   _client: any,
-  _args: { studentId: string; cohortId: string; xpContributed: number },
+  _args: { studentId: string; sectionID: string; xpContributed: number },
 ): Promise<{ contributed: true }> {
   // Stream handler handles GroupChallenge rollup with IAM privileges.
   return { contributed: true };
@@ -1973,10 +1974,10 @@ export async function engineAdvanceSkillProgress(
   const unlocked: string[] = [];
   if (newStatus === "MASTERED") {
     const { data: skill } = await client.models.Skill.get({ id: skillId });
-    const cohortId = skill?.cohortId;
-    if (cohortId) {
+    const sectionID = skill?.sectionID;
+    if (sectionID) {
       const { data: allSkills } = await client.models.Skill.list({
-        filter: { cohortId: { eq: cohortId } },
+        filter: { sectionID: { eq: sectionID } },
       });
       const validSkills = (allSkills || []).filter((s: any) => s != null);
 
@@ -2049,9 +2050,9 @@ function extractTextFromLexicalJSON(data: any): string {
 
 export async function engineGenerateSkillTree(
   client: any,
-  args: { unitID: string; cohortId?: string; sectionId?: string },
+  args: { unitID: string; sectionID?: string },
 ) {
-  const { unitID, cohortId, sectionId } = args;
+  const { unitID, sectionID } = args;
 
   const { data: unit } = await client.models.Unit.get({ id: unitID });
   if (!unit) throw new Error(`Unit not found: ${unitID}`);
@@ -2062,10 +2063,10 @@ export async function engineGenerateSkillTree(
 
   // Fetch course outline for progression context
   let courseProgressionHint = "";
-  if (sectionId) {
+  if (sectionID) {
     try {
       const { data: section } = await client.models.Section.get(
-        { id: sectionId },
+        { id: sectionID },
         { selectionSet: ["id", "courseOutline"] },
       );
       if (section?.courseOutline) {
@@ -2179,12 +2180,12 @@ Return JSON: { "skills": [{ "title": "string", "description": "string", "prerequ
     return { generated: false, reason: "No skills extracted", skills: [] };
   }
 
-  const effectiveCohortId = cohortId || `unit-${unitID}`;
+  const effectiveSectionID = sectionID || `unit-${unitID}`;
 
   // Delete existing skills for this cohort
   try {
     const { data: existingSkills } = await client.models.Skill.list({
-      filter: { cohortId: { eq: effectiveCohortId } },
+      filter: { sectionID: { eq: effectiveSectionID } },
     });
     for (const skill of existingSkills || []) {
       if (skill) {
@@ -2208,7 +2209,7 @@ Return JSON: { "skills": [{ "title": "string", "description": "string", "prerequ
       description: def.description || null,
       prerequisites: JSON.stringify([]),
       xpReward: def.xpReward || 25,
-      cohortId: effectiveCohortId,
+      sectionID: effectiveSectionID,
       unitIds: [unitID],
       minimumAccuracy: 70,
     });
@@ -2235,7 +2236,7 @@ Return JSON: { "skills": [{ "title": "string", "description": "string", "prerequ
   return {
     generated: true,
     unitID,
-    cohortId: effectiveCohortId,
+    sectionID: effectiveSectionID,
     skillCount: createdSkills.length,
     skills: createdSkills.map((s) => ({
       id: s.id,
@@ -2255,18 +2256,18 @@ Return JSON: { "skills": [{ "title": "string", "description": "string", "prerequ
 
 export async function engineRebuildLeaderboard(
   client: any,
-  args: { cohortId: string },
+  args: { sectionID: string },
 ) {
-  const { cohortId } = args;
+  const { sectionID } = args;
 
-  const { data: section } = await client.models.Section.get({ id: cohortId });
+  const { data: section } = await client.models.Section.get({ id: sectionID });
   if (section?.leaderboardEnabled === false) {
     return { updated: 0, total: 0 };
   }
 
   // Get all grades for this section
   const { data: grades } = await client.models.Grade.list({
-    filter: { sectionID: { eq: cohortId } },
+    filter: { sectionID: { eq: sectionID } },
   });
   const validGrades = (grades || []).filter((g: any) => g != null);
 
@@ -2275,10 +2276,10 @@ export async function engineRebuildLeaderboard(
   ] as string[];
 
   // Fetch all XP logs for this cohort
-  const { data: cohortXpLogs } = await client.models.StudentXPLog.list({
-    filter: { cohortId: { eq: cohortId } },
+  const { data: sectionXpLogs } = await client.models.StudentXPLog.list({
+    filter: { sectionID: { eq: sectionID } },
   });
-  const validXpLogs = (cohortXpLogs || []).filter((l: any) => l != null);
+  const validXpLogs = (sectionXpLogs || []).filter((l: any) => l != null);
 
   // Group XP logs by studentId
   const xpLogsByStudent = new Map<string, any[]>();
@@ -2306,7 +2307,7 @@ export async function engineRebuildLeaderboard(
       const profile = await getOrCreateStudentProfile(
         client,
         studentId,
-        cohortId,
+        sectionID,
       );
       await client.models.StudentProfile.update({
         id: profile.id,
@@ -2443,7 +2444,7 @@ async function grantChallengeBadge(
   studentId: string,
   badgeType: string,
   challengeId: string,
-  cohortId: string,
+  sectionID: string,
 ): Promise<void> {
   const profile = await getOrCreateStudentProfile(client, studentId);
   if (!profile) return;
@@ -2463,7 +2464,7 @@ async function grantChallengeBadge(
         badgeType,
         sourceId: `challenge-${challengeId}`,
         awardedAt: new Date().toISOString(),
-        cohortId,
+        sectionID,
       },
     ],
     _version: profile._version ?? 1,
@@ -2687,19 +2688,19 @@ export async function engineRecomputeProgress(
 
 export async function engineEvaluateSkillsForUnit(
   client: any,
-  args: { studentId: string; unitId: string; cohortId?: string },
+  args: { studentId: string; unitId: string; sectionID?: string },
 ) {
-  const { studentId, unitId, cohortId } = args;
+  const { studentId, unitId, sectionID } = args;
 
-  const cohortIds = cohortId
-    ? [cohortId, `unit-${unitId}`]
+  const sectionIDs = sectionID
+    ? [sectionID, `unit-${unitId}`]
     : [`unit-${unitId}`];
 
   let allSkills: any[] = [];
-  for (const cid of cohortIds) {
+  for (const cid of sectionIDs) {
     try {
       const { data: skillsData } = await client.models.Skill.list({
-        filter: { cohortId: { eq: cid } },
+        filter: { sectionID: { eq: cid } },
       });
       allSkills.push(...(skillsData || []).filter((s: any) => s != null));
     } catch (err) {
@@ -2772,7 +2773,7 @@ export async function engineEvaluateSkillsForUnit(
               studentId,
               reason: "ALL_BLOCKS_COMPLETED",
               referenceId: `skill-${skill.id}`,
-              cohortId,
+              sectionID,
             });
           } catch (err) {
             console.warn("[gamification] Skill mastery XP error:", err);
@@ -3026,16 +3027,18 @@ const SCRAMBLE_NAME_EFFECTS = [
 
 export async function engineApplyBattleStakes(
   client: any,
-  args: { challengeId: string; cohortId: string },
+  args: { challengeId: string; sectionID: string },
 ) {
-  const { challengeId, cohortId } = args;
+  const { challengeId, sectionID } = args;
 
   // Read the specific challenge record
   const { data: challengeData } = await client.models.GroupChallenge.get({
     id: challengeId,
   });
-  if (!challengeData || challengeData.cohortId !== cohortId) {
-    throw new Error(`Challenge ${challengeId} not found in cohort ${cohortId}`);
+  if (!challengeData || challengeData.sectionID !== sectionID) {
+    throw new Error(
+      `Challenge ${challengeId} not found in cohort ${sectionID}`,
+    );
   }
   const challenge = challengeData;
 
@@ -3052,7 +3055,7 @@ export async function engineApplyBattleStakes(
   }
 
   const { data: profilesData } = await client.models.StudentProfile.list({
-    filter: { cohortId: { eq: cohortId } },
+    filter: { sectionID: { eq: sectionID } },
   });
   const profiles = (profilesData || []).filter(
     (p: any) => p != null && !p._deleted,
@@ -3218,7 +3221,7 @@ export async function engineApplyBattleStakes(
   return {
     applied: true,
     challengeId,
-    cohortId,
+    sectionID,
     studentsAffected: results.length,
     results,
   };

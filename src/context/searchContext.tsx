@@ -76,7 +76,9 @@ function parseSearchQuery(raw: string): ParsedSearchQuery {
       continue;
     }
 
-    const fieldAliasMatch = lower.match(/^(@|\/)?(file|files|unit|units|word|words|question|questions|section|sections|chat|chats):?(.*)$/);
+    const fieldAliasMatch = lower.match(
+      /^(@|\/)?(file|files|unit|units|word|words|question|questions|section|sections|chat|chats):?(.*)$/,
+    );
     if (fieldAliasMatch) {
       const alias = fieldAliasMatch[2];
       const trailing = fieldAliasMatch[3];
@@ -108,7 +110,10 @@ function parseSearchQuery(raw: string): ParsedSearchQuery {
 }
 
 function normalizeText(value: string): string {
-  return (value || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").trim();
+  return (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .trim();
 }
 
 function tokenize(value: string): string[] {
@@ -220,8 +225,15 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { session } = React.useContext(AuthContext) as unknown as { session: { groups?: string[]; identityId?: string } };
-  const { searchChatMessagesAsync } = React.useContext(ChatContext) as { searchChatMessagesAsync: (query: string, options?: { limit?: number; role?: string; author?: string }) => Promise<any[]> };
+  const { session } = React.useContext(AuthContext) as unknown as {
+    session: { groups?: string[]; identityId?: string };
+  };
+  const { searchChatMessagesAsync } = React.useContext(ChatContext) as {
+    searchChatMessagesAsync: (
+      query: string,
+      options?: { limit?: number; role?: string; author?: string },
+    ) => Promise<any[]>;
+  };
   const debounceRef = React.useRef<NodeJS.Timeout | null>(null);
   const bundleRef = React.useRef<SearchBundle | null>(null);
   const loadingBundleRef = React.useRef<Promise<SearchBundle | null> | null>(
@@ -253,116 +265,120 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     [groups],
   );
 
-  const loadLearnerScope = React.useCallback(async (): Promise<LearnerScopeData> => {
-    if (loadingLearnerScopeRef.current) {
-      return loadingLearnerScopeRef.current;
-    }
+  const loadLearnerScope =
+    React.useCallback(async (): Promise<LearnerScopeData> => {
+      if (loadingLearnerScopeRef.current) {
+        return loadingLearnerScopeRef.current;
+      }
 
-    const client = getAmplifyClient();
+      const client = getAmplifyClient();
 
-    loadingLearnerScopeRef.current = (async () => {
-      const [assignmentsResult, sectionsResult] = await Promise.all([
-        client.models.Assignment.list(),
-        client.models.Section.list(),
-      ]);
+      loadingLearnerScopeRef.current = (async () => {
+        const [assignmentsResult, sectionsResult] = await Promise.all([
+          client.models.Assignment.list(),
+          client.models.Section.list(),
+        ]);
 
-      const assignments = (assignmentsResult?.data || []).filter(
-        (item: any) => item != null && item.id != null && item.deletedAt == null,
-      );
-      const sections = (sectionsResult?.data || []).filter(
-        (item: any) => item != null && item.id != null && item.deletedAt == null,
-      );
+        const assignments = (assignmentsResult?.data || []).filter(
+          (item: any) =>
+            item != null && item.id != null && item.deletedAt == null,
+        );
+        const sections = (sectionsResult?.data || []).filter(
+          (item: any) =>
+            item != null && item.id != null && item.deletedAt == null,
+        );
 
-      const sectionById = new Map<string, any>();
-      sections.forEach((section: any) => sectionById.set(section.id, section));
+        const sectionById = new Map<string, any>();
+        sections.forEach((section: any) =>
+          sectionById.set(section.id, section),
+        );
 
-      const unitIds = new Set<string>();
-      const sectionIds = new Set<string>();
-      assignments.forEach((assignment: any) => {
-        if (assignment.unitID) unitIds.add(assignment.unitID);
-        if (assignment.sectionID) sectionIds.add(assignment.sectionID);
-      });
+        const unitIds = new Set<string>();
+        const sectionIds = new Set<string>();
+        assignments.forEach((assignment: any) => {
+          if (assignment.unitID) unitIds.add(assignment.unitID);
+          if (assignment.sectionID) sectionIds.add(assignment.sectionID);
+        });
 
-      const units = await Promise.all(
-        Array.from(unitIds).map(async (unitId) => {
-          try {
-            const response = await client.models.Unit.get({ id: unitId });
-            return response?.data || null;
-          } catch {
-            return null;
-          }
-        }),
-      );
+        const units = await Promise.all(
+          Array.from(unitIds).map(async (unitId) => {
+            try {
+              const response = await client.models.Unit.get({ id: unitId });
+              return response?.data || null;
+            } catch {
+              return null;
+            }
+          }),
+        );
 
-      const unitFileResult = await client.models.UnitFile.list();
-      const unitFiles = (unitFileResult?.data || []).filter(
-        (item: any) =>
-          item != null &&
-          item.id != null &&
-          item.deletedAt == null &&
-          item.unitID != null &&
-          unitIds.has(item.unitID) &&
-          item.fileID != null,
-      );
-      const fileIds = Array.from(new Set(unitFiles.map((item: any) => item.fileID)));
-      const files = await Promise.all(
-        fileIds.map(async (fileId) => {
-          try {
-            const response = await client.models.File.get({ id: fileId });
-            return response?.data || null;
-          } catch {
-            return null;
-          }
-        }),
-      );
+        const unitFileResult = await client.models.UnitFile.list();
+        const unitFiles = (unitFileResult?.data || []).filter(
+          (item: any) =>
+            item != null &&
+            item.id != null &&
+            item.deletedAt == null &&
+            item.unitID != null &&
+            unitIds.has(item.unitID) &&
+            item.fileID != null,
+        );
+        const fileIds = Array.from(
+          new Set(unitFiles.map((item: any) => item.fileID)),
+        );
+        const files = await Promise.all(
+          fileIds.map(async (fileId) => {
+            try {
+              const response = await client.models.File.get({ id: fileId });
+              return response?.data || null;
+            } catch {
+              return null;
+            }
+          }),
+        );
 
-      const sectionItems: LearnerScopeItem[] = Array.from(sectionIds)
-        .map((sectionId) => sectionById.get(sectionId))
-        .filter((section) => section != null)
-        .map((section: any) => ({
-          type: "section",
-          id: section.id,
-          title: section.name || "Section",
-          description: section.description || section.code,
-        }));
+        const sectionItems: LearnerScopeItem[] = Array.from(sectionIds)
+          .map((sectionId) => sectionById.get(sectionId))
+          .filter((section) => section != null)
+          .map((section: any) => ({
+            type: "section",
+            id: section.id,
+            title: section.name || "Section",
+            description: section.description || section.code,
+          }));
 
-      const unitItems: LearnerScopeItem[] = units
-        .filter((unit) => unit != null && unit.deletedAt == null)
-        .map((unit: any) => ({
-          type: "unit",
-          id: unit.id,
-          title: unit.name || "Unit",
-          description: unit.description || undefined,
-        }));
+        const unitItems: LearnerScopeItem[] = units
+          .filter((unit) => unit != null && unit.deletedAt == null)
+          .map((unit: any) => ({
+            type: "unit",
+            id: unit.id,
+            title: unit.name || "Unit",
+            description: unit.description || undefined,
+          }));
 
-      const fileItems: LearnerScopeItem[] = files
-        .filter((file) => file != null && file.deletedAt == null)
-        .map((file: any) => ({
-          type: "file",
-          id: file.id,
-          title: file.name || "File",
-          description:
-            file.description ||
-            file.mimeType ||
-            file.path ||
-            undefined,
-        }));
+        const fileItems: LearnerScopeItem[] = files
+          .filter((file) => file != null && file.deletedAt == null)
+          .map((file: any) => ({
+            type: "file",
+            id: file.id,
+            title: file.name || "File",
+            description:
+              file.description || file.mimeType || file.path || undefined,
+          }));
 
-      return {
-        sections: sectionItems,
-        units: unitItems,
-        files: fileItems,
-      };
-    })();
+        return {
+          sections: sectionItems,
+          units: unitItems,
+          files: fileItems,
+        };
+      })();
 
-    try {
-      const scope = await loadingLearnerScopeRef.current;
-      learnerScopeRef.current = scope;
-      return scope;
-    } finally {
-      loadingLearnerScopeRef.current = null;
-    }
-  }, []);
+      try {
+        const scope = await loadingLearnerScopeRef.current;
+        learnerScopeRef.current = scope;
+        return scope;
+      } finally {
+        loadingLearnerScopeRef.current = null;
+      }
+    }, []);
 
   const loadBestBundle = React.useCallback(async () => {
     const identityId = session?.identityId;
@@ -435,114 +451,278 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const setQuery = React.useCallback(
-    (query: string) => {
-      setState((prev) => ({ ...prev, query, open: true }));
+  const setQuery = React.useCallback((query: string) => {
+    setState((prev) => ({ ...prev, query, open: true }));
 
-      // Debounce search execution
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        if (query.trim().length >= 2) {
-          executeSearch(query);
-        } else {
-          setState((prev) => ({ ...prev, results: [], searching: false }));
-        }
-      }, 300);
-    },
-    [],
-  );
-
-  const executeSearch = React.useCallback(async (query: string) => {
-    if (!query.trim()) return;
-
-    setState((prev) => ({ ...prev, searching: true }));
-
-    try {
-      const parsed = parseSearchQuery(query);
-      const cleanQuery = parsed.query;
-      if (!cleanQuery) {
+    // Debounce search execution
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (query.trim().length >= 2) {
+        executeSearch(query);
+      } else {
         setState((prev) => ({ ...prev, results: [], searching: false }));
-        return;
       }
+    }, 300);
+  }, []);
 
-      const results: SearchResult[] = [];
-      const includeBundle =
-        isPrivileged && (parsed.type == null || parsed.type !== "chat");
-      const includeLearnerScope =
-        !isPrivileged &&
-        (parsed.type == null ||
-          parsed.type === "unit" ||
-          parsed.type === "section" ||
-          parsed.type === "file");
-      const includeChat = parsed.type == null || parsed.type === "chat";
+  const executeSearch = React.useCallback(
+    async (query: string) => {
+      if (!query.trim()) return;
 
-      if (includeBundle) {
-        let bundle = bundleRef.current;
-        if (!bundle) {
-          bundle = await loadBestBundle();
+      setState((prev) => ({ ...prev, searching: true }));
+
+      try {
+        const parsed = parseSearchQuery(query);
+        const cleanQuery = parsed.query;
+        if (!cleanQuery) {
+          setState((prev) => ({ ...prev, results: [], searching: false }));
+          return;
         }
-        if (bundle) {
-          const { embedding } = await embed(cleanQuery);
-          const bundleResults = search(embedding, bundle, 10, 0.3, cleanQuery);
-          const mappedBundle = bundleResults
-            .map(
-              (r: BundleSearchResult) => ({
-                type: r.item.type,
-                id: r.item.id,
-                title: r.item.title,
-                description: r.item.meta.preview,
-                score: r.score,
-                page: r.item.meta.page,
-                highlightTerm: cleanQuery,
-              }) as SearchResult,
-            )
-            .filter((r) => (parsed.type ? r.type === parsed.type : true));
 
-          results.push(...mappedBundle);
+        const results: SearchResult[] = [];
+        const includeBundle =
+          isPrivileged && (parsed.type == null || parsed.type !== "chat");
+        const includeLearnerScope =
+          !isPrivileged &&
+          (parsed.type == null ||
+            parsed.type === "unit" ||
+            parsed.type === "section" ||
+            parsed.type === "file");
+        const includeChat = parsed.type == null || parsed.type === "chat";
+
+        if (includeBundle) {
+          let bundle = bundleRef.current;
+          if (!bundle) {
+            bundle = await loadBestBundle();
+          }
+          if (bundle) {
+            const { embedding } = await embed(cleanQuery);
+            const bundleResults = search(
+              embedding,
+              bundle,
+              10,
+              0.3,
+              cleanQuery,
+            );
+            const mappedBundle = bundleResults
+              .map(
+                (r: BundleSearchResult) =>
+                  ({
+                    type: r.item.type,
+                    id: r.item.id,
+                    title: r.item.title,
+                    description: r.item.meta.preview,
+                    score: r.score,
+                    page: r.item.meta.page,
+                    highlightTerm: cleanQuery,
+                  }) as SearchResult,
+              )
+              .filter((r) => (parsed.type ? r.type === parsed.type : true));
+
+            results.push(...mappedBundle);
+          } else {
+            // Fallback search when vector bundle is not built/available yet
+            const client = getAmplifyClient();
+            const [unitsRes, sectionsRes, filesRes, wordsRes, questionsRes] =
+              await Promise.allSettled([
+                client.models.Unit.list(),
+                client.models.Section.list(),
+                client.models.File.list(),
+                client.models.Word.list(),
+                client.models.Question.list(),
+              ]);
+
+            const fallbackItems: SearchResult[] = [];
+
+            if (
+              unitsRes.status === "fulfilled" &&
+              (parsed.type == null || parsed.type === "unit")
+            ) {
+              const items = (unitsRes.value?.data || []).filter(
+                (u: any) => u != null && u.deletedAt == null,
+              );
+              items.forEach((u: any) => {
+                const score = lexicalScore(
+                  `${u.name || ""} ${u.description || ""}`,
+                  cleanQuery,
+                );
+                if (score > 0) {
+                  fallbackItems.push({
+                    type: "unit",
+                    id: u.id,
+                    title: u.name || "Unit",
+                    description: u.description || undefined,
+                    score,
+                    highlightTerm: cleanQuery,
+                  });
+                }
+              });
+            }
+
+            if (
+              sectionsRes.status === "fulfilled" &&
+              (parsed.type == null || parsed.type === "section")
+            ) {
+              const items = (sectionsRes.value?.data || []).filter(
+                (s: any) => s != null && s.deletedAt == null,
+              );
+              items.forEach((s: any) => {
+                const score = lexicalScore(
+                  `${s.name || ""} ${s.description || ""} ${s.code || ""}`,
+                  cleanQuery,
+                );
+                if (score > 0) {
+                  fallbackItems.push({
+                    type: "section",
+                    id: s.id,
+                    title: s.name || "Section",
+                    description: s.description || s.code || undefined,
+                    score,
+                    highlightTerm: cleanQuery,
+                  });
+                }
+              });
+            }
+
+            if (
+              filesRes.status === "fulfilled" &&
+              (parsed.type == null || parsed.type === "file")
+            ) {
+              const items = (filesRes.value?.data || []).filter(
+                (f: any) => f != null && f.deletedAt == null,
+              );
+              items.forEach((f: any) => {
+                const score = lexicalScore(
+                  `${f.name || ""} ${f.description || ""} ${f.mimeType || ""}`,
+                  cleanQuery,
+                );
+                if (score > 0) {
+                  fallbackItems.push({
+                    type: "file",
+                    id: f.id,
+                    title: f.name || "File",
+                    description: f.description || f.mimeType || undefined,
+                    score,
+                    highlightTerm: cleanQuery,
+                  });
+                }
+              });
+            }
+
+            if (
+              wordsRes.status === "fulfilled" &&
+              (parsed.type == null || parsed.type === "word")
+            ) {
+              const items = (wordsRes.value?.data || []).filter(
+                (w: any) => w != null && w.deletedAt == null,
+              );
+              items.forEach((w: any) => {
+                const score = lexicalScore(
+                  `${w.phrase || ""} ${w.pronunciation || ""} ${w.definition || ""}`,
+                  cleanQuery,
+                );
+                if (score > 0) {
+                  fallbackItems.push({
+                    type: "word",
+                    id: w.id,
+                    title: w.phrase || "Word",
+                    description: w.definition || undefined,
+                    score,
+                    highlightTerm: cleanQuery,
+                  });
+                }
+              });
+            }
+
+            if (
+              questionsRes.status === "fulfilled" &&
+              (parsed.type == null || parsed.type === "question")
+            ) {
+              const items = (questionsRes.value?.data || []).filter(
+                (q: any) => q != null && q.deletedAt == null,
+              );
+              items.forEach((q: any) => {
+                const score = lexicalScore(
+                  `${q.questionText || ""} ${q.explanation || ""}`,
+                  cleanQuery,
+                );
+                if (score > 0) {
+                  fallbackItems.push({
+                    type: "question",
+                    id: q.id,
+                    title: q.questionText || "Question",
+                    description: q.explanation || undefined,
+                    score,
+                    highlightTerm: cleanQuery,
+                  });
+                }
+              });
+            }
+
+            const maxScore = fallbackItems.reduce(
+              (max, item) => (item.score > max ? item.score : max),
+              0,
+            );
+            if (maxScore > 0) {
+              fallbackItems.forEach((item) => {
+                item.score = item.score / maxScore;
+              });
+            }
+
+            results.push(...fallbackItems);
+          }
         }
-      }
 
-      if (includeLearnerScope) {
-        let scope = learnerScopeRef.current;
-        if (
-          scope.sections.length === 0 &&
-          scope.units.length === 0 &&
-          scope.files.length === 0
-        ) {
-          scope = await loadLearnerScope();
+        if (includeLearnerScope) {
+          let scope = learnerScopeRef.current;
+          if (
+            scope.sections.length === 0 &&
+            scope.units.length === 0 &&
+            scope.files.length === 0
+          ) {
+            scope = await loadLearnerScope();
+          }
+          const scopedResults = searchLearnerScope(
+            scope,
+            cleanQuery,
+            parsed.type,
+          );
+          results.push(...scopedResults);
         }
-        const scopedResults = searchLearnerScope(scope, cleanQuery, parsed.type);
-        results.push(...scopedResults);
+
+        if (includeChat) {
+          const chatMatches = await searchChatMessagesAsync(cleanQuery, {
+            limit: 10,
+            role: parsed.role,
+            author: parsed.author,
+          });
+
+          const mappedChat: SearchResult[] = (chatMatches || []).map(
+            (m: any) => ({
+              type: "chat",
+              id: m.id,
+              title:
+                m.role === "assistant" ? "Assistant message" : "Your message",
+              description: m.snippet,
+              score: m.score,
+              highlightTerm: cleanQuery,
+              role: m.role || "unknown",
+            }),
+          );
+
+          results.push(...mappedChat);
+        }
+
+        results.sort((a, b) => b.score - a.score);
+
+        setState((prev) => ({ ...prev, results, searching: false }));
+      } catch (err) {
+        console.error("[SearchContext] Search failed:", err);
+        setState((prev) => ({ ...prev, results: [], searching: false }));
       }
-
-      if (includeChat) {
-        const chatMatches = await searchChatMessagesAsync(cleanQuery, {
-          limit: 10,
-          role: parsed.role,
-          author: parsed.author,
-        });
-
-        const mappedChat: SearchResult[] = (chatMatches || []).map((m: any) => ({
-          type: "chat",
-          id: m.id,
-          title: m.role === "assistant" ? "Assistant message" : "Your message",
-          description: m.snippet,
-          score: m.score,
-          highlightTerm: cleanQuery,
-          role: m.role || "unknown",
-        }));
-
-        results.push(...mappedChat);
-      }
-
-      results.sort((a, b) => b.score - a.score);
-
-      setState((prev) => ({ ...prev, results, searching: false }));
-    } catch (err) {
-      console.error("[SearchContext] Search failed:", err);
-      setState((prev) => ({ ...prev, results: [], searching: false }));
-    }
-  }, [searchChatMessagesAsync, loadBestBundle, loadLearnerScope, isPrivileged]);
+    },
+    [searchChatMessagesAsync, loadBestBundle, loadLearnerScope, isPrivileged],
+  );
 
   const clearSearch = React.useCallback(() => {
     setState({ query: "", results: [], searching: false, open: false });
@@ -594,13 +774,10 @@ export function useLoadSearchBundle() {
     [],
   );
 
-  const loadForInstructor = React.useCallback(
-    async (identityId: string) => {
-      const bundle = await loadInstructorBundle(identityId);
-      bundleRef.current = bundle;
-    },
-    [],
-  );
+  const loadForInstructor = React.useCallback(async (identityId: string) => {
+    const bundle = await loadInstructorBundle(identityId);
+    bundleRef.current = bundle;
+  }, []);
 
   return { loadForUnit, loadForInstructor };
 }

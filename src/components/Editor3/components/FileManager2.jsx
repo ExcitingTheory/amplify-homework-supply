@@ -1041,14 +1041,30 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        // Create normalized parsed content
+        // Map the raw ParsedContent model arrays into the shape
+        // FileMetadataComponent renders (see FileMetadataNode).
         const normalizedParsedContent = parsedContent
           ? {
-              vocabulary: vocabulary,
-              summaries: summaries,
-              objectives: objectives,
-              concepts: concepts,
-              questions: questions,
+              vocabulary: (parsedContent.vocabularyJSON ?? []).map((v) => ({
+                term: v?.word,
+                definition: v?.definition,
+              })),
+              summaries: (parsedContent.summariesJSON ?? []).map((s) => ({
+                content: s?.content,
+                type: s?.title,
+              })),
+              objectives: (parsedContent.objectivesJSON ?? []).map((o) => ({
+                description: o?.objective,
+                type: o?.bloomLevel,
+              })),
+              concepts: (parsedContent.conceptsJSON ?? []).map((c) => ({
+                name: c?.concept,
+                description: c?.description,
+              })),
+              questions: (parsedContent.questionsJSON ?? []).map((q) => ({
+                question: q?.question,
+                answer: q?.expectedAnswer,
+              })),
             }
           : null;
 

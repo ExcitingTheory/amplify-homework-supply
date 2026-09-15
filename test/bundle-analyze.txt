@@ -1,0 +1,176 @@
+
+> amplify-homework-supply@1.0.0 analyze
+> ANALYZE=true next build
+
+▲ Next.js 16.2.10 (Turbopack)
+- Environments: .env.local
+- Cache Components enabled
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 116s
+  Skipping validation of types
+  Finished TypeScript config validation in 119ms ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/205) ...
+  Generating static pages using 15 workers (51/205) 
+  Generating static pages using 15 workers (102/205) 
+  Generating static pages using 15 workers (153/205) 
+✓ Generating static pages using 15 workers (205/205) in 19.2s
+  Finalizing page optimization ...
+
+Route (app)                                       Revalidate  Expire
+┌ ◐ /_not-found
+├ ◐ /[locale]
+│ ├ /[locale]
+│ ├ /en
+│ ├ /es
+│ └ [+4 more paths]
+├ ◐ /[locale]/admin/analytics
+│ ├ /[locale]/admin/analytics
+│ ├ /en/admin/analytics
+│ ├ /es/admin/analytics
+│ └ [+4 more paths]
+├ ◐ /[locale]/admin/archives
+│ ├ /[locale]/admin/archives
+│ ├ /en/admin/archives
+│ ├ /es/admin/archives
+│ └ [+4 more paths]
+├ ◐ /[locale]/admin/moderation
+│ ├ /[locale]/admin/moderation
+│ ├ /en/admin/moderation
+│ ├ /es/admin/moderation
+│ └ [+4 more paths]
+├ ◐ /[locale]/admin/settings
+│ ├ /[locale]/admin/settings
+│ ├ /en/admin/settings
+│ ├ /es/admin/settings
+│ └ [+4 more paths]
+├ ◐ /[locale]/admin/words
+│ ├ /[locale]/admin/words
+│ ├ /en/admin/words
+│ ├ /es/admin/words
+│ └ [+4 more paths]
+├ ◐ /[locale]/drill/[id]
+│ ├ /[locale]/drill/[id]
+│ ├ /en/drill/[id]
+│ ├ /es/drill/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/instructor/grade/[id]
+│ ├ /[locale]/instructor/grade/[id]
+│ ├ /en/instructor/grade/[id]
+│ ├ /es/instructor/grade/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/leaderboard
+│ ├ /[locale]/leaderboard
+│ ├ /en/leaderboard
+│ ├ /es/leaderboard
+│ └ [+4 more paths]
+├ ◐ /[locale]/offline                                    30d      1y
+│ ├ /[locale]/offline                                    30d      1y
+│ ├ /en/offline                                          30d      1y
+│ ├ /es/offline                                          30d      1y
+│ └ [+4 more paths]
+├ ◐ /[locale]/privacy
+│ ├ /[locale]/privacy
+│ ├ /en/privacy
+│ ├ /es/privacy
+│ └ [+4 more paths]
+├ ◐ /[locale]/profile
+│ ├ /[locale]/profile
+│ ├ /en/profile
+│ ├ /es/profile
+│ └ [+4 more paths]
+├ ◐ /[locale]/profile/[username]
+│ ├ /[locale]/profile/[username]
+│ ├ /en/profile/[username]
+│ ├ /es/profile/[username]
+│ └ [+4 more paths]
+├ ◐ /[locale]/profile/notifications
+│ ├ /[locale]/profile/notifications
+│ ├ /en/profile/notifications
+│ ├ /es/profile/notifications
+│ └ [+4 more paths]
+├ ◐ /[locale]/recycle-bin
+│ ├ /[locale]/recycle-bin
+│ ├ /en/recycle-bin
+│ ├ /es/recycle-bin
+│ └ [+4 more paths]
+├ ◐ /[locale]/review/[id]
+│ ├ /[locale]/review/[id]
+│ ├ /en/review/[id]
+│ ├ /es/review/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/section/[id]
+│ ├ /[locale]/section/[id]
+│ ├ /en/section/[id]
+│ ├ /es/section/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/section/[id]/settings/ai
+│ ├ /[locale]/section/[id]/settings/ai
+│ ├ /en/section/[id]/settings/ai
+│ ├ /es/section/[id]/settings/ai
+│ └ [+4 more paths]
+├ ◐ /[locale]/section/[id]/settings/gamification
+│ ├ /[locale]/section/[id]/settings/gamification
+│ ├ /en/section/[id]/settings/gamification
+│ ├ /es/section/[id]/settings/gamification
+│ └ [+4 more paths]
+├ ◐ /[locale]/sections
+│ ├ /[locale]/sections
+│ ├ /en/sections
+│ ├ /es/sections
+│ └ [+4 more paths]
+├ ◐ /[locale]/settings
+│ ├ /[locale]/settings
+│ ├ /en/settings
+│ ├ /es/settings
+│ └ [+4 more paths]
+├ ◐ /[locale]/squad/[id]
+│ ├ /[locale]/squad/[id]
+│ ├ /en/squad/[id]
+│ ├ /es/squad/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/squads
+│ ├ /[locale]/squads
+│ ├ /en/squads
+│ ├ /es/squads
+│ └ [+4 more paths]
+├ ◐ /[locale]/unit/[id]
+│ ├ /[locale]/unit/[id]
+│ ├ /en/unit/[id]
+│ ├ /es/unit/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/units
+│ ├ /[locale]/units
+│ ├ /en/units
+│ ├ /es/units
+│ └ [+4 more paths]
+├ ◐ /[locale]/workbook-offline                           30d      1y
+│ ├ /[locale]/workbook-offline                           30d      1y
+│ ├ /en/workbook-offline                                 30d      1y
+│ ├ /es/workbook-offline                                 30d      1y
+│ └ [+4 more paths]
+├ ◐ /[locale]/workbook/[id]
+│ ├ /[locale]/workbook/[id]
+│ ├ /en/workbook/[id]
+│ ├ /es/workbook/[id]
+│ └ [+4 more paths]
+├ ◐ /[locale]/xp-history
+│ ├ /[locale]/xp-history
+│ ├ /en/xp-history
+│ ├ /es/xp-history
+│ └ [+4 more paths]
+├ ƒ /api/analytics
+├ ƒ /api/chat
+├ ƒ /api/content-completion
+├ ƒ /api/grade-ai
+├ ƒ /api/hls
+├ ƒ /api/suggest-blocks
+└ ƒ /api/vitals
+
+
+ƒ Proxy (Middleware)
+
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+

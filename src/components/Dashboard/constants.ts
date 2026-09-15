@@ -3,30 +3,32 @@
  * Unified design tokens for student and instructor dashboards
  */
 
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
+
 export const DASHBOARD_TOKENS = {
   // Spacing & Layout
   spacing: {
-    panelGap: 24, // Gap between major panel sections
-    itemGap: 16, // Gap between cards/items
-    itemGapCompact: 12, // Compact gap for dense layouts
+    panelGap: SEMANTIC_THEME.spacing.panelGap, // Gap between major panel sections
+    itemGap: SEMANTIC_THEME.spacing.itemGap, // Gap between cards/items
+    itemGapCompact: SEMANTIC_THEME.spacing.itemGapCompact, // Compact gap for dense layouts
   },
 
   // Padding
   padding: {
-    panelDesktop: 24,
-    panelMobile: 16,
-    cardDesktop: 16,
-    cardMobile: 14,
-    heroDesktop: 24,
-    heroMobile: 16,
+    panelDesktop: SEMANTIC_THEME.padding.panelDesktop,
+    panelMobile: SEMANTIC_THEME.padding.panelMobile,
+    cardDesktop: SEMANTIC_THEME.padding.cardDesktop,
+    cardMobile: SEMANTIC_THEME.padding.cardMobile,
+    heroDesktop: SEMANTIC_THEME.padding.panelDesktop,
+    heroMobile: SEMANTIC_THEME.padding.panelMobile,
   },
 
   // Border Radius
   radius: {
-    panel: 12, // Main dashboard panels
-    card: 8, // Assignment/section cards
-    button: 6,
-    chip: 6,
+    panel: SEMANTIC_THEME.radius.panel, // Main dashboard panels
+    card: SEMANTIC_THEME.radius.card, // Assignment/section cards
+    button: SEMANTIC_THEME.radius.control,
+    chip: SEMANTIC_THEME.radius.chip,
   },
 
   // Borders

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "dash-msg-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Give me an overview of student performance and active classes on my dashboard."
+      }
+    ]
+  },
+  {
+    "id": "dash-msg-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I'll fetch your active class sections and summarize your current course metrics."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "list_sections",
+        "toolCallId": "call_sec_list_001"
+      },
+      {
+        "type": "tool-list_sections",
+        "toolCallId": "call_sec_list_001",
+        "state": "output-available",
+        "input": {},
+        "output": {
+          "success": true,
+          "count": 3,
+          "sections": [
+            {
+              "id": "sec-jp101",
+              "name": "Spring 2026 Japanese 101",
+              "joinCode": "JP101-S26",
+              "studentCount": 24,
+              "activeUnit": "Basic Greetings & Hiragana",
+              "averageAccuracy": 91.5,
+              "pendingSubmissions": 3
+            },
+            {
+              "id": "sec-jp201",
+              "name": "Intermediate Conversation 201",
+              "joinCode": "JP201-S26",
+              "studentCount": 18,
+              "activeUnit": "Dining & Restaurant Etiquette",
+              "averageAccuracy": 84.2,
+              "pendingSubmissions": 7
+            },
+            {
+              "id": "sec-kanji-bootcamp",
+              "name": "Kanji Mastery Intensive",
+              "joinCode": "KANJI-B26",
+              "studentCount": 15,
+              "activeUnit": "N5 Essential Radicals",
+              "averageAccuracy": 78.0,
+              "pendingSubmissions": 12
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "Here is your class performance overview:\n\n- **Japanese 101** (24 students): **91.5% average accuracy**, 3 submissions pending review.\n- **Intermediate Conversation 201** (18 students): **84.2% average accuracy**, 7 submissions pending review.\n- **Kanji Mastery** (15 students): **78.0% average accuracy**, 12 submissions pending review.\n\nStudents in the Kanji Mastery section are having difficulty with the stroke order quiz. Would you like to review their quiz submissions or assign extra practice?"
+      }
+    ]
+  },
+  {
+    "id": "dash-msg-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Can you start the guided walkthrough tour for managing section assignments?"
+      }
+    ]
+  },
+  {
+    "id": "dash-msg-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "start_tour",
+        "toolCallId": "call_tour_start_001"
+      },
+      {
+        "type": "tool-start_tour",
+        "toolCallId": "call_tour_start_001",
+        "state": "output-available",
+        "input": {
+          "tourId": "instructor-assignments-tour",
+          "mode": "tutorial"
+        },
+        "output": {
+          "success": true,
+          "action": "start_tour",
+          "tourId": "instructor-assignments-tour",
+          "mode": "tutorial",
+          "message": "Started instructor assignments workflow tour in tutorial mode"
+        }
+      },
+      {
+        "type": "text",
+        "text": "🚀 I've launched the **Instructor Assignments Tour** for you! Look at the highlighted sections on your screen to follow the step-by-step walkthrough."
+      }
+    ]
+  },
+  {
+    "id": "dash-msg-5",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "What are my top 3 recommended teaching tasks for today?"
+      }
+    ]
+  },
+  {
+    "id": "dash-msg-6",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Based on recent activity across your sections, here are your top 3 priorities:\n\n1. 📝 **Grade 12 Kanji Submissions** — Students in *Kanji Mastery Intensive* submitted stroke-order exercises awaiting instructor feedback.\n2. 📅 **Schedule Week 5 Assignment** — *Japanese 101* completes their current unit this Thursday; assign the upcoming 'Hiragana Reading Lab' unit.\n3. 🏆 **Celebrate XP Milestones** — 5 students unlocked the 'Streak Master' badge this week; send an encouraging announcement to keep momentum high!"
+      }
+    ]
+  }
+]

@@ -1,7 +1,12 @@
 import * as React from "react";
+import { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { Skeleton, Box } from "@mui/material";
 
-import { DataGrid } from "@mui/x-data-grid";
+// Lazy-load DataGrid only when MeaningAssociationEditor is rendered (authoring only)
+const DataGrid = lazy(() =>
+  import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
+);
 
 import {
   IconButton,
@@ -505,19 +510,25 @@ export default function MeaningAssociationEditor({
         </div>
       )}
       {rows.length > 0 && (
-        <DataGrid
-          sx={{
-            marginTop: "0.5rem",
-          }}
-          rows={rows}
-          columns={getColumns(t)}
-          hideFooter
-          checkboxSelection
-          rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
-          onRowSelectionModelChange={(model) => {
-            setGridSelection([...model.ids]);
-          }}
-        />
+        <Suspense
+          fallback={
+            <Skeleton variant="rectangular" width="100%" height={300} />
+          }
+        >
+          <DataGrid
+            sx={{
+              marginTop: "0.5rem",
+            }}
+            rows={rows}
+            columns={getColumns(t)}
+            hideFooter
+            checkboxSelection
+            rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+            onRowSelectionModelChange={(model) => {
+              setGridSelection([...model.ids]);
+            }}
+          />
+        </Suspense>
       )}
     </div>
   );

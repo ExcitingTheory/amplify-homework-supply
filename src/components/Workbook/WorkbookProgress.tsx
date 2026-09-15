@@ -1,13 +1,13 @@
 /**
  * Workbook Progress Indicator
- * 
+ *
  * Shows completion and accuracy stats from collaborative workbook
  */
 
-import React from 'react';
-import { Box, LinearProgress, Typography, Paper } from '@mui/material';
-import { CheckCircle, TrendingUp } from '@mui/icons-material';
-import UnitContext from '../../context/unitContext';
+import React from "react";
+import { Box, LinearProgress, Typography, Paper } from "@mui/material";
+import { CheckCircle, TrendingUp } from "@mui/icons-material";
+import UnitContext from "../../context/unitContext";
 
 export interface WorkbookProgressProps {
   /**
@@ -15,40 +15,42 @@ export interface WorkbookProgressProps {
    * @default false
    */
   detailed?: boolean;
-  
+
   /**
    * Component variant
    * @default 'default'
    */
-  variant?: 'default' | 'compact' | 'detailed';
+  variant?: "default" | "compact" | "detailed";
 }
 
-export function WorkbookProgress({ 
+export function WorkbookProgress({
   detailed = false,
-  variant = 'default',
+  variant = "default",
 }: WorkbookProgressProps) {
-  const { workbookStats, workbookEnabled, workbook } = React.useContext(UnitContext);
+  const { workbookStats, workbookEnabled, workbook } =
+    React.useContext(UnitContext);
 
   // Don't show if feature disabled or no workbook
   if (!workbookEnabled || !workbook?.provider) {
     return null;
   }
 
-  const { completion, accuracy, totalBlocks, completeBlocks } = workbookStats || {
-    completion: 0,
-    accuracy: 0,
-    totalBlocks: 0,
-    completeBlocks: 0,
-  };
+  const { completion, accuracy, totalBlocks, completeBlocks } =
+    workbookStats || {
+      completion: 0,
+      accuracy: 0,
+      totalBlocks: 0,
+      completeBlocks: 0,
+    };
 
-  if (variant === 'compact') {
+  if (variant === "compact") {
     return (
       <Box display="flex" alignItems="center" gap={1}>
-        <CheckCircle 
-          sx={{ 
-            fontSize: 16, 
-            color: completion === 100 ? 'success.main' : 'text.secondary' 
-          }} 
+        <CheckCircle
+          sx={{
+            fontSize: 16,
+            color: completion === 100 ? "success.main" : "text.secondary",
+          }}
         />
         <Typography variant="caption" color="text.secondary">
           {completeBlocks}/{totalBlocks} complete
@@ -57,13 +59,13 @@ export function WorkbookProgress({
     );
   }
 
-  if (variant === 'detailed') {
+  if (variant === "detailed") {
     return (
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Progress
         </Typography>
-        
+
         <Box mb={2}>
           <Box display="flex" justifyContent="space-between" mb={0.5}>
             <Typography variant="caption" color="text.secondary">
@@ -76,7 +78,7 @@ export function WorkbookProgress({
           <LinearProgress
             variant="determinate"
             value={completion}
-            sx={{ height: 8, borderRadius: 4 }}
+            sx={{ height: 8 }}
           />
         </Box>
 
@@ -92,20 +94,31 @@ export function WorkbookProgress({
           <LinearProgress
             variant="determinate"
             value={accuracy}
-            color={accuracy >= 80 ? 'success' : accuracy >= 60 ? 'warning' : 'error'}
-            sx={{ height: 8, borderRadius: 4 }}
+            color={
+              accuracy >= 80 ? "success" : accuracy >= 60 ? "warning" : "error"
+            }
+            sx={{ height: 8 }}
           />
         </Box>
 
-        <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          mt={2}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Typography variant="caption" color="text.secondary">
             {completeBlocks} of {totalBlocks} questions
           </Typography>
-          
+
           {completion === 100 && (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-              <Typography variant="caption" color="success.main" fontWeight="medium">
+              <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+              <Typography
+                variant="caption"
+                color="success.main"
+                fontWeight="medium"
+              >
                 Complete!
               </Typography>
             </Box>
@@ -126,16 +139,16 @@ export function WorkbookProgress({
           {Math.round(completion)}%
         </Typography>
       </Box>
-      
+
       <LinearProgress
         variant="determinate"
         value={completion}
-        sx={{ height: 6, borderRadius: 3 }}
+        sx={{ height: 6 }}
       />
 
       {detailed && accuracy > 0 && (
         <Box display="flex" alignItems="center" gap={0.5} mt={1}>
-          <TrendingUp sx={{ fontSize: 16, color: 'text.secondary' }} />
+          <TrendingUp sx={{ fontSize: 16, color: "text.secondary" }} />
           <Typography variant="caption" color="text.secondary">
             Accuracy: {Math.round(accuracy)}%
           </Typography>

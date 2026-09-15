@@ -4,7 +4,7 @@
  * button, and the current participant list.
  */
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback } from "react";
 import {
   Box,
   IconButton,
@@ -18,13 +18,14 @@ import {
   Tooltip,
   Chip,
   InputAdornment,
-} from '@mui/material'
-import ShareIcon from '@mui/icons-material/Share'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import CheckIcon from '@mui/icons-material/Check'
-import LinkIcon from '@mui/icons-material/Link'
-import { useTranslations } from 'next-intl'
-import type { PresenceUser } from '../../yjs/workbookHooks'
+} from "@mui/material";
+import ShareIcon from "@mui/icons-material/Share";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
+import LinkIcon from "@mui/icons-material/Link";
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
+import { useTranslations } from "next-intl";
+import type { PresenceUser } from "../../yjs/workbookHooks";
 
 // ============================================================================
 // Types
@@ -32,11 +33,11 @@ import type { PresenceUser } from '../../yjs/workbookHooks'
 
 export interface WorkbookInviteShareProps {
   /** Connected users from usePresenceUsers */
-  users: PresenceUser[]
+  users: PresenceUser[];
   /** The workbook/unit ID for generating the share link */
-  workbookId: string
+  workbookId: string;
   /** Whether the workbook collaboration is active */
-  isConnected?: boolean
+  isConnected?: boolean;
 }
 
 // ============================================================================
@@ -44,8 +45,8 @@ export interface WorkbookInviteShareProps {
 // ============================================================================
 
 function getShareUrl(workbookId: string): string {
-  if (typeof window === 'undefined') return ''
-  return `${window.location.origin}/workbook/${workbookId}`
+  if (typeof window === "undefined") return "";
+  return `${window.location.origin}/workbook/${workbookId}`;
 }
 
 // ============================================================================
@@ -57,48 +58,48 @@ export function WorkbookInviteShare({
   workbookId,
   isConnected = true,
 }: WorkbookInviteShareProps) {
-  const t = useTranslations('components')
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const [copied, setCopied] = useState(false)
+  const t = useTranslations("components");
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const shareUrl = getShareUrl(workbookId)
-  const open = Boolean(anchorEl)
+  const shareUrl = getShareUrl(workbookId);
+  const open = Boolean(anchorEl);
 
   const handleOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }, [])
+    setAnchorEl(event.currentTarget);
+  }, []);
 
   const handleClose = useCallback(() => {
-    setAnchorEl(null)
-    setCopied(false)
-  }, [])
+    setAnchorEl(null);
+    setCopied(false);
+  }, []);
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers
-      const input = document.createElement('input')
-      input.value = shareUrl
-      document.body.appendChild(input)
-      input.select()
-      document.execCommand('copy')
-      document.body.removeChild(input)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      const input = document.createElement("input");
+      input.value = shareUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
-  }, [shareUrl])
+  }, [shareUrl]);
 
   return (
     <>
-      <Tooltip title={t('workbook.invite.shareTooltip')}>
+      <Tooltip title={t("workbook.invite.shareTooltip")}>
         <IconButton
           size="small"
           onClick={handleOpen}
-          color={open ? 'primary' : 'default'}
-          aria-label={t('workbook.invite.shareTooltip')}
+          color={open ? "primary" : "default"}
+          aria-label={t("workbook.invite.shareTooltip")}
         >
           <ShareIcon fontSize="small" />
         </IconButton>
@@ -108,19 +109,23 @@ export function WorkbookInviteShare({
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
           paper: {
-            sx: { p: 2, width: 340, maxWidth: '90vw' },
+            sx: { p: 2, width: 340, maxWidth: "90vw" },
           },
         }}
       >
         <Typography variant="subtitle2" gutterBottom>
-          {t('workbook.invite.title')}
+          {t("workbook.invite.title")}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-          {t('workbook.invite.description')}
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block", mb: 1.5 }}
+        >
+          {t("workbook.invite.description")}
         </Typography>
 
         {/* Share link */}
@@ -141,14 +146,18 @@ export function WorkbookInviteShare({
                   <IconButton
                     size="small"
                     onClick={handleCopy}
-                    color={copied ? 'success' : 'default'}
-                    aria-label={t('workbook.invite.copy')}
+                    color={copied ? "success" : "default"}
+                    aria-label={t("workbook.invite.copy")}
                   >
-                    {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+                    {copied ? (
+                      <CheckIcon fontSize="small" />
+                    ) : (
+                      <ContentCopyIcon fontSize="small" />
+                    )}
                   </IconButton>
                 </InputAdornment>
               ),
-              sx: { fontFamily: 'monospace', fontSize: '0.75rem' },
+              sx: { fontFamily: "monospace", fontSize: "0.75rem" },
             },
           }}
           sx={{ mb: 1 }}
@@ -160,33 +169,39 @@ export function WorkbookInviteShare({
           size="small"
           startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
           onClick={handleCopy}
-          color={copied ? 'success' : 'primary'}
+          color={copied ? "success" : "primary"}
           sx={{ mb: 2 }}
         >
-          {copied
-            ? t('workbook.invite.copied')
-            : t('workbook.invite.copyLink')}
+          {copied ? t("workbook.invite.copied") : t("workbook.invite.copyLink")}
         </Button>
 
         <Divider sx={{ mb: 1.5 }} />
 
         {/* Current participants */}
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-          {t('workbook.invite.currentlyOnline')} ({users.length})
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block", mb: 1 }}
+        >
+          {t("workbook.invite.currentlyOnline")} ({users.length})
         </Typography>
 
         {users.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 1 }}>
-            {t('workbook.invite.noOthers')}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", py: 1 }}
+          >
+            {t("workbook.invite.noOthers")}
           </Typography>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
             {users.map((user) => (
               <Box
                 key={user.clientId}
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 1,
                   py: 0.5,
                   opacity: user.isIdle ? 0.5 : 1,
@@ -196,26 +211,34 @@ export function WorkbookInviteShare({
                   sx={{
                     width: 24,
                     height: 24,
-                    fontSize: '0.7rem',
-                    bgcolor: user.color || '#6366f1',
+                    fontSize: "0.7rem",
+                    bgcolor: user.color || "#6366f1",
                   }}
                 >
-                  {(user.displayName?.[0] || user.username?.[0] || '?').toUpperCase()}
+                  {(
+                    user.displayName?.[0] ||
+                    user.username?.[0] ||
+                    "?"
+                  ).toUpperCase()}
                 </Avatar>
                 <Typography variant="body2" sx={{ flex: 1 }}>
                   {user.displayName || user.username}
                 </Typography>
-                {user.role && user.role !== 'student' && (
+                {user.role && user.role !== "student" && (
                   <Chip
                     size="small"
                     label={user.role}
                     variant="outlined"
-                    sx={{ height: 20, fontSize: '0.65rem' }}
+                    sx={{
+                      height: 20,
+                      fontSize: "0.65rem",
+                      borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                    }}
                   />
                 )}
                 {user.isIdle && (
                   <Typography variant="caption" color="text.secondary">
-                    {t('workbook.invite.idle')}
+                    {t("workbook.invite.idle")}
                   </Typography>
                 )}
               </Box>
@@ -224,5 +247,5 @@ export function WorkbookInviteShare({
         )}
       </Popover>
     </>
-  )
+  );
 }

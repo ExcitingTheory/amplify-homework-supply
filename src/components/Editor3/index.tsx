@@ -571,6 +571,8 @@ export default function Editor(): React.ReactElement {
                   sx={{
                     display: "flex",
                     overflow: "hidden",
+                    height: `calc(100vh - ${appBarHeight}px)`,
+                    minHeight: 0,
                   }}
                 >
                   <ToolBarPlugin

@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof BadgeCoinFlip> = {
   title: "🏆 Gamification/Badges & Celebrations/Badge Coin Flip",
   component: BadgeCoinFlip,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

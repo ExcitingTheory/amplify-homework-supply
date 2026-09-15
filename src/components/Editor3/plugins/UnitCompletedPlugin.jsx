@@ -18,10 +18,33 @@ import { useXP } from "../../../context/gamificationContext";
 import { OpenPeerReviewButton } from "../../PeerReview/OpenPeerReviewButton";
 import { HomeworkXPSummary } from "../../Gamification/HomeworkXPSummary";
 import { PersonalBestBanner } from "../../Gamification/PersonalBestBanner";
-import { getAmplifyClient } from "../../../utils/amplifyClient";
-import { Modal, Card, Typography, Box, Button, Divider } from "@mui/material";
+import { createPeerReviewRoom } from "../../../../app/actions/peerReview";
+import {
+  trackWorkbookCompleted,
+  trackGradeRetry,
+  trackPeerReviewSubmitted,
+} from "../../../utils/analytics";
+import {
+  Modal,
+  Card,
+  Typography,
+  Box,
+  Button,
+  Divider,
+  Alert,
+} from "@mui/material";
 import ReplayIcon from "@mui/icons-material/Replay";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import RateReviewIcon from "@mui/icons-material/RateReview";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import {
+  formatGradeDuration,
+  getGradeCompletionLabel,
+} from "../../../utils/gradeTiming";
+import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
 /**
  * UnitCompletedPlugin - Displays modal when unit is completed.
@@ -48,15 +71,40 @@ export default function UnitCompletedPlugin() {
     createGrade,
     recentGrades = [],
     sectionId,
+    session,
   } = useContext(UnitContext) || {};
 
   const [retrying, setRetrying] = useState(false);
+  const [requestingGuidance, setRequestingGuidance] = useState(false);
+  const [createdRoom, setCreatedRoom] = useState(null); // { roomId } | null
+  const [copied, setCopied] = useState(false);
   const { totalXP, xpLogs } = useXP();
   const { assignments } = useContext(SectionContext) || { assignments: [] };
 
   const retryEnabled = unit?.retryEnabled !== false;
   // Most recent completed grade for peer review
   const latestCompletedGrade = recentGrades[0];
+  const timeLimitSeconds = unit?.timeLimitSeconds || 0;
+  const completionTimeLabel = getGradeCompletionLabel(
+    latestCompletedGrade || grade,
+  );
+
+  // Fire a workbook-completed analytics event once when the completion modal appears
+  const completionTrackedRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!showUnitComplete || !unit?.id) return;
+    const gradeId = grade?.id || latestCompletedGrade?.id || "";
+    if (completionTrackedRef.current === gradeId) return;
+    completionTrackedRef.current = gradeId;
+    const accuracy = grade?.accuracy ?? latestCompletedGrade?.accuracy ?? 0;
+    trackWorkbookCompleted(unit.id, gradeId, accuracy, 0);
+  }, [
+    showUnitComplete,
+    unit?.id,
+    grade?.id,
+    grade?.accuracy,
+    latestCompletedGrade,
+  ]);
 
   // Compute next assignment in same section (sorted by due date, skip current)
   const nextAssignment = useMemo(() => {
@@ -76,6 +124,7 @@ export default function UnitCompletedPlugin() {
   const handleTryAgain = async () => {
     setRetrying(true);
     try {
+      trackGradeRetry(unit?.id || "", grade?.id);
       await createGrade(0, false);
       setShowUnitComplete(false);
     } catch (err) {
@@ -86,18 +135,72 @@ export default function UnitCompletedPlugin() {
   };
 
   const handleCreateRoom = async (gradeId, invitedUserIds) => {
-    const client = getAmplifyClient();
-    const { data: room } = await client.models.HomeworkRoom.create({
+    const result = await createPeerReviewRoom(
       gradeId,
-      status: "open",
-      peerGroup: invitedUserIds,
+      invitedUserIds,
+      sectionId || "",
+      session?.username || "",
+    );
+    if (!result?.success || !result.roomId) {
+      throw new Error(result?.error || "Failed to create review room");
+    }
+    trackPeerReviewSubmitted(result.roomId, {
+      gradeId,
+      sectionId: sectionId || undefined,
+      participantCount: (invitedUserIds?.length || 0) + 1,
     });
-    return room.id;
+    return result.roomId;
   };
 
   const handleRoomCreated = (roomId) => {
-    router.push(`/review/${roomId}`);
+    // Show inline actions instead of navigating away immediately
+    setCreatedRoom({ roomId });
+    router.prefetch(`/review/${roomId}`);
   };
+
+  const handleCopyInvite = async () => {
+    if (!createdRoom?.roomId) return;
+    const url = `${window.location.origin}/review/${createdRoom.roomId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("[UnitCompletedPlugin] Failed to copy invite link:", err);
+    }
+  };
+
+  const handleRequestGuidance = async () => {
+    if (!latestCompletedGrade || requestingGuidance) return;
+    setRequestingGuidance(true);
+    try {
+      const result = await createPeerReviewRoom(
+        latestCompletedGrade.id,
+        [],
+        sectionId || "",
+        session?.username || "",
+      );
+      if (result?.success && result.roomId) {
+        router.push(`/review/${result.roomId}`);
+      }
+    } catch (err) {
+      console.error("[UnitCompletedPlugin] Error requesting guidance:", err);
+    } finally {
+      setRequestingGuidance(false);
+    }
+  };
+
+  const handlePracticeMistakes = () => {
+    if (!unit?.id) return;
+    setShowUnitComplete(false);
+    router.push(`/drill/${unit.id}?drillType=mixed&count=10`);
+  };
+
+  // Prefetch dashboard return route ahead of time
+  React.useEffect(() => {
+    router.prefetch("/");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Modal
@@ -118,7 +221,8 @@ export default function UnitCompletedPlugin() {
       slotProps={{
         backdrop: {
           sx: {
-            backdropFilter: "blur(5px)",
+            backdropFilter: SEMANTIC_THEME.surface.overlayBlur,
+            WebkitBackdropFilter: SEMANTIC_THEME.surface.overlayBlur,
           },
         },
       }}
@@ -133,8 +237,9 @@ export default function UnitCompletedPlugin() {
           width: "70vw",
           maxWidth: "700px",
           bgcolor: "background.paper",
-          boxShadow: "0 0 10px 3px rgba(0, 0, 0, .3)",
-          backdropFilter: "blur(5px)",
+          boxShadow: (theme) => theme.shadows[SEMANTIC_THEME.elevation.overlay],
+          backdropFilter: SEMANTIC_THEME.surface.overlayBlur,
+          WebkitBackdropFilter: SEMANTIC_THEME.surface.overlayBlur,
           overflow: "auto",
           maxHeight: "90vh",
         }}
@@ -161,6 +266,17 @@ export default function UnitCompletedPlugin() {
         >
           {t("unitCompletedPlugin.sectionHeading")}
         </Typography>
+
+        {timeLimitSeconds > 0 && (
+          <Typography
+            variant="body1"
+            component="p"
+            sx={{ textAlign: "center", color: "text.secondary", mt: 1 }}
+          >
+            Time limit: {formatGradeDuration(timeLimitSeconds)}
+            {completionTimeLabel ? ` • ${completionTimeLabel}` : ""}
+          </Typography>
+        )}
 
         {/* Personal Best Banner */}
         {personalBestResult?.isNewBest && (
@@ -211,6 +327,7 @@ export default function UnitCompletedPlugin() {
             );
 
             const _roundedAccuracy = Math.round(grade?.accuracy * 100) / 100;
+            const completionLabel = getGradeCompletionLabel(grade);
 
             return (
               <li key={index}>
@@ -255,6 +372,15 @@ export default function UnitCompletedPlugin() {
                     {`${_roundedAccuracy}%`}
                   </Typography>
                 </Box>
+                {completionLabel && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", textAlign: "right" }}
+                  >
+                    {completionLabel}
+                  </Typography>
+                )}
               </li>
             );
           })}
@@ -289,11 +415,11 @@ export default function UnitCompletedPlugin() {
 
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+            gap: 1.25,
             p: 3,
-            alignItems: "center",
+            alignItems: "stretch",
           }}
         >
           {retryEnabled && (
@@ -303,7 +429,7 @@ export default function UnitCompletedPlugin() {
               startIcon={<ReplayIcon />}
               onClick={handleTryAgain}
               disabled={retrying}
-              sx={{ width: "100%", maxWidth: "400px" }}
+              sx={{ width: "100%" }}
             >
               {retrying
                 ? t("unitCompletedPlugin.retrying", "Starting new attempt...")
@@ -311,13 +437,77 @@ export default function UnitCompletedPlugin() {
             </Button>
           )}
 
-          {latestCompletedGrade && (
-            <OpenPeerReviewButton
-              gradeId={latestCompletedGrade.id}
-              onCreateRoom={handleCreateRoom}
-              onRoomCreated={handleRoomCreated}
-            />
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<RateReviewIcon />}
+            onClick={() => setShowUnitComplete(false)}
+            sx={{ width: "100%" }}
+          >
+            {t("unitCompletedPlugin.reviewAnswers", "Review Answers")}
+          </Button>
+
+          {createdRoom ? (
+            <Alert severity="success" sx={{ gridColumn: "1 / -1" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                {t("unitCompletedPlugin.roomCreated", "Review room created!")}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<ContentCopyIcon />}
+                  onClick={handleCopyInvite}
+                >
+                  {copied
+                    ? t("common.copied", "Copied!")
+                    : t("unitCompletedPlugin.copyInvite", "Copy Invite Link")}
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => router.push(`/review/${createdRoom.roomId}`)}
+                >
+                  {t("unitCompletedPlugin.goToRoom", "Go to Room")}
+                </Button>
+              </Box>
+            </Alert>
+          ) : (
+            latestCompletedGrade && (
+              <OpenPeerReviewButton
+                gradeId={latestCompletedGrade.id}
+                onCreateRoom={handleCreateRoom}
+                onRoomCreated={handleRoomCreated}
+              />
+            )
           )}
+
+          {latestCompletedGrade && (
+            <Button
+              variant="outlined"
+              size="large"
+              color="secondary"
+              startIcon={<SupportAgentIcon />}
+              onClick={handleRequestGuidance}
+              disabled={requestingGuidance}
+              sx={{ width: "100%" }}
+            >
+              {requestingGuidance
+                ? t("unitCompletedPlugin.requestingGuidance", "Requesting...")
+                : t("unitCompletedPlugin.requestGuidance", "Request Guidance")}
+            </Button>
+          )}
+
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<AutoFixHighIcon />}
+            onClick={handlePracticeMistakes}
+            sx={{ width: "100%" }}
+          >
+            {t("unitCompletedPlugin.practiceMistakes", "Practice Mistakes")}
+          </Button>
 
           {nextAssignment && (
             <Button
@@ -328,7 +518,7 @@ export default function UnitCompletedPlugin() {
                 setShowUnitComplete(false);
                 router.push(`/workbook/${nextAssignment.unitID}`);
               }}
-              sx={{ width: "100%", maxWidth: "400px" }}
+              sx={{ width: "100%" }}
             >
               {t("unitCompletedPlugin.nextAssignment", "Next Assignment")}
             </Button>

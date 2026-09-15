@@ -13,6 +13,8 @@ import {
   Alert,
   Skeleton,
   Button,
+  Collapse,
+  useMediaQuery,
 } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PeopleIcon from "@mui/icons-material/People";
@@ -31,6 +33,7 @@ import { AvatarDisplay } from "./Gamification/AvatarDisplay";
 import { SkillTreePopupButton } from "./SkillTreePopupButton";
 import { listSectionStudents } from "../../app/actions/section";
 import { formatLastFirst } from "../utils/formatUserName";
+import { DASHBOARD_TOKENS } from "./Dashboard/constants";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function gradeColor(pct) {
@@ -119,7 +122,11 @@ export default function InstructorDashboard({ sections = [] }) {
   const [flaggedChats, setFlaggedChats] = useState([]);
   const [sectionStudents, setSectionStudents] = useState({});
   const [allUnits, setAllUnits] = useState({});
+  const [allSkills, setAllSkills] = useState([]);
+  const [allGroupChallenges, setAllGroupChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedSections, setExpandedSections] = useState({});
+  const isMobile = useMediaQuery("(max-width:599.95px)");
 
   // Fetch all completed grades (no assignment filter — section-based)
   useEffect(() => {
@@ -261,6 +268,90 @@ export default function InstructorDashboard({ sections = [] }) {
     return () => subscription.unsubscribe();
   }, [sections.length]);
 
+  // Fetch skills + group challenges (to detect gamification linked to draft units)
+  useEffect(() => {
+    if (sections.length === 0) return;
+    const subscription = client.models.Skill.observeQuery().subscribe({
+      next: ({ items }) => {
+        setAllSkills(items.filter((s) => s != null && s.id != null));
+      },
+      error: (err) =>
+        console.warn("[InstructorDashboard] Skill subscription error:", err),
+    });
+    return () => subscription.unsubscribe();
+  }, [sections.length]);
+
+  useEffect(() => {
+    if (sections.length === 0) return;
+    const subscription = client.models.GroupChallenge.observeQuery().subscribe({
+      next: ({ items }) => {
+        setAllGroupChallenges(items.filter((c) => c != null && c.id != null));
+      },
+      error: (err) =>
+        console.warn(
+          "[InstructorDashboard] GroupChallenge subscription error:",
+          err,
+        ),
+    });
+    return () => subscription.unsubscribe();
+  }, [sections.length]);
+
+  // Gamification items (skills, campaigns, unit gates) that reference a Unit still in DRAFT.
+  // One issue per (source item, draft unit) pair so each chip can deep-link to that unit.
+  const linkedDraftIssues = React.useMemo(() => {
+    const issues = [];
+    const unitName = (unitId) => allUnits[unitId]?.name || unitId;
+
+    for (const skill of allSkills) {
+      const draftUnitIds = (skill.unitIds || []).filter(
+        (id) => allUnits[id]?.status === "DRAFT",
+      );
+      for (const unitId of draftUnitIds) {
+        issues.push({
+          key: `skill-${skill.id}-${unitId}`,
+          unitId,
+          label: `Skill "${skill.title}" requires draft unit "${unitName(unitId)}"`,
+        });
+      }
+    }
+
+    for (const challenge of allGroupChallenges) {
+      const draftUnitIds = (challenge.linkedUnitIds || []).filter(
+        (id) => allUnits[id]?.status === "DRAFT",
+      );
+      if (
+        challenge.unlockContentId &&
+        allUnits[challenge.unlockContentId]?.status === "DRAFT"
+      ) {
+        draftUnitIds.push(challenge.unlockContentId);
+      }
+      for (const unitId of draftUnitIds) {
+        issues.push({
+          key: `challenge-${challenge.id}-${unitId}`,
+          unitId,
+          label: `Campaign "${challenge.title}" links draft unit "${unitName(unitId)}"`,
+        });
+      }
+    }
+
+    for (const unit of Object.values(allUnits)) {
+      if (
+        unit.status === "DRAFT" &&
+        (unit.requiredXP ||
+          unit.requiredBadgeId ||
+          unit.requiredModuleCompletion)
+      ) {
+        issues.push({
+          key: `unit-gate-${unit.id}`,
+          unitId: unit.id,
+          label: `Unlock gate configured on draft unit "${unit.name || unit.id}" — won't apply until published`,
+        });
+      }
+    }
+
+    return issues;
+  }, [allSkills, allGroupChallenges, allUnits]);
+
   // Calculate per-section analytics
   useEffect(() => {
     if (sections.length === 0) {
@@ -364,6 +455,15 @@ export default function InstructorDashboard({ sections = [] }) {
         };
       });
 
+      const possibleSubmissions = unitCompletion.reduce(
+        (sum, unit) => sum + unit.totalStudents,
+        0,
+      );
+      const completedSubmissions = unitCompletion.reduce(
+        (sum, unit) => sum + unit.submittedCount,
+        0,
+      );
+
       stats[section.id] = {
         studentCount: studentRankings.length,
         activeThisWeek,
@@ -376,6 +476,9 @@ export default function InstructorDashboard({ sections = [] }) {
             : 0,
         distribution,
         unitCompletion,
+        completionRate: possibleSubmissions
+          ? Math.round((completedSubmissions / possibleSubmissions) * 100)
+          : 0,
         leaderboard: studentRankings.slice(0, 10),
         recentActivity,
         flaggedCount: flaggedGrades.filter((g) => g.sectionID === section.id)
@@ -407,8 +510,34 @@ export default function InstructorDashboard({ sections = [] }) {
           )
         : 0;
     const moderationAlerts = flaggedGrades.length + flaggedChats.length;
+    const possibleSubmissions = Object.values(sectionStats).reduce(
+      (sum, s) =>
+        sum +
+        (s.unitCompletion || []).reduce(
+          (unitSum, unit) => unitSum + unit.totalStudents,
+          0,
+        ),
+      0,
+    );
+    const completedSubmissions = Object.values(sectionStats).reduce(
+      (sum, s) =>
+        sum +
+        (s.unitCompletion || []).reduce(
+          (unitSum, unit) => unitSum + unit.submittedCount,
+          0,
+        ),
+      0,
+    );
 
-    return { totalStudents, activeThisWeek, avgGrade, moderationAlerts };
+    return {
+      totalStudents,
+      activeThisWeek,
+      avgGrade,
+      completionRate: possibleSubmissions
+        ? Math.round((completedSubmissions / possibleSubmissions) * 100)
+        : 0,
+      moderationAlerts,
+    };
   }, [sectionStats, flaggedGrades, flaggedChats]);
 
   if (sections.length === 0) {
@@ -428,7 +557,7 @@ export default function InstructorDashboard({ sections = [] }) {
         elevation={0}
         sx={{
           mb: 3,
-          borderRadius: 2,
+          borderRadius: DASHBOARD_TOKENS.radius.panel / 2,
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",
@@ -459,7 +588,16 @@ export default function InstructorDashboard({ sections = [] }) {
             }}
           />
         </Box>
-        <Box sx={{ display: "flex", gap: { xs: 2, sm: 4 }, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "repeat(2, minmax(0, 1fr))",
+              sm: "repeat(5, minmax(0, 1fr))",
+            },
+            gap: { xs: 2, sm: 3 },
+          }}
+        >
           {[
             {
               icon: <PeopleIcon />,
@@ -477,6 +615,11 @@ export default function InstructorDashboard({ sections = [] }) {
               value: `${aggregateStats.avgGrade}%`,
             },
             {
+              icon: <AssignmentTurnedInIcon />,
+              label: "Completion Rate",
+              value: `${aggregateStats.completionRate}%`,
+            },
+            {
               icon: <FlagIcon />,
               label: "Moderation Alerts",
               value: aggregateStats.moderationAlerts,
@@ -484,7 +627,7 @@ export default function InstructorDashboard({ sections = [] }) {
           ].map(({ icon, label, value }) => (
             <Box
               key={label}
-              sx={{ display: "flex", flexDirection: "column", minWidth: 80 }}
+              sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}
             >
               <Box
                 sx={{
@@ -511,12 +654,48 @@ export default function InstructorDashboard({ sections = [] }) {
             </Box>
           ))}
         </Box>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ mt: 2 }}
+        >
+          <Button
+            component="a"
+            href="/sections"
+            size="small"
+            variant="contained"
+            startIcon={<PeopleIcon />}
+          >
+            Manage sections
+          </Button>
+          <Button
+            component="a"
+            href="/admin/moderation"
+            size="small"
+            variant="outlined"
+            startIcon={<FlagIcon />}
+          >
+            Review flagged content
+          </Button>
+          {validSections[0] && (
+            <Button
+              component="a"
+              href={`/section/${validSections[0].id}`}
+              size="small"
+              variant="outlined"
+              startIcon={<AssignmentTurnedInIcon />}
+            >
+              Open grade review
+            </Button>
+          )}
+        </Stack>
       </Paper>
 
       {/* ── NEEDS ATTENTION ─────────────────────────────────────────────── */}
       {(flaggedGrades.length > 0 ||
         flaggedChats.length > 0 ||
-        globalAtRiskCount > 0) && (
+        globalAtRiskCount > 0 ||
+        linkedDraftIssues.length > 0) && (
         <Alert
           severity={
             flaggedGrades.length > 0 || flaggedChats.length > 0
@@ -530,7 +709,7 @@ export default function InstructorDashboard({ sections = [] }) {
               <WarningAmberIcon />
             )
           }
-          sx={{ mb: 3, borderRadius: 2 }}
+          sx={{ mb: 3, borderRadius: `${DASHBOARD_TOKENS.radius.card}px` }}
         >
           <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
             Needs attention
@@ -552,6 +731,14 @@ export default function InstructorDashboard({ sections = [] }) {
               Content flagged for review (
               {flaggedGrades.length + flaggedChats.length} item
               {flaggedGrades.length + flaggedChats.length !== 1 ? "s" : ""})
+            </Typography>
+          )}
+          {linkedDraftIssues.length > 0 && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Gamification settings reference unpublished units (
+              {linkedDraftIssues.length} item
+              {linkedDraftIssues.length !== 1 ? "s" : ""}) — students won't be
+              able to satisfy these until the unit is published.
             </Typography>
           )}
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -588,6 +775,24 @@ export default function InstructorDashboard({ sections = [] }) {
                 clickable
                 sx={{ "& .MuiChip-icon": { order: -1 } }}
               />
+            ))}
+            {linkedDraftIssues.map((issue) => (
+              <Tooltip
+                key={issue.key}
+                title="Open the unit editor to publish it"
+              >
+                <Chip
+                  icon={<WarningAmberIcon />}
+                  label={issue.label}
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  component="a"
+                  href={`/unit/${issue.unitId}`}
+                  clickable
+                  sx={{ "& .MuiChip-icon": { order: -1 } }}
+                />
+              </Tooltip>
             ))}
           </Stack>
         </Alert>
@@ -630,7 +835,7 @@ export default function InstructorDashboard({ sections = [] }) {
                 sx={{
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: 3,
+                  borderRadius: DASHBOARD_TOKENS.radius.panel,
                   overflow: "hidden",
                 }}
               >
@@ -717,428 +922,457 @@ export default function InstructorDashboard({ sections = [] }) {
                         color="success"
                       />
                     )}
+                    <Button
+                      size="small"
+                      variant="text"
+                      aria-expanded={
+                        !isMobile || expandedSections[section.id] === true
+                      }
+                      onClick={() =>
+                        setExpandedSections((current) => ({
+                          ...current,
+                          [section.id]: current[section.id] !== true,
+                        }))
+                      }
+                      sx={{
+                        display: { xs: "inline-flex", sm: "none" },
+                      }}
+                    >
+                      {expandedSections[section.id] === true
+                        ? "Hide details"
+                        : "View details"}
+                    </Button>
                   </Stack>
                 </Box>
 
-                <Box sx={{ p: 2.5 }}>
-                  {/* ── Avg Grade + distribution ── */}
-                  <Box sx={{ mb: 2.5 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mb: 0.5,
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        Avg Grade
-                      </Typography>
-                      <Typography
-                        variant="caption"
+                <Collapse
+                  in={!isMobile || expandedSections[section.id] === true}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <Box sx={{ p: 2.5 }}>
+                    {/* ── Avg Grade + distribution ── */}
+                    <Box sx={{ mb: 2.5 }}>
+                      <Box
                         sx={{
-                          fontWeight: 700,
-                          color: `${gradeColor(stats.averageGrade)}.main`,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 0.5,
                         }}
                       >
-                        {stats.averageGrade}%
-                      </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Avg Grade
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 700,
+                            color: `${gradeColor(stats.averageGrade)}.main`,
+                          }}
+                        >
+                          {stats.averageGrade}%
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={stats.averageGrade}
+                        color={gradeColor(stats.averageGrade)}
+                        sx={{ height: 8, borderRadius: 4, mb: 0.75 }}
+                      />
+                      <GradeDistributionBar distribution={stats.distribution} />
+                      {stats.distribution.total > 0 && (
+                        <Stack
+                          direction="row"
+                          spacing={0.75}
+                          sx={{ mt: 0.5 }}
+                          flexWrap="wrap"
+                          useFlexGap
+                        >
+                          {stats.distribution.a > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#66bb6a" }}
+                            >
+                              A: {stats.distribution.a}
+                            </Typography>
+                          )}
+                          {stats.distribution.b > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#42a5f5" }}
+                            >
+                              B: {stats.distribution.b}
+                            </Typography>
+                          )}
+                          {stats.distribution.c > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#ffa726" }}
+                            >
+                              C: {stats.distribution.c}
+                            </Typography>
+                          )}
+                          {stats.distribution.f > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#ef5350" }}
+                            >
+                              F: {stats.distribution.f}
+                            </Typography>
+                          )}
+                        </Stack>
+                      )}
                     </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={stats.averageGrade}
-                      color={gradeColor(stats.averageGrade)}
-                      sx={{ height: 8, borderRadius: 4, mb: 0.75 }}
-                    />
-                    <GradeDistributionBar distribution={stats.distribution} />
-                    {stats.distribution.total > 0 && (
-                      <Stack
-                        direction="row"
-                        spacing={0.75}
-                        sx={{ mt: 0.5 }}
-                        flexWrap="wrap"
-                        useFlexGap
+
+                    {/* ── Class progress by unit ── */}
+                    {stats.unitCompletion.length > 0 && (
+                      <Box sx={{ mb: 2.5 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            mb: 1,
+                          }}
+                        >
+                          <AssignmentTurnedInIcon
+                            sx={{ fontSize: "0.85rem" }}
+                          />
+                          Class Progress by Unit
+                        </Typography>
+                        <Stack spacing={0.75}>
+                          {stats.unitCompletion.map((uc) => {
+                            const pct =
+                              uc.totalStudents > 0
+                                ? Math.round(
+                                    (uc.submittedCount / uc.totalStudents) *
+                                      100,
+                                  )
+                                : 0;
+                            const unitName =
+                              allUnits[uc.unitID]?.name ||
+                              uc.unitID?.slice(0, 8) ||
+                              "Unit";
+                            return (
+                              <Box key={uc.assignmentId}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    mb: 0.25,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    noWrap
+                                    sx={{ maxWidth: "65%" }}
+                                  >
+                                    {unitName}
+                                    {uc.dueDate && (
+                                      <Typography
+                                        component="span"
+                                        variant="caption"
+                                        color="text.disabled"
+                                        sx={{ ml: 0.5 }}
+                                      >
+                                        · due{" "}
+                                        {new Date(
+                                          uc.dueDate,
+                                        ).toLocaleDateString(undefined, {
+                                          month: "short",
+                                          day: "numeric",
+                                        })}
+                                      </Typography>
+                                    )}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      fontWeight: 700,
+                                      color:
+                                        pct === 100
+                                          ? "success.main"
+                                          : pct >= 50
+                                            ? "warning.main"
+                                            : "text.secondary",
+                                    }}
+                                  >
+                                    {uc.submittedCount}/{uc.totalStudents}
+                                  </Typography>
+                                </Box>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={pct}
+                                  color={
+                                    pct === 100
+                                      ? "success"
+                                      : pct >= 50
+                                        ? "warning"
+                                        : "inherit"
+                                  }
+                                  sx={{ height: 5, borderRadius: 3 }}
+                                />
+                              </Box>
+                            );
+                          })}
+                        </Stack>
+                      </Box>
+                    )}
+
+                    {/* ── Recent Activity ── */}
+                    {stats.recentActivity.length > 0 && (
+                      <Box sx={{ mb: 2.5 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            mb: 1,
+                          }}
+                        >
+                          <HistoryIcon sx={{ fontSize: "0.85rem" }} />
+                          Recent Activity
+                        </Typography>
+                        <Stack spacing={0.5}>
+                          {stats.recentActivity.map((grade) => (
+                            <Box
+                              key={grade.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                bgcolor: "action.hover",
+                              }}
+                            >
+                              <AvatarDisplay
+                                seed={grade.owner}
+                                size={22}
+                                style="simple"
+                              />
+                              <Typography
+                                variant="body2"
+                                sx={{ flex: 1 }}
+                                noWrap
+                              >
+                                {formatLastFirst(
+                                  sectionStudents[grade.owner] || {
+                                    id: grade.owner,
+                                  },
+                                )}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                              >
+                                {allUnits[grade.unitID]?.name ||
+                                  grade.unitID?.slice(0, 8)}
+                              </Typography>
+                              <Chip
+                                label={`${Math.round(grade.accuracy)}%`}
+                                size="small"
+                                color={gradeColor(grade.accuracy)}
+                                sx={{ fontWeight: 700, minWidth: 44 }}
+                              />
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+
+                    {/* ── At-risk alert ── */}
+                    {atRisk.length > 0 && (
+                      <Alert
+                        severity="warning"
+                        icon={<WarningAmberIcon />}
+                        sx={{ mb: 2, py: 0.5 }}
                       >
-                        {stats.distribution.a > 0 && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "#66bb6a" }}
-                          >
-                            A: {stats.distribution.a}
-                          </Typography>
-                        )}
-                        {stats.distribution.b > 0 && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "#42a5f5" }}
-                          >
-                            B: {stats.distribution.b}
-                          </Typography>
-                        )}
-                        {stats.distribution.c > 0 && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "#ffa726" }}
-                          >
-                            C: {stats.distribution.c}
-                          </Typography>
-                        )}
-                        {stats.distribution.f > 0 && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "#ef5350" }}
-                          >
-                            F: {stats.distribution.f}
-                          </Typography>
-                        )}
-                      </Stack>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          Students needing support:
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={0.5}
+                          flexWrap="wrap"
+                          useFlexGap
+                          sx={{ mt: 0.5 }}
+                        >
+                          {atRisk.map((s) => (
+                            <Chip
+                              key={s.studentId}
+                              avatar={
+                                <AvatarDisplay
+                                  seed={s.studentId}
+                                  size={20}
+                                  style="simple"
+                                />
+                              }
+                              label={`${formatLastFirst(sectionStudents[s.studentId] || { id: s.studentId })} · ${Math.round(s.average)}%`}
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                            />
+                          ))}
+                        </Stack>
+                      </Alert>
+                    )}
+
+                    {/* ── Leaderboard (top 5) ── */}
+                    {top5.length > 0 && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            display: "block",
+                            mb: 1,
+                          }}
+                        >
+                          Top Students
+                        </Typography>
+                        <Stack spacing={0.75}>
+                          {top5.map((student, idx) => (
+                            <Box
+                              key={student.studentId}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1.5,
+                                px: 1.5,
+                                py: 0.75,
+                                borderRadius: `${DASHBOARD_TOKENS.radius.card}px`,
+                                bgcolor:
+                                  idx === 0
+                                    ? "rgba(255,215,0,0.08)"
+                                    : idx === 1
+                                      ? "rgba(192,192,192,0.08)"
+                                      : idx === 2
+                                        ? "rgba(205,127,50,0.08)"
+                                        : "action.hover",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontSize: "1rem",
+                                  width: 24,
+                                  textAlign: "center",
+                                }}
+                              >
+                                {MEDAL[idx] || `#${idx + 1}`}
+                              </Typography>
+                              <AvatarDisplay
+                                seed={student.studentId}
+                                size={28}
+                                style="simple"
+                              />
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  flex: 1,
+                                  fontWeight: idx < 3 ? 600 : 400,
+                                }}
+                                noWrap
+                              >
+                                {formatLastFirst(
+                                  sectionStudents[student.studentId] || {
+                                    id: student.studentId,
+                                  },
+                                )}
+                              </Typography>
+                              <Chip
+                                label={`${Math.round(student.average)}%`}
+                                size="small"
+                                color={gradeColor(student.average)}
+                                sx={{ fontWeight: 700, minWidth: 52 }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ whiteSpace: "nowrap" }}
+                              >
+                                {student.unitsCompleted} units
+                              </Typography>
+                            </Box>
+                          ))}
+                          {stats.leaderboard.length > 5 && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ textAlign: "center", pt: 0.5 }}
+                            >
+                              +{stats.leaderboard.length - 5} more students
+                            </Typography>
+                          )}
+                        </Stack>
+                      </Box>
+                    )}
+
+                    {stats.leaderboard.length === 0 && (
+                      <Typography
+                        color="text.secondary"
+                        sx={{ textAlign: "center", py: 2 }}
+                      >
+                        {t("instructorDashboard.noDataYet")}
+                      </Typography>
                     )}
                   </Box>
 
-                  {/* ── Class progress by unit ── */}
-                  {stats.unitCompletion.length > 0 && (
-                    <Box sx={{ mb: 2.5 }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          mb: 1,
-                        }}
-                      >
-                        <AssignmentTurnedInIcon sx={{ fontSize: "0.85rem" }} />
-                        Class Progress by Unit
-                      </Typography>
-                      <Stack spacing={0.75}>
-                        {stats.unitCompletion.map((uc) => {
-                          const pct =
-                            uc.totalStudents > 0
-                              ? Math.round(
-                                  (uc.submittedCount / uc.totalStudents) * 100,
-                                )
-                              : 0;
-                          const unitName =
-                            allUnits[uc.unitID]?.name ||
-                            uc.unitID?.slice(0, 8) ||
-                            "Unit";
-                          return (
-                            <Box key={uc.assignmentId}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  mb: 0.25,
-                                }}
-                              >
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  noWrap
-                                  sx={{ maxWidth: "65%" }}
-                                >
-                                  {unitName}
-                                  {uc.dueDate && (
-                                    <Typography
-                                      component="span"
-                                      variant="caption"
-                                      color="text.disabled"
-                                      sx={{ ml: 0.5 }}
-                                    >
-                                      · due{" "}
-                                      {new Date(uc.dueDate).toLocaleDateString(
-                                        undefined,
-                                        { month: "short", day: "numeric" },
-                                      )}
-                                    </Typography>
-                                  )}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    fontWeight: 700,
-                                    color:
-                                      pct === 100
-                                        ? "success.main"
-                                        : pct >= 50
-                                          ? "warning.main"
-                                          : "text.secondary",
-                                  }}
-                                >
-                                  {uc.submittedCount}/{uc.totalStudents}
-                                </Typography>
-                              </Box>
-                              <LinearProgress
-                                variant="determinate"
-                                value={pct}
-                                color={
-                                  pct === 100
-                                    ? "success"
-                                    : pct >= 50
-                                      ? "warning"
-                                      : "inherit"
-                                }
-                                sx={{ height: 5, borderRadius: 3 }}
-                              />
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {/* ── Recent Activity ── */}
-                  {stats.recentActivity.length > 0 && (
-                    <Box sx={{ mb: 2.5 }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          mb: 1,
-                        }}
-                      >
-                        <HistoryIcon sx={{ fontSize: "0.85rem" }} />
-                        Recent Activity
-                      </Typography>
-                      <Stack spacing={0.5}>
-                        {stats.recentActivity.map((grade) => (
-                          <Box
-                            key={grade.id}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              bgcolor: "action.hover",
-                            }}
-                          >
-                            <AvatarDisplay
-                              seed={grade.owner}
-                              size={22}
-                              style="simple"
-                            />
-                            <Typography variant="body2" sx={{ flex: 1 }} noWrap>
-                              {formatLastFirst(
-                                sectionStudents[grade.owner] || {
-                                  id: grade.owner,
-                                },
-                              )}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              noWrap
-                            >
-                              {allUnits[grade.unitID]?.name ||
-                                grade.unitID?.slice(0, 8)}
-                            </Typography>
-                            <Chip
-                              label={`${Math.round(grade.accuracy)}%`}
-                              size="small"
-                              color={gradeColor(grade.accuracy)}
-                              sx={{ fontWeight: 700, minWidth: 44 }}
-                            />
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {/* ── At-risk alert ── */}
-                  {atRisk.length > 0 && (
-                    <Alert
-                      severity="warning"
-                      icon={<WarningAmberIcon />}
-                      sx={{ mb: 2, py: 0.5 }}
-                    >
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        Students needing support:
-                      </Typography>
-                      <Stack
-                        direction="row"
-                        spacing={0.5}
-                        flexWrap="wrap"
-                        useFlexGap
-                        sx={{ mt: 0.5 }}
-                      >
-                        {atRisk.map((s) => (
-                          <Chip
-                            key={s.studentId}
-                            avatar={
-                              <AvatarDisplay
-                                seed={s.studentId}
-                                size={20}
-                                style="simple"
-                              />
-                            }
-                            label={`${formatLastFirst(sectionStudents[s.studentId] || { id: s.studentId })} · ${Math.round(s.average)}%`}
-                            size="small"
-                            color="warning"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Stack>
-                    </Alert>
-                  )}
-
-                  {/* ── Leaderboard (top 5) ── */}
-                  {top5.length > 0 && (
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          display: "block",
-                          mb: 1,
-                        }}
-                      >
-                        Top Students
-                      </Typography>
-                      <Stack spacing={0.75}>
-                        {top5.map((student, idx) => (
-                          <Box
-                            key={student.studentId}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1.5,
-                              px: 1.5,
-                              py: 0.75,
-                              borderRadius: 2,
-                              bgcolor:
-                                idx === 0
-                                  ? "rgba(255,215,0,0.08)"
-                                  : idx === 1
-                                    ? "rgba(192,192,192,0.08)"
-                                    : idx === 2
-                                      ? "rgba(205,127,50,0.08)"
-                                      : "action.hover",
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                fontSize: "1rem",
-                                width: 24,
-                                textAlign: "center",
-                              }}
-                            >
-                              {MEDAL[idx] || `#${idx + 1}`}
-                            </Typography>
-                            <AvatarDisplay
-                              seed={student.studentId}
-                              size={28}
-                              style="simple"
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{ flex: 1, fontWeight: idx < 3 ? 600 : 400 }}
-                              noWrap
-                            >
-                              {formatLastFirst(
-                                sectionStudents[student.studentId] || {
-                                  id: student.studentId,
-                                },
-                              )}
-                            </Typography>
-                            <Chip
-                              label={`${Math.round(student.average)}%`}
-                              size="small"
-                              color={gradeColor(student.average)}
-                              sx={{ fontWeight: 700, minWidth: 52 }}
-                            />
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ whiteSpace: "nowrap" }}
-                            >
-                              {student.unitsCompleted} units
-                            </Typography>
-                          </Box>
-                        ))}
-                        {stats.leaderboard.length > 5 && (
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ textAlign: "center", pt: 0.5 }}
-                          >
-                            +{stats.leaderboard.length - 5} more students
-                          </Typography>
-                        )}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {stats.leaderboard.length === 0 && (
-                    <Typography
-                      color="text.secondary"
-                      sx={{ textAlign: "center", py: 2 }}
-                    >
-                      {t("instructorDashboard.noDataYet")}
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* ── Footer actions ── */}
-                <Box
-                  sx={{
-                    px: 2.5,
-                    py: 1.5,
-                    borderTop: "1px solid",
-                    borderColor: "divider",
-                    display: "flex",
-                    gap: 1,
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                    bgcolor: "action.hover",
-                  }}
-                >
-                  <Button
-                    component="a"
-                    href={`/section/${section.id}`}
-                    size="small"
-                    variant="contained"
-                    endIcon={<ArrowForwardIcon />}
+                  {/* ── Footer actions ── */}
+                  <Box
                     sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderRadius: 2,
+                      px: 2.5,
+                      py: 1.5,
+                      borderTop: "1px solid",
+                      borderColor: "divider",
+                      display: "flex",
+                      gap: 1,
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      bgcolor: "action.hover",
                     }}
                   >
-                    Manage Section
-                  </Button>
-                  <SkillTreePopupButton
-                    sectionId={section.id}
-                    label={section.name}
-                  />
-                  <Button
-                    component="a"
-                    href={`/section/${section.id}#peer-review`}
-                    size="small"
-                    variant="outlined"
-                    startIcon={<RateReviewIcon />}
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderRadius: 2,
-                    }}
-                  >
-                    Peer Review
-                  </Button>
-                </Box>
+                    <Button
+                      component="a"
+                      href={`/section/${section.id}`}
+                      size="small"
+                      variant="contained"
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Manage Section
+                    </Button>
+                    <SkillTreePopupButton
+                      sectionId={section.id}
+                      label={section.name}
+                      size="small"
+                    />
+                    <Button
+                      component="a"
+                      href={`/section/${section.id}#peer-review`}
+                      size="small"
+                      variant="outlined"
+                      startIcon={<RateReviewIcon />}
+                    >
+                      Peer Review
+                    </Button>
+                  </Box>
+                </Collapse>
               </Card>
             );
           })}

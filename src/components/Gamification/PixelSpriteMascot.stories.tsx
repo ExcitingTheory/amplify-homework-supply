@@ -1,31 +1,41 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import Box from '@mui/material/Box'
-import { PixelSpriteMascot } from './PixelSpriteMascot'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within } from "storybook/test";
+import Box from "@mui/material/Box";
+import { PixelSpriteMascot } from "./PixelSpriteMascot";
 
 const meta: Meta<typeof PixelSpriteMascot> = {
-  title: '🏆 Gamification/Easter Eggs/Pixel Sprite Mascot',
+  title: "🏆 Gamification/Easter Eggs/Pixel Sprite Mascot",
   component: PixelSpriteMascot,
-  argTypes: {
-    stage: { control: { type: 'range', min: 1, max: 5 } },
-    size: { control: { type: 'range', min: 32, max: 200 } },
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
   },
-}
+  argTypes: {
+    stage: { control: { type: "range", min: 1, max: 5 } },
+    size: { control: { type: "range", min: 32, max: 200 } },
+  },
+};
 
-export default meta
-type Story = StoryObj<typeof PixelSpriteMascot>
+export default meta;
+type Story = StoryObj<typeof PixelSpriteMascot>;
 
 export const Default: Story = {
   args: {
-    seed: 'student-abc-123',
+    seed: "student-abc-123",
     stage: 1,
     size: 64,
-    label: 'Hatchling',
+    label: "Hatchling",
   },
-}
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Hatchling");
+  },
+};
 
 export const AllStages: Story = {
   render: () => (
-    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+    <Box
+      sx={{ display: "flex", gap: 3, alignItems: "flex-end", flexWrap: "wrap" }}
+    >
       {[1, 2, 3, 4, 5].map((stage) => (
         <PixelSpriteMascot
           key={stage}
@@ -38,12 +48,17 @@ export const AllStages: Story = {
       ))}
     </Box>
   ),
-}
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Stage 1");
+    await canvas.findByText("Stage 5");
+  },
+};
 
 export const DifferentSeeds: Story = {
   render: () => (
-    <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-      {['alice', 'bob', 'charlie', 'diana', 'eve', 'frank'].map((name) => (
+    <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+      {["alice", "bob", "charlie", "diana", "eve", "frank"].map((name) => (
         <PixelSpriteMascot
           key={name}
           seed={name}
@@ -54,35 +69,49 @@ export const DifferentSeeds: Story = {
       ))}
     </Box>
   ),
-}
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("alice");
+    await canvas.findByText("frank");
+  },
+};
 
 export const Sleeping: Story = {
   args: {
-    seed: 'student-abc-123',
+    seed: "student-abc-123",
     stage: 3,
     size: 80,
-    label: 'Zzz...',
+    label: "Zzz...",
     sleeping: true,
-    tooltip: 'Streak broken — mascot is sleeping',
+    tooltip: "Streak broken — mascot is sleeping",
   },
-}
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Zzz...");
+  },
+};
 
 export const SquadPet: Story = {
   args: {
-    seed: 'squad-phoenix-squad',
+    seed: "squad-phoenix-squad",
     stage: 4,
     size: 96,
-    label: 'Squad Pet',
-    tooltip: 'Phoenix Squad mascot (Stage 4)',
+    label: "Squad Pet",
+    tooltip: "Phoenix Squad mascot (Stage 4)",
   },
-}
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Squad Pet");
+  },
+};
 
 export const BossMonster: Story = {
   args: {
-    seed: 'challenge-boss-final',
+    seed: "challenge-boss-final",
     stage: 5,
     size: 128,
-    label: 'Final Boss',
-    tooltip: 'Defeat this boss to earn bonus XP!',
+    label: "Final Boss",
+    tooltip: "Defeat this boss to earn bonus XP!",
   },
-}
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Final Boss");
+  },
+};

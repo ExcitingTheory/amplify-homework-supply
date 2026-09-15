@@ -14,7 +14,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MODEL_DECL_RE = /^\s{4}(\w+):\s*a\s*$/;
+const MODEL_DECL_RE = /^\s{2}(\w+):\s*a\s*$/;
 const RELATION_RE = /a\.(?:hasMany|hasOne|belongsTo|manyToMany)\(\s*"(\w+)"/g;
 
 /**
@@ -138,4 +138,59 @@ export function computeModelComponents(): Map<string, string> {
   const components = new Map<string, string>();
   for (const model of parent.keys()) components.set(model, find(model));
   return components;
+}
+
+/**
+ * Splits all models into `numPhases` cumulative sets for a multi-phase
+ * bootstrap deploy, staying under CloudFormation's per-operation resource
+ * cap on a from-scratch deploy of this schema's full model set.
+ *
+ * A connected component (see computeModelComponents) is NEVER split across
+ * phases — models within a component may structurally depend on each other
+ * (join tables, relation fields), so they must all exist by the time any
+ * one of them is deployed. Components are greedily bin-packed by model
+ * count into `numPhases` roughly-equal buckets (largest-first), then each
+ * returned set is the CUMULATIVE union of all buckets up to and including
+ * that phase — phase K's schema is a strict superset of phase K-1's, so
+ * later phases only ever ADD models, never remove ones already deployed.
+ *
+ * Returns an array of length `numPhases`; element i (0-indexed) is the set
+ * of model names to include when deploying phase i+1.
+ */
+export function computeBootstrapPhases(numPhases: number): Set<string>[] {
+  if (numPhases < 1) {
+    throw new Error("computeBootstrapPhases: numPhases must be >= 1");
+  }
+
+  const modelComponents = computeModelComponents();
+  const membersByComponent = new Map<string, string[]>();
+  for (const [model, componentId] of modelComponents) {
+    if (!membersByComponent.has(componentId)) {
+      membersByComponent.set(componentId, []);
+    }
+    membersByComponent.get(componentId)!.push(model);
+  }
+
+  const componentsBySizeDesc = [...membersByComponent.values()].sort(
+    (a, b) => b.length - a.length,
+  );
+
+  const buckets: string[][] = Array.from({ length: numPhases }, () => []);
+  const bucketSizes = new Array(numPhases).fill(0);
+  for (const component of componentsBySizeDesc) {
+    let smallestIdx = 0;
+    for (let i = 1; i < numPhases; i++) {
+      if (bucketSizes[i] < bucketSizes[smallestIdx]) smallestIdx = i;
+    }
+    buckets[smallestIdx].push(...component);
+    bucketSizes[smallestIdx] += component.length;
+  }
+
+  const cumulative: Set<string>[] = [];
+  const running = new Set<string>();
+  for (const bucket of buckets) {
+    for (const model of bucket) running.add(model);
+    cumulative.push(new Set(running));
+  }
+  return cumulative;
 }

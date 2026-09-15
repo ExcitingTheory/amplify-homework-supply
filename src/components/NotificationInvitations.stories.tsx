@@ -114,7 +114,7 @@ const meta: Meta<typeof NotificationInvitations> = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
       <Box

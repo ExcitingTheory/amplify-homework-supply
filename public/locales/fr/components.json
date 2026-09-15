@@ -153,7 +153,12 @@
     "rubyTagsStep4": "4. Cliquez sur Enregistrer pour appliquer les balises ruby",
     "pronunciationLabel": "Prononciation (sélectionnez d'abord) :",
     "phraseLabel": "Phrase (sélectionner la seconde) :",
-    "rubyTagPreview": "Aperçu de la balise Ruby :"
+    "rubyTagPreview": "Aperçu de la balise Ruby :",
+    "title": "Éditeur de dictionnaire",
+    "step1": "1. Sélectionnez le texte dans le champ de prononciation (en haut), puis sélectionnez le texte correspondant dans le champ de la phrase (en bas)",
+    "step2": "2. Les portions sélectionnées seront associées et déplacées vers l’aperçu de la balise ruby",
+    "step3": "3. Continuez à sélectionner des paires jusqu’à ce que les deux champs soient vides",
+    "step4": "4. Cliquez sur Enregistrer pour appliquer les balises ruby"
   },
   "recordingStudio3": {
     "addSpeakerFirst": "Veuillez d'abord ajouter un intervenant",
@@ -234,5 +239,147 @@
     "embeddingStale": "Intégration obsolète",
     "embeddingFresh": "Intégration récente",
     "error": "Erreur : {{message}}"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Modèle Sage",
+    "behaviorTuning": "Réglage du comportement",
+    "kaiTemperatureLabel": "Température Kai :",
+    "sageTemperatureLabel": "Température Sage :",
+    "kaiMaxTokensLabel": "Jetons max Kai",
+    "sageMaxTokensLabel": "Jetons max Sage",
+    "maxAgentStepsLabel": "Étapes max de l’agent",
+    "maxAgentStepsHint": "Nombre maximum de tours d’outils par tour de conversation",
+    "searchTuning": "Réglage de la recherche",
+    "similarityThresholdLabel": "Seuil de similarité :",
+    "defaultResultLimitLabel": "Limite par défaut des résultats",
+    "conversationMemory": "Mémoire de conversation",
+    "enableConversationMemory": "Activer la mémoire de conversation",
+    "summarizationModelLabel": "Modèle de synthèse",
+    "tokenBudgets": "Budgets de jetons",
+    "tokenBudgetsDescription": "Contrôle le nombre de jetons alloués à chaque partie d’un tour d’agent. Des budgets plus faibles réduisent le coût ; des budgets plus élevés permettent un contexte plus riche.",
+    "enforceTokenBudget": "Appliquer les budgets de jetons",
+    "enforceTokenBudgetNote": "Lorsqu’il est activé, l’agent tronquera les invites système et les résultats d’outils pour respecter leurs limites de budget, et interrompra les tours multi-étapes qui dépassent le budget total du tour.",
+    "systemPromptBudgetLabel": "Budget de l’invite système",
+    "systemPromptBudgetHint": "Jetons maximum pour le contexte de niveau 1 dans l’invite système (par défaut : 2000)",
+    "toolResultBudgetLabel": "Budget des résultats d’outils",
+    "toolResultBudgetHint": "Jetons maximum par résultat d’outil renvoyé au modèle (par défaut : 4000)",
+    "totalTurnBudgetLabel": "Budget total du tour",
+    "totalTurnBudgetHint": "Nombre total maximum de jetons consommés par tour d’agent sur toutes les étapes (par défaut : 16000)",
+    "perPersonaOverrides": "Remplacements par profil",
+    "kaiSystemPromptLabel": "Invite système Kai",
+    "tokensUnit": "jetons",
+    "useDefaultPlaceholder": "Utiliser la valeur par défaut",
+    "sageSystemPromptLabel": "Invite système Sage",
+    "kaiToolResultLabel": "Résultat d’outils Kai",
+    "sageToolResultLabel": "Résultat d’outils Sage"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "sky": "Ciel",
+      "mint": "Menthe",
+      "lavender": "Lavande",
+      "peach": "Pêche",
+      "rose": "Rose",
+      "gold": "Or"
+    },
+    "styles": {
+      "simple": "Simple",
+      "detailed": "Détaillé",
+      "toon": "Toon"
+    },
+    "lockedMessage": "Gagnez le badge Bot Whisperer I pour personnaliser votre assistant IA.",
+    "previewTitle": "Votre assistant IA",
+    "styleLabel": "Style",
+    "backgroundColorLabel": "Couleur d’arrière-plan"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "Copier depuis la classe",
+    "copyToClasses": "Copier vers les classes",
+    "firstMeetingDate": "Date de la première réunion",
+    "weeksLabel": "Semaines",
+    "weeklyMeetingLabel": "Réunion hebdomadaire",
+    "weeklyMeetingHint": "1 = première, 2 = deuxième, 0 = dernière",
+    "loadingCadence": "Chargement de la cadence source...",
+    "noAssignments": "La classe source ne contient aucune affectation datée à copier.",
+    "missingMetadata": "l’affectation source manque de métadonnées de cadence et ne peut pas être copiée.",
+    "close": "Fermer",
+    "copyCadence": "Copier la cadence",
+    "copying": "Copie en cours..."
+  },
+  "assignmentCard": {
+    "excellent": "Excellent",
+    "good": "Bien",
+    "fair": "Moyen",
+    "needsWork": "À améliorer",
+    "noDueDate": "Aucune date d’échéance",
+    "overdue": "En retard",
+    "dueSoon": "Échéance proche",
+    "due": "Échéance",
+    "locked": "Verrouillé",
+    "opensAt": "S’ouvre le {date}",
+    "late": "En retard",
+    "dropped": "Supprimé par l’enseignant",
+    "difficulty": "Difficulté : {level}",
+    "review": "Révision",
+    "startWorkbook": "Commencer",
+    "practice": "Entraînement",
+    "discuss": "Discuter",
+    "joinReview": "Rejoindre la révision",
+    "requestGuidance": "Demander des conseils",
+    "requestGuidanceTooltip": "Créez une salle et partagez le code avec votre enseignant pour obtenir des conseils personnalisés"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "Personnaliser l’avatar"
+  },
+  "campaignProgress": {
+    "ended": "Terminé",
+    "endedChip": "Terminé",
+    "bonus": "Bonus",
+    "chapterProgression": "Progression du chapitre",
+    "completion": "Achèvement"
+  },
+  "chatPanel": {
+    "defaultTitle": "Chat",
+    "topicsLabel": "Sujets",
+    "backButton": "Retour",
+    "onlineCount": "{count} en ligne"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "Saisissez un message... (@kai pour l’IA)",
+    "replyingTo": "Réponse à {name}"
+  },
+  "threadView": {
+    "emptyState": "Aucun message pour le moment. Commencez la conversation !",
+    "replyCount": {
+      "singular": "réponse",
+      "plural": "réponses"
+    },
+    "typingIndicator": "{names} {count, plural, one {écrit} other {écrivent}}...",
+    "edited": "(modifié)",
+    "justNow": "à l’instant",
+    "minutesAgo": "il y a {minutes} min",
+    "hoursAgo": "il y a {hours} h"
+  },
+  "topicList": {
+    "header": "Sujets",
+    "newTopicPlaceholder": "#nouveau-sujet",
+    "emptyState": "Aucun sujet pour le moment. Créez-en un pour commencer le chat."
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "Ajouter une question de minuterie",
+    "timerDescription": "Configuration du minuteur pour les devoirs chronométrés",
+    "retryToggle": "Autoriser les tentatives des élèves",
+    "publishFirstAlert": "Remarque : publiez d’abord l’unité pour créer des devoirs",
+    "meetingCalendar": "Date d’échéance",
+    "meetingDayHint": "Les points indiquent les jours de réunion de la section.",
+    "tomorrow": "Demain",
+    "nextClass": "Prochain cours",
+    "friday": "Vendredi prochain",
+    "createSectionLabel": "Créer une nouvelle section",
+    "undoSnackbar": "Devoirs créés. {count} devoir{plural} créé."
   }
 }

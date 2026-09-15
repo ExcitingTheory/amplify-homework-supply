@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof SquadLeaderboard> = {
   title: "🏆 Gamification/Squads & Teams/Squad Leaderboard",
   component: SquadLeaderboard,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

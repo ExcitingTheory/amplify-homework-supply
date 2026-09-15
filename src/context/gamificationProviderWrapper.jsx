@@ -9,18 +9,18 @@ import { GamificationToastLayer } from "../components/Gamification/GamificationT
 /**
  * Bridges AuthContext → GamificationProvider by extracting the current user's
  * identity and passing it along with the Amplify Data Client.
- * Derives cohortId from the user's Cognito group membership (section groups).
+ * Derives sectionID from the user's Cognito group membership (section groups).
  * Passes Section/Assignment data from SectionContext when available
  * to avoid duplicate subscriptions (zero extra API calls).
  * Renders children directly when no user is logged in.
  */
 export function GamificationProviderWrapper({
   children,
-  cohortId: cohortIdProp,
+  sectionID: sectionIDProp,
 }) {
   const { user, session } = useContext(AuthContext);
   const client = useMemo(() => getAmplifyClient(), []);
-  const [resolvedCohortIds, setResolvedCohortIds] = React.useState([]);
+  const [resolvedSectionIDs, setResolvedSectionIDs] = React.useState([]);
 
   // Skip gamification subscriptions for instructors/admins — they don't earn XP
   const isInstructor =
@@ -45,7 +45,7 @@ export function GamificationProviderWrapper({
     );
   }, [session?.groups]);
 
-  const extractedCohortIds = useMemo(() => {
+  const extractedSectionIDs = useMemo(() => {
     const ids = [];
     for (const group of sectionGroupNames) {
       const match = group.match(/^section-(.+?)-(learners|instructors)$/);
@@ -55,16 +55,16 @@ export function GamificationProviderWrapper({
   }, [sectionGroupNames]);
 
   React.useEffect(() => {
-    if (cohortIdProp) {
-      setResolvedCohortIds([cohortIdProp]);
+    if (sectionIDProp) {
+      setResolvedSectionIDs([sectionIDProp]);
       return;
     }
     if (!sectionGroupNames.length) {
-      setResolvedCohortIds([]);
+      setResolvedSectionIDs([]);
       return;
     }
     if (!client?.models?.Section?.observeQuery) {
-      setResolvedCohortIds(extractedCohortIds);
+      setResolvedSectionIDs(extractedSectionIDs);
       return;
     }
 
@@ -76,24 +76,24 @@ export function GamificationProviderWrapper({
           .map((section) => section.id);
 
         const merged = Array.from(
-          new Set([...resolvedFromGroups, ...extractedCohortIds]),
+          new Set([...resolvedFromGroups, ...extractedSectionIDs]),
         );
-        setResolvedCohortIds(merged);
+        setResolvedSectionIDs(merged);
       },
       error: () => {
-        setResolvedCohortIds(extractedCohortIds);
+        setResolvedSectionIDs(extractedSectionIDs);
       },
     });
 
     return () => subscription.unsubscribe();
-  }, [client, cohortIdProp, extractedCohortIds, sectionGroupNames]);
+  }, [client, sectionIDProp, extractedSectionIDs, sectionGroupNames]);
 
-  const cohortIds = useMemo(() => {
-    if (cohortIdProp) return [cohortIdProp];
-    return resolvedCohortIds;
-  }, [cohortIdProp, resolvedCohortIds]);
+  const sectionIDs = useMemo(() => {
+    if (sectionIDProp) return [sectionIDProp];
+    return resolvedSectionIDs;
+  }, [sectionIDProp, resolvedSectionIDs]);
 
-  const cohortId = cohortIds[0];
+  const sectionID = sectionIDs[0];
 
   // Always render Provider so child hooks (useSquad, useXP, etc.) never read
   // the static default context. Subscriptions inside the Provider bail early
@@ -102,8 +102,8 @@ export function GamificationProviderWrapper({
     <GamificationProvider
       client={client}
       studentId={studentId}
-      cohortId={cohortId}
-      cohortIds={cohortIds}
+      sectionID={sectionID}
+      sectionIDs={sectionIDs}
       sections={sections}
       assignments={assignments}
     >

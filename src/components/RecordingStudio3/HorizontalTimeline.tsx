@@ -7,21 +7,12 @@
  * time ruler, and zoom via Ctrl+scroll.
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-  Divider,
-} from '@mui/material';
-import {
-  PlayArrow as PlayIcon,
-  Stop as StopIcon,
-} from '@mui/icons-material';
-import AudioWaveformPlayer from '../Editor3/components/AudioWaveformPlayer';
-import TimelineCard from './TimelineCard';
+import React, { useState, useRef, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { Box, Typography, IconButton, Stack, Divider } from "@mui/material";
+import { PlayArrow as PlayIcon, Stop as StopIcon } from "@mui/icons-material";
+import AudioWaveformPlayer from "../Editor3/components/AudioWaveformPlayer";
+import TimelineCard from "./TimelineCard";
 
 // ============================================================================
 // Types
@@ -76,7 +67,7 @@ const MAX_ZOOM = 4;
 function formatTime(s: number): string {
   const mins = Math.floor(s / 60);
   const secs = Math.floor(s % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 export default function HorizontalTimeline({
@@ -90,19 +81,24 @@ export default function HorizontalTimeline({
   onRecordingComplete,
   readOnly = false,
 }: HorizontalTimelineProps) {
-  const t = useTranslations('components');
+  const t = useTranslations("components");
   const containerRef = useRef(null);
   const [zoom, setZoom] = useState(1);
 
   const pxPerSec = BASE_PX_PER_SEC * zoom;
 
   // Selected dialogue line (for RS2 item prop)
-  const selectedDialogue = scriptData.dialogue.find((d: DialogueLine) => d.id === selectedDialogueId) || null;
+  const selectedDialogue =
+    scriptData.dialogue.find(
+      (d: DialogueLine) => d.id === selectedDialogueId,
+    ) || null;
 
   // Compute total duration from the last dialogue line's end time + buffer
   const totalDuration = useMemo(() => {
     if (!scriptData.dialogue.length) return 10;
-    const maxEnd = Math.max(...scriptData.dialogue.map((d: DialogueLine) => d.timing.end));
+    const maxEnd = Math.max(
+      ...scriptData.dialogue.map((d: DialogueLine) => d.timing.end),
+    );
     return maxEnd + 2; // 2s buffer at the end
   }, [scriptData.dialogue]);
 
@@ -165,11 +161,11 @@ export default function HorizontalTimeline({
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'action.hover',
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "action.hover",
         borderTop: 1,
-        borderColor: 'divider',
+        borderColor: "divider",
         minHeight: TRACK_HEIGHT * Math.max(speakerOrder.length, 1) + 80,
       }}
     >
@@ -184,15 +180,20 @@ export default function HorizontalTimeline({
           size="small"
           onClick={playing ? onStop : onPlay}
           disabled={readOnly && !playing}
-          color={playing ? 'error' : 'default'}
-          aria-label={playing ? t('recordingStudio3.stop') : t('recordingStudio3.play')}
+          color={playing ? "error" : "default"}
+          aria-label={
+            playing
+              ? t("recordingStudio3.stop") || "Stop playback"
+              : t("recordingStudio3.play") || "Play timeline"
+          }
+          title={playing ? "Stop playback" : "Play timeline"}
         >
           {playing ? <StopIcon /> : <PlayIcon />}
         </IconButton>
 
         {/* Embedded AudioWaveformPlayer for recording on the selected line */}
         {!readOnly && selectedDialogueId && (
-          <Box sx={{ flex: '0 0 auto' }}>
+          <Box sx={{ flex: "0 0 auto" }}>
             {/* @ts-expect-error — AudioWaveformPlayer accepts partial props for recording-only mode */}
             <AudioWaveformPlayer
               enableRecording
@@ -209,7 +210,7 @@ export default function HorizontalTimeline({
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ ml: 'auto' }}
+          sx={{ ml: "auto" }}
         >
           Zoom: {Math.round(zoom * 100)}%
         </Typography>
@@ -222,8 +223,8 @@ export default function HorizontalTimeline({
         ref={containerRef}
         onWheel={handleWheel}
         sx={{
-          display: 'flex',
-          overflow: 'auto',
+          display: "flex",
+          overflow: "auto",
           flex: 1,
         }}
       >
@@ -234,21 +235,21 @@ export default function HorizontalTimeline({
             minWidth: LABEL_WIDTH,
             flexShrink: 0,
             borderRight: 1,
-            borderColor: 'divider',
+            borderColor: "divider",
           }}
         >
           {/* Ruler spacer */}
-          <Box sx={{ height: 24, borderBottom: 1, borderColor: 'divider' }} />
+          <Box sx={{ height: 24, borderBottom: 1, borderColor: "divider" }} />
           {speakerOrder.map((key) => (
             <Box
               key={key}
               sx={{
                 height: TRACK_HEIGHT,
-                display: 'flex',
-                alignItems: 'center',
+                display: "flex",
+                alignItems: "center",
                 px: 1,
                 borderBottom: 1,
-                borderColor: 'divider',
+                borderColor: "divider",
               }}
             >
               <Typography variant="caption" noWrap sx={{ fontWeight: 600 }}>
@@ -259,14 +260,16 @@ export default function HorizontalTimeline({
         </Box>
 
         {/* Tracks + ruler (scrollable) */}
-        <Box sx={{ position: 'relative', width: containerWidth, flexShrink: 0 }}>
+        <Box
+          sx={{ position: "relative", width: containerWidth, flexShrink: 0 }}
+        >
           {/* Time ruler */}
           <Box
             sx={{
               height: 24,
-              position: 'relative',
+              position: "relative",
               borderBottom: 1,
-              borderColor: 'divider',
+              borderColor: "divider",
             }}
           >
             {ticks.map((s) => (
@@ -274,12 +277,12 @@ export default function HorizontalTimeline({
                 key={s}
                 variant="caption"
                 sx={{
-                  position: 'absolute',
+                  position: "absolute",
                   left: s * pxPerSec,
                   top: 4,
-                  fontSize: '0.6rem',
-                  color: 'text.secondary',
-                  userSelect: 'none',
+                  fontSize: "0.6rem",
+                  color: "text.secondary",
+                  userSelect: "none",
                 }}
               >
                 {formatTime(s)}
@@ -293,9 +296,9 @@ export default function HorizontalTimeline({
               key={key}
               sx={{
                 height: TRACK_HEIGHT,
-                position: 'relative',
+                position: "relative",
                 borderBottom: 1,
-                borderColor: 'divider',
+                borderColor: "divider",
               }}
             >
               {(linesBySpeaker[key] || []).map((line) => (

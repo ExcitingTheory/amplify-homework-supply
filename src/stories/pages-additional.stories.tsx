@@ -31,9 +31,9 @@ import SquadDetailClient from "../../app/[locale]/squad/[id]/SquadDetailClient";
 import { XPHistoryContent } from "../../app/[locale]/xp-history/page.jsx";
 import AnalyticsClient from "../../app/[locale]/admin/analytics/AnalyticsClient";
 import AdminArchivesPage from "../../app/[locale]/admin/archives/page.jsx";
-import AdminModerationPage from "../../app/[locale]/admin/moderation/page";
+import ModerationClient from "../../app/[locale]/admin/moderation/ModerationClient";
 import AdminSettingsPage from "../../app/[locale]/admin/settings/page";
-import AdminWordsPage from "../../app/[locale]/admin/words/page";
+import WordListClient from "../../app/[locale]/admin/words/WordListClient";
 import NotificationsPage from "../../app/[locale]/profile/notifications/page";
 import DrillPage from "../../app/[locale]/drill/[id]/page";
 import SectionAISettingsClient from "../../app/[locale]/section/[id]/settings/ai/SectionAISettingsClient";
@@ -46,13 +46,25 @@ import { GradeActions } from "../../app/[locale]/instructor/grade/[id]/GradeActi
 import {
   NailedItSection,
   AvatarSection,
+  UnlockRoadmap,
 } from "../../app/[locale]/profile/[username]/ProfileClientSections";
 import ProfileThemeWrapper from "../../app/[locale]/profile/[username]/ProfileThemeWrapper";
+import { GamificationProviderWrapper } from "../../src/context/gamificationProviderWrapper";
+import { BadgeShelf } from "../../src/components/Gamification/BadgeShelf";
+import { StreakCalendar } from "../../src/components/Gamification/StreakCalendar";
+import { ProgressRings } from "../../src/components/Gamification/ProgressRings";
+import { StreakShield } from "../../src/components/Gamification/StreakShield";
+import { Box, Card, Typography } from "@mui/material";
 
 // Mock helpers
 import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
 import { FilesProvider } from "../../src/context/fileContext";
+import { withAppShell } from "./withAppShell";
+
+// Offline fallback page (real component) + its offline data store
+import { OfflinePageContent } from "../../app/[locale]/offline/OfflinePageContent";
+import { cacheAssignment } from "../offline/OfflineDataStore";
 
 const meta: Meta = {
   title: "📄 Pages/Application Pages",
@@ -103,6 +115,7 @@ export const Settings: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <SettingsPage />,
   parameters: {
@@ -136,6 +149,7 @@ export const RecycleBin: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <RecycleBinPage />,
   parameters: {
@@ -167,6 +181,7 @@ export const Squads: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <SquadsPage />,
   parameters: {
@@ -200,6 +215,7 @@ export const SquadDetail: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <SquadDetailClient />,
   parameters: {
@@ -228,7 +244,50 @@ export const SquadDetail: Story = {
 // ---------------------------------------------------------------------------
 
 export const XPHistory: Story = {
-  render: () => <XPHistoryContent logs={[]} totalXP={0} />,
+  decorators: [withAppShell],
+  render: () => (
+    <XPHistoryContent
+      logs={[
+        {
+          id: "xp-1",
+          reason: "ALL_BLOCKS_COMPLETED",
+          xpAmount: 120,
+          createdAt: "2026-09-12T14:30:00Z",
+        },
+        {
+          id: "xp-2",
+          reason: "ON_TIME_SUBMISSION",
+          xpAmount: 25,
+          createdAt: "2026-09-12T14:29:00Z",
+        },
+        {
+          id: "xp-3",
+          reason: "NAILED_IT",
+          xpAmount: 50,
+          createdAt: "2026-09-11T10:15:00Z",
+        },
+        {
+          id: "xp-4",
+          reason: "PEER_REVIEW_GIVEN",
+          xpAmount: 15,
+          createdAt: "2026-09-10T09:00:00Z",
+        },
+        {
+          id: "xp-5",
+          reason: "STREAK_7DAY",
+          xpAmount: 70,
+          createdAt: "2026-09-09T08:00:00Z",
+        },
+        {
+          id: "xp-6",
+          reason: "PERFECT_SCORE",
+          xpAmount: 100,
+          createdAt: "2026-09-08T16:45:00Z",
+        },
+      ]}
+      totalXP={380}
+    />
+  ),
   parameters: {
     mockAuth: {
       user: {
@@ -260,6 +319,7 @@ export const Leaderboard: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => (
     <LiveLeaderboard
@@ -353,6 +413,7 @@ export const Notifications: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <NotificationsPage />,
   parameters: {
@@ -375,6 +436,7 @@ export const Notifications: Story = {
 // ---------------------------------------------------------------------------
 
 export const AdminAnalytics: Story = {
+  decorators: [withAppShell],
   render: () => <AnalyticsClient initialSections={[]} />,
   parameters: {
     mockAuth: {
@@ -405,6 +467,7 @@ export const AdminArchives: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <AdminArchivesPage />,
   parameters: {
@@ -436,8 +499,40 @@ export const AdminModeration: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
-  render: () => <AdminModerationPage />,
+  render: () => (
+    <ModerationClient
+      initialItems={[
+        {
+          id: "grade-flagged-1",
+          modelName: "Grade",
+          owner: "student-alice-sub",
+          moderation: {
+            status: "flagged",
+            flags: JSON.stringify({ categories: { harassment: true } }),
+            checkedAt: "2026-09-12T10:00:00Z",
+          },
+          createdAt: "2026-09-11T09:00:00Z",
+          updatedAt: "2026-09-12T10:00:00Z",
+          sectionId: "section-jpn-101",
+        },
+        {
+          id: "word-flagged-1",
+          modelName: "Word",
+          owner: "student-bob-sub",
+          moderation: {
+            status: "flagged",
+            flags: JSON.stringify({ categories: { "hate/threatening": true } }),
+            checkedAt: "2026-09-10T14:00:00Z",
+          },
+          createdAt: "2026-09-09T08:00:00Z",
+          updatedAt: "2026-09-10T14:00:00Z",
+          sectionId: null,
+        },
+      ]}
+    />
+  ),
   parameters: {
     mockAuth: {
       user: { attributes: { sub: "admin-1", email: "admin@example.com" } },
@@ -467,6 +562,7 @@ export const AdminSettings: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <AdminSettingsPage />,
   parameters: {
@@ -498,8 +594,53 @@ export const AdminWords: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
-  render: () => <AdminWordsPage />,
+  render: () => (
+    <WordListClient
+      initialWords={[
+        {
+          id: "word-1",
+          phrase: "こんにちは",
+          pronunciation: "konnichiwa",
+          definition: "hello / good afternoon",
+          audio: ["public/audio/konnichiwa.mp3"],
+          definitionAudio: null,
+          owner: "teacher-1",
+          createdAt: "2026-01-10T10:00:00Z",
+          updatedAt: "2026-01-10T10:00:00Z",
+          moderation: { status: "ok" },
+          embedding: { model: "text-embedding-3-small" },
+        },
+        {
+          id: "word-2",
+          phrase: "ありがとう",
+          pronunciation: "arigatou",
+          definition: "thank you",
+          audio: null,
+          definitionAudio: null,
+          owner: "teacher-1",
+          createdAt: "2026-01-11T10:00:00Z",
+          updatedAt: "2026-01-11T10:00:00Z",
+          moderation: null,
+          embedding: null,
+        },
+        {
+          id: "word-3",
+          phrase: "さようなら",
+          pronunciation: null,
+          definition: null,
+          audio: null,
+          definitionAudio: null,
+          owner: "student-alice-sub",
+          createdAt: "2026-01-12T10:00:00Z",
+          updatedAt: "2026-01-12T10:00:00Z",
+          moderation: { status: "flagged" },
+          embedding: null,
+        },
+      ]}
+    />
+  ),
   parameters: {
     mockAuth: {
       user: { attributes: { sub: "admin-1", email: "admin@example.com" } },
@@ -599,6 +740,7 @@ export const Drill: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <DrillPage />,
   parameters: {
@@ -627,26 +769,35 @@ export const Drill: Story = {
 // ---------------------------------------------------------------------------
 
 export const Offline: Story = {
-  render: () => (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        gap: "1rem",
-      }}
-    >
-      <span style={{ fontSize: "3rem" }}>📡</span>
-      <h1 style={{ margin: 0 }}>You are offline</h1>
-      <p style={{ color: "#666" }}>
-        Check your internet connection and try again.
-      </p>
-      <button onClick={() => window.location.reload()}>Retry</button>
-    </div>
-  ),
+  loaders: [
+    async () => {
+      // Seed the real OfflineDataStore (IndexedDB) so the page lists cached
+      // assignments through its actual code path.
+      const now = Date.now();
+      await cacheAssignment({
+        id: "offline-asg-1",
+        unitID: "unit-japanese-1",
+        sectionID: "sec-jpn-101",
+        unitName: "Introduction to Japanese Greetings",
+        dueDate: "2026-09-20",
+        status: "PUBLISHED",
+        cachedAt: now,
+      });
+      await cacheAssignment({
+        id: "offline-asg-2",
+        unitID: "unit-japanese-2",
+        sectionID: "sec-jpn-101",
+        unitName: "Hiragana Basics",
+        dueDate: "2026-09-27",
+        status: "PUBLISHED",
+        cachedAt: now - 1000,
+      });
+      return {};
+    },
+  ],
+  render: () => <OfflinePageContent />,
   parameters: {
+    minimalProviders: true,
     nextjs: { navigation: { pathname: "/offline" } },
   },
 };
@@ -709,18 +860,156 @@ export const ProfilePublic: Story = {
       seedIndexPageData("student");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => (
     <ProfileThemeWrapper themeId="default" customPalette={null}>
-      <div style={{ padding: "2rem", maxWidth: 800, margin: "0 auto" }}>
-        <h1>Alice Johnson</h1>
-        <p style={{ color: "#666" }}>Level 12 • 2,450 XP</p>
-        <AvatarSection
-          isOwnProfile={true}
-          profileUsername="student-alice-sub"
-        />
-        <NailedItSection nailedItBlocks={[]} />
-      </div>
+      <GamificationProviderWrapper sectionID={undefined}>
+        <Box
+          data-tour="profile-page"
+          sx={{
+            marginTop: "1rem",
+            px: 2,
+            pb: 3,
+            maxWidth: "60rem",
+            mx: "auto",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Top row: Avatar + Activity side by side */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <Card
+              sx={{
+                padding: "2rem 1rem",
+                paddingTop: "2.5rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                overflow: "visible",
+              }}
+            >
+              <AvatarSection
+                isOwnProfile={false}
+                profileUsername="student-bob-sub"
+                streak={7}
+              />
+              <Typography variant="h5">Bob Smith</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <StreakShield freezesRemaining={2} freezesUsed={1} />
+              </Box>
+            </Card>
+
+            <Card
+              sx={{
+                padding: "2rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                Activity
+              </Typography>
+              <StreakCalendar
+                activeDays={
+                  new Set([
+                    "2026-09-01",
+                    "2026-09-02",
+                    "2026-09-05",
+                    "2026-09-08",
+                    "2026-09-10",
+                    "2026-09-11",
+                    "2026-09-12",
+                  ])
+                }
+              />
+            </Card>
+          </Box>
+
+          {/* Progress Rings */}
+          <Card sx={{ padding: "2rem 1rem", mb: 2 }}>
+            <Typography variant="h5" gutterBottom>
+              Progress
+            </Typography>
+            <ProgressRings
+              modules={[
+                {
+                  moduleId: "unit-jp-101",
+                  moduleName: "Hiragana Basics",
+                  completionPercent: 100,
+                  totalWorkbooks: 5,
+                  completedWorkbooks: 5,
+                },
+                {
+                  moduleId: "unit-jp-102",
+                  moduleName: "Katakana Basics",
+                  completionPercent: 60,
+                  totalWorkbooks: 5,
+                  completedWorkbooks: 3,
+                },
+              ]}
+            />
+          </Card>
+
+          {/* Badges */}
+          <Card sx={{ padding: "2rem 1rem", mb: 2 }}>
+            <Typography variant="h5" gutterBottom>
+              Badges
+            </Typography>
+            <BadgeShelf
+              earnedBadges={[
+                {
+                  badgeType: "FIRST_SUBMISSION",
+                  awardedAt: "2025-01-15T10:00:00Z",
+                },
+                {
+                  badgeType: "SHARPSHOOTER",
+                  awardedAt: "2025-02-10T11:00:00Z",
+                },
+                {
+                  badgeType: "DEEP_THINKER",
+                  awardedAt: "2025-03-10T12:00:00Z",
+                },
+              ]}
+            />
+          </Card>
+
+          {/* Unlock Roadmap (live lock state — client component) */}
+          <UnlockRoadmap />
+
+          {/* Nailed It Wall */}
+          <NailedItSection
+            nailedItBlocks={[
+              {
+                id: "nailed-1",
+                question: "Recognize こんにちは",
+                nailedItReason:
+                  "Excellent understanding demonstrated in a completed task.",
+                homeworkTitle: "Learner Workbook",
+                createdAt: "2026-09-10T10:00:00Z",
+              },
+              {
+                id: "nailed-2",
+                question: "Order numbers 1–10",
+                nailedItReason:
+                  "Excellent understanding demonstrated in a completed task.",
+                homeworkTitle: "Learner Workbook",
+                createdAt: "2026-09-08T10:00:00Z",
+              },
+            ]}
+          />
+        </Box>
+      </GamificationProviderWrapper>
     </ProfileThemeWrapper>
   ),
   parameters: {
@@ -737,8 +1026,8 @@ export const ProfilePublic: Story = {
     nextjs: {
       appDirectory: true,
       navigation: {
-        pathname: "/profile/student-alice-sub",
-        segments: [["username", "student-alice-sub"]],
+        pathname: "/profile/student-bob-sub",
+        segments: [["username", "student-bob-sub"]],
       },
     },
   },
@@ -760,6 +1049,7 @@ export const SectionAISettings: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <SectionAISettingsClient />,
   parameters: {
@@ -797,6 +1087,7 @@ export const SectionGamificationSettings: Story = {
       seedIndexPageData("instructor");
       return <Story />;
     },
+    withAppShell,
   ],
   render: () => <SectionGamificationSettingsPage />,
   parameters: {

@@ -150,7 +150,12 @@
     "rubyTagsStep3": "3. Continúa seleccionando pares hasta que ambos campos estén vacíos",
     "rubyTagsStep4": "4. Haz clic en Guardar para aplicar las etiquetas ruby",
     "rubyTagsTitle": "Cómo crear etiquetas ruby:",
-    "save": "Guardar"
+    "save": "Guardar",
+    "title": "Editor de diccionario",
+    "step1": "1. Selecciona el texto en el campo de pronunciación (arriba) y luego el texto correspondiente en el campo de la frase (abajo)",
+    "step2": "2. Las secciones seleccionadas se emparejarán y se moverán a la vista previa de la etiqueta ruby",
+    "step3": "3. Sigue seleccionando pares hasta que ambos campos estén vacíos",
+    "step4": "4. Haz clic en Guardar para aplicar las etiquetas ruby"
   },
   "documentSourceBadge": {
     "pagePrefix": "Página",
@@ -385,5 +390,147 @@
     "average": "Promedio",
     "completed": "Completado",
     "completion": "Finalización"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Modelo Sage",
+    "behaviorTuning": "Ajuste de comportamiento",
+    "kaiTemperatureLabel": "Temperatura de Kai:",
+    "sageTemperatureLabel": "Temperatura de Sage:",
+    "kaiMaxTokensLabel": "Máx. tokens de Kai",
+    "sageMaxTokensLabel": "Máx. tokens de Sage",
+    "maxAgentStepsLabel": "Máx. pasos del agente",
+    "maxAgentStepsHint": "Máximo de rondas de llamadas a herramientas por turno de conversación",
+    "searchTuning": "Ajuste de búsqueda",
+    "similarityThresholdLabel": "Umbral de similitud:",
+    "defaultResultLimitLabel": "Límite predeterminado de resultados",
+    "conversationMemory": "Memoria de conversación",
+    "enableConversationMemory": "Habilitar memoria de conversación",
+    "summarizationModelLabel": "Modelo de resumen",
+    "tokenBudgets": "Presupuestos de tokens",
+    "tokenBudgetsDescription": "Controla cuántos tokens se asignan a cada parte del turno del agente. Presupuestos más bajos reducen el costo; presupuestos más altos permiten un contexto más rico.",
+    "enforceTokenBudget": "Aplicar presupuestos de tokens",
+    "enforceTokenBudgetNote": "Cuando está habilitado, el agente truncará los mensajes del sistema y los resultados de herramientas para ajustarse a sus límites de presupuesto, y abortará turnos de varios pasos que excedan el presupuesto total del turno.",
+    "systemPromptBudgetLabel": "Presupuesto del mensaje del sistema",
+    "systemPromptBudgetHint": "Máximo de tokens para el contexto de nivel 1 en el mensaje del sistema (predeterminado: 2000)",
+    "toolResultBudgetLabel": "Presupuesto de resultados de herramientas",
+    "toolResultBudgetHint": "Máximo de tokens por resultado de herramienta devuelto al modelo (predeterminado: 4000)",
+    "totalTurnBudgetLabel": "Presupuesto total del turno",
+    "totalTurnBudgetHint": "Máximo total de tokens consumidos por turno del agente en todos los pasos (predeterminado: 16000)",
+    "perPersonaOverrides": "Sobrescrituras por persona",
+    "kaiSystemPromptLabel": "Mensaje del sistema de Kai",
+    "tokensUnit": "tokens",
+    "useDefaultPlaceholder": "Usar predeterminado",
+    "sageSystemPromptLabel": "Mensaje del sistema de Sage",
+    "kaiToolResultLabel": "Resultado de herramientas de Kai",
+    "sageToolResultLabel": "Resultado de herramientas de Sage"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Susurrador de bots I",
+      "tier2": "Susurrador de bots II"
+    },
+    "colors": {
+      "sky": "Cielo",
+      "mint": "Menta",
+      "lavender": "Lavanda",
+      "peach": "Durazno",
+      "rose": "Rosa",
+      "gold": "Oro"
+    },
+    "styles": {
+      "simple": "Simple",
+      "detailed": "Detallado",
+      "toon": "Toon"
+    },
+    "lockedMessage": "Obtén la insignia Susurrador de bots I para personalizar a tu asistente de IA.",
+    "previewTitle": "Tu asistente de IA",
+    "styleLabel": "Estilo",
+    "backgroundColorLabel": "Color de fondo"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "Copiar desde la clase",
+    "copyToClasses": "Copiar a las clases",
+    "firstMeetingDate": "Fecha de la primera reunión",
+    "weeksLabel": "Semanas",
+    "weeklyMeetingLabel": "Reunión semanal",
+    "weeklyMeetingHint": "1 = primera, 2 = segunda, 0 = última",
+    "loadingCadence": "Cargando cadencia de origen...",
+    "noAssignments": "La clase de origen no tiene asignaciones con fecha para copiar.",
+    "missingMetadata": "la asignación de origen no tiene metadatos de cadencia y no se puede copiar.",
+    "close": "Cerrar",
+    "copyCadence": "Copiar cadencia",
+    "copying": "Copiando..."
+  },
+  "assignmentCard": {
+    "excellent": "Excelente",
+    "good": "Bueno",
+    "fair": "Regular",
+    "needsWork": "Necesita mejorar",
+    "noDueDate": "Sin fecha de entrega",
+    "overdue": "Atrasado",
+    "dueSoon": "Próximo a vencer",
+    "due": "Vence",
+    "locked": "Bloqueado",
+    "opensAt": "Abre {date}",
+    "late": "Tarde",
+    "dropped": "Eliminado por el instructor",
+    "difficulty": "Dificultad: {level}",
+    "review": "Revisar",
+    "startWorkbook": "Comenzar",
+    "practice": "Practicar",
+    "discuss": "Discutir",
+    "joinReview": "Unirse a la revisión",
+    "requestGuidance": "Solicitar orientación",
+    "requestGuidanceTooltip": "Crea una sala y comparte el código con tu instructor para recibir orientación personalizada"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "Personalizar avatar"
+  },
+  "campaignProgress": {
+    "ended": "Finalizado",
+    "endedChip": "Finalizado",
+    "bonus": "Bonificación",
+    "chapterProgression": "Progreso del capítulo",
+    "completion": "Completado"
+  },
+  "chatPanel": {
+    "defaultTitle": "Chat",
+    "topicsLabel": "Temas",
+    "backButton": "Atrás",
+    "onlineCount": "{count} en línea"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "Escribe un mensaje... (@kai para IA)",
+    "replyingTo": "Respondiendo a {name}"
+  },
+  "threadView": {
+    "emptyState": "Aún no hay mensajes. ¡Empieza la conversación!",
+    "replyCount": {
+      "singular": "respuesta",
+      "plural": "respuestas"
+    },
+    "typingIndicator": "{names} {count, plural, one {está} other {están}} escribiendo...",
+    "edited": "(editado)",
+    "justNow": "justo ahora",
+    "minutesAgo": "{minutes}m atrás",
+    "hoursAgo": "{hours}h atrás"
+  },
+  "topicList": {
+    "header": "Temas",
+    "newTopicPlaceholder": "#nuevo-tema",
+    "emptyState": "Todavía no hay temas. Crea uno para empezar a chatear."
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "Añadir pregunta de temporizador",
+    "timerDescription": "Configuración del temporizador para tareas con límite de tiempo",
+    "retryToggle": "Permitir reintentos a los estudiantes",
+    "publishFirstAlert": "Nota: primero debes publicar la unidad para crear asignaciones",
+    "meetingCalendar": "Fecha de entrega",
+    "meetingDayHint": "Los puntos marcan los días de reunión de la sección.",
+    "tomorrow": "Mañana",
+    "nextClass": "Próxima clase",
+    "friday": "Próximo viernes",
+    "createSectionLabel": "Crear nueva sección",
+    "undoSnackbar": "Asignaciones creadas. {count} asignación{plural} creada."
   }
 }

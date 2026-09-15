@@ -13,7 +13,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 
 export interface CampaignInfo {
   id: string
-  cohortId: string
+  sectionID: string
   title: string
   setting?: string
   stakes?: string
@@ -22,7 +22,7 @@ export interface CampaignInfo {
 
 export interface GroupChallengeInfo {
   id: string
-  cohortId: string
+  sectionID: string
   title: string
   targetXP: number
   currentXP: number
@@ -68,13 +68,13 @@ export function useCampaign(): CampaignContextValue {
 
 export interface CampaignProviderProps {
   client: any
-  cohortId: string
+  sectionID: string
   children: React.ReactNode
 }
 
 export function CampaignProvider({
   client,
-  cohortId,
+  sectionID,
   children,
 }: CampaignProviderProps) {
   const [campaigns, setCampaigns] = useState<any[]>([])
@@ -84,13 +84,13 @@ export function CampaignProvider({
 
   // Subscribe to Campaigns for this cohort
   useEffect(() => {
-    if (!client?.models?.Campaign || !cohortId) {
+    if (!client?.models?.Campaign || !sectionID) {
       setCampaignsLoading(false)
       return
     }
 
     const sub = client.models.Campaign.observeQuery({
-      filter: { cohortId: { eq: cohortId } },
+      filter: { sectionID: { eq: sectionID } },
     }).subscribe({
       next: ({ items }: { items: any[] }) => {
         const valid = items.filter((i: any) => i != null && i.id != null)
@@ -109,17 +109,17 @@ export function CampaignProvider({
     })
 
     return () => sub.unsubscribe()
-  }, [client, cohortId])
+  }, [client, sectionID])
 
   // Subscribe to GroupChallenges for this cohort
   useEffect(() => {
-    if (!client?.models?.GroupChallenge || !cohortId) {
+    if (!client?.models?.GroupChallenge || !sectionID) {
       setChallengesLoading(false)
       return
     }
 
     const sub = client.models.GroupChallenge.observeQuery({
-      filter: { cohortId: { eq: cohortId } },
+      filter: { sectionID: { eq: sectionID } },
     }).subscribe({
       next: ({ items }: { items: any[] }) => {
         const valid = items.filter((i: any) => i != null && i.id != null)
@@ -138,7 +138,7 @@ export function CampaignProvider({
     })
 
     return () => sub.unsubscribe()
-  }, [client, cohortId])
+  }, [client, sectionID])
 
   // First campaign for this cohort
   const campaign = useMemo<CampaignInfo | null>(() => {
@@ -146,7 +146,7 @@ export function CampaignProvider({
     const c = campaigns[0]
     return {
       id: c.id,
-      cohortId: c.cohortId,
+      sectionID: c.sectionID,
       title: c.title,
       setting: c.setting,
       stakes: c.stakes,
@@ -162,7 +162,7 @@ export function CampaignProvider({
     challenges.forEach((ch: any) => {
       const info: GroupChallengeInfo = {
         id: ch.id,
-        cohortId: ch.cohortId,
+        sectionID: ch.sectionID,
         title: ch.title,
         targetXP: ch.targetXP,
         currentXP: ch.currentXP || 0,

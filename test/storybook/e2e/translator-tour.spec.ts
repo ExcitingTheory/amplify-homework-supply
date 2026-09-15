@@ -19,85 +19,12 @@ import {
   walkTaskTour,
   assertAllComplete,
   assertFullProgress,
-  type TaskSpec,
 } from "./helpers";
+import { getTasksForPersona } from "../../../.storybook/code/onboarding-tasks";
 
-// ─── Translator task catalogue ───────────────────────────────────────────────
-// Mirrors ONBOARDING_TASKS for persona="translator" plus persona="all",
-// sorted by order asc.
-
-const TRANSLATOR_TASKS: TaskSpec[] = [
-  // ── translator tasks (order 1–5, + extra credit 101–102) ─────────────────
-  {
-    id: "translator-language-switcher",
-    title: "Try the Language Switcher",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-demo-instructions"],
-    },
-  },
-  {
-    id: "translator-translation-panel",
-    title: "Open the Translations Panel",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-auth-form"],
-    },
-  },
-  {
-    id: "translator-locale-files",
-    title: "Understand Locale File Structure",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--editor-namespace",
-      completionSequence: ["translation-auth-form"],
-    },
-  },
-  {
-    id: "translator-component-context",
-    title: "Review Component Context",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--auth-namespace",
-      completionSequence: ["translation-auth-buttons"],
-    },
-  },
-  {
-    id: "translator-test-rtl",
-    title: "Test RTL Language Support",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-auth-buttons"],
-    },
-  },
-  {
-    id: "translator-pluralization",
-    title: "Review Pluralization Rules",
-    completionCriteria: {
-      tutorialStoryId: "translation-mode-demo--default",
-      completionSequence: ["translation-password-reset"],
-    },
-  },
-  // ── "all" persona tasks (order 100–103) ───────────────────────────────────
-  {
-    id: "secret-keyboard-master",
-    title: "👑 SECRET: Keyboard Master Challenge",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-speed-demon",
-    title: "⚡ SECRET: Speed Demon",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-achievement-hunter",
-    title: "🏅 SECRET: Achievement Hunter",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-shortcut-evangelist",
-    title: "📢 SECRET: Shortcut Evangelist",
-    completionCriteria: { completionSequence: ["editor-toolbar"] },
-  },
-];
+// Imported directly from the real source so this journey follows current
+// story IDs and completion criteria.
+const TRANSLATOR_TASKS = getTasksForPersona("translator");
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 

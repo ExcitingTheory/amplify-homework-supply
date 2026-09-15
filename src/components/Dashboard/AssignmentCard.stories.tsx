@@ -1,12 +1,16 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn, expect, userEvent, within } from "storybook/test";
-import { AssignmentCard } from "./AssignmentCard";
+import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
 
 const meta: Meta<typeof AssignmentCard> = {
   title: "📓 Workbook/Components/Assignment Card",
   component: AssignmentCard,
-  parameters: { layout: "centered" },
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+    layout: "centered",
+  },
   args: {
     onOpenDrill: fn(),
     onRequestGuidance: fn(),
@@ -69,8 +73,53 @@ export const Overdue: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("Chapter 3: Verb Conjugation");
-    // Overdue styling indicator exists
-    await canvas.findByText(/overdue|late|ago/i);
+    // Overdue styling indicator exists (may show both "Overdue" and "Late" chips)
+    const indicators = await canvas.findAllByText(/overdue|late/i);
+    expect(indicators.length).toBeGreaterThan(0);
+  },
+};
+
+export const DueSoon: Story = {
+  args: {
+    assignment: {
+      ...baseAssignment,
+      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    },
+    unit: baseUnit,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Due soon/i);
+  },
+};
+
+export const NoDueDate: Story = {
+  args: {
+    assignment: baseAssignment,
+    unit: baseUnit,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/No due date/i);
+  },
+};
+
+export const ExtendedAccommodation: Story = {
+  args: {
+    assignment: {
+      ...baseAssignment,
+      // Raw due date is yesterday, but a +3 day extension moves it into the future.
+      dueDate: new Date(Date.now() - 86400000).toISOString(),
+    },
+    unit: baseUnit,
+    accommodation: { dueDateExtensionDays: 3 },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
+    // The extension surfaces an "Extended" chip and keeps the card out of "Overdue".
+    await canvas.findByText(/Extended/i);
+    expect(canvas.queryByText(/Overdue/i)).toBeNull();
   },
 };
 
@@ -99,6 +148,36 @@ export const CompletedLowScore: Story = {
     const canvas = within(canvasElement);
     await canvas.findByText("Chapter 3: Verb Conjugation");
     await canvas.findByText(/55/);
+  },
+};
+
+// Demonstrates the "just completed" check-pop micro-animation (Phase 6.4).
+// The card starts pending, then flips to completed shortly after mount so the
+// transition fires the satisfying check animation (skipped under reduced motion).
+export const JustCompletedAnimation: Story = {
+  name: "Just Completed (check pop)",
+  render: (args) => {
+    const [grade, setGrade] =
+      React.useState<AssignmentCardProps["latestGrade"]>(undefined);
+    React.useEffect(() => {
+      const id = setTimeout(
+        () => setGrade({ id: "grade-1", accuracy: 92, sectionID: "section-1" }),
+        400,
+      );
+      return () => clearTimeout(id);
+    }, []);
+    return <AssignmentCard {...args} latestGrade={grade} />;
+  },
+  args: {
+    assignment: baseAssignment,
+    unit: baseUnit,
+    nailedItCount: 3,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Chapter 3: Verb Conjugation");
+    // After the pending→completed transition, the graded check chip appears
+    await canvas.findByText(/92/, {}, { timeout: 3000 });
   },
 };
 

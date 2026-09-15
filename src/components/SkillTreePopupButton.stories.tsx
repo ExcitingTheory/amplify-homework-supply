@@ -32,3 +32,15 @@ export const CustomLabel: Story = {
     await canvas.findByText("Skills & Progress Skill Tree");
   },
 };
+
+export const InstructorEmptyState: Story = {
+  args: {
+    sectionId: "section-new-789",
+    label: "Instructor View",
+    isInstructor: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Instructor View Skill Tree");
+  },
+};

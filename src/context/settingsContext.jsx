@@ -169,10 +169,10 @@ const SettingsProvider = ({ children }) => {
     // Update Squad.members with new avatar (denormalized for squad leaderboard)
     if (client.models.Squad) {
       try {
-        const cohortId = validProfiles[0]?.cohortId;
-        if (cohortId) {
+        const sectionID = validProfiles[0]?.sectionID;
+        if (sectionID) {
           const { data: squads } = await client.models.Squad.list({
-            filter: { cohortId: { eq: cohortId } },
+            filter: { sectionID: { eq: sectionID } },
           });
           const validSquads = (squads || []).filter(
             (s) => s != null && s.id != null,

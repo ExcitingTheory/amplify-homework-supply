@@ -52,7 +52,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "Set Up Your First Class",
     description: "Create a new class section for your students",
     instructions: [
-      "View the Sections page overview",
       'Click the "Create Section" button',
       "Fill in section details and save",
       "Copy the join code to share with students",
@@ -66,8 +65,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--sections", // Tutorial: Sections page with create section UI
       quizStoryId: "📄-pages-application-pages--sections", // Quiz: Navigate to actual sections page
+      // Deliberately does NOT start with a "sections-page" click — that data-tour
+      // lives on the whole-page wrapper Box, so it's not a real, discoverable
+      // interaction and real users never triggered it, leaving the task stuck
+      // incomplete forever.
       completionSequence: [
-        "sections-page",
         "create-section-button",
         "section-form",
         "join-code",
@@ -80,7 +82,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: "Build interactive learning content",
     instructions: [
       "Review the unit creation overview and goals",
-      "View the Units library overview",
       'Click the "Create Unit" button',
       "Use the rich text editor to add content",
       "Save your unit",
@@ -89,7 +90,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--units", // Tutorial: Units page (no separate component)
       quizStoryId: "📄-pages-application-pages--units", // Quiz: Navigate to actual units page
-      completionSequence: ["units-page", "create-unit-button"],
+      // Deliberately does NOT start with a "units-page" click — that data-tour
+      // lives on the whole-page wrapper Box, so it's not a real, discoverable
+      // interaction (same issue fixed for instructor-setup-class).
+      completionSequence: ["create-unit-button"],
     },
     persona: "instructor",
     category: "Content Creation",
@@ -109,9 +113,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       "Confirm the quiz block renders correctly in preview",
     ],
     completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink", // Tutorial: Kitchen sink editor with all block types
-      quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Actual editor page
-      completionSequence: ["editor-toolbar", "quiz-block", "quiz-answers"],
+      tutorialStoryId: "✏️-lesson-editor-editor--editor-with-content", // Tutorial: Editor story without scripted actions
+      quizStoryId: "✏️-lesson-editor-editor--editor-with-content", // Quiz: Editor story without scripted actions
+      completionSequence: ["insert-button", "quiz-block", "quiz-answers"],
     },
     persona: "instructor",
     category: "Content Creation",
@@ -148,10 +152,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     instructions: [
       "Review the assignment workflow overview",
       "View the assignment creation dialog",
-      'Click "Create Assignment"',
-      "Select a unit to assign",
       "Set a due date and time",
-      "Configure assignment settings",
+      "Select a section to assign to",
+      'Click "Assign" to create the assignment',
       "Confirm the assignment is visible to students",
     ],
     persona: "instructor",
@@ -161,12 +164,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "🧩-ui-components-section-assigner--default", // Tutorial: Section assigner dialog component
       quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page
+      // Order matches the real form in SectionAssigner.jsx: due date field,
+      // then the section dropdown, then the "Assign" submit button. The
+      // previous order started with the submit button and required a
+      // non-existent "assignment-settings" element (SectionAssigner has no
+      // such control), so the task could never actually complete.
       completionSequence: [
-        "create-assignment-button",
-        "unit-selector",
         "due-date-picker",
-        "assignment-settings",
-      ], // Step 1: open dialog; Step 2: select unit; Step 3: set due date; Step 4: configure settings
+        "unit-selector", // NOTE: data-tour value is misnamed in SectionAssigner.jsx — this is actually the section dropdown, not a unit selector
+        "create-assignment-button",
+      ],
     },
   },
   {
@@ -174,7 +181,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: "View Student Grades",
     description: "Review student submissions and performance",
     instructions: [
-      "View the Section page overview",
+      "View the Unit editor overview",
       'Click the "Grades" tab',
       "Browse the submissions list",
       "Open a grade to review details",
@@ -186,9 +193,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 6,
     estimatedTime: 240,
     completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail", // Tutorial: Section detail with grades tab
-      quizStoryId: "📄-pages-application-pages--section-detail", // Quiz: Section detail page
-      completionSequence: ["assignments-section", "assignment-card"],
+      tutorialStoryId: "📄-pages-application-pages--unit-detail", // Tutorial: Unit editor's Grades tab (grades-tab/grades-list/grade-detail live here, not on section-detail)
+      quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Unit editor page
+      completionSequence: ["grades-tab", "grades-list", "grade-detail"],
     },
   },
   {
@@ -219,8 +226,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: "Learn keyboard shortcuts for faster content creation",
     instructions: [
       "View the Shortcuts overview",
-      "Open Help → Keyboard Shortcuts",
-      "Browse the shortcuts reference page",
       "Watch the automated demo",
       "Practice common shortcuts in the editor",
       "Confirm mastery by completing the interactive practice session",
@@ -231,8 +236,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     estimatedTime: 300,
     completionCriteria: {
       tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default", // Tutorial: Keyboard shortcut trainer
-      quizStoryId: "📄-pages-application-pages--unit-detail", // Quiz: Editor page for practicing
-      completionSequence: ["shortcuts-demo"], // Must interact with the keyboard shortcuts demo area
+      quizStoryId: "🏠-getting-started-keyboard-shortcuts--default", // Quiz: same trainer — the real editor has no shortcut-tracking, so there's no other page this signal can come from
+      requiredSequence: ["shortcut-performed"], // Must actually press a real shortcut, not just click the demo area
     },
   },
 
@@ -256,7 +261,14 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: "📄-pages-application-pages--sections", // Tutorial: Sections page with join section dialog
       quizStoryId: "📄-pages-application-pages--sections", // Quiz: Navigate to sections page
-      completionSequence: ["sections-page", "section-card", "join-code"],
+      // Matches the actual join flow in MainToolbar.jsx (rendered globally via
+      // AppShell) — the previous sequence (sections-page/section-card/join-code)
+      // was copied from a different task and didn't match this walkthrough at all.
+      completionSequence: [
+        "join-section-button",
+        "join-section-dialog",
+        "join-code-input",
+      ],
     },
   },
   {
@@ -381,13 +393,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     estimatedTime: 180,
     completionCriteria: {
       tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default", // Tutorial: Kitchen sink workbook for practicing shortcuts
-      quizStoryId: "📄-pages-application-pages--workbook", // Quiz: Actual workbook page
-      completionSequence: ["shortcuts-demo"], // Must interact with the keyboard shortcuts demo area
-      customCheck: () => {
-        // Check if user has used any keyboard shortcuts
-        const shortcutUsed = localStorage.getItem("learner-shortcut-used");
-        return shortcutUsed === "true";
-      },
+      quizStoryId: "🏠-getting-started-keyboard-shortcuts--default", // Quiz: same trainer — the real workbook has no shortcut-tracking, so there's no other page this signal can come from
+      requiredSequence: ["shortcut-performed"], // Must actually press a real shortcut, not just click the demo area
     },
   },
 

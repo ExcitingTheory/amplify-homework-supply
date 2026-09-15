@@ -12,7 +12,9 @@
  */
 
 import * as React from "react";
+import { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
+import type { GridColDef } from "@mui/x-data-grid";
 import {
   Box,
   Typography,
@@ -24,8 +26,13 @@ import {
   Paper,
   Autocomplete,
   createFilterOptions,
+  Skeleton,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+
+// Lazy-load DataGrid only when CustomAIEditor is rendered (authoring only)
+const DataGrid = lazy(() =>
+  import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
+);
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -89,7 +96,8 @@ export default React.memo(function CustomAIEditor({
 
   // Build rows from question IDs
   const rows = React.useMemo(() => {
-    if (!questionIDs) return [] as { id: string; prompt: string; answer: string }[];
+    if (!questionIDs)
+      return [] as { id: string; prompt: string; answer: string }[];
     return questionIDs
       .map((id) => {
         const q = questionBankMap[id];
@@ -101,14 +109,25 @@ export default React.memo(function CustomAIEditor({
         };
       })
       .filter(
-        (row): row is { id: string; prompt: string; answer: string } => row != null,
+        (row): row is { id: string; prompt: string; answer: string } =>
+          row != null,
       );
   }, [questionIDs, questionBankMap]);
 
-  const columns = React.useMemo(
+  const columns = React.useMemo<GridColDef[]>(
     () => [
-      { field: "prompt", headerName: "Question Prompt", flex: 2, minWidth: 200 },
-      { field: "answer", headerName: "Expected Answer", flex: 1, minWidth: 150 },
+      {
+        field: "prompt",
+        headerName: "Question Prompt",
+        flex: 2,
+        minWidth: 200,
+      },
+      {
+        field: "answer",
+        headerName: "Expected Answer",
+        flex: 1,
+        minWidth: 150,
+      },
       {
         field: "actions",
         headerName: "",
@@ -318,19 +337,27 @@ export default React.memo(function CustomAIEditor({
 
       {/* Questions DataGrid */}
       {rows.length > 0 && (
-        <Box sx={{ height: Math.min(300, 52 + rows.length * 52), width: "100%" }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter={rows.length <= 5}
-            pageSizeOptions={[5]}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 5 } },
-            }}
-          />
-        </Box>
+        <Suspense
+          fallback={
+            <Skeleton variant="rectangular" width="100%" height={300} />
+          }
+        >
+          <Box
+            sx={{ height: Math.min(300, 52 + rows.length * 52), width: "100%" }}
+          >
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              density="compact"
+              disableRowSelectionOnClick
+              hideFooter={rows.length <= 5}
+              pageSizeOptions={[5]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 5 } },
+              }}
+            />
+          </Box>
+        </Suspense>
       )}
 
       {/* Security Notice */}

@@ -1,0 +1,171 @@
+[
+  {
+    "id": "dict-msg-1",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Add the vocabulary word 'いただきます' to our Japanese dictionary."
+      }
+    ]
+  },
+  {
+    "id": "dict-msg-2",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "I'll create a new vocabulary entry in your dictionary."
+      },
+      {
+        "type": "step-start",
+        "toolCall": "create_vocabulary_word",
+        "toolCallId": "call_vocab_create_001"
+      },
+      {
+        "type": "tool-create_vocabulary_word",
+        "toolCallId": "call_vocab_create_001",
+        "state": "output-available",
+        "input": {
+          "phrase": "いただきます",
+          "phonetic": "itadakimasu",
+          "definition": "Humble expression of gratitude spoken before eating a meal ('I humbly receive')",
+          "unitId": "unit-japanese-dining"
+        },
+        "output": {
+          "success": true,
+          "wordId": "word-itadakimasu",
+          "phrase": "いただきます",
+          "phonetic": "itadakimasu",
+          "definition": "Humble expression of gratitude spoken before eating a meal ('I humbly receive')",
+          "message": "Vocabulary word created and linked to unit"
+        }
+      },
+      {
+        "type": "text",
+        "text": "✅ Added **いただきます (itadakimasu)** to your dictionary!\n- **Definition**: Humble expression of gratitude spoken before eating a meal ('I humbly receive')\n- **Phonetic**: *itadakimasu*\n- **Unit Association**: Japanese Dining & Etiquette"
+      }
+    ]
+  },
+  {
+    "id": "dict-msg-3",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Create a question testing when 'いただきます' is spoken."
+      }
+    ]
+  },
+  {
+    "id": "dict-msg-4",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "create_question",
+        "toolCallId": "call_q_create_001"
+      },
+      {
+        "type": "tool-create_question",
+        "toolCallId": "call_q_create_001",
+        "state": "output-available",
+        "input": {
+          "prompt": "In Japanese cultural etiquette, when should you say 'いただきます' (itadakimasu)?",
+          "answer": "Immediately before beginning a meal or receiving food/drinks from someone.",
+          "unitId": "unit-japanese-dining"
+        },
+        "output": {
+          "success": true,
+          "questionId": "q-itadakimasu-001",
+          "prompt": "In Japanese cultural etiquette, when should you say 'いただきます' (itadakimasu)?",
+          "answer": "Immediately before beginning a meal or receiving food/drinks from someone.",
+          "message": "Question created and saved to Question Bank"
+        }
+      },
+      {
+        "type": "text",
+        "text": "✅ Created question in your Question Bank!\n- **Prompt**: *In Japanese cultural etiquette, when should you say 'いただきます' (itadakimasu)?*\n- **Answer**: *Immediately before beginning a meal or receiving food/drinks from someone.*"
+      }
+    ]
+  },
+  {
+    "id": "dict-msg-5",
+    "role": "user",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Search our library for all dining, meal, and food items."
+      }
+    ]
+  },
+  {
+    "id": "dict-msg-6",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_search_dining_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_search_dining_001",
+        "state": "output-available",
+        "input": {
+          "query": "dining meal food restaurant etiquette",
+          "type": "all",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "dining meal food restaurant etiquette",
+          "results": [
+            {
+              "type": "word",
+              "id": "word-itadakimasu",
+              "similarity": 0.98,
+              "phrase": "いただきます",
+              "phonetic": "itadakimasu",
+              "definition": "Expression before eating"
+            },
+            {
+              "type": "word",
+              "id": "word-gochisousama",
+              "similarity": 0.95,
+              "phrase": "ごちそうさまでした",
+              "phonetic": "gochisousama deshita",
+              "definition": "Expression of thanks after finishing a meal"
+            },
+            {
+              "type": "word",
+              "id": "word-oishii",
+              "similarity": 0.91,
+              "phrase": "美味しい",
+              "phonetic": "oishii",
+              "definition": "Delicious / tasty"
+            },
+            {
+              "type": "question",
+              "id": "q-itadakimasu-001",
+              "similarity": 0.89,
+              "prompt": "When should you say 'いただきます'?",
+              "answer": "Immediately before beginning a meal."
+            },
+            {
+              "type": "file",
+              "id": "file-restaurant-menu",
+              "similarity": 0.84,
+              "name": "Tokyo_Izakaya_Menu_Bilingual.pdf",
+              "description": "Authentic izakaya dining menu with kanji, hiragana, and English item descriptions"
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "Found 5 matching items across your vocabulary, question bank, and media library relating to dining and meal etiquette."
+      }
+    ]
+  }
+]

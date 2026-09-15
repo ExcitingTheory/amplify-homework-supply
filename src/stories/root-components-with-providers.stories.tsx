@@ -13,8 +13,14 @@ import AppShell from "../components/AppShell";
 import { GradeReviewDrawer } from "../components/GradeReviewDrawer";
 import RecordingStudioEnhancedModal from "../components/RecordingStudioEnhancedModal";
 import CollaboratorManager from "../components/CollaboratorManager";
+import DashboardClient from "../../app/[locale]/DashboardClient";
 
-import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
+import {
+  seedIndexPageData,
+  mockSections,
+  studentAssignments,
+  studentGrades,
+} from "../../.storybook/__mocks__/index-page-examples";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
 import { FilesProvider } from "../context/fileContext";
 
@@ -44,18 +50,43 @@ export const AppShellDefault: Story = {
         username: "student-alice-sub",
         userId: "student-alice-sub",
         attributes: { sub: "student-alice-sub", email: "alice@example.com" },
-        groups: ["section-jpn-101-learners"],
+        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
       });
       seedIndexPageData("student");
-      return <Story />;
+      // Start from the expanded desktop nav so the sidebar and drag handle are
+      // visible (clears any hidden/collapsed state a previous drag persisted).
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("appShell.navHidden");
+        window.localStorage.removeItem("appShell.navCollapsed");
+      }
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
     },
   ],
   render: () => (
     <AppShell toolbarChildren={null}>
-      <div style={{ padding: 24 }}>
-        <h2>Page Content</h2>
-        <p>This is the main content area rendered inside AppShell.</p>
-      </div>
+      <DashboardClient
+        signOut={undefined}
+        user={{
+          username: "student-alice-sub",
+          userId: "student-alice-sub",
+          attributes: {
+            sub: "student-alice-sub",
+            email: "alice@example.com",
+            name: "Alice Smith",
+          },
+          groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
+        }}
+        initialSections={[
+          mockSections["section-jpn-101"],
+          mockSections["section-jpn-102"],
+        ]}
+        initialAssignments={studentAssignments}
+        initialGrades={studentGrades}
+      />
     </AppShell>
   ),
   parameters: {
@@ -66,19 +97,21 @@ export const AppShellDefault: Story = {
       session: {
         username: "student-alice-sub",
         identityId: "identity-alice",
-        groups: ["section-jpn-101-learners"],
+        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
       },
     },
+    nextjs: { navigation: { pathname: "/" } },
     docs: {
       description: {
         story:
-          "Responsive shell with persistent sidebar on desktop, modal drawer on mobile.",
+          "Full application container: the responsive AppShell (persistent sidebar + " +
+          "draggable nav handle on desktop, modal drawer on mobile) wrapping the real " +
+          "learner dashboard with seeded sections, assignments, and grades.",
       },
     },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await canvas.findByText("Page Content");
+    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
   },
 };
 

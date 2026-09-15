@@ -11,6 +11,7 @@ import {
   updateUserAttribute,
   updatePassword,
   fetchAuthSession,
+  confirmUserAttribute,
 } from "aws-amplify/auth";
 
 import FormControl from "@mui/material/FormControl";
@@ -22,7 +23,12 @@ import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapp
 import { getAmplifyClient } from "@/utils/amplifyClient";
 
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
+import {
+  getSettingsErrorMessage,
+  validatePasswordChange,
+} from "@/utils/settingsValidation";
 
 import Button from "@mui/material/Button";
 import {
@@ -62,6 +68,7 @@ function Settings() {
   const [identityId, setIdentityId] = React.useState("");
 
   const [successMessage, setSuccessMessage] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
   const [clearDataStoreDialogOpen, setClearDataStoreDialogOpen] =
     React.useState(false);
   const { settings, updateSettings } = React.useContext(SettingsContext) || {};
@@ -100,17 +107,18 @@ function Settings() {
   const updateEmailConfirmation = async (event) => {
     setIsWorking(true);
     event.preventDefault();
+    setErrorMessage("");
 
     try {
       await confirmUserAttribute({
         userAttributeKey: "email",
         confirmationCode,
       });
-      setIsWorking(false);
       setNeedsConfirmation(false);
       setSuccessMessage("Email updated successfully");
     } catch (error) {
-      alert(error.message);
+      setErrorMessage(getSettingsErrorMessage(error));
+    } finally {
       setIsWorking(false);
     }
   };
@@ -118,6 +126,7 @@ function Settings() {
   const updateEmail = async (event) => {
     setIsWorking(true);
     event.preventDefault();
+    setErrorMessage("");
 
     if (email !== user?.email) {
       try {
@@ -129,41 +138,92 @@ function Settings() {
         });
         setNeedsConfirmation(true);
       } catch (error) {
-        alert(error.message);
+        setErrorMessage(getSettingsErrorMessage(error));
+      } finally {
+        setIsWorking(false);
       }
+    } else {
+      setIsWorking(false);
     }
   };
 
   const updateUser = async (event) => {
     setIsWorking(true);
     event.preventDefault();
+    setErrorMessage("");
 
-    await updateEmail(event);
+    const didUpdateEmail = email !== user?.email;
+    const didUpdateName = name !== user?.name;
+    if (didUpdateEmail || didUpdateName) {
+      try {
+        if (didUpdateEmail) {
+          await updateUserAttribute({
+            userAttribute: {
+              attributeKey: "email",
+              value: email,
+            },
+          });
+          setNeedsConfirmation(true);
+        }
+        if (didUpdateName) {
+          await updateUserAttribute({
+            userAttribute: {
+              attributeKey: "name",
+              value: name,
+            },
+          });
+        }
+        setUser((currentUser) => ({ ...currentUser, email, name }));
+        setSuccessMessage(
+          didUpdateEmail
+            ? "Verification email sent."
+            : "User updated successfully",
+        );
+      } catch (error) {
+        setErrorMessage(getSettingsErrorMessage(error));
+        setIsWorking(false);
+        return;
+      }
+    }
 
-    setIsWorking(false);
     setSuccessMessage("User updated successfully");
+    setIsWorking(false);
   };
 
   const changePassword = async (event) => {
     setIsWorking(true);
     event.preventDefault();
+    setErrorMessage("");
+
+    const passwordValidation = validatePasswordChange({
+      oldPassword,
+      newPassword,
+      confirmNewPassword,
+    });
+
+    if (!passwordValidation.isValid) {
+      setErrorMessage(passwordValidation.message);
+      setIsWorking(false);
+      return;
+    }
 
     try {
       await updatePassword({ oldPassword, newPassword });
-      setIsWorking(false);
       setSuccessMessage("Password changed successfully");
     } catch (error) {
-      alert(error.message);
+      setErrorMessage(getSettingsErrorMessage(error));
+    } finally {
+      setIsWorking(false);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
     }
-
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
   };
 
   const handleClearDataStore = async () => {
     setIsWorking(true);
     setClearDataStoreDialogOpen(false);
+    setErrorMessage("");
 
     try {
       console.log("Reloading page to clear cache...");
@@ -175,7 +235,9 @@ function Settings() {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      alert("Error clearing cache: " + error.message);
+      setErrorMessage(
+        "Error clearing cache: " + getSettingsErrorMessage(error),
+      );
       setIsWorking(false);
     }
   };
@@ -183,6 +245,7 @@ function Settings() {
   const handleLocaleChange = async (event) => {
     const newLocale = event.target.value;
     setSelectedLocale(newLocale);
+    setErrorMessage("");
 
     try {
       localStorage.setItem("preferredLocale", newLocale);
@@ -192,7 +255,9 @@ function Settings() {
       setSuccessMessage(t("profile.languagePreference.changeSuccess"));
     } catch (error) {
       console.error("Error changing locale:", error);
-      alert("Error changing language: " + error.message);
+      setErrorMessage(
+        "Error changing language: " + getSettingsErrorMessage(error),
+      );
     }
   };
 
@@ -218,11 +283,21 @@ function Settings() {
 
   React.useEffect(() => {
     if (successMessage) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setSuccessMessage("");
       }, 10000);
+      return () => clearTimeout(timeout);
     }
   }, [successMessage]);
+
+  React.useEffect(() => {
+    if (errorMessage) {
+      const timeout = setTimeout(() => {
+        setErrorMessage("");
+      }, 10000);
+      return () => clearTimeout(timeout);
+    }
+  }, [errorMessage]);
 
   return (
     <>
@@ -238,6 +313,26 @@ function Settings() {
           overflow: "auto",
         }}
       >
+        <Snackbar
+          open={Boolean(successMessage)}
+          autoHideDuration={10000}
+          onClose={() => setSuccessMessage("")}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="success" onClose={() => setSuccessMessage("")}>
+            {successMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={Boolean(errorMessage)}
+          autoHideDuration={10000}
+          onClose={() => setErrorMessage("")}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="error" onClose={() => setErrorMessage("")}>
+            {errorMessage}
+          </Alert>
+        </Snackbar>
         <Card
           sx={{
             padding: "2rem 1rem",
@@ -248,6 +343,12 @@ function Settings() {
         >
           <h1>{t("settings.profileInfo.heading")}</h1>
           <p>{t("settings.profileInfo.description")}</p>
+
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
 
           <form onSubmit={updateUser}>
             <FormControl fullWidth>
@@ -262,6 +363,7 @@ function Settings() {
               />
 
               <TextField
+                id="settings-email"
                 label="Email"
                 type="email"
                 value={email}
@@ -273,18 +375,41 @@ function Settings() {
                 autoComplete="email"
               />
 
-              <label>{t("profile.userId")}</label>
+              <TextField
+                id="settings-name"
+                label={t("profile.name", { defaultMessage: "Name" })}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                sx={{ mb: 2 }}
+                autoComplete="name"
+              />
+
+              <Typography
+                component="label"
+                htmlFor="settings-user-id"
+                sx={{ mb: 1, display: "block" }}
+              >
+                {t("profile.userId")}
+              </Typography>
 
               <TextField
+                id="settings-user-id"
                 type="text"
                 value={user?.sub || ""}
                 disabled
                 sx={{ mb: 2 }}
               />
 
-              <label>{t("profile.identityId")}</label>
+              <Typography
+                component="label"
+                htmlFor="settings-identity-id"
+                sx={{ mb: 1, display: "block" }}
+              >
+                {t("profile.identityId")}
+              </Typography>
 
               <TextField
+                id="settings-identity-id"
                 type="text"
                 value={identityId || ""}
                 disabled
@@ -357,6 +482,7 @@ function Settings() {
               <form onSubmit={updateEmailConfirmation}>
                 <FormControl fullWidth>
                   <TextField
+                    id="settings-confirmation-code"
                     label="Confirmation Code"
                     type="text"
                     value={confirmationCode}

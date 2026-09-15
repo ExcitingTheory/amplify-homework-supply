@@ -22,6 +22,7 @@ import { EasterEggLayer } from "../src/components/Gamification/EasterEggLayer";
 import GlobalChatButton from "../src/components/GlobalChatButton";
 import GlobalChatDrawer from "../src/components/GlobalChatDrawer";
 import OfflineBanner from "../src/components/OfflineBanner";
+import FirstRunChecklist from "../src/components/FirstRunChecklist";
 import { useGlobalChatShortcut } from "../src/hooks/useGlobalChatShortcut";
 import { usePageViewTracking } from "../src/hooks/usePageViewTracking";
 import AppSkeleton from "../src/components/AppSkeleton";
@@ -150,11 +151,22 @@ export default function Providers({
 }) {
   const pathname = usePathname();
 
-  useGlobalChatShortcut();
-  usePageViewTracking();
+  const storybookStoryId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("id") || ""
+      : "";
+  const isWorkbookOrUnitEditorStory =
+    storybookStoryId.includes("workbook") ||
+    storybookStoryId.includes("unit-editor") ||
+    storybookStoryId.includes("lesson-editor");
 
   const hideChatButton =
-    pathname?.includes("/workbook/") || pathname?.includes("/unit/");
+    pathname?.includes("/workbook/") ||
+    pathname?.includes("/unit/") ||
+    isWorkbookOrUnitEditorStory;
+
+  useGlobalChatShortcut(!hideChatButton);
+  usePageViewTracking();
 
   return (
     <ThemeRegistry nonce={nonce}>
@@ -195,6 +207,12 @@ function AuthenticatedShell({
   hideChatButton: boolean;
 }) {
   const { user } = React.useContext(AuthContext);
+  const userGroups = (user as { groups?: string[] } | undefined)?.groups || [];
+  const role = userGroups.some((group) =>
+    ["Admins", "Instructors"].includes(group),
+  )
+    ? "instructor"
+    : "learner";
 
   if (!user) {
     return <>{children}</>;
@@ -203,8 +221,9 @@ function AuthenticatedShell({
   return (
     <>
       <AppShell toolbarChildren={null}>{children}</AppShell>
-      <GlobalChatButton show={!hideChatButton} />
-      <GlobalChatDrawer />
+      <FirstRunChecklist role={role} />
+      {!hideChatButton && <GlobalChatButton />}
+      {!hideChatButton && <GlobalChatDrawer />}
       <OfflineBanner />
       <EasterEggLayer />
     </>

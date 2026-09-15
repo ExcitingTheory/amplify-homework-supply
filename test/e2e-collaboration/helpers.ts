@@ -134,7 +134,6 @@ export async function loginOnPage(
 
   // Wait for auth to complete — #user-button in MainToolbar confirms login
   await page.waitForSelector("#user-button", { timeout: 30_000 });
-
 }
 
 // ---------------------------------------------------------------------------
@@ -395,7 +394,7 @@ export async function joinSection(page: Page, joinCode: string): Promise<void> {
  * - [data-tour="assignment-settings"]     — AssignmentConfiguration.jsx:227
  * - [data-tour="due-date-picker"] input   — AssignmentConfiguration.jsx:246
  * - [data-tour="unit-selector"]           — AssignmentConfiguration.jsx:263
- * Note: Assignment auto-saves when both due date and section are set (no submit button).
+ * The assignment is committed by the explicit Assign button after the preview appears.
  */
 export async function assignUnitToSection(
   page: Page,
@@ -430,7 +429,12 @@ export async function assignUnitToSection(
     .first()
     .click();
 
-  // Assignment auto-saves via useEffect when both due date and section are set.
+  const assignButton = page.getByRole("button", {
+    name: /Assign to 1 section/i,
+  });
+  await expect(assignButton).toBeVisible({ timeout: 5_000 });
+  await assignButton.click();
+
   // Wait for the assignment to appear in the list below the form.
   await page
     .locator('[data-tour="assignment-settings"]')
@@ -503,9 +507,14 @@ export async function joinPracticeDrill(
 
   // Click "Join Session" button
   await dialog.getByRole("button", { name: /join session/i }).click();
-  await page.waitForSelector('[data-tour="workbook-content"], [data-tour="workbook"], [data-testid="practice-drill"]', {
-    timeout: 30_000,
-  }).catch(() => {});
+  await page
+    .waitForSelector(
+      '[data-tour="workbook-content"], [data-tour="workbook"], [data-testid="practice-drill"]',
+      {
+        timeout: 30_000,
+      },
+    )
+    .catch(() => {});
 }
 
 // ---------------------------------------------------------------------------

@@ -19,101 +19,12 @@ import {
   walkTaskTour,
   assertAllComplete,
   assertFullProgress,
-  type TaskSpec,
 } from "./helpers";
+import { getTasksForPersona } from "../../../.storybook/code/onboarding-tasks";
 
-// ─── Instructor task catalogue ───────────────────────────────────────────────
-// Mirrors ONBOARDING_TASKS for persona="instructor" plus persona="all",
-// sorted by order asc. Kept inline to avoid importing browser-side modules.
-
-const INSTRUCTOR_TASKS: TaskSpec[] = [
-  // ── instructor tasks (order 1–8) ──────────────────────────────────────────
-  {
-    id: "instructor-setup-class",
-    title: "Set Up Your First Class",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--sections",
-      completionSequence: ["create-section-button"],
-    },
-  },
-  {
-    id: "instructor-create-unit",
-    title: "Create Your First Unit",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--units",
-      completionSequence: ["create-unit-button"],
-    },
-  },
-  {
-    id: "instructor-add-quiz",
-    title: "Add a Quiz Block",
-    completionCriteria: {
-      tutorialStoryId: "✏️-lesson-editor-editor--kitchen-sink",
-      completionSequence: ["editor-toolbar", "quiz-block"],
-    },
-  },
-  {
-    id: "instructor-create-vocabulary",
-    title: "Add Vocabulary Words",
-    completionCriteria: {
-      tutorialStoryId: "📁-content-management-dictionary-editor--default",
-      completionSequence: ["add-word-button", "word-card"],
-    },
-  },
-  {
-    id: "instructor-create-assignment",
-    title: "Assign Work to Students",
-    completionCriteria: {
-      tutorialStoryId: "🧩-ui-components-section-assigner--default",
-      completionSequence: ["unit-selector", "create-assignment-button"],
-    },
-  },
-  {
-    id: "instructor-view-grades",
-    title: "View Student Grades",
-    completionCriteria: {
-      tutorialStoryId: "📄-pages-application-pages--section-detail",
-      completionSequence: ["assignments-section"],
-    },
-  },
-  {
-    id: "instructor-use-ai-assistant",
-    title: "Use AI to Generate Content",
-    completionCriteria: {
-      tutorialStoryId: "💬-ai-assistant-chat-sidebar--getting-started",
-      completionSequence: ["chat-input"],
-    },
-  },
-  {
-    id: "instructor-learn-shortcuts",
-    title: "Master Editor Shortcuts",
-    completionCriteria: {
-      tutorialStoryId: "🏠-getting-started-keyboard-shortcuts--default",
-      completionSequence: ["shortcuts-demo"],
-    },
-  },
-  // ── "all" persona tasks (order 100–103) ───────────────────────────────────
-  {
-    id: "secret-keyboard-master",
-    title: "👑 SECRET: Keyboard Master Challenge",
-    completionCriteria: { customCheck: () => false }, // customCheck only — injected
-  },
-  {
-    id: "secret-speed-demon",
-    title: "⚡ SECRET: Speed Demon",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-achievement-hunter",
-    title: "🏅 SECRET: Achievement Hunter",
-    completionCriteria: { customCheck: () => false },
-  },
-  {
-    id: "secret-shortcut-evangelist",
-    title: "📢 SECRET: Shortcut Evangelist",
-    completionCriteria: { completionSequence: ["editor-toolbar"] },
-  },
-];
+// Imported directly from the real source (not hand-duplicated) so this test
+// can never silently drift from the actual app's onboarding config.
+const INSTRUCTOR_TASKS = getTasksForPersona("instructor");
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 

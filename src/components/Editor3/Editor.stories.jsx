@@ -97,7 +97,7 @@ The editor tracks graded blocks (quiz, answer, custom-answer, meaning-associatio
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
       <AppShellDecorator>

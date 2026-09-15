@@ -5,6 +5,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof CampaignBriefing> = {
   title: "🏆 Gamification/Squads & Teams/Campaign Briefing",
   component: CampaignBriefing,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

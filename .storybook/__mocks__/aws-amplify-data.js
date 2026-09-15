@@ -11,6 +11,18 @@ import {
 import { allChatData } from "./chatDataLoader";
 
 /**
+ * Verbose mock logging is off by default — it fires 40+ times per story
+ * navigation (once per model subscription) and measurably slows story loads.
+ * Enable with STORYBOOK_MOCK_DEBUG=true when debugging the mock data layer.
+ */
+const MOCK_DEBUG =
+  typeof process !== "undefined" &&
+  process.env?.STORYBOOK_MOCK_DEBUG === "true";
+const mockLog = (...args) => {
+  if (MOCK_DEBUG) console.log(...args);
+};
+
+/**
  * Mock in-memory data stores
  */
 const dataStores = {
@@ -127,7 +139,7 @@ const initializeStores = () => {
     updatedAt: new Date().toISOString(),
   });
 
-  console.log("[Mock Data] Initialized stores:", {
+  mockLog("[Mock Data] Initialized stores:", {
     File: dataStores.File.size,
     Document: dataStores.Document.size,
     ParsedContent: dataStores.ParsedContent.size,
@@ -365,22 +377,22 @@ const createObservableQuery = (modelName, filter) => {
 
         // Apply filter if provided
         if (filter?.filter) {
-          console.log(
+          mockLog(
             `[Mock Data] ${modelName}.observeQuery() applying filter:`,
             filter.filter,
           );
-          console.log(
+          mockLog(
             `[Mock Data] ${modelName}.observeQuery() items before filter:`,
             items.length,
           );
           items = applySubscriptionFilter(items, filter);
-          console.log(
+          mockLog(
             `[Mock Data] ${modelName}.observeQuery() items after filter:`,
             items.length,
           );
         }
 
-        console.log(
+        mockLog(
           `[Mock Data] ${modelName}.observeQuery() returning ${items.length} items (filter applied)`,
           filter,
         );
@@ -396,7 +408,7 @@ const createObservableQuery = (modelName, filter) => {
           activeSubscriptions[modelName] = [];
         }
         activeSubscriptions[modelName].push(subscription);
-        console.log(
+        mockLog(
           `[Mock Data] ${modelName} subscription added. Total subscriptions: ${activeSubscriptions[modelName].length}`,
         );
 
@@ -414,7 +426,7 @@ const createObservableQuery = (modelName, filter) => {
             const index = activeSubscriptions[modelName].indexOf(subscription);
             if (index > -1) {
               activeSubscriptions[modelName].splice(index, 1);
-              console.log(
+              mockLog(
                 `[Mock Data] ${modelName} subscription unsubscribed. Remaining: ${activeSubscriptions[modelName].length}`,
               );
             }
@@ -518,7 +530,7 @@ const notifyMutationSubscribers = (modelName, mutationType, item) => {
  */
 const createMockModel = (modelName) => ({
   observeQuery: (filter) => {
-    console.log(
+    mockLog(
       `[Mock Data] ${modelName}.observeQuery() called with filter:`,
       filter,
     );
@@ -527,34 +539,22 @@ const createMockModel = (modelName) => ({
 
   // Real-time subscription methods (Amplify Gen 2 API)
   onCreate: (filter) => {
-    console.log(
-      `[Mock Data] ${modelName}.onCreate() called with filter:`,
-      filter,
-    );
+    mockLog(`[Mock Data] ${modelName}.onCreate() called with filter:`, filter);
     return createMutationSubscription(modelName, "onCreate");
   },
 
   onUpdate: (filter) => {
-    console.log(
-      `[Mock Data] ${modelName}.onUpdate() called with filter:`,
-      filter,
-    );
+    mockLog(`[Mock Data] ${modelName}.onUpdate() called with filter:`, filter);
     return createMutationSubscription(modelName, "onUpdate");
   },
 
   onDelete: (filter) => {
-    console.log(
-      `[Mock Data] ${modelName}.onDelete() called with filter:`,
-      filter,
-    );
+    mockLog(`[Mock Data] ${modelName}.onDelete() called with filter:`, filter);
     return createMutationSubscription(modelName, "onDelete");
   },
 
   list: async (options) => {
-    console.log(
-      `[Mock Data] ${modelName}.list() called with options:`,
-      options,
-    );
+    mockLog(`[Mock Data] ${modelName}.list() called with options:`, options);
     let items = Array.from(dataStores[modelName].values());
 
     // Apply filter if provided
@@ -582,7 +582,7 @@ const createMockModel = (modelName) => ({
   },
 
   get: async ({ id }) => {
-    console.log(`[Mock Data] ${modelName}.get() called with id:`, id);
+    mockLog(`[Mock Data] ${modelName}.get() called with id:`, id);
     const item = dataStores[modelName].get(id);
     const enhancedItem = item
       ? addRelationshipAccessors(item, modelName)
@@ -594,7 +594,7 @@ const createMockModel = (modelName) => ({
   },
 
   create: async (input) => {
-    console.log(`[Mock Data] ${modelName}.create() called with:`, input);
+    mockLog(`[Mock Data] ${modelName}.create() called with:`, input);
     const id = input.id || `mock-${modelName.toLowerCase()}-${Date.now()}`;
     const item = {
       ...input,
@@ -623,7 +623,7 @@ const createMockModel = (modelName) => ({
   },
 
   update: async (input) => {
-    console.log(`[Mock Data] ${modelName}.update() called with:`, input);
+    mockLog(`[Mock Data] ${modelName}.update() called with:`, input);
     const existing = dataStores[modelName].get(input.id);
     if (!existing) {
       return {
@@ -658,7 +658,7 @@ const createMockModel = (modelName) => ({
   },
 
   delete: async ({ id }) => {
-    console.log(`[Mock Data] ${modelName}.delete() called with id:`, id);
+    mockLog(`[Mock Data] ${modelName}.delete() called with id:`, id);
     const existing = dataStores[modelName].get(id);
     if (!existing) {
       return {
@@ -923,7 +923,7 @@ const mockClient = {
 
   // GraphQL method for custom queries
   graphql: async ({ query, variables }) => {
-    console.log("[Mock Data] graphql() called:", { query, variables });
+    mockLog("[Mock Data] graphql() called:", { query, variables });
     return {
       data: {},
       errors: [],
@@ -935,7 +935,7 @@ const mockClient = {
  * Mock generateClient function
  */
 export const generateClient = () => {
-  console.log("[Mock Data] generateClient() called - returning mock client");
+  mockLog("[Mock Data] generateClient() called - returning mock client");
   return mockClient;
 };
 
@@ -963,7 +963,7 @@ export const getMockData = (modelName) => {
  * Seed functions for backward compatibility with DataStore mock API
  */
 export const seedMockFiles = (filesArray) => {
-  console.log(`[Mock Data] seedMockFiles: Adding ${filesArray.length} files`);
+  mockLog(`[Mock Data] seedMockFiles: Adding ${filesArray.length} files`);
   filesArray.forEach((file) => {
     dataStores.File.set(file.id, file);
   });
@@ -1294,7 +1294,7 @@ export const seedMockHomeworkRooms = (roomsArray) => {
 };
 
 export const seedMockAssistantChats = (chatsArray) => {
-  console.log(
+  mockLog(
     `[Mock Data] seedMockAssistantChats: Replacing with ${chatsArray.length} assistant chats`,
   );
 
@@ -1307,7 +1307,7 @@ export const seedMockAssistantChats = (chatsArray) => {
 
   // Notify all active AssistantChat subscriptions
   if (activeSubscriptions.AssistantChat.length > 0) {
-    console.log(
+    mockLog(
       `[Mock Data] Notifying ${activeSubscriptions.AssistantChat.length} AssistantChat subscriptions`,
     );
     const items = Array.from(dataStores.AssistantChat.values());
@@ -1331,7 +1331,7 @@ export const seedMockAssistantChats = (chatsArray) => {
  * Useful for resetting between stories
  */
 export const clearMockData = () => {
-  console.log("[Mock Data] Clearing all data stores");
+  mockLog("[Mock Data] Clearing all data stores");
   Object.values(dataStores).forEach((store) => store.clear());
 
   // Clear mutation subscriptions
@@ -1341,7 +1341,7 @@ export const clearMockData = () => {
     modelSubs.onDelete = [];
   });
 
-  console.log("[Mock Data] All data stores cleared");
+  mockLog("[Mock Data] All data stores cleared");
 };
 
 /**
@@ -1500,7 +1500,7 @@ export const cancelDocumentAnalysis = (documentId) => {
  * Call this from preview.jsx to seed Gen 2 mock data
  */
 export const initializeMockData = () => {
-  console.log("[Mock Data Gen 2] Initializing mock data");
+  mockLog("[Mock Data Gen 2] Initializing mock data");
 
   // Seed a default Unit so UnitProvider's Unit.get({ id: "mock-unit-id" }) succeeds
   const defaultUnit = {
@@ -1527,26 +1527,23 @@ export const initializeMockData = () => {
     updatedAt: new Date().toISOString(),
   };
   dataStores.Unit.set(defaultUnit.id, defaultUnit);
-  console.log("[Mock Data Gen 2] Seeded default Unit:", defaultUnit.id);
+  mockLog("[Mock Data Gen 2] Seeded default Unit:", defaultUnit.id);
 
   // Seed AssistantChat data
   if (allChatData) {
     seedMockAssistantChats([allChatData]);
-    console.log("[Mock Data Gen 2] Seeded AssistantChat:", allChatData.id);
+    mockLog("[Mock Data Gen 2] Seeded AssistantChat:", allChatData.id);
   }
 
   // Seed Files and Documents
   if (initialMockFiles && initialMockFiles.length > 0) {
     seedMockFiles(initialMockFiles);
-    console.log("[Mock Data Gen 2] Seeded Files:", initialMockFiles.length);
+    mockLog("[Mock Data Gen 2] Seeded Files:", initialMockFiles.length);
   }
 
   if (initialMockDocuments && initialMockDocuments.length > 0) {
     seedMockDocuments(initialMockDocuments);
-    console.log(
-      "[Mock Data Gen 2] Seeded Documents:",
-      initialMockDocuments.length,
-    );
+    mockLog("[Mock Data Gen 2] Seeded Documents:", initialMockDocuments.length);
   }
 };
 

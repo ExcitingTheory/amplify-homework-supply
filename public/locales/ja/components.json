@@ -153,7 +153,12 @@
     "rubyTagsStep4": "4. 「保存」をクリックしてルビタグを適用します",
     "pronunciationLabel": "発音（最初に選択してください）：",
     "phraseLabel": "フレーズ（2番目を選択）：",
-    "rubyTagPreview": "ルビタグプレビュー："
+    "rubyTagPreview": "ルビタグプレビュー：",
+    "title": "辞書エディター",
+    "step1": "1. 発音欄（上部）でテキストを選択し、次にフレーズ欄（下部）で対応するテキストを選択してください",
+    "step2": "2. 選択した部分がペアになり、ルビタグのプレビューに移動します",
+    "step3": "3. 両方のフィールドが空になるまでペアの選択を続けてください",
+    "step4": "4. 「保存」をクリックしてルビタグを適用します"
   },
   "recordingStudio3": {
     "addSpeakerFirst": "まずスピーカーを追加してください",
@@ -234,5 +239,147 @@
     "embeddingStale": "埋め込みが古くなっています",
     "embeddingFresh": "埋め込み更新中",
     "error": "エラー: {{message}}"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Sage モデル",
+    "behaviorTuning": "振る舞いの調整",
+    "kaiTemperatureLabel": "Kai 温度:",
+    "sageTemperatureLabel": "Sage 温度:",
+    "kaiMaxTokensLabel": "Kai 最大トークン数",
+    "sageMaxTokensLabel": "Sage 最大トークン数",
+    "maxAgentStepsLabel": "エージェントの最大ステップ数",
+    "maxAgentStepsHint": "会話ごとのツール呼び出しの最大ラウンド数",
+    "searchTuning": "検索の調整",
+    "similarityThresholdLabel": "類似度の閾値:",
+    "defaultResultLimitLabel": "デフォルトの結果上限",
+    "conversationMemory": "会話メモリ",
+    "enableConversationMemory": "会話メモリを有効にする",
+    "summarizationModelLabel": "要約モデル",
+    "tokenBudgets": "トークン予算",
+    "tokenBudgetsDescription": "エージェントの各処理に割り当てるトークン数を管理します。予算が低いほどコストを抑えられ、高いほど豊かなコンテキストを使えます。",
+    "enforceTokenBudget": "トークン予算を適用",
+    "enforceTokenBudgetNote": "有効にすると、エージェントはシステムプロンプトとツール結果を予算上限内に切り詰め、総トークン予算を超えるマルチステップのターンを中止します。",
+    "systemPromptBudgetLabel": "システムプロンプト予算",
+    "systemPromptBudgetHint": "システムプロンプト内の Tier 1 コンテキストの最大トークン数（デフォルト: 2000）",
+    "toolResultBudgetLabel": "ツール結果予算",
+    "toolResultBudgetHint": "モデルに返す各ツール結果の最大トークン数（デフォルト: 4000）",
+    "totalTurnBudgetLabel": "ターン合計予算",
+    "totalTurnBudgetHint": "すべてのステップで使用されるエージェントのターンごとの最大総トークン数（デフォルト: 16000）",
+    "perPersonaOverrides": "ペルソナごとの上書き",
+    "kaiSystemPromptLabel": "Kai システムプロンプト",
+    "tokensUnit": "トークン",
+    "useDefaultPlaceholder": "デフォルトを使用",
+    "sageSystemPromptLabel": "Sage システムプロンプト",
+    "kaiToolResultLabel": "Kai ツール結果",
+    "sageToolResultLabel": "Sage ツール結果"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "sky": "空",
+      "mint": "ミント",
+      "lavender": "ラベンダー",
+      "peach": "ピーチ",
+      "rose": "ローズ",
+      "gold": "ゴールド"
+    },
+    "styles": {
+      "simple": "シンプル",
+      "detailed": "詳細",
+      "toon": "トゥーン"
+    },
+    "lockedMessage": "Bot Whisperer I バッジを取得して、AIアシスタントをカスタマイズしましょう。",
+    "previewTitle": "あなたのAIアシスタント",
+    "styleLabel": "スタイル",
+    "backgroundColorLabel": "背景色"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "クラスからコピー",
+    "copyToClasses": "クラスへコピー",
+    "firstMeetingDate": "最初の開催日",
+    "weeksLabel": "週数",
+    "weeklyMeetingLabel": "毎週の開催",
+    "weeklyMeetingHint": "1 = 1回目、2 = 2回目、0 = 最後",
+    "loadingCadence": "元の予定を読み込み中...",
+    "noAssignments": "元のクラスにはコピー可能な日付付き課題がありません。",
+    "missingMetadata": "元の課題に予定メタデータがないため、コピーできません。",
+    "close": "閉じる",
+    "copyCadence": "予定をコピー",
+    "copying": "コピー中..."
+  },
+  "assignmentCard": {
+    "excellent": "優",
+    "good": "良",
+    "fair": "可",
+    "needsWork": "要改善",
+    "noDueDate": "期限未設定",
+    "overdue": "期限超過",
+    "dueSoon": "期限間近",
+    "due": "期限",
+    "locked": "ロック中",
+    "opensAt": "{date} に開始",
+    "late": "遅延",
+    "dropped": "講師により取り消し",
+    "difficulty": "難易度: {level}",
+    "review": "レビュー",
+    "startWorkbook": "開始",
+    "practice": "練習",
+    "discuss": "話し合う",
+    "joinReview": "レビューに参加",
+    "requestGuidance": "ガイダンスを依頼",
+    "requestGuidanceTooltip": "部屋を作成し、コードを講師と共有して個別のガイダンスを受けてください"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "アバターをカスタマイズ"
+  },
+  "campaignProgress": {
+    "ended": "終了",
+    "endedChip": "終了",
+    "bonus": "ボーナス",
+    "chapterProgression": "章の進行状況",
+    "completion": "完了"
+  },
+  "chatPanel": {
+    "defaultTitle": "チャット",
+    "topicsLabel": "トピック",
+    "backButton": "戻る",
+    "onlineCount": "{count} 人オンライン"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "メッセージを入力...（AIは @kai）",
+    "replyingTo": "{name} への返信"
+  },
+  "threadView": {
+    "emptyState": "まだメッセージはありません。会話を始めましょう！",
+    "replyCount": {
+      "singular": "返信",
+      "plural": "返信"
+    },
+    "typingIndicator": "{names} が入力中...",
+    "edited": "（編集済み）",
+    "justNow": "たった今",
+    "minutesAgo": "{minutes}分前",
+    "hoursAgo": "{hours}時間前"
+  },
+  "topicList": {
+    "header": "トピック",
+    "newTopicPlaceholder": "#新しいトピック",
+    "emptyState": "まだトピックがありません。作成してチャットを始めましょう。"
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "タイマーの質問を追加",
+    "timerDescription": "時間制限付き課題のタイマー設定",
+    "retryToggle": "生徒の再試行を許可",
+    "publishFirstAlert": "注意: 課題を作成するには、まずユニットを公開してください",
+    "meetingCalendar": "提出期限",
+    "meetingDayHint": "ドットはセクションの会議日を示します。",
+    "tomorrow": "明日",
+    "nextClass": "次の授業",
+    "friday": "来週の金曜日",
+    "createSectionLabel": "新しいセクションを作成",
+    "undoSnackbar": "課題が作成されました。{count} 件の課題{plural} を作成しました。"
   }
 }

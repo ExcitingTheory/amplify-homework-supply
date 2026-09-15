@@ -162,35 +162,18 @@ function AdminArchivesContent() {
                 key={archive.key}
                 sx={{
                   mb: 1,
+                  gap: 1,
                   bgcolor: "background.paper",
                   borderRadius: 1,
                   border: 1,
                   borderColor: "divider",
                 }}
-                secondaryAction={
-                  <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <IconButton
-                      title="Preview"
-                      disabled={actionLoading === archive.key}
-                      onClick={() => handlePreview(archive)}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-                    <IconButton
-                      color="success"
-                      title="Unarchive"
-                      disabled={actionLoading === archive.key}
-                      onClick={() => setConfirmDialog(archive)}
-                    >
-                      <RestoreIcon />
-                    </IconButton>
-                  </Box>
-                }
               >
                 <ListItemIcon>
                   <ArchiveIcon />
                 </ListItemIcon>
                 <ListItemText
+                  sx={{ flex: 1, minWidth: 0 }}
                   primary={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
@@ -215,6 +198,23 @@ function AdminArchivesContent() {
                     </Typography>
                   }
                 />
+                <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                  <IconButton
+                    title="Preview"
+                    disabled={actionLoading === archive.key}
+                    onClick={() => handlePreview(archive)}
+                  >
+                    <VisibilityIcon />
+                  </IconButton>
+                  <IconButton
+                    color="success"
+                    title="Unarchive"
+                    disabled={actionLoading === archive.key}
+                    onClick={() => setConfirmDialog(archive)}
+                  >
+                    <RestoreIcon />
+                  </IconButton>
+                </Box>
               </ListItem>
             ))}
           </List>

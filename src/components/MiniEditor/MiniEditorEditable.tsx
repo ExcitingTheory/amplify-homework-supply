@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 /**
  * MiniEditorEditable — Compact Lexical editor with Notion-style block inserter.
@@ -19,25 +19,25 @@
  * @module MiniEditor/MiniEditorEditable
  */
 
-import * as React from 'react'
-import { useEffect, useRef, useCallback, useState } from 'react'
-import Box from '@mui/material/Box'
-import { LexicalComposer } from '@lexical/react/LexicalComposer'
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
-import { ContentEditable } from '@lexical/react/LexicalContentEditable'
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
-import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
-import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin'
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin'
-import { ListPlugin } from '@lexical/react/LexicalListPlugin'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
-import { TablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
-import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import * as React from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import Box from "@mui/material/Box";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
+import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { ClearEditorPlugin } from "@lexical/react/LexicalClearEditorPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getRoot,
   $getSelection,
@@ -47,129 +47,138 @@ import {
   CLEAR_EDITOR_COMMAND,
   type EditorState,
   type SerializedEditorState,
-} from 'lexical'
-import { $generateHtmlFromNodes } from '@lexical/html'
+} from "lexical";
+import { $generateHtmlFromNodes } from "@lexical/html";
 
-import LanguageEditorTheme from '../Editor3/config/LanguageEditorTheme'
-import { EditorNodes, ALL_TRANSFORMERS, onError, sanitizeEditorStateJSON } from '../Editor3/editorConfig'
+import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
+import {
+  EditorNodes,
+  ALL_TRANSFORMERS,
+  onError,
+  sanitizeEditorStateJSON,
+} from "../Editor3/editorConfig";
 
 // Custom block plugins
-import YouTubePlugin from '../Editor3/plugins/YouTubePlugin'
-import WordBlockPlugin from '../Editor3/plugins/WordBlockPlugin'
-import QuizPlugin from '../Editor3/plugins/QuizPlugin'
-import MeaningAssociationPlugin from '../Editor3/plugins/MeaningAssociationPlugin'
-import PlaylistPlugin from '../Editor3/plugins/PlaylistPlugin'
-import PdfViewerPlugin from '../Editor3/plugins/PdfViewerPlugin'
-import ImagesPlugin from '../Editor3/plugins/ImagesPlugin'
-import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
-import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
-import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
+import YouTubePlugin from "../Editor3/plugins/YouTubePlugin";
+import WordBlockPlugin from "../Editor3/plugins/WordBlockPlugin";
+import QuizPlugin from "../Editor3/plugins/QuizPlugin";
+import MeaningAssociationPlugin from "../Editor3/plugins/MeaningAssociationPlugin";
+import PlaylistPlugin from "../Editor3/plugins/PlaylistPlugin";
+import ConversationPlaylistPlugin from "../Editor3/plugins/ConversationPlaylistPlugin";
+import PdfViewerPlugin from "../Editor3/plugins/PdfViewerPlugin";
+import ImagesPlugin from "../Editor3/plugins/ImagesPlugin";
+import AnswerPlugin from "../Editor3/plugins/AnswerPlugin";
+import CustomAnswerPlugin from "../Editor3/plugins/CustomAnswerPlugin";
+import ArmorEditorPlugin from "../Editor3/plugins/ArmorEditorPlugin";
 
-import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
-import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
-import BlockInserterPlugin, { GUTTER_WIDTH } from './BlockInserterPlugin'
-import type { MiniEditorEditableProps, MentionSuggestion } from './types'
+import FloatingToolbarPlugin from "../Editor3/plugins/FloatingToolbarPlugin";
+import FloatingLinkEditorPlugin from "../Editor3/plugins/FloatingLinkEditorPlugin";
+import BlockInserterPlugin, { GUTTER_WIDTH } from "./BlockInserterPlugin";
+import type { MiniEditorEditableProps, MentionSuggestion } from "./types";
 
 // ─── Chat Submit Plugin ───────────────────────────────────────────────────────
 
 interface ChatSubmitPluginProps {
-  onSubmit: (json: SerializedEditorState, plainText: string) => void
-  enabled: boolean
+  onSubmit: (json: SerializedEditorState, plainText: string) => void;
+  enabled: boolean;
 }
 
 /**
  * In chat mode, Enter submits the message and Shift+Enter inserts a newline.
  */
 function ChatSubmitPlugin({ onSubmit, enabled }: ChatSubmitPluginProps) {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled) return;
 
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event: KeyboardEvent | null) => {
-        if (!event) return false
+        if (!event) return false;
 
         // Shift+Enter = newline (default behavior)
-        if (event.shiftKey) return false
+        if (event.shiftKey) return false;
 
         // Plain Enter = submit
-        event.preventDefault()
+        event.preventDefault();
 
-        const editorState = editor.getEditorState()
-        let plainText = ''
+        const editorState = editor.getEditorState();
+        let plainText = "";
         editorState.read(() => {
-          plainText = $getRoot().getTextContent()
-        })
+          plainText = $getRoot().getTextContent();
+        });
 
         // Don't submit empty content
-        if (!plainText.trim()) return true
+        if (!plainText.trim()) return true;
 
-        const json = editorState.toJSON()
-        onSubmit(json, plainText)
+        const json = editorState.toJSON();
+        onSubmit(json, plainText);
 
         // Clear the editor
-        editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined)
-        return true
+        editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+        return true;
       },
       COMMAND_PRIORITY_HIGH,
-    )
-  }, [editor, onSubmit, enabled])
+    );
+  }, [editor, onSubmit, enabled]);
 
-  return null
+  return null;
 }
 
 // ─── Initial Content Plugin ───────────────────────────────────────────────────
 
 interface InitialContentPluginProps {
-  content: string | null
+  content: string | null;
 }
 
 function InitialContentPlugin({ content }: InitialContentPluginProps) {
-  const [editor] = useLexicalComposerContext()
-  const hasLoaded = useRef(false)
+  const [editor] = useLexicalComposerContext();
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
-    if (hasLoaded.current || !content) return
+    if (hasLoaded.current || !content) return;
 
-    const sanitized = sanitizeEditorStateJSON(content)
-    if (!sanitized) return
+    const sanitized = sanitizeEditorStateJSON(content);
+    if (!sanitized) return;
 
     try {
-      const parsed = JSON.parse(sanitized)
-      const editorState = editor.parseEditorState(parsed)
+      const parsed = JSON.parse(sanitized);
+      const editorState = editor.parseEditorState(parsed);
       queueMicrotask(() => {
-        editor.setEditorState(editorState)
-      })
-      hasLoaded.current = true
+        editor.setEditorState(editorState);
+      });
+      hasLoaded.current = true;
     } catch (err) {
-      console.error('[MiniEditorEditable] Failed to load initial content:', err)
+      console.error(
+        "[MiniEditorEditable] Failed to load initial content:",
+        err,
+      );
     }
-  }, [content, editor])
+  }, [content, editor]);
 
-  return null
+  return null;
 }
 
 // ─── MiniEditorEditable ───────────────────────────────────────────────────────
 
 export default function MiniEditorEditable({
   content,
-  namespace = 'MiniEditorEditable',
+  namespace = "MiniEditorEditable",
   maxHeight,
-  ariaLabel = 'Editor',
+  ariaLabel = "Editor",
   className,
   compact = false,
   onChange,
   onSubmit,
-  placeholder = 'Type something...',
+  placeholder = "Type something...",
   showBlockInserter = true,
   autoFocus = false,
   chatMode = false,
   mentionSuggestions = [],
-}: Omit<MiniEditorEditableProps, 'mode'>) {
-  const [anchorElem, setAnchorElem] = useState<HTMLDivElement | null>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+}: Omit<MiniEditorEditableProps, "mode">) {
+  const [anchorElem, setAnchorElem] = useState<HTMLDivElement | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const initialConfig = React.useMemo(
     () => ({
@@ -181,39 +190,41 @@ export default function MiniEditorEditable({
       nodes: [...EditorNodes],
     }),
     [namespace],
-  )
+  );
 
-  const basePadY = compact ? '0.25rem' : '0.75rem'
-  const basePadX = compact ? '0.5rem' : '1rem'
-  const gutterPadLeft = showBlockInserter ? `calc(${basePadX} + ${GUTTER_WIDTH}px)` : basePadX
-  const padding = `${basePadY} ${basePadX} ${basePadY} ${gutterPadLeft}`
+  const basePadY = compact ? "0.25rem" : "0.75rem";
+  const basePadX = compact ? "0.5rem" : "1rem";
+  const gutterPadLeft = showBlockInserter
+    ? `calc(${basePadX} + ${GUTTER_WIDTH}px)`
+    : basePadX;
+  const padding = `${basePadY} ${basePadX} ${basePadY} ${gutterPadLeft}`;
 
   // Debounced onChange handler
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      if (!onChange) return
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (!onChange) return;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        onChange(editorState.toJSON())
-      }, 500)
+        onChange(editorState.toJSON());
+      }, 500);
     },
     [onChange],
-  )
+  );
 
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [])
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   // Submit handler for chat mode
   const handleSubmit = useCallback(
     (json: SerializedEditorState, plainText: string) => {
-      onSubmit?.(json, plainText)
+      onSubmit?.(json, plainText);
     },
     [onSubmit],
-  )
+  );
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -234,6 +245,7 @@ export default function MiniEditorEditable({
       <QuizPlugin />
       <MeaningAssociationPlugin />
       <PlaylistPlugin />
+      <ConversationPlaylistPlugin />
       <PdfViewerPlugin />
       <ImagesPlugin captionsEnabled={false} />
       <AnswerPlugin />
@@ -242,7 +254,9 @@ export default function MiniEditorEditable({
 
       {/* Floating toolbar and link editor */}
       <FloatingToolbarPlugin />
-      <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
+      <FloatingLinkEditorPlugin
+        anchorElem={typeof document !== "undefined" ? document.body : undefined}
+      />
 
       {/* Auto-focus */}
       {autoFocus && <AutoFocusPlugin />}
@@ -261,18 +275,18 @@ export default function MiniEditorEditable({
         className={className}
         ref={setAnchorElem}
         sx={{
-          position: 'relative',
+          position: "relative",
           maxHeight: maxHeight || undefined,
-          overflowX: 'visible',
-          overflowY: maxHeight ? 'auto' : 'visible',
-          border: '1px solid',
-          borderColor: 'divider',
+          overflowX: "visible",
+          overflowY: maxHeight ? "auto" : "visible",
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: 1,
-          '&:focus-within': {
-            borderColor: 'primary.main',
+          "&:focus-within": {
+            borderColor: "primary.main",
             boxShadow: (theme) => `0 0 0 1px ${theme.palette.primary.main}`,
           },
-          transition: 'border-color 0.2s, box-shadow 0.2s',
+          transition: "border-color 0.2s, box-shadow 0.2s",
         }}
       >
         <RichTextPlugin
@@ -280,23 +294,23 @@ export default function MiniEditorEditable({
             <ContentEditable
               aria-label={ariaLabel}
               style={{
-                width: '100%',
-                padding: typeof padding === 'string' ? padding : `${padding}px`,
-                outline: 'none',
-                minHeight: compact ? '36px' : '80px',
+                width: "100%",
+                padding: typeof padding === "string" ? padding : `${padding}px`,
+                outline: "none",
+                minHeight: compact ? "36px" : "80px",
               }}
             />
           }
           placeholder={
             <Box
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 padding,
-                color: 'text.disabled',
-                pointerEvents: 'none',
-                userSelect: 'none',
+                color: "text.disabled",
+                pointerEvents: "none",
+                userSelect: "none",
               }}
             >
               {placeholder}
@@ -311,5 +325,5 @@ export default function MiniEditorEditable({
         )}
       </Box>
     </LexicalComposer>
-  )
+  );
 }

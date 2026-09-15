@@ -382,7 +382,7 @@ describe('InstructorGamificationPanel', () => {
     expect(screen.getByText('5 members')).toBeDefined()
   })
 
-  it('calls onCreateSquad with squad name and cohortId', () => {
+  it('calls onCreateSquad with squad name and sectionID', () => {
     const onCreateSquad = vi.fn()
     const sections = [{ id: 'sec-1', name: 'Biology 101', description: 'Intro to biology' }]
     render(<InstructorGamificationPanel sections={sections} onCreateSquad={onCreateSquad} />)

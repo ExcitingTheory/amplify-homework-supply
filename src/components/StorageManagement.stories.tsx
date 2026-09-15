@@ -10,6 +10,8 @@ const meta: Meta<typeof StorageManagement> = {
   title: "🔌 Offline & Sync/Storage Management",
   component: StorageManagement,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
     docs: {
       description: {

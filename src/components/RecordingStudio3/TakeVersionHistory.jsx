@@ -5,6 +5,7 @@
  * on first open. Active version is marked; user can restore any previous version.
  */
 import React, { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   IconButton,
   Popover,
@@ -33,6 +34,7 @@ export default function TakeVersionHistory({
   onRestore,
   disabled = false,
 }) {
+  const t = useTranslations("components");
   const [anchorEl, setAnchorEl] = useState(null);
   const [versions, setVersions] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -53,13 +55,18 @@ export default function TakeVersionHistory({
           setVersions(result);
         } catch (err) {
           console.error("[TakeVersionHistory] Failed to list versions:", err);
-          setError("Failed to load version history");
+          setError(
+            t(
+              "recordingStudio3.versionHistoryFailed",
+              "Failed to load version history",
+            ),
+          );
         } finally {
           setLoading(false);
         }
       }
     },
-    [identityId, dialogueId, slotId, versions]
+    [identityId, dialogueId, slotId, versions],
   );
 
   const handleClose = useCallback(() => {
@@ -71,7 +78,7 @@ export default function TakeVersionHistory({
       onRestore(dialogueId, slotId, versionKey);
       handleClose();
     },
-    [dialogueId, slotId, onRestore, handleClose]
+    [dialogueId, slotId, onRestore, handleClose],
   );
 
   const isActiveVersion = (versionKey) => {
@@ -84,7 +91,11 @@ export default function TakeVersionHistory({
         size="small"
         onClick={handleOpen}
         disabled={disabled || !slotId}
-        title="Version History"
+        title={t("recordingStudio3.versionHistory", "Version history")}
+        aria-label={t(
+          "recordingStudio3.openVersionHistory",
+          "Open version history",
+        )}
       >
         <HistoryIcon fontSize="small" />
       </IconButton>
@@ -97,9 +108,12 @@ export default function TakeVersionHistory({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <Box sx={{ p: 2, minWidth: 280, maxWidth: 400 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}
+          >
             <HistoryIcon fontSize="small" />
-            Version History
+            {t("recordingStudio3.versionHistory", "Version history")}
           </Typography>
 
           {loading && (
@@ -116,7 +130,10 @@ export default function TakeVersionHistory({
 
           {versions && versions.length === 0 && (
             <Typography variant="body2" color="text.secondary" sx={{ p: 1 }}>
-              No version history available
+              {t(
+                "recordingStudio3.noVersionHistory",
+                "No version history available",
+              )}
             </Typography>
           )}
 
@@ -128,19 +145,33 @@ export default function TakeVersionHistory({
                   <ListItem key={v.version} disablePadding sx={{ mb: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 32 }}>
                       {active ? (
-                        <RadioButtonCheckedIcon fontSize="small" color="primary" />
+                        <RadioButtonCheckedIcon
+                          fontSize="small"
+                          color="primary"
+                        />
                       ) : (
                         <RadioButtonUncheckedIcon fontSize="small" />
                       )}
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Typography variant="body2" fontWeight={active ? 600 : 400}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Typography
+                            variant="body2"
+                            fontWeight={active ? 600 : 400}
+                          >
                             v{v.version}
                           </Typography>
                           {active && (
-                            <Chip label="active" size="small" color="primary" variant="outlined" sx={{ height: 18, fontSize: "0.65rem" }} />
+                            <Chip
+                              label="active"
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: "0.65rem" }}
+                            />
                           )}
                           <Chip
                             label={takeType || "human"}
@@ -161,9 +192,13 @@ export default function TakeVersionHistory({
                         size="small"
                         variant="text"
                         onClick={() => handleRestore(v.key)}
-                        sx={{ ml: 1, textTransform: "none", fontSize: "0.75rem" }}
+                        sx={{
+                          ml: 1,
+                          textTransform: "none",
+                          fontSize: "0.75rem",
+                        }}
                       >
-                        Restore
+                        {t("recordingStudio3.restore", "Restore")}
                       </Button>
                     )}
                   </ListItem>

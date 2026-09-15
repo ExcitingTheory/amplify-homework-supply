@@ -169,9 +169,9 @@ describe("gamification handler — generateSkillTree", () => {
           },
         },
       })
-      // LIST_SKILLS_BY_COHORT (existing — none)
+      // LIST_SKILLS_BY_SECTION (existing — none)
       .mockResolvedValueOnce({
-        data: { listSkillByCohort: { items: [] } },
+        data: { listSkillBySection: { items: [] } },
       })
       // CREATE_SKILL #1
       .mockResolvedValueOnce({
@@ -182,7 +182,7 @@ describe("gamification handler — generateSkillTree", () => {
             description: "Recognize chloroplasts",
             prerequisites: "[]",
             xpReward: 25,
-            cohortId: "unit-unit-1",
+            sectionID: "unit-unit-1",
             _version: 1,
           },
         },
@@ -196,7 +196,7 @@ describe("gamification handler — generateSkillTree", () => {
             description: "Light and dark reactions",
             prerequisites: "[]",
             xpReward: 50,
-            cohortId: "unit-unit-1",
+            sectionID: "unit-unit-1",
             _version: 1,
           },
         },
@@ -252,7 +252,7 @@ describe("gamification handler — generateSkillTree", () => {
       expect.objectContaining({
         generated: true,
         unitID: "unit-1",
-        cohortId: "unit-unit-1",
+        sectionID: "unit-unit-1",
         skillCount: 2,
       }),
     );
@@ -311,7 +311,7 @@ describe("gamification handler — generateSkillTree", () => {
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
       })
-      .mockResolvedValueOnce({ data: { listSkillByCohort: { items: [] } } });
+      .mockResolvedValueOnce({ data: { listSkillBySection: { items: [] } } });
 
     mockCreate.mockResolvedValueOnce({
       choices: [{ message: { content: JSON.stringify({ skills: [] }) } }],
@@ -359,7 +359,7 @@ describe("gamification handler — generateSkillTree", () => {
       // Existing skills to delete
       .mockResolvedValueOnce({
         data: {
-          listSkillByCohort: {
+          listSkillBySection: {
             items: [
               { id: "old-1", _version: 1 },
               { id: "old-2", _version: 2 },
@@ -380,7 +380,7 @@ describe("gamification handler — generateSkillTree", () => {
             description: "Find nouns in sentences",
             prerequisites: "[]",
             xpReward: 20,
-            cohortId: "my-cohort",
+            sectionID: "my-cohort",
             _version: 1,
           },
         },
@@ -408,7 +408,7 @@ describe("gamification handler — generateSkillTree", () => {
     const result = await handler(
       {
         fieldName: "generateSkillTree",
-        arguments: { unitID: "unit-3", cohortId: "my-cohort" },
+        arguments: { unitID: "unit-3", sectionID: "my-cohort" },
         identity: {},
       },
       {} as any,
@@ -416,7 +416,7 @@ describe("gamification handler — generateSkillTree", () => {
     );
 
     expect(result.generated).toBe(true);
-    expect(result.cohortId).toBe("my-cohort");
+    expect(result.sectionID).toBe("my-cohort");
     expect(result.skillCount).toBe(1);
 
     // Verify delete was called for both old skills
@@ -426,7 +426,7 @@ describe("gamification handler — generateSkillTree", () => {
     expect(deleteCalls).toHaveLength(2);
   });
 
-  it("uses custom cohortId when provided", async () => {
+  it("uses custom sectionID when provided", async () => {
     const { handler } = await import("../gamification/handler");
 
     mockGraphql
@@ -447,7 +447,7 @@ describe("gamification handler — generateSkillTree", () => {
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
       })
-      .mockResolvedValueOnce({ data: { listSkillByCohort: { items: [] } } })
+      .mockResolvedValueOnce({ data: { listSkillBySection: { items: [] } } })
       .mockResolvedValueOnce({
         data: {
           createSkill: {
@@ -456,7 +456,7 @@ describe("gamification handler — generateSkillTree", () => {
             description: "desc",
             prerequisites: "[]",
             xpReward: 30,
-            cohortId: "cohort-abc",
+            sectionID: "cohort-abc",
             _version: 1,
           },
         },
@@ -484,14 +484,14 @@ describe("gamification handler — generateSkillTree", () => {
     const result = await handler(
       {
         fieldName: "generateSkillTree",
-        arguments: { unitID: "unit-4", cohortId: "cohort-abc" },
+        arguments: { unitID: "unit-4", sectionID: "cohort-abc" },
         identity: {},
       },
       {} as any,
       vi.fn(),
     );
 
-    expect(result.cohortId).toBe("cohort-abc");
+    expect(result.sectionID).toBe("cohort-abc");
   });
 });
 
@@ -570,7 +570,7 @@ describe("extractTextFromLexicalJSON (internal)", () => {
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
       })
-      .mockResolvedValueOnce({ data: { listSkillByCohort: { items: [] } } });
+      .mockResolvedValueOnce({ data: { listSkillBySection: { items: [] } } });
 
     mockCreate.mockResolvedValueOnce({
       choices: [{ message: { content: JSON.stringify({ skills: [] }) } }],

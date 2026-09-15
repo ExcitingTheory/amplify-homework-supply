@@ -7,6 +7,8 @@ const meta: Meta<typeof AudioFilterPanel> = {
   title: "🎙️ Recording Studio/Components/Audio Filter Panel",
   component: AudioFilterPanel,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
 };

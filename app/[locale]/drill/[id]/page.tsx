@@ -45,6 +45,7 @@ import PracticeDrillProgress from "@/components/PracticeDrill/PracticeDrillProgr
 import { usePracticeDrill } from "@/components/PracticeDrill/usePracticeDrill";
 import { useDrillLibrary } from "@/components/PracticeDrill/useDrillLibrary";
 import { previewXP } from "@/utils/practiceXPCalculator";
+import { getMissedAnswerCount } from "@/utils/practiceDrillReview";
 import type { DrillStats } from "@/components/PracticeDrill/DrillGradeAdapter";
 import PracticeDrillConfigPopup from "@/components/PracticeDrill/PracticeDrillConfigPopup";
 import type { DrillConfig } from "@/components/PracticeDrill/PracticeDrillConfigPopup";
@@ -186,11 +187,13 @@ function DrillWorkbookContent() {
   const {
     session,
     generating,
+    saving,
     error,
     generateDrill,
     resumeSession,
     replayTemplate,
     completeDrill,
+    retryMissed,
     reset,
   } = usePracticeDrill(unitName);
 
@@ -199,37 +202,80 @@ function DrillWorkbookContent() {
     accuracy: 0,
     complete: false,
   });
+  const [gradeData, setGradeData] = useState<Record<string, any>>({});
+  const [showMistakeSummary, setShowMistakeSummary] = useState(false);
   const [showLibrary, setShowLibrary] = useState(true);
+  const retryActionRef = React.useRef<(() => void) | null>(null);
 
   const xpPreview = previewXP(0, drillStats.accuracy);
 
   // If sessionId is in URL, resume directly (skip library)
   const sessionIdParam = searchParams.get("sessionId");
   useEffect(() => {
-    if (sessionIdParam && session.blocks.length === 0 && !generating && !error) {
+    if (
+      sessionIdParam &&
+      session.blocks.length === 0 &&
+      !generating &&
+      !error
+    ) {
       setShowLibrary(false);
+      retryActionRef.current = () => {
+        setShowLibrary(false);
+        resumeSession(sessionIdParam);
+      };
       resumeSession(sessionIdParam);
     }
   }, [sessionIdParam, session.blocks.length, generating, error, resumeSession]);
 
-  const handleGenerate = useCallback((cfg: DrillConfig) => {
-    setShowLibrary(false);
-    if (unitId) generateDrill(unitId, cfg);
-  }, [unitId, generateDrill]);
+  const handleGenerate = useCallback(
+    (cfg: DrillConfig) => {
+      setShowLibrary(false);
+      retryActionRef.current = () => {
+        setShowLibrary(false);
+        if (unitId) generateDrill(unitId, cfg);
+      };
+      if (unitId) generateDrill(unitId, cfg);
+    },
+    [unitId, generateDrill],
+  );
 
-  const handleResume = useCallback((sessionId: string) => {
-    setShowLibrary(false);
-    resumeSession(sessionId);
-  }, [resumeSession]);
+  const handleResume = useCallback(
+    (sessionId: string) => {
+      setShowLibrary(false);
+      retryActionRef.current = () => {
+        setShowLibrary(false);
+        resumeSession(sessionId);
+      };
+      resumeSession(sessionId);
+    },
+    [resumeSession],
+  );
 
-  const handleReplay = useCallback((templateId: string) => {
-    setShowLibrary(false);
-    if (unitId) replayTemplate(templateId, unitId);
-  }, [unitId, replayTemplate]);
+  const handleReplay = useCallback(
+    (templateId: string) => {
+      setShowLibrary(false);
+      retryActionRef.current = () => {
+        setShowLibrary(false);
+        if (unitId) replayTemplate(templateId, unitId);
+      };
+      if (unitId) replayTemplate(templateId, unitId);
+    },
+    [unitId, replayTemplate],
+  );
 
   const handleStatsChange = useCallback((stats: DrillStats) => {
     setDrillStats(stats);
   }, []);
+
+  const handleGradeChange = useCallback(
+    (data: Record<string, any>, stats: DrillStats) => {
+      setGradeData(data);
+      handleStatsChange(stats);
+    },
+    [handleStatsChange],
+  );
+
+  const missedCount = getMissedAnswerCount(gradeData);
 
   // Award XP when all blocks are complete
   const completedRef = React.useRef(false);
@@ -245,12 +291,32 @@ function DrillWorkbookContent() {
   }, [router]);
 
   // Library selection screen (before starting)
-  if (showLibrary && !sessionIdParam && session.blocks.length === 0 && !generating) {
+  if (
+    showLibrary &&
+    !sessionIdParam &&
+    session.blocks.length === 0 &&
+    !generating
+  ) {
     return (
       <Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 2, borderBottom: 1, borderColor: "divider" }}>
-          <IconButton onClick={handleBack} size="small">
-            <ArrowBackIcon />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            p: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <IconButton
+            onClick={handleBack}
+            size="small"
+            aria-label={t("practiceDrill.dialog.back", {
+              defaultMessage: "Go back",
+            })}
+          >
+            <ArrowBackIcon aria-hidden="true" />
           </IconButton>
           <Typography variant="h6">
             {t("practiceDrill.library.title")}
@@ -297,13 +363,26 @@ function DrillWorkbookContent() {
           {error}
           <Button
             size="small"
-            onClick={() => { reset(); setShowLibrary(true); }}
+            onClick={() => {
+              reset();
+              if (retryActionRef.current) {
+                retryActionRef.current();
+              } else {
+                setShowLibrary(true);
+              }
+            }}
             sx={{ ml: 1 }}
           >
             {t("practiceDrill.dialog.retry")}
           </Button>
         </Alert>
-        <Button startIcon={<ArrowBackIcon />} onClick={handleBack}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBack}
+          aria-label={t("practiceDrill.dialog.back", {
+            defaultMessage: "Go back",
+          })}
+        >
           {t("practiceDrill.dialog.back")}
         </Button>
       </Box>
@@ -333,8 +412,14 @@ function DrillWorkbookContent() {
           gap: 1,
         }}
       >
-        <IconButton onClick={handleBack} size="small">
-          <ArrowBackIcon />
+        <IconButton
+          onClick={handleBack}
+          size="small"
+          aria-label={t("practiceDrill.dialog.back", {
+            defaultMessage: "Go back",
+          })}
+        >
+          <ArrowBackIcon aria-hidden="true" />
         </IconButton>
         <Typography variant="subtitle1" sx={{ flex: 1 }}>
           {unitName
@@ -354,7 +439,11 @@ function DrillWorkbookContent() {
 
       {/* Completion banner */}
       {drillStats.complete && (
-        <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mx: 2, mt: 2 }}>
+        <Alert
+          severity="success"
+          icon={<CheckCircleIcon />}
+          sx={{ mx: 2, mt: 2 }}
+        >
           <Typography variant="subtitle1" fontWeight={600}>
             {t("practiceDrill.dialog.complete")}
           </Typography>
@@ -364,7 +453,75 @@ function DrillWorkbookContent() {
               xp: session.xpAwarded,
             })}
           </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+            {missedCount > 0 && (
+              <Button
+                size="small"
+                onClick={() => setShowMistakeSummary((visible) => !visible)}
+                aria-expanded={showMistakeSummary}
+              >
+                {showMistakeSummary
+                  ? "Hide mistakes"
+                  : `Review ${missedCount} mistakes`}
+              </Button>
+            )}
+            {missedCount > 0 && (
+              <Button
+                size="small"
+                onClick={() => {
+                  completedRef.current = false;
+                  retryMissed();
+                  setShowMistakeSummary(false);
+                  setShowLibrary(false);
+                }}
+              >
+                Retry missed items
+              </Button>
+            )}
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<ReplayIcon />}
+              onClick={() => {
+                reset();
+                setShowLibrary(true);
+              }}
+            >
+              {t("practiceDrill.dialog.practiceAgain", {
+                defaultMessage: "Practice again",
+              })}
+            </Button>
+            <Button
+              size="small"
+              onClick={() => {
+                reset();
+                setShowLibrary(true);
+              }}
+            >
+              {t("practiceDrill.dialog.returnToLibrary", {
+                defaultMessage: "Return to drill library",
+              })}
+            </Button>
+          </Box>
+          {showMistakeSummary && missedCount > 0 && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              {missedCount} item{missedCount === 1 ? "" : "s"} need another
+              attempt. Choose retry to start a fresh drill session.
+            </Typography>
+          )}
         </Alert>
+      )}
+
+      {saving && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ px: 2, mt: 1 }}
+        >
+          {t("practiceDrill.dialog.saving", {
+            defaultMessage: "Saving progress...",
+          })}
+        </Typography>
       )}
 
       {/* Workbook — renders via existing Lexical graded block plugins */}
@@ -373,7 +530,7 @@ function DrillWorkbookContent() {
         blocks={
           session.blocks as import("@/components/PracticeDrill/buildDrillEditorState").PracticeDrillBlock[]
         }
-        onGradeChange={(_data, stats) => handleStatsChange(stats)}
+        onGradeChange={handleGradeChange}
       >
         <Workbook />
       </DrillGradeAdapter>

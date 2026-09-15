@@ -442,3 +442,237 @@ export function trackSquadLeaderboardModeChanged(
     mode,
   });
 }
+
+// ============================================================================
+// Workbook & grading lifecycle
+// ============================================================================
+
+/**
+ * Track when a workbook is started (grade created / opened for the first time)
+ */
+export function trackWorkbookStarted(
+  unitId: string,
+  sectionId?: string,
+  assignmentId?: string,
+) {
+  trackEvent(AnalyticsEvents.WORKBOOK_STARTED, {
+    unitId,
+    ...(sectionId && { sectionId }),
+    ...(assignmentId && { assignmentId }),
+  });
+}
+
+/**
+ * Track a grade submission with accuracy and engaged time
+ */
+export function trackGradeSubmitted(
+  unitId: string,
+  gradeId: string,
+  accuracy: number,
+  options?: {
+    sectionId?: string;
+    engagedTimeMs?: number;
+    overridden?: boolean;
+  },
+) {
+  trackEvent(
+    AnalyticsEvents.GRADE_SUBMITTED,
+    {
+      unitId,
+      gradeId,
+      ...(options?.sectionId && { sectionId: options.sectionId }),
+      ...(options?.overridden != null && {
+        overridden: String(options.overridden),
+      }),
+    },
+    {
+      accuracy,
+      ...(options?.engagedTimeMs != null && {
+        engagedTimeMs: options.engagedTimeMs,
+      }),
+    },
+  );
+}
+
+/**
+ * Track when a learner retries a workbook after completion
+ */
+export function trackGradeRetry(unitId: string, gradeId?: string) {
+  trackEvent(AnalyticsEvents.GRADE_RETRY, {
+    unitId,
+    ...(gradeId && { gradeId }),
+  });
+}
+
+// ============================================================================
+// Media playback
+// ============================================================================
+
+/**
+ * Track audio playback started within workbook/editor content
+ */
+export function trackAudioPlayed(
+  mediaId: string,
+  attributes?: { unitId?: string; durationMs?: number },
+) {
+  trackEvent(
+    AnalyticsEvents.AUDIO_PLAYED,
+    { mediaId, ...(attributes?.unitId && { unitId: attributes.unitId }) },
+    attributes?.durationMs != null
+      ? { durationMs: attributes.durationMs }
+      : undefined,
+  );
+}
+
+/**
+ * Track video playback started within workbook/editor content
+ */
+export function trackVideoPlayed(
+  mediaId: string,
+  attributes?: { unitId?: string; durationMs?: number },
+) {
+  trackEvent(
+    AnalyticsEvents.VIDEO_PLAYED,
+    { mediaId, ...(attributes?.unitId && { unitId: attributes.unitId }) },
+    attributes?.durationMs != null
+      ? { durationMs: attributes.durationMs }
+      : undefined,
+  );
+}
+
+/**
+ * Track a file download (attachments, exports, media)
+ */
+export function trackFileDownloaded(fileId: string, fileType?: string) {
+  trackEvent(AnalyticsEvents.FILE_DOWNLOADED, {
+    fileId,
+    ...(fileType && { fileType }),
+  });
+}
+
+// ============================================================================
+// AI document analysis
+// ============================================================================
+
+/**
+ * Track completion of a document (PDF) analysis
+ */
+export function trackDocumentAnalyzed(
+  documentId: string,
+  metrics?: { pageCount?: number; vocabularyCount?: number },
+) {
+  trackEvent(
+    AnalyticsEvents.DOCUMENT_ANALYZED,
+    { documentId },
+    metrics
+      ? {
+          ...(metrics.pageCount != null && { pageCount: metrics.pageCount }),
+          ...(metrics.vocabularyCount != null && {
+            vocabularyCount: metrics.vocabularyCount,
+          }),
+        }
+      : undefined,
+  );
+}
+
+// ============================================================================
+// Peer review
+// ============================================================================
+
+/**
+ * Track a completed/submitted peer review session
+ */
+export function trackPeerReviewSubmitted(
+  roomId: string,
+  options?: { gradeId?: string; sectionId?: string; participantCount?: number },
+) {
+  trackEvent(
+    AnalyticsEvents.PEER_REVIEW_SUBMITTED,
+    {
+      roomId,
+      ...(options?.gradeId && { gradeId: options.gradeId }),
+      ...(options?.sectionId && { sectionId: options.sectionId }),
+    },
+    options?.participantCount != null
+      ? { participantCount: options.participantCount }
+      : undefined,
+  );
+}
+
+// ============================================================================
+// Practice drills
+// ============================================================================
+
+/**
+ * Track when a practice drill session is started or resumed
+ */
+export function trackPracticeDrillStarted(
+  unitId: string,
+  options?: {
+    sessionId?: string;
+    drillType?: string;
+    blockCount?: number;
+    isResume?: boolean;
+  },
+) {
+  trackEvent(
+    AnalyticsEvents.PRACTICE_DRILL_STARTED,
+    {
+      unitId,
+      ...(options?.sessionId && { sessionId: options.sessionId }),
+      ...(options?.drillType && { drillType: options.drillType }),
+      ...(options?.isResume != null && { isResume: String(options.isResume) }),
+    },
+    options?.blockCount != null
+      ? { blockCount: options.blockCount }
+      : undefined,
+  );
+}
+
+/**
+ * Track when a practice drill session is completed
+ */
+export function trackPracticeDrillCompleted(
+  unitId: string,
+  metrics?: { accuracy?: number; xpAwarded?: number; engagedTimeMs?: number },
+  sessionId?: string,
+) {
+  trackEvent(
+    AnalyticsEvents.PRACTICE_DRILL_COMPLETED,
+    { unitId, ...(sessionId && { sessionId }) },
+    metrics
+      ? {
+          ...(metrics.accuracy != null && { accuracy: metrics.accuracy }),
+          ...(metrics.xpAwarded != null && { xpAwarded: metrics.xpAwarded }),
+          ...(metrics.engagedTimeMs != null && {
+            engagedTimeMs: metrics.engagedTimeMs,
+          }),
+        }
+      : undefined,
+  );
+}
+
+// ============================================================================
+// Gamification
+// ============================================================================
+
+/**
+ * Track when a badge/achievement is earned
+ */
+export function trackBadgeEarned(badgeId: string, badgeName?: string) {
+  trackEvent(AnalyticsEvents.BADGE_EARNED, {
+    badgeId,
+    ...(badgeName && { badgeName }),
+  });
+}
+
+/**
+ * Track when a learner levels up
+ */
+export function trackLevelUp(newLevel: number, totalXp?: number) {
+  trackEvent(
+    AnalyticsEvents.LEVEL_UP,
+    { newLevel: String(newLevel) },
+    totalXp != null ? { totalXp } : undefined,
+  );
+}

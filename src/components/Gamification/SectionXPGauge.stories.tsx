@@ -7,6 +7,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof SectionXPGauge> = {
   title: "🏆 Gamification/XP & Progression/Section XP Gauge",
   component: SectionXPGauge,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
   argTypes: {
     unitCount: { control: { type: "range", min: 1, max: 30, step: 1 } },
     desiredMaxLevel: { control: { type: "range", min: 2, max: 12, step: 1 } },

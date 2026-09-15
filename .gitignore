@@ -91,6 +91,9 @@ amplifytools.xcconfig
 /public/cmaps/
 /public/standard_fonts/
 
+# Serwist (generated service worker)
+/public/sw*
+
 # misc
 .DS_Store
 *.pem

@@ -31,6 +31,8 @@ const meta: Meta<typeof TakeVersionHistory> = {
   title: "🎙️ Recording Studio/Components/Take Version History",
   component: TakeVersionHistory,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
   args: {

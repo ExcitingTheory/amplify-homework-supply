@@ -6,7 +6,11 @@ import { UpNextCard } from "./UpNextCard";
 const meta: Meta<typeof UpNextCard> = {
   title: "📓 Workbook/Components/Up Next Card",
   component: UpNextCard,
-  parameters: { layout: "centered" },
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+    layout: "centered",
+  },
   args: {
     onOpenDrill: fn(),
     onRequestGuidance: fn(),

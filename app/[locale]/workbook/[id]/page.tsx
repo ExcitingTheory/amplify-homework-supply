@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
+import { cacheLife } from "next/cache";
 import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
-import { loadPublishedUnitContent } from "../../../actions/unitContent";
+import { loadPublishedUnitContent } from "@/utils/publishedUnitContent";
 import { generateHtmlFromLexicalState } from "@/utils/lexicalServerRender";
 import WorkbookClient from "./WorkbookClient";
 import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
@@ -17,7 +18,14 @@ interface WorkbookPageProps {
  * and unit content rarely changes, so cache per (unitId, publishedVersion).
  * Revalidate via revalidateTag(`unit-${unitId}`) when unit is published.
  */
-async function getCachedUnitHtml(unitId: string, unitVersion: string): Promise<string> {
+async function getCachedUnitHtml(
+  unitId: string,
+  unitVersion: string,
+): Promise<string> {
+  "use cache";
+  // Keyed by (unitId, unitVersion): publishing bumps publishedContentVersion,
+  // yielding a fresh entry, so no manual revalidation is needed.
+  cacheLife("max");
   try {
     // Load published content from S3 (server-side IAM access)
     const content = await loadPublishedUnitContent(unitId);
@@ -53,7 +61,7 @@ export default async function WorkbookPage({ params }: WorkbookPageProps) {
       const client = getServerClient();
       const { data: unitMeta } = await (client as any).models.Unit.get(
         { id },
-        { selectionSet: ["id", "publishedContentVersion"] }
+        { selectionSet: ["id", "publishedContentVersion"] },
       );
       const publishedVersion = String(unitMeta?.publishedContentVersion || 0);
       html = await getCachedUnitHtml(id, publishedVersion);

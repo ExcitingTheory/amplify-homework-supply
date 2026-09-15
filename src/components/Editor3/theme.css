@@ -8,19 +8,19 @@
 
 /* CSS custom properties for dark mode support */
 :root {
-    --editor-placeholder: #757575;
-    --editor-drag-hover: #efefef;
-    --editor-drag-target: #0099ff;
+    --editor-placeholder: var(--mui-palette-text-secondary, #757575);
+    --editor-drag-hover: var(--mui-palette-action-hover, #efefef);
+    --editor-drag-target: var(--mui-palette-primary-main, #0099ff);
     --editor-drag-target-glow: rgba(0, 153, 255, 0.6);
-    --editor-drag-icon: #222222;
+    --editor-drag-icon: var(--mui-palette-text-primary, #222222);
 }
 
 [data-mui-color-scheme="dark"] {
-    --editor-placeholder: #666666;
-    --editor-drag-hover: #333333;
-    --editor-drag-target: #4db8ff;
+    --editor-placeholder: var(--mui-palette-text-secondary, #666666);
+    --editor-drag-hover: var(--mui-palette-action-hover, #333333);
+    --editor-drag-target: var(--mui-palette-primary-main, #4db8ff);
     --editor-drag-target-glow: rgba(77, 184, 255, 0.6);
-    --editor-drag-icon: #cccccc;
+    --editor-drag-icon: var(--mui-palette-text-primary, #cccccc);
 }
 
 .editor-paragraph {
@@ -230,7 +230,7 @@ p {
 */
 mark[data-lexical-mark-id*="search-highlight"],
 .search-highlight {
-    background-color: #ffeb3b;
+    background-color: var(--mui-palette-custom-searchHighlight, #ffeb3b);
     padding: 0 2px;
     border-radius: 2px;
 }

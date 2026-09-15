@@ -514,7 +514,8 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
               style={{ fontSize: "2.5rem" }}
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
-                  rubyTagsString || "<em>No ruby tags yet</em>",
+                  rubyTagsString ||
+                    `<em>${t("dictionaryEditor.noRubyTags")}</em>`,
                   { ALLOWED_TAGS: ["rt", "rp", "em"], ALLOWED_ATTR: [] },
                 ),
               }}

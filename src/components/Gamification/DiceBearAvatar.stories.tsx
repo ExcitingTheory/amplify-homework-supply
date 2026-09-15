@@ -9,6 +9,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof DiceBearAvatar> = {
   title: "🏆 Gamification/Avatars & Cosmetics/DiceBear Avatar",
   component: DiceBearAvatar,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

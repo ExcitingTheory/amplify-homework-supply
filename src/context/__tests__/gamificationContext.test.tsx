@@ -303,13 +303,13 @@ describe('GamificationProvider', () => {
     it('parses campaign data', () => {
       const client = createMockClient({
         GroupChallenge: [
-          { id: 'ch1', cohortId: 'section-1', title: 'Science Quest', targetXP: 1000, currentXP: 600, active: true, bonusMultiplier: 1.5, setting: 'forest' },
-          { id: 'ch2', cohortId: 'section-1', title: 'Past Challenge', targetXP: 500, currentXP: 500, active: false, bonusMultiplier: 1.5 },
+          { id: 'ch1', sectionID: 'section-1', title: 'Science Quest', targetXP: 1000, currentXP: 600, active: true, bonusMultiplier: 1.5, setting: 'forest' },
+          { id: 'ch2', sectionID: 'section-1', title: 'Past Challenge', targetXP: 500, currentXP: 500, active: false, bonusMultiplier: 1.5 },
         ],
       })
 
       render(
-        <GamificationProvider client={client} studentId="s1" cohortId="section-1">
+        <GamificationProvider client={client} studentId="s1" sectionID="section-1">
           <CampaignConsumer />
         </GamificationProvider>,
       )
@@ -326,7 +326,7 @@ describe('GamificationProvider', () => {
       })
 
       render(
-        <GamificationProvider client={client} studentId="s1" cohortId="section-1">
+        <GamificationProvider client={client} studentId="s1" sectionID="section-1">
           <CampaignConsumer />
         </GamificationProvider>,
       )
@@ -334,7 +334,7 @@ describe('GamificationProvider', () => {
       expect(screen.getByTestId('campaign-title').textContent).toBe('none')
     })
 
-    it('sets loading false when no cohortId', () => {
+    it('sets loading false when no sectionID', () => {
       const client = createMockClient({})
 
       render(
@@ -352,8 +352,8 @@ describe('GamificationProvider', () => {
     it('identifies student squad and membership', () => {
       const client = createMockClient({
         Squad: [
-          { id: 'g1', name: 'Alpha', cohortId: 'c1', totalXP: 500 },
-          { id: 'g2', name: 'Beta', cohortId: 'c1', totalXP: 300 },
+          { id: 'g1', name: 'Alpha', sectionID: 'c1', totalXP: 500 },
+          { id: 'g2', name: 'Beta', sectionID: 'c1', totalXP: 300 },
         ],
         SquadMembership: [
           { id: 'm1', squadId: 'g1', studentId: 's1', role: 'LEADER' },
@@ -377,8 +377,8 @@ describe('GamificationProvider', () => {
     it('sorts leaderboard by XP descending', () => {
       const client = createMockClient({
         Squad: [
-          { id: 'g1', name: 'Alpha', cohortId: 'c1', totalXP: 200 },
-          { id: 'g2', name: 'Beta', cohortId: 'c1', totalXP: 500 },
+          { id: 'g1', name: 'Alpha', sectionID: 'c1', totalXP: 200 },
+          { id: 'g2', name: 'Beta', sectionID: 'c1', totalXP: 500 },
         ],
         SquadMembership: [],
       })
@@ -561,7 +561,7 @@ describe('GamificationProvider', () => {
 
       // Should not throw
       render(
-        <GamificationProvider client={client} studentId="s1" cohortId="c1">
+        <GamificationProvider client={client} studentId="s1" sectionID="c1">
           <FullConsumer />
         </GamificationProvider>,
       )
@@ -601,7 +601,7 @@ describe('GamificationProvider', () => {
       }
 
       const { unmount } = render(
-        <GamificationProvider client={client} studentId="s1" cohortId="c1">
+        <GamificationProvider client={client} studentId="s1" sectionID="c1">
           <FullConsumer />
         </GamificationProvider>,
       )

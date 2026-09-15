@@ -402,7 +402,7 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                 },
                 aspectRatio: { sm: "1" },
                 alignSelf: { sm: "flex-start" },
-                maxWidth: "100%",
+                maxWidth: { xs: "100%", sm: 360 },
               }}
             >
               <Box
@@ -491,7 +491,7 @@ export const Easy = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                 },
                 aspectRatio: { sm: "1" },
                 alignSelf: { sm: "flex-start" },
-                maxWidth: "100%",
+                maxWidth: { xs: "100%", sm: 360 },
               }}
             >
               <Box

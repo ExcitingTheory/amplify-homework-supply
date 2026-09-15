@@ -22,6 +22,7 @@ import {
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { GutterProvider } from "../../../context/gutterContext";
+import { expect, within, waitFor } from "storybook/test";
 import "../theme.css";
 
 export default {
@@ -240,10 +241,20 @@ export const EditableEmpty = {
       },
     },
   },
+  play: async ({ canvasElement }) => {
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('[contenteditable="true"]'),
+      ).not.toBeNull(),
+    );
+  },
 };
 
 export const EditableWithDraggableBlocks = {
   render: () => (
     <EditableTemplate editorState={JSON.stringify(sampleDraggableState)} />
   ),
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Draggable Blocks Demo");
+  },
 };

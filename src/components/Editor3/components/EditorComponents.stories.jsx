@@ -203,7 +203,7 @@ All components integrate with the UnitContext for grading and data persistence.
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
       <Box>

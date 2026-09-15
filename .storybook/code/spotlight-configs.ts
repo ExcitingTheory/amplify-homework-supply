@@ -169,18 +169,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         ],
       },
       {
-        id: "navigate",
-        title: "Sections Page",
-        description: "This is where you manage all your class sections.",
-        targetSelector: '[data-tour="sections-page"]',
-        tooltipPosition: "bottom",
-        actions: [
-          "View all your sections here",
-          "Each section has its own join code",
-          "Students use join codes to enroll",
-        ],
-      },
-      {
         id: "create-button",
         title: "Create Section Button",
         description: "Use this to start creating a new class section.",
@@ -258,13 +246,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           "Add engaging content",
           "Save for future assignments",
         ],
-      },
-      {
-        id: "units-page",
-        title: "Units Library",
-        description: "All your reusable learning content lives here.",
-        targetSelector: '[data-tour="units-page"]',
-        tooltipPosition: "bottom",
       },
       {
         id: "create-button",
@@ -501,20 +482,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         tooltipPosition: "center",
       },
       {
-        id: "create-assignment",
-        title: "Create Assignment",
-        description: "Configure and save the assignment.",
-        targetSelector: '[data-tour="create-assignment-button"]',
-        tooltipPosition: "bottom",
-      },
-      {
-        id: "select-unit",
-        title: "Select a Unit",
-        description: "Choose which unit to assign.",
-        targetSelector: '[data-tour="unit-selector"]',
-        tooltipPosition: "right",
-      },
-      {
         id: "due-date",
         title: "Set Due Date",
         description: "When should students complete this?",
@@ -528,16 +495,18 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         ],
       },
       {
-        id: "settings",
-        title: "Assignment Settings",
-        description: "Configure how students interact with this assignment.",
-        targetSelector: '[data-tour="assignment-settings"]',
+        id: "select-section",
+        title: "Select a Section",
+        description: "Choose which section to assign this unit to.",
+        targetSelector: '[data-tour="unit-selector"]',
         tooltipPosition: "right",
-        actions: [
-          "Allow late submissions?",
-          "Show answers immediately?",
-          "Allow multiple attempts?",
-        ],
+      },
+      {
+        id: "create-assignment",
+        title: "Create the Assignment",
+        description: "Click Assign to save and publish it to your students.",
+        targetSelector: '[data-tour="create-assignment-button"]',
+        tooltipPosition: "bottom",
       },
       {
         id: "complete",
@@ -720,26 +689,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description:
           "Learn shortcuts to create content faster and more efficiently.",
         tooltipPosition: "center",
-      },
-      {
-        id: "help-menu",
-        title: "Help → Keyboard Shortcuts",
-        description: "Find the comprehensive shortcuts reference.",
-        targetSelector: '[data-tour="help-menu"]',
-        tooltipPosition: "bottom",
-      },
-      {
-        id: "shortcuts-page",
-        title: "Shortcuts Reference",
-        description: "All available keyboard shortcuts organized by category.",
-        targetSelector: '[data-tour="shortcuts-page"]',
-        tooltipPosition: "bottom",
-        actions: [
-          "Bookmark this page for quick access",
-          "Try each shortcut in the editor",
-          "Focus on formatting shortcuts first",
-          "Practice block type shortcuts",
-        ],
       },
       {
         id: "demo-story",

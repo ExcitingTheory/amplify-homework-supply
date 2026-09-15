@@ -150,7 +150,12 @@
     "rubyTagsStep3": "继续选择配对，直到两个字段都为空",
     "rubyTagsStep4": "4. 点击保存以应用ruby标签",
     "rubyTagsTitle": "如何创建ruby标签：",
-    "save": "保存"
+    "save": "保存",
+    "title": "词典编辑器",
+    "step1": "1. 在发音字段（上方）中选择文本，然后在短语字段（下方）中选择对应文本",
+    "step2": "2. 所选部分将成对匹配并移动到 ruby 标签预览中",
+    "step3": "3. 继续选择成对内容，直到两个字段都为空",
+    "step4": "4. 点击“保存”应用 ruby 标签"
   },
   "documentSourceBadge": {
     "pagePrefix": "页面",
@@ -385,5 +390,147 @@
     "average": "平均",
     "completed": "已完成",
     "completion": "完成"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Sage 模型",
+    "behaviorTuning": "行为调优",
+    "kaiTemperatureLabel": "Kai 温度：",
+    "sageTemperatureLabel": "Sage 温度：",
+    "kaiMaxTokensLabel": "Kai 最大令牌数",
+    "sageMaxTokensLabel": "Sage 最大令牌数",
+    "maxAgentStepsLabel": "代理最大步骤数",
+    "maxAgentStepsHint": "每轮会话中工具调用的最大轮次",
+    "searchTuning": "搜索调优",
+    "similarityThresholdLabel": "相似度阈值：",
+    "defaultResultLimitLabel": "默认结果限制",
+    "conversationMemory": "会话记忆",
+    "enableConversationMemory": "启用会话记忆",
+    "summarizationModelLabel": "总结模型",
+    "tokenBudgets": "令牌预算",
+    "tokenBudgetsDescription": "控制代理每一轮中各部分分配的令牌数量。预算越低，成本越低；预算越高，可用上下文越丰富。",
+    "enforceTokenBudget": "执行令牌预算",
+    "enforceTokenBudgetNote": "启用后，代理会将系统提示词和工具结果截断到预算限制，并在超过总轮次预算时中止多步骤流程。",
+    "systemPromptBudgetLabel": "系统提示词预算",
+    "systemPromptBudgetHint": "系统提示词中 Tier 1 上下文的最大令牌数（默认：2000）",
+    "toolResultBudgetLabel": "工具结果预算",
+    "toolResultBudgetHint": "返回给模型的每个工具结果的最大令牌数（默认：4000）",
+    "totalTurnBudgetLabel": "单轮总预算",
+    "totalTurnBudgetHint": "跨所有步骤的单轮代理最大总令牌消耗（默认：16000）",
+    "perPersonaOverrides": "按角色覆盖",
+    "kaiSystemPromptLabel": "Kai 系统提示词",
+    "tokensUnit": "令牌",
+    "useDefaultPlaceholder": "使用默认值",
+    "sageSystemPromptLabel": "Sage 系统提示词",
+    "kaiToolResultLabel": "Kai 工具结果",
+    "sageToolResultLabel": "Sage 工具结果"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "sky": "天空",
+      "mint": "薄荷",
+      "lavender": "薰衣草",
+      "peach": "桃色",
+      "rose": "玫瑰",
+      "gold": "金色"
+    },
+    "styles": {
+      "simple": "简约",
+      "detailed": "详细",
+      "toon": "卡通"
+    },
+    "lockedMessage": "获得 Bot Whisperer I 徽章后，即可自定义您的 AI 助手。",
+    "previewTitle": "您的 AI 助手",
+    "styleLabel": "风格",
+    "backgroundColorLabel": "背景颜色"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "从班级复制",
+    "copyToClasses": "复制到班级",
+    "firstMeetingDate": "第一次会议日期",
+    "weeksLabel": "周数",
+    "weeklyMeetingLabel": "每周会议",
+    "weeklyMeetingHint": "1 = 第一次，2 = 第二次，0 = 最后一次",
+    "loadingCadence": "正在加载源节奏...",
+    "noAssignments": "源班级没有可复制的带日期作业。",
+    "missingMetadata": "源作业缺少节奏元数据，无法复制。",
+    "close": "关闭",
+    "copyCadence": "复制节奏",
+    "copying": "正在复制..."
+  },
+  "assignmentCard": {
+    "excellent": "优秀",
+    "good": "良好",
+    "fair": "一般",
+    "needsWork": "需改进",
+    "noDueDate": "无截止日期",
+    "overdue": "逾期",
+    "dueSoon": "即将到期",
+    "due": "到期",
+    "locked": "已锁定",
+    "opensAt": "{date} 开始",
+    "late": "迟交",
+    "dropped": "已被教师移除",
+    "difficulty": "难度：{level}",
+    "review": "复习",
+    "startWorkbook": "开始",
+    "practice": "练习",
+    "discuss": "讨论",
+    "joinReview": "加入复习",
+    "requestGuidance": "请求指导",
+    "requestGuidanceTooltip": "创建房间并与老师分享代码，以获得个性化指导"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "自定义头像"
+  },
+  "campaignProgress": {
+    "ended": "已结束",
+    "endedChip": "已结束",
+    "bonus": "奖励",
+    "chapterProgression": "章节进度",
+    "completion": "完成情况"
+  },
+  "chatPanel": {
+    "defaultTitle": "聊天",
+    "topicsLabel": "主题",
+    "backButton": "返回",
+    "onlineCount": "{count} 人在线"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "输入消息...（AI 请使用 @kai）",
+    "replyingTo": "回复 {name}"
+  },
+  "threadView": {
+    "emptyState": "还没有消息。开始对话吧！",
+    "replyCount": {
+      "singular": "回复",
+      "plural": "回复"
+    },
+    "typingIndicator": "{names} 正在输入...",
+    "edited": "（已编辑）",
+    "justNow": "刚刚",
+    "minutesAgo": "{minutes} 分钟前",
+    "hoursAgo": "{hours} 小时前"
+  },
+  "topicList": {
+    "header": "主题",
+    "newTopicPlaceholder": "#新主题",
+    "emptyState": "还没有主题。创建一个主题即可开始聊天。"
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "添加计时器问题",
+    "timerDescription": "限时作业的计时器配置",
+    "retryToggle": "允许学生重试",
+    "publishFirstAlert": "注意：必须先发布单元内容才能创建作业",
+    "meetingCalendar": "截止日期",
+    "meetingDayHint": "圆点标记课程分组的会议日期。",
+    "tomorrow": "明天",
+    "nextClass": "下一节课",
+    "friday": "下周五",
+    "createSectionLabel": "创建新分组",
+    "undoSnackbar": "作业已创建。已创建 {count} 个作业{plural}。"
   }
 }

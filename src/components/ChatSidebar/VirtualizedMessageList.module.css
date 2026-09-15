@@ -15,9 +15,17 @@
   --button-text: white;
   --button-hover-bg: #4080d0;
   --text-secondary: #aaa;
+  --user-message-text: #f5f7fb;
+  --assistant-message-text: #f5f7fb;
+  --message-link: #9cc4ff;
+  --message-code-bg: rgba(0, 0, 0, 0.28);
 }
 
 .container {
+  --user-message-text: #18212f;
+  --assistant-message-text: #18212f;
+  --message-link: #0759b5;
+  --message-code-bg: rgba(0, 0, 0, 0.06);
   position: relative;
   height: 100%;
   display: flex;
@@ -65,14 +73,30 @@
 /* User vs Assistant messages */
 .messageWrapper.user {
   background-color: var(--user-message-bg, rgba(0, 123, 255, 0.05));
-}
-
-.messageWrapper.user * {
-  color: #ffffff !important;
+  color: var(--user-message-text, inherit);
 }
 
 .messageWrapper.assistant {
   background-color: var(--assistant-message-bg, transparent);
+  color: var(--assistant-message-text, inherit);
+}
+
+.messageWrapper.user :global(a),
+.messageWrapper.user :global(code),
+.messageWrapper.user :global(pre),
+.messageWrapper.user :global(.tool-result) {
+  color: var(--user-message-text);
+}
+
+.messageWrapper.user :global(a) {
+  color: var(--message-link);
+  text-decoration: underline;
+}
+
+.messageWrapper.user :global(pre) {
+  background: var(--message-code-bg);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
 }
 
 /* Scroll to bottom button */

@@ -3,11 +3,11 @@
  * Demonstrates the editable Fountain editor + AI prompt input
  */
 
-import React from 'react';
-import { expect } from 'storybook/test';
-import { within, waitFor } from 'storybook/test';
-import { userEvent } from 'storybook/test';
-import ScreenplayEditor from './ScreenplayEditor';
+import React from "react";
+import { expect } from "storybook/test";
+import { within, waitFor } from "storybook/test";
+import { userEvent } from "storybook/test";
+import ScreenplayEditor from "./ScreenplayEditor";
 
 const sampleFountain = `Title: Japanese Greetings Lesson
 Date: 2026-04-17
@@ -34,10 +34,12 @@ Date: 2026-04-17
 `;
 
 export default {
-  title: '🎙️ Recording Studio/Screenplay Editor',
+  title: "🎙️ Recording Studio/Screenplay Editor",
   component: ScreenplayEditor,
   parameters: {
-    layout: 'fullscreen',
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -57,7 +59,9 @@ automatically sync to the Recording Studio timeline.
   },
   decorators: [
     (Story: any) => (
-      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
         <Story />
       </div>
     ),
@@ -67,17 +71,21 @@ automatically sync to the Recording Studio timeline.
 export const WithContent = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) =>
+      console.log("Fountain changed:", text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log("Prompt submitted:", prompt),
     isGenerating: false,
     readOnly: false,
   },
   play: async ({ canvasElement }: any) => {
     const canvas = within(canvasElement);
 
-    await waitFor(() => {
-      expect(canvas.getByText(/Welcome to our lesson/)).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(canvas.getByText(/Welcome to our lesson/)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     expect(canvas.getByText(/こんにちは/)).toBeInTheDocument();
   },
@@ -86,8 +94,9 @@ export const WithContent = {
 export const Empty = {
   args: {
     fountainText: emptyFountain,
-    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) =>
+      console.log("Fountain changed:", text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log("Prompt submitted:", prompt),
     isGenerating: false,
     readOnly: false,
   },
@@ -96,15 +105,16 @@ export const Empty = {
 export const AIGenerating = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
-    onPromptSubmit: (prompt: any) => console.log('Prompt submitted:', prompt),
+    onFountainChange: (text: any) =>
+      console.log("Fountain changed:", text.slice(0, 80)),
+    onPromptSubmit: (prompt: any) => console.log("Prompt submitted:", prompt),
     isGenerating: true,
     readOnly: false,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Shows the loading state while AI generates screenplay content.',
+        story: "Shows the loading state while AI generates screenplay content.",
       },
     },
   },
@@ -113,13 +123,14 @@ export const AIGenerating = {
 export const ReadOnly = {
   args: {
     fountainText: sampleFountain,
-    onFountainChange: (text: any) => console.log('Fountain changed:', text.slice(0, 80)),
+    onFountainChange: (text: any) =>
+      console.log("Fountain changed:", text.slice(0, 80)),
     readOnly: true,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Read-only mode — no editing, no prompt input.',
+        story: "Read-only mode — no editing, no prompt input.",
       },
     },
   },

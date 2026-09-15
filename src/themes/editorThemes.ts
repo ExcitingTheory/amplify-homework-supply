@@ -3,6 +3,11 @@
  * Each theme defines both light and dark MUI palette overrides.
  */
 import { red } from "@mui/material/colors";
+import type { Components, Theme } from "@mui/material/styles";
+import {
+  getSemanticThemeOptions,
+  semanticComponentOverrides,
+} from "./semanticTheme";
 
 export interface CustomPaletteTokens {
   chatBubbleUser: string;
@@ -13,6 +18,15 @@ export interface CustomPaletteTokens {
   searchHighlight: string;
   subtleBorder: string;
   heroCardGradient: string;
+  // Syntax-highlight token colors (theme-independent; injected in getThemeOptions).
+  tokenComment?: string;
+  tokenPunctuation?: string;
+  tokenProperty?: string;
+  tokenSelector?: string;
+  tokenOperator?: string;
+  tokenAttr?: string;
+  tokenVariable?: string;
+  tokenFunction?: string;
 }
 
 export interface ThemePaletteVariant {
@@ -206,6 +220,32 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
 };
 
 /**
+ * Syntax-highlight token colors, shared across every cosmetic theme (they are
+ * language-editor colors, not brand colors). Injected into each theme's `custom`
+ * palette so `--mui-palette-custom-token*` vars switch with the color scheme.
+ */
+const SYNTAX_TOKENS_LIGHT = {
+  tokenComment: "slategray",
+  tokenPunctuation: "#999",
+  tokenProperty: "#905",
+  tokenSelector: "#690",
+  tokenOperator: "#9a6e3a",
+  tokenAttr: "#07a",
+  tokenVariable: "#e90",
+  tokenFunction: "#dd4a68",
+} as const;
+const SYNTAX_TOKENS_DARK = {
+  tokenComment: "#6a9955",
+  tokenPunctuation: "#888",
+  tokenProperty: "#c586c0",
+  tokenSelector: "#b5cea8",
+  tokenOperator: "#d4a76a",
+  tokenAttr: "#4ec9b0",
+  tokenVariable: "#dcdcaa",
+  tokenFunction: "#ce9178",
+} as const;
+
+/**
  * Build a full MUI createTheme options object for the given cosmetic theme ID.
  * Falls back to 'default' if the ID is unknown.
  */
@@ -213,10 +253,21 @@ export function getThemeOptions(themeId: string | null | undefined) {
   const palette =
     THEME_PALETTES[themeId || "default"] ?? THEME_PALETTES.default;
   return {
+    ...getSemanticThemeOptions(),
     cssVariables: { colorSchemeSelector: "data-mui-color-scheme" },
     colorSchemes: {
-      light: { palette: palette.light },
-      dark: { palette: palette.dark },
+      light: {
+        palette: {
+          ...palette.light,
+          custom: { ...palette.light.custom, ...SYNTAX_TOKENS_LIGHT },
+        },
+      },
+      dark: {
+        palette: {
+          ...palette.dark,
+          custom: { ...palette.dark.custom, ...SYNTAX_TOKENS_DARK },
+        },
+      },
     },
   };
 }
@@ -227,10 +278,38 @@ export function getThemeOptions(themeId: string | null | undefined) {
  */
 export function getCustomThemeOptions(palette: ThemePalette) {
   return {
+    ...getSemanticThemeOptions(),
     cssVariables: { colorSchemeSelector: "data-mui-color-scheme" },
     colorSchemes: {
-      light: { palette: palette.light },
-      dark: { palette: palette.dark },
+      light: {
+        palette: {
+          ...palette.light,
+          custom: { ...palette.light.custom, ...SYNTAX_TOKENS_LIGHT },
+        },
+      },
+      dark: {
+        palette: {
+          ...palette.dark,
+          custom: { ...palette.dark.custom, ...SYNTAX_TOKENS_DARK },
+        },
+      },
     },
   };
 }
+
+/**
+ * Component style overrides shared by every theme (static, dynamic, and custom).
+ * Centralized so buttons and chips render with one consistent rounding/typography
+ * system across the whole app. `borderRadius * 2` matches the card action-bar
+ * buttons (sx `borderRadius: 2`).
+ */
+export const sharedComponentOverrides: Components<Theme> = {
+  ...semanticComponentOverrides,
+  MuiAccordionSummary: {
+    defaultProps: {
+      slotProps: {
+        content: { component: "div" },
+      },
+    },
+  },
+};

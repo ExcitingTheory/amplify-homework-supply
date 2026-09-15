@@ -98,6 +98,8 @@ import {
   trackChatBlockInserted,
   trackChatRegenerated,
   trackChatToolUsed,
+  trackChatResponseReceived,
+  trackDocumentAnalyzed,
 } from "../utils/analytics";
 
 const ChatSidebar = ({ onClose }) => {
@@ -944,6 +946,14 @@ const ChatSidebar = ({ onClose }) => {
       if (textContent) {
         processNailedIt(textContent);
       }
+      // Report AI response received (with any tools invoked) for chat depth analytics
+      const toolsUsed =
+        message?.parts
+          ?.filter(
+            (p) => typeof p.type === "string" && p.type.startsWith("tool-"),
+          )
+          .map((p) => p.type.replace(/^tool-/, "")) || [];
+      trackChatResponseReceived(assistantChat?.id, toolsUsed);
       // Save messages when streaming completes
       if (assistantChat) {
         saveMessages(messages, assistantChat, input);
@@ -1132,6 +1142,9 @@ const ChatSidebar = ({ onClose }) => {
               `Analysis complete! ${pageCount ? `${pageCount} pages analyzed.` : ""}`.trim(),
           };
           hasChanges = true;
+          trackDocumentAnalyzed(status.documentId, {
+            ...(pageCount != null && { pageCount }),
+          });
         } else if (docStatus === "analyzing" && status.status !== "analyzing") {
           updated[index] = {
             ...status,

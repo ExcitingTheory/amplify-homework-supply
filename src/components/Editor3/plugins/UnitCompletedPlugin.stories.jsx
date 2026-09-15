@@ -16,6 +16,7 @@ import { Button } from "@mui/material";
 
 import UnitCompletedPlugin from "./UnitCompletedPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
+import { expect, within } from "storybook/test";
 import {
   seedMockUnit,
   clearMockData,
@@ -165,4 +166,9 @@ const ControlledTemplate = () => {
 
 export const Interactive = {
   render: () => <ControlledTemplate />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Unit Completed Plugin");
+    await canvas.findByRole("button", { name: /Trigger Unit Completion/i });
+  },
 };

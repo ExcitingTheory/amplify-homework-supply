@@ -7,18 +7,20 @@
  * when highlight or edit mode is active.
  */
 
-import React, { useSyncExternalStore, useContext, useRef } from 'react';
-import { TranslationModeContext } from '../addons/translation-mode/contexts/TranslationModeContext';
-import { TranslationCaptureContext } from '../addons/translation-mode/contexts/TranslationCaptureContext';
-import { TranslationOverlay } from '../addons/translation-mode/components/TranslationOverlay';
+import React, { useSyncExternalStore, useContext, useRef } from "react";
+import { TranslationModeContext } from "../addons/translation-mode/contexts/TranslationModeContext";
+import { TranslationCaptureContext } from "../addons/translation-mode/contexts/TranslationCaptureContext";
+import { TranslationOverlay } from "../addons/translation-mode/components/TranslationOverlay";
 import {
   subscribeTranslationOverrides,
   getTranslationOverrideVersion,
   getTranslationOverride,
-} from '../addons/translation-mode/utils/translationOverrides';
+} from "../addons/translation-mode/utils/translationOverrides";
 
 // Eagerly load ALL locale JSON files at build time
-const allLocaleModules = import.meta.glob('../../public/locales/**/*.json', { eager: true });
+const allLocaleModules = import.meta.glob("../../public/locales/**/*.json", {
+  eager: true,
+});
 
 // Build a lookup: locale → namespace → translations object
 // e.g. { "en": { "pages": { "index.title": "Homework Supply" } }, "es": { ... } }
@@ -29,13 +31,13 @@ for (const [filePath, mod] of Object.entries(allLocaleModules)) {
   if (!match) continue;
   const [, locale, ns] = match;
   // Skip .meta.json and .missing.json files
-  if (ns.endsWith('.meta') || ns.endsWith('.missing')) continue;
+  if (ns.endsWith(".meta") || ns.endsWith(".missing")) continue;
   if (!allTranslations[locale]) allTranslations[locale] = {};
   allTranslations[locale][ns] = mod.default || mod;
 }
 
 // --- Reactive locale store ---
-let currentLocale = 'en';
+let currentLocale = "en";
 const listeners = new Set();
 
 function subscribe(listener) {
@@ -51,16 +53,18 @@ function getSnapshot() {
 export function setLocale(locale) {
   if (locale === currentLocale) return;
   if (!allTranslations[locale]) {
-    console.warn(`[next-intl mock] Locale "${locale}" not found. Available: ${Object.keys(allTranslations).join(', ')}`);
+    console.warn(
+      `[next-intl mock] Locale "${locale}" not found. Available: ${Object.keys(allTranslations).join(", ")}`,
+    );
     return;
   }
   currentLocale = locale;
-  listeners.forEach(fn => fn());
+  listeners.forEach((fn) => fn());
 }
 
 // Helper to get translations for the current locale (with English fallback)
 function getTranslations() {
-  return allTranslations[currentLocale] || allTranslations['en'] || {};
+  return allTranslations[currentLocale] || allTranslations["en"] || {};
 }
 
 /**
@@ -68,20 +72,57 @@ function getTranslations() {
  * e.g. resolve({ index: { title: "Homework Supply" } }, "index.title") → "Homework Supply"
  */
 function resolve(obj, keyPath) {
-  const parts = keyPath.split('.');
+  const parts = keyPath.split(".");
   let current = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined;
+    if (current == null || typeof current !== "object") return undefined;
     current = current[part];
   }
   return current;
 }
 
 /**
+ * Resolve a value for a (possibly nested) namespace + key.
+ * Locale files are keyed by filename (e.g. "components", "editor.authoring"),
+ * but callers may pass nested namespaces like "components.assignmentCard".
+ * Try the whole namespace as a filename first, then progressively treat the
+ * leading segments as the filename and the remainder as a key-path prefix.
+ */
+function resolveNamespaced(localeData, targetNs, key) {
+  if (!targetNs || typeof targetNs !== "string") {
+    if (!key || typeof key !== "string") return undefined;
+    const parts = key.split(".");
+    for (let i = parts.length - 1; i >= 1; i--) {
+      const fileNs = parts.slice(0, i).join(".");
+      const nsData = localeData[fileNs];
+      if (nsData === undefined) continue;
+      const v = resolve(nsData, parts.slice(i).join("."));
+      if (v !== undefined) return v;
+    }
+    return undefined;
+  }
+  // 1. Whole namespace is the filename (e.g. "common", "editor.authoring")
+  if (localeData[targetNs] !== undefined) {
+    const v = resolve(localeData[targetNs], key);
+    if (v !== undefined) return v;
+  }
+  // 2. Leading segments are the filename; remainder is a key-path prefix
+  const parts = targetNs.split(".");
+  for (let i = parts.length - 1; i >= 1; i--) {
+    const fileNs = parts.slice(0, i).join(".");
+    const nsData = localeData[fileNs];
+    if (nsData === undefined) continue;
+    const v = resolve(nsData, `${parts.slice(i).join(".")}.${key}`);
+    if (v !== undefined) return v;
+  }
+  return undefined;
+}
+
+/**
  * Interpolate {param} placeholders in a translated string.
  */
 function interpolate(str, params) {
-  if (!params || typeof str !== 'string') return str;
+  if (!params || typeof str !== "string") return str;
   return str.replace(/\{(\w+)\}/g, (_, key) => {
     return params[key] !== undefined ? String(params[key]) : `{${key}}`;
   });
@@ -93,18 +134,21 @@ export const useTranslations = (namespace) => {
 
   // Subscribe to translation overrides so components re-render when the panel edits a key
   // eslint-disable-next-line no-unused-vars
-  const _overrideVersion = useSyncExternalStore(subscribeTranslationOverrides, getTranslationOverrideVersion);
+  const _overrideVersion = useSyncExternalStore(
+    subscribeTranslationOverrides,
+    getTranslationOverrideVersion,
+  );
 
   // Translation mode integration
-  let mode = 'off';
-  let storyName = '';
+  let mode = "off";
+  let storyName = "";
   let captureTranslation = null;
   let getTranslation = null;
   try {
     const modeCtx = useContext(TranslationModeContext);
     const captureCtx = useContext(TranslationCaptureContext);
-    mode = modeCtx?.mode || 'off';
-    storyName = modeCtx?.storyName || '';
+    mode = modeCtx?.mode || "off";
+    storyName = modeCtx?.storyName || "";
     captureTranslation = captureCtx?.captureTranslation;
     getTranslation = captureCtx?.getTranslation;
   } catch (e) {
@@ -119,7 +163,7 @@ export const useTranslations = (namespace) => {
 
   // Get translations for current locale, with English as fallback
   const localeData = allTranslations[locale] || {};
-  const fallbackData = allTranslations['en'] || {};
+  const fallbackData = allTranslations["en"] || {};
 
   const t = (key, paramsOrDefault) => {
     let targetNs = namespaces[0]; // default to first namespace
@@ -128,9 +172,9 @@ export const useTranslations = (namespace) => {
     let defaultValue = undefined;
 
     // Handle second argument: string = default value, object = params/options
-    if (typeof paramsOrDefault === 'string') {
+    if (typeof paramsOrDefault === "string") {
       defaultValue = paramsOrDefault;
-    } else if (paramsOrDefault && typeof paramsOrDefault === 'object') {
+    } else if (paramsOrDefault && typeof paramsOrDefault === "object") {
       params = { ...paramsOrDefault };
       // Extract ns option (namespace override)
       if (params.ns) {
@@ -145,7 +189,7 @@ export const useTranslations = (namespace) => {
     }
 
     // Handle colon-separated namespace prefix: "common:navigation.home"
-    const colonIdx = resolveKey.indexOf(':');
+    const colonIdx = resolveKey.indexOf(":");
     if (colonIdx > -1) {
       targetNs = resolveKey.slice(0, colonIdx);
       resolveKey = resolveKey.slice(colonIdx + 1);
@@ -158,6 +202,13 @@ export const useTranslations = (namespace) => {
       const fallbackNsData = fallbackData[targetNs] || {};
       value = resolve(fallbackNsData, resolveKey);
     }
+    // Nested namespace support (e.g. "components.assignmentCard" → components.json → assignmentCard)
+    if (value === undefined) {
+      value = resolveNamespaced(localeData, targetNs, resolveKey);
+    }
+    if (value === undefined) {
+      value = resolveNamespaced(fallbackData, targetNs, resolveKey);
+    }
 
     let result;
     if (value === undefined) {
@@ -166,9 +217,9 @@ export const useTranslations = (namespace) => {
         result = interpolate(defaultValue, params);
       } else {
         // Fallback: return "namespace.key" so missing keys are visible
-        result = `${targetNs}.${resolveKey}`;
+        result = targetNs ? `${targetNs}.${resolveKey}` : resolveKey;
       }
-    } else if (typeof value === 'string') {
+    } else if (typeof value === "string") {
       result = interpolate(value, params);
     } else {
       // If the resolved value is an object (nested namespace), return the key
@@ -183,7 +234,10 @@ export const useTranslations = (namespace) => {
     }
 
     // Translation mode: wrap in TranslationOverlay for highlight/edit modes
-    if ((mode === 'highlight' || mode === 'edit') && typeof result === 'string') {
+    if (
+      (mode === "highlight" || mode === "edit") &&
+      typeof result === "string"
+    ) {
       // Capture translation for the panel (only once per key).
       // Deferred via queueMicrotask to avoid calling setState during render,
       // which triggers the "Cannot update a component while rendering" warning.
@@ -208,7 +262,7 @@ export const useTranslations = (namespace) => {
           value: result,
           storyName,
         },
-        result
+        result,
       );
       // Return a Proxy that renders as React element but coerces to string
       // for non-JSX contexts (aria-label, title attributes, etc.)
@@ -217,11 +271,11 @@ export const useTranslations = (namespace) => {
           if (prop === Symbol.toPrimitive) {
             return () => String(result);
           }
-          if (prop === 'toString' || prop === 'valueOf') {
+          if (prop === "toString" || prop === "valueOf") {
             return () => String(result);
           }
           // Prevent React from treating this as a thenable/async component
-          if (prop === 'then') {
+          if (prop === "then") {
             return undefined;
           }
           return target[prop];
@@ -237,7 +291,7 @@ export const useTranslations = (namespace) => {
   t.raw = (key) => {
     let targetNs = namespaces[0];
     let resolveKey = key;
-    const colonIdx = resolveKey.indexOf(':');
+    const colonIdx = resolveKey.indexOf(":");
     if (colonIdx > -1) {
       targetNs = resolveKey.slice(0, colonIdx);
       resolveKey = resolveKey.slice(colonIdx + 1);
@@ -248,8 +302,16 @@ export const useTranslations = (namespace) => {
       const fallbackNsData = fallbackData[targetNs] || {};
       value = resolve(fallbackNsData, resolveKey);
     }
+    if (value === undefined) {
+      value = resolveNamespaced(localeData, targetNs, resolveKey);
+    }
+    if (value === undefined) {
+      value = resolveNamespaced(fallbackData, targetNs, resolveKey);
+    }
     return value;
   };
+  // next-intl t.has() — checks whether a key resolves to a value
+  t.has = (key) => t.raw(key) !== undefined;
   return t;
 };
 
@@ -259,7 +321,7 @@ export const useLocale = () => {
 
 export const useMessages = () => {
   const locale = useSyncExternalStore(subscribe, getSnapshot);
-  const localeData = allTranslations[locale] || allTranslations['en'] || {};
+  const localeData = allTranslations[locale] || allTranslations["en"] || {};
   // Return all loaded translations for current locale
   const all = {};
   for (const [ns, data] of Object.entries(localeData)) {

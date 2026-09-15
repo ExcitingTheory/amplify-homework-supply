@@ -7,6 +7,8 @@ const meta: Meta<typeof XPTunerDialog> = {
   title: "🏆 Gamification/Instructor/XP Tuner Dialog",
   component: XPTunerDialog,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "centered",
   },
   args: {

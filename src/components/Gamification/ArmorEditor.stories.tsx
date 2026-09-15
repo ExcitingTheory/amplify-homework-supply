@@ -5,6 +5,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof ArmorEditor> = {
   title: "🏆 Gamification/Avatars & Cosmetics/Armor Editor",
   component: ArmorEditor,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 
 export default meta;

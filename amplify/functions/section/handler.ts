@@ -253,6 +253,8 @@ const GET_SECTION = /* GraphQL */ `
       _deleted
       name
       code
+      instructor
+      learner
       readableGroups
       writableGroups
     }
@@ -495,6 +497,20 @@ export const handler: Handler = async (event: any, context: any) => {
           username || userId,
           groupManager,
         );
+      case "addStudentsToSection":
+        return await handleAddStudentsToSection(
+          args,
+          userId,
+          claims,
+          groupManager,
+        );
+      case "removeStudentFromSection":
+        return await handleRemoveStudentFromSection(
+          args,
+          userId,
+          claims,
+          groupManager,
+        );
       case "listSectionStudents":
         return await handleListSectionStudents(args, userId, groupManager);
       case "createPeerReviewRoom":
@@ -726,6 +742,164 @@ async function handleAddSelfToSection(
     console.error("[Add Self to Section Error]:", error);
     throw error;
   }
+}
+
+/**
+ * Verifies the caller may manage a section's roster.
+ * Returns the section record if authorized, throws otherwise.
+ */
+async function authorizeSectionInstructor(
+  sectionId: string,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<any> {
+  const client = getClient();
+  const { data, errors } = await client.graphql({
+    query: GET_SECTION,
+    variables: { id: sectionId },
+  });
+
+  const section = data?.getSection;
+  if (errors || !section) {
+    throw new Error(`Section not found: ${sectionId}`);
+  }
+
+  const rawGroups = claims["cognito:groups"];
+  const groups: string[] = Array.isArray(rawGroups)
+    ? rawGroups
+    : typeof rawGroups === "string"
+      ? rawGroups.split(/[,\s]+/).filter(Boolean)
+      : [];
+
+  const isAdmin = groups.includes("Admins");
+  const isSectionInstructor =
+    section.instructor === userId ||
+    groups.includes(`section-${sectionId}-instructors`);
+
+  if (!isAdmin && !isSectionInstructor) {
+    throw new Error(
+      "Unauthorized: caller is not an instructor of this section",
+    );
+  }
+
+  return section;
+}
+
+/**
+ * Instructor-initiated bulk enrollment.
+ * Resolves each email to a Cognito user, adds them to the section learner group,
+ * and creates their assignment copies (mirrors handleAddSelfToSection).
+ */
+async function handleAddStudentsToSection(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+  groupManager: GroupManager,
+): Promise<string> {
+  const { sectionId, emails } = args;
+  const client = getClient();
+
+  const section = await authorizeSectionInstructor(sectionId, userId, claims);
+
+  // De-duplicate + normalize the requested emails
+  const requested = Array.from(
+    new Set(
+      (emails || [])
+        .map((e: string) => (e || "").trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ) as string[];
+
+  const added: string[] = [];
+  const alreadyEnrolled: string[] = [];
+  const notFound: string[] = [];
+
+  // Load section assignments once so we can replicate them for each new learner
+  const { data: assignmentsData } = await client.graphql({
+    query: LIST_ASSIGNMENTS,
+    variables: { filter: { sectionID: { eq: sectionId } } },
+  });
+  const sectionAssignments = (
+    assignmentsData?.listAssignments?.items || []
+  ).filter((a: any) => a != null && a.id != null);
+
+  const readableGroups = [`section-${sectionId}-learners`];
+  const writableGroups = [`section-${sectionId}-learners`];
+
+  for (const email of requested) {
+    try {
+      const resolvedUsername = await groupManager.findUserByEmail(email);
+      if (!resolvedUsername) {
+        notFound.push(email);
+        continue;
+      }
+
+      if (await groupManager.isLearnerInSection(resolvedUsername, sectionId)) {
+        alreadyEnrolled.push(email);
+        continue;
+      }
+
+      await groupManager.addLearner(resolvedUsername, sectionId);
+
+      for (const assignment of sectionAssignments) {
+        await client.graphql({
+          query: CREATE_ASSIGNMENT,
+          variables: {
+            input: {
+              sectionID: sectionId,
+              unitID: assignment.unitID,
+              learner: resolvedUsername,
+              readableGroups,
+              writableGroups,
+              status: "PUBLISHED",
+            },
+          },
+        });
+      }
+
+      added.push(email);
+    } catch (err) {
+      console.error(`[addStudentsToSection] Failed for ${email}:`, err);
+      notFound.push(email);
+    }
+  }
+
+  return JSON.stringify({
+    success: true,
+    sectionId,
+    sectionName: section.name,
+    added,
+    alreadyEnrolled,
+    notFound,
+    message: `Enrolled ${added.length} student(s) in "${section.name}"`,
+  });
+}
+
+/**
+ * Instructor-initiated removal — removes a student from the section learner group.
+ */
+async function handleRemoveStudentFromSection(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+  groupManager: GroupManager,
+): Promise<string> {
+  const { sectionId, username } = args;
+
+  await authorizeSectionInstructor(sectionId, userId, claims);
+
+  if (!username) {
+    throw new Error("username is required");
+  }
+
+  await groupManager.removeLearner(username, sectionId);
+
+  return JSON.stringify({
+    success: true,
+    sectionId,
+    username,
+    message: `Removed ${username} from section`,
+  });
 }
 
 /**

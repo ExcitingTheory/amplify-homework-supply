@@ -50,7 +50,7 @@ export function GamificationQuickPanel({ sectionId, locale = 'en' }: Gamificatio
     async function fetch() {
       try {
         const { data } = await (client.models as any).GroupChallenge.list({
-          filter: { cohortId: { eq: sectionId } },
+          filter: { sectionID: { eq: sectionId } },
         })
         if (!cancelled && data) {
           const items = (data as any[])

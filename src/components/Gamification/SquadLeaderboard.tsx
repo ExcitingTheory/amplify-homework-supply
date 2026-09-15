@@ -34,7 +34,7 @@ export interface SquadLeaderboardEntry {
   totalXP: number
   memberCount: number
   /** Section/cohort this squad belongs to */
-  cohortId?: string
+  sectionID?: string
   /** Resolved section name for display */
   sectionName?: string
   /** Denormalized member avatar configs for display */

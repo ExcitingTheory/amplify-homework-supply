@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   Accordion,
   AccordionDetails,
@@ -17,8 +18,10 @@ import SchoolIcon from "@mui/icons-material/School";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
+import { openDiscussion } from "@/utils/chatDiscussBus";
 import { DASHBOARD_TOKENS } from "./constants";
 import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
 import { UpNextCard } from "./UpNextCard";
@@ -43,6 +46,12 @@ export interface SectionPanelProps {
     description?: string;
   };
   assignments: SectionAssignment[];
+  /** This learner's accommodation for the section (extra due-date days / time multiplier) */
+  accommodation?: {
+    dueDateExtensionDays?: number;
+    timeMultiplier?: number;
+    note?: string;
+  } | null;
   units: Record<
     string,
     | {
@@ -99,6 +108,7 @@ export function SectionPanel({
   defaultExpanded = false,
   campaignTimeline,
   campaignBriefing,
+  accommodation,
   onOpenDrill,
   onRequestGuidance,
   onCreateReviewRoom,
@@ -107,6 +117,7 @@ export function SectionPanel({
   const [showCompleted, setShowCompleted] = React.useState(false);
   const reducedMotion = useReducedMotion();
   const upNextRef = React.useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const handleAccordionChange = React.useCallback(
     (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -143,6 +154,11 @@ export function SectionPanel({
   const upNext = pending.find((a) => !isLocked(a.unitID));
   const remainingPending = pending.filter((a) => a.id !== upNext?.id);
   const nextDueAssignment = pending.find((assignment) => assignment.dueDate);
+
+  // Prefetch the up-next workbook route so opening it feels instant
+  React.useEffect(() => {
+    if (upNext?.unitID) router.prefetch(`/workbook/${upNext.unitID}`);
+  }, [upNext?.unitID, router]);
 
   // Stats
   const completionPct = assignments.length
@@ -311,6 +327,7 @@ export function SectionPanel({
               sectionName={section.name || "this section"}
               chapterTitle={activeChapterTitle}
               nailedItCount={nailedItByUnit[upNext.unitID] || 0}
+              accommodation={accommodation}
               onOpenDrill={onOpenDrill}
               onRequestGuidance={onRequestGuidance}
             />
@@ -328,6 +345,7 @@ export function SectionPanel({
                 locked={isLocked(assignment.unitID)}
                 lockStatus={getLockStatus(assignment.unitID)}
                 nailedItCount={nailedItByUnit[assignment.unitID] || 0}
+                accommodation={accommodation}
                 onOpenDrill={onOpenDrill}
                 onRequestGuidance={onRequestGuidance}
               />
@@ -371,6 +389,7 @@ export function SectionPanel({
                       unit={units[assignment.unitID]}
                       latestGrade={latestGrade}
                       nailedItCount={nailedItByUnit[assignment.unitID] || 0}
+                      accommodation={accommodation}
                       onOpenDrill={onOpenDrill}
                       onRequestGuidance={onRequestGuidance}
                       onCreateReviewRoom={onCreateReviewRoom}
@@ -409,11 +428,28 @@ export function SectionPanel({
             size="small"
             variant="outlined"
             endIcon={<ArrowForwardIcon />}
-            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
           >
             View Class
           </Button>
-          <SkillTreePopupButton sectionId={section.id} label={section.name} />
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<ChatBubbleOutlineIcon />}
+            onClick={() =>
+              openDiscussion({
+                sectionID: section.id,
+                scope: "section",
+                topicName: section.name || "Class discussion",
+              })
+            }
+          >
+            Discuss
+          </Button>
+          <SkillTreePopupButton
+            sectionId={section.id}
+            label={section.name}
+            size="small"
+          />
         </Box>
       </AccordionDetails>
     </Accordion>

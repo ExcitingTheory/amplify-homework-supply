@@ -8,6 +8,8 @@ const meta: Meta<typeof NotificationCard> = {
   title: "📬 Notifications/Notification Card",
   component: NotificationCard,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
     docs: {
       description: {
@@ -16,7 +18,7 @@ const meta: Meta<typeof NotificationCard> = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
       <Box sx={{ maxWidth: 500 }}>

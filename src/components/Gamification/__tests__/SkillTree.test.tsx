@@ -114,7 +114,7 @@ describe('SkillTree', () => {
     mockGenerateSkillTree.mockResolvedValue({ generated: true, skillCount: 5 })
     const onGenerated = vi.fn()
 
-    render(<SkillTree skills={[]} canGenerate unitId="unit-1" cohortId="cohort-1" onGenerated={onGenerated} />)
+    render(<SkillTree skills={[]} canGenerate unitId="unit-1" sectionID="cohort-1" onGenerated={onGenerated} />)
 
     fireEvent.click(screen.getByText('Generate from Unit Content'))
 

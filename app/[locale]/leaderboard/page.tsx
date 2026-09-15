@@ -45,7 +45,7 @@ export default async function LeaderboardPage() {
   }
 
   return (
-      <GamificationProviderWrapper cohortId={undefined}>
+      <GamificationProviderWrapper sectionID={undefined}>
         <LiveLeaderboard initialEntries={initialEntries} />
       </GamificationProviderWrapper>
   );

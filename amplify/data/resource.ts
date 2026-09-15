@@ -1,5 +1,5 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-import { findIsolatedModelNames } from "../custom/dataStackWaveOrder/resource";
+import { computeBootstrapPhases } from "../custom/dataStackWaveOrder/resource";
 import { openaiHandler } from "../functions/openai/resource";
 import { sectionHandler } from "../functions/section/resource";
 import { embeddingsHandler } from "../functions/embeddings/resource";
@@ -181,6 +181,40 @@ const CustomBadgeDefinition = a.customType({
   autoEvaluate: a.boolean(),
 });
 
+// Recurring weekly class meeting time — used to compute accurate "next class" due dates
+const ClassScheduleEntry = a.customType({
+  dayOfWeek: a.integer().required(), // 0 = Sunday .. 6 = Saturday
+  startTime: a.string().required(), // 24-hour local time, "HH:mm"
+  endTime: a.string(), // 24-hour local time, "HH:mm"
+});
+
+const LateAssignmentStatus = a.enum(["PENDING", "KEPT", "DROPPED"]);
+
+const TimingPattern = a.customType({
+  id: a.string().required(),
+  name: a.string().required(),
+  availableFromAnchor: a.enum(["CLASS_START", "CLASS_END", "CUSTOM"]),
+  availableFromOffsetMinutes: a.integer(),
+  availableUntilAnchor: a.enum([
+    "CLASS_END",
+    "END_OF_DAY",
+    "END_OF_WEEK",
+    "CUSTOM",
+  ]),
+  availableUntilOffsetMinutes: a.integer(),
+  allowLateCompletion: a.boolean(),
+});
+
+// Reusable planning position. Actual learner work remains an Assignment.
+const AssignmentSlot = a.customType({
+  id: a.string().required(),
+  name: a.string(),
+  week: a.integer().required(),
+  meetingIndex: a.integer(),
+  dueDate: a.datetime(),
+  timingPatternId: a.string(),
+});
+
 const SectionGamificationConfig = a.customType({
   // Feature toggles — null means "use platform default"
   xpEnabled: a.boolean(), // Toggle XP earning and display (default: platform)
@@ -208,7 +242,7 @@ const BadgeEntry = a.customType({
   badgeType: a.string().required(),
   sourceId: a.string(),
   awardedAt: a.datetime(),
-  cohortId: a.string(),
+  sectionID: a.string(),
   unitID: a.string(),
   count: a.integer(),
   isAnti: a.boolean(),
@@ -445,20 +479,37 @@ const ReportCard = a.customType({
 /**
  * CloudFormation caps a single deploy operation at 2500 total nested-stack
  * resource changes. This schema's full model set exceeds that on a from-
- * scratch deploy. When AMPLIFY_BOOTSTRAP_PHASE=1, strip the relation-free
- * "isolated" models (zero hasMany/hasOne/belongsTo/manyToMany to anything)
- * so the first deploy stays under budget; a second deploy with the full
- * schema then only needs to ADD those isolated models, which is also safely
- * under budget since it never touches the already-created phase-1 resources.
- * See scripts/sandbox-bootstrap.mjs for the two-phase orchestration.
+ * scratch deploy — even after excluding relation-free "isolated" models.
+ * When AMPLIFY_BOOTSTRAP_PHASE=<N> (1-indexed) and AMPLIFY_BOOTSTRAP_TOTAL_PHASES=<T>
+ * are both set, only models assigned to cumulative phase N (see
+ * computeBootstrapPhases) are included — connected components (models
+ * linked by hasMany/hasOne/belongsTo/manyToMany) are never split across
+ * phases, and each phase is a strict superset of the previous one, so later
+ * phases only ever ADD models, never touching already-created resources.
+ * See scripts/sandbox-bootstrap.mjs for the multi-phase orchestration.
  */
 function filterSchemaForBootstrapPhase<T extends Record<string, unknown>>(
   schemaDefinition: T,
 ): T {
-  if (process.env.AMPLIFY_BOOTSTRAP_PHASE !== "1") return schemaDefinition;
+  const phase = Number(process.env.AMPLIFY_BOOTSTRAP_PHASE);
+  const totalPhases = Number(process.env.AMPLIFY_BOOTSTRAP_TOTAL_PHASES);
+  if (
+    !Number.isInteger(phase) ||
+    !Number.isInteger(totalPhases) ||
+    phase < 1 ||
+    totalPhases < 1 ||
+    phase > totalPhases
+  ) {
+    return schemaDefinition;
+  }
+  const phases = computeBootstrapPhases(totalPhases);
+  const includedModels = phases[phase - 1];
   const filtered = { ...schemaDefinition } as Record<string, unknown>;
-  for (const modelName of findIsolatedModelNames()) {
-    delete filtered[modelName];
+  for (const key of Object.keys(filtered)) {
+    // Only ever remove known model names — custom types/mutations/queries
+    // are never keys returned by computeBootstrapPhases, so they're kept.
+    const isModel = phases[totalPhases - 1].has(key);
+    if (isModel && !includedModels.has(key)) delete filtered[key];
   }
   return filtered as T;
 }
@@ -536,6 +587,9 @@ const rawSchemaDefinition = {
   BadgeConfig,
   CustomBadgeDefinition,
   SectionGamificationConfig,
+  ClassScheduleEntry,
+  TimingPattern,
+  AssignmentSlot,
   BadgeEntry,
   ModuleProgressEntry,
   PersonalBestEntry,
@@ -650,6 +704,18 @@ const rawSchemaDefinition = {
       _deleted: a.boolean(),
       dueDate: a.datetime(),
       unlockDate: a.datetime(),
+      availableFrom: a.datetime(),
+      availableUntil: a.datetime(),
+      allowLateCompletion: a.boolean(),
+      lateStatus: LateAssignmentStatus,
+      timingPatternId: a.string(),
+      workbookChatEnabled: a.boolean(),
+      aiChatEnabled: a.boolean(),
+      studentID: a.id(),
+      // Optional placement within a recurring class cadence.
+      cadenceWeek: a.integer(),
+      cadenceMeetingIndex: a.integer(),
+      slotID: a.string(),
       status: PublishedStatus,
       // Foreign keys for relationships
       sectionID: a
@@ -731,6 +797,9 @@ const rawSchemaDefinition = {
       // Practice drill link — null for workbook grades
       practiceSessionID: a.id(),
       attempt: a.integer(),
+      // Instructor review tracking — set when an instructor opens this grade in the review drawer
+      reviewedAt: a.datetime(),
+      reviewedBy: a.string(),
       // Foreign keys
       unitID: a
         .id()
@@ -776,8 +845,16 @@ const rawSchemaDefinition = {
       status: PublishedStatus,
       code: a.string(),
       instructor: a.string(), // User ID of instructor
+      // Recurring weekly meeting times — powers "Next class" due-date suggestions
+      classSchedule: a.ref("ClassScheduleEntry").array(),
+      assignmentSlots: a.ref("AssignmentSlot").array(),
+      timezone: a.string(), // IANA timezone (e.g. "America/New_York") used to interpret classSchedule
       // Relationships
       assignments: a.hasMany("Assignment", ["sectionID"]),
+      // Gamification items scoped to this section (real FK, replaces sectionID-by-convention)
+      badges: a.hasMany("Badge", ["sectionID"]),
+      skills: a.hasMany("Skill", ["sectionID"]),
+      easterEggs: a.hasMany("EasterEgg", ["sectionID"]),
       // Dynamic group authorization - students and instructors can read
       // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
       readableGroups: a.string().array(),
@@ -803,6 +880,9 @@ const rawSchemaDefinition = {
       curveSettings: a.ref("CurveSettings").array(),
       // Instructor grade overrides — per-student per-unit
       gradeOverrides: a.json(), // { [studentId]: { [unitID]: { score: number, updatedAt: string } } }
+      // Per-student accommodations — extra time / due-date extensions applied across this section's assignments
+      // { [studentId]: { dueDateExtensionDays?: number, timeMultiplier?: number, note?: string, updatedAt: string } }
+      accommodations: a.json(),
       // Leaderboard
       leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
       leaderboardRebuiltAt: a.datetime(), // Timestamp of last successful leaderboard rebuild (debounce)
@@ -1781,6 +1861,7 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
+      timingPatterns: a.ref("TimingPattern").array(),
       // Document analysis
       autoAnalyzeDocuments: a.boolean(),
       documentAnalysisModel: a.string(),
@@ -2075,12 +2156,12 @@ const rawSchemaDefinition = {
         "PRACTICE_DRILL_ACCURACY_BONUS",
       ]),
       referenceId: a.string(),
-      cohortId: a.string(),
+      sectionID: a.string(),
       unitID: a.string(),
     })
     .secondaryIndexes((index) => [
       index("studentId").name("byStudent"),
-      index("cohortId").name("byCohort"),
+      index("sectionID").name("bySection"),
     ])
     .authorization((allow) => [
       allow.owner(),
@@ -2109,7 +2190,7 @@ const rawSchemaDefinition = {
           allow.group("Admins").to(["create", "read", "delete"]),
           allow.authenticated().to(["read"]),
         ]),
-      cohortId: a.string(),
+      sectionID: a.string(),
       studentName: a.string(),
       // XP & Level (computed from StudentXPLog by Lambda)
       totalXP: a.integer().default(0),
@@ -2158,7 +2239,7 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [
       index("studentId").name("byStudent"),
-      index("cohortId").name("byCohort"),
+      index("sectionID").name("bySection"),
     ])
     .authorization((allow) => [
       allow.owner(),
@@ -2411,10 +2492,12 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       active: a.boolean().default(true),
-      cohortId: a.string(),
+      sectionID: a.id(),
+      section: a.belongsTo("Section", ["sectionID"]),
       // Embedded discoveries (absorbed from EasterEggDiscovery)
       discoveries: a.ref("EasterEggDiscoveryEntry").array(),
     })
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -2445,11 +2528,12 @@ const rawSchemaDefinition = {
       description: a.string(),
       prerequisites: a.json(),
       xpReward: a.integer(),
-      cohortId: a.string(),
+      sectionID: a.id(),
+      section: a.belongsTo("Section", ["sectionID"]),
       unitIds: a.string().array(),
       minimumAccuracy: a.integer().default(70),
     })
-    .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -2477,7 +2561,7 @@ const rawSchemaDefinition = {
           allow.group("Admins").to(["create", "read", "delete"]),
           allow.authenticated().to(["read"]),
         ]),
-      cohortId: a
+      sectionID: a
         .string()
         .required()
         .authorization((allow) => [
@@ -2497,7 +2581,7 @@ const rawSchemaDefinition = {
       // Per-challenge recaps (generated at challenge resolution)
       recaps: a.ref("SquadRecapEntry").array(),
     })
-    .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -2516,7 +2600,7 @@ const rawSchemaDefinition = {
           allow.group("Admins").to(["create", "read", "delete"]),
           allow.authenticated().to(["read"]),
         ]),
-      cohortId: a
+      sectionID: a
         .string()
         .required()
         .authorization((allow) => [
@@ -2567,7 +2651,7 @@ const rawSchemaDefinition = {
       // Embedded contributions (absorbed from GroupChallengeContribution)
       contributions: a.ref("ChallengeContribution").array(),
     })
-    .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -2601,10 +2685,11 @@ const rawSchemaDefinition = {
       rarity: a.enum(["common", "uncommon", "rare", "epic", "legendary"]),
       category: a.string(),
       criteria: a.json(),
-      cohortId: a.string(),
+      sectionID: a.id(),
+      section: a.belongsTo("Section", ["sectionID"]),
       autoEvaluate: a.boolean().default(true),
     })
-    .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -2621,7 +2706,7 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      cohortId: a
+      sectionID: a
         .string()
         .required()
         .authorization((allow) => [
@@ -2659,7 +2744,7 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
     })
-    .secondaryIndexes((index) => [index("cohortId").name("byCohort")])
+    .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -3116,6 +3201,35 @@ const rawSchemaDefinition = {
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
+  // Instructor-initiated bulk enrollment — resolves each email to a Cognito user,
+  // adds them to the section's learner group, and creates their assignment copies.
+  addStudentsToSection: a
+    .mutation()
+    .arguments({
+      sectionId: a.id().required(),
+      emails: a.string().array().required(),
+    })
+    .returns(a.string())
+    .authorization((allow) => [
+      allow.group("Instructors"),
+      allow.group("Admins"),
+    ])
+    .handler(a.handler.function(sectionHandler)),
+
+  // Instructor-initiated removal — removes a student from the section's learner group.
+  removeStudentFromSection: a
+    .mutation()
+    .arguments({
+      sectionId: a.id().required(),
+      username: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization((allow) => [
+      allow.group("Instructors"),
+      allow.group("Admins"),
+    ])
+    .handler(a.handler.function(sectionHandler)),
+
   // Peer Review Mutations
   createPeerReviewRoom: a
     .mutation()
@@ -3204,7 +3318,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
       reason: a.string().required(),
       referenceId: a.string(),
-      cohortId: a.string(),
+      sectionID: a.string(),
       unitID: a.string(),
       accuracy: a.float(),
     })
@@ -3242,7 +3356,7 @@ const rawSchemaDefinition = {
   rebuildLeaderboard: a
     .mutation()
     .arguments({
-      cohortId: a.string().required(),
+      sectionID: a.string().required(),
     })
     .returns(a.json())
     .authorization((allow) => [allow.authenticated()])
@@ -3349,7 +3463,7 @@ const rawSchemaDefinition = {
     .mutation()
     .arguments({
       studentId: a.string().required(),
-      cohortId: a.string().required(),
+      sectionID: a.string().required(),
       xpContributed: a.integer().required(),
     })
     .returns(a.json())
@@ -3360,7 +3474,7 @@ const rawSchemaDefinition = {
     .mutation()
     .arguments({
       unitID: a.id().required(),
-      cohortId: a.string(),
+      sectionID: a.string(),
     })
     .returns(a.json())
     .authorization((allow) => [allow.authenticated()])
@@ -3382,7 +3496,7 @@ const rawSchemaDefinition = {
     .arguments({
       studentId: a.string().required(),
       unitId: a.string().required(),
-      cohortId: a.string(),
+      sectionID: a.string(),
     })
     .returns(a.json())
     .authorization((allow) => [allow.authenticated()])

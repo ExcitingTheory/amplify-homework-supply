@@ -281,3 +281,122 @@ export async function listSectionStudents(
     };
   }
 }
+
+// ============================================================================
+// Bulk Roster Enrollment (Instructor)
+// ============================================================================
+
+export interface AddStudentsToSectionResult {
+  success: boolean;
+  added?: string[];
+  alreadyEnrolled?: string[];
+  notFound?: string[];
+  error?: string;
+}
+
+/**
+ * Instructor-initiated bulk enrollment. Resolves each email to a Cognito user,
+ * adds them to the section's learner group, and creates their assignment copies.
+ * Wraps the `addStudentsToSection` Lambda mutation server-side.
+ */
+export async function addStudentsToSection(
+  sectionId: string,
+  emails: string[],
+): Promise<AddStudentsToSectionResult> {
+  if (!sectionId || sectionId.trim().length === 0) {
+    return { success: false, error: "Section is required" };
+  }
+
+  const cleaned = Array.from(
+    new Set(
+      (emails || [])
+        .map((e) => (e || "").trim().toLowerCase())
+        .filter((e) => e.length > 0),
+    ),
+  );
+
+  if (cleaned.length === 0) {
+    return { success: false, error: "At least one email is required" };
+  }
+
+  const client = getServerClient();
+
+  try {
+    const { data, errors } = await (
+      client as any
+    ).mutations.addStudentsToSection({
+      sectionId: sectionId.trim(),
+      emails: cleaned,
+    });
+
+    if (errors?.length) {
+      const errorMsg = errors[0]?.message || "Failed to enroll students";
+      console.error("[section action] addStudentsToSection errors:", errors);
+      return { success: false, error: errorMsg };
+    }
+
+    const result = typeof data === "string" ? JSON.parse(data) : data;
+    return {
+      success: true,
+      added: result?.added || [],
+      alreadyEnrolled: result?.alreadyEnrolled || [],
+      notFound: result?.notFound || [],
+    };
+  } catch (err: any) {
+    console.error("[section action] addStudentsToSection error:", err);
+    return {
+      success: false,
+      error: err?.message || "Failed to enroll students",
+    };
+  }
+}
+
+export interface RemoveStudentFromSectionResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Instructor-initiated removal — removes a student from the section's learner group.
+ * Wraps the `removeStudentFromSection` Lambda mutation server-side.
+ */
+export async function removeStudentFromSection(
+  sectionId: string,
+  username: string,
+): Promise<RemoveStudentFromSectionResult> {
+  if (!sectionId || sectionId.trim().length === 0) {
+    return { success: false, error: "Section is required" };
+  }
+  if (!username || username.trim().length === 0) {
+    return { success: false, error: "Student is required" };
+  }
+
+  const client = getServerClient();
+
+  try {
+    const { data, errors } = await (
+      client as any
+    ).mutations.removeStudentFromSection({
+      sectionId: sectionId.trim(),
+      username: username.trim(),
+    });
+
+    if (errors?.length) {
+      const errorMsg = errors[0]?.message || "Failed to remove student";
+      console.error(
+        "[section action] removeStudentFromSection errors:",
+        errors,
+      );
+      return { success: false, error: errorMsg };
+    }
+
+    void data;
+    return { success: true };
+  } catch (err: any) {
+    console.error("[section action] removeStudentFromSection error:", err);
+    return {
+      success: false,
+      error: err?.message || "Failed to remove student",
+    };
+  }
+}

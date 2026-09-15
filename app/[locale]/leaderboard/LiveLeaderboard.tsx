@@ -60,8 +60,8 @@ export function LiveLeaderboard({
 
   // Track leaderboard viewed once on mount
   useEffect(() => {
-    trackSquadLeaderboardViewed(mySquad?.cohortId || "");
-  }, [mySquad?.cohortId]);
+    trackSquadLeaderboardViewed(mySquad?.sectionID || "");
+  }, [mySquad?.sectionID]);
 
   useEffect(() => {
     getCurrentUser()
@@ -158,7 +158,7 @@ export function LiveLeaderboard({
   const handleModeChange = (_event: any, newMode: string | null) => {
     if (newMode) {
       setMode(newMode);
-      trackSquadLeaderboardModeChanged(mySquad?.cohortId || "", newMode);
+      trackSquadLeaderboardModeChanged(mySquad?.sectionID || "", newMode);
     }
   };
 

@@ -29,15 +29,15 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 // GraphQL Operations
 // ============================================================================
 
-const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!, $cohortId: String) {
-  listStudentProfiles(filter: { studentId: { eq: $studentId }, cohortId: { eq: $cohortId } }) {
-    items { id studentId cohortId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!, $sectionID: String) {
+  listStudentProfiles(filter: { studentId: { eq: $studentId }, sectionID: { eq: $sectionID } }) {
+    items { id studentId sectionID totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
 const GET_SECTION_PROGRESS = `query GetSectionProgress($studentId: String!, $sectionId: String!) {
   listSectionProgresses(filter: { studentId: { eq: $studentId }, sectionId: { eq: $sectionId } }) {
-    items { id studentId sectionId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt cohortId unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId sectionId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
   }
 }`;
 
@@ -67,9 +67,9 @@ const CREATE_NOTIFICATION = `mutation CreateNotification($input: CreateNotificat
   createNotification(input: $input) { id }
 }`;
 
-const LIST_ACTIVE_CHALLENGES_BY_COHORT = `query ListActiveChallenges($cohortId: String!) {
-  listGroupChallenges(filter: { cohortId: { eq: $cohortId }, active: { eq: true } }) {
-    items { id cohortId title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } _version }
+const LIST_ACTIVE_CHALLENGES_BY_SECTION = `query ListActiveChallenges($sectionID: String!) {
+  listGroupChallenges(filter: { sectionID: { eq: $sectionID }, active: { eq: true } }) {
+    items { id sectionID title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } _version }
   }
 }`;
 
@@ -159,7 +159,7 @@ async function grantChallengeBadgeToProfile(
   studentId: string,
   badgeType: string,
   challengeId: string,
-  cohortId: string,
+  sectionID: string,
 ): Promise<void> {
   const { data } = await (gqlClient as any).graphql({
     query: GET_STUDENT_PROFILE_FOR_REWARDS,
@@ -186,7 +186,7 @@ async function grantChallengeBadgeToProfile(
             badgeType,
             sourceId: `challenge-${challengeId}`,
             awardedAt: new Date().toISOString(),
-            cohortId,
+            sectionID,
           },
         ],
         _version: profile._version ?? 1,
@@ -276,7 +276,7 @@ interface XPRecord {
   xpAmount: number;
   reason: string;
   accuracy?: number;
-  cohortId?: string;
+  sectionID?: string;
   unitID?: string;
   referenceId?: string;
 }
@@ -296,7 +296,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
       xpAmount: parseInt(img.xpAmount?.N || "0", 10),
       reason: img.reason?.S || "",
       accuracy: img.accuracy?.N ? parseFloat(img.accuracy.N) : undefined,
-      cohortId: img.cohortId?.S || undefined,
+      sectionID: img.sectionID?.S || undefined,
       unitID: img.unitID?.S || undefined,
       referenceId: img.referenceId?.S || undefined,
     });
@@ -310,7 +310,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
     { records: XPRecord[]; totalDelta: number }
   >();
   for (const rec of xpRecords) {
-    const key = `${rec.studentId}|${rec.cohortId || ""}`;
+    const key = `${rec.studentId}|${rec.sectionID || ""}`;
     const existing = grouped.get(key) || { records: [], totalDelta: 0 };
     existing.records.push(rec);
     existing.totalDelta += rec.xpAmount;
@@ -322,13 +322,13 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
   for (const [, group] of grouped) {
     const { records, totalDelta } = group;
-    const { studentId, cohortId, unitID } = records[0];
+    const { studentId, sectionID, unitID } = records[0];
 
     try {
       // 1. Rollup: increment totalXP on StudentProfile
       const { data: profileData } = await (gqlClient as any).graphql({
         query: GET_STUDENT_PROFILE,
-        variables: { studentId, cohortId: cohortId || null },
+        variables: { studentId, sectionID: sectionID || null },
       });
       const profiles = profileData?.listStudentProfiles?.items || [];
       const profile = profiles[0];
@@ -517,11 +517,11 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         // 4. Update SectionProgress (per-student, per-section tracking)
         let sectionLevel = newLevel;
-        if (cohortId) {
+        if (sectionID) {
           try {
             const { data: spData } = await (gqlClient as any).graphql({
               query: GET_SECTION_PROGRESS,
-              variables: { studentId, sectionId: cohortId },
+              variables: { studentId, sectionId: sectionID },
             });
             const spItems = spData?.listSectionProgresses?.items || [];
             const sectionProgress = spItems[0];
@@ -650,7 +650,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 variables: {
                   input: {
                     studentId,
-                    sectionId: cohortId,
+                    sectionId: sectionID,
                     totalXP: totalDelta,
                     level: sectionLevel,
                     nailedItCount: nailedItDelta,
@@ -681,8 +681,8 @@ export const handler: DynamoDBStreamHandler = async (event) => {
           // (IAM credentials) can update challenge records.
           try {
             const { data: challengeData } = await (gqlClient as any).graphql({
-              query: LIST_ACTIVE_CHALLENGES_BY_COHORT,
-              variables: { cohortId },
+              query: LIST_ACTIVE_CHALLENGES_BY_SECTION,
+              variables: { sectionID },
             });
             const activeChallenges = (
               challengeData?.listGroupChallenges?.items || []
@@ -784,7 +784,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                           xpAmount: finalRewardXP,
                           reason: "SQUAD_CHALLENGE_BONUS",
                           referenceId: `challenge-${challenge.id}`,
-                          cohortId,
+                          sectionID,
                         },
                       },
                     });
@@ -820,7 +820,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                         contributorId,
                         challenge.rewardBadge,
                         challenge.id,
-                        cohortId,
+                        sectionID,
                       );
                     } catch (badgeErr) {
                       console.warn(
@@ -859,7 +859,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             }
           } catch (challengeErr) {
             console.warn(
-              `[xpStream] challenge rollup failed for cohort ${cohortId}:`,
+              `[xpStream] challenge rollup failed for cohort ${sectionID}:`,
               challengeErr,
             );
           }
@@ -871,7 +871,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         // AND skip scanning XP logs — all criteria data is in rollup fields
         badgeEntries.push({
           studentId,
-          cohortId: cohortId || null,
+          sectionID: sectionID || null,
           unitID: unitID || null,
           // Pre-fetched profile data
           profileId: profile.id,

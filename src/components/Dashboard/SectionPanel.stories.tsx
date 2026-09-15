@@ -6,7 +6,11 @@ import { SectionPanel } from "./SectionPanel";
 const meta: Meta<typeof SectionPanel> = {
   title: "📓 Workbook/Components/Section Panel",
   component: SectionPanel,
-  parameters: { layout: "padded" },
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+    layout: "padded",
+  },
   args: {
     onOpenDrill: fn(),
     onRequestGuidance: fn(),

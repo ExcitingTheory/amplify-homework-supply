@@ -5,7 +5,11 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof TimelineCard> = {
   title: "🎙️ Recording Studio/TimelineCard",
   component: TimelineCard,
-  parameters: { layout: "padded" },
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+    layout: "padded",
+  },
   decorators: [
     (Story) => (
       <div style={{ position: "relative", height: 120, width: "100%" }}>

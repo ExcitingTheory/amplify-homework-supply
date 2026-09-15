@@ -4,7 +4,7 @@ import { defineFunction } from "@aws-amplify/backend";
  * Leaderboard Stream Lambda
  *
  * Triggered by DynamoDB Streams on the StudentXPLog table.
- * On INSERT events, extracts the cohortId and triggers a debounced
+ * On INSERT events, extracts the sectionID and triggers a debounced
  * leaderboard rebuild via the gamification handler's rebuildLeaderboard mutation.
  *
  * This decouples leaderboard rebuilds from the XP award hot path,

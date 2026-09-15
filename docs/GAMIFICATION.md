@@ -125,7 +125,7 @@ sequenceDiagram
     participant DB as DynamoDB
 
     S->>UC: Complete unit (all blocks graded)
-    UC->>L: evaluateSkillsForUnit(studentId, unitId, cohortId)
+    UC->>L: evaluateSkillsForUnit(studentId, unitId, sectionID)
     L->>DB: Load skills where unitIds contains unitId
     L->>DB: Load student grades for those units
     L->>L: Check accuracy >= minimumAccuracy (default 70%)

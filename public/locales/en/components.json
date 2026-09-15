@@ -162,7 +162,36 @@
     "rubyTagsStep3": "3. Continue selecting pairs until both fields are empty",
     "rubyTagsStep4": "4. Click Save to apply the ruby tags",
     "rubyTagsTitle": "How to create ruby tags:",
-    "save": "Save"
+    "save": "Save",
+    "noRubyTags": "No ruby tags yet",
+    "saveRubyTags": "Save ruby tags"
+  },
+  "chatPanel": {
+    "defaultTitle": "Chat",
+    "topicsLabel": "Topics",
+    "backButton": "Back",
+    "onlineCount": "{count} online"
+  },
+  "threadView": {
+    "emptyState": "No messages yet. Start the conversation!",
+    "replyCount": {
+      "singular": "reply",
+      "plural": "replies"
+    },
+    "typingIndicator": "{names} {count, plural, one {is} other {are}} typing...",
+    "edited": "(edited)",
+    "justNow": "just now",
+    "minutesAgo": "{minutes}m ago",
+    "hoursAgo": "{hours}h ago"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "Type a message... (@kai for AI)",
+    "replyingTo": "Replying to {name}"
+  },
+  "topicList": {
+    "header": "Topics",
+    "newTopicPlaceholder": "#new-topic",
+    "emptyState": "No topics yet. Create one to start chatting."
   },
   "documentSourceBadge": {
     "pagePrefix": "Page",
@@ -641,5 +670,116 @@
     "cancel": "Cancel",
     "saveConversation": "Save Conversation",
     "defaultTitle": "Generate Conversation"
+  },
+  "aiAgentConfig": {
+    "sageModel": "Sage Model",
+    "behaviorTuning": "Behavior Tuning",
+    "kaiTemperatureLabel": "Kai Temperature:",
+    "sageTemperatureLabel": "Sage Temperature:",
+    "kaiMaxTokensLabel": "Kai Max Tokens",
+    "sageMaxTokensLabel": "Sage Max Tokens",
+    "maxAgentStepsLabel": "Max Agent Steps",
+    "maxAgentStepsHint": "Maximum tool-calling rounds per conversation turn",
+    "searchTuning": "Search Tuning",
+    "similarityThresholdLabel": "Similarity Threshold:",
+    "defaultResultLimitLabel": "Default Result Limit",
+    "conversationMemory": "Conversation Memory",
+    "enableConversationMemory": "Enable conversation memory",
+    "summarizationModelLabel": "Summarization Model",
+    "tokenBudgets": "Token Budgets",
+    "tokenBudgetsDescription": "Control how many tokens are allocated to each part of an agent turn. Lower budgets reduce cost; higher budgets allow richer context.",
+    "enforceTokenBudget": "Enforce token budgets",
+    "enforceTokenBudgetNote": "When enabled, the agent will truncate system prompts and tool results to their budget limits, and abort multi-step turns that exceed the total turn budget.",
+    "systemPromptBudgetLabel": "System Prompt Budget",
+    "systemPromptBudgetHint": "Max tokens for Tier 1 context in system prompt (default: 2000)",
+    "toolResultBudgetLabel": "Tool Result Budget",
+    "toolResultBudgetHint": "Max tokens per tool result returned to model (default: 4000)",
+    "totalTurnBudgetLabel": "Total Turn Budget",
+    "totalTurnBudgetHint": "Max total tokens consumed per agent turn across all steps (default: 16000)",
+    "perPersonaOverrides": "Per-Persona Overrides",
+    "kaiSystemPromptLabel": "Kai System Prompt",
+    "tokensUnit": "tokens",
+    "useDefaultPlaceholder": "Use default",
+    "sageSystemPromptLabel": "Sage System Prompt",
+    "kaiToolResultLabel": "Kai Tool Result",
+    "sageToolResultLabel": "Sage Tool Result"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "Customize Avatar"
+  },
+  "botCustomizer": {
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "sky": "Sky",
+      "mint": "Mint",
+      "lavender": "Lavender",
+      "peach": "Peach",
+      "rose": "Rose",
+      "gold": "Gold"
+    },
+    "styles": {
+      "simple": "Simple",
+      "detailed": "Detailed",
+      "toon": "Toon"
+    },
+    "lockedMessage": "Earn the Bot Whisperer I badge to customize your AI assistant.",
+    "previewTitle": "Your AI Assistant",
+    "styleLabel": "Style",
+    "backgroundColorLabel": "Background Color"
+  },
+  "cadenceCopyDialog": {
+    "copyFromClass": "Copy from class",
+    "copyToClasses": "Copy to classes",
+    "firstMeetingDate": "First meeting date",
+    "weeksLabel": "Weeks",
+    "weeklyMeetingLabel": "Weekly meeting",
+    "weeklyMeetingHint": "1 = first, 2 = second, 0 = last",
+    "loadingCadence": "Loading source cadence...",
+    "noAssignments": "The source class has no dated assignments to copy.",
+    "missingMetadata": "source assignment missing cadence metadata and cannot be copied.",
+    "close": "Close",
+    "copyCadence": "Copy cadence",
+    "copying": "Copying..."
+  },
+  "amblifyAuthenticator": {
+    "emailPhoneOptions": "Email or phone number"
+  },
+  "assignmentCard": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "needsWork": "Needs work",
+    "noDueDate": "No due date",
+    "overdue": "Overdue",
+    "dueSoon": "Due soon",
+    "due": "Due",
+    "locked": "Locked",
+    "opensAt": "Opens {date}",
+    "late": "Late",
+    "dropped": "Dropped by instructor",
+    "difficulty": "Difficulty: {level}",
+    "review": "Review",
+    "startWorkbook": "Start",
+    "practice": "Practice",
+    "discuss": "Discuss",
+    "joinReview": "Join Review",
+    "requestGuidance": "Request Guidance",
+    "requestGuidanceTooltip": "Create a room and share the code with your instructor to get personal guidance"
+  },
+  "assignmentConfiguration": {
+    "timerQuestion": "Add Timer Question",
+    "timerDescription": "Timer configuration for timed assignments",
+    "retryToggle": "Allow student retries",
+    "publishFirstAlert": "Note: Must publish unit first to create assignments",
+    "meetingCalendar": "Due date",
+    "meetingDayHint": "Dots mark section meeting days.",
+    "tomorrow": "Tomorrow",
+    "nextClass": "Next class",
+    "friday": "Next Friday",
+    "createSectionLabel": "Create new section",
+    "undoSnackbar": "Assignments created. {count} assignment{plural} created."
   }
 }

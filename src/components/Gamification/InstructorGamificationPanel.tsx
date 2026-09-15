@@ -1,6 +1,6 @@
 /**
  * InstructorGamificationPanel — Admin UI for managing gamification features:
- * - Section selector (scopes all data by cohortId)
+ * - Section selector (scopes all data by sectionID)
  * - Skill tree editor (multi-field with unit linking)
  * - Campaign editor (narrative setting, stakes, chapter text)
  * - Squad management (create/edit squads, assign students)
@@ -171,7 +171,7 @@ export interface InstructorGamificationPanelProps {
   onDeleteCampaign?: (campaignId: string) => void
   /** Generate campaign narrative via AI from a title prompt */
   onGenerateCampaign?: (title: string) => Promise<{ setting: string } | null>
-  onCreateSquad?: (name: string, cohortId: string) => void
+  onCreateSquad?: (name: string, sectionID: string) => void
   onDeleteSquad?: (squadId: string) => void
   onAddEasterEgg?: (egg: EasterEggFormData) => void
   onDeleteEasterEgg?: (eggId: string) => void
@@ -455,7 +455,7 @@ export function InstructorGamificationPanel({
                 onPrerequisiteChange={onPrerequisiteChange}
                 editable={!!onPrerequisiteChange}
                 height={Math.max(300, skills.length * 60)}
-                cohortId={selectedSectionId || undefined}
+                sectionID={selectedSectionId || undefined}
                 canGenerate={!!onGenerateSkillTree}
               />
             </Box>

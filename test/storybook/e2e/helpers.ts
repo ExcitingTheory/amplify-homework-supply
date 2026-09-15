@@ -5,27 +5,20 @@
  *  - Opening/resetting the onboarding panel
  *  - Selecting a persona
  *  - Walking through a task's SpotlightOverlay tour
- *  - Triggering task completion (data-tour click or localStorage injection)
+ *  - Triggering task completion through real browser interactions
  *  - Asserting per-task and overall progress state
  */
 
 import { Page, expect } from "@playwright/test";
+import type { OnboardingTaskWithCriteria } from "../../../.storybook/code/onboarding-tasks";
+import { SPOTLIGHT_CONFIGURATIONS } from "../../../.storybook/code/spotlight-configs";
 
-// ─── Types (inline to avoid importing browser-side code) ────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────
 
 export type Persona = "instructor" | "learner" | "translator";
 
-/** Minimal task shape needed by the helpers. Matches OnboardingTaskWithCriteria. */
-export interface TaskSpec {
-  id: string;
-  title: string;
-  completionCriteria?: {
-    tutorialStoryId?: string;
-    quizStoryId?: string;
-    completionSequence?: string[];
-    customCheck?: () => boolean;
-  };
-}
+/** Re-export the real task shape so specs can't drift from onboarding-tasks.ts. */
+export type TaskSpec = OnboardingTaskWithCriteria;
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -101,9 +94,9 @@ export async function selectPersona(
     .getByRole("button", { name: "Change" });
   if (await changeBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
     await changeBtn.click();
-    await expect(
-      page.getByText(/Select your role/).first(),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/Select your role/).first()).toBeVisible({
+      timeout: 5_000,
+    });
   }
 
   // The persona selection shows cards with the label + "Click to start onboarding"
@@ -144,49 +137,42 @@ export async function walkTaskTour(
 
   await taskCard.click();
 
-  // ── 2. Walk through every spotlight step ───────────────────────────────────
-  await walkAllSpotlightSteps(page);
-
-  // ── 3. Navigate to the task's story and trigger completion ─────────────────
-  const sequence = task.completionCriteria?.completionSequence;
-  const storyId = task.completionCriteria?.tutorialStoryId;
-
-  if (sequence && sequence.length > 0) {
-    // Ensure persona is persisted to localStorage before navigating
-    await page.evaluate(
-      ({ persona: p, key }) => {
-        const data = JSON.parse(localStorage.getItem(key) || "{}");
-        if (!data.currentPersona) {
-          data.currentPersona = p;
-          data.currentMode = data.currentMode || "tutorial";
-          data.completedTasks = data.completedTasks || [];
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      },
-      { persona, key: STORAGE_KEY },
+  // "getting-started-storybook-basics" steps target real manager-frame elements
+  // with no manual Next button (advancement === completion action itself), so
+  // it can't go through the generic spotlight-walk-then-navigate flow below.
+  if (task.id === "getting-started-storybook-basics") {
+    await performStorybookBasicsAction(page);
+    await openOnboardingPanel(page);
+    const updatedTaskCard = page
+      .locator('[data-testid="task-item"]')
+      .filter({ hasText: task.title });
+    await expect(updatedTaskCard.locator(`text=${task.title}`)).toHaveCSS(
+      "text-decoration",
+      /line-through/,
+      { timeout: 10_000 },
     );
-
-    if (storyId) {
-      await page.goto(`/?path=/story/${storyId}`, {
-        waitUntil: "domcontentloaded",
-        timeout: 60_000,
-      });
-      await page.waitForSelector("#storybook-preview-iframe", {
-        timeout: 15_000,
-      });
-      // Wait for story render + task-completion listener init (requestIdleCallback)
-      await expect(
-        page
-          .frameLocator("#storybook-preview-iframe")
-          .locator(`[data-tour="${sequence[0]}"]`)
-          .first(),
-      ).toBeAttached({ timeout: 15_000 });
-    }
-
-    await clickCompletionSequence(page, sequence);
+    await expect(updatedTaskCard.locator('input[type="checkbox"]')).toBeChecked(
+      { timeout: 5_000 },
+    );
+    await expect(
+      page.getByText(
+        new RegExp(`${expectedCompleted} of \\d+ tasks completed`),
+      ),
+    ).toBeVisible({ timeout: 8_000 });
+    return;
   }
 
-  // ── 4. Return to onboarding panel and verify ──────────────────────────────
+  // ── 2. Interleave manual "Next" clicks with real completion clicks ─────────
+  // Steps with a real target (per SpotlightOverlay's own design) advance ONLY
+  // by clicking that real element in the app — they render no manual button.
+  // The previous version of this helper walked every step via a manual
+  // button first and only clicked completionSequence elements afterward,
+  // which meant it never actually worked for any task with a targeted step
+  // (i.e. almost all of them) — it just silently timed out looking for a
+  // button that was never there by design.
+  await walkSpotlightInterleaved(page, task);
+
+  // ── 3. Return to onboarding panel and verify ──────────────────────────────
   await openOnboardingPanel(page);
 
   const updatedTaskCard = page
@@ -209,6 +195,70 @@ export async function walkTaskTour(
 }
 
 // ─── Completion Helpers ──────────────────────────────────────────────────────
+
+/**
+ * Click the given [data-tour] element in a way that's safe for large
+ * container elements (Dialogs, forms). Clicking the center of a MUI Dialog's
+ * root can land on the backdrop (which sits behind/around the visible Paper)
+ * and silently close the dialog via onClose instead of registering a real
+ * interaction. If the element itself isn't a native interactive control,
+ * click its first interactive descendant instead (a real user would click
+ * into the first field, not the dialog's empty backdrop).
+ */
+async function clickTourTarget(
+  preview: ReturnType<Page["frameLocator"]>,
+  selector: string,
+): Promise<void> {
+  // Retry the whole locate-and-click a few times — a mock-data list re-render
+  // (e.g. a newly created section being inserted) can detach the exact node
+  // between locating it and the scroll/click actions.
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const target = preview.locator(selector).first();
+      await expect(target).toBeAttached({ timeout: 15_000 });
+
+      const tag = await target.evaluate((el) => el.tagName.toLowerCase());
+      const isNativelyInteractive = [
+        "input",
+        "textarea",
+        "select",
+        "button",
+        "a",
+      ].includes(tag);
+
+      const clickable = isNativelyInteractive
+        ? target
+        : target
+            .locator(
+              'input, textarea, button, [role="combobox"], [role="button"]',
+            )
+            .first();
+
+      const finalTarget = (await clickable
+        .isVisible({ timeout: 2_000 })
+        .catch(() => false))
+        ? clickable
+        : target;
+
+      await finalTarget.scrollIntoViewIfNeeded();
+      // The spotlight tooltip overlay can visually sit above a modal Dialog
+      // that just opened (z-index race), intercepting pointer events even
+      // though the target is otherwise visible/enabled — force the click
+      // since we've already confirmed this is the correct interactive
+      // descendant of the real data-tour target.
+      await finalTarget
+        .click({ force: true, timeout: 5_000 })
+        .catch(async () => {
+          await finalTarget.click({ timeout: 15_000 });
+        });
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
 
 /**
  * Walk through ALL spotlight steps by clicking the primary action button:
@@ -235,7 +285,7 @@ async function walkAllSpotlightSteps(page: Page): Promise<void> {
 
     // Click the primary button (Start / Next / Done)
     const primaryBtn = tooltip.locator(
-      'button:has-text("Start"), button:has-text("Next"), button:has-text("Done")',
+      'button:has-text("Start"), button:has-text("Continue"), button:has-text("Next"), button:has-text("Done")',
     );
     await expect(primaryBtn).toBeEnabled({ timeout: 10_000 });
     await primaryBtn.click();
@@ -246,8 +296,99 @@ async function walkAllSpotlightSteps(page: Page): Promise<void> {
 }
 
 /**
+ * Extract the data-tour value from a targetSelector like
+ * '[data-tour="join-code"], form' or '[data-tour="x"]'.
+ */
+function extractDataTourValue(selector?: string): string | null {
+  if (!selector) return null;
+  const match = selector.match(/\[data-tour="([^"]+)"\]/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Walk a tutorial-mode spotlight tour to real completion, one step at a time,
+ * driven directly by the REAL spotlight step definitions (not a separately
+ * tracked completionSequence index, which can desync from what's actually
+ * on screen at any given step):
+ *  - info-only steps (no real target): click the manual Start/Next/Done button
+ *  - target-based steps: click the REAL element in the app (the click both
+ *    advances the tour, per SpotlightOverlay's design, and satisfies the
+ *    task's completionCriteria)
+ *
+ * Clicking the task card already auto-navigates the preview iframe to the
+ * task's tutorialStoryId (see OnboardingPanel.handleTaskClick), so this never
+ * needs to `page.goto()` itself.
+ */
+async function walkSpotlightInterleaved(
+  page: Page,
+  task: TaskSpec,
+): Promise<void> {
+  const tooltip = page.locator('[data-testid="spotlight-tooltip"]');
+  const preview = page.frameLocator("#storybook-preview-iframe");
+  const requiredSequence = task.completionCriteria?.requiredSequence ?? [];
+
+  const config = SPOTLIGHT_CONFIGURATIONS.find((c) => c.taskId === task.id);
+  const steps = config?.tutorialSteps ?? [];
+
+  await expect(tooltip.locator("text=/Step \\d+ of \\d+/")).toBeVisible({
+    timeout: 10_000,
+  });
+
+  for (const step of steps) {
+    if (!(await tooltip.isVisible().catch(() => false))) break;
+
+    if (!step.targetSelector) {
+      // Info-only step (or a manager-frame target we don't drive here) —
+      // advance via the manual button.
+      const manualBtn = tooltip.locator(
+        'button:has-text("Start"), button:has-text("Continue"), button:has-text("Next"), button:has-text("Done")',
+      );
+      await expect(manualBtn).toBeEnabled({ timeout: 10_000 });
+      await manualBtn.click();
+      continue;
+    }
+
+    if (
+      step.targetSelector.includes('[data-tour="shortcuts-demo"]') &&
+      requiredSequence.includes("shortcut-performed")
+    ) {
+      // Clicking the demo area alone only advances the tour — the task also
+      // requires actually performing a real shortcut.
+      await performKeyboardShortcut(page);
+      continue;
+    }
+
+    // Only auto-fill/submit a dialog if it was ALREADY open before this
+    // click — otherwise the click itself is what OPENS the dialog (e.g. a
+    // "Create Section" button), and the dialog's own form deserves its own
+    // step/click before being filled and submitted.
+    const dialogWasOpen = await preview
+      .locator('[role="dialog"]')
+      .first()
+      .isVisible()
+      .catch(() => false);
+    if (step.targetFrame === "manager") {
+      await expect(page.locator(step.targetSelector).first()).toBeVisible({
+        timeout: 15_000,
+      });
+      await page.locator(step.targetSelector).first().click();
+    } else {
+      await clickTourTarget(preview, step.targetSelector);
+    }
+    if (dialogWasOpen) {
+      await fillAnyOpenDialogFields(page);
+    }
+  }
+
+  await expect(tooltip).not.toBeVisible({ timeout: 5_000 });
+}
+
+/**
  * Click each data-tour element in the completionSequence inside the preview
  * iframe using real Playwright clicks (scrolls into view, fires all event phases).
+ * After each click, fills any newly-visible required dialog fields so a step
+ * later in the sequence (e.g. a chip revealed only after real form submission)
+ * isn't blocked by a modal that never closes.
  */
 async function clickCompletionSequence(
   page: Page,
@@ -256,11 +397,91 @@ async function clickCompletionSequence(
   const preview = page.frameLocator("#storybook-preview-iframe");
 
   for (const tourId of sequence) {
-    const target = preview.locator(`[data-tour="${tourId}"]`).first();
-    await expect(target).toBeAttached({ timeout: 15_000 });
-    await target.scrollIntoViewIfNeeded();
-    await target.click();
+    await clickTourTarget(preview, `[data-tour="${tourId}"]`);
+    await fillAnyOpenDialogFields(page);
   }
+}
+
+/**
+ * Fill any visible, empty, required inputs/selects in the preview iframe with
+ * placeholder values and submit the enclosing form. Generic on purpose — new
+ * dialogs added to completionSequence flows shouldn't need bespoke test code.
+ */
+async function fillAnyOpenDialogFields(page: Page): Promise<void> {
+  const preview = page.frameLocator("#storybook-preview-iframe");
+
+  const inputs = preview.locator("input[required], textarea[required]");
+  const inputCount = await inputs.count().catch(() => 0);
+  for (let i = 0; i < inputCount; i++) {
+    const input = inputs.nth(i);
+    if (!(await input.isVisible().catch(() => false))) continue;
+    const value = await input.inputValue().catch(() => "");
+    if (value) continue;
+    const type = (await input.getAttribute("type")) || "text";
+    if (type === "datetime-local") await input.fill("2026-12-31T23:59");
+    else if (type === "date") await input.fill("2026-12-31");
+    else await input.fill("Automated test value");
+  }
+
+  // MUI <Select> renders a clickable div[role="combobox"] rather than a native
+  // <select> — open it and pick the first option if nothing is selected yet.
+  const selects = preview.locator('[role="combobox"]');
+  const selectCount = await selects.count().catch(() => 0);
+  for (let i = 0; i < selectCount; i++) {
+    const select = selects.nth(i);
+    if (!(await select.isVisible().catch(() => false))) continue;
+    const text = (await select.textContent())?.trim();
+    if (text) continue;
+    await select.click();
+    const option = page.locator('li[role="option"]').first();
+    await option.waitFor({ state: "visible", timeout: 3_000 }).catch(() => {});
+    if (await option.isVisible().catch(() => false)) await option.click();
+  }
+
+  const submit = preview.locator('button[type="submit"]:visible').first();
+  if (await submit.isVisible().catch(() => false)) {
+    await submit.click();
+    // Let the resulting mock-data update (e.g. a new section/list item)
+    // settle before the caller clicks the next target — otherwise a
+    // React re-render can detach an element between locating and clicking it.
+    const dialog = preview.locator('[role="dialog"]').first();
+    await dialog.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+    await preview
+      .locator("body")
+      .waitFor({ state: "attached" })
+      .catch(() => {});
+  }
+}
+
+/**
+ * Perform a real keyboard shortcut (Bold: Ctrl/Cmd+B) inside the
+ * KeyboardShortcutTrainer demo to satisfy `requiredSequence: ["shortcut-performed"]`.
+ * Clicking the demo area alone deliberately does NOT complete these tasks —
+ * a real key combo must be pressed (see KeyboardShortcutTrainer.tsx).
+ */
+async function performKeyboardShortcut(page: Page): Promise<void> {
+  const preview = page.frameLocator("#storybook-preview-iframe");
+  const demo = preview.locator('[data-tour="shortcuts-demo"]').first();
+  await expect(demo).toBeAttached({ timeout: 15_000 });
+  await demo.click();
+  await page.keyboard.press("Control+b");
+}
+
+/**
+ * Click the sidebar story tree and the toolbar in the manager frame to
+ * satisfy the "getting-started-storybook-basics" task's completion listener
+ * (registered in manager.tsx, not the preview-iframe DOM listener).
+ *
+ * Clicks the toolbar's top-left corner (padding, not a control) — clicking
+ * its center previously landed on the viewport-size control and silently
+ * switched the preview to a 320px mobile viewport for the rest of the test.
+ */
+async function performStorybookBasicsAction(page: Page): Promise<void> {
+  await page.locator("#storybook-explorer-tree").click();
+  await page
+    .locator('[role="toolbar"]')
+    .first()
+    .click({ position: { x: 4, y: 4 } });
 }
 
 // ─── Mode Switching ──────────────────────────────────────────────────────────
@@ -325,42 +546,24 @@ export async function walkQuizTaskTour(
   // ── 2. Walk through quiz spotlight steps (typically 1 step) ────────────────
   await walkAllSpotlightSteps(page);
 
+  if (task.id === "getting-started-storybook-basics") {
+    await performStorybookBasicsAction(page);
+  }
+
   // ── 3. Navigate to task story and trigger completion via real clicks ────────
-  const sequence = task.completionCriteria?.completionSequence;
-  const storyId =
-    task.completionCriteria?.quizStoryId ||
-    task.completionCriteria?.tutorialStoryId;
+  const sequence = task.completionCriteria?.completionSequence ?? [];
+  const requiredSequence = task.completionCriteria?.requiredSequence ?? [];
+  const preview = page.frameLocator("#storybook-preview-iframe");
 
-  if (sequence && sequence.length > 0 && storyId) {
-    // Ensure persona is persisted before navigating
-    await page.evaluate(
-      ({ persona: p, key }) => {
-        const data = JSON.parse(localStorage.getItem(key) || "{}");
-        if (!data.currentPersona) {
-          data.currentPersona = p;
-          data.currentMode = "quiz";
-          data.completedTasks = data.completedTasks || [];
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      },
-      { persona, key: STORAGE_KEY },
-    );
-
-    await page.goto(`/?path=/story/${storyId}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000,
-    });
-    await page.waitForSelector("#storybook-preview-iframe", {
-      timeout: 15_000,
-    });
-    await expect(
-      page
-        .frameLocator("#storybook-preview-iframe")
-        .locator(`[data-tour="${sequence[0]}"]`)
-        .first(),
-    ).toBeAttached({ timeout: 15_000 });
-
+  // Clicking the task card already performs the app's real mode-aware story
+  // navigation. Do not write onboarding state or call page.goto here: the
+  // browser must exercise the same route selected by a human user.
+  if (sequence.length > 0) {
+    const firstTarget = preview.locator(`[data-tour="${sequence[0]}"]`).first();
+    await expect(firstTarget).toBeAttached({ timeout: 15_000 });
     await clickCompletionSequence(page, sequence);
+  } else if (requiredSequence.includes("shortcut-performed")) {
+    await performKeyboardShortcut(page);
   }
 
   // ── 4. Return to onboarding panel and verify ──────────────────────────────

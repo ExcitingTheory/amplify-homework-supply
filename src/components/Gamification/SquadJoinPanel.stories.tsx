@@ -7,6 +7,8 @@ const meta: Meta<typeof SquadJoinPanel> = {
   title: "🏆 Gamification/Squads & Teams/Squad Join Panel",
   component: SquadJoinPanel,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "padded",
   },
 };

@@ -1,15 +1,23 @@
 /**
  * Cognito Group Management Utility
- * 
+ *
  * Manages dynamic section-based Cognito groups for fine-grained authorization.
  * Pattern: section-{sectionId}-{role} (e.g., section-abc123-instructors)
- * 
+ *
  * Groups are used in Data model authorization:
  * - allow.field('sectionID').group('section-{id}-instructors').to(['read'])
  * - allow.field('sectionID').group('section-{id}-learners').to(['read'])
  */
 
-import { CognitoIdentityProviderClient, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand, CreateGroupCommand, DeleteGroupCommand, ListUsersInGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
+import {
+  CognitoIdentityProviderClient,
+  AdminAddUserToGroupCommand,
+  AdminRemoveUserFromGroupCommand,
+  CreateGroupCommand,
+  DeleteGroupCommand,
+  ListUsersInGroupCommand,
+} from "@aws-sdk/client-cognito-identity-provider";
+import { ListUsersCommand } from "@aws-sdk/client-cognito-identity-provider";
 
 export class GroupManager {
   private cognitoClient: CognitoIdentityProviderClient;
@@ -17,7 +25,7 @@ export class GroupManager {
 
   constructor(userPoolId: string, region: string) {
     if (!userPoolId) {
-      throw new Error('GroupManager requires userPoolId parameter');
+      throw new Error("GroupManager requires userPoolId parameter");
     }
     this.userPoolId = userPoolId;
     this.cognitoClient = new CognitoIdentityProviderClient({ region });
@@ -28,19 +36,24 @@ export class GroupManager {
    * @param sectionId - Section ID
    * @param sectionName - Section name (for description)
    */
-  async createInstructorGroup(sectionId: string, sectionName: string): Promise<void> {
+  async createInstructorGroup(
+    sectionId: string,
+    sectionName: string,
+  ): Promise<void> {
     const groupName = this.getInstructorGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new CreateGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Description: `Instructors for section: ${sectionName}`,
-        Precedence: 10, // Higher precedence = stronger permissions
-      }));
+      await this.cognitoClient.send(
+        new CreateGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Description: `Instructors for section: ${sectionName}`,
+          Precedence: 10, // Higher precedence = stronger permissions
+        }),
+      );
       console.log(`[GroupManager] Created group: ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'GroupExistsException') {
+      if (error.name === "GroupExistsException") {
         console.log(`[GroupManager] Group already exists: ${groupName}`);
         return;
       }
@@ -53,19 +66,24 @@ export class GroupManager {
    * @param sectionId - Section ID
    * @param sectionName - Section name (for description)
    */
-  async createLearnerGroup(sectionId: string, sectionName: string): Promise<void> {
+  async createLearnerGroup(
+    sectionId: string,
+    sectionName: string,
+  ): Promise<void> {
     const groupName = this.getLearnerGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new CreateGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Description: `Learners in section: ${sectionName}`,
-        Precedence: 5, // Lower precedence than instructors
-      }));
+      await this.cognitoClient.send(
+        new CreateGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Description: `Learners in section: ${sectionName}`,
+          Precedence: 5, // Lower precedence than instructors
+        }),
+      );
       console.log(`[GroupManager] Created group: ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'GroupExistsException') {
+      if (error.name === "GroupExistsException") {
         console.log(`[GroupManager] Group already exists: ${groupName}`);
         return;
       }
@@ -80,16 +98,18 @@ export class GroupManager {
    */
   async addInstructor(username: string, sectionId: string): Promise<void> {
     const groupName = this.getInstructorGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new AdminAddUserToGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminAddUserToGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Added ${username} to ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;
@@ -103,16 +123,18 @@ export class GroupManager {
    */
   async addLearner(username: string, sectionId: string): Promise<void> {
     const groupName = this.getLearnerGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new AdminAddUserToGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminAddUserToGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Added ${username} to ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;
@@ -126,16 +148,18 @@ export class GroupManager {
    */
   async removeInstructor(username: string, sectionId: string): Promise<void> {
     const groupName = this.getInstructorGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new AdminRemoveUserFromGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminRemoveUserFromGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Removed ${username} from ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;
@@ -149,16 +173,18 @@ export class GroupManager {
    */
   async removeLearner(username: string, sectionId: string): Promise<void> {
     const groupName = this.getLearnerGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new AdminRemoveUserFromGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminRemoveUserFromGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Removed ${username} from ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;
@@ -172,27 +198,31 @@ export class GroupManager {
   async deleteGroups(sectionId: string): Promise<void> {
     const instructorGroup = this.getInstructorGroupName(sectionId);
     const learnerGroup = this.getLearnerGroupName(sectionId);
-    
+
     try {
-      await this.cognitoClient.send(new DeleteGroupCommand({
-        GroupName: instructorGroup,
-        UserPoolId: this.userPoolId,
-      }));
+      await this.cognitoClient.send(
+        new DeleteGroupCommand({
+          GroupName: instructorGroup,
+          UserPoolId: this.userPoolId,
+        }),
+      );
       console.log(`[GroupManager] Deleted group: ${instructorGroup}`);
     } catch (error: any) {
-      if (error.name !== 'GroupNotFoundException') {
+      if (error.name !== "GroupNotFoundException") {
         throw error;
       }
     }
-    
+
     try {
-      await this.cognitoClient.send(new DeleteGroupCommand({
-        GroupName: learnerGroup,
-        UserPoolId: this.userPoolId,
-      }));
+      await this.cognitoClient.send(
+        new DeleteGroupCommand({
+          GroupName: learnerGroup,
+          UserPoolId: this.userPoolId,
+        }),
+      );
       console.log(`[GroupManager] Deleted group: ${learnerGroup}`);
     } catch (error: any) {
-      if (error.name !== 'GroupNotFoundException') {
+      if (error.name !== "GroupNotFoundException") {
         throw error;
       }
     }
@@ -205,16 +235,21 @@ export class GroupManager {
    */
   async listLearnersInSection(sectionId: string): Promise<any[]> {
     const groupName = this.getLearnerGroupName(sectionId);
-    
+
     try {
-      const response = await this.cognitoClient.send(new ListUsersInGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-      }));
-      
+      const response = await this.cognitoClient.send(
+        new ListUsersInGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+        }),
+      );
+
       return response.Users || [];
     } catch (error: any) {
-      if (error.name === 'ResourceNotFoundException' || error.name === 'GroupNotFoundException') {
+      if (
+        error.name === "ResourceNotFoundException" ||
+        error.name === "GroupNotFoundException"
+      ) {
         console.log(`[GroupManager] Group not found: ${groupName}`);
         return [];
       }
@@ -238,9 +273,42 @@ export class GroupManager {
     return `section-${sectionId}-learners`;
   }
 
-  // ====================================================================
-  // Peer Review Groups
-  // ====================================================================
+  /**
+   * Resolve a Cognito username from an email address.
+   * Returns the Username of the first matching user, or null if none found.
+   */
+  async findUserByEmail(email: string): Promise<string | null> {
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) return null;
+
+    try {
+      const response = await this.cognitoClient.send(
+        new ListUsersCommand({
+          UserPoolId: this.userPoolId,
+          Filter: `email = "${normalized}"`,
+          Limit: 1,
+        }),
+      );
+      return response.Users?.[0]?.Username || null;
+    } catch (error) {
+      console.error(
+        `[GroupManager] findUserByEmail failed for ${normalized}:`,
+        error,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Check whether a user is already a learner in a section.
+   */
+  async isLearnerInSection(
+    username: string,
+    sectionId: string,
+  ): Promise<boolean> {
+    const learners = await this.listLearnersInSection(sectionId);
+    return learners.some((u: any) => u.Username === username);
+  }
 
   /**
    * Create a Cognito group for peer review room participants.
@@ -250,16 +318,20 @@ export class GroupManager {
     const groupName = `review-${roomId}-peers`;
 
     try {
-      await this.cognitoClient.send(new CreateGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Description: `Peer reviewers for room: ${roomId}`,
-        Precedence: 3,
-      }));
+      await this.cognitoClient.send(
+        new CreateGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Description: `Peer reviewers for room: ${roomId}`,
+          Precedence: 3,
+        }),
+      );
       console.log(`[GroupManager] Created peer review group: ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'GroupExistsException') {
-        console.log(`[GroupManager] Peer review group already exists: ${groupName}`);
+      if (error.name === "GroupExistsException") {
+        console.log(
+          `[GroupManager] Peer review group already exists: ${groupName}`,
+        );
         return;
       }
       throw error;
@@ -273,14 +345,16 @@ export class GroupManager {
     const groupName = `review-${roomId}-peers`;
 
     try {
-      await this.cognitoClient.send(new AdminAddUserToGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminAddUserToGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Added ${username} to ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;
@@ -290,18 +364,23 @@ export class GroupManager {
   /**
    * Remove a user from a peer review room's Cognito group.
    */
-  async removeFromPeerReviewGroup(username: string, roomId: string): Promise<void> {
+  async removeFromPeerReviewGroup(
+    username: string,
+    roomId: string,
+  ): Promise<void> {
     const groupName = `review-${roomId}-peers`;
 
     try {
-      await this.cognitoClient.send(new AdminRemoveUserFromGroupCommand({
-        GroupName: groupName,
-        UserPoolId: this.userPoolId,
-        Username: username,
-      }));
+      await this.cognitoClient.send(
+        new AdminRemoveUserFromGroupCommand({
+          GroupName: groupName,
+          UserPoolId: this.userPoolId,
+          Username: username,
+        }),
+      );
       console.log(`[GroupManager] Removed ${username} from ${groupName}`);
     } catch (error: any) {
-      if (error.name === 'UserNotFoundException') {
+      if (error.name === "UserNotFoundException") {
         console.error(`[GroupManager] User not found: ${username}`);
       }
       throw error;

@@ -122,7 +122,6 @@ import {
   initializeMockData,
   generateClient,
 } from "./__mocks__/aws-amplify-data";
-import { initializeMockData as initializeGen2MockData } from "./__mocks__/aws-amplify-data";
 
 // Mock client instance for GamificationProvider
 const mockGamificationClient = generateClient();
@@ -551,6 +550,15 @@ if (typeof window !== "undefined") {
 // Use the app's shared theme with CSS variables and dark mode support
 // The theme is imported from src/theme.js
 
+// Verbose per-story preview logging is off by default (fires on every
+// navigation). Enable with STORYBOOK_MOCK_DEBUG=true when debugging.
+const PREVIEW_DEBUG =
+  typeof process !== "undefined" &&
+  process.env?.STORYBOOK_MOCK_DEBUG === "true";
+const previewLog = (...args) => {
+  if (PREVIEW_DEBUG) console.log(...args);
+};
+
 /** @type { import('@storybook/nextjs').Preview } */
 const preview = {
   globalTypes: {
@@ -914,7 +922,7 @@ const preview = {
     },
   },
 
-  tags: [],
+  tags: ["!autodocs"],
 
   decorators: [
     // Deferred rendering — shows loading screen while heavy component trees mount
@@ -1011,13 +1019,36 @@ const preview = {
       // Check if this is a fullscreen layout story (like pages)
       const isFullscreen = context?.parameters?.layout === "fullscreen";
 
-      // Check if contexts should be disabled (for page-level stories)
+      // Check if contexts should be disabled (for page-level or pure-UI stories).
+      // Every optional app context is opt-OUT: absent parameter => provider mounts
+      // (unchanged default). `minimalProviders: true` is a convenience that skips
+      // ALL optional contexts at once, leaving only Auth + Theme — ideal for pure
+      // presentational component stories that don't read any app context.
+      const minimalProviders = context?.parameters?.minimalProviders || false;
       const disableUnitContext =
-        context?.parameters?.disableUnitContext || false;
+        minimalProviders || context?.parameters?.disableUnitContext || false;
       const disableSectionContext =
-        context?.parameters?.disableSectionContext || false;
+        minimalProviders || context?.parameters?.disableSectionContext || false;
       const disableDictionaryContext =
-        context?.parameters?.disableDictionaryContext || false;
+        minimalProviders ||
+        context?.parameters?.disableDictionaryContext ||
+        false;
+      const disableGamificationContext =
+        minimalProviders ||
+        context?.parameters?.disableGamificationContext ||
+        false;
+      const disableSettingsContext =
+        minimalProviders ||
+        context?.parameters?.disableSettingsContext ||
+        false;
+      const disableChatContext =
+        minimalProviders || context?.parameters?.disableChatContext || false;
+      const disableAudioPlayerContext =
+        minimalProviders ||
+        context?.parameters?.disableAudioPlayerContext ||
+        false;
+      const disableFilesContext =
+        minimalProviders || context?.parameters?.disableFilesContext || false;
 
       // Get router configuration from story parameters
       // Support both nextRouter and nextjs.router for compatibility
@@ -1030,7 +1061,7 @@ const preview = {
 
       // Configure next/navigation mock state from story parameters
       const navParams = context?.parameters?.nextjs?.navigation || {};
-      console.log(
+      previewLog(
         "[Preview] setNavigationState called, params:",
         JSON.stringify(navParams.params),
         "story:",
@@ -1114,62 +1145,67 @@ const preview = {
               }}
             >
               <AuthProvider {...authProps}>
-                <GamificationProvider
-                  client={mockGamificationClient}
-                  studentId="mock-user-sub"
-                >
-                  <SettingsProvider>
-                    <ChatContextProvider>
-                      <AudioPlayerProvider>
-                        <FilesProvider>
-                          {disableDictionaryContext ? (
-                            disableUnitContext ? (
-                              disableSectionContext ? (
-                                <Story />
-                              ) : (
-                                <SectionProvider unitId={unitId}>
-                                  <Story />
-                                </SectionProvider>
-                              )
-                            ) : (
-                              <UnitProvider id={unitId}>
-                                {disableSectionContext ? (
-                                  <Story />
-                                ) : (
-                                  <SectionProvider unitId={unitId}>
-                                    <Story />
-                                  </SectionProvider>
-                                )}
-                              </UnitProvider>
-                            )
-                          ) : (
-                            <DictionaryProvider>
-                              {disableUnitContext ? (
-                                disableSectionContext ? (
-                                  <Story />
-                                ) : (
-                                  <SectionProvider unitId={unitId}>
-                                    <Story />
-                                  </SectionProvider>
-                                )
-                              ) : (
-                                <UnitProvider id={unitId}>
-                                  {disableSectionContext ? (
-                                    <Story />
-                                  ) : (
-                                    <SectionProvider unitId={unitId}>
-                                      <Story />
-                                    </SectionProvider>
-                                  )}
-                                </UnitProvider>
-                              )}
-                            </DictionaryProvider>
-                          )}
-                        </FilesProvider>
-                      </AudioPlayerProvider>
-                    </ChatContextProvider>
-                  </SettingsProvider>
-                </GamificationProvider>
+                {/*
+                  Optional app-context stack, composed from outermost to innermost.
+                  Each entry mounts unless its `disable*Context` flag is set, so the
+                  default (no flags) reproduces the original full nesting order:
+                  Gamification > Settings > Chat > AudioPlayer > Files > Dictionary >
+                  Unit > Section > Story. reduceRight wraps <Story /> from the bottom
+                  up, skipping disabled providers entirely (no mount, no subscription).
+                */}
+                {[
+                  {
+                    Provider: GamificationProvider,
+                    props: {
+                      client: mockGamificationClient,
+                      studentId: "mock-user-sub",
+                    },
+                    enabled: !disableGamificationContext,
+                  },
+                  {
+                    Provider: SettingsProvider,
+                    props: {},
+                    enabled: !disableSettingsContext,
+                  },
+                  {
+                    Provider: ChatContextProvider,
+                    props: {},
+                    enabled: !disableChatContext,
+                  },
+                  {
+                    Provider: AudioPlayerProvider,
+                    props: {},
+                    enabled: !disableAudioPlayerContext,
+                  },
+                  {
+                    Provider: FilesProvider,
+                    props: {},
+                    enabled: !disableFilesContext,
+                  },
+                  {
+                    Provider: DictionaryProvider,
+                    props: {},
+                    enabled: !disableDictionaryContext,
+                  },
+                  {
+                    Provider: UnitProvider,
+                    props: { id: unitId },
+                    enabled: !disableUnitContext,
+                  },
+                  {
+                    Provider: SectionProvider,
+                    props: { unitId },
+                    enabled: !disableSectionContext,
+                  },
+                ].reduceRight(
+                  (children, { Provider, props, enabled }) =>
+                    enabled ? (
+                      <Provider {...props}>{children}</Provider>
+                    ) : (
+                      children
+                    ),
+                  <Story />,
+                )}
               </AuthProvider>
             </div>
           </ThemeProvider>
@@ -1187,7 +1223,7 @@ const preview = {
         );
       } else {
         clearMockData();
-        console.log("[Preview] Cleared mock data for story");
+        previewLog("[Preview] Cleared mock data for story");
       }
 
       // Initialize default mock data (unless explicitly disabled)
@@ -1196,9 +1232,10 @@ const preview = {
           "[Preview] Skipped initializing default mock data (initializeMockData=false)",
         );
       } else {
-        initializeMockData(); // DataStore mock (old Gen 1)
-        initializeGen2MockData(); // Gen 2 client mock
-        console.log("[Preview] Initialized default mock data for story");
+        // NOTE: initializeGen2MockData is the SAME function as initializeMockData
+        // (imported under an alias) — calling it once is sufficient.
+        initializeMockData();
+        previewLog("[Preview] Initialized default mock data for story");
       }
       return null; // Return null instead of empty object to avoid extra div
     },

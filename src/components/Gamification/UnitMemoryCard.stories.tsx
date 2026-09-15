@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof UnitMemoryCard> = {
   title: "🏆 Gamification/Adaptive Learning/Unit Memory Card",
   component: UnitMemoryCard,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

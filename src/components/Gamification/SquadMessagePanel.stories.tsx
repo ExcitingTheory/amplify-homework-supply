@@ -13,6 +13,10 @@ const mockSquads = [
 const meta: Meta<typeof SquadMessagePanel> = {
   title: "🏆 Gamification/Squads & Teams/Squad Message Panel",
   component: SquadMessagePanel,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
   args: {
     squads: mockSquads,
     onSend: fn(),

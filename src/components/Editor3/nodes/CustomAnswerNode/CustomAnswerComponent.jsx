@@ -47,7 +47,7 @@ function LinearProgressWithLabel({ value }) {
   );
 }
 
-export default function CustomAnswerComponent({
+export function CustomAnswerView({
   className,
   nodeKey,
   // questions,
@@ -56,6 +56,9 @@ export default function CustomAnswerComponent({
   customPrompt,
   allowedInput = [],
   promptMethod = [],
+  questionBank = {},
+  grade,
+  saveGrade,
 }) {
   const t = useTranslations("workbook");
   const tEditor = useTranslations("editor");
@@ -74,10 +77,6 @@ export default function CustomAnswerComponent({
   const [currentPromptMethod, setCurrentPromptMethod] = useState(
     promptMethod[0] || "text",
   );
-
-  const { grade, saveGrade, workbook } = React.useContext(UnitContext);
-  const { studentMemory, contentContext } = useVerifyContext();
-  const { questionBank } = React.useContext(DictionaryContext);
 
   const gradeId = grade?.id;
   const inProgress = grade?.data?.[nodeKey];
@@ -198,144 +197,117 @@ export default function CustomAnswerComponent({
     }
   }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress]);
 
-  const blockGradeData = grade?.data?.[nodeKey];
-  const nailedIt = blockGradeData?.nailedIt === true;
-
   return (
-    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <div
-        className={className}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          // alignItems: 'center',
-          marginBottom: "6rem",
-        }}
+    <div
+      className={className}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        // alignItems: 'center',
+        marginBottom: "6rem",
+      }}
+    >
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          {t("customAnswerComponent.answerQuestions")}
+        </Typography>
+      </Box>
+
+      <ToggleButtonGroup
+        exclusive
+        value={currentInputMethod}
+        onChange={handleInputChange}
+        aria-label={tEditorAi("promptMethodSelector.inputButton")}
       >
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {t("customAnswerComponent.answerQuestions")}
-          </Typography>
-        </Box>
-
-        <ToggleButtonGroup
-          exclusive
-          value={currentInputMethod}
-          onChange={handleInputChange}
-          aria-label={tEditorAi("promptMethodSelector.inputButton")}
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("text")}
+          value="text"
+          aria-label={tEditor("customAnswerComponent.text")}
         >
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("text")}
-            value="text"
-            aria-label={tEditor("customAnswerComponent.text")}
-          >
-            {t("customAnswerComponent.text")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("audio")}
-            value="audio"
-            aria-label={tEditor("customAnswerComponent.audio")}
-          >
-            {t("customAnswerComponent.audio")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("writing")}
-            value="writing"
-            aria-label={tEditor("customAnswerComponent.writing")}
-          >
-            {t("customAnswerComponent.writing")}
-          </ToggleButton>
-        </ToggleButtonGroup>
+          {t("customAnswerComponent.text")}
+        </ToggleButton>
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("audio")}
+          value="audio"
+          aria-label={tEditor("customAnswerComponent.audio")}
+        >
+          {t("customAnswerComponent.audio")}
+        </ToggleButton>
+        <ToggleButton
+          disabled={!allowedInputMethods.includes("writing")}
+          value="writing"
+          aria-label={tEditor("customAnswerComponent.writing")}
+        >
+          {t("customAnswerComponent.writing")}
+        </ToggleButton>
+      </ToggleButtonGroup>
 
-        <Box>
-          <LinearProgressWithLabel value={0} />
-        </Box>
+      <Box>
+        <LinearProgressWithLabel value={0} />
+      </Box>
 
-        <ol>
-          {questionIDs &&
-            questionIDs.map((questionID) => {
-              const question = questionBank[questionID] || {};
-              console.log("CustomAnswerComponent.questionID", questionID);
-              console.log("CustomAnswerComponent.questionBank", questionBank);
-              console.log("CustomAnswerComponent.question", question);
+      <ol>
+        {questionIDs &&
+          questionIDs.map((questionID) => {
+            const question = questionBank[questionID] || {};
+            console.log("CustomAnswerComponent.questionID", questionID);
+            console.log("CustomAnswerComponent.questionBank", questionBank);
+            console.log("CustomAnswerComponent.question", question);
 
-              let borderStyle = "1px solid #ccc";
-              if (feedback[questionID]?.answer === true) {
-                console.log("feedback[questionID]", feedback[questionID]);
-                borderStyle = "1px solid green";
-              } else if (feedback[questionID]?.answer === false) {
-                console.log("feedback[questionID]", feedback[questionID]);
-                borderStyle = "1px solid red";
-              }
+            let borderStyle = "1px solid #ccc";
+            if (feedback[questionID]?.answer === true) {
+              console.log("feedback[questionID]", feedback[questionID]);
+              borderStyle = "1px solid green";
+            } else if (feedback[questionID]?.answer === false) {
+              console.log("feedback[questionID]", feedback[questionID]);
+              borderStyle = "1px solid red";
+            }
 
-              const { prompt, answer, phrase, definition, pronunciation } =
-                question;
-              console.log("CustomAnswerComponent.question", question);
-              console.log("CustomAnswerComponent.prompt", prompt);
-              console.log(
-                "CustomAnswerComponent.feedback[questionID]",
-                feedback[questionID],
-              );
+            const { prompt, answer, phrase, definition, pronunciation } =
+              question;
+            console.log("CustomAnswerComponent.question", question);
+            console.log("CustomAnswerComponent.prompt", prompt);
+            console.log(
+              "CustomAnswerComponent.feedback[questionID]",
+              feedback[questionID],
+            );
 
-              // Determine if this question is completed
-              const isCompleted =
-                feedback[questionID] &&
-                feedback[questionID].answer !== undefined;
-              console.log("CustomAnswerComponent.isCompleted", isCompleted);
-              console.log(
-                "CustomAnswerComponent.currentPromptMethod",
-                currentPromptMethod,
-              );
+            // Determine if this question is completed
+            const isCompleted =
+              feedback[questionID] && feedback[questionID].answer !== undefined;
+            console.log("CustomAnswerComponent.isCompleted", isCompleted);
+            console.log(
+              "CustomAnswerComponent.currentPromptMethod",
+              currentPromptMethod,
+            );
 
-              // Determine what to display as the prompt
-              let displayPrompt = prompt;
-              if (!displayPrompt && currentPromptMethod === "phrase") {
-                displayPrompt = phrase;
-              } else if (
-                !displayPrompt &&
-                currentPromptMethod === "definition"
-              ) {
-                displayPrompt = definition;
-              } else if (
-                !displayPrompt &&
-                currentPromptMethod === "pronunciation"
-              ) {
-                displayPrompt = pronunciation;
-              }
+            // Determine what to display as the prompt
+            let displayPrompt = prompt;
+            if (!displayPrompt && currentPromptMethod === "phrase") {
+              displayPrompt = phrase;
+            } else if (!displayPrompt && currentPromptMethod === "definition") {
+              displayPrompt = definition;
+            } else if (
+              !displayPrompt &&
+              currentPromptMethod === "pronunciation"
+            ) {
+              displayPrompt = pronunciation;
+            }
 
-              // If still no prompt but we have feedback, try to extract from there
-              if (!displayPrompt && isCompleted && feedback[questionID]) {
-                displayPrompt = feedback[questionID]?.prompt || null;
-              }
+            // If still no prompt but we have feedback, try to extract from there
+            if (!displayPrompt && isCompleted && feedback[questionID]) {
+              displayPrompt = feedback[questionID]?.prompt || null;
+            }
 
-              console.log("CustomAnswerComponent.displayPrompt", displayPrompt);
+            console.log("CustomAnswerComponent.displayPrompt", displayPrompt);
 
-              return (
-                <li display="flex" key={questionID}>
-                  {/**
-                   * Display the question prompt when not using audio OR when completed
-                   */}
-                  {(currentPromptMethod !== "audio" || isCompleted) &&
-                    displayPrompt && (
-                      <Typography
-                        variant="body1"
-                        display="flex"
-                        style={{
-                          textWrap: "wrap",
-                          wordBreak: "normal",
-                          marginBottom: "0.5rem",
-                        }}
-                        color="textPrimary"
-                      >
-                        <strong>{t("customAnswerComponent.question")}</strong>
-                        &nbsp;{displayPrompt}
-                      </Typography>
-                    )}
-
-                  {/**
-                   * If completed but no prompt data, at least show there was a question
-                   */}
-                  {isCompleted && !displayPrompt && (
+            return (
+              <li display="flex" key={questionID}>
+                {/**
+                 * Display the question prompt when not using audio OR when completed
+                 */}
+                {(currentPromptMethod !== "audio" || isCompleted) &&
+                  displayPrompt && (
                     <Typography
                       variant="body1"
                       display="flex"
@@ -344,244 +316,292 @@ export default function CustomAnswerComponent({
                         wordBreak: "normal",
                         marginBottom: "0.5rem",
                       }}
-                      color="text.secondary"
+                      color="textPrimary"
                     >
-                      <strong>
-                        {t("customAnswerComponent.completedQuestion")}
-                      </strong>{" "}
-                      {t("customAnswerComponent.promptNotAvailable")}
+                      <strong>{t("customAnswerComponent.question")}</strong>
+                      &nbsp;{displayPrompt}
                     </Typography>
                   )}
 
-                  {/**
-                   * Area for feedback from api call
-                   */}
-                  {feedback[questionID] && (
-                    <Box
-                      sx={{
-                        mb: 1.5,
-                        p: 1.5,
-                        border: 1,
-                        borderColor:
-                          feedback[questionID]?.answer === true
-                            ? "success.main"
-                            : "error.main",
-                        borderRadius: 1,
-                        bgcolor: "action.hover",
-                      }}
-                    >
-                      {feedback[questionID]?.userResponse && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 0.5, fontStyle: "italic" }}
-                        >
-                          {t("customAnswerComponent.yourAnswer", {
-                            answer: feedback[questionID].userResponse,
-                          })}
-                        </Typography>
-                      )}
+                {/**
+                 * If completed but no prompt data, at least show there was a question
+                 */}
+                {isCompleted && !displayPrompt && (
+                  <Typography
+                    variant="body1"
+                    display="flex"
+                    style={{
+                      textWrap: "wrap",
+                      wordBreak: "normal",
+                      marginBottom: "0.5rem",
+                    }}
+                    color="text.secondary"
+                  >
+                    <strong>
+                      {t("customAnswerComponent.completedQuestion")}
+                    </strong>{" "}
+                    {t("customAnswerComponent.promptNotAvailable")}
+                  </Typography>
+                )}
+
+                {/**
+                 * Area for feedback from api call
+                 */}
+                {feedback[questionID] && (
+                  <Box
+                    sx={{
+                      mb: 1.5,
+                      p: 1.5,
+                      border: 1,
+                      borderColor:
+                        feedback[questionID]?.answer === true
+                          ? "success.main"
+                          : "error.main",
+                      borderRadius: 1,
+                      bgcolor: "action.hover",
+                    }}
+                  >
+                    {feedback[questionID]?.userResponse && (
                       <Typography
                         variant="body2"
-                        color="text.primary"
-                        component="div"
-                        sx={{ flexGrow: 1 }}
+                        color="text.secondary"
+                        sx={{ mb: 0.5, fontStyle: "italic" }}
                       >
-                        {feedback[questionID]?.reason || ""}
+                        {t("customAnswerComponent.yourAnswer", {
+                          answer: feedback[questionID].userResponse,
+                        })}
                       </Typography>
-                    </Box>
-                  )}
-
-                  {currentPromptMethod === "audio" && question?.audio && (
-                    <AudioWaveformPlayer
-                      audioUrl={question.audio[0]}
-                      width={400}
-                      height={60}
-                      title={
-                        question.prompt ||
-                        t("customAnswerComponent.audioQuestion")
-                      }
-                    />
-                  )}
-
-                  {currentInputMethod === "text" && (
-                    <Box
-                      display="flex"
-                      style={{
-                        marginBottom: "1rem",
-                      }}
+                    )}
+                    <Typography
+                      variant="body2"
+                      color="text.primary"
+                      component="div"
+                      sx={{ flexGrow: 1 }}
                     >
-                      <PlainTextAnswerInput
-                        value={answers[questionID] || ""}
-                        onChange={(text) => {
-                          setAnswers({
-                            ...answers,
-                            [questionID]: text,
-                          });
-                        }}
-                        onAutoSubmit={async (text) => {
-                          try {
-                            const client = getAmplifyClient();
+                      {feedback[questionID]?.reason || ""}
+                    </Typography>
+                  </Box>
+                )}
 
-                            const response = await client.queries.verifyShortAnswer({
+                {currentPromptMethod === "audio" && question?.audio && (
+                  <AudioWaveformPlayer
+                    audioUrl={question.audio[0]}
+                    width={400}
+                    height={60}
+                    title={
+                      question.prompt ||
+                      t("customAnswerComponent.audioQuestion")
+                    }
+                  />
+                )}
+
+                {currentInputMethod === "text" && (
+                  <Box
+                    display="flex"
+                    style={{
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <PlainTextAnswerInput
+                      value={answers[questionID] || ""}
+                      onChange={(text) => {
+                        setAnswers({
+                          ...answers,
+                          [questionID]: text,
+                        });
+                      }}
+                      onAutoSubmit={async (text) => {
+                        try {
+                          const client = getAmplifyClient();
+
+                          const response =
+                            await client.queries.verifyShortAnswer({
                               answer: text,
                               prompt: prompt,
                               expected: answer,
-                              model: 'gpt-3.5-turbo',
+                              model: "gpt-3.5-turbo",
                               studentMemory,
                               contentContext,
                             });
 
-                            console.log('response', response);
+                          console.log("response", response);
 
-                            const data = JSON.parse(response?.data) || {};
+                          const data = JSON.parse(response?.data) || {};
 
-                            setFeedback({
-                              ...feedback,
-                              [questionID]: data,
-                            });
-                            // Broadcast to collaborators via Yjs
-                            workbook?.setFeedback?.(nodeKey, {
-                              text: data?.reason || "",
-                              timestamp: Date.now(),
-                            });
-                          } catch (error) {
-                            console.error(error);
-                            setFeedback({
-                              ...feedback,
-                              [questionID]: t(
-                                "customAnswerComponent.errorOccurred",
-                              ),
-                            });
-                          }
-                        }}
-                        historyState={sharedHistoryState.current}
-                        placeholder={t(
-                          "customAnswerComponent.answerPlaceholder",
-                        )}
-                        ariaLabel={tEditor("customAnswerComponent.yourAnswer")}
-                        borderStyle={borderStyle}
-                        textColor={
-                          feedback[questionID]?.answer === true
-                            ? "green"
-                            : feedback[questionID]?.answer === false
-                              ? "red"
-                              : "inherit"
+                          setFeedback({
+                            ...feedback,
+                            [questionID]: data,
+                          });
+                          // Broadcast to collaborators via Yjs
+                          workbook?.setFeedback?.(nodeKey, {
+                            text: data?.reason || "",
+                            timestamp: Date.now(),
+                          });
+                        } catch (error) {
+                          console.error(error);
+                          setFeedback({
+                            ...feedback,
+                            [questionID]: t(
+                              "customAnswerComponent.errorOccurred",
+                            ),
+                          });
                         }
-                        testId="custom-answer-input"
-                        questionId={questionID}
-                        disabled={isCompleted}
-                      />
-                    </Box>
-                  )}
-                  {currentInputMethod === "audio" && (
-                    <Box
-                      display="flex"
-                      style={{
-                        marginBottom: "1rem",
                       }}
-                    >
-                      <AudioAutoSubmitWrapper>
-                        {({ wrapOnRecordingComplete }) => (
-                          <AudioWaveformPlayer
-                            enableRecording={true}
-                            gradeId={grade?.id}
-                            nodeKey={`custom-answer-${questionID}`}
-                            title={prompt || question?.prompt}
-                            onRecordingComplete={wrapOnRecordingComplete(
-                              async (audioFile, uploadResult) => {
-                                const currentGradeData = grade?.data || {};
-                                const audioNodeKey = `custom-answer-${questionID}`;
-                                const updatedGradeData = {
-                                  ...currentGradeData,
-                                  [audioNodeKey]: {
-                                    ...currentGradeData[audioNodeKey],
-                                    audioFilePath: audioFile?.path || null,
-                                    audioFileId: audioFile?.id || null,
-                                    inputMethod: "audio",
-                                  },
-                                };
-                                saveGrade(updatedGradeData);
+                      historyState={sharedHistoryState.current}
+                      placeholder={t("customAnswerComponent.answerPlaceholder")}
+                      ariaLabel={tEditor("customAnswerComponent.yourAnswer")}
+                      borderStyle={borderStyle}
+                      textColor={
+                        feedback[questionID]?.answer === true
+                          ? "green"
+                          : feedback[questionID]?.answer === false
+                            ? "red"
+                            : "inherit"
+                      }
+                      testId="custom-answer-input"
+                      questionId={questionID}
+                      disabled={isCompleted}
+                    />
+                  </Box>
+                )}
+                {currentInputMethod === "audio" && (
+                  <Box
+                    display="flex"
+                    style={{
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <AudioAutoSubmitWrapper>
+                      {({ wrapOnRecordingComplete }) => (
+                        <AudioWaveformPlayer
+                          enableRecording={true}
+                          gradeId={grade?.id}
+                          nodeKey={`custom-answer-${questionID}`}
+                          title={prompt || question?.prompt}
+                          onRecordingComplete={wrapOnRecordingComplete(
+                            async (audioFile, uploadResult) => {
+                              const currentGradeData = grade?.data || {};
+                              const audioNodeKey = `custom-answer-${questionID}`;
+                              const updatedGradeData = {
+                                ...currentGradeData,
+                                [audioNodeKey]: {
+                                  ...currentGradeData[audioNodeKey],
+                                  audioFilePath: audioFile?.path || null,
+                                  audioFileId: audioFile?.id || null,
+                                  inputMethod: "audio",
+                                },
+                              };
+                              saveGrade(updatedGradeData);
 
-                                // Verify the recorded audio
-                                try {
-                                  const client = getAmplifyClient();
-                                  const audioUrl =
-                                    audioFile?.path || uploadResult?.path;
-                                  if (audioUrl) {
-                                    const { data, errors } = await client.queries.verifyShortAnswer({
+                              // Verify the recorded audio
+                              try {
+                                const client = getAmplifyClient();
+                                const audioUrl =
+                                  audioFile?.path || uploadResult?.path;
+                                if (audioUrl) {
+                                  const { data, errors } =
+                                    await client.queries.verifyShortAnswer({
                                       answer: audioUrl,
                                       prompt: prompt,
                                       expected: answer,
-                                      model: 'gpt-3.5-turbo',
+                                      model: "gpt-3.5-turbo",
                                       studentMemory,
                                       contentContext,
                                     });
-                                    if (!errors && data) {
-                                      const feedbackData = JSON.parse(data);
-                                      setFeedback((prev) => ({
-                                        ...prev,
-                                        [questionID]: feedbackData,
-                                      }));
-                                      // Broadcast to collaborators via Yjs
-                                      workbook?.setFeedback?.(nodeKey, {
-                                        text: feedbackData?.reason || "",
-                                        timestamp: Date.now(),
-                                      });
-                                    }
+                                  if (!errors && data) {
+                                    const feedbackData = JSON.parse(data);
+                                    setFeedback((prev) => ({
+                                      ...prev,
+                                      [questionID]: feedbackData,
+                                    }));
+                                    // Broadcast to collaborators via Yjs
+                                    workbook?.setFeedback?.(nodeKey, {
+                                      text: feedbackData?.reason || "",
+                                      timestamp: Date.now(),
+                                    });
                                   }
-                                } catch (err) {
-                                  console.error(
-                                    "[CustomAnswerComponent] Audio verification error:",
-                                    err,
-                                  );
                                 }
-                              },
-                            )}
-                          />
-                        )}
-                      </AudioAutoSubmitWrapper>
-                    </Box>
-                  )}
-                  {currentInputMethod === "writing" && (
-                    <Box
-                      display="flex"
-                      style={{
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      <Suspense
-                        fallback={
-                          <div>{t("customAnswerComponent.loading")}</div>
-                        }
-                      >
-                        <SketchPad
-                          excalidrawData={inProgress?.excalidrawData ?? {}}
-                          className={className}
-                          expect={answer}
-                          questionID={questionID}
-                          setFeedback={(data) => {
-                            setFeedback({
-                              ...feedback,
-                              [questionID]: data,
-                            });
-                            // Broadcast to collaborators via Yjs
-                            workbook?.setFeedback?.(nodeKey, {
-                              text: data?.reason || "",
-                              timestamp: Date.now(),
-                            });
-                          }}
-                          feedback={feedback}
-                          question={prompt}
+                              } catch (err) {
+                                console.error(
+                                  "[CustomAnswerComponent] Audio verification error:",
+                                  err,
+                                );
+                              }
+                            },
+                          )}
                         />
-                      </Suspense>
-                    </Box>
-                  )}
-                </li>
-              );
-            })}
-        </ol>
-      </div>
+                      )}
+                    </AudioAutoSubmitWrapper>
+                  </Box>
+                )}
+                {currentInputMethod === "writing" && (
+                  <Box
+                    display="flex"
+                    style={{
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <Suspense
+                      fallback={<div>{t("customAnswerComponent.loading")}</div>}
+                    >
+                      <SketchPad
+                        excalidrawData={inProgress?.excalidrawData ?? {}}
+                        className={className}
+                        expect={answer}
+                        questionID={questionID}
+                        setFeedback={(data) => {
+                          setFeedback({
+                            ...feedback,
+                            [questionID]: data,
+                          });
+                          // Broadcast to collaborators via Yjs
+                          workbook?.setFeedback?.(nodeKey, {
+                            text: data?.reason || "",
+                            timestamp: Date.now(),
+                          });
+                        }}
+                        feedback={feedback}
+                        question={prompt}
+                      />
+                    </Suspense>
+                  </Box>
+                )}
+              </li>
+            );
+          })}
+      </ol>
+    </div>
+  );
+}
+
+export default function CustomAnswerComponent({
+  className,
+  nodeKey,
+  ids,
+  requestDefinition = false,
+  customPrompt,
+  allowedInput = [],
+  promptMethod = [],
+}) {
+  const { grade, saveGrade } = React.useContext(UnitContext);
+  // Keep verify-context hook for parity (memory/personalization side effects).
+  useVerifyContext();
+  const { questionBank } = React.useContext(DictionaryContext);
+  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
+  return (
+    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
+      <CustomAnswerView
+        className={className}
+        nodeKey={nodeKey}
+        ids={ids}
+        requestDefinition={requestDefinition}
+        customPrompt={customPrompt}
+        allowedInput={allowedInput}
+        promptMethod={promptMethod}
+        questionBank={questionBank}
+        grade={grade}
+        saveGrade={saveGrade}
+      />
     </WorkbookBlockEnhancements>
   );
 }

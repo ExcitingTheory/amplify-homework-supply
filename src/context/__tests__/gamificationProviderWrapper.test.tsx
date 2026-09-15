@@ -1,7 +1,7 @@
 /**
  * Tests for GamificationProviderWrapper
  *
- * Validates cohortId derivation from Cognito groups, no-auth passthrough,
+ * Validates sectionID derivation from Cognito groups, no-auth passthrough,
  * and correct prop forwarding to GamificationProvider.
  */
 
@@ -42,7 +42,7 @@ import { GamificationProviderWrapper } from '../gamificationProviderWrapper'
 function renderWithAuth(authValue: Record<string, any>) {
   return render(
     <AuthContext.Provider value={authValue as any}>
-      <GamificationProviderWrapper cohortId={undefined}>
+      <GamificationProviderWrapper sectionID={undefined}>
         <div data-testid="child">Hello</div>
       </GamificationProviderWrapper>
     </AuthContext.Provider>,
@@ -87,7 +87,7 @@ describe('GamificationProviderWrapper', () => {
     )
   })
 
-  it('derives cohortId from learner section group', () => {
+  it('derives sectionID from learner section group', () => {
     renderWithAuth({
       user: { username: 'student-1' },
       session: { groups: ['section-abc123-learners'] },
@@ -96,12 +96,12 @@ describe('GamificationProviderWrapper', () => {
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         studentId: 'student-1',
-        cohortId: 'abc123',
+        sectionID: 'abc123',
       }),
     )
   })
 
-  it('derives cohortId from instructor section group', () => {
+  it('derives sectionID from instructor section group', () => {
     renderWithAuth({
       user: { username: 'instructor-1' },
       session: { groups: ['Admins', 'section-myClass-instructors', 'Instructors'] },
@@ -110,12 +110,12 @@ describe('GamificationProviderWrapper', () => {
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         studentId: '',
-        cohortId: 'myClass',
+        sectionID: 'myClass',
       }),
     )
   })
 
-  it('returns first matching section group as cohortId', () => {
+  it('returns first matching section group as sectionID', () => {
     renderWithAuth({
       user: { username: 'student-1' },
       session: {
@@ -125,12 +125,12 @@ describe('GamificationProviderWrapper', () => {
 
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        cohortId: 'first',
+        sectionID: 'first',
       }),
     )
   })
 
-  it('passes undefined cohortId when no section groups match', () => {
+  it('passes undefined sectionID when no section groups match', () => {
     renderWithAuth({
       user: { username: 'student-1' },
       session: { groups: ['SomeOtherGroup'] },
@@ -139,7 +139,7 @@ describe('GamificationProviderWrapper', () => {
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         studentId: 'student-1',
-        cohortId: undefined,
+        sectionID: undefined,
       }),
     )
   })
@@ -152,7 +152,7 @@ describe('GamificationProviderWrapper', () => {
 
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        cohortId: undefined,
+        sectionID: undefined,
       }),
     )
   })
@@ -179,7 +179,7 @@ describe('GamificationProviderWrapper', () => {
     // Non-greedy match should capture 'my-class-2026'
     expect(providerSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        cohortId: 'my-class-2026',
+        sectionID: 'my-class-2026',
       }),
     )
   })

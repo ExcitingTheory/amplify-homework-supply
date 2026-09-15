@@ -63,7 +63,7 @@ export interface SkillNodeData {
   xpReward?: number;
   prerequisites?: string[];
   /** Cohort scope — encodes unit link as `unit-{unitID}` */
-  cohortId?: string;
+  sectionID?: string;
   /** Set by parent to indicate this node is currently selected */
   selected?: boolean;
 }
@@ -78,7 +78,7 @@ export interface SkillTreeProps {
   /** Unit ID for AI skill generation (instructor only) */
   unitId?: string;
   /** Cohort ID scope for generated skills */
-  cohortId?: string;
+  sectionID?: string;
   /** Whether the user can generate/regenerate skills */
   canGenerate?: boolean;
   /** Called after skills are generated */
@@ -654,7 +654,7 @@ function SkillTreeInner({
   onSkillClick,
   height = "100%",
   unitId,
-  cohortId,
+  sectionID,
   canGenerate = false,
   onGenerated,
   editable = false,
@@ -763,7 +763,7 @@ function SkillTreeInner({
     setGenerating(true);
     setError(null);
     try {
-      const result = await generateSkillTreeFromUnit(unitId, cohortId);
+      const result = await generateSkillTreeFromUnit(unitId, sectionID);
       if (result?.generated) {
         onGenerated?.({ skillCount: result.skillCount ?? 0 });
       } else {
@@ -774,7 +774,7 @@ function SkillTreeInner({
     } finally {
       setGenerating(false);
     }
-  }, [unitId, cohortId, onGenerated]);
+  }, [unitId, sectionID, onGenerated]);
 
   // Node click: fire onSkillClick AND trigger physics impulse
   const handleNodeClick: NodeMouseHandler = useCallback(

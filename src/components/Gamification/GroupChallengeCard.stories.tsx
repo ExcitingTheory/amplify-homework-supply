@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof GroupChallengeCard> = {
   title: "🏆 Gamification/Squads & Teams/Group Challenge Card",
   component: GroupChallengeCard,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

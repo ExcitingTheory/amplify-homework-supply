@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof StreakIndicator> = {
   title: "🏆 Gamification/Streaks/Streak Indicator",
   component: StreakIndicator,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

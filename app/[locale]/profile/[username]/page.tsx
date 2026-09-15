@@ -208,7 +208,7 @@ export default async function ProfilePage({ params }: Props) {
       themeId={profileThemeId}
       customPalette={parsedCustomPalette}
     >
-      <GamificationProviderWrapper cohortId={undefined as any}>
+      <GamificationProviderWrapper sectionID={undefined as any}>
         <Box
           data-tour="profile-page"
           sx={{

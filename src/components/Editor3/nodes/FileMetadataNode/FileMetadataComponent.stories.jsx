@@ -23,20 +23,37 @@ const mockImageFile = {
   _version: 1,
 };
 
+// Normalized shape consumed by FileMetadataComponent (see FileMetadataNode /
+// FileManager2 handleInsertIntoEditor which maps the raw ParsedContent model
+// fields — vocabularyJSON { word, definition, context, page }, etc. — into this).
 const mockParsedContent = {
   id: "parsed-1",
   documentID: "file-1",
-  vocabularyJSON: JSON.stringify([
-    { phrase: "mitochondria", definition: "organelle that generates ATP" },
-    { phrase: "chloroplast", definition: "organelle for photosynthesis" },
-  ]),
-  summariesJSON: JSON.stringify([
-    "Cell structure overview covering organelles and their functions.",
-  ]),
-  objectivesJSON: JSON.stringify([
-    "Identify major cell organelles",
-    "Explain cellular respiration",
-  ]),
+  vocabulary: [
+    { term: "mitochondria", definition: "organelle that generates ATP" },
+    { term: "chloroplast", definition: "organelle for photosynthesis" },
+  ],
+  summaries: [
+    {
+      content:
+        "Cell structure overview covering organelles and their functions.",
+      type: "Overview",
+    },
+  ],
+  objectives: [
+    { description: "Identify major cell organelles", type: "Remember" },
+    { description: "Explain cellular respiration", type: "Understand" },
+  ],
+  concepts: [
+    {
+      name: "Organelles",
+      description:
+        "Specialized subunits within a cell with specific functions.",
+    },
+  ],
+  questions: [
+    { question: "What organelle generates ATP?", answer: "Mitochondria" },
+  ],
   status: "completed",
 };
 

@@ -20,6 +20,10 @@ const mockSkills = [
 const meta: Meta<typeof SkillTreeEditor> = {
   title: "🏆 Gamification/Instructor/Skill Tree Editor",
   component: SkillTreeEditor,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
   args: {
     onSubmit: fn(),
     availableUnits: mockUnits,

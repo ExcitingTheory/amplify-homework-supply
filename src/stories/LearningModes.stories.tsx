@@ -4,6 +4,7 @@
 
 import React from "react";
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within } from "storybook/test";
 import { Button, TextField, Box } from "@mui/material";
 import TutorialStep from "../../.storybook/components/TutorialStep";
 import QuizMode from "../../.storybook/components/QuizMode";
@@ -34,6 +35,9 @@ export default meta;
  * Shows a step with interactive demo component
  */
 export const TutorialModeExample: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Create Your First Demo Item");
+  },
   render: () => {
     const [value, setValue] = React.useState("");
     const [submitted, setSubmitted] = React.useState(false);
@@ -123,6 +127,9 @@ export const TutorialModeExample: StoryObj = {
  * Shows quiz-mode behavior in a demo-only flow
  */
 export const QuizModeExample: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Try the Demo Flow");
+  },
   render: () => {
     const [completed, setCompleted] = React.useState(false);
 
@@ -227,6 +234,9 @@ export const QuizModeExample: StoryObj = {
  * Shows how to chain multiple steps together
  */
 export const MultipleTutorialSteps: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Complete Demo Onboarding Workflow");
+  },
   render: () => {
     return (
       <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>
@@ -277,6 +287,9 @@ export const MultipleTutorialSteps: StoryObj = {
  * Step that completes automatically when rendered
  */
 export const AutoCompleteTutorial: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Auto-Completion Demo");
+  },
   render: () => {
     return (
       <Box sx={{ p: "20px", maxWidth: "800px", mx: "auto" }}>

@@ -1,11 +1,15 @@
 import * as React from "react";
+import { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
-
 import { useEffect, useState, useRef } from "react";
+import { Skeleton, Box } from "@mui/material";
 
-import { DataGrid } from "@mui/x-data-grid";
+// Lazy-load DataGrid only when MediaPlayerComponent is rendered (authoring only)
+const DataGrid = lazy(() =>
+  import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
+);
 
-import { Box, LinearProgress, Typography } from "@mui/material";
+import { LinearProgress, Typography } from "@mui/material";
 
 import UnitContext from "../../../context/unitContext";
 
@@ -13,6 +17,7 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import DictionaryContext from "../../../context/dictionaryContext";
+import { trackAudioPlayed, trackVideoPlayed } from "../../../utils/analytics";
 
 function LinearProgressWithLabel({ value }) {
   return (
@@ -281,6 +286,10 @@ export default function MediaPlayerComponent({
   const playerRef = useRef(null);
   // const {options, onReady} = props;
 
+  // Track the currently-playing media id so the videojs play handler (registered
+  // once) can report the right item even as the playlist index changes.
+  const nowPlayingIdRef = useRef(null);
+
   useEffect(() => {
     // Only initialize player if we have sources
     if (sources.length === 0) {
@@ -298,6 +307,20 @@ export default function MediaPlayerComponent({
       const player = (playerRef.current = videojs(videoElement, options, () => {
         console.log("VIDEOJS: player is ready");
       }));
+
+      player.on("play", () => {
+        const mimeType =
+          player.currentType?.() || options?.sources?.[0]?.type || "";
+        const mediaId = nowPlayingIdRef.current || unit?.id || "media";
+        const durationMs = Number.isFinite(player.duration?.())
+          ? Math.round(player.duration() * 1000)
+          : undefined;
+        if (mimeType.startsWith("video")) {
+          trackVideoPlayed(mediaId, { unitId: unit?.id, durationMs });
+        } else {
+          trackAudioPlayed(mediaId, { unitId: unit?.id, durationMs });
+        }
+      });
     } else {
       const player = playerRef.current;
 
@@ -325,6 +348,7 @@ export default function MediaPlayerComponent({
   }, [playerRef]);
 
   const nowPlayingId = playlist.current?.[index];
+  nowPlayingIdRef.current = nowPlayingId;
   console.log("nowPlayingId", nowPlayingId);
 
   return (
@@ -339,53 +363,59 @@ export default function MediaPlayerComponent({
       </div>
 
       {rows.length > 0 && (
-        <DataGrid
-          sx={{
-            marginTop: "0.5rem",
-          }}
-          rows={rows}
-          columns={columns}
-          hideFooter
-          checkboxSelection={false}
-          rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
-          onRowSelectionModelChange={async (model) => {
-            const e = [...model.ids];
-            if (e.length > 0) {
-              playlist.current = e;
-              const _id = e[index];
-              if (!_id) return;
-              const player = playerRef.current;
+        <Suspense
+          fallback={
+            <Skeleton variant="rectangular" width="100%" height={300} />
+          }
+        >
+          <DataGrid
+            sx={{
+              marginTop: "0.5rem",
+            }}
+            rows={rows}
+            columns={columns}
+            hideFooter
+            checkboxSelection={false}
+            rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+            onRowSelectionModelChange={async (model) => {
+              const e = [...model.ids];
+              if (e.length > 0) {
+                playlist.current = e;
+                const _id = e[index];
+                if (!_id) return;
+                const player = playerRef.current;
 
-              player.autoplay(true);
+                player.autoplay(true);
 
-              // sign url
-              const url = playlistUrls[_id];
-              const src = await getCachedUrl(url);
-              if (src) {
-                const ext = url?.split(".").pop().toLowerCase() || "mp3";
-                const mimeType =
-                  ext === "mp4"
-                    ? "video/mp4"
-                    : ext === "webm"
-                      ? "video/webm"
-                      : ext === "ogg"
-                        ? "audio/ogg"
-                        : ext === "wav"
-                          ? "audio/wav"
-                          : ext === "m4a"
-                            ? "audio/mp4"
-                            : "audio/mpeg";
-                setSources([
-                  {
-                    src,
-                    type: mimeType,
-                  },
-                ]);
+                // sign url
+                const url = playlistUrls[_id];
+                const src = await getCachedUrl(url);
+                if (src) {
+                  const ext = url?.split(".").pop().toLowerCase() || "mp3";
+                  const mimeType =
+                    ext === "mp4"
+                      ? "video/mp4"
+                      : ext === "webm"
+                        ? "video/webm"
+                        : ext === "ogg"
+                          ? "audio/ogg"
+                          : ext === "wav"
+                            ? "audio/wav"
+                            : ext === "m4a"
+                              ? "audio/mp4"
+                              : "audio/mpeg";
+                  setSources([
+                    {
+                      src,
+                      type: mimeType,
+                    },
+                  ]);
+                }
               }
-            }
-            setGridSelection(e);
-          }}
-        />
+              setGridSelection(e);
+            }}
+          />
+        </Suspense>
       )}
     </Box>
   );

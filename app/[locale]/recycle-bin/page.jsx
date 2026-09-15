@@ -189,38 +189,18 @@ function RecycleBinContent() {
               key={item.id}
               sx={{
                 mb: 1,
+                gap: 1,
                 bgcolor: "background.paper",
                 borderRadius: 1,
                 border: 1,
                 borderColor: "divider",
               }}
-              secondaryAction={
-                <Box sx={{ display: "flex", gap: 0.5 }}>
-                  <IconButton
-                    edge="end"
-                    color="success"
-                    title="Restore"
-                    disabled={actionLoading === item.id}
-                    onClick={() => handleRestore(item)}
-                  >
-                    <RestoreIcon />
-                  </IconButton>
-                  <IconButton
-                    edge="end"
-                    color="error"
-                    title="Permanently delete"
-                    disabled={actionLoading === item.id}
-                    onClick={() => setConfirmDialog(item)}
-                  >
-                    <DeleteForeverIcon />
-                  </IconButton>
-                </Box>
-              }
             >
               <ListItemIcon>
                 {MODEL_ICONS[item._modelName] || <InsertDriveFileIcon />}
               </ListItemIcon>
               <ListItemText
+                sx={{ flex: 1, minWidth: 0 }}
                 primary={
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography variant="body1" noWrap sx={{ maxWidth: 400 }}>
@@ -241,6 +221,26 @@ function RecycleBinContent() {
                   </Typography>
                 }
               />
+              <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                <IconButton
+                  edge="end"
+                  color="success"
+                  title="Restore"
+                  disabled={actionLoading === item.id}
+                  onClick={() => handleRestore(item)}
+                >
+                  <RestoreIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  color="error"
+                  title="Permanently delete"
+                  disabled={actionLoading === item.id}
+                  onClick={() => setConfirmDialog(item)}
+                >
+                  <DeleteForeverIcon />
+                </IconButton>
+              </Box>
             </ListItem>
           ))}
         </List>

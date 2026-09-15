@@ -36,7 +36,7 @@ export interface StreakInfo {
 
 export interface CampaignInfo {
   id: string;
-  cohortId: string;
+  sectionID: string;
   title: string;
   setting?: string;
   stakes?: string;
@@ -45,7 +45,7 @@ export interface CampaignInfo {
 
 export interface GroupChallengeInfo {
   id: string;
-  cohortId: string;
+  sectionID: string;
   title: string;
   targetXP: number;
   currentXP: number;
@@ -69,7 +69,7 @@ export interface GroupChallengeInfo {
 export interface SquadInfo {
   id: string;
   name: string;
-  cohortId: string;
+  sectionID: string;
   totalXP: number;
   crestSvg?: string | null;
   description?: string;

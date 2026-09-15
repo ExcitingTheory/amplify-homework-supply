@@ -3,14 +3,17 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import { getTranslations } from "next-intl/server";
+import { cacheLife } from "next/cache";
 
 /**
  * Privacy Policy page that displays the privacy policy information.
  * This page is accessible to all users and does not require authentication.
  * Fully cached — content only changes on deployments.
  */
-export default async function PrivacyPolicy() {
-  const t = await getTranslations("pages");
+async function PrivacyContent({ locale }) {
+  "use cache";
+  cacheLife("days");
+  const t = await getTranslations({ locale, namespace: "pages" });
 
   return (
     <>
@@ -252,4 +255,9 @@ export default async function PrivacyPolicy() {
       </Box>
     </>
   );
+}
+
+export default async function PrivacyPolicy({ params }) {
+  const { locale } = await params;
+  return <PrivacyContent locale={locale} />;
 }

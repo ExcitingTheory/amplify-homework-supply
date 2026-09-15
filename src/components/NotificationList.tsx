@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * NotificationList — Filterable list of notifications with category tabs,
  * "mark all as read" button, and empty state.
@@ -15,6 +17,7 @@ import DoneAllIcon from "@mui/icons-material/DoneAll";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import WorkIcon from "@mui/icons-material/Work";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useNotifications } from "../context/notificationContext";
 import AuthContext from "../context/authContext";
 import NotificationCard from "./NotificationCard";
@@ -34,8 +37,12 @@ interface NotificationListProps {
   onNavigate?: (path: string) => void;
 }
 
-export default function NotificationList({ onNavigate }: NotificationListProps) {
+export default function NotificationList({
+  onNavigate,
+}: NotificationListProps) {
   const t = useTranslations("components");
+  const router = useRouter();
+  const navigate = onNavigate ?? ((path: string) => router.push(path));
   const {
     notifications,
     unseenCount,
@@ -92,15 +99,9 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="h5">
-            {t("notification.title")}
-          </Typography>
+          <Typography variant="h5">{t("notification.title")}</Typography>
           {unseenCount > 0 && (
-            <Chip
-              label={unseenCount}
-              size="small"
-              color="error"
-            />
+            <Chip label={unseenCount} size="small" color="error" />
           )}
         </Box>
         {unseenCount > 0 && (
@@ -109,7 +110,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             startIcon={<DoneAllIcon />}
             onClick={markAllSeen}
           >
-              {t("notification.markAllRead")}
+            {t("notification.markAllRead")}
           </Button>
         )}
       </Box>
@@ -129,9 +130,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
             <Tab
               key={cat}
               label={
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   {t(`notification.category.${cat.toLowerCase()}`)}
                   {count > 0 && (
                     <Chip
@@ -162,7 +161,8 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
       {/* Jobs tab — admins/instructors only */}
       {isAdminOrInstructor && selectedCategory === JOBS_TAB_INDEX ? (
         <JobsDashboard compact />
-      ) : selectedCategory < CATEGORIES.length && filteredNotifications.length === 0 ? (
+      ) : selectedCategory < CATEGORIES.length &&
+        filteredNotifications.length === 0 ? (
         <Box
           sx={{
             display: "flex",
@@ -191,7 +191,7 @@ export default function NotificationList({ onNavigate }: NotificationListProps) 
               onMarkSeen={markSeen}
               onMarkInteracted={markInteracted}
               onDelete={deleteNotification}
-              onNavigate={onNavigate}
+              onNavigate={navigate}
             />
           ))}
         </Box>

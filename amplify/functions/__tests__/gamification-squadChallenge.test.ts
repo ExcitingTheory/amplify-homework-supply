@@ -1,8 +1,8 @@
 /**
  * Unit tests for the gamification handler — squad XP and group challenges
  *
- * updateSquadXP now uses getOrCreateStudentProfile to get cohortId, then queries
- * squads via listSquadByCohortId and checks squad.members array for membership.
+ * updateSquadXP now uses getOrCreateStudentProfile to get sectionID, then queries
+ * squads via listSquadBySectionID and checks squad.members array for membership.
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -35,7 +35,7 @@ const baseProfile = (overrides: Record<string, any> = {}) => ({
   badges: "[]",
   personalBests: "[]",
   moduleProgress: "[]",
-  cohortId: "cohort-1",
+  sectionID: "cohort-1",
   freezesRemaining: 0,
   freezesUsed: 0,
   _version: 1,
@@ -57,9 +57,9 @@ describe("gamification handler — updateSquadXP", () => {
           data: { listStudentProfileByStudentId: { items: [baseProfile()] } },
         });
       }
-      if (query?.includes("listSquadByCohortId")) {
+      if (query?.includes("listSquadBySectionID")) {
         return Promise.resolve({
-          data: { listSquadByCohortId: { items: [] } },
+          data: { listSquadBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -86,15 +86,15 @@ describe("gamification handler — updateSquadXP", () => {
           data: { listStudentProfileByStudentId: { items: [baseProfile()] } },
         });
       }
-      if (query?.includes("listSquadByCohortId")) {
+      if (query?.includes("listSquadBySectionID")) {
         return Promise.resolve({
           data: {
-            listSquadByCohortId: {
+            listSquadBySectionID: {
               items: [
                 {
                   id: "squad-1",
                   name: "Alpha Squad",
-                  cohortId: "cohort-1",
+                  sectionID: "cohort-1",
                   totalXP: 200,
                   members: [{ studentId: "student-1", role: "MEMBER" }],
                   _version: 3,
@@ -109,9 +109,9 @@ describe("gamification handler — updateSquadXP", () => {
           data: { updateSquad: { id: "squad-1", totalXP: 250, _version: 4 } },
         });
       }
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
-          data: { listGroupChallengeByCohortId: { items: [] } },
+          data: { listGroupChallengeBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -150,9 +150,9 @@ describe("gamification handler — contributeToChallenge", () => {
 
   it("should return not contributed when no active challenges", async () => {
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
-          data: { listGroupChallengeByCohortId: { items: [] } },
+          data: { listGroupChallengeBySectionID: { items: [] } },
         });
       }
       return Promise.resolve({ data: {} });
@@ -164,7 +164,7 @@ describe("gamification handler — contributeToChallenge", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "cohort-1",
+          sectionID: "cohort-1",
           xpContributed: 30,
         },
       },
@@ -180,14 +180,14 @@ describe("gamification handler — contributeToChallenge", () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString();
 
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
           data: {
-            listGroupChallengeByCohortId: {
+            listGroupChallengeBySectionID: {
               items: [
                 {
                   id: "ch-1",
-                  cohortId: "cohort-1",
+                  sectionID: "cohort-1",
                   title: "Weekly Sprint",
                   targetXP: 1000,
                   currentXP: 800,
@@ -218,7 +218,7 @@ describe("gamification handler — contributeToChallenge", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "cohort-1",
+          sectionID: "cohort-1",
           xpContributed: 30,
         },
       },
@@ -237,14 +237,14 @@ describe("gamification handler — contributeToChallenge", () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString();
 
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
           data: {
-            listGroupChallengeByCohortId: {
+            listGroupChallengeBySectionID: {
               items: [
                 {
                   id: "ch-2",
-                  cohortId: "cohort-1",
+                  sectionID: "cohort-1",
                   title: "Finish Line",
                   targetXP: 500,
                   currentXP: 480,
@@ -287,7 +287,7 @@ describe("gamification handler — contributeToChallenge", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "cohort-1",
+          sectionID: "cohort-1",
           xpContributed: 20,
         },
       },
@@ -313,14 +313,14 @@ describe("gamification handler — contributeToChallenge", () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
 
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGroupChallengeByCohortId")) {
+      if (query?.includes("listGroupChallengeBySectionID")) {
         return Promise.resolve({
           data: {
-            listGroupChallengeByCohortId: {
+            listGroupChallengeBySectionID: {
               items: [
                 {
                   id: "ch-expired",
-                  cohortId: "cohort-1",
+                  sectionID: "cohort-1",
                   title: "Expired Challenge",
                   targetXP: 1000,
                   currentXP: 500,
@@ -343,7 +343,7 @@ describe("gamification handler — contributeToChallenge", () => {
         fieldName: "contributeToChallenge",
         arguments: {
           studentId: "student-1",
-          cohortId: "cohort-1",
+          sectionID: "cohort-1",
           xpContributed: 50,
         },
       },

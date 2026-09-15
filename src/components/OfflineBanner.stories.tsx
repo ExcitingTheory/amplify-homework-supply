@@ -14,6 +14,8 @@ const meta: Meta<typeof OfflineBanner> = {
   title: "🔌 Offline & Sync/Offline Banner",
   component: OfflineBanner,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "fullscreen",
     docs: {
       description: {

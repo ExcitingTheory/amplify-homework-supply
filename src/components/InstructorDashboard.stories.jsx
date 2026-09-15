@@ -1,9 +1,11 @@
 import React from "react";
+import { expect, within } from "storybook/test";
 import {
   seedMockGrade,
   seedMockAssignments,
   seedMockAssistantChats,
   seedMockUnit,
+  clearMockData,
 } from "@storybook-mocks/aws-amplify-data";
 import InstructorDashboard from "./InstructorDashboard";
 
@@ -211,6 +213,27 @@ export const SingleSection = {
 export const NoSections = {
   args: {
     sections: [],
+  },
+};
+
+// Sections with assignments but no submissions yet — exercises the per-section
+// "no student data available yet" empty state (validation matrix coverage).
+export const NoGradeData = {
+  args: {
+    sections: mockSections,
+  },
+  decorators: [
+    (Story) => {
+      clearMockData();
+      mockUnits.forEach((u) => seedMockUnit(u));
+      seedMockAssignments(mockAssignments);
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const emptyStates = await canvas.findAllByText(/no student data/i);
+    expect(emptyStates.length).toBeGreaterThan(0);
   },
 };
 

@@ -5,53 +5,55 @@
  * @module SkillForm
  */
 
-import React, { useState } from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Autocomplete from '@mui/material/Autocomplete'
-import Chip from '@mui/material/Chip'
-import InputAdornment from '@mui/material/InputAdornment'
-import Slider from '@mui/material/Slider'
-import Typography from '@mui/material/Typography'
-import AddIcon from '@mui/icons-material/Add'
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
+import React, { useState } from "react";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Autocomplete from "@mui/material/Autocomplete";
+import Chip from "@mui/material/Chip";
+import InputAdornment from "@mui/material/InputAdornment";
+import Slider from "@mui/material/Slider";
+import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface UnitOption {
-  id: string
-  name: string
+  id: string;
+  name: string;
+  /** PublishedStatus of the underlying Unit — used to flag drafts in pickers */
+  status?: string;
 }
 
 export interface SkillOption {
-  id: string
-  title: string
+  id: string;
+  title: string;
 }
 
 export interface SkillFormData {
-  title: string
-  description?: string
-  xpReward: number
-  unitIds: string[]
-  prerequisites: string[]
-  minimumAccuracy: number
+  title: string;
+  description?: string;
+  xpReward: number;
+  unitIds: string[];
+  prerequisites: string[];
+  minimumAccuracy: number;
 }
 
 export interface SkillFormProps {
   /** Available units for linking (from section assignments) */
-  availableUnits?: UnitOption[]
+  availableUnits?: UnitOption[];
   /** Available skills for prerequisites */
-  availableSkills?: SkillOption[]
+  availableSkills?: SkillOption[];
   /** Called when form is submitted */
-  onSubmit: (data: SkillFormData) => void
+  onSubmit: (data: SkillFormData) => void;
   /** Called when "Generate from Unit" is clicked */
-  onGenerateFromUnit?: (unitId: string) => void
+  onGenerateFromUnit?: (unitId: string) => void;
   /** Disable during submission */
-  submitting?: boolean
+  submitting?: boolean;
 }
 
 // ============================================================================
@@ -65,19 +67,19 @@ export function SkillForm({
   onGenerateFromUnit,
   submitting = false,
 }: SkillFormProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [xpReward, setXpReward] = useState(0)
-  const [selectedUnits, setSelectedUnits] = useState<UnitOption[]>([])
-  const [selectedPrereqs, setSelectedPrereqs] = useState<SkillOption[]>([])
-  const [minimumAccuracy, setMinimumAccuracy] = useState(70)
-  const [generateUnit, setGenerateUnit] = useState<UnitOption | null>(null)
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [xpReward, setXpReward] = useState(0);
+  const [selectedUnits, setSelectedUnits] = useState<UnitOption[]>([]);
+  const [selectedPrereqs, setSelectedPrereqs] = useState<SkillOption[]>([]);
+  const [minimumAccuracy, setMinimumAccuracy] = useState(70);
+  const [generateUnit, setGenerateUnit] = useState<UnitOption | null>(null);
 
-  const isValid = title.trim().length > 0
+  const isValid = title.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isValid) return
+    e.preventDefault();
+    if (!isValid) return;
 
     onSubmit({
       title: title.trim(),
@@ -86,16 +88,16 @@ export function SkillForm({
       unitIds: selectedUnits.map((u) => u.id),
       prerequisites: selectedPrereqs.map((s) => s.id),
       minimumAccuracy,
-    })
+    });
 
     // Reset form
-    setTitle('')
-    setDescription('')
-    setXpReward(0)
-    setSelectedUnits([])
-    setSelectedPrereqs([])
-    setMinimumAccuracy(70)
-  }
+    setTitle("");
+    setDescription("");
+    setXpReward(0);
+    setSelectedUnits([]);
+    setSelectedPrereqs([]);
+    setMinimumAccuracy(70);
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
@@ -131,7 +133,9 @@ export function SkillForm({
             value={xpReward}
             onChange={(e) => setXpReward(Number(e.target.value))}
             InputProps={{
-              startAdornment: <InputAdornment position="start">XP</InputAdornment>,
+              startAdornment: (
+                <InputAdornment position="start">XP</InputAdornment>
+              ),
               inputProps: { min: 0 },
             }}
             sx={{ width: 140 }}
@@ -164,13 +168,39 @@ export function SkillForm({
           onChange={(_, newValue) => setSelectedUnits(newValue)}
           getOptionLabel={(option) => option.name}
           isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderOption={(props, option) => (
+            <li {...props} key={option.id}>
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
+                sx={{ flex: 1 }}
+              >
+                <Box sx={{ flex: 1 }}>{option.name}</Box>
+                {option.status === "DRAFT" && (
+                  <Chip
+                    label="Draft"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                    sx={{ height: 18, fontSize: "0.6rem" }}
+                  />
+                )}
+              </Stack>
+            </li>
+          )}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
               <Chip
                 {...getTagProps({ index })}
                 key={option.id}
-                label={option.name}
+                label={
+                  option.status === "DRAFT"
+                    ? `${option.name} (Draft)`
+                    : option.name
+                }
                 size="small"
+                color={option.status === "DRAFT" ? "warning" : "default"}
               />
             ))
           }
@@ -180,6 +210,7 @@ export function SkillForm({
               size="small"
               label="Required Units"
               placeholder="Select units required for mastery..."
+              helperText="Units marked Draft aren't published yet — students can't complete them until you publish."
             />
           )}
           disabled={submitting}
@@ -225,7 +256,7 @@ export function SkillForm({
             disabled={!isValid || submitting}
             sx={{ flex: 1 }}
           >
-            {submitting ? 'Adding...' : 'Add Skill'}
+            {submitting ? "Adding..." : "Add Skill"}
           </Button>
 
           {onGenerateFromUnit && (
@@ -236,6 +267,27 @@ export function SkillForm({
                 onChange={(_, newValue) => setGenerateUnit(newValue)}
                 getOptionLabel={(option) => option.name}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
+                      alignItems="center"
+                      sx={{ flex: 1 }}
+                    >
+                      <Box sx={{ flex: 1 }}>{option.name}</Box>
+                      {option.status === "DRAFT" && (
+                        <Chip
+                          label="Draft"
+                          size="small"
+                          color="warning"
+                          variant="outlined"
+                          sx={{ height: 18, fontSize: "0.6rem" }}
+                        />
+                      )}
+                    </Stack>
+                  </li>
+                )}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -255,8 +307,8 @@ export function SkillForm({
                 disabled={!generateUnit || submitting}
                 onClick={() => {
                   if (generateUnit) {
-                    onGenerateFromUnit(generateUnit.id)
-                    setGenerateUnit(null)
+                    onGenerateFromUnit(generateUnit.id);
+                    setGenerateUnit(null);
                   }
                 }}
               >
@@ -267,7 +319,7 @@ export function SkillForm({
         </Stack>
       </Stack>
     </Box>
-  )
+  );
 }
 
-export default SkillForm
+export default SkillForm;

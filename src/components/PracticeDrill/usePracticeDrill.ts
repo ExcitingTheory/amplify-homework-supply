@@ -15,6 +15,10 @@ import {
 } from "./buildPracticeDrillFeedback";
 import { updateLearningMemory } from "../../../app/actions/gamification";
 import { generatePracticeDrill as generatePracticeDrillAction } from "../../../app/actions/drill";
+import {
+  trackPracticeDrillStarted,
+  trackPracticeDrillCompleted,
+} from "../../utils/analytics";
 import type { DrillConfig } from "./PracticeDrillConfigPopup";
 
 // ============================================================================
@@ -82,6 +86,8 @@ interface UsePracticeDrillReturn {
   submitAnswer: (blockId: string, answer: BlockAnswer) => void;
   /** Mark session as complete and award XP */
   completeDrill: () => Promise<void>;
+  /** Start a focused retry using the blocks that were answered below 100%. */
+  retryMissed: () => void;
   /** Reset session */
   reset: () => void;
 }
@@ -135,10 +141,7 @@ export function usePracticeDrill(
           await client.models.PracticeSession.create({
             unitID: unitId,
             drillType: config.drillType.toUpperCase() as
-              | "MIXED"
-              | "VOCABULARY"
-              | "COMPREHENSION"
-              | "REVIEW",
+              "MIXED" | "VOCABULARY" | "COMPREHENSION" | "REVIEW",
             blockCount: blocks.length,
             blocksCompleted: 0,
             complete: false,
@@ -172,6 +175,12 @@ export function usePracticeDrill(
             sourcesEnabled: config.sources,
             ...(result as any)?.metadata,
           },
+        });
+
+        trackPracticeDrillStarted(unitId, {
+          sessionId,
+          drillType: config.drillType,
+          blockCount: blocks.length,
         });
       } catch (err: any) {
         console.error("[usePracticeDrill] Generation error:", err);
@@ -230,6 +239,13 @@ export function usePracticeDrill(
           unitId: record.unitID,
           drillType: record.drillType,
         },
+      });
+
+      trackPracticeDrillStarted(record.unitID || "", {
+        sessionId,
+        drillType: record.drillType || undefined,
+        blockCount: blocks.length,
+        isResume: true,
       });
     } catch (err: any) {
       console.error("[usePracticeDrill] Resume error:", err);
@@ -458,6 +474,12 @@ export function usePracticeDrill(
         complete: true,
         xpAwarded: totalXP,
       }));
+
+      trackPracticeDrillCompleted(
+        unitId,
+        { accuracy: session.accuracy, xpAwarded: totalXP },
+        sessionIdRef.current || undefined,
+      );
     } catch (err: any) {
       console.error("[usePracticeDrill] Completion error:", err);
       setError(err.message || "Failed to complete drill");
@@ -465,6 +487,30 @@ export function usePracticeDrill(
       setSaving(false);
     }
   }, [session, unitName]);
+
+  const retryMissed = useCallback(() => {
+    setSession((prev) => {
+      const answers = Object.values(prev.answers);
+      const missedIndexes = new Set(
+        answers.reduce<number[]>((indexes, answer, index) => {
+          if (answer?.complete && Number(answer.accuracy || 0) < 100) {
+            indexes.push(index);
+          }
+          return indexes;
+        }, []),
+      );
+
+      return {
+        ...prev,
+        blocks: prev.blocks.filter((_, index) => missedIndexes.has(index)),
+        answers: {},
+        accuracy: 0,
+        blocksCompleted: 0,
+        complete: false,
+        xpAwarded: 0,
+      };
+    });
+  }, []);
 
   const reset = useCallback(() => {
     setSession(INITIAL_SESSION);
@@ -482,6 +528,7 @@ export function usePracticeDrill(
     replayTemplate,
     submitAnswer,
     completeDrill,
+    retryMissed,
     reset,
   };
 }

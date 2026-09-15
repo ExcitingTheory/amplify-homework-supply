@@ -2,6 +2,7 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import { optimizeDepsInclude } from "./optimize-deps.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,9 @@ const config: StorybookConfig = {
     path.resolve(__dirname, "addons/translation-mode/preset.js"),
   ],
   framework: getAbsolutePath("@storybook/nextjs-vite"),
+  docs: {
+    autodocs: false,
+  },
   features: {
     experimentalRSC: true,
   },
@@ -507,9 +511,26 @@ const config: StorybookConfig = {
       "react/jsx-runtime",
     ];
 
-    // Enable lazy compilation for faster initial load
+    // Warm up the modules that load on EVERY story (the global preview decorator
+    // wraps all stories in this provider stack). Transforming them in the
+    // background at boot removes the first-visit compile waterfall. Vite warmup
+    // is non-blocking, so this only helps startup for these always-used files.
     config.server = config.server || {};
-    config.server.warmup = { clientFiles: [] };
+    config.server.warmup = {
+      clientFiles: [
+        "./.storybook/preview.jsx",
+        "./.storybook/__mocks__/authContext.js",
+        "./.storybook/__mocks__/aws-amplify-data.js",
+        "./src/context/fileContext.jsx",
+        "./src/context/dictionaryContext.jsx",
+        "./src/context/sectionContext.jsx",
+        "./src/context/unitContext.jsx",
+        "./src/context/chatContext.jsx",
+        "./src/context/settingsContext.jsx",
+        "./src/context/gamificationContext.tsx",
+        "./src/components/Editor3/context/AudioPlayerContext.jsx",
+      ],
+    };
 
     // Exclude YJS folder from being processed to prevent loading real files
     if (!config.optimizeDeps) {
@@ -527,39 +548,14 @@ const config: StorybookConfig = {
       "@aws-amplify/adapter-nextjs",
     );
 
-    // Pre-bundle heavy dependencies so they don't block story loading
+    // Pre-bundle heavy dependencies so they don't block story loading.
+    // The full list is generated from Vite's resolved optimize metadata so that
+    // every dep (including hundreds of @mui deep imports) is bundled in a single
+    // startup pass instead of being discovered lazily as stories load — which
+    // otherwise triggers repeated re-optimization + full page reloads.
+    // Regenerate with: node scripts/generate-optimize-deps.mjs
     config.optimizeDeps.include = config.optimizeDeps.include || [];
-    config.optimizeDeps.include.push(
-      "lexical",
-      "@lexical/react/LexicalComposer",
-      "@lexical/react/LexicalRichTextPlugin",
-      "@lexical/react/LexicalContentEditable",
-      "@lexical/react/LexicalErrorBoundary",
-      "@lexical/react/LexicalHistoryPlugin",
-      "@lexical/react/LexicalListPlugin",
-      "@lexical/react/LexicalTablePlugin",
-      "@lexical/react/LexicalMarkdownShortcutPlugin",
-      "@lexical/rich-text",
-      "@lexical/list",
-      "@lexical/table",
-      "@lexical/code",
-      "@lexical/link",
-      "@lexical/utils",
-      "@lexical/selection",
-      "@lexical/markdown",
-      "@mui/material",
-      "@mui/material/Fade",
-      "@mui/material/Collapse",
-      "@mui/icons-material",
-      "@mui/x-data-grid",
-      "@mui/x-tree-view",
-      "@emotion/react",
-      "@emotion/styled",
-      "react-pdf",
-      "pdfjs-dist/build/pdf.worker.mjs",
-      "framer-motion",
-      "@ai-sdk/react",
-    );
+    config.optimizeDeps.include.push(...optimizeDepsInclude);
 
     // Define Node.js globals for browser environment to fix Next.js compatibility
     if (!config.define) {

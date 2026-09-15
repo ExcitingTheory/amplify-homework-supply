@@ -6,6 +6,10 @@ import { expect, within } from "storybook/test";
 const meta: Meta<typeof CampaignTimeline> = {
   title: "🏆 Gamification/XP & Progression/Campaign Timeline",
   component: CampaignTimeline,
+  parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
+  },
 };
 export default meta;
 

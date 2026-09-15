@@ -26,6 +26,7 @@ import {
   trackSquadLeft,
   trackSquadPostCreated,
   trackSquadPostDeleted,
+  trackSquadEdited,
 } from "@/utils/analytics";
 
 /**
@@ -67,9 +68,9 @@ function SquadPage() {
   // Track squad page view (deeper than pageView — includes squad/section context)
   React.useEffect(() => {
     if (mySquad?.id) {
-      trackSquadViewed(mySquad.id, mySquad.cohortId || "");
+      trackSquadViewed(mySquad.id, mySquad.sectionID || "");
     }
-  }, [mySquad?.id, mySquad?.cohortId]);
+  }, [mySquad?.id, mySquad?.sectionID]);
 
   // Instructor view state — for instructors who aren't squad members
   const [isInstructor, setIsInstructor] = React.useState(false);
@@ -96,9 +97,9 @@ function SquadPage() {
         const isInstructorGroup = groups.includes("Instructors");
 
         let hasAccess = isAdmin;
-        if (!hasAccess && isInstructorGroup && squad.cohortId) {
+        if (!hasAccess && isInstructorGroup && squad.sectionID) {
           const { data: section } = await client.models.Section.get({
-            id: squad.cohortId,
+            id: squad.sectionID,
           });
           const currentUser = await getCurrentUser();
           hasAccess =
@@ -239,7 +240,7 @@ function SquadPage() {
           ],
           _version: squad._version,
         });
-        trackSquadJoined(squadId, squad.cohortId || "");
+        trackSquadJoined(squadId, squad.sectionID || "");
       } catch (err) {
         console.error("[SquadPage] Failed to join squad:", err);
       }
@@ -260,7 +261,7 @@ function SquadPage() {
         members: updatedMembers,
         _version: squad._version,
       });
-      trackSquadLeft(mySquad.id, mySquad.cohortId || "");
+      trackSquadLeft(mySquad.id, mySquad.sectionID || "");
     } catch (err) {
       console.error("[SquadPage] Failed to leave squad:", err);
     }
@@ -299,7 +300,7 @@ function SquadPage() {
           posts: [...currentPosts, newPost],
           _version: squad._version,
         });
-        trackSquadPostCreated(mySquad.id, mySquad.cohortId || "");
+        trackSquadPostCreated(mySquad.id, mySquad.sectionID || "");
       } catch (err) {
         console.error("[SquadPage] Failed to publish post:", err);
       } finally {
@@ -328,7 +329,7 @@ function SquadPage() {
           posts: currentPosts,
           _version: squad._version,
         });
-        trackSquadPostDeleted(mySquad.id, mySquad.cohortId || "");
+        trackSquadPostDeleted(mySquad.id, mySquad.sectionID || "");
       } catch (err) {
         console.error("[SquadPage] Failed to delete post:", err);
       }
@@ -369,6 +370,14 @@ function SquadPage() {
           crestSvg: svg || undefined,
           _version: data?._version,
         });
+        const changed = [
+          name !== mySquad.name && "name",
+          (description || "") !== (mySquad.description || "") && "description",
+          svg && svg !== mySquad.crestSvg && "crest",
+        ]
+          .filter(Boolean)
+          .join(",");
+        trackSquadEdited(mySquad.id, changed || "profile");
       } catch (err) {
         console.error("[SquadPage] Failed to save squad:", err);
       }
@@ -727,24 +736,24 @@ function SquadPage() {
   );
 }
 
-export default function WrappedPage({ initialCohortId }) {
+export default function WrappedPage({ initialSectionID }) {
   const router = useRouter();
   const { id: squadId } = useParams();
-  const [cohortId, setCohortId] = React.useState(initialCohortId);
+  const [sectionID, setSectionID] = React.useState(initialSectionID);
 
-  // Fetch the squad record to get its cohortId for scoping the gamification provider
+  // Fetch the squad record to get its sectionID for scoping the gamification provider
   React.useEffect(() => {
-    if (!squadId || cohortId) return;
+    if (!squadId || sectionID) return;
     const client = getAmplifyClient();
     client.models.Squad.get({ id: squadId })
       .then(({ data }) => {
-        if (data?.cohortId) setCohortId(data.cohortId);
+        if (data?.sectionID) setSectionID(data.sectionID);
       })
-      .catch(() => {}); // Ignore errors — provider will work without cohortId
-  }, [squadId, cohortId]);
+      .catch(() => {}); // Ignore errors — provider will work without sectionID
+  }, [squadId, sectionID]);
 
   return (
-    <GamificationProviderWrapper cohortId={cohortId}>
+    <GamificationProviderWrapper sectionID={sectionID}>
       <SquadPage />
     </GamificationProviderWrapper>
   );

@@ -49,6 +49,19 @@ export async function listSectionStudents(code) {
   };
 }
 
+export async function addStudentsToSection(sectionId, emails) {
+  return {
+    success: true,
+    added: emails || [],
+    alreadyEnrolled: [],
+    notFound: [],
+  };
+}
+
+export async function removeStudentFromSection(sectionId, username) {
+  return { success: true };
+}
+
 // --- app/actions/collaborator ---
 export async function grantCollaboratorAccess() {
   return { success: true };

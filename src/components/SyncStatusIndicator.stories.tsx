@@ -11,6 +11,8 @@ const meta: Meta<typeof SyncStatusIndicator> = {
   title: "🔌 Offline & Sync/Sync Status Indicator",
   component: SyncStatusIndicator,
   parameters: {
+    // Pure presentational component — skip the app context/subscription stack.
+    minimalProviders: true,
     layout: "centered",
     docs: {
       description: {

@@ -20,9 +20,6 @@ import React, {
   useContext,
   useMemo,
 } from "react";
-import { useTranslations } from "next-intl";
-import UnitContext from "../context/unitContext";
-import SectionContext from "../context/sectionContext";
 import {
   Box,
   Paper,
@@ -48,7 +45,14 @@ import {
   List,
   ListItem,
   Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
+import UnitContext from "../context/unitContext";
+import SectionContext from "../context/sectionContext";
 import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
@@ -90,12 +94,12 @@ import {
 
 // Available TTS voices
 const TTS_VOICES = [
-  { value: "alloy", label: "Alloy (Neutral)" },
-  { value: "echo", label: "Echo (Male)" },
-  { value: "fable", label: "Fable (British Male)" },
-  { value: "onyx", label: "Onyx (Deep Male)" },
-  { value: "nova", label: "Nova (Female)" },
-  { value: "shimmer", label: "Shimmer (Soft Female)" },
+  { value: "alloy", fallback: "Alloy (Neutral)" },
+  { value: "echo", fallback: "Echo (Male)" },
+  { value: "fable", fallback: "Fable (British Male)" },
+  { value: "onyx", fallback: "Onyx (Deep Male)" },
+  { value: "nova", fallback: "Nova (Female)" },
+  { value: "shimmer", fallback: "Shimmer (Soft Female)" },
 ];
 
 /**
@@ -172,6 +176,8 @@ export default forwardRef(function RecordingStudio3(
   const [recordingMode, setRecordingMode] = useState("overdub"); // 'overdub', 'punch-in', 'replace'
   const [ttsQueue, setTtsQueue] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [activeFilters, setActiveFilters] = useState(new Set());
 
   // Fountain screenplay text — bidirectional sync with scriptData
@@ -585,8 +591,14 @@ export default forwardRef(function RecordingStudio3(
           takeIndex: updatedTakes.length - 1,
         },
       );
+      setStatusMessage(
+        t("recordingStudio3.recordingSaved", "Recording saved."),
+      );
     } catch (error) {
       console.error("Error processing recording:", error);
+      setStatusMessage(
+        t("recordingStudio3.saveRecordingFailed", "Unable to save recording."),
+      );
       alert(t("recordingStudio3.saveRecordingFailed"));
     }
   };
@@ -606,6 +618,9 @@ export default forwardRef(function RecordingStudio3(
     }
 
     setIsGenerating(true);
+    setStatusMessage(
+      t("recordingStudio3.generatingAudio", "Generating audio..."),
+    );
 
     try {
       // Build cinematic context for TTS generation
@@ -658,8 +673,14 @@ export default forwardRef(function RecordingStudio3(
         emotion: dialogue.emotion,
         characterDescription: speaker.description,
       });
+      setStatusMessage(
+        t("recordingStudio3.audioGenerated", "Audio generated."),
+      );
     } catch (error) {
       console.error("Error generating TTS:", error);
+      setStatusMessage(
+        t("recordingStudio3.ttsGenerationFailed", "Audio generation failed."),
+      );
       alert(t("recordingStudio3.ttsGenerationFailed"));
     } finally {
       setIsGenerating(false);
@@ -678,11 +699,15 @@ export default forwardRef(function RecordingStudio3(
     }
 
     setTtsQueue(missingLines.map((line) => line.id));
+    setStatusMessage(
+      t("recordingStudio3.generatingAudio", "Generating audio..."),
+    );
 
     for (const line of missingLines) {
       await handleGenerateTTS(line.id);
       setTtsQueue((prev) => prev.filter((id) => id !== line.id));
     }
+    setStatusMessage(t("recordingStudio3.audioGenerated", "Audio generated."));
   };
 
   // Expose imperative API for parent (e.g., RecordingStudio3Modal)
@@ -710,6 +735,11 @@ export default forwardRef(function RecordingStudio3(
 
   // Delete take
   const handleDeleteTake = (dialogueId, takeIndex) => {
+    const confirmDeleteTake = () => {
+      if (!pendingDelete) return;
+      handleDeleteTake(pendingDelete.dialogueId, pendingDelete.takeIndex);
+      setPendingDelete(null);
+    };
     const dialogue = scriptData.dialogue.find((d) => d.id === dialogueId);
     if (!dialogue) return;
 
@@ -939,8 +969,12 @@ export default forwardRef(function RecordingStudio3(
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Paper sx={{ p: 1.5, borderRadius: 0 }}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Typography variant="h6" sx={{ flex: 1 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+        >
+          <Typography variant="h6" sx={{ flex: 1, minWidth: 0 }}>
             {scriptData.metadata.title}
           </Typography>
 
@@ -954,7 +988,7 @@ export default forwardRef(function RecordingStudio3(
             {t("recordingStudio3.generateAllMissing")}
           </Button>
           {ttsQueue.length > 0 && (
-            <Box sx={{ width: 120 }}>
+            <Box sx={{ width: { xs: "100%", sm: 120 } }}>
               <LinearProgress />
             </Box>
           )}
@@ -986,10 +1020,30 @@ export default forwardRef(function RecordingStudio3(
             {t("recordingStudio3.exportJson")}
           </Button>
         </Stack>
+        <Box
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          sx={{ minHeight: statusMessage ? 24 : 0, mt: statusMessage ? 1 : 0 }}
+        >
+          {statusMessage && (
+            <Typography variant="caption" color="text.secondary">
+              {statusMessage}
+            </Typography>
+          )}
+        </Box>
       </Paper>
 
       {/* ── Top section: Screenplay Editor + Speakers Panel ── */}
-      <Box sx={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flex: 1,
+          overflow: "hidden",
+          minHeight: 0,
+          flexDirection: { xs: "column", md: "row" },
+        }}
+      >
         {/* Screenplay Editor (left) */}
         <Box
           sx={{
@@ -1010,7 +1064,13 @@ export default forwardRef(function RecordingStudio3(
 
         {/* Right: Speakers Panel + Properties (when card selected) */}
         <Paper
-          sx={{ width: 300, borderRadius: 0, overflow: "auto", flexShrink: 0 }}
+          sx={{
+            width: { xs: "100%", md: 300 },
+            maxHeight: { xs: "45vh", md: "none" },
+            borderRadius: 0,
+            overflow: "auto",
+            flexShrink: 0,
+          }}
         >
           <Box sx={{ p: 2 }}>
             {/* ── Properties Panel (shown when a timeline card is selected) ── */}
@@ -1032,7 +1092,7 @@ export default forwardRef(function RecordingStudio3(
                     multiline
                     rows={2}
                     size="small"
-                    label="Text"
+                    label={t("recordingStudio3.text", "Text")}
                     value={selectedDialogue.text || ""}
                     onChange={(e) =>
                       handleUpdateDialogueLine(selectedDialogue.id, {
@@ -1045,7 +1105,7 @@ export default forwardRef(function RecordingStudio3(
                   <TextField
                     fullWidth
                     size="small"
-                    label="Direction"
+                    label={t("recordingStudio3.direction", "Direction")}
                     value={selectedDialogue.direction || ""}
                     onChange={(e) =>
                       handleUpdateDialogueLine(selectedDialogue.id, {
@@ -1053,13 +1113,16 @@ export default forwardRef(function RecordingStudio3(
                       })
                     }
                     disabled={readOnly}
-                    placeholder="e.g., entering, out of breath"
+                    placeholder={t(
+                      "recordingStudio3.directionPlaceholder",
+                      "e.g., entering, out of breath",
+                    )}
                   />
 
                   <TextField
                     fullWidth
                     size="small"
-                    label="Emotion"
+                    label={t("recordingStudio3.emotion", "Emotion")}
                     value={selectedDialogue.emotion || ""}
                     onChange={(e) =>
                       handleUpdateDialogueLine(selectedDialogue.id, {
@@ -1067,7 +1130,10 @@ export default forwardRef(function RecordingStudio3(
                       })
                     }
                     disabled={readOnly}
-                    placeholder="e.g., cheerful, tired"
+                    placeholder={t(
+                      "recordingStudio3.emotionPlaceholder",
+                      "e.g., cheerful, tired",
+                    )}
                   />
 
                   {/* Recording / TTS controls */}
@@ -1079,7 +1145,7 @@ export default forwardRef(function RecordingStudio3(
                           handleAudioWaveformRecordingComplete
                         }
                         height={60}
-                        width={400}
+                        width="100%"
                       />
                     )}
 
@@ -1126,22 +1192,6 @@ export default forwardRef(function RecordingStudio3(
                                   alignItems: "stretch",
                                   py: 1,
                                 }}
-                                secondaryAction={
-                                  !readOnly && (
-                                    <IconButton
-                                      edge="end"
-                                      size="small"
-                                      onClick={() =>
-                                        handleDeleteTake(
-                                          selectedDialogue.id,
-                                          index,
-                                        )
-                                      }
-                                    >
-                                      <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                  )
-                                }
                               >
                                 <Stack
                                   direction="row"
@@ -1151,6 +1201,13 @@ export default forwardRef(function RecordingStudio3(
                                 >
                                   <IconButton
                                     size="small"
+                                    aria-label={t(
+                                      isActive
+                                        ? "recordingStudio3.activeTake"
+                                        : "recordingStudio3.selectTake",
+                                      isActive ? "Active take" : "Select take",
+                                    )}
+                                    aria-pressed={isActive}
                                     onClick={() =>
                                       handleSetActiveTake(
                                         selectedDialogue.id,
@@ -1195,6 +1252,25 @@ export default forwardRef(function RecordingStudio3(
                                       readOnly || typeof take.id !== "string"
                                     }
                                   />
+                                  {!readOnly && (
+                                    <IconButton
+                                      edge="end"
+                                      size="small"
+                                      aria-label={t(
+                                        "recordingStudio3.deleteTake",
+                                        "Delete take",
+                                      )}
+                                      onClick={() =>
+                                        setPendingDelete({
+                                          dialogueId: selectedDialogue.id,
+                                          takeIndex: index,
+                                        })
+                                      }
+                                      sx={{ ml: "auto", flexShrink: 0 }}
+                                    >
+                                      <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                  )}
                                 </Stack>
                                 {(takeAudioUrl || take.file) && (
                                   <Box sx={{ mt: 0.5, pl: 5 }}>
@@ -1203,7 +1279,7 @@ export default forwardRef(function RecordingStudio3(
                                       file={take.file}
                                       waveformData={take.waveformData}
                                       audioFilters={activeFilters}
-                                      width={350}
+                                      width="100%"
                                       height={50}
                                       showDuration
                                     />
@@ -1255,19 +1331,34 @@ export default forwardRef(function RecordingStudio3(
                               })
                             }
                             disabled={readOnly || isLocked}
-                            label="Name"
+                            label={t("recordingStudio3.name", "Name")}
                           />
                           {!isLocked && !readOnly && (
                             <IconButton
                               size="small"
+                              aria-label={t(
+                                "recordingStudio3.deleteSpeaker",
+                                "Delete speaker",
+                              )}
                               onClick={() => handleDeleteSpeaker(speakerId)}
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
                           )}
                           {isLocked && (
-                            <Tooltip title="Locked track">
-                              <Badge badgeContent="🔒" />
+                            <Tooltip
+                              title={t(
+                                "recordingStudio3.lockedTrack",
+                                "Locked track",
+                              )}
+                            >
+                              <Badge
+                                badgeContent="🔒"
+                                aria-label={t(
+                                  "recordingStudio3.lockedTrack",
+                                  "Locked track",
+                                )}
+                              />
                             </Tooltip>
                           )}
                         </Stack>
@@ -1286,7 +1377,10 @@ export default forwardRef(function RecordingStudio3(
                           >
                             {TTS_VOICES.map((voice) => (
                               <MenuItem key={voice.value} value={voice.value}>
-                                {voice.label}
+                                {t(
+                                  `recordingStudio3.voices.${voice.value}`,
+                                  voice.fallback,
+                                )}
                               </MenuItem>
                             ))}
                           </Select>
@@ -1304,8 +1398,14 @@ export default forwardRef(function RecordingStudio3(
                             })
                           }
                           disabled={readOnly}
-                          label="Description"
-                          placeholder="e.g., 30s, energetic, professional"
+                          label={t(
+                            "recordingStudio3.description",
+                            "Description",
+                          )}
+                          placeholder={t(
+                            "recordingStudio3.descriptionPlaceholder",
+                            "e.g., 30s, energetic, professional",
+                          )}
                         />
                       </Stack>
                     </Paper>
@@ -1328,6 +1428,30 @@ export default forwardRef(function RecordingStudio3(
         onRecordingComplete={handleAudioWaveformRecordingComplete}
         readOnly={readOnly}
       />
+
+      <Dialog
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        aria-labelledby="delete-take-title"
+      >
+        <DialogTitle id="delete-take-title">
+          {t("recordingStudio3.deleteTakeTitle", "Delete this take?")}
+        </DialogTitle>
+        <DialogContent>
+          {t(
+            "recordingStudio3.deleteTakeMessage",
+            "This recording will be removed from the dialogue line.",
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingDelete(null)}>
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button color="error" variant="contained" onClick={confirmDeleteTake}>
+            {t("common.delete", "Delete")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 });

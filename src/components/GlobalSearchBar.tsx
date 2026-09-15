@@ -27,6 +27,7 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 import { listSectionStudents } from "../../app/actions/section";
 import { useSearch, type SearchResult } from "../context/searchContext";
 import { usePathname, useRouter } from "next/navigation";
+import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
 interface FilterOption {
   label: string;
@@ -64,9 +65,7 @@ const typeLabels: Record<string, string> = {
   chat: "CHAT",
 };
 
-function groupResults(
-  results: SearchResult[],
-): Record<string, SearchResult[]> {
+function groupResults(results: SearchResult[]): Record<string, SearchResult[]> {
   const grouped: Record<string, SearchResult[]> = {};
   for (const result of results) {
     if (!grouped[result.type]) grouped[result.type] = [];
@@ -120,9 +119,8 @@ export default function GlobalSearchBar() {
   const sectionCtx = React.useContext(SectionContext as React.Context<any>);
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = React.useState(-1);
-  const [fromOptions, setFromOptions] = React.useState<FilterOption[]>(
-    FROM_BASE_OPTIONS,
-  );
+  const [fromOptions, setFromOptions] =
+    React.useState<FilterOption[]>(FROM_BASE_OPTIONS);
   const [fromLoading, setFromLoading] = React.useState(false);
 
   const grouped = React.useMemo(() => groupResults(results), [results]);
@@ -177,7 +175,9 @@ export default function GlobalSearchBar() {
 
         if (!sectionCode) {
           const client = getAmplifyClient();
-          const section = await client.models.Section.get({ id: currentSectionId });
+          const section = await client.models.Section.get({
+            id: currentSectionId,
+          });
           sectionCode = section?.data?.code;
         }
 
@@ -187,7 +187,11 @@ export default function GlobalSearchBar() {
         }
 
         const response = await listSectionStudents(sectionCode);
-        if (!response?.success || !Array.isArray(response.students) || cancelled) {
+        if (
+          !response?.success ||
+          !Array.isArray(response.students) ||
+          cancelled
+        ) {
           setFromOptions(FROM_BASE_OPTIONS);
           return;
         }
@@ -280,19 +284,25 @@ export default function GlobalSearchBar() {
   };
 
   return (
-    <Box ref={anchorRef} sx={{ position: "relative", mx: 1, flexGrow: 1, maxWidth: 400 }}>
+    <Box
+      ref={anchorRef}
+      sx={{ position: "relative", mx: 1, flexGrow: 1, maxWidth: 400 }}
+    >
       <Paper
         sx={{
           display: "flex",
           alignItems: "center",
           px: 1,
           py: 0.25,
-          borderRadius: 2,
+          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
           bgcolor: "action.hover",
         }}
         elevation={0}
       >
-        <SearchIcon sx={{ color: "text.secondary", mr: 0.5 }} fontSize="small" />
+        <SearchIcon
+          sx={{ color: "text.secondary", mr: 0.5 }}
+          fontSize="small"
+        />
         <InputBase
           placeholder="Search..."
           value={query}
@@ -320,7 +330,15 @@ export default function GlobalSearchBar() {
         }}
       >
         <Paper elevation={4} sx={{ maxHeight: 400, overflow: "auto", mt: 0.5 }}>
-          <Box sx={{ px: 1, pt: 1, pb: 0.5, borderBottom: "1px solid", borderColor: "divider" }}>
+          <Box
+            sx={{
+              px: 1,
+              pt: 1,
+              pb: 0.5,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
               <Autocomplete
                 size="small"
@@ -408,7 +426,7 @@ export default function GlobalSearchBar() {
                     setQuery(noFrom);
                     setOpen(true);
                   }}
-                  sx={{ minWidth: "auto", px: 0.75, textTransform: "none" }}
+                  sx={{ minWidth: "auto", px: 0.75 }}
                 >
                   Clear filters
                 </Button>
@@ -436,8 +454,14 @@ export default function GlobalSearchBar() {
                       <ListItemText
                         primary={result.title}
                         secondary={result.description}
-                        primaryTypographyProps={{ noWrap: true, fontSize: "0.85rem" }}
-                        secondaryTypographyProps={{ noWrap: true, fontSize: "0.75rem" }}
+                        primaryTypographyProps={{
+                          noWrap: true,
+                          fontSize: "0.85rem",
+                        }}
+                        secondaryTypographyProps={{
+                          noWrap: true,
+                          fontSize: "0.75rem",
+                        }}
                       />
                       <Typography
                         variant="caption"
@@ -462,7 +486,10 @@ export default function GlobalSearchBar() {
                   </Box>
                   <ListItemText
                     primary={`No matches for "${query.trim()}"`}
-                    primaryTypographyProps={{ noWrap: true, fontSize: "0.85rem" }}
+                    primaryTypographyProps={{
+                      noWrap: true,
+                      fontSize: "0.85rem",
+                    }}
                   />
                 </ListItemButton>
               </>

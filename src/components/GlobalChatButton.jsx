@@ -1,77 +1,75 @@
 /**
  * GlobalChatButton - Floating Action Button to open global chat
- * 
+ *
  * A fixed-position FAB that appears on all pages (except editor which has its own chat).
  * Clicking it opens the GlobalChatDrawer.
- * 
+ *
  * @see docs/GLOBAL_CHAT_INTEGRATION_PLAN.md
  */
 
-import React, { useContext } from 'react';
-import { Fab, Badge, Tooltip, Zoom } from '@mui/material';
-import ChatIcon from '@mui/icons-material/Chat';
-import { useTranslations } from 'next-intl';
-import ChatContext from '../context/chatContext';
+import React, { useContext } from "react";
+import { Fab, Badge, Tooltip, Zoom } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
+import { useTranslations } from "next-intl";
+import ChatContext from "../context/chatContext";
+import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
 /**
  * GlobalChatButton component
- * 
+ *
  * @param {object} props - Component props
  * @param {boolean} [props.show=true] - Whether to show the button
  * @param {number} [props.unreadCount=0] - Number of unread messages (for badge)
  * @returns {JSX.Element}
  */
 export function GlobalChatButton({ show = true, unreadCount = 0 }) {
-    const t = useTranslations('common', { bindI18nStore: '' });
-    const { isChatOpen, setIsChatOpen } = useContext(ChatContext);
-    
-    const handleClick = () => {
-        console.log('[GlobalChatButton] Opening chat');
-        setIsChatOpen(true);
-    };
-    
-    // Don't show if explicitly hidden or chat is already open
-    if (!show || isChatOpen) {
-        return null;
-    }
-    
-    return (
-        <Zoom in={show}>
-            <Tooltip
-                title={t('chat.openAssistant')}
-                placement="left"
-                arrow
-            >
-                <Fab
-                    color="primary"
-                    aria-label={t('chat.openAssistant')}
-                    onClick={handleClick}
-                    sx={{
-                        position: 'fixed',
-                        bottom: 24,
-                        right: 24,
-                        zIndex: (theme) => theme.zIndex.speedDial,
-                        // Ensure it stays above most content
-                        boxShadow: (theme) => theme.shadows[8],
-                        '&:hover': {
-                            boxShadow: (theme) => theme.shadows[12],
-                        },
-                    }}
-                    data-testid="global-chat-button"
-                    data-tour="chat-button"
-                >
-                    <Badge
-                        badgeContent={unreadCount}
-                        color="error"
-                        max={99}
-                        invisible={unreadCount === 0}
-                    >
-                        <ChatIcon />
-                    </Badge>
-                </Fab>
-            </Tooltip>
-        </Zoom>
-    );
+  const t = useTranslations("common", { bindI18nStore: "" });
+  const { isChatOpen, setIsChatOpen } = useContext(ChatContext);
+
+  const handleClick = () => {
+    console.log("[GlobalChatButton] Opening chat");
+    setIsChatOpen(true);
+  };
+
+  // Don't show if explicitly hidden or chat is already open
+  if (!show || isChatOpen) {
+    return null;
+  }
+
+  return (
+    <Zoom in={show}>
+      <Tooltip title={t("chat.openAssistant")} placement="left" arrow>
+        <Fab
+          color="primary"
+          aria-label={t("chat.openAssistant")}
+          onClick={handleClick}
+          sx={{
+            position: "fixed",
+            bottom: `calc(${SEMANTIC_THEME.padding.floatingAction}px + env(safe-area-inset-bottom))`,
+            right: `calc(${SEMANTIC_THEME.padding.floatingAction}px + env(safe-area-inset-right))`,
+            zIndex: (theme) => theme.zIndex.speedDial,
+            boxShadow: (theme) =>
+              theme.shadows[SEMANTIC_THEME.elevation.floatingAction],
+            "&:hover": {
+              boxShadow: (theme) =>
+                theme.shadows[SEMANTIC_THEME.elevation.floatingActionHover],
+            },
+          }}
+          data-testid="global-chat-button"
+          data-tour="chat-button"
+        >
+          <Badge
+            badgeContent={unreadCount}
+            color="error"
+            max={99}
+            invisible={unreadCount === 0}
+          >
+            <ChatIcon />
+          </Badge>
+        </Fab>
+      </Tooltip>
+    </Zoom>
+  );
 }
 
 export default GlobalChatButton;

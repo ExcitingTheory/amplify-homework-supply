@@ -15,6 +15,7 @@
 
 import React from "react";
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within } from "storybook/test";
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -98,6 +99,9 @@ function AutoDetectInner({ persona }: { persona: string }) {
  * Waits for a persona to be selected before mounting the completion logic.
  */
 export const AutoDetectTaskCompletion: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Auto-Detect Task Completion");
+  },
   render: () => {
     const emitter = getOnboardingEmitter();
     const [persona, setPersona] = useState<string | null>(emitter.getPersona());
@@ -149,6 +153,9 @@ export const AutoDetectTaskCompletion: StoryObj = {
  * Demonstrates the useTrackTask hook for programmatic task control
  */
 export const ManualTaskTracking: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Complete a Demo Bonus Task");
+  },
   render: () => {
     const { completeTask, startTask } = useTrackTask(
       "secret-documentation-explorer",
@@ -211,6 +218,9 @@ export const ManualTaskTracking: StoryObj = {
  * Shows the persona, completed tasks, and completion percentage
  */
 export const DisplayOnboardingStatus: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText(/No persona selected/);
+  },
   render: () => {
     const emitter = getOnboardingEmitter();
     const [persona, setPersona] = useState<string | null>(emitter.getPersona());
@@ -397,6 +407,9 @@ export const DisplayOnboardingStatus: StoryObj = {
  * Navigate to other stories, complete tasks, or select a persona to see events appear.
  */
 export const EventEmissionExample: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Live Event Monitor");
+  },
   render: () => {
     const emitter = getOnboardingEmitter();
     const [events, setEvents] = useState<any[]>([]);
@@ -543,6 +556,9 @@ export const EventEmissionExample: StoryObj = {
  * Demonstrates the spotlight overlay system for guided tours
  */
 export const SpotlightIntegration: StoryObj = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText("Spotlight Overlay Demo");
+  },
   render: () => {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>

@@ -60,6 +60,10 @@ import {
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
 import { useStudentMemory } from "@/hooks/useStudentMemory";
 import { parseMemoryMarkdown } from "@/utils/memoryParser";
+import {
+  getStudentAccommodation,
+  getEffectiveDueDate,
+} from "@/utils/accommodations";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { useRouter } from "next/navigation";
 import { PrefetchButton } from "@/components/PrefetchButton";
@@ -67,7 +71,9 @@ import { PrefetchButton } from "@/components/PrefetchButton";
 import { createPeerReviewRoom } from "../actions/peerReview";
 import AuthContext from "@/context/authContext";
 import { SectionPanel } from "@/components/Dashboard";
+import { DashboardHeroView } from "@/components/Dashboard/DashboardHeroView";
 import InstructorDashboard from "@/components/InstructorDashboard";
+import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -82,42 +88,23 @@ function gradeLabel(pct = 0) {
   return "Needs work";
 }
 
+function getDueStatus(dueDate) {
+  if (!dueDate) return { label: "No due date", color: "default" };
+
+  const dueTime = new Date(dueDate).getTime();
+  const now = Date.now();
+  const twoDays = 2 * 24 * 60 * 60 * 1000;
+
+  if (dueTime < now) return { label: "Overdue", color: "error" };
+  if (dueTime - now <= twoDays) return { label: "Due soon", color: "warning" };
+  return { label: "Due", color: "default" };
+}
+
 function getUserId(user) {
   return (
     user?.signInUserSession?.idToken?.payload?.sub ||
     user?.userId ||
     user?.username
-  );
-}
-
-// ── Stat chip used in the hero bar ────────────────────────────────────────
-function StatPill({ icon, label, value, color = "default" }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minWidth: 56,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.5,
-          color: `${color}.main`,
-        }}
-      >
-        {icon}
-        <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
-          {value}
-        </Typography>
-      </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25 }}>
-        {label}
-      </Typography>
-    </Box>
   );
 }
 
@@ -429,28 +416,42 @@ function Index({
 
   const hasNoSections = sections.length === 0 && mySections.length === 0;
 
+  // This learner's accommodation entry per enrolled section (extra due-date days, etc.)
+  const accommodationBySectionId = React.useMemo(() => {
+    const map = {};
+    sections.forEach((s) => {
+      if (!s?.id) return;
+      map[s.id] = getStudentAccommodation(s.accommodations, userId);
+    });
+    return map;
+  }, [sections, userId]);
+
   // All assignments the learner should work on (from enrolled sections)
-  const allAssignments = [...assignments, ...myAssignments];
+  const allAssignments = [...assignments, ...myAssignments].filter(
+    (assignment) => !assignment.studentID || assignment.studentID === userId,
+  );
   const pendingAssignments = allAssignments.filter(
-    (a) => !myGradeMap[a.unitID]?.length,
+    (a) => a.lateStatus !== "DROPPED" && !myGradeMap[a.unitID]?.length,
   );
   const completedAssignmentsList = allAssignments.filter(
-    (a) => myGradeMap[a.unitID]?.length > 0,
+    (a) => a.lateStatus !== "DROPPED" && myGradeMap[a.unitID]?.length > 0,
   );
 
   // Most urgent incomplete, unlocked assignment across all sections (Phase 6.1)
   const urgentNextAssignment = React.useMemo(() => {
+    const effectiveDue = (a) => {
+      const iso =
+        getEffectiveDueDate(a.dueDate, accommodationBySectionId[a.sectionID]) ||
+        a.dueDate;
+      return iso ? new Date(iso).getTime() : Infinity;
+    };
     return (
       allAssignments
         .filter((a) => !myGradeMap[a.unitID]?.length && !isLocked(a.unitID))
-        .sort((a, b) => {
-          const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-          const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-          return aDate - bDate;
-        })[0] || null
+        .sort((a, b) => effectiveDue(a) - effectiveDue(b))[0] || null
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allAssignments, myGradeMap]);
+  }, [allAssignments, myGradeMap, accommodationBySectionId]);
 
   // ── render ────────────────────────────────────────────────────────────────
   return (
@@ -497,334 +498,92 @@ function Index({
           Skip to your next assignment
         </Box>
         {/* ── HERO CARD ────────────────────────────────────────────────── */}
-        <Paper
-          data-tour="dashboard-hero"
-          elevation={0}
-          sx={{
-            mb: 3,
-            borderRadius: 2,
-            overflow: "hidden",
-            border: "1px solid",
-            borderColor: "divider",
-            background: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(25,118,210,0.12)"
-                : "rgba(63,81,181,0.08)",
-            color: (theme) =>
-              theme.palette.mode === "dark" ? "#e3f2fd" : "#1a237e",
-          }}
-        >
-          <Box
-            sx={{
-              p: { xs: 2, sm: 3 },
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "auto 1fr" },
-              gap: { xs: 2, sm: 2.5 },
-            }}
-          >
-            {/* Avatar */}
-            <Box sx={{ flexShrink: 0, position: "relative" }}>
-              {avatarSeed && isLoaded ? (
-                <AvatarDisplay
-                  seed={avatarSeed}
-                  size={72}
-                  style={avatarStyle}
-                  overrides={avatarOverrides}
-                  glowRing={glowRing}
-                  guildCrestSvg={mySquad?.crestSvg ?? null}
-                  guildName={mySquad?.name}
-                  guildId={mySquad?.id}
-                />
-              ) : (
-                <Avatar
-                  sx={{
-                    width: 72,
-                    height: 72,
-                    bgcolor: "rgba(255,255,255,0.2)",
-                    fontSize: 32,
-                  }}
-                >
-                  {(user?.username || "?")[0]?.toUpperCase()}
-                </Avatar>
-              )}
-            </Box>
-
-            <Box sx={{ minWidth: 0 }}>
-              {/* Greeting and level */}
-              <Box
+        <DashboardHeroView
+          greeting={t(greetingKey, {
+            name: user?.attributes?.name || user?.username || "Learner",
+          })}
+          level={level}
+          avatar={
+            avatarSeed && isLoaded ? (
+              <AvatarDisplay
+                seed={avatarSeed}
+                size={72}
+                style={avatarStyle}
+                overrides={avatarOverrides}
+                glowRing={glowRing}
+                guildCrestSvg={mySquad?.crestSvg ?? null}
+                guildName={mySquad?.name}
+                guildId={mySquad?.id}
+              />
+            ) : (
+              <Avatar
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  flexWrap: "wrap",
-                  mb: urgentNextAssignment ? 1.5 : 0.75,
+                  width: 72,
+                  height: 72,
+                  bgcolor: "rgba(255,255,255,0.2)",
+                  fontSize: 32,
                 }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "inherit", lineHeight: 1 }}
-                >
-                  {t(greetingKey, {
-                    name: user?.attributes?.name || user?.username || "Learner",
-                  })}
-                </Typography>
-                {level && (
-                  <Chip
-                    label={`Lv. ${level.level} · ${level.label}`}
-                    size="small"
-                    sx={{
-                      bgcolor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(25,118,210,0.3)"
-                          : "rgba(63,81,181,0.2)",
-                      color: "inherit",
-                      fontWeight: 600,
-                      fontSize: "0.7rem",
-                    }}
-                  />
-                )}
-              </Box>
-
-              {/* One dominant next step */}
-              {urgentNextAssignment ? (
-                <Box
-                  sx={{
-                    p: { xs: 1.5, sm: 2 },
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 1.5,
-                    bgcolor: "background.paper",
-                    color: "text.primary",
-                    display: "flex",
-                    alignItems: { xs: "stretch", sm: "center" },
-                    gap: 1.5,
-                    flexDirection: { xs: "column", sm: "row" },
-                  }}
-                >
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="overline"
-                      color="primary.main"
-                      sx={{ fontWeight: 800, lineHeight: 1.2 }}
-                    >
-                      Today
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ fontWeight: 700, lineHeight: 1.3 }}
-                    >
-                      {units[urgentNextAssignment.unitID]?.name ||
-                        "Next assignment"}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {sections.find(
-                        (s) => s.id === urgentNextAssignment.sectionID,
-                      )?.name || "Your next lesson"}
-                      {urgentNextAssignment.dueDate
-                        ? ` · Due ${new Date(urgentNextAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-                        : ""}
-                    </Typography>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() =>
-                      openDrill(
-                        urgentNextAssignment.unitID,
-                        units[urgentNextAssignment.unitID]?.name ||
-                          "Assignment",
-                      )
-                    }
-                    sx={{
-                      flexShrink: 0,
-                      alignSelf: { xs: "stretch", sm: "center" },
-                    }}
-                  >
-                    Start practice
-                  </Button>
-                </Box>
-              ) : (
-                <Typography
-                  variant="body2"
-                  sx={{ color: "inherit", opacity: 0.8 }}
-                >
-                  You are caught up on your assignments.
-                </Typography>
-              )}
-
-              {/* Level progress */}
-              {level && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mt: 1.5,
-                  }}
-                >
-                  <LinearProgress
-                    variant="determinate"
-                    value={level.progress ?? level.progressPercent ?? 0}
-                    sx={{
-                      flex: 1,
-                      height: 6,
-                      borderRadius: 3,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.15)"
-                          : "rgba(63,81,181,0.15)",
-                      "& .MuiLinearProgress-bar": {
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.9)"
-                            : "rgba(63,81,181,0.8)",
-                      },
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "inherit",
-                      opacity: 0.9,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {level.progress ?? level.progressPercent ?? 0}%
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Supporting stats */}
-            <Box
-              sx={{
-                gridColumn: { xs: "1", sm: "2" },
-                display: "flex",
-                alignItems: "center",
-                gap: { xs: 2, sm: 3 },
-                flexWrap: "wrap",
-                pt: { xs: 0, sm: 0.5 },
-                borderTop: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <StreakIndicator
-                currentStreak={streak?.currentStreak || 0}
-                size="medium"
-                showEmpty={!isInstructorOrAdmin}
-              />
-              <StreakShield
-                freezesRemaining={streak?.freezesRemaining || 0}
-                freezesUsed={streak?.freezesUsed || 0}
-                size="medium"
-                showEmpty={!isInstructorOrAdmin}
-              />
-              <StatPill
-                icon={<EmojiEventsIcon sx={{ fontSize: "1rem" }} />}
-                label="Assignments"
-                value={
-                  completedAssignmentsList.length + pendingAssignments.length
+                {(user?.username || "?")[0]?.toUpperCase()}
+              </Avatar>
+            )
+          }
+          nextStep={
+            urgentNextAssignment
+              ? {
+                  todayLabel: "Today",
+                  unitName:
+                    units[urgentNextAssignment.unitID]?.name ||
+                    "Next assignment",
+                  sectionName:
+                    sections.find(
+                      (s) => s.id === urgentNextAssignment.sectionID,
+                    )?.name || "Your next lesson",
+                  dueText: urgentNextAssignment.dueDate
+                    ? `Due ${new Date(getEffectiveDueDate(urgentNextAssignment.dueDate, accommodationBySectionId[urgentNextAssignment.sectionID]) || urgentNextAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                    : undefined,
                 }
-                color="warning"
-              />
-              {earnedBadges?.length > 0 && (
-                <StatPill
-                  icon={<SchoolIcon sx={{ fontSize: "1rem" }} />}
-                  label="Badges"
-                  value={earnedBadges.length}
-                  color="success"
-                />
-              )}
-              <Typography
-                variant="caption"
-                sx={{ color: "inherit", opacity: 0.75 }}
+              : null
+          }
+          startButton={
+            urgentNextAssignment ? (
+              <PrefetchButton
+                variant="contained"
+                size="small"
+                href={`/workbook/${urgentNextAssignment.unitID}`}
+                sx={{
+                  flexShrink: 0,
+                  alignSelf: { xs: "stretch", sm: "center" },
+                }}
               >
-                {totalXP?.toLocaleString() || 0} XP total
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Badge shelf */}
-          {earnedBadges?.length > 0 && (
-            <Box
-              sx={{
-                px: { xs: 2, sm: 3 },
-                py: 1.5,
-                borderTop: "1px solid",
-                borderColor: "divider",
-              }}
-            >
+                Start
+              </PrefetchButton>
+            ) : null
+          }
+          caughtUpText="You are caught up on your assignments."
+          streak={streak}
+          showStreakEmpty={!isInstructorOrAdmin}
+          assignmentsCount={
+            completedAssignmentsList.length + pendingAssignments.length
+          }
+          badgesCount={earnedBadges?.length || 0}
+          totalXP={totalXP}
+          badgeShelf={
+            earnedBadges?.length > 0 ? (
               <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
-            </Box>
-          )}
-
-          {/* Squad banner (if in a squad) */}
-          {mySquad && (
-            <Box
-              component="a"
-              href={`/squad/${mySquad.id}`}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                px: 3,
-                py: 1.5,
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(25,118,210,0.2)"
-                    : "rgba(63,81,181,0.12)",
-                borderTop: "1px solid",
-                borderColor: "divider",
-                textDecoration: "none",
-                "&:hover": {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(25,118,210,0.28)"
-                      : "rgba(63,81,181,0.18)",
-                },
-              }}
-            >
-              <ArmoriaShield
-                squadId={mySquad.id}
-                squadName={mySquad.name}
-                crestSvg={mySquad.crestSvg}
-                size={32}
-                showName={false}
-              />
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="caption"
-                  sx={{ color: "inherit", opacity: 0.7, display: "block" }}
-                >
-                  Your Squad
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "inherit", fontWeight: 600 }}
-                >
-                  {mySquad.name}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Chip
-                  label={`${(mySquad.totalXP || 0).toLocaleString()} XP`}
-                  size="small"
-                  sx={{
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(25,118,210,0.3)"
-                        : "rgba(63,81,181,0.2)",
-                    color: "inherit",
-                    fontSize: "0.7rem",
-                  }}
-                />
-                <ArrowForwardIcon
-                  sx={{ fontSize: "1rem", color: "inherit", opacity: 0.6 }}
-                />
-              </Box>
-            </Box>
-          )}
-        </Paper>
+            ) : null
+          }
+          squad={
+            mySquad
+              ? {
+                  id: mySquad.id,
+                  name: mySquad.name,
+                  crestSvg: mySquad.crestSvg,
+                  totalXP: mySquad.totalXP,
+                }
+              : null
+          }
+        />
 
         {/* ── INSTRUCTOR DASHBOARD ─────────────────────────────────── */}
         {isInstructorOrAdmin && mySections.length > 0 && (
@@ -953,35 +712,53 @@ function Index({
               >
                 {/* Global "Up Next" banner — most urgent across all sections */}
                 {(() => {
+                  const globalEffectiveDue = (a) => {
+                    const iso =
+                      getEffectiveDueDate(
+                        a.dueDate,
+                        accommodationBySectionId[a.sectionID],
+                      ) || a.dueDate;
+                    return iso ? new Date(iso).getTime() : Infinity;
+                  };
                   const globalUpNext = allAssignments
                     .filter(
                       (a) =>
                         !myGradeMap[a.unitID]?.length && !isLocked(a.unitID),
                     )
-                    .sort((a, b) => {
-                      const aDate = a.dueDate
-                        ? new Date(a.dueDate).getTime()
-                        : Infinity;
-                      const bDate = b.dueDate
-                        ? new Date(b.dueDate).getTime()
-                        : Infinity;
-                      return aDate - bDate;
-                    })[0];
+                    .sort(
+                      (a, b) => globalEffectiveDue(a) - globalEffectiveDue(b),
+                    )[0];
                   if (!globalUpNext) return null;
                   const upNextSection = sections.find(
                     (s) => s.id === globalUpNext.sectionID,
                   );
                   const upNextUnit = units[globalUpNext.unitID];
+                  const dueStatus = getDueStatus(
+                    getEffectiveDueDate(
+                      globalUpNext.dueDate,
+                      accommodationBySectionId[globalUpNext.sectionID],
+                    ) || globalUpNext.dueDate,
+                  );
                   return (
                     <Paper
                       elevation={0}
                       sx={{
                         mb: 3,
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         borderRadius: 2,
                         border: "1px solid",
-                        borderColor: "primary.light",
-                        bgcolor: "primary.50",
+                        borderColor:
+                          dueStatus.color === "error"
+                            ? "error.light"
+                            : dueStatus.color === "warning"
+                              ? "warning.light"
+                              : "primary.light",
+                        bgcolor:
+                          dueStatus.color === "error"
+                            ? "error.50"
+                            : dueStatus.color === "warning"
+                              ? "warning.50"
+                              : "primary.50",
                         display: "flex",
                         alignItems: "center",
                         gap: 1.5,
@@ -990,18 +767,49 @@ function Index({
                       role="status"
                       aria-live="polite"
                     >
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 700, color: "primary.main" }}
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          flexShrink: 0,
+                          display: "grid",
+                          placeItems: "center",
+                          borderRadius: 1.5,
+                          bgcolor: "background.paper",
+                          color: "primary.main",
+                        }}
+                        aria-hidden="true"
                       >
-                        Your next step:
-                      </Typography>
-                      <Typography variant="body2" sx={{ flex: 1 }}>
-                        {upNextUnit?.name || "Assignment"} in{" "}
-                        {upNextSection?.name || "your class"}
-                        {globalUpNext.dueDate &&
-                          ` — due ${new Date(globalUpNext.dueDate).toLocaleDateString()}`}
-                      </Typography>
+                        <SchoolIcon />
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          variant="overline"
+                          sx={{
+                            fontWeight: 800,
+                            color: "primary.main",
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          Your next step
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 700 }}
+                        >
+                          {upNextUnit?.name || "Assignment"}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {upNextSection?.name || "Your class"}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={dueStatus.label}
+                        color={dueStatus.color}
+                        size="small"
+                        variant="outlined"
+                        sx={{ flexShrink: 0, fontWeight: 700 }}
+                      />
                       <PrefetchButton
                         data-testid="dashboard-next-step"
                         variant="contained"
@@ -1057,7 +865,7 @@ function Index({
                     );
                     // Find active chapter for this section
                     const sectionChapter = (activeChallenges || []).find(
-                      (c) => c.cohortId === section.id,
+                      (c) => c.sectionID === section.id,
                     );
 
                     return (
@@ -1072,6 +880,7 @@ function Index({
                         getLockStatus={getLockStatus}
                         sectionLevel={sectionLevel}
                         defaultExpanded={idx === 0}
+                        accommodation={accommodationBySectionId[section.id]}
                         campaignTimeline={
                           campaignChapters.length > 0 ? (
                             <Box sx={{ mb: 2 }}>
@@ -1301,6 +1110,8 @@ function Index({
           </>
         )}
       </Box>
+
+      <CollaborativeChatWrapper />
     </>
   );
 }

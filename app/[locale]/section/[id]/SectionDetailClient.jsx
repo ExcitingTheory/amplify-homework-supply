@@ -6,6 +6,7 @@ import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { uploadData } from "aws-amplify/storage";
 import { listSectionStudents } from "../../../actions/section";
 import { formatLastFirst, getInitials } from "@/utils/formatUserName";
+import { trackGradeSubmitted, trackGuildViewed } from "@/utils/analytics";
 
 import {
   Button,
@@ -49,7 +50,6 @@ import {
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import AppShell from "@/components/AppShell";
 import PrefetchBadge from "@/components/PrefetchBadge";
 import {
   InlineGradeCell,
@@ -62,10 +62,12 @@ import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
 import LazyCardMedia from "@/components/LazyCardMedia";
 import FilesContext from "@/context/fileContext";
+import UnitContext from "@/context/unitContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
@@ -85,6 +87,22 @@ import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
 import { GamificationQuickPanel } from "@/components/Section/GamificationQuickPanel";
 import { ChapterDetailPopover } from "@/components/Gamification/ChapterDetailPopover";
 import LockIcon from "@mui/icons-material/Lock";
+import { AssignmentComposer } from "@/components/AssignmentComposer";
+import AddIcon from "@mui/icons-material/Add";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import AccessibilityNewIcon from "@mui/icons-material/AccessibilityNew";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import { NeedsAttention } from "@/components/Section/NeedsAttention";
+import { RosterEnrollDialog } from "@/components/Section/RosterEnrollDialog";
+import { AccommodationsDialog } from "@/components/Section/AccommodationsDialog";
+import { BulkDueDateDialog } from "@/components/Section/BulkDueDateDialog";
+import { removeStudentFromSection } from "../../../actions/section";
+import {
+  parseAccommodations,
+  getStudentAccommodation,
+  hasAccommodation,
+} from "@/utils/accommodations";
+import { openDiscussion } from "@/utils/chatDiscussBus";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -265,12 +283,32 @@ function SectionDetail({
 
   const { id, locale } = useParams();
 
+  // Emit a section-viewed engagement event once per section id
+  const guildViewTrackedRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!id || guildViewTrackedRef.current === id) return;
+    guildViewTrackedRef.current = id;
+    trackGuildViewed(id, "section");
+  }, [id]);
+
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
   const [coverVideoUrlInput, setCoverVideoUrlInput] = React.useState("");
 
   const { session } = React.useContext(FilesContext);
+
+  // Assignment composer state for section-first flow (Item 3 & 4)
+  const [assignmentComposerOpen, setAssignmentComposerOpen] =
+    React.useState(false);
+  // Roster batch actions & accommodations (Section Roster Batch Actions)
+  const [enrollDialogOpen, setEnrollDialogOpen] = React.useState(false);
+  const [accommodationsDialogOpen, setAccommodationsDialogOpen] =
+    React.useState(false);
+  const [bulkDueDateOpen, setBulkDueDateOpen] = React.useState(false);
+  const [accommodations, setAccommodations] = React.useState({});
+  const [rosterRefreshKey, setRosterRefreshKey] = React.useState(0);
+  const { units: allUnits = [] } = React.useContext(UnitContext) || {};
 
   // Content lock and campaign hooks for student progression view
   const { isLocked, getLockStatus } = useContentLock();
@@ -524,6 +562,65 @@ function SectionDetail({
     }
   };
 
+  const refreshRoster = React.useCallback(() => {
+    setRosterRefreshKey((k) => k + 1);
+  }, []);
+
+  // Remove a student from the section's learner group (instructor action).
+  const handleDelete = async (student) => {
+    if (!student?.id || !section?.id) return;
+    const label = student.name || student.email || student.id;
+    if (
+      !confirm(
+        t("sectionDetail.removeStudentConfirm", {
+          name: label,
+          defaultValue: `Remove ${label} from this section?`,
+        }),
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await removeStudentFromSection(section.id, student.id);
+      if (!res.success) {
+        console.error("Error removing student:", res.error);
+        return;
+      }
+      // Optimistically drop from local roster, then refetch to confirm.
+      setSectionStudents((current) => {
+        if (Array.isArray(current)) {
+          return current.filter((s) => s.id !== student.id);
+        }
+        const next = { ...current };
+        delete next[student.id];
+        return next;
+      });
+      refreshRoster();
+    } catch (err) {
+      console.error("Error removing student:", err);
+    }
+  };
+
+  // Persist per-student accommodations to the section record.
+  const saveAccommodations = async (nextAccommodations) => {
+    if (!section?.id) return;
+    setAccommodations(nextAccommodations);
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        accommodations: JSON.stringify(nextAccommodations),
+        _version: section._version,
+      });
+    } catch (err) {
+      console.error("Error saving accommodations:", err);
+    }
+  };
+
+  const getUnitName = React.useCallback(
+    (unitID) => units?.[unitID]?.name || "",
+    [units],
+  );
+
   const handleImageUpload = async (event) => {
     setIsWorking(true);
     event.preventDefault();
@@ -636,6 +733,17 @@ function SectionDetail({
           // Mark grade overrides as server-loaded (skip first auto-save)
           if (!gradeOverridesLoadedRef.current)
             gradeOverridesLoadedRef.current = true;
+          // Load per-student accommodations from section
+          {
+            const parsedAccommodations = parseAccommodations(
+              sectionData.accommodations,
+            );
+            setAccommodations((prev) => {
+              if (JSON.stringify(prev) === JSON.stringify(parsedAccommodations))
+                return prev;
+              return parsedAccommodations;
+            });
+          }
           if (sectionData.leaderboardEnabled !== undefined) {
             setLeaderboardEnabledLocal(sectionData.leaderboardEnabled);
           }
@@ -658,9 +766,15 @@ function SectionDetail({
     const subscription = client.models.Grade.observeQuery().subscribe({
       next: ({ items: allItems }) => {
         // Filter out null items
-        const validGrades = allItems.filter(
-          (grade) => grade != null && grade.id != null,
-        );
+        const validGrades = allItems.filter((grade) => {
+          if (!grade || !grade.id) return false;
+          return !sectionAssignments.some(
+            (assignment) =>
+              assignment.unitID === grade.unitID &&
+              assignment.lateStatus === "DROPPED" &&
+              (!assignment.studentID || assignment.studentID === grade.owner),
+          );
+        });
 
         // --- My grades (learner view) ---
         const myCompleted = validGrades.filter(
@@ -771,7 +885,7 @@ function SectionDetail({
     return function cleanup() {
       subscription.unsubscribe();
     };
-  }, [currentUser?.username, units]);
+  }, [currentUser?.username, units, sectionAssignments]);
 
   useEffect(() => {
     if (!id) return;
@@ -841,7 +955,7 @@ function SectionDetail({
       setSectionStudents(sectionStudentsData);
       setIsOwner(true);
     }
-  }, [section?.code]);
+  }, [section?.code, rosterRefreshKey]);
 
   // Fetch leaderboard entries for this section
   useEffect(() => {
@@ -849,7 +963,7 @@ function SectionDetail({
     const client = getAmplifyClient();
 
     const subscription = client.models.StudentProfile.observeQuery({
-      filter: { cohortId: { eq: id } },
+      filter: { sectionID: { eq: id } },
     }).subscribe({
       next: ({ items }) => {
         const valid = items.filter((item) => item != null && item.id != null);
@@ -878,12 +992,12 @@ function SectionDetail({
     return () => subscription.unsubscribe();
   }, [id]);
 
-  // Fetch squads for this section (by cohortId)
+  // Fetch squads for this section (by sectionID)
   useEffect(() => {
     if (!id) return;
     const client = getAmplifyClient();
     const subscription = client.models.Squad.observeQuery({
-      filter: { cohortId: { eq: id } },
+      filter: { sectionID: { eq: id } },
     }).subscribe({
       next: ({ items }) => {
         const valid = items.filter((item) => item != null && item.id != null);
@@ -982,8 +1096,16 @@ function SectionDetail({
 
   // Filter assignments based on visibility settings
   const visibleAssignments = React.useMemo(() => {
-    if (!clientNow) return sectionAssignments;
     return sectionAssignments.filter((assignment) => {
+      if (
+        !isOwner &&
+        assignment.studentID &&
+        assignment.studentID !== currentUser?.username
+      ) {
+        return false;
+      }
+      if (assignment.lateStatus === "DROPPED") return false;
+      if (!clientNow) return true;
       // Students cannot see draft assignments
       if (assignment.status === "DRAFT") {
         return isOwner && showDraftAssignments;
@@ -1006,6 +1128,7 @@ function SectionDetail({
     showDraftAssignments,
     isOwner,
     clientNow,
+    currentUser?.username,
   ]);
 
   const totalAssignments = sectionAssignments.length;
@@ -1261,9 +1384,13 @@ function SectionDetail({
           alert(t("sectionDetail.overrideGrade.saveFailed"));
           return;
         }
+        trackGradeSubmitted(assignment.unitID, currentGrade.id, score, {
+          sectionId: assignment.sectionID || undefined,
+          overridden: true,
+        });
       } else {
         // Create new grade for this student
-        const { errors } = await client.models.Grade.create({
+        const { data: newGrade, errors } = await client.models.Grade.create({
           unitID: assignment.unitID,
           assignmentID: assignment.id,
           owner: student.id, // Student owns the grade so they can see it
@@ -1279,6 +1406,10 @@ function SectionDetail({
           alert(t("sectionDetail.overrideGrade.saveFailed"));
           return;
         }
+        trackGradeSubmitted(assignment.unitID, newGrade?.id || "", score, {
+          sectionId: assignment.sectionID || undefined,
+          overridden: true,
+        });
       }
 
       handleGradeOverrideClose();
@@ -1327,6 +1458,13 @@ function SectionDetail({
     () => sortStudents(Object.values(sectionStudents)),
     [sectionStudents, sortStudents],
   );
+
+  React.useEffect(() => {
+    if (!isOwner || !sectionAssignments?.length) return;
+    sectionAssignments.slice(0, 5).forEach((assignment) => {
+      if (assignment?.unitID) router.prefetch(`/unit/${assignment.unitID}`);
+    });
+  }, [isOwner, sectionAssignments, router]);
 
   return (
     <>
@@ -1793,19 +1931,51 @@ function SectionDetail({
               >
                 {t("sectionDetail.students")}
               </Typography>
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel id="student-sort-label">Sort by</InputLabel>
-                <Select
-                  labelId="student-sort-label"
-                  value={studentSort}
-                  label="Sort by"
-                  onChange={(e) => setStudentSort(e.target.value)}
-                >
-                  <MenuItem value="natural">Original</MenuItem>
-                  <MenuItem value="first">First Name</MenuItem>
-                  <MenuItem value="last">Last Name</MenuItem>
-                </Select>
-              </FormControl>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                }}
+              >
+                {isOwner && (
+                  <>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<PersonAddAlt1Icon />}
+                      onClick={() => setEnrollDialogOpen(true)}
+                      sx={{ whiteSpace: "nowrap" }}
+                    >
+                      {t("sectionDetail.addStudents", "Add students")}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AccessibilityNewIcon />}
+                      onClick={() => setAccommodationsDialogOpen(true)}
+                      sx={{ whiteSpace: "nowrap" }}
+                    >
+                      {t("sectionDetail.accommodations", "Accommodations")}
+                    </Button>
+                  </>
+                )}
+                <FormControl size="small" sx={{ minWidth: 140 }}>
+                  <InputLabel id="student-sort-label">Sort by</InputLabel>
+                  <Select
+                    labelId="student-sort-label"
+                    value={studentSort}
+                    label="Sort by"
+                    onChange={(e) => setStudentSort(e.target.value)}
+                  >
+                    <MenuItem value="natural">Original</MenuItem>
+                    <MenuItem value="first">First Name</MenuItem>
+                    <MenuItem value="last">Last Name</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
             </Box>
 
             <TableContainer component={Paper} data-testid="roster-table">
@@ -1823,6 +1993,23 @@ function SectionDetail({
                 </TableHead>
                 <TableBody>
                   {sortedStudents.map((student, studentKey) => {
+                    const accommodation = getStudentAccommodation(
+                      accommodations,
+                      student.id,
+                    );
+                    const showAccommodation = hasAccommodation(accommodation);
+                    const accommodationLabel = showAccommodation
+                      ? [
+                          Number(accommodation.dueDateExtensionDays) > 0
+                            ? `+${accommodation.dueDateExtensionDays}d`
+                            : null,
+                          Number(accommodation.timeMultiplier) > 1
+                            ? `${accommodation.timeMultiplier}×`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : "";
                     return (
                       <TableRow
                         key={student.id}
@@ -1835,7 +2022,47 @@ function SectionDetail({
                         }}
                       >
                         <TableCell component="th" scope="row" key={studentKey}>
-                          {formatLastFirst(student)}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {formatLastFirst(student)}
+                            {showAccommodation && (
+                              <Tooltip
+                                title={
+                                  accommodation.note ||
+                                  t(
+                                    "sectionDetail.accommodations",
+                                    "Accommodations",
+                                  )
+                                }
+                              >
+                                <Chip
+                                  size="small"
+                                  color="info"
+                                  variant="outlined"
+                                  icon={
+                                    <AccessibilityNewIcon fontSize="small" />
+                                  }
+                                  label={
+                                    accommodationLabel ||
+                                    t(
+                                      "sectionDetail.accommodations",
+                                      "Accommodations",
+                                    )
+                                  }
+                                  onClick={
+                                    isOwner
+                                      ? () => setAccommodationsDialogOpen(true)
+                                      : undefined
+                                  }
+                                />
+                              </Tooltip>
+                            )}
+                          </Box>
                         </TableCell>
                         <TableCell align="right">{student.email}</TableCell>
                         <TableCell align="right">
@@ -1865,6 +2092,18 @@ function SectionDetail({
           margin: "0 auto",
         }}
       >
+        {/* Needs Attention strip — instructor action queue (Item 7) */}
+        {isOwner && !viewAsStudent && (
+          <NeedsAttention
+            sectionID={section?.id}
+            assignments={sectionAssignments}
+            grades={grades}
+            students={sortedStudents}
+            openRooms={openRooms}
+            onAssignUnit={() => setAssignmentComposerOpen(true)}
+          />
+        )}
+
         <Box
           sx={{
             display: "flex",
@@ -1963,6 +2202,41 @@ function SectionDetail({
                   "Show Leaderboard",
                 )}
               />
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setAssignmentComposerOpen(true)}
+                startIcon={<AddIcon />}
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {t("sectionDetail.assignUnit", "Assign Unit")}
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setBulkDueDateOpen(true)}
+                startIcon={<EditCalendarIcon />}
+                disabled={sectionAssignments.length === 0}
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {t("sectionDetail.shiftDueDates", "Shift dates")}
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<ChatBubbleOutlineIcon />}
+                onClick={() =>
+                  openDiscussion({
+                    sectionID: section?.id,
+                    scope: "section",
+                    topicName: section?.name || "Section discussion",
+                  })
+                }
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {t("sectionDetail.discuss", "Discuss")}
+              </Button>
             </Box>
           )}
         </Box>
@@ -2076,7 +2350,7 @@ function SectionDetail({
                       ...(activeChallenges || []),
                       ...(completedChallenges || []),
                     ]
-                      .filter((c) => c.cohortId === id)
+                      .filter((c) => c.sectionID === id)
                       .find(
                         (c) =>
                           Array.isArray(c.linkedUnitIds) &&
@@ -2293,7 +2567,7 @@ function SectionDetail({
                 ...(completedChallenges || []),
               ];
               const sectionChallenges = allChallenges.filter(
-                (ch) => ch.cohortId === id,
+                (ch) => ch.sectionID === id,
               );
               if (sectionChallenges.length === 0) return null;
 
@@ -2399,6 +2673,17 @@ function SectionDetail({
                                   label="Future"
                                   size="small"
                                   color="info"
+                                />
+                              )}
+                              {assignment.lateStatus && (
+                                <Chip
+                                  label={`Late: ${assignment.lateStatus}`}
+                                  size="small"
+                                  color={
+                                    assignment.lateStatus === "DROPPED"
+                                      ? "default"
+                                      : "warning"
+                                  }
                                 />
                               )}
                             </Box>
@@ -2694,14 +2979,14 @@ function SectionDetail({
             {t("sectionDetail.completionGrid", "Completion Overview")}
           </Typography>
           <CompletionGrid
-            assignments={sectionAssignments.map((a) => ({
+            assignments={visibleAssignments.map((a) => ({
               id: a.id || a.unitID,
               title: units[a.unitID]?.name || a.unitID,
             }))}
             students={sortedStudents.map((student) => ({
               studentId: student.id,
               studentName: formatLastFirst(student),
-              assignments: sectionAssignments.reduce((acc, assignment) => {
+              assignments: visibleAssignments.reduce((acc, assignment) => {
                 const allGrade = allGradeMap[student.id]?.[assignment.unitID];
                 if (allGrade?.hasComplete) {
                   acc[assignment.id || assignment.unitID] = "completed";
@@ -2837,7 +3122,7 @@ function SectionDetail({
             const allSectionChallenges = [
               ...(activeChallenges || []),
               ...(completedChallenges || []),
-            ].filter((c) => c.cohortId === id);
+            ].filter((c) => c.sectionID === id);
             const linkedChapter = allSectionChallenges.find(
               (c) =>
                 Array.isArray(c.linkedUnitIds) &&
@@ -3069,6 +3354,47 @@ function SectionDetail({
           setChapterPopoverData(null);
         }}
         chapter={chapterPopoverData}
+      />
+
+      {/* Assignment Composer — section-first workflow (Item 3 & 4) */}
+      <AssignmentComposer
+        open={assignmentComposerOpen}
+        onClose={() => setAssignmentComposerOpen(false)}
+        units={allUnits}
+        sections={[section].filter(Boolean)}
+        onSuccess={() => {
+          // Trigger refetch of assignments if needed
+          // The subscription will auto-update
+        }}
+      />
+
+      {/* Roster batch enrollment */}
+      <RosterEnrollDialog
+        open={enrollDialogOpen}
+        onClose={() => setEnrollDialogOpen(false)}
+        sectionId={section?.id}
+        onEnrolled={refreshRoster}
+      />
+
+      {/* Per-student accommodations */}
+      <AccommodationsDialog
+        open={accommodationsDialogOpen}
+        onClose={() => setAccommodationsDialogOpen(false)}
+        students={sortedStudents}
+        accommodations={accommodations}
+        onSave={saveAccommodations}
+        formatName={formatLastFirst}
+      />
+
+      {/* Bulk assignment due-date shifts */}
+      <BulkDueDateDialog
+        open={bulkDueDateOpen}
+        onClose={() => setBulkDueDateOpen(false)}
+        assignments={sectionAssignments}
+        getUnitName={getUnitName}
+        onUpdated={() => {
+          // Assignment subscription auto-updates the gradebook.
+        }}
       />
     </>
   );
