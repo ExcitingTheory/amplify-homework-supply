@@ -15,7 +15,7 @@ import Skeleton from "@mui/material/Skeleton";
 import EditIcon from "@mui/icons-material/Edit";
 import SettingsContext from "../context/settingsContext";
 import { useAvatarConfig } from "../hooks/useAvatarConfig";
-import { useXP } from "../context/gamificationContext";
+import { useXP, useBadges } from "../context/gamificationContext";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
 import { AvatarCustomizer } from "./Gamification/AvatarCustomizer";
 import type {
@@ -59,6 +59,22 @@ export function AvatarEditor({
   } = useAvatarConfig();
   const { level: xpLevel, avatarUnlockConfig } = useXP();
   const numericLevel = levelProp ?? xpLevel?.level ?? 1;
+
+  // Robot (bottts) avatar styles unlock only after all four Bot Whisperer badges
+  const { badges: earnedBadges } = useBadges();
+  const robotStylesUnlocked = React.useMemo(() => {
+    const earned = new Set(
+      earnedBadges
+        .map((b) => b.badgeType)
+        .filter((t): t is string => typeof t === "string"),
+    );
+    return (
+      earned.has("BOT_WHISPERER_I") &&
+      earned.has("BOT_WHISPERER_II") &&
+      earned.has("BOT_WHISPERER_III") &&
+      earned.has("BOT_WHISPERER_IV")
+    );
+  }, [earnedBadges]);
 
   const [customizerOpen, setCustomizerOpen] = useState(false);
 
@@ -175,6 +191,7 @@ export function AvatarEditor({
         glowRing={glowRing}
         onSave={handleSave}
         avatarUnlockConfig={avatarUnlockConfig}
+        robotStylesUnlocked={robotStylesUnlocked}
       />
     </Box>
   );

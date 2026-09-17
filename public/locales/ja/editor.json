@@ -41,8 +41,10 @@
       "correct": "正解です！",
       "incorrect": "もう一度試してください"
     },
-    "audioNotAvailable": "{{text}}（音声利用不可）",
-    "audioNotAvailableParens": "（音声は利用できません）"
+    "audioNotAvailable": "{text}（音声利用不可）",
+    "audioNotAvailableParens": "（音声は利用できません）",
+    "noDictionaryAvailable": "辞書は利用できません",
+    "submit": "提出する"
   },
   "answerEditor": {
     "instructions": "以下に回答を作成してください",
@@ -50,7 +52,8 @@
     "cancel": "キャンセル",
     "save": "保存",
     "emptyState": "回答が入力されていません",
-    "addWordToDict": "辞書に新しい単語を追加します。"
+    "addWordToDict": "辞書に新しい単語を追加します。",
+    "addWordLabel": "単語ラベルを追加"
   },
   "assignmentConfiguration": {
     "timerLabel": "タイマー",
@@ -97,7 +100,7 @@
     "dragDropPrompt": "ここに画像をドラッグ＆ドロップして、注目画像として設定してください。"
   },
   "documentUploader": {
-    "title": "{{extractionType}}抽出用の書類をアップロードしてください",
+    "title": "{extractionType}抽出用の書類をアップロードしてください",
     "extractionTypes": {
       "vocabulary": "語彙",
       "question": "問題",
@@ -107,7 +110,7 @@
     "dragDropPrompt": "ここにドキュメントをドラッグ&ドロップしてください",
     "supportedFormats": "対応形式：PDF、Word（.doc、.docx）、テキスト（.txt）、Excel（.xls、.xlsx、.csv）",
     "browseFiles": "ファイルを参照",
-    "uploadingProgress": "アップロード中... {{progress}}%",
+    "uploadingProgress": "アップロード中... {progress}%",
     "recentUploads": "最近のアップロード",
     "statusLabels": {
       "processing": "処理中...",
@@ -117,14 +120,14 @@
     "errorMessages": {
       "noSupportedFiles": "サポートされているドキュメントが見つかりません。PDF、Word、テキスト、またはExcelファイルをアップロードしてください。",
       "skippedFiles": "一部のファイルはスキップされました（サポートされていないファイル形式）",
-      "uploadFailed": "{{fileName}}のアップロードに失敗しました：{{error}}"
+      "uploadFailed": "{fileName}のアップロードに失敗しました：{error}"
     },
     "howItWorks": {
       "title": "仕組みについて：",
       "step1": "1. 文書をアップロードしてください（PDF、Word、テキスト、またはExcelファイル）",
-      "step2": "2. AIがコンテンツを分析し、{{extractionType}}を抽出します",
+      "step2": "2. AIがコンテンツを分析し、{extractionType}を抽出します",
       "step3": "3. 「提案」タブで提案を確認し、承認してください",
-      "step4": "4. 選択したアイテムを{{target}}にインポートします"
+      "step4": "4. 選択したアイテムを{target}にインポートします"
     }
   },
   "enhancedGenerators": {
@@ -175,11 +178,11 @@
     "cohortChatTab": "コホートチャット"
   },
   "unifiedGenerateModal": {
-    "generating": "{{type}}を生成しています...",
+    "generating": "{type}を生成しています...",
     "takeMoments": "しばらくお待ちください",
     "preview": "プレビュー",
     "discardChanges": "変更を破棄しますか？",
-    "lostWarning": "今キャンセルすると、生成された{{type}}は失われます。",
+    "lostWarning": "今キャンセルすると、生成された{type}は失われます。",
     "cancel": "キャンセル",
     "generate": "生成します",
     "saveClose": "保存して閉じる",
@@ -200,8 +203,8 @@
   },
   "imageMaskEditor": {
     "instructions": "<strong>手順:</strong> 再生成したい領域をペイントしてください。消しゴムを使用してマスクの一部を削除できます。Shiftキーを押しながらドラッグするとパンできます。ズームボタンを使用してより詳細に表示できます。",
-    "brushSize": "ブラシサイズ: {{size}}",
-    "zoomInfo": "ズーム: {{level}}% | Shiftキーを押しながらパンします",
+    "brushSize": "ブラシサイズ: {size}",
+    "zoomInfo": "ズーム: {level}% | Shiftキーを押しながらパンします",
     "applyMask": "マスクを適用して再生成します",
     "save": "保存",
     "cancel": "キャンセル"
@@ -252,7 +255,7 @@
     "done": "完了しました",
     "invalid": "無効です",
     "addAnswer": "回答を追加",
-    "gradeDisplay": "成績: {{score}}",
+    "gradeDisplay": "成績: {score}",
     "status": "ステータス"
   },
   "staticWaveform": {
@@ -266,7 +269,24 @@
     "insertRow": "行を挿入します",
     "insertColumn": "列を挿入します",
     "deleteRow": "行を削除します",
-    "deleteColumn": "列を削除します"
+    "deleteColumn": "列を削除します",
+    "clearCell": "セルをクリア",
+    "deleteTable": "テーブルを削除します",
+    "insertColumnLeft": "列を左に挿入します",
+    "insertColumnRight": "右に列を挿入",
+    "insertRowAbove": "上に行を挿入します",
+    "insertRowBelow": "下に行を挿入",
+    "makeColumnHeader": "列ヘッダーを作成します",
+    "makeHeader": "ヘッダーを作成します",
+    "makeRowHeader": "行ヘッダーを作成します",
+    "removeColumnHeader": "列ヘッダーを削除します",
+    "removeHeader": "ヘッダーを削除",
+    "removeRowHeader": "行ヘッダーを削除",
+    "removeSorting": "ソートを解除",
+    "sortAscending": "昇順で並び替え",
+    "sortDescending": "降順で並び替え",
+    "cellActionsLabel": "セルの操作ラベル",
+    "cellActionsTitle": "セルアクション タイトル"
   },
   "tableOfContents": {
     "emptyState": "見出しが見つかりません。目次を表示するには、文書に見出しを追加してください。",
@@ -318,7 +338,7 @@
     "expand": "展開します",
     "fileInfo": "ファイル情報",
     "deleteFile": "ファイルを削除します",
-    "deleteConfirmation": "ファイル「{{fileName}}」を削除しますか？",
+    "deleteConfirmation": "ファイル「{fileName}」を削除しますか？",
     "filename": "ファイル名:",
     "type": "タイプ:",
     "unknown": "不明です",
@@ -338,19 +358,19 @@
     "objectives": "目的",
     "concepts": "概念",
     "questions": "質問",
-    "vocabularyCount": "語彙（{{count}}）",
-    "summariesCount": "要約 ({{count}})",
-    "objectivesCount": "学習目標 ({{count}})",
-    "conceptsCount": "コンセプト ({{count}})",
-    "questionsCount": "質問（{{count}}）",
+    "vocabularyCount": "語彙（{count}）",
+    "summariesCount": "要約 ({count})",
+    "objectivesCount": "学習目標 ({count})",
+    "conceptsCount": "コンセプト ({count})",
+    "questionsCount": "質問（{count}）",
     "confirm": "確認します",
     "cancel": "キャンセル"
   },
   "autoEmbedPlugin": {
     "youtubeVideo": "YouTube動画",
     "dismiss": "閉じる",
-    "embedTitle": "{{contentName}}を埋め込み",
-    "embedOption": "{{contentName}}を埋め込む",
+    "embedTitle": "{contentName}を埋め込み",
+    "embedOption": "{contentName}を埋め込む",
     "embed": "埋め込みます"
   },
   "floatingLinkEditorPlugin": {
@@ -415,7 +435,7 @@
     "deleteUnitConfirmation": "このユニットを削除してもよろしいですか？",
     "delete": "削除します",
     "cancel": "キャンセル",
-    "closePreview": "{{name}}のプレビューを閉じる",
+    "closePreview": "{name}のプレビューを閉じる",
     "untitledUnit": "無題のユニット",
     "addDescription": "説明を追加します",
     "status": "ステータス",
@@ -462,15 +482,15 @@
     "textToImagePreview": "テキストから画像へのプレビュー",
     "textToSpeechPreview": "テキスト読み上げプレビュー",
     "close": "閉じる",
-    "errorRendering": "ファイルマネージャーの表示エラー: {{message}}"
+    "errorRendering": "ファイルマネージャーの表示エラー: {message}"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "PDFを読み込み中: {{filename}}",
+    "loadingPdf": "PDFを読み込み中: {filename}",
     "noPdfToDisplay": "表示するPDFがありません"
   },
   "quizComponent": {
-    "grade": "成績: {{grade}}",
-    "gradeDisplay": "成績: {{score}}%"
+    "grade": "成績: {grade}",
+    "gradeDisplay": "成績: {score}%"
   },
   "playlistEditor": {
     "noFilesMessage": "ファイルはまだ追加されていません。上の入力欄を使用してプレイリストにファイルを追加してください。",
@@ -498,7 +518,7 @@
     "categories": "カテゴリー",
     "savedMessage": "コンテンツが保存されました。学校のポリシーに従ってご確認ください。",
     "flagged": "フラグ済み",
-    "flaggedWithCategories": "フラグ付き: {{categories}}"
+    "flaggedWithCategories": "フラグ付き: {categories}"
   },
   "moderationPanel": {
     "title": "コンテンツモデレーション",
@@ -506,9 +526,9 @@
     "warning": "このコンテンツは確認が必要です",
     "alertMessage": "このコンテンツは自動モデレーションによってフラグが付けられました。保存されましたが、お客様の機関のポリシーに従って審査が必要な場合があります。",
     "flaggedCategories": "フラグ付きカテゴリ：",
-    "confidence": "信頼度: {{score}}%",
-    "checked": "確認済み: {{date}}",
-    "model": "モデル: {{model}}",
+    "confidence": "信頼度: {score}%",
+    "checked": "確認済み: {date}",
+    "model": "モデル: {model}",
     "disclaimerNote": "自動モデレーションは完璧ではありません。このコンテンツを文脈に沿って確認し、お客様の教育機関の特定のポリシーおよび現地の法的要件に従って対応してください。",
     "disclaimerLabel": "注意：",
     "categories": {
@@ -528,9 +548,9 @@
   },
   "questionBlock": {
     "submit": "提出する",
-    "gradeDisplay": "成績: {{score}}",
+    "gradeDisplay": "成績: {score}",
     "status": "ステータス",
-    "answerLabel": "回答{{number}}",
+    "answerLabel": "回答{number}",
     "correct": "正解です",
     "incorrect": "不正解です",
     "edit": "編集します",
@@ -555,8 +575,8 @@
     "noQuestions": "この文書に対する質問は見つかりませんでした。",
     "from": "から",
     "pages": "ページ",
-    "importedOn": "{{date}}にインポートされました",
-    "filteringBySearch": "検索による絞り込み: \"{{searchTerm}}\" ({{total}}項目中{{count}}項目)",
+    "importedOn": "{date}にインポートされました",
+    "filteringBySearch": "検索による絞り込み: \"{searchTerm}\" ({total}項目中{count}項目)",
     "hide": "非表示にする",
     "show": "表示",
     "summariesAndObjectives": "要約と目標",
@@ -564,7 +584,7 @@
     "learningObjectives": "学習目標",
     "selectAll": "すべて選択",
     "deselectAll": "すべて選択解除",
-    "selectedCount": "{{total}}件中{{count}}件を選択しています",
+    "selectedCount": "{total}件中{count}件を選択しています",
     "importToQuestionBank": "問題バンクにインポート",
     "questionPrompt": "問題文",
     "enterQuestion": "質問を入力してください...",
@@ -580,7 +600,7 @@
     "preview": "プレビュー"
   },
   "recordingStudio2": {
-    "recordingNumber": "録画{{number}}",
+    "recordingNumber": "録画{number}",
     "existingRecordings": "既存の録画",
     "staticWaveformPreview": "静的波形プレビュー：",
     "recordedAudioWaveform": "録音された音声波形:"
@@ -600,7 +620,7 @@
     "add": "追加します",
     "unknown": "不明です",
     "empty": "（空）",
-    "lineNumber": "{{number}}行目 - {{speaker}}",
+    "lineNumber": "{number}行目 - {speaker}",
     "text": "テキスト",
     "direction": "方向",
     "emotion": "感情",
@@ -608,14 +628,14 @@
     "emotionPlaceholder": "例：明るい、疲れた",
     "generateTTS": "TTS生成",
     "takes": "テイク",
-    "takeNumber": "テイク{{number}}（{{type}}）",
+    "takeNumber": "テイク{number}（{type}）",
     "name": "名前",
     "lockedTrack": "ロックされたトラック",
     "voice": "音声",
     "description": "説明",
     "descriptionPlaceholder": "例：30秒、エネルギッシュ、プロフェッショナル",
     "generateAllMissingTTS": "不足している音声を一括生成",
-    "processing": "{{count}}行を処理しています...",
+    "processing": "{count}行を処理しています...",
     "selectDialogueFirst": "まず対話の行を選択してください",
     "micAccessFailed": "マイクにアクセスできませんでした",
     "recordingSaveFailed": "録画の保存に失敗しました",
@@ -653,7 +673,7 @@
     "cutButton": "カット",
     "tracks": "トラック",
     "addTrack": "トラックを追加します",
-    "trackName": "トラック{{number}}",
+    "trackName": "トラック{number}",
     "deleteLastTrackAlert": "最後のトラックを削除することはできません",
     "voice": "音声",
     "promptPlaceholder": "音声を生成するためのテキストを入力してください...",
@@ -668,7 +688,7 @@
   },
   "savedPdfThumbnail": {
     "errorMessage": "PDFの読み込みエラーです",
-    "pageOverlay": "{{number}}ページ目"
+    "pageOverlay": "{number}ページ目"
   },
   "sectionAssigner": {
     "dialogTitle": "セクションに割り当てる",
@@ -769,16 +789,16 @@
     },
     "contextMenu": {
       "deselectAll": "すべて選択解除",
-      "deleteConfirmMessage": "選択した{{count}}個のファイルを削除しますか？",
-      "deleteSelected": "選択項目を削除 ({{count}})",
-      "reAnalyzeSelected": "選択項目を再分析 ({{count}})"
+      "deleteConfirmMessage": "選択した{count}個のファイルを削除しますか？",
+      "deleteSelected": "選択項目を削除 ({count})",
+      "reAnalyzeSelected": "選択項目を再分析 ({count})"
     },
     "mainView": {
       "noFilesMessage": "ファイルがありません。開始するにはファイルをアップロードしてください。"
     }
   },
   "sortableAnswers": {
-    "answerLabel": "回答{{number}}",
+    "answerLabel": "回答{number}",
     "correct": "正解です",
     "incorrect": "不正解です"
   },
@@ -788,7 +808,7 @@
   },
   "pdfThumbnail": {
     "failedToLoad": "PDFの読み込みに失敗しました",
-    "pageNumber": "{{current}} / {{total}}"
+    "pageNumber": "{current} / {total}"
   },
   "unitEmbedding": {
     "publishing": "公開中...",
@@ -797,13 +817,13 @@
     "generating": "生成中...",
     "generateEmbeddings": "埋め込みを生成します",
     "cached": "キャッシュ済み",
-    "wordsEmbedded": "{{count}}語が埋め込まれました",
-    "completedCount": "{{completed}}/{{total}} 完了しました",
+    "wordsEmbedded": "{count}語が埋め込まれました",
+    "completedCount": "{completed}/{total} 完了しました",
     "allSectionsComplete": "すべてのセクションが完了しました！"
   },
   "wordEmbedding": {
-    "embeddingFailed": "単語は保存されましたが、埋め込み生成に失敗しました: {{error}}",
-    "embeddingGenerated": "埋め込み生成完了: {{count}}語を処理しました",
+    "embeddingFailed": "単語は保存されましたが、埋め込み生成に失敗しました: {error}",
+    "embeddingGenerated": "埋め込み生成完了: {count}語を処理しました",
     "questionSaveFailed": "埋め込みエラーで保存されました"
   },
   "toolBarRoPlugin": {
@@ -812,7 +832,7 @@
     "noDescription": "説明がありません"
   },
   "wordBlockPlugin": {
-    "wordNotFound": "単語が見つかりません: {{wordID}}",
+    "wordNotFound": "単語が見つかりません: {wordID}",
     "loadingAudio": "オーディオを読み込んでいます...",
     "audioUnavailable": "音声は利用できません"
   },
@@ -821,7 +841,26 @@
   },
   "sketchPad": {
     "hoverToStartDrawing": "ホバーして描画を開始してください",
-    "submittingInSeconds": "{{countdown}}秒後に描画を採点のため提出します...",
-    "cancelSubmission": "提出をキャンセルします"
+    "submittingInSeconds": "{countdown}秒後に描画を採点のため提出します...",
+    "cancelSubmission": "提出をキャンセルします",
+    "activatingDrawingPad": "描画パッドを起動しています..."
+  },
+  "aiContentSuggestion": {
+    "tabToAccept": "Tabキーで確定します"
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "回答を入力してください",
+    "answerQuestions": "質問に答える",
+    "audio": "オーディオ",
+    "audioQuestion": "音声問題",
+    "completedQuestion": "完了した問題",
+    "errorOccurred": "エラーが発生しました",
+    "loading": "読み込み中です",
+    "promptNotAvailable": "プロンプトが利用できません",
+    "question": "質問",
+    "submit": "提出する",
+    "text": "テキスト",
+    "writing": "記述",
+    "yourAnswer": "あなたの回答"
   }
 }

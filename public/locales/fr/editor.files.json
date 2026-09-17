@@ -1,10 +1,10 @@
 {
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "Supprimer {{count}} fichier(s) sélectionné(s) ?",
-      "deleteSelected": "Supprimer la sélection ({{count}})",
+      "deleteConfirmMessage": "Supprimer {count} fichier(s) sélectionné(s) ?",
+      "deleteSelected": "Supprimer la sélection ({count})",
       "deselectAll": "Tout désélectionner",
-      "reAnalyzeSelected": "Ré-analyser la sélection ({{count}})"
+      "reAnalyzeSelected": "Ré-analyser la sélection ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "Description :",
@@ -63,7 +63,8 @@
       "actionsTooltip": "Actions",
       "searchPlaceholder": "Rechercher des fichiers...",
       "selectAllTooltip": "Tout sélectionner",
-      "uploadTooltip": "Téléverser des fichiers"
+      "uploadTooltip": "Téléverser des fichiers",
+      "recordConversation": "Enregistrer la conversation"
     },
     "dragDrop": {
       "dropFilesHere": "Déposez les fichiers ici pour les téléverser",
@@ -75,10 +76,10 @@
     "cancel": "Annuler",
     "collapse": "Réduire",
     "concepts": "Concepts",
-    "conceptsCount": "Concepts ({{count}})",
+    "conceptsCount": "Concepts ({count})",
     "confirm": "Confirmer",
     "created": "Créé :",
-    "deleteConfirmation": "Supprimer le fichier : \"{{fileName}}\" ?",
+    "deleteConfirmation": "Supprimer le fichier : \"{fileName}\" ?",
     "deleteFile": "Supprimer le fichier",
     "expand": "Développer",
     "fileInfo": "Informations du fichier",
@@ -86,22 +87,22 @@
     "noMetadataAvailable": "Aucune métadonnée disponible pour ce fichier.",
     "noParsedContentAvailable": "Aucun contenu analysé disponible pour ce fichier.",
     "objectives": "Objectifs",
-    "objectivesCount": "Objectifs ({{count}})",
+    "objectivesCount": "Objectifs ({count})",
     "parsedContent": "Contenu analysé",
     "path": "Chemin :",
     "protectionLevel": "Niveau de protection :",
     "questions": "Questions",
-    "questionsCount": "Questions ({{count}})",
+    "questionsCount": "Questions ({count})",
     "rawMetadata": "Métadonnées brutes",
     "searchPlaceholder": "Rechercher dans le contenu des fichiers...",
     "summaries": "Résumés",
-    "summariesCount": "Résumés ({{count}})",
+    "summariesCount": "Résumés ({count})",
     "type": "Type :",
     "unknown": "Inconnu",
     "unknownSize": "Taille inconnue",
     "unset": "NON DÉFINI",
     "vocabulary": "Vocabulaire",
-    "vocabularyCount": "Vocabulaire ({{count}})"
+    "vocabularyCount": "Vocabulaire ({count})"
   },
   "documentUploader": {
     "browseFiles": "Parcourir les fichiers",
@@ -109,7 +110,7 @@
     "errorMessages": {
       "noSupportedFiles": "Aucun document pris en charge trouvé. Veuillez télécharger des fichiers PDF, Word, Texte ou Excel.",
       "skippedFiles": "Certains fichiers ont été ignorés (type non pris en charge)",
-      "uploadFailed": "Échec du téléchargement de {{fileName}} : {{error}}"
+      "uploadFailed": "Échec du téléchargement de {fileName} : {error}"
     },
     "extractionTypes": {
       "dictionary": "dictionnaire",
@@ -119,9 +120,9 @@
     },
     "howItWorks": {
       "step1": "1. Téléchargez vos documents (fichiers PDF, Word, texte ou Excel)",
-      "step2": "2. L'IA analysera le contenu et extraira {{extractionType}}",
+      "step2": "2. L'IA analysera le contenu et extraira {extractionType}",
       "step3": "3. Examinez et approuvez les suggestions dans l'onglet \"Suggestions\"",
-      "step4": "4. Importer les éléments sélectionnés vers votre {{target}}",
+      "step4": "4. Importer les éléments sélectionnés vers votre {target}",
       "title": "Comment ça marche :"
     },
     "recentUploads": "Téléchargements récents",
@@ -131,14 +132,14 @@
       "processing": "Traitement en cours..."
     },
     "supportedFormats": "Pris en charge : PDF, Word (.doc, .docx), Texte (.txt), Excel (.xls, .xlsx, .csv)",
-    "title": "Télécharger des documents pour l'extraction {{extractionType}}",
-    "uploadingProgress": "Téléchargement... {{progress}}%"
+    "title": "Télécharger des documents pour l'extraction {extractionType}",
+    "uploadingProgress": "Téléchargement... {progress}%"
   },
   "fileManager": {
     "close": "Fermer",
     "create": "Créer",
     "draftChanges": "Brouillon des modifications",
-    "errorRendering": "Erreur lors du rendu de FileManager : {{message}}",
+    "errorRendering": "Erreur lors du rendu de FileManager : {message}",
     "revert": "Rétablir",
     "save": "Enregistrer",
     "textToImagePreview": "Aperçu Texte vers Image",

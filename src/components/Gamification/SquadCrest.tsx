@@ -1,14 +1,24 @@
 /**
- * SquadCrest — Generates a styled avatar from squad name initials
- * with a deterministic color from the squad ID hash.
+ * SquadCrest — Composes a deterministic heraldic mini-crest for a squad via the
+ * shared `Medallion` primitive: a shield silhouette, a division/tinctures picked
+ * from the squadId, a metallic rim keyed to totalXP, and a centered charge
+ * (initials in a serif by default, or an optional icon device).
  *
  * @module SquadCrest
  */
 
 import React, { useMemo } from 'react'
-import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import type { IconType } from 'react-icons'
+import { Medallion } from './Medallion'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import {
+  pickTinctures,
+  pickDivision,
+  metalForTier,
+  readableInk,
+} from '@/themes/heraldry'
 
 export interface SquadCrestProps {
   squadId: string
@@ -16,25 +26,14 @@ export interface SquadCrestProps {
   totalXP?: number
   size?: 'small' | 'medium' | 'large'
   showName?: boolean
+  /** Optional deterministic charge device drawn in place of initials. */
+  chargeIcon?: IconType
 }
 
 const SIZE_MAP = {
   small: 40,
   medium: 64,
   large: 96,
-}
-
-/**
- * Simple hash to deterministic HSL color
- */
-function hashToColor(str: string): string {
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-    hash |= 0
-  }
-  const hue = Math.abs(hash) % 360
-  return `hsl(${hue}, 60%, 45%)`
 }
 
 function getInitials(name: string): string {
@@ -51,26 +50,51 @@ export function SquadCrest({
   totalXP,
   size = 'medium',
   showName = true,
+  chargeIcon: ChargeIcon,
 }: SquadCrestProps) {
-  const bgColor = useMemo(() => hashToColor(squadId), [squadId])
-  const initials = useMemo(() => getInitials(squadName), [squadName])
+  const reducedMotion = useReducedMotion()
   const px = SIZE_MAP[size]
+  const initials = useMemo(() => getInitials(squadName), [squadName])
+  const { field, charge } = useMemo(() => pickTinctures(squadId), [squadId])
+  const division = useMemo(() => pickDivision(squadId), [squadId])
+  const metal = useMemo(() => metalForTier(totalXP ?? 0), [totalXP])
+  const ink = useMemo(() => readableInk(field.main), [field])
+
+  const chargeNode = ChargeIcon ? (
+    <ChargeIcon
+      size={Math.round(px * 0.44)}
+      color={charge.light}
+      style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }}
+    />
+  ) : (
+    <Typography
+      component="span"
+      sx={{
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontWeight: 700,
+        fontSize: px * 0.4,
+        lineHeight: 1,
+        color: ink,
+        textShadow: '0 1px 1px rgba(0,0,0,0.25)',
+      }}
+    >
+      {initials}
+    </Typography>
+  )
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-      <Avatar
-        sx={{
-          width: px,
-          height: px,
-          bgcolor: bgColor,
-          fontSize: px * 0.4,
-          fontWeight: 700,
-          border: '3px solid',
-          borderColor: 'divider',
-        }}
-      >
-        {initials}
-      </Avatar>
+      <Medallion
+        shape="shield"
+        size={px}
+        rimMetal={metal}
+        fieldColor={field.main}
+        divisionColor={charge.main}
+        division={division}
+        charge={chargeNode}
+        ariaLabel={`${squadName} squad crest`}
+        reducedMotion={reducedMotion}
+      />
       {showName && (
         <Typography variant="subtitle2" sx={{ fontWeight: 600, textAlign: 'center' }}>
           {squadName}
@@ -86,3 +110,4 @@ export function SquadCrest({
 }
 
 export default SquadCrest
+

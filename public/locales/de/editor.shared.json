@@ -1,1 +1,263 @@
-{}
+{
+  "recordingStudio3": {
+    "add": "Hinzufügen",
+    "addLine": "Zeile hinzufügen",
+    "addSpeakerFirst": "Bitte fügen Sie zuerst einen Sprecher hinzu",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "z.B. 30s, energisch, professionell",
+    "direction": "Richtung",
+    "directionPlaceholder": "z. B. atemlos eintretend",
+    "emotion": "Emotion",
+    "emotionPlaceholder": "z. B. fröhlich, müde",
+    "empty": "(leer)",
+    "exportJSON": "JSON exportieren",
+    "generateAllMissingTTS": "Alle fehlenden TTS generieren",
+    "generateTTS": "TTS generieren",
+    "importFailed": "Fehler beim Importieren der JSON-Datei",
+    "importJSON": "JSON importieren",
+    "lockedTrack": "Gesperrte Spur",
+    "micAccessFailed": "Zugriff auf Mikrofon fehlgeschlagen",
+    "name": "Name",
+    "noMissingAudio": "Keine fehlenden Audiodateien zu generieren",
+    "noTextToGenerate": "Kein Text zum Generieren",
+    "play": "Abspielen",
+    "record": "Aufnehmen",
+    "recordingSaveFailed": "Aufzeichnung konnte nicht gespeichert werden",
+    "save": "Speichern",
+    "script": "Skript",
+    "sectionHeading": "Aufnahmestudio",
+    "selectDialogueFirst": "Bitte wählen Sie zuerst eine Dialogzeile aus.",
+    "speakerNotFound": "Lautsprecher nicht gefunden",
+    "speakers": "Lautsprecher",
+    "stop": "Stopp",
+    "takes": "Aufnahmen",
+    "text": "Text",
+    "timeline": "Zeitleiste",
+    "ttsGenerationFailed": "TTS-Audio konnte nicht generiert werden",
+    "unknown": "Unbekannt",
+    "voice": "Stimme",
+    "lineNumber": "Zeile #{number} - {speaker}",
+    "processing": "\"{count} Zeilen werden verarbeitet...\"",
+    "takeNumber": "Aufnahme {number} ({type})"
+  },
+  "recordingStudioEnhanced": {
+    "cutButton": "Schneiden",
+    "highPass": "Hochpass",
+    "highPassTooltip": "Tiefe Frequenzen entfernen",
+    "lowPass": "Tiefpassfilter",
+    "lowPassTooltip": "Hohe Frequenzen entfernen",
+    "normalize": "Normalisieren",
+    "normalizeTooltip": "Audiopegel normalisieren",
+    "popClick": "Knacken/Klicken",
+    "popClickTooltip": "\"Pops und Klicks entfernen\"",
+    "record": "Aufnehmen",
+    "stop": "Stopp",
+    "tracks": "Spuren"
+  },
+  "recordingStudio": {
+    "preview": "Vorschau",
+    "sectionHeading": "Aufnahmestudio"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "Keine Audioquelle bereitgestellt"
+  },
+  "staticWaveform": {
+    "errorLoading": "Fehler beim Laden der Wellenform"
+  },
+  "sketchPad": {
+    "cancelSubmission": "Übermittlung abbrechen",
+    "hoverToStartDrawing": "Zum Zeichnen mit der Maus darüberfahren",
+    "submittingInSeconds": "Zeichnung wird in {countdown} Sekunden zur Bewertung eingereicht..."
+  },
+  "autoSubmit": {
+    "cancelSubmission": "Abbrechen",
+    "submittingInSeconds": "Antwort wird in {countdown} Sekunden übermittelt..."
+  },
+  "unitEmbedding": {
+    "allSectionsComplete": "Alle Abschnitte abgeschlossen!",
+    "cached": "Im Cache gespeichert",
+    "generateEmbeddings": "Einbettungen generieren",
+    "generating": "Wird generiert...",
+    "publishSuccess": "Einheit veröffentlicht mit generierten Einbettungen!",
+    "publishUnit": "Einheit veröffentlichen",
+    "publishing": "Wird veröffentlicht...",
+    "completedCount": "{completed}/{total} abgeschlossen",
+    "wordsEmbedded": "{count} Wörter eingebettet"
+  },
+  "autoEmbedPlugin": {
+    "dismiss": "Schließen",
+    "embed": "Einbetten",
+    "youtubeVideo": "YouTube-Video",
+    "embedOption": "\"{contentName} einbetten\"",
+    "embedTitle": "\"{contentName} einbetten\""
+  },
+  "unitEmbeddingComponents": {
+    "errorMessage": "Fehler beim Generieren der Einbettungen",
+    "generateButton": "Einbettungen generieren",
+    "successMessage": "Einbettungen generiert"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "Einbettungen werden generiert",
+    "successConfirmation": "Embeddings erfolgreich generiert"
+  },
+  "imagesPlugin": {
+    "altText": "Alternativtext",
+    "altTextDescriptive": "Beschreibender Alternativtext",
+    "altTextPlaceholder": "Zufälliges Unsplash-Bild",
+    "confirm": "Bestätigen",
+    "dropImagesHere": "Bilder hier ablegen",
+    "file": "Datei",
+    "imageUpload": "Bild hochladen",
+    "imageUrl": "Bild-URL",
+    "imageUrlPlaceholder": "z.B. https://source.unsplash.com/random",
+    "insertFromUrl": "Von URL einfügen",
+    "sample": "Beispiel",
+    "upload": "Bild hochladen",
+    "url": "URL"
+  },
+  "tablePlugin": {
+    "chooseLayout": "Wählen Sie ein Layout",
+    "columns": "Spalten",
+    "columnsPlaceholder": "Anzahl der Spalten (1-50)",
+    "insert": "Einfügen",
+    "insertTable": "Tabelle einfügen",
+    "rows": "Zeilen",
+    "rowsPlaceholder": "Anzahl der Zeilen (1-500)",
+    "table": "Tabelle"
+  },
+  "wordBlockPlugin": {
+    "audioUnavailable": "Audio nicht verfügbar",
+    "loadingAudio": "Audio wird geladen...",
+    "wordNotFound": "Wort nicht gefunden: {wordID}"
+  },
+  "vocabularyReview": {
+    "alertMessage": "Vokabeln vor dem Fortfahren wiederholen",
+    "cancel": "Abbrechen",
+    "continue": "Weiter",
+    "summary": "Zusammenfassung"
+  },
+  "questionsReview": {
+    "alertMessage": "Überprüfen Sie alle Fragen vor dem Absenden",
+    "cancel": "Abbrechen",
+    "filterBy": "Filtern nach",
+    "submit": "Senden"
+  },
+  "tableComponent": {
+    "clearCell": "Zelle löschen",
+    "deleteColumn": "Spalte löschen",
+    "deleteRow": "Zeile löschen",
+    "deleteTable": "Tabelle löschen",
+    "insertColumn": "Spalte einfügen",
+    "insertColumnLeft": "Spalte links einfügen",
+    "insertColumnRight": "Spalte rechts einfügen",
+    "insertRow": "Zeile einfügen",
+    "insertRowAbove": "Zeile oberhalb einfügen",
+    "insertRowBelow": "Zeile darunter einfügen",
+    "makeColumnHeader": "Spaltenüberschrift erstellen",
+    "makeHeader": "Kopfzeile erstellen",
+    "makeRowHeader": "Zeilenüberschrift erstellen",
+    "removeColumnHeader": "Spaltenüberschrift entfernen",
+    "removeHeader": "Kopfzeile entfernen",
+    "removeRowHeader": "Zeilenüberschrift entfernen",
+    "removeSorting": "Sortierung entfernen",
+    "sortAscending": "Aufsteigend sortieren",
+    "sortDescending": "Absteigend sortieren",
+    "cellActionsTitle": "Zellenaktionsmenü",
+    "cellActionsLabel": "Tabellenzellen-Aktionen"
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "Titel"
+  },
+  "pdfViewerComponent": {
+    "noPdfToDisplay": "Keine PDF-Datei zum Anzeigen vorhanden",
+    "loadingPdf": "PDF wird geladen: {filename}"
+  },
+  "metadataEditor": {
+    "aiGenerationInfo": "KI-Generierungsinformationen",
+    "createdLabel": "Erstellt:",
+    "fileInfo": "Dateiinformationen",
+    "fileMetadataHeading": "Datei-Metadaten",
+    "modelLabel": "Modell",
+    "notSet": "Nicht festgelegt",
+    "pathLabel": "Pfad:",
+    "promptLabel": "Eingabeaufforderung",
+    "protectionLabel": "Schutz:",
+    "sizeLabel": "Größe:",
+    "typeLabel": "Typ:",
+    "unknown": "Unbekannt",
+    "updatedLabel": "Aktualisiert:",
+    "variantLabel": "Variante"
+  },
+  "metadataField": {
+    "unsavedChanges": "nicht gespeicherte Änderungen"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "Link-Bearbeitung abbrechen",
+    "closeLinkEditor": "Link-Editor schließen",
+    "confirmLink": "Link bestätigen",
+    "convertToYoutubeEmbed": "In YouTube-Einbettung konvertieren",
+    "editLink": "Link bearbeiten",
+    "linkUrl": "Link-URL",
+    "removeLink": "Link entfernen",
+    "youtubeEmbed": "YouTube-Einbettung"
+  },
+  "imageMaskEditor": {
+    "applyMask": "Maske anwenden & regenerieren",
+    "cancel": "Abbrechen",
+    "instructions": "**Anweisungen:** Übermalen Sie die Bereiche, die Sie regenerieren möchten. Verwenden Sie den Radierer, um Teile der Maske zu entfernen. Halten Sie die Umschalttaste gedrückt und ziehen Sie, um zu schwenken. Nutzen Sie die Zoom-Schaltflächen für detailliertere Ansichten.",
+    "save": "Speichern",
+    "brushSize": "Pinselgröße: {size}",
+    "zoomInfo": "Zoom: {level}% | Umschalttaste halten zum Verschieben"
+  },
+  "freeSoloCreateOptionDialog": {
+    "cancel": "Abbrechen",
+    "create": "Hinzufügen",
+    "description": "Ein neues Wort zum Wörterbuch hinzufügen.",
+    "dialogTitle": "Ein neues Wort hinzufügen",
+    "label": "Freies Solo-Dialogfeld"
+  },
+  "insertLayoutDialog": {
+    "cancel": "Abbrechen",
+    "insert": "Einfügen"
+  },
+  "placeholders": {
+    "enter_text": "Text eingeben",
+    "search_words": "Wörter suchen...",
+    "type_here": "Hier eingeben..."
+  },
+  "blocks": {
+    "answer": "Antwortblock",
+    "custom_answer": "Benutzerdefinierte Antwort",
+    "meaning_association": "Bedeutungsverknüpfung",
+    "quiz": "Quiz-Block"
+  },
+  "questionBlock": {
+    "status": "Status",
+    "submit": "Senden"
+  },
+  "autocompleteNode": {
+    "desktopHint": "(TAB)",
+    "mobileHint": "(WISCHEN ⮕)"
+  },
+  "tableOfContents": {
+    "emptyState": "Keine Überschriften gefunden. Fügen Sie Überschriften zu Ihrem Dokument hinzu, um das Inhaltsverzeichnis anzuzeigen.",
+    "title": "Inhaltsverzeichnis"
+  },
+  "imageResizer": {
+    "addCaption": "Bildunterschrift hinzufügen"
+  },
+  "playlistEditor": {
+    "emptyState": "Keine Elemente in der Playlist",
+    "menuAttribute": "Menü",
+    "noFilesMessage": "Es wurden noch keine Dateien hinzugefügt. Verwenden Sie das Eingabefeld oben, um Dateien zur Playlist hinzuzufügen."
+  },
+  "wordEmbedding": {
+    "embeddingGenerated": "Einbettung generiert: {count} Wörter verarbeitet"
+  },
+  "micLevelIndicator": {
+    "noSignalShort": "Kein Signal",
+    "tooLow": "Die Mikrofoneingabe ist sehr niedrig. Versuchen Sie, lauter zu sprechen oder näher an das Mikrofon heranzugehen.",
+    "noSignal": "Kein Mikrofonsignal erkannt. Überprüfen Sie, ob Ihr Mikrofon angeschlossen und nicht stummgeschaltet ist.",
+    "tooLowShort": "Zu leise"
+  }
+}

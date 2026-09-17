@@ -41,8 +41,10 @@
       "correct": "Richtig!",
       "incorrect": "Versuchen Sie es erneut"
     },
-    "audioNotAvailable": "{{text}} (Audio nicht verfügbar)",
-    "audioNotAvailableParens": "(Audio nicht verfügbar)"
+    "audioNotAvailable": "{text} (Audio nicht verfügbar)",
+    "audioNotAvailableParens": "(Audio nicht verfügbar)",
+    "noDictionaryAvailable": "Kein Wörterbuch verfügbar",
+    "submit": "Senden"
   },
   "answerEditor": {
     "instructions": "Erstellen Sie Ihre Antwort unten",
@@ -50,7 +52,8 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "emptyState": "Keine Antwort angegeben",
-    "addWordToDict": "Neues Wort zum Wörterbuch hinzufügen."
+    "addWordToDict": "Neues Wort zum Wörterbuch hinzufügen.",
+    "addWordLabel": "Wortbeschriftung hinzufügen"
   },
   "assignmentConfiguration": {
     "timerLabel": "Timer",
@@ -97,7 +100,7 @@
     "dragDropPrompt": "Ziehen Sie hier ein Bild hinein, um es als Hauptbild festzulegen."
   },
   "documentUploader": {
-    "title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+    "title": "Dokumente für {extractionType}-Extraktion hochladen",
     "extractionTypes": {
       "vocabulary": "Vokabular",
       "question": "Frage",
@@ -107,7 +110,7 @@
     "dragDropPrompt": "Dokumente hier per Drag & Drop hinzufügen",
     "supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
     "browseFiles": "Dateien durchsuchen",
-    "uploadingProgress": "Wird hochgeladen... {{progress}}%",
+    "uploadingProgress": "Wird hochgeladen... {progress}%",
     "recentUploads": "Kürzlich hochgeladene Dateien",
     "statusLabels": {
       "processing": "Wird verarbeitet...",
@@ -117,14 +120,14 @@
     "errorMessages": {
       "noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
       "skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
-      "uploadFailed": "Fehler beim Hochladen von {{fileName}}: {{error}}"
+      "uploadFailed": "Fehler beim Hochladen von {fileName}: {error}"
     },
     "howItWorks": {
       "title": "So funktioniert es:",
       "step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
-      "step2": "2. Die KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "step2": "2. Die KI wird den Inhalt analysieren und {extractionType} extrahieren",
       "step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
-      "step4": "4. Importieren Sie die ausgewählten Elemente in Ihr {{target}}"
+      "step4": "4. Importieren Sie die ausgewählten Elemente in Ihr {target}"
     }
   },
   "enhancedGenerators": {
@@ -175,11 +178,11 @@
     "cohortChatTab": "Kohorte-Chat"
   },
   "unifiedGenerateModal": {
-    "generating": "\"{{type}} wird generiert...\"",
+    "generating": "\"{type} wird generiert...\"",
     "takeMoments": "Dies kann einige Augenblicke dauern",
     "preview": "Vorschau",
     "discardChanges": "Änderungen verwerfen?",
-    "lostWarning": "Ihr generierter {{type}} geht verloren, wenn Sie jetzt abbrechen.",
+    "lostWarning": "Ihr generierter {type} geht verloren, wenn Sie jetzt abbrechen.",
     "cancel": "Abbrechen",
     "generate": "Generieren",
     "saveClose": "Speichern & Schließen",
@@ -200,8 +203,8 @@
   },
   "imageMaskEditor": {
     "instructions": "**Anweisungen:** Übermalen Sie die Bereiche, die Sie regenerieren möchten. Verwenden Sie den Radierer, um Teile der Maske zu entfernen. Halten Sie die Umschalttaste gedrückt und ziehen Sie, um zu schwenken. Nutzen Sie die Zoom-Schaltflächen für detailliertere Ansichten.",
-    "brushSize": "Pinselgröße: {{size}}",
-    "zoomInfo": "Zoom: {{level}}% | Umschalttaste halten zum Verschieben",
+    "brushSize": "Pinselgröße: {size}",
+    "zoomInfo": "Zoom: {level}% | Umschalttaste halten zum Verschieben",
     "applyMask": "Maske anwenden & regenerieren",
     "save": "Speichern",
     "cancel": "Abbrechen"
@@ -252,7 +255,7 @@
     "done": "Fertig",
     "invalid": "Ungültig",
     "addAnswer": "Antwort hinzufügen",
-    "gradeDisplay": "Note: {{score}}",
+    "gradeDisplay": "Note: {score}",
     "status": "Status"
   },
   "staticWaveform": {
@@ -335,7 +338,7 @@
     "expand": "Erweitern",
     "fileInfo": "Dateiinformationen",
     "deleteFile": "Datei löschen",
-    "deleteConfirmation": "Datei \"{{fileName}}\" löschen?",
+    "deleteConfirmation": "Datei \"{fileName}\" löschen?",
     "filename": "Dateiname:",
     "type": "Typ:",
     "unknown": "Unbekannt",
@@ -355,19 +358,19 @@
     "objectives": "Lernziele",
     "concepts": "Konzepte",
     "questions": "Fragen",
-    "vocabularyCount": "Vokabular ({{count}})",
-    "summariesCount": "Zusammenfassungen ({{count}})",
-    "objectivesCount": "Lernziele ({{count}})",
-    "conceptsCount": "Konzepte ({{count}})",
-    "questionsCount": "Fragen ({{count}})",
+    "vocabularyCount": "Vokabular ({count})",
+    "summariesCount": "Zusammenfassungen ({count})",
+    "objectivesCount": "Lernziele ({count})",
+    "conceptsCount": "Konzepte ({count})",
+    "questionsCount": "Fragen ({count})",
     "confirm": "Bestätigen",
     "cancel": "Abbrechen"
   },
   "autoEmbedPlugin": {
     "youtubeVideo": "YouTube-Video",
     "dismiss": "Schließen",
-    "embedTitle": "\"{{contentName}} einbetten\"",
-    "embedOption": "\"{{contentName}} einbetten\"",
+    "embedTitle": "\"{contentName} einbetten\"",
+    "embedOption": "\"{contentName} einbetten\"",
     "embed": "Einbetten"
   },
   "floatingLinkEditorPlugin": {
@@ -432,7 +435,7 @@
     "deleteUnitConfirmation": "Sind Sie sicher, dass Sie diese Einheit löschen möchten?",
     "delete": "Löschen",
     "cancel": "Abbrechen",
-    "closePreview": "Vorschau von {{name}} schließen",
+    "closePreview": "Vorschau von {name} schließen",
     "untitledUnit": "Unbenannte Einheit",
     "addDescription": "Beschreibung hinzufügen",
     "status": "Status",
@@ -479,15 +482,15 @@
     "textToImagePreview": "Text-zu-Bild-Vorschau",
     "textToSpeechPreview": "Text-to-Speech-Vorschau",
     "close": "Schließen",
-    "errorRendering": "Fehler beim Rendern des Dateimanagers: {{message}}"
+    "errorRendering": "Fehler beim Rendern des Dateimanagers: {message}"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "PDF wird geladen: {{filename}}",
+    "loadingPdf": "PDF wird geladen: {filename}",
     "noPdfToDisplay": "Keine PDF-Datei zum Anzeigen vorhanden"
   },
   "quizComponent": {
-    "grade": "Note: {{note}}",
-    "gradeDisplay": "Bewertung: {{score}}%"
+    "grade": "Note: {note}",
+    "gradeDisplay": "Bewertung: {score}%"
   },
   "playlistEditor": {
     "noFilesMessage": "Es wurden noch keine Dateien hinzugefügt. Verwenden Sie das Eingabefeld oben, um Dateien zur Playlist hinzuzufügen.",
@@ -515,7 +518,7 @@
     "categories": "Kategorien",
     "savedMessage": "Der Inhalt wurde gespeichert. Bitte überprüfen Sie ihn gemäß den Richtlinien Ihrer Schule.",
     "flagged": "Markiert",
-    "flaggedWithCategories": "Markiert: {{categories}}"
+    "flaggedWithCategories": "Markiert: {categories}"
   },
   "moderationPanel": {
     "title": "Inhaltsmoderation",
@@ -523,9 +526,9 @@
     "warning": "Dieser Inhalt erfordert eine Überprüfung",
     "alertMessage": "Dieser Inhalt wurde durch die automatische Moderation markiert. Er wurde gespeichert, könnte aber gemäß den Richtlinien Ihrer Einrichtung einer Überprüfung bedürfen.",
     "flaggedCategories": "Markierte Kategorien:",
-    "confidence": "Vertrauen: {{score}}%",
-    "checked": "Geprüft: {{date}}",
-    "model": "Modell: {{model}}",
+    "confidence": "Vertrauen: {score}%",
+    "checked": "Geprüft: {date}",
+    "model": "Modell: {model}",
     "disclaimerNote": "Automatisierte Moderation ist nicht fehlerfrei. Bitte prüfen Sie diesen Inhalt im Kontext und handeln Sie entsprechend den spezifischen Richtlinien Ihrer Einrichtung und den Anforderungen der örtlichen Rechtsprechung.",
     "disclaimerLabel": "Hinweis:",
     "categories": {
@@ -545,9 +548,9 @@
   },
   "questionBlock": {
     "submit": "Absenden",
-    "gradeDisplay": "Note: {{score}}",
+    "gradeDisplay": "Note: {score}",
     "status": "Status",
-    "answerLabel": "Antwort {{number}}",
+    "answerLabel": "Antwort {number}",
     "correct": "Richtig",
     "incorrect": "Falsch",
     "edit": "Bearbeiten",
@@ -572,8 +575,8 @@
     "noQuestions": "Für dieses Dokument wurden keine Fragen gefunden.",
     "from": "Von",
     "pages": "Seiten",
-    "importedOn": "Importiert am {{date}}",
-    "filteringBySearch": "Filterung nach Suche: \"{{searchTerm}}\" ({{count}} von {{total}} Elementen)",
+    "importedOn": "Importiert am {date}",
+    "filteringBySearch": "Filterung nach Suche: \"{searchTerm}\" ({count} von {total} Elementen)",
     "hide": "Ausblenden",
     "show": "Anzeigen",
     "summariesAndObjectives": "Zusammenfassungen & Lernziele",
@@ -581,7 +584,7 @@
     "learningObjectives": "Lernziele",
     "selectAll": "Alle auswählen",
     "deselectAll": "Alle abwählen",
-    "selectedCount": "{{count}} von {{total}} ausgewählt",
+    "selectedCount": "{count} von {total} ausgewählt",
     "importToQuestionBank": "In Fragenbank importieren",
     "questionPrompt": "Frageaufforderung",
     "enterQuestion": "Frage eingeben...",
@@ -597,7 +600,7 @@
     "preview": "Vorschau"
   },
   "recordingStudio2": {
-    "recordingNumber": "Aufnahme {{number}}",
+    "recordingNumber": "Aufnahme {number}",
     "existingRecordings": "Vorhandene Aufnahmen",
     "staticWaveformPreview": "Statische Wellenform-Vorschau:",
     "recordedAudioWaveform": "Aufgezeichnete Audio-Wellenform:"
@@ -617,7 +620,7 @@
     "add": "Hinzufügen",
     "unknown": "Unbekannt",
     "empty": "(leer)",
-    "lineNumber": "Zeile #{{number}} - {{speaker}}",
+    "lineNumber": "Zeile #{number} - {speaker}",
     "text": "Text",
     "direction": "Richtung",
     "emotion": "Emotion",
@@ -625,14 +628,14 @@
     "emotionPlaceholder": "z. B. fröhlich, müde",
     "generateTTS": "TTS generieren",
     "takes": "Aufnahmen",
-    "takeNumber": "Aufnahme {{number}} ({{type}})",
+    "takeNumber": "Aufnahme {number} ({type})",
     "name": "Name",
     "lockedTrack": "Gesperrte Spur",
     "voice": "Stimme",
     "description": "Beschreibung",
     "descriptionPlaceholder": "z.B. 30s, energisch, professionell",
     "generateAllMissingTTS": "Alle fehlenden TTS generieren",
-    "processing": "Verarbeite {{count}} Zeilen...",
+    "processing": "Verarbeite {count} Zeilen...",
     "selectDialogueFirst": "Bitte wählen Sie zuerst eine Dialogzeile aus",
     "micAccessFailed": "Mikrofonzugriff fehlgeschlagen",
     "recordingSaveFailed": "Aufzeichnung konnte nicht gespeichert werden",
@@ -670,7 +673,7 @@
     "cutButton": "Schneiden",
     "tracks": "Spuren",
     "addTrack": "Spur hinzufügen",
-    "trackName": "Spur {{number}}",
+    "trackName": "Spur {number}",
     "deleteLastTrackAlert": "Der letzte Track kann nicht gelöscht werden",
     "voice": "Stimme",
     "promptPlaceholder": "Text eingeben, um Audio zu generieren...",
@@ -685,7 +688,7 @@
   },
   "savedPdfThumbnail": {
     "errorMessage": "Fehler beim Laden der PDF-Datei",
-    "pageOverlay": "Seite {{number}}"
+    "pageOverlay": "Seite {number}"
   },
   "sectionAssigner": {
     "dialogTitle": "Abschnitt zuweisen",
@@ -786,16 +789,16 @@
     },
     "contextMenu": {
       "deselectAll": "Alle abwählen",
-      "deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
-      "deleteSelected": "Ausgewählte löschen ({{count}})",
-      "reAnalyzeSelected": "\"Ausgewählte erneut analysieren ({{count}})\""
+      "deleteConfirmMessage": "{count} ausgewählte Datei(en) löschen?",
+      "deleteSelected": "Ausgewählte löschen ({count})",
+      "reAnalyzeSelected": "\"Ausgewählte erneut analysieren ({count})\""
     },
     "mainView": {
       "noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen."
     }
   },
   "sortableAnswers": {
-    "answerLabel": "Antwort {{number}}",
+    "answerLabel": "Antwort {number}",
     "correct": "Richtig",
     "incorrect": "Falsch"
   },
@@ -805,7 +808,7 @@
   },
   "pdfThumbnail": {
     "failedToLoad": "PDF konnte nicht geladen werden",
-    "pageNumber": "{{current}} / {{total}}"
+    "pageNumber": "{current} / {total}"
   },
   "unitEmbedding": {
     "publishing": "Veröffentliche...",
@@ -814,13 +817,13 @@
     "generating": "Wird generiert...",
     "generateEmbeddings": "Einbettungen generieren",
     "cached": "Im Cache gespeichert",
-    "wordsEmbedded": "{{count}} Wörter eingebettet",
-    "completedCount": "{{completed}}/{{total}} abgeschlossen",
+    "wordsEmbedded": "{count} Wörter eingebettet",
+    "completedCount": "{completed}/{total} abgeschlossen",
     "allSectionsComplete": "Alle Abschnitte abgeschlossen!"
   },
   "wordEmbedding": {
-    "embeddingFailed": "Wort gespeichert, aber Embedding-Generierung fehlgeschlagen: {{error}}",
-    "embeddingGenerated": "Einbettung generiert: {{count}} Wörter verarbeitet",
+    "embeddingFailed": "Wort gespeichert, aber Embedding-Generierung fehlgeschlagen: {error}",
+    "embeddingGenerated": "Einbettung generiert: {count} Wörter verarbeitet",
     "questionSaveFailed": "Speichern mit Einbettungsfehler"
   },
   "toolBarRoPlugin": {
@@ -829,7 +832,7 @@
     "noDescription": "Keine Beschreibung"
   },
   "wordBlockPlugin": {
-    "wordNotFound": "Wort nicht gefunden: {{wordID}}",
+    "wordNotFound": "Wort nicht gefunden: {wordID}",
     "loadingAudio": "Audio wird geladen...",
     "audioUnavailable": "Audio nicht verfügbar"
   },
@@ -838,7 +841,26 @@
   },
   "sketchPad": {
     "hoverToStartDrawing": "Zum Zeichnen mit der Maus darüberfahren",
-    "submittingInSeconds": "Zeichnung wird in {{countdown}} Sekunden zur Bewertung eingereicht...",
-    "cancelSubmission": "Übermittlung abbrechen"
+    "submittingInSeconds": "Zeichnung wird in {countdown} Sekunden zur Bewertung eingereicht...",
+    "cancelSubmission": "Übermittlung abbrechen",
+    "activatingDrawingPad": "Zeichenpad wird aktiviert..."
+  },
+  "aiContentSuggestion": {
+    "tabToAccept": "Tab zum Akzeptieren"
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "Antwort-Platzhalter",
+    "answerQuestions": "Fragen beantworten",
+    "audio": "Audio",
+    "audioQuestion": "Audiofrage",
+    "completedQuestion": "Abgeschlossene Frage",
+    "errorOccurred": "Fehler aufgetreten",
+    "loading": "Lädt",
+    "promptNotAvailable": "Eingabeaufforderung nicht verfügbar",
+    "question": "Frage",
+    "submit": "Senden",
+    "text": "Text",
+    "writing": "Schreiben",
+    "yourAnswer": "Ihre Antwort"
   }
 }

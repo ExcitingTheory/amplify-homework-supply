@@ -40,8 +40,8 @@ export const SmallNoName: Story = {
   play: async ({ canvasElement }) => {
     // Squad name not visible when showName=false
     expect(canvasElement.textContent).not.toContain("Gamma");
-    // But avatar initials still render
-    const avatar = canvasElement.querySelector(".MuiAvatar-root");
-    expect(avatar).not.toBeNull();
+    // But the heraldic crest medallion still renders
+    const crest = canvasElement.querySelector('svg[role="img"]');
+    expect(crest).not.toBeNull();
   },
 };

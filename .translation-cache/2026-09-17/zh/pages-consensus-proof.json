@@ -1,0 +1,3722 @@
+{
+  "namespace": "pages",
+  "sourceLang": "en",
+  "targetLang": "zh",
+  "mode": "provable",
+  "timestamp": "2026-09-17T00:34:35.869Z",
+  "summary": {
+    "totalKeys": 240,
+    "existingKeys": 140,
+    "translatedKeys": 100,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 24345,
+    "gpt": 21615,
+    "gemini": 9900
+  },
+  "translations": [
+    {
+      "keyPath": "squads.createSquad",
+      "source": "Start a New Squad",
+      "translations": {
+        "claude": "创建新小组",
+        "gpt": "创建新小组",
+        "gemma": "...",
+        "consensus": "创建新小组"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:24.882Z",
+          "requestId": "msg_011Cf83b62Sm7afx4d8M2Svc",
+          "tokensUsed": 225,
+          "fingerprint": "a4059aaa84c78fb43005f02d5e6409752aa84130d014a56ecec3b1cd9047cdb6"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.455Z",
+          "requestId": "chatcmpl-EOu2l3QPQ1AKxp5zAnChqIp3iG7vx",
+          "tokensUsed": 204,
+          "fingerprint": "a4059aaa84c78fb43005f02d5e6409752aa84130d014a56ecec3b1cd9047cdb6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:10:42.959Z",
+          "requestId": "a65fab3d-61a2-4014-94eb-102a7a9cc8ee",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.selectSection",
+      "source": "Select a Section",
+      "translations": {
+        "claude": "选择章节",
+        "gpt": "选择一个部分",
+        "gemma": "...",
+        "consensus": "选择章节"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:24.715Z",
+          "requestId": "msg_011Cf83b5Ui5axqtqxqsKe3F",
+          "tokensUsed": 222,
+          "fingerprint": "f9afea4369dfa2814847ad675545ad86353c4931de46c1dcfebdcafa9fb26140"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.929Z",
+          "requestId": "chatcmpl-EOu2lnoN4wPx9KKe0VuzQNL4aVgmj",
+          "tokensUsed": 201,
+          "fingerprint": "2433327ee311f917f03e8a7a43daaa143ec02b84bb5cabc487abd43d989a74f1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:10:44.214Z",
+          "requestId": "0b30add8-c4d7-4c45-abb9-49de2afb2e5c",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.heading",
+      "source": "Privacy",
+      "translations": {
+        "claude": "隐私设置",
+        "gpt": "隐私",
+        "gemma": "translation",
+        "consensus": "隐私设置"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:44.042Z",
+          "requestId": "msg_011Cf83cWh3uECv4LSjh5sMT",
+          "tokensUsed": 221,
+          "fingerprint": "f42a0719f1548f5e6d858c446ef1a31daddac25a178b2ac15853d05aa63b6bea"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:43.613Z",
+          "requestId": "chatcmpl-EOu34zkemxCT7xBF4A8DTvrv99TdY",
+          "tokensUsed": 199,
+          "fingerprint": "86651d17a401c55b251a5a6750b0b26222bdc56238cdce7106f890dd1eb619f2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:10:50.480Z",
+          "requestId": "e1bf44d4-5cb7-4bfe-a230-ea4bbc0bb3b8",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.heading",
+      "source": "All Squads",
+      "translations": {
+        "claude": "所有小组",
+        "gpt": "所有小组",
+        "gemma": "...",
+        "consensus": "所有小组"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:24.990Z",
+          "requestId": "msg_011Cf83b5etJpZdf5dZLWkyc",
+          "tokensUsed": 222,
+          "fingerprint": "50f8661c99b974dbf34de36ac7839a0366150dd2040dd5fe998723f3906d574b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.868Z",
+          "requestId": "chatcmpl-EOu2lYsKjkjrCWcreaB2oH69UdQql",
+          "tokensUsed": 200,
+          "fingerprint": "50f8661c99b974dbf34de36ac7839a0366150dd2040dd5fe998723f3906d574b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:10:54.640Z",
+          "requestId": "c398f030-de5e-44a4-b3b1-77959486b4b8",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.noSections",
+      "source": "No sections found",
+      "translations": {
+        "claude": "未找到任何章节",
+        "gpt": "未找到章节",
+        "gemma": "...",
+        "consensus": "未找到任何章节"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:25.382Z",
+          "requestId": "msg_011Cf83b67AEshqau1ySrkZP",
+          "tokensUsed": 226,
+          "fingerprint": "2afaed35ac535312dffd3d5d81ea40019628bf3d137fe6edd77aaca1a1542c05"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:25.052Z",
+          "requestId": "chatcmpl-EOu2lqM9ap4PnWc0t9Us453V261Zl",
+          "tokensUsed": 201,
+          "fingerprint": "4be2147a75f4abd6fdff6054be5551bb8ed9d45ac785fa30d65b467234cac40b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:01.091Z",
+          "requestId": "9a92e6c7-68d4-45de-bc35-cc5a92cd46e6",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.leaderboardOptIn",
+      "source": "Show my name on leaderboards",
+      "translations": {
+        "claude": "在排行榜上显示我的姓名",
+        "gpt": "在排行榜上显示我的名字",
+        "gemma": "...",
+        "consensus": "在排行榜上显示我的姓名"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:45.525Z",
+          "requestId": "msg_011Cf83cbkA1gseoqa1spR9T",
+          "tokensUsed": 239,
+          "fingerprint": "71eeb38f7aa10e628a6179cb49fbf5bd7a027bc59d7083dca0cc3aec8e530289"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:44.837Z",
+          "requestId": "chatcmpl-EOu35rNr6kBXSaMUil3k1kbZrjdSS",
+          "tokensUsed": 212,
+          "fingerprint": "864a94747859cb6dfccfed81a8c444ba3f01c41a037c6be7a9a72f2d2400b4b6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:03.649Z",
+          "requestId": "aad30fcb-11a0-43a2-8a34-6c6343e9e649",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.description",
+      "source": "Join a squad to compete with your team and climb the leaderboard together.",
+      "translations": {
+        "claude": "加入小队，与您的团队一起竞争，共同攀登排行榜。",
+        "gpt": "加入一个小队，与您的团队一起竞争并攀升排行榜。",
+        "gemma": "加入小队，与您的团队共同竞争，并一起在排行榜上攀升。",
+        "consensus": "加入小队，与您的团队一起竞争，共同攀登排行榜。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:25.223Z",
+          "requestId": "msg_011Cf83b5dtBGYYdYmqQgy1T",
+          "tokensUsed": 255,
+          "fingerprint": "dfa537097ebe224f41c81445dd9c6f0244ab0a14765976895ded5a213a5290fc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.868Z",
+          "requestId": "chatcmpl-EOu2lw7W18GWEs5jH5tBrO7IRfVOQ",
+          "tokensUsed": 222,
+          "fingerprint": "8d54ecb6528805715016aae8809b11e93c41241ac3020fd1b9c0acaafbe4258d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:04.225Z",
+          "requestId": "170ad023-4901-4419-8f8d-70426f45b48c",
+          "tokensUsed": 100,
+          "fingerprint": "a6d03105231c46fef7074c62b679883325bad6033683ff0f6881e0eec70570b1"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.customization.heading",
+      "source": "Customization",
+      "translations": {
+        "claude": "自定义设置",
+        "gpt": "自定义",
+        "gemma": "...",
+        "consensus": "自定义设置"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:56.073Z",
+          "requestId": "msg_011Cf83dNUUFeC9VEfb6RK1C",
+          "tokensUsed": 224,
+          "fingerprint": "eb04f71bf56f5c993b6808391863ce4ee264f8453697e9a7f592912456733da9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:55.255Z",
+          "requestId": "chatcmpl-EOu3GMVMFFnx7Py9xa55l8cUKKR3t",
+          "tokensUsed": 199,
+          "fingerprint": "4eafa9e925b30bcdc99faefeb4a833b47194b0d4f6d7753cecfebea31a61d01a"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:08.529Z",
+          "requestId": "33070eec-f3fb-4070-b644-14b39d0159d5",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.squadPosts",
+      "source": "Squad Posts",
+      "translations": {
+        "claude": "小组帖子",
+        "gpt": "小组帖子",
+        "gemma": "...",
+        "consensus": "小组帖子"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:24.881Z",
+          "requestId": "msg_011Cf83b6Ec7JLQjhxDpdxCf",
+          "tokensUsed": 223,
+          "fingerprint": "336425fde23bfca8091d063849d51b6153b92b4cc8e290801cd67f96838074c8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.939Z",
+          "requestId": "chatcmpl-EOu2l65xwoCn3zR3Dgb7puQCgbVbO",
+          "tokensUsed": 202,
+          "fingerprint": "336425fde23bfca8091d063849d51b6153b92b4cc8e290801cd67f96838074c8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:12.393Z",
+          "requestId": "0702e5ad-b9f6-46d8-9b4b-eb90bb6111a6",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.botCustomizer.heading",
+      "source": "AI Assistant Avatar",
+      "translations": {
+        "claude": "AI助手头像",
+        "gpt": "AI助手头像",
+        "gemma": "...",
+        "consensus": "AI助手头像"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:04.880Z",
+          "requestId": "msg_011Cf83e2yDzHVBX29fthoNZ",
+          "tokensUsed": 224,
+          "fingerprint": "4cd0496c2e62b7f804d5d1cd64a9d62934f81cf874e071805b06dda20e948410"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:04.173Z",
+          "requestId": "chatcmpl-EOu3PquQLEiFFIkrRsELn2n2fvDQw",
+          "tokensUsed": 202,
+          "fingerprint": "4cd0496c2e62b7f804d5d1cd64a9d62934f81cf874e071805b06dda20e948410"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:12.603Z",
+          "requestId": "da65f497-0e53-47de-946c-e87969700bd9",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.profileInfo.heading",
+      "source": "Profile Information",
+      "translations": {
+        "claude": "个人资料信息",
+        "gpt": "个人信息",
+        "gemma": "...",
+        "consensus": "个人资料信息"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:09.790Z",
+          "requestId": "msg_011Cf83eQnQCgv5MqAM5sTY3",
+          "tokensUsed": 224,
+          "fingerprint": "bfaff4346b97ab47a051be137016d9114e0812cd8cd44910be6cd1736c1815aa"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:09.281Z",
+          "requestId": "chatcmpl-EOu3UFa5kswb6CFd0ixm4aL6fjDqe",
+          "tokensUsed": 200,
+          "fingerprint": "640803d897735fe2ed21353315bb2ca63b4cda37df9191a3a8b8efaca5e3df32"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:20.753Z",
+          "requestId": "cf3167ca-3a5f-4463-a47c-d873837e34d4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.leaderboardOptInHint",
+      "source": "When off, your name appears as \"Anonymous Student\" on leaderboards.",
+      "translations": {
+        "claude": "关闭后，您的姓名在排行榜上将显示为\"匿名学生\"。",
+        "gpt": "关闭时，您的名字将在排行榜上显示为“匿名学生”。",
+        "gemma": "关闭时，您在排行榜上的姓名将显示为“匿名学生”。",
+        "consensus": "关闭后，您的姓名在排行榜上将显示为\"匿名学生\"。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:52.078Z",
+          "requestId": "msg_011Cf83d4sZVFgYmN8AReJ6W",
+          "tokensUsed": 264,
+          "fingerprint": "f9455db048359c7f093e81424e9c26ccc4832f3d16cfec4d6467142f669ab746"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:51.467Z",
+          "requestId": "chatcmpl-EOu3CfiL5VTEmSXSVi9tVBDCecVdI",
+          "tokensUsed": 229,
+          "fingerprint": "f7b11f99095f4c749e11cead2e4de71e1ee56b527d50882e834938019f6a7d42"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:20.756Z",
+          "requestId": "a4cc0c44-7188-4af3-8695-42c0d0968a40",
+          "tokensUsed": 100,
+          "fingerprint": "e7e33a82fa48be982c58e59eee6bc62db8f028974039f2588b5a10abd3de4b81"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.description",
+      "source": "Manage your account settings and preferences",
+      "translations": {
+        "claude": "管理您的账户设置和偏好",
+        "gpt": "管理您的账户设置和偏好",
+        "gemma": "tags.\n\n    Result: 管理您的账户设置与偏好设置\n\n    Actually, \"管理您的账户设置及偏好设置\" is also good. \"与\" or \"及\" are both fine. \"与\" is very common.\n\n    Let's go with: 管理您的账户设置与偏好设置.\n\n    Wait, looking at common translations for \"preferences\" in settings:\n    \"偏好设置\" is the most common term.\n    \"settings\" -> \"设置\"\n    \"account settings\" -> \"账户设置\"\n\n    So \"Manage your account settings and preferences\" -> \"管理您的账户设置与偏好设置\".\n\n    One detail: \"account settings\" (账户设置) and \"preferences\" (偏好设置).\n    If I say \"管理您的账户设置与偏好设置\", it's slightly redundant in Chinese (setting... setting).\n    Maybe \"管理您的账户设置及偏好\" is better?\n    Or \"管理您的账户设置与偏好\"\n\n    Let's look at how Google translates it:\n    \"Manage your account settings\" -> \"管理您的帐号设置\"\n    \"Preferences\" -> \"偏好设置\"\n\n    So: \"管理您的账户设置与偏好设置\" is the most accurate.\n\n    One more thought: \"Manage your account settings and preferences\"\n    Could be \"管理您的账户设置及偏好\". This is cleaner.\n    However, \"偏好设置\" is the full term for \"preferences\" in a UI context.\n\n    Let's stick to the most standard UI translation.\n    管理您的账户设置与偏好设置.\n\n    Actually, \"管理您的账户设置及偏好\" is very common in professional software.\n    Let's try to find a balance.\n    \"管理您的账户设置与偏好设置\" is very safe.\n\n    Final decision: 管理您的账户设置与偏好设置.\n\n    Wait, I'll check if \"account settings\" is usually \"账户设置\" or \"账号设置\".\n    \"账户\" is more formal/standard for \"account\". \"账号\" is more \"account ID/name\".\n    So \"账户设置\" is correct.\n\n    Final string: 管理您的账户设置与偏好设置.\n\n    Wait, I'll check if \"preferences\" can be \"偏好\".\n    In many apps: \"Settings & Preferences\" -> \"设置与偏好\".\n    So \"Manage your account settings and preferences\" -> \"管理您的账户设置与偏好\".\n    This is more concise and avoids the double \"设置\".\n\n    Let's compare:\n    1. 管理您的账户设置与偏好设置 (A bit wordy)\n    2. 管理您的账户设置与偏好 (Clean, professional)\n\n    In a \"description\" field (which this is), \"管理您的账户设置与偏好\" sounds very natural.\n\n    Let's re-read: \"Manage your account settings and preferences\"\n    \"Manage\" (管理) \"your\" (您的) \"account settings\" (账户设置) \"and\" (与) \"preferences\" (偏好).\n\n    This is the most professional way to handle the redundancy in Chinese.\n\n    Final check:\n    - Polite-formal? Yes (您的).\n    - All users? Yes.\n    - No placeholders? Correct.\n    - No extra text? Correct.\n\n    Final string: 管理您的账户设置与偏好\n\n    Actually, looking at standard translations for \"preferences\" in Chinese UI:\n    - Google: 偏好设置\n    - Microsoft: 偏好设置\n    - Apple: 偏好\n\n    If I use \"管理您的账户设置与偏好设置\", it's definitely correct.\n    If I use \"管理您的账户设置与偏好\", it's also correct and more elegant.\n\n    Let's go with \"管理您的账户设置与偏好设置\" to be as explicit as the English source.\n\n    Wait, \"preferences\" is plural. \"偏好设置\" covers that.\n\n    Let's try one more: \"管理您的账户设置及偏好设置\". \"及\" is slightly more formal than \"与\".\n\n    Actually, \"管理您的账户设置与偏好设置\" is the most standard.\n\n    One last look at the source: \"Manage your account settings and preferences\"\n    If I translate it as \"管理您的账户设置与偏好设置\", it's a direct and accurate translation.\n\n    Final check on \"polite-formal\":\n    \"管理您的账户设置与偏好设置\"\n    \"管理\" (Manage)\n    \"您的\" (Your - polite)\n    \"账户设置\" (Account settings)\n    \"与\" (and)\n    \"偏好设置\" (preferences)\n\n    This is perfect.\n\n    Wait, I just realized \"preferences\" in English is often just \"preferences\". In Chinese, \"偏好\" is \"preferences\", but \"偏好设置\" is \"preference settings\". Since the English says \"preferences\", \"偏好\" is the literal translation, but \"偏好设置\" is the UI term. However, \"settings\" is already in the first part.\n\n    Let's look at \"Manage your account settings and preferences\" again.\n    If I say \"管理您的账户设置与偏好\", it's very clean.\n    If I say \"管理您的账户设置与偏好设置\", it's very clear.\n\n    I will provide \"管理您的账户设置与偏好设置\".\n\n    Actually, I'll use \"管理您的账户设置及偏好设置\" to increase the formality level as requested. \"及\" is more formal than \"与\".\n\n    Wait, \"与\" is perfectly fine for formal.\n\n    Let's go with: 管理您的账户设置与偏好设置.\n\n    Actually, I'll check one more time.\n    \"Manage your account settings and preferences\"\n    \"管理您的账户设置与偏好\"\n    This is actually very common in high-end software.\n\n    Let's look at the prompt: \"Keep the same formality level as the source text\".\n    The source is \"Manage your account settings and preferences\". It's standard, not overly flowery.\n    \"管理您的账户设置与偏好设置\" is the most faithful.\n\n    Final check:\n    - Chinese (Simplified): Yes.\n    - No quotes: Yes.\n    - No explanation: Yes.\n    - Wrapped in <T>: Yes.\n\n    One last thought: \"account settings\" -> \"账户设置\". \"preferences\" -> \"偏好设置\".\n    \"管理您的账户设置与偏好设置\"\n\n    Wait, I'll use \"管理您的账户设置及偏好设置\". \"及\" is a bit more formal.\n\n    Actually, let's stick to the most natural:\n    管理您的账户设置与偏好设置\n\n    (Self-correction: In Chinese, repeating \"设置\" is not as awkward as it is in English, but it's still slightly repetitive. However, for a UI description, clarity is king.)\n\n    Let's try: 管理您的账户设置与偏好.\n    This is actually very common.\n\n    Let's look at the source again. \"settings\" (plural) and \"preferences\" (plural).\n    \"管理您的账户设置与偏好\"\n\n    I will use \"管理您的账户设置与偏好设置\". It's the most unambiguous.\n\n    Wait, I'll check \"preferences\" in a dictionary.\n    Preference: 偏好 (piānhào).\n    In UI: 偏好设置 (piānhào shèzhì).\n\n    If the user sees \"Manage your account settings and preferences\", they expect to see \"管理您的账户设置与偏好设置\".\n\n    Final decision: 管理您的账户设置与偏好设置.管理您的账户设置与偏好设置\n\n<T>管理您的账户设置与偏好设置",
+        "consensus": "管理您的账户设置和偏好"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:25.196Z",
+          "requestId": "msg_011Cf83b6HKypjEwHpwTp4JS",
+          "tokensUsed": 232,
+          "fingerprint": "c93e1c2df0a11b0c0241282b935d10459f24b05cbf88b4106a1999897f01c1a0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.510Z",
+          "requestId": "chatcmpl-EOu2lMay9AjZen2G54sYc5cdhAjNI",
+          "tokensUsed": 207,
+          "fingerprint": "c93e1c2df0a11b0c0241282b935d10459f24b05cbf88b4106a1999897f01c1a0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:21.267Z",
+          "requestId": "f9521e89-094b-4f78-9225-4c2aad38386c",
+          "tokensUsed": 100,
+          "fingerprint": "bef8dcd3fedd22d4c043dedc12279d8243b5c00229e5a24ac79fe321a083733a"
+        }
+      }
+    },
+    {
+      "keyPath": "index.learningPathway",
+      "source": "Skill Tree",
+      "translations": {
+        "claude": "技能树",
+        "gpt": "技能树",
+        "gemma": "...",
+        "consensus": "技能树"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:10:24.869Z",
+          "requestId": "msg_011Cf83b61Ddkut15QE6rGho",
+          "tokensUsed": 222,
+          "fingerprint": "ef72b4f07b692a7984989401fdffa52b9ebf4c00d851ed61202955cad7f65e44"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:10:24.887Z",
+          "requestId": "chatcmpl-EOu2l1uvVyeLdqiOAZ1RTTLYxq9nw",
+          "tokensUsed": 200,
+          "fingerprint": "ef72b4f07b692a7984989401fdffa52b9ebf4c00d851ed61202955cad7f65e44"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:22.228Z",
+          "requestId": "6f276a0e-0456-4a19-ba63-4d9090acc776",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.progress",
+      "source": "Progress",
+      "translations": {
+        "claude": "进度",
+        "gpt": "进度",
+        "gemma": "...",
+        "consensus": "进度"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:13.896Z",
+          "requestId": "msg_011Cf83ehCstCxEfm3QtkFJM",
+          "tokensUsed": 216,
+          "fingerprint": "f81ff55de14e3f455a87f7fe1c23e7ba1f138bd9a112d7d18488d027b2f7dea7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:13.238Z",
+          "requestId": "chatcmpl-EOu3YAbtNgUwLmEj6Ab8d4vDRJjF1",
+          "tokensUsed": 197,
+          "fingerprint": "f81ff55de14e3f455a87f7fe1c23e7ba1f138bd9a112d7d18488d027b2f7dea7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:28.228Z",
+          "requestId": "44a59421-8d4b-45cc-8c57-dc971df9e7c4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.botCustomizer.description",
+      "source": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges.",
+      "translations": {
+        "claude": "自定义您的AI导师外观。通过获得Bot Whisperer徽章解锁更多选项。",
+        "gpt": "自定义您的AI导师外观。通过解锁Bot Whisperer徽章获得更多选项。",
+        "gemma": "自定义您的 AI 导师外观。通过 Bot Whisperer 徽章解锁更多选项。",
+        "consensus": "自定义您的AI导师外观。通过获得Bot Whisperer徽章解锁更多选项。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:05.779Z",
+          "requestId": "msg_011Cf83e5XmxhHiyfyQ3i5C6",
+          "tokensUsed": 268,
+          "fingerprint": "1fa6d3192e80af0a4298f1ee653bedf5b318e1e9ca6b6a1bef1ce7620cbdf67c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:05.363Z",
+          "requestId": "chatcmpl-EOu3P3pPfWnJgNZxkIHaRB8j51CVv",
+          "tokensUsed": 232,
+          "fingerprint": "eb49bd8379e7d1e98ab995513e5995d3aff690ccdf3183b7d0fcc9f5ac5c5f87"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:33.026Z",
+          "requestId": "fd9a80c7-e7d6-42ef-9998-8e430b45bcd3",
+          "tokensUsed": 100,
+          "fingerprint": "9971f608ce62e87e8fa7df1963cf8187c63eba5db4214112c7c5c293c8d9c40d"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.badges",
+      "source": "Badges",
+      "translations": {
+        "claude": "徽章",
+        "gpt": "徽章",
+        "gemma": "...",
+        "consensus": "徽章"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:22.085Z",
+          "requestId": "msg_011Cf83fJ3cqzUJGh3ofpeWY",
+          "tokensUsed": 218,
+          "fingerprint": "2007e7c457991125e93d643fb4c4f4c386c892ab411b9efbadd89a38611fefbe"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:21.419Z",
+          "requestId": "chatcmpl-EOu3gUQHzo4sdQubxz0RjQzfJo59I",
+          "tokensUsed": 199,
+          "fingerprint": "2007e7c457991125e93d643fb4c4f4c386c892ab411b9efbadd89a38611fefbe"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:33.860Z",
+          "requestId": "3e94c89e-2d10-47ec-a3e2-e804179c4266",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.customization.description",
+      "source": "Unlock new avatar styles and editor themes as you level up.",
+      "translations": {
+        "claude": "随着等级提升，解锁新的头像样式和编辑器主题。",
+        "gpt": "随着您的等级提升，解锁新的头像风格和编辑器主题。",
+        "gemma": "随着等级提升，解锁新的头像样式与编辑器主题。",
+        "consensus": "随着等级提升，解锁新的头像样式和编辑器主题。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:02.729Z",
+          "requestId": "msg_011Cf83dqvxwC6gsrjoGX64K",
+          "tokensUsed": 252,
+          "fingerprint": "c992f69fcd9e7236f53736878e0fbf91c79f331efbd3927dc9c17b2a4f1795c9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:01.759Z",
+          "requestId": "chatcmpl-EOu3MPSLgNMTms7by0ONcBPhSq7zg",
+          "tokensUsed": 223,
+          "fingerprint": "6660a551b2b0df9d111d3469e5e833d061f1f25e9d8dc60569527c710d793928"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:35.973Z",
+          "requestId": "ddae0c6a-91ba-4a1a-b41c-d54d4adf435e",
+          "tokensUsed": 100,
+          "fingerprint": "df1571c44c817d93d5092726f95f99b525205eed124c708facfc7fe44b3c65cb"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.setCoverVideo",
+      "source": "Set Cover Video",
+      "translations": {
+        "claude": "设置封面视频",
+        "gpt": "设置封面视频",
+        "gemma": "...",
+        "consensus": "设置封面视频"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:23.517Z",
+          "requestId": "msg_011Cf83fQSqJp4FxXbCEQLod",
+          "tokensUsed": 226,
+          "fingerprint": "e0ee91c6b2670b0a026e0143618b7ae4d4d2930bb9cc0f02cde6da9a0a8979dc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:22.803Z",
+          "requestId": "chatcmpl-EOu3hsKgknCAyH0CdQhmzXp2ncAT1",
+          "tokensUsed": 204,
+          "fingerprint": "e0ee91c6b2670b0a026e0143618b7ae4d4d2930bb9cc0f02cde6da9a0a8979dc"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:42.320Z",
+          "requestId": "6e855d1b-2371-4e8f-a2bc-61f10b07125d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noCoverVideo",
+      "source": "No cover video set.",
+      "translations": {
+        "claude": "未设置封面视频。",
+        "gpt": "未设置封面视频。",
+        "gemma": "...",
+        "consensus": "未设置封面视频。"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:29.633Z",
+          "requestId": "msg_011Cf83frP3pZT274ETSX9mY",
+          "tokensUsed": 230,
+          "fingerprint": "f4849b69f013c05ed2969c42f0e2c8ae0084f316b93cceae5daa1897b8eaa669"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:28.853Z",
+          "requestId": "chatcmpl-EOu3nzckNCOBbiVJltpg561bsMPp3",
+          "tokensUsed": 207,
+          "fingerprint": "f4849b69f013c05ed2969c42f0e2c8ae0084f316b93cceae5daa1897b8eaa669"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:49.622Z",
+          "requestId": "f99b387f-1f20-4ec1-9914-4eae03bb6113",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.activity",
+      "source": "Activity",
+      "translations": {
+        "claude": "活动",
+        "gpt": "活动",
+        "gemma": "...",
+        "consensus": "活动"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:22.109Z",
+          "requestId": "msg_011Cf83fJ66i79S75sFxKHTz",
+          "tokensUsed": 216,
+          "fingerprint": "9e9bead81498b8980af6092ce91f0161f6b1eea4d1836b3fdc1338e140b7a481"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:21.266Z",
+          "requestId": "chatcmpl-EOu3gzIvPIjYHiL3IhgoozWdsCVKS",
+          "tokensUsed": 196,
+          "fingerprint": "9e9bead81498b8980af6092ce91f0161f6b1eea4d1836b3fdc1338e140b7a481"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:50.515Z",
+          "requestId": "97834dc3-e08c-466e-9fda-b7a8c38d043d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.profileInfo.description",
+      "source": "Update your display name and email address",
+      "translations": {
+        "claude": "更新您的显示名称和电子邮箱地址",
+        "gpt": "更新您的显示名称和电子邮件地址",
+        "gemma": "...",
+        "consensus": "更新您的显示名称和电子邮箱地址"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:13.580Z",
+          "requestId": "msg_011Cf83egPm54hyHaP9AQeyq",
+          "tokensUsed": 240,
+          "fingerprint": "cd3174772bb5728b24bd21e2ac072fda9b0253001fda7de9c8269a37b9a59ea8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:13.071Z",
+          "requestId": "chatcmpl-EOu3XzGtZzRKc6mU6pdSuZDaFFllx",
+          "tokensUsed": 211,
+          "fingerprint": "ffcfbeb4e378971f6174703f11e76293888b110f17530f3092f486ca79e7b0bf"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:52.071Z",
+          "requestId": "2da66398-44b6-4383-ab3a-cd7e8f83c4bf",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.coverVideoUrlLabel",
+      "source": "Video URL",
+      "translations": {
+        "claude": "视频链接",
+        "gpt": "视频网址",
+        "gemma": "...",
+        "consensus": "视频链接"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:35.151Z",
+          "requestId": "msg_011Cf83gGFVXu4bXuQ5s7Ytg",
+          "tokensUsed": 224,
+          "fingerprint": "97f18dbc40be70df5199f3fb5dc8c193fe9e60d157fd6ce6782152457e2ead0c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:34.960Z",
+          "requestId": "chatcmpl-EOu3tmjshFVhwSMyH3jabVTbOMJA3",
+          "tokensUsed": 202,
+          "fingerprint": "349fdb61ad7d20ccbd510ad8a860327ddc31796d4563e5c1e69f05ea9a230c98"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:52.679Z",
+          "requestId": "53d9d02a-78e3-4878-90ff-892ff6aca4b2",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noCurve",
+      "source": "No Curve",
+      "translations": {
+        "claude": "无曲线",
+        "gpt": "无曲线",
+        "gemma": "...",
+        "consensus": "无曲线"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:37.443Z",
+          "requestId": "msg_011Cf83gRDkaAVaLYefYzynT",
+          "tokensUsed": 225,
+          "fingerprint": "4b109c26454c8496ec25b814eb8b8d7849380119f11a2d2d7e2c45b2470507ea"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:36.624Z",
+          "requestId": "chatcmpl-EOu3vVYg42Ejz7fSqKVgX2aUzFuWG",
+          "tokensUsed": 201,
+          "fingerprint": "4b109c26454c8496ec25b814eb8b8d7849380119f11a2d2d7e2c45b2470507ea"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:54.045Z",
+          "requestId": "86d35ff3-a2ea-4a7c-9f74-808e58a8455c",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.completionGrid",
+      "source": "Completion Overview",
+      "translations": {
+        "claude": "完成情况概览",
+        "gpt": "完成概览",
+        "gemma": "...",
+        "consensus": "完成情况概览"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:43.793Z",
+          "requestId": "msg_011Cf83gtU6SriUYGbXDhKvm",
+          "tokensUsed": 226,
+          "fingerprint": "46bce15a730370f116c9542f87e0a01294943d8f1d5dc1451b3c86b003988ce6"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:42.975Z",
+          "requestId": "chatcmpl-EOu419b12bmnRqz1RzoDxHGpC6NLm",
+          "tokensUsed": 202,
+          "fingerprint": "3b8ef9a484bee93030099555ba6cc3e56dcdc2a993e5bab730b16fbe0346f9b0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:11:54.651Z",
+          "requestId": "b6381a54-fc92-4d89-9658-832c67a2bab9",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.leaderboardEnabled",
+      "source": "Show Leaderboard",
+      "translations": {
+        "claude": "显示排行榜",
+        "gpt": "显示排行榜",
+        "gemma": "...",
+        "consensus": "显示排行榜"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:51.679Z",
+          "requestId": "msg_011Cf83hVXk1iQ4q6ji3xULD",
+          "tokensUsed": 229,
+          "fingerprint": "bc49eea3d6395b12e90cec079bbeca552efbbd5c82ae57c9d4cfeb253ebcae76"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:50.994Z",
+          "requestId": "chatcmpl-EOu493x8r6CpYcU8AaLD3O4m4kWXk",
+          "tokensUsed": 203,
+          "fingerprint": "bc49eea3d6395b12e90cec079bbeca552efbbd5c82ae57c9d4cfeb253ebcae76"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:04.154Z",
+          "requestId": "fab5a0b5-b05d-45b9-a5bb-405f56f98059",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.coverVideoUrlPlaceholder",
+      "source": "Paste a video URL (https://...)",
+      "translations": {
+        "claude": "请粘贴视频链接（https://...）",
+        "gpt": "粘贴视频网址（https://...）",
+        "gemma": "...",
+        "consensus": "请粘贴视频链接（https://...）"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:34.469Z",
+          "requestId": "msg_011Cf83gCcyEYsJUKgUaFsW5",
+          "tokensUsed": 243,
+          "fingerprint": "c631d38b96bf6abd4df89f0e13cf119990a0fe82e818d45cf63968c95dbcff73"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:33.554Z",
+          "requestId": "chatcmpl-EOu3sDZ0c0Elko6MG06YooIP8TfkO",
+          "tokensUsed": 216,
+          "fingerprint": "774edb46ab069b6e447a7d240bed932a67cfe48742ff6b32b0899fd9aab85bef"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:13.287Z",
+          "requestId": "8c94965d-a018-4c62-9362-cd552d63a2b8",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.unarchive",
+      "source": "Unarchive",
+      "translations": {
+        "claude": "取消归档",
+        "gpt": "取消归档",
+        "gemma": "translation",
+        "consensus": "取消归档"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:54.223Z",
+          "requestId": "msg_011Cf83heguCvoLpmAfNcLBf",
+          "tokensUsed": 223,
+          "fingerprint": "be235f67fed22f0199f6e7c13c223c7ef51c3a7c693f378cd05d2f90f9dc6f10"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:53.319Z",
+          "requestId": "chatcmpl-EOu4CgFx5Vn2HSJKaXKz8Ahw6QPzm",
+          "tokensUsed": 200,
+          "fingerprint": "be235f67fed22f0199f6e7c13c223c7ef51c3a7c693f378cd05d2f90f9dc6f10"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:15.435Z",
+          "requestId": "8aff8092-33da-4c8c-b1fc-7179c1136e22",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noLeaderboardEntries",
+      "source": "No leaderboard data yet. Students will appear here as they earn XP.",
+      "translations": {
+        "claude": "暂无排行榜数据。学生获得经验值后将显示在此处。",
+        "gpt": "目前没有排行榜数据。学生获得经验值后将显示在此处。",
+        "gemma": "...",
+        "consensus": "暂无排行榜数据。学生获得经验值后将显示在此处。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:51.179Z",
+          "requestId": "msg_011Cf83hRf55QayCNmPMgkbW",
+          "tokensUsed": 261,
+          "fingerprint": "c5cb3446ac1380e62dd8c8dcdfac5432e2a8d8106775ea6ea81feba6c9af1fc8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:50.246Z",
+          "requestId": "chatcmpl-EOu49yyphrv8Z207PE6QOYtvjXf44",
+          "tokensUsed": 226,
+          "fingerprint": "368cea78b911244a2717ec858d7c2d1ca61981e22af6817f75748664ad110eb6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:18.350Z",
+          "requestId": "54df519e-3959-48e6-876a-245a31a02ab1",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archive",
+      "source": "Archive",
+      "translations": {
+        "claude": "归档",
+        "gpt": "存档",
+        "gemma": "...",
+        "consensus": "归档"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:53.319Z",
+          "requestId": "msg_011Cf83hbygnWNC7NCnhUFgm",
+          "tokensUsed": 216,
+          "fingerprint": "5292ab1a36c56a6bc8980b3d2d2571d49fe9e4adb7a961ec4b6417fa9cc90d6c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:52.918Z",
+          "requestId": "chatcmpl-EOu4Bfr5oaqmjSBJkiizST3q6h9ow",
+          "tokensUsed": 197,
+          "fingerprint": "c73a6774d91ca0f610a2d6340e5b56139d47ee0408b8bb7431fb62eee624cc76"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:22.722Z",
+          "requestId": "f80cb3a9-a6c3-4281-a742-3d1dfb8879ac",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabMyUnits",
+      "source": "My Units",
+      "translations": {
+        "claude": "我的单元",
+        "gpt": "我的单元",
+        "gemma": "...",
+        "consensus": "我的单元"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:16.461Z",
+          "requestId": "msg_011Cf83jKhx1TL6Au2r4ebuW",
+          "tokensUsed": 222,
+          "fingerprint": "ca584dbedeb9c8702517b10a8c40cffb9775431237dd7f104c822d5fd7a45a26"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:16.149Z",
+          "requestId": "chatcmpl-EOu4YZqJYJIuQhg24LqAeuo5Rjdl1",
+          "tokensUsed": 201,
+          "fingerprint": "ca584dbedeb9c8702517b10a8c40cffb9775431237dd7f104c822d5fd7a45a26"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:25.473Z",
+          "requestId": "46eebec2-b7f3-4206-8953-a85343ad8b2e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archivedSuccess",
+      "source": "Section archived successfully",
+      "translations": {
+        "claude": "章节已成功归档",
+        "gpt": "章节归档成功",
+        "gemma": "...",
+        "consensus": "章节已成功归档"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:55.981Z",
+          "requestId": "msg_011Cf83hnrH2oJ5tggPUg6Kx",
+          "tokensUsed": 226,
+          "fingerprint": "ccd6dcb5bd2aa7d15922704d27a67f43e92b600e93f95a35c24c98b878f54c62"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:55.202Z",
+          "requestId": "chatcmpl-EOu4EtvCviabjbzoXLiQ6BCdVoYiM",
+          "tokensUsed": 203,
+          "fingerprint": "a0aa75e527944b961e0a1aacf06699022c9bafcc65211aa89413ad4ba6366042"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:38.169Z",
+          "requestId": "68f3a86f-c908-4558-8c9d-03916ca46d8a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabCommunity",
+      "source": "Community",
+      "translations": {
+        "claude": "社区",
+        "gpt": "社区",
+        "gemma": "translation",
+        "consensus": "社区"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:23.704Z",
+          "requestId": "msg_011Cf83js46Y5a35MsX62yf6",
+          "tokensUsed": 219,
+          "fingerprint": "5bcd0ddcdd694b5c4e12853ae80bf8aacc1303a2c311cd3ec012e28d31f7a0b2"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:23.322Z",
+          "requestId": "chatcmpl-EOu4g5tGnoJTHrcYg83q2Ej7oLjUR",
+          "tokensUsed": 197,
+          "fingerprint": "5bcd0ddcdd694b5c4e12853ae80bf8aacc1303a2c311cd3ec012e28d31f7a0b2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:38.989Z",
+          "requestId": "420b59f4-ad0f-4fbb-a7d5-6155f22513aa",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.nailedItWall",
+      "source": "Nailed It Wall",
+      "translations": {
+        "claude": "成就墙",
+        "gpt": "成功墙",
+        "gemma": "成就墙",
+        "consensus": "成就墙"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:22.664Z",
+          "requestId": "msg_011Cf83fLJYj8B5kUMY14PnH",
+          "tokensUsed": 227,
+          "fingerprint": "b06f5c363fb186185d1e276d800c691e2a6ae5c5f5111e3b50151e4b80bd0181"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:21.775Z",
+          "requestId": "chatcmpl-EOu3guKvKwoqoA6OGapywjSU8c3Jp",
+          "tokensUsed": 203,
+          "fingerprint": "902b4c3459238195b402325525afdbc20dee3f528225f7835237ff7ec046d025"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:41.218Z",
+          "requestId": "e51be84e-a67e-4b4e-97f7-a338a0f1eec4",
+          "tokensUsed": 100,
+          "fingerprint": "b06f5c363fb186185d1e276d800c691e2a6ae5c5f5111e3b50151e4b80bd0181"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archiveError",
+      "source": "Failed to update section. Please try again.",
+      "translations": {
+        "claude": "更新章节失败，请重试。",
+        "gpt": "更新部分失败。请重试。",
+        "gemma": "...",
+        "consensus": "更新章节失败，请重试。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:14.654Z",
+          "requestId": "msg_011Cf83jApezjS3ATM16GaVK",
+          "tokensUsed": 234,
+          "fingerprint": "b5a9633fbda7c90623e1ad5521d4626fcab11514227404ef4fed2905b58020ee"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:14.002Z",
+          "requestId": "chatcmpl-EOu4WGugxrWPXSvGcWEwL9wsOim8B",
+          "tokensUsed": 211,
+          "fingerprint": "2eb131f11b65b5b5b8a8df9b81ff82b47edc31168f442a9cf8a9319052b6c687"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:43.291Z",
+          "requestId": "8cf76228-bcbc-4e5d-b9ab-727a0eced12d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabSharedWithMe",
+      "source": "Shared With Me",
+      "translations": {
+        "claude": "与我共享",
+        "gpt": "与我共享",
+        "gemma": "...",
+        "consensus": "与我共享"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:19.630Z",
+          "requestId": "msg_011Cf83jYBnoFGwrWXUFHsg9",
+          "tokensUsed": 225,
+          "fingerprint": "6114f352f3d88fb8d6013aa6203fa65b3d3ec6d92fb093e722881d261b889737"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:19.024Z",
+          "requestId": "chatcmpl-EOu4blTCAIUHsTPYyY0E7PNQ10Jg4",
+          "tokensUsed": 203,
+          "fingerprint": "6114f352f3d88fb8d6013aa6203fa65b3d3ec6d92fb093e722881d261b889737"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:49.866Z",
+          "requestId": "61a5b37c-160a-4db6-84c8-6570f76e9862",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkSuccess",
+      "source": "Unit forked successfully",
+      "translations": {
+        "claude": "单元已成功复刻",
+        "gpt": "单元成功分叉",
+        "gemma": "...",
+        "consensus": "单元已成功复刻"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:44.743Z",
+          "requestId": "msg_011Cf83mNpX5yvu4msT5WZ1h",
+          "tokensUsed": 227,
+          "fingerprint": "fb3bd50e61ee8cb1d0f2c0a69152cbbdd71c2bdc91e24570a4427d43fcd9d2dc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:43.902Z",
+          "requestId": "chatcmpl-EOu50JZJspNj8pG8jCsVaTzT5OlsT",
+          "tokensUsed": 205,
+          "fingerprint": "fb80a93f6641cc79db2bc74dd474395b5dcfd127eceb84e975f93643f24a612c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:12:55.783Z",
+          "requestId": "186caae6-050e-44e8-912a-7bb3854f9d52",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.unarchivedSuccess",
+      "source": "Section unarchived successfully",
+      "translations": {
+        "claude": "章节已成功取消归档",
+        "gpt": "章节取消归档成功",
+        "gemma": "`? Yes.\n\n    Final string: 章节已成功取消归档\n\n    (Self-correction: Some might use \"部分\" for section, but in eLearning, \"章节\" is the standard term for course sections/chapters).\n\n    Let's double check \"unarchive\".\n    Archive: 归档\n    Unarchive: 取消归档\n\n    Result: 章节已成功取消归档.章节已成功取消归档\n\n<T>章节已成功取消归档",
+        "consensus": "章节已成功取消归档"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:05.416Z",
+          "requestId": "msg_011Cf83iVsra4KGHuvaFbWYV",
+          "tokensUsed": 231,
+          "fingerprint": "0c79dfbbc4dbe4eb85e54f0ad5105fed0eceb0254bd1daa6a2bd30cf550930d7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:04.886Z",
+          "requestId": "chatcmpl-EOu4NpbSYB5jrwWdGPFldwbG89iOy",
+          "tokensUsed": 209,
+          "fingerprint": "891450a795f638473108832dd6e0a2f4540f1567c6d6539c8c5687e2a54fde10"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:02.030Z",
+          "requestId": "77b7f454-5e1b-4fcd-939f-77147242366b",
+          "tokensUsed": 100,
+          "fingerprint": "5a6e9185b1d2c7d7b62b872a3ae204a70098383eb25b5d754ce2b017e5b78862"
+        }
+      }
+    },
+    {
+      "keyPath": "units.noCommunityUnits",
+      "source": "No community units available",
+      "translations": {
+        "claude": "暂无社区单元",
+        "gpt": "暂无社区单元可用",
+        "gemma": "暂无可用的社区单元",
+        "consensus": "暂无社区单元"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:42.438Z",
+          "requestId": "msg_011Cf83mE7uJ8fgu2QNyQycx",
+          "tokensUsed": 229,
+          "fingerprint": "e9f95af5f353a8b7f3f045772e13062d31121db6024491715f78d8cfd2b44a5d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:41.750Z",
+          "requestId": "chatcmpl-EOu4y2d2YKECz96aJLBHsmaaqTL7L",
+          "tokensUsed": 206,
+          "fingerprint": "4ad891927697ab9b5afbab3769ad71631b08dbb25f62ff51fbdcf4829dfcc2d0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:09.809Z",
+          "requestId": "041ab8ce-274d-42c6-9387-b11102b0dcff",
+          "tokensUsed": 100,
+          "fingerprint": "ace08fe44f9a12436d12c55b5f66b68a3632cda06f9f27cfec4c98f26ff7ad9a"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.title",
+      "source": "Privacy Policy",
+      "translations": {
+        "claude": "隐私政策",
+        "gpt": "隐私政策",
+        "gemma": "translation",
+        "consensus": "隐私政策"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:11.244Z",
+          "requestId": "msg_011Cf83oLJmwHswLsgAJ2Zcr",
+          "tokensUsed": 220,
+          "fingerprint": "e464b41fd5c45ba59eee93e306984348f5c640dbc2b3f9da3e06556866f15e83"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:10.427Z",
+          "requestId": "chatcmpl-EOu5RtSJcEwbRTI5kH1ahdiZTsNKi",
+          "tokensUsed": 199,
+          "fingerprint": "e464b41fd5c45ba59eee93e306984348f5c640dbc2b3f9da3e06556866f15e83"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:15.646Z",
+          "requestId": "f8cbab3c-e974-4fe5-843b-70e65820ab8c",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "workbook.reload",
+      "source": "Reload",
+      "translations": {
+        "claude": "重新加载",
+        "gpt": "重新加载",
+        "gemma": "...",
+        "consensus": "重新加载"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:03.462Z",
+          "requestId": "msg_011Cf83nmDwRdHbARjASyw6M",
+          "tokensUsed": 220,
+          "fingerprint": "7bdd5ce1e298a972b0c84183c360e85ab9b80ff47231b31bf56886a6902d5f88"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:02.644Z",
+          "requestId": "chatcmpl-EOu5JPD7CIx9XbduFXGCSR4q82ubz",
+          "tokensUsed": 197,
+          "fingerprint": "7bdd5ce1e298a972b0c84183c360e85ab9b80ff47231b31bf56886a6902d5f88"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:17.082Z",
+          "requestId": "ed379fe7-0428-4bf8-a389-3466766d3aed",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.showArchived",
+      "source": "Show Archived ({count})",
+      "translations": {
+        "claude": "显示已归档 ({count})",
+        "gpt": "显示已归档 ({count})",
+        "gemma": "...",
+        "consensus": "显示已归档 ({count})"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:11:54.998Z",
+          "requestId": "msg_011Cf83hkFX9FgqH9NYwkZT5",
+          "tokensUsed": 230,
+          "fingerprint": "f6e3eb5509662a9d5ff5dbcc65127c5948f9131913b98b2de0a90332873f7f8f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:11:54.650Z",
+          "requestId": "chatcmpl-EOu4Dw2zZEDO2AvamkRQBglN5uZ10",
+          "tokensUsed": 207,
+          "fingerprint": "f6e3eb5509662a9d5ff5dbcc65127c5948f9131913b98b2de0a90332873f7f8f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:18.925Z",
+          "requestId": "02d536a9-728c-4ea8-beea-a7c2af1b714e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbook.unitUpdated",
+      "source": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
+      "translations": {
+        "claude": "本单元已由教师更新。您是否希望重新加载最新版本?",
+        "gpt": "此单元已由讲师更新。您想重新加载最新版本吗？",
+        "gemma": "讲师已更新此单元。您是否要使用最新版本重新加载？",
+        "consensus": "本单元已由教师更新。您是否希望重新加载最新版本?"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:57.453Z",
+          "requestId": "msg_011Cf83nJLRtgfUQHb8hmZPk",
+          "tokensUsed": 258,
+          "fingerprint": "e07e8bc1c76ace938b3890a09aa0bcf7f2c073e0794d98ef19c88018c4480dea"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:56.812Z",
+          "requestId": "chatcmpl-EOu5Dq8yO51PXRb1I4Tiygl8xoLAu",
+          "tokensUsed": 230,
+          "fingerprint": "f7af296fe2bece0ec508c16f989c92b78638f24467a4edd9b09ced6384742867"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:22.970Z",
+          "requestId": "93fa9ed3-c4ea-474d-aa09-57e920ddb72a",
+          "tokensUsed": 100,
+          "fingerprint": "1235c777174fc9caf19bdde388cb642d05bc19bd77518370f207f96af5b56885"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.lastUpdated",
+      "source": "Last updated: May 2026",
+      "translations": {
+        "claude": "最后更新时间：2026年5月",
+        "gpt": "最后更新：2026年5月",
+        "gemma": "...",
+        "consensus": "最后更新时间：2026年5月"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:17.100Z",
+          "requestId": "msg_011Cf83omSsFX8JVvFsWEwQf",
+          "tokensUsed": 234,
+          "fingerprint": "e259df0e704420fc7506906bd7edcea1fcfa05e01b9928a98aa6c2a6e2ede02c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:16.367Z",
+          "requestId": "chatcmpl-EOu5Xg38mbn3Ep5WcCLQ9O5pOpxz9",
+          "tokensUsed": 210,
+          "fingerprint": "d0e850f9a53579987d73a03e0880f19b47b9676559c6d2c3f1f4b511a10204b1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:30.395Z",
+          "requestId": "d65552a3-6659-467b-9113-c6c500734f5e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.heading",
+      "source": "Information We Collect",
+      "translations": {
+        "claude": "我们收集的信息",
+        "gpt": "我们收集的信息",
+        "gemma": "...",
+        "consensus": "我们收集的信息"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:24.149Z",
+          "requestId": "msg_011Cf83pJioUw3XsoMWwjW6y",
+          "tokensUsed": 230,
+          "fingerprint": "ccf3b690bb311f1f05708e24c179f01c6f2551b20ea1615f452e03a5c867a112"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:23.747Z",
+          "requestId": "chatcmpl-EOu5eYdEW74EP3F1Ze4ap1wgbE5IS",
+          "tokensUsed": 205,
+          "fingerprint": "ccf3b690bb311f1f05708e24c179f01c6f2551b20ea1615f452e03a5c867a112"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:35.612Z",
+          "requestId": "5dbea89c-e8a8-49f1-b62a-9dc839e87e70",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.introduction.content",
+      "source": "Welcome to Homework Supply. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and share your information when you use our educational platform.",
+      "translations": {
+        "claude": "欢迎使用Homework Supply。我们致力于保护您的隐私并确保您个人信息的安全。本隐私政策说明了当您使用我们的教育平台时，我们如何收集、使用、存储和共享您的信息。",
+        "gpt": "欢迎来到Homework Supply。我们致力于保护您的隐私并确保您的个人信息安全。本隐私政策解释了在您使用我们的教育平台时，我们如何收集、使用、存储和共享您的信息。",
+        "gemma": "...",
+        "consensus": "欢迎使用Homework Supply。我们致力于保护您的隐私并确保您个人信息的安全。本隐私政策说明了当您使用我们的教育平台时，我们如何收集、使用、存储和共享您的信息。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:20.975Z",
+          "requestId": "msg_011Cf83p1KJCHAzRkyu4n1r2",
+          "tokensUsed": 335,
+          "fingerprint": "022ef2bdbdd5f95c1145cccaf8868ff0bf379048c21ea43fd617ea224da821d9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:19.690Z",
+          "requestId": "chatcmpl-EOu5a68y11dhYTCAT3ysh720AMuhL",
+          "tokensUsed": 285,
+          "fingerprint": "d3af0a17bc6916b44ce10b1527b369b17d7cf3b1dda6bd967ae5424c66761f66"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:40.054Z",
+          "requestId": "b6124998-e17f-468e-85f7-ab7bcd1001ea",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forking",
+      "source": "Forking...",
+      "translations": {
+        "claude": "正在复制...",
+        "gpt": "正在分叉...",
+        "gemma": "...",
+        "consensus": "正在复制..."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:39.648Z",
+          "requestId": "msg_011Cf83m1TPYZfrb7Gg2z1tn",
+          "tokensUsed": 222,
+          "fingerprint": "ad961d24bb235f6a0288d76928d02f2dc4291860aca0c392d4f78f5ffcf63ecd"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:38.989Z",
+          "requestId": "chatcmpl-EOu4vx37tR3DZxFgHLQY4wxqbtAhx",
+          "tokensUsed": 202,
+          "fingerprint": "af2c49f67ff5d8f712a306f7bf08b57ee9a5f5646f9287276bdd55400f4540ad"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:44.117Z",
+          "requestId": "61fdd71a-632d-46b7-892e-056128bb6447",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.accountInfo",
+      "source": "Account Information:",
+      "translations": {
+        "claude": "账户信息：",
+        "gpt": "账户信息：",
+        "gemma": "...",
+        "consensus": "账户信息："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:36.837Z",
+          "requestId": "msg_011Cf83qEfzLmvGvRTQaghMm",
+          "tokensUsed": 227,
+          "fingerprint": "3e2848fea7cadcc49213caf63832fda73ebd3d0f10222085899a0981cbca412e"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:36.113Z",
+          "requestId": "chatcmpl-EOu5rTeNvMVgwH7shVW3dBxWOVBvw",
+          "tokensUsed": 204,
+          "fingerprint": "3e2848fea7cadcc49213caf63832fda73ebd3d0f10222085899a0981cbca412e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:46.593Z",
+          "requestId": "2c36b6a4-5542-4cca-8c99-8c7007fc57d9",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.introduction.heading",
+      "source": "Introduction",
+      "translations": {
+        "claude": "简介",
+        "gpt": "介绍",
+        "gemma": "...",
+        "consensus": "简介"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:18.416Z",
+          "requestId": "msg_011Cf83osaxNGufYEVqvD7Un",
+          "tokensUsed": 218,
+          "fingerprint": "8131eafd02396e6a2482d37b443ac68fb23c198062ed4d7e46c3ec5b5a61928c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:17.593Z",
+          "requestId": "chatcmpl-EOu5Yp4XSJEi65FZxyUPCZy92fiVu",
+          "tokensUsed": 198,
+          "fingerprint": "66a66f52a2b114b54638c45bbc1338f633a31a3d938b80ee087a3c28dd558a1e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:46.985Z",
+          "requestId": "fd0150ae-3f21-4d18-9c43-9cbcf7412df6",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkUnit",
+      "source": "Fork",
+      "translations": {
+        "claude": "复制",
+        "gpt": "复制",
+        "gemma": "...",
+        "consensus": "复制"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:26.500Z",
+          "requestId": "msg_011Cf83k4o2ghWzaSXawi1Vb",
+          "tokensUsed": 218,
+          "fingerprint": "63d90d977348ab1f9aa34ebb42b103216ce161feb0a1c08e237607bf42c3cf79"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:26.086Z",
+          "requestId": "chatcmpl-EOu4iH35kLBQxVGa1XwrhrqmwzjtX",
+          "tokensUsed": 198,
+          "fingerprint": "63d90d977348ab1f9aa34ebb42b103216ce161feb0a1c08e237607bf42c3cf79"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:56.543Z",
+          "requestId": "64081345-ea96-4f9a-98c0-a614b977d090",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.intro",
+      "source": "We collect the following types of information to provide and improve our educational services:",
+      "translations": {
+        "claude": "我们收集以下类型的信息，以提供并改进我们的教育服务：",
+        "gpt": "我们收集以下类型的信息以提供和改进我们的教育服务：",
+        "gemma": "我们收集以下类型的信息，以提供并改进我们的教育服务：",
+        "consensus": "我们收集以下类型的信息，以提供并改进我们的教育服务："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:32.134Z",
+          "requestId": "msg_011Cf83prVWBaeGRwk9o8pHF",
+          "tokensUsed": 259,
+          "fingerprint": "c2fd031a0fcedc4ce880779a85ab7bd91392e2f4c6af1a9606cf876908967845"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:31.318Z",
+          "requestId": "chatcmpl-EOu5lsvL8IXhLYHqIKTSKl7D2oupP",
+          "tokensUsed": 228,
+          "fingerprint": "5b7cd92d794c2fa87b9326db902a6d2d40ece49f167dc01b5795f10325af0b8a"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:13:59.783Z",
+          "requestId": "a4481dd5-9c2e-40ea-84a0-67ba056b9088",
+          "tokensUsed": 100,
+          "fingerprint": "c2fd031a0fcedc4ce880779a85ab7bd91392e2f4c6af1a9606cf876908967845"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.userContent",
+      "source": "User-Generated Content:",
+      "translations": {
+        "claude": "用户生成的内容：",
+        "gpt": "用户生成内容：",
+        "gemma": "...",
+        "consensus": "用户生成的内容："
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:48.223Z",
+          "requestId": "msg_011Cf83r5GifyjxvcHKenkBT",
+          "tokensUsed": 232,
+          "fingerprint": "855092c529378baff27def76b32d1a8b534e355dcdc78a882f311a81d4f79310"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:48.131Z",
+          "requestId": "chatcmpl-EOu630lsFzBaXpN5BTDeugeJRkO98",
+          "tokensUsed": 207,
+          "fingerprint": "94fafd2d03df4450f04f2e9873baab25d8abe173e48c9227535f5cbd8b2f161d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:02.038Z",
+          "requestId": "6392060a-f2a1-43a3-91a2-e585a451b636",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.learningData",
+      "source": "Learning Data:",
+      "translations": {
+        "claude": "学习数据：",
+        "gpt": "学习数据：",
+        "gemma": "...",
+        "consensus": "学习数据："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:45.142Z",
+          "requestId": "msg_011Cf83qs6kHReaeHFM5abMK",
+          "tokensUsed": 228,
+          "fingerprint": "e873ad69f683005a02f3a574c669a078d7ee575962fa12064e21fcaf72b99e41"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:44.729Z",
+          "requestId": "chatcmpl-EOu5zFY6oiYk4hQGX1DZQSuBa8Nw2",
+          "tokensUsed": 204,
+          "fingerprint": "e873ad69f683005a02f3a574c669a078d7ee575962fa12064e21fcaf72b99e41"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:05.316Z",
+          "requestId": "4ca8ee75-0901-43fa-89aa-44b0d0567f5e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.usageInfo",
+      "source": "Usage Information:",
+      "translations": {
+        "claude": "使用信息：",
+        "gpt": "使用信息：",
+        "gemma": "...",
+        "consensus": "使用信息："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:01.041Z",
+          "requestId": "msg_011Cf83s1vbFBEsi1h4vrgoR",
+          "tokensUsed": 228,
+          "fingerprint": "14b3c1c91f14f0fa7530787c03821dd8d9df891a50ac4941c72ae69c02cb08b8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:01.525Z",
+          "requestId": "chatcmpl-EOu6FRpZvlXUWPwCN0YPW92eJRHk8",
+          "tokensUsed": 205,
+          "fingerprint": "14b3c1c91f14f0fa7530787c03821dd8d9df891a50ac4941c72ae69c02cb08b8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:10.741Z",
+          "requestId": "bcec8730-dc1e-4dcd-a99a-80259e1dfadb",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.learningDataText",
+      "source": "Assignment submissions, grades, progress tracking, XP earned, and learning analytics.",
+      "translations": {
+        "claude": "作业提交、成绩、进度跟踪、获得的经验值以及学习分析数据。",
+        "gpt": "作业提交、成绩、进度跟踪、获得的经验值和学习分析。",
+        "gemma": "作业提交、成绩、进度跟踪、获得的经验值以及学习分析。",
+        "consensus": "作业提交、成绩、进度跟踪、获得的经验值以及学习分析数据。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:48.522Z",
+          "requestId": "msg_011Cf83r3iiLqH9Qp2jER4nM",
+          "tokensUsed": 268,
+          "fingerprint": "b0406c7f1b3a0cab86c43e32f1ec8edee68e34f990c638901ba3cc308664115c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:47.600Z",
+          "requestId": "chatcmpl-EOu62bVN1uCqkQhzrJv9FwqcAeYBC",
+          "tokensUsed": 233,
+          "fingerprint": "9cff9fcc014837bf94853ae4304bdce824aed52fea5ece91c26ecf84ba735c77"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:14.017Z",
+          "requestId": "10ea477b-21a6-4132-9a73-a2028f323825",
+          "tokensUsed": 100,
+          "fingerprint": "467d0e87f9c58b7efcc29cef74e5997e0d59ebf8da8a31c4b11ac5ed5e2e100d"
+        }
+      }
+    },
+    {
+      "keyPath": "units.noSharedUnits",
+      "source": "No units have been shared with you yet",
+      "translations": {
+        "claude": "暂无单元与您共享",
+        "gpt": "尚未有单元与您共享",
+        "gemma": "...",
+        "consensus": "暂无单元与您共享"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:40.392Z",
+          "requestId": "msg_011Cf83m4ZRPWRYykCWYr39g",
+          "tokensUsed": 234,
+          "fingerprint": "a4d307505f7d02c074413f4895ae3bc1b8471f34f9f85aa2154481f0bc03ba0b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:39.557Z",
+          "requestId": "chatcmpl-EOu4wTtV6loNAtVHBQKFt71LW8pWs",
+          "tokensUsed": 212,
+          "fingerprint": "63d7a02db69299f724fa3c447b97975592af6448776bd1a6b4e75f4b444ef3ee"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:14.531Z",
+          "requestId": "11da911e-e445-4238-8a88-478d7e6708bf",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkError",
+      "source": "Failed to fork unit",
+      "translations": {
+        "claude": "复制单元失败",
+        "gpt": "分叉单元失败",
+        "gemma": "...",
+        "consensus": "复制单元失败"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:12:51.340Z",
+          "requestId": "msg_011Cf83msDagc8ak7Vjbk1Ja",
+          "tokensUsed": 225,
+          "fingerprint": "dde6a09f8b3202115211fbaba2bb888aae6889cfd143d1859b88c959e8c88148"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:12:50.457Z",
+          "requestId": "chatcmpl-EOu57Z8htBZzFQuPWUEubdM4Gd7GG",
+          "tokensUsed": 205,
+          "fingerprint": "6f10a2e313992e0c2ee6b4bec9828d2469ba495ebf0c33fd7187e51aeb81e4dd"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:16.579Z",
+          "requestId": "889750bb-4a1f-4612-8760-c833160c57d4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.heading",
+      "source": "How We Use Your Information",
+      "translations": {
+        "claude": "我们如何使用您的信息",
+        "gpt": "我们如何使用您的信息",
+        "gemma": "...",
+        "consensus": "我们如何使用您的信息"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:06.747Z",
+          "requestId": "msg_011Cf83sRccpBaK6qRLqw8PA",
+          "tokensUsed": 234,
+          "fingerprint": "0c1e319be1a0a40dd138e41352f35fbcb9c32cab045f77d61da3cb21a3190fa8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:05.929Z",
+          "requestId": "chatcmpl-EOu6KzcFqw2ZPtReoKucjy4n4rEgZ",
+          "tokensUsed": 209,
+          "fingerprint": "0c1e319be1a0a40dd138e41352f35fbcb9c32cab045f77d61da3cb21a3190fa8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:18.891Z",
+          "requestId": "528ae9b8-1676-4d74-a072-3d1c2b903015",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item2",
+      "source": "Tracking academic progress and generating performance reports for instructors",
+      "translations": {
+        "claude": "跟踪学习进度并为教师生成绩效报告",
+        "gpt": "跟踪学术进展并为教师生成绩效报告",
+        "gemma": "追踪学业进度并为讲师生成表现报告",
+        "consensus": "跟踪学习进度并为教师生成绩效报告"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:16.112Z",
+          "requestId": "msg_011Cf83t7C7zxYkP9fg6Qoaw",
+          "tokensUsed": 250,
+          "fingerprint": "03578a9992173c2474f8d7fb0b14e6dacaaf43fcadd9949ce75994b176c9ff3a"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:15.162Z",
+          "requestId": "chatcmpl-EOu6TvcPWYEit3JLTSSQQJaOYHkrR",
+          "tokensUsed": 222,
+          "fingerprint": "918bb4bf67965b8e5de72ff49828451d349a58757227b6bc9eaca59e5d3f2d9e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:35.780Z",
+          "requestId": "c4fd0756-b942-425a-a79a-d40a8b760098",
+          "tokensUsed": 100,
+          "fingerprint": "0aa88a3d123994abb43e29374a504474e3ef54620aa8f2dbb492ee305f641858"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.accountInfoText",
+      "source": "Email address, display name, and authentication credentials when you create an account.",
+      "translations": {
+        "claude": "当您创建账户时，我们会收集您的电子邮件地址、显示名称和身份验证凭据。",
+        "gpt": "创建账户时的电子邮件地址、显示名称和身份验证凭据。",
+        "gemma": "您在创建账户时提供的电子邮件地址、显示名称及身份验证凭据。",
+        "consensus": "当您创建账户时，我们会收集您的电子邮件地址、显示名称和身份验证凭据。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:41.761Z",
+          "requestId": "msg_011Cf83qZcHBdna39wbXytao",
+          "tokensUsed": 271,
+          "fingerprint": "546de725e5b3b4b5296bf1656ca41e8cf163a1c53488cf61dc2f50f4ebcb64bf"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:41.556Z",
+          "requestId": "chatcmpl-EOu5wBc2aW9OGSw3ZohSiiVNQ7uEX",
+          "tokensUsed": 230,
+          "fingerprint": "0a62c65b1e32a88ed09891c5ad08038ef624a758d4f158e30a6149c0a5b1c7b8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:36.240Z",
+          "requestId": "c843b513-5b63-4059-8bf0-41cacd296659",
+          "tokensUsed": 100,
+          "fingerprint": "64eddcead15e168aa4d529fd8777d740a66f59061e531c22742a39db39efb242"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item1",
+      "source": "Providing personalized learning experiences and AI-powered tutoring",
+      "translations": {
+        "claude": "提供个性化学习体验和AI驱动的辅导服务",
+        "gpt": "提供个性化学习体验和人工智能驱动的辅导",
+        "gemma": "...",
+        "consensus": "提供个性化学习体验和AI驱动的辅导服务"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:15.450Z",
+          "requestId": "msg_011Cf83t4tTc1zLWyUs7VBWA",
+          "tokensUsed": 252,
+          "fingerprint": "a385af7350ac3521192cc344add42f03444cc8fa1017576b0859a174c73689f0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:14.694Z",
+          "requestId": "chatcmpl-EOu6TfO0BOEf4tzcyvxUNcKjm8oc4",
+          "tokensUsed": 222,
+          "fingerprint": "e10d5082cc6b1d464e445ea6c64085b6807fa4241c4285de7e16d043b5098168"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:36.403Z",
+          "requestId": "67a8864d-f0d0-440a-899b-bb20a1b84f43",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.usageInfoText",
+      "source": "Device information, browser type, pages visited, and interaction patterns to improve the platform experience.",
+      "translations": {
+        "claude": "设备信息、浏览器类型、访问页面及交互模式，以改善平台体验。",
+        "gpt": "设备信息、浏览器类型、访问的页面和交互模式，以改善平台体验。",
+        "gemma": "设备信息、浏览器类型、访问页面及交互模式，旨在优化平台体验。",
+        "consensus": "设备信息、浏览器类型、访问页面及交互模式，以改善平台体验。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:03.570Z",
+          "requestId": "msg_011Cf83sBjCSnS1HyPUTPa1Q",
+          "tokensUsed": 269,
+          "fingerprint": "90e131ad16fc777d36593139856b38e185c07b68a945895eeeb16b3afe5019ba"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:02.958Z",
+          "requestId": "chatcmpl-EOu6HAdSscJvBQDOu177UkwwBM6tm",
+          "tokensUsed": 237,
+          "fingerprint": "d36b74ab442b2b2526424779f0b4abea1a6efdbc28d52d31286504db7bf69ed0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:36.650Z",
+          "requestId": "d2ff79db-6f03-4154-b076-e613268dd1b5",
+          "tokensUsed": 100,
+          "fingerprint": "5e97f2ef18f2237d95f22bf4e6a329ba5cf45fc243d48cda6c72b48e4cc0f906"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item4",
+      "source": "Enabling real-time collaboration features between students and instructors",
+      "translations": {
+        "claude": "实现学生与教师之间的实时协作功能",
+        "gpt": "启用学生和教师之间的实时协作功能",
+        "gemma": "实现学生与讲师之间的实时协作功能",
+        "consensus": "实现学生与教师之间的实时协作功能"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:20.250Z",
+          "requestId": "msg_011Cf83tRfNVgM5inFdt6Wj8",
+          "tokensUsed": 248,
+          "fingerprint": "6b70d7bed26af18e4f7fff1d5b62fbaa5095a3f7fcb076aae53bd012b4c94316"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:20.111Z",
+          "requestId": "chatcmpl-EOu6Y0yx4jRfwFcciJraZHYEvCi3m",
+          "tokensUsed": 223,
+          "fingerprint": "849859738404fa7c2f2a5ab9c66d4878e5c9d68d15f3b2d25f24d6e63cd2e7e3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:41.018Z",
+          "requestId": "080421ca-2e73-4ca6-a7e8-6bfcdf7423e8",
+          "tokensUsed": 100,
+          "fingerprint": "e70a145e8f39b13181359f239e1b5a2b1a2eaa788972271e03b5e7f312c196c5"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item3",
+      "source": "Processing audio and text through AI services (OpenAI) for feedback and assessment",
+      "translations": {
+        "claude": "通过AI服务（OpenAI）处理音频和文本以提供反馈和评估",
+        "gpt": "通过 AI 服务（OpenAI）处理音频和文本以进行反馈和评估",
+        "gemma": "`? Yes.\n\n    \"通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\"\n\n    Actually, \"通过人工智能服务 (OpenAI) 对音频和文本进行处理，以提供反馈和评估\" is slightly more formal, but for a list item in a privacy policy, the shorter version is often preferred.\n\n    Let's try: \"通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\"\n\n    One more check: \"Processing... for...\"\n    \"通过人工智能服务 (OpenAI) 处理音频和文本，以进行反馈和评估\"\n    \"通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\" -> This sounds most natural for a UI list item.\n\n    Let's look at \"assessment\" in eLearning context. \"评估\" is standard.\n\n    Final choice: 通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\n\n    Wait, \"Processing\" can also be translated as \"处理...\".\n    \"通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\"\n\n    Let's ensure \"AI services\" is \"人工智能服务\". Yes.\n\n    Final string: 通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\n\n    Wait, I should check if \"feedback and assessment\" should be \"反馈和评估\". \"与\" is slightly more formal than \"和\".\n\n    Final string: 通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\n\n    One more look at the source: \"Processing audio and text through AI services (OpenAI) for feedback and assessment\"\n    If it's a bullet point:\n    - 通过人工智能服务 (OpenAI) 处理音频和文本，用于反馈与评估\n\n    The translation is accurate and formal.\n\n    *Self-Correction*: Is \"assessment\" better as \"测评\"? In eLearning, \"assessment\" is often \"测评\" (like a quiz) or \"评估\" (general evaluation). \"评估\" is safer and more formal for a privacy policy.\n\n    Final check of the prompt requirements:\n    - Return ONLY the Chinese (Simplified) translation.\n    - Wrap in <T>...",
+        "consensus": "通过AI服务（OpenAI）处理音频和文本以提供反馈和评估"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:17.850Z",
+          "requestId": "msg_011Cf83tFh6BPevBGHn6Y3rW",
+          "tokensUsed": 262,
+          "fingerprint": "bfcf4e115e7bee32691e353428c924c590adfa7401e408f0ddc030cff0705143"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:17.271Z",
+          "requestId": "chatcmpl-EOu6VrUfLae9CU3f4vL2gEBgZNoNp",
+          "tokensUsed": 235,
+          "fingerprint": "5296b2d7d83fad9729260aa8cd83753651839e2b9590b7d8847fc337b0f96ca7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:43.285Z",
+          "requestId": "cd340659-3e78-4606-a57e-8e4385be4853",
+          "tokensUsed": 100,
+          "fingerprint": "d20c8d57d6aabc26d2fd7c8dd8278a009ef8419ce8311db72ea5e9b2e221e0ab"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.intro",
+      "source": "We use your information for the following purposes:",
+      "translations": {
+        "claude": "我们出于以下目的使用您的信息：",
+        "gpt": "我们将您的信息用于以下目的：",
+        "gemma": "我们出于以下目的使用您的信息：",
+        "consensus": "我们出于以下目的使用您的信息："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:12.192Z",
+          "requestId": "msg_011Cf83spxZrTJxPFrKxnrSo",
+          "tokensUsed": 242,
+          "fingerprint": "d093770c80bcbc5f7e8f7eb5a62405b4d0ae9af325fc7f07dd84a4df578141d7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:11.458Z",
+          "requestId": "chatcmpl-EOu6Qlq7JAqM5L8e7iThBspGR2jUl",
+          "tokensUsed": 216,
+          "fingerprint": "0a2f58f9e029b68fd45b885c113255d8b064a665a39b7fa006e2e76e7895a7be"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:43.475Z",
+          "requestId": "ffa03295-04de-478b-a554-ef37f049fd18",
+          "tokensUsed": 100,
+          "fingerprint": "d093770c80bcbc5f7e8f7eb5a62405b4d0ae9af325fc7f07dd84a4df578141d7"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.heading",
+      "source": "Data Storage & Security",
+      "translations": {
+        "claude": "数据存储与安全",
+        "gpt": "数据存储与安全",
+        "gemma": "...",
+        "consensus": "数据存储与安全"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:37.545Z",
+          "requestId": "msg_011Cf83ui6d8nz7QKWxvvvqd",
+          "tokensUsed": 227,
+          "fingerprint": "bb876102e4a61abe6a70a3f9da30c8f0613fe87ce272cdc54470017995996628"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:36.958Z",
+          "requestId": "chatcmpl-EOu6pFQPTcFRaz0TBtjL4yyJLuM6y",
+          "tokensUsed": 205,
+          "fingerprint": "bb876102e4a61abe6a70a3f9da30c8f0613fe87ce272cdc54470017995996628"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:49.363Z",
+          "requestId": "7e254cd2-74e1-4794-b2bd-5ca9a81bbf00",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.heading",
+      "source": "Data Sharing",
+      "translations": {
+        "claude": "数据共享",
+        "gpt": "数据共享",
+        "gemma": "...",
+        "consensus": "数据共享"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:50.784Z",
+          "requestId": "msg_011Cf83vg956oh3jBSKe7tAT",
+          "tokensUsed": 224,
+          "fingerprint": "ada7692392ae811fd240c549b42a46e2943ecc5713c5a22ae472a335366444b0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:50.064Z",
+          "requestId": "chatcmpl-EOu72S0d6baJ83Hkui6E45dS25vve",
+          "tokensUsed": 200,
+          "fingerprint": "ada7692392ae811fd240c549b42a46e2943ecc5713c5a22ae472a335366444b0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:14:55.904Z",
+          "requestId": "9f8873c9-86dc-47bd-aa95-cc2053e23b7d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.intro",
+      "source": "Your data is stored securely using industry-standard practices:",
+      "translations": {
+        "claude": "您的数据通过行业标准做法进行安全存储：",
+        "gpt": "您的数据使用行业标准实践安全存储：",
+        "gemma": "您的数据采用行业标准进行安全存储：",
+        "consensus": "您的数据通过行业标准做法进行安全存储："
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:38.050Z",
+          "requestId": "msg_011Cf83uigbcyettrbryHZKM",
+          "tokensUsed": 246,
+          "fingerprint": "1411a5d2396c34bff794b068b3e0b8af4a9bf13e223e5b8773e2de910fa5b62a"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:37.078Z",
+          "requestId": "chatcmpl-EOu6p3731hF9uO3VWA3uBWHQIiOAo",
+          "tokensUsed": 216,
+          "fingerprint": "ba7ac64604becc70276f7687f6ee3b87db4bc503839b2395876da8b511a7a4a4"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:01.931Z",
+          "requestId": "35d5bb01-fb24-4c7e-9cef-5559aa6f382e",
+          "tokensUsed": 100,
+          "fingerprint": "6254737d78923eea6da92c36253cde6bf1a5723570bba527c8e44e97c8d74182"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item2",
+      "source": "Files are stored in Amazon S3 with access controls based on your role and ownership",
+      "translations": {
+        "claude": "文件存储在 Amazon S3 中，访问控制基于您的角色和所有权",
+        "gpt": "文件存储在 Amazon S3 中，访问控制基于您的角色和所有权",
+        "gemma": "tags.\n\n    Result: 文件存储在 Amazon S3 中，并根据您的角色和所有权实施访问控制。文件存储在 Amazon S3 中，并根据您的角色和所有权实施访问控制。\n\n<T>文件存储在 Amazon S3 中，并根据您的角色和所有权实施访问控制。",
+        "consensus": "文件存储在 Amazon S3 中，访问控制基于您的角色和所有权"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:42.570Z",
+          "requestId": "msg_011Cf83v4D69awSYLyuhJW3M",
+          "tokensUsed": 260,
+          "fingerprint": "01d43e09f3421ac4275efae8aba22a5c5c69aafc7721e755041b9bdb5f488094"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:41.678Z",
+          "requestId": "chatcmpl-EOu6uWxrx0SbZve4cxnD1YenvFfTf",
+          "tokensUsed": 231,
+          "fingerprint": "01d43e09f3421ac4275efae8aba22a5c5c69aafc7721e755041b9bdb5f488094"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:07.389Z",
+          "requestId": "a5a94866-5467-4735-bfe8-b84d544e5517",
+          "tokensUsed": 100,
+          "fingerprint": "5da9c370f1366ed14ca024b2f181a53084b051eb219e375d42cf7aedf8561aa5"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item3",
+      "source": "Database records are managed through AWS DynamoDB with fine-grained access control",
+      "translations": {
+        "claude": "数据库记录通过 AWS DynamoDB 进行管理，并实施精细化访问控制",
+        "gpt": "数据库记录通过 AWS DynamoDB 管理，并具有细粒度的访问控制",
+        "gemma": "`? Yes.\n\n    One more look: \"Database records are managed through AWS DynamoDB with fine-grained access control\"\n    Could also be: \"数据库记录通过具备细粒度访问控制的 AWS DynamoDB 进行管理。\"\n    This is more concise and flows well in a technical document.\n\n    Let's compare:\n    A: 数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。\n    B: 数据库记录通过具备细粒度访问控制的 AWS DynamoDB 进行管理。\n\n    A is a bit more \"itemized\" which fits \"item3\" in a list. B is a single flowing sentence. Given it's \"item3\", it's likely part of a list of features or security measures.\n\n    Let's go with: 数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。\n\n    Actually, \"通过...进行管理\" is a very standard way to translate \"managed through\".\n\n    Final Polish:\n    数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。\n\n    Wait, looking at the source again, \"with fine-grained access control\" describes the management or the database.\n    \"Database records are managed through [AWS DynamoDB with fine-grained access control]\"\n    OR\n    \"[Database records are managed through AWS DynamoDB] with fine-grained access control\"\n\n    In technical documentation, it usually means the system (DynamoDB) provides/uses fine-grained access control.\n\n    Let's use: 数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。\n\n    (Self-correction: Ensure no extra spaces or punctuation issues).\n\n    Final string: 数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。\n\n<T>数据库记录通过 AWS DynamoDB 进行管理，并具备细粒度的访问控制。",
+        "consensus": "数据库记录通过 AWS DynamoDB 进行管理，并实施精细化访问控制"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:44.942Z",
+          "requestId": "msg_011Cf83vE3gWYjjmZiJQy2nw",
+          "tokensUsed": 261,
+          "fingerprint": "8965508283036bdbddf18f13a7374fd22a238343c3b1ba5921ad817413ea9bdf"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:44.024Z",
+          "requestId": "chatcmpl-EOu6wgxw9KTpaMgLHePEkk6wayOY1",
+          "tokensUsed": 229,
+          "fingerprint": "5d8a0f9d77e9976549710ec96dad44e9fbc75c07c965ac3c35785bb807c4a156"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:11.647Z",
+          "requestId": "aeec5225-24b7-4b50-8b46-bda0c80e68ae",
+          "tokensUsed": 100,
+          "fingerprint": "d962ee516092890839c99aafae8aaf942dd490fd80803b443b09b1dc613a73f0"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item1",
+      "source": "All data is encrypted in transit (TLS/SSL) and at rest using AWS encryption services",
+      "translations": {
+        "claude": "所有数据在传输过程中（TLS/SSL）和静态存储时均使用AWS加密服务进行加密",
+        "gpt": "所有数据在传输过程中（TLS/SSL）和静止状态下均使用AWS加密服务进行加密",
+        "gemma": "所有数据在传输过程中 (TLS/SSL) 及静态存储时均使用 AWS 加密服务进行加密",
+        "consensus": "所有数据在传输过程中（TLS/SSL）和静态存储时均使用AWS加密服务进行加密"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:38.558Z",
+          "requestId": "msg_011Cf83ujkqFfQiPsSLqQTwT",
+          "tokensUsed": 270,
+          "fingerprint": "f19ee9c40bcb9be8e2ff68f6d7f1e74566e42e77a044dabc353d697bfdb7861f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:37.522Z",
+          "requestId": "chatcmpl-EOu6qnk9zb9FLGr9vtnw7Q04D6XJh",
+          "tokensUsed": 240,
+          "fingerprint": "3dcb97ee3dadace89774b58ddc6a2c06754d0876b4e9f07c4a80157b6c24d28e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:13.900Z",
+          "requestId": "d80da7c7-1cf5-4295-b182-275f681f936c",
+          "tokensUsed": 100,
+          "fingerprint": "69a4e635c91c7f8df66762932b3207db91b95322c7e26728b19be2d2c3f4ca57"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.userContentText",
+      "source": "Audio recordings, text responses, uploaded files, and chat messages created during learning activities.",
+      "translations": {
+        "claude": "在学习活动中创建的音频录音、文本回答、上传的文件和聊天消息。",
+        "gpt": "在学习活动中创建的音频录音、文本回复、上传的文件和聊天消息。",
+        "gemma": "tags.\n\n    Let's double check \"text responses\". In many UI translations, \"text responses\" is \"文本回复\".\n    \"Audio recordings\" -> 语音录音\n    \"text responses\" -> 文本回复\n    \"uploaded files\" -> 上传的文件\n    \"chat messages\" -> 聊天消息\n\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\"\n\n    Actually, \"text responses\" in an eLearning context (like a quiz or prompt) is often \"文本回答\".\n    Let's use \"文本回答\".\n\n    Final check of the source: \"Audio recordings, text responses, uploaded files, and chat messages created during learning activities.\"\n\n    Translation: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    (Self-correction: \"text responses\" -> \"文本回答\" is very safe for eLearning).\n\n    One more look at \"created during learning activities\".\n    If I put it at the end: 语音录音、文本回答、上传的文件和聊天消息，这些均是在学习活动期间创建的。 (Too wordy, not a direct translation).\n    The standard way is to put the modifier at the front.\n\n    Result: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, \"text responses\" could also be \"文字回复\".\n    Let's look at common privacy policy terms in Chinese.\n    \"Audio recordings\" -> 语音录音\n    \"Text responses\" -> 文本回答 / 文字回复\n    \"Uploaded files\" -> 上传的文件\n    \"Chat messages\" -> 聊天消息\n\n    \"在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\"\n\n    This looks correct and professional.\n\n    One detail: \"and\" in a list.\n    \"A, B, C, and D\" -> \"A、B、C和D\" or \"A、B、C以及D\".\n    In Chinese, the enumeration comma is \"、\".\n    So: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, the source uses commas. In Chinese, for lists, we use the enumeration comma (、).\n    \"Audio recordings, text responses, uploaded files, and chat messages...\"\n    \"语音录音、文本回答、上传的文件和聊天消息...\"\n\n    Final string: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, \"text responses\" might be \"文本回复\" (responses/replies). Let's use \"文本回答\" as it's more specific to learning. Or \"文本回复\" to be more general. \"文本回答\" is better for \"learning activities\".\n\n    Let's try one more variation:\n    \"在学习活动期间产生的语音录音、文本回答、上传的文件及聊天消息。\"\n    \"产生的\" (generated) is often used for data. \"创建的\" (created) is the literal translation of \"created\".\n    The prompt asks to keep the same formality level. \"创建的\" is fine.\n\n    Final decision: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, I should check if \"text responses\" is better as \"文字回复\".\n    \"Text responses\" -> 文本回答 (Text answers) or 文字回复 (Text replies).\n    In eLearning, users \"respond\" to prompts. \"文本回答\" is very common.\n\n    Let's check \"Audio recordings\". 语音录音 is standard.\n    \"Uploaded files\" -> 上传的文件.\n    \"Chat messages\" -> 聊天消息.\n\n    Final string: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Actually, looking at the source again: \"Audio recordings, text responses, uploaded files, and chat messages created during learning activities.\"\n    The modifier \"created during learning activities\" might only apply to the \"chat messages\" or to the whole list. In English, it's slightly ambiguous but usually applies to the whole list in this context. In Chinese, placing it at the beginning makes it apply to the whole list.\n\n    Final check:\n    在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    One minor thing: \"text responses\" -> \"文本回复\" is slightly more formal/standard for \"responses\" in a general sense. Let's use \"文本回复\".\n\n    Actually, \"文本回答\" is better for \"learning activities\". Let's stick with \"文本回答\".\n\n    Wait, I'll use \"文本回复\" to be safe as \"responses\" is broader. No, \"文本回答\" is better for eLearning. Let's go with \"文本回答\".\n\n    Actually, let's look at \"text responses\" in a privacy context. It's usually \"文本回复\".\n    Let's use: 在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\n\n    Wait, \"text responses\" -> \"文本回答\" (answers) or \"文本回复\" (responses).\n    \"Responses\" -> 回复.\n    \"Answers\" -> 回答.\n    \"Text responses\" -> 文本回复.\n\n    Let's use \"文本回复\".\n\n    Final string: 在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\n\n    Wait, I'll use \"以及\" instead of \"和\" for a more formal tone.\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件以及聊天消息。\"\n\n    Let's re-evaluate \"text responses\" one last time.\n    If it's a chat, it's \"回复\". If it's a quiz, it's \"回答\".\n    Since \"chat messages\" is also in the list, \"text responses\" likely refers to the text entered in learning modules.\n    \"文本回复\" is a good middle ground.\n\n    Final string: 在学习活动期间创建的语音录音、文本回复、上传的文件以及聊天消息。\n\n    Actually, the source uses \"and\" before the last item.\n    \"Audio recordings, text responses, uploaded files, and chat messages...\"\n    In Chinese: \"语音录音、文本回复、上传的文件以及聊天消息。\"\n\n    Let's check the modifier position again.\n    \"Audio recordings, text responses, uploaded files, and chat messages created during learning activities.\"\n    If the modifier only applies to \"chat messages\", the translation would be different. But in privacy policies, it almost always applies to the whole list.\n\n    Final version: 在学习活动期间创建的语音录音、文本回复、上传的文件以及聊天消息。\n\n    Wait, \"text responses\" -> \"文本回答\" is actually more common in eLearning (e.g., responding to a question). Let's use \"文本回答\".\n\n    Final check:\n    在学习活动期间创建的语音录音、文本回答、上传的文件以及聊天消息。\n\n    One more look: \"Audio recordings, text responses, uploaded files, and chat messages created during learning activities.\"\n    Is \"text responses\" \"文字回复\"?\n    \"Text\" (文字/文本) \"responses\" (回复/回答).\n    \"文本回答\" is very professional.\n\n    Let's go.\n\n    Final string: 在学习活动期间创建的语音录音、文本回答、上传的文件以及聊天消息。\n\n    Wait, I'll use \"和\" instead of \"以及\" to keep it simple and match the source's \"and\". \"以及\" is slightly more formal, but \"和\" is perfectly fine for \"polite-formal\". Actually, \"以及\" is better for a formal privacy policy.\n\n    Let's check \"text responses\" again. \"文本回复\" is more common in software.\n    Let's use \"文本回复\".\n\n    Final string: 在学习活动期间创建的语音录音、文本回复、上传的文件以及聊天消息。\n\n    Wait, I'll use \"和\" to be safe.\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\"\n\n    Actually, \"文本回答\" is better for \"learning activities\".\n    \"在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\"\n\n    Let's try to be as natural as possible.\n    \"在学习活动期间创建的语音录音、文本回答、上传的文件及聊天消息。\" (Using \"及\" is very common in formal lists).\n\n    Let's go with: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, I'll use \"文本回复\" because \"responses\" is \"回复\".\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\"\n\n    Final check on \"Audio recordings\". 语音录音 is better than 音频录音 for user-generated content.\n\n    Final string: 在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\n\n    Wait, I'll use \"文本回答\" because it's an eLearning platform.\n    \"在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\"\n\n    Actually, looking at the source \"text responses\", \"文本回复\" is the most accurate translation of the words.\n\n    Final string: 在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\n\n    One last check.\n    Source: Audio recordings, text responses, uploaded files, and chat messages created during learning activities.\n    Target: 在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\n\n    This is polite, formal, and accurate.\n\n    Wait, I'll use \"以及\" for \"and\" to ensure the \"polite-formal\" tone.\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件以及聊天消息。\"\n\n    Actually, \"和\" is fine. Let's use \"和\".\n\n    Final check:\n    \"在学习活动期间创建的语音录音、文本回复、上传的文件和聊天消息。\"\n\n    Wait, \"text responses\" -> \"文本回答\" is better for eLearning.\n    \"在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\"\n\n    Let's use \"文本回答\".\n\n    Final string: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    Wait, I'll use \"语音录音、文本回答、上传的文件以及聊天消息，这些均是在学习活动期间创建的。\"? No, that's too long.\n\n    The most standard way to translate this in a UI/Privacy policy is:\n    在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n    (Self-correction: \"text responses\" -> \"文本回答\" is more appropriate for \"learning activities\" than \"文本回复\").\n\n    Final decision: 在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。\n\n<T>在学习活动期间创建的语音录音、文本回答、上传的文件和聊天消息。",
+        "consensus": "在学习活动中创建的音频录音、文本回答、上传的文件和聊天消息。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:13:58.145Z",
+          "requestId": "msg_011Cf83rnCqqbHVJcuHEhdGo",
+          "tokensUsed": 268,
+          "fingerprint": "69f661a08aaa17b8306cdcddfe9ba1ff986630f93785e29731c28863b0014cca"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:13:57.532Z",
+          "requestId": "chatcmpl-EOu6CHxS56fmJat70CWi1lsvdQg1a",
+          "tokensUsed": 237,
+          "fingerprint": "4abaa776e94ffbf19e0379234b2917f8c21619a8d334ef54813791c529c7ff86"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:14.745Z",
+          "requestId": "d4b072ad-044c-4165-aee0-e3dadc2f6f78",
+          "tokensUsed": 100,
+          "fingerprint": "a0f28d8b523ea31b686c6374c129f83d65301af07c7c5ed00ff4aaa281464755"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.instructors",
+      "source": "Instructors:",
+      "translations": {
+        "claude": "讲师：",
+        "gpt": "讲师：",
+        "gemma": "...",
+        "consensus": "讲师："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:03.377Z",
+          "requestId": "msg_011Cf83wbptSQf4cXCeptXgL",
+          "tokensUsed": 225,
+          "fingerprint": "02fb50595cc793505e3c965454f8a7ddb688fc8f767cab0c1dd4ebe8369f51b1"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:02.561Z",
+          "requestId": "chatcmpl-EOu7F08vWohhXzI9sQJUn7lTUhzqn",
+          "tokensUsed": 202,
+          "fingerprint": "02fb50595cc793505e3c965454f8a7ddb688fc8f767cab0c1dd4ebe8369f51b1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:14.753Z",
+          "requestId": "bf25138c-b84f-4f1f-9f9f-b9e3cd3b6ed7",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.classmates",
+      "source": "Classmates:",
+      "translations": {
+        "claude": "同学：",
+        "gpt": "同学：",
+        "gemma": "...",
+        "consensus": "同学："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:13.108Z",
+          "requestId": "msg_011Cf83xKHFY9pgm9rawqQZR",
+          "tokensUsed": 224,
+          "fingerprint": "a9a970cf934fe437f7ac42355d0d9ba400afa430f18758bee171ff6c41a57edc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:12.190Z",
+          "requestId": "chatcmpl-EOu7OS7J0Q9Lf1fB2YVPUY5UCJos9",
+          "tokensUsed": 202,
+          "fingerprint": "a9a970cf934fe437f7ac42355d0d9ba400afa430f18758bee171ff6c41a57edc"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:27.544Z",
+          "requestId": "624316a1-190c-46e1-b2f0-c2f8bdeab35f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.intro",
+      "source": "We do not sell your personal information. We may share data in the following limited circumstances:",
+      "translations": {
+        "claude": "我们不会出售您的个人信息。我们仅在以下有限情况下共享数据：",
+        "gpt": "我们不会出售您的个人信息。我们可能在以下有限情况下共享数据：",
+        "gemma": "tags.\n\n    One detail: \"We may share data in the following limited circumstances:\"\n    In Chinese, the colon is used at the end.\n\n    Final string: 我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：\n\n    Wait, I should check if \"sharing data\" should be \"分享数据\".\n    \"共享数据\" is more technical/formal.\n    \"分享数据\" is more social/casual.\n    For an eLearning platform's privacy policy, \"共享数据\" is better.\n\n    Let's re-verify the \"limited circumstances\" part.\n    \"in the following limited circumstances\"\n    \"在以下有限的情况下\"\n\n    Final check of the whole sentence:\n    我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：\n\n    (Self-correction: Ensure \"您\" is used for \"your\" to maintain polite-formal tone).\n\n    Source: \"We do not sell your personal information. We may share data in the following limited circumstances:\"\n    Target: 我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：\n\n    Wait, looking at the source again, \"We may share data in the following limited circumstances:\"\n    Is it \"We may share data [in the following limited circumstances]\" or \"We may share data [in the following] [limited circumstances]\"?\n    It means: In the following limited circumstances, we may share data.\n    Translation: 我们可能会在以下有限的情况下共享数据：\n\n    This is correct.\n\n    One more thought: \"We do not sell your personal information.\"\n    \"我们不向第三方出售您的个人信息\" (We do not sell your personal information to third parties) is a common expansion, but I must stick to the source.\n    \"我们不会出售您的个人信息。\" is the most faithful and formal translation.\n\n    Final string: 我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：\n\n<T>我们不会出售您的个人信息。我们可能会在以下有限的情况下共享数据：",
+        "consensus": "我们不会出售您的个人信息。我们仅在以下有限情况下共享数据："
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:57.745Z",
+          "requestId": "msg_011Cf83wABJ1Tw3gZQBL7LZ3",
+          "tokensUsed": 264,
+          "fingerprint": "62f890104ea8a63403ecf8a21e817cd8366ad7c1b253e0d5c9d75459c5e2a08a"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:56.975Z",
+          "requestId": "chatcmpl-EOu79lCm5dmRuqakXKyLboQ2xaV0b",
+          "tokensUsed": 230,
+          "fingerprint": "4263fec3e6aabd7a4d4a1cd3e0d1f879d2798cc2f7e0b00056d8975380ce2e62"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:32.856Z",
+          "requestId": "b2982cb9-df25-4d3d-b431-9abb3479df1b",
+          "tokensUsed": 100,
+          "fingerprint": "1217446faf1c3c9962dbcde2ee3b81c00ef9774f84915f803544b04c134fc214"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.instructorsText",
+      "source": "Your instructors can view your submissions, grades, and learning progress within their sections.",
+      "translations": {
+        "claude": "您的授课教师可以查看您在其课程班级中的作业提交、成绩和学习进度。",
+        "gpt": "您的讲师可以查看您在其课程中的提交、成绩和学习进度。",
+        "gemma": "tags.\n\n    Translation: 您的讲师可以查看您在其负责的课程范围内的提交内容、成绩及学习进度。您的讲师可以查看您在其负责的课程范围内的提交内容、成绩及学习进度。\n\n<T>您的讲师可以查看您在其负责的课程范围内的提交内容、成绩及学习进度。",
+        "consensus": "您的授课教师可以查看您在其课程班级中的作业提交、成绩和学习进度。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:09.277Z",
+          "requestId": "msg_011Cf83x17rkUNzUk4fqxZY8",
+          "tokensUsed": 268,
+          "fingerprint": "8f9b8fc6459f2a2cc456ec10aa6aa4d65c8522229df1f59be5aeb9e29cde2db7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:08.100Z",
+          "requestId": "chatcmpl-EOu7KEKszcehrxqUEljw0IiIpAfIq",
+          "tokensUsed": 231,
+          "fingerprint": "e9c79d4964275e6fbd270cc8ad064bd8f25d518a91a81df81bfa1ee492a4496c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:36.863Z",
+          "requestId": "86a8dc29-54a4-4469-adc0-b57518fddc76",
+          "tokensUsed": 100,
+          "fingerprint": "7be463592951ed4df0259587cac8ea9feac55ff218b7840dc410e74be973efcd"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.outro",
+      "source": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your data at any time.",
+      "translations": {
+        "claude": "我们会在您的账户处于活跃状态期间或在需要提供服务的必要时间内保留您的数据。您可以随时请求删除您的数据。",
+        "gpt": "我们会在您的账户处于活跃状态或需要提供服务时保留您的数据。您可以随时请求删除您的数据。",
+        "gemma": "我们将保留您的数据，直至您的账户保持活跃，或在提供服务所需的必要期限内。您可以随时申请删除您的数据。",
+        "consensus": "我们会在您的账户处于活跃状态期间或在需要提供服务的必要时间内保留您的数据。您可以随时请求删除您的数据。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:45.389Z",
+          "requestId": "msg_011Cf83vEv2NeNqgZXXb9M4C",
+          "tokensUsed": 297,
+          "fingerprint": "7753e59c2330d3f5cb5a10ea2b5937eb6b8b53f0445133948a44153ef675a2d9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:44.226Z",
+          "requestId": "chatcmpl-EOu6wKHl92QOgEiKD8tEFrYJmey46",
+          "tokensUsed": 255,
+          "fingerprint": "10c237fcf8a3b2ec96b2f1d736a59f98caaa6c4cf8d3d683924ef1936b7c6e05"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:36.955Z",
+          "requestId": "dc1cb250-8e10-408e-bfa2-bb35dae8e5a3",
+          "tokensUsed": 100,
+          "fingerprint": "c270b9874dc2699b99620d650a03345d359cdd27be619bd29c20ede8a85a087e"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.aiProcessingText",
+      "source": "Audio and text content is sent to OpenAI for transcription, feedback, and assessment. OpenAI does not use this data for training.",
+      "translations": {
+        "claude": "音频和文本内容将被发送至 OpenAI 进行转录、反馈和评估。OpenAI 不会使用这些数据进行训练。",
+        "gpt": "音频和文本内容会被发送到OpenAI进行转录、反馈和评估。OpenAI不会将这些数据用于训练。",
+        "gemma": "音频和文本内容将发送至 OpenAI，用于转录、反馈和评估。OpenAI 不会将此类数据用于训练。",
+        "consensus": "音频和文本内容将被发送至 OpenAI 进行转录、反馈和评估。OpenAI 不会使用这些数据进行训练。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:16.524Z",
+          "requestId": "msg_011Cf83xYcSSQp6BY7TYxsRF",
+          "tokensUsed": 295,
+          "fingerprint": "831d97f18377e818cfcd64baba81ed55c4daaa8356954698552bcf56e1d8f855"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:15.561Z",
+          "requestId": "chatcmpl-EOu7SaW4d19z9nSq9nktpVyEYH9iC",
+          "tokensUsed": 253,
+          "fingerprint": "e1d6ac4752102c13857d601614effdf63d568dfb75e94133414f7e15cde2a1d8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:41.965Z",
+          "requestId": "8f36fa87-9cb2-485e-8df3-10270c265311",
+          "tokensUsed": 100,
+          "fingerprint": "3b26883ceb368d52f2eb867d38a85a75c5f31ae1a02e93c6959cc52dfb000625"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.legal",
+      "source": "Legal Requirements:",
+      "translations": {
+        "claude": "法律要求：",
+        "gpt": "法律要求：",
+        "gemma": "...",
+        "consensus": "法律要求："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:28.791Z",
+          "requestId": "msg_011Cf83yVMmSaaj3qGVKsy68",
+          "tokensUsed": 224,
+          "fingerprint": "8b7f8bffa835c84143a754e402b7c130303177234e81317f78cd24473c609f9d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:28.178Z",
+          "requestId": "chatcmpl-EOu7eeRoeQYaqk77OadoL21dqlCd3",
+          "tokensUsed": 202,
+          "fingerprint": "8b7f8bffa835c84143a754e402b7c130303177234e81317f78cd24473c609f9d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:43.518Z",
+          "requestId": "586c37f6-d6f0-49bb-ba9a-d62a57bd9f18",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.classmatesText",
+      "source": "Leaderboard rankings and squad activity may be visible to other students in your section (you can opt out).",
+      "translations": {
+        "claude": "排行榜排名和小组活动可能对您所在班级的其他学生可见（您可以选择退出）。",
+        "gpt": "排行榜排名和小组活动可能会对您所在班级的其他学生可见（您可以选择退出）。",
+        "gemma": "排行榜排名及小组活动可能对您所在班级的其他学生可见（您可以选择退出）。",
+        "consensus": "排行榜排名和小组活动可能对您所在班级的其他学生可见（您可以选择退出）。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:15.360Z",
+          "requestId": "msg_011Cf83xUm2NonHt5MdEV2Kn",
+          "tokensUsed": 279,
+          "fingerprint": "4b33cf9f34d0c4c278ca28b14ca5216e2ceb9fa119758bb4563c020310e1fbc7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:14.744Z",
+          "requestId": "chatcmpl-EOu7RgpZAgcLRhFgpmWD4BBu55pNp",
+          "tokensUsed": 242,
+          "fingerprint": "1370ec56fa0f5211ff23bc220b936b71e61c4614402afa2f8f1e7bc4b33e39a9"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:15:44.955Z",
+          "requestId": "f1056690-1f44-4b37-adce-6bb3e8dd3b26",
+          "tokensUsed": 100,
+          "fingerprint": "a922c7a5c97e568cc9951f6c0a3427de11690cd918860de5744e8b5fed041605"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item2",
+      "source": "Correction: Update or correct inaccurate personal information",
+      "translations": {
+        "claude": "更正：更新或纠正不准确的个人信息",
+        "gpt": "更正：更新或更正不准确的个人信息",
+        "gemma": "tags.\n\n    Result: 更正：更新或更正不准确的个人信息更正：更新或更正不准确的个人信息\n\n<T>更正：更新或更正不准确的个人信息",
+        "consensus": "更正：更新或纠正不准确的个人信息"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:45.102Z",
+          "requestId": "msg_011Cf83zfefRhRZyM5rDZsYS",
+          "tokensUsed": 247,
+          "fingerprint": "6946ace92f40752de9c73ed2aa7bde5df6ebef28a79b9520b7ec77be9b60456a"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:44.237Z",
+          "requestId": "chatcmpl-EOu7vcgjBWpNVK8Tz1g8NDackZrF8",
+          "tokensUsed": 218,
+          "fingerprint": "a732ea8c93b761ea6ba7e69cd8a978277bcceead7b20551f221d31c92d7d6f8f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:04.796Z",
+          "requestId": "03434d82-998d-46b7-ba29-27f452fcd568",
+          "tokensUsed": 100,
+          "fingerprint": "c762bf661ead5fb96a2050b09eaad0cf2b6c1e1f9eb1bac1964cd92c3cc27ad2"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.intro",
+      "source": "You have the following rights regarding your personal data:",
+      "translations": {
+        "claude": "您对您的个人数据享有以下权利：",
+        "gpt": "您对您的个人数据拥有以下权利：",
+        "gemma": "`.\n\n    Wait, looking at the source again: \"You have the following rights regarding your personal data:\"\n    Translation: 您拥有以下关于您个人数据的权利：\n\n    Is there a more natural way?\n    \"针对您的个人数据，您拥有以下权利：\" (Regarding your personal data, you have the following rights:)\n    \"您拥有以下关于个人数据的权利：\" (You have the following rights regarding personal data:)\n\n    Let's go with: 您拥有以下关于您个人数据的权利：\n\n    Actually, \"您拥有以下关于个人数据的权利：\" (dropping the second 'your') is slightly more elegant in Chinese, but \"您拥有以下关于您个人数据的权利：\" is a perfect 1:1 formal match.\n\n    Let's try one more: \"关于您的个人数据，您拥有以下权利：\"\n    This is very common in legal headers.\n\n    Let's stick to the most direct formal translation:\n    您拥有以下关于您个人数据的权利：\n\n    Wait, I'll check if \"个人信息\" is safer. Most international platforms (Google, Apple) translate \"Personal Data\" to \"个人信息\" in Simplified Chinese.\n    Example: Google's privacy policy uses \"个人信息\".\n    However, the prompt asks to translate the text provided. I will use \"个人数据\" to be faithful to the source \"personal data\".\n\n    Final check of the source: \"You have the following rights regarding your personal data:\"\n    Translation: 您拥有以下关于您个人数据的权利：\n\n    One more check: \"regarding\" -> \"关于\".\n    \"You have the following rights\" -> \"您拥有以下权利\".\n    \"regarding your personal data\" -> \"关于您的个人数据\".\n    Result: 您拥有以下关于您个人数据的权利：\n\n    This is correct, formal, and polite.\n\n    *Wait*, looking at the prompt's \"polite-formal\" requirement.\n    \"您拥有以下关于您个人数据的权利：\" is perfect.\n\n    One detail: The source ends with a colon. I will include it.\n\n    Final string: 您拥有以下关于您个人数据的权利：\n\n    (Self-correction: \"个人数据\" vs \"个人信息\". In the context of GDPR/Privacy, \"Data\" is \"数据\". In the context of China's PIPL, \"Information\" is \"信息\". Since this is for \"international users\" and the source is \"Data\", \"数据\" is the most accurate translation of the specific word used.)\n\n    Final Polish:\n    您拥有以下关于您个人数据的权利：您拥有以下关于您个人数据的权利：\n\n<T>您拥有以下关于您个人数据的权利：",
+        "consensus": "您对您的个人数据享有以下权利："
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:38.304Z",
+          "requestId": "msg_011Cf83zBcwYftJgcWpePfcr",
+          "tokensUsed": 241,
+          "fingerprint": "6f76c9bc3c74aceefb10f745b366ddfde75139c37553a8867e3103333afc9a10"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:37.785Z",
+          "requestId": "chatcmpl-EOu7ohfPFdjMSVSoiOhFUIxhLj7p6",
+          "tokensUsed": 218,
+          "fingerprint": "8a9babdb7307bed8319f6266c8291437681f2b92eada47f80a83709e14691d25"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:11.745Z",
+          "requestId": "f34ce46e-8477-4390-b3fd-72649ecfa97c",
+          "tokensUsed": 100,
+          "fingerprint": "6ceba88097863d764105b46c33b7481405d2fe4ce45484ed75c10a9448c5459d"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.aiProcessing",
+      "source": "AI Processing:",
+      "translations": {
+        "claude": "AI处理：",
+        "gpt": "AI处理：",
+        "gemma": "AI 处理：",
+        "consensus": "AI处理："
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:16.074Z",
+          "requestId": "msg_011Cf83xYdgwzsHXnXcX3KED",
+          "tokensUsed": 224,
+          "fingerprint": "fdde89a3b8587cdc3b8944447fb3bdafd4ffc724c20a36f75a319b09a50c7c2d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:15.368Z",
+          "requestId": "chatcmpl-EOu7Sh36Sam0VEkwEUVtxR3jzAfRR",
+          "tokensUsed": 202,
+          "fingerprint": "fdde89a3b8587cdc3b8944447fb3bdafd4ffc724c20a36f75a319b09a50c7c2d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:19.051Z",
+          "requestId": "f1b1f6f6-9dc2-450f-af80-c17d9350d2d2",
+          "tokensUsed": 100,
+          "fingerprint": "52cd1d6dffc1fba0d5150e9f0a4ebdbb7228d08e3daa627c42c004a809d8e1e0"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.heading",
+      "source": "Your Rights",
+      "translations": {
+        "claude": "您的权利",
+        "gpt": "您的权利",
+        "gemma": "...",
+        "consensus": "您的权利"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:37.785Z",
+          "requestId": "msg_011Cf83zB6hLW7EP16jMqRGi",
+          "tokensUsed": 223,
+          "fingerprint": "06bfd902f63348b08e9333d74a921f41441a051cd6e6806e28bc6c99cabd8fdf"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:37.476Z",
+          "requestId": "chatcmpl-EOu7oDhrrl9Gw1l9C1T7Al89F3Jel",
+          "tokensUsed": 202,
+          "fingerprint": "06bfd902f63348b08e9333d74a921f41441a051cd6e6806e28bc6c99cabd8fdf"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:21.036Z",
+          "requestId": "4e96525d-633d-4445-924c-0f44ab4cda3e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.heading",
+      "source": "Cookies & Local Storage",
+      "translations": {
+        "claude": "Cookie 和本地存储",
+        "gpt": "Cookies 和本地存储",
+        "gemma": "...",
+        "consensus": "Cookie 和本地存储"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:22.330Z",
+          "requestId": "msg_011Cf843S1DW2vBiKwYDdYZK",
+          "tokensUsed": 226,
+          "fingerprint": "f5ddd966b34cdf7dfdad40ab65e1544331a89ed60b36cf5e226f9c543df4cd3e"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:21.716Z",
+          "requestId": "chatcmpl-EOu8WdC0QNOy43hmVeNOIfVFOksDt",
+          "tokensUsed": 205,
+          "fingerprint": "a5a7c989728ee4de30e7b9561a6101ba7f8f894eab84bba745a820bda4ec3d16"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:35.016Z",
+          "requestId": "5c1a9e2e-2074-495c-aaa6-7e218c3328e9",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.legalText",
+      "source": "We may disclose information if required by law or to protect the safety of our users.",
+      "translations": {
+        "claude": "如法律要求或为保护用户安全，我们可能会披露相关信息。",
+        "gpt": "我们可能会在法律要求或保护用户安全的情况下披露信息。",
+        "gemma": "根据法律要求或为保护用户安全，我们可能会披露信息。",
+        "consensus": "如法律要求或为保护用户安全，我们可能会披露相关信息。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:34.610Z",
+          "requestId": "msg_011Cf83yt5kpe9oAMJECKTWX",
+          "tokensUsed": 262,
+          "fingerprint": "a18e0f05a5f898e8b97066fe6b0c31ae962c3282bb357584e620b4d816e48ff3"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:33.583Z",
+          "requestId": "chatcmpl-EOu7kcNWr1OFUBdTsQvds23m8gQwB",
+          "tokensUsed": 230,
+          "fingerprint": "d65b39e7e85c1e3260113295db9a2306c7d5f361460c576f10281a5f29e8725f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:42.114Z",
+          "requestId": "cbb1ba0b-8f2b-438d-9dc1-c18b043dbcd1",
+          "tokensUsed": 100,
+          "fingerprint": "57352b135c8a5b59e77138d3a193c29cc318ca49d4fdbdf3023f0a3f49aad2ac"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.outro",
+      "source": "To exercise these rights, contact your instructor or reach out to us using the contact information below.",
+      "translations": {
+        "claude": "如需行使这些权利，请联系您的授课教师或使用以下联系信息与我们取得联系。",
+        "gpt": "要行使这些权利，请联系您的讲师或使用以下联系信息与我们联系。",
+        "gemma": "...",
+        "consensus": "如需行使这些权利，请联系您的授课教师或使用以下联系信息与我们取得联系。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:20.893Z",
+          "requestId": "msg_011Cf843HS2fT8U2u6DREBSR",
+          "tokensUsed": 270,
+          "fingerprint": "e677a9b946f069658ba44e14953ef0aa6c8a02b40b0a292d3994bf90ca60c3f0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:19.873Z",
+          "requestId": "chatcmpl-EOu8UKzTxBcxJiwt3K2BbBhn3m85W",
+          "tokensUsed": 236,
+          "fingerprint": "fea8771b8eb138237afedd81b1e045fef8d84eb53030456e26ae8998a9256d88"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:43.630Z",
+          "requestId": "636e153e-fdd5-4f9d-bbbd-3bd78cce3ce3",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item5",
+      "source": "Opt-out: Disable leaderboard visibility and certain data sharing features",
+      "translations": {
+        "claude": "选择退出：禁用排行榜可见性和某些数据共享功能",
+        "gpt": "选择退出：禁用排行榜可见性和某些数据共享功能",
+        "gemma": "选择退出：禁用排行榜可见性及特定数据共享功能",
+        "consensus": "选择退出：禁用排行榜可见性和某些数据共享功能"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:13.317Z",
+          "requestId": "msg_011Cf842kLFNZCrq1PHpg3xy",
+          "tokensUsed": 258,
+          "fingerprint": "01327c56959eedaddde686e934d85d45d7a24627893a4c4ce88a235e89b90f7c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:12.362Z",
+          "requestId": "chatcmpl-EOu8N8UboDIg3VoyhJjz1X6UuTi7d",
+          "tokensUsed": 224,
+          "fingerprint": "01327c56959eedaddde686e934d85d45d7a24627893a4c4ce88a235e89b90f7c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:47.111Z",
+          "requestId": "79d3c266-063a-4a05-8cec-fea42c7529a8",
+          "tokensUsed": 100,
+          "fingerprint": "4a7b7b7e60bccdf849cb1860d8b37d5906b0464b925c56233f0a3d19a81f8bd5"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item3",
+      "source": "Deletion: Request deletion of your account and associated data",
+      "translations": {
+        "claude": "删除：请求删除您的账户及相关数据",
+        "gpt": "删除：请求删除您的账户和相关数据",
+        "gemma": "tags.\n\n    One more check: \"associated data\" -> \"关联数据\" or \"相关数据\". \"相关数据\" is more natural.\n\n    Final string: 删除：请求删除您的账户及相关数据\n\n    Actually, \"注销\" is specifically for accounts. But the text says \"Deletion: Request deletion of your account AND associated data\". Since it includes data, \"删除\" is the more accurate term for the whole concept.\n\n    Final string: 删除：请求删除您的账户及相关数据删除：请求删除您的账户及相关数据\n\n<T>删除：请求删除您的账户及相关数据",
+        "consensus": "删除：请求删除您的账户及相关数据"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:46.467Z",
+          "requestId": "msg_011Cf83zmkmahn38gD9gxhhS",
+          "tokensUsed": 245,
+          "fingerprint": "804b5352591a47dec07c0b9fe983cca3fba4d42746cc68e762dcc4391c201a5c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:45.563Z",
+          "requestId": "chatcmpl-EOu7wB1fWvzuv3UsHtw8MoccopI6h",
+          "tokensUsed": 217,
+          "fingerprint": "87c55c7222785946263295b87cd06220c7dcdc157006c631c7e98b9136454784"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:51.206Z",
+          "requestId": "75d91ba4-fe89-47bc-84f9-bf66cea22c02",
+          "tokensUsed": 100,
+          "fingerprint": "8c209049311011050e979b7ba4ba00298a44c9b2d672a336597c04fc4c232e44"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.heading",
+      "source": "Children's Privacy",
+      "translations": {
+        "claude": "儿童隐私",
+        "gpt": "儿童隐私",
+        "gemma": "...",
+        "consensus": "儿童隐私"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:43.222Z",
+          "requestId": "msg_011Cf844zPeJubpPUGvQ3Gyh",
+          "tokensUsed": 228,
+          "fingerprint": "414740da957443138e9b6bc3466158c93537181857600e437a6bebff9b1703aa"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:42.916Z",
+          "requestId": "chatcmpl-EOu8r3X2Zjg67GYBkVF1WcNOMOs8g",
+          "tokensUsed": 203,
+          "fingerprint": "414740da957443138e9b6bc3466158c93537181857600e437a6bebff9b1703aa"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:51.225Z",
+          "requestId": "25665a5a-d370-4f05-975b-c61e89aeb69c",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.heading",
+      "source": "Contact Us",
+      "translations": {
+        "claude": "联系我们",
+        "gpt": "联系我们",
+        "gemma": "translation",
+        "consensus": "联系我们"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:52.641Z",
+          "requestId": "msg_011Cf845f4LT1DGf2Q8ehyQc",
+          "tokensUsed": 222,
+          "fingerprint": "c044f887b35d4c3a2e4f58b8f3d074b0cc703153a132543070e06da91a96b424"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:51.822Z",
+          "requestId": "chatcmpl-EOu906R1ZocfX6jmi8gTQa1gdmIW9",
+          "tokensUsed": 199,
+          "fingerprint": "c044f887b35d4c3a2e4f58b8f3d074b0cc703153a132543070e06da91a96b424"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:16:59.907Z",
+          "requestId": "8134579a-ebe5-41d2-a353-db27feadab24",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item4",
+      "source": "Export: Download your learning data in a portable format",
+      "translations": {
+        "claude": "导出：以便携格式下载您的学习数据",
+        "gpt": "导出：以便携格式下载您的学习数据",
+        "gemma": "tags.\n\n    Result: 导出：以可移植格式下载您的学习数据\n\n    Wait, looking at the source \"Export: Download...\", the colon is part of the text.\n    \"导出：以可移植格式下载您的学习数据\"\n\n    One more check: Is \"Export\" a verb or a noun here? In \"Export: [Description]\", it acts as a category/label.\n    \"导出：以可移植格式下载您的学习数据\" is correct.\n\n    Let's consider if \"Export\" should be \"数据导出\" (Data Export). But the source is just \"Export\". I will stick to \"导出\".\n\n    Final string: 导出：以可移植格式下载您的学习数据\n\n    Wait, \"portable format\" in the context of data rights (GDPR) is often \"机器可读的格式\" (machine-readable format) or \"可携带格式\". But I must translate the source text provided. \"Portable format\" -> \"可移植格式\".\n\n    Let's refine the flow:\n    \"导出：以可移植格式下载您的学习数据\"\n\n    Is there a more natural way?\n    \"导出：下载您的学习数据（采用可移植格式）\" - No, too complex.\n    \"导出：以可移植格式下载您的学习数据\" - This is standard.\n\n    One detail: \"learning data\" -> \"学习数据\".\n    \"your\" -> \"您的\" (polite).\n\n    Final Polish:\n    导出：以可移植格式下载您的学习数据\n\n    (Self-correction: Ensure no extra spaces or characters).\n\n    Source: Export: Download your learning data in a portable format\n    Target: 导出：以可移植格式下载您的学习数据\n\n    Actually, \"Export\" in a list of rights might be \"数据导出\" or just \"导出\". Given the source is \"Export:\", \"导出：\" is the most faithful.\n\n    Final check on \"portable format\":\n    In many Chinese UI translations for \"portable format\", \"可移植格式\" is used.\n\n    Final string: 导出：以可移植格式下载您的学习数据导出：以可移植格式下载您的学习数据\n\n<T>导出：以可移植格式下载您的学习数据",
+        "consensus": "导出：以便携格式下载您的学习数据"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:06.456Z",
+          "requestId": "msg_011Cf842ErDSBJ73874J4gHV",
+          "tokensUsed": 244,
+          "fingerprint": "d4148bb808ab3c3db770e5339b9fa9e712e469a2d6fedb87fcd89ea8b4936604"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:05.868Z",
+          "requestId": "chatcmpl-EOu8GPUYWTH2G4reiZDYS8jTNMeXb",
+          "tokensUsed": 219,
+          "fingerprint": "d4148bb808ab3c3db770e5339b9fa9e712e469a2d6fedb87fcd89ea8b4936604"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:17:04.368Z",
+          "requestId": "3a6fb4ff-8325-4918-88d3-60752e60d82c",
+          "tokensUsed": 100,
+          "fingerprint": "aa06780f27fc12d6e6ccc638bcab71f102d96538749f467cb98ca0cc28913e3d"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.content",
+      "source": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access.",
+      "translations": {
+        "claude": "我们使用必要的cookie和本地存储来实现身份验证、会话管理和离线功能。我们不使用第三方跟踪cookie或广告cookie。本地存储用于缓存学习内容以供离线访问。",
+        "gpt": "我们使用必要的Cookie和本地存储进行身份验证、会话管理和离线功能。我们不使用第三方跟踪Cookie或广告Cookie。本地存储用于缓存学习内容以便离线访问。",
+        "gemma": "...",
+        "consensus": "我们使用必要的cookie和本地存储来实现身份验证、会话管理和离线功能。我们不使用第三方跟踪cookie或广告cookie。本地存储用于缓存学习内容以供离线访问。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:36.872Z",
+          "requestId": "msg_011Cf844Tzo2tzMmq2FD3P5z",
+          "tokensUsed": 325,
+          "fingerprint": "0dded8a7505519e59cadc7da7b8c9b0e37284b5ef34015511b81edbf5b37b502"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:35.852Z",
+          "requestId": "chatcmpl-EOu8kkxw65wSUQ06wdTw6DOBNEpku",
+          "tokensUsed": 282,
+          "fingerprint": "3292ed4879f7b8fffd61fb9286b2fb9d27c8c28c5e4b627d57ebec53b274732b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:17:04.428Z",
+          "requestId": "9558e90c-5abb-4de2-a17a-d418441e22ce",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.policyChanges.heading",
+      "source": "Changes to This Policy",
+      "translations": {
+        "claude": "本政策的变更",
+        "gpt": "本政策的变更",
+        "gemma": "...",
+        "consensus": "本政策的变更"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:48.416Z",
+          "requestId": "msg_011Cf845MGWHb1nScMKgYYth",
+          "tokensUsed": 228,
+          "fingerprint": "08b90f65d1fcf19898022e437ee7fc502f81a95eaeb281caeb93c02770da4291"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:47.774Z",
+          "requestId": "chatcmpl-EOu8wDlmTMIMAY77QFVzkV86KrDzS",
+          "tokensUsed": 205,
+          "fingerprint": "08b90f65d1fcf19898022e437ee7fc502f81a95eaeb281caeb93c02770da4291"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:20:19.285Z",
+          "requestId": "fb4ac062-7a41-434c-a673-31ecb04a05e0",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item1",
+      "source": "Access: Request a copy of all personal data we hold about you",
+      "translations": {
+        "claude": "访问权：请求获取我们持有的关于您的所有个人数据的副本",
+        "gpt": "访问：请求获取我们持有的关于您的所有个人数据的副本",
+        "gemma": "访问权：要求获取我们所持有的您的所有个人数据的副本",
+        "consensus": "访问权：请求获取我们持有的关于您的所有个人数据的副本"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:15:43.623Z",
+          "requestId": "msg_011Cf83zZGSgRDVjNqAGEwRA",
+          "tokensUsed": 257,
+          "fingerprint": "9ff819e9cebfd11b49ce6a27d5237d8965962d4a5d2a5bb323fff18a8452b609"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:15:42.803Z",
+          "requestId": "chatcmpl-EOu7trpJRF5pcKzJ6SOg1wWWwHMfA",
+          "tokensUsed": 227,
+          "fingerprint": "73b9fe1f8f0740352fd7353dffe9307db58965c016d7befd726317bf8e663e11"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:20:20.620Z",
+          "requestId": "53eb798c-2058-4ac3-acb6-2156ef70a7f1",
+          "tokensUsed": 100,
+          "fingerprint": "716f405c638807d3e6d9f6cca2071ea560826dd970eb68fb560d78e95331e76c"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.content",
+      "source": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform.",
+      "translations": {
+        "claude": "如果您对本隐私政策有任何疑问或希望行使您的数据权利，请联系您的讲师或平台管理员。如有一般咨询，您可以通过平台提供的支持渠道与我们联系。",
+        "gpt": "如果您对本隐私政策有任何疑问或希望行使您的数据权利，请联系您的讲师或平台管理员。对于一般咨询，您可以通过平台中提供的支持渠道联系我们。",
+        "gemma": "如果您对本隐私政策有任何疑问或希望行使您的数据权利，请联系您的讲师或平台管理员。如有一般性咨询，您可以通过平台提供的支持渠道与我们联系。",
+        "consensus": "如果您对本隐私政策有任何疑问或希望行使您的数据权利，请联系您的讲师或平台管理员。如有一般咨询，您可以通过平台提供的支持渠道与我们联系。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:17:01.735Z",
+          "requestId": "msg_011Cf846JEjAgZbyKMkmoQtS",
+          "tokensUsed": 330,
+          "fingerprint": "a41713da112a4ad89ab3af3ca4f0951d4755ad4bb11dc97c7ed09ec3ccd8eff8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:17:00.995Z",
+          "requestId": "chatcmpl-EOu99hZVuSYtLDW5qMZS7LZBSD8yw",
+          "tokensUsed": 280,
+          "fingerprint": "c357f67caef8ab2c4308ed3d44fc6508ccfd2252de0473b49b1100f930fb2b89"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:20:27.720Z",
+          "requestId": "32f4aea4-1547-461d-afb5-df69674c31f2",
+          "tokensUsed": 100,
+          "fingerprint": "7511de1d51d0f9db33c15415b27f0f96f7df39b516f400b526507860bfcf8d05"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.content",
+      "source": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent.",
+      "translations": {
+        "claude": "Homework Supply 专为教育用途设计，13岁以下的学生可在家长或学校同意的情况下使用。我们遵守《儿童在线隐私保护法》(COPPA) 的要求，在未获得适当同意的情况下，不会有意收集儿童的个人信息。学校和教师有责任获取必要的家长同意。",
+        "gpt": "Homework Supply 旨在用于教育用途，13岁以下的学生可以在父母或学校同意的情况下使用。我们遵循COPPA要求，在没有适当同意的情况下不会故意收集儿童的个人信息。学校和教师负责获取必要的家长同意。",
+        "gemma": "Homework Supply 旨在用于教育用途，经家长或学校同意后，可供 13 岁以下的未成年学生使用。我们遵守 COPPA 的要求，在未获得适当同意的情况下，不会故意收集儿童的个人信息。学校和教师负责获取必要的家长同意。",
+        "consensus": "Homework Supply 专为教育用途设计，13岁以下的学生可在家长或学校同意的情况下使用。我们遵守《儿童在线隐私保护法》(COPPA) 的要求，在未获得适当同意的情况下，不会有意收集儿童的个人信息。学校和教师有责任获取必要的家长同意。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:46.239Z",
+          "requestId": "msg_011Cf8456R3rcbuRG8LiYaFR",
+          "tokensUsed": 387,
+          "fingerprint": "a38ce6794f133ecab86cdac9fad8dbe7b0d37d1cd1a0d84e46d6a224faf82fcc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:44.758Z",
+          "requestId": "chatcmpl-EOu8sALGi45mmNrDqDC4PXAkzJU62",
+          "tokensUsed": 311,
+          "fingerprint": "4e7966362eb05780434e99c7c77f40b0163f98ac6216b8eb5f38055fd759297a"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:20:31.715Z",
+          "requestId": "516a2221-2bb5-41bb-ad4a-7cfd8dfc9975",
+          "tokensUsed": 100,
+          "fingerprint": "41e335ea1a45e0f4da8bfd0c5d98d85acaeafb8c3609e3b017bdcbcf40037666"
+        }
+      }
+    },
+    {
+      "keyPath": "Peer Review",
+      "source": "Peer Review",
+      "translations": {
+        "claude": "同行评审",
+        "gpt": "同行评审",
+        "gemma": "translation",
+        "consensus": "同行评审"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:17:05.764Z",
+          "requestId": "msg_011Cf846dDVLJj5ohhYf59py",
+          "tokensUsed": 220,
+          "fingerprint": "1263941bf9c3b4805dc031210ffeac4aa0dbba72bc24e83bd0a9e6e0bd01711f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:17:04.999Z",
+          "requestId": "chatcmpl-EOu9DJ0OLeOcDlDeEotWWpWyn4f3b",
+          "tokensUsed": 199,
+          "fingerprint": "1263941bf9c3b4805dc031210ffeac4aa0dbba72bc24e83bd0a9e6e0bd01711f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:21:03.996Z",
+          "requestId": "ebd4b9e4-793f-47ed-b52e-b9b1f8427ac6",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.policyChanges.content",
+      "source": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy.",
+      "translations": {
+        "claude": "我们可能会不定期更新本隐私政策，以反映我们实践或法律要求的变化。我们将通过平台通知用户重大变更。在变更后继续使用平台即表示接受更新后的政策。",
+        "gpt": "我们可能会不时更新本隐私政策，以反映我们的实践或法律要求的变化。我们将通过平台通知用户重大更改。更改后继续使用平台即表示接受更新后的政策。",
+        "gemma": "我们可能会不时更新本隐私政策，以反映我们的业务实践或法律要求的变更。我们将通过平台通知用户重大变更。在变更后继续使用本平台，即视为接受更新后的政策。",
+        "consensus": "我们可能会不定期更新本隐私政策，以反映我们实践或法律要求的变化。我们将通过平台通知用户重大变更。在变更后继续使用平台即表示接受更新后的政策。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:16:53.155Z",
+          "requestId": "msg_011Cf845evQGsLyfZtXrXsfz",
+          "tokensUsed": 335,
+          "fingerprint": "bc585188a093382f6e5f0d07895f946f7c767ee2da8f8af5c6602ff6236e4ddc"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:16:52.129Z",
+          "requestId": "chatcmpl-EOu90TaD5rFoTwgYwRPCq5Pyl6utt",
+          "tokensUsed": 284,
+          "fingerprint": "176ceea5dd70f71727be5c59aeb9c8029a2dce5efbd85d2a1c157dd100ee0b11"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:21:10.820Z",
+          "requestId": "74edef77-8723-4ebf-9168-c2639bf5bbb5",
+          "tokensUsed": 100,
+          "fingerprint": "7a41c31987a9a41afa4b874cf5de44067b88cb932bfe53cf498b9ab7cea11f64"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item5",
+      "source": "Improving platform features, fixing bugs, and enhancing educational outcomes",
+      "translations": {
+        "claude": "改进平台功能、修复错误并提升教育成果",
+        "gpt": "改进平台功能、修复漏洞和提升教育成果",
+        "gemma": "",
+        "consensus": "改进平台功能、修复错误并提升教育成果"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:14:37.522Z",
+          "requestId": "msg_011Cf83ug7ZTYw8gzDWCBr5p",
+          "tokensUsed": 251,
+          "fingerprint": "7f608f55b94f7d2903106fce10a3ace5419d606a498980468549bb45c6cd5602"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:14:36.389Z",
+          "requestId": "chatcmpl-EOu6phl36Ryuw05643NPC85Pjfh2H",
+          "tokensUsed": 224,
+          "fingerprint": "37d1e17b21ce800f02de54386760fe141cd3ed431a1eeb386e8676557d43374d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:34:35.793Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "7ffda9657600de8460c9c346ae50e517e8d2011979cad099557de3828a6febf4"
+}

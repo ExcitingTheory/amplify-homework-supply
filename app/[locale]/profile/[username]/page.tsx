@@ -6,6 +6,7 @@ import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { StreakCalendar } from "@/components/Gamification/StreakCalendar";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { StreakShield } from "@/components/Gamification/StreakShield";
+import { ProfileCardView } from "@/components/Gamification/ProfileCardView";
 import {
   NailedItSection,
   AvatarSection,
@@ -230,31 +231,22 @@ export default async function ProfilePage({ params }: Props) {
             }}
           >
             {/* Avatar Card */}
-            <Card
-              sx={{
-                padding: "2rem 1rem",
-                paddingTop: "2.5rem",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 2,
-                overflow: "visible",
-              }}
-            >
-              <AvatarSection
-                isOwnProfile={isOwnProfile}
-                profileUsername={routeUsername}
-                streak={currentStreak}
-              />
-              <Typography variant="h5">{displayName}</Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <ProfileCardView
+              avatar={
+                <AvatarSection
+                  isOwnProfile={isOwnProfile}
+                  profileUsername={routeUsername}
+                  streak={currentStreak}
+                />
+              }
+              displayName={displayName}
+              streakShield={
                 <StreakShield
                   freezesRemaining={freezesRemaining}
                   freezesUsed={freezesUsed}
                 />
-              </Box>
-            </Card>
+              }
+            />
 
             {/* Activity Calendar Card */}
             <Card

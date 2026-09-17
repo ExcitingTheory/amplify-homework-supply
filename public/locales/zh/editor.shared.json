@@ -15,14 +15,14 @@
     "generateTTS": "生成TTS",
     "importFailed": "导入JSON文件失败",
     "importJSON": "导入JSON",
-    "lineNumber": "第{{number}}行 - {{speaker}}",
+    "lineNumber": "第{number}行 - {speaker}",
     "lockedTrack": "锁定课程",
     "micAccessFailed": "无法访问麦克风",
     "name": "姓名",
     "noMissingAudio": "没有缺失音频需要生成",
     "noTextToGenerate": "无文本可生成",
     "play": "播放",
-    "processing": "正在处理 {{count}} 行...",
+    "processing": "正在处理 {count} 行...",
     "record": "记录",
     "recordingSaveFailed": "录制保存失败",
     "save": "保存",
@@ -32,7 +32,7 @@
     "speakerNotFound": "未找到演讲者",
     "speakers": "演讲者",
     "stop": "停止",
-    "takeNumber": "第{{number}}次 ({{type}})",
+    "takeNumber": "第{number}次 ({type})",
     "takes": "需要",
     "text": "文本",
     "timeline": "时间轴",
@@ -67,24 +67,24 @@
   "sketchPad": {
     "cancelSubmission": "取消提交",
     "hoverToStartDrawing": "悬停开始绘制",
-    "submittingInSeconds": "正在提交绘图作业进行评分，{{countdown}} 秒后完成..."
+    "submittingInSeconds": "正在提交绘图作业进行评分，{countdown} 秒后完成..."
   },
   "unitEmbedding": {
     "allSectionsComplete": "所有部分已完成！",
     "cached": "缓存",
-    "completedCount": "{{completed}}/{{total}} 完成",
+    "completedCount": "{completed}/{total} 完成",
     "generateEmbeddings": "生成嵌入",
     "generating": "生成中...",
     "publishSuccess": "单元已发布并生成嵌入内容！",
     "publishUnit": "发布单元",
     "publishing": "发布中...",
-    "wordsEmbedded": "已嵌入{{count}}个单词"
+    "wordsEmbedded": "已嵌入{count}个单词"
   },
   "autoEmbedPlugin": {
     "dismiss": "忽略",
     "embed": "嵌入",
-    "embedOption": "嵌入{{contentName}}",
-    "embedTitle": "嵌入 {{contentName}}",
+    "embedOption": "嵌入{contentName}",
+    "embedTitle": "嵌入 {contentName}",
     "youtubeVideo": "YouTube视频"
   },
   "unitEmbeddingComponents": {
@@ -97,7 +97,7 @@
     "successConfirmation": "嵌入向量生成成功"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "已生成嵌入：已处理 {{count}} 个单词"
+    "embeddingGenerated": "已生成嵌入：已处理 {count} 个单词"
   },
   "imagesPlugin": {
     "altText": "替代文字",
@@ -127,7 +127,7 @@
   "wordBlockPlugin": {
     "audioUnavailable": "音频不可用",
     "loadingAudio": "正在加载音频...",
-    "wordNotFound": "未找到词汇：{{wordID}}"
+    "wordNotFound": "未找到词汇：{wordID}"
   },
   "vocabularyReview": {
     "alertMessage": "继续前请复习词汇",
@@ -168,7 +168,7 @@
     "titleHeader": "标题"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "正在加载PDF：{{filename}}",
+    "loadingPdf": "正在加载PDF：{filename}",
     "noPdfToDisplay": "没有PDF可显示"
   },
   "metadataEditor": {
@@ -202,11 +202,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "应用蒙版并重新生成",
-    "brushSize": "画笔大小：{{size}}",
+    "brushSize": "画笔大小：{size}",
     "cancel": "取消",
     "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦移除蒙版的部分区域。按住Shift键并拖动以平移视图。使用缩放按钮查看更多细节。",
     "save": "保存",
-    "zoomInfo": "缩放: {{level}}% | 按住Shift键平移"
+    "zoomInfo": "缩放: {level}% | 按住Shift键平移"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "取消",
@@ -249,5 +249,15 @@
     "emptyState": "播放列表中没有项目",
     "menuAttribute": "菜单",
     "noFilesMessage": "尚未添加任何文件。请使用上方的输入框将文件添加到播放列表中。"
+  },
+  "autoSubmit": {
+    "cancelSubmission": "取消",
+    "submittingInSeconds": "{countdown} 秒后将自动提交答案..."
+  },
+  "micLevelIndicator": {
+    "tooLowShort": "音量过低",
+    "tooLow": "麦克风输入音量过低。请尝试提高音量或靠近麦克风。",
+    "noSignalShort": "无信号",
+    "noSignal": "未检测到麦克风信号。请检查您的麦克风是否已连接且未被静音。"
   }
 }

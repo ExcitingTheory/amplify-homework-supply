@@ -1185,6 +1185,7 @@ export default function InstructorDashboard({ sections = [] }) {
                               <Chip
                                 label={`${Math.round(grade.accuracy)}%`}
                                 size="small"
+                                variant="status"
                                 color={gradeColor(grade.accuracy)}
                                 sx={{ fontWeight: 700, minWidth: 44 }}
                               />
@@ -1299,6 +1300,7 @@ export default function InstructorDashboard({ sections = [] }) {
                               <Chip
                                 label={`${Math.round(student.average)}%`}
                                 size="small"
+                                variant="status"
                                 color={gradeColor(student.average)}
                                 sx={{ fontWeight: 700, minWidth: 52 }}
                               />

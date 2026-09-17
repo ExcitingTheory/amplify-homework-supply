@@ -81,6 +81,9 @@ export interface ActiveDebuff {
   avatarDowngrade?: string;
   hideFromLeaderboard?: boolean;
   extraDrills?: number;
+  mascotBorrow?: boolean;
+  borrowedSlot?: string;
+  borrowedAccessoryId?: string;
 }
 
 // ============================================================================
@@ -580,7 +583,9 @@ export function GamificationProvider({
     }
 
     const cohortSet = new Set(
-      normalizedSectionIDs.length > 0 ? normalizedSectionIDs : [primarySectionID],
+      normalizedSectionIDs.length > 0
+        ? normalizedSectionIDs
+        : [primarySectionID],
     );
 
     const filter =
@@ -1438,7 +1443,9 @@ export function GamificationProvider({
 
       // Also apply linear lock to challenges (chapters) in this section
       const sectionChallenges = state.rawChallenges
-        .filter((c: any) => c.sectionID === section.id && c.chapterOrder != null)
+        .filter(
+          (c: any) => c.sectionID === section.id && c.chapterOrder != null,
+        )
         .sort(
           (a: any, b: any) => (a.chapterOrder || 0) - (b.chapterOrder || 0),
         );

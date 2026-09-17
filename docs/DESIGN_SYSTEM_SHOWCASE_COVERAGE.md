@@ -56,7 +56,7 @@ In **Recurring Patterns** — being migrated from mocks to real view sub-compone
 | --- | --- | --- |
 | Dashboard card | ✅ | `Dashboard/AssignmentCardView` (real, context-free) |
 | Workbook gate (timed) | 🟡 | `Workbook/*` gate |
-| Instructor review chips | 🟡 | `InlineGradeCell` / grade chips |
+| Instructor review chips | ✅ | `InlineGradeCell` (real, Real Components — gradebook table) |
 | App bar (two-row) | 🟡 | `MainToolbar` |
 | Drawer | 🟡 | `GlobalChatDrawer` / app drawer |
 | Completion modal | 🟡 | workbook completion card |
@@ -114,19 +114,19 @@ In **Gamification Components** — real components.
 Add these to reach full coverage. Grouped by domain.
 
 ### Avatars & identity
-- ⬜ `UserAvatar`
-- ⬜ `BotAvatar` / `BotCustomizer`
-- ⬜ `DiceBearAvatar` (standalone, outside glow ring)
+- ✅ `UserAvatar` (real, Real Components gallery)
+- ✅ `BotAvatar` / `BotCustomizer` (real, Gamification Components)
+- ✅ `DiceBearAvatar` (real, standalone in Gamification Components)
 ### Notifications
 - ✅ `NotificationBadge` (real, Real Components gallery)
 - ✅ `NotificationCard` (real, Recurring Patterns + Real Components)
-- ⬜ `NotificationList` (context-bound — needs view/wrapper split)
+- ✅ `NotificationList` (real, Real Components gallery — mock NotificationContext)
 
 ### Offline & sync
-- ⬜ `OfflineBanner` (renders null when online — needs forced state)
-- ⬜ `SyncStatusIndicator` (renders null when synced — needs mock queue)
+- ✅ `OfflineBanner` (real `OfflineBannerView` split — Real Components gallery)
+- ✅ `SyncStatusIndicator` (real `SyncStatusIndicatorView` split — Real Components gallery)
 - ✅ `PrefetchBadge` (real, Real Components gallery)
-- ⬜ `PrefetchButton`
+- ✅ `PrefetchButton` (real, Real Components gallery)
 
 ### Cards & content
 - ✅ `Dashboard/AssignmentCardView` (real, Recurring Patterns)
@@ -134,7 +134,7 @@ Add these to reach full coverage. Grouped by domain.
 - ✅ `SharedUnitCard` (real, Real Components gallery)
 - ✅ `CommunityUnitCard` (real, Real Components gallery)
 - ⬜ `PdfThumbnail` (pdf.worker fails to resolve in iframe context)
-- ⬜ `InlineGradeCell` (Lexical-based; extract view or specimen)
+- ✅ `InlineGradeCell` (real, Real Components gallery — full gradebook table)
 
 ### Main menu / sidebar & app chrome
 - ⬜ Main menu sidebar / app drawer nav (context-bound — view/wrapper split)
@@ -142,22 +142,36 @@ Add these to reach full coverage. Grouped by domain.
 - ⬜ `GlobalChatButton` / `GlobalChatDrawer`
 
 ### Settings
-- ⬜ Settings page panels (cosmetic selector, XP tuner, theme mixer, profile)
+- ✅ `ThemeMixer` (real, custom-palette designer — All Themes & Colors + Real Components)
+- ✅ `CosmeticSelector` (real, Real Components gallery — Settings panels)
+- ✅ XP tuner (`XPTunerInline`, real, Real Components gallery — Settings panels)
+- ✅ Profile panel (`ProfileInfoView`, real, Real Components gallery — Settings panels)
 
 ### Peer review
-- ⬜ `PeerReview` room view
-- ⬜ `OpenCollaborationRooms`
-- ⬜ `PeerReviewAssignmentDialog`
+- ✅ `PeerReview` room view (`PeerReviewChat`, real, Real Components gallery)
+- ✅ `OpenCollaborationRooms` (real, Real Components gallery)
+- ✅ `PeerReviewAssignmentDialog` (real, via `OpenCollaborationRooms` — Assign button)
 
 ### Dialogs & overlays
-- ⬜ `ConfirmDialog`
-- ⬜ `ConflictResolutionDialog`
-- ⬜ `PersonalBestBanner`
-- ⬜ `PermissionErrorOverlay`
+- ✅ `ConfirmDialog` (real, Real Components gallery — open-trigger)
+- ✅ `ConflictResolutionDialog` (real, Real Components gallery — open-trigger)
+- ✅ `PersonalBestBanner` (real, Real Components gallery)
+- ✅ `PermissionErrorOverlay` (real, Real Components gallery — open-trigger)
 
 ### Moderation & admin
 - ✅ `ModerationBadge` (real, Real Components gallery)
-- ⬜ `ModerationPanel`
+- ✅ `ModerationPanel` (real, Real Components gallery)
+
+### Chat & AI assistant
+- ✅ `GlobalChatButton` (real, Real Components gallery — contained FAB)
+- ✅ `ChatMessageList` (new presentational transcript view — Real Components gallery)
+- ✅ `ToolCallPreview` (real, Chat blocks section)
+- ✅ `ContentPreview` (real, Chat blocks section)
+- ✅ `SearchResults` (real, Chat blocks section)
+- ✅ `BlockInsertPreview` (real, Chat blocks section — mock editor contexts)
+- ✅ `RecordingScriptPreview` (real, Chat blocks section)
+- ⬜ `GlobalChatDrawer` / `ChatSidebar` (context + AI-SDK heavy — covered by its own
+  fully-mocked `ChatSidebar.stories.jsx`, not the minimal-providers showcase)
 
 ### Search & navigation
 - 🟡 Search bar (specimen in Recurring Patterns; real `GlobalSearchBar` not used)
@@ -167,8 +181,8 @@ Add these to reach full coverage. Grouped by domain.
 - ⬜ `AppSkeleton` (full app-shell skeleton — too large for a gallery cell)
 
 ### Storage & jobs
-- ⬜ `StorageManagement`
-- ⬜ `JobsDashboard`
+- ✅ `StorageManagement` (real `StorageManagementView` split — Real Components gallery)
+- ✅ `JobsDashboard` (real `JobsDashboardView` split — Real Components gallery)
 
 ### Armor
 - ✅ `ArmoriaShield` (real, Gamification Components — Armor Editor coat of arms)

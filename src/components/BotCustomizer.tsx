@@ -3,9 +3,9 @@
  * Unlocked progressively via "Bot Whisperer" achievement badges.
  *
  * - Bot Whisperer I: Unlock background color
- * - Bot Whisperer II: Unlock style tier (detailed)
+ * - Bot Whisperer II: Unlock robot style tier (bottts-neutral)
  * - Bot Whisperer III: Unlock eyes & mouth options
- * - Bot Whisperer IV: Full customization (toonhead style + all options)
+ * - Bot Whisperer IV: Full customization (all robot options)
  *
  * @module BotCustomizer
  */
@@ -66,16 +66,15 @@ export function BotCustomizer({
 }: BotCustomizerProps) {
   const t = useTranslations("components.botCustomizer");
   const [style, setStyle] = useState<AvatarStyleTier>(
-    initialConfig?.style || "simple",
+    initialConfig?.style || "bottts",
   );
   const [bgColor, setBgColor] = useState(
     initialConfig?.backgroundColor || "b6e3f4",
   );
 
   const styleOptions = [
-    { value: "simple", label: t("styles.simple"), minTier: 0 },
-    { value: "detailed", label: t("styles.detailed"), minTier: 2 },
-    { value: "toonhead", label: t("styles.toon"), minTier: 4 },
+    { value: "bottts", label: t("styles.bottts"), minTier: 0 },
+    { value: "bottts-neutral", label: t("styles.botttsNeutral"), minTier: 2 },
   ] as Array<{ value: AvatarStyleTier; label: string; minTier: number }>;
 
   const colorLabels = [
@@ -109,7 +108,7 @@ export function BotCustomizer({
   // Sync if initialConfig changes externally
   useEffect(() => {
     if (initialConfig) {
-      setStyle(initialConfig.style || "simple");
+      setStyle(initialConfig.style || "bottts");
       setBgColor(initialConfig.backgroundColor || "b6e3f4");
     }
   }, [initialConfig]);

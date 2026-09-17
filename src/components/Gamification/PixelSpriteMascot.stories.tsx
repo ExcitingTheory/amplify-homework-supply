@@ -115,3 +115,91 @@ export const BossMonster: Story = {
     await within(canvasElement).findByText("Final Boss");
   },
 };
+
+export const BorrowedAccessories: Story = {
+  render: () => (
+    <Box
+      sx={{ display: "flex", gap: 3, alignItems: "flex-end", flexWrap: "wrap" }}
+    >
+      {[
+        { id: "sunglasses", label: "Sunglasses" },
+        { id: "round", label: "Round" },
+        { id: "wayfarers", label: "Wayfarers" },
+        { id: "prescription01", label: "Glasses" },
+        { id: "eyepatch", label: "Eyepatch" },
+        { id: "kurt", label: "Kurt" },
+      ].map((a) => (
+        <PixelSpriteMascot
+          key={a.id}
+          seed="student-abc-123"
+          stage={3}
+          size={80}
+          accessory={a.id}
+          label={a.label}
+          tooltip={`Mascot borrowed: ${a.label}`}
+        />
+      ))}
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Sunglasses");
+    await canvas.findByText("Kurt");
+  },
+};
+
+export const BorrowedHats: Story = {
+  render: () => (
+    <Box
+      sx={{ display: "flex", gap: 3, alignItems: "flex-end", flexWrap: "wrap" }}
+    >
+      {[
+        { id: "hat", label: "Hat" },
+        { id: "turban", label: "Turban" },
+        { id: "winterHat1", label: "Bobble" },
+        { id: "winterHat03", label: "Beanie" },
+        { id: "winterHat04", label: "Cap" },
+      ].map((a) => (
+        <PixelSpriteMascot
+          key={a.id}
+          seed="student-abc-123"
+          stage={4}
+          size={96}
+          accessory={a.id}
+          label={a.label}
+          tooltip={`Mascot borrowed: ${a.label}`}
+        />
+      ))}
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Hat");
+    await canvas.findByText("Cap");
+  },
+};
+
+export const BorrowedAcrossStages: Story = {
+  render: () => (
+    <Box
+      sx={{ display: "flex", gap: 3, alignItems: "flex-end", flexWrap: "wrap" }}
+    >
+      {[1, 2, 3, 4, 5].map((stage) => (
+        <PixelSpriteMascot
+          key={stage}
+          seed="student-abc-123"
+          stage={stage}
+          size={48 + stage * 12}
+          accessory="sunglasses"
+          label={`Stage ${stage}`}
+          tooltip={`Borrowed sunglasses (stage ${stage})`}
+        />
+      ))}
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Stage 1");
+    await canvas.findByText("Stage 5");
+  },
+};

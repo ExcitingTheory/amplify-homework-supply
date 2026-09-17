@@ -7,5 +7,90 @@
     "retrying": "Comenzando nuevo intento...",
     "sectionHeading": "Próximos pasos",
     "tryAgain": "Intentar de nuevo"
+  },
+  "answerComponent": {
+    "audioNotAvailableParens": "(audio no disponible)",
+    "errorMessages": {
+      "noAnswer": "Por favor, proporciona una respuesta",
+      "recordingFailed": "La grabación falló"
+    },
+    "feedback": {
+      "correct": "¡Correcto!",
+      "incorrect": "Inténtalo de nuevo"
+    },
+    "inputMethods": {
+      "audio": "Audio",
+      "text": "Texto",
+      "writing": "Escritura"
+    },
+    "submit": "Enviar",
+    "audioNotAvailable": "{text} (audio no disponible)",
+    "inputMethodSelector": "Método de entrada",
+    "placeholder": "Ingrese su respuesta aquí",
+    "noDictionaryAvailable": "No hay diccionario disponible"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "Formato",
+    "noDescription": "Sin descripción",
+    "untitledUnit": "Unidad sin título"
+  },
+  "verticalTabsRo": {
+    "aiAssistant": "Asistente de IA",
+    "previousAttempts": "Intentos Anteriores",
+    "settings": "Configuración",
+    "tableOfContents": "Tabla de contenidos"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "fila"
+  },
+  "customAnswerComponent": {
+    "audio": "Audio",
+    "loading": "Cargando",
+    "question": "Pregunta",
+    "submit": "Enviar",
+    "text": "Texto",
+    "writing": "Escritura",
+    "answerQuestions": "Responder Preguntas",
+    "promptNotAvailable": "Mensaje no disponible",
+    "errorOccurred": "Se ha producido un error",
+    "answerPlaceholder": "Marcador de Respuesta",
+    "yourAnswer": "Su Respuesta",
+    "audioQuestion": "Pregunta de Audio",
+    "completedQuestion": "Pregunta Completada"
+  },
+  "workbookSettings": {
+    "title": "Configuración",
+    "displayPreferences": "Preferencias de Visualización",
+    "highContrastMode": "Modo de Alto Contraste",
+    "reducedMotion": "Movimiento Reducido",
+    "autoPlayAudio": "Reproducción automática de audio",
+    "feedbackPreferences": "Preferencias de Retroalimentación",
+    "reducedMotionDescription": "Minimiza las animaciones y transiciones",
+    "audioPreferences": "Preferencias de Audio",
+    "highContrastModeDescription": "Aumenta el contraste de color para una mejor visibilidad",
+    "showWaveformsDescription": "Mostrar formas de onda visuales para el contenido de audio",
+    "immediateFeedback": "Retroalimentación Inmediata",
+    "autoPlayAudioDescription": "Reproducir audio automáticamente cuando esté disponible",
+    "immediateFeedbackDescription": "Mostrar retroalimentación correcta/incorrecta de inmediato",
+    "showWaveforms": "Mostrar formas de onda de audio"
+  },
+  "quizComponent": {
+    "gradeDisplay": "Calificación: {score}%"
+  },
+  "gradeHistory": {
+    "title": "Historial de Calificaciones",
+    "attempts": "intentos",
+    "trend": {
+      "up": "Mejorando",
+      "flat": "Estable",
+      "down": "Revisión necesaria"
+    },
+    "bestScore": "Mejor Calificación",
+    "recentAttempts": "Intentos Recientes",
+    "completeFirstAttempt": "Complete esta tarea para ver su progreso aquí.",
+    "best": "Mejor",
+    "complete": "completado",
+    "averageScore": "Puntuación Promedio",
+    "noAttempts": "No hay intentos previos"
   }
 }

@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "Effacer toute la mise en forme du texte",
     "clearFormatting": "Effacer la mise en forme",
     "clearTextFormatting": "Effacer la mise en forme du texte",
-    "closePreview": "Fermer l'aperçu de {{name}}",
+    "closePreview": "Fermer l'aperçu de {name}",
     "columnsLayout": "Disposition en colonnes",
     "delete": "Supprimer",
     "deleteUnitConfirmation": "Êtes-vous sûr de vouloir supprimer cette unité ?",
@@ -63,7 +63,21 @@
     "underline": "Souligner",
     "undo": "Annuler",
     "untitledUnit": "Unité sans titre",
-    "wordBlock": "Bloc de mots"
+    "wordBlock": "Bloc de mots",
+    "numberedList": "Liste numérotée",
+    "codeBlock": "Bloc de code",
+    "bulletedList": "Liste à puces",
+    "heading1": "Titre 1",
+    "heading3": "Titre 3",
+    "heading2": "Titre 2",
+    "normal": "Normal",
+    "quoteBlock": "Citation",
+    "blockFormat": "Format de bloc",
+    "textColor": "Couleur du texte",
+    "backgroundColor": "Couleur d'arrière-plan",
+    "increaseFontSize": "Augmenter la taille de la police",
+    "generateConversation": "Générer une conversation",
+    "decreaseFontSize": "Réduire la taille de la police"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "Assistant IA",
@@ -85,7 +99,8 @@
     "tagKaiDesc": "Obtenir l'assistance de l'IA dans la discussion",
     "tagKaiLabel": "💬 Taguer @kai",
     "useTopicsDesc": "Organiser les conversations par thème",
-    "useTopicsLabel": "🏷️ Utilisez #sujets"
+    "useTopicsLabel": "🏷️ Utilisez #sujets",
+    "tableOfContentsTab": "Table des matières"
   },
   "assignmentConfiguration": {
     "addDueDateButton": "Ajouter une date d'échéance",
@@ -103,7 +118,9 @@
     "sectionLabel": "Section",
     "selectSectionHelper": "Sélectionnez une section pour lui attribuer une date d'échéance",
     "timerDescription": "Le minuteur démarrera après que l'utilisateur ait cliqué sur le bouton « Commencer ». Les utilisateurs seront autorisés à continuer après l'expiration du minuteur, et il sera enregistré quand le devoir a été commencé et terminé. Le compte à rebours sera affiché en haut de l'écran pendant toute la durée du minuteur.",
-    "timerLabel": "Minuteur"
+    "timerLabel": "Minuteur",
+    "retryEnabled": "Permettre aux étudiants de réessayer après avoir terminé",
+    "retryEnabledDescription": "Lorsqu'elle est activée, les étudiants voient un bouton « Réessayer » sur l'écran de fin."
   },
   "toolbar": {
     "align_center": "Centrer",
@@ -130,7 +147,14 @@
     "pdfAnalysisSettings": "Paramètres d'analyse PDF",
     "setFeaturedImage": "Définir l'image mise en avant",
     "uploadImagePrompt": "Télécharger une image",
-    "uploadingImage": "Téléchargement de l'image"
+    "uploadingImage": "Téléchargement de l'image",
+    "coverVideoUrlLabel": "URL de la vidéo",
+    "setCoverVideo": "Définir la vidéo de couverture",
+    "noCoverVideo": "Aucune vidéo de couverture définie.",
+    "dragDropVideoPrompt": "Glissez et déposez un fichier vidéo ici.",
+    "removeCoverVideo": "Supprimer la vidéo de couverture",
+    "uploadingVideo": "Transcodage de la vidéo en cours",
+    "coverVideoUrlPlaceholder": "Collez une URL de vidéo ou laissez vide pour télécharger un fichier"
   },
   "tabsVerticalLeft": {
     "tabs": {
@@ -140,7 +164,8 @@
       "dictionary": "Dictionnaire",
       "files": "Fichiers",
       "questions": "Questions",
-      "tableOfContents": "Table des matières"
+      "tableOfContents": "Table des matières",
+      "campaign": "Campagne"
     }
   },
   "mainToolbar": {

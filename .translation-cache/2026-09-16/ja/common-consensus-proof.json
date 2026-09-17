@@ -1,0 +1,614 @@
+{
+  "namespace": "common",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "mode": "provable",
+  "timestamp": "2026-09-16T06:29:21.738Z",
+  "summary": {
+    "totalKeys": 86,
+    "existingKeys": 70,
+    "translatedKeys": 16,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 3413,
+    "gpt": 3075,
+    "gemini": 1400
+  },
+  "translations": [
+    {
+      "keyPath": "navigation.gamification",
+      "source": "Gamification",
+      "translations": {
+        "claude": "ゲーミフィケーション",
+        "gpt": "ゲーミフィケーション",
+        "gemma": "translation",
+        "consensus": "ゲーミフィケーション"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.497Z",
+          "requestId": "msg_011Cf6csr2tc48AsCtqwMNBC",
+          "tokensUsed": 215,
+          "fingerprint": "2e9f576dd5c6b6dccf041884c4d0378a8adca01c08fbdf56323ece83fd7e9c84"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.419Z",
+          "requestId": "chatcmpl-EOd76S8w6xZT8tYIzEQWMM5E9rMYw",
+          "tokensUsed": 193,
+          "fingerprint": "2e9f576dd5c6b6dccf041884c4d0378a8adca01c08fbdf56323ece83fd7e9c84"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:05.610Z",
+          "requestId": "284018a7-e2ae-4214-be92-480521cd0a27",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "navigation.drafts",
+      "source": "Drafts",
+      "translations": {
+        "claude": "下書き",
+        "gpt": "下書き",
+        "gemma": "translation",
+        "consensus": "下書き"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.538Z",
+          "requestId": "msg_011Cf6csr48YFaysW4dK7fjt",
+          "tokensUsed": 209,
+          "fingerprint": "11082165a9e9a13daa80fdf46e131b17a8e1adaa6ea2c71118fbea297cb28311"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.418Z",
+          "requestId": "chatcmpl-EOd76M6dCYyuCMtA9qJf9yTsLymhK",
+          "tokensUsed": 189,
+          "fingerprint": "11082165a9e9a13daa80fdf46e131b17a8e1adaa6ea2c71118fbea297cb28311"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:11.653Z",
+          "requestId": "41d2e8ef-efb5-494e-822c-c3f338f85fbd",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "mainToolbar.collaboration",
+      "source": "Collaboration",
+      "translations": {
+        "claude": "コラボレーション",
+        "gpt": "コラボレーション",
+        "gemma": "...",
+        "consensus": "コラボレーション"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.477Z",
+          "requestId": "msg_011Cf6csr1eKk5mYhLh4CvnK",
+          "tokensUsed": 211,
+          "fingerprint": "5feec0347a761ee4d0b23ff9852a586a366a705395d1e36277ed2330a230c036"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.582Z",
+          "requestId": "chatcmpl-EOd7698JHqAuJKsfXSFcUYCOqjYfG",
+          "tokensUsed": 192,
+          "fingerprint": "5feec0347a761ee4d0b23ff9852a586a366a705395d1e36277ed2330a230c036"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:12.880Z",
+          "requestId": "4a48050c-3545-4b4b-95c8-a59130904bda",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "mainToolbar.settings.colorMode",
+      "source": "Color mode",
+      "translations": {
+        "claude": "カラーモード",
+        "gpt": "カラーモード",
+        "gemma": "...",
+        "consensus": "カラーモード"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.401Z",
+          "requestId": "msg_011Cf6csqzuQQW8wGs3zffw5",
+          "tokensUsed": 213,
+          "fingerprint": "d9e30b1a254d1329908e3341bb591dbc0f283cdb141b9fe70ddd1c49b155eccd"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.269Z",
+          "requestId": "chatcmpl-EOd76zH3pYN3fb5FVnmZnA33178gQ",
+          "tokensUsed": 193,
+          "fingerprint": "d9e30b1a254d1329908e3341bb591dbc0f283cdb141b9fe70ddd1c49b155eccd"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:20.048Z",
+          "requestId": "35edf361-dc12-47eb-b335-cc80f3bd593e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "navigation.notifications",
+      "source": "Notifications",
+      "translations": {
+        "claude": "通知",
+        "gpt": "通知",
+        "gemma": "...",
+        "consensus": "通知"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.696Z",
+          "requestId": "msg_011Cf6csrHWi3jRyfovKNMTF",
+          "tokensUsed": 206,
+          "fingerprint": "4b6ded8a7f181397121cbfa64c684d5d183160a83cfd03b01dfa434337fc08e0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.479Z",
+          "requestId": "chatcmpl-EOd76csF0D949kyy8ZRwruCanb02b",
+          "tokensUsed": 185,
+          "fingerprint": "4b6ded8a7f181397121cbfa64c684d5d183160a83cfd03b01dfa434337fc08e0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:20.359Z",
+          "requestId": "7a4e48c3-642a-4572-a7c0-497e5274414e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "navigation.collaboration",
+      "source": "Collaboration",
+      "translations": {
+        "claude": "コラボレーション",
+        "gpt": "コラボレーション",
+        "gemma": "...",
+        "consensus": "コラボレーション"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.497Z",
+          "requestId": "msg_011Cf6csqvh1mjPMKEv7RhH5",
+          "tokensUsed": 209,
+          "fingerprint": "5feec0347a761ee4d0b23ff9852a586a366a705395d1e36277ed2330a230c036"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.465Z",
+          "requestId": "chatcmpl-EOd76WkMoDXI5GakoCVZSLxglswT8",
+          "tokensUsed": 191,
+          "fingerprint": "5feec0347a761ee4d0b23ff9852a586a366a705395d1e36277ed2330a230c036"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:30.392Z",
+          "requestId": "e26f6ad4-cf43-44eb-9a39-c53e9bd6acd4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "timer.minutes",
+      "source": "Minutes",
+      "translations": {
+        "claude": "分",
+        "gpt": "分",
+        "gemma": "translation",
+        "consensus": "分"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:14.212Z",
+          "requestId": "msg_011Cf6cuPm8h4ZKWGoYA4MC2",
+          "tokensUsed": 204,
+          "fingerprint": "b6a993c256ef577abb04b0c353affde222af27a0e4254d66bb697a154cfec553"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:13.258Z",
+          "requestId": "chatcmpl-EOd7RAIPgFijGpiMeTF6a5gpzCImr",
+          "tokensUsed": 185,
+          "fingerprint": "b6a993c256ef577abb04b0c353affde222af27a0e4254d66bb697a154cfec553"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:33.155Z",
+          "requestId": "c6ae72c9-45fa-429f-a970-91594f563dab",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "chat.openAssistant",
+      "source": "Open AI Assistant",
+      "translations": {
+        "claude": "AIアシスタントを開く",
+        "gpt": "AIアシスタントを開く",
+        "gemma": "AIアシスタントを開きます",
+        "consensus": "AIアシスタントを開く"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:53.717Z",
+          "requestId": "msg_011Cf6csrA5Ak5dRwMKbGjRY",
+          "tokensUsed": 216,
+          "fingerprint": "f3efc7405465241e438da8359bb74ee78f6a58015d8a4da3cb267f8889123bbe"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.449Z",
+          "requestId": "chatcmpl-EOd76tmMpCHqOly5ikhJP0P1WXjM2",
+          "tokensUsed": 195,
+          "fingerprint": "f3efc7405465241e438da8359bb74ee78f6a58015d8a4da3cb267f8889123bbe"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:48.108Z",
+          "requestId": "8e776157-983c-4b00-9021-21aecc7fec74",
+          "tokensUsed": 100,
+          "fingerprint": "caf880da4f6400bf791a3a6882272abca1d5da01edd4be98430b2e5a8d96abd0"
+        }
+      }
+    },
+    {
+      "keyPath": "timer.seconds",
+      "source": "Seconds",
+      "translations": {
+        "claude": "秒",
+        "gpt": "秒",
+        "gemma": "...",
+        "consensus": "秒"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:20.972Z",
+          "requestId": "msg_011Cf6cuvPdT3tYHe3oNVcdm",
+          "tokensUsed": 206,
+          "fingerprint": "9dcdc2b289b9d23314e89a7830623090087aaeda0bffe3b606bdd466e61e98f1"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:20.765Z",
+          "requestId": "chatcmpl-EOd7Y5JooyxDNDDQYegJBJA5suUKS",
+          "tokensUsed": 185,
+          "fingerprint": "9dcdc2b289b9d23314e89a7830623090087aaeda0bffe3b606bdd466e61e98f1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:51.142Z",
+          "requestId": "9b201350-4da0-44a8-88c8-bb2672a8b1fb",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "peerReview.helpful",
+      "source": "Peer review was helpful",
+      "translations": {
+        "claude": "ピアレビューは役に立ちました",
+        "gpt": "ピアレビューは役に立ちました",
+        "gemma": "...",
+        "consensus": "ピアレビューは役に立ちました"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:34.711Z",
+          "requestId": "msg_011Cf6cvtYHZ9mtoD64BqDbe",
+          "tokensUsed": 222,
+          "fingerprint": "4c5cb62a2a2a59418234b3e0d8505b23eba2e3b6c6aa68e93e72ae601de57805"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:33.667Z",
+          "requestId": "chatcmpl-EOd7ll4hbOtkPZPeX2UyiOOB4HwAd",
+          "tokensUsed": 198,
+          "fingerprint": "4c5cb62a2a2a59418234b3e0d8505b23eba2e3b6c6aa68e93e72ae601de57805"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:58.650Z",
+          "requestId": "c9c470b8-ee16-4216-a1e0-54ad9cf0029e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "navigation.skills",
+      "source": "Skill Tree",
+      "translations": {
+        "claude": "スキルツリー",
+        "gpt": "スキルツリー",
+        "gemma": "translation",
+        "consensus": "スキルツリー"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:07.145Z",
+          "requestId": "msg_011Cf6ctrsGGgjdZKNzGHEZM",
+          "tokensUsed": 210,
+          "fingerprint": "b58ed38c86a38647bb235a35e589971e2fff6a14428cca6362152356e651035b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:06.121Z",
+          "requestId": "chatcmpl-EOd7J7674wuEQOEzQVYs7JQL119M0",
+          "tokensUsed": 190,
+          "fingerprint": "b58ed38c86a38647bb235a35e589971e2fff6a14428cca6362152356e651035b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:09:59.166Z",
+          "requestId": "a5512f72-0842-4b6c-9682-9c2dbfacad21",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "peerReview.notHelpful",
+      "source": "Peer review was not helpful",
+      "translations": {
+        "claude": "ピアレビューは役に立ちませんでした",
+        "gpt": "ピアレビューは役に立ちませんでした",
+        "gemma": "ピアレビューは役に立ちませんでした",
+        "consensus": "ピアレビューは役に立ちませんでした"
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:50.025Z",
+          "requestId": "msg_011Cf6cwzdRg3xAVcMMQ5Ha5",
+          "tokensUsed": 229,
+          "fingerprint": "53d5b2bc489552b2f7a8d83f1f0915e24a5ad8fedff1febffa1e5deef409393c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:48.925Z",
+          "requestId": "chatcmpl-EOd80ptCahxjEvsm4cpXqopIycZjs",
+          "tokensUsed": 200,
+          "fingerprint": "53d5b2bc489552b2f7a8d83f1f0915e24a5ad8fedff1febffa1e5deef409393c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:10:21.080Z",
+          "requestId": "9807e2ff-26c8-47c7-a026-991e4b7f6859",
+          "tokensUsed": 100,
+          "fingerprint": "53d5b2bc489552b2f7a8d83f1f0915e24a5ad8fedff1febffa1e5deef409393c"
+        }
+      }
+    },
+    {
+      "keyPath": "timer.increase",
+      "source": "Increase selected time segment",
+      "translations": {
+        "claude": "選択した時間セグメントを増やす",
+        "gpt": "選択した時間セグメントを増やします",
+        "gemma": "...",
+        "consensus": "選択した時間セグメントを増やす"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:22.050Z",
+          "requestId": "msg_011Cf6cuwzscW5qknVvPbXCq",
+          "tokensUsed": 220,
+          "fingerprint": "e48c40b86f8693da0373102244967655552e4f0541ba6f853cc0b491a0f5dc11"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:21.077Z",
+          "requestId": "chatcmpl-EOd7YKF5N1gjUFx1DdngtPIUyHRuw",
+          "tokensUsed": 199,
+          "fingerprint": "a9f5186057576f2086ab5a2b3d1f84b4a9210e6c708c8ef0ad893ae627952a5f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:10:35.930Z",
+          "requestId": "11062c0b-0293-46b3-8c8c-4e034258a7e1",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "timer.decrease",
+      "source": "Decrease selected time segment",
+      "translations": {
+        "claude": "選択した時間セグメントを減らします",
+        "gpt": "選択した時間セグメントを減らします",
+        "gemma": "選択した時間セグメントを短縮します",
+        "consensus": "選択した時間セグメントを減らします"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:32.027Z",
+          "requestId": "msg_011Cf6cvgfAQmSmZd7C2iuUc",
+          "tokensUsed": 220,
+          "fingerprint": "13b5640ce996a957966cd5ec2c6fc5ced7d3d5a78667543c3edaec48f3dc2d5c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:31.209Z",
+          "requestId": "chatcmpl-EOd7icu1SXgVBniqiClHrwRzA2XLF",
+          "tokensUsed": 199,
+          "fingerprint": "13b5640ce996a957966cd5ec2c6fc5ced7d3d5a78667543c3edaec48f3dc2d5c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:10:41.796Z",
+          "requestId": "7bed4be9-5459-4137-ad21-360cfc0a5a96",
+          "tokensUsed": 100,
+          "fingerprint": "dc213d531d6ba49dfcfb226f38905279a19c7e73b18887b7ca0253268fef6d55"
+        }
+      }
+    },
+    {
+      "keyPath": "navigation.collaborationDesc",
+      "source": "Invitations & join sessions",
+      "translations": {
+        "claude": "招待とセッション参加",
+        "gpt": "招待と参加セッション",
+        "gemma": "",
+        "consensus": "招待とセッション参加"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:08:54.080Z",
+          "requestId": "msg_011Cf6csrPxnw7jkw8Phyw4G",
+          "tokensUsed": 218,
+          "fingerprint": "67288bbcfcfc52e8c639f1035a43ed510770900c23c7b712e2328720c667aba1"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:08:52.418Z",
+          "requestId": "chatcmpl-EOd76yEJIukGHxd6Jwftau3xCOKsT",
+          "tokensUsed": 196,
+          "fingerprint": "a13773ec59a4513c06363df28c0f8b2b4b0a1243c21bef77b346d2a81e2c46ea"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:22:11.793Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "timer.hours",
+      "source": "Hours",
+      "translations": {
+        "claude": "時間",
+        "gpt": "時間",
+        "gemma": "",
+        "consensus": "時間"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T06:09:13.258Z",
+          "requestId": "msg_011Cf6cuJU9gDKwhWJ1b8L9K",
+          "tokensUsed": 205,
+          "fingerprint": "bf6267da6077b6bedde993a6ec599e9d5474eef12284b6823ef8dd0facc08f40"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T06:09:12.238Z",
+          "requestId": "chatcmpl-EOd7Pk7Nh5VxbqGKGkMUsG04pb27A",
+          "tokensUsed": 185,
+          "fingerprint": "bf6267da6077b6bedde993a6ec599e9d5474eef12284b6823ef8dd0facc08f40"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T06:29:21.727Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "ab2cba2e3813fe9d970a8bc49a1345dd0ede8c117c27fe9018a55935cdb4f872"
+}

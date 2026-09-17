@@ -41,8 +41,10 @@
       "correct": "¡Correcto!",
       "incorrect": "Inténtalo de nuevo"
     },
-    "audioNotAvailable": "{{text}} (audio no disponible)",
-    "audioNotAvailableParens": "(audio no disponible)"
+    "audioNotAvailable": "{text} (audio no disponible)",
+    "audioNotAvailableParens": "(audio no disponible)",
+    "submit": "Enviar",
+    "noDictionaryAvailable": "No hay diccionario disponible"
   },
   "answerEditor": {
     "instructions": "Crea tu respuesta a continuación",
@@ -50,7 +52,8 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "emptyState": "No se proporcionó respuesta",
-    "addWordToDict": "Añadir una nueva palabra al diccionario."
+    "addWordToDict": "Añadir una nueva palabra al diccionario.",
+    "addWordLabel": "Agregar etiqueta de palabra"
   },
   "assignmentConfiguration": {
     "timerLabel": "Temporizador",
@@ -97,7 +100,7 @@
     "dragDropPrompt": "Arrastra y suelta una imagen aquí para establecerla como imagen destacada."
   },
   "documentUploader": {
-    "title": "Cargar Documentos para Extracción de {{extractionType}}",
+    "title": "Cargar Documentos para Extracción de {extractionType}",
     "extractionTypes": {
       "vocabulary": "Vocabulario",
       "question": "Pregunta",
@@ -107,7 +110,7 @@
     "dragDropPrompt": "Arrastra y suelta los documentos aquí",
     "supportedFormats": "\"Formatos compatibles: PDF, Word (.doc, .docx), Texto (.txt), Excel (.xls, .xlsx, .csv)\"",
     "browseFiles": "Explorar archivos",
-    "uploadingProgress": "Subiendo... {{progress}}%",
+    "uploadingProgress": "Subiendo... {progress}%",
     "recentUploads": "Subidas Recientes",
     "statusLabels": {
       "processing": "Procesando...",
@@ -117,14 +120,14 @@
     "errorMessages": {
       "noSupportedFiles": "No se encontraron documentos compatibles. Por favor, suba archivos PDF, Word, Texto o Excel.",
       "skippedFiles": "Algunos archivos fueron omitidos (tipo no compatible)",
-      "uploadFailed": "Error al cargar {{fileName}}: {{error}}"
+      "uploadFailed": "Error al cargar {fileName}: {error}"
     },
     "howItWorks": {
       "title": "Cómo funciona:",
       "step1": "1. Sube tus documentos (archivos PDF, Word, Texto o Excel)",
-      "step2": "2. La IA analizará el contenido y extraerá {{extractionType}}",
+      "step2": "2. La IA analizará el contenido y extraerá {extractionType}",
       "step3": "3. Revise y apruebe las sugerencias en la pestaña \"Sugerencias\"",
-      "step4": "4. Importar los elementos seleccionados a tu {{target}}"
+      "step4": "4. Importar los elementos seleccionados a tu {target}"
     }
   },
   "enhancedGenerators": {
@@ -175,11 +178,11 @@
     "cohortChatTab": "Chat del Grupo"
   },
   "unifiedGenerateModal": {
-    "generating": "Generando {{type}}...",
+    "generating": "Generando {type}...",
     "takeMoments": "Esto puede tomar unos momentos",
     "preview": "Vista previa",
     "discardChanges": "¿Descartar los cambios?",
-    "lostWarning": "\"Su {{type}} generado se perderá si cancela ahora.\"",
+    "lostWarning": "\"Su {type} generado se perderá si cancela ahora.\"",
     "cancel": "Cancelar",
     "generate": "Generar",
     "saveClose": "Guardar y cerrar",
@@ -200,8 +203,8 @@
   },
   "imageMaskEditor": {
     "instructions": "<strong>Instrucciones:</strong> Pinte sobre las áreas que desea regenerar. Use la goma de borrar para eliminar partes de la máscara. Mantenga presionado Shift y arrastre para desplazarse. Use los botones de zoom para obtener más detalles.",
-    "brushSize": "Tamaño del pincel: {{size}}",
-    "zoomInfo": "Zoom: {{level}}% | Mantén Shift presionado para desplazar",
+    "brushSize": "Tamaño del pincel: {size}",
+    "zoomInfo": "Zoom: {level}% | Mantén Shift presionado para desplazar",
     "applyMask": "Aplicar máscara y regenerar",
     "save": "Guardar",
     "cancel": "Cancelar"
@@ -252,7 +255,7 @@
     "done": "Hecho",
     "invalid": "Inválido",
     "addAnswer": "Añadir respuesta",
-    "gradeDisplay": "Calificación: {{score}}",
+    "gradeDisplay": "Calificación: {score}",
     "status": "Estado"
   },
   "staticWaveform": {
@@ -266,7 +269,24 @@
     "insertRow": "Insertar fila",
     "insertColumn": "Insertar columna",
     "deleteRow": "Eliminar fila",
-    "deleteColumn": "Eliminar columna"
+    "deleteColumn": "Eliminar columna",
+    "clearCell": "Limpiar celda",
+    "deleteTable": "Eliminar tabla",
+    "insertColumnLeft": "Insertar columna a la izquierda",
+    "insertColumnRight": "Insertar columna a la derecha",
+    "insertRowAbove": "Insertar fila arriba",
+    "insertRowBelow": "Insertar fila debajo",
+    "makeColumnHeader": "Convertir en Encabezado de Columna",
+    "makeHeader": "Crear Encabezado",
+    "makeRowHeader": "Convertir en encabezado de fila",
+    "removeColumnHeader": "Eliminar encabezado de columna",
+    "removeHeader": "Eliminar encabezado",
+    "removeRowHeader": "Eliminar encabezado de fila",
+    "removeSorting": "Quitar ordenación",
+    "sortAscending": "Ordenar Ascendente",
+    "sortDescending": "Ordenar descendente",
+    "cellActionsTitle": "Título de Acciones de Celda",
+    "cellActionsLabel": "Etiqueta de Acciones de Celda"
   },
   "tableOfContents": {
     "emptyState": "No se encontraron encabezados. Agregue encabezados a su documento para ver la tabla de contenidos.",
@@ -318,7 +338,7 @@
     "expand": "Expandir",
     "fileInfo": "Información del archivo",
     "deleteFile": "Eliminar archivo",
-    "deleteConfirmation": "¿Eliminar archivo: \"{{fileName}}\"?",
+    "deleteConfirmation": "¿Eliminar archivo: \"{fileName}\"?",
     "filename": "Nombre del archivo:",
     "type": "Tipo:",
     "unknown": "Desconocido",
@@ -338,19 +358,19 @@
     "objectives": "Objetivos",
     "concepts": "Conceptos",
     "questions": "Preguntas",
-    "vocabularyCount": "Vocabulario ({{count}})",
-    "summariesCount": "Resúmenes ({{count}})",
-    "objectivesCount": "Objetivos ({{count}})",
-    "conceptsCount": "Conceptos ({{count}})",
-    "questionsCount": "Preguntas ({{count}})",
+    "vocabularyCount": "Vocabulario ({count})",
+    "summariesCount": "Resúmenes ({count})",
+    "objectivesCount": "Objetivos ({count})",
+    "conceptsCount": "Conceptos ({count})",
+    "questionsCount": "Preguntas ({count})",
     "confirm": "Confirmar",
     "cancel": "Cancelar"
   },
   "autoEmbedPlugin": {
     "youtubeVideo": "Video de YouTube",
     "dismiss": "Descartar",
-    "embedTitle": "Insertar {{contentName}}",
-    "embedOption": "\"Insertar {{contentName}}\"",
+    "embedTitle": "Insertar {contentName}",
+    "embedOption": "\"Insertar {contentName}\"",
     "embed": "Insertar"
   },
   "floatingLinkEditorPlugin": {
@@ -415,7 +435,7 @@
     "deleteUnitConfirmation": "¿Está seguro de que desea eliminar esta Unidad?",
     "delete": "Eliminar",
     "cancel": "Cancelar",
-    "closePreview": "Cerrar vista previa de {{name}}",
+    "closePreview": "Cerrar vista previa de {name}",
     "untitledUnit": "Unidad sin título",
     "addDescription": "Agregar descripción",
     "status": "Estado",
@@ -462,15 +482,15 @@
     "textToImagePreview": "Vista previa de texto a imagen",
     "textToSpeechPreview": "Vista previa de texto a voz",
     "close": "Cerrar",
-    "errorRendering": "Error al renderizar FileManager: {{message}}"
+    "errorRendering": "Error al renderizar FileManager: {message}"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "Cargando PDF: {{filename}}",
+    "loadingPdf": "Cargando PDF: {filename}",
     "noPdfToDisplay": "No hay PDF para mostrar"
   },
   "quizComponent": {
-    "grade": "Calificación: {{grade}}",
-    "gradeDisplay": "Calificación: {{score}}%"
+    "grade": "Calificación: {grade}",
+    "gradeDisplay": "Calificación: {score}%"
   },
   "playlistEditor": {
     "noFilesMessage": "Aún no se han añadido archivos. Use el campo de entrada de arriba para añadir archivos a la lista de reproducción.",
@@ -498,7 +518,7 @@
     "categories": "Categorías",
     "savedMessage": "El contenido ha sido guardado. Por favor, revíselo de acuerdo con las políticas de su institución educativa.",
     "flagged": "Marcado",
-    "flaggedWithCategories": "Marcado: {{categories}}"
+    "flaggedWithCategories": "Marcado: {categories}"
   },
   "moderationPanel": {
     "title": "Moderación de Contenido",
@@ -506,9 +526,9 @@
     "warning": "Este contenido requiere revisión",
     "alertMessage": "Este contenido ha sido marcado por moderación automatizada. Ha sido guardado, pero puede requerir revisión de acuerdo con las políticas de su institución.",
     "flaggedCategories": "Categorías Marcadas:",
-    "confidence": "Confianza: {{score}}%",
-    "checked": "\"Revisado: {{date}}\"",
-    "model": "Modelo: {{model}}",
+    "confidence": "Confianza: {score}%",
+    "checked": "\"Revisado: {date}\"",
+    "model": "Modelo: {model}",
     "disclaimerNote": "La moderación automatizada no es perfecta. Por favor, revise este contenido en contexto y proceda de acuerdo con las políticas específicas de su institución y los requisitos de la jurisdicción local.",
     "disclaimerLabel": "Nota:",
     "categories": {
@@ -528,9 +548,9 @@
   },
   "questionBlock": {
     "submit": "Enviar",
-    "gradeDisplay": "Calificación: {{score}}",
+    "gradeDisplay": "Calificación: {score}",
     "status": "Estado",
-    "answerLabel": "Respuesta {{number}}",
+    "answerLabel": "Respuesta {number}",
     "correct": "Correcto",
     "incorrect": "Incorrecto",
     "edit": "Editar",
@@ -555,8 +575,8 @@
     "noQuestions": "No se encontraron preguntas para este documento.",
     "from": "Desde",
     "pages": "páginas",
-    "importedOn": "Importado el {{date}}",
-    "filteringBySearch": "Filtrando por búsqueda: \"{{searchTerm}}\" ({{count}} de {{total}} elementos)",
+    "importedOn": "Importado el {date}",
+    "filteringBySearch": "Filtrando por búsqueda: \"{searchTerm}\" ({count} de {total} elementos)",
     "hide": "Ocultar",
     "show": "Mostrar",
     "summariesAndObjectives": "Resúmenes y Objetivos",
@@ -564,7 +584,7 @@
     "learningObjectives": "Objetivos de aprendizaje",
     "selectAll": "Seleccionar todo",
     "deselectAll": "Deseleccionar todo",
-    "selectedCount": "{{count}} de {{total}} seleccionados",
+    "selectedCount": "{count} de {total} seleccionados",
     "importToQuestionBank": "Importar al Banco de Preguntas",
     "questionPrompt": "Indicación de la pregunta",
     "enterQuestion": "Ingrese la pregunta...",
@@ -580,7 +600,7 @@
     "preview": "Vista previa"
   },
   "recordingStudio2": {
-    "recordingNumber": "\"Grabación {{number}}\"",
+    "recordingNumber": "\"Grabación {number}\"",
     "existingRecordings": "Grabaciones Existentes",
     "staticWaveformPreview": "Vista previa de forma de onda estática:",
     "recordedAudioWaveform": "Forma de onda del audio grabado:"
@@ -600,7 +620,7 @@
     "add": "Agregar",
     "unknown": "Desconocido",
     "empty": "(vacío)",
-    "lineNumber": "Línea #{{number}} - {{speaker}}",
+    "lineNumber": "Línea #{number} - {speaker}",
     "text": "Texto",
     "direction": "Dirección",
     "emotion": "Emoción",
@@ -608,14 +628,14 @@
     "emotionPlaceholder": "p. ej., alegre, cansado",
     "generateTTS": "Generar TTS",
     "takes": "Tomas",
-    "takeNumber": "\"Toma {{number}} ({{type}})\"",
+    "takeNumber": "\"Toma {number} ({type})\"",
     "name": "Nombre",
     "lockedTrack": "Pista bloqueada",
     "voice": "Voz",
     "description": "Descripción",
     "descriptionPlaceholder": "p. ej., 30s, enérgico, profesional",
     "generateAllMissingTTS": "Generar Todos los TTS Faltantes",
-    "processing": "Procesando {{count}} líneas...",
+    "processing": "Procesando {count} líneas...",
     "selectDialogueFirst": "Por favor, selecciona primero una línea de diálogo",
     "micAccessFailed": "Error al acceder al micrófono",
     "recordingSaveFailed": "Error al guardar la grabación",
@@ -653,7 +673,7 @@
     "cutButton": "Cortar",
     "tracks": "Pistas",
     "addTrack": "Agregar pista",
-    "trackName": "Pista {{number}}",
+    "trackName": "Pista {number}",
     "deleteLastTrackAlert": "No se puede eliminar la última pista",
     "voice": "Voz",
     "promptPlaceholder": "Ingrese texto para generar audio...",
@@ -668,7 +688,7 @@
   },
   "savedPdfThumbnail": {
     "errorMessage": "Error al cargar el PDF",
-    "pageOverlay": "Página {{number}}"
+    "pageOverlay": "Página {number}"
   },
   "sectionAssigner": {
     "dialogTitle": "Asignar a sección",
@@ -769,16 +789,16 @@
     },
     "contextMenu": {
       "deselectAll": "Deseleccionar todo",
-      "deleteConfirmMessage": "¿Eliminar {{count}} archivo(s) seleccionado(s)?",
-      "deleteSelected": "Eliminar seleccionados ({{count}})",
-      "reAnalyzeSelected": "\"Volver a analizar seleccionados ({{count}})\""
+      "deleteConfirmMessage": "¿Eliminar {count} archivo(s) seleccionado(s)?",
+      "deleteSelected": "Eliminar seleccionados ({count})",
+      "reAnalyzeSelected": "\"Volver a analizar seleccionados ({count})\""
     },
     "mainView": {
       "noFilesMessage": "No hay archivos disponibles. Sube archivos para comenzar."
     }
   },
   "sortableAnswers": {
-    "answerLabel": "Respuesta {{number}}",
+    "answerLabel": "Respuesta {number}",
     "correct": "Correcto",
     "incorrect": "Incorrecto"
   },
@@ -788,7 +808,7 @@
   },
   "pdfThumbnail": {
     "failedToLoad": "Error al cargar el PDF",
-    "pageNumber": "{{current}} / {{total}}"
+    "pageNumber": "{current} / {total}"
   },
   "unitEmbedding": {
     "publishing": "Publicando...",
@@ -797,13 +817,13 @@
     "generating": "Generando...",
     "generateEmbeddings": "Generar Incrustaciones",
     "cached": "En caché",
-    "wordsEmbedded": "{{count}} palabras incrustadas",
-    "completedCount": "{{completed}}/{{total}} completados",
+    "wordsEmbedded": "{count} palabras incrustadas",
+    "completedCount": "{completed}/{total} completados",
     "allSectionsComplete": "¡Todas las secciones completadas!"
   },
   "wordEmbedding": {
-    "embeddingFailed": "Palabra guardada, pero falló la generación de incrustación: {{error}}",
-    "embeddingGenerated": "Embedding generado: {{count}} palabras procesadas",
+    "embeddingFailed": "Palabra guardada, pero falló la generación de incrustación: {error}",
+    "embeddingGenerated": "Embedding generado: {count} palabras procesadas",
     "questionSaveFailed": "Guardar con error de incrustación"
   },
   "toolBarRoPlugin": {
@@ -812,7 +832,7 @@
     "noDescription": "Sin descripción"
   },
   "wordBlockPlugin": {
-    "wordNotFound": "Palabra no encontrada: {{wordID}}",
+    "wordNotFound": "Palabra no encontrada: {wordID}",
     "loadingAudio": "Cargando audio...",
     "audioUnavailable": "Audio no disponible"
   },
@@ -821,7 +841,26 @@
   },
   "sketchPad": {
     "hoverToStartDrawing": "Pasa el cursor para empezar a dibujar",
-    "submittingInSeconds": "\"Enviando dibujo para calificación en {{countdown}} segundos...\"",
-    "cancelSubmission": "Cancelar envío"
+    "submittingInSeconds": "\"Enviando dibujo para calificación en {countdown} segundos...\"",
+    "cancelSubmission": "Cancelar envío",
+    "activatingDrawingPad": "Activando panel de dibujo..."
+  },
+  "aiContentSuggestion": {
+    "tabToAccept": "Pestaña para aceptar"
+  },
+  "customAnswerComponent": {
+    "audio": "Audio",
+    "loading": "Cargando",
+    "question": "Pregunta",
+    "submit": "Enviar",
+    "text": "Texto",
+    "writing": "Escritura",
+    "completedQuestion": "Pregunta Completada",
+    "audioQuestion": "Pregunta de Audio",
+    "yourAnswer": "Su Respuesta",
+    "answerPlaceholder": "Marcador de posición para respuesta",
+    "answerQuestions": "Responder Preguntas",
+    "errorOccurred": "Se ha producido un error",
+    "promptNotAvailable": "Indicación No Disponible"
   }
 }

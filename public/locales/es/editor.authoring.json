@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "Borrar todo el formato de texto",
     "clearFormatting": "Borrar formato",
     "clearTextFormatting": "Borrar formato de texto",
-    "closePreview": "Cerrar vista previa de {{name}}",
+    "closePreview": "Cerrar vista previa de {name}",
     "columnsLayout": "Diseño de Columnas",
     "delete": "Eliminar",
     "deleteUnitConfirmation": "¿Estás seguro de que quieres eliminar esta Unidad?",
@@ -63,7 +63,21 @@
     "underline": "Subrayar",
     "undo": "Deshacer",
     "untitledUnit": "Unidad sin título",
-    "wordBlock": "Bloque de Palabras"
+    "wordBlock": "Bloque de Palabras",
+    "numberedList": "Lista numerada",
+    "codeBlock": "Bloque de Código",
+    "bulletedList": "Lista con viñetas",
+    "heading1": "Encabezado 1",
+    "blockFormat": "Formato de bloque",
+    "normal": "Normal",
+    "quoteBlock": "Cita",
+    "heading2": "Encabezado 2",
+    "heading3": "Encabezado 3",
+    "textColor": "Color del texto",
+    "backgroundColor": "Color de fondo",
+    "generateConversation": "Generar Conversación",
+    "increaseFontSize": "Aumentar tamaño de fuente",
+    "decreaseFontSize": "Disminuir tamaño de fuente"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "Asistente de IA",
@@ -85,7 +99,8 @@
     "tagKaiDesc": "Obtener asistencia de IA en la discusión",
     "tagKaiLabel": "💬 Etiqueta a @kai",
     "useTopicsDesc": "Organizar conversaciones por tema",
-    "useTopicsLabel": "🏷️ Usa #temas"
+    "useTopicsLabel": "🏷️ Usa #temas",
+    "tableOfContentsTab": "Tabla de contenidos"
   },
   "assignmentConfiguration": {
     "addDueDateButton": "Agregar Fecha de Vencimiento",
@@ -103,7 +118,9 @@
     "sectionLabel": "Sección",
     "selectSectionHelper": "Seleccione una sección para asignar la fecha de vencimiento",
     "timerDescription": "El temporizador comenzará después de que el usuario haya hecho clic en el botón \"Iniciar\". Se permitirá a los usuarios continuar después de que el temporizador haya terminado, y se registrará cuándo se inició y completó la tarea. La cuenta regresiva se mostrará en la parte superior de la pantalla durante la duración del temporizador.",
-    "timerLabel": "Temporizador"
+    "timerLabel": "Temporizador",
+    "retryEnabledDescription": "Cuando está habilitado, los estudiantes ven un botón \"Intentar de nuevo\" en la pantalla de finalización.",
+    "retryEnabled": "Permitir a los estudiantes reintentar después de completar"
   },
   "toolbar": {
     "align_center": "Centrar",
@@ -130,7 +147,14 @@
     "pdfAnalysisSettings": "Configuración de análisis de PDF",
     "setFeaturedImage": "Establecer imagen destacada",
     "uploadImagePrompt": "Subir imagen",
-    "uploadingImage": "Subiendo imagen"
+    "uploadingImage": "Subiendo imagen",
+    "setCoverVideo": "Establecer video de portada",
+    "coverVideoUrlPlaceholder": "Pegue una URL de video o deje en blanco para cargar un archivo",
+    "dragDropVideoPrompt": "Arrastre y suelte un archivo de video aquí.",
+    "removeCoverVideo": "Eliminar video de portada",
+    "uploadingVideo": "Transcodificando video",
+    "coverVideoUrlLabel": "URL del video",
+    "noCoverVideo": "No se ha establecido ningún video de portada."
   },
   "tabsVerticalLeft": {
     "tabs": {
@@ -140,7 +164,8 @@
       "dictionary": "Diccionario",
       "files": "Archivos",
       "questions": "Preguntas",
-      "tableOfContents": "Tabla de contenidos"
+      "tableOfContents": "Tabla de contenidos",
+      "campaign": "Campaña"
     }
   },
   "mainToolbar": {

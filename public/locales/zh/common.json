@@ -52,8 +52,10 @@
       "darkMode": "深色模式",
       "disableNotifications": "禁用通知",
       "experimentalFeatures": "实验性功能",
-      "studentMode": "学生模式"
-    }
+      "studentMode": "学生模式",
+      "colorMode": "颜色模式"
+    },
+    "collaboration": "协作"
   },
   "navigation": {
     "grades": "成绩",
@@ -61,10 +63,20 @@
     "profile": "个人资料",
     "sections": "章节",
     "units": "单元",
-    "workbook": "作业本"
+    "workbook": "作业本",
+    "squads": "小队",
+    "leaderboard": "排行榜",
+    "published": "已发布",
+    "settings": "设置",
+    "collaboration": "协作",
+    "gamification": "游戏化",
+    "drafts": "草稿",
+    "skills": "技能树",
+    "notifications": "通知",
+    "collaborationDesc": "邀请与加入会话"
   },
   "quizComponent": {
-    "grade": "成绩：{{grade}}"
+    "grade": "成绩：{grade}"
   },
   "status": {
     "complete": "完成",
@@ -83,5 +95,20 @@
     "created": "已创建",
     "due": "截止",
     "updated": "已更新"
+  },
+  "chat": {
+    "aiAssistant": "AI助手",
+    "openAssistant": "打开AI助手"
+  },
+  "timer": {
+    "minutes": "分钟",
+    "seconds": "秒",
+    "hours": "小时",
+    "decrease": "减少所选时间段",
+    "increase": "增加所选时间段"
+  },
+  "peerReview": {
+    "helpful": "同行评审很有帮助",
+    "notHelpful": "同行评审没有帮助"
   }
 }

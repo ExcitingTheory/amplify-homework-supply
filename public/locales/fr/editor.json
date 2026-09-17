@@ -3,7 +3,7 @@
     "tabToAccept": "Appuyez sur Tab pour accepter"
   },
   "answerComponent": {
-    "audioNotAvailable": "{{text}} (audio non disponible)",
+    "audioNotAvailable": "{text} (audio non disponible)",
     "audioNotAvailableParens": "(audio non disponible)",
     "errorMessages": {
       "noAnswer": "Veuillez fournir une réponse",
@@ -54,8 +54,8 @@
   "autoEmbedPlugin": {
     "dismiss": "Ignorer",
     "embed": "Intégrer",
-    "embedOption": "Intégrer {{contentName}}",
-    "embedTitle": "Intégrer {{contentName}}",
+    "embedOption": "Intégrer {contentName}",
+    "embedTitle": "Intégrer {contentName}",
     "youtubeVideo": "Vidéo YouTube"
   },
   "autocompleteNode": {
@@ -138,7 +138,7 @@
     "errorMessages": {
       "noSupportedFiles": "Aucun document pris en charge trouvé. Veuillez télécharger des fichiers PDF, Word, Texte ou Excel.",
       "skippedFiles": "Certains fichiers ont été ignorés (type non pris en charge)",
-      "uploadFailed": "Échec du téléchargement de {{fileName}} : {{error}}"
+      "uploadFailed": "Échec du téléchargement de {fileName} : {error}"
     },
     "extractionTypes": {
       "dictionary": "dictionnaire",
@@ -148,9 +148,9 @@
     },
     "howItWorks": {
       "step1": "1. Téléchargez vos documents (fichiers PDF, Word, Texte ou Excel)",
-      "step2": "2. L'IA analysera le contenu et extraira {{extractionType}}",
+      "step2": "2. L'IA analysera le contenu et extraira {extractionType}",
       "step3": "3. Examinez et approuvez les suggestions dans l'onglet \"Suggestions\"",
-      "step4": "4. Importer les éléments sélectionnés vers votre {{target}}",
+      "step4": "4. Importer les éléments sélectionnés vers votre {target}",
       "title": "Comment ça marche :"
     },
     "recentUploads": "Téléchargements récents",
@@ -160,8 +160,8 @@
       "processing": "Traitement en cours..."
     },
     "supportedFormats": "Pris en charge : PDF, Word (.doc, .docx), Texte (.txt), Excel (.xls, .xlsx, .csv)",
-    "title": "Télécharger des documents pour l'extraction {{extractionType}}",
-    "uploadingProgress": "Téléchargement... {{progress}}%"
+    "title": "Télécharger des documents pour l'extraction {extractionType}",
+    "uploadingProgress": "Téléchargement... {progress}%"
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "Entrez le texte à convertir en parole...",
@@ -176,7 +176,7 @@
     "close": "Fermer",
     "create": "Créer",
     "draftChanges": "Brouillon des modifications",
-    "errorRendering": "Erreur lors du rendu de FileManager : {{message}}",
+    "errorRendering": "Erreur lors du rendu de FileManager : {message}",
     "revert": "Annuler",
     "save": "Enregistrer",
     "textToImagePreview": "Aperçu de texte vers image",
@@ -184,10 +184,10 @@
   },
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "Supprimer {{count}} fichier(s) sélectionné(s) ?",
-      "deleteSelected": "Supprimer la sélection ({{count}})",
+      "deleteConfirmMessage": "Supprimer {count} fichier(s) sélectionné(s) ?",
+      "deleteSelected": "Supprimer la sélection ({count})",
       "deselectAll": "Tout désélectionner",
-      "reAnalyzeSelected": "Ré-analyser la sélection ({{count}})"
+      "reAnalyzeSelected": "Ré-analyser la sélection ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "Description :",
@@ -258,10 +258,10 @@
     "cancel": "Annuler",
     "collapse": "Réduire",
     "concepts": "Concepts",
-    "conceptsCount": "Concepts ({{count}})",
+    "conceptsCount": "Concepts ({count})",
     "confirm": "Confirmer",
     "created": "Créé :",
-    "deleteConfirmation": "Supprimer le fichier : \"{{fileName}}\" ?",
+    "deleteConfirmation": "Supprimer le fichier : \"{fileName}\" ?",
     "deleteFile": "Supprimer le fichier",
     "expand": "Développer",
     "fileInfo": "Infos du fichier",
@@ -269,22 +269,22 @@
     "noMetadataAvailable": "Aucune métadonnée disponible pour ce fichier.",
     "noParsedContentAvailable": "Aucun contenu analysé disponible pour ce fichier.",
     "objectives": "Objectifs",
-    "objectivesCount": "Objectifs ({{count}})",
+    "objectivesCount": "Objectifs ({count})",
     "parsedContent": "Contenu analysé",
     "path": "Chemin :",
     "protectionLevel": "Niveau de protection :",
     "questions": "Questions",
-    "questionsCount": "Questions ({{count}})",
+    "questionsCount": "Questions ({count})",
     "rawMetadata": "Métadonnées brutes",
     "searchPlaceholder": "Rechercher dans le contenu des fichiers...",
     "summaries": "Résumés",
-    "summariesCount": "Résumés ({{count}})",
+    "summariesCount": "Résumés ({count})",
     "type": "Type :",
     "unknown": "Inconnu",
     "unknownSize": "Taille inconnue",
     "unset": "NON DÉFINI",
     "vocabulary": "Vocabulaire",
-    "vocabularyCount": "Vocabulaire ({{count}})"
+    "vocabularyCount": "Vocabulaire ({count})"
   },
   "floatingLinkEditorPlugin": {
     "cancelLinkEditing": "Annuler la modification du lien",
@@ -305,11 +305,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "Appliquer le masque et régénérer",
-    "brushSize": "Taille du pinceau : {{size}}",
+    "brushSize": "Taille du pinceau : {size}",
     "cancel": "Annuler",
     "instructions": "<strong>Instructions :</strong> Peignez sur les zones que vous souhaitez régénérer. Utilisez la gomme pour supprimer des parties du masque. Maintenez Shift et faites glisser pour déplacer la vue. Utilisez les boutons de zoom pour obtenir plus de détails.",
     "save": "Enregistrer",
-    "zoomInfo": "Zoom : {{level}}% | Maintenez Maj enfoncée pour faire un panoramique"
+    "zoomInfo": "Zoom : {level}% | Maintenez Maj enfoncée pour faire un panoramique"
   },
   "imageResizer": {
     "addCaption": "Ajouter une légende"
@@ -381,7 +381,7 @@
     "unsavedChanges": "modifications non enregistrées"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "Chargement du PDF : {{filename}}",
+    "loadingPdf": "Chargement du PDF : {filename}",
     "noPdfToDisplay": "Aucun PDF à afficher"
   },
   "placeholders": {
@@ -419,14 +419,14 @@
     "submit": "Soumettre"
   },
   "quizComponent": {
-    "gradeDisplay": "Note : {{score}} %"
+    "gradeDisplay": "Note : {score} %"
   },
   "quizEditor": {
     "addAnswer": "Ajouter une réponse",
     "cancel": "Annuler",
     "done": "Terminé",
     "edit": "Modifier",
-    "gradeDisplay": "Note : {{score}}",
+    "gradeDisplay": "Note : {score}",
     "invalid": "Invalide",
     "reset": "Réinitialiser",
     "save": "Enregistrer",
@@ -452,14 +452,14 @@
     "generateTTS": "Générer TTS",
     "importFailed": "Échec de l'importation du fichier JSON",
     "importJSON": "Importer JSON",
-    "lineNumber": "Ligne #{{number}} - {{speaker}}",
+    "lineNumber": "Ligne #{number} - {speaker}",
     "lockedTrack": "Piste verrouillée",
     "micAccessFailed": "Échec d'accès au microphone",
     "name": "Nom",
     "noMissingAudio": "Aucun audio manquant à générer",
     "noTextToGenerate": "Aucun texte à générer",
     "play": "Lire",
-    "processing": "Traitement de {{count}} lignes...",
+    "processing": "Traitement de {count} lignes...",
     "record": "Enregistrer",
     "recordingSaveFailed": "Échec de l'enregistrement",
     "save": "Enregistrer",
@@ -469,7 +469,7 @@
     "speakerNotFound": "Haut-parleur introuvable",
     "speakers": "Intervenants",
     "stop": "Arrêter",
-    "takeNumber": "Prise {{number}} ({{type}})",
+    "takeNumber": "Prise {number} ({type})",
     "takes": "Prend",
     "text": "Texte",
     "timeline": "Chronologie",
@@ -495,7 +495,7 @@
     "activatingDrawingPad": "Activation de la tablette graphique...",
     "cancelSubmission": "Annuler la soumission",
     "hoverToStartDrawing": "Survolez pour commencer à dessiner",
-    "submittingInSeconds": "Envoi du dessin pour correction dans {{countdown}} secondes..."
+    "submittingInSeconds": "Envoi du dessin pour correction dans {countdown} secondes..."
   },
   "staticWaveform": {
     "errorLoading": "Erreur de chargement de la forme d'onde"
@@ -588,7 +588,7 @@
     "clearAllTextFormatting": "Effacer toute la mise en forme du texte",
     "clearFormatting": "Effacer la mise en forme",
     "clearTextFormatting": "Effacer la mise en forme du texte",
-    "closePreview": "Fermer l'aperçu de {{name}}",
+    "closePreview": "Fermer l'aperçu de {name}",
     "columnsLayout": "Disposition en colonnes",
     "delete": "Supprimer",
     "deleteUnitConfirmation": "Êtes-vous sûr de vouloir supprimer cette unité ?",
@@ -667,9 +667,9 @@
     "discard": "Annuler",
     "discardChanges": "Abandonner les modifications ?",
     "generate": "Générer",
-    "generating": "Génération de {{type}}...",
+    "generating": "Génération de {type}...",
     "keepEditing": "Continuer à modifier",
-    "lostWarning": "Votre {{type}} généré sera perdu si vous annulez maintenant.",
+    "lostWarning": "Votre {type} généré sera perdu si vous annulez maintenant.",
     "preview": "Aperçu",
     "saveClose": "Enregistrer et fermer",
     "takeMoments": "Cela peut prendre quelques instants"
@@ -682,13 +682,13 @@
   "unitEmbedding": {
     "allSectionsComplete": "Toutes les sections terminées !",
     "cached": "En cache",
-    "completedCount": "{{completed}}/{{total}} terminé(s)",
+    "completedCount": "{completed}/{total} terminé(s)",
     "generateEmbeddings": "Générer des embeddings",
     "generating": "Génération...",
     "publishSuccess": "Unité publiée avec intégrations générées !",
     "publishUnit": "Publier l'unité",
     "publishing": "Publication...",
-    "wordsEmbedded": "{{count}} mots intégrés"
+    "wordsEmbedded": "{count} mots intégrés"
   },
   "unitEmbeddingComponents": {
     "errorMessage": "Erreur lors de la génération des intégrations",
@@ -709,10 +709,10 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio non disponible",
     "loadingAudio": "Chargement de l'audio...",
-    "wordNotFound": "Mot non trouvé : {{wordID}}"
+    "wordNotFound": "Mot non trouvé : {wordID}"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "Intégration générée : {{count}} mots traités"
+    "embeddingGenerated": "Intégration générée : {count} mots traités"
   },
   "wordEmbeddingIntegration": {
     "alertMessage": "Les embeddings seront générés",

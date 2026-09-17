@@ -78,6 +78,7 @@
     "userId": "User Id",
     "identityId": "Identity Id",
     "cancel": "Cancel",
+    "name": "Name",
     "updateProfile": "Update Profile",
     "confirmEmail": {
       "title": "Confirm your email",

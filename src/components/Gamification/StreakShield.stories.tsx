@@ -43,8 +43,8 @@ export const SmallSize: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("2");
-    // Small size uses caption variant text
-    const text = canvasElement.querySelector(".MuiTypography-caption");
-    expect(text).not.toBeNull();
+    // Small size renders the compact shield medallion
+    const crest = canvasElement.querySelector('svg[role="img"]');
+    expect(crest).not.toBeNull();
   },
 };

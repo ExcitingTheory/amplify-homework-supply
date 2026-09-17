@@ -4,9 +4,9 @@
     "discard": "Verwerfen",
     "discardChanges": "Änderungen verwerfen?",
     "generate": "Generieren",
-    "generating": "{{type}} wird generiert...",
+    "generating": "{type} wird generiert...",
     "keepEditing": "Weiter bearbeiten",
-    "lostWarning": "Ihr erstellter {{type}} geht verloren, wenn Sie jetzt abbrechen.",
+    "lostWarning": "Ihr erstellter {type} geht verloren, wenn Sie jetzt abbrechen.",
     "preview": "Vorschau",
     "saveClose": "Speichern & Schließen",
     "takeMoments": "Dies kann einen Moment dauern"

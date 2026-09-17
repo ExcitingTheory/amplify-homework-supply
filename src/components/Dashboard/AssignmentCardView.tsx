@@ -335,6 +335,7 @@ export function AssignmentCardView({
             <Chip
               label={`${pct}% · ${gradeLabel(pct, (key) => t(key))}`}
               size="small"
+              variant="status"
               color={gradeColor(pct)}
               icon={<CheckCircleIcon />}
               sx={{

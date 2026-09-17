@@ -8,14 +8,15 @@ import * as React from "react";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
 import { useTranslations } from "next-intl";
 
 import UnitContext from "../../../context/unitContext";
+import { EditorBlockCard } from "./EditorBlockCard";
+import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
 export default function QuestionBlockRo(props) {
   const t = useTranslations("workbook");
@@ -146,6 +147,8 @@ export default function QuestionBlockRo(props) {
       data={questionContent}
       attemptedAnswers={attemptedAnswers}
       isLocked={isLocked}
+      accuracy={accuracy}
+      graded={complete}
       gradeDisplayText={t("quizComponent.gradeDisplay", { score: accuracy })}
       onToggle={gradeAnswer}
       className={className}
@@ -162,6 +165,8 @@ export function QuizView({
   data = [],
   attemptedAnswers = {},
   isLocked = false,
+  accuracy = 0,
+  graded = false,
   gradeDisplayText = "",
   onToggle = () => {},
   className = "Editor-question",
@@ -177,6 +182,22 @@ export function QuizView({
     const showCorrectFeedback = isLocked && wasAttempted && isCorrectAnswer;
     const showWrongFeedback = isLocked && wasAttempted && !isCorrectAnswer;
 
+    // Bordered, rounded option row matching the Recurring Patterns quiz specimen.
+    const rowBorderColor = showCorrectFeedback
+      ? "success.main"
+      : showWrongFeedback
+        ? "warning.main"
+        : checked
+          ? "primary.main"
+          : "divider";
+    const rowBgColor = showCorrectFeedback
+      ? "success.light"
+      : showWrongFeedback
+        ? "warning.light"
+        : checked && !isLocked
+          ? "action.hover"
+          : "transparent";
+
     return (
       <FormControlLabel
         key={key}
@@ -188,16 +209,48 @@ export function QuizView({
             onChange={async (e) => {
               onToggle(e, key, item);
             }}
-            sx={
-              isLocked && wasAttempted
-                ? {
-                    "&.Mui-disabled": {
-                      color: showCorrectFeedback
-                        ? "success.main"
-                        : "warning.main",
-                    },
-                  }
-                : undefined
+            sx={{ borderRadius: `${SEMANTIC_THEME.radius.chip}px` }}
+            icon={
+              <Box
+                sx={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                  border: "2px solid",
+                  borderColor: "text.disabled",
+                }}
+              />
+            }
+            checkedIcon={
+              <Box
+                sx={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                  border: "2px solid",
+                  borderColor: showCorrectFeedback
+                    ? "success.main"
+                    : showWrongFeedback
+                      ? "warning.main"
+                      : "primary.main",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: "3px",
+                    bgcolor: showCorrectFeedback
+                      ? "success.main"
+                      : showWrongFeedback
+                        ? "warning.main"
+                        : "primary.main",
+                  }}
+                />
+              </Box>
             }
           />
         }
@@ -212,11 +265,23 @@ export function QuizView({
             )}
           </Box>
         }
-        sx={
-          isLocked && wasAttempted
-            ? { color: showCorrectFeedback ? "success.main" : "warning.main" }
-            : undefined
-        }
+        sx={{
+          m: 0,
+          width: "100%",
+          px: 1,
+          py: 0.5,
+          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+          border: "1px solid",
+          borderColor: rowBorderColor,
+          bgcolor: rowBgColor,
+          transition: "border-color 0.15s, background-color 0.15s",
+          color:
+            isLocked && wasAttempted
+              ? showCorrectFeedback
+                ? "success.main"
+                : "warning.main"
+              : undefined,
+        }}
       />
     );
   });
@@ -229,14 +294,16 @@ export function QuizView({
       suppressContentEditableWarning={true}
       style={{ userSelect: "none" }}
     >
-      <Card elevation={2} sx={{ flexGrow: 1, marginBottom: "1rem" }}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1 }}></Box>
-          <Box>{gradeDisplayText}</Box>
-        </Toolbar>
-      </Card>
-
-      <FormGroup>{checkboxes}</FormGroup>
+      <EditorBlockCard blockType="quiz" accuracy={accuracy} graded={graded}>
+        {gradeDisplayText ? (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {gradeDisplayText}
+            </Typography>
+          </Box>
+        ) : null}
+        <FormGroup sx={{ gap: 0.75 }}>{checkboxes}</FormGroup>
+      </EditorBlockCard>
     </div>
   );
 }

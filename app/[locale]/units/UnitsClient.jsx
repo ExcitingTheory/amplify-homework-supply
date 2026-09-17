@@ -23,6 +23,7 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import LazyCardMedia from "@/components/LazyCardMedia";
 import CommunityUnitCard from "@/components/CommunityUnitCard";
 import SharedUnitCard from "@/components/SharedUnitCard";
+import { EmptyState } from "@/components/EmptyState";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import AuthContext from "@/context/authContext";
 import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
@@ -483,13 +484,7 @@ function Units({ initialUnits = [] }) {
                 </Alert>
               </Box>
             ) : sharedState === "success-empty" ? (
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ textAlign: "center", py: 4 }}
-              >
-                {t("units.noSharedUnits")}
-              </Typography>
+              <EmptyState dense title={t("units.noSharedUnits")} />
             ) : (
               sharedUnits.map((unit) => (
                 <SharedUnitCard
@@ -544,13 +539,7 @@ function Units({ initialUnits = [] }) {
                 </Alert>
               </Box>
             ) : communityState === "success-empty" ? (
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ textAlign: "center", py: 4 }}
-              >
-                {t("units.noCommunityUnits")}
-              </Typography>
+              <EmptyState dense title={t("units.noCommunityUnits")} />
             ) : (
               communityUnits.map((unit) => (
                 <CommunityUnitCard
@@ -705,22 +694,13 @@ function Units({ initialUnits = [] }) {
                       requiredPriorUnitId={lockStatus?.requiredPriorUnitId}
                     >
                       <Card
-                        elevation={2}
+                        variant="assignment"
                         sx={{
                           display: "flex",
                           margin: "1rem auto",
                           width: "90vw",
                           maxWidth: "80rem",
-                          borderRadius: 2,
-                          borderLeft: "4px solid",
-                          borderLeftColor: "text.primary",
-                          transition: "all 0.3s ease-in-out",
                           overflow: "hidden",
-                          "&:hover": {
-                            elevation: 6,
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                          },
                         }}
                       >
                         <Box
@@ -782,11 +762,11 @@ function Units({ initialUnits = [] }) {
                                 py: 1,
                                 borderRadius: 2,
                                 boxShadow: 2,
-                                color: "text.primary",
-                                borderColor: "text.primary",
+                                color: "primary.main",
+                                borderColor: "primary.main",
                                 "&:hover": {
                                   boxShadow: 4,
-                                  borderColor: "text.primary",
+                                  borderColor: "primary.main",
                                   backgroundColor: "action.hover",
                                 },
                               }}
@@ -805,11 +785,11 @@ function Units({ initialUnits = [] }) {
                                 py: 1,
                                 borderRadius: 2,
                                 boxShadow: 2,
-                                color: "text.primary",
-                                borderColor: "text.primary",
+                                color: "primary.main",
+                                borderColor: "primary.main",
                                 "&:hover": {
                                   boxShadow: 4,
-                                  borderColor: "text.primary",
+                                  borderColor: "primary.main",
                                   backgroundColor: "action.hover",
                                 },
                               }}
@@ -828,11 +808,11 @@ function Units({ initialUnits = [] }) {
                                 py: 1,
                                 borderRadius: 2,
                                 boxShadow: 2,
-                                color: "text.primary",
-                                borderColor: "text.primary",
+                                color: "primary.main",
+                                borderColor: "primary.main",
                                 "&:hover": {
                                   boxShadow: 4,
-                                  borderColor: "text.primary",
+                                  borderColor: "primary.main",
                                   backgroundColor: "action.hover",
                                 },
                               }}
@@ -880,21 +860,12 @@ function Units({ initialUnits = [] }) {
                     <Card
                       key={unit.id}
                       id={`unit-${unit.id}`}
-                      elevation={2}
+                      variant="assignment"
                       sx={{
                         display: "flex",
                         margin: "1rem auto",
                         width: "90vw",
                         maxWidth: "80rem",
-                        borderRadius: 2,
-                        borderLeft: "4px solid",
-                        borderLeftColor: "text.primary",
-                        transition: "all 0.3s ease-in-out",
-                        "&:hover": {
-                          elevation: 6,
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                        },
                       }}
                     >
                       <Box
@@ -955,11 +926,11 @@ function Units({ initialUnits = [] }) {
                               mr: 1,
                               borderRadius: 2,
                               boxShadow: 2,
-                              color: "text.primary",
-                              borderColor: "text.primary",
+                              color: "primary.main",
+                              borderColor: "primary.main",
                               "&:hover": {
                                 boxShadow: 4,
-                                borderColor: "text.primary",
+                                borderColor: "primary.main",
                                 backgroundColor: "action.hover",
                               },
                             }}
@@ -978,11 +949,11 @@ function Units({ initialUnits = [] }) {
                               py: 1,
                               borderRadius: 2,
                               boxShadow: 2,
-                              color: "text.primary",
-                              borderColor: "text.primary",
+                              color: "primary.main",
+                              borderColor: "primary.main",
                               "&:hover": {
                                 boxShadow: 4,
-                                borderColor: "text.primary",
+                                borderColor: "primary.main",
                                 backgroundColor: "action.hover",
                               },
                             }}
@@ -1029,22 +1000,13 @@ function Units({ initialUnits = [] }) {
                     <Card
                       key={unit.id}
                       id={`unit-${unit.id}`}
-                      elevation={2}
+                      variant="assignment"
                       sx={{
                         display: "flex",
                         margin: "1rem auto",
                         width: "90vw",
                         maxWidth: "80rem",
-                        borderRadius: 2,
-                        borderLeft: "4px solid",
-                        borderLeftColor: "text.primary",
-                        transition: "all 0.3s ease-in-out",
                         overflow: "hidden",
-                        "&:hover": {
-                          elevation: 6,
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                        },
                       }}
                     >
                       <Box
@@ -1105,11 +1067,11 @@ function Units({ initialUnits = [] }) {
                               mr: 1,
                               borderRadius: 2,
                               boxShadow: 2,
-                              color: "text.primary",
-                              borderColor: "text.primary",
+                              color: "primary.main",
+                              borderColor: "primary.main",
                               "&:hover": {
                                 boxShadow: 4,
-                                borderColor: "text.primary",
+                                borderColor: "primary.main",
                                 backgroundColor: "action.hover",
                               },
                             }}
@@ -1128,11 +1090,11 @@ function Units({ initialUnits = [] }) {
                               py: 1,
                               borderRadius: 2,
                               boxShadow: 2,
-                              color: "text.primary",
-                              borderColor: "text.primary",
+                              color: "primary.main",
+                              borderColor: "primary.main",
                               "&:hover": {
                                 boxShadow: 4,
-                                borderColor: "text.primary",
+                                borderColor: "primary.main",
                                 backgroundColor: "action.hover",
                               },
                             }}

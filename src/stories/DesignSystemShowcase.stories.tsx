@@ -4,6 +4,8 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
+import AppBar from "@mui/material/AppBar";
+import MainToolbar from "../components/MainToolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -24,14 +26,21 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import MenuItem from "@mui/material/MenuItem";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import Collapse from "@mui/material/Collapse";
 import {
   THEME_PALETTES,
   getThemeOptions,
+  getCustomThemeOptions,
   sharedComponentOverrides,
   type ThemePaletteVariant,
+  type ThemePalette,
 } from "../themes/editorThemes";
+import {
+  ThemeMixer,
+  buildFullPaletteFromCustom,
+  type CustomThemePaletteInput,
+} from "../components/Gamification/ThemeMixer";
+import { useThemeDrafts } from "../themes/themeDrafts";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
 import { BadgeIcon } from "../components/Gamification/BadgeIcon";
 import {
@@ -42,6 +51,8 @@ import { LevelBadge } from "../components/Gamification/LevelBadge";
 import { AnimatedXPCounter } from "../components/Gamification/AnimatedXPCounter";
 import { ProgressRings } from "../components/Gamification/ProgressRings";
 import { StreakIndicator } from "../components/Gamification/StreakIndicator";
+import { WorkbookContextualToolbarView } from "../components/Workbook/WorkbookContextualToolbarView";
+import { WorkbookToolbarTitle } from "../components/Workbook/WorkbookContextualToolbarView";
 import { StreakCalendar } from "../components/Gamification/StreakCalendar";
 import { SquadCrest } from "../components/Gamification/SquadCrest";
 import { ArmoriaShield } from "../components/Gamification/ArmoriaShield";
@@ -52,7 +63,11 @@ import { DiceBearAvatar } from "../components/Gamification/DiceBearAvatar";
 import {
   AvatarGlowRing,
   DEFAULT_GLOW_COLORS,
+  GLOW_COLOR_PRESETS,
 } from "../components/Gamification/AvatarGlowRing";
+import { BadgeVisualPicker } from "../components/Gamification/BadgeVisualPicker";
+import { BadgeEditor } from "../components/Gamification/BadgeEditor";
+import { RedemptionConditionForm } from "../components/Gamification/RedemptionConditionForm";
 import { SquadMentionPill } from "../components/Gamification/SquadMentionPill";
 import { BossBattleProgress } from "../components/Gamification/BossBattleProgress";
 import { AssignmentCardView } from "../components/Dashboard/AssignmentCardView";
@@ -66,12 +81,44 @@ import UnitContext from "../context/unitContext";
 import { QuizView as QuizViewImpl } from "../components/Editor3/components/QuizComponent";
 import NotificationBadge from "../components/NotificationBadge";
 import NotificationContext from "../context/notificationContext";
+import NotificationList from "../components/NotificationList";
 import { UserAvatar } from "../components/UserAvatar";
 import ModerationBadge from "../components/ModerationBadge";
 import PrefetchBadge from "../components/PrefetchBadge";
 import SharedUnitCard from "../components/SharedUnitCard";
 import CommunityUnitCard from "../components/CommunityUnitCard";
 import AuthFormSkeleton from "../components/AuthFormSkeleton";
+import { PersonalBestBanner } from "../components/Gamification/PersonalBestBanner";
+import { PrefetchButton } from "../components/PrefetchButton";
+import ModerationPanel from "../components/ModerationPanel";
+import ConfirmDialog from "../components/ConfirmDialog";
+import ConflictResolutionDialog from "../components/ConflictResolutionDialog";
+import PermissionErrorOverlay from "../components/PermissionErrorOverlay";
+import { CosmeticSelector } from "../components/Gamification/CosmeticSelector";
+import { XPTunerInline } from "../components/Gamification/XPTunerDialog";
+import { StorageManagementView } from "../components/StorageManagementView";
+import { JobsDashboardView } from "../components/JobsDashboardView";
+import { OfflineBannerView } from "../components/OfflineBannerView";
+import { SyncStatusIndicatorView } from "../components/SyncStatusIndicatorView";
+import {
+  InlineGradeCell,
+  createEmptyHistoryState,
+} from "../components/InlineGradeCell";
+import { OpenCollaborationRooms } from "../components/PeerReview/OpenCollaborationRooms";
+import { PeerReviewChat } from "../components/PeerReview/PeerReviewChat";
+import { GlobalChatButton } from "../components/GlobalChatButton";
+import ChatContext from "../context/chatContext";
+import { ChatMessageList } from "../components/Chat/ChatMessageList";
+import { ContentPreview } from "../components/ChatSidebar/ContentPreview";
+import EditableBlockPreview from "../components/ChatSidebar/EditableBlockPreview";
+import RecordingScriptPreview from "../components/ChatSidebar/RecordingScriptPreview";
+import SearchResultsImpl from "../components/ChatSidebar/SearchResults";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import SearchIcon from "@mui/icons-material/Search";
 import TitleIcon from "@mui/icons-material/Title";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
@@ -98,6 +145,11 @@ import ForumIcon from "@mui/icons-material/Forum";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import { ToolbarSpecimens } from "../components/DesignSystem/ToolbarSpecimens";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { EditorNodes } from "../components/Editor3/editorConfig";
+import LanguageEditorTheme from "../components/Editor3/config/LanguageEditorTheme";
+import ToolBarPlugin from "../components/Editor3/plugins/ToolBarPlugin";
+import { AppShellContext } from "../components/AppShellContext";
 import { WaveformSpecimen } from "../components/DesignSystem/WaveformSpecimen";
 import { BotAvatar } from "../components/BotAvatar";
 import { BotCustomizer, type BotConfig } from "../components/BotCustomizer";
@@ -117,12 +169,31 @@ import {
 } from "../components/AIAgentConfig";
 import RecordingSettings from "../components/RecordingStudio3/RecordingSettings";
 import AudioFilterPanel from "../components/RecordingStudio3/AudioFilterPanel";
-import TimelineCard from "../components/RecordingStudio3/TimelineCard";
-import HorizontalTimeline from "../components/RecordingStudio3/HorizontalTimeline";
-import ScreenplayEditor from "../components/RecordingStudio3/ScreenplayEditor";
+import RecordingStudioEnhancedViewImpl from "../components/RecordingStudioEnhancedView";
+import { RecordingStudio2View as RecordingStudio2ViewImpl } from "../components/RecordingStudio2View";
+import RecordingStudio3ViewImpl from "../components/RecordingStudio3View";
+import { AudioPlayerProvider } from "../components/Editor3/context/AudioPlayerContext";
+import { ProfileCardView } from "../components/Gamification/ProfileCardView";
+import {
+  AccountPreferencesView,
+  type AccountPreferences,
+} from "../components/AccountPreferencesView";
+import { ProfileInfoView } from "../components/Settings/ProfileInfoView";
+import { PasswordChangeView } from "../components/Settings/PasswordChangeView";
+import { LanguagePreferenceView } from "../components/Settings/LanguagePreferenceView";
+import { AdvancedSettingsView } from "../components/Settings/AdvancedSettingsView";
+import { EmptyState } from "../components/EmptyState";
+import { ErrorState } from "../components/ErrorState";
 
 // The graded block views are JS components; type as any for the showcase props.
 const QuizView = QuizViewImpl as React.FC<any>;
+// SearchResults is a JS default export; cast for the showcase props.
+const SearchResults = SearchResultsImpl as React.FC<any>;
+// The recording studio views are JS components; type as any for showcase props.
+const RecordingStudioEnhancedView =
+  RecordingStudioEnhancedViewImpl as React.FC<any>;
+const RecordingStudio2View = RecordingStudio2ViewImpl as React.FC<any>;
+const RecordingStudio3View = RecordingStudio3ViewImpl as React.FC<any>;
 
 /**
  * Design System Showcase — every cosmetic theme's palette and the MUI
@@ -152,6 +223,25 @@ export default meta;
 type Story = StoryObj;
 
 const THEME_IDS = Object.keys(THEME_PALETTES);
+
+// Display names for theme ids that don't read well when merely capitalized.
+const THEME_LABELS: Record<string, string> = {
+  highContrast: "High Contrast",
+};
+const themeLabel = (id: string) => THEME_LABELS[id] ?? id;
+
+/** Resolve the Storybook `colorScheme` toolbar global to a concrete scheme. */
+function resolveGlobalScheme(colorScheme: unknown): "light" | "dark" {
+  if (colorScheme === "dark") return "dark";
+  if (
+    colorScheme === "system" &&
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+  return "light";
+}
 
 // --- Color swatch helpers ---------------------------------------------------
 
@@ -489,6 +579,444 @@ function createShowcaseTheme(themeId: string) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Theme designer (edit / build / import / export custom themes)
+// ---------------------------------------------------------------------------
+
+const CUSTOM_THEME_ID = "custom";
+
+/**
+ * A downloadable theme file. `input` is the 5-color source the mixer edits;
+ * `palette` is the expanded light/dark `ThemePalette` ready to paste straight
+ * into `THEME_PALETTES` in `src/themes/editorThemes.ts`.
+ */
+interface ShowcaseThemeFile {
+  id: string;
+  name: string;
+  input: CustomThemePaletteInput;
+  palette: ThemePalette;
+}
+
+/** Derive the mixer's 5-color input from a preset palette (light scheme). */
+function presetToCustomInput(themeId: string): CustomThemePaletteInput {
+  const p = (THEME_PALETTES[themeId] ?? THEME_PALETTES.default).light;
+  return {
+    primaryMain: p.primary.main,
+    secondaryMain: p.secondary.main,
+    backgroundDefault: p.background.default,
+    backgroundPaper: p.background.paper,
+    accentColor: p.custom.searchHighlight,
+  };
+}
+
+/** Build a showcase theme from a user-mixed custom palette input. */
+function createCustomShowcaseTheme(input: CustomThemePaletteInput) {
+  return createTheme({
+    ...getCustomThemeOptions(buildFullPaletteFromCustom(input) as ThemePalette),
+    cssVariables: {
+      colorSchemeSelector: "data-mui-color-scheme",
+      cssVarPrefix: `dss-${CUSTOM_THEME_ID}`,
+    },
+    components: sharedComponentOverrides,
+  });
+}
+
+function slugifyThemeId(name: string): string {
+  return (
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "custom-theme"
+  );
+}
+
+function buildThemeFile(
+  name: string,
+  input: CustomThemePaletteInput,
+): ShowcaseThemeFile {
+  return {
+    id: slugifyThemeId(name),
+    name: name.trim() || "Custom Theme",
+    input,
+    palette: buildFullPaletteFromCustom(input) as ThemePalette,
+  };
+}
+
+function downloadThemeFile(file: ShowcaseThemeFile): void {
+  const blob = new Blob([JSON.stringify(file, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${file.id}.theme.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+const CUSTOM_INPUT_FIELDS: (keyof CustomThemePaletteInput)[] = [
+  "primaryMain",
+  "secondaryMain",
+  "backgroundDefault",
+  "backgroundPaper",
+  "accentColor",
+];
+
+/** Validate + extract a `CustomThemePaletteInput` from an uploaded file's JSON. */
+function parseThemeFileInput(text: string): CustomThemePaletteInput {
+  const parsed = JSON.parse(text) as Partial<ShowcaseThemeFile>;
+  const input = parsed?.input;
+  if (!input || CUSTOM_INPUT_FIELDS.some((f) => typeof input[f] !== "string")) {
+    throw new Error(
+      "Not a valid theme file — expected an `input` object with 5 color fields.",
+    );
+  }
+  return {
+    primaryMain: input.primaryMain,
+    secondaryMain: input.secondaryMain,
+    backgroundDefault: input.backgroundDefault,
+    backgroundPaper: input.backgroundPaper,
+    accentColor: input.accentColor,
+  };
+}
+
+/** Code snippet a developer can paste into `THEME_PALETTES` to ship the theme. */
+function themePaletteSnippet(file: ShowcaseThemeFile): string {
+  return `// Add to THEME_PALETTES in src/themes/editorThemes.ts\n${file.id}: ${JSON.stringify(
+    file.palette,
+    null,
+    2,
+  )},`;
+}
+
+/**
+ * The real ThemeMixer (in multi-draft mode) wired up with import / export /
+ * "load preset" controls so custom palettes can be edited across several
+ * drafts, downloaded as theme files, pasted into code, or restored from an
+ * uploaded theme file. Drafts persist to localStorage and sync across every
+ * mounted mixer.
+ */
+function ThemeDesignerPanel({
+  currentPresetId,
+  onApply,
+}: {
+  currentPresetId: string;
+  onApply: (input: CustomThemePaletteInput) => void;
+}) {
+  const drafts = useThemeDrafts();
+  const [snippet, setSnippet] = React.useState<string | null>(null);
+  const [importError, setImportError] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const activeInput =
+    drafts.activeDraft?.input ?? presetToCustomInput(currentPresetId);
+  const activeName = drafts.activeDraft?.name ?? "Custom Theme";
+
+  const handleSave = React.useCallback(
+    (input: CustomThemePaletteInput) => onApply(input),
+    [onApply],
+  );
+
+  const handleLoadPreset = React.useCallback(() => {
+    const input = presetToCustomInput(currentPresetId);
+    drafts.updateActiveInput(input);
+    onApply(input);
+  }, [currentPresetId, drafts, onApply]);
+
+  const handleExport = React.useCallback(() => {
+    downloadThemeFile(buildThemeFile(activeName, activeInput));
+  }, [activeName, activeInput]);
+
+  const handleShowSnippet = React.useCallback(() => {
+    setSnippet(themePaletteSnippet(buildThemeFile(activeName, activeInput)));
+  }, [activeName, activeInput]);
+
+  const handleImportClick = React.useCallback(() => {
+    setImportError(null);
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFile = React.useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      try {
+        const input = parseThemeFileInput(await file.text());
+        const name =
+          file.name.replace(/\.theme\.json$|\.json$/i, "") || "Imported Theme";
+        // Each uploaded file becomes its own draft.
+        drafts.createDraft(input, name);
+        onApply(input);
+        setImportError(null);
+      } catch (err) {
+        setImportError(
+          err instanceof Error ? err.message : "Could not read theme file.",
+        );
+      }
+    },
+    [drafts, onApply],
+  );
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2, mb: 4, bgcolor: "background.paper" }}>
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={3}
+        alignItems="flex-start"
+      >
+        <Box sx={{ flexShrink: 0 }}>
+          <ThemeMixer enableDrafts value={activeInput} onSave={handleSave} />
+        </Box>
+        <Stack spacing={2} sx={{ flex: 1, minWidth: 240 }}>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleLoadPreset}
+              sx={{ textTransform: "none" }}
+            >
+              Load &ldquo;{currentPresetId}&rdquo; into draft
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleImportClick}
+              sx={{ textTransform: "none" }}
+            >
+              Upload theme file
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={handleExport}
+              sx={{ textTransform: "none" }}
+            >
+              Download theme file
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleShowSnippet}
+              sx={{ textTransform: "none" }}
+            >
+              Show code snippet
+            </Button>
+            <Box
+              component="input"
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleFile}
+              sx={{ display: "none" }}
+            />
+          </Stack>
+          <Typography variant="caption" color="text.secondary">
+            Keep multiple drafts in the mixer&rsquo;s <strong>Draft</strong>{" "}
+            selector — they persist to <code>localStorage</code> and sync across
+            every mixer. <strong>Save Custom Theme</strong> applies the active
+            draft live; download saves a <code>.theme.json</code> you can
+            re-upload or paste into <code>THEME_PALETTES</code>.
+          </Typography>
+          {importError && (
+            <Alert severity="error" onClose={() => setImportError(null)}>
+              {importError}
+            </Alert>
+          )}
+          {snippet && (
+            <Box
+              component="pre"
+              sx={{
+                m: 0,
+                p: 1.5,
+                maxHeight: 220,
+                overflow: "auto",
+                fontSize: "0.7rem",
+                fontFamily: "monospace",
+                bgcolor: "action.hover",
+                borderRadius: 1,
+                border: "1px solid",
+                borderColor: "divider",
+                whiteSpace: "pre",
+              }}
+            >
+              {snippet}
+            </Box>
+          )}
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+}
+
+/**
+ * Interactive theme + color-scheme picker used by the live-component stories so
+ * the same specimens can be viewed under every cosmetic palette in both
+ * schemes without leaving the story. A "Design…" toggle reveals the theme
+ * designer for building, importing, and exporting custom palettes.
+ */
+function ShowcaseThemePicker({
+  themeId,
+  scheme,
+  hasCustom,
+  designerOpen,
+  onThemeChange,
+  onSchemeChange,
+  onToggleDesigner,
+}: {
+  themeId: string;
+  scheme: "light" | "dark";
+  hasCustom: boolean;
+  designerOpen: boolean;
+  onThemeChange: (id: string) => void;
+  onSchemeChange: (scheme: "light" | "dark") => void;
+  onToggleDesigner: () => void;
+}) {
+  return (
+    <Stack
+      direction="row"
+      spacing={3}
+      alignItems="center"
+      flexWrap="wrap"
+      useFlexGap
+      sx={{ mb: 4 }}
+    >
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography variant="overline" color="text.secondary">
+          Theme
+        </Typography>
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={themeId}
+          onChange={(_, v) => v && onThemeChange(v)}
+        >
+          {THEME_IDS.map((id) => (
+            <ToggleButton
+              key={id}
+              value={id}
+              sx={{ textTransform: "capitalize" }}
+            >
+              {themeLabel(id)}
+            </ToggleButton>
+          ))}
+          {hasCustom && (
+            <ToggleButton
+              value={CUSTOM_THEME_ID}
+              sx={{ textTransform: "capitalize" }}
+            >
+              custom
+            </ToggleButton>
+          )}
+        </ToggleButtonGroup>
+      </Stack>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography variant="overline" color="text.secondary">
+          Scheme
+        </Typography>
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={scheme}
+          onChange={(_, v) => v && onSchemeChange(v)}
+        >
+          <ToggleButton value="light">Light</ToggleButton>
+          <ToggleButton value="dark">Dark</ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
+      <Button
+        size="small"
+        variant={designerOpen ? "contained" : "outlined"}
+        onClick={onToggleDesigner}
+        sx={{ textTransform: "none" }}
+      >
+        {designerOpen ? "Close designer" : "Design theme…"}
+      </Button>
+    </Stack>
+  );
+}
+
+/**
+ * Story shell that renders a heading, description, and an interactive theme +
+ * scheme picker (with a built-in theme designer), then mounts its children
+ * under the selected showcase theme.
+ */
+function ThemedShowcaseShell({
+  title,
+  description,
+  globalScheme,
+  children,
+}: {
+  title: string;
+  description: React.ReactNode;
+  /** Scheme from the Storybook color-scheme toolbar toggle. */
+  globalScheme: "light" | "dark";
+  children: React.ReactNode;
+}) {
+  const [themeId, setThemeId] = React.useState("default");
+  const [scheme, setScheme] = React.useState<"light" | "dark">(globalScheme);
+  // Follow the Storybook dark-mode toolbar toggle; manual picks still work
+  // until the global changes again.
+  React.useEffect(() => {
+    setScheme(globalScheme);
+  }, [globalScheme]);
+  const [customInput, setCustomInput] =
+    React.useState<CustomThemePaletteInput | null>(null);
+  const [designerOpen, setDesignerOpen] = React.useState(false);
+
+  const theme = React.useMemo(() => {
+    if (themeId === CUSTOM_THEME_ID && customInput) {
+      return createCustomShowcaseTheme(customInput);
+    }
+    return createShowcaseTheme(themeId);
+  }, [themeId, customInput]);
+
+  const handleApplyCustom = React.useCallback(
+    (input: CustomThemePaletteInput) => {
+      setCustomInput(input);
+      setThemeId(CUSTOM_THEME_ID);
+    },
+    [],
+  );
+
+  // Which preset to seed the designer from when editing a current theme.
+  const presetForDesigner = themeId === CUSTOM_THEME_ID ? "default" : themeId;
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Paper
+        data-mui-color-scheme={scheme}
+        elevation={0}
+        sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}
+      >
+        <Typography variant="h4" gutterBottom>
+          {title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          {description}
+        </Typography>
+        <ShowcaseThemePicker
+          themeId={themeId}
+          scheme={scheme}
+          hasCustom={customInput != null}
+          designerOpen={designerOpen}
+          onThemeChange={setThemeId}
+          onSchemeChange={setScheme}
+          onToggleDesigner={() => setDesignerOpen((o) => !o)}
+        />
+        <Collapse in={designerOpen} unmountOnExit>
+          <ThemeDesignerPanel
+            currentPresetId={presetForDesigner}
+            onApply={handleApplyCustom}
+          />
+        </Collapse>
+        {children}
+      </Paper>
+    </ThemeProvider>
+  );
+}
+
 function ThemeBlock({ themeId }: { themeId: string }) {
   const theme = React.useMemo(() => createShowcaseTheme(themeId), [themeId]);
   const palette = THEME_PALETTES[themeId];
@@ -496,7 +1024,7 @@ function ThemeBlock({ themeId }: { themeId: string }) {
     <ThemeProvider theme={theme}>
       <Box sx={{ mb: 5 }}>
         <Typography variant="h5" sx={{ textTransform: "capitalize", mb: 1.5 }}>
-          {themeId}
+          {themeLabel(themeId)}
         </Typography>
         <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
           <SchemePanel scheme="light" variant={palette.light} />
@@ -916,58 +1444,209 @@ function SearchBarMock() {
   );
 }
 
-function AppBarMock() {
+/**
+ * Static app-bar shell styled exactly like AppShell's fixed app bar — glass
+ * background, elevation, bottom divider, square corners. Reused by every
+ * app-bar variant below.
+ */
+function ShowcaseAppBar({ children }: { children: React.ReactNode }) {
   return (
-    <Box sx={{ width: "100%" }}>
-      <Paper
-        elevation={SEMANTIC_THEME.elevation.appBar}
-        sx={{
-          px: `${SEMANTIC_THEME.padding.toolbarX}px`,
-          py: `${SEMANTIC_THEME.padding.toolbarY}px`,
-          backgroundColor: SEMANTIC_THEME.surface.lightGlass,
-          backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
-          borderRadius: 0,
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="subtitle1" sx={{ flex: 1 }}>
-            Unit Editor
-          </Typography>
-          <IconButton size="small" color="primary">
-            <Box
-              sx={{
-                width: 16,
-                height: 16,
-                borderRadius: "50%",
-                bgcolor: "currentColor",
-              }}
-            />
-          </IconButton>
-          <Avatar sx={{ width: 28, height: 28 }}>A</Avatar>
-        </Stack>
-      </Paper>
-      <Paper
-        elevation={0}
-        sx={{
-          px: `${SEMANTIC_THEME.padding.toolbarX}px`,
-          py: `${SEMANTIC_THEME.padding.toolbarY}px`,
-          borderTop: "1px solid",
-          borderColor: "divider",
-          borderRadius: 0,
-        }}
-      >
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Chip size="small" label="Search" variant="outlined" />
-          <Chip size="small" label="⏱ 20:00" variant="outlined" />
-          <Chip
-            size="small"
-            label="Synced"
-            color="success"
-            variant="outlined"
-          />
-        </Stack>
-      </Paper>
-    </Box>
+    <AppBar
+      position="static"
+      color="default"
+      elevation={SEMANTIC_THEME.elevation.appBar}
+      sx={{
+        borderRadius: 0,
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        backgroundColor: "custom.glassNavbar",
+        backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+        WebkitBackdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+      }}
+    >
+      {children}
+    </AppBar>
+  );
+}
+
+// MainToolbar requires a children prop; the app bar injects nothing here.
+const emptyToolbarChild = <Box component="span" sx={{ display: "none" }} />;
+
+/** Global navigation app bar — dashboard / list pages (single row). */
+function GlobalAppBar() {
+  return (
+    <ShowcaseAppBar>
+      <MainToolbar>{emptyToolbarChild}</MainToolbar>
+    </ShowcaseAppBar>
+  );
+}
+
+/** Workbook app bar — read-only learner view with the contextual second row. */
+function WorkbookAppBar() {
+  return (
+    <ShowcaseAppBar>
+      <MainToolbar>
+        <WorkbookToolbarTitle
+          title="Chapter 3: Verb Conjugation"
+          description="Practice conjugating regular -ar, -er, and -ir verbs."
+        />
+      </MainToolbar>
+      <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+        <WorkbookContextualToolbarView
+          timeString="19:58"
+          connection="connected"
+          joinCode="A1B2C3"
+          finishedQuestions={3}
+          totalQuestions={5}
+        />
+      </Box>
+    </ShowcaseAppBar>
+  );
+}
+
+/** Workbook app bar — mid-session syncing state, no timer, higher progress. */
+function WorkbookAppBarSyncing() {
+  return (
+    <ShowcaseAppBar>
+      <MainToolbar>
+        <WorkbookToolbarTitle
+          title="Chapter 4: Ser vs. Estar"
+          description="When to use each “to be” verb in everyday context."
+        />
+      </MainToolbar>
+      <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+        <WorkbookContextualToolbarView
+          connection="syncing"
+          finishedQuestions={4}
+          totalQuestions={5}
+        />
+      </Box>
+    </ShowcaseAppBar>
+  );
+}
+
+/** Workbook app bar — offline / disconnected collaboration state. */
+function WorkbookAppBarOffline() {
+  return (
+    <ShowcaseAppBar>
+      <MainToolbar>
+        <WorkbookToolbarTitle
+          title="Chapter 5: Preterite Tense"
+          description="Narrating completed past actions."
+        />
+      </MainToolbar>
+      <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+        <WorkbookContextualToolbarView
+          connection="offline"
+          finishedQuestions={0}
+          totalQuestions={5}
+        />
+      </Box>
+    </ShowcaseAppBar>
+  );
+}
+
+/** Lexical config + mock contexts for mounting the REAL editor toolbar. */
+const editorToolbarConfig = {
+  namespace: "ShowcaseEditor",
+  nodes: [...EditorNodes],
+  theme: LanguageEditorTheme,
+  onError: (e: Error) => console.error("[ShowcaseEditor]", e),
+  editable: true,
+};
+
+const editorToolbarUnit = {
+  unit: {
+    id: "showcase-editor-unit",
+    name: "Chapter 3: Verb Conjugation",
+    description: "Draft · editing",
+    status: "DRAFT",
+    data: null,
+  },
+  name: "Chapter 3: Verb Conjugation",
+  identityId: "showcase-user",
+  session: { username: "instructor-1" },
+  editorRef: { current: null },
+  handleDelete: () => {},
+  handleStatusChange: () => {},
+};
+
+/**
+ * Mounts the real ToolBarPlugin inside a minimal LexicalComposer. The plugin
+ * portals its toolbar into AppShell's toolbarPortalRef, so we point that ref at
+ * the second app-bar row here.
+ */
+function RealEditorToolbar() {
+  const toolbarPortalRef = React.useRef<HTMLDivElement | null>(null);
+  const toolbarChildrenPortalRef = React.useRef<HTMLDivElement | null>(null);
+  // Force one re-render after mount so the portal ref is attached before
+  // ToolBarPlugin reads it.
+  const [, forceRender] = React.useReducer((x) => x + 1, 0);
+  React.useEffect(() => {
+    forceRender();
+  }, []);
+
+  const appShellValue = React.useMemo(
+    () => ({
+      drawerOpen: false,
+      setDrawerOpen: () => {},
+      isDesktop: true,
+      drawerWidth: 0,
+      collapsed: false,
+      setCollapsed: () => {},
+      hidden: true,
+      setHidden: () => {},
+      toolbarContent: null,
+      setToolbarContent: () => {},
+      appBarHeight: 48,
+      toolbarPortalRef,
+      toolbarChildrenPortalRef,
+    }),
+    [],
+  );
+
+  return (
+    <AppShellContext.Provider value={appShellValue as never}>
+      <UnitContext.Provider value={editorToolbarUnit as never}>
+        {/* ToolBarPlugin portals its own scrollable toolbar (with arrows) here.
+            Hide its inline title editor — the title lives in the first row. */}
+        <Box
+          ref={toolbarPortalRef}
+          sx={{
+            width: "100%",
+            minWidth: 0,
+            "& > div > :not([data-tour='editor-toolbar'])": {
+              display: "none",
+            },
+          }}
+        />
+        <LexicalComposer initialConfig={editorToolbarConfig}>
+          {React.createElement(ToolBarPlugin as never, {
+            open: false,
+            setOpen: () => {},
+            setTabValue: () => {},
+            isScrolled: false,
+          })}
+        </LexicalComposer>
+      </UnitContext.Provider>
+    </AppShellContext.Provider>
+  );
+}
+
+/** Editor app bar — instructor edit mode: identity row + full Lexical toolbar. */
+function EditorAppBar() {
+  return (
+    <ShowcaseAppBar>
+      <MainToolbar>
+        <WorkbookToolbarTitle
+          title="Chapter 3: Verb Conjugation"
+          description="Practice conjugating regular -ar, -er, and -ir verbs."
+        />
+      </MainToolbar>
+      <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+        <RealEditorToolbar />
+      </Box>
+    </ShowcaseAppBar>
   );
 }
 
@@ -1077,31 +1756,107 @@ function EmptyStateMock() {
       sx={{
         width: "100%",
         maxWidth: 340,
-        p: 4,
         borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
-        textAlign: "center",
       }}
     >
-      <Avatar
-        sx={{
-          width: 48,
-          height: 48,
-          mx: "auto",
-          mb: 1.5,
-          bgcolor: "action.hover",
-          color: "text.secondary",
-        }}
-      >
-        ☆
-      </Avatar>
-      <Typography variant="subtitle1" gutterBottom>
-        No squads yet
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Join or create a squad to compete on the leaderboard.
-      </Typography>
-      <Button variant="contained">Create a squad</Button>
+      <EmptyState
+        dense
+        title="No squads yet"
+        description="Join or create a squad to compete on the leaderboard."
+        action={<Button variant="contained">Create a squad</Button>}
+        secondaryAction={<Button variant="outlined">Browse squads</Button>}
+      />
     </Paper>
+  );
+}
+
+function ErrorStateMock() {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        width: "100%",
+        maxWidth: 340,
+        borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
+      }}
+    >
+      <ErrorState
+        dense
+        title="Review room not found"
+        description="This peer-review room may have closed or the link is out of date."
+        onRetry={() => {}}
+      />
+    </Paper>
+  );
+}
+
+// Direct specimen of the semantic Card variants so they're exercised in isolation.
+function CardVariantsSpecimen() {
+  return (
+    <Stack spacing={2} sx={{ width: "100%", maxWidth: 340 }}>
+      <Card variant="assignment">
+        <CardContent>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Card variant=&quot;assignment&quot;
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Primary left accent, token radius, hover elevation lift.
+          </Typography>
+        </CardContent>
+      </Card>
+      <Card variant="panel">
+        <CardContent>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Card variant=&quot;panel&quot;
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Neutral divider border, larger panel radius, no shadow.
+          </Typography>
+        </CardContent>
+      </Card>
+    </Stack>
+  );
+}
+
+// Soft status chips: readable tinted fills, neutral grey for the zero/default
+// case (never white-on-red for a benign count).
+function StatusChipSpecimen() {
+  return (
+    <Stack spacing={1.5} sx={{ width: "100%", maxWidth: 340 }}>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Chip variant="status" label="0 pending" />
+        <Chip variant="status" color="info" label="3 in review" />
+        <Chip variant="status" color="success" label="Passed" />
+      </Stack>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Chip variant="status" color="warning" label="Due soon" />
+        <Chip variant="status" color="error" label="Overdue" />
+        <Chip variant="status" color="primary" label="New" />
+      </Stack>
+    </Stack>
+  );
+}
+
+// Button hierarchy: primary = contained, secondary = outlined, tertiary = text.
+function ButtonHierarchySpecimen() {
+  return (
+    <Stack spacing={1.5} sx={{ width: "100%", maxWidth: 340 }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        flexWrap="wrap"
+        useFlexGap
+      >
+        <Button variant="contained">Primary</Button>
+        <Button variant="outlined">Secondary</Button>
+        <Button variant="text">Tertiary</Button>
+      </Stack>
+      <Typography variant="body2" color="text.secondary">
+        One solid primary action per view; outlined for secondary; text for
+        tertiary. No uppercase (theme sets textTransform: none).
+      </Typography>
+    </Stack>
   );
 }
 
@@ -2694,7 +3449,15 @@ function RecurringNotificationCards() {
 }
 
 function RecurringPatternsTabs() {
-  const [tab, setTab] = React.useState(0);
+  const [active, setActive] = React.useState(0);
+  const sectionRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const scrollTo = (i: number) => {
+    setActive(i);
+    sectionRefs.current[i]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
   const groups: { label: string; content: React.ReactNode }[] = [
     {
       label: "Cards & states",
@@ -2712,23 +3475,51 @@ function RecurringPatternsTabs() {
           <PatternCell title="Empty state">
             <EmptyStateMock />
           </PatternCell>
+          <PatternCell title="Error state">
+            <ErrorStateMock />
+          </PatternCell>
+          <PatternCell title="Card variants">
+            <CardVariantsSpecimen />
+          </PatternCell>
+          <PatternCell title="Status chips">
+            <StatusChipSpecimen />
+          </PatternCell>
+          <PatternCell title="Button hierarchy">
+            <ButtonHierarchySpecimen />
+          </PatternCell>
         </PatternGrid>
       ),
     },
     {
       label: "App chrome",
       content: (
-        <PatternGrid>
-          <PatternCell title="App bar (two-row)">
-            <AppBarMock />
-          </PatternCell>
-          <PatternCell title="Drawer">
-            <DrawerMock />
-          </PatternCell>
-          <PatternCell title="Search bar">
-            <SearchBarMock />
-          </PatternCell>
-        </PatternGrid>
+        <Stack spacing={4}>
+          <Stack spacing={3}>
+            <PatternCell title="Global app bar — dashboard / list pages (single row)">
+              <GlobalAppBar />
+            </PatternCell>
+            <PatternCell title="Workbook app bar — connected, timer running (two rows)">
+              <WorkbookAppBar />
+            </PatternCell>
+            <PatternCell title="Workbook app bar — syncing, no timer (two rows)">
+              <WorkbookAppBarSyncing />
+            </PatternCell>
+            <PatternCell title="Workbook app bar — offline collaboration (two rows)">
+              <WorkbookAppBarOffline />
+            </PatternCell>
+            <PatternCell title="Editor app bar — edit mode with full Lexical toolbar (two rows)">
+              <EditorAppBar />
+            </PatternCell>
+          </Stack>
+          <PatternGrid>
+            <PatternCell title="Drawer">
+              <DrawerMock />
+            </PatternCell>
+            <PatternCell title="Search bar">
+              <SearchBarMock />
+            </PatternCell>
+          </PatternGrid>
+        </Stack>
       ),
     },
     {
@@ -2788,30 +3579,64 @@ function RecurringPatternsTabs() {
         </>
       ),
     },
+    {
+      label: "Settings (mock)",
+      content: (
+        <PatternGrid>
+          <PatternCell title="User settings — target design (mock)">
+            <UserSettingsSpecimen />
+          </PatternCell>
+        </PatternGrid>
+      ),
+    },
   ];
   return (
     <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
-      <Tabs
-        orientation="vertical"
-        value={tab}
-        onChange={(_, v) => setTab(v)}
+      <Box
+        component="nav"
         sx={{
-          borderRight: 1,
-          borderColor: "divider",
+          position: "sticky",
+          top: 16,
+          alignSelf: "flex-start",
           minWidth: 200,
           flexShrink: 0,
-          "& .MuiTab-root": {
-            alignItems: "flex-start",
-            textTransform: "none",
-            textAlign: "left",
-          },
+          borderRight: 1,
+          borderColor: "divider",
+          pr: 1,
         }}
       >
-        {groups.map((g) => (
-          <Tab key={g.label} label={g.label} />
-        ))}
-      </Tabs>
-      <Box sx={{ flex: 1, minWidth: 0 }}>{groups[tab].content}</Box>
+        <Stack spacing={0.5}>
+          {groups.map((g, i) => (
+            <Button
+              key={g.label}
+              onClick={() => scrollTo(i)}
+              variant={active === i ? "contained" : "text"}
+              size="small"
+              sx={{ justifyContent: "flex-start", textTransform: "none" }}
+            >
+              {g.label}
+            </Button>
+          ))}
+        </Stack>
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Stack spacing={6}>
+          {groups.map((g, i) => (
+            <Box
+              key={g.label}
+              ref={(el: HTMLDivElement | null) => {
+                sectionRefs.current[i] = el;
+              }}
+              sx={{ scrollMarginTop: 16 }}
+            >
+              <Typography variant="h5" gutterBottom>
+                {g.label}
+              </Typography>
+              {g.content}
+            </Box>
+          ))}
+        </Stack>
+      </Box>
     </Box>
   );
 }
@@ -2853,31 +3678,15 @@ export const RecurringPatterns: Story = {
  */
 export const EditorBlocksLive: Story = {
   name: "Editor Blocks (Live)",
-  render: () => {
-    const theme = createTheme({
-      ...getThemeOptions("default"),
-      components: sharedComponentOverrides,
-    });
-    return (
-      <ThemeProvider theme={theme}>
-        <Paper
-          data-mui-color-scheme="light"
-          elevation={0}
-          sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Editor Blocks (Live)
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Actual interactive block components rendered from their exported
-            view components (shared with the real editor) — a quiz, a
-            meaning-association matching exercise, and a media embed.
-          </Typography>
-          <LiveEditorBlocks />
-        </Paper>
-      </ThemeProvider>
-    );
-  },
+  render: (_args, context) => (
+    <ThemedShowcaseShell
+      title="Editor Blocks (Live)"
+      description="Actual interactive block components rendered from their exported view components (shared with the real editor) — a quiz, a meaning-association matching exercise, and a media embed."
+      globalScheme={resolveGlobalScheme(context.globals?.colorScheme)}
+    >
+      <LiveEditorBlocks />
+    </ThemedShowcaseShell>
+  ),
 };
 
 /**
@@ -2950,51 +3759,30 @@ const showcaseProfileLevel = {
 };
 
 /**
- * A learner profile card — avatar (with streak/level/border), name, level
- * badge, XP, streak shield, and badge shelf. Composed from the same
- * presentational components the profile page uses.
+ * The real profile "avatar card" (ProfileCardView) — the same component the
+ * profile page renders. Avatar + level badge are provided via the avatar slot
+ * so it renders without the gamification context AvatarSection needs.
  */
-function ProfileCardSpecimen() {
+function ProfileCardReal() {
   return (
-    <Card
-      sx={{
-        p: 3,
-        pt: 3.5,
-        maxWidth: 300,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 1.25,
-        overflow: "visible",
-      }}
-    >
-      <AvatarDisplay
-        seed="profile-demo"
-        size={112}
-        style="detailed"
-        streak={7}
-        level={showcaseProfileLevel}
-        borderEffect="gold"
-      />
-      <Typography variant="h6" sx={{ mt: 0.5 }}>
-        Sakura Tanaka
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        @sakura
-      </Typography>
-      <LevelBadge level={showcaseProfileLevel} />
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 0.5 }}>
-        <Stack alignItems="center">
-          <AnimatedXPCounter targetValue={4250} />
-          <Typography variant="caption" color="text.secondary">
-            Total XP
-          </Typography>
+    <ProfileCardView
+      sx={{ maxWidth: 320 }}
+      avatar={
+        <Stack alignItems="center" spacing={2}>
+          <AvatarDisplay
+            seed="profile-demo"
+            size={112}
+            style="detailed"
+            streak={7}
+            level={showcaseProfileLevel}
+            borderEffect="gold"
+          />
+          <LevelBadge level={showcaseProfileLevel} />
         </Stack>
-        <StreakShield freezesRemaining={2} freezesUsed={1} />
-      </Stack>
-      <Divider flexItem sx={{ my: 0.5 }} />
-      <BadgeShelf earnedBadges={SHOWCASE_BADGES} earnedOnly />
-    </Card>
+      }
+      displayName="Sakura Tanaka"
+      streakShield={<StreakShield freezesRemaining={2} freezesUsed={1} />}
+    />
   );
 }
 
@@ -3091,17 +3879,129 @@ function UserSettingsSpecimen() {
   );
 }
 
+/** The instructor badge editor (overrides + custom badges with visual editor). */
+function BadgeEditorCard() {
+  const [overrides, setOverrides] = React.useState<any[]>([]);
+  const [customBadges, setCustomBadges] = React.useState<any[]>([]);
+  return (
+    <BadgeEditor
+      overrides={overrides}
+      customBadges={customBadges}
+      onOverrideChange={(o: any) =>
+        setOverrides((prev) => [
+          ...prev.filter((x) => x.badgeType !== o.badgeType),
+          o,
+        ])
+      }
+      onOverrideReset={(type: string) =>
+        setOverrides((prev) => prev.filter((x) => x.badgeType !== type))
+      }
+      onAddCustomBadge={(b: any) =>
+        setCustomBadges((prev) => [
+          ...prev,
+          { ...b, id: `custom-${Date.now()}` },
+        ])
+      }
+      onDeleteCustomBadge={(id: string) =>
+        setCustomBadges((prev) => prev.filter((b) => b.id !== id))
+      }
+    />
+  );
+}
+
+/** The anti-badge redemption-condition editor. */
+function RedemptionConditionFormCard() {
+  const [condition, setCondition] = React.useState<any>(null);
+  return <RedemptionConditionForm value={condition} onChange={setCondition} />;
+}
+
+/** The badge visual / gradient editor (shape, colors, gradient stops, icon). */
+function BadgeVisualPickerCard() {
+  const [visual, setVisual] = React.useState<any>({
+    iconName: "GiTrophy",
+    iconLib: "gi",
+    shape: "shield",
+    bgColor: "#4caf50",
+    iconColor: "#ffffff",
+    animation: "draw",
+    gradient: {
+      type: "linear",
+      angle: "135deg",
+      stops: [
+        { color: "#ffd700", position: "0%" },
+        { color: "#b8860b", position: "100%" },
+      ],
+    },
+  });
+  return <BadgeVisualPicker value={visual} onChange={setVisual} />;
+}
+
+/** The avatar glow-ring gradient editor (rotating conic-gradient presets). */
+function GlowRingGradientCard() {
+  const [colors, setColors] = React.useState<string[]>([
+    ...DEFAULT_GLOW_COLORS,
+  ]);
+  return (
+    <Stack spacing={2} alignItems="flex-start">
+      <AvatarGlowRing
+        size={96}
+        config={{
+          colors,
+          speed: 4,
+          thickness: 3,
+          active: true,
+          expiresAt: null,
+        }}
+      >
+        <DiceBearAvatar seed="glow-editor" size={96} style="detailed" />
+      </AvatarGlowRing>
+      <Stack direction="row" flexWrap="wrap" gap={0.5}>
+        {Object.entries(GLOW_COLOR_PRESETS).map(([name, preset]) => {
+          const presetColors = preset as string[];
+          const selected = colors.join(",") === presetColors.join(",");
+          return (
+            <Chip
+              key={name}
+              label={name.charAt(0).toUpperCase() + name.slice(1)}
+              size="small"
+              variant={selected ? "filled" : "outlined"}
+              color={selected ? "primary" : "default"}
+              onClick={() => setColors([...presetColors])}
+              avatar={
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    background: `conic-gradient(${presetColors
+                      .slice(0, 4)
+                      .join(", ")})`,
+                  }}
+                />
+              }
+            />
+          );
+        })}
+      </Stack>
+    </Stack>
+  );
+}
+
+/** The hero theme gradient editor (ThemeMixer custom-palette designer). */
+function HeroGradientCard() {
+  const [input, setInput] = React.useState<CustomThemePaletteInput>(() =>
+    presetToCustomInput("default"),
+  );
+  return <ThemeMixer value={input} onSave={setInput} />;
+}
+
 /**
  * The presentational gamification components (badges, XP, levels, streaks,
  * squads) rendered together so their styling reads as one system.
  */
 export const GamificationComponents: Story = {
   name: "Gamification Components",
-  render: () => {
-    const theme = createTheme({
-      ...getThemeOptions("default"),
-      components: sharedComponentOverrides,
-    });
+  render: (_args, context) => {
     const borderEffects: {
       effect:
         | "solid"
@@ -3124,345 +4024,368 @@ export const GamificationComponents: Story = {
       { effect: "shadow", label: "shadow" },
     ];
     return (
-      <ThemeProvider theme={theme}>
-        <Paper
-          data-mui-color-scheme="light"
-          elevation={0}
-          sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}
+      <ThemedShowcaseShell
+        title="Gamification Components"
+        description="Badges, XP counters, level progression, streaks, squad crests, and status indicators — the presentational gamification building blocks."
+        globalScheme={resolveGlobalScheme(context.globals?.colorScheme)}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: 4,
+            alignItems: "start",
+          }}
         >
-          <Typography variant="h4" gutterBottom>
-            Gamification Components
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Badges, XP counters, level progression, streaks, squad crests, and
-            status indicators — the presentational gamification building blocks.
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: 4,
-              alignItems: "start",
-            }}
-          >
-            <PatternCell title="Badge icons">
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                flexWrap="wrap"
-                useFlexGap
-              >
-                <BadgeIcon badgeType="FIRST_SUBMISSION" size={64} earned />
-                <BadgeIcon badgeType="SHARPSHOOTER" size={64} earned />
-                <BadgeIcon badgeType="TOP_OF_CLASS" size={64} earned />
-                <BadgeIcon badgeType="PERFECTIONIST" size={64} earned={false} />
-              </Stack>
-            </PatternCell>
+          <PatternCell title="Badge icons">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              flexWrap="wrap"
+              useFlexGap
+            >
+              <BadgeIcon badgeType="FIRST_SUBMISSION" size={64} earned />
+              <BadgeIcon badgeType="SHARPSHOOTER" size={64} earned />
+              <BadgeIcon badgeType="TOP_OF_CLASS" size={64} earned />
+              <BadgeIcon badgeType="PERFECTIONIST" size={64} earned={false} />
+            </Stack>
+          </PatternCell>
 
-            <PatternCell title="Badge shelf">
-              <BadgeShelf earnedBadges={SHOWCASE_BADGES} />
-            </PatternCell>
+          <PatternCell title="Badge shelf">
+            <BadgeShelf earnedBadges={SHOWCASE_BADGES} />
+          </PatternCell>
 
-            <PatternCell title="Level badge">
-              <LevelBadge
-                level={{
-                  level: 3,
-                  label: "Adventurer",
-                  xpRequired: 400,
-                  xpForNextLevel: 800,
-                  progress: 55,
-                }}
-              />
-            </PatternCell>
+          <PatternCell title="Level badge">
+            <LevelBadge
+              level={{
+                level: 3,
+                label: "Adventurer",
+                xpRequired: 400,
+                xpForNextLevel: 800,
+                progress: 55,
+              }}
+            />
+          </PatternCell>
 
-            <PatternCell title="Animated XP counter">
-              <AnimatedXPCounter targetValue={1250} />
-            </PatternCell>
+          <PatternCell title="Animated XP counter">
+            <AnimatedXPCounter targetValue={1250} />
+          </PatternCell>
 
-            <PatternCell title="Progress rings">
-              <ProgressRings
-                modules={[
-                  {
-                    moduleId: "m1",
-                    moduleName: "Foundations",
-                    completionPercent: 75,
-                    totalWorkbooks: 4,
-                    completedWorkbooks: 3,
-                  },
-                  {
-                    moduleId: "m2",
-                    moduleName: "Advanced",
-                    completionPercent: 40,
-                    totalWorkbooks: 5,
-                    completedWorkbooks: 2,
-                  },
-                  {
-                    moduleId: "m3",
-                    moduleName: "Projects",
-                    completionPercent: 100,
-                    totalWorkbooks: 3,
-                    completedWorkbooks: 3,
-                  },
-                ]}
-              />
-            </PatternCell>
+          <PatternCell title="Progress rings">
+            <ProgressRings
+              modules={[
+                {
+                  moduleId: "m1",
+                  moduleName: "Foundations",
+                  completionPercent: 75,
+                  totalWorkbooks: 4,
+                  completedWorkbooks: 3,
+                },
+                {
+                  moduleId: "m2",
+                  moduleName: "Advanced",
+                  completionPercent: 40,
+                  totalWorkbooks: 5,
+                  completedWorkbooks: 2,
+                },
+                {
+                  moduleId: "m3",
+                  moduleName: "Projects",
+                  completionPercent: 100,
+                  totalWorkbooks: 3,
+                  completedWorkbooks: 3,
+                },
+              ]}
+            />
+          </PatternCell>
 
-            <PatternCell title="Streak indicator">
-              <Stack direction="row" spacing={3} alignItems="center">
-                <StreakIndicator currentStreak={5} />
-                <StreakIndicator currentStreak={7} />
-              </Stack>
-            </PatternCell>
+          <PatternCell title="Streak indicator">
+            <Stack direction="row" spacing={3} alignItems="center">
+              <StreakIndicator currentStreak={5} />
+              <StreakIndicator currentStreak={7} />
+            </Stack>
+          </PatternCell>
 
-            <PatternCell title="Streak calendar">
-              <StreakCalendar activeDays={showcaseStreakDays()} />
-            </PatternCell>
+          <PatternCell title="Streak calendar">
+            <StreakCalendar activeDays={showcaseStreakDays()} />
+          </PatternCell>
 
-            <PatternCell title="Squad crests">
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                flexWrap="wrap"
-                useFlexGap
-              >
-                <SquadCrest
-                  squadId="g1"
-                  squadName="Alpha Squad"
-                  totalXP={1500}
-                />
-                <SquadCrest squadId="g2" squadName="Beta Team" totalXP={3000} />
-              </Stack>
-            </PatternCell>
+          <PatternCell title="Squad crests">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              flexWrap="wrap"
+              useFlexGap
+            >
+              <SquadCrest squadId="g1" squadName="Alpha Squad" totalXP={1500} />
+              <SquadCrest squadId="g2" squadName="Beta Team" totalXP={3000} />
+            </Stack>
+          </PatternCell>
 
-            <PatternCell title="Armor Editor (coat of arms)">
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                flexWrap="wrap"
-                useFlexGap
-              >
-                <ArmoriaShield
-                  squadId="armor-1"
-                  squadName="Phoenix Squad"
-                  crestSvg={armorSampleCrestSvg}
-                  armoriaUnlocked
-                  size={96}
-                />
-                <ArmoriaShield
-                  squadId="armor-2"
-                  squadName="Dragon Knights"
-                  crestSvg={null}
-                  armoriaUnlocked={false}
-                  size={96}
-                />
-              </Stack>
-            </PatternCell>
-
-            <PatternCell title="Streak freeze shield">
-              <Stack direction="row" spacing={3} alignItems="center">
-                <StreakShield freezesRemaining={3} freezesUsed={1} />
-                <StreakShield freezesRemaining={0} freezesUsed={2} />
-              </Stack>
-            </PatternCell>
-
-            <PatternCell title="Avatar border effects">
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: 2,
-                }}
-              >
-                {borderEffects.map(({ effect, label }) => (
-                  <Stack key={effect} alignItems="center" spacing={0.5}>
-                    <AvatarDisplay
-                      seed={`indicator-${effect}`}
-                      size={56}
-                      borderEffect={effect}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {label}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Box>
-            </PatternCell>
-
-            <PatternCell title="Avatar glow ring">
-              <AvatarGlowRing
+          <PatternCell title="Armor Editor (coat of arms)">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              flexWrap="wrap"
+              useFlexGap
+            >
+              <ArmoriaShield
+                squadId="armor-1"
+                squadName="Phoenix Squad"
+                crestSvg={armorSampleCrestSvg}
+                armoriaUnlocked
                 size={96}
-                config={{
-                  colors: DEFAULT_GLOW_COLORS,
-                  speed: 4,
-                  thickness: 3,
-                  active: true,
-                  expiresAt: null,
-                }}
-              >
-                <DiceBearAvatar
-                  seed="indicator-glow"
-                  size={96}
-                  style="detailed"
-                />
-              </AvatarGlowRing>
-            </PatternCell>
-
-            <PatternCell title="Squad mention pills">
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                <SquadMentionPill
-                  squadId="squad-alpha-001"
-                  squadName="Iron Dragons"
-                  totalXP={4250}
-                  size="small"
-                />
-                <SquadMentionPill
-                  squadId="squad-beta-002"
-                  squadName="Night Owls"
-                  totalXP={2100}
-                  size="medium"
-                />
-              </Stack>
-            </PatternCell>
-
-            <PatternCell title="Section XP gauge">
-              <SectionXPGauge
-                unitCount={8}
-                desiredMaxLevel={6}
-                showTuner={false}
               />
-            </PatternCell>
+              <ArmoriaShield
+                squadId="armor-2"
+                squadName="Dragon Knights"
+                crestSvg={null}
+                armoriaUnlocked={false}
+                size={96}
+              />
+            </Stack>
+          </PatternCell>
 
-            <PatternCell title="Boss battle progress">
-              <BossBattleProgress
-                id="boss-1"
-                title="The Algorithm Dragon"
-                currentXP={500}
-                targetXP={1000}
+          <PatternCell title="Streak freeze shield">
+            <Stack direction="row" spacing={3} alignItems="center">
+              <StreakShield freezesRemaining={3} freezesUsed={1} />
+              <StreakShield freezesRemaining={0} freezesUsed={2} />
+            </Stack>
+          </PatternCell>
+
+          <PatternCell title="Avatar border effects">
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: 2,
+              }}
+            >
+              {borderEffects.map(({ effect, label }) => (
+                <Stack key={effect} alignItems="center" spacing={0.5}>
+                  <AvatarDisplay
+                    seed={`indicator-${effect}`}
+                    size={56}
+                    borderEffect={effect}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    {label}
+                  </Typography>
+                </Stack>
+              ))}
+            </Box>
+          </PatternCell>
+
+          <PatternCell title="Avatar glow ring">
+            <AvatarGlowRing
+              size={96}
+              config={{
+                colors: DEFAULT_GLOW_COLORS,
+                speed: 4,
+                thickness: 3,
+                active: true,
+                expiresAt: null,
+              }}
+            >
+              <DiceBearAvatar
+                seed="indicator-glow"
+                size={96}
+                style="detailed"
+              />
+            </AvatarGlowRing>
+          </PatternCell>
+
+          <PatternCell title="Squad mention pills">
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              <SquadMentionPill
+                squadId="squad-alpha-001"
+                squadName="Iron Dragons"
+                totalXP={4250}
+                size="small"
+              />
+              <SquadMentionPill
+                squadId="squad-beta-002"
+                squadName="Night Owls"
+                totalXP={2100}
+                size="medium"
+              />
+            </Stack>
+          </PatternCell>
+
+          <PatternCell title="Section XP gauge">
+            <SectionXPGauge
+              unitCount={8}
+              desiredMaxLevel={6}
+              showTuner={false}
+            />
+          </PatternCell>
+
+          <PatternCell title="Boss battle progress">
+            <BossBattleProgress
+              id="boss-1"
+              title="The Algorithm Dragon"
+              currentXP={500}
+              targetXP={1000}
+              active
+              bonusMultiplier={1.5}
+              setting="A fortress of infinite loops and recursive nightmares."
+              stakes="If the team fails, everyone loses a streak freeze."
+              deadline={new Date(
+                Date.now() + 3 * 24 * 60 * 60 * 1000,
+              ).toISOString()}
+              contributors={[
+                { studentId: "s1", displayName: "Alice", xpContributed: 200 },
+                { studentId: "s2", displayName: "Bob", xpContributed: 150 },
+                {
+                  studentId: "s3",
+                  displayName: "Charlie",
+                  xpContributed: 100,
+                },
+                { studentId: "s4", displayName: "Diana", xpContributed: 50 },
+              ]}
+            />
+          </PatternCell>
+
+          <PatternCell title="Profile card">
+            <ProfileCardReal />
+          </PatternCell>
+
+          <PatternCell title="Bot avatar (AI assistant, robot styles)">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <BotAvatar size={56} style="bottts" />
+              <BotAvatar size={56} style="bottts-neutral" />
+            </Stack>
+          </PatternCell>
+
+          <PatternCell title="Bot customizer (inline editor card)">
+            <BotCustomizerCard />
+          </PatternCell>
+
+          <PatternCell title="Avatar customizer (editor dialog)">
+            <AvatarCustomizerEditorView />
+          </PatternCell>
+
+          <PatternCell title="Squad armor editor (editor dialog)">
+            <ArmorCrestEditorView />
+          </PatternCell>
+
+          <PatternCell title="Group challenge">
+            <GroupChallengeCard
+              title="Weekly Sprint"
+              targetXP={1000}
+              currentXP={600}
+              active
+              bonusMultiplier={1.5}
+              deadline={new Date(Date.now() + 2 * 86400000).toISOString()}
+            />
+          </PatternCell>
+        </Box>
+
+        <Box sx={{ mt: 5 }}>
+          <Typography variant="h5" gutterBottom>
+            Squads &amp; Teams
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            The collaborative squad surface — leaderboards, boss battles,
+            campaign briefings, and the instructor / member panels from the
+            squads page.
+          </Typography>
+          <Stack spacing={4}>
+            <PatternCell title="Squad leaderboard">
+              <SquadLeaderboard squads={SHOWCASE_SQUADS} mySquadId="g2" />
+            </PatternCell>
+            <PatternCell title="Boss battle">
+              <BossBattleCard
+                title="The Grammar Wyrm"
+                narrative="A fearsome wyrm guards the irregular verbs. Only a coordinated squad can defeat it."
+                phases={SHOWCASE_BOSS_PHASES}
+                totalHP={1000}
+                totalDamage={650}
                 active
-                bonusMultiplier={1.5}
-                setting="A fortress of infinite loops and recursive nightmares."
-                stakes="If the team fails, everyone loses a streak freeze."
-                deadline={new Date(
-                  Date.now() + 3 * 24 * 60 * 60 * 1000,
-                ).toISOString()}
+                bonusMultiplier={2}
+                currentUserRole="Reviewer"
                 contributors={[
-                  { studentId: "s1", displayName: "Alice", xpContributed: 200 },
-                  { studentId: "s2", displayName: "Bob", xpContributed: 150 },
+                  { userId: "u1", displayName: "Alice", xpContributed: 250 },
+                  { userId: "u2", displayName: "Bob", xpContributed: 200 },
                   {
-                    studentId: "s3",
+                    userId: "u3",
                     displayName: "Charlie",
-                    xpContributed: 100,
+                    xpContributed: 150,
                   },
-                  { studentId: "s4", displayName: "Diana", xpContributed: 50 },
+                  { userId: "u4", displayName: "Diana", xpContributed: 50 },
                 ]}
-              />
-            </PatternCell>
-
-            <PatternCell title="Profile card">
-              <ProfileCardSpecimen />
-            </PatternCell>
-
-            <PatternCell title="Bot avatar (AI assistant, style tiers)">
-              <Stack direction="row" spacing={2} alignItems="center">
-                <BotAvatar size={56} style="simple" />
-                <BotAvatar size={56} style="detailed" />
-                <BotAvatar size={56} style="toonhead" />
-              </Stack>
-            </PatternCell>
-
-            <PatternCell title="Bot customizer (inline editor card)">
-              <BotCustomizerCard />
-            </PatternCell>
-
-            <PatternCell title="Avatar customizer (editor dialog)">
-              <AvatarCustomizerEditorView />
-            </PatternCell>
-
-            <PatternCell title="Squad armor editor (editor dialog)">
-              <ArmorCrestEditorView />
-            </PatternCell>
-
-            <PatternCell title="Group challenge">
-              <GroupChallengeCard
-                title="Weekly Sprint"
-                targetXP={1000}
-                currentXP={600}
-                active
-                bonusMultiplier={1.5}
                 deadline={new Date(Date.now() + 2 * 86400000).toISOString()}
               />
             </PatternCell>
-          </Box>
+            <PatternCell title="Campaign briefing">
+              <CampaignBriefing
+                title="Operation Syntax Storm"
+                setting="In the year 2142, the world runs on code. Your cohort must debug reality itself."
+                stakes="If the compiler isn't fixed in time, every app crashes — and civilization with it."
+                chapterText="Chapter 3: You've reached the Memory Leak Caverns. Debug the reference cycles to proceed."
+              />
+            </PatternCell>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+                gap: 4,
+                alignItems: "start",
+              }}
+            >
+              <PatternCell title="Squad message panel (instructor)">
+                <SquadMessagePanelCard />
+              </PatternCell>
+              <PatternCell title="Squad join / membership panel">
+                <SquadJoinPanelCard />
+              </PatternCell>
+            </Box>
+            <PatternCell title="Squad post feed">
+              <SquadPostFeedCard />
+            </PatternCell>
+          </Stack>
+        </Box>
 
-          <Box sx={{ mt: 5 }}>
-            <Typography variant="h5" gutterBottom>
-              Squads &amp; Teams
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              The collaborative squad surface — leaderboards, boss battles,
-              campaign briefings, and the instructor / member panels from the
-              squads page.
-            </Typography>
-            <Stack spacing={4}>
-              <PatternCell title="Squad leaderboard">
-                <SquadLeaderboard squads={SHOWCASE_SQUADS} mySquadId="g2" />
+        <Box sx={{ mt: 5 }}>
+          <Typography variant="h5" gutterBottom>
+            Editors
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            The instructor badge editor, the anti-badge redemption editor, and
+            the gradient / visual editors — badge visual, avatar glow ring, and
+            the hero theme gradient (ThemeMixer).
+          </Typography>
+          <Stack spacing={4}>
+            <PatternCell title="Badge editor (instructor)">
+              <BadgeEditorCard />
+            </PatternCell>
+            <PatternCell title="Anti-badge redemption editor">
+              <RedemptionConditionFormCard />
+            </PatternCell>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+                gap: 4,
+                alignItems: "start",
+              }}
+            >
+              <PatternCell title="Badge visual / gradient editor">
+                <BadgeVisualPickerCard />
               </PatternCell>
-              <PatternCell title="Boss battle">
-                <BossBattleCard
-                  title="The Grammar Wyrm"
-                  narrative="A fearsome wyrm guards the irregular verbs. Only a coordinated squad can defeat it."
-                  phases={SHOWCASE_BOSS_PHASES}
-                  totalHP={1000}
-                  totalDamage={650}
-                  active
-                  bonusMultiplier={2}
-                  currentUserRole="Reviewer"
-                  contributors={[
-                    { userId: "u1", displayName: "Alice", xpContributed: 250 },
-                    { userId: "u2", displayName: "Bob", xpContributed: 200 },
-                    {
-                      userId: "u3",
-                      displayName: "Charlie",
-                      xpContributed: 150,
-                    },
-                    { userId: "u4", displayName: "Diana", xpContributed: 50 },
-                  ]}
-                  deadline={new Date(Date.now() + 2 * 86400000).toISOString()}
-                />
+              <PatternCell title="Avatar glow-ring gradient editor">
+                <GlowRingGradientCard />
               </PatternCell>
-              <PatternCell title="Campaign briefing">
-                <CampaignBriefing
-                  title="Operation Syntax Storm"
-                  setting="In the year 2142, the world runs on code. Your cohort must debug reality itself."
-                  stakes="If the compiler isn't fixed in time, every app crashes — and civilization with it."
-                  chapterText="Chapter 3: You've reached the Memory Leak Caverns. Debug the reference cycles to proceed."
-                />
-              </PatternCell>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                  gap: 4,
-                  alignItems: "start",
-                }}
-              >
-                <PatternCell title="Squad message panel (instructor)">
-                  <SquadMessagePanelCard />
-                </PatternCell>
-                <PatternCell title="Squad join / membership panel">
-                  <SquadJoinPanelCard />
-                </PatternCell>
-              </Box>
-              <PatternCell title="Squad post feed">
-                <SquadPostFeedCard />
-              </PatternCell>
-            </Stack>
-          </Box>
-        </Paper>
-      </ThemeProvider>
+            </Box>
+            <PatternCell title="Hero theme gradient editor (ThemeMixer)">
+              <HeroGradientCard />
+            </PatternCell>
+          </Stack>
+        </Box>
+      </ThemedShowcaseShell>
     );
   },
 };
@@ -3487,240 +4410,1169 @@ const moderationApprovedItem = {
   moderationCheckedAt: new Date().toISOString(),
 };
 
+// Open-trigger wrappers so modal dialogs are inspectable in the gallery.
+function ConfirmDialogCard() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
+        Delete unit…
+      </Button>
+      <ConfirmDialog
+        open={open}
+        title="Delete this unit?"
+        message="This permanently removes the unit and all its content. This cannot be undone."
+        confirmLabel="Delete"
+        confirmColor="error"
+        onConfirm={() => setOpen(false)}
+        onCancel={() => setOpen(false)}
+      />
+    </>
+  );
+}
+
+const showcaseGradeConflict = {
+  gradeId: "grade-gallery-1",
+  localVersion: 4,
+  serverVersion: 5,
+  localData: {
+    "block-1": {
+      userAnswer: "こんにちは、はじめまして。",
+      complete: true,
+      accuracy: 92,
+      gradedOffline: true,
+      prompt: "Introduce yourself politely.",
+    },
+  },
+  serverData: {
+    "block-1": {
+      userAnswer: "こんにちは。",
+      complete: true,
+      accuracy: 70,
+      prompt: "Introduce yourself politely.",
+    },
+  },
+  requiresInstructorReview: false,
+};
+
+function ConflictResolutionDialogCard() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <Button variant="outlined" onClick={() => setOpen(true)}>
+        Resolve sync conflict…
+      </Button>
+      <ConflictResolutionDialog
+        open={open}
+        conflict={showcaseGradeConflict}
+        onClose={() => setOpen(false)}
+        onResolve={() => setOpen(false)}
+      />
+    </>
+  );
+}
+
+function PermissionErrorOverlayCard() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <Button variant="outlined" color="warning" onClick={() => setOpen(true)}>
+        Trigger permission error…
+      </Button>
+      <PermissionErrorOverlay
+        open={open}
+        resourceType="unit"
+        message="You don't have permission to access this unit."
+        onClose={() => setOpen(false)}
+      />
+    </>
+  );
+}
+
+function PersonalBestBannerCard() {
+  const [open, setOpen] = React.useState(true);
+  return (
+    <Stack spacing={1}>
+      <PersonalBestBanner
+        open={open}
+        newScore={92}
+        previousBest={78}
+        onClose={() => setOpen(false)}
+      />
+      {!open && (
+        <Button size="small" onClick={() => setOpen(true)}>
+          Replay banner
+        </Button>
+      )}
+    </Stack>
+  );
+}
+
+const showcaseNotifications = [
+  {
+    id: "nl-1",
+    category: "ASSIGNMENT",
+    title: "New assignment: Hiragana Basics",
+    body: "Due Friday at 5pm.",
+    linkPath: "/assignments/1",
+    linkLabel: "Open",
+    senderName: "Ms. Tanaka",
+    seen: false,
+    interacted: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+  },
+  {
+    id: "nl-2",
+    category: "SQUAD",
+    title: "Iron Dragons posted in your squad",
+    body: "Check out the latest challenge results.",
+    linkPath: "/squads",
+    linkLabel: "View squad",
+    senderName: "Iron Dragons",
+    seen: true,
+    interacted: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+  },
+  {
+    id: "nl-3",
+    category: "GAMIFICATION",
+    title: "You reached Level 5!",
+    body: "Scholar tier unlocked new themes.",
+    linkPath: "/profile",
+    linkLabel: "View profile",
+    senderName: "System",
+    seen: true,
+    interacted: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
+  },
+];
+
+function NotificationListCard() {
+  return (
+    <NotificationContext.Provider
+      value={
+        {
+          notifications: showcaseNotifications,
+          unseenCount: 1,
+          unseenByCategory: { ASSIGNMENT: 1 },
+          loading: false,
+          markSeen: async () => {},
+          markInteracted: async () => {},
+          markAllSeen: async () => {},
+          deleteNotification: async () => {},
+        } as any
+      }
+    >
+      <NotificationList onNavigate={() => {}} />
+    </NotificationContext.Provider>
+  );
+}
+
+const showcaseJobs = [
+  {
+    id: "job-1",
+    type: "document_analysis" as const,
+    subType: "pdf_analysis",
+    status: "processing",
+    owner: "student-abc123",
+    resourceName: "vocabulary-lesson.pdf",
+    startedAt: new Date(Date.now() - 120000).toISOString(),
+    retryCount: 0,
+  },
+  {
+    id: "job-2",
+    type: "agent_job" as const,
+    status: "failed",
+    owner: "instructor-xyz789",
+    resourceName: "Unit: Greetings",
+    startedAt: new Date(Date.now() - 600000).toISOString(),
+    completedAt: new Date(Date.now() - 540000).toISOString(),
+    retryCount: 2,
+    error: { message: "Timeout contacting model provider" },
+  },
+  {
+    id: "job-3",
+    type: "media_transcode" as const,
+    status: "completed",
+    owner: "student-def456",
+    resourceName: "intro.mp4",
+    startedAt: new Date(Date.now() - 7200000).toISOString(),
+    completedAt: new Date(Date.now() - 7100000).toISOString(),
+    retryCount: 0,
+  },
+  {
+    id: "job-4",
+    type: "agent_job" as const,
+    status: "queued",
+    owner: "student-ghi012",
+    resourceName: "Exercise generation",
+    startedAt: null,
+    retryCount: 0,
+  },
+];
+
+function JobsDashboardCard() {
+  const [typeFilter, setTypeFilter] = React.useState("all");
+  const [statusFilter, setStatusFilter] = React.useState("active");
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "info" as "success" | "error" | "info",
+  });
+  return (
+    <JobsDashboardView
+      jobs={showcaseJobs}
+      loading={false}
+      typeFilter={typeFilter}
+      statusFilter={statusFilter}
+      actionInProgress={null}
+      snackbar={snackbar}
+      onTypeFilterChange={setTypeFilter}
+      onStatusFilterChange={setStatusFilter}
+      onRefresh={() => {}}
+      onRetry={() => {}}
+      onCancel={() => {}}
+      onRetryAllFailed={() => {}}
+      onSnackbarClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+    />
+  );
+}
+
+const showcaseSyncOps = [
+  {
+    id: 1,
+    model: "Grade",
+    operation: "update",
+    createdAt: Date.now() - 1000 * 60 * 3,
+    retryCount: 0,
+  },
+  {
+    id: 2,
+    model: "Word",
+    operation: "create",
+    createdAt: Date.now() - 1000 * 60 * 12,
+    retryCount: 2,
+    lastError: "Version conflict — server changed",
+  },
+];
+
+function SyncStatusIndicatorCard() {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  return (
+    <SyncStatusIndicatorView
+      isOnline
+      pendingCount={showcaseSyncOps.length}
+      pendingOps={showcaseSyncOps}
+      syncing={false}
+      lastSyncedAt={Date.now() - 1000 * 60 * 30}
+      dialogOpen={dialogOpen}
+      onOpenDialog={() => setDialogOpen(true)}
+      onCloseDialog={() => setDialogOpen(false)}
+      onSync={() => {}}
+      onResolveOp={() => {}}
+    />
+  );
+}
+
+// The full instructor gradebook table built from real InlineGradeCell cells,
+// with local override state + shared undo/redo history across every cell.
+function GradebookTableCard() {
+  const historyRef = React.useRef(createEmptyHistoryState());
+  const [overrides, setOverrides] = React.useState<
+    Record<string, Record<string, { score: number }>>
+  >({});
+
+  const students = [
+    { id: "s1", name: "Yuki Tanaka" },
+    { id: "s2", name: "Maria Chen" },
+    { id: "s3", name: "Jordan Smith" },
+    { id: "s4", name: "Aisha Patel" },
+  ];
+  const assignments = [
+    { id: "a1", unitID: "u1", name: "Japanese Greetings" },
+    { id: "a2", unitID: "u2", name: "Verb Conjugation" },
+    { id: "a3", unitID: "u3", name: "Kanji Basics" },
+  ];
+  const grades: Record<string, Record<string, number>> = {
+    s1: { u1: 92, u2: 78, u3: 88 },
+    s2: { u1: 65, u2: 91, u3: 72 },
+    s3: { u1: 45, u2: 58, u3: 33 },
+    s4: { u1: 100, u2: 84, u3: 96 },
+  };
+
+  return (
+    <Box>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Click a grade to edit it inline; typing autosaves. Undo/redo (Cmd+Z) is
+        shared across every cell.
+      </Typography>
+      <TableContainer component={Paper} variant="outlined">
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Student</TableCell>
+              {assignments.map((a) => (
+                <TableCell key={a.id} align="right">
+                  {a.name}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {students.map((student, rowIndex) => (
+              <TableRow key={student.id}>
+                <TableCell>{student.name}</TableCell>
+                {assignments.map((assignment, colIndex) => {
+                  const raw = grades[student.id]?.[assignment.unitID];
+                  const override = overrides[student.id]?.[assignment.unitID];
+                  return (
+                    <TableCell key={assignment.id} align="right">
+                      <InlineGradeCell
+                        computedGrade={raw != null ? `${raw}%` : "—"}
+                        rawHighest={raw}
+                        overrideScore={override?.score}
+                        sharedHistory={historyRef.current}
+                        isOwner
+                        row={rowIndex}
+                        col={colIndex}
+                        onOverride={(score: number) =>
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [student.id]: {
+                              ...(prev[student.id] || {}),
+                              [assignment.unitID]: { score },
+                            },
+                          }))
+                        }
+                        onRemoveOverride={() =>
+                          setOverrides((prev) => {
+                            const next = { ...prev };
+                            if (next[student.id]) {
+                              const s = { ...next[student.id] };
+                              delete s[assignment.unitID];
+                              if (Object.keys(s).length === 0)
+                                delete next[student.id];
+                              else next[student.id] = s;
+                            }
+                            return next;
+                          })
+                        }
+                        onGradeClick={() => {}}
+                      />
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+}
+
+// Instructor peer-review rooms panel (also opens the assignment dialog).
+const peerReviewStudents = {
+  "student-1": { userId: "student-1", preferredName: "Yuki Tanaka" },
+  "student-2": { userId: "student-2", preferredName: "Maria Chen" },
+  "student-3": { userId: "student-3", preferredName: "Jordan Smith" },
+};
+const peerReviewGrades = [
+  { id: "grade-1", owner: "student-1", unitID: "u1" },
+  { id: "grade-2", owner: "student-2", unitID: "u1" },
+  { id: "grade-3", owner: "student-3", unitID: "u2" },
+];
+const peerReviewUnits = {
+  u1: { id: "u1", name: "Japanese Greetings" },
+  u2: { id: "u2", name: "Verb Conjugation" },
+};
+
+function OpenCollaborationRoomsCard() {
+  return (
+    <OpenCollaborationRooms
+      rooms={[
+        {
+          id: "room-1",
+          gradeId: "grade-1",
+          ownerId: "student-1",
+          status: "OPEN",
+          invitedUserIds: ["student-2"],
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          id: "room-2",
+          gradeId: "grade-3",
+          ownerId: "instructor-1",
+          status: "IN_REVIEW",
+          invitedUserIds: ["student-3"],
+          createdAt: new Date(Date.now() - 7200000).toISOString(),
+        },
+      ]}
+      grades={peerReviewGrades}
+      units={peerReviewUnits}
+      sectionStudents={peerReviewStudents}
+      sectionId="section-1"
+      isInstructor
+      onJoinRoom={() => {}}
+      onAssignPeerReview={async () => {}}
+      onRandomAssign={async () => {}}
+      onAwardTopReviewer={async () => {}}
+    />
+  );
+}
+
+function PeerReviewChatCard() {
+  const [messages, setMessages] = React.useState([
+    {
+      id: "m0",
+      author: "system",
+      authorRole: "system",
+      content: "Peer review room opened for Japanese Greetings.",
+      messageType: "SYSTEM" as const,
+      createdAt: new Date(Date.now() - 600000).toISOString(),
+    },
+    {
+      id: "m1",
+      author: "student-2",
+      authorRole: "reviewer",
+      displayName: "Maria Chen",
+      content: "Your intro sentence looks great! Maybe add a particle here?",
+      messageType: "CHAT" as const,
+      referencedBlockId: "block-3",
+      createdAt: new Date(Date.now() - 480000).toISOString(),
+    },
+    {
+      id: "m2",
+      author: "student-1",
+      authorRole: "owner",
+      displayName: "Yuki Tanaka",
+      content: "Good catch — thanks! Let me fix that.",
+      messageType: "CHAT" as const,
+      createdAt: new Date(Date.now() - 300000).toISOString(),
+    },
+    {
+      id: "m3",
+      author: "ai",
+      authorRole: "assistant",
+      content:
+        "Consider using は to mark the topic in the second sentence for a more natural flow.",
+      messageType: "AI_SUGGESTION" as const,
+      createdAt: new Date(Date.now() - 120000).toISOString(),
+    },
+  ]);
+  return (
+    <Box sx={{ height: 420, display: "flex", flexDirection: "column" }}>
+      <PeerReviewChat
+        messages={messages}
+        typingPeers={[]}
+        currentUsername="student-1"
+        isClosed={false}
+        onSendMessage={(content) =>
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `m${prev.length}`,
+              author: "student-1",
+              authorRole: "owner",
+              displayName: "Yuki Tanaka",
+              content,
+              messageType: "CHAT" as const,
+              createdAt: new Date().toISOString(),
+            },
+          ])
+        }
+      />
+    </Box>
+  );
+}
+
+// The global chat FAB. It's position:fixed, so a transform box creates a
+// containing block that keeps it inside this cell; ChatContext is mocked closed.
+function GlobalChatButtonCard() {
+  return (
+    <ChatContext.Provider
+      value={{ isChatOpen: false, setIsChatOpen: () => {} } as any}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          transform: "translateZ(0)",
+          height: 140,
+          borderRadius: 1,
+          border: "1px dashed",
+          borderColor: "divider",
+          bgcolor: "action.hover",
+        }}
+      >
+        <GlobalChatButton show unreadCount={3} />
+      </Box>
+    </ChatContext.Provider>
+  );
+}
+
+// Presentational chat transcript (ChatMessageList) — mirrors ChatSidebar's
+// bubbles + tool-call cards from the AI SDK `parts` format, no context/AI SDK.
+const showcaseChatTranscript = [
+  {
+    id: "c1",
+    role: "user" as const,
+    parts: [
+      { type: "text", text: "Add a quiz checking greetings for my unit." },
+    ],
+  },
+  {
+    id: "c2",
+    role: "assistant" as const,
+    parts: [
+      {
+        type: "text",
+        text: "Sure! Let me search your unit content first, then draft a quiz.",
+      },
+      {
+        type: "tool-search_content",
+        toolCallId: "call-1",
+        state: "output-available",
+        input: { query: "greetings vocabulary" },
+        output: {
+          success: true,
+          results: [{ title: "Konnichiwa" }, { title: "Ohayō" }],
+        },
+      },
+    ],
+  },
+  {
+    id: "c3",
+    role: "assistant" as const,
+    parts: [
+      {
+        type: "text",
+        text: "Here's a quiz with one correct answer (こんにちは) and two distractors.",
+      },
+      {
+        type: "tool-create_quiz",
+        toolCallId: "call-2",
+        state: "output-available",
+        input: { question: 'Which word means "hello"?', options: 3 },
+        output: { inserted: true },
+      },
+    ],
+  },
+];
+
+function ChatMessageListCard() {
+  return (
+    <Box sx={{ bgcolor: "background.default" }}>
+      <ChatMessageList
+        messages={showcaseChatTranscript}
+        isLoading
+        renderToolPart={(part) => {
+          if (part.type === "tool-search_content") {
+            return (
+              <SearchResults
+                results={showcaseSearchResults}
+                searchQuery={(part.input as any)?.query || ""}
+                onInsertWord={() => {}}
+                onInsertQuestion={() => {}}
+                onFocusItem={() => {}}
+              />
+            );
+          }
+          if (part.type === "tool-create_quiz") {
+            return <EditableBlockPreviewCard />;
+          }
+          return undefined;
+        }}
+      />
+    </Box>
+  );
+}
+
+// --- Individual AI chat block previews (as rendered inside ChatSidebar) ------
+
+function ContentPreviewCard() {
+  return (
+    <ContentPreview
+      contentType="lesson"
+      topic="Japanese Greetings"
+      generatedContent={
+        "# Japanese Greetings\n\n**こんにちは (konnichiwa)** means *hello*.\n\n- Morning: おはよう\n- Evening: こんばんは\n\n> Bow slightly when greeting formally."
+      }
+      format="markdown"
+      showInsertButton
+      onInsert={() => {}}
+      onRegenerate={() => {}}
+      onCopy={() => {}}
+    />
+  );
+}
+
+const showcaseSearchResults = [
+  {
+    id: "word-1",
+    type: "word",
+    phrase: "食べる",
+    phonetic: "たべる (taberu)",
+    definition: "to eat; one of the most common verbs in Japanese",
+    similarity: 0.95,
+  },
+  {
+    id: "question-1",
+    type: "question",
+    prompt: "What is the difference between は and が?",
+    answer:
+      "は marks the **topic**; が marks the **subject** (new information/emphasis).",
+    similarity: 0.91,
+  },
+  {
+    id: "file-1",
+    type: "file",
+    name: "Japanese Grammar Basics.pdf",
+    description: "Introduction to **particles** (は, が, を) with examples.",
+    page: 12,
+    similarity: 0.82,
+  },
+];
+
+function SearchResultsCard() {
+  return (
+    <SearchResults
+      results={showcaseSearchResults}
+      searchQuery="greetings"
+      onInsertWord={() => {}}
+      onInsertQuestion={() => {}}
+      onFocusItem={() => {}}
+    />
+  );
+}
+
+function RecordingScriptPreviewCard() {
+  return (
+    <RecordingScriptPreview
+      toolOutput={{
+        preset: "dialogue",
+        scriptData: SHOWCASE_SCRIPT_DATA,
+        lockedTracks: [],
+        wordData: [],
+        fileData: [],
+      }}
+      onOpenStudio={() => {}}
+      unitId="unit-showcase"
+      owner="student-1"
+      identityId="identity-1"
+    />
+  );
+}
+
+// BlockInsertPreview renders real editor blocks, so it needs the mock
+// Dictionary/Unit contexts (same ones the live editor blocks use).
+const chatBlockMockUnitContext = {
+  files: {},
+  dictionary: blockMockDictionary,
+  questionBank: blockMockDictionaryContext.questionBank,
+  playlistUrls: {},
+  unit: {},
+  grade: null,
+  saveGrade: () => {},
+};
+
+// An AI-proposed quiz shown as an editable live-editor block (not a confirm
+// dialog) — the same QuizEditor the real editor uses, so it can be edited.
+// Quiz block as an AI tool would emit it (insert_editor_block output shape).
+const showcaseQuizToolOutput = {
+  success: true,
+  action: "insert_editor_block",
+  blockType: "quiz",
+  blockData: [
+    {
+      id: "eq-a",
+      question: 'Which word means "hello"?',
+      answer: "こんにちは (konnichiwa)",
+      correct: true,
+    },
+    {
+      id: "eq-b",
+      question: 'Which word means "hello"?',
+      answer: "さようなら (sayōnara)",
+      correct: false,
+    },
+    {
+      id: "eq-c",
+      question: 'Which word means "hello"?',
+      answer: "ありがとう (arigatō)",
+      correct: false,
+    },
+  ],
+  preview: { title: "Quiz: greetings", questionCount: 1 },
+};
+
+// Thin showcase wrapper around the real EditableBlockPreview — provides the
+// mock Dictionary/Unit contexts the live MiniEditor needs (the app supplies
+// these in production).
+function EditableBlockPreviewCard() {
+  return (
+    <DictionaryContext.Provider value={blockMockDictionaryContext as any}>
+      <UnitContext.Provider value={chatBlockMockUnitContext as any}>
+        <EditableBlockPreview
+          toolOutput={showcaseQuizToolOutput}
+          onInsert={() => {}}
+          onReject={() => {}}
+        />
+      </UnitContext.Provider>
+    </DictionaryContext.Provider>
+  );
+}
+
 /**
  * Real reusable components that render directly (props-only, or wrapped in a
  * lightweight mock provider) — no full app context needed.
  */
 export const RealComponents: Story = {
   name: "Real Components (gallery)",
-  render: () => {
-    const theme = createShowcaseTheme("default");
-    return (
-      <ThemeProvider theme={theme}>
-        <Paper
-          data-mui-color-scheme="light"
-          elevation={0}
-          sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}
+  render: (_args, context) => (
+    <ThemedShowcaseShell
+      title="Real Components"
+      description="Actual reusable components rendered without the full app context — props-only, or wrapped in a lightweight mock provider."
+      globalScheme={resolveGlobalScheme(context.globals?.colorScheme)}
+    >
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="overline" color="text.secondary">
+          Dashboard hero
+        </Typography>
+        <Box sx={{ mt: 1 }}>
+          <DashboardHeroReal />
+        </Box>
+      </Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="overline" color="text.secondary">
+          Theme mixer
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          The real <code>ThemeMixer</code> — the same custom-palette designer
+          used by the picker&rsquo;s &ldquo;Design theme…&rdquo; panel and the
+          account cosmetic settings.
+        </Typography>
+        <Paper variant="outlined" sx={{ p: 2, maxWidth: 560 }}>
+          <ThemeMixer
+            enableDrafts
+            onSave={(palette) => console.log("theme mixer save:", palette)}
+          />
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: 4,
+          alignItems: "start",
+        }}
+      >
+        <PatternCell title="User avatar">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <UserAvatar size={40} />
+            <UserAvatar size={56} streak={5} />
+            <UserAvatar size={72} streak={14} />
+          </Stack>
+        </PatternCell>
+
+        <PatternCell title="Notification badge">
+          <NotificationContext.Provider
+            value={
+              {
+                notifications: [],
+                unseenCount: 5,
+                unseenByCategory: { COLLABORATION: 3 },
+                loading: false,
+                markSeen: async () => {},
+                markInteracted: async () => {},
+                markAllSeen: async () => {},
+                deleteNotification: async () => {},
+              } as any
+            }
+          >
+            <Stack direction="row" spacing={3} alignItems="center">
+              <NotificationBadge>
+                <UserAvatar size={40} />
+              </NotificationBadge>
+              <NotificationBadge category="COLLABORATION">
+                <UserAvatar size={40} />
+              </NotificationBadge>
+            </Stack>
+          </NotificationContext.Provider>
+        </PatternCell>
+
+        <PatternCell title="Moderation badge">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <ModerationBadge item={moderationFlaggedItem} showDetails />
+            <ModerationBadge item={moderationApprovedItem} showDetails />
+          </Stack>
+        </PatternCell>
+
+        <PatternCell title="Moderation panel (instructor)">
+          <ModerationPanel
+            item={moderationFlaggedItem}
+            title="Content review"
+          />
+        </PatternCell>
+
+        <PatternCell title="Prefetch badge">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <PrefetchBadge unitId="unit-gallery-1" />
+          </Stack>
+        </PatternCell>
+
+        <PatternCell title="Prefetch button">
+          <PrefetchButton href="/units/unit-gallery-1" variant="contained">
+            Open unit
+          </PrefetchButton>
+        </PatternCell>
+
+        <PatternCell title="Personal best banner">
+          <PersonalBestBannerCard />
+        </PatternCell>
+
+        <PatternCell title="Confirm dialog">
+          <ConfirmDialogCard />
+        </PatternCell>
+
+        <PatternCell title="Conflict resolution dialog">
+          <ConflictResolutionDialogCard />
+        </PatternCell>
+
+        <PatternCell title="Permission error overlay">
+          <PermissionErrorOverlayCard />
+        </PatternCell>
+
+        <PatternCell title="Global chat button (FAB)">
+          <GlobalChatButtonCard />
+        </PatternCell>
+
+        <PatternCell title="Notification card">
+          <NotificationCard
+            notification={{
+              id: "n-gallery",
+              category: "SQUAD",
+              title: "Iron Dragons posted in your squad",
+              body: "Check out the latest challenge results.",
+              linkPath: "/squads",
+              linkLabel: "View squad",
+              senderName: "Iron Dragons",
+              seen: false,
+              interacted: false,
+              createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+            }}
+            onMarkSeen={() => {}}
+            onMarkInteracted={() => {}}
+            onDelete={() => {}}
+            onNavigate={() => {}}
+          />
+        </PatternCell>
+
+        <PatternCell title="Auth form skeleton">
+          <AuthFormSkeleton />
+        </PatternCell>
+      </Box>
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="overline" color="text.secondary">
+          Notification list
+        </Typography>
+        <Box
+          sx={{
+            mt: 1,
+            maxWidth: 520,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+          }}
         >
-          <Typography variant="h4" gutterBottom>
-            Real Components
+          <NotificationListCard />
+        </Box>
+      </Box>
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="overline" color="text.secondary">
+          Unit cards
+        </Typography>
+        <Box
+          sx={{
+            mt: 1,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 3,
+            alignItems: "start",
+          }}
+        >
+          <SharedUnitCard
+            unit={{
+              id: "u-shared",
+              name: "Japanese Greetings",
+              description:
+                "Learn essential greetings and polite phrases for everyday conversation.",
+              _collaboratorPermission: "EDIT",
+            }}
+            onOpen={() => {}}
+          />
+          <CommunityUnitCard
+            unit={{
+              id: "u-community",
+              name: "Hiragana Basics",
+              description:
+                "A community-published unit covering the hiragana syllabary.",
+              publishedAt: new Date().toISOString(),
+            }}
+            onFork={() => {}}
+          />
+        </Box>
+      </Box>
+
+      <Box sx={{ mt: 5 }}>
+        <Typography variant="h5" gutterBottom>
+          Settings panels
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Configuration surfaces — the account settings views (profile info,
+          password, language, advanced, preferences), the Kai/Sage AI agent
+          config form, and the recording cleanup-strength control.
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+            gap: 4,
+            alignItems: "start",
+          }}
+        >
+          <PatternCell title="AI agent config — platform mode">
+            <AIAgentConfigCard mode="platform" />
+          </PatternCell>
+          <PatternCell title="AI agent config — section mode">
+            <AIAgentConfigCard mode="section" />
+          </PatternCell>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Cosmetic selector (avatar style + editor theme)
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Actual reusable components rendered without the full app context —
-            props-only, or wrapped in a lightweight mock provider.
+          <Paper
+            variant="outlined"
+            sx={{ mt: 1, p: 2, width: "fit-content", maxWidth: "100%" }}
+          >
+            <CosmeticSelector
+              level={5}
+              selectedThemeId="aurora"
+              avatarSeed="cosmetic-demo"
+            />
+          </Paper>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            XP tuner (section gamification config)
           </Typography>
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="overline" color="text.secondary">
-              Dashboard hero
-            </Typography>
-            <Box sx={{ mt: 1 }}>
-              <DashboardHeroReal />
+          <Paper
+            variant="outlined"
+            sx={{ mt: 1, p: 2, width: "fit-content", maxWidth: "100%" }}
+          >
+            <Box sx={{ maxWidth: 640 }}>
+              <XPTunerInline
+                sectionName="Period 3 — Japanese I"
+                unitCount={8}
+                onSave={() => {}}
+              />
             </Box>
+          </Paper>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Storage management (offline storage + AI model + cache)
+          </Typography>
+          <Box sx={{ mt: 1, maxWidth: 640 }}>
+            <StorageManagementView
+              storageBudget={{
+                used: 320 * 1024 * 1024,
+                quota: 1024 * 1024 * 1024,
+                percentUsed: 31,
+              }}
+              models={[
+                {
+                  id: "webllm-1",
+                  name: "Llama 3.2 1B (WebLLM)",
+                  sizeBytes: 850 * 1024 * 1024,
+                  backend: "webllm",
+                  ready: true,
+                },
+                {
+                  id: "chrome-ai",
+                  name: "Chrome Built-in AI (Gemini Nano)",
+                  sizeBytes: 0,
+                  backend: "chrome-ai",
+                  ready: true,
+                },
+                {
+                  id: "webllm-2",
+                  name: "Phi-3 Mini (WebLLM)",
+                  sizeBytes: 1600 * 1024 * 1024,
+                  backend: "webllm",
+                  ready: false,
+                },
+              ]}
+              prefetchStatuses={[
+                {
+                  unitId: "unit-abc12345",
+                  status: "completed",
+                  progress: 100,
+                  lastUpdated: Date.now() - 86400000,
+                },
+                {
+                  unitId: "unit-def67890",
+                  status: "downloading",
+                  progress: 60,
+                  lastUpdated: Date.now() - 3600000,
+                },
+              ]}
+              downloading={false}
+              downloadProgress={0}
+              onDownloadModel={() => {}}
+              onDeleteModel={() => {}}
+              onClearUnitCache={() => {}}
+            />
           </Box>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Jobs dashboard (background processing — admin / instructor)
+          </Typography>
+          <Paper variant="outlined" sx={{ mt: 1 }}>
+            <JobsDashboardCard />
+          </Paper>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Offline &amp; sync status (offline banner + pending-sync chip)
+          </Typography>
+          <Stack
+            spacing={2}
+            sx={{ mt: 1, maxWidth: 480 }}
+            alignItems="flex-start"
+          >
+            <OfflineBannerView
+              variant="offline"
+              pendingCount={3}
+              onSync={() => {}}
+            />
+            <OfflineBannerView
+              variant="reconnecting"
+              pendingCount={3}
+              onSync={() => {}}
+            />
+            <SyncStatusIndicatorCard />
+          </Stack>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Gradebook table (inline grade cells — instructor)
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <GradebookTableCard />
+          </Box>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Peer review — open collaboration rooms (instructor)
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <OpenCollaborationRoomsCard />
+          </Box>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Peer review — room chat pane
+          </Typography>
+          <Paper variant="outlined" sx={{ mt: 1, maxWidth: 560 }}>
+            <PeerReviewChatCard />
+          </Paper>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            AI chat transcript (ChatMessageList — presentational)
+          </Typography>
+          <Paper variant="outlined" sx={{ mt: 1, maxWidth: 560 }}>
+            <ChatMessageListCard />
+          </Paper>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Chat blocks
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            The distinct block/preview cards the AI assistant renders inside a
+            chat message — an editable quiz block, generated content, search
+            results, and a recording-script handoff.
+          </Typography>
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: 4,
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 3,
               alignItems: "start",
             }}
           >
-            <PatternCell title="User avatar">
-              <Stack direction="row" spacing={2} alignItems="center">
-                <UserAvatar size={40} />
-                <UserAvatar size={56} streak={5} />
-                <UserAvatar size={72} streak={14} />
-              </Stack>
+            <PatternCell title="Editable quiz block (live editor)">
+              <EditableBlockPreviewCard />
             </PatternCell>
-
-            <PatternCell title="Notification badge">
-              <NotificationContext.Provider
-                value={
-                  {
-                    notifications: [],
-                    unseenCount: 5,
-                    unseenByCategory: { COLLABORATION: 3 },
-                    loading: false,
-                    markSeen: async () => {},
-                    markInteracted: async () => {},
-                    markAllSeen: async () => {},
-                    deleteNotification: async () => {},
-                  } as any
-                }
-              >
-                <Stack direction="row" spacing={3} alignItems="center">
-                  <NotificationBadge>
-                    <UserAvatar size={40} />
-                  </NotificationBadge>
-                  <NotificationBadge category="COLLABORATION">
-                    <UserAvatar size={40} />
-                  </NotificationBadge>
-                </Stack>
-              </NotificationContext.Provider>
+            <PatternCell title="Generated content preview">
+              <ContentPreviewCard />
             </PatternCell>
-
-            <PatternCell title="Moderation badge">
-              <Stack direction="row" spacing={2} alignItems="center">
-                <ModerationBadge item={moderationFlaggedItem} showDetails />
-                <ModerationBadge item={moderationApprovedItem} showDetails />
-              </Stack>
+            <PatternCell title="Search results">
+              <SearchResultsCard />
             </PatternCell>
-
-            <PatternCell title="Prefetch badge">
-              <Stack direction="row" spacing={2} alignItems="center">
-                <PrefetchBadge unitId="unit-gallery-1" />
-              </Stack>
-            </PatternCell>
-
-            <PatternCell title="Notification card">
-              <NotificationCard
-                notification={{
-                  id: "n-gallery",
-                  category: "SQUAD",
-                  title: "Iron Dragons posted in your squad",
-                  body: "Check out the latest challenge results.",
-                  linkPath: "/squads",
-                  linkLabel: "View squad",
-                  senderName: "Iron Dragons",
-                  seen: false,
-                  interacted: false,
-                  createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-                }}
-                onMarkSeen={() => {}}
-                onMarkInteracted={() => {}}
-                onDelete={() => {}}
-                onNavigate={() => {}}
-              />
-            </PatternCell>
-
-            <PatternCell title="Auth form skeleton">
-              <AuthFormSkeleton />
+            <PatternCell title="Recording script preview">
+              <RecordingScriptPreviewCard />
             </PatternCell>
           </Box>
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="overline" color="text.secondary">
-              Unit cards
-            </Typography>
-            <Box
-              sx={{
-                mt: 1,
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 3,
-                alignItems: "start",
-              }}
-            >
-              <SharedUnitCard
-                unit={{
-                  id: "u-shared",
-                  name: "Japanese Greetings",
-                  description:
-                    "Learn essential greetings and polite phrases for everyday conversation.",
-                  _collaboratorPermission: "EDIT",
-                }}
-                onOpen={() => {}}
-              />
-              <CommunityUnitCard
-                unit={{
-                  id: "u-community",
-                  name: "Hiragana Basics",
-                  description:
-                    "A community-published unit covering the hiragana syllabary.",
-                  publishedAt: new Date().toISOString(),
-                }}
-                onFork={() => {}}
-              />
-            </Box>
-          </Box>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="overline" color="text.secondary">
+            Account settings (real views extracted from the settings page)
+          </Typography>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <ProfileInfoCard />
+            <PasswordChangeCard />
+            <LanguagePreferenceCard />
+            <AdvancedSettingsCard />
+            <AccountPreferencesCard />
+          </Stack>
+        </Box>
+        <Box sx={{ mt: 3, maxWidth: 480 }}>
+          <PatternCell title="Recording cleanup strength">
+            <RecordingSettingsCard />
+          </PatternCell>
+        </Box>
+      </Box>
 
-          <Box sx={{ mt: 5 }}>
-            <Typography variant="h5" gutterBottom>
-              Settings panels
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Configuration surfaces — the Kai/Sage AI agent config form and the
-              recording cleanup-strength control.
-            </Typography>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                gap: 4,
-                alignItems: "start",
-              }}
-            >
-              <PatternCell title="AI agent config — platform mode">
-                <AIAgentConfigCard mode="platform" />
-              </PatternCell>
-              <PatternCell title="AI agent config — section mode">
-                <AIAgentConfigCard mode="section" />
-              </PatternCell>
-            </Box>
-            <Box sx={{ mt: 3 }}>
-              <PatternCell title="User settings (account & preferences)">
-                <UserSettingsSpecimen />
-              </PatternCell>
-            </Box>
-            <Box sx={{ mt: 3, maxWidth: 480 }}>
-              <PatternCell title="Recording cleanup strength">
-                <RecordingSettingsCard />
-              </PatternCell>
-            </Box>
-          </Box>
-
-          <Box sx={{ mt: 5 }}>
-            <Typography variant="h5" gutterBottom>
-              Recording studio
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              The presentational building blocks of the multi-speaker recording
-              studio — audio cleanup filters, timeline cards, the horizontal
-              timeline, and the Fountain screenplay editor.
-            </Typography>
-            <Stack spacing={4}>
-              <PatternCell title="Audio filter panel">
-                <AudioFilterCard />
-              </PatternCell>
-              <PatternCell title="Timeline card">
-                <Box sx={{ position: "relative", height: 120 }}>
-                  <TimelineCard
-                    line={{
-                      id: "line-1",
-                      text: "Hello, welcome to today's lesson.",
-                      emotion: "neutral",
-                    }}
-                    speaker={{ name: "Instructor", color: "#1976d2" }}
-                    isSelected={false}
-                    left={10}
-                    width={220}
-                    onClick={() => {}}
-                  />
-                  <TimelineCard
-                    line={{
-                      id: "line-2",
-                      text: "こんにちは！",
-                      emotion: "cheerful",
-                    }}
-                    speaker={{ name: "Akiko", color: "#9c27b0" }}
-                    isSelected
-                    left={250}
-                    width={140}
-                    onClick={() => {}}
-                  />
-                </Box>
-              </PatternCell>
-              <PatternCell title="Horizontal timeline">
-                <HorizontalTimelineCard />
-              </PatternCell>
-              <PatternCell title="Screenplay editor (Fountain)">
-                <ScreenplayEditorCard />
-              </PatternCell>
-            </Stack>
-          </Box>
-        </Paper>
-      </ThemeProvider>
-    );
-  },
+      <Box sx={{ mt: 5 }}>
+        <Typography variant="h5" gutterBottom>
+          Recording studio
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          The presentational building blocks of the multi-speaker recording
+          studio — audio cleanup filters, timeline cards, the horizontal
+          timeline, and the Fountain screenplay editor.
+        </Typography>
+        <Stack spacing={4}>
+          <PatternCell title="Recording Studio (Enhanced) — full view">
+            <RecordingStudioEnhancedViewCard />
+          </PatternCell>
+          <PatternCell title="Recording Studio 2 (single word) — full view">
+            <RecordingStudio2ViewCard />
+          </PatternCell>
+          <PatternCell title="Recording Studio 3 (dialogue script) — full view">
+            <RecordingStudio3ViewCard />
+          </PatternCell>
+          <PatternCell title="Audio filter panel">
+            <AudioFilterCard />
+          </PatternCell>
+        </Stack>
+      </Box>
+    </ThemedShowcaseShell>
+  ),
 };
 
 /**
@@ -3803,7 +5655,7 @@ export const ComponentsAcrossThemes: Story = {
                   variant="subtitle1"
                   sx={{ textTransform: "capitalize", mb: 1 }}
                 >
-                  {id}
+                  {themeLabel(id)}
                 </Typography>
                 <Stack spacing={2}>
                   {(["light", "dark"] as const).map((scheme) => (
@@ -3849,7 +5701,7 @@ export const ComponentsAcrossThemes: Story = {
 /** BotCustomizer is already an inline card (not a dialog) — full unlock tier. */
 function BotCustomizerCard() {
   const [config, setConfig] = React.useState<BotConfig>({
-    style: "detailed",
+    style: "bottts",
     backgroundColor: "b6e3f4",
   });
   return (
@@ -4095,6 +5947,96 @@ function RecordingSettingsCard() {
   return <RecordingSettings value={value} onChange={setValue} />;
 }
 
+// The real privacy / accessibility / profile-visibility preference cards.
+function AccountPreferencesCard() {
+  const [prefs, setPrefs] = React.useState<AccountPreferences>({
+    leaderboardOptIn: true,
+    reducedMotion: false,
+    highContrastMode: false,
+    showBadgesOnProfile: true,
+    showAntiBadgesOnProfile: false,
+  });
+  return (
+    <AccountPreferencesView
+      preferences={prefs}
+      onToggle={(key, value) => setPrefs((p) => ({ ...p, [key]: value }))}
+    />
+  );
+}
+
+// The real settings-page profile-info card (auth handlers stubbed here).
+function ProfileInfoCard() {
+  const [email, setEmail] = React.useState("sakura@example.com");
+  const [name, setName] = React.useState("Sakura Tanaka");
+  return (
+    <ProfileInfoView
+      email={email}
+      name={name}
+      username="student-sub-123"
+      userSub="student-sub-123"
+      identityId="us-east-1:demo-identity-abc"
+      onEmailChange={setEmail}
+      onNameChange={setName}
+      onSubmit={(e) => e.preventDefault()}
+      onCancel={() => {
+        setEmail("sakura@example.com");
+        setName("Sakura Tanaka");
+      }}
+    />
+  );
+}
+
+// The real change-password card (updatePassword stubbed here).
+function PasswordChangeCard() {
+  const [oldP, setOldP] = React.useState("");
+  const [newP, setNewP] = React.useState("");
+  const [confirmP, setConfirmP] = React.useState("");
+  return (
+    <PasswordChangeView
+      username="student-sub-123"
+      oldPassword={oldP}
+      newPassword={newP}
+      confirmNewPassword={confirmP}
+      onOldPasswordChange={setOldP}
+      onNewPasswordChange={setNewP}
+      onConfirmNewPasswordChange={setConfirmP}
+      onSubmit={(e) => e.preventDefault()}
+    />
+  );
+}
+
+// The real language-preference card (router push stubbed here).
+function LanguagePreferenceCard() {
+  const [loc, setLoc] = React.useState("en");
+  return (
+    <LanguagePreferenceView
+      selectedLocale={loc}
+      availableLocales={[
+        { code: "en", name: "English" },
+        { code: "es", name: "Español" },
+        { code: "fr", name: "Français" },
+        { code: "de", name: "Deutsch" },
+        { code: "ja", name: "日本語" },
+        { code: "zh", name: "中文" },
+      ]}
+      onChange={(e) => setLoc(e.target.value as string)}
+    />
+  );
+}
+
+// The real advanced-settings card + clear-cache dialog (reload stubbed here).
+function AdvancedSettingsCard() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <AdvancedSettingsView
+      dialogOpen={open}
+      onClearCacheClick={() => setOpen(true)}
+      onDialogClose={() => setOpen(false)}
+      onConfirmClear={() => setOpen(false)}
+    />
+  );
+}
+
 // ============================================================================
 // Recording studio
 // ============================================================================
@@ -4168,46 +6110,149 @@ function AudioFilterCard() {
   );
 }
 
-function HorizontalTimelineCard() {
-  const [selected, setSelected] = React.useState<string | null>(null);
-  return (
-    <Box sx={{ height: 300 }}>
-      <HorizontalTimeline
-        scriptData={SHOWCASE_SCRIPT_DATA as any}
-        selectedDialogueId={selected}
-        onSelectDialogue={(id) => setSelected(String(id))}
-        onPlay={() => {}}
-        onStop={() => {}}
-        onRecordingComplete={() => {}}
-        readOnly
-      />
-    </Box>
-  );
-}
-
-function ScreenplayEditorCard() {
-  const [fountain, setFountain] = React.useState(SHOWCASE_FOUNTAIN);
+// The full multi-track studio view (RecordingStudioEnhancedView) with local state.
+function RecordingStudioEnhancedViewCard() {
+  const [tracks, setTracks] = React.useState<any[]>([
+    {
+      id: 1,
+      name: "Narrator",
+      voice: "fable",
+      prompt: "Welcome to today's lesson on greetings.",
+      clips: [],
+    },
+    { id: 2, name: "Student", voice: "nova", prompt: "", clips: [] },
+  ]);
+  const [selectedTrackId, setSelectedTrackId] = React.useState<number>(1);
+  const [filters, setFilters] = React.useState({
+    noiseReduction: "light",
+    speechEnhancement: "clarity",
+    popClickRemoval: true,
+    highPassFilter: false,
+    lowPassFilter: false,
+    normalize: true,
+  });
   return (
     <Box
       sx={{
-        height: 360,
-        display: "flex",
-        flexDirection: "column",
         border: "1px solid",
         borderColor: "divider",
         borderRadius: 1,
         overflow: "hidden",
+        // The multi-track viewer caps itself at maxHeight:60vh and scrolls
+        // internally; drop the cap so it flows to content height and scrolls with
+        // the page. (Keep its overflow so horizontal track scrolling still works.)
+        "& > *:first-of-type > *": { maxHeight: "none" },
       }}
     >
-      <ScreenplayEditor
-        fountainText={fountain}
-        onFountainChange={setFountain}
-        onPromptSubmit={() => {}}
-        isGenerating={false}
-        readOnly={false}
+      <RecordingStudioEnhancedView
+        tracks={tracks}
+        selectedTrackId={selectedTrackId}
+        filters={filters}
+        recording={false}
+        onSetFilter={(f: any) => setFilters((prev) => ({ ...prev, ...f }))}
+        onSelectTrack={(id: number) => setSelectedTrackId(id)}
+        onUpdateTrack={(id: number, updates: any) =>
+          setTracks((ts) =>
+            ts.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+          )
+        }
+        onAddTrack={() =>
+          setTracks((ts) => [
+            ...ts,
+            {
+              id: Date.now(),
+              name: `Track ${ts.length + 1}`,
+              voice: "alloy",
+              prompt: "",
+              clips: [],
+            },
+          ])
+        }
+        onDeleteTrack={(id: number) =>
+          setTracks((ts) =>
+            ts.length > 1 ? ts.filter((t) => t.id !== id) : ts,
+          )
+        }
       />
     </Box>
   );
 }
 
 // Recording Studio building blocks are shown in the Real Components story.
+// The single-word recorder view (RecordingStudio2View) with local refs/state.
+function RecordingStudio2ViewCard() {
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [recording, setRecording] = React.useState(false);
+  return (
+    <Box
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        p: 2,
+      }}
+    >
+      <RecordingStudio2View
+        audioFiles={{}}
+        embedded={false}
+        recording={recording}
+        isPlaying={false}
+        audioRef={audioRef}
+        canvasRef={canvasRef}
+        onStartRecording={() => setRecording(true)}
+        onStopRecording={() => setRecording(false)}
+      />
+    </Box>
+  );
+}
+
+// The script/dialogue studio view (RecordingStudio3View) with local state.
+function RecordingStudio3ViewCard() {
+  const [selectedDialogueId, setSelectedDialogueId] = React.useState<any>(1);
+  const [activeFilters, setActiveFilters] = React.useState<Set<string>>(
+    new Set(),
+  );
+  const [playing, setPlaying] = React.useState(false);
+  const [pendingDelete, setPendingDelete] = React.useState<any>(null);
+  return (
+    <Box
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        overflow: "hidden",
+        // RS3View is a 100vh internal-scroll shell (only its speakers sub-panel
+        // scrolled). Let its root flow to natural height and relax the inner
+        // section/panel scroll regions so the whole studio is visible and scrolls
+        // with the page — no trapped sub-panel, no wheel-capture dead zones.
+        "& > *:first-of-type": { height: "auto" },
+        "& > *:first-of-type > *, & > *:first-of-type > * > *": {
+          overflow: "visible",
+          maxHeight: "none",
+          minHeight: 0,
+        },
+      }}
+    >
+      <AudioPlayerProvider>
+        <RecordingStudio3View
+          scriptData={SHOWCASE_SCRIPT_DATA}
+          selectedDialogueId={selectedDialogueId}
+          playing={playing}
+          isGenerating={false}
+          ttsQueue={[]}
+          statusMessage=""
+          fountainText={SHOWCASE_FOUNTAIN}
+          activeFilters={activeFilters}
+          pendingDelete={pendingDelete}
+          readOnly={false}
+          setSelectedDialogueId={setSelectedDialogueId}
+          setPlaying={setPlaying}
+          setPendingDelete={setPendingDelete}
+          handleFiltersChange={setActiveFilters}
+          isTrackLocked={() => false}
+        />
+      </AudioPlayerProvider>
+    </Box>
+  );
+}

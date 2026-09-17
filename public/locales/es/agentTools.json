@@ -1,0 +1,46 @@
+{
+  "studentProgress": {
+    "noUnit": "No se especificó ninguna unidad y no hay contexto de unidad actual.",
+    "noGrades": "No se encontraron registros de calificaciones para esta unidad.",
+    "error": "No se pudo cargar los datos de progreso."
+  },
+  "semanticSearch": {
+    "error": "La búsqueda falló. Intente con una consulta diferente.",
+    "noIdentity": "No hay índice de búsqueda disponible — no se ha resuelto la identidad del propietario de la unidad.",
+    "noIndex": "No hay índice de búsqueda disponible para el contexto actual."
+  },
+  "readFileContent": {
+    "noContent": "No hay contenido extraído disponible para este archivo.",
+    "error": "No se pudo leer el contenido del archivo."
+  },
+  "courseOutline": {
+    "noSection": "No hay contexto de sección disponible.",
+    "error": "No se pudo cargar el esquema del curso.",
+    "noOutline": "No hay esquema del curso disponible. Es posible que las unidades aún no se hayan publicado."
+  },
+  "recallMemory": {
+    "noHistory": "No se encontró historial de conversación para este contexto.",
+    "noMemory": "No se encontró memoria de conversación.",
+    "error": "No se pudo recuperar la memoria."
+  },
+  "recallConversations": {
+    "noSummaries": "Aún no hay resúmenes de conversaciones disponibles.",
+    "error": "No se pudieron recuperar las conversaciones anteriores.",
+    "noHistory": "No se encontró historial de conversaciones anteriores."
+  },
+  "updateMemory": {
+    "error": "No se pudo actualizar la memoria."
+  },
+  "sectionAnalytics": {
+    "noSection": "No se ha especificado ninguna sección y no hay contexto de sección actual.",
+    "noAssignments": "No se encontraron tareas para esta sección.",
+    "noGrades": "Aún no se han registrado calificaciones de estudiantes.",
+    "instructorOnly": "Esta herramienta solo está disponible para instructores.",
+    "error": "No se pudieron cargar las analíticas de la sección."
+  },
+  "studentList": {
+    "noSection": "No se ha especificado ninguna sección.",
+    "error": "No se pudo cargar la lista de estudiantes.",
+    "instructorOnly": "Esta herramienta solo está disponible para instructores."
+  }
+}

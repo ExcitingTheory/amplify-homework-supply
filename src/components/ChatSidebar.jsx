@@ -84,12 +84,13 @@ import { VirtualizedMessageList } from "./ChatSidebar/VirtualizedMessageList";
 import { LexicalMessageRenderer } from "./ChatSidebar/LexicalMessageRenderer";
 import ToolCallPreview from "./ChatSidebar/ToolCallPreview";
 import ContentPreview from "./ChatSidebar/ContentPreview";
-import BlockInsertPreview from "./ChatSidebar/BlockInsertPreview";
+import EditableBlockPreview from "./ChatSidebar/EditableBlockPreview";
 import RecordingScriptPreview from "./ChatSidebar/RecordingScriptPreview";
-import { INSERT_QUIZ_COMMAND } from "../components/Editor3/plugins/QuizPlugin";
-import { INSERT_ANSWER_BLOCK_COMMAND } from "../components/Editor3/plugins/AnswerPlugin";
-import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "../components/Editor3/plugins/MeaningAssociationPlugin";
-import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from "../components/Editor3/plugins/CustomAnswerPlugin";
+import { $getRoot, $getSelection, $isRangeSelection } from "lexical";
+import {
+  $generateNodesFromSerializedNodes,
+  $insertGeneratedNodes,
+} from "@lexical/clipboard";
 import { BotAvatar } from "./BotAvatar";
 import {
   trackChatMessageSent,
@@ -358,52 +359,42 @@ const ChatSidebar = ({ onClose }) => {
   };
 
   // Handle inserting editor blocks from chat
-  const handleInsertBlock = useCallback(
-    (blockType, blockData) => {
-      if (!editorRef?.current) {
+  const handleInsertEditedBlock = useCallback(
+    (editorState, blockType) => {
+      const editor = editorRef?.current;
+      if (!editor) {
         console.error("[ChatSidebar] No editor ref available");
         return;
       }
       trackChatBlockInserted(assistantChat?.id, blockType);
 
-      const editor = editorRef.current;
+      // Drop the trailing empty paragraph the preview adds as an editing affordance.
+      const serializedChildren = editorState?.root?.children || [];
+      const meaningful = serializedChildren.filter(
+        (n) =>
+          !(
+            n?.type === "paragraph" &&
+            (!n.children || n.children.length === 0)
+          ),
+      );
+      if (meaningful.length === 0) return;
 
-      editor.update(() => {
-        switch (blockType) {
-          case "quiz":
-            editor.dispatchCommand(INSERT_QUIZ_COMMAND, blockData);
-            console.log("[ChatSidebar] Inserted quiz block:", blockData);
-            break;
-          case "answer":
-            editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, blockData);
-            console.log("[ChatSidebar] Inserted answer block:", blockData);
-            break;
-          case "meaning-association":
-            editor.dispatchCommand(
-              INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND,
-              blockData,
-            );
-            console.log(
-              "[ChatSidebar] Inserted meaning association block:",
-              blockData,
-            );
-            break;
-          case "custom-answer":
-            editor.dispatchCommand(
-              INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
-              blockData,
-            );
-            console.log(
-              "[ChatSidebar] Inserted custom answer block:",
-              blockData,
-            );
-            break;
-          default:
-            console.warn("[ChatSidebar] Unknown block type:", blockType);
-        }
-      });
+      try {
+        editor.update(() => {
+          const nodes = $generateNodesFromSerializedNodes(meaningful);
+          const selection = $getSelection() ?? $getRoot().selectEnd();
+          if ($isRangeSelection(selection)) {
+            $insertGeneratedNodes(editor, nodes, selection);
+          } else {
+            $getRoot().append(...nodes);
+          }
+        });
+        console.log("[ChatSidebar] Inserted edited block:", blockType);
+      } catch (e) {
+        console.error("[ChatSidebar] Failed to insert edited block:", e);
+      }
     },
-    [editorRef],
+    [editorRef, assistantChat?.id],
   );
 
   // Load chat data when chat changes
@@ -1035,7 +1026,7 @@ const ChatSidebar = ({ onClose }) => {
         console.log("[ChatSidebar] Navigating to tab:", tab);
         tabContext.setLeftTab(tab);
       }
-      // Note: 'insert_editor_block' actions are handled by BlockInsertPreview component
+      // Note: 'insert_editor_block' actions are handled by EditableBlockPreview component
     });
   }, [messages, tourContext, tabContext]);
 
@@ -2177,7 +2168,7 @@ const ChatSidebar = ({ onClose }) => {
                         }}
                       >
                         {message.role === "assistant" && (
-                          <BotAvatar size={24} />
+                          <BotAvatar size={48} />
                         )}
                         <Box
                           className={
@@ -2556,9 +2547,9 @@ const ChatSidebar = ({ onClose }) => {
 
                             {part.state === "output-available" &&
                               parsedOutput && (
-                                <BlockInsertPreview
+                                <EditableBlockPreview
                                   toolOutput={parsedOutput}
-                                  onInsertBlock={handleInsertBlock}
+                                  onInsert={handleInsertEditedBlock}
                                   onReject={() =>
                                     console.log(
                                       "[ChatSidebar] Block insert rejected",

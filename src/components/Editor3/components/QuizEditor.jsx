@@ -4,9 +4,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
-import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -17,6 +16,8 @@ import { useTranslations } from "next-intl";
 import SortableAnswers from "../../SortableAnswers";
 import UnitContext from "../../../context/unitContext";
 import { $isQuizNode } from "../plugins/QuizPlugin";
+import { EditorBlockCard } from "./EditorBlockCard";
+import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
 import {
   $getNodeByKey,
@@ -352,9 +353,54 @@ const QuizEditor = ({ className, nodeKey, data }) => {
               onClick={(e) => {
                 gradeAnswer(e, key, data, questionValue);
               }}
+              sx={{ borderRadius: `${SEMANTIC_THEME.radius.chip}px` }}
+              icon={
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                    border: "2px solid",
+                    borderColor: "text.disabled",
+                  }}
+                />
+              }
+              checkedIcon={
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                    border: "2px solid",
+                    borderColor: "primary.main",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 13,
+                      height: 13,
+                      borderRadius: "3px",
+                      bgcolor: "primary.main",
+                    }}
+                  />
+                </Box>
+              }
             />
           }
           label={data.answer}
+          sx={{
+            m: 0,
+            width: "100%",
+            px: 1,
+            py: 0.5,
+            borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+            border: "1px solid",
+            borderColor: checked ? "primary.main" : "divider",
+            bgcolor: checked ? "action.hover" : "transparent",
+          }}
         />
       );
     });
@@ -367,34 +413,22 @@ const QuizEditor = ({ className, nodeKey, data }) => {
       data-tour="quiz-block"
       contentEditable={false}
       readOnly
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        marginBottom: "2rem",
-        border: isSelected
-          ? "2px solid var(--mui-palette-primary-main, #1976d2)"
-          : "1px solid transparent",
-        borderRadius: "4px",
-        padding: "8px",
-        cursor: "pointer",
-      }}
+      style={{ cursor: "pointer" }}
     >
       <style global jsx>{`
         figure[data-block="true"] {
           margin: 0;
         }
       `}</style>
-      {!editMode && (
-        <>
-          <Card
-            elevation={2}
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-              maxWidth: "900px",
-            }}
-          >
-            <Toolbar>
+      <EditorBlockCard
+        blockType="quiz"
+        selected={isSelected}
+        accuracy={grade}
+        graded={isLocked}
+      >
+        {!editMode && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <Button
                 data-testid="quiz-edit-toggle"
                 size="small"
@@ -402,20 +436,20 @@ const QuizEditor = ({ className, nodeKey, data }) => {
               >
                 {t("quizEditor.edit")}
               </Button>
-              <Box sx={{ flexGrow: 1 }}></Box>
+              <Box sx={{ flexGrow: 1 }} />
               <Button size="small" onClick={reset}>
                 {t("quizEditor.reset")}
               </Button>
-              <Box>{t("quizEditor.gradeDisplay", { score: grade })}</Box>
-            </Toolbar>
-          </Card>
-          <FormGroup>{checkboxes}</FormGroup>
-        </>
-      )}
-      {editMode && (
-        <>
-          <Card elevation={3} sx={{ flexGrow: 1, marginBottom: "1rem" }}>
-            <Toolbar>
+              <Typography variant="caption" color="text.secondary">
+                {t("quizEditor.gradeDisplay", { score: grade })}
+              </Typography>
+            </Box>
+            <FormGroup sx={{ gap: 0.75 }}>{checkboxes}</FormGroup>
+          </>
+        )}
+        {editMode && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <Button
                 data-testid="quiz-edit-toggle"
                 size="small"
@@ -426,42 +460,36 @@ const QuizEditor = ({ className, nodeKey, data }) => {
                   ? t("quizEditor.invalid")
                   : t("quizEditor.done")}
               </Button>
-              <Box sx={{ flexGrow: 1 }}></Box>
-              {/* <Button
-                                size='small'
-                                onClick={remove}
-                            >
-                                Remove
-                            </Button> */}
-            </Toolbar>
-          </Card>
-          <SortableAnswers
-            answers={questionValue}
-            onQuestionChange={onQuestionChange}
-            onCorrectChange={onCorrectChange}
-            onQuestionDelete={onQuestionDelete}
-            onQuestionReorder={onQuestionReorder}
-          />
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            border="thin solid"
-            borderColor="divider"
-            padding="0.5rem"
-            margin="0.5rem"
-            maxWidth="40rem"
-          >
-            <DragIndicatorIcon />
-            <TextField
-              data-testid="quiz-add-answer"
-              placeholder={t("quizEditor.addAnswer")}
-              onClick={onAddQuestion}
-              fullWidth
+              <Box sx={{ flexGrow: 1 }} />
+            </Box>
+            <SortableAnswers
+              answers={questionValue}
+              onQuestionChange={onQuestionChange}
+              onCorrectChange={onCorrectChange}
+              onQuestionDelete={onQuestionDelete}
+              onQuestionReorder={onQuestionReorder}
             />
-          </Stack>
-        </>
-      )}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              border="thin solid"
+              borderColor="divider"
+              padding="0.5rem"
+              margin="0.5rem"
+              maxWidth="40rem"
+            >
+              <DragIndicatorIcon />
+              <TextField
+                data-testid="quiz-add-answer"
+                placeholder={t("quizEditor.addAnswer")}
+                onClick={onAddQuestion}
+                fullWidth
+              />
+            </Stack>
+          </>
+        )}
+      </EditorBlockCard>
     </div>
   );
 };

@@ -1,0 +1,3722 @@
+{
+  "namespace": "pages",
+  "sourceLang": "en",
+  "targetLang": "fr",
+  "mode": "provable",
+  "timestamp": "2026-09-16T21:20:29.329Z",
+  "summary": {
+    "totalKeys": 240,
+    "existingKeys": 140,
+    "translatedKeys": 100,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 0,
+    "gpt": 20864,
+    "gemini": 9700
+  },
+  "translations": [
+    {
+      "keyPath": "index.learningPathway",
+      "source": "Skill Tree",
+      "translations": {
+        "claude": "",
+        "gpt": "Arbre de compétences",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:04.486Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.482Z",
+          "requestId": "chatcmpl-EOqwVwwCHHWRhQW2HYFNj1FgOyKs2",
+          "tokensUsed": 191,
+          "fingerprint": "0d4fc520d50d6959a4af13a074945b50a2f249c0caac186adeba840814844ce6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:04.486Z",
+          "requestId": "1f1cfaef-23bf-4660-9e38-7a7ec8f723d9",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.selectSection",
+      "source": "Select a Section",
+      "translations": {
+        "claude": "",
+        "gpt": "Sélectionnez une section",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:07.675Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.418Z",
+          "requestId": "chatcmpl-EOqwVKHxOS1RqCA5dyiRF1S4IlYX8",
+          "tokensUsed": 192,
+          "fingerprint": "fc8be89792997586cd2e16e656e01e52ea5afb3600133aa37354421b59abf609"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:07.675Z",
+          "requestId": "5d587bdd-9694-439e-b593-209c00c29970",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.squadPosts",
+      "source": "Squad Posts",
+      "translations": {
+        "claude": "",
+        "gpt": "Publications de l'équipe",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:10.322Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.774Z",
+          "requestId": "chatcmpl-EOqwVadffX1BIEiS4jQ73hjLH5MUR",
+          "tokensUsed": 193,
+          "fingerprint": "caca7ab1049f612fbf848f513049c13d67887bd1093d50a2133d47dd6f23a407"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:10.322Z",
+          "requestId": "7cb99758-6394-42c0-a9e2-d6f904b173ba",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.heading",
+      "source": "Privacy",
+      "translations": {
+        "claude": "",
+        "gpt": "Confidentialité",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:15.853Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:05.406Z",
+          "requestId": "chatcmpl-EOqwjjXQjKvKd2iF928q5kRl46cyo",
+          "tokensUsed": 189,
+          "fingerprint": "f19bb4113dafe7cf9e956a612dd5ebe97fcecad9e18ecf591386d5c6f5352c74"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:15.853Z",
+          "requestId": "89f84c75-e7d6-4fdd-a58f-1234e9f31dc8",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.customization.heading",
+      "source": "Customization",
+      "translations": {
+        "claude": "",
+        "gpt": "Personnalisation",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:23.639Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:16.496Z",
+          "requestId": "chatcmpl-EOqwubUwGWctLopLMAhHD8pfcYHji",
+          "tokensUsed": 189,
+          "fingerprint": "12840c93ea3d08ff00f986f21ccfe8ccb043b1d5832e0059900086e94722d2a1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:23.639Z",
+          "requestId": "b7b7aebb-9165-480d-b135-5f08cf8ecc64",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.noSections",
+      "source": "No sections found",
+      "translations": {
+        "claude": "",
+        "gpt": "Aucune section trouvée",
+        "gemma": "tags.\n\n    Result: Aucune section trouvée.Aucune section trouvée\n\n<T>Aucune section trouvée",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:25.149Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.422Z",
+          "requestId": "chatcmpl-EOqwVUt6HWR3bUfAhihkK5pvJn5Uq",
+          "tokensUsed": 192,
+          "fingerprint": "b6edd7cb0f11a7393942eb2346910396bf35eb059f2350aec77f3fb2815d8c25"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:25.148Z",
+          "requestId": "dfea4ce1-9990-4092-aff2-e20013aad1b9",
+          "tokensUsed": 100,
+          "fingerprint": "cc72e258604f946f18b86d7013dfc7f3c3b6b786c280d3da3f1e8076e83e2acc"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.description",
+      "source": "Join a squad to compete with your team and climb the leaderboard together.",
+      "translations": {
+        "claude": "",
+        "gpt": "Rejoignez une escouade pour rivaliser avec votre équipe et gravir ensemble le classement.",
+        "gemma": "Rejoignez une escouade pour rivaliser avec votre équipe et grimper ensemble dans le classement.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:30.393Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.775Z",
+          "requestId": "chatcmpl-EOqwVQsvYzSAdkNOk8hv3JLODkaMN",
+          "tokensUsed": 216,
+          "fingerprint": "f31642352a142a3bfaf7cd53a905e44d3597f7814be99d33cae981af242c5d86"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:30.393Z",
+          "requestId": "5a38cffc-2f3e-438e-a03b-5ad267113d74",
+          "tokensUsed": 100,
+          "fingerprint": "653238f8baf069a2311a9479b26f2ce835df11d406605289d09ff488752ad6fc"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.createSquad",
+      "source": "Start a New Squad",
+      "translations": {
+        "claude": "",
+        "gpt": "Créer une nouvelle équipe",
+        "gemma": "Créez une nouvelle équipe",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:36.405Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.775Z",
+          "requestId": "chatcmpl-EOqwVYNf82qDX3109UaU8nFRvUxZO",
+          "tokensUsed": 193,
+          "fingerprint": "a689973b237ebc2f49d9560ea66d5852ef15ee854d823d0a9c332111b34e707f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:36.404Z",
+          "requestId": "f503da1c-38bc-4ae9-a3cf-041edda7f0ba",
+          "tokensUsed": 100,
+          "fingerprint": "5b57d7af6cdb3dcfd1151a15bf38736e49c5f8d176f2c21116d1bec35af93199"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.botCustomizer.heading",
+      "source": "AI Assistant Avatar",
+      "translations": {
+        "claude": "",
+        "gpt": "Avatar de l'assistant IA",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:38.143Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:25.804Z",
+          "requestId": "chatcmpl-EOqx3cfjspheQAfXbVOQXxcVb0K0F",
+          "tokensUsed": 194,
+          "fingerprint": "c7942d7687d8a9c705c9f14293cda609d9ecb46c0d1843010d7daa83a2f4fde8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:38.143Z",
+          "requestId": "3d8a8154-7916-4d45-ba51-7315f07772ce",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.leaderboardOptIn",
+      "source": "Show my name on leaderboards",
+      "translations": {
+        "claude": "",
+        "gpt": "Afficher mon nom sur les classements",
+        "gemma": "Afficher mon nom dans les classements",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:42.272Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:08.229Z",
+          "requestId": "chatcmpl-EOqwlDlCwtKh5uwp9lBvAB5tG6maf",
+          "tokensUsed": 202,
+          "fingerprint": "360042dddd16c412d72428416ade9a765d0fda1eecef43585432664ac65d001d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:42.272Z",
+          "requestId": "189a4cda-d126-4d1c-b20b-d48066d02269",
+          "tokensUsed": 100,
+          "fingerprint": "075441c0b62a886a6b4be462a87eefe379f8fed487d0327603510e2d2e6cdc59"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.customization.description",
+      "source": "Unlock new avatar styles and editor themes as you level up.",
+      "translations": {
+        "claude": "",
+        "gpt": "Débloquez de nouveaux styles d'avatar et thèmes d'éditeur à mesure que vous progressez.",
+        "gemma": "? Yes.\n\n    \"Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur à mesure que vous montez de niveau.\"\n\n    Actually, \"Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur en montant de niveau\" is very common in UI. But \"à mesure que vous montez de niveau\" is a more precise translation of \"as you level up\".\n\n    Let's try: \"Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur à mesure que vous montez de niveau.\"\n\n    One more check: \"Unlock\" (Imperative).\n    \"Débloquez\" is the imperative form for \"vous\".\n\n    Final string: Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur à mesure que vous montez de niveau.Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur à mesure que vous montez de niveau.\n\n<T>Débloquez de nouveaux styles d'avatar et des thèmes d'éditeur à mesure que vous montez de niveau.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:46.380Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:24.456Z",
+          "requestId": "chatcmpl-EOqx2msWc0JRNXqQiZzC2zcgl7YkZ",
+          "tokensUsed": 218,
+          "fingerprint": "2a4d7831437693cdfd461548317605cfcb2d7489f5e0509b29f153850ce1694d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:46.379Z",
+          "requestId": "9b5d2063-83fd-4fde-875d-28177c57aec2",
+          "tokensUsed": 100,
+          "fingerprint": "eb8cc3dba08ef9b1fd3b6b5ea9a2ea6747f863ebe4db7221f2c6c7852a4ba075"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.privacy.leaderboardOptInHint",
+      "source": "When off, your name appears as \"Anonymous Student\" on leaderboards.",
+      "translations": {
+        "claude": "",
+        "gpt": "Lorsque désactivé, votre nom apparaît comme « Étudiant Anonyme » sur les classements.",
+        "gemma": "Si cette option est désactivée, votre nom apparaîtra comme « Étudiant anonyme » dans les classements.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:46.666Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:11.142Z",
+          "requestId": "chatcmpl-EOqwoBemQ1nGfhCyt9NhnwM4XS72q",
+          "tokensUsed": 225,
+          "fingerprint": "78c8ea1a58d3f851557a3ca81a2446e14ac1e96b5ae0734a35011d28453cfa67"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:46.666Z",
+          "requestId": "dbbde09b-e5e7-4459-bb9d-c7afccc32df9",
+          "tokensUsed": 100,
+          "fingerprint": "6c2210d29085bfdb51efa2d4947b4739b15044e0197e9a41d53a214684f661b3"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.profileInfo.heading",
+      "source": "Profile Information",
+      "translations": {
+        "claude": "",
+        "gpt": "Informations sur le profil",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:50.024Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:37.053Z",
+          "requestId": "chatcmpl-EOqxEfyt4m4Z7lMJNdOInIgAxz2c3",
+          "tokensUsed": 191,
+          "fingerprint": "60d79e39156a16e14c6a8ae065ca1fd3f59963f19de9a446120f0b0913106cf2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:50.024Z",
+          "requestId": "a4f3fe5a-812a-46d9-9c0b-65dc857a1727",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.botCustomizer.description",
+      "source": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges.",
+      "translations": {
+        "claude": "",
+        "gpt": "Personnalisez l'apparence de votre tuteur IA. Débloquez plus d'options avec les badges Bot Whisperer.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:50.267Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:31.470Z",
+          "requestId": "chatcmpl-EOqx8nHQWdR8twnuSo5jDjFdH6WJ9",
+          "tokensUsed": 226,
+          "fingerprint": "c16b7d587a1f084f4b41926ecea4915ed618fb0beb46fb2dee32a4193740a0ae"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:50.267Z",
+          "requestId": "5fcbeba3-1943-49ba-a15c-a7e8e8e7892c",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.badges",
+      "source": "Badges",
+      "translations": {
+        "claude": "",
+        "gpt": "Badges",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:57.318Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:47.163Z",
+          "requestId": "chatcmpl-EOqxP2Rn6R5dendo08EvI3DN29R5a",
+          "tokensUsed": 188,
+          "fingerprint": "185d8ef0ae5ea9b841831f1b8be33a362d945d835f8d08060ff2635aef883957"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:57.318Z",
+          "requestId": "1f879b21-d33c-475b-ae50-0df582a8ed85",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.description",
+      "source": "Manage your account settings and preferences",
+      "translations": {
+        "claude": "",
+        "gpt": "Gérez les paramètres et préférences de votre compte",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:57.983Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.483Z",
+          "requestId": "chatcmpl-EOqwVgvPHhujJC9r7HjJWksgxnPpX",
+          "tokensUsed": 199,
+          "fingerprint": "720bccb9fe431d8c2b7f8ac976453f1b428cd4486c7ff17f4ecf6e4e0e3d59b2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:57.983Z",
+          "requestId": "d06efd01-9379-4027-863a-47a052f36bff",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.activity",
+      "source": "Activity",
+      "translations": {
+        "claude": "",
+        "gpt": "Activité",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:58.172Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:46.950Z",
+          "requestId": "chatcmpl-EOqxO0tldLT38Xxx0c56V68ujIkM0",
+          "tokensUsed": 186,
+          "fingerprint": "6b2b8f1b80e0743cab723ecbb51fb978996f12c6f62c6141e07fbc08a5b851a7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:58.172Z",
+          "requestId": "b63b17f7-62ba-4e91-ac2c-acc54d0fd2d8",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.progress",
+      "source": "Progress",
+      "translations": {
+        "claude": "",
+        "gpt": "Progression",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:55:58.541Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:42.893Z",
+          "requestId": "chatcmpl-EOqxKt1xnQAot1HKNRoPdHJVXfoTI",
+          "tokensUsed": 186,
+          "fingerprint": "f193d07c37765ecb1de9acb1af52d788851273a68ddd8b3791e4288c5e85ef77"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:55:58.541Z",
+          "requestId": "d510ca4a-de4b-4c30-9236-88465ea0f575",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "squads.heading",
+      "source": "All Squads",
+      "translations": {
+        "claude": "",
+        "gpt": "Toutes les équipes",
+        "gemma": "tags.\n\n    *Wait*, I'll check if \"Squads\" should be \"Squads\" (plural) in French. If I use the word \"squad\", it's \"les squads\". If I use \"équipe\", it's \"les équipes\".\n\n    Let's consider \"Tous les squads\" one last time. If the platform is an eLearning platform, \"Squads\" might be a specific term for a group of students. In that case, \"Équipes\" is the perfect translation.\n\n    Final Answer seems to be \"Toutes les équipes\".\n\n    *Wait*, I just realized \"All Squads\" could also be \"Tous les squads\" if \"squad\" is treated as a masculine noun.\n    But \"Toutes les équipes\" is much more natural for a formal French UI.\n\n    Let's check \"All Squads\" in a professional context.\n    \"All Teams\" -> \"Toutes les équipes\".\n    \"All Squads\" -> \"Toutes les équipes\" (most likely).\n\n    One more check: \"All Squads\" -> \"Tous les squads\".\n    If I search for \"squad\" in French, \"escouade\" is the dictionary definition. But \"équipe\" is the functional definition.\n\n    I'll go with \"Toutes les équipes\".\n\n    *Actually*, I'll check if \"Tous les squads\" is better for \"polite-formal\". No, anglicisms are generally considered less formal in French.\n\n    Final decision: Toutes les équipes.<T>Toutes les équipes",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:01.546Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:54:51.884Z",
+          "requestId": "chatcmpl-EOqwVXVYNdeaZaZMRXyJkq0lMoPjo",
+          "tokensUsed": 189,
+          "fingerprint": "e7fcdc32bf918c90b9bf710197c1c4a79e8ec44ad1871fc9c69442e148328dd0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:01.546Z",
+          "requestId": "73ed0ed1-1515-43b9-ac1a-9a914ebccd32",
+          "tokensUsed": 100,
+          "fingerprint": "b4372b344bf6ce1953a9b08d902796c45d5a5f6a18f99dd2c7528bfa793616e4"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.coverVideoUrlLabel",
+      "source": "Video URL",
+      "translations": {
+        "claude": "",
+        "gpt": "URL de la vidéo",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:10.840Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:58.663Z",
+          "requestId": "chatcmpl-EOqxau9z05rnyRnZRWFAQHqAoBm7s",
+          "tokensUsed": 193,
+          "fingerprint": "7d9708a9eeeeba580d04b6115e6fefb31554f7a994003c6cbc7597d05fe66290"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:10.840Z",
+          "requestId": "a22cba4a-d879-40fe-975b-b709ba3c2387",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.setCoverVideo",
+      "source": "Set Cover Video",
+      "translations": {
+        "claude": "",
+        "gpt": "Définir la vidéo de couverture",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:11.456Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:50.799Z",
+          "requestId": "chatcmpl-EOqxS2sESnzb5pZvKwZrvmcOdtSgh",
+          "tokensUsed": 196,
+          "fingerprint": "1b8c90e68c0aa9340eef98ffc1f09c5a887538e7d89aebcc5cae1133a6baeb62"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:11.456Z",
+          "requestId": "d9e0ead1-5f93-4334-93b0-fa19fe516666",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noCurve",
+      "source": "No Curve",
+      "translations": {
+        "claude": "",
+        "gpt": "Pas de courbe",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:13.708Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:59.171Z",
+          "requestId": "chatcmpl-EOqxageH06CMai7mif9JhScA2o5tr",
+          "tokensUsed": 191,
+          "fingerprint": "f772cef295b2bbd1cf774d6d494f615ef45efad71dd6de3dc6b700613e143b96"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:13.708Z",
+          "requestId": "0eeb24cc-949a-465c-a567-d413154a48af",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noCoverVideo",
+      "source": "No cover video set.",
+      "translations": {
+        "claude": "",
+        "gpt": "Aucune vidéo de couverture définie.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:16.271Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:58.145Z",
+          "requestId": "chatcmpl-EOqxZpMr7S7GMdXbribeeIRrEJUFR",
+          "tokensUsed": 198,
+          "fingerprint": "d4faa6b49110fb58c40ff0a0b7346929fa4f9fe878269369e6ad44fd04e40ad1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:16.271Z",
+          "requestId": "a147c093-46f8-4983-a22f-9c14c518238a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "settings.profileInfo.description",
+      "source": "Update your display name and email address",
+      "translations": {
+        "claude": "",
+        "gpt": "Mettez à jour votre nom d'affichage et votre adresse e-mail",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:17.585Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:38.792Z",
+          "requestId": "chatcmpl-EOqxG27NN5eu4Qs0bt0BHpsfgp2ij",
+          "tokensUsed": 207,
+          "fingerprint": "3e94a3d4e94dd141c854a348ab612672f39f6fb92777436d208f707cd1e330be"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:17.585Z",
+          "requestId": "7b3dc8c6-af94-44f8-87a3-e0924b24a685",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "profile.nailedItWall",
+      "source": "Nailed It Wall",
+      "translations": {
+        "claude": "",
+        "gpt": "Mur des réussites",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:18.725Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:50.772Z",
+          "requestId": "chatcmpl-EOqxSrWJzCzB1dnWCmhqOJVocTNFa",
+          "tokensUsed": 194,
+          "fingerprint": "7571a9367d228ba37b859d866200851d79709fed143aea4cd5bd12a8aab73188"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:18.725Z",
+          "requestId": "0be30562-d92d-4356-bc60-26cbd0a22d56",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.coverVideoUrlPlaceholder",
+      "source": "Paste a video URL (https://...)",
+      "translations": {
+        "claude": "",
+        "gpt": "Collez une URL de vidéo (https://...)",
+        "gemma": "Collez l'URL d'une vidéo (https://...)",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:24.956Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:55:58.551Z",
+          "requestId": "chatcmpl-EOqxaj4bfsbG26MO5aIir6bg8Jvxb",
+          "tokensUsed": 205,
+          "fingerprint": "7cf9f3ec5c82f85dc183bb51c09bec71fd168e4e592ff9691e260620e5edd4a5"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:24.956Z",
+          "requestId": "e2954749-3c7e-484a-836a-45370fbb4993",
+          "tokensUsed": 100,
+          "fingerprint": "1b66ac8ccdcf096a886d3c8ad1981866ce37572df4751566570af359bb74ab02"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.unarchive",
+      "source": "Unarchive",
+      "translations": {
+        "claude": "",
+        "gpt": "Désarchiver",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:25.635Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:16.887Z",
+          "requestId": "chatcmpl-EOqxsphiAWJRINsom2IJZvsULlQDf",
+          "tokensUsed": 190,
+          "fingerprint": "01ab6a46e1f7fd1b6870923537952edb6f45347f96d04779ebc2c528ecdfe143"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:25.634Z",
+          "requestId": "22a7f71e-9f67-4c51-91bb-8cab9e4bbdda",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.leaderboardEnabled",
+      "source": "Show Leaderboard",
+      "translations": {
+        "claude": "",
+        "gpt": "Afficher le classement",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:29.275Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:12.397Z",
+          "requestId": "chatcmpl-EOqxojCtcQRfE19Od9cZSjKGjqS2l",
+          "tokensUsed": 193,
+          "fingerprint": "4709d7f21a61a02f91431694ab6e03c1efd21d0c739e5a45343f2d24515089ab"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:29.275Z",
+          "requestId": "dd2f1fb2-9b72-468e-a607-616135023785",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archive",
+      "source": "Archive",
+      "translations": {
+        "claude": "",
+        "gpt": "Archive",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:29.493Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:14.514Z",
+          "requestId": "chatcmpl-EOqxqqXsuvf9OPqWQTA5bJojEayZt",
+          "tokensUsed": 185,
+          "fingerprint": "66f4804ee23ddc092d1bae43cb88186aa541187fff7c1cc8a4aa17e59a9f4123"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:29.493Z",
+          "requestId": "ee3d335c-1b43-4eed-9385-90549569e1b2",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.completionGrid",
+      "source": "Completion Overview",
+      "translations": {
+        "claude": "",
+        "gpt": "Aperçu de l'achèvement",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:31.221Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:02.152Z",
+          "requestId": "chatcmpl-EOqxd4DusiQRVu5lgy2QjVChFI8dp",
+          "tokensUsed": 196,
+          "fingerprint": "8b7f1c52c5bfea619472335947ba159631ff398c621bef012bc62cfb8a8edf07"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:31.221Z",
+          "requestId": "64ae6e84-54d6-4570-a495-82d895c4291a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archivedSuccess",
+      "source": "Section archived successfully",
+      "translations": {
+        "claude": "",
+        "gpt": "Section archivée avec succès",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:33.452Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:20.644Z",
+          "requestId": "chatcmpl-EOqxwAumQfrrhJqaNngFpr87Je7GD",
+          "tokensUsed": 193,
+          "fingerprint": "e1260324d9deff9d4320d1f4dfc6b8fd9f2e08f41ef131ed397029982b879d88"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:33.452Z",
+          "requestId": "f39e54b3-708b-490b-884b-4786fea34330",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabCommunity",
+      "source": "Community",
+      "translations": {
+        "claude": "",
+        "gpt": "Communauté",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:40.951Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:31.864Z",
+          "requestId": "chatcmpl-EOqy78G4pmDfeabXS7pO0iZI1NV6b",
+          "tokensUsed": 187,
+          "fingerprint": "07cc69527b392f720a82f1568fa8883a5c2bba84ef1ddf67ab9cf3c9a7889f5d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:40.950Z",
+          "requestId": "72165e5f-a0b0-4bff-869e-0e3a8923e926",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabMyUnits",
+      "source": "My Units",
+      "translations": {
+        "claude": "",
+        "gpt": "Mes Unités",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:42.383Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:29.767Z",
+          "requestId": "chatcmpl-EOqy574nLZc1TfA23bGscGTwp2AOD",
+          "tokensUsed": 190,
+          "fingerprint": "bc092fdeae0ac821b8ffb7974ea255f536ed654718d391131d42eaf00def04b3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:42.383Z",
+          "requestId": "faeea67c-0ebf-4caa-9040-6157a9f097ab",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.archiveError",
+      "source": "Failed to update section. Please try again.",
+      "translations": {
+        "claude": "",
+        "gpt": "Échec de la mise à jour de la section. Veuillez réessayer.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:42.546Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:26.685Z",
+          "requestId": "chatcmpl-EOqy2xGyaFOXWZ736MU8C7YhEeVUl",
+          "tokensUsed": 209,
+          "fingerprint": "2fd3a6603548e8deea0de31c48d30e83194738050f0bb97419d4d39d56ee2112"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:42.546Z",
+          "requestId": "f0831236-612b-4242-b256-0ca7d7c6b991",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.tabSharedWithMe",
+      "source": "Shared With Me",
+      "translations": {
+        "claude": "",
+        "gpt": "Partagé avec moi",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:43.028Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:30.137Z",
+          "requestId": "chatcmpl-EOqy5GovGTxUSyWYatMF2NqKdtct6",
+          "tokensUsed": 195,
+          "fingerprint": "5a3c00bdd2a8cc2ab9885b2e12d9257a4fde7768b43458eb7dd7c6de7f004e5c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:43.028Z",
+          "requestId": "2992dba9-d4ac-438f-8002-2234934325b7",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.unarchivedSuccess",
+      "source": "Section unarchived successfully",
+      "translations": {
+        "claude": "",
+        "gpt": "Section désarchivée avec succès",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:46.584Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:25.641Z",
+          "requestId": "chatcmpl-EOqy1tQqGDOGGDrgBd0tQenVSnQDw",
+          "tokensUsed": 197,
+          "fingerprint": "f7216ad98472e7fd58bd5ce60e52af7fdbfc17d2e763a7ae6d46fef89eb2555b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:46.584Z",
+          "requestId": "ebcc99a4-914f-4566-8708-cf30892ab370",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionDetail.noLeaderboardEntries",
+      "source": "No leaderboard data yet. Students will appear here as they earn XP.",
+      "translations": {
+        "claude": "",
+        "gpt": "Pas encore de données de classement. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront des XP.",
+        "gemma": "tags.\n\n    \"Aucune donnée de classement pour le moment. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront de l'XP.\"\n\n    Actually, \"gagneront de l'XP\" is fine, but \"accumulent de l'XP\" is also very professional. I'll stick to \"gagneront\" to stay closer to \"earn\".\n\n    One detail: \"No leaderboard data yet.\"\n    \"Pas encore de données de classement.\" is slightly more punchy for a UI.\n    \"Aucune donnée de classement pour le moment.\" is more formal.\n    The prompt asks for \"polite-formal\".\n\n    \"Aucune donnée de classement pour le moment. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront de l'XP.\"\n\n    Let's check if \"XP\" needs to be \"points d'expérience\". In most modern platforms (Duolingo, etc.), \"XP\" is used. Given the source uses \"XP\", I will keep \"XP\".\n\n    Final string:\n    Aucune donnée de classement pour le moment. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront de l'XP.Aucune donnée de classement pour le moment. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront de l'XP.\n\n<T>Aucune donnée de classement pour le moment. Les étudiants apparaîtront ici au fur et à mesure qu'ils gagneront de l'XP.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:56:51.724Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:11.719Z",
+          "requestId": "chatcmpl-EOqxnpW9HtohnJOIEydLK2HhfynrC",
+          "tokensUsed": 225,
+          "fingerprint": "811100e058a10593e71f42d088f75398d00c9d20c3bbada3f389d14e4e8d73ed"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:56:51.724Z",
+          "requestId": "d5192e55-5ac6-4732-819d-2ec0b1897b14",
+          "tokensUsed": 100,
+          "fingerprint": "e3b2f2da097bd3ad69907eca63fbdc14857c64210b1a87d734c49e307729e32a"
+        }
+      }
+    },
+    {
+      "keyPath": "units.noSharedUnits",
+      "source": "No units have been shared with you yet",
+      "translations": {
+        "claude": "",
+        "gpt": "Aucune unité ne vous a été partagée pour le moment",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:11.566Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:43.303Z",
+          "requestId": "chatcmpl-EOqyIyw2aMKDBOoMejWvVqLW6FcD8",
+          "tokensUsed": 206,
+          "fingerprint": "719e906f25d9887024718db2b8a2bfff76926d5eacef7a8e945ba4c75eceee4e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:11.566Z",
+          "requestId": "075cc600-1a18-4ed2-9ca3-0964e87422b6",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.noCommunityUnits",
+      "source": "No community units available",
+      "translations": {
+        "claude": "",
+        "gpt": "Aucune unité communautaire disponible",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:13.820Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:43.194Z",
+          "requestId": "chatcmpl-EOqyIPPXRgYeRiaUpo87RR7I3saaf",
+          "tokensUsed": 195,
+          "fingerprint": "2b9b531b6953ca1f8f86b58f8af20a5a15c2a782c9e22d9d7cd279689e42d112"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:13.820Z",
+          "requestId": "57da74a0-d320-4dd3-9c86-8a81ccb31489",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.title",
+      "source": "Privacy Policy",
+      "translations": {
+        "claude": "",
+        "gpt": "Politique de confidentialité",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:19.554Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:14.332Z",
+          "requestId": "chatcmpl-EOqyovhhsAiFoVaZggeZLoDP0KFXS",
+          "tokensUsed": 189,
+          "fingerprint": "f873b7dcc8ea03148257fe0659a34d75684a6aef252e874488a3270bf8f3e979"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:19.554Z",
+          "requestId": "237d128a-ae04-4df7-85a6-3b0ac6ee38b4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbook.unitUpdated",
+      "source": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
+      "translations": {
+        "claude": "",
+        "gpt": "Cette unité a été mise à jour par l'instructeur. Souhaitez-vous recharger avec la dernière version ?",
+        "gemma": "tags.\n\n    Text: Cette unité a été mise à jour par l'instructeur. Souhaitez-vous la recharger avec la version la plus récente ?\n\n    (Note: \"l'instructeur\" is masculine. If the instructor is female, it would be \"l'instructrice\", but in UI, the masculine is used as the neutral/generic form).\n\n    Let's double check \"reload with the latest version\".\n    \"recharger avec la version la plus récente\" vs \"recharger la version la plus récente\".\n    The source says \"reload *with* the latest version\".\n    \"recharger avec la version la plus récente\" is the correct translation of the prepositional phrase.\n\n    Final string: Cette unité a été mise à jour par l'instructeur. Souhaitez-vous la recharger avec la version la plus récente ?Cette unité a été mise à jour par l'instructeur. Souhaitez-vous la recharger avec la version la plus récente ?\n\n<T>Cette unité a été mise à jour par l'instructeur. Souhaitez-vous la recharger avec la version la plus récente ?",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:21.136Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:52.624Z",
+          "requestId": "chatcmpl-EOqyS8uoePbIF8nyViLo0NaCBaeH2",
+          "tokensUsed": 226,
+          "fingerprint": "b0cd70655ba3ec0542ce88d34bbe0231b71843b8e0eec52c3a8f107213de443f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:21.136Z",
+          "requestId": "1fc7f66e-bce1-4d43-b3ee-8d586596ba94",
+          "tokensUsed": 100,
+          "fingerprint": "3e41423e98d7fcd0439ddf40e9a2c7a58c1f31ae23d8c85ca26417b5b51b19f8"
+        }
+      }
+    },
+    {
+      "keyPath": "workbook.reload",
+      "source": "Reload",
+      "translations": {
+        "claude": "",
+        "gpt": "Recharger",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:26.704Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:12.227Z",
+          "requestId": "chatcmpl-EOqylYh58ad9Dtul4pMIrfVU0E1rg",
+          "tokensUsed": 186,
+          "fingerprint": "98d1213e191bb679f73654eeaf7da59e0d85ecc21775b95dfbcab9674477a907"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:26.704Z",
+          "requestId": "b0482858-dbc7-4561-b350-99fafcc61fa1",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.introduction.heading",
+      "source": "Introduction",
+      "translations": {
+        "claude": "",
+        "gpt": "Introduction",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:28.154Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:21.761Z",
+          "requestId": "chatcmpl-EOqyv10DBz3HdJB4cisv5iFmacrYP",
+          "tokensUsed": 187,
+          "fingerprint": "b605350bc00209520b7cd8f546322663356ba630708f71bbf30aead6b3dd608e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:28.154Z",
+          "requestId": "a0988c24-cf40-4721-b114-665ce307fabe",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sections.showArchived",
+      "source": "Show Archived ({count})",
+      "translations": {
+        "claude": "",
+        "gpt": "Afficher les archivés ({count})",
+        "gemma": "Afficher les éléments archivés ({count})",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:31.939Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:18.123Z",
+          "requestId": "chatcmpl-EOqxtvcMJ2pY8XXINrIdS2jXQChRY",
+          "tokensUsed": 196,
+          "fingerprint": "7abcbfc3a904f83ff0e6beb0bd45172b4dd9a2846af62b1d80012167f93303e0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:31.939Z",
+          "requestId": "be9ac816-f8f4-42a9-b7f3-ea6ab3876500",
+          "tokensUsed": 100,
+          "fingerprint": "3c59afcf08ed32921a0e71becb5b900164b930ecccaa57514b0bcbd80ab96375"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.lastUpdated",
+      "source": "Last updated: May 2026",
+      "translations": {
+        "claude": "",
+        "gpt": "Dernière mise à jour : mai 2026",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:32.910Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:20.271Z",
+          "requestId": "chatcmpl-EOqyuj7vuIXglhxD3grwbVPw0fKDx",
+          "tokensUsed": 201,
+          "fingerprint": "1d1fd532feff2603ce6f34658e8cc6aa1ccb364266dfdd3cd2c0bc55809cd222"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:32.909Z",
+          "requestId": "431386b4-6d0e-49b9-854f-db38a3b6922e",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forking",
+      "source": "Forking...",
+      "translations": {
+        "claude": "",
+        "gpt": "Clonage en cours...",
+        "gemma": "tags.\n\n    Translation: Bifurcation en cours...\n\n    (Self-correction: If \"Forking\" refers to the technical act of forking a repository/unit, \"Bifurcation\" is the correct term. If it's a very technical platform, sometimes they keep \"Forking\", but the instruction is to translate to French.)\n\n    Let's consider \"Création d'une bifurcation...\". It's slightly more explicit. But \"Bifurcation en cours...\" is cleaner for UI.\n\n    Actually, looking at how \"Forking\" is used in software (like GitHub), the action is \"Fork\". The process is \"Forking\". In French, \"Forker\" is used colloquially among devs, but \"Bifurquer\" or \"Créer une bifurcation\" is the formal way. For a UI, \"Bifurcation en cours...\" is the most professional.\n\n    One more thought: Could it be \"Création d'une copie...\"? No, that's \"Copying...\". \"Forking\" is specific.\n\n    Final decision: Bifurcation en cours...\n\n    Wait, I'll check if \"Forking...\" can be translated as \"Bifurcation...\".\n    In many UI strings, \"...\" is used to indicate a process.\n    \"Processing...\" -> \"Traitement en cours...\"\n    \"Forking...\" -> \"Bifurcation en cours...\"\n\n    This is the most robust translation.\n\n    *Wait*, I just realized \"Forking\" might be a very specific action in this eLearning platform (like forking a course).\n    If I use \"Bifurcation en cours...\", it is the most accurate translation of the concept.\n\n    Let's double check if \"Forking\" is ever translated as \"Dérivation\". No, \"Bifurcation\" is better.\n\n    Final string: Bifurcation en cours...\n\n    *Wait*, I should ensure I don't add anything else.\n\n    One last look at the source: \"Forking...\"\n    If I want to be extremely minimal: \"Bifurcation...\"\n    But \"Bifurcation en cours...\" is better French for a status.\n\n    Let's look at the \"polite-formal\" instruction. \"Bifurcation en cours...\" is formal.\n\n    Final check:\n    Source: Forking...\n    Target: Bifurcation en cours...\n\n    (Actually, looking at some French software, \"Forking\" is sometimes translated as \"Création d'une branche...\" if it's git-related, but \"Bifurcation\" is the direct translation of the concept of a fork).\n\n    Let's go with \"Bifurcation en cours...\".\n\n    *Wait*, I'll check if \"Forking\" could be \"Création d'une copie...\". In eLearning, \"forking\" a module usually means creating a new version of it. \"Duplication en cours...\" might be more user-friendly for \"all users\". However, \"Forking\" is a specific term. If the English says \"Forking\", the French should reflect that specific action. \"Bifurcation\" is the correct term for \"Fork\".\n\n    Let's try to see if there's a more common way.\n    \"Forking...\" -> \"Bifurcation en cours...\"\n\n    Actually, I will provide \"Bifurcation en cours...\" as it is the most professional translation for a status message.\n\n    *Wait*, I just thought of something. Is \"Forking\" a verb? \"Forking...\" (the act of forking).\n    In French: \"Bifurcation en cours...\" (the bifurcation is in progress).\n    This is the standard pattern.\n\n    One more check: \"Forking...\"\n    If the user is clicking a button \"Fork\", the status is \"Forking...\".\n    In French: \"Bifurcation en cours...\"\n\n    Final check on constraints:\n    - Return ONLY the French translation.\n    - No quotes.\n    - No explanations.\n    - Wrap in <T> tags.\n\n    Result: <T>Bifurcation en cours...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:33.375Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:41.869Z",
+          "requestId": "chatcmpl-EOqyHImAt3zfvQxSjrY6U5uV7Isvy",
+          "tokensUsed": 194,
+          "fingerprint": "287cfc63466be6559ee0f7ad18ace1fb9537ae3bb65dce584ab2774aefd76832"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:33.375Z",
+          "requestId": "ea0b6b93-0ca4-4311-96f6-cdbbb739def2",
+          "tokensUsed": 100,
+          "fingerprint": "93d43d8f41604fcc081c28c17aa891d84dc1ce46e065c952417ef3c05ef21c10"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkError",
+      "source": "Failed to fork unit",
+      "translations": {
+        "claude": "",
+        "gpt": "Échec du clonage de l'unité",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:34.824Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:47.194Z",
+          "requestId": "chatcmpl-EOqyMdq60091fGLQMHS6pgCBXfBiU",
+          "tokensUsed": 198,
+          "fingerprint": "f14b303f5c7db07b6c538cabc066669bfc9cf43b99078edbeaf8662638c3fce5"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:34.824Z",
+          "requestId": "ed33366f-6b51-4983-be15-455143cd2345",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.heading",
+      "source": "Information We Collect",
+      "translations": {
+        "claude": "",
+        "gpt": "Informations que nous collectons",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:41.294Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:28.708Z",
+          "requestId": "chatcmpl-EOqz28J4rLHkyawECyfUE9SNX9b7j",
+          "tokensUsed": 195,
+          "fingerprint": "9945d506a801f61186e819f5fb7a3ec25d758877334005074c999dafc2261875"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:41.294Z",
+          "requestId": "1502c9a0-869d-4c08-97bd-7bb0bcff7af4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkUnit",
+      "source": "Fork",
+      "translations": {
+        "claude": "",
+        "gpt": "Dupliquer",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:46.796Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:33.962Z",
+          "requestId": "chatcmpl-EOqy9aoXfMqSAiI6MN9FIYchWnt4G",
+          "tokensUsed": 188,
+          "fingerprint": "9d726e2b316de2acea723135a2b6973f80eb0699a5da4857febd2b1da96937fd"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:46.796Z",
+          "requestId": "20f5a813-94a2-4195-a74a-8ed2c7bcfe90",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.learningData",
+      "source": "Learning Data:",
+      "translations": {
+        "claude": "",
+        "gpt": "Données d'apprentissage :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:47.766Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:35.428Z",
+          "requestId": "chatcmpl-EOqz9SxTkdz2sS86SJFkchUgSVdZ8",
+          "tokensUsed": 196,
+          "fingerprint": "5614e9a75559cf02cba39ea47d7a638136a1c26f257a05e6050dc5073e853a65"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:47.766Z",
+          "requestId": "203adaeb-c613-4ea6-b200-3f1a943035a1",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.introduction.content",
+      "source": "Welcome to Homework Supply. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and share your information when you use our educational platform.",
+      "translations": {
+        "claude": "",
+        "gpt": "Bienvenue sur Homework Supply. Nous nous engageons à protéger votre vie privée et à garantir la sécurité de vos informations personnelles. Cette Politique de Confidentialité explique comment nous collectons, utilisons, stockons et partageons vos informations lorsque vous utilisez notre plateforme éducative.",
+        "gemma": "Bienvenue sur Homework Supply. Nous nous engageons à protéger votre vie privée et à assurer la sécurité de vos informations personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons, stockons et partageons vos informations lorsque vous utilisez notre plateforme éducative.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:52.474Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:27.820Z",
+          "requestId": "chatcmpl-EOqz1y3xQ54ibtZy9xwMJp7em79bO",
+          "tokensUsed": 282,
+          "fingerprint": "d18d8309e1df5b3cbff74fcff2f70e3a5cc8f6af634fe505deb75d4f96cd56e2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:52.474Z",
+          "requestId": "810366b7-9883-42aa-aa90-61bb60b762f4",
+          "tokensUsed": 100,
+          "fingerprint": "bb0122f04917c2fe2c06ffffcd23bf1c6bdd11387b9d01c7a40678751cb9f87f"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.accountInfo",
+      "source": "Account Information:",
+      "translations": {
+        "claude": "",
+        "gpt": "Informations sur le compte :",
+        "gemma": "`? Yes.\n\n    \"Informations sur le compte :\" is the most standard UI translation.\n\n    Let's try \"Informations relatives au compte :\" to be safe on the \"formal\" requirement. Actually, \"Informations sur le compte :\" is standard for \"Account Information\".\n\n    Let's go with: Informations sur le compte :\n\n    Wait, \"Account Information\" (singular/plural nuance). In English, \"Information\" is uncountable. In French, \"Informations\" is almost always plural in this context.\n\n    Final choice: Informations sur le compte :\n\n    *Self-correction*: Is there a more formal way? \"Données relatives au compte\" (Account data)? No, the source says \"Information\".\n\n    \"Informations sur le compte :\" is the best fit.\n\n    One more check: \"Account Information:\" -> \"Informations sur le compte :\"\n\n    (Note: In French, there is a non-breaking space before the colon, but in UI strings, standard practice often follows the source's punctuation style or standard French typography. I will provide the standard French punctuation: \"Informations sur le compte :\")\n\n    Actually, looking at the prompt \"Keep the same formality level as the source text\", the source is a simple label.\n\n    \"Informations sur le compte :\"\n\n    Let's double check if \"Informations de compte :\" is better. No, \"sur le compte\" is better.\n\n    Final string: Informations sur le compte :Informations sur le compte :\n\n<T>Informations sur le compte :",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:57:53.449Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:33.423Z",
+          "requestId": "chatcmpl-EOqz7G2V3x9tpht7sXcxR3n3AmRk2",
+          "tokensUsed": 195,
+          "fingerprint": "357bda4fec5a3d2fb58e5fe6b6cfd068d0d3212f474387ce5dd985be67f23bd1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:57:53.449Z",
+          "requestId": "0b9034e1-2628-46a8-b6ce-a44605434ea4",
+          "tokensUsed": 100,
+          "fingerprint": "a2cd4eb6438f8a6b883b9a0f914799453e3dca9cef7f074daed24c6c943f2cd7"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.accountInfoText",
+      "source": "Email address, display name, and authentication credentials when you create an account.",
+      "translations": {
+        "claude": "",
+        "gpt": "Adresse e-mail, nom d'affichage et identifiants d'authentification lorsque vous créez un compte.",
+        "gemma": "tags.\n\n    One thought: \"lorsque vous créez un compte\" vs \"lors de la création de votre compte\".\n    \"lors de la création de votre compte\" is more formal.\n\n    Final Polish:\n    Adresse e-mail, nom d'affichage et identifiants d'authentification lors de la création de votre compte.Adresse e-mail, nom d'affichage et identifiants d'authentification lors de la création de votre compte.\n\n<T>Adresse e-mail, nom d'affichage et identifiants d'authentification lors de la création de votre compte.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:00.619Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:34.199Z",
+          "requestId": "chatcmpl-EOqz7b3V3xWQehT9CJ0AM1tsjHoVD",
+          "tokensUsed": 227,
+          "fingerprint": "42126e2e144c817335fd73200a12f524ce730e9cfc77d5a1ee7dd116b846ed5f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:00.619Z",
+          "requestId": "71ae2199-cb2f-4ef0-9435-da7f593cdde2",
+          "tokensUsed": 100,
+          "fingerprint": "1f7645ccd67d9ce2add795bfcfebdc630c467ec51b054d33ed073955dd7649a9"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.learningDataText",
+      "source": "Assignment submissions, grades, progress tracking, XP earned, and learning analytics.",
+      "translations": {
+        "claude": "",
+        "gpt": "Soumissions de devoirs, notes, suivi des progrès, XP gagné et analyses d'apprentissage.",
+        "gemma": "Soumissions de devoirs, notes, suivi de la progression, XP gagnés et analyses d'apprentissage.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:02.655Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:42.098Z",
+          "requestId": "chatcmpl-EOqzFITqTJJujQoEVZ4n4d61ypuIu",
+          "tokensUsed": 224,
+          "fingerprint": "0687e534fbc1eb0663ff1f6ea1261f38fa435e2f89bc613f43daa1d61934a731"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:02.655Z",
+          "requestId": "66fc9e64-db61-4083-891d-adbc15ffb1c6",
+          "tokensUsed": 100,
+          "fingerprint": "9bb3aac210b63c6a3749f4f70d0c30e23c46d155b3d64e8b40542cdbe95f3855"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.userContent",
+      "source": "User-Generated Content:",
+      "translations": {
+        "claude": "",
+        "gpt": "Contenu généré par l'utilisateur :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:06.865Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:47.408Z",
+          "requestId": "chatcmpl-EOqzL2sy6lm3nTKX9kPyGQB4zciG8",
+          "tokensUsed": 200,
+          "fingerprint": "766e1c8af5d3aee1b93b41c80671f7112201bbc29f79256dab6bba64d4e81e87"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:06.865Z",
+          "requestId": "dd214ce9-3e40-4526-83c4-03cbcb2016a2",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.intro",
+      "source": "We collect the following types of information to provide and improve our educational services:",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous collectons les types d'informations suivants pour fournir et améliorer nos services éducatifs :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:11.035Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:32.783Z",
+          "requestId": "chatcmpl-EOqz6BsfaFw7zlavHcrqjn4lXP1L3",
+          "tokensUsed": 219,
+          "fingerprint": "d3779afb576c8f474b745aa6020b7ce81e6368f3818c150c0d6e737a88f3803f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:11.035Z",
+          "requestId": "d83815ac-4d30-438a-9ade-3a21d577819f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "units.forkSuccess",
+      "source": "Unit forked successfully",
+      "translations": {
+        "claude": "",
+        "gpt": "Unité dupliquée avec succès",
+        "gemma": "`.\n\n    *Refining the translation*:\n    \"Unité dupliquée avec succès\" (Standard UI)\n    \"L'unité a été dupliquée avec succès\" (More formal/complete sentence)\n\n    The source \"Unit forked successfully\" is a status message. In English UI, status messages are often \"Noun + Verb-ed + successfully\".\n    In French, \"Unité dupliquée avec succès\" is the direct equivalent.\n\n    Let's double check \"forked\". If the user *specifically* wants the term \"fork\" preserved because it's a technical feature:\n    \"Unité forkée avec succès\".\n    But \"dupliquée\" is the proper translation for a general audience. Given \"all users\", \"dupliquée\" is safer.\n\n    Actually, in many professional translations for SaaS, \"fork\" is often left as \"forkée\" if the feature is called \"Fork\". But \"dupliquée\" is the standard translation for the concept.\n\n    Let's go with \"L'unité a été dupliquée avec succès\" or \"Unité dupliquée avec succès\".\n    \"Unité dupliquée avec succès\" is more common for short toast/notification messages.\n\n    Let's re-read: \"Match the specified tone: polite-formal\".\n    \"L'unité a été dupliquée avec succès\" is more formal than \"Unité dupliquée avec succès\".\n\n    However, \"Unit forked successfully\" is quite direct.\n    Let's look at the English again. It's not \"The unit was forked successfully\". It's \"Unit forked successfully\".\n    So \"Unité dupliquée avec succès\" is the most faithful to the source's structure.\n\n    One more check: Is \"fork\" used in eLearning? Yes, to create a copy of a module.\n    Is \"dupliquer\" the right word? Yes.\n\n    Final choice: **Unité dupliquée avec succès**\n\n    Wait, I should check if \"fork\" should be translated as \"bifurquée\". No, that's definitely not used in software.\n    What about \"L'unité a été créée avec succès\"? No, \"fork\" implies a relationship to the original.\n\n    Let's consider \"L'unité a été dupliquée avec succès\". It sounds more \"polite-formal\" than the clipped version.\n\n    Let's look at the prompt again: \"Keep the same formality level as the source text\".\n    The source text is a status message. It's neutral/formal.\n    \"Unité dupliquée avec succès\" is the standard.\n\n    Final decision: **Unité dupliquée avec succès** (or \"L'unité a été dupliquée avec succès\").\n    Actually, \"L'unité a été dupliquée avec succès\" is more \"polite-formal\".\n\n    Let's try to see if \"fork\" is better as \"forkée\".\n    If I am a user and I click \"Fork\", and the message says \"Unité dupliquée avec succès\", I understand perfectly. If it says \"Unité forkée avec succès\", it sounds like a bad translation or very heavy jargon.\n\n    Let's go with: **L'unité a été dupliquée avec succès**\n\n    Wait, I'll check one more thing. In many translation memories:\n    \"Forked successfully\" -> \"Forké avec succès\" or \"Dupliqué avec succès\".\n    Given \"all users\", \"dupliquée\" is the winner.\n\n    Let's look at the source again: \"Unit forked successfully\".\n    If I use \"L'unité a été dupliquée avec succès\", I am adding \"L'\" and \"a été\".\n    If I use \"Unité dupliquée avec succès\", I am matching the structure.\n    In French UI, \"Unité dupliquée avec succès\" is very common for notifications.\n\n    Let's go with: **Unité dupliquée avec succès**\n\n    Actually, looking at \"polite-formal\", \"L'unité a été dupliquée avec succès\" is the most complete and formal way to express it.\n\n    Let's compare:\n    1. Unité dupliquée avec succès (Concise, standard UI)\n    2. L'unité a été dupliquée avec succès (Formal, complete sentence)\n\n    The source \"Unit forked successfully\" is a bit of a \"telegraphic\" style.\n    In French, telegraphic style is \"Unité dupliquée avec succès\".\n\n    Final check on \"fork\":\n    If the platform is technical (like a coding platform), \"forkée\" is acceptable.\n    If the platform is an eLearning platform (like Moodle, Canvas, etc.), \"dupliquée\" is much better.\n    The prompt says \"eLearning Platform\".\n\n    Final Translation: **Unité dupliquée avec succès**\n\n    Wait, I'll check if \"fork\" can be \"créée\". No.\n    \"Unité dupliquée avec succès\" is the best fit.\n\n    One last thought: \"L'unité a été dupliquée avec succès\" is safer for \"polite-formal\".\n    Let's use the most natural French UI string.\n    \"L'unité a été dupliquée avec succès\"\n\n    Actually, I will provide \"L'unité a été dupliquée avec succès\" to ensure the \"polite-formal\" requirement is met, as \"Unité dupliquée avec succès\" can feel a bit abrupt.\n\n    *Self-Correction*: The source \"Unit forked successfully\" is not \"The unit was forked successfully\". It's a status. In French, status messages often use the noun-first approach.\n    \"Duplication de l'unité réussie\" (Success of unit duplication)\n    \"Unité dupliquée avec succès\" (Unit duplicated successfully)\n\n    \"Unité dupliquée avec succès\" is the most direct and professional translation.\n\n    Let's check \"fork\" one more time. In Git, \"fork\" is a specific action. In eLearning, it's almost always \"duplication\".\n\n    Final choice: **Unité dupliquée avec succès**\n\n    Wait, I'll check if \"fork\" should be \"bifurquée\". No.\n    \"Unité dupliquée avec succès\" is the most professional.\n\n    *Wait*, I just realized \"fork\" might be a specific term in this platform. If the button is \"Fork\", the message should probably use the same term. But \"dupliquée\" is the correct translation of the *action*.\n    If I use \"Unité forkée avec succès\", it's technically correct in a dev context.\n    But \"Unité dupliquée avec succès\" is better for \"all users\".\n\n    Let's look at the prompt: \"Match the specified tone: polite-formal\".\n    \"L'unité a été dupliquée avec succès\" is the most formal.\n\n    Let's go with: **L'unité a été dupliquée avec succès**\n\n    Actually, I'll go with **Unité dupliquée avec succès** because it's a standard UI notification.\n\n    Wait, I'll search for \"Unit forked successfully\" in French.\n    Most results for \"forked\" in software are \"forké\".\n    But \"dupliqué\" is the standard for \"copy\".\n    Given \"eLearning\", \"dupliquée\" is much more appropriate.\n\n    Final decision: **Unité dupliquée avec succès**\n\n    *Wait*, I'll try to be even more formal to satisfy \"polite-formal\".\n    \"L'unité a été dupliquée avec succès.\"\n\n    Let's look at the source again. \"Unit forked successfully\".\n    It's a status.\n    \"Unité dupliquée avec succès\" is perfect.\n\n    One more check: \"fork\" -> \"bifurquer\" (to fork a path), \"fourcher\" (to fork a tool). Neither works.\n    \"Dupliquer\" is the way.\n\n    Final check on \"polite-formal\":\n    In French, \"polite-formal\" usually refers to the use of \"vous\". Since there is no \"you\" in the sentence, it refers to the level of language (avoiding slang, using proper grammar).\n    \"Unité dupliquée avec succès\" is professional.\n\n    Let's consider if \"L'unité a été dupliquée avec succès\" is better.\n    In a UI, brevity is key.\n    \"Unité dupliquée avec succès\"\n\n    Let's go.\n\n    *Wait*, I just thought of something. If \"fork\" is a verb used in the platform, the user might expect \"forkée\". But \"dupliquée\" is the correct translation. I will stick with \"dupliquée\".\n\n    Actually, I'll use \"L'unité a été dupliquée avec succès\" to be safe on the \"formal\" requirement. It's a complete sentence.\n\n    Actually, looking at common UI translations:\n    \"File uploaded successfully\" -> \"Fichier téléchargé avec succès\" (not \"Le fichier a été téléchargé...\")\n    \"Unit forked successfully\" -> \"Unité dupliquée avec succès\"\n\n    This is the most standard.\n\n    Final check:\n    Source: Unit forked successfully\n    Target: Unité dupliquée avec succès\n\n    Wait, \"fork\" is a very specific term. If I change it to \"duplicate\", am I losing meaning?\n    In Git, a fork is different from a clone/duplicate. A fork is a copy of a repository that lives on the server.\n    In eLearning, a \"fork\" of a unit usually means creating a new version of that unit in your own space.\n    \"Dupliquer\" is the most accurate way to describe this to a non-technical user.\n\n    If the user is a developer, they might want \"forkée\". But the prompt says \"all users\".\n    \"Unité dupliquée avec succès\" is the best choice.\n\n    One last look at the source: \"Unit forked successfully\".\n    If I translate it as \"L'unité a été dupliquée avec succès\", it's more formal.\n    If I translate it as \"Unité dupliquée avec succès\", it's more concise.\n    The prompt says \"Keep the same formality level as the source text\".\n    The source is concise.\n    So: \"Unité dupliquée avec succès\".\n\n    Wait, I'll check \"fork\" in French again.\n    \"Forker\" is used in tech.\n    \"Dupliquer\" is used in general.\n    \"Unité dupliquée avec succès\" is the most professional.\n\n    Let's try \"L'unité a été dupliquée avec succès\" one more time. It feels more \"polite-formal\".\n    Actually, \"Unité dupliquée avec succès\" is perfectly polite and formal in a UI context.\n\n    Final decision: **Unité dupliquée avec succès**\n\n    Wait, I'll check if \"fork\" should be \"créée\". No.\n    \"Unité dupliquée avec succès\"\n\n    Let's consider \"L'unité a été forkée avec succès\" just in case. No, \"dupliquée\" is better for \"all users\".\n\n    Final check of the instructions:\n    - Return ONLY the French translation.\n    - Preserve placeholders (none).\n    - Match tone: polite-formal.\n    - User type: all users.\n    - Formality level: same as source.\n    - Use \"vous\" (not applicable).\n    - No quotes, no explanations.\n\n    \"Unité dupliquée avec succès\"\n\n    Wait, I'll use \"L'unité a été dupliquée avec succès\" because \"polite-formal\" in French often implies using the full sentence structure rather than the telegraphic style, even if the English is telegraphic. It sounds more \"polite\".\n\n    Actually, let's look at \"Unit forked successfully\" again.\n    If I say \"Unité dupliquée avec succès\", it's a bit dry.\n    If I say \"L'unité a été dupliquée avec succès\", it's a proper sentence.\n    In a formal context, the latter is better.\n\n    Let's go with: **L'unité a été dupliquée avec succès**\n\n    Wait, I'll search for \"Unit forked successfully\" in English UI. It's a toast message.\n    Toast messages in French:\n    \"Message envoyé\" (Message sent)\n    \"Fichier enregistré\" (File saved)\n    \"Unité dupliquée avec succès\" (Unit duplicated successfully)\n\n    This is the standard. I will use this. It's professional, formal, and matches the source's brevity.\n\n    Final check:\n    \"Unité dupliquée avec succès\"\n    (Unit duplicated successfully)\n\n    One more thing: \"fork\" -> \"dupliquer\".\n    Is there any other word? \"Bifurquer\" (no), \"Fourcher\" (no).\n    \"Dupliquer\" is the only one that makes sense for \"all users\".\n\n    Final Answer: Unité dupliquée avec succès.\n\n    Wait, I'll check if \"fork\" is better as \"créée\". No.\n    \"Unité dupliquée avec succès\"\n\n    Actually, I'll use \"L'unité a été dupliquée avec succès\" to be absolutely sure about the \"polite-formal\" instruction. It's more \"polite\" to use a full sentence.\n\n    Let's look at the source again. \"Unit forked successfully\".\n    It's not \"The unit was forked successfully\".\n    If I want to match the formality *and* the level, \"Unité dupliquée avec succès\" is the winner.\n\n    Final, final decision: **Unité dupliquée avec succès**<T>Unité dupliquée avec succès",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:14.025Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:56:43.815Z",
+          "requestId": "chatcmpl-EOqyJB7CpG0zjlKJlkBuGImbCYqau",
+          "tokensUsed": 198,
+          "fingerprint": "e9806303d151322a2b9b7fd90accd9612829ce910b2d81ed751fb665126d0a6c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:14.024Z",
+          "requestId": "d0547f58-cba5-4c75-9b7c-99ed45d8e14e",
+          "tokensUsed": 100,
+          "fingerprint": "1df67a64f6ad233c631cc0b193819be55274872fb2c2f84ef3f2abb5eacea82a"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.usageInfoText",
+      "source": "Device information, browser type, pages visited, and interaction patterns to improve the platform experience.",
+      "translations": {
+        "claude": "",
+        "gpt": "Informations sur l'appareil, type de navigateur, pages visitées et schémas d'interaction pour améliorer l'expérience de la plateforme.",
+        "gemma": "`? Yes.\n\n    *Self-Correction during drafting:*\n    \"Device information\" -> \"Informations sur l'appareil\"\n    \"browser type\" -> \"type de navigateur\"\n    \"pages visited\" -> \"pages visitées\"\n    \"interaction patterns\" -> \"modèles d'interaction\"\n    \"to improve the platform experience\" -> \"pour améliorer l'expérience sur la plateforme\"\n\n    Result: Informations sur l'appareil, type de navigateur, pages visitées et modèles d'interaction pour améliorer l'expérience sur la plateforme.\n\n    (Alternative for \"interaction patterns\": \"schémas d'interaction\" or \"habitudes d'interaction\". \"Modèles d'interaction\" is the most standard technical translation).\n\n    (Alternative for \"platform experience\": \"l'expérience utilisateur sur la plateforme\" - but the source says \"platform experience\", so \"l'expérience sur la plateforme\" is closer).\n\n    Let's go with:\n    Informations sur l'appareil, type de navigateur, pages visitées et modèles d'interaction pour améliorer l'expérience sur la plateforme.Informations sur l'appareil, type de navigateur, pages visitées et modèles d'interaction pour améliorer l'expérience sur la plateforme.\n\n<T>Informations sur l'appareil, type de navigateur, pages visitées et modèles d'interaction pour améliorer l'expérience sur la plateforme.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:18.141Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:54.267Z",
+          "requestId": "chatcmpl-EOqzRbVjd3TZCR7URQgkCNmq603PQ",
+          "tokensUsed": 236,
+          "fingerprint": "0325e4ab035db657cb088f8e33bf47d494d7b30ea4fa034532bfd592220fb60b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:18.141Z",
+          "requestId": "8454a2bd-9203-4d51-b82e-66d14b87687d",
+          "tokensUsed": 100,
+          "fingerprint": "6f95ab8e4f5379ff9e1445d6ee47e2c5c2b9b3d1d62e5265453f8a7c6e52dd7d"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.usageInfo",
+      "source": "Usage Information:",
+      "translations": {
+        "claude": "",
+        "gpt": "Informations d'utilisation :",
+        "gemma": "`? Yes.\n\n    Final check on the colon: In French typography, a non-breaking space is used before a colon. In UI strings, usually, a standard space is acceptable, but the colon itself is part of the string.\n\n    Source: \"Usage Information:\"\n    Target: \"Informations d'utilisation :\"\n\n    (Note: \"Informations sur l'utilisation :\" is also very common).\n    \"Informations d'utilisation :\" is slightly more \"label-like\".\n\n    Let's verify \"Usage Information\" vs \"Usage Data\".\n    \"Usage Information\" -> \"Informations d'utilisation\"\n    \"Usage Data\" -> \"Données d'utilisation\"\n\n    The source says \"Information\".\n\n    Final choice: Informations d'utilisation :\n\n    Wait, looking at the source \"Usage Information:\", it's a header.\n    \"Informations d'utilisation :\"\n\n    Let's double check the tone. \"Polite-formal\".\n    \"Informations d'utilisation :\" is neutral-formal, which is appropriate for a privacy policy.\n\n    One more option: \"Informations relatives à l'utilisation :\"\n    This is very formal.\n    However, \"Informations d'utilisation :\" is the standard translation for this specific UI element in most localized apps.\n\n    Let's stick to \"Informations d'utilisation :\".\n\n    *Wait*, I should check if the colon in the source is a character to be translated or just a punctuation mark. It's part of the string.\n\n    Final string: Informations d'utilisation :\n\n    (Actually, in many UI translations, the space before the colon is standard in French).\n\n    Let's re-evaluate \"Informations d'utilisation :\".\n    If the source is \"Usage Information:\", the translation is \"Informations d'utilisation :\".\n\n    One detail: \"Usage Information\" (singular/uncountable in English) -> \"Informations d'utilisation\" (plural in French is standard for \"information\" when referring to data points).\n\n    Final check:\n    Source: Usage Information:\n    Target: Informations d'utilisation :\n\n    (I will provide the version with the space before the colon as per French grammar rules, which is the standard for \"polite-formal\" French).\n\n    Actually, looking at the prompt \"Keep the same formality level as the source text\", the source is a simple label.\n\n    \"Informations d'utilisation :\"\n\n    Let's try to see if there's a more \"polite\" way. No, for a label, \"polite\" means \"correct and professional\".\n\n    Final decision: Informations d'utilisation :Informations d'utilisation :\n\n<T>Informations d'utilisation :",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:18.217Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:53.142Z",
+          "requestId": "chatcmpl-EOqzQcufVBCYoaG8lkzsyWIuHAa5i",
+          "tokensUsed": 195,
+          "fingerprint": "79453a3f69774595f9afed4f4d2a212c11180310c102902baa359597c1b3988c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:18.217Z",
+          "requestId": "f0adbe3b-1147-46a7-82db-c3f567211a2c",
+          "tokensUsed": 100,
+          "fingerprint": "eaf14f89e55bcc6a892be3c5a9d5dd55832ef996d3950372a21e521a2640cdf3"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.intro",
+      "source": "We use your information for the following purposes:",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous utilisons vos informations aux fins suivantes :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:25.295Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:03.742Z",
+          "requestId": "chatcmpl-EOqzbKN51H7UH0AOSl079Y72VcCex",
+          "tokensUsed": 206,
+          "fingerprint": "8790b8789a48860a5e34f392feea8b98ced7dc8d2e4be297510e8b51e2020374"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:25.295Z",
+          "requestId": "42277636-c13e-4332-b9dc-defbcfa2e0a3",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.heading",
+      "source": "How We Use Your Information",
+      "translations": {
+        "claude": "",
+        "gpt": "Comment nous utilisons vos informations",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:29.723Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:01.316Z",
+          "requestId": "chatcmpl-EOqzYhSGcC5HWzDc9qHkG9Kosf5j2",
+          "tokensUsed": 199,
+          "fingerprint": "f776b644e247a2b05ce0855cde6e5d944f367aacf83d2d7f29e4932b75914ce3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:29.723Z",
+          "requestId": "86318abe-9611-4e04-844f-4fefe723443a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item2",
+      "source": "Tracking academic progress and generating performance reports for instructors",
+      "translations": {
+        "claude": "",
+        "gpt": "Suivi des progrès académiques et génération de rapports de performance pour les instructeurs",
+        "gemma": "Suivi de la progression académique et génération de rapports de performance pour les instructeurs",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:37.975Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:11.880Z",
+          "requestId": "chatcmpl-EOqzjL8EsET8Me3a0SVLpJfbeO7DD",
+          "tokensUsed": 217,
+          "fingerprint": "bf27414a8551ed00b962fe298f0cd5680f9fec98f08fcdc39602baabc1f81171"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:37.975Z",
+          "requestId": "473954b0-2a1a-4452-9f2d-e5d08f0b38f2",
+          "tokensUsed": 100,
+          "fingerprint": "0c2d998d97e7e9b82f102e5e7215343331449837df66b524926328ab6d2192d0"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.heading",
+      "source": "Data Storage & Security",
+      "translations": {
+        "claude": "",
+        "gpt": "Stockage et Sécurité des Données",
+        "gemma": "tags.\n\n    Translation: Stockage et sécurité des données.Stockage et sécurité des données\n\n<T>Stockage et sécurité des données",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:42.187Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:26.219Z",
+          "requestId": "chatcmpl-EOqzxqitzZWgKksppDjW7CLF6F5xd",
+          "tokensUsed": 199,
+          "fingerprint": "c1d666962d01ee0030e1a9d06a2b7edf264047f40233b6b93df878b89d86f7d9"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:42.187Z",
+          "requestId": "676d764a-29b7-4c5a-9358-8268f4c918ad",
+          "tokensUsed": 100,
+          "fingerprint": "90d6ca575ba420ae9fc079dba6f51e3f151786722f26d4843316b10b81290d6e"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.informationWeCollect.userContentText",
+      "source": "Audio recordings, text responses, uploaded files, and chat messages created during learning activities.",
+      "translations": {
+        "claude": "",
+        "gpt": "Enregistrements audio, réponses textuelles, fichiers téléchargés et messages de chat créés lors des activités d'apprentissage.",
+        "gemma": "Enregistrements audio, réponses textuelles, fichiers importés et messages de chat créés lors des activités d'apprentissage.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:44.798Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:57:48.744Z",
+          "requestId": "chatcmpl-EOqzMhBDsfbGhn77j0B28FnZZ0OoE",
+          "tokensUsed": 231,
+          "fingerprint": "dc7d6f5c67aed363652346116664a9d757afd647fd3996b865dc3f977f738a6b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:44.798Z",
+          "requestId": "c4580d0c-cab5-4d60-8d7c-e6f6637e3a0f",
+          "tokensUsed": 100,
+          "fingerprint": "91d9f661e32d6dfe0baa27fb9c482b4f398a532d4d1c987bf7559d06933d17c2"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item1",
+      "source": "Providing personalized learning experiences and AI-powered tutoring",
+      "translations": {
+        "claude": "",
+        "gpt": "Fournir des expériences d'apprentissage personnalisées et un tutorat assisté par l'IA",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:51.318Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:07.587Z",
+          "requestId": "chatcmpl-EOqzftZVMRfAVosiTr97eIHGDPrgx",
+          "tokensUsed": 217,
+          "fingerprint": "4301f75002be47b857e0323e6da6e6fe925a7ccfdebec8bcd4b32e49725f97a6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:51.317Z",
+          "requestId": "02a39631-20f7-458f-a7f8-1380c319ee17",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item1",
+      "source": "All data is encrypted in transit (TLS/SSL) and at rest using AWS encryption services",
+      "translations": {
+        "claude": "",
+        "gpt": "Toutes les données sont chiffrées en transit (TLS/SSL) et au repos à l'aide des services de chiffrement AWS",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:58:59.500Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:38.814Z",
+          "requestId": "chatcmpl-EOr0AGe60zpTB3JUmt7RkJrsKd5Rh",
+          "tokensUsed": 231,
+          "fingerprint": "898936df454bac4c6ee9f740022f1e4295932fd1754782d95713c008ac12d152"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:58:59.500Z",
+          "requestId": "c27e6d45-deb4-4583-bfbe-eed0f76567e3",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item3",
+      "source": "Database records are managed through AWS DynamoDB with fine-grained access control",
+      "translations": {
+        "claude": "",
+        "gpt": "Les enregistrements de la base de données sont gérés via AWS DynamoDB avec un contrôle d'accès granulaire",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:03.492Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:45.598Z",
+          "requestId": "chatcmpl-EOr0Huh3E9o3GwtsHNJpt4AnblbcC",
+          "tokensUsed": 225,
+          "fingerprint": "3a9461666f126a4e0fd4626dc226e3b46d3c4274873a681c4fde3043e866066d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:03.492Z",
+          "requestId": "6026f393-48c9-4d85-a0ed-3318fe34a6d9",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item4",
+      "source": "Enabling real-time collaboration features between students and instructors",
+      "translations": {
+        "claude": "",
+        "gpt": "Activation des fonctionnalités de collaboration en temps réel entre les étudiants et les instructeurs",
+        "gemma": "Permettre des fonctionnalités de collaboration en temps réel entre les étudiants et les instructeurs",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:03.745Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:18.819Z",
+          "requestId": "chatcmpl-EOqzqqtTE0J6HOvKhcZaMa8J5iqJK",
+          "tokensUsed": 216,
+          "fingerprint": "ea170998a8577716270349eaf8631b7e08dbf2534e018c643cc82b1c082c4b5d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:03.745Z",
+          "requestId": "b435ef4d-4e36-4ed3-92eb-53f809224ec3",
+          "tokensUsed": 100,
+          "fingerprint": "55f955f11ef0cc10e7f2ee9423aa483ecd1c4e856a0bea26515427c06524a91d"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.intro",
+      "source": "Your data is stored securely using industry-standard practices:",
+      "translations": {
+        "claude": "",
+        "gpt": "Vos données sont stockées en toute sécurité en utilisant des pratiques conformes aux normes de l'industrie :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:11.230Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:30.936Z",
+          "requestId": "chatcmpl-EOr02C3VQazaIHAAHrEFqmp0ioyOt",
+          "tokensUsed": 215,
+          "fingerprint": "f70bd5463527955c9179909e76e9f625543f000b4c3c9c416932d6305a2a2bc8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:11.230Z",
+          "requestId": "ef36bafa-4ae5-453d-a3e3-1470b834849e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.heading",
+      "source": "Data Sharing",
+      "translations": {
+        "claude": "",
+        "gpt": "Partage de données",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:13.324Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:00.424Z",
+          "requestId": "chatcmpl-EOr0VopOt3Et5TZschWePubN0Bx38",
+          "tokensUsed": 191,
+          "fingerprint": "b4e269e3fee16ccb8076901b4838859e166344a670d17e50d3d70131c68adefb"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:13.324Z",
+          "requestId": "a5b1b9b3-2c8c-4a3f-a253-edbfe7fb6841",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.outro",
+      "source": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your data at any time.",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous conservons vos données aussi longtemps que votre compte est actif ou selon les besoins pour fournir des services. Vous pouvez demander la suppression de vos données à tout moment.",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:16.191Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:57.883Z",
+          "requestId": "chatcmpl-EOr0NF9CX8QmJEBLk16TzuUhXRWhO",
+          "tokensUsed": 248,
+          "fingerprint": "e3222cf7778997adc20f0546d97d3cc15fcb7a3a1440fe44ea1969b04acc2f7b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:16.190Z",
+          "requestId": "7e006e1d-c382-423f-a5ef-3e8aca283a94",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item3",
+      "source": "Processing audio and text through AI services (OpenAI) for feedback and assessment",
+      "translations": {
+        "claude": "",
+        "gpt": "Traitement de l'audio et du texte via des services d'IA (OpenAI) pour retour d'information et évaluation",
+        "gemma": "Traitement de l'audio et du texte via des services d'IA (OpenAI) pour les commentaires et l'évaluation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:19.575Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:14.956Z",
+          "requestId": "chatcmpl-EOqzmu6jSkU6z7QM7YbwQAt3eSxoM",
+          "tokensUsed": 232,
+          "fingerprint": "ac17c5b8bb9fab5820ca102944098d7ed8cd4dddcd18f537c64c72ca87b0a28f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:19.575Z",
+          "requestId": "936d8dc4-ba9b-4129-a46a-1ffb6ae4175e",
+          "tokensUsed": 100,
+          "fingerprint": "d192ff5e00640cfac3e51ad8897ccf42f16dfd350f84253066bef51600796b4b"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.instructors",
+      "source": "Instructors:",
+      "translations": {
+        "claude": "",
+        "gpt": "Instructeurs :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:24.896Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:04.864Z",
+          "requestId": "chatcmpl-EOr0a5BR7VHJrP2DovtrD4PgemSg1",
+          "tokensUsed": 192,
+          "fingerprint": "3a900b6416f154d633e4b07d2cf3d9271c95499ec825b7a2297460ab04769cd5"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:24.896Z",
+          "requestId": "4d63130c-b44e-43a2-bba6-d0c0a25806ff",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.intro",
+      "source": "We do not sell your personal information. We may share data in the following limited circumstances:",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous ne vendons pas vos informations personnelles. Nous pouvons partager des données dans les circonstances limitées suivantes :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:27.488Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:04.317Z",
+          "requestId": "chatcmpl-EOr0ZzkHZiQ4e16vBVl77W9vhJBHV",
+          "tokensUsed": 224,
+          "fingerprint": "0d98181ce8cd926a4f40e65eb5f4f9c9b4ed745a4f658b82a867c4d57025eebe"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:27.488Z",
+          "requestId": "1eac15a8-418c-4e97-b40e-f606bbd1f472",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.howWeUseInfo.item5",
+      "source": "Improving platform features, fixing bugs, and enhancing educational outcomes",
+      "translations": {
+        "claude": "",
+        "gpt": "Améliorer les fonctionnalités de la plateforme, corriger les bugs et améliorer les résultats éducatifs",
+        "gemma": "Améliorer les fonctionnalités de la plateforme, corriger les bugs et optimiser les résultats pédagogiques",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:28.073Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:18.946Z",
+          "requestId": "chatcmpl-EOqzquhiPKUEU7R4K9opXX5atCAbq",
+          "tokensUsed": 220,
+          "fingerprint": "db790b734523b3b3e3022503651e81f5f52ccc264cd6e953b9c9a4cfadb21106"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:28.073Z",
+          "requestId": "73490785-5fbf-4cf0-9b59-26bff49b8e13",
+          "tokensUsed": 100,
+          "fingerprint": "960094d190cfe674d7da8567bbb64b78a707022615bf0b9a57293cbdea43a8f2"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.instructorsText",
+      "source": "Your instructors can view your submissions, grades, and learning progress within their sections.",
+      "translations": {
+        "claude": "",
+        "gpt": "Vos instructeurs peuvent voir vos soumissions, notes et progrès d'apprentissage dans leurs sections.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:42.164Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:12.300Z",
+          "requestId": "chatcmpl-EOr0h6LoVIKbV3jQ2ZFKRwqdBoXdO",
+          "tokensUsed": 222,
+          "fingerprint": "2a604f116a57bf4a73a0e1183e831a7b33d7195221a3969d3c09ca4bcc98f8dc"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:42.164Z",
+          "requestId": "504d35ba-e07f-4dc3-8be6-1afee9ab811e",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.legal",
+      "source": "Legal Requirements:",
+      "translations": {
+        "claude": "",
+        "gpt": "Exigences légales :",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:48.757Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:28.083Z",
+          "requestId": "chatcmpl-EOr0xPkWKMtpq8nZHD6ooZOnaE3pO",
+          "tokensUsed": 194,
+          "fingerprint": "04df6f6dc287764f0017825377553c019e66a46e010462730b3ada8f2e6e187d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:48.757Z",
+          "requestId": "faf5e3d8-77f4-4a13-b286-d04c69cb7099",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.classmates",
+      "source": "Classmates:",
+      "translations": {
+        "claude": "",
+        "gpt": "Camarades de classe :",
+        "gemma": "Camarades de classe :",
+        "consensus": "Camarades de classe :"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:49.106Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:14.041Z",
+          "requestId": "chatcmpl-EOr0jjfFDZVZrpPLajSxCeJgAEI7U",
+          "tokensUsed": 194,
+          "fingerprint": "2f99452f90282242b9d2f6cab46bf2ea822d141c4ad86b5bfa19f63f7f29b02f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:49.106Z",
+          "requestId": "c30f11dc-26c6-4bca-b5f8-3bdc147475d9",
+          "tokensUsed": 100,
+          "fingerprint": "2f99452f90282242b9d2f6cab46bf2ea822d141c4ad86b5bfa19f63f7f29b02f"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.legalText",
+      "source": "We may disclose information if required by law or to protect the safety of our users.",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous pouvons divulguer des informations si la loi l'exige ou pour protéger la sécurité de nos utilisateurs.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:54.589Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:29.241Z",
+          "requestId": "chatcmpl-EOr0yNYMMKoAcyXLEAGxx3KcGZ2Jq",
+          "tokensUsed": 224,
+          "fingerprint": "cadf1553353bf2820a0b1d2dbefae7a2933de8ed39a3d7d04da8d5b6eaf9e566"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:54.589Z",
+          "requestId": "7361f86e-d8be-42cd-9a18-30bf49b97858",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.aiProcessingText",
+      "source": "Audio and text content is sent to OpenAI for transcription, feedback, and assessment. OpenAI does not use this data for training.",
+      "translations": {
+        "claude": "",
+        "gpt": "Le contenu audio et textuel est envoyé à OpenAI pour transcription, retour d'information et évaluation. OpenAI n'utilise pas ces données pour l'entraînement.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:55.950Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:25.795Z",
+          "requestId": "chatcmpl-EOr0veVj5KiRFrad6cRQIS2lY6TpN",
+          "tokensUsed": 248,
+          "fingerprint": "0af6f0a6933bc622d01d613b3e5de386abd01af3d2d63d8ba71da3189e8f3eef"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:55.949Z",
+          "requestId": "c499eed1-b6dc-4bdf-a58d-de6b5e124124",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.heading",
+      "source": "Your Rights",
+      "translations": {
+        "claude": "",
+        "gpt": "Vos droits",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T20:59:57.022Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:42.713Z",
+          "requestId": "chatcmpl-EOr1CFePR0mBP3zsfBx1Pr1SSTJSD",
+          "tokensUsed": 190,
+          "fingerprint": "e8951c4d4d0e64935f0189804424601c888d1af42d13cd91b27bde5296777938"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T20:59:57.022Z",
+          "requestId": "38b95fc7-7a91-49c5-8f83-426451aa1055",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.classmatesText",
+      "source": "Leaderboard rankings and squad activity may be visible to other students in your section (you can opt out).",
+      "translations": {
+        "claude": "",
+        "gpt": "Les classements du tableau de bord et l'activité de l'équipe peuvent être visibles par d'autres étudiants de votre section (vous pouvez vous désinscrire).",
+        "gemma": "Les classements et l'activité de votre escouade peuvent être visibles par les autres étudiants de votre section (vous pouvez vous y opposer).",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:01.312Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:17.131Z",
+          "requestId": "chatcmpl-EOr0mTr5XwtYmr59WwxLjCyAVzEUY",
+          "tokensUsed": 238,
+          "fingerprint": "6e7f7c247d615a9a38583918fde9ecc2c04850f410d258307f0b4caf3b0a6d2a"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:01.312Z",
+          "requestId": "04033ba0-e966-40b5-a81a-f4d38ccf7af7",
+          "tokensUsed": 100,
+          "fingerprint": "65659bd32562bc9c6d4ea1064c91436c7df3e9c04373947c4fa630f146390a6f"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.intro",
+      "source": "You have the following rights regarding your personal data:",
+      "translations": {
+        "claude": "",
+        "gpt": "Vous avez les droits suivants concernant vos données personnelles :",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:17.736Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:49.435Z",
+          "requestId": "chatcmpl-EOr1JK1n860tldajwbWbHebWqFUGn",
+          "tokensUsed": 206,
+          "fingerprint": "f676fcdc0cc02379738c736477f679849e4f726d21f1a4b916c5b8a40bf6faea"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:17.736Z",
+          "requestId": "b208bbe6-256b-418f-b83d-006400dc0ca6",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item1",
+      "source": "Access: Request a copy of all personal data we hold about you",
+      "translations": {
+        "claude": "",
+        "gpt": "Accès : Demandez une copie de toutes les données personnelles que nous détenons à votre sujet",
+        "gemma": "Accès : Demander une copie de toutes les données personnelles que nous détenons à votre sujet",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:22.860Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:49.885Z",
+          "requestId": "chatcmpl-EOr1JcLT5J0MbWsc9c3hsHJWF3a9b",
+          "tokensUsed": 219,
+          "fingerprint": "edfe139b315e9f8a1ff7f912df3715f28b0ff5015cdf3fa2c73ed79e0a65a92f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:22.860Z",
+          "requestId": "5e5e3ae1-5a4a-4c51-8e16-b912dba2c98e",
+          "tokensUsed": 100,
+          "fingerprint": "bf81a7c7e11aa47e681b6697a7fb6d88b577b1875d644fdfc04f19874a5b877e"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataStorage.item2",
+      "source": "Files are stored in Amazon S3 with access controls based on your role and ownership",
+      "translations": {
+        "claude": "",
+        "gpt": "Les fichiers sont stockés dans Amazon S3 avec des contrôles d'accès basés sur votre rôle et propriété",
+        "gemma": "Les fichiers sont stockés dans Amazon S3 avec des contrôles d'accès basés sur votre rôle et votre droit de propriété.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:23.182Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:58:42.954Z",
+          "requestId": "chatcmpl-EOr0ELDrRWNZ6nsPqdCpQRZfRDQz1",
+          "tokensUsed": 226,
+          "fingerprint": "1e9ff426cdff5d20d48450fe4ae7b0e5a472a8949dbc1d48a8039f3803e7fbbc"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:23.181Z",
+          "requestId": "bd2f77b2-a180-4bb4-a2ba-badf83259ae4",
+          "tokensUsed": 100,
+          "fingerprint": "c34a3d624e41226ed036499e9446a1f581f2d117197ae9bd63dcc64d59dcca6e"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item4",
+      "source": "Export: Download your learning data in a portable format",
+      "translations": {
+        "claude": "",
+        "gpt": "Exportation : Téléchargez vos données d'apprentissage dans un format portable",
+        "gemma": "Exportation : Téléchargez vos données d'apprentissage dans un format portable",
+        "consensus": "Exportation : Téléchargez vos données d'apprentissage dans un format portable"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:27.096Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:58.083Z",
+          "requestId": "chatcmpl-EOr1Rzr04tqGDaCbkUC6UDGqlFvoO",
+          "tokensUsed": 214,
+          "fingerprint": "254d1e6c1f72499c132f3f4073d8344ec3ae37bbfbc89b3743ce4a7629bde67f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:27.096Z",
+          "requestId": "587908e0-e587-4e6f-b0c6-a7cbac145f09",
+          "tokensUsed": 100,
+          "fingerprint": "254d1e6c1f72499c132f3f4073d8344ec3ae37bbfbc89b3743ce4a7629bde67f"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item2",
+      "source": "Correction: Update or correct inaccurate personal information",
+      "translations": {
+        "claude": "",
+        "gpt": "Correction : Mettre à jour ou corriger des informations personnelles inexactes",
+        "gemma": "Correction : Mettre à jour ou corriger des informations personnelles inexactes",
+        "consensus": "Correction : Mettre à jour ou corriger des informations personnelles inexactes"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:37.191Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:55.413Z",
+          "requestId": "chatcmpl-EOr1PuqkQ6hifxqCdJRgsDJr0n2mf",
+          "tokensUsed": 210,
+          "fingerprint": "e531f128115a7484208be6c83c0725bd244c5a0fce2272797efb97d21a977910"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:37.191Z",
+          "requestId": "8bd531d5-c021-40d5-8938-b2dc2d3ff73f",
+          "tokensUsed": 100,
+          "fingerprint": "e531f128115a7484208be6c83c0725bd244c5a0fce2272797efb97d21a977910"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.heading",
+      "source": "Cookies & Local Storage",
+      "translations": {
+        "claude": "",
+        "gpt": "Cookies et stockage local",
+        "gemma": "`? Yes.\n\n    *Self-Correction*: The source uses \"&\". If I want to match the formality and style, \"Cookies et stockage local\" is better French.\n\n    Result: Cookies et stockage local.Cookies et stockage local\n\n<T>Cookies et stockage local",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:38.118Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:23.496Z",
+          "requestId": "chatcmpl-EOr1rXa2p7IMScYYSLVRTCHhiS9U0",
+          "tokensUsed": 192,
+          "fingerprint": "dc2fa9b4e8144be441cbaf3c1d3181735c92d74840afeea27fcf2bb960cd281c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:38.117Z",
+          "requestId": "5534a45c-74d4-4c60-b378-252b0be092da",
+          "tokensUsed": 100,
+          "fingerprint": "f8bba9256d2105d60f304ac5bb5cb105628a4c3a868070e056929f76dddc704b"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item3",
+      "source": "Deletion: Request deletion of your account and associated data",
+      "translations": {
+        "claude": "",
+        "gpt": "Suppression : Demandez la suppression de votre compte et des données associées",
+        "gemma": "Suppression : Demandez la suppression de votre compte et des données associées",
+        "consensus": "Suppression : Demandez la suppression de votre compte et des données associées"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:38.753Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:56.645Z",
+          "requestId": "chatcmpl-EOr1QwpowcZFSk4XFp6LbcEVTsThZ",
+          "tokensUsed": 212,
+          "fingerprint": "2f7fe6f24c6c46bf68f2731f9edb1ab9c28490b07b810800f4a55e6c315c3fac"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:38.753Z",
+          "requestId": "fd0e2a79-50fd-42c4-a8bb-21cd4ac29f78",
+          "tokensUsed": 100,
+          "fingerprint": "2f7fe6f24c6c46bf68f2731f9edb1ab9c28490b07b810800f4a55e6c315c3fac"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.heading",
+      "source": "Children's Privacy",
+      "translations": {
+        "claude": "",
+        "gpt": "Confidentialité des enfants",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:40.011Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:27.631Z",
+          "requestId": "chatcmpl-EOr1v8CmvIDQP3UtI1WeRe4Ekgofd",
+          "tokensUsed": 194,
+          "fingerprint": "c219efad1849bf1d78ed26cf7d90bce5c1ae6c1c3238e2a0e5dad384f8f10819"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:40.011Z",
+          "requestId": "0190a225-a783-4eec-a21d-66b587a8ff7d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.heading",
+      "source": "Contact Us",
+      "translations": {
+        "claude": "",
+        "gpt": "Contactez-nous",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:55.320Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:40.670Z",
+          "requestId": "chatcmpl-EOr2807gPjiwVByA9G0w04jpzHS0D",
+          "tokensUsed": 190,
+          "fingerprint": "496b4c608bc839f1599c0f39fee2d695379b91a6bdcf2adf24e5cb63e0dfaa77"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:55.320Z",
+          "requestId": "44c2ad1f-258e-4dc6-8f9d-4212bc9df6aa",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.policyChanges.heading",
+      "source": "Changes to This Policy",
+      "translations": {
+        "claude": "",
+        "gpt": "Modifications de cette politique",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:00:59.620Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:38.812Z",
+          "requestId": "chatcmpl-EOr26Fy1g6iiS7ZoJ0WzXuvjhjGJj",
+          "tokensUsed": 194,
+          "fingerprint": "97b82542abc8fe22d1f6a3f0fbad0fd45ae02965973bd5b4e3c8530abcb2a40d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:00:59.620Z",
+          "requestId": "86227299-30be-4fc5-9008-08c4eae82925",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.content",
+      "source": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access.",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous utilisons des cookies essentiels et le stockage local pour l'authentification, la gestion des sessions et la fonctionnalité hors ligne. Nous n'utilisons pas de cookies de suivi tiers ou de cookies publicitaires. Le stockage local est utilisé pour mettre en cache le contenu d'apprentissage pour un accès hors ligne.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:01:06.786Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:24.402Z",
+          "requestId": "chatcmpl-EOr1rGDpTDAHmq98LUxDLWHNi2ZWI",
+          "tokensUsed": 288,
+          "fingerprint": "8043fd73d51f76f559ccfe953441a6292806b5b04c616126af066ccd9750b173"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:01:06.786Z",
+          "requestId": "8e8e0196-25aa-4ac8-97da-793668c6a01f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "Peer Review",
+      "source": "Peer Review",
+      "translations": {
+        "claude": "",
+        "gpt": "Évaluation par les pairs",
+        "gemma": "translation",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:01:08.675Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:01:00.213Z",
+          "requestId": "chatcmpl-EOr2RAKlfX5FUEZi0SZ5WAFfUNWpW",
+          "tokensUsed": 190,
+          "fingerprint": "00f4f6876b0a501b1704dc7b62ac6c5b4f0ff272eb0447e70244d5c7ef31b2de"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:01:08.675Z",
+          "requestId": "32afcc25-ce36-436f-8e7c-40bc2612c036",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.policyChanges.content",
+      "source": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy.",
+      "translations": {
+        "claude": "",
+        "gpt": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps à autre pour refléter les changements dans nos pratiques ou exigences légales. Nous informerons les utilisateurs des modifications importantes via la plateforme. L'utilisation continue de la plateforme après les changements constitue l'acceptation de la politique mise à jour.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:01:14.976Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:39.926Z",
+          "requestId": "chatcmpl-EOr27rZiF5JGibFszZOvaqPElA25z",
+          "tokensUsed": 290,
+          "fingerprint": "cd6a0d8f2edb22dcb36f351def942e6a89d90a3acd68766d3bbd9d73ad0a9c92"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:01:14.976Z",
+          "requestId": "42c9705a-e128-4a56-b3bb-163912c9e09a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.content",
+      "source": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent.",
+      "translations": {
+        "claude": "",
+        "gpt": "Homework Supply est conçu pour un usage éducatif et peut être utilisé par des élèves de moins de 13 ans avec le consentement des parents ou de l'école. Nous respectons les exigences de la COPPA et ne collectons pas sciemment d'informations personnelles auprès des enfants sans le consentement approprié. Les écoles et les enseignants sont responsables d'obtenir le consentement parental nécessaire.",
+        "gemma": "tags.\n\n    *Wait, I should ensure \"Homework Supply\" isn't translated if it's the name of the platform.* The prompt says \"Homework Supply is designed...\", implying it's the subject/name.\n\n    *Final Text:*\n    Homework Supply est conçu à des fins éducatives et peut être utilisé par des élèves de moins de 13 ans avec le consentement des parents ou de l'établissement scolaire. Nous nous conformons aux exigences de la loi COPPA et ne collectons pas sciemment d'informations personnelles auprès d'enfants sans le consentement approprié. Les établissements scolaires et les instructeurs sont responsables de l'obtention du consentement parental nécessaire.Homework Supply est conçu à des fins éducatives et peut être utilisé par des élèves de moins de 13 ans avec le consentement des parents ou de l'établissement scolaire. Nous nous conformons aux exigences de la loi COPPA et ne collectons pas sciemment d'informations personnelles auprès d'enfants sans le consentement approprié. Les établissements scolaires et les instructeurs sont responsables de l'obtention du consentement parental nécessaire.\n\n<T>Homework Supply est conçu à des fins éducatives et peut être utilisé par des élèves de moins de 13 ans avec le consentement des parents ou de l'établissement scolaire. Nous nous conformons aux exigences de la loi COPPA et ne collectons pas sciemment d'informations personnelles auprès d'enfants sans le consentement approprié. Les établissements scolaires et les instructeurs sont responsables de l'obtention du consentement parental nécessaire.",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:01:16.367Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:38.726Z",
+          "requestId": "chatcmpl-EOr25r2LC9DDwbNO9681Vvtj2LqIK",
+          "tokensUsed": 315,
+          "fingerprint": "b96565e68ea61496955d6a4142aaf779bf0aa0b9896325a2b26b9c753ebd29fe"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:01:16.367Z",
+          "requestId": "9888fc86-050d-4145-89f4-4062ba1d7a15",
+          "tokensUsed": 100,
+          "fingerprint": "474c7199d7d8151dafd6ce13e206ea400d3e53d83e1829ebed5e3e06fa96dbb9"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.content",
+      "source": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform.",
+      "translations": {
+        "claude": "",
+        "gpt": "Si vous avez des questions concernant cette Politique de Confidentialité ou souhaitez exercer vos droits relatifs aux données, veuillez contacter votre instructeur ou l'administrateur de la plateforme. Pour des demandes générales, vous pouvez nous joindre via les canaux de support disponibles sur la plateforme.",
+        "gemma": "...",
+        "consensus": ""
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:01:21.738Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:56.708Z",
+          "requestId": "chatcmpl-EOr2N4Jg6IYz6AMmfyGeP87Zq9dlq",
+          "tokensUsed": 282,
+          "fingerprint": "d53d77d9300178c85dd9150f2b83c9fa922c505caa92fd7562d8ffa9ccfdbd70"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:01:21.738Z",
+          "requestId": "acbb5ee7-895c-4ca1-836d-b790ffc14884",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.dataSharing.aiProcessing",
+      "source": "AI Processing:",
+      "translations": {
+        "claude": "",
+        "gpt": "Traitement par IA :",
+        "gemma": "",
+        "consensus": ""
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:19:30.282Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T20:59:20.287Z",
+          "requestId": "chatcmpl-EOr0p3wTT3uVLay3oR0N1dNZ3jNrM",
+          "tokensUsed": 193,
+          "fingerprint": "3ca0b7462ec30ed22abb2792af64e64195677e3c4f488769ebbbd0afddabfb2d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:19:30.284Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item5",
+      "source": "Opt-out: Disable leaderboard visibility and certain data sharing features",
+      "translations": {
+        "claude": "",
+        "gpt": "Désactivation : Désactiver la visibilité du classement et certaines fonctionnalités de partage de données",
+        "gemma": "",
+        "consensus": ""
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:20:11.744Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:02.169Z",
+          "requestId": "chatcmpl-EOr1VZItu9VBJrw5lb16brHFVJZ7F",
+          "tokensUsed": 216,
+          "fingerprint": "da59b071e1a15a5427a06342027617b671d870e01835f124da5fe252efb48db2"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:20:11.744Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.outro",
+      "source": "To exercise these rights, contact your instructor or reach out to us using the contact information below.",
+      "translations": {
+        "claude": "",
+        "gpt": "Pour exercer ces droits, contactez votre instructeur ou contactez-nous en utilisant les coordonnées ci-dessous.",
+        "gemma": "",
+        "consensus": ""
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T21:20:29.254Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T21:00:18.369Z",
+          "requestId": "chatcmpl-EOr1mWv1Hh8iyfCTEKqvfmHCLkfNR",
+          "tokensUsed": 224,
+          "fingerprint": "05d9419b70504aa2f06d2c26af41639d88abdd97de559af00cc2b8dd7956d802"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T21:20:29.255Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "0c64a74858d23c0784d3287c0f8728e4f51d4482862e8c45457819b915bbaf7d"
+}

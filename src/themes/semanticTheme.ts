@@ -1,4 +1,5 @@
 import type { Components, Theme, ThemeOptions } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
 export const SEMANTIC_THEME = {
   spacing: {
@@ -74,6 +75,17 @@ export const SEMANTIC_THEME = {
     },
   },
   editor: {
+    // Compact heading scale for editor/NarrativeReader content: a real
+    // hierarchy that stays tighter than the full page type scale so dense
+    // workbook content doesn't balloon. Injected as CSS vars via MuiCssBaseline.
+    headings: {
+      h1: { size: "1.75rem", weight: 700 },
+      h2: { size: "1.5rem", weight: 700 },
+      h3: { size: "1.25rem", weight: 600 },
+      h4: { size: "1.125rem", weight: 600 },
+      h5: { size: "1rem", weight: 600 },
+      h6: { size: "0.9375rem", weight: 600 },
+    },
     lexicalTheme: {
       blockCursor: "LanguageEditorTheme__blockCursor",
       characterLimit: "LanguageEditorTheme__characterLimit",
@@ -245,7 +257,78 @@ export function getSemanticThemeOptions(): ThemeOptions {
   };
 }
 
+// Soft, readable status chips: tinted background + same-hue text (AA in light
+// and dark), neutral grey for the `default`/zero case so counts never read as
+// alarming white-on-red badges.
+const STATUS_CHIP_COLORS = [
+  "primary",
+  "secondary",
+  "success",
+  "warning",
+  "error",
+  "info",
+] as const;
+
+function buildStatusChipVariants(): NonNullable<
+  NonNullable<Components<Theme>["MuiChip"]>["variants"]
+> {
+  const base = {
+    border: "none",
+    borderRadius: SEMANTIC_THEME.radius.chip,
+    fontWeight: SEMANTIC_THEME.typography.controlWeight,
+    "& .MuiChip-icon, & .MuiChip-deleteIcon": { color: "inherit" },
+  } as const;
+  return [
+    {
+      props: { variant: "status" as const, color: "default" as const },
+      style: ({ theme }: { theme: Theme }) => ({
+        ...base,
+        backgroundColor: theme.palette.action.selected,
+        color: theme.palette.text.secondary,
+      }),
+    },
+    ...STATUS_CHIP_COLORS.map((color) => ({
+      props: { variant: "status" as const, color },
+      style: ({ theme }: { theme: Theme }) => ({
+        ...base,
+        backgroundColor: alpha(theme.palette[color].main, 0.16),
+        color: theme.palette[color].main,
+      }),
+    })),
+  ];
+}
+
+// Editor CSS variables sourced from SEMANTIC_THEME so the Lexical stylesheets
+// (theme.css / LanguageEditorTheme.css) consume tokens instead of magic numbers.
+// Color-scheme independent, so injected once at :root.
+const editorH = SEMANTIC_THEME.editor.headings;
+const editorRootCssVars = `
+:root {
+  --let-radius-card: ${SEMANTIC_THEME.radius.card}px;
+  --let-radius-control: ${SEMANTIC_THEME.radius.control}px;
+  --let-radius-chip: ${SEMANTIC_THEME.radius.chip}px;
+  --let-radius-modal: ${SEMANTIC_THEME.radius.modal}px;
+  --let-h1-size: ${editorH.h1.size};
+  --let-h2-size: ${editorH.h2.size};
+  --let-h3-size: ${editorH.h3.size};
+  --let-h4-size: ${editorH.h4.size};
+  --let-h5-size: ${editorH.h5.size};
+  --let-h6-size: ${editorH.h6.size};
+  --let-h1-weight: ${editorH.h1.weight};
+  --let-h2-weight: ${editorH.h2.weight};
+  --let-h3-weight: ${editorH.h3.weight};
+  --let-h4-weight: ${editorH.h4.weight};
+  --let-h5-weight: ${editorH.h5.weight};
+  --let-h6-weight: ${editorH.h6.weight};
+  --let-heading-line-height: ${SEMANTIC_THEME.typography.lineHeight.heading};
+  --let-heading-line-height-dense: ${SEMANTIC_THEME.typography.lineHeight.dense};
+}
+`;
+
 export const semanticComponentOverrides: Components<Theme> = {
+  MuiCssBaseline: {
+    styleOverrides: editorRootCssVars,
+  },
   MuiButton: {
     styleOverrides: {
       root: {
@@ -261,6 +344,36 @@ export const semanticComponentOverrides: Components<Theme> = {
         borderRadius: SEMANTIC_THEME.radius.card,
       },
     },
+    variants: [
+      {
+        props: { variant: "assignment" },
+        style: ({ theme }) => ({
+          borderRadius: SEMANTIC_THEME.radius.card,
+          borderLeft: `4px solid ${theme.palette.primary.main}`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.02),
+          boxShadow: theme.shadows[SEMANTIC_THEME.elevation.card],
+          transition: theme.transitions.create(["box-shadow", "transform"], {
+            duration: theme.transitions.duration.shorter,
+          }),
+          "&:hover": {
+            boxShadow: theme.shadows[SEMANTIC_THEME.elevation.cardHover],
+            transform: "translateY(-2px)",
+          },
+          "@media (prefers-reduced-motion: reduce)": {
+            transition: "none",
+            "&:hover": { transform: "none" },
+          },
+        }),
+      },
+      {
+        props: { variant: "panel" },
+        style: ({ theme }) => ({
+          borderRadius: SEMANTIC_THEME.radius.panel,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: "none",
+        }),
+      },
+    ],
   },
   MuiChip: {
     styleOverrides: {
@@ -268,6 +381,7 @@ export const semanticComponentOverrides: Components<Theme> = {
         borderRadius: SEMANTIC_THEME.radius.chip,
       },
     },
+    variants: buildStatusChipVariants(),
   },
   MuiDialog: {
     styleOverrides: {
@@ -294,4 +408,36 @@ export const semanticComponentOverrides: Components<Theme> = {
       },
     },
   },
+  MuiTab: {
+    styleOverrides: {
+      root: {
+        textTransform: "none",
+        fontWeight: SEMANTIC_THEME.typography.controlWeight,
+      },
+    },
+  },
 };
+
+// Register the custom Card variants so `<Card variant="assignment" | "panel">`
+// typechecks. MUI v7 resolves Card's `variant` type through Paper, so both
+// override interfaces must carry the custom names.
+declare module "@mui/material/Card" {
+  interface CardPropsVariantOverrides {
+    assignment: true;
+    panel: true;
+  }
+}
+
+declare module "@mui/material/Paper" {
+  interface PaperPropsVariantOverrides {
+    assignment: true;
+    panel: true;
+  }
+}
+
+// Register the soft status Chip variant so `<Chip variant="status">` typechecks.
+declare module "@mui/material/Chip" {
+  interface ChipPropsVariantOverrides {
+    status: true;
+  }
+}

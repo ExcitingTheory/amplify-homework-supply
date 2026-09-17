@@ -492,8 +492,21 @@ export default function BlockInserterPlugin({
           }
         }
 
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) return;
+        let selection = $getSelection();
+        if (!$isRangeSelection(selection)) {
+          // No cursor placed — fall back to the end of the document.
+          const root = $getRoot();
+          const last = root.getLastChild();
+          if (last) {
+            last.selectEnd();
+          } else {
+            const paragraph = $createParagraphNode();
+            root.append(paragraph);
+            paragraph.selectEnd();
+          }
+          selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+        }
 
         switch (block.type) {
           case "heading1": {
@@ -531,6 +544,8 @@ export default function BlockInserterPlugin({
             break;
         }
       });
+      // Autofocus the editor so the caret lands in the freshly inserted block.
+      editor.focus();
     },
     [editor],
   );
@@ -639,8 +654,17 @@ export default function BlockInserterPlugin({
               }}
               onKeyDown={handleMenuKeyDown}
             >
-              {/* Search filter */}
-              <Box sx={{ p: 1, pb: 0 }}>
+              {/* Search filter — sticks to the top while the list scrolls */}
+              <Box
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                  bgcolor: "background.paper",
+                  p: 1,
+                  pb: 1,
+                }}
+              >
                 <TextField
                   size="small"
                   fullWidth

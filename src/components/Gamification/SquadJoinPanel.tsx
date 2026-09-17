@@ -6,75 +6,76 @@
  * @module SquadJoinPanel
  */
 
-import React, { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardActions from '@mui/material/CardActions'
-import Chip from '@mui/material/Chip'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Divider from '@mui/material/Divider'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import ListItemText from '@mui/material/ListItemText'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import GroupIcon from '@mui/icons-material/Group'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'
-import StarIcon from '@mui/icons-material/Star'
-import { SquadCrest } from './SquadCrest'
-import { AvatarDisplay } from './AvatarDisplay'
-import type { AvatarStyleTier, AvatarOverrides } from './DiceBearAvatar'
-import { ArmoriaShield } from './ArmoriaShield'
-import { PixelSpriteMascot } from './PixelSpriteMascot'
-import { NarrativeReader } from '../Editor3/NarrativeReader'
+import React, { useState, useCallback } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Divider from "@mui/material/Divider";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import GroupIcon from "@mui/icons-material/Group";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import StarIcon from "@mui/icons-material/Star";
+import { SquadCrest } from "./SquadCrest";
+import { AvatarDisplay } from "./AvatarDisplay";
+import { EmptyState } from "../EmptyState";
+import type { AvatarStyleTier, AvatarOverrides } from "./DiceBearAvatar";
+import { ArmoriaShield } from "./ArmoriaShield";
+import { PixelSpriteMascot } from "./PixelSpriteMascot";
+import { NarrativeReader } from "../Editor3/NarrativeReader";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface SquadListEntry {
-  id: string
-  name: string
-  totalXP: number
-  memberCount: number
-  description?: string
-  crestSvg?: string | null
+  id: string;
+  name: string;
+  totalXP: number;
+  memberCount: number;
+  description?: string;
+  crestSvg?: string | null;
 }
 
 export interface SquadMemberEntry {
-  id: string
-  studentId: string
-  role: 'LEADER' | 'MEMBER'
-  joinedAt?: string
-  displayName?: string
-  avatarSeed?: string
-  avatarStyle?: AvatarStyleTier
-  avatarOverrides?: AvatarOverrides
+  id: string;
+  studentId: string;
+  role: "LEADER" | "MEMBER";
+  joinedAt?: string;
+  displayName?: string;
+  avatarSeed?: string;
+  avatarStyle?: AvatarStyleTier;
+  avatarOverrides?: AvatarOverrides;
 }
 
 export interface SquadJoinPanelProps {
   /** Available squads to join */
-  availableSquads: SquadListEntry[]
+  availableSquads: SquadListEntry[];
   /** The student's current squad (null if not in one) */
-  mySquad?: SquadListEntry | null
+  mySquad?: SquadListEntry | null;
   /** Members of the student's current squad */
-  mySquadMembers?: SquadMemberEntry[]
+  mySquadMembers?: SquadMemberEntry[];
   /** Current student's ID (to identify leader status) */
-  studentId: string
+  studentId: string;
   /** Called when student joins a squad */
-  onJoinSquad: (squadId: string) => void
+  onJoinSquad: (squadId: string) => void;
   /** Called when student leaves their squad */
-  onLeaveSquad: () => void
+  onLeaveSquad: () => void;
   /** Whether operations are loading */
-  isLoading?: boolean
+  isLoading?: boolean;
   /** Current student level (for PixelSprite stage) */
-  level?: number
+  level?: number;
 }
 
 // ============================================================================
@@ -91,28 +92,29 @@ export function SquadJoinPanel({
   isLoading = false,
   level = 1,
 }: SquadJoinPanelProps) {
-  const [confirmLeave, setConfirmLeave] = useState(false)
-  const [selectedSquad, setSelectedSquad] = useState<SquadListEntry | null>(null)
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [selectedSquad, setSelectedSquad] = useState<SquadListEntry | null>(
+    null,
+  );
 
   const handleJoin = useCallback((squad: SquadListEntry) => {
-    setSelectedSquad(squad)
-  }, [])
+    setSelectedSquad(squad);
+  }, []);
 
   const handleConfirmJoin = useCallback(() => {
     if (selectedSquad) {
-      onJoinSquad(selectedSquad.id)
-      setSelectedSquad(null)
+      onJoinSquad(selectedSquad.id);
+      setSelectedSquad(null);
     }
-  }, [selectedSquad, onJoinSquad])
+  }, [selectedSquad, onJoinSquad]);
 
   const handleLeave = useCallback(() => {
-    onLeaveSquad()
-    setConfirmLeave(false)
-  }, [onLeaveSquad])
+    onLeaveSquad();
+    setConfirmLeave(false);
+  }, [onLeaveSquad]);
 
-  const isLeader = mySquadMembers.find(
-    (m) => m.studentId === studentId,
-  )?.role === 'LEADER'
+  const isLeader =
+    mySquadMembers.find((m) => m.studentId === studentId)?.role === "LEADER";
 
   // ── Current squad view ──────────────────────────────────────────────────
   if (mySquad) {
@@ -142,24 +144,40 @@ export function SquadJoinPanel({
                   variant="outlined"
                 />
                 {isLeader && (
-                  <Chip icon={<StarIcon />} label="Leader" size="small" color="warning" />
+                  <Chip
+                    icon={<StarIcon />}
+                    label="Leader"
+                    size="small"
+                    color="warning"
+                  />
                 )}
               </Stack>
-              {mySquad.description && (
-                mySquad.description.trim().startsWith('{') ? (
-                  <NarrativeReader contentJson={mySquad.description} ariaLabel="Squad description" padding="0.25rem 0" />
+              {mySquad.description &&
+                (mySquad.description.trim().startsWith("{") ? (
+                  <NarrativeReader
+                    contentJson={mySquad.description}
+                    ariaLabel="Squad description"
+                    padding="0.25rem 0"
+                  />
                 ) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 0.5 }}
+                  >
                     {mySquad.description}
                   </Typography>
-                )
-              )}
+                ))}
             </Box>
           </Stack>
 
           {/* Squad mascot */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-            <PixelSpriteMascot seed={mySquad.id} stage={Math.min(5, Math.ceil(level / 2))} size={48} />
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <PixelSpriteMascot
+              seed={mySquad.id}
+              stage={Math.min(5, Math.ceil(level / 2))}
+              size={48}
+            />
           </Box>
 
           <Divider sx={{ my: 1 }} />
@@ -172,11 +190,16 @@ export function SquadJoinPanel({
             {mySquadMembers.map((member) => (
               <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
                 <ListItemAvatar sx={{ minWidth: 36 }}>
-                  <AvatarDisplay seed={member.studentId} size={32} style={member.avatarStyle} overrides={member.avatarOverrides} />
+                  <AvatarDisplay
+                    seed={member.studentId}
+                    size={32}
+                    style={member.avatarStyle}
+                    overrides={member.avatarOverrides}
+                  />
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.displayName || member.studentId}
-                  secondary={member.role === 'LEADER' ? '⭐ Leader' : 'Member'}
+                  secondary={member.role === "LEADER" ? "⭐ Leader" : "Member"}
                 />
               </ListItem>
             ))}
@@ -199,7 +222,8 @@ export function SquadJoinPanel({
           <DialogTitle>Leave {mySquad.name}?</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to leave this squad? You can rejoin later if space is available.
+              Are you sure you want to leave this squad? You can rejoin later if
+              space is available.
             </Typography>
           </DialogContent>
           <DialogActions>
@@ -210,7 +234,7 @@ export function SquadJoinPanel({
           </DialogActions>
         </Dialog>
       </Card>
-    )
+    );
   }
 
   // ── Squad browser (not in a squad) ─────────────────────────────────────
@@ -220,21 +244,37 @@ export function SquadJoinPanel({
         Join a Squad
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Join a squad to collaborate with peers, earn bonus XP, and compete on the leaderboard.
+        Join a squad to collaborate with peers, earn bonus XP, and compete on
+        the leaderboard.
       </Typography>
 
       {/* Create Squad section */}
 
       {availableSquads.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-          No squads available yet.
-        </Typography>
+        <EmptyState
+          dense
+          title="No squads available yet"
+          description="Check back soon or create your own squad to get started."
+        />
       ) : (
         <Stack spacing={1.5}>
           {availableSquads.map((squad) => (
             <Card key={squad.id} variant="outlined">
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <SquadCrest squadId={squad.id} squadName={squad.name} size="small" showName={false} />
+              <CardContent
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  py: 1.5,
+                  "&:last-child": { pb: 1.5 },
+                }}
+              >
+                <SquadCrest
+                  squadId={squad.id}
+                  squadName={squad.name}
+                  size="small"
+                  showName={false}
+                />
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle2">{squad.name}</Typography>
                   <Stack direction="row" spacing={1}>
@@ -245,15 +285,18 @@ export function SquadJoinPanel({
                       {squad.totalXP} XP
                     </Typography>
                   </Stack>
-                  {squad.description && (
-                    squad.description.trim().startsWith('{') ? (
-                      <NarrativeReader contentJson={squad.description} ariaLabel={`${squad.name} description`} padding="0.25rem 0" />
+                  {squad.description &&
+                    (squad.description.trim().startsWith("{") ? (
+                      <NarrativeReader
+                        contentJson={squad.description}
+                        ariaLabel={`${squad.name} description`}
+                        padding="0.25rem 0"
+                      />
                     ) : (
                       <Typography variant="caption" color="text.secondary">
                         {squad.description}
                       </Typography>
-                    )
-                  )}
+                    ))}
                 </Box>
                 <Button
                   variant="contained"
@@ -282,19 +325,24 @@ export function SquadJoinPanel({
               />
             )}
             <Typography>
-              You&apos;ll join as a member and start contributing XP to this squad.
+              You&apos;ll join as a member and start contributing XP to this
+              squad.
             </Typography>
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSelectedSquad(null)}>Cancel</Button>
-          <Button onClick={handleConfirmJoin} variant="contained" disabled={isLoading}>
+          <Button
+            onClick={handleConfirmJoin}
+            variant="contained"
+            disabled={isLoading}
+          >
             Join Squad
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
-  )
+  );
 }
 
-export default SquadJoinPanel
+export default SquadJoinPanel;

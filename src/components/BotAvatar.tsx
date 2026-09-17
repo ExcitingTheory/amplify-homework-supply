@@ -5,25 +5,32 @@
  * @module BotAvatar
  */
 
-import React from 'react'
-import { AvatarDisplay } from './Gamification/AvatarDisplay'
-import type { AvatarStyleTier, AvatarOverrides } from './Gamification/DiceBearAvatar'
+import React from "react";
+import { AvatarDisplay } from "./Gamification/AvatarDisplay";
+import type {
+  AvatarStyleTier,
+  AvatarOverrides,
+} from "./Gamification/DiceBearAvatar";
 
 export interface BotAvatarProps {
   /** Size in pixels. Defaults to 28. */
-  size?: number
-  /** DiceBear style tier. Defaults to 'simple'. */
-  style?: AvatarStyleTier
+  size?: number;
+  /** DiceBear robot style tier. Defaults to 'bottts'. */
+  style?: AvatarStyleTier;
   /** Optional customization overrides (unlocked via Bot Whisperer badges). */
-  overrides?: AvatarOverrides
+  overrides?: AvatarOverrides;
 }
 
 /** Default bot appearance — purple-ish tones, friendly look */
 const BOT_DEFAULTS: AvatarOverrides = {
-  backgroundColor: ['b6e3f4'],
-}
+  backgroundColor: ["b6e3f4"],
+};
 
-export function BotAvatar({ size = 28, style = 'simple', overrides }: BotAvatarProps) {
+export function BotAvatar({
+  size = 28,
+  style = "bottts",
+  overrides,
+}: BotAvatarProps) {
   return (
     <AvatarDisplay
       seed="homework-supply-bot"
@@ -31,7 +38,7 @@ export function BotAvatar({ size = 28, style = 'simple', overrides }: BotAvatarP
       size={size}
       overrides={overrides || BOT_DEFAULTS}
     />
-  )
+  );
 }
 
-export default BotAvatar
+export default BotAvatar;

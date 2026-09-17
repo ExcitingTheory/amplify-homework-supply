@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "Alle Textformatierungen löschen",
     "clearFormatting": "Formatierung löschen",
     "clearTextFormatting": "Textformatierung löschen",
-    "closePreview": "Vorschau von {{name}} schließen",
+    "closePreview": "Vorschau von {name} schließen",
     "columnsLayout": "Spaltenlayout",
     "delete": "Löschen",
     "deleteUnitConfirmation": "Sind Sie sicher, dass Sie diese Einheit löschen möchten?",
@@ -63,7 +63,21 @@
     "underline": "Unterstreichen",
     "undo": "Rückgängig",
     "untitledUnit": "Unbenannte Einheit",
-    "wordBlock": "Wortblock"
+    "wordBlock": "Wortblock",
+    "numberedList": "Nummerierte Liste",
+    "heading2": "Überschrift 2",
+    "heading3": "Überschrift 3",
+    "quoteBlock": "Zitat",
+    "heading1": "Überschrift 1",
+    "codeBlock": "Codeblock",
+    "normal": "Normal",
+    "bulletedList": "Aufzählungsliste",
+    "textColor": "Textfarbe",
+    "backgroundColor": "Hintergrundfarbe",
+    "increaseFontSize": "Schriftgröße erhöhen",
+    "generateConversation": "Konversation generieren",
+    "blockFormat": "Blockformat",
+    "decreaseFontSize": "Schriftgröße verringern"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "KI-Assistent",
@@ -85,7 +99,8 @@
     "tagKaiDesc": "KI-Unterstützung in der Diskussion erhalten",
     "tagKaiLabel": "💬 @kai markieren",
     "useTopicsDesc": "Gespräche nach Thema organisieren",
-    "useTopicsLabel": "🏷️ #Themen verwenden"
+    "useTopicsLabel": "🏷️ #Themen verwenden",
+    "tableOfContentsTab": "Inhaltsverzeichnis"
   },
   "assignmentConfiguration": {
     "addDueDateButton": "Fälligkeitsdatum hinzufügen",
@@ -103,7 +118,9 @@
     "sectionLabel": "Abschnitt",
     "selectSectionHelper": "Wählen Sie einen Abschnitt aus, dem Sie das Fälligkeitsdatum zuweisen möchten",
     "timerDescription": "Der Timer startet, nachdem der Benutzer auf die Schaltfläche „Start\" geklickt hat. Benutzer können fortfahren, nachdem der Timer abgelaufen ist, und es wird aufgezeichnet, wann die Aufgabe gestartet und abgeschlossen wurde. Der Countdown wird für die Dauer des Timers oben auf dem Bildschirm angezeigt.",
-    "timerLabel": "Timer"
+    "timerLabel": "Timer",
+    "retryEnabledDescription": "Wenn aktiviert, sehen Schüler eine Schaltfläche „Erneut versuchen\" auf dem Abschlussbildschirm.",
+    "retryEnabled": "Studierenden erlauben, nach Abschluss erneut zu versuchen"
   },
   "toolbar": {
     "align_center": "Zentrieren",
@@ -130,7 +147,14 @@
     "pdfAnalysisSettings": "PDF-Analyse-Einstellungen",
     "setFeaturedImage": "Hauptbild festlegen",
     "uploadImagePrompt": "Bild hochladen",
-    "uploadingImage": "Bild wird hochgeladen"
+    "uploadingImage": "Bild wird hochgeladen",
+    "coverVideoUrlLabel": "Video-URL",
+    "setCoverVideo": "Titelvideo festlegen",
+    "coverVideoUrlPlaceholder": "Fügen Sie eine Video-URL ein oder lassen Sie das Feld leer, um eine Datei hochzuladen",
+    "uploadingVideo": "Video wird transcodiert",
+    "dragDropVideoPrompt": "Ziehen Sie eine Videodatei hierher und legen Sie sie ab.",
+    "noCoverVideo": "Kein Titelvideo festgelegt.",
+    "removeCoverVideo": "Covervideo entfernen"
   },
   "tabsVerticalLeft": {
     "tabs": {
@@ -140,7 +164,8 @@
       "dictionary": "Wörterbuch",
       "files": "Dateien",
       "questions": "Fragen",
-      "tableOfContents": "Inhaltsverzeichnis"
+      "tableOfContents": "Inhaltsverzeichnis",
+      "campaign": "Kampagne"
     }
   },
   "mainToolbar": {

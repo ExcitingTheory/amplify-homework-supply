@@ -51,7 +51,7 @@
     "cancel": "キャンセル",
     "done": "完了",
     "edit": "編集します",
-    "gradeDisplay": "成績: {{score}}",
+    "gradeDisplay": "成績: {score}",
     "invalid": "無効です",
     "reset": "リセット",
     "save": "保存",

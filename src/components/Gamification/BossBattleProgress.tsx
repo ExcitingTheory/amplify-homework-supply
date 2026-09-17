@@ -5,48 +5,48 @@
  * @module BossBattleProgress
  */
 
-import React from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
-import Chip from '@mui/material/Chip'
-import Stack from '@mui/material/Stack'
-import IconButton from '@mui/material/IconButton'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Avatar from '@mui/material/Avatar'
-import Tooltip from '@mui/material/Tooltip'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import PauseIcon from '@mui/icons-material/Pause'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import React from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import LinearProgress from "@mui/material/LinearProgress";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import PauseIcon from "@mui/icons-material/Pause";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface Contributor {
-  studentId: string
-  displayName: string
-  xpContributed: number
+  studentId: string;
+  displayName: string;
+  xpContributed: number;
 }
 
 export interface BossBattleProgressProps {
-  id: string
-  title: string
-  currentXP: number
-  targetXP: number
-  active: boolean
-  startDate?: string // ISO datetime
-  deadline?: string // ISO datetime (end date)
-  bonusMultiplier?: number
-  setting?: string
-  stakes?: string
-  contributors?: Contributor[]
-  onToggleActive?: (id: string, active: boolean) => void
-  onDelete?: (id: string) => void
-  onEdit?: (id: string) => void
+  id: string;
+  title: string;
+  currentXP: number;
+  targetXP: number;
+  active: boolean;
+  startDate?: string; // ISO datetime
+  deadline?: string; // ISO datetime (end date)
+  bonusMultiplier?: number;
+  setting?: string;
+  stakes?: string;
+  contributors?: Contributor[];
+  onToggleActive?: (id: string, active: boolean) => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
 // ============================================================================
@@ -54,20 +54,20 @@ export interface BossBattleProgressProps {
 // ============================================================================
 
 function getTimeRemaining(deadline: string): string {
-  const now = new Date()
-  const end = new Date(deadline)
-  const diffMs = end.getTime() - now.getTime()
+  const now = new Date();
+  const end = new Date(deadline);
+  const diffMs = end.getTime() - now.getTime();
 
-  if (diffMs <= 0) return 'Expired'
+  if (diffMs <= 0) return "Expired";
 
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-  if (days > 0) return `${days}d ${hours}h remaining`
-  if (hours > 0) return `${hours}h remaining`
+  if (days > 0) return `${days}d ${hours}h remaining`;
+  if (hours > 0) return `${hours}h remaining`;
 
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
-  return `${minutes}m remaining`
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${minutes}m remaining`;
 }
 
 // ============================================================================
@@ -90,20 +90,21 @@ export function BossBattleProgress({
   onDelete,
   onEdit,
 }: BossBattleProgressProps) {
-  const progress = targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0
-  const isComplete = currentXP >= targetXP
-  const timeRemaining = deadline ? getTimeRemaining(deadline) : null
-  const isExpired = timeRemaining === 'Expired'
-  const hasStarted = !startDate || new Date(startDate).getTime() <= Date.now()
+  const progress =
+    targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0;
+  const isComplete = currentXP >= targetXP;
+  const timeRemaining = deadline ? getTimeRemaining(deadline) : null;
+  const isExpired = timeRemaining === "Expired";
+  const hasStarted = !startDate || new Date(startDate).getTime() <= Date.now();
 
   // Sort contributors by XP desc, take top 5
   const topContributors = [...contributors]
     .sort((a, b) => b.xpContributed - a.xpContributed)
-    .slice(0, 5)
+    .slice(0, 5);
 
   return (
     <Card variant="outlined" sx={{ mb: 1, opacity: active ? 1 : 0.6 }}>
-      <CardContent sx={{ pb: '12px !important' }}>
+      <CardContent sx={{ pb: "12px !important" }}>
         {/* Header: Title + status chip + actions */}
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
           <Typography variant="subtitle2" fontWeight={600} sx={{ flex: 1 }}>
@@ -115,16 +116,17 @@ export function BossBattleProgress({
               icon={<EmojiEventsIcon />}
               label="Complete!"
               size="small"
+              variant="status"
               color="success"
               sx={{ height: 22 }}
             />
           )}
 
           <Chip
-            label={active ? 'Active' : 'Inactive'}
+            label={active ? "Active" : "Inactive"}
             size="small"
-            color={active ? 'primary' : 'default'}
-            sx={{ height: 22, fontSize: '0.65rem' }}
+            color={active ? "primary" : "default"}
+            sx={{ height: 22, fontSize: "0.65rem" }}
           />
 
           {bonusMultiplier && bonusMultiplier > 1 && (
@@ -132,17 +134,21 @@ export function BossBattleProgress({
               label={`×${bonusMultiplier}`}
               size="small"
               variant="outlined"
-              sx={{ height: 22, fontSize: '0.65rem' }}
+              sx={{ height: 22, fontSize: "0.65rem" }}
             />
           )}
 
-          <Tooltip title={active ? 'Pause' : 'Activate'}>
+          <Tooltip title={active ? "Pause" : "Activate"}>
             <IconButton
               size="small"
               onClick={() => onToggleActive?.(id, !active)}
-              aria-label={active ? 'Pause battle' : 'Activate battle'}
+              aria-label={active ? "Pause battle" : "Activate battle"}
             >
-              {active ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+              {active ? (
+                <PauseIcon fontSize="small" />
+              ) : (
+                <PlayArrowIcon fontSize="small" />
+              )}
             </IconButton>
           </Tooltip>
 
@@ -171,7 +177,11 @@ export function BossBattleProgress({
 
         {/* Progress bar */}
         <Box sx={{ mb: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            sx={{ mb: 0.5 }}
+          >
             <Typography variant="caption" color="text.secondary">
               {currentXP.toLocaleString()} / {targetXP.toLocaleString()} XP
             </Typography>
@@ -182,7 +192,7 @@ export function BossBattleProgress({
           <LinearProgress
             variant="determinate"
             value={progress}
-            color={isComplete ? 'success' : isExpired ? 'error' : 'primary'}
+            color={isComplete ? "success" : isExpired ? "error" : "primary"}
             sx={{ height: 8, borderRadius: 1 }}
           />
         </Box>
@@ -198,9 +208,9 @@ export function BossBattleProgress({
             {timeRemaining && (
               <Typography
                 variant="caption"
-                color={isExpired ? 'error.main' : 'text.secondary'}
+                color={isExpired ? "error.main" : "text.secondary"}
               >
-                {isExpired ? '⏰ Deadline passed' : `⏳ ${timeRemaining}`}
+                {isExpired ? "⏰ Deadline passed" : `⏳ ${timeRemaining}`}
               </Typography>
             )}
           </Stack>
@@ -208,12 +218,20 @@ export function BossBattleProgress({
 
         {/* Narrative */}
         {setting && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', mb: 0.5 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", fontStyle: "italic", mb: 0.5 }}
+          >
             {setting}
           </Typography>
         )}
         {stakes && (
-          <Typography variant="caption" color="warning.main" sx={{ display: 'block', mb: 1 }}>
+          <Typography
+            variant="caption"
+            color="warning.main"
+            sx={{ display: "block", mb: 1 }}
+          >
             Stakes: {stakes}
           </Typography>
         )}
@@ -221,18 +239,26 @@ export function BossBattleProgress({
         {/* Top contributors */}
         {topContributors.length > 0 && (
           <Box>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              sx={{ display: "block", mb: 0.5 }}
+            >
               Top Contributors
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap">
               {topContributors.map((c) => (
                 <Chip
                   key={c.studentId}
-                  avatar={<Avatar sx={{ width: 20, height: 20, fontSize: '0.6rem' }}>{c.displayName?.[0] ?? '?'}</Avatar>}
-                  label={`${c.displayName ?? 'Unknown'} (${c.xpContributed} XP)`}
+                  avatar={
+                    <Avatar sx={{ width: 20, height: 20, fontSize: "0.6rem" }}>
+                      {c.displayName?.[0] ?? "?"}
+                    </Avatar>
+                  }
+                  label={`${c.displayName ?? "Unknown"} (${c.xpContributed} XP)`}
                   size="small"
                   variant="outlined"
-                  sx={{ height: 24, fontSize: '0.65rem' }}
+                  sx={{ height: 24, fontSize: "0.65rem" }}
                 />
               ))}
             </Stack>
@@ -240,7 +266,7 @@ export function BossBattleProgress({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default BossBattleProgress
+export default BossBattleProgress;

@@ -400,7 +400,7 @@ function Sections({ user }) {
               {[0, 1, 2].map((i) => (
                 <Card
                   key={i}
-                  elevation={2}
+                  variant="assignment"
                   sx={{
                     display: "flex",
                     margin: "1rem auto",
@@ -409,9 +409,6 @@ function Sections({ user }) {
                         ? `calc(90vw - ${drawerWidth}px)`
                         : "90vw",
                     maxWidth: "80rem",
-                    borderRadius: 2,
-                    borderLeft: "4px solid",
-                    borderLeftColor: "text.primary",
                     p: 2,
                   }}
                 >
@@ -497,7 +494,7 @@ function Sections({ user }) {
                 <Card
                   key={section.id}
                   data-tour="section-card"
-                  elevation={2}
+                  variant="assignment"
                   sx={{
                     display: "flex",
                     margin: "1rem auto",
@@ -506,15 +503,6 @@ function Sections({ user }) {
                         ? `calc(90vw - ${drawerWidth}px)`
                         : "90vw",
                     maxWidth: "80rem",
-                    borderRadius: 2,
-                    borderLeft: "4px solid",
-                    borderLeftColor: "text.primary",
-                    transition: "all 0.3s ease-in-out",
-                    "&:hover": {
-                      elevation: 6,
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    },
                   }}
                 >
                   <Box
@@ -619,11 +607,11 @@ function Sections({ user }) {
                           py: 1,
                           borderRadius: 2,
                           boxShadow: 2,
-                          color: "text.primary",
-                          borderColor: "text.primary",
+                          color: "primary.main",
+                          borderColor: "primary.main",
                           "&:hover": {
                             boxShadow: 4,
-                            borderColor: "text.primary",
+                            borderColor: "primary.main",
                             backgroundColor: "action.hover",
                           },
                         }}

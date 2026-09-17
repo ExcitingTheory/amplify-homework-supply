@@ -97,7 +97,7 @@ export const BotAvatarDefault: Story = {
 
 export const BotAvatarLarge: Story = {
   name: "BotAvatar / Large",
-  render: () => <BotAvatar size={64} style="detailed" />,
+  render: () => <BotAvatar size={64} style="bottts" />,
   play: async ({ canvasElement }) => {
     expect(canvasElement.querySelector("img, svg")).not.toBeNull();
   },
@@ -137,7 +137,7 @@ export const BotCustomizerTier4: Story = {
     <BotCustomizer
       botWhispererTier={4}
       onChange={fn()}
-      initialConfig={{ style: "toonhead", backgroundColor: "ffd8b1" }}
+      initialConfig={{ style: "bottts-neutral", backgroundColor: "ffd8b1" }}
     />
   ),
   play: async ({ canvasElement }) => {

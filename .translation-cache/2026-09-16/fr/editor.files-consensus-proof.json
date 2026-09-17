@@ -1,0 +1,59 @@
+{
+  "namespace": "editor.files",
+  "sourceLang": "en",
+  "targetLang": "fr",
+  "mode": "provable",
+  "timestamp": "2026-09-16T19:15:42.951Z",
+  "summary": {
+    "totalKeys": 112,
+    "existingKeys": 111,
+    "translatedKeys": 1,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 219,
+    "gpt": 194,
+    "gemini": 100
+  },
+  "translations": [
+    {
+      "keyPath": "fileManager2.toolbar.recordConversation",
+      "source": "Record Conversation",
+      "translations": {
+        "claude": "Enregistrer la conversation",
+        "gpt": "Enregistrer la conversation",
+        "gemma": "translation",
+        "consensus": "Enregistrer la conversation"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:15:32.891Z",
+          "requestId": "msg_011Cf7es7ZEh2fyZm9jMrbL8",
+          "tokensUsed": 219,
+          "fingerprint": "55bc564070e05b71d8f53c7e5af0a967dfb847095c9cd67cab980699d9cdfa1d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:15:32.914Z",
+          "requestId": "chatcmpl-EOpOOucHSAWRm3TayiN6Woo6g6TeB",
+          "tokensUsed": 194,
+          "fingerprint": "55bc564070e05b71d8f53c7e5af0a967dfb847095c9cd67cab980699d9cdfa1d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:15:42.945Z",
+          "requestId": "115a013c-c648-42bb-9e7b-0523f04671e8",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    }
+  ],
+  "fingerprint": "6eaec0e2a282c8be2ace81d2f51693dba0a1e0ca6687fa259c80a78c44df2581"
+}

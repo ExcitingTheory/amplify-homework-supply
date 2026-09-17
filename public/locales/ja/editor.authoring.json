@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "すべてのテキスト書式を削除します",
     "clearFormatting": "書式をクリア",
     "clearTextFormatting": "テキストの書式をクリア",
-    "closePreview": "{{name}}のプレビューを閉じます",
+    "closePreview": "{name}のプレビューを閉じます",
     "columnsLayout": "カラムレイアウト",
     "delete": "削除します",
     "deleteUnitConfirmation": "このユニットを削除してもよろしいですか？",
@@ -63,7 +63,21 @@
     "underline": "下線",
     "undo": "元に戻す",
     "untitledUnit": "無題のユニット",
-    "wordBlock": "ワードブロック"
+    "wordBlock": "ワードブロック",
+    "numberedList": "番号付きリスト",
+    "codeBlock": "コードブロック",
+    "heading1": "見出し1",
+    "heading2": "見出し2",
+    "bulletedList": "箇条書きリスト",
+    "heading3": "見出し3",
+    "normal": "標準",
+    "textColor": "テキストの色",
+    "backgroundColor": "背景色",
+    "blockFormat": "ブロック形式",
+    "generateConversation": "会話を生成",
+    "increaseFontSize": "フォントサイズを大きくする",
+    "decreaseFontSize": "フォントサイズを小さくする",
+    "quoteBlock": "引用"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "AIアシスタント",
@@ -85,7 +99,8 @@
     "tagKaiDesc": "ディスカッションでAIサポートを受ける",
     "tagKaiLabel": "💬 @kaiをタグ付け",
     "useTopicsDesc": "テーマ別に会話を整理します",
-    "useTopicsLabel": "🏷️ #トピックを使用してください"
+    "useTopicsLabel": "🏷️ #トピックを使用してください",
+    "tableOfContentsTab": "目次"
   },
   "assignmentConfiguration": {
     "addDueDateButton": "提出期限を追加",
@@ -103,7 +118,9 @@
     "sectionLabel": "セクション",
     "selectSectionHelper": "期限を設定するセクションを選択してください",
     "timerDescription": "タイマーはユーザーが「開始」ボタンをクリックした後に開始されます。ユーザーはタイマーが終了した後も継続することができ、課題の開始時刻と完了時刻が記録されます。タイマーの動作中は、画面上部にカウントダウンが表示されます。",
-    "timerLabel": "タイマー"
+    "timerLabel": "タイマー",
+    "retryEnabled": "完了後に学生が再挑戦することを許可する",
+    "retryEnabledDescription": "有効にすると、完了画面に「もう一度挑戦」ボタンが学習者に表示されます。"
   },
   "toolbar": {
     "align_center": "中央揃え",
@@ -130,7 +147,14 @@
     "pdfAnalysisSettings": "PDF解析設定",
     "setFeaturedImage": "アイキャッチ画像を設定",
     "uploadImagePrompt": "画像をアップロードしてください",
-    "uploadingImage": "画像をアップロードしています"
+    "uploadingImage": "画像をアップロードしています",
+    "noCoverVideo": "カバー動画が設定されていません。",
+    "coverVideoUrlLabel": "動画URL",
+    "coverVideoUrlPlaceholder": "動画URLを貼り付けるか、空欄のままファイルをアップロードしてください",
+    "dragDropVideoPrompt": "ここに動画ファイルをドラッグ&ドロップしてください。",
+    "removeCoverVideo": "カバー動画を削除",
+    "setCoverVideo": "カバー動画を設定",
+    "uploadingVideo": "動画を変換しています"
   },
   "tabsVerticalLeft": {
     "tabs": {
@@ -140,7 +164,8 @@
       "dictionary": "辞書",
       "files": "ファイル",
       "questions": "質問",
-      "tableOfContents": "目次"
+      "tableOfContents": "目次",
+      "campaign": "キャンペーン"
     }
   },
   "mainToolbar": {

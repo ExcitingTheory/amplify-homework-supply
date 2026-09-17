@@ -1,6 +1,6 @@
 {
   "answerComponent": {
-    "audioNotAvailable": "{{text}}（音声はご利用いただけません）",
+    "audioNotAvailable": "{text}（音声はご利用いただけません）",
     "audioNotAvailableParens": "（音声は利用できません）",
     "errorMessages": {
       "noAnswer": "回答を入力してください",
@@ -16,7 +16,9 @@
       "writing": "記述"
     },
     "noDictionaryAvailable": "辞書は利用できません",
-    "submit": "提出する"
+    "submit": "提出する",
+    "inputMethodSelector": "入力方法",
+    "placeholder": "こちらに回答を入力してください"
   },
   "toolBarRoPlugin": {
     "fallbackText": "フォーマット",
@@ -26,7 +28,8 @@
   "verticalTabsRo": {
     "aiAssistant": "AIアシスタント",
     "previousAttempts": "以前の試行",
-    "settings": "設定"
+    "settings": "設定",
+    "tableOfContents": "目次"
   },
   "unitCompletedPlugin": {
     "allCaughtUp": "すべて完了！課題はありません。",
@@ -38,7 +41,7 @@
     "tryAgain": "もう一度"
   },
   "quizComponent": {
-    "gradeDisplay": "成績: {{score}}%"
+    "gradeDisplay": "成績: {score}%"
   },
   "meaningAssociationExercise": {
     "layoutDirection": "行"
@@ -57,5 +60,37 @@
     "text": "テキスト",
     "writing": "ライティング",
     "yourAnswer": "あなたの回答"
+  },
+  "workbookSettings": {
+    "title": "設定",
+    "reducedMotionDescription": "アニメーションと画面遷移を最小限に抑えます",
+    "displayPreferences": "表示設定",
+    "highContrastModeDescription": "より良い視認性のために色のコントラストを高めます",
+    "highContrastMode": "ハイコントラストモード",
+    "audioPreferences": "音声設定",
+    "autoPlayAudioDescription": "利用可能な場合は音声を自動再生します",
+    "immediateFeedback": "即時フィードバック",
+    "showWaveformsDescription": "オーディオコンテンツの波形を視覚的に表示します",
+    "showWaveforms": "音声波形を表示",
+    "autoPlayAudio": "オーディオを自動再生します",
+    "immediateFeedbackDescription": "正解・不正解のフィードバックをすぐに表示します",
+    "reducedMotion": "モーションを減らす",
+    "feedbackPreferences": "フィードバック設定"
+  },
+  "gradeHistory": {
+    "title": "成績履歴",
+    "trend": {
+      "up": "向上しています",
+      "down": "復習が必要です",
+      "flat": "安定"
+    },
+    "averageScore": "平均スコア",
+    "completeFirstAttempt": "この課題を完了すると、ここで進捗状況を確認できます。",
+    "bestScore": "最高得点",
+    "noAttempts": "過去の受験記録はありません",
+    "attempts": "受験回数",
+    "best": "最高得点",
+    "recentAttempts": "最近の試行履歴",
+    "complete": "完了"
   }
 }

@@ -1,0 +1,207 @@
+{
+  "namespace": "editor.shared",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "mode": "provable",
+  "timestamp": "2026-09-16T19:57:58.126Z",
+  "summary": {
+    "totalKeys": 193,
+    "existingKeys": 188,
+    "translatedKeys": 5,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 1207,
+    "gpt": 1065,
+    "gemini": 500
+  },
+  "translations": [
+    {
+      "keyPath": "micLevelIndicator.tooLow",
+      "source": "Microphone input is very low. Try speaking louder or moving closer to the microphone.",
+      "translations": {
+        "claude": "マイクの入力レベルが非常に低くなっています。より大きな声で話すか、マイクに近づいてお試しください。",
+        "gpt": "マイクの入力が非常に低いです。もっと大きな声で話すか、マイクに近づいてください。",
+        "gemma": "translation",
+        "consensus": "マイクの入力レベルが非常に低くなっています。より大きな声で話すか、マイクに近づいてお試しください。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:57:26.439Z",
+          "requestId": "msg_011Cf7i4PvepQKvqDtQqxUha",
+          "tokensUsed": 271,
+          "fingerprint": "f656dec42646dd28c3d7c97e2f4a4c7bef9c6642bee508fa1d43ddfff84f6938"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:57:25.705Z",
+          "requestId": "chatcmpl-EOq2vXQNU235C1aX1kkMInx0cgs78",
+          "tokensUsed": 233,
+          "fingerprint": "1612619eb01c207b816217a94159917e982fdaaaf81c4c136ad1d62866138bc3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:57:43.646Z",
+          "requestId": "bbc721a4-7864-4c9e-a8fc-934fcb0b3dd8",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.tooLowShort",
+      "source": "Too quiet",
+      "translations": {
+        "claude": "小さすぎます",
+        "gpt": "音が小さいです",
+        "gemma": "...",
+        "consensus": "小さすぎます"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:57:26.049Z",
+          "requestId": "msg_011Cf7i4PvQ2xaqBgu4LK31E",
+          "tokensUsed": 221,
+          "fingerprint": "df04b3b1d4c3522d9a357656bc7eb6c848fb9a407c3e046c9be09968a37040d5"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:57:25.923Z",
+          "requestId": "chatcmpl-EOq2v5BBLouXt05MWkUpj4DhOmuzK",
+          "tokensUsed": 196,
+          "fingerprint": "4430048eac48695961d7fa94b3b09ff4c59e5cc92fb11604d32addbc64840f8e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:57:53.061Z",
+          "requestId": "b672f6d9-a8f4-4017-92f1-5d71e6e681bc",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.noSignal",
+      "source": "No microphone signal detected. Check that your microphone is connected and not muted.",
+      "translations": {
+        "claude": "マイクの信号が検出されませんでした。マイクが接続されており、ミュートになっていないことを確認してください。",
+        "gpt": "マイクの信号が検出されませんでした。マイクが接続されていてミュートになっていないことを確認してください。",
+        "gemma": "マイクの信号が検出されていません。マイクが接続されているか、ミュートになっていないかを確認してください。",
+        "consensus": "マイクの信号が検出されませんでした。マイクが接続されており、ミュートになっていないことを確認してください。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:57:26.424Z",
+          "requestId": "msg_011Cf7i4Pwe6fgHk4xi98Gvf",
+          "tokensUsed": 265,
+          "fingerprint": "206abfbff6f6977ca7c3529d68026e7535d0a622c2aad7aae8a2eda3fff529c1"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:57:25.619Z",
+          "requestId": "chatcmpl-EOq2v54b18aJZFD7AGX393AcQL9d6",
+          "tokensUsed": 233,
+          "fingerprint": "5e87fe1ade2bd0a7fefc1b490d75e33239e0368dfe9cae836b8b460e49c51633"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:57:54.381Z",
+          "requestId": "fc7c3aa7-7a4b-41bf-86fd-8e48601bccec",
+          "tokensUsed": 100,
+          "fingerprint": "83878c634fc1f0f61e353e135399d178c7214d86c6a18bf388f2cf5811b1242a"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.noSignalShort",
+      "source": "No signal",
+      "translations": {
+        "claude": "信号なし",
+        "gpt": "信号がありません",
+        "gemma": "...",
+        "consensus": "信号なし"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:57:25.506Z",
+          "requestId": "msg_011Cf7i4PtfhEdyeUkoAm7ij",
+          "tokensUsed": 218,
+          "fingerprint": "5a1af7bb3464707ca947355b6f53ac9d90d091ee6c074468db3fa644fac17843"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:57:25.344Z",
+          "requestId": "chatcmpl-EOq2vKH5j7okQhaqICRqHcXuIu5TP",
+          "tokensUsed": 194,
+          "fingerprint": "c30090fcf3c8655f4ecc0ffea772cfb648c6dc890d74d46068d60243795c21cb"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:57:56.630Z",
+          "requestId": "01eb034f-818c-4b46-9426-c6757fcb9741",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "autoSubmit.submittingInSeconds",
+      "source": "Submitting answer in {countdown} seconds...",
+      "translations": {
+        "claude": "{countdown}秒後に解答を送信します...",
+        "gpt": "{countdown}秒後に回答を送信します...",
+        "gemma": "...",
+        "consensus": "{countdown}秒後に解答を送信します..."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:57:26.188Z",
+          "requestId": "msg_011Cf7i4PydAQ2JTRA5rbWGX",
+          "tokensUsed": 232,
+          "fingerprint": "25775ff408c954f7535cb8083fc0bb4595c6a8769ffe46da9061fc480170554b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:57:25.291Z",
+          "requestId": "chatcmpl-EOq2vxRYODnIPDTa4dxciU7VqFqIt",
+          "tokensUsed": 209,
+          "fingerprint": "a0e1a8047f32d289af08ce72e97ee8734bcf11410c3d088e3aaf7c4586181e4c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:57:58.122Z",
+          "requestId": "77897f1a-4128-41fd-a29d-5a1a808fc11a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    }
+  ],
+  "fingerprint": "64b648f43624488118bd0175d5762ff4193ec080d55265b9271f8c5f17678c74"
+}

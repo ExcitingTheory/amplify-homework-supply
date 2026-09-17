@@ -354,6 +354,106 @@ card/button/type systems recur on nearly every page.
 
 ---
 
+## Showcase & gamification visual unification
+
+Goal: unify the visual style of **every showcase and gamification element** so
+they read as one product, using the Design System Showcase stories as the living
+reference. This is a **restyle and re-layout** pass, not a feature cut — **no
+functionality may be removed**. Elements may be **collapsed, grouped, or moved**
+(for example, replacing a stack of oversized profile cards with a compact series
+of toggles/rows), but every control, stat, and affordance must survive the
+reorganization.
+
+### Canonical examples to match
+
+Treat these two stories as the target visual language; migrate other showcase and
+gamification surfaces toward their density, rounding, elevation, and rhythm:
+
+- **Toolbars** — `🧩 UI Components/Design System Showcase` → "Toolbars (all
+  variants, in proportion)"
+  ([Toolbars story](http://localhost:6006/?path=/story/%F0%9F%A7%A9-ui-components-design-system-showcase--toolbars)),
+  backed by [ToolbarSpecimens](../src/components/DesignSystem/ToolbarSpecimens.tsx).
+- **Recurring Patterns** — "Recurring Patterns (cards · gates · chips · chrome ·
+  modals · empty)"
+  ([Recurring Patterns story](http://localhost:6006/?path=/story/%F0%9F%A7%A9-ui-components-design-system-showcase--recurring-patterns)).
+
+### Surfaces to verify while iterating
+
+Re-render and visually diff these stories after each change to confirm nothing
+regresses and the language converges:
+
+- **Editor Blocks (Live)**
+  ([story](http://localhost:6006/?path=/story/%F0%9F%A7%A9-ui-components-design-system-showcase--editor-blocks-live))
+- **Gamification Components**
+  ([story](http://localhost:6006/?path=/story/%F0%9F%A7%A9-ui-components-design-system-showcase--gamification-components))
+- **Real Components (gallery)**
+  ([story](http://localhost:6006/?path=/story/%F0%9F%A7%A9-ui-components-design-system-showcase--real-components))
+
+### Constraints
+
+- **No feature loss.** Collapsing cards into toggles/rows/accordions is allowed
+  only when every prior control and data point remains reachable. If a card
+  exposed an action, that action must still exist after regrouping.
+- **Preserve component APIs.** Prefer restyling via the Semantic Theme
+  ([src/themes/semanticTheme.ts](../src/themes/semanticTheme.ts)) and shared view
+  sub-components (e.g. `AssignmentCardView`, `ProfileCardView`,
+  `AccountPreferencesView`) over rewriting behavior.
+- **Density over decoration.** Match the proportion and spacing shown in the
+  Toolbars and Recurring Patterns stories rather than inventing per-surface
+  padding.
+
+### Work items
+
+25. **Adopt the Semantic Theme across showcase + gamification.** Route rounding,
+    elevation, spacing, and surface/glass decisions for gamification components
+    (`BadgeShelf`, `LevelBadge`, `ProgressRings`, `StreakCalendar`, `SquadCrest`,
+    `SectionXPGauge`, `BossBattleProgress`, squad/boss/campaign cards) through
+    `SEMANTIC_THEME` tokens instead of local `sx`, so they match the Toolbars and
+    Recurring Patterns reference.
+26. **Unify gamification card rounding/elevation/chips** with the dashboard
+    assignment-card language used in Recurring Patterns (single accent token,
+    consistent chip rounding, no bespoke capsule/rectangle mixing).
+27. **Collapse oversized profile cards into a compact toggle/row layout.** In the
+    profile/settings surfaces (`ProfileCardView`, `AccountPreferencesView`,
+    `ProfileInfoView`, `LanguagePreferenceView`, `AdvancedSettingsView`), replace
+    stacked full-width cards with grouped toggles/rows/accordions — keeping every
+    field, action, and preference intact, only reorganized for density.
+28. **Normalize gamification typography** to the established type scale (Typography
+    & Font Rhythm story) so XP counters, level labels, streak counts, and squad
+    headings share weight/spacing hierarchy instead of default system sizing.
+29. **Align gamification empty/loading/error states** with the shared
+    `EmptyState`/`ErrorState` pattern (item 17) — squad feeds, leaderboards, boss
+    battles, and badge walls must not render bare centered text.
+30. **Promote toolbar/app-bar consistency** from the Toolbars specimen into the
+    real chrome so main, editor, and contextual toolbars share the same variant
+    tokens.
+31. **Rework the editor, its blocks, and editor/code styles with the Semantic
+    Theme.** The Lexical editor styling currently lives in standalone CSS and
+    ad-hoc `sx`:
+    - Editor chrome/typography: [src/components/Editor3/theme.css](../src/components/Editor3/theme.css)
+      and the Lexical theme-class map in
+      [src/components/Editor3/config/LanguageEditorTheme.js](../src/components/Editor3/config/LanguageEditorTheme.js)
+      / [LanguageEditorTheme.css](../src/components/Editor3/components/LanguageEditorTheme.css).
+    - Custom block nodes (`AnswerNode`, `CustomAnswerNode`, `QuizNode`,
+      `MeaningAssociationNode`, word/media blocks) rendered live via
+      `NarrativeReader` in the **Editor Blocks (Live)** story.
+    - Code blocks / syntax highlighting driven by `CodeHighlightPlugin` and the
+      `@lexical/code` token classes.
+
+    Migrate these to `SEMANTIC_THEME` tokens (radius, elevation, spacing,
+    surface/glass, semantic colors) and the shared type scale so editor text,
+    block containers, chips, gates, and code styling match the Toolbars and
+    Recurring Patterns reference instead of drifting from the app theme. Drive
+    code-block colors from theme tokens (not hardcoded Prism hex values) so light
+    and dark palettes stay in sync. No editor block, plugin, or authoring control
+    may be removed — this is styling only.
+32. **Regression-check the four verification stories** (Editor Blocks Live,
+    Gamification Components, Real Components, plus Recurring Patterns) after each
+    change; capture before/after screenshots to confirm convergence and no
+    feature loss.
+
+---
+
 ## Copy change completed alongside this audit
 
 Requested rename of the "Start Workbook" buttons to just "Start":

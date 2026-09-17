@@ -243,6 +243,9 @@ interface AntiBadgeCriteria {
     extraDrills?: number;
     hideFromLeaderboard?: boolean;
     hideFromLeaderboardHours?: number;
+    mascotBorrow?: boolean;
+    borrowedSlot?: string;
+    borrowedAccessoryId?: string;
   };
   redeemable: boolean;
 }
@@ -553,6 +556,9 @@ interface ActiveDebuff {
   avatarDowngrade?: string;
   hideFromLeaderboard?: boolean;
   extraDrills?: number;
+  mascotBorrow?: boolean;
+  borrowedSlot?: string;
+  borrowedAccessoryId?: string;
 }
 
 function getActiveDebuffs(profile: any): ActiveDebuff[] {
@@ -590,6 +596,9 @@ function applyDebuff(
     avatarDowngrade: debuffConfig.avatarDowngrade,
     hideFromLeaderboard: debuffConfig.hideFromLeaderboard,
     extraDrills: debuffConfig.extraDrills,
+    mascotBorrow: debuffConfig.mascotBorrow,
+    borrowedSlot: debuffConfig.borrowedSlot,
+    borrowedAccessoryId: debuffConfig.borrowedAccessoryId,
   });
 }
 

@@ -1582,18 +1582,11 @@ function SectionDetail({
       {section && (
         <Card
           data-tour="section-card"
-          elevation={2}
+          variant="assignment"
           sx={{
             width: "90vw",
             margin: "5rem auto",
             maxWidth: "80rem",
-            borderRadius: 2,
-            borderLeft: "4px solid",
-            borderLeftColor: "primary.main",
-            transition: "all 0.3s ease-in-out",
-            "&:hover": {
-              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-            },
           }}
         >
           {/* Section-scoped Skill Tree modal button */}
@@ -3133,21 +3126,14 @@ function SectionDetail({
               <React.Fragment key={assignment.id || assignment.unitID}>
                 <Card
                   data-tour="assignment-card"
-                  elevation={2}
+                  variant="assignment"
                   sx={{
                     display: "flex",
                     margin: "1rem auto",
                     width: "90vw",
                     maxWidth: "80rem",
                     height: 180,
-                    borderRadius: 2,
-                    borderLeft: "4px solid",
-                    borderLeftColor: "primary.main",
-                    transition: "all 0.3s ease-in-out",
                     overflow: "hidden",
-                    "&:hover": {
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    },
                   }}
                 >
                   <Box

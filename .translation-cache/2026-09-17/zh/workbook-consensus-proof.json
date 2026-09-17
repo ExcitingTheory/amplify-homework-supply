@@ -1,0 +1,96 @@
+{
+  "namespace": "workbook",
+  "sourceLang": "en",
+  "targetLang": "zh",
+  "mode": "provable",
+  "timestamp": "2026-09-17T01:21:58.892Z",
+  "summary": {
+    "totalKeys": 68,
+    "existingKeys": 66,
+    "translatedKeys": 2,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 450,
+    "gpt": 403,
+    "gemini": 200
+  },
+  "translations": [
+    {
+      "keyPath": "answerComponent.inputMethodSelector",
+      "source": "Input method",
+      "translations": {
+        "claude": "输入方式",
+        "gpt": "输入法",
+        "gemma": "...",
+        "consensus": "输入方式"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:21:26.289Z",
+          "requestId": "msg_011Cf88mQucRRcfFJm55iCQs",
+          "tokensUsed": 224,
+          "fingerprint": "0c1d0269f51eeed1d94854e3728f3ddbffdf9d5829b024ff0b2afb67d7a26e31"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:21:25.766Z",
+          "requestId": "chatcmpl-EOv6Tc8wDAMLSA2sHt8SuLu16W6o9",
+          "tokensUsed": 201,
+          "fingerprint": "aa3a904604cb35cc307990a13cf5ec7f9af2acec1221914c139b8358be32d60c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:21:36.820Z",
+          "requestId": "116d9ff0-2ae3-4567-b7fa-77882de6505b",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "answerComponent.placeholder",
+      "source": "Enter answer here",
+      "translations": {
+        "claude": "请在此输入答案",
+        "gpt": "在此输入答案",
+        "gemma": "...",
+        "consensus": "请在此输入答案"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:21:26.737Z",
+          "requestId": "msg_011Cf88mQmgq5w2Xj5ThKHTo",
+          "tokensUsed": 226,
+          "fingerprint": "d1d4bdc3f5ccf15f25e53bdbadad672cef239324c0c3764212bdb6c173658ea8"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:21:25.987Z",
+          "requestId": "chatcmpl-EOv6TWrOMQcdcVNlHqGWVBv5v4TdJ",
+          "tokensUsed": 202,
+          "fingerprint": "92c4fc16928cca7f22c093ee17fec6d787d072e399a6fe6da934e1501ed28501"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:21:58.887Z",
+          "requestId": "58a8b23c-d5b0-4116-8495-e9d844f6ba1b",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    }
+  ],
+  "fingerprint": "a420f44c30f2fa9178c124a2fe249a56f80e6c3a255037853d64fbc9d089c82d"
+}

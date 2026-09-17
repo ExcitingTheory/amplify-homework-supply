@@ -1,0 +1,1021 @@
+{
+  "namespace": "workbook",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "mode": "provable",
+  "timestamp": "2026-09-17T01:20:52.361Z",
+  "summary": {
+    "totalKeys": 68,
+    "existingKeys": 41,
+    "translatedKeys": 27,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 5947,
+    "gpt": 5296,
+    "gemini": 2400
+  },
+  "translations": [
+    {
+      "keyPath": "gradeHistory.title",
+      "source": "Grade History",
+      "translations": {
+        "claude": "成績履歴",
+        "gpt": "成績履歴",
+        "gemma": "translation",
+        "consensus": "成績履歴"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.139Z",
+          "requestId": "msg_011Cf8752aDeoTyVmsE8pSEV",
+          "tokensUsed": 212,
+          "fingerprint": "5dc6a47c2dcd412ea3557de8f38853fef920ddcf973880f477a190f71263f85e"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.013Z",
+          "requestId": "chatcmpl-EOukwkWvQDqZ3o8Uj2RaYUVYf3Uue",
+          "tokensUsed": 190,
+          "fingerprint": "5dc6a47c2dcd412ea3557de8f38853fef920ddcf973880f477a190f71263f85e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:59:23.410Z",
+          "requestId": "4252cec8-7f49-4101-b8fb-7c3434ab5622",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.trend.up",
+      "source": "Improving",
+      "translations": {
+        "claude": "向上しています",
+        "gpt": "向上しています",
+        "gemma": "...",
+        "consensus": "向上しています"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.076Z",
+          "requestId": "msg_011Cf874ziMLWGYjzKyYVM8L",
+          "tokensUsed": 213,
+          "fingerprint": "5a0b495acbe34fd60b0b619745dc212f29c18fe15b233237e6e82e9284c6049d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.017Z",
+          "requestId": "chatcmpl-EOukwOG8r2Wmqx8mbtidQKECJQlUn",
+          "tokensUsed": 191,
+          "fingerprint": "5a0b495acbe34fd60b0b619745dc212f29c18fe15b233237e6e82e9284c6049d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:59:31.576Z",
+          "requestId": "fcc4a40a-e0e0-4c94-8d64-9788757ee7d8",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.trend.down",
+      "source": "Review needed",
+      "translations": {
+        "claude": "復習が必要です",
+        "gpt": "レビューが必要です",
+        "gemma": "translation",
+        "consensus": "復習が必要です"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.209Z",
+          "requestId": "msg_011Cf8753tqZrVfexJFErjKV",
+          "tokensUsed": 215,
+          "fingerprint": "ac931b2b327c6bdb43c0f368462f755346fec56517ee96c96c04eedaa24f0402"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.069Z",
+          "requestId": "chatcmpl-EOukw1zLXBRP5QrdF4W5MvncGlxaK",
+          "tokensUsed": 192,
+          "fingerprint": "ff0c6d0341a5595596b572d70fce6fb4d14478518ec329572b93a8464dd75e64"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:59:32.610Z",
+          "requestId": "f788a5c5-d37d-440d-964d-390ee6aee654",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "answerComponent.inputMethodSelector",
+      "source": "Input method",
+      "translations": {
+        "claude": "入力方法",
+        "gpt": "入力方法",
+        "gemma": "...",
+        "consensus": "入力方法"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.073Z",
+          "requestId": "msg_011Cf874zrXzvXUH3dhoQ1ZF",
+          "tokensUsed": 213,
+          "fingerprint": "d3473908b9bd27191fcda608c8672a1c7e31412b045643e03021990199e0373c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.003Z",
+          "requestId": "chatcmpl-EOukvldSCmsVXfDVHgLUyXVWYcOzK",
+          "tokensUsed": 190,
+          "fingerprint": "d3473908b9bd27191fcda608c8672a1c7e31412b045643e03021990199e0373c"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:59:33.135Z",
+          "requestId": "9e567d54-c3f1-47ed-84a6-9985967d9b1a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "answerComponent.placeholder",
+      "source": "Enter answer here",
+      "translations": {
+        "claude": "こちらに回答を入力してください",
+        "gpt": "こちらに回答を入力してください",
+        "gemma": "ここに回答を入力してください",
+        "consensus": "こちらに回答を入力してください"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.192Z",
+          "requestId": "msg_011Cf87538SqRE4jivTxoYNG",
+          "tokensUsed": 218,
+          "fingerprint": "68a37887d06b78b11c9ec9e6ce9891ec2647e017f3564d852aba015f68e6d4d9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.016Z",
+          "requestId": "chatcmpl-EOukwnoxZHH5WJ3YoaiuQKvUzcXKa",
+          "tokensUsed": 193,
+          "fingerprint": "68a37887d06b78b11c9ec9e6ce9891ec2647e017f3564d852aba015f68e6d4d9"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T00:59:36.827Z",
+          "requestId": "204a21f3-1d88-4dba-897d-fa7aa499a3c4",
+          "tokensUsed": 100,
+          "fingerprint": "34513026d9dbf4bad22d516eb7e1f291bc6a4175bf03d801d15dab30afcadaca"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.averageScore",
+      "source": "Average Score",
+      "translations": {
+        "claude": "平均スコア",
+        "gpt": "平均スコア",
+        "gemma": "平均スコア",
+        "consensus": "平均スコア"
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:34.362Z",
+          "requestId": "msg_011Cf876gCBCCyZPb37x2TdZ",
+          "tokensUsed": 214,
+          "fingerprint": "ff617146ed09150f0c58438a45fad1a91eacf6b0b2e712ec743f611758b0349f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:33.132Z",
+          "requestId": "chatcmpl-EOulIUErFp3y5Ykm90feDH82qAV8a",
+          "tokensUsed": 191,
+          "fingerprint": "ff617146ed09150f0c58438a45fad1a91eacf6b0b2e712ec743f611758b0349f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:16.746Z",
+          "requestId": "083f6e7d-7c3f-4fa0-bf64-d4d9b21b3047",
+          "tokensUsed": 100,
+          "fingerprint": "ff617146ed09150f0c58438a45fad1a91eacf6b0b2e712ec743f611758b0349f"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.completeFirstAttempt",
+      "source": "Complete this assignment to see your progress here.",
+      "translations": {
+        "claude": "この課題を完了すると、ここで進捗状況を確認できます。",
+        "gpt": "この課題を完了して、ここで進捗を確認してください。",
+        "gemma": "この課題を完了すると、こちらに進捗が表示されます。",
+        "consensus": "この課題を完了すると、ここで進捗状況を確認できます。"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.077Z",
+          "requestId": "msg_011Cf874zukMvf4RYXsfBcAm",
+          "tokensUsed": 240,
+          "fingerprint": "481cd99f0da5186dbc03bcb05436230123d498c7fcf94d991b6236da06113f66"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.015Z",
+          "requestId": "chatcmpl-EOukwMkSZ6GN1QSFy0g8nLqPvndcA",
+          "tokensUsed": 211,
+          "fingerprint": "4d9c7aa1fcb4cf590a0190d250b6fcf3b98a33d0bb543711a036b4e377d9e32b"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:20.747Z",
+          "requestId": "f54bde11-5554-4c66-8d3d-a25546c81b52",
+          "tokensUsed": 100,
+          "fingerprint": "bef4c1939e8eed3c368ef7e1146fd515090c437c9a4d67900e450a937d2302dc"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.bestScore",
+      "source": "Best Score",
+      "translations": {
+        "claude": "最高得点",
+        "gpt": "最高スコア",
+        "gemma": "...",
+        "consensus": "最高得点"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:33.214Z",
+          "requestId": "msg_011Cf876csVuCzmRXppGoc5s",
+          "tokensUsed": 212,
+          "fingerprint": "a8599de6b62cbd0744fd05e15d19255b87b18f4f2a582931b831c3829906149b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:32.191Z",
+          "requestId": "chatcmpl-EOulHQELJlUWCJKmOi2DkBK1heoTN",
+          "tokensUsed": 191,
+          "fingerprint": "d66f9606480d030aadf17148c74cc28af1a2c2644f2a5ece05b0698887233861"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:30.882Z",
+          "requestId": "5ef4b179-293e-46f7-878f-9f89d896f883",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.noAttempts",
+      "source": "No previous attempts",
+      "translations": {
+        "claude": "過去の受験記録はありません",
+        "gpt": "以前の試行はありません",
+        "gemma": "tags.\n\n    Result: これまでの試行はありません\n\n    Actually, \"これまでの試行はありません\" is slightly wordy for a UI element.\n    \"試行履歴はありません\" (There is no attempt history) is very common in Japanese UI for \"No [X] history\".\n    However, the source is \"No previous attempts\", not \"No attempt history\".\n    \"これまでの試行はありません\" is the most faithful translation.\n\n    Let's look at \"No previous attempts\" again.\n    If I am a user looking at my grade history, and I see \"No previous attempts\", I expect to see \"これまでの試行はありません\".\n\n    One more thought: \"受験履歴はありません\" is very common if it's a test. \"回答履歴はありません\" if it's a quiz. \"試行\" is the most neutral.\n\n    Let's go with \"これまでの試行はありません\".\n\n    Wait, I should check if \"試行\" sounds too \"technical/experimental\".\n    In many Japanese LMS, \"attempt\" is translated as \"受験\" (for exams) or \"回答\" (for quizzes).\n    But \"試行\" is the standard translation for \"attempt\" in the context of \"number of attempts\".\n    Example: \"Attempt 1\" -> \"試行 1\".\n\n    Let's refine:\n    \"これまでの試行はありません\"\n\n    Actually, \"これまでの試行はありません\" is perfect.\n\n    One alternative: \"これまでの履歴はありません\" (There is no previous history). But that loses the \"attempts\" part.\n\n    Let's stick to \"これまでの試行はありません\".\n\n    Wait, I'll check if \"試行\" is used in Japanese eLearning.\n    Moodle (a major LMS) uses \"試行\" or \"受験\".\n    If the key is `gradeHistory.noAttempts`, it's definitely about the attempts.\n\n    Final decision: これまでの試行はありません.\n\n    Wait, looking at the source \"No previous attempts\", it's a fragment.\n    In Japanese, fragments are often used, but the instruction says \"Use です/ます form for polite-formal tone\".\n    \"これまでの試行はありません\" uses \"ありません\" (polite).\n\n    Final check:\n    Source: No previous attempts\n    Target: これまでの試行はありません\n    Tone: Polite-formal (Yes)\n    Placeholders: None (Yes)\n    Only Japanese: Yes.\n\n    One more check: Is \"試行\" the best word for \"attempts\" in a workbook?\n    A workbook usually involves \"answering\" (回答).\n    However, \"attempts\" is a very specific term in LMS (Attempt 1, Attempt 2).\n    In that specific context, \"試行\" is the correct technical term.\n\n    Let's consider \"これまでの回答はありません\" (No previous answers).\n    \"これまでの試行はありません\" (No previous attempts).\n    \"試行\" is safer as a translation for \"attempts\".\n\n    Final string: これまでの試行はありません\n\n    Wait, I just realized \"No previous attempts\" could also be \"これまでの試行はありません\" or \"過去の試行はありません\". \"これまでの\" is more natural for \"previous\" in a \"so far\" sense.\n\n    Let's verify \"polite-formal\".\n    \"ありません\" is the polite form of \"ない\".\n    \"です/ます\" form is requested.\n    \"ありません\" is the \"masu\" form of the verb \"ある\" (negated).\n\n    Final check on \"No previous attempts\" -> \"これまでの試行はありません\".\n\n    One more possibility: \"試行履歴はありません\" (There is no attempt history).\n    Given the key `gradeHistory.noAttempts`, \"試行履歴はありません\" is extremely natural for a UI.\n    But \"これまでの試行はありません\" is a more direct translation of the source text.\n    Usually, in localization, we prioritize the source text's meaning unless it's clearly a label.\n    \"No previous attempts\" is a status message.\n    \"これまでの試行はありません\" is a perfect status message.\n\n    Let's try to see if \"試行\" is too \"scientific\".\n    In many contexts, \"attempt\" is \"挑戦\" (challenge). But \"挑戦はありません\" sounds like \"You haven't challenged anything\", which is weird.\n    \"受験\" is for exams.\n    \"回答\" is for answers.\n    \"試行\" is the standard for \"attempts\" in software.\n\n    I will provide \"これまでの試行はありません\".\n\n    Wait, I'll check one more thing. Is \"No previous attempts\" a heading or a message?\n    If it's a message in a list, \"これまでの試行はありません\" is perfect.\n\n    Final check of the prompt:\n    \"Return ONLY the Japanese translation, nothing else\"\n    \"Preserve ALL placeholders\"\n    \"Match the specified tone: polite-formal\"\n    \"Use です/ます form\"\n    \"DO NOT add quotes, explanations, or extra formatting\"\n\n    Okay.\n\n    One last thought: \"これまでの試行はありません\" vs \"これまでの試行はございません\".\n    \"ございません\" is even more formal (Keigo).\n    \"です/ます\" is requested. \"ありません\" is the standard \"masu\" form.\n\n    Final string: これまでの試行はありません.<T>これまでの試行はありません",
+        "consensus": "過去の受験記録はありません"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.210Z",
+          "requestId": "msg_011Cf8753exjNZBqTh6HXtrH",
+          "tokensUsed": 221,
+          "fingerprint": "95c7de83d19d9b1eeda60a1bfa82cd3d48ae09e3cfcf60a2ea512be1d91a94aa"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:11.014Z",
+          "requestId": "chatcmpl-EOukw0wTUiRL6Ew8EkGJ35oq1fxJD",
+          "tokensUsed": 194,
+          "fingerprint": "7a371a6230822501b1680f7b49aae6f751bb3449452800bfffbf39f1b3201a03"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:35.536Z",
+          "requestId": "ccf30c71-f826-4a27-94f9-ab4f323c5ce5",
+          "tokensUsed": 100,
+          "fingerprint": "00605a0783d7d428912c435123d78b38c7540b966a6c6cdb697fd21e61be914c"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.trend.flat",
+      "source": "Steady",
+      "translations": {
+        "claude": "安定",
+        "gpt": "安定しています",
+        "gemma": "...",
+        "consensus": "安定"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:25.741Z",
+          "requestId": "msg_011Cf8764nCKdh4jk9B3MEBr",
+          "tokensUsed": 211,
+          "fingerprint": "176c2761f312f87c22652706da7c42e16cc92c1aa6e5859a6d24ddb2b44ee3eb"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:24.991Z",
+          "requestId": "chatcmpl-EOulAFAcUbRPp1lFCDF5wnVDUjdQu",
+          "tokensUsed": 191,
+          "fingerprint": "284eff6113c34e336477217193acf1c1340595201d5fb48cfcffc033cf339422"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:39.000Z",
+          "requestId": "5d7a38be-4f82-4d48-a425-80b29bd99434",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.attempts",
+      "source": "attempts",
+      "translations": {
+        "claude": "受験回数",
+        "gpt": "試行回数",
+        "gemma": "...",
+        "consensus": "受験回数"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:12.181Z",
+          "requestId": "msg_011Cf87527SKwdBJ5stWcgZK",
+          "tokensUsed": 210,
+          "fingerprint": "41891850f3ff0cbf368389625961b19b8ab3b254b44c900ea61f7a3a1397ce5f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:12.054Z",
+          "requestId": "chatcmpl-EOukwyl8lQDh5LoZsUr8zPqCxgV8s",
+          "tokensUsed": 192,
+          "fingerprint": "ea83da2f15050e6f8af2b03a5079fa84fb81f09a5b608f6d5d1cdc12d853019f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:43.800Z",
+          "requestId": "074243f1-bea8-4492-bc83-66e14a8802a7",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.reducedMotionDescription",
+      "source": "Minimizes animations and transitions",
+      "translations": {
+        "claude": "アニメーションと画面遷移を最小限に抑えます",
+        "gpt": "アニメーションとトランジションを最小限に抑えます",
+        "gemma": "...",
+        "consensus": "アニメーションと画面遷移を最小限に抑えます"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:45.437Z",
+          "requestId": "msg_011Cf87Bvgx9tmfVNwYdcohD",
+          "tokensUsed": 235,
+          "fingerprint": "b6ae8e7f480594f50d2084a98fc5b8f384cf2b3cc4f1f76f29701a921085c000"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:44.548Z",
+          "requestId": "chatcmpl-EOumSEjCcRIUuLHhtuggjNXHtcT47",
+          "tokensUsed": 210,
+          "fingerprint": "2c929480b0de34c41cef0e291ba5ebe3681285971641635c3a93a77b4a384c7d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:00:59.536Z",
+          "requestId": "72b27493-fce3-4d7c-b079-841a27677cfa",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.displayPreferences",
+      "source": "Display Preferences",
+      "translations": {
+        "claude": "表示設定",
+        "gpt": "表示設定",
+        "gemma": "translation",
+        "consensus": "表示設定"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:22.020Z",
+          "requestId": "msg_011Cf87ADn4AXT9n8riXipwW",
+          "tokensUsed": 215,
+          "fingerprint": "52cbc155c4ad44fb6b2f3fa3449e60b6b1ae389bc146aab0a10709f5c1d6736d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:21.267Z",
+          "requestId": "chatcmpl-EOum5043nWyq5ITowCvBtME865jnn",
+          "tokensUsed": 189,
+          "fingerprint": "52cbc155c4ad44fb6b2f3fa3449e60b6b1ae389bc146aab0a10709f5c1d6736d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:01.522Z",
+          "requestId": "af4674a7-44bc-446c-b77a-3d08462f01af",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.best",
+      "source": "Best",
+      "translations": {
+        "claude": "最高得点",
+        "gpt": "ベスト",
+        "gemma": "...",
+        "consensus": "最高得点"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:18.492Z",
+          "requestId": "msg_011Cf879wpc7Q83YqJE6kQQr",
+          "tokensUsed": 210,
+          "fingerprint": "a8599de6b62cbd0744fd05e15d19255b87b18f4f2a582931b831c3829906149b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:17.578Z",
+          "requestId": "chatcmpl-EOum1DTr7gHRKe6byill8PsjTF6Sx",
+          "tokensUsed": 187,
+          "fingerprint": "df6e49160c8bdd1bc2a681953a1cf6a314eb8659eae3168d93dfb5507941ec13"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:10.752Z",
+          "requestId": "7be5d0fd-711a-48be-b7dd-e9f7ca3a39d4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.highContrastModeDescription",
+      "source": "Increases color contrast for better visibility",
+      "translations": {
+        "claude": "より良い視認性のために色のコントラストを高めます",
+        "gpt": "視認性を向上させるために色のコントラストを高めます",
+        "gemma": "視認性を向上させるために、色のコントラストを高めます。",
+        "consensus": "より良い視認性のために色のコントラストを高めます"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:37.334Z",
+          "requestId": "msg_011Cf87BK6JwA2TAoZB1f6St",
+          "tokensUsed": 235,
+          "fingerprint": "ac8c17ce5c9876c62fc736f9f6e8ffa4ac2f02f3b731a4f119a5aa469a00be5d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:36.598Z",
+          "requestId": "chatcmpl-EOumJRqRUFqBeioZlf59whEAnn0DX",
+          "tokensUsed": 215,
+          "fingerprint": "198a7a98122c8d7bfd2f76ab9276e52970af4c7121d053d70dab371db84247e8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:12.929Z",
+          "requestId": "ea20d898-1b49-401f-add4-c403fb070cb8",
+          "tokensUsed": 100,
+          "fingerprint": "ae7fff41bfb58a96510fa6dc6915bdb073fd943b963e1dc5be9d4db07675cd17"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.highContrastMode",
+      "source": "High Contrast Mode",
+      "translations": {
+        "claude": "ハイコントラストモード",
+        "gpt": "ハイコントラストモード",
+        "gemma": "translation",
+        "consensus": "ハイコントラストモード"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:32.527Z",
+          "requestId": "msg_011Cf87AykiMg1ZQDzjx4F3p",
+          "tokensUsed": 221,
+          "fingerprint": "6cbf4ff53ac516b874eddd22a97d6db20aaa6f854858110cef6100bd82e2bf25"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:31.905Z",
+          "requestId": "chatcmpl-EOumF6Uo8iCM86iJUmVgjE3VB5Gj4",
+          "tokensUsed": 197,
+          "fingerprint": "6cbf4ff53ac516b874eddd22a97d6db20aaa6f854858110cef6100bd82e2bf25"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:16.878Z",
+          "requestId": "3375e772-23ba-45be-8c11-778f2d15f1de",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.audioPreferences",
+      "source": "Audio Preferences",
+      "translations": {
+        "claude": "音声設定",
+        "gpt": "オーディオ設定",
+        "gemma": "...",
+        "consensus": "音声設定"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:01.092Z",
+          "requestId": "msg_011Cf87D6JB6aUTYX4dqEWYR",
+          "tokensUsed": 215,
+          "fingerprint": "f0e857db4a22f9216c5f1c076dd27688cbaf74c5e35c3c3b9b3bd0602c91b0c5"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:00.294Z",
+          "requestId": "chatcmpl-EOumhr5ZMGBUSQ9dd5J52vfuWaQdl",
+          "tokensUsed": 192,
+          "fingerprint": "2d027145773ef0bffd7d96629874e6a762a71c8f44e8ad96e04f85cc62aa99b7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:24.065Z",
+          "requestId": "fcc632e2-6b71-4cc0-a680-d20cb3a4ad4d",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.autoPlayAudioDescription",
+      "source": "Automatically play audio when available",
+      "translations": {
+        "claude": "利用可能な場合は音声を自動再生します",
+        "gpt": "利用可能な場合は自動的にオーディオを再生します",
+        "gemma": "translation",
+        "consensus": "利用可能な場合は音声を自動再生します"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:12.389Z",
+          "requestId": "msg_011Cf87DvKvzrkjywEC8gX1c",
+          "tokensUsed": 232,
+          "fingerprint": "f00c4f43a7113bf301d65f0c51d520e3a15e51c30230515de2a76b17908d5c17"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:11.717Z",
+          "requestId": "chatcmpl-EOumtVKQ5y2E2iujA2774eZBFayKQ",
+          "tokensUsed": 209,
+          "fingerprint": "9eca90975a44d98dbc7bfe846b2d341f973658a02704920b0eeab7449fb80a56"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:30.432Z",
+          "requestId": "87e972bc-ea6d-4a14-9358-9cd7d3450b4e",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.immediateFeedback",
+      "source": "Immediate Feedback",
+      "translations": {
+        "claude": "即時フィードバック",
+        "gpt": "即時フィードバック",
+        "gemma": "...",
+        "consensus": "即時フィードバック"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:32.174Z",
+          "requestId": "msg_011Cf87FP4YfNL5k6MayDP9w",
+          "tokensUsed": 221,
+          "fingerprint": "c42e01cef46bf8cdb24f892ad658b2c7add1beff7d7d6353332799b6d67cf0f3"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:31.409Z",
+          "requestId": "chatcmpl-EOunDPTUoFgWe9YoPHiisMSX7JZsj",
+          "tokensUsed": 193,
+          "fingerprint": "c42e01cef46bf8cdb24f892ad658b2c7add1beff7d7d6353332799b6d67cf0f3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:56.617Z",
+          "requestId": "e72f989d-d9fa-49b7-b36c-b70ac6f85e5f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.showWaveformsDescription",
+      "source": "Display visual waveforms for audio content",
+      "translations": {
+        "claude": "オーディオコンテンツの波形を視覚的に表示します",
+        "gpt": "オーディオコンテンツの視覚的な波形を表示します",
+        "gemma": "...",
+        "consensus": "オーディオコンテンツの波形を視覚的に表示します"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:18.875Z",
+          "requestId": "msg_011Cf87EPSqDYt5XTrm6nQ2b",
+          "tokensUsed": 239,
+          "fingerprint": "dc79b385b636e32f1dd647663025ccab38c4f04f47611ffa3f6f8537b06a998d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:17.841Z",
+          "requestId": "chatcmpl-EOumz1D8uYzcwEpqWS4VfTYO1r0iU",
+          "tokensUsed": 211,
+          "fingerprint": "397531e3e94333026551e1ea067de43b9db250bee1ae65e8534b36aad65b39ab"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:01:56.770Z",
+          "requestId": "5ac8d22b-c9da-45b2-8ae9-2f3d164e6fd4",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.showWaveforms",
+      "source": "Show Audio Waveforms",
+      "translations": {
+        "claude": "音声波形を表示",
+        "gpt": "オーディオ波形を表示します",
+        "gemma": "...",
+        "consensus": "音声波形を表示"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:14.498Z",
+          "requestId": "msg_011Cf87E5A12ZEtRJFQd6RuN",
+          "tokensUsed": 222,
+          "fingerprint": "6c0f19c663bdddd27b7be895491ae9ce5b444f0176bc4fe598d6b724ef6a6da0"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:13.594Z",
+          "requestId": "chatcmpl-EOumvdYYzmTtpnabvec0UBKWgPDKO",
+          "tokensUsed": 199,
+          "fingerprint": "c382de4209088c7802a7e299f1566487ddda02c3cfff6f8c1e4588c160515ea9"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:02:04.322Z",
+          "requestId": "a87e0348-5392-45f6-9b24-d95d19f0807b",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.autoPlayAudio",
+      "source": "Auto-play Audio",
+      "translations": {
+        "claude": "音声の自動再生",
+        "gpt": "オーディオを自動再生します",
+        "gemma": "オーディオを自動再生します",
+        "consensus": "オーディオを自動再生します"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:03.161Z",
+          "requestId": "msg_011Cf87DEJdNugqs5KRBDfLB",
+          "tokensUsed": 220,
+          "fingerprint": "afd7cab0f2443f2903f6fa4e66c77586383f624b79f1ac455f41f68c90166fbb"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:02.178Z",
+          "requestId": "chatcmpl-EOumjfTkVTHLELXLAEaaMcmHFtWuP",
+          "tokensUsed": 199,
+          "fingerprint": "a2294fa1f31de1ccfd86cf069b34b80fb2af92056055bd46c70313bd38c8b02d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:02:17.556Z",
+          "requestId": "d19c1f75-7d75-4cd1-a8a5-325200424cb2",
+          "tokensUsed": 100,
+          "fingerprint": "a2294fa1f31de1ccfd86cf069b34b80fb2af92056055bd46c70313bd38c8b02d"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.recentAttempts",
+      "source": "Recent Attempts",
+      "translations": {
+        "claude": "最近の試行履歴",
+        "gpt": "最近の試行",
+        "gemma": "tags.\n\n    One last thought: Is \"最近の試行\" too \"robotic\"?\n    In a UI, \"最近の試行\" is standard.\n\n    Let's consider \"最近の履歴\" (Recent history). But the key is `recentAttempts`, not `recentHistory`.\n\n    Let's consider \"最近の挑戦\" (Recent challenges). Too \"game-like\".\n\n    \"最近の試行\" is the winner.\n\n    Wait, I'll check \"直近の試行\" one more time. \"直近\" is often used in \"Recent activity\" or \"Recent history\" in Japanese software.\n    \"Recent Attempts\" -> \"最近の試行\" is perfectly fine.\n\n    Actually, looking at common Japanese LMS (like Moodle):\n    \"Attempts\" is often translated as \"試行回数\" (number of attempts) or \"試行\" (attempt).\n    So \"最近の試行\" is correct.\n\n    Final check:\n    Source: Recent Attempts\n    Target: 最近の試行\n\n    (Wait, I just thought of \"最近の受験\". If it's an exam. But \"Attempts\" is broader. \"試行\" is broader.)\n\n    (Wait, I just thought of \"最近の回答\". If it's a quiz. \"回答\" is very common.)\n\n    Let's look at the key: `gradeHistory.recentAttempts`.\n    If I am a user looking at my grades, I see \"Recent Attempts\".\n    \"最近の試行\" is the most professional.\n\n    One more look at \"Use です/ます form\".\n    If the user *insists* on it, they might want \"最近の試行です\". But that is so wrong for a UI heading that I will assume \"polite-formal\" refers to the register of the words used.\n\n    Actually, I'll use \"最近の試行\".\n\n    Wait, I'll search for \"Recent Attempts\" in Japanese UI.\n    \"最近の試行\" - 1,200 hits.\n    \"最近の回答\" - 5,000 hits.\n    \"最近の履歴\" - 100,000 hits.\n\n    In the context of \"Attempts\" (the noun), \"試行\" is the direct translation.\n\n    Let's try to see if there's a more \"polite\" way.\n    \"最近の試行\" is standard.\n\n    Final decision: 最近の試行.\n\n    Wait, I'll check \"直近の試行\" again.\n    \"直近の試行\" sounds slightly more \"formal\" than \"最近の試行\".\n    \"Recent\" -> \"最近\" (Saikin) or \"直近\" (Chokkin).\n    \"Chokkin\" is more common in professional/business/technical contexts.\n    \"Saikin\" is more general.\n    Since it's an eLearning platform (professional), \"直近の試行\" might be better.\n    However, \"最近の試行\" is the most direct translation of \"Recent Attempts\".\n\n    Let's go with \"最近の試行\".\n\n    Actually, I'll check one more: \"最近の受験\". No, that's only for exams.\n    \"最近の試行\" is the safest and most accurate.\n\n    One last check on \"polite-formal\".\n    If the source was \"You have recent attempts\", then \"最近の試行があります\" would be the です/ます form.\n    Since the source is just \"Recent Attempts\", it's a label. Labels in Japanese don't use です/ます.\n\n    Final Answer seems to be 最近の試行.\n\n    Wait, I'll search for \"Recent attempts\" in Google Translate to see the commonality.\n    \"Recent attempts\" -> \"最近の試行\".\n    Okay.\n\n    One more thing: \"Attempts\" can also be \"解答\" (answers) or \"回答\" (responses).\n    In many LMS, \"Attempts\" is \"試行\".\n    Example: \"Attempt 1\", \"Attempt 2\" -> \"試行 1\", \"試行 2\".\n\n    Final check:\n    Namespace: workbook\n    Key: gradeHistory.recentAttempts\n    Source: Recent Attempts\n    Target: 最近の試行\n\n    Wait, I'll consider \"最近の回答\" one more time. If the user is taking a quiz, they \"answer\" it.\n    But \"Attempts\" is the specific word used.\n    I will stick to \"最近の試行\".\n\n    Actually, I'll use \"最近の試行\". It's the most faithful.\n\n    Wait, I just thought of \"最近の履歴\" (Recent history). But that's not \"Attempts\".\n\n    Let's look at the prompt again.\n    \"Match the specified tone: polite-formal\"\n    \"Use です/ます form for polite-formal tone\"\n    If I don't use です/ます, am I failing?\n    If I use \"最近の試行です\", I am providing a sentence where a label should be.\n    In UI localization, \"polite-formal\" for a label means using \"です/ます\" *if the source is a sentence*. If the source is a noun phrase, you use a noun phrase.\n    Example:\n    Source: \"Settings\" -> \"設定\" (Not \"設定です\")\n    Source: \"Welcome\" -> \"ようこそ\" (Not \"ようこそです\")\n    Source: \"Recent Attempts\" -> \"最近の試行\" (Not \"最近の試行です\")\n\n    This is the standard rule for professional localization.\n\n    Final check:\n    \"Recent Attempts\"\n    \"最近の試行\"\n\n    (Self-correction): Is \"最近の試行\" too formal? No, it's perfect for an eLearning platform.\n\n    One more check: \"Attempts\" -> \"挑戦\" (Challenge).\n    \"Recent Challenges\" -> \"最近の挑戦\".\n    This is used in gamified learning (like Duolingo).\n    But \"Attempts\" in \"Grade History\" is more academic.\n    \"最近の試行\" is better.\n\n    Final Answer: 最近の試行.<T>最近の試行",
+        "consensus": "最近の試行履歴"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:34.853Z",
+          "requestId": "msg_011Cf876jNRT27iHA7bHWqUV",
+          "tokensUsed": 220,
+          "fingerprint": "c6e353244e7284dbcb933b264a243cc30e1e3274568b19ecc4697345bd0ba732"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:34.110Z",
+          "requestId": "chatcmpl-EOulJv9uyPPkhAi5CJklvlap9LCJ1",
+          "tokensUsed": 192,
+          "fingerprint": "4318f8951b60748a47da723b36f1f92654291b49011817144fd2fccea3c627af"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:02:31.189Z",
+          "requestId": "8026a289-bf42-413b-b95f-2cf39a6e33b6",
+          "tokensUsed": 100,
+          "fingerprint": "63d8d8391d5b3620d00cfa78117e219238598c06244160320feec26409be9684"
+        }
+      }
+    },
+    {
+      "keyPath": "gradeHistory.complete",
+      "source": "complete",
+      "translations": {
+        "claude": "完了",
+        "gpt": "完了",
+        "gemma": "完了しました",
+        "consensus": "完了"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T00:59:38.165Z",
+          "requestId": "msg_011Cf876z3yKUbHHGtwBKJbo",
+          "tokensUsed": 208,
+          "fingerprint": "1031639454032f27aee34d14d86df41c568e65621bb6b7bd802bde092551b870"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T00:59:37.330Z",
+          "requestId": "chatcmpl-EOulNdj8RaqFjLyzfbH8FnSr61iNA",
+          "tokensUsed": 187,
+          "fingerprint": "1031639454032f27aee34d14d86df41c568e65621bb6b7bd802bde092551b870"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:03:11.296Z",
+          "requestId": "c26e63b1-4fc2-4264-893a-3b22898ff379",
+          "tokensUsed": 100,
+          "fingerprint": "f1740133c82e02f7c84f64abf9d5f4b0933005c027b122136f3c7b70c220d961"
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.immediateFeedbackDescription",
+      "source": "Show correct/incorrect feedback right away",
+      "translations": {
+        "claude": "正解・不正解のフィードバックをすぐに表示します",
+        "gpt": "正誤フィードバックをすぐに表示します",
+        "gemma": "",
+        "consensus": "正解・不正解のフィードバックをすぐに表示します"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:58.441Z",
+          "requestId": "msg_011Cf87HJcxW6uUuotYFwUsd",
+          "tokensUsed": 238,
+          "fingerprint": "ba38a788d3b0bf35335ee4117a2f73e30fc637659f6f4f434baf72db4bb639ea"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:57.633Z",
+          "requestId": "chatcmpl-EOundM7l8lzuYLg9MctCTpNcvbZFX",
+          "tokensUsed": 206,
+          "fingerprint": "bc8e6eabf0d9ebcf1bbff7b837f461b0255aa5d04da6e3aeaba23ed04d66ef23"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:20:39.079Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.reducedMotion",
+      "source": "Reduced Motion",
+      "translations": {
+        "claude": "モーションを減らす",
+        "gpt": "動きの軽減",
+        "gemma": "",
+        "consensus": "モーションを減らす"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:00:40.497Z",
+          "requestId": "msg_011Cf87Ba4EA5XwAXCgsWnav",
+          "tokensUsed": 218,
+          "fingerprint": "5faeb216737e582e622f2e2550aed19e530e4c9530b8a28f8a97daf1e7040f78"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:00:39.637Z",
+          "requestId": "chatcmpl-EOumNZUFaZdp1BuPkXpCvsXfM9H2Q",
+          "tokensUsed": 193,
+          "fingerprint": "0bace48d00dc7633989a561654f55806fd768717667094dd106bfa071a16eabf"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:20:50.909Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "workbookSettings.feedbackPreferences",
+      "source": "Feedback Preferences",
+      "translations": {
+        "claude": "フィードバック設定",
+        "gpt": "フィードバック設定",
+        "gemma": "",
+        "consensus": "フィードバック設定"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-17T01:01:25.304Z",
+          "requestId": "msg_011Cf87EuNQdz2ZW3DYfN79S",
+          "tokensUsed": 219,
+          "fingerprint": "4833211abfa7b55436869f9992e39f089e1789d5b8ee878d6d927e9e652319a7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-17T01:01:24.878Z",
+          "requestId": "chatcmpl-EOun6ZJrSVysrqtqIPCRxJZFcdAzY",
+          "tokensUsed": 191,
+          "fingerprint": "4833211abfa7b55436869f9992e39f089e1789d5b8ee878d6d927e9e652319a7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-17T01:20:52.340Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "31eb293d0f0d183d03fb469781a0db4aad519df537dd3f1665ea2ec7b2eaf947"
+}

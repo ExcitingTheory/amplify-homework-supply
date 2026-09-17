@@ -79,6 +79,12 @@ export interface BadgeDebuff {
   hideFromLeaderboard?: boolean;
   /** Duration of leaderboard hiding in hours */
   hideFromLeaderboardHours?: number;
+  /** Cosmetic-only: the mascot temporarily "borrows" one equipped avatar accessory. */
+  mascotBorrow?: boolean;
+  /** Which override slot was borrowed: "accessories" | "top". Set at apply time. */
+  borrowedSlot?: string;
+  /** The specific accessory id borrowed (e.g. "sunglasses"). Set at apply time. */
+  borrowedAccessoryId?: string;
 }
 
 /** Full anti-badge configuration */
@@ -130,6 +136,39 @@ export interface RedemptionCondition {
 // ============================================================================
 
 export const ANTI_BADGE_REGISTRY: Record<string, AntiBadgeConfig> = {
+  // ── Mascot Mischief ───────────────────────────────────────────────────
+
+  MAGPIE_MASCOT: {
+    icon: GiJesterHat,
+    name: "Sticky-Pawed Sidekick",
+    description:
+      "Your mascot took a shine to one of your accessories and 'borrowed' it. You'll get it back.",
+    bgColor: "#4527a0",
+    gradient: {
+      type: "linear",
+      angle: "135deg",
+      stops: [
+        { color: "#7e57c2", position: "0%" },
+        { color: "#311b92", position: "100%" },
+      ],
+    },
+    iconColor: "#ede7f6",
+    shape: "circle",
+    animation: "bounce-in",
+    hoverAnimation: "pulse",
+    rarity: "common",
+    category: "anti",
+    debuff: {
+      mascotBorrow: true,
+      cosmeticDurationHours: 6,
+      temporaryTitle: "🐦 Missing an Accessory",
+      shameText: "Your mascot is a magpie. It'll give it back... eventually.",
+    },
+    redeemable: true,
+    redemptionHint: "Tap your mascot to ask for it back — or just wait it out.",
+    redemptionCondition: { type: "WAIT_PERIOD", hours: 6 },
+  },
+
   // ── The Classics: Late & Missing Work ─────────────────────────────────
 
   FASHIONABLY_LATE: {

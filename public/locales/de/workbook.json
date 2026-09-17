@@ -1,6 +1,6 @@
 {
   "answerComponent": {
-    "audioNotAvailable": "{{text}} (Audio nicht verfügbar)",
+    "audioNotAvailable": "{text} (Audio nicht verfügbar)",
     "audioNotAvailableParens": "(Audio nicht verfügbar)",
     "errorMessages": {
       "noAnswer": "Bitte geben Sie eine Antwort an",
@@ -16,7 +16,9 @@
       "writing": "Schreiben"
     },
     "noDictionaryAvailable": "Kein Wörterbuch verfügbar",
-    "submit": "Absenden"
+    "submit": "Absenden",
+    "inputMethodSelector": "Eingabemethode",
+    "placeholder": "Antwort hier eingeben"
   },
   "toolBarRoPlugin": {
     "fallbackText": "Format",
@@ -26,7 +28,8 @@
   "verticalTabsRo": {
     "aiAssistant": "KI-Assistent",
     "previousAttempts": "Vorherige Versuche",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "tableOfContents": "Inhaltsverzeichnis"
   },
   "unitCompletedPlugin": {
     "allCaughtUp": "Alles erledigt! Keine weiteren Aufgaben.",
@@ -38,7 +41,7 @@
     "tryAgain": "Erneut versuchen"
   },
   "quizComponent": {
-    "gradeDisplay": "Note: {{score}}%"
+    "gradeDisplay": "Note: {score}%"
   },
   "meaningAssociationExercise": {
     "layoutDirection": "Zeile"

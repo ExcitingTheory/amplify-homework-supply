@@ -24,7 +24,8 @@
     "untitledSection": "未命名章节",
     "noDescription": "无描述",
     "viewSection": "查看章节",
-    "sections": "章节"
+    "sections": "章节",
+    "learningPathway": "技能树"
   },
   "profile": {
     "title": "我的资料",
@@ -33,6 +34,7 @@
     "userId": "用户ID",
     "identityId": "身份ID",
     "cancel": "取消",
+    "name": "姓名",
     "updateProfile": "更新资料",
     "confirmEmail": {
       "title": "确认您的邮箱",
@@ -60,7 +62,11 @@
         "cancel": "取消",
         "confirm": "清除缓存"
       }
-    }
+    },
+    "progress": "进度",
+    "badges": "徽章",
+    "activity": "活动",
+    "nailedItWall": "成就墙"
   },
   "sections": {
     "title": "部分",
@@ -77,7 +83,15 @@
       "descriptionLabel": "描述",
       "cancel": "取消",
       "create": "创建"
-    }
+    },
+    "joinCode": "代码标签",
+    "archived": "已归档",
+    "unarchive": "取消归档",
+    "archive": "归档",
+    "archivedSuccess": "章节已成功归档",
+    "archiveError": "更新章节失败，请重试。",
+    "unarchivedSuccess": "章节已成功取消归档",
+    "showArchived": "显示已归档 ({count})"
   },
   "sectionDetail": {
     "noFeaturedImage": "未设置特色图片",
@@ -129,7 +143,19 @@
       "saveFailed": "保存成绩失败，请重试。",
       "cancel": "取消",
       "save": "保存成绩"
-    }
+    },
+    "saveCoverVideo": "保存",
+    "removeCoverVideo": "移除",
+    "leaderboard": "排行榜",
+    "squads": "小队",
+    "setCoverVideo": "设置封面视频",
+    "noCoverVideo": "未设置封面视频。",
+    "coverVideoUrlLabel": "视频链接",
+    "noCurve": "无曲线",
+    "completionGrid": "完成情况概览",
+    "leaderboardEnabled": "显示排行榜",
+    "coverVideoUrlPlaceholder": "请粘贴视频链接（https://...）",
+    "noLeaderboardEntries": "暂无排行榜数据。学生获得经验值后将显示在此处。"
   },
   "units": {
     "title": "单元",
@@ -142,7 +168,16 @@
     "editUnit": "编辑单元",
     "myDrafts": "我的草稿",
     "practice": "练习",
-    "archivedUnits": "已归档单元"
+    "archivedUnits": "已归档单元",
+    "tabMyUnits": "我的单元",
+    "tabCommunity": "社区",
+    "tabSharedWithMe": "与我共享",
+    "forkSuccess": "单元已成功复刻",
+    "noCommunityUnits": "暂无社区单元",
+    "forking": "正在复制...",
+    "forkUnit": "复制",
+    "noSharedUnits": "暂无单元与您共享",
+    "forkError": "复制单元失败"
   },
   "unitDetail": {
     "loading": "加载中…"
@@ -150,7 +185,9 @@
   "workbook": {
     "timerInstructions": "这是一个限时练习，请点击开始按钮启动计时器并回答问题。",
     "start": "开始",
-    "loading": "加载中…"
+    "loading": "加载中…",
+    "reload": "重新加载",
+    "unitUpdated": "本单元已由教师更新。您是否希望重新加载最新版本?"
   },
   "leaderboard": {
     "title": "排行榜",
@@ -160,5 +197,112 @@
     "fastestMode": "最快",
     "squadsMode": "小队",
     "empty": "暂无排行榜数据。完成作业以赚取XP！"
-  }
+  },
+  "squads": {
+    "title": "小队",
+    "createSquad": "创建新小组",
+    "selectSection": "选择章节",
+    "heading": "所有小组",
+    "noSections": "未找到任何章节",
+    "description": "加入小队，与您的团队一起竞争，共同攀登排行榜。",
+    "squadPosts": "小组帖子"
+  },
+  "settings": {
+    "title": "设置",
+    "heading": "设置",
+    "privacy": {
+      "heading": "隐私设置",
+      "leaderboardOptIn": "在排行榜上显示我的姓名",
+      "leaderboardOptInHint": "关闭后，您的姓名在排行榜上将显示为\"匿名学生\"。"
+    },
+    "customization": {
+      "heading": "自定义设置",
+      "description": "随着等级提升，解锁新的头像样式和编辑器主题。"
+    },
+    "botCustomizer": {
+      "heading": "AI助手头像",
+      "description": "自定义您的AI导师外观。通过获得Bot Whisperer徽章解锁更多选项。"
+    },
+    "profileInfo": {
+      "heading": "个人资料信息",
+      "description": "更新您的显示名称和电子邮箱地址"
+    },
+    "description": "管理您的账户设置和偏好"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新时间：2026年5月",
+    "informationWeCollect": {
+      "heading": "我们收集的信息",
+      "accountInfo": "账户信息：",
+      "intro": "我们收集以下类型的信息，以提供并改进我们的教育服务：",
+      "userContent": "用户生成的内容：",
+      "learningData": "学习数据：",
+      "usageInfo": "使用信息：",
+      "learningDataText": "作业提交、成绩、进度跟踪、获得的经验值以及学习分析数据。",
+      "accountInfoText": "当您创建账户时，我们会收集您的电子邮件地址、显示名称和身份验证凭据。",
+      "usageInfoText": "设备信息、浏览器类型、访问页面及交互模式，以改善平台体验。",
+      "userContentText": "在学习活动中创建的音频录音、文本回答、上传的文件和聊天消息。"
+    },
+    "introduction": {
+      "content": "欢迎使用Homework Supply。我们致力于保护您的隐私并确保您个人信息的安全。本隐私政策说明了当您使用我们的教育平台时，我们如何收集、使用、存储和共享您的信息。",
+      "heading": "简介"
+    },
+    "howWeUseInfo": {
+      "heading": "我们如何使用您的信息",
+      "item2": "跟踪学习进度并为教师生成绩效报告",
+      "item1": "提供个性化学习体验和AI驱动的辅导服务",
+      "item4": "实现学生与教师之间的实时协作功能",
+      "item3": "通过AI服务（OpenAI）处理音频和文本以提供反馈和评估",
+      "intro": "我们出于以下目的使用您的信息：",
+      "item5": "改进平台功能、修复错误并提升教育成果"
+    },
+    "dataStorage": {
+      "heading": "数据存储与安全",
+      "intro": "您的数据通过行业标准做法进行安全存储：",
+      "item2": "文件存储在 Amazon S3 中，访问控制基于您的角色和所有权",
+      "item3": "数据库记录通过 AWS DynamoDB 进行管理，并实施精细化访问控制",
+      "item1": "所有数据在传输过程中（TLS/SSL）和静态存储时均使用AWS加密服务进行加密",
+      "outro": "我们会在您的账户处于活跃状态期间或在需要提供服务的必要时间内保留您的数据。您可以随时请求删除您的数据。"
+    },
+    "dataSharing": {
+      "heading": "数据共享",
+      "instructors": "讲师：",
+      "classmates": "同学：",
+      "intro": "我们不会出售您的个人信息。我们仅在以下有限情况下共享数据：",
+      "instructorsText": "您的授课教师可以查看您在其课程班级中的作业提交、成绩和学习进度。",
+      "aiProcessingText": "音频和文本内容将被发送至 OpenAI 进行转录、反馈和评估。OpenAI 不会使用这些数据进行训练。",
+      "legal": "法律要求：",
+      "classmatesText": "排行榜排名和小组活动可能对您所在班级的其他学生可见（您可以选择退出）。",
+      "aiProcessing": "AI处理：",
+      "legalText": "如法律要求或为保护用户安全，我们可能会披露相关信息。"
+    },
+    "yourRights": {
+      "item2": "更正：更新或纠正不准确的个人信息",
+      "intro": "您对您的个人数据享有以下权利：",
+      "heading": "您的权利",
+      "outro": "如需行使这些权利，请联系您的授课教师或使用以下联系信息与我们取得联系。",
+      "item5": "选择退出：禁用排行榜可见性和某些数据共享功能",
+      "item3": "删除：请求删除您的账户及相关数据",
+      "item4": "导出：以便携格式下载您的学习数据",
+      "item1": "访问权：请求获取我们持有的关于您的所有个人数据的副本"
+    },
+    "cookies": {
+      "heading": "Cookie 和本地存储",
+      "content": "我们使用必要的cookie和本地存储来实现身份验证、会话管理和离线功能。我们不使用第三方跟踪cookie或广告cookie。本地存储用于缓存学习内容以供离线访问。"
+    },
+    "childrensPrivacy": {
+      "heading": "儿童隐私",
+      "content": "Homework Supply 专为教育用途设计，13岁以下的学生可在家长或学校同意的情况下使用。我们遵守《儿童在线隐私保护法》(COPPA) 的要求，在未获得适当同意的情况下，不会有意收集儿童的个人信息。学校和教师有责任获取必要的家长同意。"
+    },
+    "contactUs": {
+      "heading": "联系我们",
+      "content": "如果您对本隐私政策有任何疑问或希望行使您的数据权利，请联系您的讲师或平台管理员。如有一般咨询，您可以通过平台提供的支持渠道与我们联系。"
+    },
+    "policyChanges": {
+      "heading": "本政策的变更",
+      "content": "我们可能会不定期更新本隐私政策，以反映我们实践或法律要求的变化。我们将通过平台通知用户重大变更。在变更后继续使用平台即表示接受更新后的政策。"
+    }
+  },
+  "Peer Review": "同行评审"
 }

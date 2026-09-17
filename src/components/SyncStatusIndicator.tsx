@@ -1,44 +1,16 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Chip,
-  Badge,
-  Tooltip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Typography,
-  Skeleton,
-} from "@mui/material";
-import {
-  CloudSync,
-  CloudDone,
-  CloudOff,
-  ErrorOutline,
-  Refresh,
-  CompareArrows,
-} from "@mui/icons-material";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
-import { useTranslations } from "next-intl";
 import ConflictResolutionDialog, {
   GradeConflictDetails,
 } from "./ConflictResolutionDialog";
+import { SyncStatusIndicatorView } from "./SyncStatusIndicatorView";
 
 /**
  * Shows "X changes pending sync" chip and a dialog to inspect/retry the queue.
  */
 export default function SyncStatusIndicator() {
   const { isOnline } = useNetworkStatus();
-  const t = useTranslations("components");
-  const td = (key: string, fallback: string) =>
-    t.has(key) ? t(key) : fallback;
   const [pendingCount, setPendingCount] = useState(0);
   const [pendingOps, setPendingOps] = useState<
     Array<{
@@ -219,147 +191,24 @@ export default function SyncStatusIndicator() {
     }
   }, [isOnline, refreshCount, syncing]);
 
-  if (pendingCount === 0) {
-    if (!isOnline) {
-      return (
-        <Tooltip title="Offline — no pending changes">
-          <Chip
-            icon={<CloudOff />}
-            label="Offline"
-            size="small"
-            variant="outlined"
-          />
-        </Tooltip>
-      );
-    }
+  if (pendingCount === 0 && isOnline) {
     return null; // All synced, nothing to show
   }
 
   return (
     <>
-      <Tooltip title={`${pendingCount} changes pending sync`}>
-        <Badge badgeContent={pendingCount} color="warning">
-          <Chip
-            icon={isOnline ? <CloudSync /> : <CloudOff />}
-            label={`${pendingCount} pending`}
-            size="small"
-            variant="outlined"
-            color={isOnline ? "primary" : "default"}
-            onClick={() => setDialogOpen(true)}
-            sx={{ cursor: "pointer" }}
-          />
-        </Badge>
-      </Tooltip>
-
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          {td("offline.pendingOperations", "Pending sync operations")}
-          <IconButton
-            onClick={handleManualSync}
-            disabled={!isOnline || syncing}
-            sx={{ float: "right" }}
-          >
-            {syncing ? (
-              <Skeleton variant="circular" width={20} height={20} />
-            ) : (
-              <Refresh />
-            )}
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            display="block"
-            sx={{ mb: 1 }}
-          >
-            {lastSyncedAt
-              ? t("offline.lastSynced", {
-                  defaultMessage: `Last synced ${new Date(lastSyncedAt).toLocaleString()}`,
-                })
-              : td("offline.notSynced", "Not synced in this session")}
-          </Typography>
-          {pendingOps.length === 0 ? (
-            <Typography color="text.secondary">
-              {td("offline.noPendingOperations", "No pending operations")}
-            </Typography>
-          ) : (
-            <List dense>
-              {pendingOps.map((op) => (
-                <ListItem
-                  key={op.id ?? op.createdAt}
-                  secondaryAction={
-                    (op.lastError?.toLowerCase().includes("version") ||
-                      op.lastError?.toLowerCase().includes("conflict") ||
-                      op.model === "Grade") && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="warning"
-                        startIcon={<CompareArrows />}
-                        onClick={() => handleOpenConflictDialog(op)}
-                      >
-                        Resolve
-                      </Button>
-                    )
-                  }
-                >
-                  <ListItemIcon>
-                    {op.lastError ? (
-                      <ErrorOutline color="error" />
-                    ) : (
-                      <CloudSync color="primary" />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={`${op.operation} ${op.model}`}
-                    secondary={
-                      <>
-                        {new Date(op.createdAt).toLocaleString()}
-                        {op.retryCount > 0 && ` · ${op.retryCount} retries`}
-                        {op.lastError && (
-                          <Typography
-                            component="span"
-                            variant="caption"
-                            color="error"
-                            display="block"
-                          >
-                            {op.lastError}
-                          </Typography>
-                        )}
-                      </>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>
-            {td("common.close", "Close")}
-          </Button>
-          <Button
-            onClick={handleManualSync}
-            disabled={!isOnline || syncing}
-            variant="contained"
-            startIcon={
-              syncing ? (
-                <Skeleton variant="circular" width={16} height={16} />
-              ) : (
-                <CloudSync />
-              )
-            }
-          >
-            {td("offline.syncNow", "Sync now")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SyncStatusIndicatorView
+        isOnline={isOnline}
+        pendingCount={pendingCount}
+        pendingOps={pendingOps}
+        syncing={syncing}
+        lastSyncedAt={lastSyncedAt}
+        dialogOpen={dialogOpen}
+        onOpenDialog={() => setDialogOpen(true)}
+        onCloseDialog={() => setDialogOpen(false)}
+        onSync={handleManualSync}
+        onResolveOp={handleOpenConflictDialog}
+      />
 
       <ConflictResolutionDialog
         open={conflictDialogOpen}

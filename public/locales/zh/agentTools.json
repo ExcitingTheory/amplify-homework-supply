@@ -1,0 +1,46 @@
+{
+  "readFileContent": {
+    "noContent": "此文件暂无可提取的内容。",
+    "error": "读取文件内容失败。"
+  },
+  "semanticSearch": {
+    "noIdentity": "无可用搜索索引——单元所有者身份未解析。",
+    "noIndex": "当前上下文没有可用的搜索索引。",
+    "error": "搜索失败。请尝试其他查询。"
+  },
+  "studentProgress": {
+    "error": "加载进度数据失败。",
+    "noGrades": "未找到本单元的成绩记录。",
+    "noUnit": "未指定单元且无当前单元上下文。"
+  },
+  "courseOutline": {
+    "noOutline": "暂无课程大纲。单元可能尚未发布。",
+    "error": "课程大纲加载失败。",
+    "noSection": "暂无章节内容。"
+  },
+  "recallMemory": {
+    "noMemory": "未找到对话记忆。",
+    "error": "无法调取记忆。",
+    "noHistory": "未找到此上下文的对话历史记录。"
+  },
+  "updateMemory": {
+    "error": "更新记忆失败。"
+  },
+  "sectionAnalytics": {
+    "instructorOnly": "此工具仅对授课教师开放。",
+    "noSection": "未指定章节且无当前章节上下文。",
+    "noAssignments": "未找到此部分的作业。",
+    "noGrades": "暂无学生成绩记录。",
+    "error": "加载部分分析数据失败。"
+  },
+  "recallConversations": {
+    "noSummaries": "暂无对话摘要。",
+    "noHistory": "未找到历史对话记录。",
+    "error": "未能调取过往对话记录。"
+  },
+  "studentList": {
+    "noSection": "未指定班级。",
+    "instructorOnly": "此工具仅对授课教师开放。",
+    "error": "加载学生列表失败。"
+  }
+}

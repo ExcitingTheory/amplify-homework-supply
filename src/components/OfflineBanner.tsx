@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Snackbar, Alert, Button, Slide } from "@mui/material";
-import { WifiOff, CloudSync } from "@mui/icons-material";
+import { Snackbar, Slide } from "@mui/material";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
+import { OfflineBannerView } from "./OfflineBannerView";
 
 /**
  * Persistent offline banner displayed at the top of the app when the user
@@ -127,26 +127,11 @@ export default function OfflineBanner() {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         TransitionComponent={Slide}
       >
-        <Alert
-          severity="warning"
-          icon={<WifiOff />}
-          action={
-            pendingCount > 0 ? (
-              <Button
-                color="inherit"
-                size="small"
-                startIcon={<CloudSync />}
-                onClick={handleManualSync}
-                aria-label={`Sync ${pendingCount} pending changes`}
-              >
-                {pendingCount} pending
-              </Button>
-            ) : undefined
-          }
-          sx={{ width: "100%" }}
-        >
-          You&apos;re offline — your work is saved locally
-        </Alert>
+        <OfflineBannerView
+          variant="offline"
+          pendingCount={pendingCount}
+          onSync={handleManualSync}
+        />
       </Snackbar>
     );
   }
@@ -161,18 +146,11 @@ export default function OfflineBanner() {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         TransitionComponent={Slide}
       >
-        <Alert
-          severity="success"
-          icon={<CloudSync />}
-          action={
-            <Button color="inherit" size="small" onClick={handleManualSync}>
-              Sync now
-            </Button>
-          }
-          sx={{ width: "100%" }}
-        >
-          Back online — syncing {pendingCount} pending changes
-        </Alert>
+        <OfflineBannerView
+          variant="reconnecting"
+          pendingCount={pendingCount}
+          onSync={handleManualSync}
+        />
       </Snackbar>
     );
   }

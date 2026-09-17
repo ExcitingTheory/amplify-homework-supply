@@ -1,0 +1,96 @@
+{
+  "namespace": "editor",
+  "sourceLang": "en",
+  "targetLang": "de",
+  "mode": "provable",
+  "timestamp": "2026-09-16T17:46:27.221Z",
+  "summary": {
+    "totalKeys": 557,
+    "existingKeys": 676,
+    "translatedKeys": 2,
+    "errors": 0,
+    "coverage": 122
+  },
+  "tokens": {
+    "claude": 443,
+    "gpt": 391,
+    "gemini": 200
+  },
+  "translations": [
+    {
+      "keyPath": "sketchPad.activatingDrawingPad",
+      "source": "Activating drawing pad...",
+      "translations": {
+        "claude": "Zeichenpad wird aktiviert...",
+        "gpt": "Zeichenblock wird aktiviert...",
+        "gemma": "Zeichenpad wird aktiviert...",
+        "consensus": "Zeichenpad wird aktiviert..."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:45:24.584Z",
+          "requestId": "msg_011Cf7XzSdbXUyCTrV92RGuX",
+          "tokensUsed": 223,
+          "fingerprint": "a7c16d49275f02999b7058c583f59c83bee4913dc14bd5c1bf501fbe7c45dafa"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:45:23.877Z",
+          "requestId": "chatcmpl-EOnz9ZDDmdiy17lwiCw3qmTKnLjIy",
+          "tokensUsed": 197,
+          "fingerprint": "5a39445f05a19de8843086029fe3e2ad67f5bf75241ee16a7ba3f9ba12fad3ec"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:19.575Z",
+          "requestId": "a651f221-b68b-46d4-a8c0-2c73a17e7612",
+          "tokensUsed": 100,
+          "fingerprint": "a7c16d49275f02999b7058c583f59c83bee4913dc14bd5c1bf501fbe7c45dafa"
+        }
+      }
+    },
+    {
+      "keyPath": "answerEditor.addWordLabel",
+      "source": "Add Word Label",
+      "translations": {
+        "claude": "Wortbeschriftung hinzufügen",
+        "gpt": "Wortbezeichnung hinzufügen",
+        "gemma": "...",
+        "consensus": "Wortbeschriftung hinzufügen"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:45:24.588Z",
+          "requestId": "msg_011Cf7XzSW9SqYuDpURHtv82",
+          "tokensUsed": 220,
+          "fingerprint": "fe4ea57f17cacf8f820bf7db25d32b671d933336edd542b7fb6d78a1c11c5ed3"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:45:23.850Z",
+          "requestId": "chatcmpl-EOnz9hC8HWlwByIezmBEKFDdr5WKH",
+          "tokensUsed": 194,
+          "fingerprint": "03636d92a6a446d7d1e440eedb83bbabdad3f7f648b6ed7e3ec785feae4d1fed"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:27.215Z",
+          "requestId": "4370a00e-6448-4e32-9c56-ba351fa398ff",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    }
+  ],
+  "fingerprint": "e013226ac5dec88f9dfd7b158898a0f76bef4ec52307ad27b8c43eeaac108f2e"
+}

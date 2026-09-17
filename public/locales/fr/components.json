@@ -26,7 +26,13 @@
     "passwordLabel": "Mot de passe :",
     "passwordPlaceholder": "Entrez votre mot de passe :",
     "phoneLabel": "Numéro de téléphone :",
-    "phonePlaceholder": "Entrez votre numéro de téléphone"
+    "phonePlaceholder": "Entrez votre numéro de téléphone",
+    "firstNamePlaceholder": "Entrez votre prénom",
+    "lastNameLabel": "Nom de famille :",
+    "firstNameLabel": "Prénom :",
+    "lastNamePlaceholder": "Saisissez votre nom de famille",
+    "preferredNamePlaceholder": "Nom que vous souhaitez utiliser en classe",
+    "preferredNameLabel": "Nom d'usage (optionnel) :"
   },
   "chatSidebar": {
     "errorRenderingMessage": "Erreur lors de l'affichage du message",
@@ -37,7 +43,7 @@
     "showLess": "afficher moins",
     "showMore": "Afficher plus",
     "searchHelper": "Rechercher du contenu...",
-    "contentTypeAndTopic": "{{contentType}} : « {{topic}} »",
+    "contentTypeAndTopic": "{contentType} : « {topic} »",
     "created": "Créé",
     "ready": "Prêt",
     "cancel": "Annuler",
@@ -84,7 +90,7 @@
     "unknown": "inconnu",
     "searchResultsHeader": "🔍 Résultats de recherche",
     "searchingFor": "Recherche de : \"{query}\"",
-    "foundResults": "{{count}} résultat trouvé",
+    "foundResults": "{count} résultat trouvé",
     "searchFailed": "Échec de la recherche",
     "createSection": "➕ Créer une section",
     "generateContent": "✨ Générer du contenu",
@@ -102,7 +108,7 @@
     "cancellingMessage": "Annulation en cours...",
     "analysisCancelled": "Analyse annulée",
     "contentPreview": {
-      "generatedContent": "\"{{contentType}} généré(e)\"",
+      "generatedContent": "\"{contentType} généré(e)\"",
       "insertButton": "Insérer",
       "inserted": "Inséré",
       "insertIntoEditor": "Insérer dans l'éditeur",
@@ -135,7 +141,8 @@
         "sectionsTitle": "Sections",
         "units": "Unités"
       }
-    }
+    },
+    "close": "Fermer"
   },
   "dictionaryEditor": {
     "rubyTagInstructions": "Utilisez les balises ruby pour les annotations phonétiques",
@@ -158,7 +165,9 @@
     "step1": "1. Sélectionnez le texte dans le champ de prononciation (en haut), puis sélectionnez le texte correspondant dans le champ de la phrase (en bas)",
     "step2": "2. Les portions sélectionnées seront associées et déplacées vers l’aperçu de la balise ruby",
     "step3": "3. Continuez à sélectionner des paires jusqu’à ce que les deux champs soient vides",
-    "step4": "4. Cliquez sur Enregistrer pour appliquer les balises ruby"
+    "step4": "4. Cliquez sur Enregistrer pour appliquer les balises ruby",
+    "noRubyTags": "Aucune balise ruby pour le moment",
+    "saveRubyTags": "Enregistrer les balises ruby"
   },
   "recordingStudio3": {
     "addSpeakerFirst": "Veuillez d'abord ajouter un intervenant",
@@ -180,11 +189,11 @@
     "speakers": "Haut-parleurs",
     "add": "Ajouter",
     "generateAllMissing": "Générer tous les TTS manquants",
-    "lineNumber": "Ligne n°{{number}} - {{speaker}}",
+    "lineNumber": "Ligne n°{number} - {speaker}",
     "takes": "Prises :",
     "timeline": "Chronologie",
     "voice": "Voix",
-    "processingLines": "Traitement de {{count}} lignes..."
+    "processingLines": "Traitement de {count} lignes..."
   },
   "recordingStudioEnhanced": {
     "popClickTooltip": "Supprimer les pops et les clics",
@@ -193,13 +202,43 @@
     "normalizeTooltip": "Normaliser les niveaux audio",
     "popClick": "Pop/Clic",
     "normalize": "Normaliser",
-    "tips": "Conseils : Utilisez les filtres pour éliminer les bruits de fond et améliorer la qualité vocale. Cliquez sur une piste pour la sélectionner pour l'enregistrement. L'audio généré sera ajouté à la piste sélectionnée. Faites glisser pour sélectionner des portions d'audio et utilisez le bouton couper pour les supprimer."
+    "tips": "Conseils : Utilisez les filtres pour éliminer les bruits de fond et améliorer la qualité vocale. Cliquez sur une piste pour la sélectionner pour l'enregistrement. L'audio généré sera ajouté à la piste sélectionnée. Faites glisser pour sélectionner des portions d'audio et utilisez le bouton couper pour les supprimer.",
+    "generate": "Générer",
+    "voice": "Voix",
+    "addTrack": "Ajouter une piste",
+    "broadcast": "Diffusion",
+    "audioFilters": "Filtres audio",
+    "clarity": "Clarté",
+    "cutTooltip": "Couper la portion sélectionnée",
+    "clickToRecord": "Cliquez pour enregistrer",
+    "enterPrompt": "Veuillez saisir une consigne pour cette piste",
+    "light": "Lumière",
+    "heavy": "Lourd",
+    "micAccessError": "Impossible d'accéder au microphone",
+    "medium": "Moyen",
+    "deleteLastTrackAlert": "Impossible de supprimer la dernière piste",
+    "none": "Aucun",
+    "recording": "Enregistrement",
+    "noiseReduction": "Réduction du bruit",
+    "selectToCut": "Veuillez sélectionner une partie de l'audio à couper",
+    "noClips": "Aucun clip",
+    "promptPlaceholder": "Saisissez le texte pour générer l'audio...",
+    "speechEnhancement": "Amélioration de la parole",
+    "presence": "Présence",
+    "trackName": "Piste {number}",
+    "ttsNotImplemented": "La génération de synthèse vocale n'est pas encore implémentée",
+    "ttsGenerationFailed": "Échec de la génération audio à partir de l'invite"
   },
   "sectionAssigner": {
     "dueDateNote": "Les utilisateurs seront autorisés à continuer après l'échéance. La date d'échéance sera utilisée pour trier les unités dans la section de cours.",
     "selectSectionHelper": "Sélectionnez une section à laquelle attribuer la date d'échéance",
     "assignedToSections": "Attribué aux sections",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "dueDate": "Date d'échéance",
+    "assign": "Attribuer",
+    "dialogTitle": "Assigner à la section",
+    "selectSection": "Sélectionner la section"
   },
   "questionsReview": {
     "answer": "Answer",
@@ -209,14 +248,14 @@
     "enterHint": "Enter hint...",
     "enterQuestion": "Enter question...",
     "expand": "Expand",
-    "filteringBySearch": "Filtering by search: \"{{searchTerm}}\" ({{count}} of {{total}} items)",
+    "filteringBySearch": "Filtering by search: \"{searchTerm}\" ({count} of {total} items)",
     "from": "From",
     "hasAudio": "Has audio",
     "hasImage": "Has image",
     "hide": "Hide",
     "hintOptional": "Hint (optional)",
     "importToQuestionBank": "Import to Question Bank",
-    "importedOn": "Imported on {{date}}",
+    "importedOn": "Imported on {date}",
     "learningObjectives": "Learning Objectives",
     "loading": "Loading questions...",
     "noQuestions": "No questions found for this document.",
@@ -224,7 +263,7 @@
     "questionPrompt": "Question Prompt",
     "sectionHeading": "Questions Review",
     "selectAll": "Select All",
-    "selectedCount": "{{count}} of {{total}} selected",
+    "selectedCount": "{count} of {total} selected",
     "show": "Show",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
@@ -238,7 +277,7 @@
     "noEmbedding": "Aucune intégration",
     "embeddingStale": "Intégration obsolète",
     "embeddingFresh": "Intégration récente",
-    "error": "Erreur : {{message}}"
+    "error": "Erreur : {message}"
   },
   "aiAgentConfig": {
     "sageModel": "Modèle Sage",
@@ -287,14 +326,97 @@
       "gold": "Or"
     },
     "styles": {
-      "simple": "Simple",
-      "detailed": "Détaillé",
-      "toon": "Toon"
+      "bottts": "Robot",
+      "botttsNeutral": "Mini Robot"
     },
     "lockedMessage": "Gagnez le badge Bot Whisperer I pour personnaliser votre assistant IA.",
     "previewTitle": "Votre assistant IA",
     "styleLabel": "Style",
     "backgroundColorLabel": "Couleur d’arrière-plan"
+  },
+  "chatMessageList": {
+    "tool": "Outil",
+    "thinking": "Réflexion…",
+    "input": "Entrée",
+    "result": "Résultat"
+  },
+  "editableBlockPreview": {
+    "quiz": "Bloc de quiz généré",
+    "answer": "Bloc de réponse généré",
+    "meaningAssociation": "Bloc d'association de sens généré",
+    "customAnswer": "Bloc de réponse personnalisée généré",
+    "content": "Bloc de contenu généré",
+    "block": "Bloc généré",
+    "copy": "Copier dans le presse-papiers",
+    "copied": "Copié !",
+    "regenerate": "Régénérer",
+    "editHint": "Modifiez le bloc ci-dessous, puis insérez-le dans votre leçon.",
+    "reject": "Rejeter",
+    "insert": "Insérer dans la leçon",
+    "inserted": "Inséré dans la leçon",
+    "rejected": "Rejeté",
+    "undo": "Annuler"
+  },
+  "offlineBanner": {
+    "offline": "Vous êtes hors ligne — votre travail est enregistré localement",
+    "pending": "{count} en attente",
+    "syncAria": "Synchroniser {count} modifications en attente",
+    "backOnline": "De nouveau en ligne — synchronisation de {count} modifications en attente",
+    "syncNow": "Synchroniser maintenant"
+  },
+  "jobsDashboard": {
+    "active": "{count} actif(s)",
+    "failed": "{count} échoué(s)",
+    "totalJobs": "{count} tâches au total",
+    "type": "Type",
+    "allTypes": "Tous les types",
+    "agentJobs": "Tâches d'agent",
+    "docAnalysis": "Analyse de document",
+    "mediaTranscode": "Transcodage multimédia",
+    "status": "Statut",
+    "activeFailed": "Actif / Échoué",
+    "allStatuses": "Tous les statuts",
+    "queued": "En file d'attente",
+    "processing": "En cours de traitement",
+    "failedStatus": "Échoué",
+    "completed": "Terminé",
+    "cancelled": "Annulé",
+    "refresh": "Actualiser",
+    "colType": "Type",
+    "colStatus": "Statut",
+    "colOwner": "Propriétaire",
+    "colResource": "Ressource",
+    "colStarted": "Démarré",
+    "colDuration": "Durée",
+    "colRetries": "Tentatives",
+    "colError": "Erreur",
+    "colActions": "Actions",
+    "noJobs": "Aucune tâche correspondant aux filtres actuels",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "retryAllFailed": "Réessayer tous les échecs ({count})",
+    "typeAgentJob": "Tâche d'agent",
+    "typeDocumentAnalysis": "Analyse de document",
+    "typeMediaTranscode": "Transcodage multimédia"
+  },
+  "storageManagement": {
+    "offlineStorage": "Stockage hors ligne",
+    "usedOfQuota": "{used} sur {quota} utilisé ({percent}%)",
+    "storageFullWarning": "Le stockage est presque plein. Envisagez de supprimer les tâches en cache ou le modèle d'IA pour libérer de l'espace.",
+    "aiModelForOffline": "Modèle d'IA pour une utilisation hors ligne",
+    "downloaded": "Téléchargé",
+    "notDownloaded": "Non téléchargé",
+    "modelSizeStatus": "{size} · {status}",
+    "preInstalled": "Préinstallé — aucun téléchargement nécessaire",
+    "builtIn": "Intégré",
+    "removeModel": "Supprimer le modèle",
+    "download": "Télécharger",
+    "downloadingModel": "Téléchargement du modèle d'IA... {percent}%",
+    "cachedAssignments": "Tâches en cache",
+    "noCachedAssignments": "Aucune tâche mise en cache pour une utilisation hors ligne pour le moment. Ouvrez une tâche pour la mettre en cache automatiquement.",
+    "unitLabel": "Unité : {id}...",
+    "cacheStatusUpdated": "{status} · Dernière mise à jour {date}",
+    "removeOfflineData": "Supprimer les données hors ligne"
   },
   "cadenceCopyDialog": {
     "copyFromClass": "Copier depuis la classe",
@@ -381,5 +503,378 @@
     "friday": "Vendredi prochain",
     "createSectionLabel": "Créer une nouvelle section",
     "undoSnackbar": "Devoirs créés. {count} devoir{plural} créé."
+  },
+  "chat": {
+    "aiAssistant": "Assistant IA",
+    "close": "Fermer",
+    "openAssistant": "Ouvrir l'assistant IA"
+  },
+  "questionBlock": {
+    "addAnswerPlaceholder": "Ajouter une réponse",
+    "done": "Terminé",
+    "edit": "Modifier",
+    "invalid": "Invalide",
+    "remove": "Supprimer",
+    "reset": "Réinitialiser",
+    "gradeDisplay": "Note : {score}",
+    "answerLabel": "Réponse {number}",
+    "incorrect": "Incorrect",
+    "correct": "Correct"
+  },
+  "questionEditor": {
+    "save": "Enregistrer",
+    "dialogTitle": "Modifier la question"
+  },
+  "screenplayEditor": {
+    "formatLabel": "Format",
+    "placeholder": "OUVERTURE AU FONDU :"
+  },
+  "vocabularyReview": {
+    "deselectAll": "Deselect All",
+    "from": "From",
+    "hide": "Hide",
+    "learningObjectives": "Learning Objectives",
+    "loading": "Chargement",
+    "selectAll": "Select All",
+    "show": "Show",
+    "summaries": "Summaries",
+    "filteringBySearch": "Filtrage par recherche",
+    "importToDictionary": "Importer dans le dictionnaire",
+    "pages": "Pages",
+    "sectionHeading": "Révision du vocabulaire",
+    "noVocabulary": "Aucun vocabulaire",
+    "selectedCount": "Nombre de sélections",
+    "importedOn": "Importé le",
+    "summariesAndObjectives": "Résumés et objectifs"
+  },
+  "instructorDashboard": {
+    "student": "Étudiant",
+    "completed": "Terminé",
+    "completion": "Complétion",
+    "overallPerformance": "Performance globale",
+    "totalStudents": "Nombre total d'étudiants",
+    "totalAssignments": "Total des devoirs",
+    "averageGrade": "Note moyenne",
+    "avg": "moy.",
+    "averageCompletion": "Taux de complétion moyen",
+    "sectionLeaderboards": "Classements des sections",
+    "rank": "Classement",
+    "students": "étudiants",
+    "average": "Moyenne",
+    "noDataYet": "Aucune donnée d'étudiant disponible pour le moment"
+  },
+  "collaboration": {
+    "typePractice": "Entraînement",
+    "typeWorkbook": "Cahier d'exercices",
+    "title": "Collaboration",
+    "tabInvitations": "Invitations",
+    "typePeerReview": "Évaluation par les pairs",
+    "joining": "Connexion en cours...",
+    "emptyInput": "Veuillez saisir un code ou un lien",
+    "noInvitations": "Aucune invitation de collaboration en attente",
+    "tabJoin": "Rejoindre par code",
+    "error": "Échec de la connexion à la session",
+    "joinButton": "Rejoindre"
+  },
+  "practiceDrill": {
+    "config": {
+      "vocabulary": "Vocabulaire",
+      "questions": "Questions",
+      "vocabularyType": "Vocabulaire",
+      "cancel": "Annuler",
+      "generating": "Génération en cours...",
+      "vocabularyDesc": "Mots, définitions, associations",
+      "title": "Pratique : {unitName}",
+      "text": "Contenu textuel",
+      "questionsDesc": "À partir de la banque de questions",
+      "textDesc": "À partir du texte de la leçon et des blocs notés",
+      "documentsDesc": "À partir des PDF téléversés et du contenu analysé",
+      "questionCount": "Nombre de questions",
+      "coverage": "Couverture : {covered}/{total} éléments pratiqués ({percent}%)",
+      "drillType": "Type d'exercice",
+      "comprehension": "Compréhension",
+      "mixed": "Mixte",
+      "studyTogether": "Étudier Ensemble",
+      "documents": "Documents",
+      "studyTogetherDesc": "Pratiquez avec vos camarades de classe en temps réel. Un code de salle sera créé pour le partage.",
+      "maxParticipants": "Nombre maximal de participants",
+      "review": "Réviser les erreurs",
+      "noSourcesWarning": "Veuillez activer au moins une source de contenu pour commencer à pratiquer.",
+      "start": "Commencer la pratique",
+      "subtitle": "Choisissez ce que vous souhaitez pratiquer :"
+    },
+    "progress": {
+      "questions": "questions",
+      "xpTooltip": "XP estimés pour cet exercice",
+      "streakTooltip": "Série actuelle : {count}",
+      "xpDiminishedTooltip": "XP réduits en raison de tentatives répétées"
+    },
+    "collab": {
+      "copied": "Copié !",
+      "connected": "Connecté",
+      "groupAccuracyTip": "Exactitude moyenne pour l'ensemble des participants",
+      "disconnected": "Déconnecté",
+      "participants": "{count} participants",
+      "groupAccuracy": "Précision du groupe : {accuracy} %",
+      "groupProgress": "Progression du groupe",
+      "copyCode": "Copiez le code de la salle pour le partager"
+    },
+    "dialog": {
+      "title": "Entraînement",
+      "close": "Fermer",
+      "retry": "Réessayer",
+      "back": "Retour",
+      "done": "Terminé",
+      "cancel": "Annuler",
+      "complete": "Exercice terminé !",
+      "generating": "Génération de l'exercice en cours...",
+      "titleWithUnit": "Pratique : {unit}",
+      "completeSummary": "Vous avez obtenu {accuracy}% et gagné {xp} XP !",
+      "finish": "Terminer et gagner des XP"
+    },
+    "join": {
+      "cancel": "Annuler",
+      "title": "Rejoindre la session d'étude",
+      "tabCode": "Entrer le code",
+      "tabInvitations": "Invitations",
+      "codeLabel": "Code de salle",
+      "codeTooShort": "Le code de la salle doit contenir au moins 4 caractères",
+      "description": "Saisissez le code de salle partagé par votre instructeur ou camarade de classe pour rejoindre leur session d'étude.",
+      "notFound": "Aucune session active trouvée avec ce code",
+      "joinButton": "Rejoindre la session",
+      "error": "Échec de la connexion à la session",
+      "noInvitations": "Aucune invitation de session en attente",
+      "full": "Cette session est complète ({max} participants)",
+      "joining": "Connexion en cours..."
+    },
+    "library": {
+      "templatesTitle": "Bibliothèque d'exercices",
+      "resumeLabel": "Reprendre ({completed}/{total} terminés)",
+      "title": "Exercice d'entraînement",
+      "resumeTitle": "Continuez là où vous vous êtes arrêté",
+      "generateNew": "Générer un nouvel exercice"
+    },
+    "workbook": {
+      "label": "Cahier d'exercices pratiques",
+      "noBlocks": "Aucun bloc d'exercice pour le moment"
+    }
+  },
+  "workbook": {
+    "invite": {
+      "copied": "Copié !",
+      "shareTooltip": "Inviter d'autres personnes à ce classeur",
+      "description": "Toute personne disposant de ce lien et inscrite dans la même section peut rejoindre et travailler ensemble en temps réel.",
+      "currentlyOnline": "Actuellement en ligne",
+      "noOthers": "Personne d'autre n'est encore présent",
+      "idle": "inactif",
+      "copyLink": "Copier le lien",
+      "copy": "Copier le lien",
+      "title": "Partager le classeur"
+    },
+    "joinDialog": {
+      "title": "Rejoindre la session de cahier d'exercices",
+      "tabLink": "Saisir le lien",
+      "tabInvitations": "Invitations",
+      "description": "Collez un lien de classeur ou saisissez un identifiant d'unité pour rejoindre une session d'édition collaborative.",
+      "inputLabel": "Lien du cahier d'exercices ou identifiant de l'unité",
+      "joinButton": "Rejoindre le classeur",
+      "noInvitations": "Aucune invitation de cahier d'exercices en attente",
+      "joining": "Recherche en cours..."
+    }
+  },
+  "peerReview": {
+    "joinDialog": {
+      "joinButton": "Rejoindre la révision",
+      "tabCode": "Saisir le code",
+      "title": "Rejoindre l'évaluation par les pairs",
+      "tabInvitations": "Invitations",
+      "codeLabel": "Code de la salle de révision",
+      "description": "Saisissez le code de la salle de révision partagé par votre camarade de classe pour rejoindre sa session d'évaluation par les pairs.",
+      "joining": "Connexion en cours...",
+      "noInvitations": "Aucune invitation d'évaluation en attente"
+    }
+  },
+  "notification": {
+    "delete": "Supprimer",
+    "category": {
+      "assignment": "Devoirs",
+      "squad": "Équipes",
+      "chat": "Chat",
+      "all": "Tout",
+      "gamification": "Gamification",
+      "system": "Système",
+      "collaboration": "Collaboration"
+    },
+    "title": "Notifications",
+    "emptyDescription": "Vous verrez ici les notifications concernant les devoirs, les notes, les badges et bien plus encore.",
+    "empty": "Aucune notification pour le moment",
+    "markAllRead": "Tout marquer comme lu"
+  },
+  "common": {
+    "close": "Fermer"
+  },
+  "recordingStudio3Modal": {
+    "confirmSave": "Enregistrer",
+    "done": "Terminé",
+    "generatingTts": "Génération en cours...",
+    "saving": "Enregistrement...",
+    "discard": "Annuler",
+    "conversationSaveInfo": "Les fichiers audio seront enregistrés en tant qu'enregistrements de fichiers attachés à cette unité.",
+    "confirmTitle": "Confirmer l'enregistrement",
+    "generateMissingTts": "Générer les éléments manquants ({count})",
+    "recording": "Enregistrement",
+    "unsavedChanges": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir fermer ?",
+    "generatingTtsProgress": "Génération de l'audio TTS...",
+    "noActiveTake": "Aucune prise active",
+    "missingTakesWarning": "{count} lignes n'ont pas de prise active et ne seront pas enregistrées.",
+    "unsavedChangesTitle": "Modifications non enregistrées",
+    "backToStudio": "Retour au Studio",
+    "wordSaveInfo": "L'audio sera enregistré dans les champs audio et definitionAudio du modèle Word."
+  },
+  "sectionDetail": {
+    "students": "Étudiants",
+    "gradebook": "Carnet de notes",
+    "leaderboard": "Classement",
+    "assignments": "Devoirs",
+    "completionGrid": "Grille de progression"
+  },
+  "collaboratorManager": {
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "editPermission": "Modifier",
+    "title": "Collaborateurs",
+    "searchInstructors": "Rechercher des formateurs",
+    "noInstructorsFound": "Aucun instructeur trouvé",
+    "noCollaborators": "Aucun collaborateur pour le moment",
+    "failedToLoad": "Échec du chargement des collaborateurs",
+    "permissionEdit": "Modifier — Peut modifier le contenu",
+    "failedToAdd": "Échec de l'ajout du collaborateur",
+    "typeAtLeast": "Veuillez saisir au moins 2 caractères",
+    "addCollaborator": "Ajouter un collaborateur",
+    "permissionLevel": "Niveau d'autorisation",
+    "removeCollaborator": "Retirer {name}",
+    "permissionRead": "Lecture — Consulter le contenu uniquement",
+    "readPermission": "Lecture",
+    "searchPlaceholder": "Rechercher par nom, nom d'utilisateur ou adresse e-mail",
+    "failedToRemove": "Échec de la suppression du collaborateur"
+  },
+  "communityUnitCard": {
+    "untitledUnit": "Unité sans titre",
+    "noDescription": "Aucune description",
+    "byAuthor": "Par : {author}",
+    "forking": "Bifurcation...",
+    "fork": "Dupliquer"
+  },
+  "sharedUnitCard": {
+    "untitledUnit": "Unité sans titre",
+    "noDescription": "Aucune description",
+    "edit": "Modifier",
+    "view": "Voir",
+    "readOnly": "Lecture seule",
+    "showDeletedItems": "Afficher les éléments supprimés",
+    "editAccess": "Modifier l'accès",
+    "sharedBy": "Partagé par : {owner}"
+  },
+  "recordingStudioEnhancedModal": {
+    "cancel": "Annuler",
+    "defaultTitle": "Générer une conversation",
+    "saveConversation": "Enregistrer la conversation"
+  },
+  "documentSourceBadge": {
+    "pagePrefix": "Page",
+    "sourcePrefix": "Source :"
+  },
+  "moderationBadge": {
+    "categories": "Catégories",
+    "flagged": "Signalé",
+    "approved": "Contenu approuvé",
+    "flaggedWithCategories": "Signalé : {categories}",
+    "flaggedForReview": "Contenu signalé pour examen",
+    "savedMessage": "Le contenu a été enregistré. Veuillez l'examiner conformément aux politiques de votre établissement."
+  },
+  "moderationPanel": {
+    "alertMessage": "Ce contenu a été signalé par la modération automatique. Il a été enregistré, mais peut nécessiter un examen conformément aux politiques de votre établissement.",
+    "categories": {
+      "fallback": "Contenu signalé dans cette catégorie.",
+      "harassment threatening": "Contenu de harcèlement incluant de la violence ou des préjudices graves",
+      "hate threatening": "Contenu haineux incluant de la violence ou des préjudices graves",
+      "sexual minors": "Contenu sexuel impliquant des individus de moins de 18 ans",
+      "hate": "Contenu faisant la promotion de la haine fondée sur la race, le genre, l'origine ethnique, la religion, etc.",
+      "violence": "Contenu représentant la mort, la violence ou des blessures physiques",
+      "harassment": "Contenu destiné à harceler, menacer ou intimider un individu",
+      "sexual": "Contenu destiné à susciter l'excitation sexuelle",
+      "self-harm intent": "Contenu dans lequel une personne exprime l'intention de se faire du mal",
+      "violence graphic": "Contenu graphique représentant la mort, la violence ou des blessures physiques",
+      "self-harm": "Contenu promouvant, encourageant ou représentant des actes d'automutilation",
+      "self-harm instructions": "Contenu encourageant ou fournissant des instructions pour l'automutilation"
+    },
+    "checked": "Vérifié : {date}",
+    "flaggedCategories": "Catégories signalées :",
+    "title": "Modération du contenu",
+    "disclaimerNote": "La modération automatisée n'est pas parfaite. Veuillez examiner ce contenu dans son contexte et le traiter conformément aux politiques spécifiques de votre établissement et aux exigences de la juridiction locale.",
+    "disclaimerLabel": "Remarque :",
+    "model": "Modèle : {model}",
+    "confidence": "Confiance : {score} %"
+  },
+  "pdfThumbnail": {
+    "failedToLoad": "Échec du chargement du PDF",
+    "pageNumber": "{current} / {total}"
+  },
+  "recordingStudio2": {
+    "existingRecordings": "Enregistrements existants",
+    "recordingNumber": "Enregistrement {number}",
+    "recordedAudioWaveform": "Forme d'onde audio enregistrée :",
+    "staticWaveformPreview": "Aperçu statique de la forme d'onde :"
+  },
+  "savedPdfThumbnail": {
+    "errorMessage": "Erreur lors du chargement du PDF",
+    "pageOverlay": "Page {number}"
+  },
+  "sortableAnswers": {
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "answerLabel": "Réponse {number}"
+  },
+  "svgPreview": {
+    "emptyState": "Aucun SVG à prévisualiser",
+    "caption": "Légende"
+  },
+  "wordEmbedding": {
+    "embeddingFailed": "Mot enregistré, mais la génération de l'intégration a échoué : {error}",
+    "questionSaveFailed": "Enregistrer avec erreur d'intégration"
+  },
+  "wordEmbeddingIntegration": {
+    "embeddingFailed": "Échec de l'intégration",
+    "embeddingGenerated": "Intégration générée"
+  },
+  "permissionError": {
+    "title": "Accès refusé",
+    "explanation": "Ce contenu est restreint. Vous devez être le propriétaire ou disposer des permissions d'instructeur pour y accéder.",
+    "defaultMessage": "Vous n'avez pas la permission d'accéder à ce {resourceType}.",
+    "contactInfo": "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter votre instructeur ou administrateur.",
+    "resourceTypes": {
+      "unit": "unité",
+      "grade": "note\n\n\n(In the context of grading/assessment, \"grade\" translates to \"note\" in French educational terminology)",
+      "section": "section",
+      "assignment": "devoir"
+    },
+    "goBack": "Retour",
+    "goHome": "Retourner à l'accueil"
+  },
+  "armorEditor": {
+    "chargeRotation": "Rotation de charge",
+    "xOffset": "Décalage X",
+    "yOffset": "Décalage Y",
+    "shieldPreview": "Aperçu du bouclier",
+    "addCharge": "Ajouter une charge",
+    "chargeSize": "Taille de charge"
+  },
+  "skillTree": {
+    "title": "Arbre de compétences",
+    "empty": "Aucune compétence n'est encore disponible. Votre instructeur configurera l'arbre de compétences."
+  },
+  "showDeletedItems": "Afficher les éléments supprimés",
+  "amblifyAuthenticator": {
+    "emailPhoneOptions": "Adresse e-mail ou numéro de téléphone"
   }
 }

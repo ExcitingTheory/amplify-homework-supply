@@ -246,7 +246,7 @@ export function HelpMenu() {
   );
 }
 
-export function UserMenu() {
+export function UserMenu({ onJoinSection }) {
   const tCommon = useTranslations("common");
   const tAuth = useTranslations("auth");
   const { level } = useXP();
@@ -323,6 +323,17 @@ export function UserMenu() {
           >
             <UserIcon />
             &nbsp;{tCommon("navigation.profile")}
+          </MenuItem>,
+          <MenuItem
+            key="join-section"
+            data-tour="join-section-button"
+            onClick={() => {
+              onJoinSection?.();
+              handleClose();
+            }}
+          >
+            <PersonAddIcon />
+            &nbsp;{tCommon("mainToolbar.addToSection.title")}
           </MenuItem>,
           <MenuItem
             key="notifications"
@@ -1302,32 +1313,9 @@ export default function MainToolbar({ children }) {
           />
           <LevelBadge
             level={currentSearchParams.get("sectionId") ? sectionLevel : level}
-            showProgress
             size="small"
           />
         </Box>
-        <IconButton
-          color="inherit"
-          aria-label={tCommon("mainToolbar.collaboration")}
-          data-tour="collaboration-button"
-          onClick={() => setOpenCollaboration(true)}
-          sx={{ display: { xs: "none", md: "inline-flex" } }}
-        >
-          <NotificationBadge category="COLLABORATION">
-            <HandshakeIcon />
-          </NotificationBadge>
-        </IconButton>
-        <IconButton
-          color="inherit"
-          aria-label={tCommon("mainToolbar.addToSection.title")}
-          data-tour="join-section-button"
-          onClick={() => setOpenAddStudentToSection(true)}
-          sx={{ display: { xs: "none", md: "inline-flex" } }}
-        >
-          <NotificationBadge category="ASSIGNMENT">
-            <PersonAddIcon />
-          </NotificationBadge>
-        </IconButton>
         <IconButton
           color="inherit"
           aria-label="Notifications"
@@ -1348,7 +1336,7 @@ export default function MainToolbar({ children }) {
         {/* <HelpMenu />
          <SettingsMenu /> */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <UserMenu />
+          <UserMenu onJoinSection={() => setOpenAddStudentToSection(true)} />
         </Box>
 
         {/**

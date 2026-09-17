@@ -1,6 +1,6 @@
 {
   "answerComponent": {
-    "audioNotAvailable": "{{text}} (audio non disponible)",
+    "audioNotAvailable": "{text} (audio non disponible)",
     "audioNotAvailableParens": "(audio non disponible)",
     "errorMessages": {
       "noAnswer": "Veuillez fournir une réponse",
@@ -16,7 +16,9 @@
       "writing": "Écriture"
     },
     "noDictionaryAvailable": "Aucun dictionnaire disponible",
-    "submit": "Soumettre"
+    "submit": "Soumettre",
+    "inputMethodSelector": "Méthode de saisie",
+    "placeholder": "Saisissez votre réponse ici"
   },
   "toolBarRoPlugin": {
     "fallbackText": "Format",
@@ -26,7 +28,8 @@
   "verticalTabsRo": {
     "aiAssistant": "Assistant IA",
     "previousAttempts": "Tentatives précédentes",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "tableOfContents": "Table des matières"
   },
   "unitCompletedPlugin": {
     "allCaughtUp": "Tout est à jour ! Plus de devoirs.",
@@ -38,7 +41,7 @@
     "tryAgain": "Réessayer"
   },
   "quizComponent": {
-    "gradeDisplay": "Note : {{score}} %"
+    "gradeDisplay": "Note : {score} %"
   },
   "meaningAssociationExercise": {
     "layoutDirection": "rangée"

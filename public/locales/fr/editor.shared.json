@@ -15,14 +15,14 @@
     "generateTTS": "Générer TTS",
     "importFailed": "Échec de l'importation du fichier JSON",
     "importJSON": "Importer JSON",
-    "lineNumber": "Ligne n°{{number}} - {{speaker}}",
+    "lineNumber": "Ligne n°{number} - {speaker}",
     "lockedTrack": "Piste verrouillée",
     "micAccessFailed": "Échec d'accès au microphone",
     "name": "Nom",
     "noMissingAudio": "Aucun audio manquant à générer",
     "noTextToGenerate": "Aucun texte à générer",
     "play": "Lire",
-    "processing": "Traitement de {{count}} lignes...",
+    "processing": "Traitement de {count} lignes...",
     "record": "Enregistrer",
     "recordingSaveFailed": "Échec de l'enregistrement de l'enregistrement",
     "save": "Enregistrer",
@@ -32,7 +32,7 @@
     "speakerNotFound": "Haut-parleur introuvable",
     "speakers": "Intervenants",
     "stop": "Arrêter",
-    "takeNumber": "Essai {{number}} ({{type}})",
+    "takeNumber": "Essai {number} ({type})",
     "takes": "Prend",
     "text": "Texte",
     "timeline": "Chronologie",
@@ -67,24 +67,24 @@
   "sketchPad": {
     "cancelSubmission": "Annuler la soumission",
     "hoverToStartDrawing": "Survolez pour commencer à dessiner",
-    "submittingInSeconds": "Envoi du dessin pour correction dans {{countdown}} secondes..."
+    "submittingInSeconds": "Envoi du dessin pour correction dans {countdown} secondes..."
   },
   "unitEmbedding": {
     "allSectionsComplete": "Toutes les sections terminées !",
     "cached": "En cache",
-    "completedCount": "{{completed}}/{{total}} terminé(s)",
+    "completedCount": "{completed}/{total} terminé(s)",
     "generateEmbeddings": "Générer les embeddings",
     "generating": "Génération...",
     "publishSuccess": "Unité publiée avec intégrations générées !",
     "publishUnit": "Publier l'unité",
     "publishing": "Publication en cours...",
-    "wordsEmbedded": "{{count}} mots intégrés"
+    "wordsEmbedded": "{count} mots intégrés"
   },
   "autoEmbedPlugin": {
     "dismiss": "Ignorer",
     "embed": "Intégrer",
-    "embedOption": "Intégrer {{contentName}}",
-    "embedTitle": "Intégrer {{contentName}}",
+    "embedOption": "Intégrer {contentName}",
+    "embedTitle": "Intégrer {contentName}",
     "youtubeVideo": "Vidéo YouTube"
   },
   "unitEmbeddingComponents": {
@@ -97,7 +97,7 @@
     "successConfirmation": "Embeddings générés avec succès"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "Intégration générée : {{count}} mots traités"
+    "embeddingGenerated": "Intégration générée : {count} mots traités"
   },
   "imagesPlugin": {
     "altText": "Texte alternatif",
@@ -127,7 +127,7 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio non disponible",
     "loadingAudio": "Chargement de l'audio...",
-    "wordNotFound": "Mot introuvable : {{wordID}}"
+    "wordNotFound": "Mot introuvable : {wordID}"
   },
   "vocabularyReview": {
     "alertMessage": "Révisez le vocabulaire avant de continuer",
@@ -168,7 +168,7 @@
     "titleHeader": "Titre"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "Chargement du PDF : {{filename}}",
+    "loadingPdf": "Chargement du PDF : {filename}",
     "noPdfToDisplay": "Aucun PDF à afficher"
   },
   "metadataEditor": {
@@ -202,11 +202,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "Appliquer le masque et régénérer",
-    "brushSize": "Taille du pinceau : {{size}}",
+    "brushSize": "Taille du pinceau : {size}",
     "cancel": "Annuler",
     "instructions": "<strong>Instructions :</strong> Peignez sur les zones que vous souhaitez régénérer. Utilisez la gomme pour supprimer des parties du masque. Maintenez Shift et faites glisser pour faire un panoramique. Utilisez les boutons de zoom pour obtenir plus de détails.",
     "save": "Enregistrer",
-    "zoomInfo": "Zoom : {{level}}% | Maintenez Maj enfoncée pour faire un panoramique"
+    "zoomInfo": "Zoom : {level}% | Maintenez Maj enfoncée pour faire un panoramique"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "Annuler",
@@ -249,5 +249,15 @@
     "emptyState": "Aucun élément dans la playlist",
     "menuAttribute": "Menu",
     "noFilesMessage": "Aucun fichier n'a encore été ajouté. Utilisez la zone de saisie ci-dessus pour ajouter des fichiers à la liste de lecture."
+  },
+  "autoSubmit": {
+    "cancelSubmission": "Annuler",
+    "submittingInSeconds": "Envoi de la réponse dans {countdown} secondes..."
+  },
+  "micLevelIndicator": {
+    "noSignalShort": "Aucun signal",
+    "noSignal": "Aucun signal de microphone détecté. Vérifiez que votre microphone est connecté et non mis en sourdine.",
+    "tooLow": "Le niveau d'entrée du microphone est très faible. Essayez de parler plus fort ou de vous rapprocher du microphone.",
+    "tooLowShort": "Trop faible"
   }
 }

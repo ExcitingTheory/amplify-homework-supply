@@ -14,6 +14,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { Workbook } from "@/components/Editor3";
 import { PeerReviewChat } from "@/components/PeerReview";
 import { PeerReviewFeedbackPrompt } from "@/components/PeerReview/PeerReviewFeedbackPrompt";
+import { ErrorState } from "@/components/ErrorState";
 import { usePeerReviewRoom } from "@/yjs/peerReviewHooks";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import {
@@ -86,10 +87,8 @@ function PeerReviewContent() {
 
   if (error) {
     return (
-      <Box sx={{ textAlign: "center", mt: 10 }}>
-        <Typography color="error" variant="h6">
-          {error}
-        </Typography>
+      <Box sx={{ maxWidth: 480, mx: "auto", mt: 10 }}>
+        <ErrorState title={error} />
       </Box>
     );
   }

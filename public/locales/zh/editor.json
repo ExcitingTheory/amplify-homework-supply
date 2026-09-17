@@ -1,0 +1,721 @@
+{
+  "aiContentSuggestion": {
+    "tabToAccept": "按Tab键接受"
+  },
+  "answerComponent": {
+    "audioNotAvailableParens": "（音频不可用）",
+    "errorMessages": {
+      "noAnswer": "请提供答案",
+      "recordingFailed": "录制失败"
+    },
+    "feedback": {
+      "correct": "正确！",
+      "incorrect": "重试"
+    },
+    "inputMethods": {
+      "audio": "音频",
+      "text": "文本",
+      "writing": "写作"
+    },
+    "noDictionaryAvailable": "无可用词典",
+    "submit": "提交",
+    "audioNotAvailable": "{text}（音频不可用）"
+  },
+  "answerEditor": {
+    "addWordToDict": "向词典添加新单词。",
+    "cancel": "取消",
+    "dialogTitle": "编辑答案",
+    "emptyState": "未提供答案",
+    "instructions": "在下方创建您的答案",
+    "save": "保存",
+    "addWordLabel": "添加词语标签"
+  },
+  "assignmentConfiguration": {
+    "addDueDateButton": "添加截止日期",
+    "addTimerButton": "添加计时器",
+    "addTimerQuestion": "为此单元添加计时器？",
+    "assignDueDateQuestion": "为此单元设置截止日期到某个班级吗？",
+    "assignedToSectionsHeading": "分配到班级",
+    "cancel": "取消",
+    "dueDateDescriptionLine1": "用户可以在截止日期过后继续学习。",
+    "dueDateDescriptionLine2": "截止日期将用于对班级部分中的单元进行排序。",
+    "dueDateLabel": "截止日期",
+    "noDueDateSet": "未设置截止日期",
+    "noSectionSet": "未设置章节",
+    "save": "保存",
+    "sectionLabel": "部分",
+    "selectSectionHelper": "选择要分配截止日期的部分",
+    "timerDescription": "计时器将在用户点击\"开始\"按钮后启动。用户在计时器结束后仍可继续操作，系统将记录作业的开始和完成时间。在计时器运行期间，倒计时将显示在屏幕顶部。",
+    "timerLabel": "计时器"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "未提供音频源"
+  },
+  "autoEmbedPlugin": {
+    "dismiss": "忽略",
+    "embed": "嵌入",
+    "youtubeVideo": "YouTube视频",
+    "embedOption": "嵌入{contentName}",
+    "embedTitle": "嵌入{contentName}"
+  },
+  "autocompleteNode": {
+    "desktopHint": "(TAB)",
+    "mobileHint": "（向右滑动 ⮕）"
+  },
+  "blockSuggestionMenu": {
+    "aiTitle": "🤖 AI智能建议",
+    "emptyState": "暂无建议",
+    "emptyStateHelper": "开始在编辑器中输入以查看AI驱动的块建议。",
+    "generateMore": "生成更多建议",
+    "helper": "点击建议将其插入到您的课程中",
+    "helperAI": "点击建议或按Tab/Enter键插入",
+    "suggestionsTitle": "💡 推荐模块"
+  },
+  "blocks": {
+    "answer": "答题区块",
+    "custom_answer": "自定义答案",
+    "meaning_association": "意义关联",
+    "quiz": "测验模块"
+  },
+  "configurationManager": {
+    "autoAnalyzeDescription": "启用后，PDF文件将在上传后立即发送至OpenAI进行词汇提取。",
+    "autoAnalyzeLabel": "上传时自动分析文档",
+    "dragDropPrompt": "拖拽图片到此处设置为特色图片。",
+    "noFeaturedImage": "未设置特色图片。",
+    "pdfAnalysisSettings": "PDF分析设置",
+    "setFeaturedImage": "设置特色图片",
+    "uploadImagePrompt": "上传图片",
+    "uploadingImage": "上传图片"
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "答案占位符",
+    "answerQuestions": "回答问题",
+    "audio": "音频",
+    "audioQuestion": "音频题目",
+    "completedQuestion": "已完成题目",
+    "errorOccurred": "发生错误",
+    "loading": "加载中",
+    "promptNotAvailable": "提示不可用",
+    "question": "问题",
+    "submit": "提交",
+    "text": "文本",
+    "writing": "写作",
+    "yourAnswer": "您的答案"
+  },
+  "customAnswerEditor": {
+    "add": "添加",
+    "addWordLabel": "将单词添加到练习",
+    "answerLabel": "答案",
+    "answerPlaceholder": "答案",
+    "audioPreview": "音频预览",
+    "cancel": "取消",
+    "columnHeaders": {
+      "answer": "答案",
+      "answerAudio": "回答音频",
+      "hint": "提示",
+      "id": "ID",
+      "prompt": "提示",
+      "promptAudio": "提示音频"
+    },
+    "description": "创建一个简答练习，可以向用户提出问题并期望得到简短回答。",
+    "dialogDescription": "添加新的问答对。",
+    "dialogTitle": "添加新问题",
+    "emptyState": "尚未添加任何问题。请使用上方的输入框添加提示和答案对。",
+    "errorCreatingQuestion": "创建问题时出错",
+    "errorGeneratingAudio": "生成音频文件时出错",
+    "generatingAudio": "正在生成音频文件...",
+    "hintLabel": "提示",
+    "hintPlaceholder": "提示",
+    "promptLabel": "提示",
+    "remove": "移除",
+    "successGeneratedAudio": "成功生成音频文件",
+    "title": "自定义答案练习",
+    "ttsPreview": "文字转语音预览"
+  },
+  "documentUploader": {
+    "browseFiles": "浏览文件",
+    "dragDropPrompt": "将文档拖放到此处",
+    "errorMessages": {
+      "noSupportedFiles": "未找到支持的文档。请上传PDF、Word、文本或Excel文件。",
+      "skippedFiles": "部分文件已跳过（不支持的文件类型）",
+      "uploadFailed": "上传 {fileName} 失败：{error}"
+    },
+    "extractionTypes": {
+      "dictionary": "词典",
+      "question": "问题",
+      "questions": "问题",
+      "vocabulary": "词汇"
+    },
+    "howItWorks": {
+      "step1": "1. 上传您的文档（PDF、Word、文本或Excel文件）",
+      "step3": "3. 在\"建议\"标签页中查看并批准建议",
+      "title": "工作原理：",
+      "step2": "2. AI将分析内容并提取{extractionType}",
+      "step4": "4. 将选定项目导入到您的{target}"
+    },
+    "recentUploads": "最近上传",
+    "statusLabels": {
+      "complete": "完成",
+      "failed": "失败",
+      "processing": "正在处理..."
+    },
+    "supportedFormats": "支持：PDF、Word (.doc, .docx)、文本 (.txt)、Excel (.xls, .xlsx, .csv)",
+    "title": "上传文档进行{extractionType}提取",
+    "uploadingProgress": "上传中... {progress}%"
+  },
+  "enhancedGenerators": {
+    "audioPromptPlaceholder": "输入要转换为语音的文本...",
+    "backToGenerator": "返回生成器",
+    "editWithMask": "使用蒙版编辑（重新生成部分）",
+    "generateAudio": "生成音频",
+    "generateImage": "生成图像",
+    "imagePromptPlaceholder": "请描述您想要生成的图片...",
+    "openRecordingStudio": "在录音工作室中打开"
+  },
+  "fileManager": {
+    "close": "关闭",
+    "create": "创建",
+    "draftChanges": "草稿更改",
+    "revert": "恢复",
+    "save": "保存",
+    "textToImagePreview": "文本转图像预览",
+    "textToSpeechPreview": "文字转语音预览",
+    "errorRendering": "渲染文件管理器时出错：{message}"
+  },
+  "fileManager2": {
+    "contextMenu": {
+      "deselectAll": "取消全选",
+      "deleteConfirmMessage": "删除选中的{count}个文件？",
+      "deleteSelected": "删除选中项 ({count})",
+      "reAnalyzeSelected": "重新分析所选 ({count})"
+    },
+    "expandedContent": {
+      "descriptionLabel": "描述：",
+      "extractedContentHeading": "提取内容",
+      "noConceptsExtracted": "未提取概念",
+      "noContentAvailable": "无可提取的内容",
+      "noObjectivesExtracted": "未提取目标",
+      "noQuestionsExtracted": "未提取问题",
+      "noSummariesExtracted": "未提取摘要",
+      "noVocabularyExtracted": "未提取词汇",
+      "reviewQuestionsMessage": "审查并从文档中导入问题",
+      "reviewVocabularyMessage": "从文档中审核并导入词汇",
+      "transcriptionLabel": "转录："
+    },
+    "fileDetails": {
+      "deleteTooltip": "删除",
+      "downloadTooltip": "下载",
+      "insertTooltip": "插入到编辑器",
+      "noWaveformAvailable": "无可用波形",
+      "reAnalyzeTooltip": "重新分析",
+      "videoNotSupported": "您的浏览器不支持视频标签。"
+    },
+    "generators": {
+      "audioPromptPlaceholder": "要转换为音频文件的文本。",
+      "errorGeneratingAudio": "生成音频文件时出错",
+      "errorGeneratingImage": "生成图片文件时出错",
+      "generatingAudio": "正在生成音频文件...",
+      "generatingImage": "正在生成图像文件...",
+      "imagePromptPlaceholder": "要转换为图像文件的文本。",
+      "successfullyGeneratedAudio": "成功生成音频文件",
+      "successfullyGeneratedImage": "成功生成图像文件"
+    },
+    "mainView": {
+      "noFilesMessage": "没有可用文件。请上传文件以开始使用。"
+    },
+    "metadataEditor": {
+      "cancelButton": "取消",
+      "createdLabel": "已创建",
+      "descriptionLabel": "描述",
+      "heading": "文件元数据",
+      "modelLabel": "模型",
+      "nameLabel": "姓名",
+      "pathLabel": "路径",
+      "promptLabel": "提示（用于AI生成文件）",
+      "protectionLevelLabel": "保护级别",
+      "saveButton": "保存",
+      "sizeLabel": "大小",
+      "typeLabel": "类型",
+      "unknown": "未知",
+      "variantLabel": "变体"
+    },
+    "selectedFileDetails": {
+      "emptyState": "选择文件以查看详细信息和元数据"
+    },
+    "toolbar": {
+      "actionsTooltip": "操作",
+      "searchPlaceholder": "搜索文件...",
+      "selectAllTooltip": "全选",
+      "uploadTooltip": "上传文件"
+    },
+    "dragDrop": {
+      "dropFilesHere": "拖放文件到此处以上传",
+      "supportedFormats": "音频、图片、PDF、文档等"
+    }
+  },
+  "fileMetadataComponent": {
+    "basicInfo": "基本信息",
+    "cancel": "取消",
+    "collapse": "Collapse",
+    "concepts": "概念",
+    "confirm": "确认",
+    "created": "创建时间：",
+    "deleteFile": "删除文件",
+    "expand": "Expand",
+    "fileInfo": "文件信息",
+    "filename": "文件名：",
+    "noMetadataAvailable": "此文件没有可用的元数据。",
+    "noParsedContentAvailable": "此文件没有可解析的内容。",
+    "objectives": "目标",
+    "parsedContent": "解析内容",
+    "path": "路径：",
+    "protectionLevel": "保护级别：",
+    "questions": "问题",
+    "rawMetadata": "原始元数据",
+    "searchPlaceholder": "搜索文件内容...",
+    "summaries": "摘要",
+    "type": "类型：",
+    "unknown": "未知",
+    "unknownSize": "未知大小",
+    "unset": "未设置",
+    "vocabulary": "词汇",
+    "conceptsCount": "概念 ({count})",
+    "deleteConfirmation": "删除文件：\"{fileName}\"？",
+    "objectivesCount": "目标 ({count})",
+    "questionsCount": "问题 ({count})",
+    "summariesCount": "摘要 ({count})",
+    "vocabularyCount": "词汇 ({count})"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "取消链接编辑",
+    "closeLinkEditor": "关闭链接编辑器",
+    "confirmLink": "确认链接",
+    "convertToYoutubeEmbed": "转换为YouTube嵌入",
+    "editLink": "编辑链接",
+    "linkUrl": "链接网址",
+    "removeLink": "移除链接",
+    "youtubeEmbed": "YouTube 嵌入"
+  },
+  "freeSoloCreateOptionDialog": {
+    "cancel": "取消",
+    "create": "添加",
+    "description": "向词典添加新单词。",
+    "dialogTitle": "添加新词",
+    "label": "自由独白对话框"
+  },
+  "imageMaskEditor": {
+    "applyMask": "应用蒙版并重新生成",
+    "cancel": "取消",
+    "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦移除蒙版的部分区域。按住Shift键并拖动以平移视图。使用缩放按钮查看更多细节。",
+    "save": "保存",
+    "brushSize": "画笔大小：{size}",
+    "zoomInfo": "缩放: {level}% | 按住Shift键平移"
+  },
+  "imageResizer": {
+    "addCaption": "添加字幕"
+  },
+  "imagesPlugin": {
+    "altText": "替代文字",
+    "altTextDescriptive": "描述性替代文本",
+    "altTextPlaceholder": "随机 Unsplash 图片",
+    "confirm": "确认",
+    "dropImagesHere": "将图片拖拽到此处",
+    "file": "文件",
+    "imageUpload": "图片上传",
+    "imageUrl": "图片网址",
+    "imageUrlPlaceholder": "例如 https://source.unsplash.com/random",
+    "insertFromUrl": "从URL插入",
+    "sample": "示例",
+    "upload": "上传图片",
+    "url": "URL"
+  },
+  "insertLayoutDialog": {
+    "cancel": "取消",
+    "insert": "插入"
+  },
+  "mainToolbar": {
+    "menuAttribute": "菜单",
+    "newUnit": "新单元",
+    "save": "保存"
+  },
+  "meaningAssociationEditor": {
+    "add": "添加",
+    "addWordLabel": "将单词添加到练习",
+    "cancel": "取消",
+    "columnHeaders": {
+      "definition": "定义",
+      "phrase": "短语",
+      "pronunciation": "发音"
+    },
+    "definitionPlaceholder": "定义",
+    "dialogDescription": "向词典添加新单词。",
+    "dialogTitle": "添加新词",
+    "emptyState": "尚未添加任何单词。请使用上方的输入框从词典中添加单词。如果您要添加的单词不在词典中，可以通过点击下拉菜单中的\"添加单词\"选项或侧边栏的词典编辑器来添加。",
+    "phraseLabel": "短语",
+    "pronunciationLabel": "发音",
+    "removeFromAssignment": "从作业中移除"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "行"
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "标题"
+  },
+  "metadataEditor": {
+    "aiGenerationInfo": "AI生成信息",
+    "createdLabel": "创建时间：",
+    "fileInfo": "文件信息",
+    "fileMetadataHeading": "文件元数据",
+    "modelLabel": "模型",
+    "notSet": "未设置",
+    "pathLabel": "路径：",
+    "promptLabel": "提示",
+    "protectionLabel": "防护：",
+    "sizeLabel": "大小：",
+    "typeLabel": "类型：",
+    "unknown": "未知",
+    "updatedLabel": "更新时间：",
+    "variantLabel": "变体"
+  },
+  "metadataField": {
+    "unsavedChanges": "未保存的更改"
+  },
+  "pdfViewerComponent": {
+    "noPdfToDisplay": "没有PDF可显示",
+    "loadingPdf": "正在加载PDF：{filename}"
+  },
+  "placeholders": {
+    "enter_text": "输入文本",
+    "search_words": "搜索词汇...",
+    "type_here": "在此输入..."
+  },
+  "playlistEditor": {
+    "emptyState": "播放列表中没有项目",
+    "menuAttribute": "菜单",
+    "noFilesMessage": "尚未添加任何文件。请使用上方的输入框将文件添加到播放列表中。"
+  },
+  "promptMethodSelector": {
+    "inputButton": "输入",
+    "menuItems": {
+      "audio": "音频",
+      "drawing": "绘图",
+      "image": "图像",
+      "text": "文本",
+      "video": "视频"
+    },
+    "outputButton": "输出"
+  },
+  "questionBlock": {
+    "status": "状态",
+    "submit": "提交"
+  },
+  "questionEditor": {
+    "cancel": "取消"
+  },
+  "questionsReview": {
+    "alertMessage": "提交前请检查所有问题",
+    "cancel": "取消",
+    "filterBy": "筛选条件",
+    "submit": "提交"
+  },
+  "quizEditor": {
+    "addAnswer": "添加答案",
+    "cancel": "取消",
+    "done": "完成",
+    "edit": "编辑",
+    "invalid": "无效",
+    "reset": "重置",
+    "save": "保存",
+    "status": "状态",
+    "gradeDisplay": "成绩：{score}"
+  },
+  "recordingStudio": {
+    "preview": "预览",
+    "sectionHeading": "录音室"
+  },
+  "recordingStudio3": {
+    "add": "添加",
+    "addLine": "添加行",
+    "addSpeakerFirst": "请先添加演讲者",
+    "description": "描述",
+    "descriptionPlaceholder": "例如，30多岁，精力充沛，专业",
+    "direction": "方向",
+    "directionPlaceholder": "例如，进入时、上气不接下气",
+    "emotion": "情感",
+    "emotionPlaceholder": "例如：开朗、疲倦",
+    "empty": "（空）",
+    "exportJSON": "导出JSON",
+    "generateAllMissingTTS": "生成所有缺失的TTS",
+    "generateTTS": "生成TTS",
+    "importFailed": "导入JSON文件失败",
+    "importJSON": "导入JSON",
+    "lockedTrack": "锁定课程",
+    "micAccessFailed": "无法访问麦克风",
+    "name": "姓名",
+    "noMissingAudio": "没有缺失的音频需要生成",
+    "noTextToGenerate": "无文本可生成",
+    "play": "播放",
+    "record": "记录",
+    "recordingSaveFailed": "录制保存失败",
+    "save": "保存",
+    "script": "脚本",
+    "sectionHeading": "录音室",
+    "selectDialogueFirst": "请先选择一行对话",
+    "speakerNotFound": "找不到讲师",
+    "speakers": "演讲者",
+    "stop": "停止",
+    "takes": "需要",
+    "text": "文本",
+    "timeline": "时间轴",
+    "ttsGenerationFailed": "生成 TTS 音频失败",
+    "unknown": "未知",
+    "voice": "语音",
+    "lineNumber": "第{number}行 - {speaker}",
+    "processing": "正在处理 {count} 行...",
+    "takeNumber": "第{number}次 ({type})"
+  },
+  "recordingStudioEnhanced": {
+    "cutButton": "剪切",
+    "highPass": "高通",
+    "highPassTooltip": "去除低频",
+    "lowPass": "低通",
+    "lowPassTooltip": "移除高频",
+    "normalize": "标准化",
+    "normalizeTooltip": "标准化音频音量",
+    "popClick": "点击/单击",
+    "popClickTooltip": "移除爆音和咔嗒声",
+    "record": "记录",
+    "stop": "停止",
+    "tracks": "课程轨道"
+  },
+  "sketchPad": {
+    "cancelSubmission": "取消提交",
+    "hoverToStartDrawing": "悬停开始绘制",
+    "submittingInSeconds": "正在提交绘图作业进行评分，{countdown} 秒后完成...",
+    "activatingDrawingPad": "正在激活绘图板..."
+  },
+  "staticWaveform": {
+    "errorLoading": "波形加载错误"
+  },
+  "suggestedContent": {
+    "identityPlaceholder": "身份ID",
+    "ownerPlaceholder": "所有者ID"
+  },
+  "tableComponent": {
+    "clearCell": "清除单元格",
+    "deleteColumn": "删除列",
+    "deleteRow": "删除行",
+    "deleteTable": "删除表格",
+    "insertColumn": "插入列",
+    "insertColumnLeft": "在左侧插入列",
+    "insertColumnRight": "插入右侧列",
+    "insertRow": "插入行",
+    "insertRowAbove": "在上方插入行",
+    "insertRowBelow": "在下方插入行",
+    "makeColumnHeader": "设为列标题",
+    "makeHeader": "设为标题",
+    "makeRowHeader": "设为行标题",
+    "removeColumnHeader": "删除列标题",
+    "removeHeader": "移除标题",
+    "removeRowHeader": "删除行标题",
+    "removeSorting": "移除排序",
+    "sortAscending": "升序排列",
+    "sortDescending": "降序排列",
+    "cellActionsLabel": "单元格操作标签",
+    "cellActionsTitle": "单元格操作标题"
+  },
+  "tableOfContents": {
+    "emptyState": "未找到标题。请在文档中添加标题以查看目录。",
+    "title": "目录"
+  },
+  "tablePlugin": {
+    "chooseLayout": "选择布局",
+    "columns": "列",
+    "columnsPlaceholder": "列数 (1-50)",
+    "insert": "插入",
+    "insertTable": "插入表格",
+    "rows": "行",
+    "rowsPlaceholder": "行数 (1-500)",
+    "table": "表"
+  },
+  "tabsVerticalLeft": {
+    "tabs": {
+      "aiAssistant": "AI助手",
+      "assignments": "作业",
+      "configuration": "配置",
+      "dictionary": "词典",
+      "files": "文件",
+      "questions": "问题",
+      "tableOfContents": "目录"
+    }
+  },
+  "tabsVerticalRight": {
+    "aiAssistantTab": "AI助手",
+    "aiSuggestionsDesc": "基于您当前课程内容的AI智能内容块建议将在此处显示。",
+    "aiSuggestionsHeading": "AI区块建议",
+    "aiSuggestionsTab": "AI建议",
+    "cohortChatDesc": "与您的同学和老师协作。",
+    "cohortChatHeading": "群组聊天",
+    "cohortChatTab": "群组聊天",
+    "comingSoon": "即将推出：带有推理和优先级指标的交互式建议面板。",
+    "gradesDesc": "查看本单元的成绩和进度。",
+    "gradesHeading": "单元成绩",
+    "gradesTab": "成绩",
+    "instructorsDesc": "查看所有学生成绩和作业提交",
+    "instructorsLabel": "📊 讲师：",
+    "learnersDesc": "查看您的成绩和反馈",
+    "learnersLabel": "✍️ 学习者：",
+    "shareInsights": "分享见解，提出问题，共同学习",
+    "tagKaiDesc": "在讨论中获得AI协助",
+    "tagKaiLabel": "💬 标记 @kai",
+    "useTopicsDesc": "按主题整理对话",
+    "useTopicsLabel": "🏷️ 使用 #话题"
+  },
+  "toolBarPlugin": {
+    "addDescription": "添加描述",
+    "align": "对齐",
+    "alignCenter": "居中对齐",
+    "alignLeft": "左对齐",
+    "alignRight": "右对齐",
+    "archived": "已归档",
+    "audioPlaylist": "音频播放列表",
+    "bold": "粗体",
+    "cancel": "取消",
+    "chooseLayout": "选择布局",
+    "clearAllTextFormatting": "清除所有文本格式",
+    "clearFormatting": "清除格式",
+    "clearTextFormatting": "清除文本格式",
+    "columnsLayout": "列布局",
+    "delete": "删除",
+    "deleteUnitConfirmation": "您确定要删除此单元吗？",
+    "dialogTitle": "格式",
+    "draft": "草稿",
+    "dueDate": "截止日期",
+    "font": "字体",
+    "formatBold": "将文本设为粗体",
+    "formatItalic": "将文本设置为斜体",
+    "formatStrikethrough": "给文本添加删除线格式",
+    "formatSubscript": "使用下标格式化文本",
+    "formatSuperscript": "将文本设置为上标格式",
+    "formatTextStyles": "文本样式的格式选项",
+    "formatUnderline": "将文本格式设置为下划线",
+    "formattingBackgroundColor": "设置背景颜色",
+    "formattingFont": "字体系列格式选项",
+    "formattingSize": "字体大小格式选项",
+    "formattingTextColor": "设置文本颜色",
+    "horizontalRule": "水平线",
+    "indent": "缩进",
+    "insert": "插入",
+    "insertImage": "插入图片",
+    "insertLink": "插入链接",
+    "insertTable": "插入表格",
+    "italic": "斜体",
+    "justifyAlign": "两端对齐",
+    "meaningAssociation": "意义关联",
+    "moreTextFormatting": "更多文本格式",
+    "multipleChoiceQuiz": "多选题测验",
+    "outdent": "减少缩进",
+    "published": "已发布",
+    "redo": "重做",
+    "scrollToolbarLeft": "向左滚动工具栏",
+    "scrollToolbarRight": "向右滚动工具栏",
+    "shortAnswerCustom": "简答：自定义",
+    "shortAnswerVocabulary": "简答：词汇",
+    "size": "大小",
+    "status": "状态",
+    "strikethrough": "删除线",
+    "strikethroughTitle": "删除线",
+    "subscript": "下标",
+    "superscript": "上标",
+    "text": "文本",
+    "textAlignment": "文本对齐",
+    "textFormatting": "文本对齐的格式选项",
+    "timer": "计时器",
+    "underline": "下划线",
+    "undo": "撤销",
+    "untitledUnit": "未命名单元",
+    "wordBlock": "词块",
+    "closePreview": "关闭{name}预览"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "格式",
+    "noDescription": "无描述",
+    "untitledUnit": "未命名单元"
+  },
+  "toolbar": {
+    "align_center": "居中对齐",
+    "align_left": "左对齐",
+    "align_right": "右对齐",
+    "bold": "粗体",
+    "bullet_list": "项目符号列表",
+    "heading": "标题",
+    "insert_code": "插入代码块",
+    "insert_image": "插入图片",
+    "insert_link": "插入链接",
+    "insert_table": "插入表格",
+    "italic": "斜体",
+    "numbered_list": "编号列表",
+    "paragraph": "段落",
+    "strikethrough": "删除线",
+    "underline": "下划线"
+  },
+  "unifiedGenerateModal": {
+    "cancel": "取消",
+    "discard": "丢弃",
+    "discardChanges": "放弃更改？",
+    "generate": "生成",
+    "keepEditing": "继续编辑",
+    "preview": "预览",
+    "saveClose": "保存并关闭",
+    "takeMoments": "这可能需要一些时间",
+    "generating": "正在生成{type}...",
+    "lostWarning": "如果您现在取消，您生成的{type}将会丢失。"
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": "单元已完成！",
+    "continueButton": "继续",
+    "sectionHeading": "下一步"
+  },
+  "unitEmbedding": {
+    "allSectionsComplete": "所有部分已完成！",
+    "cached": "缓存",
+    "generateEmbeddings": "生成嵌入",
+    "generating": "生成中...",
+    "publishSuccess": "单元已发布并生成嵌入内容！",
+    "publishUnit": "发布单元",
+    "publishing": "发布中...",
+    "completedCount": "{completed}/{total} 完成",
+    "wordsEmbedded": "已嵌入{count}个单词"
+  },
+  "unitEmbeddingComponents": {
+    "errorMessage": "生成嵌入向量时出错",
+    "generateButton": "生成嵌入",
+    "successMessage": "生成的嵌入"
+  },
+  "verticalTabsRo": {
+    "aiAssistant": "AI助手",
+    "previousAttempts": "之前的尝试",
+    "settings": "设置"
+  },
+  "vocabularyReview": {
+    "alertMessage": "继续前请复习词汇",
+    "cancel": "取消",
+    "continue": "继续",
+    "summary": "摘要"
+  },
+  "wordBlockPlugin": {
+    "audioUnavailable": "音频不可用",
+    "loadingAudio": "正在加载音频...",
+    "wordNotFound": "未找到词汇：{wordID}"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "将生成嵌入向量",
+    "successConfirmation": "嵌入向量生成成功"
+  },
+  "quizComponent": {
+    "gradeDisplay": "成绩：{score}%"
+  },
+  "wordEmbedding": {
+    "embeddingGenerated": "已生成嵌入：已处理 {count} 个单词"
+  }
+}

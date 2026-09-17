@@ -1,0 +1,207 @@
+{
+  "namespace": "editor.shared",
+  "sourceLang": "en",
+  "targetLang": "es",
+  "mode": "provable",
+  "timestamp": "2026-09-16T19:36:57.851Z",
+  "summary": {
+    "totalKeys": 193,
+    "existingKeys": 188,
+    "translatedKeys": 5,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 1190,
+    "gpt": 1049,
+    "gemini": 500
+  },
+  "translations": [
+    {
+      "keyPath": "micLevelIndicator.noSignalShort",
+      "source": "No signal",
+      "translations": {
+        "claude": "Sin señal",
+        "gpt": "Sin señal",
+        "gemma": "translation",
+        "consensus": "Sin señal"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:36:15.467Z",
+          "requestId": "msg_011Cf7gSkYm1sjnLUjtqVb7D",
+          "tokensUsed": 217,
+          "fingerprint": "be549eebfd94e341d222af64093eb70cfdd6451f32d9ba291b58fd77d11b31d5"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:36:15.856Z",
+          "requestId": "chatcmpl-EOpiRsZLdJdedRXCieGJfvf5xzRFu",
+          "tokensUsed": 192,
+          "fingerprint": "be549eebfd94e341d222af64093eb70cfdd6451f32d9ba291b58fd77d11b31d5"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:36:25.800Z",
+          "requestId": "8ca32d63-e3b5-4895-b87a-8b54d3e6630b",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.tooLow",
+      "source": "Microphone input is very low. Try speaking louder or moving closer to the microphone.",
+      "translations": {
+        "claude": "La entrada del micrófono es muy baja. Intente hablar más alto o acercarse más al micrófono.",
+        "gpt": "La entrada del micrófono es muy baja. Intente hablar más fuerte o acercarse al micrófono.",
+        "gemma": "...",
+        "consensus": "La entrada del micrófono es muy baja. Intente hablar más alto o acercarse más al micrófono."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:36:16.244Z",
+          "requestId": "msg_011Cf7gSkPpqHyCjj3NesQiC",
+          "tokensUsed": 260,
+          "fingerprint": "cf022c5bc5db016fc6683683838c1fef67ba3f6ca0b2236896724e93fc10615d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:36:15.388Z",
+          "requestId": "chatcmpl-EOpiQREJR0USFLocBnZX3WcESs5Fc",
+          "tokensUsed": 227,
+          "fingerprint": "4a211f101d0b9ee1c6ec612c929147e400dbfcee18dc1fccc174cc4fbdeadac8"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:36:30.813Z",
+          "requestId": "f6ef92bb-0453-4eb2-bd13-e1d7a32c2db2",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.tooLowShort",
+      "source": "Too quiet",
+      "translations": {
+        "claude": "Demasiado bajo",
+        "gpt": "Demasiado silencioso",
+        "gemma": "...",
+        "consensus": "Demasiado bajo"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:36:16.003Z",
+          "requestId": "msg_011Cf7gSkaFNFAsW8rfttioY",
+          "tokensUsed": 221,
+          "fingerprint": "e8edb38c6989fde95686a87326a2edb9231325103d6d2ceaf204148e820e997a"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:36:16.621Z",
+          "requestId": "chatcmpl-EOpiS5vQnahtZUFTpF9z2Ry4olahQ",
+          "tokensUsed": 196,
+          "fingerprint": "aba7d70c3537a9482dd99bafec626ac5624afb452909585bd0cbc1bc8abd1582"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:36:31.223Z",
+          "requestId": "0335fcc5-bb87-4f2f-ace6-1a75d00beba8",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "micLevelIndicator.noSignal",
+      "source": "No microphone signal detected. Check that your microphone is connected and not muted.",
+      "translations": {
+        "claude": "No se detectó señal del micrófono. Verifique que su micrófono esté conectado y no esté silenciado.",
+        "gpt": "No se detectó señal de micrófono. Verifique que su micrófono esté conectado y no esté silenciado.",
+        "gemma": "No se detecta señal de micrófono. Compruebe que su micrófono esté conectado y no esté silenciado.",
+        "consensus": "No se detectó señal del micrófono. Verifique que su micrófono esté conectado y no esté silenciado."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:36:16.077Z",
+          "requestId": "msg_011Cf7gSkWXj8euziiiY86NT",
+          "tokensUsed": 261,
+          "fingerprint": "15cf0f1d2b3bde1224cdfe262aeab37645773c9f20ab2bb776751b6b6117a6a7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:36:16.125Z",
+          "requestId": "chatcmpl-EOpiRJiS4Xkk6JUnvF0RuHrWpNe29",
+          "tokensUsed": 226,
+          "fingerprint": "e794b4ed9abbb01fed9da1de2cc5b7d7ac5d6d09db3edec19cda3aa80d8dafe7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:36:54.467Z",
+          "requestId": "4813cfd0-4200-45c6-8f41-ee3c979102db",
+          "tokensUsed": 100,
+          "fingerprint": "4f0212bce5f693ea8d251056fb0ae838a60a7a99d3ff979653700cce4e7ff42e"
+        }
+      }
+    },
+    {
+      "keyPath": "autoSubmit.submittingInSeconds",
+      "source": "Submitting answer in {countdown} seconds...",
+      "translations": {
+        "claude": "Enviando respuesta en {countdown} segundos...",
+        "gpt": "Enviando respuesta en {countdown} segundos...",
+        "gemma": "...",
+        "consensus": "Enviando respuesta en {countdown} segundos..."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:36:15.909Z",
+          "requestId": "msg_011Cf7gSkcUfmvfQ7mQgW2iS",
+          "tokensUsed": 231,
+          "fingerprint": "eacbb0a482ce562f2a914b97e763cf5bcbf3301922b8d61aebdc7d5f58db0d62"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:36:15.384Z",
+          "requestId": "chatcmpl-EOpiRz77WU7QkpKDQxgiTWhljBsNk",
+          "tokensUsed": 208,
+          "fingerprint": "eacbb0a482ce562f2a914b97e763cf5bcbf3301922b8d61aebdc7d5f58db0d62"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:36:57.846Z",
+          "requestId": "0a957601-9c4e-4651-8f71-753bf3689513",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    }
+  ],
+  "fingerprint": "4f065d32f1d5adc60f371a07723acd36948530dd21dc65af46763200da4713dd"
+}

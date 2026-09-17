@@ -1,10 +1,10 @@
 {
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "選択した{{count}}個のファイルを削除しますか？",
-      "deleteSelected": "選択項目を削除 ({{count}})",
+      "deleteConfirmMessage": "選択した{count}個のファイルを削除しますか？",
+      "deleteSelected": "選択項目を削除 ({count})",
       "deselectAll": "すべて選択解除",
-      "reAnalyzeSelected": "選択したファイルを再分析します（{{count}}）"
+      "reAnalyzeSelected": "選択したファイルを再分析します（{count}）"
     },
     "expandedContent": {
       "descriptionLabel": "説明:",
@@ -63,7 +63,8 @@
       "actionsTooltip": "操作",
       "searchPlaceholder": "ファイルを検索...",
       "selectAllTooltip": "すべて選択します",
-      "uploadTooltip": "ファイルをアップロードします"
+      "uploadTooltip": "ファイルをアップロードします",
+      "recordConversation": "会話を録音する"
     },
     "dragDrop": {
       "dropFilesHere": "ここにファイルをドロップしてアップロード",
@@ -75,10 +76,10 @@
     "cancel": "キャンセル",
     "collapse": "折りたたむ",
     "concepts": "概念",
-    "conceptsCount": "コンセプト（{{count}}）",
+    "conceptsCount": "コンセプト（{count}）",
     "confirm": "確認します",
     "created": "作成日:",
-    "deleteConfirmation": "ファイル「{{fileName}}」を削除しますか？",
+    "deleteConfirmation": "ファイル「{fileName}」を削除しますか？",
     "deleteFile": "ファイルを削除する",
     "expand": "展開する",
     "fileInfo": "ファイル情報",
@@ -86,22 +87,22 @@
     "noMetadataAvailable": "このファイルにはメタデータがありません。",
     "noParsedContentAvailable": "このファイルの解析済みコンテンツはご利用いただけません。",
     "objectives": "学習目標",
-    "objectivesCount": "学習目標 ({{count}})",
+    "objectivesCount": "学習目標 ({count})",
     "parsedContent": "解析済みコンテンツ",
     "path": "パス:",
     "protectionLevel": "保護レベル:",
     "questions": "問題",
-    "questionsCount": "質問 ({{count}})",
+    "questionsCount": "質問 ({count})",
     "rawMetadata": "生メタデータ",
     "searchPlaceholder": "ファイル内容を検索...",
     "summaries": "概要",
-    "summariesCount": "要約 ({{count}})",
+    "summariesCount": "要約 ({count})",
     "type": "タイプ：",
     "unknown": "不明",
     "unknownSize": "サイズ不明です",
     "unset": "未設定",
     "vocabulary": "語彙",
-    "vocabularyCount": "語彙 ({{count}})"
+    "vocabularyCount": "語彙 ({count})"
   },
   "documentUploader": {
     "browseFiles": "ファイルを参照",
@@ -109,7 +110,7 @@
     "errorMessages": {
       "noSupportedFiles": "サポートされている文書が見つかりません。PDF、Word、テキスト、またはExcelファイルをアップロードしてください。",
       "skippedFiles": "一部のファイルはスキップされました（サポートされていないファイル形式）",
-      "uploadFailed": "{{fileName}}のアップロードに失敗しました: {{error}}"
+      "uploadFailed": "{fileName}のアップロードに失敗しました: {error}"
     },
     "extractionTypes": {
       "dictionary": "辞書",
@@ -119,9 +120,9 @@
     },
     "howItWorks": {
       "step1": "1. 文書をアップロードしてください（PDF、Word、テキスト、またはExcelファイル）",
-      "step2": "2. AIがコンテンツを分析し、{{extractionType}}を抽出いたします",
+      "step2": "2. AIがコンテンツを分析し、{extractionType}を抽出いたします",
       "step3": "3. 「提案」タブで提案内容を確認し、承認してください",
-      "step4": "4. 選択した項目を{{target}}にインポートします",
+      "step4": "4. 選択した項目を{target}にインポートします",
       "title": "使用方法："
     },
     "recentUploads": "最近のアップロード",
@@ -131,14 +132,14 @@
       "processing": "処理中です..."
     },
     "supportedFormats": "対応ファイル形式：PDF、Word（.doc、.docx）、テキスト（.txt）、Excel（.xls、.xlsx、.csv）",
-    "title": "{{extractionType}}抽出用ドキュメントをアップロードしてください",
-    "uploadingProgress": "アップロード中です... {{progress}}%"
+    "title": "{extractionType}抽出用ドキュメントをアップロードしてください",
+    "uploadingProgress": "アップロード中です... {progress}%"
   },
   "fileManager": {
     "close": "閉じる",
     "create": "作成します",
     "draftChanges": "下書きの変更",
-    "errorRendering": "ファイルマネージャーの表示中にエラーが発生しました: {{message}}",
+    "errorRendering": "ファイルマネージャーの表示中にエラーが発生しました: {message}",
     "revert": "元に戻す",
     "save": "保存します",
     "textToImagePreview": "テキストから画像へのプレビュー",

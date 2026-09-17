@@ -24,7 +24,8 @@
     "untitledSection": "Unbenannter Abschnitt",
     "noDescription": "Keine Beschreibung",
     "viewSection": "Abschnitt anzeigen",
-    "sections": "Abschnitte"
+    "sections": "Abschnitte",
+    "learningPathway": "Kompetenzbaum"
   },
   "profile": {
     "title": "Mein Profil",
@@ -33,6 +34,7 @@
     "userId": "Benutzer-ID",
     "identityId": "Identitäts-ID",
     "cancel": "Abbrechen",
+    "name": "Name",
     "updateProfile": "Profil aktualisieren",
     "confirmEmail": {
       "title": "E-Mail bestätigen",
@@ -60,7 +62,11 @@
         "cancel": "Abbrechen",
         "confirm": "Cache leeren"
       }
-    }
+    },
+    "progress": "Fortschritt",
+    "activity": "Aktivität",
+    "badges": "Abzeichen",
+    "nailedItWall": "Erfolgswand"
   },
   "sections": {
     "title": "Abschnitte",
@@ -77,7 +83,15 @@
       "descriptionLabel": "Beschreibung",
       "cancel": "Abbrechen",
       "create": "Erstellen"
-    }
+    },
+    "joinCode": "Code-Bezeichnung",
+    "archived": "Archiviert",
+    "archive": "Archiv",
+    "showArchived": "Archivierte anzeigen ({count})",
+    "unarchive": "Archivierung aufheben",
+    "archivedSuccess": "Abschnitt erfolgreich archiviert",
+    "archiveError": "Aktualisierung des Abschnitts fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "unarchivedSuccess": "Abschnitt erfolgreich aus dem Archiv wiederhergestellt"
   },
   "sectionDetail": {
     "noFeaturedImage": "Kein Beitragsbild festgelegt",
@@ -129,7 +143,19 @@
       "saveFailed": "Speichern der Note fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "cancel": "Abbrechen",
       "save": "Note speichern"
-    }
+    },
+    "saveCoverVideo": "Speichern",
+    "removeCoverVideo": "Entfernen",
+    "leaderboard": "Rangliste",
+    "squads": "Squads",
+    "setCoverVideo": "Titelvideo festlegen",
+    "noCurve": "Keine Kurve",
+    "coverVideoUrlLabel": "Video-URL",
+    "completionGrid": "Abschlussübersicht",
+    "leaderboardEnabled": "Bestenliste anzeigen",
+    "noLeaderboardEntries": "Noch keine Bestenlisten-Daten vorhanden. Studierende werden hier angezeigt, sobald sie XP sammeln.",
+    "coverVideoUrlPlaceholder": "Fügen Sie eine Video-URL ein (https://...)",
+    "noCoverVideo": "Kein Titelvideo festgelegt."
   },
   "units": {
     "title": "Einheiten",
@@ -142,7 +168,16 @@
     "editUnit": "Einheit bearbeiten",
     "myDrafts": "Meine Entwürfe",
     "practice": "Üben",
-    "archivedUnits": "Archivierte Einheiten"
+    "archivedUnits": "Archivierte Einheiten",
+    "tabMyUnits": "Meine Lerneinheiten",
+    "tabSharedWithMe": "Mit mir geteilt",
+    "tabCommunity": "Gemeinschaft",
+    "noSharedUnits": "Es wurden noch keine Einheiten mit Ihnen geteilt",
+    "noCommunityUnits": "Keine Community-Einheiten verfügbar",
+    "forking": "Wird verzweigt...",
+    "forkUnit": "Verzweigen",
+    "forkSuccess": "Einheit erfolgreich geforkt",
+    "forkError": "Fehler beim Duplizieren der Lerneinheit"
   },
   "unitDetail": {
     "loading": "Wird geladen…"
@@ -150,7 +185,9 @@
   "workbook": {
     "timerInstructions": "Dies ist eine zeitlich begrenzte Übung. Drücken Sie Start, um den Timer zu beginnen und die Fragen zu beantworten.",
     "start": "Starten",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "reload": "Neu laden",
+    "unitUpdated": "Diese Einheit wurde vom Kursleiter aktualisiert. Möchten Sie die neueste Version neu laden?"
   },
   "leaderboard": {
     "title": "Rangliste",
@@ -160,5 +197,112 @@
     "fastestMode": "Schnellste",
     "squadsMode": "Squads",
     "empty": "Noch keine Ranglisten-Daten. Schließe Aufgaben ab, um XP zu verdienen\\!"
-  }
+  },
+  "squads": {
+    "title": "Squads",
+    "heading": "Alle Squads",
+    "selectSection": "Wählen Sie einen Abschnitt aus",
+    "createSquad": "Neues Squad starten",
+    "squadPosts": "Squad-Beiträge",
+    "noSections": "Keine Abschnitte gefunden",
+    "description": "Treten Sie einem Squad bei, um mit Ihrem Team zu wetteifern und gemeinsam die Bestenliste zu erklimmen."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "heading": "Einstellungen",
+    "privacy": {
+      "heading": "Datenschutz",
+      "leaderboardOptIn": "Meinen Namen in Bestenlisten anzeigen",
+      "leaderboardOptInHint": "Wenn deaktiviert, erscheint Ihr Name als „Anonymer Student\" in den Bestenlisten."
+    },
+    "description": "Verwalten Sie Ihre Kontoeinstellungen und Präferenzen",
+    "customization": {
+      "heading": "Anpassung",
+      "description": "Schalten Sie neue Avatar-Stile und Editor-Themes frei, während Sie aufsteigen."
+    },
+    "profileInfo": {
+      "heading": "Profilinformationen",
+      "description": "Aktualisieren Sie Ihren Anzeigenamen und Ihre E-Mail-Adresse"
+    },
+    "botCustomizer": {
+      "description": "Passen Sie das Erscheinungsbild Ihres KI-Tutors an. Schalten Sie weitere Optionen mit Bot Whisperer-Abzeichen frei.",
+      "heading": "Avatar des KI-Assistenten"
+    }
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "lastUpdated": "Zuletzt aktualisiert: Mai 2026",
+    "introduction": {
+      "heading": "Einleitung",
+      "content": "Willkommen bei Homework Supply. Wir sind dem Schutz Ihrer Privatsphäre und der Sicherheit Ihrer persönlichen Daten verpflichtet. Diese Datenschutzerklärung erläutert, wie wir Ihre Informationen erfassen, verwenden, speichern und weitergeben, wenn Sie unsere Bildungsplattform nutzen."
+    },
+    "informationWeCollect": {
+      "heading": "Informationen, die wir erheben",
+      "accountInfo": "Kontoinformationen:",
+      "learningData": "Lerndaten:",
+      "accountInfoText": "E-Mail-Adresse, Anzeigename und Authentifizierungsdaten, wenn Sie ein Konto erstellen.",
+      "intro": "Wir erfassen die folgenden Arten von Informationen, um unsere Bildungsdienstleistungen bereitzustellen und zu verbessern:",
+      "userContent": "Nutzergenerierte Inhalte:",
+      "usageInfo": "Nutzungsinformationen:",
+      "userContentText": "Audioaufnahmen, Textantworten, hochgeladene Dateien und Chat-Nachrichten, die während Lernaktivitäten erstellt wurden.",
+      "learningDataText": "Abgabe von Aufgaben, Noten, Fortschrittsverfolgung, verdiente XP und Lernanalysen.",
+      "usageInfoText": "Geräteinformationen, Browsertyp, besuchte Seiten und Interaktionsmuster zur Verbesserung der Plattformerfahrung."
+    },
+    "howWeUseInfo": {
+      "heading": "Wie wir Ihre Informationen verwenden",
+      "intro": "Wir verwenden Ihre Informationen für die folgenden Zwecke:",
+      "item2": "Verfolgung des akademischen Fortschritts und Erstellung von Leistungsberichten für Dozenten",
+      "item3": "Verarbeitung von Audio- und Textdaten durch KI-Dienste (OpenAI) für Feedback und Bewertung",
+      "item5": "Verbesserung der Plattformfunktionen, Behebung von Fehlern und Optimierung der Lernergebnisse",
+      "item4": "Ermöglichung von Echtzeit-Kollaborationsfunktionen zwischen Studierenden und Dozenten",
+      "item1": "Bereitstellung personalisierter Lernerfahrungen und KI-gestützter Nachhilfe"
+    },
+    "dataStorage": {
+      "heading": "Datenspeicherung & Sicherheit",
+      "item1": "Alle Daten werden während der Übertragung (TLS/SSL) und im Ruhezustand mit AWS-Verschlüsselungsdiensten verschlüsselt",
+      "item3": "Datenbankeinträge werden über AWS DynamoDB mit fein abgestufter Zugriffskontrolle verwaltet",
+      "item2": "Dateien werden in Amazon S3 gespeichert mit Zugriffskontrollen basierend auf Ihrer Rolle und Ihrem Eigentum",
+      "outro": "Wir speichern Ihre Daten so lange, wie Ihr Konto aktiv ist oder wie es zur Bereitstellung unserer Dienste erforderlich ist. Sie können jederzeit die Löschung Ihrer Daten beantragen.",
+      "intro": "Ihre Daten werden sicher und nach branchenüblichen Standards gespeichert:"
+    },
+    "dataSharing": {
+      "heading": "Datenweitergabe",
+      "instructors": "Lehrkräfte:",
+      "intro": "Wir verkaufen Ihre persönlichen Daten nicht. Wir dürfen Daten unter den folgenden eingeschränkten Umständen weitergeben:",
+      "classmates": "Klassenkameraden:",
+      "instructorsText": "Ihre Kursleiter können Ihre Einreichungen, Noten und Ihren Lernfortschritt innerhalb ihrer Kursbereiche einsehen.",
+      "aiProcessing": "KI-Verarbeitung:",
+      "aiProcessingText": "Audio- und Textinhalte werden zur Transkription, zum Feedback und zur Bewertung an OpenAI gesendet. OpenAI verwendet diese Daten nicht für Trainingszwecke.",
+      "classmatesText": "Bestenlisten-Platzierungen und Gruppenaktivitäten können für andere Teilnehmer in Ihrem Kursbereich sichtbar sein (Sie können dies deaktivieren).",
+      "legal": "Rechtliche Anforderungen:",
+      "legalText": "Wir können Informationen offenlegen, wenn dies gesetzlich vorgeschrieben ist oder um die Sicherheit unserer Nutzer zu schützen."
+    },
+    "yourRights": {
+      "item1": "Zugriff: Fordern Sie eine Kopie aller personenbezogenen Daten an, die wir über Sie gespeichert haben",
+      "intro": "Sie haben die folgenden Rechte in Bezug auf Ihre personenbezogenen Daten:",
+      "item4": "Export: Laden Sie Ihre Lerndaten in einem portablen Format herunter",
+      "item2": "Korrektur: Aktualisierung oder Berichtigung ungenauer personenbezogener Daten",
+      "item3": "Löschung: Beantragen Sie die Löschung Ihres Kontos und der zugehörigen Daten",
+      "heading": "Ihre Rechte",
+      "item5": "Abmeldung: Deaktivieren Sie die Sichtbarkeit der Bestenliste und bestimmte Datenfreigabefunktionen",
+      "outro": "Um diese Rechte auszuüben, kontaktieren Sie Ihren Kursleiter oder wenden Sie sich mit den unten stehenden Kontaktinformationen an uns."
+    },
+    "policyChanges": {
+      "heading": "Änderungen an dieser Richtlinie",
+      "content": "Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren, um Änderungen in unseren Praktiken oder gesetzlichen Anforderungen widerzuspiegeln. Wir werden die Benutzer über wesentliche Änderungen über die Plattform informieren. Die fortgesetzte Nutzung der Plattform nach Änderungen gilt als Zustimmung zur aktualisierten Richtlinie."
+    },
+    "childrensPrivacy": {
+      "heading": "Datenschutz von Kindern",
+      "content": "Homework Supply ist für den Bildungsgebrauch konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir erfüllen die Anforderungen von COPPA und sammeln wissentlich keine persönlichen Informationen von Kindern ohne entsprechende Zustimmung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Zustimmung einzuholen."
+    },
+    "contactUs": {
+      "heading": "Kontaktieren Sie uns",
+      "content": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben oder Ihre Datenrechte ausüben möchten, wenden Sie sich bitte an Ihren Kursleiter oder den Plattformadministrator. Für allgemeine Anfragen können Sie uns über die im System verfügbaren Supportkanäle erreichen."
+    },
+    "cookies": {
+      "heading": "Cookies & Lokaler Speicher",
+      "content": "Wir verwenden essentielle Cookies und lokalen Speicher für Authentifizierung, Sitzungsverwaltung und Offline-Funktionalität. Wir verwenden keine Tracking-Cookies von Drittanbietern oder Werbe-Cookies. Der lokale Speicher wird verwendet, um Lerninhalte für den Offline-Zugriff zwischenzuspeichern."
+    }
+  },
+  "Peer Review": "Begutachtung"
 }

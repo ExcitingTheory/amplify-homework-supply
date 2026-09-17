@@ -4,9 +4,9 @@
     "discard": "Descartar",
     "discardChanges": "¿Descartar cambios?",
     "generate": "Generar",
-    "generating": "Generando {{type}}...",
+    "generating": "Generando {type}...",
     "keepEditing": "Seguir editando",
-    "lostWarning": "Tu {{type}} generado se perderá si cancelas ahora.",
+    "lostWarning": "Tu {type} generado se perderá si cancelas ahora.",
     "preview": "Vista previa",
     "saveClose": "Guardar y cerrar",
     "takeMoments": "Esto puede tardar unos momentos"

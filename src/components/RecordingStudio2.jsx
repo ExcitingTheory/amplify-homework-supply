@@ -1,18 +1,7 @@
 "use strict";
 import React from "react";
-import { useTranslations } from "next-intl";
 import FilesContext from "../context/fileContext";
-import DictionaryContext from "../context/dictionaryContext";
-import StopIcon from "@mui/icons-material/Stop";
-import PlayIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import RecordIcon from "@mui/icons-material/KeyboardVoice";
-import StaticWaveform from "./Editor3/components/StaticWaveform";
-import AudioWaveformPlayer from "./Editor3/components/AudioWaveformPlayer";
-import MicLevelIndicator from "./Editor3/components/MicLevelIndicator";
 import { calculateWaveformData } from "../utils/calculateWaveformData";
-// import { SvgConverter } from './Editor2';
-import { Box, Typography, Card, CardContent } from "@mui/material";
 
 import { hexToRgb } from "../utils/hexToRgb";
 
@@ -20,70 +9,10 @@ import getCachedUrl from "../utils/getCachedUrl";
 import UnitContext from "../context/unitContext";
 import { uploadStudentSubmission } from "../utils/userSubmissionStorage";
 
-import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import { getCurrentUser } from "aws-amplify/auth";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { transcribeAudio } from "../../app/actions/grading";
-
-// Component to handle async audio URL loading
-function AudioRecordingCard({ file, index, identityId }) {
-  const t = useTranslations("components");
-  const [audioUrl, setAudioUrl] = React.useState(null);
-
-  React.useEffect(() => {
-    if (file.path) {
-      getCachedUrl(file.path)
-        .then((url) => setAudioUrl(url))
-        .catch((err) => console.error("Error loading audio URL:", err));
-    }
-  }, [file.path, identityId]);
-
-  return (
-    <Card
-      sx={{
-        boxShadow: 3,
-        "&:hover": {
-          boxShadow: 6,
-        },
-      }}
-    >
-      <CardContent>
-        {audioUrl ? (
-          <AudioWaveformPlayer
-            audioUrl={audioUrl}
-            file={file}
-            width={600}
-            height={80}
-            title={
-              file.name ||
-              t("recordingStudio2.recordingNumber", {
-                number: index + 1,
-              })
-            }
-            showDuration={true}
-          />
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              {file.name ||
-                t("recordingStudio2.recordingNumber", {
-                  number: index + 1,
-                })}
-            </Typography>
-            <StaticWaveform
-              file={file}
-              width={600}
-              height={80}
-              backgroundColor="transparent"
-            />
-            <Typography variant="caption" color="text.secondary">
-              {new Date(file.createdAt).toLocaleString()}
-            </Typography>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+import RecordingStudio2View from "./RecordingStudio2View";
 
 export function RecordingStudio2({
   word,
@@ -107,7 +36,6 @@ export function RecordingStudio2({
   // TODO: a hidden input that allows you to update the word phrase and pronunciation
   // if during the recording, you change the word, then it should update the word
 
-  const t = useTranslations("components");
   const [recording, setRecording] = React.useState(false);
   const [mediaRecorder, setMediaRecorder] = React.useState(null);
   const [audioBlob, setAudioBlob] = React.useState(null);
@@ -456,120 +384,28 @@ export function RecordingStudio2({
         streamRef.current = null;
       }
     };
-     
   }, []);
 
   return (
-    <>
-      {error && (
-        <Box sx={{ mb: 2 }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      )}
-      <Box>
-        {audioFile && (
-          <>
-            <audio controls={false} ref={audioRef} onEnded={handleEnded}>
-              <source src={audioFile} />
-            </audio>
-            {!isPlaying && (
-              <PlayIcon
-                color="primary"
-                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-                onClick={handlePlay}
-              />
-            )}
-            {isPlaying && (
-              <PauseIcon
-                color="primary"
-                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-                onClick={handlePause}
-              />
-            )}
-          </>
-        )}
-        {!recording && (
-          <RecordIcon
-            color="primary"
-            onClick={startRecording}
-            sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-          />
-        )}
-        {recording && (
-          <StopIcon
-            onClick={stopRecording}
-            color="error"
-            sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-          />
-        )}
-        {audioBlob && (
-          <>
-            <audio controls={false} ref={audioRef} onEnded={handleEnded}>
-              <source src={URL.createObjectURL(audioBlob)} />
-            </audio>
-            {!isPlaying && (
-              <PlayIcon
-                color="primary"
-                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-                onClick={handlePlay}
-              />
-            )}
-            {isPlaying && (
-              <PauseIcon
-                color="primary"
-                sx={{ position: "relative", top: "0.2rem", cursor: "pointer" }}
-                onClick={handlePause}
-              />
-            )}
-          </>
-        )}
-      </Box>
-      <canvas
-        ref={canvasRef}
-        id="waveform"
-        style={{ backgroundColor: "white" }}
-      />
-      {/* Mic level indicator during recording */}
-      {recording && (
-        <Box sx={{ mt: 1 }}>
-          <MicLevelIndicator analyser={recordingAnalyser} />
-        </Box>
-      )}
-      {/* Display all existing audio recordings */}
-      {!embedded && Object.keys(audioFiles).length > 0 && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {t("recordingStudio2.existingRecordings")}
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {Object.values(audioFiles).map((file, index) => (
-              <AudioRecordingCard
-                key={file.id || index}
-                file={file}
-                index={index}
-                identityId={identityId}
-              />
-            ))}
-          </Box>
-        </Box>
-      )}
-      {!embedded && audioFile && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            {t("recordingStudio2.staticWaveformPreview")}
-          </Typography>
-          <StaticWaveform file={audioFile} width={600} height={80} />
-        </Box>
-      )}
-      {!embedded && waveformData && audioBlob && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            {t("recordingStudio2.recordedAudioWaveform")}
-          </Typography>
-          <StaticWaveform waveformData={waveformData} width={600} height={80} />
-        </Box>
-      )}
-    </>
+    <RecordingStudio2View
+      error={error}
+      audioFile={audioFile}
+      audioFiles={audioFiles}
+      embedded={embedded}
+      recording={recording}
+      isPlaying={isPlaying}
+      audioBlob={audioBlob}
+      waveformData={waveformData}
+      recordingAnalyser={recordingAnalyser}
+      identityId={identityId}
+      audioRef={audioRef}
+      canvasRef={canvasRef}
+      onPlay={handlePlay}
+      onPause={handlePause}
+      onEnded={handleEnded}
+      onStartRecording={startRecording}
+      onStopRecording={stopRecording}
+    />
   );
 }
 

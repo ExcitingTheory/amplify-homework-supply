@@ -1,6 +1,6 @@
 {
   "answerComponent": {
-    "audioNotAvailable": "{{text}}（音频不可用）",
+    "audioNotAvailable": "{text}（音频不可用）",
     "audioNotAvailableParens": "（音频不可用）",
     "errorMessages": {
       "noAnswer": "请提供答案",
@@ -16,7 +16,9 @@
       "writing": "写作"
     },
     "noDictionaryAvailable": "无可用词典",
-    "submit": "提交"
+    "submit": "提交",
+    "inputMethodSelector": "输入方式",
+    "placeholder": "请在此输入答案"
   },
   "toolBarRoPlugin": {
     "fallbackText": "格式",
@@ -26,7 +28,8 @@
   "verticalTabsRo": {
     "aiAssistant": "AI助手",
     "previousAttempts": "之前的尝试",
-    "settings": "设置"
+    "settings": "设置",
+    "tableOfContents": "目录"
   },
   "unitCompletedPlugin": {
     "allCaughtUp": "全部完成！没有更多作业了。",
@@ -38,7 +41,7 @@
     "tryAgain": "再试一次"
   },
   "quizComponent": {
-    "gradeDisplay": "成绩：{{score}}%"
+    "gradeDisplay": "成绩：{score}%"
   },
   "meaningAssociationExercise": {
     "layoutDirection": "行"

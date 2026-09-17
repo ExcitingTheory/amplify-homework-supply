@@ -18,9 +18,14 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $getRoot,
+  $createParagraphNode,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  UNDO_COMMAND,
+  REDO_COMMAND,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_CRITICAL,
   type RangeSelection,
   type LexicalEditor,
 } from 'lexical'
@@ -200,8 +205,14 @@ function FloatingToolbar({
 
   // Drag state
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const dragOffsetRef = useRef(dragOffset)
   const isDragging = useRef(false)
-  const dragStart = useRef({ mouseX: 0, mouseY: 0, elemX: 0, elemY: 0 })
+  const dragMoved = useRef(false)
+  const dragStart = useRef({ mouseX: 0, mouseY: 0, elemX: 0, elemY: 0, rectLeft: 0, rectTop: 0, width: 0, height: 0 })
+  // Local undo/redo history for the toolbar's dragged position
+  const posHistory = useRef<{ x: number; y: number }[]>([])
+  const posFuture = useRef<{ x: number; y: number }[]>([])
+  const lastActionWasMove = useRef(false)
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection()
@@ -274,36 +285,128 @@ function FloatingToolbar({
     )
   }, [editor, updateToolbar])
 
+  // Keep a ref of the current drag offset for command handlers
+  useEffect(() => {
+    dragOffsetRef.current = dragOffset
+  }, [dragOffset])
+
+  // Wire toolbar drag movements into the editor undo/redo stack.
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand(
+        UNDO_COMMAND,
+        () => {
+          if (lastActionWasMove.current && posHistory.current.length > 0) {
+            const prev = posHistory.current.pop()!
+            posFuture.current.push(dragOffsetRef.current)
+            setDragOffset(prev)
+            if (posHistory.current.length === 0) lastActionWasMove.current = false
+            return true
+          }
+          return false
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerCommand(
+        REDO_COMMAND,
+        () => {
+          if (posFuture.current.length > 0) {
+            const next = posFuture.current.pop()!
+            posHistory.current.push(dragOffsetRef.current)
+            setDragOffset(next)
+            lastActionWasMove.current = true
+            return true
+          }
+          return false
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      // A real content/selection change means a move is no longer the latest action
+      editor.registerUpdateListener(() => {
+        lastActionWasMove.current = false
+      }),
+    )
+  }, [editor])
+
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     isDragging.current = true
+    dragMoved.current = false
+    // Distinct dragging cursor for the whole gesture (pointer leaves the handle).
+    document.body.style.cursor = 'grabbing'
+    document.body.style.userSelect = 'none'
+    const rect = toolbarRef.current?.getBoundingClientRect()
     dragStart.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
       elemX: dragOffset.x,
       elemY: dragOffset.y,
+      rectLeft: rect?.left ?? 0,
+      rectTop: rect?.top ?? 0,
+      width: rect?.width ?? 0,
+      height: rect?.height ?? 0,
     }
+    const offsetBeforeDrag = { x: dragOffset.x, y: dragOffset.y }
 
     const handleMouseMove = (ev: MouseEvent) => {
       if (!isDragging.current) return
+      dragMoved.current = true
       const dx = ev.clientX - dragStart.current.mouseX
       const dy = ev.clientY - dragStart.current.mouseY
+      const { rectLeft, rectTop, width, height, elemX, elemY } = dragStart.current
+      const margin = 8
+      // Clamp within the viewport so the toolbar can't be dragged off-screen
+      const maxLeft = Math.max(margin, window.innerWidth - width - margin)
+      const maxTop = Math.max(margin, window.innerHeight - height - margin)
+      const viewLeft = Math.min(Math.max(rectLeft + dx, margin), maxLeft)
+      const viewTop = Math.min(Math.max(rectTop + dy, margin), maxTop)
       setDragOffset({
-        x: dragStart.current.elemX + dx,
-        y: dragStart.current.elemY + dy,
+        x: elemX + (viewLeft - rectLeft),
+        y: elemY + (viewTop - rectTop),
       })
     }
 
     const handleMouseUp = () => {
       isDragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      if (dragMoved.current) {
+        posHistory.current.push(offsetBeforeDrag)
+        posFuture.current = []
+        lastActionWasMove.current = true
+      }
     }
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
   }, [dragOffset])
+
+  // Ensure there's an insertion point (cursor, or document end) then insert & focus.
+  const insertWithSelection = useCallback(
+    (dispatch: () => void) => {
+      editor.update(() => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection)) {
+          const root = $getRoot()
+          const last = root.getLastChild()
+          if (last) {
+            last.selectEnd()
+          } else {
+            const paragraph = $createParagraphNode()
+            root.append(paragraph)
+            paragraph.selectEnd()
+          }
+        }
+      })
+      dispatch()
+      editor.focus()
+    },
+    [editor],
+  )
 
   const insertLink = useCallback(() => {
     if (!isLink) {
@@ -386,7 +489,10 @@ function FloatingToolbar({
           alignItems: 'center',
           cursor: 'grab',
           color: 'text.disabled',
+          opacity: 0.35,
+          transition: 'opacity 0.15s',
           mr: 0.25,
+          '&:hover': { opacity: 0.75 },
           '&:active': { cursor: 'grabbing' },
         }}
       >
@@ -568,43 +674,43 @@ function FloatingToolbar({
             slotProps={{ paper: { sx: { borderRadius: '10px' } } }}
           >
             {config.insertBlocks.includes('meaningAssociation') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, undefined); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><WordBlockIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Meaning Association</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('wordBlock') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_WORD_BLOCK_COMMAND, 'placeholder-word-id'); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_WORD_BLOCK_COMMAND, 'placeholder-word-id')); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FontDownloadIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Word Block</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('answerVocabulary') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, []); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, [])); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FormatSizeIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Short Answer (Vocabulary)</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('answerCustom') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, []); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, [])); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FormatSizeIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Short Answer (Custom)</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('quiz') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_QUIZ_COMMAND, undefined); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_QUIZ_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><QuizIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Multiple Choice Quiz</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('playlist') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, undefined); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><AudiotrackIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Audio Playlist</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('horizontalRule') && (
-              <MenuItem onClick={() => { editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined); setInsertAnchorEl(null) }}>
+              <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><HorizontalRuleIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Horizontal Rule</ListItemText>
               </MenuItem>
@@ -634,7 +740,7 @@ function FloatingToolbar({
               <MenuItem
                 key={value}
                 onClick={() => {
-                  editor.dispatchCommand(INSERT_LAYOUT_COMMAND, value)
+                  insertWithSelection(() => editor.dispatchCommand(INSERT_LAYOUT_COMMAND, value))
                   setLayoutAnchorEl(null)
                 }}
               >
@@ -647,6 +753,25 @@ function FloatingToolbar({
           </Menu>
         </>
       )}
+
+      {/* Drag handle (right) — mirrors the left handle so the toolbar can be
+          grabbed from either side. */}
+      <Box
+        onMouseDown={handleDragStart}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'grab',
+          color: 'text.disabled',
+          opacity: 0.35,
+          transition: 'opacity 0.15s',
+          ml: 0.25,
+          '&:hover': { opacity: 0.75 },
+          '&:active': { cursor: 'grabbing' },
+        }}
+      >
+        <DragIndicatorIcon sx={{ fontSize: 16 }} />
+      </Box>
     </Box>,
     anchorElem,
   )

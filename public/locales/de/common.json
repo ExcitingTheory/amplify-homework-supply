@@ -52,8 +52,10 @@
       "darkMode": "Dunkelmodus",
       "disableNotifications": "Benachrichtigungen deaktivieren",
       "experimentalFeatures": "Experimentelle Funktionen",
-      "studentMode": "Schülermodus"
-    }
+      "studentMode": "Schülermodus",
+      "colorMode": "Farbmodus"
+    },
+    "collaboration": "Zusammenarbeit"
   },
   "navigation": {
     "grades": "Noten",
@@ -61,10 +63,20 @@
     "profile": "Profil",
     "sections": "Bereiche",
     "units": "Einheiten",
-    "workbook": "Arbeitsbuch"
+    "workbook": "Arbeitsbuch",
+    "squads": "Squads",
+    "leaderboard": "Rangliste",
+    "published": "Veröffentlicht",
+    "settings": "Einstellungen",
+    "drafts": "Entwürfe",
+    "notifications": "Benachrichtigungen",
+    "collaboration": "Zusammenarbeit",
+    "collaborationDesc": "Einladungen & Sitzungen beitreten",
+    "skills": "Kompetenzbaum",
+    "gamification": "Gamification"
   },
   "quizComponent": {
-    "grade": "Note: {{grade}}"
+    "grade": "Note: {grade}"
   },
   "status": {
     "complete": "Abschließen",
@@ -83,5 +95,20 @@
     "created": "Erstellt",
     "due": "Fällig",
     "updated": "Aktualisiert"
+  },
+  "chat": {
+    "aiAssistant": "KI-Assistent",
+    "openAssistant": "KI-Assistent öffnen"
+  },
+  "timer": {
+    "hours": "Stunden",
+    "minutes": "Minuten",
+    "seconds": "Sekunden",
+    "increase": "Ausgewähltes Zeitsegment erhöhen",
+    "decrease": "Verringern Sie das ausgewählte Zeitsegment"
+  },
+  "peerReview": {
+    "notHelpful": "Die Peer-Review war nicht hilfreich",
+    "helpful": "Die Peer-Review war hilfreich"
   }
 }

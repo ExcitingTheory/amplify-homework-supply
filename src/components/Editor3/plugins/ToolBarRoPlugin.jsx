@@ -40,84 +40,11 @@ import { useXP } from "../../../context/gamificationContext";
 import { StreakIndicator } from "../../Gamification/StreakIndicator";
 import GlobalSearchBar from "../../GlobalSearchBar";
 import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
+import { OverflowRevealText } from "../../Workbook/OverflowRevealText";
 
 const workbookChipSx = {
   borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
 };
-
-function OverflowRevealText({ text, variant, component = "div", sx }) {
-  const containerRef = React.useRef(null);
-  const textRef = React.useRef(null);
-  const [isClipped, setIsClipped] = React.useState(false);
-  const [marqueeDistance, setMarqueeDistance] = React.useState(0);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  React.useEffect(() => {
-    const measure = () => {
-      const container = containerRef.current;
-      const textElement = textRef.current;
-      if (!container || !textElement) return;
-
-      const overflow = textElement.scrollWidth - container.clientWidth;
-      setIsClipped(overflow > 1);
-      setMarqueeDistance(Math.max(0, overflow + 12));
-    };
-
-    measure();
-    const resizeObserver = new ResizeObserver(measure);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    if (textRef.current) resizeObserver.observe(textRef.current);
-    return () => resizeObserver.disconnect();
-  }, [text]);
-
-  const handleClick = (event) => {
-    if (isClipped) setAnchorEl(event.currentTarget);
-  };
-
-  return (
-    <>
-      <Typography
-        ref={containerRef}
-        variant={variant}
-        component={component}
-        onClick={handleClick}
-        aria-haspopup={isClipped ? "dialog" : undefined}
-        sx={{
-          ...sx,
-          cursor: isClipped ? "pointer" : "default",
-          "&:hover .overflow-reveal-text": isClipped
-            ? { transform: `translateX(-${marqueeDistance}px)` }
-            : undefined,
-        }}
-      >
-        <Box
-          className="overflow-reveal-text"
-          component="span"
-          ref={textRef}
-          sx={{
-            display: "inline-block",
-            maxWidth: "none",
-            transition: isClipped
-              ? `transform ${Math.min(6, Math.max(1.6, marqueeDistance / 42))}s linear`
-              : undefined,
-            willChange: isClipped ? "transform" : undefined,
-          }}
-        >
-          {text}
-        </Box>
-      </Typography>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <Typography sx={{ p: 1.5, maxWidth: 360 }}>{text}</Typography>
-      </Popover>
-    </>
-  );
-}
 
 /**
  * @param {number} countDown

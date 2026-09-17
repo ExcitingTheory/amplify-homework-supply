@@ -1,10 +1,10 @@
 {
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "删除选中的{{count}}个文件？",
-      "deleteSelected": "删除选中项 ({{count}})",
+      "deleteConfirmMessage": "删除选中的{count}个文件？",
+      "deleteSelected": "删除选中项 ({count})",
       "deselectAll": "取消全选",
-      "reAnalyzeSelected": "重新分析所选 ({{count}})"
+      "reAnalyzeSelected": "重新分析所选 ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "描述：",
@@ -63,7 +63,8 @@
       "actionsTooltip": "操作",
       "searchPlaceholder": "搜索文件...",
       "selectAllTooltip": "全选",
-      "uploadTooltip": "上传文件"
+      "uploadTooltip": "上传文件",
+      "recordConversation": "记录对话"
     },
     "dragDrop": {
       "dropFilesHere": "拖放文件到此处以上传",
@@ -75,10 +76,10 @@
     "cancel": "取消",
     "collapse": "折叠",
     "concepts": "概念",
-    "conceptsCount": "概念 ({{count}})",
+    "conceptsCount": "概念 ({count})",
     "confirm": "确认",
     "created": "创建时间：",
-    "deleteConfirmation": "删除文件：\"{{fileName}}\"？",
+    "deleteConfirmation": "删除文件：\"{fileName}\"？",
     "deleteFile": "删除文件",
     "expand": "展开",
     "fileInfo": "文件信息",
@@ -86,22 +87,22 @@
     "noMetadataAvailable": "此文件没有可用的元数据。",
     "noParsedContentAvailable": "此文件没有可解析的内容。",
     "objectives": "目标",
-    "objectivesCount": "目标 ({{count}})",
+    "objectivesCount": "目标 ({count})",
     "parsedContent": "解析内容",
     "path": "路径：",
     "protectionLevel": "保护级别：",
     "questions": "问题",
-    "questionsCount": "问题 ({{count}})",
+    "questionsCount": "问题 ({count})",
     "rawMetadata": "原始元数据",
     "searchPlaceholder": "搜索文件内容...",
     "summaries": "摘要",
-    "summariesCount": "摘要 ({{count}})",
+    "summariesCount": "摘要 ({count})",
     "type": "类型：",
     "unknown": "未知",
     "unknownSize": "未知大小",
     "unset": "未设置",
     "vocabulary": "词汇",
-    "vocabularyCount": "词汇 ({{count}})"
+    "vocabularyCount": "词汇 ({count})"
   },
   "documentUploader": {
     "browseFiles": "浏览文件",
@@ -109,7 +110,7 @@
     "errorMessages": {
       "noSupportedFiles": "未找到支持的文档。请上传PDF、Word、文本或Excel文件。",
       "skippedFiles": "部分文件已跳过（不支持的文件类型）",
-      "uploadFailed": "上传 {{fileName}} 失败：{{error}}"
+      "uploadFailed": "上传 {fileName} 失败：{error}"
     },
     "extractionTypes": {
       "dictionary": "词典",
@@ -119,9 +120,9 @@
     },
     "howItWorks": {
       "step1": "1. 上传您的文档（PDF、Word、文本或Excel文件）",
-      "step2": "2. AI将分析内容并提取{{extractionType}}",
+      "step2": "2. AI将分析内容并提取{extractionType}",
       "step3": "3. 在\"建议\"标签页中查看并批准建议",
-      "step4": "4. 将选定项目导入到您的{{target}}",
+      "step4": "4. 将选定项目导入到您的{target}",
       "title": "工作原理："
     },
     "recentUploads": "最近上传",
@@ -131,14 +132,14 @@
       "processing": "处理中..."
     },
     "supportedFormats": "支持：PDF、Word (.doc, .docx)、文本 (.txt)、Excel (.xls, .xlsx, .csv)",
-    "title": "上传文档进行{{extractionType}}提取",
-    "uploadingProgress": "上传中... {{progress}}%"
+    "title": "上传文档进行{extractionType}提取",
+    "uploadingProgress": "上传中... {progress}%"
   },
   "fileManager": {
     "close": "关闭",
     "create": "创建",
     "draftChanges": "草稿更改",
-    "errorRendering": "渲染文件管理器时出错：{{message}}",
+    "errorRendering": "渲染文件管理器时出错：{message}",
     "revert": "恢复",
     "save": "保存",
     "textToImagePreview": "文本转图像预览",

@@ -1,10 +1,10 @@
 {
   "fileManager2": {
     "contextMenu": {
-      "deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
-      "deleteSelected": "Ausgewählte löschen ({{count}})",
+      "deleteConfirmMessage": "{count} ausgewählte Datei(en) löschen?",
+      "deleteSelected": "Ausgewählte löschen ({count})",
       "deselectAll": "Alle abwählen",
-      "reAnalyzeSelected": "Ausgewählte erneut analysieren ({{count}})"
+      "reAnalyzeSelected": "Ausgewählte erneut analysieren ({count})"
     },
     "expandedContent": {
       "descriptionLabel": "Beschreibung:",
@@ -63,7 +63,8 @@
       "actionsTooltip": "Aktionen",
       "searchPlaceholder": "Dateien suchen...",
       "selectAllTooltip": "Alle auswählen",
-      "uploadTooltip": "Dateien hochladen"
+      "uploadTooltip": "Dateien hochladen",
+      "recordConversation": "Gespräch aufzeichnen"
     },
     "dragDrop": {
       "dropFilesHere": "Dateien hier ablegen zum Hochladen",
@@ -75,10 +76,10 @@
     "cancel": "Abbrechen",
     "collapse": "Einklappen",
     "concepts": "Konzepte",
-    "conceptsCount": "Konzepte ({{count}})",
+    "conceptsCount": "Konzepte ({count})",
     "confirm": "Bestätigen",
     "created": "Erstellt:",
-    "deleteConfirmation": "Datei löschen: \"{{fileName}}\"?",
+    "deleteConfirmation": "Datei löschen: \"{fileName}\"?",
     "deleteFile": "Datei löschen",
     "expand": "Erweitern",
     "fileInfo": "Dateiinformationen",
@@ -86,22 +87,22 @@
     "noMetadataAvailable": "Keine Metadaten für diese Datei verfügbar.",
     "noParsedContentAvailable": "Für diese Datei sind keine analysierten Inhalte verfügbar.",
     "objectives": "Ziele",
-    "objectivesCount": "Ziele ({{count}})",
+    "objectivesCount": "Ziele ({count})",
     "parsedContent": "Geparster Inhalt",
     "path": "Pfad:",
     "protectionLevel": "Schutzebene:",
     "questions": "Fragen",
-    "questionsCount": "Fragen ({{count}})",
+    "questionsCount": "Fragen ({count})",
     "rawMetadata": "Rohe Metadaten",
     "searchPlaceholder": "Dateiinhalt durchsuchen...",
     "summaries": "Zusammenfassungen",
-    "summariesCount": "Zusammenfassungen ({{count}})",
+    "summariesCount": "Zusammenfassungen ({count})",
     "type": "Typ:",
     "unknown": "Unbekannt",
     "unknownSize": "Unbekannte Größe",
     "unset": "UNSET",
     "vocabulary": "Vokabeln",
-    "vocabularyCount": "Vokabeln ({{count}})"
+    "vocabularyCount": "Vokabeln ({count})"
   },
   "documentUploader": {
     "browseFiles": "Dateien durchsuchen",
@@ -109,7 +110,7 @@
     "errorMessages": {
       "noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
       "skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
-      "uploadFailed": "Upload von {{fileName}} fehlgeschlagen: {{error}}"
+      "uploadFailed": "Upload von {fileName} fehlgeschlagen: {error}"
     },
     "extractionTypes": {
       "dictionary": "Wörterbuch",
@@ -119,9 +120,9 @@
     },
     "howItWorks": {
       "step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
-      "step2": "2. KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "step2": "2. KI wird den Inhalt analysieren und {extractionType} extrahieren",
       "step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
-      "step4": "4. Ausgewählte Elemente in Ihr {{target}} importieren",
+      "step4": "4. Ausgewählte Elemente in Ihr {target} importieren",
       "title": "Wie es funktioniert:"
     },
     "recentUploads": "Neueste Uploads",
@@ -131,14 +132,14 @@
       "processing": "Wird verarbeitet..."
     },
     "supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
-    "title": "Dokumente für {{extractionType}}-Extraktion hochladen",
-    "uploadingProgress": "Wird hochgeladen... {{progress}}%"
+    "title": "Dokumente für {extractionType}-Extraktion hochladen",
+    "uploadingProgress": "Wird hochgeladen... {progress}%"
   },
   "fileManager": {
     "close": "Schließen",
     "create": "Erstellen",
     "draftChanges": "Änderungen entwerfen",
-    "errorRendering": "Fehler beim Rendern von FileManager: {{message}}",
+    "errorRendering": "Fehler beim Rendern von FileManager: {message}",
     "revert": "Zurücksetzen",
     "save": "Speichern",
     "textToImagePreview": "Text-zu-Bild-Vorschau",

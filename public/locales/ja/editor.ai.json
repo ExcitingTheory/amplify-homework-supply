@@ -4,9 +4,9 @@
     "discard": "破棄します",
     "discardChanges": "変更を破棄しますか？",
     "generate": "生成します",
-    "generating": "{{type}}を生成しています...",
+    "generating": "{type}を生成しています...",
     "keepEditing": "編集を続ける",
-    "lostWarning": "今キャンセルすると、生成された{{type}}は失われます。",
+    "lostWarning": "今キャンセルすると、生成された{type}は失われます。",
     "preview": "プレビュー",
     "saveClose": "保存して閉じる",
     "takeMoments": "しばらくお待ちください"

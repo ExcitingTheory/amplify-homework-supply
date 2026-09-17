@@ -13,7 +13,7 @@
     "clearAllTextFormatting": "清除所有文本格式",
     "clearFormatting": "清除格式",
     "clearTextFormatting": "清除文本格式",
-    "closePreview": "关闭{{name}}预览",
+    "closePreview": "关闭{name}预览",
     "columnsLayout": "列布局",
     "delete": "删除",
     "deleteUnitConfirmation": "您确定要删除此单元吗？",
@@ -63,7 +63,21 @@
     "underline": "下划线",
     "undo": "撤销",
     "untitledUnit": "未命名单元",
-    "wordBlock": "词块"
+    "wordBlock": "词块",
+    "numberedList": "编号列表",
+    "heading2": "二级标题",
+    "heading3": "三级标题",
+    "codeBlock": "代码块",
+    "blockFormat": "块格式",
+    "bulletedList": "项目符号列表",
+    "heading1": "标题 1",
+    "backgroundColor": "背景颜色",
+    "quoteBlock": "引用",
+    "decreaseFontSize": "减小字体大小",
+    "generateConversation": "生成对话",
+    "textColor": "文本颜色",
+    "increaseFontSize": "增大字体大小",
+    "normal": "常规"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "AI助手",
@@ -85,7 +99,8 @@
     "tagKaiDesc": "在讨论中获得AI协助",
     "tagKaiLabel": "💬 标记 @kai",
     "useTopicsDesc": "按主题整理对话",
-    "useTopicsLabel": "🏷️ 使用 #话题"
+    "useTopicsLabel": "🏷️ 使用 #话题",
+    "tableOfContentsTab": "目录"
   },
   "assignmentConfiguration": {
     "addDueDateButton": "添加截止日期",
@@ -103,7 +118,9 @@
     "sectionLabel": "部分",
     "selectSectionHelper": "选择要分配截止日期的章节",
     "timerDescription": "计时器将在用户点击\"开始\"按钮后启动。用户在计时器结束后仍可继续操作，系统将记录作业的开始和完成时间。在计时器运行期间，倒计时将显示在屏幕顶部。",
-    "timerLabel": "计时器"
+    "timerLabel": "计时器",
+    "retryEnabled": "允许学生在完成后重新尝试",
+    "retryEnabledDescription": "启用后，学生将在完成页面看到\"重新尝试\"按钮。"
   },
   "toolbar": {
     "align_center": "居中对齐",
@@ -130,7 +147,14 @@
     "pdfAnalysisSettings": "PDF分析设置",
     "setFeaturedImage": "设置特色图片",
     "uploadImagePrompt": "上传图片",
-    "uploadingImage": "上传图片"
+    "uploadingImage": "上传图片",
+    "setCoverVideo": "设置封面视频",
+    "coverVideoUrlLabel": "视频网址",
+    "uploadingVideo": "正在转码视频",
+    "removeCoverVideo": "移除封面视频",
+    "noCoverVideo": "未设置封面视频。",
+    "dragDropVideoPrompt": "请将视频文件拖放到此处。",
+    "coverVideoUrlPlaceholder": "粘贴视频 URL 或留空以上传文件"
   },
   "tabsVerticalLeft": {
     "tabs": {
@@ -140,7 +164,8 @@
       "dictionary": "词典",
       "files": "文件",
       "questions": "问题",
-      "tableOfContents": "目录"
+      "tableOfContents": "目录",
+      "campaign": "营销活动"
     }
   },
   "mainToolbar": {

@@ -1,0 +1,984 @@
+{
+  "namespace": "agentTools",
+  "sourceLang": "en",
+  "targetLang": "es",
+  "mode": "provable",
+  "timestamp": "2026-09-16T05:17:29.792Z",
+  "summary": {
+    "totalKeys": 26,
+    "existingKeys": 0,
+    "translatedKeys": 26,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 5933,
+    "gpt": 5261,
+    "gemini": 2100
+  },
+  "translations": [
+    {
+      "keyPath": "studentProgress.noUnit",
+      "source": "No unit specified and no current unit context.",
+      "translations": {
+        "claude": "No se especificó ninguna unidad y no hay contexto de unidad actual.",
+        "gpt": "No se ha especificado ninguna unidad y no hay contexto de unidad actual.",
+        "gemma": "No se ha especificado ninguna unidad y no hay un contexto de unidad actual.",
+        "consensus": "No se especificó ninguna unidad y no hay contexto de unidad actual."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.802Z",
+          "requestId": "msg_011Cf6YLrY5AMkjX9mrS6cmC",
+          "tokensUsed": 233,
+          "fingerprint": "55d045bd6bddcf442145f74d9d979205f2e367dc373e633d584fdb4626650602"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:25.477Z",
+          "requestId": "chatcmpl-EOcBZZEgyaoJEUywAGpW0tr7Lrx70",
+          "tokensUsed": 209,
+          "fingerprint": "ae9da180ce98343b2cde18867c9682a8b333b943a5c70a6ff2e028894fad5456"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:02.945Z",
+          "requestId": "79e93a6e-c91f-4c1d-b760-0897dd9be838",
+          "tokensUsed": 100,
+          "fingerprint": "ba9bc3e1a4230b09e76a4e2a3fa914b316855f566cad71b5e5ec4bae3bca6dee"
+        }
+      }
+    },
+    {
+      "keyPath": "semanticSearch.error",
+      "source": "Search failed. Try a different query.",
+      "translations": {
+        "claude": "La búsqueda ha fallado. Intente con una consulta diferente.",
+        "gpt": "La búsqueda falló. Intente con una consulta diferente.",
+        "gemma": "La búsqueda falló. Intente con una consulta diferente.",
+        "consensus": "La búsqueda falló. Intente con una consulta diferente."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.619Z",
+          "requestId": "msg_011Cf6YLrWpwuQB2ytHVLpRF",
+          "tokensUsed": 232,
+          "fingerprint": "691cc5419f417da7aa3f3de41e17f50798c0f22bd19e466ff5f0777aafd37905"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:25.030Z",
+          "requestId": "chatcmpl-EOcBYyrK2IkWFzVsgw7RibnbrZyFH",
+          "tokensUsed": 204,
+          "fingerprint": "e16682e03e88a519e98164289f13c470e95bcdf1f5e8db5d85f835b3797063d8"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:15.410Z",
+          "requestId": "f06753b3-90e3-4a75-9eca-c3f3ab5e84e3",
+          "tokensUsed": 100,
+          "fingerprint": "e16682e03e88a519e98164289f13c470e95bcdf1f5e8db5d85f835b3797063d8"
+        }
+      }
+    },
+    {
+      "keyPath": "readFileContent.noContent",
+      "source": "No extracted content available for this file.",
+      "translations": {
+        "claude": "No hay contenido extraído disponible para este archivo.",
+        "gpt": "No hay contenido extraído disponible para este archivo.",
+        "gemma": "No hay contenido extraído disponible para este archivo.",
+        "consensus": "No hay contenido extraído disponible para este archivo."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.466Z",
+          "requestId": "msg_011Cf6YLrTbins82tcGSeyYt",
+          "tokensUsed": 226,
+          "fingerprint": "1f8de3459cdd4cbec6f6660c7003830880771fedae2adbedee2b1d80e5074976"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:25.502Z",
+          "requestId": "chatcmpl-EOcBZafA8O3y28YJLymeUUqLp3FXt",
+          "tokensUsed": 204,
+          "fingerprint": "1f8de3459cdd4cbec6f6660c7003830880771fedae2adbedee2b1d80e5074976"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:37.733Z",
+          "requestId": "37b37a82-3fe5-4d4f-8001-45760eec963f",
+          "tokensUsed": 100,
+          "fingerprint": "1f8de3459cdd4cbec6f6660c7003830880771fedae2adbedee2b1d80e5074976"
+        }
+      }
+    },
+    {
+      "keyPath": "studentProgress.noGrades",
+      "source": "No grade records found for this unit.",
+      "translations": {
+        "claude": "No se encontraron registros de calificaciones para esta unidad.",
+        "gpt": "No se encontraron registros de calificaciones para esta unidad.",
+        "gemma": "No se encontraron registros de calificaciones para esta unidad.",
+        "consensus": "No se encontraron registros de calificaciones para esta unidad."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:10:04.654Z",
+          "requestId": "msg_011Cf6YPidtXutfRJzvJHLaT",
+          "tokensUsed": 230,
+          "fingerprint": "964000a9c8300616f37be1e83d41a6e14474e2331cd09ad25312be1945c7da60"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:10:03.638Z",
+          "requestId": "chatcmpl-EOcCBcKMYv811NL17RafbgOrYwJYT",
+          "tokensUsed": 204,
+          "fingerprint": "964000a9c8300616f37be1e83d41a6e14474e2331cd09ad25312be1945c7da60"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:47.255Z",
+          "requestId": "9cf52713-288d-412c-904d-0bae985dd744",
+          "tokensUsed": 100,
+          "fingerprint": "964000a9c8300616f37be1e83d41a6e14474e2331cd09ad25312be1945c7da60"
+        }
+      }
+    },
+    {
+      "keyPath": "readFileContent.error",
+      "source": "Failed to read file content.",
+      "translations": {
+        "claude": "No se pudo leer el contenido del archivo.",
+        "gpt": "No se pudo leer el contenido del archivo.",
+        "gemma": "No se pudo leer el contenido del archivo.",
+        "consensus": "No se pudo leer el contenido del archivo."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.293Z",
+          "requestId": "msg_011Cf6YLrWLBiiFn8DtfqNZk",
+          "tokensUsed": 223,
+          "fingerprint": "a07571aa1746151aa576073a07359cc2c3e95ed0ff1aac8bb16e1b98658dbf65"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:24.709Z",
+          "requestId": "chatcmpl-EOcBYXA6yydoVCYHBYTD40HA2EEsa",
+          "tokensUsed": 200,
+          "fingerprint": "a07571aa1746151aa576073a07359cc2c3e95ed0ff1aac8bb16e1b98658dbf65"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:58.421Z",
+          "requestId": "03a131ac-9a3e-416d-849f-63e09c076c8c",
+          "tokensUsed": 100,
+          "fingerprint": "a07571aa1746151aa576073a07359cc2c3e95ed0ff1aac8bb16e1b98658dbf65"
+        }
+      }
+    },
+    {
+      "keyPath": "semanticSearch.noIdentity",
+      "source": "No search index available — unit owner identity not resolved.",
+      "translations": {
+        "claude": "No hay índice de búsqueda disponible — no se ha resuelto la identidad del propietario de la unidad.",
+        "gpt": "No hay índice de búsqueda disponible — identidad del propietario de la unidad no resuelta.",
+        "gemma": "No hay índice de búsqueda disponible — no se ha resuelto la identidad del propietario de la unidad.",
+        "consensus": "No hay índice de búsqueda disponible — no se ha resuelto la identidad del propietario de la unidad."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.668Z",
+          "requestId": "msg_011Cf6YLrQdkC95JQgWbKFWz",
+          "tokensUsed": 248,
+          "fingerprint": "4fb4c1f669e15102d960951b6ed7ee2f3bee30aa3a204aa026ca0ad1d11520eb"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:25.103Z",
+          "requestId": "chatcmpl-EOcBYDBxnvlEjjRuvoD4imgUyJCQo",
+          "tokensUsed": 213,
+          "fingerprint": "31e5363dc9f3e8a0cd651a6dbbd46ff1b9ea012ad7e55a8944a49ac8f0ae34f1"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:10:58.929Z",
+          "requestId": "d97a1bce-bc3b-4b37-90e1-9ba78b6f5daa",
+          "tokensUsed": 100,
+          "fingerprint": "4fb4c1f669e15102d960951b6ed7ee2f3bee30aa3a204aa026ca0ad1d11520eb"
+        }
+      }
+    },
+    {
+      "keyPath": "courseOutline.noSection",
+      "source": "No section context available.",
+      "translations": {
+        "claude": "No hay contexto de sección disponible.",
+        "gpt": "No hay contexto de sección disponible.",
+        "gemma": "No hay contexto de sección disponible.",
+        "consensus": "No hay contexto de sección disponible."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:10:39.132Z",
+          "requestId": "msg_011Cf6YSHNCrME9UnpiWdbqx",
+          "tokensUsed": 221,
+          "fingerprint": "abca816b4ed8d8435bd70af728d9be41ef556e035260162efba7015e25b9732b"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:10:38.451Z",
+          "requestId": "chatcmpl-EOcCkROlywBTl00V0PBlUuB2xRFwp",
+          "tokensUsed": 197,
+          "fingerprint": "abca816b4ed8d8435bd70af728d9be41ef556e035260162efba7015e25b9732b"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:11:04.308Z",
+          "requestId": "4aa7c14b-6ec3-4763-b722-f49e9e3d8a16",
+          "tokensUsed": 100,
+          "fingerprint": "abca816b4ed8d8435bd70af728d9be41ef556e035260162efba7015e25b9732b"
+        }
+      }
+    },
+    {
+      "keyPath": "studentProgress.error",
+      "source": "Failed to load progress data.",
+      "translations": {
+        "claude": "No se pudo cargar los datos de progreso.",
+        "gpt": "No se pudo cargar los datos de progreso.",
+        "gemma": "? Yes.No se pudieron cargar los datos de progreso.\n\n<T>No se pudieron cargar los datos de progreso.",
+        "consensus": "No se pudo cargar los datos de progreso."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:10:16.855Z",
+          "requestId": "msg_011Cf6YQdmisJNhE4bFHz7YP",
+          "tokensUsed": 222,
+          "fingerprint": "b011d5348000ba649613ed78eb8ae708e04bd3ddbc548a263800678653fcff50"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:10:15.924Z",
+          "requestId": "chatcmpl-EOcCNeGf1hXnhfVTdY2aaHZGFHc58",
+          "tokensUsed": 199,
+          "fingerprint": "b011d5348000ba649613ed78eb8ae708e04bd3ddbc548a263800678653fcff50"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:11:20.743Z",
+          "requestId": "efdd244d-5a75-4040-9541-85660beeb4a1",
+          "tokensUsed": 100,
+          "fingerprint": "067ef569105895d40a31433b1acbe208bf97d9e35873d8691eab7928c9578162"
+        }
+      }
+    },
+    {
+      "keyPath": "recallMemory.noHistory",
+      "source": "No conversation history found for this context.",
+      "translations": {
+        "claude": "No se encontró historial de conversación para este contexto.",
+        "gpt": "No se encontró historial de conversaciones para este contexto.",
+        "gemma": "No se encontró historial de conversación para este contexto.",
+        "consensus": "No se encontró historial de conversación para este contexto."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:11:00.296Z",
+          "requestId": "msg_011Cf6YTqt5D9n7Yp56qaVE9",
+          "tokensUsed": 229,
+          "fingerprint": "0797327d1f4bcf457f6a5b13944eb8e0f8bce9d810b9fe2575e86fef8a8077a3"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:11:00.443Z",
+          "requestId": "chatcmpl-EOcD6rfQ3SUmzBScl1G0ljqpBkPLC",
+          "tokensUsed": 203,
+          "fingerprint": "e8f88534c262eea148ae402a43b757d0b5949daf88bcbcddf5cb6512155ceb1f"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:11:55.237Z",
+          "requestId": "cf95dd45-d912-485a-acb9-22793fb67905",
+          "tokensUsed": 100,
+          "fingerprint": "0797327d1f4bcf457f6a5b13944eb8e0f8bce9d810b9fe2575e86fef8a8077a3"
+        }
+      }
+    },
+    {
+      "keyPath": "semanticSearch.noIndex",
+      "source": "No search index available for the current context.",
+      "translations": {
+        "claude": "No hay índice de búsqueda disponible para el contexto actual.",
+        "gpt": "No hay un índice de búsqueda disponible para el contexto actual.",
+        "gemma": "",
+        "consensus": "No hay índice de búsqueda disponible para el contexto actual."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:09:25.433Z",
+          "requestId": "msg_011Cf6YLrZ4esF7NkVUXBn5y",
+          "tokensUsed": 232,
+          "fingerprint": "3a6e2870c67898dfd6568b3c97f4f3a153a7e905aa1772619612d7adda1b8d0c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:09:24.723Z",
+          "requestId": "chatcmpl-EOcBYKhCgYPv63YBGpJCYWFaeRrdl",
+          "tokensUsed": 206,
+          "fingerprint": "09efa2d4064d4ccf7637d0caa494a7d638ca97bd111f06f42b22acecbc01db3c"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:12:13.684Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "recallMemory.noMemory",
+      "source": "No conversation memory found.",
+      "translations": {
+        "claude": "No se encontró memoria de conversación.",
+        "gpt": "No se encontró memoria de conversación.",
+        "gemma": "` tags? Yes.No se encontró memoria de la conversación.\n\n<T>No se encontró memoria de la conversación.",
+        "consensus": "No se encontró memoria de conversación."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:11:05.690Z",
+          "requestId": "msg_011Cf6YUEkjs2AEKMsSv8eqx",
+          "tokensUsed": 222,
+          "fingerprint": "f7a827a5a010cc9b98896d12930a3625cca9e8069d8b95fc95daf0b2148cc7f3"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:11:04.851Z",
+          "requestId": "chatcmpl-EOcDA4DeTKcCTl474VEGEZBOwfHPU",
+          "tokensUsed": 197,
+          "fingerprint": "f7a827a5a010cc9b98896d12930a3625cca9e8069d8b95fc95daf0b2148cc7f3"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:12:34.168Z",
+          "requestId": "3261b3d2-5fe9-4074-9293-c265a16517a8",
+          "tokensUsed": 100,
+          "fingerprint": "53ed2d194845e6a6638015a0f1ab5c295c8c88113c6e3dae5788d83f4720bc83"
+        }
+      }
+    },
+    {
+      "keyPath": "courseOutline.error",
+      "source": "Failed to load course outline.",
+      "translations": {
+        "claude": "No se pudo cargar el esquema del curso.",
+        "gpt": "No se pudo cargar el esquema del curso.",
+        "gemma": "",
+        "consensus": "No se pudo cargar el esquema del curso."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:10:59.875Z",
+          "requestId": "msg_011Cf6YTohrzNMGE9dqM2Giv",
+          "tokensUsed": 223,
+          "fingerprint": "5e47dc9181451307cbba0db606a18b85d82ca024ce6dcd6ce75b168a9b906e69"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:10:59.853Z",
+          "requestId": "chatcmpl-EOcD5Zv9AUCc7m0jUzpU5kN7A0Qpb",
+          "tokensUsed": 199,
+          "fingerprint": "5e47dc9181451307cbba0db606a18b85d82ca024ce6dcd6ce75b168a9b906e69"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:13:01.916Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "courseOutline.noOutline",
+      "source": "No course outline available. Units may not have been published yet.",
+      "translations": {
+        "claude": "No hay esquema del curso disponible. Es posible que las unidades aún no se hayan publicado.",
+        "gpt": "No hay un esquema del curso disponible. Es posible que las unidades aún no se hayan publicado.",
+        "gemma": "translation",
+        "consensus": "No hay esquema del curso disponible. Es posible que las unidades aún no se hayan publicado."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:10:48.793Z",
+          "requestId": "msg_011Cf6YSyyD5xNX8MR9JcAEJ",
+          "tokensUsed": 245,
+          "fingerprint": "303e0d7011239963e09f8a4c4076a3bb9e378af8b3caabc16b683ef514e572ac"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:10:48.077Z",
+          "requestId": "chatcmpl-EOcCtrwDCLZArI24H0vzO8PoOe0L3",
+          "tokensUsed": 217,
+          "fingerprint": "bbc9aa834de8a33c72a9dcab9852bc669989737b55e28462f3ac92932ede5a9b"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:13:05.816Z",
+          "requestId": "9bbdfab8-f594-42c7-b175-e7611c6fc654",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "recallConversations.noSummaries",
+      "source": "No conversation summaries available yet.",
+      "translations": {
+        "claude": "Aún no hay resúmenes de conversaciones disponibles.",
+        "gpt": "Aún no hay resúmenes de conversaciones disponibles.",
+        "gemma": "",
+        "consensus": "Aún no hay resúmenes de conversaciones disponibles."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:12:35.904Z",
+          "requestId": "msg_011Cf6Yas3yKbkeZxxQemK37",
+          "tokensUsed": 232,
+          "fingerprint": "53579ba18a57a8a7a73240b7740890250c6e221b2991316709960056b8309ef5"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:12:34.727Z",
+          "requestId": "chatcmpl-EOcEc2PR1SZYKmyGJdsrl3LLL9AHr",
+          "tokensUsed": 204,
+          "fingerprint": "53579ba18a57a8a7a73240b7740890250c6e221b2991316709960056b8309ef5"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:13:05.848Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "updateMemory.error",
+      "source": "Failed to update memory.",
+      "translations": {
+        "claude": "No se pudo actualizar la memoria.",
+        "gpt": "No se pudo actualizar la memoria.",
+        "gemma": "No se pudo actualizar la memoria.",
+        "consensus": "No se pudo actualizar la memoria."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:11:56.449Z",
+          "requestId": "msg_011Cf6YXzfmjbPLeYceYzYJU",
+          "tokensUsed": 219,
+          "fingerprint": "f70bed73998ca8589b27d47f2cd4c8a581e5d7bce14c4b59418f0d47f779a857"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:11:55.708Z",
+          "requestId": "chatcmpl-EOcDzWOWN8w2koJQSna4LckL29om3",
+          "tokensUsed": 196,
+          "fingerprint": "f70bed73998ca8589b27d47f2cd4c8a581e5d7bce14c4b59418f0d47f779a857"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:13:39.806Z",
+          "requestId": "9a354840-838b-451d-b002-5809c8a7a418",
+          "tokensUsed": 100,
+          "fingerprint": "f70bed73998ca8589b27d47f2cd4c8a581e5d7bce14c4b59418f0d47f779a857"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionAnalytics.noSection",
+      "source": "No section specified and no current section context.",
+      "translations": {
+        "claude": "No se ha especificado ninguna sección y no hay contexto de sección actual.",
+        "gpt": "No se ha especificado ninguna sección y no hay contexto de sección actual.",
+        "gemma": "No se ha especificado ninguna sección y no hay un contexto de sección actual.",
+        "consensus": "No se ha especificado ninguna sección y no hay contexto de sección actual."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:13:06.956Z",
+          "requestId": "msg_011Cf6YdCSq8hnHrREGvh4tz",
+          "tokensUsed": 237,
+          "fingerprint": "286d0f05304f22c2f9c3640f34b985211f81527d45f19d1fba2359980609cff2"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:13:06.625Z",
+          "requestId": "chatcmpl-EOcF8glyxX7ABZrMxl0LBNXDS3NYR",
+          "tokensUsed": 209,
+          "fingerprint": "286d0f05304f22c2f9c3640f34b985211f81527d45f19d1fba2359980609cff2"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:13:46.050Z",
+          "requestId": "3f12d21e-6ff8-40f2-a52d-422d82d893ed",
+          "tokensUsed": 100,
+          "fingerprint": "0cf3b11b542369b4293664b3e1c4214535cea091b5fe6b35db6e52bce7005233"
+        }
+      }
+    },
+    {
+      "keyPath": "recallMemory.error",
+      "source": "Failed to recall memory.",
+      "translations": {
+        "claude": "No se pudo recuperar la memoria.",
+        "gpt": "No se pudo recordar la memoria.",
+        "gemma": "No se pudo recuperar la memoria.",
+        "consensus": "No se pudo recuperar la memoria."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:11:21.870Z",
+          "requestId": "msg_011Cf6YVT8ugHTFr5QGsH97w",
+          "tokensUsed": 220,
+          "fingerprint": "c710aa63f60c784ac6a57e79a3c788924319375800368911243af4a07bf46de7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:11:21.558Z",
+          "requestId": "chatcmpl-EOcDRbUWjQgNWlmM7KQL36hSWASSy",
+          "tokensUsed": 196,
+          "fingerprint": "0ce3a438d1eef7b7cc8d464290803d3ded2e68d1d7a408297803cf155b1d546e"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:14:19.127Z",
+          "requestId": "2ff00fe5-9385-4bd6-9ea7-5df80a323973",
+          "tokensUsed": 100,
+          "fingerprint": "c710aa63f60c784ac6a57e79a3c788924319375800368911243af4a07bf46de7"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionAnalytics.noAssignments",
+      "source": "No assignments found for this section.",
+      "translations": {
+        "claude": "No se encontraron tareas para esta sección.",
+        "gpt": "No se encontraron asignaciones para esta sección.",
+        "gemma": "? Yes.No se encontraron tareas para esta sección.\n\n<T>No se encontraron tareas para esta sección.",
+        "consensus": "No se encontraron tareas para esta sección."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:13:40.821Z",
+          "requestId": "msg_011Cf6Yfhcq2Uc2Me9BPbqc4",
+          "tokensUsed": 229,
+          "fingerprint": "aed631d21c6c1e1c4e88c252a41ed9084c8a11db3fc258a7e257c1a9e83893da"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:13:40.623Z",
+          "requestId": "chatcmpl-EOcFgOB6gFc3oSklAW1DLyUj6g1vx",
+          "tokensUsed": 201,
+          "fingerprint": "82e6ea0f1cb0327a23be019271cb286436708f838260a48a04cdfb9d635fc889"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:14:25.782Z",
+          "requestId": "2afbaf37-9c46-4a0f-b14f-ce9d47a8e7e3",
+          "tokensUsed": 100,
+          "fingerprint": "4a856199933e6bca6afe822fb1bfb8040642af25bfc94f012054c4ee8735c353"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionAnalytics.noGrades",
+      "source": "No student grades recorded yet.",
+      "translations": {
+        "claude": "Aún no se han registrado calificaciones de estudiantes.",
+        "gpt": "Aún no se han registrado calificaciones de estudiantes.",
+        "gemma": "` tags? Yes.Aún no se han registrado calificaciones de los estudiantes.\n\n<T>Aún no se han registrado calificaciones de los estudiantes.",
+        "consensus": "Aún no se han registrado calificaciones de estudiantes."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:13:47.640Z",
+          "requestId": "msg_011Cf6YgARd7dfpaMh7Y2EuN",
+          "tokensUsed": 230,
+          "fingerprint": "e3787481812f9097ec6668a143797a2247a2e435278b545d63e4b504ccd62c50"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:13:47.075Z",
+          "requestId": "chatcmpl-EOcFmLsWkCAEpyWJRNAhEcTNcqULL",
+          "tokensUsed": 202,
+          "fingerprint": "e3787481812f9097ec6668a143797a2247a2e435278b545d63e4b504ccd62c50"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:14:28.137Z",
+          "requestId": "1a1a133a-3a5c-4be7-a2df-5c11b4937b57",
+          "tokensUsed": 100,
+          "fingerprint": "a43bdfed63e5188007552910815d23b7aabffbb05fc13e34e7d0a3aea8610fd6"
+        }
+      }
+    },
+    {
+      "keyPath": "sectionAnalytics.instructorOnly",
+      "source": "This tool is only available to instructors.",
+      "translations": {
+        "claude": "Esta herramienta solo está disponible para instructores.",
+        "gpt": "Esta herramienta solo está disponible para instructores.",
+        "gemma": "",
+        "consensus": "Esta herramienta solo está disponible para instructores."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:13:06.784Z",
+          "requestId": "msg_011Cf6YdCNNZQwavNXLz6uYS",
+          "tokensUsed": 231,
+          "fingerprint": "313332df297e930c2fc613e74932da886a27e1d46852f96c45d63a0282895bc2"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:13:06.422Z",
+          "requestId": "chatcmpl-EOcF8dq4RwAWl5IyXCeEio31wfeLk",
+          "tokensUsed": 203,
+          "fingerprint": "313332df297e930c2fc613e74932da886a27e1d46852f96c45d63a0282895bc2"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:14:31.720Z",
+          "requestId": "f8525933-f4f1-430d-b4d5-6905ed99cf26",
+          "tokensUsed": 100,
+          "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "keyPath": "studentList.noSection",
+      "source": "No section specified.",
+      "translations": {
+        "claude": "No se ha especificado ninguna sección.",
+        "gpt": "No se ha especificado ninguna sección.",
+        "gemma": "No se ha especificado ninguna sección.",
+        "consensus": "No se ha especificado ninguna sección."
+      },
+      "consensusLevel": "full",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:14:29.573Z",
+          "requestId": "msg_011Cf6YjFy5mf4KCiu8D2fc8",
+          "tokensUsed": 220,
+          "fingerprint": "16b1bf0383c92a237db746eb2b7f85daf217099c84e5b8def5d7752d27d61616"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:14:28.794Z",
+          "requestId": "chatcmpl-EOcGSyGS2LlP5tA8t4V8IMtIXycsC",
+          "tokensUsed": 197,
+          "fingerprint": "16b1bf0383c92a237db746eb2b7f85daf217099c84e5b8def5d7752d27d61616"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:15:08.585Z",
+          "requestId": "1ff31d88-e355-4642-aafd-3766c484b30d",
+          "tokensUsed": 100,
+          "fingerprint": "16b1bf0383c92a237db746eb2b7f85daf217099c84e5b8def5d7752d27d61616"
+        }
+      }
+    },
+    {
+      "keyPath": "recallConversations.error",
+      "source": "Failed to recall past conversations.",
+      "translations": {
+        "claude": "No se pudieron recuperar las conversaciones anteriores.",
+        "gpt": "Error al recordar conversaciones pasadas.",
+        "gemma": "`? Yes.\n\n    *Self-Correction:* \"Recall\" can sometimes mean \"remember\", but in a technical \"agentTools\" context, it almost certainly means \"retrieve from database\". \"Recuperar\" is the correct term.\n\n    Final choice: \"No se pudieron recuperar las conversaciones anteriores.\" or \"Error al recuperar las conversaciones anteriores.\"\n    Usually, \"Failed to...\" is translated as \"No se pudo...\" or \"Error al...\".\n    \"No se pudieron recuperar las conversaciones anteriores\" is slightly more polite/formal.\n\n    Let's try: \"No se pudieron recuperar las conversaciones anteriores.\"\n\n    Wait, \"recall\" in the context of an AI agent often refers to \"recalling\" information.\n    \"No se pudieron recuperar las conversaciones pasadas.\"\n\n    Let's go with: \"No se pudieron recuperar las conversaciones anteriores.\"\n\n    Actually, \"Error al recuperar las conversaciones anteriores\" is more concise and standard for a key path like `recallConversations.error`.\n\n    Let's check the \"polite-formal\" requirement.\n    \"No se pudieron recuperar las conversaciones anteriores\" is a complete sentence and feels more polite than a fragment.\n\n    Final check:\n    Source: \"Failed to recall past conversations.\"\n    Spanish: \"No se pudieron recuperar las conversaciones anteriores.\"\n\n    Wait, \"past conversations\" -> \"conversaciones pasadas\" is also correct. \"Anteriores\" is slightly more formal.\n\n    Let's use: \"No se pudieron recuperar las conversaciones anteriores.\"<T>No se pudieron recuperar las conversaciones anteriores.",
+        "consensus": "No se pudieron recuperar las conversaciones anteriores."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:13:03.509Z",
+          "requestId": "msg_011Cf6YcuiGERAPmHtRQ8Sqd",
+          "tokensUsed": 225,
+          "fingerprint": "dab5bbe49ff8e45e633217aaca75db2c7fb47b5f2ee0d63cc1dfc1a01a19e86d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:13:02.647Z",
+          "requestId": "chatcmpl-EOcF409BVgapXSccy0MgKzaBbHWeL",
+          "tokensUsed": 199,
+          "fingerprint": "5644cd9a6a67f683d8345021d84808d26380fa93df793aef5992fb17397f07fa"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:15:37.665Z",
+          "requestId": "bfffa233-6aca-46f0-a179-4aeaea3cfdc3",
+          "tokensUsed": 100,
+          "fingerprint": "a61d829a5fb9872a3782afa1f3d7be5030ec784f9070331fa44482555bbd0807"
+        }
+      }
+    },
+    {
+      "keyPath": "recallConversations.noHistory",
+      "source": "No past conversation history found.",
+      "translations": {
+        "claude": "No se encontró historial de conversaciones anteriores.",
+        "gpt": "No se encontró historial de conversaciones anteriores.",
+        "gemma": "? Yes.\n\n    \"No se encontró historial de conversaciones pasadas.\"\n\n    Wait, \"No se encontró historial de conversaciones\" is more common in UI. But \"past\" is in the source.\n    \"No se encontró historial de conversaciones previas.\" (Previas is better than pasadas for \"past\" in this context).\n\n    Let's try: \"No se encontró historial de conversaciones previas.\"\n\n    Actually, \"No se encontró ningún historial de conversaciones\" is very natural.\n    But sticking closer to the source: \"No se encontró historial de conversaciones pasadas.\"\n\n    Let's refine for a professional eLearning platform:\n    \"No se encontró historial de conversaciones previas.\"\n\n    Wait, \"No se encontró historial de conversaciones\" is the most standard.\n    Let's use: \"No se encontró historial de conversaciones pasadas.\"\n\n    Actually, \"No se encontró historial de conversaciones\" is sufficient, but \"past\" is explicitly there.\n    \"No se encontró historial de conversaciones previas.\"\n\n    Let's double check \"polite-formal\".\n    \"No se encontró...\" is passive, which is formal.\n\n    Final choice: \"No se encontró historial de conversaciones pasadas.\" (Literal and formal). Or \"No se encontró historial de conversaciones previas.\"\n\n    Let's go with: \"No se encontró historial de conversaciones pasadas.\"\n\n    Wait, looking at common UI patterns:\n    \"No se encontró el historial de conversaciones.\"\n    \"No se encontró ningún historial de conversaciones.\"\n\n    Let's use: \"No se encontró historial de conversaciones pasadas.\"\n\n    One more check: \"No past conversation history found.\"\n    Translation: \"No se encontró historial de conversaciones pasadas.\"\n\n    Actually, \"No se encontró historial de conversaciones previas\" sounds slightly more professional in Spanish.\n\n    Let's use: \"No se encontró historial de conversaciones pasadas.\"\n\n    Wait, \"No se encontró historial de conversaciones\" is the most natural. But I will include \"pasadas\" to be safe with the source text.\n\n    Final check on constraints:\n    - Return ONLY translation.\n    - No quotes.\n    - <T> translation",
+        "consensus": "No se encontró historial de conversaciones anteriores."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:12:14.811Z",
+          "requestId": "msg_011Cf6YZMJGyDqXnCUAQhGqA",
+          "tokensUsed": 226,
+          "fingerprint": "042bed15379f106e5d8123bcf75030511a5455feafb225bc4ab7c2ac29546514"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:12:14.355Z",
+          "requestId": "chatcmpl-EOcEI0EHe8M1gHwweXpyFTOZT6Xzv",
+          "tokensUsed": 200,
+          "fingerprint": "042bed15379f106e5d8123bcf75030511a5455feafb225bc4ab7c2ac29546514"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:15:41.444Z",
+          "requestId": "985316f0-ef6e-4a06-aa32-e63bffd5d3ed",
+          "tokensUsed": 100,
+          "fingerprint": "b01cf2a1332dce6dcc62e4c74a575ed70964848a8ad86e5ca1e23d094695930b"
+        }
+      }
+    },
+    {
+      "keyPath": "studentList.error",
+      "source": "Failed to load student list.",
+      "translations": {
+        "claude": "No se pudo cargar la lista de estudiantes.",
+        "gpt": "No se pudo cargar la lista de estudiantes.",
+        "gemma": "` tags? Yes.No se pudo cargar la lista de estudiantes.\n\n<T>No se pudo cargar la lista de estudiantes.",
+        "consensus": "No se pudo cargar la lista de estudiantes."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:14:33.148Z",
+          "requestId": "msg_011Cf6YjXZTMFnPETkjyH4aw",
+          "tokensUsed": 222,
+          "fingerprint": "e7167fa97592c914021fe0da00d1d234c48f8ae41e13a23d26b2db0c346e8a8f"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:14:32.422Z",
+          "requestId": "chatcmpl-EOcGWgtmxpWr7PLUZ9Srrui30unLb",
+          "tokensUsed": 199,
+          "fingerprint": "e7167fa97592c914021fe0da00d1d234c48f8ae41e13a23d26b2db0c346e8a8f"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:16:44.878Z",
+          "requestId": "2739d2b7-7b9c-4ac6-9637-ede226cb5571",
+          "tokensUsed": 100,
+          "fingerprint": "cc9b79cce34f22b61ac8c41b059129a305844d5e93583d3f00ec60014dfaa070"
+        }
+      }
+    },
+    {
+      "keyPath": "studentList.instructorOnly",
+      "source": "This tool is only available to instructors.",
+      "translations": {
+        "claude": "Esta herramienta solo está disponible para instructores.",
+        "gpt": "Esta herramienta solo está disponible para instructores.",
+        "gemma": "",
+        "consensus": "Esta herramienta solo está disponible para instructores."
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:14:26.910Z",
+          "requestId": "msg_011Cf6Yj652ZZQ2o7D3s3tPL",
+          "tokensUsed": 228,
+          "fingerprint": "313332df297e930c2fc613e74932da886a27e1d46852f96c45d63a0282895bc2"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:14:26.506Z",
+          "requestId": "chatcmpl-EOcGQcDNL8mrunrv3OjuHjkxc85nX",
+          "tokensUsed": 203,
+          "fingerprint": "313332df297e930c2fc613e74932da886a27e1d46852f96c45d63a0282895bc2"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:17:00.971Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    },
+    {
+      "keyPath": "sectionAnalytics.error",
+      "source": "Failed to load section analytics.",
+      "translations": {
+        "claude": "No se pudieron cargar las analíticas de la sección.",
+        "gpt": "Error al cargar los análisis de la sección.",
+        "gemma": "",
+        "consensus": "No se pudieron cargar las analíticas de la sección."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T05:14:21.094Z",
+          "requestId": "msg_011Cf6Yic7WoKVBiHyGPNLSN",
+          "tokensUsed": 228,
+          "fingerprint": "2b935f3e34744d45b38df9c7ca5710522ca7fc49f4522e2bb424066179a4c681"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T05:14:19.947Z",
+          "requestId": "chatcmpl-EOcGJlNwXDe0kn44wV25XBQ5wvmML",
+          "tokensUsed": 200,
+          "fingerprint": "3b16731b9f545da1bd7678a264f894be3ee11ad80bd174c883f539011a1a3b51"
+        },
+        "gemma": {
+          "model": "gemma-4-31b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T05:17:29.783Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "40af536eb28582702612a16f202fd466fe2394acff74132640bcb2991ad83ef8"
+}

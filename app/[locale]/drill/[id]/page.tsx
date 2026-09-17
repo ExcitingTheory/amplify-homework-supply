@@ -35,6 +35,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import AddIcon from "@mui/icons-material/Add";
 
 import { Workbook } from "@/components/Editor3/Workbook";
+import { EmptyState } from "@/components/EmptyState";
 import { FilesProvider } from "@/context/fileContext";
 import { DictionaryProvider } from "@/context/dictionaryContext";
 import { UnitProvider } from "@/context/unitContext";
@@ -140,6 +141,19 @@ function DrillLibraryPicker({
             ))}
           </List>
         </Box>
+      )}
+
+      {!hasOptions && (
+        <EmptyState
+          dense
+          title={t("practiceDrill.library.emptyTitle", {
+            defaultValue: "No practice drills yet",
+          })}
+          description={t("practiceDrill.library.emptyDescription", {
+            defaultValue:
+              "Generate a drill to practice vocabulary and questions from this unit at your own pace.",
+          })}
+        />
       )}
 
       {/* Generate new */}

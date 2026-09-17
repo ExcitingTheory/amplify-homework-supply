@@ -1,0 +1,466 @@
+{
+  "namespace": "editor",
+  "sourceLang": "en",
+  "targetLang": "es",
+  "mode": "provable",
+  "timestamp": "2026-09-16T17:55:55.424Z",
+  "summary": {
+    "totalKeys": 557,
+    "existingKeys": 666,
+    "translatedKeys": 12,
+    "errors": 0,
+    "coverage": 122
+  },
+  "tokens": {
+    "claude": 2615,
+    "gpt": 2325,
+    "gemini": 1100
+  },
+  "translations": [
+    {
+      "keyPath": "customAnswerComponent.completedQuestion",
+      "source": "Completed Question",
+      "translations": {
+        "claude": "Pregunta Completada",
+        "gpt": "Pregunta completada",
+        "gemma": "...",
+        "consensus": "Pregunta Completada"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.562Z",
+          "requestId": "msg_011Cf7Y5dUbNUmz2A4auhZQ1",
+          "tokensUsed": 216,
+          "fingerprint": "6d2b7b1d56c53199bd29ed710cded4a146dc7d50ac820a2f7636da0a6b28b461"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:33.784Z",
+          "requestId": "chatcmpl-EOo0HgcnWSa8IyLVc27RAQNobFb7U",
+          "tokensUsed": 191,
+          "fingerprint": "76dcdc8629a05d5df0a4d35bad64ec760b3d1328b227ec7ce9b04344af8e3768"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:46.101Z",
+          "requestId": "54059b16-ba6c-4279-a186-874c999d7bfa",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.audioQuestion",
+      "source": "Audio Question",
+      "translations": {
+        "claude": "Pregunta de Audio",
+        "gpt": "Pregunta de audio",
+        "gemma": "translation",
+        "consensus": "Pregunta de Audio"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.558Z",
+          "requestId": "msg_011Cf7Y5dQdVjcRnGQukTYtG",
+          "tokensUsed": 213,
+          "fingerprint": "6f35029f1f2da62fc3a5f928469a94034d07fe372725e19be008363b6a8a6b15"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:34.626Z",
+          "requestId": "chatcmpl-EOo0I64cOZidEq3hKzDUw4p3aHHM7",
+          "tokensUsed": 191,
+          "fingerprint": "0e8e96aba5d1ecc66df88f75352beb5fbee9d1b4d506395740421ad34fe30121"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:52.853Z",
+          "requestId": "16407326-689d-4569-843c-5479e620664d",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.yourAnswer",
+      "source": "Your Answer",
+      "translations": {
+        "claude": "Su Respuesta",
+        "gpt": "Su respuesta",
+        "gemma": "translation",
+        "consensus": "Su Respuesta"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:47.510Z",
+          "requestId": "msg_011Cf7Y6abyrxsSA9YD91L1y",
+          "tokensUsed": 212,
+          "fingerprint": "27e3b519b400246054ad559b3c61cdc6ce4a1d4c9371fffab4f26bab0742fc34"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:47.196Z",
+          "requestId": "chatcmpl-EOo0UGJk6YWZi3uAm9Gh5J245WKN4",
+          "tokensUsed": 191,
+          "fingerprint": "89ac7a277dc41f72db395aa22aff8f959ff9013596c8471072f41d350108b63e"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:53.538Z",
+          "requestId": "468a6844-610d-4471-b81d-8f3f84e46119",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.answerPlaceholder",
+      "source": "Answer Placeholder",
+      "translations": {
+        "claude": "Marcador de posición para respuesta",
+        "gpt": "Marcador de posición de respuesta",
+        "gemma": "translation",
+        "consensus": "Marcador de posición para respuesta"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.829Z",
+          "requestId": "msg_011Cf7Y5dFCGhcciKPeNEizc",
+          "tokensUsed": 221,
+          "fingerprint": "b26860f57c98d323d143f4e200ed2759db0e5cf29cc6998847d701ba4f82859d"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:33.796Z",
+          "requestId": "chatcmpl-EOo0HfMdKpA4Pme6G28lCp9fv4SRs",
+          "tokensUsed": 194,
+          "fingerprint": "26ee498e9b4eb865ec9504d6ee6ffba991766076c7d986ec2da186fd1707dbf1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:53.826Z",
+          "requestId": "63d2a8b7-8577-4eae-bd0c-636a57380c02",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.answerQuestions",
+      "source": "Answer Questions",
+      "translations": {
+        "claude": "Responder Preguntas",
+        "gpt": "Responda preguntas",
+        "gemma": "translation",
+        "consensus": "Responder Preguntas"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.744Z",
+          "requestId": "msg_011Cf7Y5dKRDYvgQtVAJKQft",
+          "tokensUsed": 217,
+          "fingerprint": "5b687ed0a54405f5f5e46c376640fea1b404a944c1a3696b4317c9a7e5f43cb7"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:34.233Z",
+          "requestId": "chatcmpl-EOo0HhLaDwe0ordXTldi71UjozAOw",
+          "tokensUsed": 192,
+          "fingerprint": "14df0954b47da730d2ca32aaa5506a820149d3ee828b6f7e2d6450025982b4b1"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:54.551Z",
+          "requestId": "da0104bd-9cc8-4b59-911b-7f867fa36f58",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "answerEditor.addWordLabel",
+      "source": "Add Word Label",
+      "translations": {
+        "claude": "Agregar etiqueta de palabra",
+        "gpt": "Agregar etiqueta de palabra",
+        "gemma": "...",
+        "consensus": "Agregar etiqueta de palabra"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.752Z",
+          "requestId": "msg_011Cf7Y5dBEH3VweMuJs1WAc",
+          "tokensUsed": 217,
+          "fingerprint": "63ab07e710b8bdc1c481bdc2dd75e33710219950fde454761762b08467e85b24"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:33.872Z",
+          "requestId": "chatcmpl-EOo0HSAvnUoGQpybarKFjC1bSKPs7",
+          "tokensUsed": 193,
+          "fingerprint": "63ab07e710b8bdc1c481bdc2dd75e33710219950fde454761762b08467e85b24"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:57.359Z",
+          "requestId": "d966d5b5-3204-4091-97b6-bb9f091dc813",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.errorOccurred",
+      "source": "Error Occurred",
+      "translations": {
+        "claude": "Se ha producido un error",
+        "gpt": "Se ha producido un error",
+        "gemma": "translation",
+        "consensus": "Se ha producido un error"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.607Z",
+          "requestId": "msg_011Cf7Y5dWKWcz2uuDmdxq4u",
+          "tokensUsed": 217,
+          "fingerprint": "d1a1e0a360177c83e2f50cb375c0c56ad1dd6eb979452b9916cfa27fdc081a05"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:33.912Z",
+          "requestId": "chatcmpl-EOo0HlWlPyzGjhEwJ8cOGTNgth3Qt",
+          "tokensUsed": 196,
+          "fingerprint": "d1a1e0a360177c83e2f50cb375c0c56ad1dd6eb979452b9916cfa27fdc081a05"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:46:58.641Z",
+          "requestId": "5d84c479-1cef-4476-aa61-b316ba016ee3",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "answerComponent.noDictionaryAvailable",
+      "source": "No Dictionary Available",
+      "translations": {
+        "claude": "No hay diccionario disponible",
+        "gpt": "No hay diccionario disponible",
+        "gemma": "tags.\n\n    Translation: No hay diccionario disponible.\n\n    Wait, I'll check if \"No hay diccionario disponible\" is better than \"No se encuentra un diccionario disponible\".\n    \"No hay diccionario disponible\" is more direct.\n    \"No se encuentra un diccionario disponible\" is more \"formal\".\n    However, \"No hay diccionario disponible\" is not informal. It's neutral-formal.\n\n    Let's try \"No se dispone de diccionario\". This is very formal.\n    But \"No hay diccionario disponible\" is the most common and correct translation for this specific UI string.\n\n    Let's go with: No hay diccionario disponible.\n\n    Actually, looking at the source \"No Dictionary Available\", it's a status.\n    \"Diccionario no disponible\" is also a very strong candidate.\n    But \"No hay diccionario disponible\" feels more like a complete, polite message.\n\n    Let's refine:\n    \"No hay diccionario disponible\" (There is no dictionary available).\n    \"No se encuentra un diccionario disponible\" (A dictionary is not found available).\n\n    I will provide \"No hay diccionario disponible\".\n\n    Wait, I'll check if \"No hay diccionario disponible\" is too \"plain\".\n    If the user is \"all users\" and the tone is \"polite-formal\", \"No hay diccionario disponible\" is safe and professional.\n\n    One more thought: \"No se encuentra ningún diccionario disponible\". This is very formal.\n    But \"No hay diccionario disponible\" is the standard.\n\n    Let's look at the English again. \"No Dictionary Available\".\n    It's a bit clipped.\n    Spanish: \"No hay diccionario disponible\".\n\n    Final decision: No hay diccionario disponible.\n\n    Wait, I'll check if \"No se dispone de diccionario\" is better.\n    \"No se dispone de diccionario\" is very formal.\n    \"No hay diccionario disponible\" is standard.\n    Given \"polite-formal\", \"No hay diccionario disponible\" is appropriate.\n\n    Let's check if \"No hay diccionario disponible\" uses \"usted\". It doesn't use a pronoun, so it's neutral/formal.\n\n    Final check:\n    Source: No Dictionary Available\n    Target: No hay diccionario disponible\n\n    Wait, I'll consider \"No se encuentra un diccionario disponible\" one last time. It's a bit long for a UI component. \"No hay diccionario disponible\" is better.\n\n    Actually, \"No hay diccionario disponible\" is the most natural translation for \"No [Something] Available\".\n\n    One more check: \"No hay diccionario disponible\" vs \"No hay ningún diccionario disponible\".\n    \"No hay diccionario disponible\" is cleaner.\n\n    Final result: No hay diccionario disponible.No hay diccionario disponible\n\n<T>No hay diccionario disponible",
+        "consensus": "No hay diccionario disponible"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.711Z",
+          "requestId": "msg_011Cf7Y5dLQu2rrmY29es8Rh",
+          "tokensUsed": 219,
+          "fingerprint": "0d14b9eddfd687133c80fa3b10273c0cdf9b2d746876426aa891ed4cae213cc9"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:34.031Z",
+          "requestId": "chatcmpl-EOo0H7pR8bX5vp4F0e2yo6iz7VhRX",
+          "tokensUsed": 194,
+          "fingerprint": "0d14b9eddfd687133c80fa3b10273c0cdf9b2d746876426aa891ed4cae213cc9"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:47:11.354Z",
+          "requestId": "95332d86-5cb2-4f45-9abd-9708f5398e7c",
+          "tokensUsed": 100,
+          "fingerprint": "0df06c1a44429e77e152f8fac08e2b8a815bd15396081920a23fd737c332efad"
+        }
+      }
+    },
+    {
+      "keyPath": "tableComponent.cellActionsTitle",
+      "source": "Cell Actions Title",
+      "translations": {
+        "claude": "Título de Acciones de Celda",
+        "gpt": "Título de Acciones de Celda",
+        "gemma": "translation",
+        "consensus": "Título de Acciones de Celda"
+      },
+      "consensusLevel": "partial",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:55.257Z",
+          "requestId": "msg_011Cf7Y79Liw9TLer4kCjKko",
+          "tokensUsed": 219,
+          "fingerprint": "575255103509a8c24570e982d8ee3824d98b6a37602cb8b45afb99850ec706a6"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:54.494Z",
+          "requestId": "chatcmpl-EOo0cI6Tft0mBUl42hrho5eRL0xyR",
+          "tokensUsed": 196,
+          "fingerprint": "575255103509a8c24570e982d8ee3824d98b6a37602cb8b45afb99850ec706a6"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:47:29.697Z",
+          "requestId": "4618dce7-b7d9-4df4-956a-958bbf072140",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "sketchPad.activatingDrawingPad",
+      "source": "Activating drawing pad...",
+      "translations": {
+        "claude": "Activando panel de dibujo...",
+        "gpt": "Activando el bloc de dibujo...",
+        "gemma": "translation",
+        "consensus": "Activando panel de dibujo..."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:54.080Z",
+          "requestId": "msg_011Cf7Y75RqBQF9z4yWjEdCm",
+          "tokensUsed": 224,
+          "fingerprint": "2e10a02556da517d3dc03009ed3fb5b6ced759b3868b51c4667b321094ff9181"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:53.704Z",
+          "requestId": "chatcmpl-EOo0bukIpKsfWIlOtSSyYE5mo78jh",
+          "tokensUsed": 198,
+          "fingerprint": "1bbf744b94eec3872b1bd78e116474af350c4112985dc488a37aa19d5b0a0ca3"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:47:29.791Z",
+          "requestId": "ddeb547f-ef7f-40ac-929c-284951ce7700",
+          "tokensUsed": 100,
+          "fingerprint": "839cd11692e82b35399802778a0d4b08fb21690eb757a7d9e5030d9a2bcc2b97"
+        }
+      }
+    },
+    {
+      "keyPath": "tableComponent.cellActionsLabel",
+      "source": "Cell Actions Label",
+      "translations": {
+        "claude": "Etiqueta de Acciones de Celda",
+        "gpt": "Etiqueta de acciones de celda",
+        "gemma": "Etiqueta de acciones de la celda",
+        "consensus": "Etiqueta de Acciones de Celda"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:54.964Z",
+          "requestId": "msg_011Cf7Y78JUNbip4MDjRqKr8",
+          "tokensUsed": 221,
+          "fingerprint": "f9251138a651b8e5d3e7b6253329163a30ed4b781be1c1ef8bf07901d7a07af6"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:54.494Z",
+          "requestId": "chatcmpl-EOo0cH6LzYR2lLNJIWDwo63tWAwai",
+          "tokensUsed": 195,
+          "fingerprint": "2ef0444c9e4bfcc24740e6c39f95e9aa12307df59b132c7dadb7ef3b49dd387d"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:47:35.702Z",
+          "requestId": "5e042101-fa07-438f-acde-7818ba5a956b",
+          "tokensUsed": 100,
+          "fingerprint": "d7478bd40e1a22bdf7d1906e15777d416125673b4f32302588cb970228d316cd"
+        }
+      }
+    },
+    {
+      "keyPath": "customAnswerComponent.promptNotAvailable",
+      "source": "Prompt Not Available",
+      "translations": {
+        "claude": "Indicación No Disponible",
+        "gpt": "Indicación no disponible",
+        "gemma": "",
+        "consensus": "Indicación No Disponible"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T17:46:34.571Z",
+          "requestId": "msg_011Cf7Y5dUbEYCtj4PNKQtzH",
+          "tokensUsed": 219,
+          "fingerprint": "90df6cb58ec7d241aa60df7bf6b852c0cb7caf903a1d380fa0b5e2de2cdda2db"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T17:46:34.749Z",
+          "requestId": "chatcmpl-EOo0IZMM8DY1zaRc8tTZ69xKnbvki",
+          "tokensUsed": 194,
+          "fingerprint": "8e176678a097cf34ec0e651d6b9a27835572d4f8c5e45180212e1019f84149c0"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T17:55:55.396Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "be4ea794b91167842a2bc98ccabdd167f15e79a87ba70f3f2eafd1821c733d14"
+}

@@ -1,10 +1,14 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { getThemeOptions, getCustomThemeOptions } from '@/themes/editorThemes'
-import { buildFullPaletteFromCustom } from '@/components/Gamification/ThemeMixer'
-import type { CustomThemePaletteInput } from '@/components/Gamification/ThemeMixer'
+import * as React from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  getThemeOptions,
+  getCustomThemeOptions,
+  sharedComponentOverrides,
+} from "@/themes/editorThemes";
+import { buildFullPaletteFromCustom } from "@/components/Gamification/ThemeMixer";
+import type { CustomThemePaletteInput } from "@/components/Gamification/ThemeMixer";
 
 /**
  * Wraps the public profile page in a ThemeProvider using the viewed user's
@@ -18,22 +22,28 @@ export default function ProfileThemeWrapper({
   customPalette,
   children,
 }: {
-  themeId: string | null
-  customPalette?: CustomThemePaletteInput | null
-  children: React.ReactNode
+  themeId: string | null;
+  customPalette?: CustomThemePaletteInput | null;
+  children: React.ReactNode;
 }) {
   const theme = React.useMemo(() => {
-    if (themeId === 'custom' && customPalette) {
-      const palette = buildFullPaletteFromCustom(customPalette)
-      return createTheme(getCustomThemeOptions(palette))
+    if (themeId === "custom" && customPalette) {
+      const palette = buildFullPaletteFromCustom(customPalette);
+      return createTheme({
+        ...getCustomThemeOptions(palette),
+        components: sharedComponentOverrides,
+      });
     }
-    return createTheme(getThemeOptions(themeId))
-  }, [themeId, customPalette])
+    return createTheme({
+      ...getThemeOptions(themeId),
+      components: sharedComponentOverrides,
+    });
+  }, [themeId, customPalette]);
 
-  if (!themeId || themeId === 'default') {
+  if (!themeId || themeId === "default") {
     // No override needed — use the parent theme
-    return <>{children}</>
+    return <>{children}</>;
   }
 
-  return <ThemeProvider theme={theme}>{children}</ThemeProvider>
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 }

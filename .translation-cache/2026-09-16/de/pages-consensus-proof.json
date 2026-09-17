@@ -1,0 +1,429 @@
+{
+  "namespace": "pages",
+  "sourceLang": "en",
+  "targetLang": "de",
+  "mode": "provable",
+  "timestamp": "2026-09-16T22:22:24.104Z",
+  "summary": {
+    "totalKeys": 240,
+    "existingKeys": 229,
+    "translatedKeys": 11,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 0,
+    "gpt": 2568,
+    "gemini": 1000
+  },
+  "translations": [
+    {
+      "keyPath": "privacy.policyChanges.heading",
+      "source": "Changes to This Policy",
+      "translations": {
+        "claude": "",
+        "gpt": "Änderungen an dieser Richtlinie",
+        "gemma": "...",
+        "consensus": "Änderungen an dieser Richtlinie"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:02:45.106Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:31.878Z",
+          "requestId": "chatcmpl-EOrzzXF2pgvAnMb2M4EyUX9hTZHds",
+          "tokensUsed": 196,
+          "fingerprint": "9e1a97959b7f995b68a301e155b24c3429733fb0e26c8f270329393cadd26cd7"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:02:45.106Z",
+          "requestId": "60649250-f90a-4f2a-915f-1b5151dd3631",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.heading",
+      "source": "Children's Privacy",
+      "translations": {
+        "claude": "",
+        "gpt": "Datenschutz von Kindern",
+        "gemma": "...",
+        "consensus": "Datenschutz von Kindern"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:02:47.943Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:31.905Z",
+          "requestId": "chatcmpl-EOrzzoUZ30k4eNFK5phKGZL4Omuy1",
+          "tokensUsed": 195,
+          "fingerprint": "0761549f16837b3d7cd6649bc19c40b7a10085c419e9ad2e17dee98594cf7beb"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:02:47.943Z",
+          "requestId": "c5cbabb7-bfcf-4b69-96c0-fb452d3c4b65",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.heading",
+      "source": "Contact Us",
+      "translations": {
+        "claude": "",
+        "gpt": "Kontaktieren Sie uns",
+        "gemma": "...",
+        "consensus": "Kontaktieren Sie uns"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:01.326Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:45.722Z",
+          "requestId": "chatcmpl-EOs0DAOisXyj9tuqaE0yHjwaiBv4q",
+          "tokensUsed": 191,
+          "fingerprint": "835a9ca17b09648d7ea2c1f8aed2fbc137030047fa02c94e8f709a10243e1f37"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:01.326Z",
+          "requestId": "5907cc4b-4225-4615-8c28-1188ff7c744f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.item5",
+      "source": "Opt-out: Disable leaderboard visibility and certain data sharing features",
+      "translations": {
+        "claude": "",
+        "gpt": "Abmeldung: Deaktivieren Sie die Sichtbarkeit der Bestenliste und bestimmte Datenfreigabefunktionen",
+        "gemma": "Opt-out: Deaktivieren Sie die Sichtbarkeit der Bestenliste und bestimmte Funktionen zur Datenweitergabe",
+        "consensus": "Abmeldung: Deaktivieren Sie die Sichtbarkeit der Bestenliste und bestimmte Datenfreigabefunktionen"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:04.105Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:31.738Z",
+          "requestId": "chatcmpl-EOrzzwStmZ7kLl6ZLADrj89bU1TZW",
+          "tokensUsed": 220,
+          "fingerprint": "fcc0cd1059afa7c143a65038fce4df29e658be45b804426ac0dc139276e32201"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:04.105Z",
+          "requestId": "6f5e2f9d-df77-4ba7-880b-2e01a696e6af",
+          "tokensUsed": 100,
+          "fingerprint": "829bf10d407141f474188aad8a7eb7d3ec265786f94776efa3aeac7ed447a1b7"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.heading",
+      "source": "Cookies & Local Storage",
+      "translations": {
+        "claude": "",
+        "gpt": "Cookies & Lokaler Speicher",
+        "gemma": "tags.\n\n    Translation: Cookies & lokaler Speicher.\n\n    Wait, I'll check if \"Local Storage\" is better left as is. In many professional German localizations (like MDN or developer docs), they use \"Local Storage\". But for an *end-user* eLearning platform, \"lokaler Speicher\" is much more user-friendly and follows the \"international users\" context.\n\n    Actually, \"Cookies & Local Storage\" is so common in German that translating it might feel slightly \"off\" to a dev, but \"Cookies & lokaler Speicher\" is the correct linguistic translation.\n\n    Let's look at the source again: \"Cookies & Local Storage\".\n    If I provide \"Cookies & lokaler Speicher\", it is a perfect translation.\n\n    One more thought: Should it be \"Cookies & Local Storage\" (untranslated)?\n    If the platform is being translated to German, the user expects German terms.\n    \"Cookies & lokaler Speicher\" is the way to go.\n\n    *Refining*:\n    \"Cookies & lokaler Speicher\"\n\n    Wait, I should check if \"Local Storage\" is often used as a compound noun in German.\n    \"Local Storage\" (English) -> \"Lokaler Speicher\" (German).\n\n    Final decision: Cookies & lokaler Speicher.\n\n    *Wait*, looking at the source again. It's a heading.\n    \"Cookies & Local Storage\"\n    In German: \"Cookies & lokaler Speicher\"\n\n    Let's verify the capitalization.\n    Cookies (Noun) - Yes.\n    lokaler (Adjective) - Yes.\n    Speicher (Noun) - Yes.\n\n    Final string: Cookies & lokaler Speicher.\n\n    Wait, I'll check if \"Cookies & Local Storage\" is better.\n    Actually, many German UI translations for \"Local Storage\" in privacy settings use \"Lokaler Speicher\".\n\n    Let's try to see if there's a more \"formal\" way.\n    \"Cookies und lokaler Speicher\"\n    But the source uses \"&\". I will stick to \"&\".\n\n    Final check:\n    Source: Cookies & Local Storage\n    Target: Cookies & lokaler Speicher\n\n    One last check: Is \"Cookies\" plural in German? Yes, \"Cookies\" is the same in German.\n\n    Final string: Cookies & lokaler Speicher.Cookies & lokaler Speicher\n\n<T>Cookies & lokaler Speicher",
+        "consensus": "Cookies & Lokaler Speicher"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:06.190Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:31.696Z",
+          "requestId": "chatcmpl-EOrzzeUmOOkcL04Q5NWXgcImzpVCj",
+          "tokensUsed": 193,
+          "fingerprint": "bba9b1c3eef5c07dbda1ee7fcf6921a8eae59312f1272e9355603fea690d1dd4"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:06.190Z",
+          "requestId": "b341b8ec-a665-4d18-9ccd-b1181363b5db",
+          "tokensUsed": 100,
+          "fingerprint": "e42b303e0e30d4ecca1402619cbd722b183f825abc7708852b7ee711c605fdcb"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.cookies.content",
+      "source": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access.",
+      "translations": {
+        "claude": "",
+        "gpt": "Wir verwenden essentielle Cookies und lokalen Speicher für Authentifizierung, Sitzungsverwaltung und Offline-Funktionalität. Wir verwenden keine Tracking-Cookies von Drittanbietern oder Werbe-Cookies. Der lokale Speicher wird verwendet, um Lerninhalte für den Offline-Zugriff zwischenzuspeichern.",
+        "gemma": "...",
+        "consensus": "Wir verwenden essentielle Cookies und lokalen Speicher für Authentifizierung, Sitzungsverwaltung und Offline-Funktionalität. Wir verwenden keine Tracking-Cookies von Drittanbietern oder Werbe-Cookies. Der lokale Speicher wird verwendet, um Lerninhalte für den Offline-Zugriff zwischenzuspeichern."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:06.765Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:31.984Z",
+          "requestId": "chatcmpl-EOrzzD30SUGreKIBkyMbAe2IDhj5k",
+          "tokensUsed": 283,
+          "fingerprint": "3bd1f8138f4c32d6357095a7e7a5bda3615fb382fe8e30b55f35a8ddc89b11ae"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:06.765Z",
+          "requestId": "a06ff5ec-bb55-40e6-9b13-268a2bbb429f",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.yourRights.outro",
+      "source": "To exercise these rights, contact your instructor or reach out to us using the contact information below.",
+      "translations": {
+        "claude": "",
+        "gpt": "Um diese Rechte auszuüben, kontaktieren Sie Ihren Kursleiter oder wenden Sie sich mit den unten stehenden Kontaktinformationen an uns.",
+        "gemma": "...",
+        "consensus": "Um diese Rechte auszuüben, kontaktieren Sie Ihren Kursleiter oder wenden Sie sich mit den unten stehenden Kontaktinformationen an uns."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:09.783Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:32.178Z",
+          "requestId": "chatcmpl-EOrzz9bbxSquMU7N0fPpzWYzeB7wt",
+          "tokensUsed": 232,
+          "fingerprint": "c9af3b5d2899bde10e8ff379d1fd616b8eae650dc740abad2c68fbd9f8030fab"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:09.783Z",
+          "requestId": "71e513a6-ebfe-48de-b192-72f00b443d8a",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.policyChanges.content",
+      "source": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy.",
+      "translations": {
+        "claude": "",
+        "gpt": "Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren, um Änderungen in unseren Praktiken oder gesetzlichen Anforderungen widerzuspiegeln. Wir werden die Benutzer über wesentliche Änderungen über die Plattform informieren. Die fortgesetzte Nutzung der Plattform nach Änderungen gilt als Zustimmung zur aktualisierten Richtlinie.",
+        "gemma": "...",
+        "consensus": "Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren, um Änderungen in unseren Praktiken oder gesetzlichen Anforderungen widerzuspiegeln. Wir werden die Benutzer über wesentliche Änderungen über die Plattform informieren. Die fortgesetzte Nutzung der Plattform nach Änderungen gilt als Zustimmung zur aktualisierten Richtlinie."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:20.435Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:32.614Z",
+          "requestId": "chatcmpl-EOrzz8mRfh9iQf8mcWYMMFEDDMftd",
+          "tokensUsed": 287,
+          "fingerprint": "7db5e6647425fc6cbe52d8806474c3fb7a9a10d4efb5f24ea2d69a3a01d87726"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:20.435Z",
+          "requestId": "c26edb1f-983e-49dd-ba91-01700f36c643",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.contactUs.content",
+      "source": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform.",
+      "translations": {
+        "claude": "",
+        "gpt": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben oder Ihre Datenrechte ausüben möchten, wenden Sie sich bitte an Ihren Kursleiter oder den Plattformadministrator. Für allgemeine Anfragen können Sie uns über die im System verfügbaren Supportkanäle erreichen.",
+        "gemma": "...",
+        "consensus": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben oder Ihre Datenrechte ausüben möchten, wenden Sie sich bitte an Ihren Kursleiter oder den Plattformadministrator. Für allgemeine Anfragen können Sie uns über die im System verfügbaren Supportkanäle erreichen."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:22.144Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:48.790Z",
+          "requestId": "chatcmpl-EOs0GQtarPVBrAm5rNJb7bkdqf0QN",
+          "tokensUsed": 277,
+          "fingerprint": "67f810591927031e5d4f90b81f7ef16b479c5ac839eaddd685391eb0b1bbd905"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:22.143Z",
+          "requestId": "925e0c4f-cfaf-4bec-8d71-e0dd95375e93",
+          "tokensUsed": 100,
+          "fingerprint": "ab5df625bc76dbd4e163bed2dd888df828f90159bb93556525c31821b6541d46"
+        }
+      }
+    },
+    {
+      "keyPath": "privacy.childrensPrivacy.content",
+      "source": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent.",
+      "translations": {
+        "claude": "",
+        "gpt": "Homework Supply ist für den Bildungsgebrauch konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir erfüllen die Anforderungen von COPPA und sammeln wissentlich keine persönlichen Informationen von Kindern ohne entsprechende Zustimmung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Zustimmung einzuholen.",
+        "gemma": "tags.\n\n    *Final Polish of the German sentence structure:*\n    \"Homework Supply ist für den Bildungsbereich konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\"\n\n    (Note: \"unter 13 Jahren\" is standard. \"personenbezogene Daten\" is the correct legal term for \"personal information\" in GDPR/German context).\n\n    *One more look at \"designed for educational use\":*\n    \"ist für den Bildungsbereich konzipiert\" (is designed for the education sector)\n    \"ist für den pädagogischen Einsatz konzipiert\" (is designed for pedagogical use)\n    \"ist für Bildungszwecke konzipiert\" (is designed for educational purposes) -> This is very clean.\n\n    Let's use: \"Homework Supply ist für Bildungszwecke konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\"\n\n    Actually, \"für den Bildungsbereich\" sounds slightly more natural for a platform description.\n\n    Let's stick to:\n    Homework Supply ist für den Bildungsbereich konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\n\n    *Wait, \"instructors\" in an eLearning context:* \"Lehrkräfte\" is good. \"Instruktoren\" is a bit of an anglicism but used. \"Lehrkräfte\" is better.\n\n    *Final check of the English \"may be used\":* \"kann ... genutzt werden\" or \"darf ... genutzt werden\". \"Darf\" implies permission, \"kann\" implies possibility. The English \"may\" in this context implies permission/allowance. \"Darf\" is better.\n\n    *Revised:*\n    Homework Supply ist für den Bildungsbereich konzipiert und darf von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\n\n    This is professional, formal, and accurate.\n\n    *Final check of \"personal information\":* \"personenbezogene Daten\" is the standard legal term in German.\n\n    *Final check of \"appropriate consent\":* \"entsprechende Einwilligung\".\n\n    *Final check of \"parental consent\":* \"elterliche Einwilligung\".\n\n    *Final check of \"Schools and instructors are responsible for obtaining necessary parental consent\":* \"Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\"\n\n    Everything looks perfect.\n\n    *One last look at \"Homework Supply is designed for educational use\":*\n    \"Homework Supply ist für den Bildungsbereich konzipiert...\"\n    \"Homework Supply ist für Bildungszwecke konzipiert...\"\n    \"Homework Supply ist für den Einsatz im Bildungsbereich konzipiert...\"\n\n    \"Homework Supply ist für den Bildungsbereich konzipiert\" is concise and professional.\n\n    *Final String Construction:*\n    Homework Supply ist für den Bildungsbereich konzipiert und darf von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.Homework Supply ist für den Bildungsbereich konzipiert und darf von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.\n\n<T>Homework Supply ist für den Bildungsbereich konzipiert und darf von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir halten die COPPA-Anforderungen ein und erfassen nicht wissentlich personenbezogene Daten von Kindern ohne entsprechende Einwilligung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Einwilligung einzuholen.",
+        "consensus": "Homework Supply ist für den Bildungsgebrauch konzipiert und kann von Schülern unter 13 Jahren mit Zustimmung der Eltern oder der Schule genutzt werden. Wir erfüllen die Anforderungen von COPPA und sammeln wissentlich keine persönlichen Informationen von Kindern ohne entsprechende Zustimmung. Schulen und Lehrkräfte sind dafür verantwortlich, die erforderliche elterliche Zustimmung einzuholen."
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:03:22.290Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:02:32.614Z",
+          "requestId": "chatcmpl-EOrzzbdwR4EM4QpwNPIxVRDsg6PTY",
+          "tokensUsed": 306,
+          "fingerprint": "c07d194fdd0b30dad430cba7029851c3849a8cdb7f17d799c9f78963b744cd2f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:03:22.290Z",
+          "requestId": "93fe92d3-68d2-4b2e-ba05-6f740c578b79",
+          "tokensUsed": 100,
+          "fingerprint": "5634beb00624021b800a5c00c2875694727cf395ccb6bf8deff771024ec6ac58"
+        }
+      }
+    },
+    {
+      "keyPath": "Peer Review",
+      "source": "Peer Review",
+      "translations": {
+        "claude": "",
+        "gpt": "Begutachtung",
+        "gemma": "",
+        "consensus": "Begutachtung"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T22:22:24.034Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T22:03:02.003Z",
+          "requestId": "chatcmpl-EOs0TCD1moFxZ8zJz8INQws62QRCH",
+          "tokensUsed": 188,
+          "fingerprint": "cf6eaced9464f8a41892968046925c7efef85acf0ff92c22a344bdad6a9c0221"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T22:22:24.037Z",
+          "requestId": "",
+          "tokensUsed": 0,
+          "fingerprint": ""
+        }
+      }
+    }
+  ],
+  "fingerprint": "8b3dd89b299ffe52e148eb5e3ff3030d12aefe5f2d9932f53623dd6db1e5e1ee"
+}

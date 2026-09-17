@@ -51,7 +51,7 @@
     "cancel": "取消",
     "done": "完成",
     "edit": "编辑",
-    "gradeDisplay": "成绩：{{score}}",
+    "gradeDisplay": "成绩：{score}",
     "invalid": "无效",
     "reset": "重置",
     "save": "保存",

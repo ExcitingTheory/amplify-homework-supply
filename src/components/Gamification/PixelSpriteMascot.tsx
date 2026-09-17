@@ -8,30 +8,32 @@
  * @module PixelSpriteMascot
  */
 
-import React, { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
-import { generatePixelSpriteSvg } from '../../utils/generatePixelSprite'
+import React, { useMemo } from "react";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import { generatePixelSpriteSvg } from "../../utils/generatePixelSprite";
 
 export interface PixelSpriteMascotProps {
   /** Deterministic seed (e.g. studentId, squadId) */
-  seed: string
+  seed: string;
   /** Evolution stage 1-5, maps to level tiers */
-  stage?: number
+  stage?: number;
   /** Display size in px (the SVG scales to fit) */
-  size?: number
+  size?: number;
   /** Label shown below the sprite */
-  label?: string
+  label?: string;
   /** Whether the creature is "sleeping" (greyed out — streak broken) */
-  sleeping?: boolean
+  sleeping?: boolean;
+  /** DiceBear accessory/top id the mascot is currently "wearing" (borrowed cosmetic) */
+  accessory?: string;
   /** Tooltip text */
-  tooltip?: string
+  tooltip?: string;
   /** Click handler */
-  onClick?: () => void
+  onClick?: () => void;
 }
 
-const STAGE_LABELS = ['Hatchling', 'Juvenile', 'Adult', 'Elder', 'Legendary']
+const STAGE_LABELS = ["Hatchling", "Juvenile", "Adult", "Elder", "Legendary"];
 
 export function PixelSpriteMascot({
   seed,
@@ -39,29 +41,33 @@ export function PixelSpriteMascot({
   size = 64,
   label,
   sleeping = false,
+  accessory,
   tooltip,
   onClick,
 }: PixelSpriteMascotProps) {
-  const svg = useMemo(() => generatePixelSpriteSvg(seed, stage, 4), [seed, stage])
+  const svg = useMemo(
+    () => generatePixelSpriteSvg(seed, stage, 4, accessory),
+    [seed, stage, accessory],
+  );
 
   const content = (
     <Box
       sx={{
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "inline-flex",
+        flexDirection: "column",
+        alignItems: "center",
         gap: 0.5,
-        cursor: onClick ? 'pointer' : 'default',
-        filter: sleeping ? 'grayscale(100%) opacity(0.5)' : 'none',
-        transition: 'filter 0.3s, transform 0.2s',
-        '&:hover': onClick
-          ? { transform: 'scale(1.1)' }
+        cursor: onClick ? "pointer" : "default",
+        filter: sleeping ? "grayscale(100%) opacity(0.5)" : "none",
+        transition: "filter 0.3s, transform 0.2s",
+        "&:hover": onClick
+          ? { transform: "scale(1.1)" }
           : sleeping
             ? {}
-            : { transform: 'translateY(-2px)' },
+            : { transform: "translateY(-2px)" },
       }}
       onClick={onClick}
-      role={onClick ? 'button' : undefined}
+      role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-label={tooltip || label || `Pixel mascot (stage ${stage})`}
     >
@@ -69,24 +75,27 @@ export function PixelSpriteMascot({
         sx={{
           width: size,
           height: size,
-          '& svg': { width: '100%', height: '100%' },
+          "& svg": { width: "100%", height: "100%" },
         }}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
       {label && (
-        <Typography variant="caption" sx={{ fontWeight: 600, textAlign: 'center' }}>
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 600, textAlign: "center" }}
+        >
           {label}
         </Typography>
       )}
     </Box>
-  )
+  );
 
   if (tooltip) {
-    return <Tooltip title={tooltip}>{content}</Tooltip>
+    return <Tooltip title={tooltip}>{content}</Tooltip>;
   }
 
-  return content
+  return content;
 }
 
-export { STAGE_LABELS }
-export default PixelSpriteMascot
+export { STAGE_LABELS };
+export default PixelSpriteMascot;

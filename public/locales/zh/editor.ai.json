@@ -4,9 +4,9 @@
     "discard": "丢弃",
     "discardChanges": "放弃更改？",
     "generate": "生成",
-    "generating": "正在生成{{type}}...",
+    "generating": "正在生成{type}...",
     "keepEditing": "继续编辑",
-    "lostWarning": "如果您现在取消，您生成的{{type}}将会丢失。",
+    "lostWarning": "如果您现在取消，您生成的{type}将会丢失。",
     "preview": "预览",
     "saveClose": "保存并关闭",
     "takeMoments": "这可能需要一些时间"

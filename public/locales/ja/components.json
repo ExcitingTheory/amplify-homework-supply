@@ -26,7 +26,13 @@
     "passwordLabel": "パスワード：",
     "passwordPlaceholder": "パスワードを入力してください：",
     "phoneLabel": "電話番号：",
-    "phonePlaceholder": "電話番号を入力してください"
+    "phonePlaceholder": "電話番号を入力してください",
+    "lastNamePlaceholder": "姓を入力してください",
+    "lastNameLabel": "姓：",
+    "firstNamePlaceholder": "名を入力してください",
+    "preferredNamePlaceholder": "クラスで呼ばれたいお名前",
+    "preferredNameLabel": "希望する名前（任意）：",
+    "firstNameLabel": "名（めい）："
   },
   "chatSidebar": {
     "errorRenderingMessage": "メッセージの表示でエラーが発生しました",
@@ -37,7 +43,7 @@
     "showLess": "少なく表示",
     "showMore": "もっと表示します",
     "searchHelper": "コンテンツを検索してください...",
-    "contentTypeAndTopic": "{{contentType}}: 「{{topic}}」",
+    "contentTypeAndTopic": "{contentType}: 「{topic}」",
     "created": "作成済み",
     "ready": "準備完了です",
     "cancel": "キャンセル",
@@ -84,7 +90,7 @@
     "unknown": "不明",
     "searchResultsHeader": "🔍 検索結果",
     "searchingFor": "「{query}」を検索しています",
-    "foundResults": "{{count}}件の結果が見つかりました",
+    "foundResults": "{count}件の結果が見つかりました",
     "searchFailed": "検索に失敗しました",
     "createSection": "➕ セクションを作成",
     "generateContent": "✨ コンテンツを生成",
@@ -102,7 +108,7 @@
     "cancellingMessage": "キャンセル中...",
     "analysisCancelled": "分析がキャンセルされました",
     "contentPreview": {
-      "generatedContent": "生成された{{contentType}}",
+      "generatedContent": "生成された{contentType}",
       "insertButton": "挿入します",
       "inserted": "挿入されました",
       "insertIntoEditor": "エディターに挿入",
@@ -135,7 +141,8 @@
         "sectionsTitle": "セクション",
         "units": "ユニット"
       }
-    }
+    },
+    "close": "閉じる"
   },
   "dictionaryEditor": {
     "rubyTagInstructions": "ルビタグを使用して読み仮名を注釈してください",
@@ -158,7 +165,9 @@
     "step1": "1. 発音欄（上部）でテキストを選択し、次にフレーズ欄（下部）で対応するテキストを選択してください",
     "step2": "2. 選択した部分がペアになり、ルビタグのプレビューに移動します",
     "step3": "3. 両方のフィールドが空になるまでペアの選択を続けてください",
-    "step4": "4. 「保存」をクリックしてルビタグを適用します"
+    "step4": "4. 「保存」をクリックしてルビタグを適用します",
+    "noRubyTags": "ルビタグはまだありません",
+    "saveRubyTags": "ルビタグを保存する"
   },
   "recordingStudio3": {
     "addSpeakerFirst": "まずスピーカーを追加してください",
@@ -180,11 +189,11 @@
     "speakers": "スピーカー",
     "add": "追加します",
     "generateAllMissing": "不足しているTTSをすべて生成",
-    "lineNumber": "{{number}}行目 - {{speaker}}",
+    "lineNumber": "{number}行目 - {speaker}",
     "takes": "テイク:",
     "timeline": "タイムライン",
     "voice": "音声",
-    "processingLines": "{{count}}行を処理しています..."
+    "processingLines": "{count}行を処理しています..."
   },
   "recordingStudioEnhanced": {
     "popClickTooltip": "ポップ音とクリック音を除去します",
@@ -193,13 +202,43 @@
     "normalizeTooltip": "音声レベルを正規化します",
     "popClick": "ポップ/クリック",
     "normalize": "ノーマライズ",
-    "tips": "ヒント：フィルターを使用してバックグラウンドノイズを除去し、音声を向上させることができます。録音するトラックをクリックして選択してください。生成された音声は選択されたトラックに追加されます。音声の一部をドラッグして選択し、カットボタンを使用して削除することができます。"
+    "tips": "ヒント：フィルターを使用してバックグラウンドノイズを除去し、音声を向上させることができます。録音するトラックをクリックして選択してください。生成された音声は選択されたトラックに追加されます。音声の一部をドラッグして選択し、カットボタンを使用して削除することができます。",
+    "generate": "生成します",
+    "voice": "音声",
+    "audioFilters": "オーディオフィルター",
+    "addTrack": "トラックを追加",
+    "clarity": "明瞭性",
+    "clickToRecord": "クリックして録音する",
+    "cutTooltip": "選択した部分をカットします",
+    "deleteLastTrackAlert": "最後のトラックは削除できません",
+    "enterPrompt": "このトラックのプロンプトを入力してください",
+    "light": "ライト",
+    "broadcast": "配信",
+    "heavy": "重い",
+    "micAccessError": "マイクにアクセスできませんでした",
+    "noClips": "クリップがありません",
+    "noiseReduction": "ノイズリダクション",
+    "promptPlaceholder": "音声を生成するためのテキストを入力してください...",
+    "none": "なし",
+    "presence": "プレゼンス",
+    "selectToCut": "カットする音声の部分を選択してください",
+    "speechEnhancement": "音声強化",
+    "trackName": "トラック{number}",
+    "ttsGenerationFailed": "プロンプトから音声の生成に失敗しました",
+    "ttsNotImplemented": "テキスト読み上げ機能はまだ実装されていません",
+    "medium": "中",
+    "recording": "録画中"
   },
   "sectionAssigner": {
     "dueDateNote": "期限日を過ぎた後もユーザーは続行することができます。期限日はクラスセクション内のユニットの並び順に使用されます。",
     "selectSectionHelper": "期限日を割り当てるセクションを選択してください",
     "assignedToSections": "セクションに割り当て済み",
-    "delete": "削除"
+    "delete": "削除",
+    "cancel": "キャンセル",
+    "dueDate": "期限日",
+    "assign": "割り当てる",
+    "selectSection": "セクションを選択してください",
+    "dialogTitle": "セクションに割り当て"
   },
   "questionsReview": {
     "answer": "Answer",
@@ -209,14 +248,14 @@
     "enterHint": "Enter hint...",
     "enterQuestion": "Enter question...",
     "expand": "Expand",
-    "filteringBySearch": "Filtering by search: \"{{searchTerm}}\" ({{count}} of {{total}} items)",
+    "filteringBySearch": "Filtering by search: \"{searchTerm}\" ({count} of {total} items)",
     "from": "From",
     "hasAudio": "Has audio",
     "hasImage": "Has image",
     "hide": "Hide",
     "hintOptional": "Hint (optional)",
     "importToQuestionBank": "Import to Question Bank",
-    "importedOn": "Imported on {{date}}",
+    "importedOn": "Imported on {date}",
     "learningObjectives": "Learning Objectives",
     "loading": "Loading questions...",
     "noQuestions": "No questions found for this document.",
@@ -224,7 +263,7 @@
     "questionPrompt": "Question Prompt",
     "sectionHeading": "Questions Review",
     "selectAll": "Select All",
-    "selectedCount": "{{count}} of {{total}} selected",
+    "selectedCount": "{count} of {total} selected",
     "show": "Show",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
@@ -238,7 +277,7 @@
     "noEmbedding": "埋め込みなし",
     "embeddingStale": "埋め込みが古くなっています",
     "embeddingFresh": "埋め込み更新中",
-    "error": "エラー: {{message}}"
+    "error": "エラー: {message}"
   },
   "aiAgentConfig": {
     "sageModel": "Sage モデル",
@@ -287,14 +326,97 @@
       "gold": "ゴールド"
     },
     "styles": {
-      "simple": "シンプル",
-      "detailed": "詳細",
-      "toon": "トゥーン"
+      "bottts": "ロボット",
+      "botttsNeutral": "ミニロボット"
     },
     "lockedMessage": "Bot Whisperer I バッジを取得して、AIアシスタントをカスタマイズしましょう。",
     "previewTitle": "あなたのAIアシスタント",
     "styleLabel": "スタイル",
     "backgroundColorLabel": "背景色"
+  },
+  "chatMessageList": {
+    "tool": "ツール",
+    "thinking": "考え中…",
+    "input": "入力",
+    "result": "結果"
+  },
+  "editableBlockPreview": {
+    "quiz": "生成されたクイズブロック",
+    "answer": "生成された解答ブロック",
+    "meaningAssociation": "生成された意味関連付けブロック",
+    "customAnswer": "生成されたカスタム解答ブロック",
+    "content": "生成されたコンテンツブロック",
+    "block": "生成されたブロック",
+    "copy": "クリップボードにコピー",
+    "copied": "コピーしました！",
+    "regenerate": "再生成",
+    "editHint": "下のブロックを編集してから、レッスンに挿入してください。",
+    "reject": "却下",
+    "insert": "レッスンに挿入",
+    "inserted": "レッスンに挿入しました",
+    "rejected": "却下しました",
+    "undo": "元に戻す"
+  },
+  "offlineBanner": {
+    "offline": "オフラインです — 作業内容はローカルに保存されます",
+    "pending": "{count} 件保留中",
+    "syncAria": "{count} 件の保留中の変更を同期",
+    "backOnline": "オンラインに復帰 — {count} 件の保留中の変更を同期しています",
+    "syncNow": "今すぐ同期"
+  },
+  "jobsDashboard": {
+    "active": "{count} 件アクティブ",
+    "failed": "{count} 件失敗",
+    "totalJobs": "合計 {count} 件のジョブ",
+    "type": "種類",
+    "allTypes": "すべての種類",
+    "agentJobs": "エージェントジョブ",
+    "docAnalysis": "ドキュメント解析",
+    "mediaTranscode": "メディアトランスコード",
+    "status": "ステータス",
+    "activeFailed": "アクティブ / 失敗",
+    "allStatuses": "すべてのステータス",
+    "queued": "キュー内",
+    "processing": "処理中",
+    "failedStatus": "失敗",
+    "completed": "完了",
+    "cancelled": "キャンセル済み",
+    "refresh": "更新",
+    "colType": "種類",
+    "colStatus": "ステータス",
+    "colOwner": "所有者",
+    "colResource": "リソース",
+    "colStarted": "開始",
+    "colDuration": "所要時間",
+    "colRetries": "再試行",
+    "colError": "エラー",
+    "colActions": "操作",
+    "noJobs": "現在のフィルターに一致するジョブはありません",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "retryAllFailed": "失敗したものをすべて再試行 ({count})",
+    "typeAgentJob": "エージェントジョブ",
+    "typeDocumentAnalysis": "ドキュメント解析",
+    "typeMediaTranscode": "メディアトランスコード"
+  },
+  "storageManagement": {
+    "offlineStorage": "オフラインストレージ",
+    "usedOfQuota": "{quota} 中 {used} を使用 ({percent}%)",
+    "storageFullWarning": "ストレージの空き容量が少なくなっています。キャッシュされた課題またはAIモデルを削除して空き容量を確保することを検討してください。",
+    "aiModelForOffline": "オフライン利用向けAIモデル",
+    "downloaded": "ダウンロード済み",
+    "notDownloaded": "未ダウンロード",
+    "modelSizeStatus": "{size} · {status}",
+    "preInstalled": "プリインストール済み — ダウンロード不要",
+    "builtIn": "組み込み",
+    "removeModel": "モデルを削除",
+    "download": "ダウンロード",
+    "downloadingModel": "AIモデルをダウンロード中... {percent}%",
+    "cachedAssignments": "キャッシュされた課題",
+    "noCachedAssignments": "オフライン利用向けにキャッシュされた課題はまだありません。課題を開くと自動的にキャッシュされます。",
+    "unitLabel": "ユニット: {id}...",
+    "cacheStatusUpdated": "{status} · 最終更新 {date}",
+    "removeOfflineData": "オフラインデータを削除"
   },
   "cadenceCopyDialog": {
     "copyFromClass": "クラスからコピー",
@@ -381,5 +503,378 @@
     "friday": "来週の金曜日",
     "createSectionLabel": "新しいセクションを作成",
     "undoSnackbar": "課題が作成されました。{count} 件の課題{plural} を作成しました。"
+  },
+  "chat": {
+    "aiAssistant": "AIアシスタント",
+    "close": "閉じる",
+    "openAssistant": "AIアシスタントを開く"
+  },
+  "questionBlock": {
+    "addAnswerPlaceholder": "答えを追加",
+    "done": "完了",
+    "edit": "編集します",
+    "invalid": "無効です",
+    "remove": "削除します",
+    "reset": "リセット",
+    "gradeDisplay": "成績: {score}",
+    "incorrect": "不正解です",
+    "correct": "正解です",
+    "answerLabel": "回答{number}"
+  },
+  "questionEditor": {
+    "save": "保存",
+    "dialogTitle": "質問を編集"
+  },
+  "screenplayEditor": {
+    "formatLabel": "フォーマット",
+    "placeholder": "フェードイン："
+  },
+  "vocabularyReview": {
+    "deselectAll": "Deselect All",
+    "from": "From",
+    "hide": "Hide",
+    "learningObjectives": "Learning Objectives",
+    "loading": "読み込み中です",
+    "selectAll": "Select All",
+    "show": "Show",
+    "summaries": "Summaries",
+    "importToDictionary": "辞書にインポート",
+    "filteringBySearch": "検索条件で絞り込んでいます",
+    "pages": "ページ",
+    "noVocabulary": "語彙がありません",
+    "sectionHeading": "語彙の復習",
+    "selectedCount": "選択数",
+    "summariesAndObjectives": "要約と学習目標",
+    "importedOn": "インポート日時"
+  },
+  "instructorDashboard": {
+    "student": "学生",
+    "completed": "完了しました",
+    "completion": "完了",
+    "overallPerformance": "総合パフォーマンス",
+    "averageCompletion": "平均完了率",
+    "avg": "平均",
+    "students": "受講生",
+    "totalStudents": "総受講生数",
+    "average": "平均",
+    "averageGrade": "平均成績",
+    "totalAssignments": "総課題数",
+    "sectionLeaderboards": "セクション別リーダーボード",
+    "rank": "ランク",
+    "noDataYet": "まだ生徒のデータがありません"
+  },
+  "collaboration": {
+    "typePractice": "練習",
+    "typeWorkbook": "ワークブック",
+    "typePeerReview": "相互レビュー",
+    "joining": "参加しています...",
+    "tabJoin": "コードで参加",
+    "title": "コラボレーション",
+    "tabInvitations": "招待",
+    "noInvitations": "保留中のコラボレーション招待はありません",
+    "emptyInput": "コードまたはリンクを入力してください",
+    "joinButton": "参加する",
+    "error": "セッションへの参加に失敗しました"
+  },
+  "practiceDrill": {
+    "config": {
+      "vocabulary": "語彙",
+      "questions": "質問",
+      "vocabularyType": "語彙",
+      "cancel": "キャンセル",
+      "generating": "生成中...",
+      "subtitle": "練習する内容を選択してください：",
+      "text": "テキストコンテンツ",
+      "documents": "ドキュメント",
+      "questionsDesc": "問題バンクから",
+      "vocabularyDesc": "単語、定義、マッチング",
+      "textDesc": "レッスンテキストと採点ブロックから",
+      "drillType": "ドリルの種類",
+      "documentsDesc": "アップロードされたPDFと解析されたコンテンツから",
+      "mixed": "混合",
+      "coverage": "カバー率: {covered}/{total} 項目を練習しました ({percent}%)",
+      "studyTogetherDesc": "クラスメートとリアルタイムで練習できます。共有用のルームコードが作成されます。",
+      "review": "間違いを復習する",
+      "studyTogether": "一緒に学習する",
+      "noSourcesWarning": "練習を開始するには、少なくとも1つのコンテンツソースを有効にしてください。",
+      "maxParticipants": "最大参加者数",
+      "title": "練習: {unitName}",
+      "comprehension": "読解",
+      "start": "練習を開始する",
+      "questionCount": "問題数"
+    },
+    "progress": {
+      "questions": "質問",
+      "xpTooltip": "このドリルの推定獲得XPです",
+      "xpDiminishedTooltip": "繰り返しの試行により獲得XPが減少しています",
+      "streakTooltip": "現在の連続記録: {count}"
+    },
+    "collab": {
+      "copied": "コピーしました！",
+      "disconnected": "切断されました",
+      "connected": "接続済み",
+      "groupAccuracyTip": "全参加者の平均正答率",
+      "groupAccuracy": "グループ正答率: {accuracy}%",
+      "copyCode": "ルームコードをコピーして共有します",
+      "groupProgress": "グループの進捗状況",
+      "participants": "{count}名の参加者"
+    },
+    "dialog": {
+      "title": "練習",
+      "close": "閉じる",
+      "retry": "再試行",
+      "back": "戻る",
+      "done": "完了",
+      "cancel": "キャンセル",
+      "titleWithUnit": "練習: {unit}",
+      "generating": "ドリルを生成中です...",
+      "complete": "ドリルが完了しました！",
+      "completeSummary": "スコアは{accuracy}%で、{xp} XPを獲得しました！",
+      "finish": "完了してXPを獲得する"
+    },
+    "join": {
+      "cancel": "キャンセル",
+      "tabCode": "コードを入力",
+      "description": "講師またはクラスメートから共有されたルームコードを入力して、学習セッションに参加してください。",
+      "codeLabel": "ルームコード",
+      "notFound": "そのコードに該当するアクティブなセッションが見つかりませんでした",
+      "error": "セッションへの参加に失敗しました",
+      "joining": "参加しています...",
+      "joinButton": "セッションに参加する",
+      "codeTooShort": "ルームコードは4文字以上である必要があります",
+      "noInvitations": "保留中のセッション招待はありません",
+      "tabInvitations": "招待",
+      "title": "学習セッションに参加する",
+      "full": "このセッションは満席です（{max}名）"
+    },
+    "library": {
+      "title": "練習ドリル",
+      "resumeLabel": "再開 ({completed}/{total} 完了)",
+      "templatesTitle": "ドリルライブラリ",
+      "generateNew": "新しいドリルを生成する",
+      "resumeTitle": "前回の続きから始める"
+    },
+    "workbook": {
+      "noBlocks": "まだドリルブロックがありません",
+      "label": "練習ドリルワークブック"
+    }
+  },
+  "workbook": {
+    "invite": {
+      "copied": "コピーしました！",
+      "shareTooltip": "このワークブックに他のユーザーを招待する",
+      "title": "ワークブックを共有します",
+      "description": "このリンクを持ち、同じセクションに登録しているすべての方が参加して、リアルタイムで一緒に作業することができます。",
+      "currentlyOnline": "現在オンライン中",
+      "noOthers": "まだ他に誰もいません",
+      "idle": "待機中",
+      "copy": "リンクをコピー",
+      "copyLink": "リンクをコピー"
+    },
+    "joinDialog": {
+      "tabInvitations": "招待",
+      "title": "ワークブックセッションに参加します",
+      "tabLink": "リンクを入力",
+      "description": "共同編集セッションに参加するには、ワークブックのリンクを貼り付けるか、ユニットIDを入力してください。",
+      "joining": "検索中...",
+      "noInvitations": "保留中のワークブック招待はありません",
+      "joinButton": "ワークブックに参加する",
+      "inputLabel": "ワークブックのリンクまたはユニットID"
+    }
+  },
+  "peerReview": {
+    "joinDialog": {
+      "joinButton": "レビューに参加",
+      "tabInvitations": "招待",
+      "tabCode": "コードを入力してください",
+      "description": "クラスメートが共有したレビュールームコードを入力して、ピアレビューセッションに参加してください。",
+      "joining": "参加しています...",
+      "codeLabel": "レビュールームコード",
+      "noInvitations": "保留中のレビュー招待はありません",
+      "title": "ピアレビューに参加する"
+    }
+  },
+  "notification": {
+    "delete": "削除します",
+    "category": {
+      "assignment": "課題",
+      "squad": "チーム",
+      "chat": "チャット",
+      "all": "すべて",
+      "gamification": "ゲーミフィケーション",
+      "collaboration": "コラボレーション",
+      "system": "システム"
+    },
+    "title": "通知",
+    "emptyDescription": "課題、成績、バッジなどの通知がここに表示されます。",
+    "empty": "通知はまだありません",
+    "markAllRead": "すべて既読にする"
+  },
+  "common": {
+    "close": "閉じる"
+  },
+  "recordingStudio3Modal": {
+    "confirmSave": "保存",
+    "done": "完了",
+    "generatingTts": "生成中...",
+    "saving": "保存しています...",
+    "discard": "破棄します",
+    "conversationSaveInfo": "音声ファイルは、このユニットに添付されたファイルレコードとして保存されます。",
+    "generateMissingTts": "不足分を生成 ({count})",
+    "generatingTtsProgress": "TTS音声を生成しています...",
+    "confirmTitle": "保存を確認します",
+    "missingTakesWarning": "{count}行にアクティブなテイクがなく、保存されません。",
+    "noActiveTake": "アクティブなテイクがありません",
+    "unsavedChanges": "保存されていない変更があります。本当に閉じてもよろしいですか？",
+    "wordSaveInfo": "音声はWordモデルのaudioフィールドとdefinitionAudioフィールドに保存されます。",
+    "recording": "録音",
+    "backToStudio": "スタジオに戻る",
+    "unsavedChangesTitle": "保存されていない変更"
+  },
+  "sectionDetail": {
+    "students": "学生",
+    "gradebook": "成績表",
+    "leaderboard": "ランキング",
+    "assignments": "課題",
+    "completionGrid": "完了状況グリッド"
+  },
+  "collaboratorManager": {
+    "add": "追加します",
+    "cancel": "キャンセル",
+    "editPermission": "編集します",
+    "addCollaborator": "共同編集者を追加",
+    "noCollaborators": "まだコラボレーターはいません",
+    "title": "共同編集者",
+    "typeAtLeast": "2文字以上入力してください",
+    "noInstructorsFound": "インストラクターが見つかりませんでした",
+    "searchInstructors": "講師を検索します",
+    "permissionLevel": "権限レベル",
+    "removeCollaborator": "{name}を削除",
+    "permissionEdit": "編集 — コンテンツを変更できます",
+    "failedToLoad": "コラボレーターの読み込みに失敗しました",
+    "failedToRemove": "コラボレーターの削除に失敗しました",
+    "failedToAdd": "コラボレーターの追加に失敗しました",
+    "permissionRead": "閲覧 — コンテンツの表示のみ",
+    "searchPlaceholder": "名前、ユーザー名、またはメールアドレスで検索",
+    "readPermission": "閲覧"
+  },
+  "communityUnitCard": {
+    "untitledUnit": "無題のユニット",
+    "noDescription": "説明がありません",
+    "forking": "フォーク中...",
+    "fork": "フォークする",
+    "byAuthor": "著者: {author}"
+  },
+  "sharedUnitCard": {
+    "untitledUnit": "無題のユニット",
+    "noDescription": "説明がありません",
+    "edit": "編集します",
+    "view": "表示",
+    "editAccess": "アクセス権限を編集",
+    "showDeletedItems": "削除された項目を表示する",
+    "readOnly": "閲覧のみ",
+    "sharedBy": "共有者：{owner}"
+  },
+  "recordingStudioEnhancedModal": {
+    "cancel": "キャンセル",
+    "saveConversation": "会話を保存",
+    "defaultTitle": "会話を生成します"
+  },
+  "documentSourceBadge": {
+    "sourcePrefix": "出典:",
+    "pagePrefix": "ページ"
+  },
+  "moderationBadge": {
+    "categories": "カテゴリー",
+    "savedMessage": "コンテンツが保存されました。学校のポリシーに従ってご確認ください。",
+    "flagged": "フラグ付き",
+    "flaggedForReview": "レビューのためにフラグが付けられたコンテンツ",
+    "approved": "コンテンツが承認されました",
+    "flaggedWithCategories": "フラグ付き: {categories}"
+  },
+  "moderationPanel": {
+    "categories": {
+      "fallback": "このカテゴリーでコンテンツにフラグが付けられました。",
+      "harassment threatening": "暴力または深刻な危害を含む嫌がらせコンテンツ",
+      "harassment": "個人に対して嫌がらせ、脅迫、またはいじめを意図したコンテンツ",
+      "hate threatening": "暴力または深刻な危害を含む憎悪的なコンテンツ",
+      "self-harm": "自傷行為を促進、奨励、または描写するコンテンツ",
+      "hate": "人種、性別、民族、宗教などに基づいたヘイトを助長するコンテンツです。",
+      "self-harm instructions": "自傷行為を助長する、または自傷行為の方法を提供するコンテンツ",
+      "self-harm intent": "自傷行為を行う意図を表明している内容です",
+      "sexual": "性的興奮を引き起こすことを目的としたコンテンツ",
+      "violence graphic": "死、暴力、または身体的傷害を描写するグラフィックコンテンツ",
+      "sexual minors": "18歳未満の個人が関与する性的コンテンツ",
+      "violence": "死、暴力、または身体的傷害を描写するコンテンツ"
+    },
+    "alertMessage": "このコンテンツは自動モデレーションによりフラグが設定されました。保存されましたが、お客様の機関のポリシーに従って、確認が必要となる場合があります。",
+    "disclaimerNote": "自動モデレーションは完全ではありません。このコンテンツを文脈に沿ってご確認の上、貴機関の特定のポリシーおよび現地の法的要件に従って対応してください。",
+    "checked": "確認日: {date}",
+    "confidence": "信頼度: {score}%",
+    "flaggedCategories": "フラグ付きカテゴリ:",
+    "title": "コンテンツモデレーション",
+    "disclaimerLabel": "注意：",
+    "model": "モデル: {model}"
+  },
+  "pdfThumbnail": {
+    "failedToLoad": "PDFの読み込みに失敗しました",
+    "pageNumber": "{current} / {total}"
+  },
+  "recordingStudio2": {
+    "recordedAudioWaveform": "録音された音声波形:",
+    "existingRecordings": "既存の録音データ",
+    "staticWaveformPreview": "静的波形プレビュー：",
+    "recordingNumber": "録音 {number}"
+  },
+  "savedPdfThumbnail": {
+    "errorMessage": "PDFの読み込みにエラーが発生しました",
+    "pageOverlay": "ページ {number}"
+  },
+  "sortableAnswers": {
+    "incorrect": "不正解です",
+    "answerLabel": "回答 {number}",
+    "correct": "正解です"
+  },
+  "svgPreview": {
+    "emptyState": "プレビューするSVGがありません",
+    "caption": "キャプション"
+  },
+  "wordEmbedding": {
+    "embeddingFailed": "単語は保存されましたが、埋め込みの生成に失敗しました：{error}",
+    "questionSaveFailed": "埋め込みエラーで保存"
+  },
+  "wordEmbeddingIntegration": {
+    "embeddingGenerated": "埋め込みが生成されました",
+    "embeddingFailed": "埋め込みに失敗しました"
+  },
+  "permissionError": {
+    "defaultMessage": "この{resourceType}にアクセスする権限がありません。",
+    "title": "アクセスが拒否されました",
+    "resourceTypes": {
+      "section": "セクション",
+      "grade": "成績",
+      "assignment": "課題",
+      "unit": "単元"
+    },
+    "explanation": "このコンテンツは制限されています。アクセスするには、所有者であるか、インストラクター権限が必要です。",
+    "contactInfo": "これがエラーであると思われる場合は、講師または管理者にお問い合わせください。",
+    "goBack": "戻る",
+    "goHome": "ホームに戻る"
+  },
+  "armorEditor": {
+    "shieldPreview": "シールドプレビュー",
+    "addCharge": "チャージを追加",
+    "xOffset": "Xオフセット",
+    "chargeSize": "チャージサイズ",
+    "yOffset": "Y オフセット",
+    "chargeRotation": "チャージローテーション"
+  },
+  "skillTree": {
+    "empty": "まだスキルは登録されていません。インストラクターがスキルツリーを設定いたします。",
+    "title": "スキルツリー"
+  },
+  "showDeletedItems": "削除された項目を表示する",
+  "amblifyAuthenticator": {
+    "emailPhoneOptions": "メールアドレスまたは電話番号"
   }
 }

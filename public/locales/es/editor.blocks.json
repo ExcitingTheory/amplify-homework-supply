@@ -51,7 +51,7 @@
     "cancel": "Cancelar",
     "done": "Hecho",
     "edit": "Editar",
-    "gradeDisplay": "Calificación: {{score}}",
+    "gradeDisplay": "Calificación: {score}",
     "invalid": "Inválido",
     "reset": "Restablecer",
     "save": "Guardar",

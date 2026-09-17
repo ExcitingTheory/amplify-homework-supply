@@ -1,0 +1,59 @@
+{
+  "namespace": "editor.files",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "mode": "provable",
+  "timestamp": "2026-09-16T19:17:28.833Z",
+  "summary": {
+    "totalKeys": 112,
+    "existingKeys": 111,
+    "translatedKeys": 1,
+    "errors": 0,
+    "coverage": 100
+  },
+  "tokens": {
+    "claude": 220,
+    "gpt": 196,
+    "gemini": 100
+  },
+  "translations": [
+    {
+      "keyPath": "fileManager2.toolbar.recordConversation",
+      "source": "Record Conversation",
+      "translations": {
+        "claude": "会話を録音する",
+        "gpt": "会話を記録します",
+        "gemma": "会話を録音します",
+        "consensus": "会話を録音する"
+      },
+      "consensusLevel": "none",
+      "metadata": {
+        "claude": {
+          "model": "claude-sonnet-4-5-20250929",
+          "provider": "anthropic",
+          "timestamp": "2026-09-16T19:15:50.135Z",
+          "requestId": "msg_011Cf7etPSkavNTyMBcvULsq",
+          "tokensUsed": 220,
+          "fingerprint": "59cdb80b9627f1fe900f14de23d5ebc546b65f6f1ad5f5d8bfedbc07055bb46c"
+        },
+        "gpt": {
+          "model": "gpt-4o",
+          "provider": "openai",
+          "timestamp": "2026-09-16T19:15:49.780Z",
+          "requestId": "chatcmpl-EOpOfryC8LYEEilqiTAaykm5XMZak",
+          "tokensUsed": 196,
+          "fingerprint": "e436450218e27a30d3a144e1628e2f3c2fded34852d7563a24dbc0a90f66756f"
+        },
+        "gemma": {
+          "model": "gemma-4-26b-a4b-it",
+          "provider": "google-gemma",
+          "timestamp": "2026-09-16T19:17:28.825Z",
+          "requestId": "ee0a59ec-b94f-4edc-89f4-a3af06ed3e79",
+          "tokensUsed": 100,
+          "fingerprint": "4a2063f59b8cc1247deb880757e2d9d27996cc42a2e4e1309f499a19fb6677fc"
+        }
+      }
+    }
+  ],
+  "fingerprint": "48ea8152db45f11b9fd7224203f06231adae3420c48711e56b4d91f46a3867c2"
+}

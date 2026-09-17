@@ -32,6 +32,29 @@
     "close": "Close",
     "openAssistant": "Open AI Assistant"
   },
+  "chatMessageList": {
+    "tool": "Tool",
+    "thinking": "Thinking…",
+    "input": "Input",
+    "result": "Result"
+  },
+  "editableBlockPreview": {
+    "quiz": "Generated quiz block",
+    "answer": "Generated answer block",
+    "meaningAssociation": "Generated meaning-association block",
+    "customAnswer": "Generated custom-answer block",
+    "content": "Generated content block",
+    "block": "Generated block",
+    "copy": "Copy to clipboard",
+    "copied": "Copied!",
+    "regenerate": "Regenerate",
+    "editHint": "Edit the block below, then insert it into your lesson.",
+    "reject": "Reject",
+    "insert": "Insert into lesson",
+    "inserted": "Inserted into lesson",
+    "rejected": "Rejected",
+    "undo": "Undo"
+  },
   "chatSidebar": {
     "activeChats": "Active Chats",
     "aiAssistant": "AI Assistant",
@@ -374,6 +397,67 @@
     "caption": "Caption",
     "emptyState": "No SVG to preview"
   },
+  "offlineBanner": {
+    "offline": "You're offline — your work is saved locally",
+    "pending": "{count} pending",
+    "syncAria": "Sync {count} pending changes",
+    "backOnline": "Back online — syncing {count} pending changes",
+    "syncNow": "Sync now"
+  },
+  "jobsDashboard": {
+    "active": "{count} active",
+    "failed": "{count} failed",
+    "totalJobs": "{count} total jobs",
+    "type": "Type",
+    "allTypes": "All Types",
+    "agentJobs": "Agent Jobs",
+    "docAnalysis": "Doc Analysis",
+    "mediaTranscode": "Media Transcode",
+    "status": "Status",
+    "activeFailed": "Active / Failed",
+    "allStatuses": "All Statuses",
+    "queued": "Queued",
+    "processing": "Processing",
+    "failedStatus": "Failed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "refresh": "Refresh",
+    "colType": "Type",
+    "colStatus": "Status",
+    "colOwner": "Owner",
+    "colResource": "Resource",
+    "colStarted": "Started",
+    "colDuration": "Duration",
+    "colRetries": "Retries",
+    "colError": "Error",
+    "colActions": "Actions",
+    "noJobs": "No jobs matching the current filters",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "retryAllFailed": "Retry All Failed ({count})",
+    "typeAgentJob": "Agent Job",
+    "typeDocumentAnalysis": "Document Analysis",
+    "typeMediaTranscode": "Media Transcode"
+  },
+  "storageManagement": {
+    "offlineStorage": "Offline Storage",
+    "usedOfQuota": "{used} of {quota} used ({percent}%)",
+    "storageFullWarning": "Storage is getting full. Consider removing cached assignments or the AI model to free space.",
+    "aiModelForOffline": "AI Model for Offline Use",
+    "downloaded": "Downloaded",
+    "notDownloaded": "Not downloaded",
+    "modelSizeStatus": "{size} · {status}",
+    "preInstalled": "Pre-installed — no download needed",
+    "builtIn": "Built-in",
+    "removeModel": "Remove model",
+    "download": "Download",
+    "downloadingModel": "Downloading AI model... {percent}%",
+    "cachedAssignments": "Cached Assignments",
+    "noCachedAssignments": "No assignments cached for offline use yet. Open an assignment to cache it automatically.",
+    "unitLabel": "Unit: {id}...",
+    "cacheStatusUpdated": "{status} · Last updated {date}",
+    "removeOfflineData": "Remove offline data"
+  },
   "unitEmbedding": {
     "embeddingFresh": "Embedding fresh",
     "embeddingStale": "Embedding stale",
@@ -641,7 +725,7 @@
     "permissionEdit": "Edit — Can modify content",
     "add": "Add",
     "cancel": "Cancel",
-    "removeCollaborator": "Remove {{name}}",
+    "removeCollaborator": "Remove {name}",
     "failedToLoad": "Failed to load collaborators",
     "failedToAdd": "Failed to add collaborator",
     "failedToRemove": "Failed to remove collaborator",
@@ -651,7 +735,7 @@
   "communityUnitCard": {
     "untitledUnit": "Untitled Unit",
     "noDescription": "No description",
-    "byAuthor": "By: {{author}}",
+    "byAuthor": "By: {author}",
     "fork": "Fork",
     "forking": "Forking..."
   },
@@ -660,7 +744,7 @@
     "noDescription": "No description",
     "editAccess": "Edit Access",
     "readOnly": "Read Only",
-    "sharedBy": "Shared by: {{owner}}",
+    "sharedBy": "Shared by: {owner}",
     "edit": "Edit",
     "view": "View",
     "showDeletedItems": "Show deleted items"
@@ -721,9 +805,8 @@
       "gold": "Gold"
     },
     "styles": {
-      "simple": "Simple",
-      "detailed": "Detailed",
-      "toon": "Toon"
+      "bottts": "Robot",
+      "botttsNeutral": "Mini Robot"
     },
     "lockedMessage": "Earn the Bot Whisperer I badge to customize your AI assistant.",
     "previewTitle": "Your AI Assistant",

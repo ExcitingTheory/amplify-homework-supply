@@ -52,8 +52,10 @@
       "darkMode": "Mode sombre",
       "disableNotifications": "Désactiver les notifications",
       "experimentalFeatures": "Fonctionnalités expérimentales",
-      "studentMode": "Mode Étudiant"
-    }
+      "studentMode": "Mode Étudiant",
+      "colorMode": "Mode de couleur"
+    },
+    "collaboration": "Collaboration"
   },
   "navigation": {
     "grades": "Notes",
@@ -61,10 +63,20 @@
     "profile": "Profil",
     "sections": "Sections",
     "units": "Unités",
-    "workbook": "Cahier d'exercices"
+    "workbook": "Cahier d'exercices",
+    "squads": "Équipes",
+    "leaderboard": "Classement",
+    "published": "Publié",
+    "settings": "Paramètres",
+    "collaboration": "Collaboration",
+    "notifications": "Notifications",
+    "drafts": "Brouillons",
+    "gamification": "Ludification",
+    "skills": "Arbre de compétences",
+    "collaborationDesc": "Invitations et sessions à rejoindre"
   },
   "quizComponent": {
-    "grade": "Note : {{grade}}"
+    "grade": "Note : {grade}"
   },
   "status": {
     "complete": "Terminer",
@@ -83,5 +95,20 @@
     "created": "Créé",
     "due": "À rendre",
     "updated": "Mis à jour"
+  },
+  "chat": {
+    "aiAssistant": "Assistant IA",
+    "openAssistant": "Ouvrir l'assistant IA"
+  },
+  "timer": {
+    "hours": "Heures",
+    "minutes": "Minutes",
+    "seconds": "Secondes",
+    "increase": "Augmenter le segment de temps sélectionné",
+    "decrease": "Diminuer le segment de temps sélectionné"
+  },
+  "peerReview": {
+    "helpful": "L'évaluation par les pairs a été utile",
+    "notHelpful": "L'évaluation par les pairs n'a pas été utile"
   }
 }

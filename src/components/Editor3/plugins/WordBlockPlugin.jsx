@@ -26,11 +26,26 @@ import {
 import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
 import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 import * as React from "react";
-import { useEffect, useContext, useState, useRef, useCallback } from "react";
+import {
+  useEffect,
+  useContext,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useTranslations } from "next-intl";
 
 import DictionaryContext from "../../../context/dictionaryContext";
-import { Card, CardContent, Typography, Box, Chip } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Chip,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import AudioWaveformPlayer from "../components/AudioWaveformPlayer";
 import getCachedUrl from "../../../utils/getCachedUrl";
@@ -93,8 +108,8 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
           variant="outlined"
           sx={{
             my: 2,
-            bgcolor: "#fff3e0",
-            borderColor: "#ff9800",
+            bgcolor: "warning.light",
+            borderColor: "warning.main",
             borderWidth: 2,
           }}
         >
@@ -118,14 +133,10 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
         variant="outlined"
         sx={{
           my: 2,
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark" ? "grey.900" : "grey.100",
+          bgcolor: "action.hover",
           border: "none",
           borderRadius: 2,
-          boxShadow: (theme) =>
-            theme.palette.mode === "dark"
-              ? "0 1px 3px rgba(0,0,0,0.4)"
-              : "0 1px 3px rgba(0,0,0,0.12)",
+          boxShadow: 1,
           transition: "all 0.2s ease",
           userSelect: "none",
           cursor: "default",
@@ -288,6 +299,27 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
   const [isSelected, setSelected, clearSelection] =
     useLexicalNodeSelection(nodeKey);
 
+  const { wordMapId: dictionary } = useContext(DictionaryContext);
+  const wordOptions = useMemo(
+    () => Object.values(dictionary || {}).filter((w) => w && w.id),
+    [dictionary],
+  );
+  const selectedWord = (dictionary && dictionary[wordID]) || null;
+
+  const handleWordChange = useCallback(
+    (_event, option) => {
+      const nextId = option?.id;
+      if (!nextId || nextId === wordID) return;
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isWordBlockNode(node)) {
+          node.setWordID(nextId);
+        }
+      });
+    },
+    [editor, nodeKey, wordID],
+  );
+
   const onDelete = useCallback(
     (payload) => {
       if (isSelected && $isNodeSelection($getSelection())) {
@@ -396,6 +428,30 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
         transition: "border 0.2s ease",
       }}
     >
+      {isSelected && (
+        // Stop propagation so Lexical's key/click commands don't hijack typing.
+        <Box
+          sx={{ p: 1, pb: 0 }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Autocomplete
+            size="small"
+            options={wordOptions}
+            value={selectedWord}
+            onChange={handleWordChange}
+            getOptionLabel={(option) => option?.phrase || ""}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Change word"
+                placeholder="Search vocabulary…"
+              />
+            )}
+          />
+        </Box>
+      )}
       <WordBlockComponent
         className={className}
         format={format}
@@ -478,6 +534,11 @@ export class WordBlockNode extends DecoratorBlockNode {
 
   getId() {
     return this.__id;
+  }
+
+  setWordID(id) {
+    const writable = this.getWritable();
+    writable.__id = id;
   }
 
   getTextContent(_includeInert, _includeDirectionless) {

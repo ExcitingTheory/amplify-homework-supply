@@ -1,0 +1,46 @@
+{
+  "semanticSearch": {
+    "noIdentity": "Kein Suchindex verfügbar – Identität des Unit-Besitzers konnte nicht aufgelöst werden.",
+    "noIndex": "Für den aktuellen Kontext ist kein Suchindex verfügbar.",
+    "error": "Die Suche ist fehlgeschlagen. Versuchen Sie bitte eine andere Suchanfrage."
+  },
+  "readFileContent": {
+    "noContent": "Für diese Datei ist kein extrahierter Inhalt verfügbar.",
+    "error": "Fehler beim Lesen des Dateiinhalts."
+  },
+  "studentProgress": {
+    "noUnit": "Keine Lerneinheit angegeben und kein aktueller Lerneinheitskontext vorhanden.",
+    "noGrades": "Für diese Lerneinheit wurden keine Notendatensätze gefunden.",
+    "error": "Fortschrittsdaten konnten nicht geladen werden."
+  },
+  "courseOutline": {
+    "noSection": "Kein Abschnittskontext verfügbar.",
+    "noOutline": "Keine Kursübersicht verfügbar. Die Lerneinheiten wurden möglicherweise noch nicht veröffentlicht.",
+    "error": "Kursgliederung konnte nicht geladen werden."
+  },
+  "recallMemory": {
+    "noHistory": "Für diesen Kontext wurde kein Gesprächsverlauf gefunden.",
+    "noMemory": "Kein Gesprächsspeicher gefunden.",
+    "error": "Erinnerung konnte nicht abgerufen werden."
+  },
+  "updateMemory": {
+    "error": "Aktualisierung des Speichers fehlgeschlagen."
+  },
+  "recallConversations": {
+    "noHistory": "Es wurde kein früherer Gesprächsverlauf gefunden.",
+    "noSummaries": "Es sind noch keine Gesprächszusammenfassungen verfügbar.",
+    "error": "Frühere Konversationen konnten nicht abgerufen werden."
+  },
+  "sectionAnalytics": {
+    "instructorOnly": "Dieses Tool ist nur für Dozenten verfügbar.",
+    "noSection": "Kein Abschnitt angegeben und kein aktueller Abschnittskontext vorhanden.",
+    "noAssignments": "Für diesen Abschnitt wurden keine Aufgaben gefunden.",
+    "noGrades": "Es wurden noch keine Schülernoten erfasst.",
+    "error": "Das Laden der Abschnittsanalyse ist fehlgeschlagen."
+  },
+  "studentList": {
+    "instructorOnly": "Dieses Tool steht nur Dozenten zur Verfügung.",
+    "noSection": "Kein Abschnitt angegeben.",
+    "error": "Fehler beim Laden der Studierendenliste."
+  }
+}

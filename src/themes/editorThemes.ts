@@ -33,6 +33,9 @@ export interface ThemePaletteVariant {
   primary: { main: string };
   secondary: { main: string };
   error?: { main: string };
+  warning?: { main: string };
+  info?: { main: string };
+  success?: { main: string };
   background: { default: string; paper: string };
   text?: { primary: string; secondary: string };
   custom: CustomPaletteTokens;
@@ -214,6 +217,42 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         subtleBorder: "#311b92",
         heroCardGradient:
           "linear-gradient(135deg, #0d1b2a 0%, #4a148c 50%, #6a1b9a 100%)",
+      },
+    },
+  },
+  highContrast: {
+    light: {
+      primary: { main: "#0b3d91" },
+      secondary: { main: "#8a1500" },
+      error: { main: "#b00020" },
+      background: { default: "#ffffff", paper: "#ffffff" },
+      text: { primary: "#000000", secondary: "#1a1a1a" },
+      custom: {
+        chatBubbleUser: "#e6eeff",
+        chatBubbleAssistant: "#f2f2f2",
+        glassNavbar: "rgba(255,255,255,0.98)",
+        editorBackground: "#ffffff",
+        codeBlock: "#f0f0f0",
+        searchHighlight: "#ffff00",
+        subtleBorder: "#000000",
+        heroCardGradient: "linear-gradient(135deg, #000000 0%, #0b3d91 100%)",
+      },
+    },
+    dark: {
+      primary: { main: "#40c4ff" },
+      secondary: { main: "#ffd400" },
+      error: { main: "#ff5252" },
+      background: { default: "#000000", paper: "#000000" },
+      text: { primary: "#ffffff", secondary: "#f0f0f0" },
+      custom: {
+        chatBubbleUser: "#002b5c",
+        chatBubbleAssistant: "#141414",
+        glassNavbar: "rgba(0,0,0,0.98)",
+        editorBackground: "#000000",
+        codeBlock: "#0a0a0a",
+        searchHighlight: "#ffff00",
+        subtleBorder: "#ffffff",
+        heroCardGradient: "linear-gradient(135deg, #000000 0%, #003366 100%)",
       },
     },
   },

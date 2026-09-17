@@ -33,6 +33,7 @@
     "userId": "Identifiant utilisateur",
     "identityId": "Identité Id",
     "cancel": "Annuler",
+    "name": "Nom",
     "updateProfile": "Mettre à jour le profil",
     "confirmEmail": {
       "title": "Confirmez votre e-mail",
@@ -77,7 +78,9 @@
       "descriptionLabel": "Description",
       "cancel": "Annuler",
       "create": "Créer"
-    }
+    },
+    "joinCode": "Étiquette de code",
+    "archived": "Archivé"
   },
   "sectionDetail": {
     "noFeaturedImage": "Aucune image mise en avant définie",
@@ -129,7 +132,11 @@
       "saveFailed": "Échec de l'enregistrement de la note. Veuillez réessayer.",
       "cancel": "Annuler",
       "save": "Enregistrer la note"
-    }
+    },
+    "saveCoverVideo": "Enregistrer",
+    "removeCoverVideo": "Supprimer",
+    "leaderboard": "Classement",
+    "squads": "Équipes"
   },
   "units": {
     "title": "Unités",
@@ -160,5 +167,22 @@
     "fastestMode": "Le plus rapide",
     "squadsMode": "Équipes",
     "empty": "Pas encore de données de classement. Terminez des devoirs pour gagner des XP \\!"
+  },
+  "squads": {
+    "title": "Équipes"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "heading": "Paramètres"
+  },
+  "privacy": {
+    "dataSharing": {
+      "classmates": "Camarades de classe :"
+    },
+    "yourRights": {
+      "item4": "Exportation : Téléchargez vos données d'apprentissage dans un format portable",
+      "item2": "Correction : Mettre à jour ou corriger des informations personnelles inexactes",
+      "item3": "Suppression : Demandez la suppression de votre compte et des données associées"
+    }
   }
 }

@@ -4,9 +4,9 @@
     "discard": "Annuler",
     "discardChanges": "Abandonner les modifications ?",
     "generate": "Générer",
-    "generating": "Génération de {{type}}...",
+    "generating": "Génération de {type}...",
     "keepEditing": "Continuer à modifier",
-    "lostWarning": "Votre {{type}} généré sera perdu si vous annulez maintenant.",
+    "lostWarning": "Votre {type} généré sera perdu si vous annulez maintenant.",
     "preview": "Aperçu",
     "saveClose": "Enregistrer et fermer",
     "takeMoments": "Cela peut prendre quelques instants"

@@ -52,8 +52,10 @@
       "darkMode": "ダークモード",
       "disableNotifications": "通知を無効にする",
       "experimentalFeatures": "実験的機能",
-      "studentMode": "学習者モード"
-    }
+      "studentMode": "学習者モード",
+      "colorMode": "カラーモード"
+    },
+    "collaboration": "コラボレーション"
   },
   "navigation": {
     "grades": "成績",
@@ -61,10 +63,20 @@
     "profile": "プロフィール",
     "sections": "セクション",
     "units": "ユニット",
-    "workbook": "ワークブック"
+    "workbook": "ワークブック",
+    "squads": "チーム",
+    "leaderboard": "ランキング",
+    "published": "公開済み",
+    "settings": "設定",
+    "gamification": "ゲーミフィケーション",
+    "drafts": "下書き",
+    "notifications": "通知",
+    "collaboration": "コラボレーション",
+    "skills": "スキルツリー",
+    "collaborationDesc": "招待とセッション参加"
   },
   "quizComponent": {
-    "grade": "成績: {{grade}}"
+    "grade": "成績: {grade}"
   },
   "status": {
     "complete": "完了しました",
@@ -83,5 +95,20 @@
     "created": "作成済み",
     "due": "期限",
     "updated": "更新されました"
+  },
+  "chat": {
+    "aiAssistant": "AIアシスタント",
+    "openAssistant": "AIアシスタントを開く"
+  },
+  "timer": {
+    "minutes": "分",
+    "seconds": "秒",
+    "increase": "選択した時間セグメントを増やす",
+    "decrease": "選択した時間セグメントを減らします",
+    "hours": "時間"
+  },
+  "peerReview": {
+    "helpful": "ピアレビューは役に立ちました",
+    "notHelpful": "ピアレビューは役に立ちませんでした"
   }
 }

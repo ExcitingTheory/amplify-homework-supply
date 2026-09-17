@@ -15,14 +15,14 @@
     "generateTTS": "TTS生成",
     "importFailed": "JSONファイルのインポートに失敗しました",
     "importJSON": "JSONをインポート",
-    "lineNumber": "{{number}}行目 - {{speaker}}",
+    "lineNumber": "{number}行目 - {speaker}",
     "lockedTrack": "ロックされたトラック",
     "micAccessFailed": "マイクへのアクセスに失敗しました",
     "name": "名前",
     "noMissingAudio": "生成する音声の不足はありません",
     "noTextToGenerate": "生成するテキストがありません",
     "play": "再生します",
-    "processing": "{{count}}行を処理しています...",
+    "processing": "{count}行を処理しています...",
     "record": "録画する",
     "recordingSaveFailed": "録画の保存に失敗しました",
     "save": "保存",
@@ -32,7 +32,7 @@
     "speakerNotFound": "スピーカーが見つかりません",
     "speakers": "スピーカー",
     "stop": "停止します",
-    "takeNumber": "テイク{{number}} ({{type}})",
+    "takeNumber": "テイク{number} ({type})",
     "takes": "テイク",
     "text": "テキスト",
     "timeline": "タイムライン",
@@ -67,24 +67,24 @@
   "sketchPad": {
     "cancelSubmission": "提出をキャンセルします",
     "hoverToStartDrawing": "ホバーして描画を開始してください",
-    "submittingInSeconds": "{{countdown}}秒後に描画を採点のために提出します..."
+    "submittingInSeconds": "{countdown}秒後に描画を採点のために提出します..."
   },
   "unitEmbedding": {
     "allSectionsComplete": "すべてのセクションが完了しました！",
     "cached": "キャッシュ済み",
-    "completedCount": "{{completed}}/{{total}} 完了しました",
+    "completedCount": "{completed}/{total} 完了しました",
     "generateEmbeddings": "埋め込みを生成します",
     "generating": "生成中...",
     "publishSuccess": "ユニットが公開され、埋め込みが生成されました！",
     "publishUnit": "ユニットを公開",
     "publishing": "公開中...",
-    "wordsEmbedded": "{{count}}語を埋め込みました"
+    "wordsEmbedded": "{count}語を埋め込みました"
   },
   "autoEmbedPlugin": {
     "dismiss": "閉じる",
     "embed": "埋め込みます",
-    "embedOption": "{{contentName}}を埋め込みます",
-    "embedTitle": "{{contentName}}を埋め込み",
+    "embedOption": "{contentName}を埋め込みます",
+    "embedTitle": "{contentName}を埋め込み",
     "youtubeVideo": "YouTube動画"
   },
   "unitEmbeddingComponents": {
@@ -97,7 +97,7 @@
     "successConfirmation": "埋め込みが正常に生成されました"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "埋め込み生成完了: {{count}}語を処理しました"
+    "embeddingGenerated": "埋め込み生成完了: {count}語を処理しました"
   },
   "imagesPlugin": {
     "altText": "代替テキスト",
@@ -127,7 +127,7 @@
   "wordBlockPlugin": {
     "audioUnavailable": "音声は利用できません",
     "loadingAudio": "オーディオを読み込んでいます...",
-    "wordNotFound": "単語が見つかりません: {{wordID}}"
+    "wordNotFound": "単語が見つかりません: {wordID}"
   },
   "vocabularyReview": {
     "alertMessage": "続行する前に語彙を復習してください",
@@ -168,7 +168,7 @@
     "titleHeader": "タイトル"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "PDFを読み込み中: {{filename}}",
+    "loadingPdf": "PDFを読み込み中: {filename}",
     "noPdfToDisplay": "表示するPDFがありません"
   },
   "metadataEditor": {
@@ -202,11 +202,11 @@
   },
   "imageMaskEditor": {
     "applyMask": "マスクを適用して再生成します",
-    "brushSize": "ブラシサイズ: {{size}}",
+    "brushSize": "ブラシサイズ: {size}",
     "cancel": "キャンセル",
     "instructions": "<strong>手順:</strong> 再生成したい領域をペイントしてください。マスクの一部を削除するには消しゴムを使用してください。Shiftキーを押しながらドラッグすると画面を移動できます。ズームボタンを使用して詳細を確認してください。",
     "save": "保存",
-    "zoomInfo": "ズーム: {{level}}% | Shiftキーを押しながらパンします"
+    "zoomInfo": "ズーム: {level}% | Shiftキーを押しながらパンします"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "キャンセル",
@@ -249,5 +249,15 @@
     "emptyState": "プレイリストにアイテムがありません",
     "menuAttribute": "メニュー",
     "noFilesMessage": "まだファイルが追加されていません。上の入力欄を使用してプレイリストにファイルを追加してください。"
+  },
+  "autoSubmit": {
+    "cancelSubmission": "キャンセル",
+    "submittingInSeconds": "{countdown}秒後に解答を送信します..."
+  },
+  "micLevelIndicator": {
+    "tooLow": "マイクの入力レベルが非常に低くなっています。より大きな声で話すか、マイクに近づいてお試しください。",
+    "tooLowShort": "小さすぎます",
+    "noSignal": "マイクの信号が検出されませんでした。マイクが接続されており、ミュートになっていないことを確認してください。",
+    "noSignalShort": "信号なし"
   }
 }

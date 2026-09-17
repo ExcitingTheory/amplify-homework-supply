@@ -17,6 +17,7 @@ import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
 import { FastestCompletionsTable } from "@/components/Leaderboard/FastestCompletionsTable";
 import type { FastestCompletionEntry } from "@/components/Leaderboard/FastestCompletionsTable";
 import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
+import { EmptyState } from "@/components/EmptyState";
 import { useSquad } from "@/context/gamificationContext";
 import {
   trackSquadLeaderboardViewed,
@@ -236,14 +237,13 @@ export function LiveLeaderboard({
       )}
 
       {entries.length === 0 && (
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
-            {t("leaderboard.empty", {
-              defaultValue:
-                "No leaderboard data yet. Complete assignments to earn XP!",
-            })}
-          </Typography>
-        </Box>
+        <EmptyState
+          icon={<LeaderboardIcon fontSize="inherit" />}
+          title={t("leaderboard.empty", {
+            defaultValue:
+              "No leaderboard data yet. Complete assignments to earn XP!",
+          })}
+        />
       )}
     </Container>
   );
