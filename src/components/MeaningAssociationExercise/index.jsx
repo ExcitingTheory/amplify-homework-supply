@@ -14,12 +14,12 @@
 import * as React from "react";
 import { useDrop } from "react-dnd";
 import { useTranslations } from "next-intl";
+import { alpha } from "@mui/material/styles";
 
 import {
   Box,
   Tabs,
   Tab,
-  AppBar,
   LinearProgress,
   Typography,
   ListItem,
@@ -35,6 +35,47 @@ import { Learn } from "./Learn";
 import { DndWrapper } from "./DndWrapper";
 import UnitContext from "../../context/unitContext";
 import getCachedUrl from "../../utils/getCachedUrl";
+import { ExerciseBlockCard } from "../Editor3/components/ExerciseBlockCard";
+import { ExerciseProgressMeters } from "../Editor3/components/ExerciseProgressMeters";
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
+
+function dropTargetSx(theme, { isActive, canDrop, isMatched = false }) {
+  const primaryTint = alpha(
+    theme.palette.primary.main,
+    theme.palette.mode === "dark" ? 0.18 : 0.08,
+  );
+
+  return {
+    boxSizing: "border-box",
+    borderWidth: 2,
+    borderStyle: isMatched ? "solid" : "dashed",
+    borderColor: isMatched
+      ? "success.main"
+      : isActive
+        ? "primary.main"
+        : canDrop
+          ? alpha(theme.palette.primary.main, 0.65)
+          : alpha(theme.palette.text.primary, 0.28),
+    bgcolor: isMatched
+      ? alpha(theme.palette.success.main, 0.12)
+      : isActive
+        ? primaryTint
+        : canDrop
+          ? alpha(theme.palette.primary.main, 0.04)
+          : "action.hover",
+    borderRadius: `${SEMANTIC_THEME.radius.card}px`,
+    boxShadow: isActive
+      ? `inset 0 0 0 2px ${alpha(theme.palette.primary.main, 0.22)}`
+      : 0,
+    transition: theme.transitions.create(
+      ["border-color", "background-color", "box-shadow"],
+      { duration: theme.transitions.duration.shorter },
+    ),
+    "@media (prefers-reduced-motion: reduce)": {
+      transition: "none",
+    },
+  };
+}
 
 export function LinearProgressWithLabel(props) {
   return (
@@ -122,7 +163,13 @@ export const PlayAudioButton = ({ audioPaths, size = "small" }) => {
 };
 
 /** Static card shown in completed state for Easy/Hard — shows the word with a check or X */
-export const ResultCard = ({ phrase, passed, audioPaths, cardWidth = 140 }) => {
+export const ResultCard = ({
+  phrase,
+  passed,
+  audioPaths,
+  cardWidth = 140,
+  showAudio = true,
+}) => {
   return (
     <Box
       data-testid="result-card"
@@ -162,7 +209,7 @@ export const ResultCard = ({ phrase, passed, audioPaths, cardWidth = 140 }) => {
         <CancelIcon sx={{ fontSize: "1rem", flexShrink: 0 }} />
       )}
       {phrase}
-      <PlayAudioButton audioPaths={audioPaths} />
+      {showAudio && <PlayAudioButton audioPaths={audioPaths} />}
     </Box>
   );
 };
@@ -175,6 +222,8 @@ export const ResultDropLearn = ({
   passed,
   audioPaths,
   definitionAudioPaths,
+  showAudio = true,
+  showPronunciation = true,
 }) => {
   const borderColor = passed
     ? "var(--mui-palette-success-main, #4caf50)"
@@ -244,7 +293,7 @@ export const ResultDropLearn = ({
                 >
                   {matchedWord?.phrase}
                 </Typography>
-                <PlayAudioButton audioPaths={audioPaths} />
+                {showAudio && <PlayAudioButton audioPaths={audioPaths} />}
               </Box>
               <Typography
                 component="span"
@@ -255,7 +304,7 @@ export const ResultDropLearn = ({
                   marginBottom: "0.25rem",
                 }}
               >
-                {pronunciation}
+                {showPronunciation && pronunciation}
               </Typography>
             </Box>
           }
@@ -268,7 +317,9 @@ export const ResultDropLearn = ({
               >
                 {definition}
               </Typography>
-              <PlayAudioButton audioPaths={definitionAudioPaths} />
+              {showAudio && (
+                <PlayAudioButton audioPaths={definitionAudioPaths} />
+              )}
             </Box>
           }
         />
@@ -287,6 +338,9 @@ export const AnswerDropLearn = ({
   isMatched,
   audioPaths,
   definitionAudioPaths,
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
 }) => {
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: "box",
@@ -298,18 +352,6 @@ export const AnswerDropLearn = ({
   });
 
   const isActive = canDrop && isOver;
-  let borderColor = "var(--mui-palette-text-disabled)";
-  let backgroundColor = "var(--mui-palette-action-disabledBackground)";
-
-  if (isMatched) {
-    borderColor = "var(--mui-palette-divider)";
-    backgroundColor = "var(--mui-palette-action-selected)";
-  } else if (isActive) {
-    borderColor = "var(--mui-palette-primary-main)";
-    backgroundColor = "var(--mui-palette-action-focus)";
-  } else if (canDrop) {
-    borderColor = "var(--mui-palette-text-primary)";
-  }
 
   return (
     <ListItem
@@ -318,18 +360,16 @@ export const AnswerDropLearn = ({
       data-testid="drop-target-learn"
       data-word-id={id}
       data-is-matched={isMatched}
-      sx={{
+      sx={(theme) => ({
         margin: "0.25rem 0",
         padding: "0.75rem",
-        border: `1px solid ${borderColor}`,
-        backgroundColor: backgroundColor,
-        borderRadius: "8px",
+        ...dropTargetSx(theme, { isActive, canDrop, isMatched }),
         boxSizing: "border-box",
         width: { xs: "220px", sm: "100%" },
         minWidth: { xs: "220px", sm: "auto" },
         maxWidth: { xs: "220px", sm: "100%" },
         flexShrink: 0,
-      }}
+      })}
     >
       {isMatched && matchedWord ? (
         // Show complete information when matched
@@ -352,7 +392,7 @@ export const AnswerDropLearn = ({
                 >
                   {matchedWord.phrase}
                 </Typography>
-                <PlayAudioButton audioPaths={audioPaths} />
+                {showAudio && <PlayAudioButton audioPaths={audioPaths} />}
               </Box>
               <Typography
                 component="span"
@@ -363,7 +403,7 @@ export const AnswerDropLearn = ({
                   marginBottom: "0.25rem",
                 }}
               >
-                {pronunciation}
+                {showPronunciation && pronunciation}
               </Typography>
             </Box>
           }
@@ -376,7 +416,9 @@ export const AnswerDropLearn = ({
               >
                 {definition}
               </Typography>
-              <PlayAudioButton audioPaths={definitionAudioPaths} />
+              {showAudio && (
+                <PlayAudioButton audioPaths={definitionAudioPaths} />
+              )}
             </Box>
           }
         />
@@ -384,18 +426,32 @@ export const AnswerDropLearn = ({
         // Show only pronunciation/definition when not matched
         <ListItemText
           secondaryTypographyProps={{ component: "div" }}
-          primary={pronunciation}
+          primary={
+            promptFor === "word"
+              ? phrase
+              : showPronunciation
+                ? pronunciation
+                : null
+          }
           secondary={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                component="span"
-                variant="body2"
-                color="textSecondary"
-              >
-                {definition}
-              </Typography>
-              <PlayAudioButton audioPaths={definitionAudioPaths} />
-            </Box>
+            promptFor === "word" ? (
+              showPronunciation ? (
+                pronunciation
+              ) : null
+            ) : (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textSecondary"
+                >
+                  {definition}
+                </Typography>
+                {showAudio && (
+                  <PlayAudioButton audioPaths={definitionAudioPaths} />
+                )}
+              </Box>
+            )
           }
         />
       )}
@@ -403,7 +459,12 @@ export const AnswerDropLearn = ({
   );
 };
 
-export const AnswerDrop = ({ correctAnswer }) => {
+export const AnswerDrop = ({
+  correctAnswer,
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
+}) => {
   // console.log('AnswerDrop correctAnswer', correctAnswer)
 
   const [{ canDrop, isOver }, drop] = useDrop({
@@ -419,24 +480,14 @@ export const AnswerDrop = ({ correctAnswer }) => {
   });
 
   const isActive = canDrop && isOver;
-  let borderColor = "var(--mui-palette-text-disabled)";
-  let backgroundColor = "var(--mui-palette-action-disabledBackground)";
-  if (isActive) {
-    borderColor = "var(--mui-palette-primary-main)";
-    backgroundColor = "var(--mui-palette-action-focus)";
-  } else if (canDrop) {
-    borderColor = "var(--mui-palette-text-primary)";
-  }
   return (
     <>
       <Box
         ref={drop}
-        borderRadius={3}
-        border={1}
         data-testid="drop-target"
         data-word-id={correctAnswer?.id}
-        style={{
-          borderStyle: "dashed",
+        sx={(theme) => ({
+          ...dropTargetSx(theme, { isActive, canDrop }),
           width: "100%",
           maxWidth: "100%",
           minWidth: "0",
@@ -448,10 +499,7 @@ export const AnswerDrop = ({ correctAnswer }) => {
           display: "flex",
           flexDirection: "column",
           padding: "1rem",
-          borderRadius: "8px",
-          border: `1px solid ${borderColor}`,
-          backgroundColor: backgroundColor,
-        }}
+        })}
       >
         <div
           style={{
@@ -465,10 +513,21 @@ export const AnswerDrop = ({ correctAnswer }) => {
             gap: "0.5rem",
           }}
         >
-          {correctAnswer?.definition}
-          <PlayAudioButton
-            audioPaths={correctAnswer?.definitionAudio || correctAnswer?.audio}
-          />
+          {promptFor === "word"
+            ? correctAnswer?.phrase
+            : correctAnswer?.definition}
+          {showPronunciation &&
+            promptFor !== "word" &&
+            correctAnswer?.pronunciation}
+          {showAudio && (
+            <PlayAudioButton
+              audioPaths={
+                promptFor === "word"
+                  ? correctAnswer?.audio
+                  : correctAnswer?.definitionAudio || correctAnswer?.audio
+              }
+            />
+          )}
         </div>
       </Box>
       {/* <Paper
@@ -514,13 +573,45 @@ function a11yProps(index) {
   };
 }
 
+export const MEANING_MODE_ORDER = ["learn", "easy", "hard"];
+
+export function getAvailableMeaningModes(enabledModes) {
+  const modes = MEANING_MODE_ORDER.filter((mode) =>
+    enabledModes.includes(mode),
+  );
+  return modes.length > 0 ? modes : ["learn"];
+}
+
+export function resolveMeaningMode(savedValue, availableModes) {
+  const legacyMode =
+    typeof savedValue === "number"
+      ? MEANING_MODE_ORDER[savedValue]
+      : savedValue;
+  return availableModes.includes(legacyMode) ? legacyMode : availableModes[0];
+}
+
+export function getNextMeaningMode(mode, availableModes) {
+  const nextIndex = availableModes.indexOf(mode) + 1;
+  return nextIndex > 0 && nextIndex < availableModes.length
+    ? availableModes[nextIndex]
+    : null;
+}
+
+function modeLabel(mode) {
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
 const MeaningAssociationTabs = ({
   nodeKey,
   wordIDs,
   enabledModes = ["learn", "easy", "hard"],
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
 }) => {
   const t = useTranslations("common");
   const { grade } = React.useContext(UnitContext);
+  const [liveModeProgress, setLiveModeProgress] = React.useState({});
   const gradeData = React.useMemo(() => {
     if (!grade?.data) return {};
     if (typeof grade.data === "string") {
@@ -534,66 +625,139 @@ const MeaningAssociationTabs = ({
   }, [grade?.data]);
   const inProgress = gradeData[nodeKey] || {};
 
-  // Load saved tab index or default to 0
-  const savedTabIndex = inProgress?.tabIndex || 0;
-  const [tabIndex, setTabIndex] = React.useState(savedTabIndex);
+  React.useEffect(() => {
+    setLiveModeProgress({});
+  }, [grade?.id, nodeKey]);
+
+  const handleModeProgressChange = React.useCallback((mode, progress) => {
+    setLiveModeProgress((current) => ({
+      ...current,
+      [mode]: progress,
+    }));
+  }, []);
+
+  const availableModes = React.useMemo(() => {
+    return getAvailableMeaningModes(enabledModes);
+  }, [enabledModes]);
+
+  const resolveSavedMode = React.useCallback(
+    (savedValue) => {
+      return resolveMeaningMode(savedValue, availableModes);
+    },
+    [availableModes],
+  );
+
+  const [activeMode, setActiveMode] = React.useState(() =>
+    resolveSavedMode(inProgress?.tabIndex),
+  );
 
   // Update tab index when grade data changes (e.g., from another component)
   React.useEffect(() => {
-    if (
-      inProgress?.tabIndex !== undefined &&
-      inProgress.tabIndex !== tabIndex
-    ) {
-      setTabIndex(inProgress.tabIndex);
+    if (inProgress?.tabIndex !== undefined) {
+      setActiveMode(resolveSavedMode(inProgress.tabIndex));
     }
-  }, [inProgress?.tabIndex]);
+  }, [inProgress?.tabIndex, resolveSavedMode]);
+
+  React.useEffect(() => {
+    setActiveMode((currentMode) =>
+      availableModes.includes(currentMode) ? currentMode : availableModes[0],
+    );
+  }, [availableModes]);
 
   const handleTabChange = (event, newValue) => {
-    setTabIndex(newValue);
+    if (availableModes.includes(newValue)) {
+      setActiveMode(newValue);
+    }
+  };
+
+  const nextModeAfter = (mode) => {
+    return getNextMeaningMode(mode, availableModes);
   };
 
   // Check completion status for each mode
   const learnComplete = inProgress?.learn?.complete || false;
   const easyComplete = inProgress?.easy?.complete || false;
   const hardComplete = inProgress?.hard?.complete || false;
+  const modeProgress = availableModes.map(
+    (mode) => liveModeProgress[mode] || inProgress?.[mode] || {},
+  );
+  const overallProgress =
+    (modeProgress.reduce(
+      (total, mode) => total + (Number(mode.percentComplete) || 0),
+      0,
+    ) /
+      availableModes.length) *
+    100;
+  const totalAttempts = modeProgress.reduce(
+    (total, mode) => total + (Number(mode.attemptsCount) || 0),
+    0,
+  );
+  const overallAccuracy =
+    totalAttempts > 0
+      ? (modeProgress.reduce(
+          (total, mode) =>
+            total +
+            (Number(mode.accuracy) || 0) * (Number(mode.attemptsCount) || 0),
+          0,
+        ) /
+          totalAttempts) *
+        100
+      : 0;
+  const allEnabledModesComplete = availableModes.every(
+    (mode) => inProgress?.[mode]?.complete,
+  );
 
   return (
-    <Box
+    <ExerciseBlockCard
+      blockType="meaning-association"
+      accuracy={overallAccuracy}
+      graded={allEnabledModesComplete}
       sx={{
         width: "100%",
         maxWidth: "100vw",
-        overflow: "hidden",
-        boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
         flex: "1 1 auto",
         minHeight: 0,
+        overflow: "hidden",
       }}
     >
-      <AppBar
-        elevation={2}
-        style={{
-          borderRadius: "3px",
+      <ExerciseProgressMeters
+        percentComplete={overallProgress}
+        accuracy={overallAccuracy}
+        hasAttempts={totalAttempts > 0}
+        progressDescription="Average completion across enabled practice modes."
+        accuracyDescription="Accuracy across attempts in enabled practice modes."
+      />
+      <Box
+        sx={{
+          mb: 1.5,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+          overflow: "hidden",
+          bgcolor: "action.hover",
         }}
-        position="static"
-        color="inherit"
-        margin={1}
       >
         <Tabs
-          value={tabIndex}
+          value={activeMode}
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
           variant="scrollable"
           scrollButtons="auto"
           aria-label={t("common.filter")}
-          style={{
-            margin: 0,
-            padding: 0,
+          sx={{
+            minHeight: 40,
+            "& .MuiTab-root": {
+              minHeight: 40,
+              py: 0.75,
+            },
           }}
         >
-          {enabledModes.includes("learn") && (
+          {availableModes.includes("learn") && (
             <Tab
+              value="learn"
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Learn
@@ -607,11 +771,12 @@ const MeaningAssociationTabs = ({
                   )}
                 </Box>
               }
-              {...a11yProps(enabledModes.indexOf("learn"))}
+              {...a11yProps("learn")}
             />
           )}
-          {enabledModes.includes("easy") && (
+          {availableModes.includes("easy") && (
             <Tab
+              value="easy"
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Easy
@@ -625,11 +790,12 @@ const MeaningAssociationTabs = ({
                   )}
                 </Box>
               }
-              {...a11yProps(enabledModes.indexOf("easy"))}
+              {...a11yProps("easy")}
             />
           )}
-          {enabledModes.includes("hard") && (
+          {availableModes.includes("hard") && (
             <Tab
+              value="hard"
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Hard
@@ -643,44 +809,65 @@ const MeaningAssociationTabs = ({
                   )}
                 </Box>
               }
-              {...a11yProps(enabledModes.indexOf("hard"))}
+              {...a11yProps("hard")}
             />
           )}
         </Tabs>
-      </AppBar>
+      </Box>
       <DndWrapper>
-        {enabledModes.includes("learn") && (
-          <TabPanel value={tabIndex} index={enabledModes.indexOf("learn")}>
+        {availableModes.includes("learn") && (
+          <TabPanel value={activeMode} index="learn">
             <Learn
               nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
+              setTabIndex={setActiveMode}
+              tabIndex={activeMode}
               wordIDs={wordIDs}
+              enabledModes={availableModes}
+              nextMode={nextModeAfter("learn")}
+              nextModeLabel={modeLabel(nextModeAfter("learn") || "learn")}
+              onProgressChange={handleModeProgressChange}
+              promptFor={promptFor}
+              showAudio={showAudio}
+              showPronunciation={showPronunciation}
             />
           </TabPanel>
         )}
-        {enabledModes.includes("easy") && (
-          <TabPanel value={tabIndex} index={enabledModes.indexOf("easy")}>
+        {availableModes.includes("easy") && (
+          <TabPanel value={activeMode} index="easy">
             <Easy
               nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
+              setTabIndex={setActiveMode}
+              tabIndex={activeMode}
               wordIDs={wordIDs}
+              enabledModes={availableModes}
+              nextMode={nextModeAfter("easy")}
+              nextModeLabel={modeLabel(nextModeAfter("easy") || "easy")}
+              onProgressChange={handleModeProgressChange}
+              promptFor={promptFor}
+              showAudio={showAudio}
+              showPronunciation={showPronunciation}
             />
           </TabPanel>
         )}
-        {enabledModes.includes("hard") && (
-          <TabPanel value={tabIndex} index={enabledModes.indexOf("hard")}>
+        {availableModes.includes("hard") && (
+          <TabPanel value={activeMode} index="hard">
             <Hard
               nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
+              setTabIndex={setActiveMode}
+              tabIndex={activeMode}
               wordIDs={wordIDs}
+              enabledModes={availableModes}
+              nextMode={nextModeAfter("hard")}
+              nextModeLabel={modeLabel(nextModeAfter("hard") || "hard")}
+              onProgressChange={handleModeProgressChange}
+              promptFor={promptFor}
+              showAudio={showAudio}
+              showPronunciation={showPronunciation}
             />
           </TabPanel>
         )}
       </DndWrapper>
-    </Box>
+    </ExerciseBlockCard>
   );
 };
 
@@ -688,6 +875,9 @@ const MeaningAssociationExercise = ({
   nodeKey,
   wordIDs,
   enabledModes = ["learn", "easy", "hard"],
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
 }) => {
   return (
     <div
@@ -707,6 +897,9 @@ const MeaningAssociationExercise = ({
         nodeKey={nodeKey}
         wordIDs={wordIDs}
         enabledModes={enabledModes}
+        promptFor={promptFor}
+        showAudio={showAudio}
+        showPronunciation={showPronunciation}
       />
     </div>
   );

@@ -10,13 +10,17 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import ClearIcon from "@mui/icons-material/Clear";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import Stack from "@mui/material/Stack";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningIcon from "@mui/icons-material/Warning";
+import EditIcon from "@mui/icons-material/Edit";
+import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 // import { GutterContext } from '../context/gutterContext';
 import SortableAnswers from "../../SortableAnswers";
 import UnitContext from "../../../context/unitContext";
 import { $isQuizNode } from "../plugins/QuizPlugin";
-import { EditorBlockCard } from "./EditorBlockCard";
+import { ExerciseBlockCard } from "./ExerciseBlockCard";
+import { QuizProgressMeters } from "./QuizProgressMeters";
 import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
 import {
@@ -330,18 +334,51 @@ const QuizEditor = ({ className, nodeKey, data }) => {
     console.log("startEdit");
   };
 
+  const correctCount = (questionValue || []).filter(
+    (q) => q && q.correct === true,
+  ).length;
+  const attemptedCount = Object.keys(attemptedAnswers || {}).length;
+  const percentComplete =
+    correctCount > 0 ? Math.floor((attemptedCount / correctCount) * 100) : 0;
+
   let checkboxes = [];
 
   if (questionValue && questionValue.length > 0) {
     checkboxes = questionValue.map((data, key) => {
-      let _attemptedAnswers = attemptedAnswers || {};
-      if (!_attemptedAnswers) {
-        _attemptedAnswers = {};
-      }
-      let checked = false;
-      if (_attemptedAnswers[key]) {
-        checked = true;
-      }
+      const _attemptedAnswers = attemptedAnswers || {};
+      const checked = _attemptedAnswers[key] != null;
+      const isCorrectAnswer = data.correct === true;
+      const showCorrectFeedback = isLocked && checked && isCorrectAnswer;
+      const showWrongFeedback = isLocked && checked && !isCorrectAnswer;
+      const feedbackColor = showCorrectFeedback
+        ? "success.main"
+        : showWrongFeedback
+          ? "error.main"
+          : "primary.main";
+      const rowBorderColor = showCorrectFeedback
+        ? "success.main"
+        : showWrongFeedback
+          ? "error.main"
+          : checked
+            ? "primary.main"
+            : "divider";
+      const rowBgColor = (theme) =>
+        showCorrectFeedback
+          ? alpha(
+              theme.palette.success.main,
+              theme.palette.mode === "dark" ? 0.32 : 0.24,
+            )
+          : showWrongFeedback
+            ? alpha(
+                theme.palette.error.main,
+                theme.palette.mode === "dark" ? 0.32 : 0.24,
+              )
+            : checked && !isLocked
+              ? alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.22 : 0.12,
+                )
+              : "transparent";
       return (
         <FormControlLabel
           key={key}
@@ -353,44 +390,26 @@ const QuizEditor = ({ className, nodeKey, data }) => {
               onClick={(e) => {
                 gradeAnswer(e, key, data, questionValue);
               }}
-              sx={{ borderRadius: `${SEMANTIC_THEME.radius.chip}px` }}
-              icon={
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
-                    border: "2px solid",
-                    borderColor: "text.disabled",
-                  }}
-                />
-              }
-              checkedIcon={
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
-                    border: "2px solid",
-                    borderColor: "primary.main",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 13,
-                      height: 13,
-                      borderRadius: "3px",
-                      bgcolor: "primary.main",
-                    }}
-                  />
-                </Box>
-              }
+              sx={{
+                borderRadius: `${SEMANTIC_THEME.radius.chip}px`,
+                "&.Mui-disabled": {
+                  color: feedbackColor,
+                  opacity: 1,
+                },
+              }}
             />
           }
-          label={data.answer}
+          label={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              {data.answer}
+              {showCorrectFeedback && (
+                <CheckCircleIcon sx={{ fontSize: 18, color: "success.main" }} />
+              )}
+              {showWrongFeedback && (
+                <WarningIcon sx={{ fontSize: 18, color: "error.main" }} />
+              )}
+            </Box>
+          }
           sx={{
             m: 0,
             width: "100%",
@@ -398,8 +417,13 @@ const QuizEditor = ({ className, nodeKey, data }) => {
             py: 0.5,
             borderRadius: `${SEMANTIC_THEME.radius.control}px`,
             border: "1px solid",
-            borderColor: checked ? "primary.main" : "divider",
-            bgcolor: checked ? "action.hover" : "transparent",
+            borderColor: rowBorderColor,
+            bgcolor: rowBgColor,
+            transition: "border-color 0.15s, background-color 0.15s",
+            color: "text.primary",
+            "& .MuiFormControlLabel-label.Mui-disabled": {
+              color: checked ? "text.primary" : "text.disabled",
+            },
           }}
         />
       );
@@ -420,7 +444,7 @@ const QuizEditor = ({ className, nodeKey, data }) => {
           margin: 0;
         }
       `}</style>
-      <EditorBlockCard
+      <ExerciseBlockCard
         blockType="quiz"
         selected={isSelected}
         accuracy={grade}
@@ -428,40 +452,43 @@ const QuizEditor = ({ className, nodeKey, data }) => {
       >
         {!editMode && (
           <>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <QuizProgressMeters
+              percentComplete={percentComplete}
+              accuracy={grade}
+              hasAttempts={attemptedCount > 0}
+            />
+            <FormGroup sx={{ gap: 0.75 }}>{checkboxes}</FormGroup>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 1,
+                mt: 1.5,
+              }}
+            >
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                onClick={reset}
+              >
+                {t("quizEditor.reset")}
+              </Button>
               <Button
                 data-testid="quiz-edit-toggle"
                 size="small"
+                variant="contained"
+                startIcon={<EditIcon />}
                 onClick={onClick}
               >
                 {t("quizEditor.edit")}
               </Button>
-              <Box sx={{ flexGrow: 1 }} />
-              <Button size="small" onClick={reset}>
-                {t("quizEditor.reset")}
-              </Button>
-              <Typography variant="caption" color="text.secondary">
-                {t("quizEditor.gradeDisplay", { score: grade })}
-              </Typography>
             </Box>
-            <FormGroup sx={{ gap: 0.75 }}>{checkboxes}</FormGroup>
           </>
         )}
         {editMode && (
           <>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-              <Button
-                data-testid="quiz-edit-toggle"
-                size="small"
-                disabled={invalidQuestion}
-                onClick={save}
-              >
-                {invalidQuestion
-                  ? t("quizEditor.invalid")
-                  : t("quizEditor.done")}
-              </Button>
-              <Box sx={{ flexGrow: 1 }} />
-            </Box>
             <SortableAnswers
               answers={questionValue}
               onQuestionChange={onQuestionChange}
@@ -469,27 +496,93 @@ const QuizEditor = ({ className, nodeKey, data }) => {
               onQuestionDelete={onQuestionDelete}
               onQuestionReorder={onQuestionReorder}
             />
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              border="thin solid"
-              borderColor="divider"
-              padding="0.5rem"
-              margin="0.5rem"
-              maxWidth="40rem"
+            <Box
+              sx={{
+                mt: 0.5,
+                position: "relative",
+              }}
             >
-              <DragIndicatorIcon />
+              <DragIndicatorIcon
+                color="disabled"
+                fontSize="small"
+                sx={{
+                  opacity: 0.7,
+                  position: "absolute",
+                  left: { xs: 8, sm: 10 },
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }}
+              />
+              <Checkbox
+                disabled
+                sx={{
+                  p: 0.5,
+                  m: 0,
+                  position: "absolute",
+                  left: { xs: 28, sm: 32 },
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }}
+              />
               <TextField
                 data-testid="quiz-add-answer"
                 placeholder={t("quizEditor.addAnswer")}
                 onClick={onAddQuestion}
+                size="small"
                 fullWidth
+                variant="standard"
+                aria-label={t("quizEditor.addAnswer")}
+                sx={{
+                  "& .MuiInput-root": {
+                    border: "1px dashed",
+                    borderColor: "divider",
+                    borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+                    bgcolor: "transparent",
+                    px: 1,
+                    py: 0.5,
+                  },
+                  "& input": {
+                    pl: { xs: 5, sm: 5.5 },
+                    pr: { xs: 5, sm: 5.5 },
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    sx: { px: 0.5 },
+                  },
+                }}
               />
-            </Stack>
+              <IconButton
+                disabled
+                size="small"
+                aria-hidden="true"
+                sx={{
+                  position: "absolute",
+                  right: { xs: 4, sm: 6 },
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }}
+              >
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+              <Button
+                data-testid="quiz-edit-toggle"
+                size="small"
+                variant="contained"
+                disabled={invalidQuestion}
+                onClick={save}
+              >
+                {invalidQuestion
+                  ? t("quizEditor.invalid")
+                  : t("quizEditor.done")}
+              </Button>
+            </Box>
           </>
         )}
-      </EditorBlockCard>
+      </ExerciseBlockCard>
     </div>
   );
 };

@@ -24,6 +24,7 @@ import MeaningAssociationPlugin, {
   MeaningAssociationNode,
 } from "./MeaningAssociationPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
+import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import {
   seedMockUnit,
   clearMockData,
@@ -162,43 +163,47 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
   return (
     <DictionaryContext.Provider value={mockDictionaryContext}>
       <DndWrapper>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <h2>Meaning Association Plugin - Editable Mode</h2>
-            {showInsertButton && <InsertMeaningAssociationButton />}
+        <AudioPlayerProvider>
+          <LexicalComposer initialConfig={initialConfig}>
             <div
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                minHeight: "400px",
-                padding: "20px",
-              }}
+              style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}
             >
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{ outline: "none", minHeight: "350px" }}
-                  />
-                }
-                placeholder={
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      left: "20px",
-                      color: "#999",
-                    }}
-                  >
-                    Enter text or insert matching exercises...
-                  </div>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <MeaningAssociationPlugin />
+              <h2>Meaning Association Plugin - Editable Mode</h2>
+              {showInsertButton && <InsertMeaningAssociationButton />}
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  minHeight: "400px",
+                  padding: "20px",
+                }}
+              >
+                <RichTextPlugin
+                  contentEditable={
+                    <ContentEditable
+                      style={{ outline: "none", minHeight: "350px" }}
+                    />
+                  }
+                  placeholder={
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "20px",
+                        left: "20px",
+                        color: "#999",
+                      }}
+                    >
+                      Enter text or insert matching exercises...
+                    </div>
+                  }
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+                <HistoryPlugin />
+                <MeaningAssociationPlugin />
+              </div>
             </div>
-          </div>
-        </LexicalComposer>
+          </LexicalComposer>
+        </AudioPlayerProvider>
       </DndWrapper>
     </DictionaryContext.Provider>
   );
@@ -227,31 +232,35 @@ const ReadOnlyTemplate = ({ editorState }) => {
   return (
     <DictionaryContext.Provider value={mockDictionaryContext}>
       <DndWrapper>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <h2>Meaning Association Plugin - Read-Only Mode</h2>
+        <AudioPlayerProvider>
+          <LexicalComposer initialConfig={initialConfig}>
             <div
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                minHeight: "400px",
-                padding: "20px",
-                backgroundColor: "#f5f5f5",
-              }}
+              style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}
             >
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    style={{ outline: "none", minHeight: "350px" }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <MeaningAssociationPlugin />
+              <h2>Meaning Association Plugin - Read-Only Mode</h2>
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  minHeight: "400px",
+                  padding: "20px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <RichTextPlugin
+                  contentEditable={
+                    <ContentEditable
+                      style={{ outline: "none", minHeight: "350px" }}
+                    />
+                  }
+                  placeholder={null}
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+                <MeaningAssociationPlugin />
+              </div>
             </div>
-          </div>
-        </LexicalComposer>
+          </LexicalComposer>
+        </AudioPlayerProvider>
       </DndWrapper>
     </DictionaryContext.Provider>
   );

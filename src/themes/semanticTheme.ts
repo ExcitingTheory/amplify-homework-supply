@@ -1,5 +1,6 @@
 import type { Components, Theme, ThemeOptions } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
+import { roundedCheckboxIcons } from "../components/RoundedCheckboxIcon";
 
 export const SEMANTIC_THEME = {
   spacing: {
@@ -335,6 +336,17 @@ export const semanticComponentOverrides: Components<Theme> = {
         textTransform: "none",
         fontWeight: SEMANTIC_THEME.typography.controlWeight,
         borderRadius: SEMANTIC_THEME.radius.control,
+      },
+    },
+  },
+  MuiCheckbox: {
+    defaultProps: {
+      ...roundedCheckboxIcons,
+    },
+    styleOverrides: {
+      root: {
+        padding: 8,
+        borderRadius: SEMANTIC_THEME.radius.chip,
       },
     },
   },

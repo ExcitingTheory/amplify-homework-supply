@@ -1,6 +1,10 @@
 import * as React from "react";
 import { useDrag } from "react-dnd";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { alpha } from "@mui/material/styles";
+
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
 
 const onTouchMove = () => {
   window.navigator.vibrate(5);
@@ -45,33 +49,47 @@ export const DragBox = ({ answer, wordID, cardWidth = 140 }) => {
     }),
   });
 
-  const opacity = isDragging ? 0.4 : 1;
-
   return (
     <Box
       className="strokeorder"
       component="div"
       ref={drag}
-      variant="outlined"
-      boxShadow="0 2px 4px var(--mui-palette-action-disabledBackground)"
       onTouchStart={onTouchMove}
       data-testid="drag-box"
       data-word-id={wordID}
       data-answer={answer}
-      style={{
-        fontSize: "1.2rem",
-        margin: ".3rem",
-        padding: ".8rem",
+      role="button"
+      aria-label={`Drag ${answer}`}
+      sx={(theme) => ({
+        minHeight: 48,
+        m: 0.5,
+        px: 1,
+        py: 0.75,
         display: "inline-flex",
-        cursor: "move",
-        opacity: opacity,
-        borderRadius: "8px",
-        border: "2px dotted var(--mui-palette-primary-light)",
-        backgroundColor: "var(--mui-palette-background-default)",
-        color: "var(--mui-palette-primary-main)",
-        fontWeight: 500,
+        alignItems: "center",
+        gap: 0.5,
+        cursor: isDragging ? "grabbing" : "grab",
+        opacity: isDragging ? 0.55 : 1,
+        transform: isDragging ? "scale(0.98)" : "translateY(0)",
+        borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+        border: "1px solid",
+        borderColor: alpha(theme.palette.primary.main, 0.55),
+        bgcolor: "background.paper",
+        color: "text.primary",
+        fontSize: "1rem",
+        fontWeight: SEMANTIC_THEME.typography.controlWeight,
+        boxShadow: theme.shadows[1],
         touchAction: "none",
-        transition: "all 0.2s ease",
+        transition: theme.transitions.create(
+          [
+            "box-shadow",
+            "border-color",
+            "background-color",
+            "transform",
+            "opacity",
+          ],
+          { duration: theme.transitions.duration.shorter },
+        ),
         width: `${cardWidth}px`,
         minWidth: `${cardWidth}px`,
         maxWidth: `${cardWidth}px`,
@@ -83,9 +101,26 @@ export const DragBox = ({ answer, wordID, cardWidth = 140 }) => {
         justifyContent: "center",
         textAlign: "center",
         boxSizing: "border-box",
-      }}
+        "&:hover": {
+          borderColor: "primary.main",
+          bgcolor: alpha(theme.palette.primary.main, 0.07),
+          boxShadow: theme.shadows[SEMANTIC_THEME.elevation.cardHover],
+          transform: isDragging ? "scale(0.98)" : "translateY(-2px)",
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          transition: "none",
+          transform: "none",
+          "&:hover": { transform: "none" },
+        },
+      })}
     >
-      {answer}
+      <DragIndicatorIcon
+        aria-hidden="true"
+        sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0 }}
+      />
+      <Box component="span" sx={{ minWidth: 0 }}>
+        {answer}
+      </Box>
     </Box>
   );
 };

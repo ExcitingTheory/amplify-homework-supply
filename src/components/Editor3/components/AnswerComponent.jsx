@@ -15,7 +15,6 @@ import { useEffect, useState, useRef } from "react";
 
 import {
   Box,
-  LinearProgress,
   Typography,
   ToggleButtonGroup,
   ToggleButton,
@@ -30,6 +29,8 @@ import UnitContext from "../../../context/unitContext";
 import dynamic from "next/dynamic";
 
 import { WorkbookBlockEnhancements } from "./WorkbookBlockEnhancements";
+import { ExerciseBlockCard } from "./ExerciseBlockCard";
+import { ExerciseProgressMeters } from "./ExerciseProgressMeters";
 import { useVerifyContext } from "../../../hooks/useVerifyContext";
 
 const SketchPad = dynamic(async () => (await import("./SketchPad")).default, {
@@ -86,28 +87,6 @@ function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
   );
 }
 
-function LinearProgressWithLabel({ value }) {
-  return (
-    <>
-      <Box display="flex" alignItems="center" margin={1}>
-        <Box width="95%">
-          <LinearProgress variant="determinate" value={value} />
-        </Box>
-        <Box width="fit-content" marginLeft={1}>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            style={{
-              marginLeft: "1rem",
-              width: "55%",
-            }}
-          >{`${Math.round(value)}%`}</Typography>
-        </Box>
-      </Box>
-    </>
-  );
-}
-
 export function AnswerView({
   className,
   nodeKey,
@@ -146,7 +125,6 @@ export function AnswerView({
 
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
-  const [progress, setProgress] = useState(0);
   const sharedHistoryState = useRef(createEmptyHistoryState());
 
   const [currentInputMethod, setCurrentInputMethod] = useState(
@@ -214,11 +192,6 @@ export function AnswerView({
     const answeredCount = answeredWords.length;
     const correctCount = correctAnswers.length;
 
-    // Update local progress bar
-    const progressValue =
-      totalWords > 0 ? Math.floor((correctCount / totalWords) * 100) : 0;
-    setProgress(progressValue);
-
     // Consider complete if all words have been attempted
     const isComplete = answeredCount >= totalWords;
     const accuracy =
@@ -243,80 +216,99 @@ export function AnswerView({
     }
   }, [feedback, wordIDs, saveGrade, nodeKey, grade]);
 
+  const totalWords = wordIDs?.length || 0;
+  const answeredCount = Object.keys(feedback).length;
+  const correctCount = Object.values(feedback).filter(
+    (result) => result?.answer === true,
+  ).length;
+  const percentComplete =
+    totalWords > 0 ? (answeredCount / totalWords) * 100 : 0;
+  const accuracy = answeredCount > 0 ? (correctCount / answeredCount) * 100 : 0;
+  const graded = totalWords > 0 && answeredCount >= totalWords;
+
   return (
     <div className={className}>
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {thisPrompt}
-        </Typography>
-      </Box>
-
-      <ToggleButtonGroup
-        exclusive
-        value={currentInputMethod}
-        onChange={handleInputChange}
-        aria-label={t("answerComponent.inputMethodSelector")}
+      <ExerciseBlockCard
+        blockType="answer"
+        accuracy={accuracy}
+        graded={graded}
+        sx={{ my: 2 }}
       >
-        <ToggleButton
-          disabled={!allowedInputMethods.includes("text")}
-          value="text"
-          aria-label={t("answerComponent.inputMethods.text")}
-        >
-          {t("answerComponent.inputMethods.text")}
-        </ToggleButton>
-        <ToggleButton
-          disabled={!allowedInputMethods.includes("audio")}
-          value="audio"
-          aria-label={t("answerComponent.inputMethods.audio")}
-        >
-          {t("answerComponent.inputMethods.audio")}
-        </ToggleButton>
-        <ToggleButton
-          disabled={!allowedInputMethods.includes("writing")}
-          value="writing"
-          aria-label={t("answerComponent.inputMethods.writing")}
-        >
-          {t("answerComponent.inputMethods.writing")}
-        </ToggleButton>
-      </ToggleButtonGroup>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            {thisPrompt}
+          </Typography>
+        </Box>
 
-      {/**
-       * Progress bar to show the user how many questions they have answered correctly
-       */}
-      <Box>
-        <LinearProgressWithLabel value={progress} />
-      </Box>
-      {!requestDefinition &&
-        ByDefinitionWordList(
-          wordIDs,
-          dictionary,
-          feedback,
-          setAnswers,
-          answers,
-          setFeedback,
-          currentInputMethod,
-          currentPromptMethod,
-          grade,
-          nodeKey,
-          t,
-          sharedHistoryState.current,
-        )}
-      {requestDefinition &&
-        ByWordList(
-          wordIDs,
-          feedback,
-          dictionary,
-          answers,
-          setAnswers,
-          setFeedback,
-          currentInputMethod,
-          currentPromptMethod,
-          grade,
-          nodeKey,
-          t,
-          saveGrade,
-          sharedHistoryState.current,
-        )}
+        <ExerciseProgressMeters
+          percentComplete={percentComplete}
+          accuracy={accuracy}
+          hasAttempts={answeredCount > 0}
+          progressDescription="Percentage of prompts answered."
+          accuracyDescription="Percentage of submitted answers marked correct."
+        />
+
+        <ToggleButtonGroup
+          exclusive
+          value={currentInputMethod}
+          onChange={handleInputChange}
+          aria-label={t("answerComponent.inputMethodSelector")}
+        >
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("text")}
+            value="text"
+            aria-label={t("answerComponent.inputMethods.text")}
+          >
+            {t("answerComponent.inputMethods.text")}
+          </ToggleButton>
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("audio")}
+            value="audio"
+            aria-label={t("answerComponent.inputMethods.audio")}
+          >
+            {t("answerComponent.inputMethods.audio")}
+          </ToggleButton>
+          <ToggleButton
+            disabled={!allowedInputMethods.includes("writing")}
+            value="writing"
+            aria-label={t("answerComponent.inputMethods.writing")}
+          >
+            {t("answerComponent.inputMethods.writing")}
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        {!requestDefinition &&
+          ByDefinitionWordList(
+            wordIDs,
+            dictionary,
+            feedback,
+            setAnswers,
+            answers,
+            setFeedback,
+            currentInputMethod,
+            currentPromptMethod,
+            grade,
+            nodeKey,
+            t,
+            sharedHistoryState.current,
+          )}
+        {requestDefinition &&
+          ByWordList(
+            wordIDs,
+            feedback,
+            dictionary,
+            answers,
+            setAnswers,
+            setFeedback,
+            currentInputMethod,
+            currentPromptMethod,
+            grade,
+            nodeKey,
+            t,
+            saveGrade,
+            sharedHistoryState.current,
+          )}
+      </ExerciseBlockCard>
     </div>
   );
 }

@@ -24,9 +24,9 @@ language for editor blocks:
     else error) — the performance color.
   - ungraded default → state color (pending = `warning.main`), or per-type.
 
-> Rebuild the block frame modeled on this card (do NOT reuse the deleted
-> `EditorBlockCard`, which was modeled on the wrong element). Reuse `gradeColor`
-> rather than duplicating thresholds.
+> The editor/workbook uses the dedicated `ExerciseBlockCard`; the chat-specific
+> `EditorBlockCard` is not used here. Reuse `gradeColor` thresholds rather than
+> duplicating their behavior.
 
 ## Interaction: inline word-as-dropdown
 
@@ -49,7 +49,8 @@ language for editor blocks:
 
 ## Rollout checklist
 
-- [x] Remove the mis-modeled `EditorBlockCard` (chat-only element).
+- [x] Keep chat `EditorBlockCard` semantics out of editor/workbook code.
+- [x] Add the workbook-specific `ExerciseBlockCard` surface.
 - [x] Rebuild a block frame modeled on **AssignmentCardView** (elevation 0,
       1px divider, 4px left accent, card radius, hover shadow, `gradeColor`).
 - [ ] Apply inline word-as-dropdown to answer/vocabulary blocks.

@@ -15,6 +15,9 @@ function convertMeaningAssociationElement(domNode) {
 export class MeaningAssociationNode extends DecoratorNode {
   __ids;
   __enabledModes;
+  __promptFor;
+  __showAudio;
+  __showPronunciation;
 
   static getType() {
     return "meaning-association";
@@ -24,6 +27,9 @@ export class MeaningAssociationNode extends DecoratorNode {
     return new MeaningAssociationNode(
       node.__ids,
       node.__enabledModes,
+      node.__promptFor,
+      node.__showAudio,
+      node.__showPronunciation,
       node.__format,
       node.__key,
     );
@@ -33,6 +39,9 @@ export class MeaningAssociationNode extends DecoratorNode {
     return $createMeaningAssociationNode(
       serializedNode.wordIDs,
       serializedNode.enabledModes,
+      serializedNode.promptFor,
+      serializedNode.showAudio,
+      serializedNode.showPronunciation,
     );
   }
 
@@ -42,13 +51,27 @@ export class MeaningAssociationNode extends DecoratorNode {
       version: 1,
       wordIDs: [...this.__ids],
       enabledModes: this.__enabledModes || ["learn", "easy", "hard"],
+      promptFor: this.__promptFor || "definition",
+      showAudio: this.__showAudio !== false,
+      showPronunciation: this.__showPronunciation !== false,
     };
   }
 
-  constructor(ids = [], enabledModes = ["learn", "easy", "hard"], format, key) {
+  constructor(
+    ids = [],
+    enabledModes = ["learn", "easy", "hard"],
+    promptFor = "definition",
+    showAudio = true,
+    showPronunciation = true,
+    format,
+    key,
+  ) {
     super(key);
     this.__ids = ids;
     this.__enabledModes = enabledModes;
+    this.__promptFor = promptFor || "definition";
+    this.__showAudio = showAudio !== false;
+    this.__showPronunciation = showPronunciation !== false;
   }
 
   exportDOM() {
@@ -62,10 +85,7 @@ export class MeaningAssociationNode extends DecoratorNode {
 
   createDOM(config) {
     const div = document.createElement("div");
-    div.setAttribute(
-      "data-lexical-meaning-association",
-      this.__ids.join(","),
-    );
+    div.setAttribute("data-lexical-meaning-association", this.__ids.join(","));
     return div;
   }
 
@@ -97,6 +117,18 @@ export class MeaningAssociationNode extends DecoratorNode {
 
   getEnabledModes() {
     return this.__enabledModes || ["learn", "easy", "hard"];
+  }
+
+  getPromptFor() {
+    return this.__promptFor || "definition";
+  }
+
+  getShowAudio() {
+    return this.__showAudio !== false;
+  }
+
+  getShowPronunciation() {
+    return this.__showPronunciation !== false;
   }
 
   setEnabledModes(modes) {
@@ -133,8 +165,20 @@ export class MeaningAssociationNode extends DecoratorNode {
   }
 }
 
-export function $createMeaningAssociationNode(ids, enabledModes) {
-  return new MeaningAssociationNode(ids, enabledModes);
+export function $createMeaningAssociationNode(
+  ids,
+  enabledModes,
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
+) {
+  return new MeaningAssociationNode(
+    ids,
+    enabledModes,
+    promptFor,
+    showAudio,
+    showPronunciation,
+  );
 }
 
 export function $isMeaningAssociationNode(node) {

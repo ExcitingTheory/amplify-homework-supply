@@ -1044,9 +1044,7 @@ const preview = {
       const disableChatContext =
         minimalProviders || context?.parameters?.disableChatContext || false;
       const disableAudioPlayerContext =
-        minimalProviders ||
-        context?.parameters?.disableAudioPlayerContext ||
-        false;
+        context?.parameters?.disableAudioPlayerContext || false;
       const disableFilesContext =
         minimalProviders || context?.parameters?.disableFilesContext || false;
 

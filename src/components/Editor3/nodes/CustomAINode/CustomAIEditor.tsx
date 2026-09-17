@@ -23,7 +23,6 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
-  Paper,
   Autocomplete,
   createFilterOptions,
   Skeleton,
@@ -52,6 +51,7 @@ import { mergeRegister } from "@lexical/utils";
 import DictionaryContext from "../../../../context/dictionaryContext";
 import { $isCustomAINode } from "../../plugins/CustomAIPlugin";
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
+import { ExerciseBlockCard } from "../../components/ExerciseBlockCard";
 
 const filter = createFilterOptions<{ id: string; prompt: string }>();
 
@@ -246,16 +246,7 @@ export default React.memo(function CustomAIEditor({
   }, [editor, onDelete]);
 
   return (
-    <Paper
-      elevation={2}
-      sx={{
-        p: 2,
-        my: 2,
-        border: isSelected ? "2px solid" : "1px solid",
-        borderColor: isSelected ? "primary.main" : "divider",
-        borderRadius: 2,
-      }}
-    >
+    <ExerciseBlockCard blockType="custom-ai" selected={isSelected}>
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1 }}>
         <SmartToyIcon color="primary" />
@@ -373,6 +364,6 @@ export default React.memo(function CustomAIEditor({
           PII-filtered.
         </Typography>
       </Box>
-    </Paper>
+    </ExerciseBlockCard>
   );
 });

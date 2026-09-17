@@ -7,6 +7,7 @@ import { Skeleton, Box } from "@mui/material";
 const DataGrid = lazy(() =>
   import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
 );
+import { roundedCheckboxIcons } from "../../../RoundedCheckboxIcon";
 
 import {
   IconButton,
@@ -46,17 +47,24 @@ import {
 } from "lexical";
 
 import DictionaryContext from "../../../../context/dictionaryContext";
+import { ExerciseBlockCard } from "../../components/ExerciseBlockCard";
+import {
+  compactEditorAutocompleteSx,
+  editorDataGridSx,
+  getEditorDataGridRowClassName,
+  isEditorControlTarget,
+} from "../../components/editorControlStyles";
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import Divider from "@mui/material/Divider";
 import UnitContext from "../../../../context/unitContext";
 
 import { getAmplifyClient } from "../../../../utils/amplifyClient";
 import { $isCustomAnswerNode } from "../../plugins/CustomAnswerPlugin";
 
-import {
-  PromptMethodSelector,
-  AllowedInputSelector,
-} from "../../components/PromptMethodSelector";
+import { AnswerConfigurationSelector } from "../../components/PromptMethodSelector";
 import { fetchAuthSession } from "aws-amplify/auth";
 
 import getCachedUrl from "../../../../utils/getCachedUrl";
@@ -65,12 +73,102 @@ import { Remove } from "@mui/icons-material";
 
 const filter = createFilterOptions();
 
+function CustomAnswerRowActions({ row, onRemove }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const playAudio = async (audioPaths) => {
+    const path = Array.isArray(audioPaths) ? audioPaths[0] : audioPaths;
+    if (!path) return;
+
+    try {
+      const url = path.startsWith("http") ? path : await getCachedUrl(path);
+      if (!url) return;
+      const audio = new Audio(url);
+      await audio.play();
+    } catch (error) {
+      console.warn("Unable to play Custom Answer audio:", error);
+    }
+    setAnchorEl(null);
+  };
+
+  return (
+    <>
+      <IconButton
+        size="small"
+        aria-label={`Actions for ${row.prompt || "answer"}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          setAnchorEl(event.currentTarget);
+        }}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={() => setAnchorEl(null)}
+        slotProps={{ paper: { sx: { mt: 0.5 } } }}
+      >
+        <MenuItem
+          disabled={!row.promptAudio?.length}
+          onClick={() => playAudio(row.promptAudio)}
+        >
+          <VolumeUpIcon fontSize="small" sx={{ mr: 1 }} />
+          Play prompt audio
+        </MenuItem>
+        <MenuItem
+          disabled={!row.answerAudio?.length}
+          onClick={() => playAudio(row.answerAudio)}
+        >
+          <VolumeUpIcon fontSize="small" sx={{ mr: 1 }} />
+          Play answer audio
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            onRemove(row.id);
+            setAnchorEl(null);
+          }}
+        >
+          <DeleteOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+          Remove answer
+        </MenuItem>
+      </Menu>
+    </>
+  );
+}
+
 const useColumns = (t) => [
   {
     field: "prompt",
     headerName: t("customAnswerEditor.columnHeaders.prompt"),
     flex: 1,
     minWidth: 100,
+    colSpan: (params) => (params.id === "__empty__" ? 7 : 1),
+    renderCell: (params) =>
+      params.id === "__empty__" ? (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          fontStyle="italic"
+          sx={{ width: "100%", textAlign: "center" }}
+        >
+          {params.value}
+        </Typography>
+      ) : (
+        <Box
+          component="span"
+          sx={{
+            display: "block",
+            width: "100%",
+            pl: 2,
+            boxSizing: "border-box",
+          }}
+        >
+          {params.value}
+        </Box>
+      ),
   },
   {
     field: "answer",
@@ -137,6 +235,7 @@ export default React.memo(function CustomAnswerEditor({
 }) {
   const t = useTranslations("editor.blocks");
   const [value, setValue] = React.useState(null);
+  const [inputValue, setInputValue] = React.useState("");
   const [open, toggleOpen] = React.useState(false);
   const [gridSelection, setGridSelection] = React.useState([]);
   const [dialogValue, setDialogValue] = React.useState({
@@ -173,7 +272,7 @@ export default React.memo(function CustomAnswerEditor({
 
   const { unit } = React.useContext(UnitContext);
 
-  const columns = useColumns(t);
+  const baseColumns = useColumns(t);
 
   const rows = React.useMemo(() => {
     const result = [];
@@ -354,6 +453,44 @@ export default React.memo(function CustomAnswerEditor({
     });
   };
 
+  const columns = [
+    ...baseColumns,
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 80,
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      align: "center",
+      renderCell: (params) => {
+        if (params.row.id === "__empty__") return null;
+        return (
+          <CustomAnswerRowActions
+            row={params.row}
+            onRemove={(id) => {
+              removeQuestionIDs([id]);
+              setGridSelection((current) =>
+                current.filter((item) => item !== id),
+              );
+            }}
+          />
+        );
+      },
+    },
+  ];
+
+  const gridRows =
+    rows?.length > 0
+      ? rows
+      : [
+          {
+            id: "__empty__",
+            prompt: t("customAnswerEditor.emptyState"),
+            answer: "",
+          },
+        ];
+
   const addQuestionID = (id) => {
     editor.update(async () => {
       const node = $getNodeByKey(nodeKey);
@@ -488,6 +625,9 @@ export default React.memo(function CustomAnswerEditor({
             customAnswerRef.current &&
             customAnswerRef.current.contains(event.target)
           ) {
+            if (isEditorControlTarget(event.target)) {
+              return false;
+            }
             event.preventDefault();
             if (event.shiftKey) {
               setSelected(!isSelected);
@@ -529,118 +669,119 @@ export default React.memo(function CustomAnswerEditor({
   const _questionBank = Object.values(questionBank || []);
 
   return (
-    <div
-      ref={customAnswerRef}
-      style={{
-        maxHeight: "32rem",
-        maxWidth: "72rem",
-        border: isSelected ? "2px solid #1976d2" : "1px solid transparent",
-        borderRadius: "4px",
-        padding: "8px",
-        cursor: "pointer",
-      }}
-    >
-      <Typography variant="h5">{title}</Typography>
-
-      <Typography variant="p">{t("customAnswerEditor.description")}</Typography>
-
-      {/**
-       * The custom answer editor is a simple text input that allows the user to add questions and answer pairs to to the exercise.
-       */}
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "right",
-        }}
+    <div ref={customAnswerRef} style={{ cursor: "pointer" }}>
+      <ExerciseBlockCard
+        blockType="custom-answer"
+        selected={isSelected}
+        sx={{ maxWidth: "72rem" }}
       >
-        <Autocomplete
-          value={value}
-          onChange={(event, newValue) => {
-            if (typeof newValue === "string") {
-              // timeout to avoid instant validation of the dialog's form.
-              setTimeout(() => {
+        <Typography variant="h5">{title}</Typography>
+
+        <Typography variant="p">
+          {t("customAnswerEditor.description")}
+        </Typography>
+
+        {/**
+         * The custom answer editor is a simple text input that allows the user to add questions and answer pairs to to the exercise.
+         */}
+
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 1,
+            mt: 1,
+          }}
+        >
+          <Autocomplete
+            value={value}
+            inputValue={inputValue}
+            onInputChange={(_, nextInputValue) => setInputValue(nextInputValue)}
+            onChange={(event, newValue) => {
+              setInputValue("");
+              if (typeof newValue === "string") {
+                // timeout to avoid instant validation of the dialog's form.
+                setTimeout(() => {
+                  toggleOpen(true);
+                  setDialogValue({
+                    phrase: newValue,
+                    pronunciation: "",
+                    definition: "",
+                  });
+                });
+              } else if (newValue && newValue.inputValue) {
                 toggleOpen(true);
                 setDialogValue({
-                  phrase: newValue,
-                  pronunciation: "",
-                  definition: "",
-                });
-              });
-            } else if (newValue && newValue.inputValue) {
-              toggleOpen(true);
-              setDialogValue({
-                prompt: newValue.inputValue,
-                answer: "",
-                hint: "",
-              });
-            } else {
-              console.log("Autocomplete.newValue", newValue);
-              // Append wordID to wordIDs
-              const newQuestionId = newValue?.id;
-              if (newQuestionId) {
-                addQuestionID(newQuestionId);
-                setValue(null);
-                setDialogValue({
-                  prompt: "",
+                  prompt: newValue.inputValue,
                   answer: "",
                   hint: "",
                 });
+              } else {
+                console.log("Autocomplete.newValue", newValue);
+                // Append wordID to wordIDs
+                const newQuestionId = newValue?.id;
+                if (newQuestionId) {
+                  addQuestionID(newQuestionId);
+                  setValue(null);
+                  setDialogValue({
+                    prompt: "",
+                    answer: "",
+                    hint: "",
+                  });
+                }
               }
-            }
-          }}
-          filterOptions={(options, params) => {
-            const filtered = filter(options, params);
+            }}
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params);
 
-            if (params.inputValue !== "") {
-              filtered.push({
-                inputValue: params.inputValue,
-                prompt: `Add "${params.inputValue}"`,
-              });
-            }
+              if (params.inputValue !== "") {
+                filtered.push({
+                  inputValue: params.inputValue,
+                  prompt: `Add "${params.inputValue}"`,
+                });
+              }
 
-            return filtered;
-          }}
-          sx={{
-            flexGrow: 1,
-          }}
-          id="add-new-question"
-          options={_questionBank}
-          getOptionLabel={(option) => {
-            // e.g value selected with enter, right from the input
-            if (typeof option === "string") {
-              return option;
-            }
-            if (option.inputValue) {
-              return option.inputValue;
-            }
-            return option.prompt;
-          }}
-          selectOnFocus
-          clearOnBlur
-          handleHomeEndKeys
-          renderOption={(props, option) => {
-            const { key, ...otherProps } = props;
-            const phrase = `${option?.prompt} (${option?.answer}) ${option?.hint}`;
-            const uniqueKey = option?.id || key;
-            return (
-              <li key={uniqueKey} {...otherProps}>
-                {phrase}
-              </li>
-            );
-          }}
-          // sx={{ width: 300 }}
-          freeSolo
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={t("customAnswerEditor.addWordLabel")}
-            />
-          )}
-        />
+              return filtered;
+            }}
+            sx={compactEditorAutocompleteSx}
+            id="add-new-question"
+            options={_questionBank}
+            getOptionLabel={(option) => {
+              // e.g value selected with enter, right from the input
+              if (typeof option === "string") {
+                return option;
+              }
+              if (option.inputValue) {
+                return option.inputValue;
+              }
+              return option.prompt;
+            }}
+            selectOnFocus
+            clearOnBlur
+            handleHomeEndKeys
+            renderOption={(props, option) => {
+              const { key, ...otherProps } = props;
+              const phrase = `${option?.prompt} (${option?.answer}) ${option?.hint}`;
+              const uniqueKey = option?.id || key;
+              return (
+                <li key={uniqueKey} {...otherProps}>
+                  {phrase}
+                </li>
+              );
+            }}
+            // sx={{ width: 300 }}
+            freeSolo
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                label={t("customAnswerEditor.dialogTitle")}
+              />
+            )}
+          />
 
-        {/* <Autocomplete
+          {/* <Autocomplete
                     value={value}
                     onChange={(event, newValue) => {
                         if (typeof newValue === 'string') {
@@ -712,199 +853,226 @@ export default React.memo(function CustomAnswerEditor({
                     renderInput={(params) => <TextField {...params} label="Add question" />}
                 /> */}
 
-        {/* <ActionsMenu
+          {/* <ActionsMenu
                     removeQuestionIDs={removeQuestionIDs}
                     ids={gridSelection}
                 /> */}
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "right",
-        }}
-      >
-        <Button
-          color="error"
-          style={{
-            margin: "0 0.5rem",
-          }}
-          onClick={() => {
-            console.log("gridSelection", gridSelection);
-            console.log("removeQuestionIDs");
-            removeQuestionIDs(gridSelection);
-          }}
-        >
-          <Remove />
-          &nbsp;{t("customAnswerEditor.remove")}
-        </Button>
-        <PromptMethodSelector
-          ids={gridSelection}
-          promptMethod={promptMethod}
-          setPromptMethod={setPromptMethod}
-        />
-        <AllowedInputSelector
-          ids={gridSelection}
-          setAllowedInput={setAllowedInput}
-          allowedInput={allowedInput}
-        />
-      </div>
+        </Box>
 
-      <Dialog open={open} onClose={handleClose}>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle>{t("customAnswerEditor.dialogTitle")}</DialogTitle>
-          <DialogContent
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "fit-content",
-            }}
-          >
-            <DialogContentText>
-              {t("customAnswerEditor.dialogDescription")}
-            </DialogContentText>
+        <Dialog open={open} onClose={handleClose}>
+          <form onSubmit={handleSubmit}>
+            <DialogTitle>{t("customAnswerEditor.dialogTitle")}</DialogTitle>
+            <DialogContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: "fit-content",
+              }}
+            >
+              <DialogContentText>
+                {t("customAnswerEditor.dialogDescription")}
+              </DialogContentText>
 
-            {audioSrc && (
-              <>
-                <Typography id="modal-modal-title" variant="h6" component="h2">
-                  {t("customAnswerEditor.ttsPreview")}{" "}
-                  {working && (
-                    <Skeleton
-                      variant="rectangular"
-                      width={24}
-                      height={24}
-                      sx={{
-                        display: "inline-block",
-                        borderRadius: 1,
-                        verticalAlign: "middle",
-                      }}
-                    />
-                  )}
-                </Typography>
+              {audioSrc && (
+                <>
+                  <Typography
+                    id="modal-modal-title"
+                    variant="h6"
+                    component="h2"
+                  >
+                    {t("customAnswerEditor.ttsPreview")}{" "}
+                    {working && (
+                      <Skeleton
+                        variant="rectangular"
+                        width={24}
+                        height={24}
+                        sx={{
+                          display: "inline-block",
+                          borderRadius: 1,
+                          verticalAlign: "middle",
+                        }}
+                      />
+                    )}
+                  </Typography>
 
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                  {previewMessage}
-                </Typography>
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: "100%",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <canvas
+                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    {previewMessage}
+                  </Typography>
+                  <Box
                     style={{
-                      // width: '100%',
-                      // height: '10vw',
-                      margin: "auto",
+                      display: "flex",
+                      flexDirection: "column",
+                      width: "100%",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
-                    ref={canvasRef}
-                  />
-                  {audioSrc && (
-                    <AudioWaveformPlayer
-                      audioUrl={audioSrc}
-                      width={600}
-                      height={120}
-                      title={t("customAnswerEditor.audioPreview")}
-                      showDuration={true}
+                  >
+                    <canvas
+                      style={{
+                        // width: '100%',
+                        // height: '10vw',
+                        margin: "auto",
+                      }}
+                      ref={canvasRef}
                     />
-                  )}
-                </Box>
-              </>
-            )}
-            <TextField
-              autoFocus
-              margin="dense"
-              id="prompt"
-              value={dialogValue.phrase}
-              onChange={(event) =>
-                setDialogValue({
-                  ...dialogValue,
-                  prompt: event.target.value,
-                })
-              }
-              label={t("customAnswerEditor.promptLabel")}
-              type="text"
-              variant="standard"
-            />
-            <TextareaAutosize
-              minRows={3}
-              style={{
-                width: "100%",
-                marginTop: "1rem",
-              }}
-              id="answer"
-              value={dialogValue.definition}
-              onChange={(event) =>
-                setDialogValue({
-                  ...dialogValue,
-                  answer: event.target.value,
-                })
-              }
-              aria-label={t("customAnswerEditor.answerLabel")}
-              placeholder={t("customAnswerEditor.answerPlaceholder")}
-              type="text"
-              variant="standard"
-            />
-            <TextareaAutosize
-              minRows={3}
-              style={{
-                width: "100%",
-                marginTop: "1rem",
-              }}
-              id="hint"
-              value={dialogValue.hint}
-              onChange={(event) =>
-                setDialogValue({
-                  ...dialogValue,
-                  hint: event.target.value,
-                })
-              }
-              aria-label={t("customAnswerEditor.hintLabel")}
-              placeholder={t("customAnswerEditor.hintPlaceholder")}
-              type="text"
-              variant="standard"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>
-              {t("customAnswerEditor.cancel")}
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              {t("customAnswerEditor.add")}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+                    {audioSrc && (
+                      <AudioWaveformPlayer
+                        audioUrl={audioSrc}
+                        width={600}
+                        height={120}
+                        title={t("customAnswerEditor.audioPreview")}
+                        showDuration={true}
+                      />
+                    )}
+                  </Box>
+                </>
+              )}
+              <TextField
+                autoFocus
+                margin="dense"
+                id="prompt"
+                value={dialogValue.phrase}
+                onChange={(event) =>
+                  setDialogValue({
+                    ...dialogValue,
+                    prompt: event.target.value,
+                  })
+                }
+                label={t("customAnswerEditor.promptLabel")}
+                type="text"
+                variant="standard"
+              />
+              <TextareaAutosize
+                minRows={3}
+                style={{
+                  width: "100%",
+                  marginTop: "1rem",
+                }}
+                id="answer"
+                value={dialogValue.definition}
+                onChange={(event) =>
+                  setDialogValue({
+                    ...dialogValue,
+                    answer: event.target.value,
+                  })
+                }
+                aria-label={t("customAnswerEditor.answerLabel")}
+                placeholder={t("customAnswerEditor.answerPlaceholder")}
+                type="text"
+                variant="standard"
+              />
+              <TextareaAutosize
+                minRows={3}
+                style={{
+                  width: "100%",
+                  marginTop: "1rem",
+                }}
+                id="hint"
+                value={dialogValue.hint}
+                onChange={(event) =>
+                  setDialogValue({
+                    ...dialogValue,
+                    hint: event.target.value,
+                  })
+                }
+                aria-label={t("customAnswerEditor.hintLabel")}
+                placeholder={t("customAnswerEditor.hintPlaceholder")}
+                type="text"
+                variant="standard"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose}>
+                {t("customAnswerEditor.cancel")}
+              </Button>
+              <Button type="submit" variant="contained" color="primary">
+                {t("customAnswerEditor.add")}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
 
-      {rows?.length === 0 && (
-        <div style={{ marginTop: "0.5" }}>
-          <p>{t("customAnswerEditor.emptyState")}</p>
-        </div>
-      )}
-      {rows?.length > 0 && (
         <Suspense
           fallback={
             <Skeleton variant="rectangular" width="100%" height={300} />
           }
         >
           <DataGrid
-            sx={{
-              marginTop: "0.5rem",
-            }}
-            rows={rows}
+            sx={(theme) => ({
+              ...editorDataGridSx(theme),
+              "& .MuiDataGrid-cell[data-field='prompt']": {
+                pl: 2,
+              },
+              "& .MuiDataGrid-cell[data-field='prompt'] .MuiDataGrid-cellContent":
+                {
+                  pl: 2,
+                  overflow: "visible",
+                },
+            })}
+            rows={gridRows}
             columns={columns}
+            getRowHeight={(params) =>
+              params.id === "__empty__" ? "auto" : null
+            }
+            columnVisibilityModel={{
+              id: false,
+              promptAudio: false,
+              answerAudio: false,
+              hint: false,
+            }}
+            getRowClassName={getEditorDataGridRowClassName}
             hideFooter
             checkboxSelection
-            rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+            isRowSelectable={(params) => params.id !== "__empty__"}
+            disableRowSelectionExcludeModel
+            slotProps={{ baseCheckbox: roundedCheckboxIcons }}
+            rowSelectionModel={{
+              type: "include",
+              ids: new Set(gridSelection),
+            }}
             onRowSelectionModelChange={(model) => {
-              setGridSelection([...model.ids]);
+              const ids =
+                model.type === "exclude"
+                  ? rows.map((r) => r.id).filter((id) => !model.ids.has(id))
+                  : [...model.ids];
+              setGridSelection(ids);
             }}
           />
         </Suspense>
-      )}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            flexWrap: "wrap",
+            gap: 1,
+            mt: 1.5,
+          }}
+        >
+          <Box sx={{ order: 2, ml: { xs: 0, sm: "auto" }, flexShrink: 0 }}>
+            <AnswerConfigurationSelector
+              promptMethod={promptMethod}
+              setPromptMethod={setPromptMethod}
+              allowedInput={allowedInput}
+              setAllowedInput={setAllowedInput}
+            />
+          </Box>
+          <Box sx={{ order: 1, flexShrink: 0 }}>
+            <Button
+              color="error"
+              variant="outlined"
+              startIcon={<Remove />}
+              disabled={gridSelection.length === 0}
+              onClick={() => {
+                removeQuestionIDs(gridSelection);
+                setGridSelection([]);
+              }}
+            >
+              {`Remove ${gridSelection.length} ${gridSelection.length === 1 ? "answer" : "answers"}`}
+            </Button>
+          </Box>
+        </Box>
+      </ExerciseBlockCard>
     </div>
   );
 });

@@ -13,18 +13,29 @@ import {
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { LinearProgressWithLabel, AnswerDropLearn, ResultDropLearn } from ".";
+import { AnswerDropLearn, ResultDropLearn } from ".";
 import { DragBox } from "./DragBox";
 import { shuffle, calcCardWidth } from "./utils";
 
-export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
+export const Learn = ({
+  tabIndex,
+  setTabIndex,
+  nodeKey,
+  wordIDs,
+  enabledModes = ["learn", "easy", "hard"],
+  nextMode = "easy",
+  nextModeLabel = "Easy",
+  onProgressChange,
+  promptFor = "definition",
+  showAudio = true,
+  showPronunciation = true,
+}) => {
   const [answers, setAnswers] = React.useState([]);
   const [length, setLength] = React.useState();
   const [vocabulary, setVocabulary] = React.useState([]);
   let [assignment, setAssignment] = React.useState([]);
 
   const [filterLearn, setFilterLearn] = React.useState([]);
-  const [completedLearn, setCompletedLearn] = React.useState(0);
   const [startPositionLearn, setStartPositionLearn] = React.useState(0);
   const [dropAnswerVisibility, setDropAnswerVisibility] = React.useState([]);
   const [droppedPairs, setDroppedPairs] = React.useState({}); // Track which answer was dropped on which target
@@ -83,11 +94,9 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
   useEffect(() => {
     if (inProgress && Object.keys(inProgress).length > 0) {
       const verified = inProgress?.learn?.verifiedAnswers || [];
-      const percentComplete = (inProgress?.learn?.percentComplete || 0) * 100;
       const pairs = inProgress?.learn?.droppedPairs || {};
 
       setFilterLearn(verified);
-      setCompletedLearn(percentComplete);
       setStartPositionLearn(verified.length);
       setDropAnswerVisibility(verified);
       setDroppedPairs(pairs);
@@ -107,9 +116,11 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
 
   // Calculate drag card width based on longest unbroken word
   const cardWidth = React.useMemo(() => {
-    const phrases = answers.map((w) => w?.phrase).filter(Boolean);
-    return calcCardWidth(phrases);
-  }, [answers]);
+    const labels = answers
+      .map((word) => (promptFor === "word" ? word?.definition : word?.phrase))
+      .filter(Boolean);
+    return calcCardWidth(labels);
+  }, [answers, promptFor]);
 
   const cardPanelWidth = cardWidth + 16;
 
@@ -118,7 +129,7 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
     .filter((word) => !filterLearn.includes(word?.id))
     .map((word) => (
       <DragBox
-        answer={word.phrase}
+        answer={promptFor === "word" ? word.definition : word.phrase}
         wordID={word.id}
         key={word.id}
         cardWidth={cardWidth}
@@ -127,13 +138,15 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
 
   const easyAssignment = stableAssignment;
   const verifiedAnswers = filterLearn;
-  const percentComplete = completedLearn;
 
   const totalWords = stableAssignment.length;
   const currentQuestion = startPositionLearn;
 
-  const loadAttemptedAnswers = inProgress?.learn?.attemptedAnswers || {};
-  const attemptsCount = inProgress?.learn?.attemptsCount || 0;
+  const attemptedAnswersRef = React.useRef({});
+
+  React.useEffect(() => {
+    attemptedAnswersRef.current = inProgress?.learn?.attemptedAnswers || {};
+  }, [inProgress?.learn?.attemptedAnswers]);
 
   async function progressAssignment(draggedWordID, targetWordID) {
     // Verify the match is correct
@@ -160,23 +173,27 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
     const _verified = [...new Set([...verifiedAnswers, targetWordID])];
 
     // Add to attempted answers
-    let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
+    let _attemptedAnswers = JSON.parse(
+      JSON.stringify(attemptedAnswersRef.current),
+    );
 
     if (typeof _attemptedAnswers[targetWordID] === "undefined") {
       _attemptedAnswers[targetWordID] = [];
     }
 
     _attemptedAnswers[targetWordID].push(draggedWordID);
-    const attempts = attemptsCount + 1;
+    attemptedAnswersRef.current = _attemptedAnswers;
+    const attempts = Object.values(_attemptedAnswers).reduce(
+      (total, answers) => total + answers.length,
+      0,
+    );
 
     if (_verified.length === totalWords) {
       thisExerciseComplete = true;
       // check for top level complete, all assignments are completed
-      const completedEasy = inProgress.easy?.complete;
-      const completedHard = inProgress.hard?.complete;
-      if (completedEasy && completedHard) {
-        allTabsComplete = true;
-      }
+      allTabsComplete = enabledModes.every(
+        (mode) => mode === "learn" || inProgress[mode]?.complete,
+      );
 
       // Don't auto-advance, show completion screen instead
       // newTab++;
@@ -218,8 +235,8 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
     // Update local state immediately before saving to prevent reset
     setFilterLearn(_verified);
     setStartPositionLearn(_verified.length);
-    setCompletedLearn((newIndex / totalWords) * 100);
     setDroppedPairs(_droppedPairs);
+    onProgressChange?.("learn", savedGradeCopy[nodeKey]["learn"]);
 
     await saveGrade(savedGradeCopy);
 
@@ -230,14 +247,20 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
   }
 
   async function sendFail(draggedWordID, targetWordID) {
-    let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
+    let _attemptedAnswers = JSON.parse(
+      JSON.stringify(attemptedAnswersRef.current),
+    );
 
     if (typeof _attemptedAnswers[targetWordID] === "undefined") {
       _attemptedAnswers[targetWordID] = [];
     }
 
     _attemptedAnswers[targetWordID].push(draggedWordID);
-    const attempts = attemptsCount + 1;
+    attemptedAnswersRef.current = _attemptedAnswers;
+    const attempts = Object.values(_attemptedAnswers).reduce(
+      (total, answers) => total + answers.length,
+      0,
+    );
 
     // Handle grade.data - it might be a string or object
     let gradeData = grade?.data || {};
@@ -266,9 +289,10 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
       tabIndex,
     };
 
-    savedGradeCopy[nodeKey].tabIndex = 0;
+    savedGradeCopy[nodeKey].tabIndex = tabIndex;
 
     console.log("Learn savedGradeCopy", savedGradeCopy);
+    onProgressChange?.("learn", savedGradeCopy[nodeKey]["learn"]);
     await saveGrade(savedGradeCopy);
   }
 
@@ -277,7 +301,7 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
   }
   const handleContinueFromCompletion = () => {
     setShowCompletion(false);
-    setTabIndex(1); // Move to Easy mode
+    if (nextMode) setTabIndex(nextMode);
   };
 
   const handleDismissCompletion = () => {
@@ -328,9 +352,6 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
             overflow: "hidden",
           }}
         >
-          <Box sx={{ flexShrink: 0, width: "100%" }}>
-            <LinearProgressWithLabel value={100} />
-          </Box>
           <Box
             sx={{
               flexShrink: 0,
@@ -355,10 +376,13 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
               </Button>
               <Button
                 variant="contained"
+                color={nextMode ? "primary" : "success"}
                 size="small"
                 onClick={handleContinueFromCompletion}
               >
-                Continue to Easy Mode
+                {nextMode
+                  ? `Continue to ${nextModeLabel} Mode`
+                  : "Finish Exercise"}
               </Button>
             </Box>
           </Box>
@@ -382,7 +406,8 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                   ? dictionary[matchedWordId]
                   : null;
                 // Determine pass/fail: passed if matched on first attempt
-                const attempts = loadAttemptedAnswers[_correctWord?.id] || [];
+                const attempts =
+                  attemptedAnswersRef.current[_correctWord?.id] || [];
                 const passed =
                   attempts.length > 0 && attempts[0] === _correctWord?.id;
                 return (
@@ -412,9 +437,6 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
             overflow: "hidden",
           }}
         >
-          <Box sx={{ flexShrink: 0, width: "100%" }}>
-            <LinearProgressWithLabel value={percentComplete} />
-          </Box>
           <Box
             sx={{
               display: "flex",
@@ -496,6 +518,9 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                           isMatched={!!matchedWordId}
                           audioPaths={_correctWord?.audio}
                           definitionAudioPaths={_correctWord?.definitionAudio}
+                          promptFor={promptFor}
+                          showAudio={showAudio}
+                          showPronunciation={showPronunciation}
                         />
                       </Box>
                     );
@@ -545,6 +570,9 @@ export const Learn = ({ tabIndex, setTabIndex, nodeKey, wordIDs }) => {
                         isMatched={!!matchedWordId}
                         audioPaths={_correctWord?.audio}
                         definitionAudioPaths={_correctWord?.definitionAudio}
+                        promptFor={promptFor}
+                        showAudio={showAudio}
+                        showPronunciation={showPronunciation}
                       />
                     );
                   })}

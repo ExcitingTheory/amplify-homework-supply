@@ -7,60 +7,58 @@
  * @module GroupChallengeEditor
  */
 
-import React, { useState, useEffect } from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Switch from '@mui/material/Switch'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import InputAdornment from '@mui/material/InputAdornment'
-import LinearProgress from '@mui/material/LinearProgress'
-import Chip from '@mui/material/Chip'
-import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
-import Autocomplete from '@mui/material/Autocomplete'
-import Checkbox from '@mui/material/Checkbox'
-import SaveIcon from '@mui/icons-material/Save'
-import TimerIcon from '@mui/icons-material/Timer'
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
-import ImageIcon from '@mui/icons-material/Image'
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
-import CheckBoxIcon from '@mui/icons-material/CheckBox'
-import { generateImage } from '../../app/actions/generate'
-import getCachedUrl from '../utils/getCachedUrl'
-import { calculateFeasibility } from '../utils/chapterFeasibility'
+import React, { useState, useEffect } from "react";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import InputAdornment from "@mui/material/InputAdornment";
+import LinearProgress from "@mui/material/LinearProgress";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
+import Autocomplete from "@mui/material/Autocomplete";
+import Checkbox from "@mui/material/Checkbox";
+import SaveIcon from "@mui/icons-material/Save";
+import TimerIcon from "@mui/icons-material/Timer";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import ImageIcon from "@mui/icons-material/Image";
+import { generateImage } from "../../app/actions/generate";
+import getCachedUrl from "../utils/getCachedUrl";
+import { calculateFeasibility } from "../utils/chapterFeasibility";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface GroupChallengeEditorData {
-  title: string
-  targetXP: number
-  deadline?: string // ISO datetime
-  startDate?: string // ISO datetime
-  bonusMultiplier: number
-  setting?: string
-  stakes?: string
-  systemPromptSeed?: string
-  active: boolean
-  featuredImage?: string
-  linkedUnitIds?: string[]
+  title: string;
+  targetXP: number;
+  deadline?: string; // ISO datetime
+  startDate?: string; // ISO datetime
+  bonusMultiplier: number;
+  setting?: string;
+  stakes?: string;
+  systemPromptSeed?: string;
+  active: boolean;
+  featuredImage?: string;
+  linkedUnitIds?: string[];
 }
 
 export interface GroupChallengeEditorProps {
   /** Initial data for editing (omit for create mode) */
-  initialData?: Partial<GroupChallengeEditorData> & { currentXP?: number }
+  initialData?: Partial<GroupChallengeEditorData> & { currentXP?: number };
   /** Called when form is submitted */
-  onSubmit: (data: GroupChallengeEditorData) => void
+  onSubmit: (data: GroupChallengeEditorData) => void;
   /** Disable during submission */
-  submitting?: boolean
+  submitting?: boolean;
   /** Available units for linking (id + name pairs) */
-  availableUnits?: Array<{ id: string; name: string }>
+  availableUnits?: Array<{ id: string; name: string }>;
 }
 
 // ============================================================================
@@ -68,14 +66,14 @@ export interface GroupChallengeEditorProps {
 // ============================================================================
 
 function formatCountdown(deadline: string): string {
-  const diff = new Date(deadline).getTime() - Date.now()
-  if (diff <= 0) return 'Expired'
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  if (days > 0) return `${days}d ${hours}h remaining`
-  if (hours > 0) return `${hours}h ${minutes}m remaining`
-  return `${minutes}m remaining`
+  const diff = new Date(deadline).getTime() - Date.now();
+  if (diff <= 0) return "Expired";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (days > 0) return `${days}d ${hours}h remaining`;
+  if (hours > 0) return `${hours}h ${minutes}m remaining`;
+  return `${minutes}m remaining`;
 }
 
 // ============================================================================
@@ -88,64 +86,80 @@ export function GroupChallengeEditor({
   submitting = false,
   availableUnits = [],
 }: GroupChallengeEditorProps) {
-  const [title, setTitle] = useState(initialData?.title || '')
-  const [targetXP, setTargetXP] = useState(initialData?.targetXP ?? 1000)
-  const [deadline, setDeadline] = useState(initialData?.deadline || '')
-  const [startDate, setStartDate] = useState(initialData?.startDate || '')
-  const [bonusMultiplier, setBonusMultiplier] = useState(initialData?.bonusMultiplier ?? 1.5)
-  const [setting, setSetting] = useState(initialData?.setting || '')
-  const [stakes, setStakes] = useState(initialData?.stakes || '')
-  const [systemPromptSeed, setSystemPromptSeed] = useState(initialData?.systemPromptSeed || '')
-  const [active, setActive] = useState(initialData?.active ?? true)
-  const [countdown, setCountdown] = useState('')
-  const [featuredImage, setFeaturedImage] = useState(initialData?.featuredImage || '')
-  const [featuredImageUrl, setFeaturedImageUrl] = useState('')
-  const [imagePrompt, setImagePrompt] = useState('')
-  const [imageGenerating, setImageGenerating] = useState(false)
-  const [linkedUnitIds, setLinkedUnitIds] = useState<string[]>(initialData?.linkedUnitIds || [])
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [targetXP, setTargetXP] = useState(initialData?.targetXP ?? 1000);
+  const [deadline, setDeadline] = useState(initialData?.deadline || "");
+  const [startDate, setStartDate] = useState(initialData?.startDate || "");
+  const [bonusMultiplier, setBonusMultiplier] = useState(
+    initialData?.bonusMultiplier ?? 1.5,
+  );
+  const [setting, setSetting] = useState(initialData?.setting || "");
+  const [stakes, setStakes] = useState(initialData?.stakes || "");
+  const [systemPromptSeed, setSystemPromptSeed] = useState(
+    initialData?.systemPromptSeed || "",
+  );
+  const [active, setActive] = useState(initialData?.active ?? true);
+  const [countdown, setCountdown] = useState("");
+  const [featuredImage, setFeaturedImage] = useState(
+    initialData?.featuredImage || "",
+  );
+  const [featuredImageUrl, setFeaturedImageUrl] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageGenerating, setImageGenerating] = useState(false);
+  const [linkedUnitIds, setLinkedUnitIds] = useState<string[]>(
+    initialData?.linkedUnitIds || [],
+  );
 
-  const currentXP = initialData?.currentXP ?? 0
-  const progress = targetXP > 0 ? Math.min(100, (currentXP / targetXP) * 100) : 0
-  const isValid = title.trim().length > 0 && targetXP > 0
+  const currentXP = initialData?.currentXP ?? 0;
+  const progress =
+    targetXP > 0 ? Math.min(100, (currentXP / targetXP) * 100) : 0;
+  const isValid = title.trim().length > 0 && targetXP > 0;
 
   // Resolve existing featured image URL
   useEffect(() => {
     if (featuredImage && !featuredImageUrl) {
-      getCachedUrl(featuredImage).then(setFeaturedImageUrl).catch(() => {})
+      getCachedUrl(featuredImage)
+        .then(setFeaturedImageUrl)
+        .catch(() => {});
     }
-  }, [featuredImage, featuredImageUrl])
+  }, [featuredImage, featuredImageUrl]);
 
   // Live countdown timer
   useEffect(() => {
     if (!deadline) {
-      setCountdown('')
-      return
+      setCountdown("");
+      return;
     }
-    setCountdown(formatCountdown(deadline))
+    setCountdown(formatCountdown(deadline));
     const interval = setInterval(() => {
-      setCountdown(formatCountdown(deadline))
-    }, 60_000)
-    return () => clearInterval(interval)
-  }, [deadline])
+      setCountdown(formatCountdown(deadline));
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [deadline]);
 
   const handleGenerateImage = async () => {
-    const prompt = imagePrompt.trim() || `Fantasy battle scene: ${title}. ${setting}`
-    setImageGenerating(true)
+    const prompt =
+      imagePrompt.trim() || `Fantasy battle scene: ${title}. ${setting}`;
+    setImageGenerating(true);
     try {
-      const result = await generateImage({ phrase: prompt, model: 'dall-e-3', size: '1792x1024' })
-      setFeaturedImage(result.path)
-      const url = await getCachedUrl(result.path)
-      setFeaturedImageUrl(url)
+      const result = await generateImage({
+        phrase: prompt,
+        model: "dall-e-3",
+        size: "1792x1024",
+      });
+      setFeaturedImage(result.path);
+      const url = await getCachedUrl(result.path);
+      setFeaturedImageUrl(url);
     } catch (err) {
-      console.error('Image generation failed:', err)
+      console.error("Image generation failed:", err);
     } finally {
-      setImageGenerating(false)
+      setImageGenerating(false);
     }
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isValid) return
+    e.preventDefault();
+    if (!isValid) return;
     onSubmit({
       title,
       targetXP,
@@ -158,8 +172,8 @@ export function GroupChallengeEditor({
       active,
       featuredImage: featuredImage || undefined,
       linkedUnitIds: linkedUnitIds.length > 0 ? linkedUnitIds : undefined,
-    })
-  }
+    });
+  };
 
   return (
     <Card variant="outlined">
@@ -167,13 +181,20 @@ export function GroupChallengeEditor({
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <Typography variant="h6">
-              {initialData?.title ? 'Edit Group Challenge' : 'Create Group Challenge'}
+              {initialData?.title
+                ? "Edit Group Challenge"
+                : "Create Group Challenge"}
             </Typography>
 
             {/* Progress display (only in edit mode with current XP) */}
             {initialData?.currentXP != null && (
               <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={1}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Progress: {currentXP} / {targetXP} XP
                   </Typography>
@@ -182,7 +203,7 @@ export function GroupChallengeEditor({
                       icon={<TimerIcon />}
                       label={countdown}
                       size="small"
-                      color={countdown === 'Expired' ? 'error' : 'default'}
+                      color={countdown === "Expired" ? "error" : "default"}
                     />
                   )}
                 </Stack>
@@ -218,10 +239,14 @@ export function GroupChallengeEditor({
               label="Target XP (HP)"
               type="number"
               value={targetXP}
-              onChange={(e) => setTargetXP(Math.max(1, parseInt(e.target.value) || 0))}
+              onChange={(e) =>
+                setTargetXP(Math.max(1, parseInt(e.target.value) || 0))
+              }
               required
               InputProps={{
-                startAdornment: <InputAdornment position="start">⚡</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">⚡</InputAdornment>
+                ),
               }}
             />
 
@@ -248,10 +273,14 @@ export function GroupChallengeEditor({
               label="Bonus Multiplier"
               type="number"
               value={bonusMultiplier}
-              onChange={(e) => setBonusMultiplier(Math.max(1, parseFloat(e.target.value) || 1))}
+              onChange={(e) =>
+                setBonusMultiplier(Math.max(1, parseFloat(e.target.value) || 1))
+              }
               inputProps={{ step: 0.1, min: 1 }}
               InputProps={{
-                startAdornment: <InputAdornment position="start">×</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">×</InputAdornment>
+                ),
               }}
               helperText="XP multiplier applied to all contributions during the challenge"
             />
@@ -293,56 +322,95 @@ export function GroupChallengeEditor({
 
             {/* Featured Image Generation */}
             <Divider>
-              <Chip label="Linked Units (Scoped XP)" icon={<EmojiEventsIcon />} />
+              <Chip
+                label="Linked Units (Scoped XP)"
+                icon={<EmojiEventsIcon />}
+              />
             </Divider>
 
             {availableUnits.length > 0 && (
               <>
                 <Typography variant="body2" color="text.secondary">
-                  Only XP earned from the selected units will count toward this chapter.
-                  Leave empty to count all XP in the section.
+                  Only XP earned from the selected units will count toward this
+                  chapter. Leave empty to count all XP in the section.
                 </Typography>
                 <Autocomplete
                   multiple
                   options={availableUnits}
                   getOptionLabel={(opt) => opt.name}
-                  value={availableUnits.filter((u) => linkedUnitIds.includes(u.id))}
-                  onChange={(_, newValue) => setLinkedUnitIds(newValue.map((v) => v.id))}
+                  value={availableUnits.filter((u) =>
+                    linkedUnitIds.includes(u.id),
+                  )}
+                  onChange={(_, newValue) =>
+                    setLinkedUnitIds(newValue.map((v) => v.id))
+                  }
                   disableCloseOnSelect
                   renderOption={(props, option, { selected }) => (
                     <li {...props} key={option.id}>
-                      <Checkbox
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                        checkedIcon={<CheckBoxIcon fontSize="small" />}
-                        checked={selected}
-                        sx={{ mr: 1 }}
-                      />
+                      <Checkbox checked={selected} sx={{ mr: 1 }} />
                       {option.name}
                     </li>
                   )}
                   renderInput={(params) => (
-                    <TextField {...params} label="Linked Units" placeholder="Select units..." />
+                    <TextField
+                      {...params}
+                      label="Linked Units"
+                      placeholder="Select units..."
+                    />
                   )}
                 />
-                {linkedUnitIds.length > 0 && targetXP > 0 && (() => {
-                  const feasibility = calculateFeasibility(targetXP, linkedUnitIds.length, { bonusMultiplier })
-                  return (
-                    <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: feasibility.achievableWithoutDrills ? 'success.50' : feasibility.achievableWithinWeek ? 'warning.50' : 'error.50', border: '1px solid', borderColor: feasibility.achievableWithoutDrills ? 'success.main' : feasibility.achievableWithinWeek ? 'warning.main' : 'error.main' }}>
-                      <Typography variant="caption" fontWeight={600}>
-                        Feasibility: {feasibility.verdict.toUpperCase()}
-                      </Typography>
-                      <Typography variant="caption" display="block" color="text.secondary">
-                        One-time XP from linked units: ~{feasibility.oneTimeXPConservative}–{feasibility.oneTimeXPOptimistic} XP
-                        {feasibility.drillSessionsNeeded > 0 && ` · ~${feasibility.drillSessionsNeeded} extra drill sessions needed per student`}
-                      </Typography>
-                      {feasibility.warning && (
-                        <Typography variant="caption" color="error.main" display="block">
-                          {feasibility.warning}
+                {linkedUnitIds.length > 0 &&
+                  targetXP > 0 &&
+                  (() => {
+                    const feasibility = calculateFeasibility(
+                      targetXP,
+                      linkedUnitIds.length,
+                      { bonusMultiplier },
+                    );
+                    return (
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 1,
+                          bgcolor: feasibility.achievableWithoutDrills
+                            ? "success.50"
+                            : feasibility.achievableWithinWeek
+                              ? "warning.50"
+                              : "error.50",
+                          border: "1px solid",
+                          borderColor: feasibility.achievableWithoutDrills
+                            ? "success.main"
+                            : feasibility.achievableWithinWeek
+                              ? "warning.main"
+                              : "error.main",
+                        }}
+                      >
+                        <Typography variant="caption" fontWeight={600}>
+                          Feasibility: {feasibility.verdict.toUpperCase()}
                         </Typography>
-                      )}
-                    </Box>
-                  )
-                })()}
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          color="text.secondary"
+                        >
+                          One-time XP from linked units: ~
+                          {feasibility.oneTimeXPConservative}–
+                          {feasibility.oneTimeXPOptimistic} XP
+                          {feasibility.drillSessionsNeeded > 0 &&
+                            ` · ~${feasibility.drillSessionsNeeded} extra drill sessions needed per student`}
+                        </Typography>
+                        {feasibility.warning && (
+                          <Typography
+                            variant="caption"
+                            color="error.main"
+                            display="block"
+                          >
+                            {feasibility.warning}
+                          </Typography>
+                        )}
+                      </Box>
+                    );
+                  })()}
               </>
             )}
 
@@ -356,25 +424,33 @@ export function GroupChallengeEditor({
               onChange={(e) => setImagePrompt(e.target.value)}
               multiline
               rows={2}
-              placeholder={`e.g., Fantasy battle scene: ${title || 'The Algorithm Dragon'}. ${setting || 'A world where bugs rule the codebase...'}`}
+              placeholder={`e.g., Fantasy battle scene: ${title || "The Algorithm Dragon"}. ${setting || "A world where bugs rule the codebase..."}`}
               helperText="Describe the featured image you want to generate (leave blank for auto-prompt from title + setting)"
             />
 
             <Button
               variant="outlined"
-              startIcon={imageGenerating ? <CircularProgress size={16} /> : <ImageIcon />}
+              startIcon={
+                imageGenerating ? <CircularProgress size={16} /> : <ImageIcon />
+              }
               onClick={handleGenerateImage}
-              disabled={imageGenerating || (!imagePrompt.trim() && !title.trim())}
+              disabled={
+                imageGenerating || (!imagePrompt.trim() && !title.trim())
+              }
             >
-              {imageGenerating ? 'Generating...' : featuredImage ? 'Regenerate Image' : 'Generate Featured Image'}
+              {imageGenerating
+                ? "Generating..."
+                : featuredImage
+                  ? "Regenerate Image"
+                  : "Generate Featured Image"}
             </Button>
 
             {featuredImageUrl && (
-              <Box sx={{ borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ borderRadius: 2, overflow: "hidden" }}>
                 <img
                   src={featuredImageUrl}
                   alt="Featured"
-                  style={{ width: '100%', maxHeight: 300, objectFit: 'cover' }}
+                  style={{ width: "100%", maxHeight: 300, objectFit: "cover" }}
                 />
               </Box>
             )}
@@ -386,11 +462,11 @@ export function GroupChallengeEditor({
               startIcon={<SaveIcon />}
               disabled={!isValid || submitting}
             >
-              {initialData?.title ? 'Save Challenge' : 'Create Challenge'}
+              {initialData?.title ? "Save Challenge" : "Create Challenge"}
             </Button>
           </Stack>
         </Box>
       </CardContent>
     </Card>
-  )
+  );
 }

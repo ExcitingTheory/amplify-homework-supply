@@ -15,6 +15,7 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { HeadingNode } from "@lexical/rich-text";
 
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
+import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import {
   seedMockUnit,
   seedMockQuestions,
@@ -85,42 +86,44 @@ const ReadOnlyTemplate = ({
   }
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <div
-        style={{
-          padding: "2rem",
-          maxWidth: "900px",
-          margin: "0 auto",
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-        }}
-      >
+    <AudioPlayerProvider>
+      <LexicalComposer initialConfig={initialConfig}>
         <div
           style={{
-            backgroundColor: "white",
-            borderRadius: "8px",
             padding: "2rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            maxWidth: "900px",
+            margin: "0 auto",
+            backgroundColor: "#f5f5f5",
+            minHeight: "100vh",
           }}
         >
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                style={{
-                  minHeight: "400px",
-                  outline: "none",
-                  padding: "1rem",
-                }}
-              />
-            }
-            placeholder={null}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <CustomAnswerPlugin />
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "2rem",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{
+                    minHeight: "400px",
+                    outline: "none",
+                    padding: "1rem",
+                  }}
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <CustomAnswerPlugin />
+          </div>
         </div>
-      </div>
-    </LexicalComposer>
+      </LexicalComposer>
+    </AudioPlayerProvider>
   );
 };
 
@@ -776,58 +779,60 @@ const ReadOnlyTemplateWithGrade = ({
   }
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <div
-        style={{
-          padding: "2rem",
-          maxWidth: "900px",
-          margin: "0 auto",
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-        }}
-      >
+    <AudioPlayerProvider>
+      <LexicalComposer initialConfig={initialConfig}>
         <div
           style={{
-            backgroundColor: "white",
-            borderRadius: "8px",
             padding: "2rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            maxWidth: "900px",
+            margin: "0 auto",
+            backgroundColor: "#f5f5f5",
+            minHeight: "100vh",
           }}
         >
           <div
             style={{
-              marginBottom: "1.5rem",
-              padding: "1rem",
-              backgroundColor: "#e3f2fd",
-              borderRadius: "4px",
-              borderLeft: "4px solid #2196f3",
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "2rem",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
           >
-            <strong>Grade Data Preview:</strong>
-            <div style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
-              <div>✓ Complete: {gradeData.complete ? "Yes" : "No"}</div>
-              <div>✓ Accuracy: {(gradeData.accuracy * 100).toFixed(0)}%</div>
-              <div>✓ Files: {gradeData.files?.length || 0} uploaded</div>
+            <div
+              style={{
+                marginBottom: "1.5rem",
+                padding: "1rem",
+                backgroundColor: "#e3f2fd",
+                borderRadius: "4px",
+                borderLeft: "4px solid #2196f3",
+              }}
+            >
+              <strong>Grade Data Preview:</strong>
+              <div style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
+                <div>✓ Complete: {gradeData.complete ? "Yes" : "No"}</div>
+                <div>✓ Accuracy: {(gradeData.accuracy * 100).toFixed(0)}%</div>
+                <div>✓ Files: {gradeData.files?.length || 0} uploaded</div>
+              </div>
             </div>
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  style={{
+                    minHeight: "400px",
+                    outline: "none",
+                    padding: "1rem",
+                  }}
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <CustomAnswerPlugin />
           </div>
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                style={{
-                  minHeight: "400px",
-                  outline: "none",
-                  padding: "1rem",
-                }}
-              />
-            }
-            placeholder={null}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <CustomAnswerPlugin />
         </div>
-      </div>
-    </LexicalComposer>
+      </LexicalComposer>
+    </AudioPlayerProvider>
   );
 };
 

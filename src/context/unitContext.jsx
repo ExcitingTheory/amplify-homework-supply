@@ -50,12 +50,17 @@ const UnitProvider = ({ children, id }) => {
   const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
   const practiceSessionVersionMapRef = useRef({});
   const gradeVersionMapRef = useRef({});
+  const gradeStateRef = useRef(unitInitialState.grade);
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
   const unitRef = useRef({});
   const usernameRef = useRef(null);
   const workbookCollaborationRef = useRef(null); // Ref to access workbook collaboration from saveGrade
+
+  React.useEffect(() => {
+    gradeStateRef.current = state.grade;
+  }, [state.grade]);
 
   // Memoize derived values to prevent recalculation on every render
   const name = React.useMemo(() => state.unit?.name, [state.unit?.name]);
@@ -391,6 +396,7 @@ const UnitProvider = ({ children, id }) => {
 
   const saveGrade = React.useCallback(
     async (data) => {
+      const currentGrade = gradeStateRef.current;
       const assignment = assignmentRecord || null;
       const assignmentLateWindow = assignment?.availableUntil
         ? new Date(assignment.availableUntil)
@@ -422,6 +428,18 @@ const UnitProvider = ({ children, id }) => {
         unitAccuracy = verifyAccuracy(data);
       }
 
+      // Keep the current record usable before the Grade subscription echoes the write.
+      if (currentGrade?.id) {
+        const optimisticGrade = {
+          ...currentGrade,
+          data,
+          accuracy: unitAccuracy,
+          complete: unitIsComplete,
+        };
+        gradeStateRef.current = optimisticGrade;
+        dispatch({ type: actionTypes.SET_GRADE, payload: optimisticGrade });
+      }
+
       dispatch({
         type: actionTypes.SET_FINISHED_QUESTIONS,
         payload: _finishedQuestions,
@@ -436,7 +454,7 @@ const UnitProvider = ({ children, id }) => {
 
       try {
         // Save grade first, then kick off moderation (backend persists to record)
-        let gradeId = state.grade?.id;
+        let gradeId = currentGrade?.id;
 
         // Helper: persist grade via offline-aware path
         const persistGrade = async (id) => {
@@ -447,7 +465,7 @@ const UnitProvider = ({ children, id }) => {
             data,
             accuracy: unitAccuracy,
             complete: unitIsComplete,
-            version: state.grade?._version,
+            version: gradeStateRef.current?._version,
           };
           await saveGradeOfflineAware(gradeParams, async (params) => {
             const client = getAmplifyClient();
@@ -460,21 +478,24 @@ const UnitProvider = ({ children, id }) => {
           });
         };
 
-        if (!state.grade) {
+        if (!currentGrade?.id) {
           const newGrade = await createGrade(unitAccuracy, unitIsComplete);
           if (newGrade && newGrade.id) {
             gradeId = newGrade.id;
+            gradeStateRef.current = {
+              ...newGrade,
+              data,
+              accuracy: unitAccuracy,
+              complete: unitIsComplete,
+            };
+            dispatch({
+              type: actionTypes.SET_GRADE,
+              payload: gradeStateRef.current,
+            });
             await persistGrade(newGrade.id);
           }
-        } else if (state.grade && state.grade.id) {
-          await persistGrade(state.grade.id);
         } else {
-          console.error("Invalid grade object:", state.grade);
-          const newGrade = await createGrade(unitAccuracy, unitIsComplete);
-          if (newGrade && newGrade.id) {
-            gradeId = newGrade.id;
-            await persistGrade(newGrade.id);
-          }
+          await persistGrade(currentGrade.id);
         }
 
         if (shouldRequestLateReview && assignment?.id) {
@@ -523,7 +544,7 @@ const UnitProvider = ({ children, id }) => {
           dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
           // Award XP + badges + streak + personal best via batched Server Action
           const currentUsername = usernameRef.current || user?.attributes?.sub;
-          if (currentUsername && state.grade?.id) {
+          if (currentUsername && gradeStateRef.current?.id) {
             // Primary: Server Action batches XP, badges, streak, personal best, easter eggs
             (async () => {
               try {
@@ -531,7 +552,7 @@ const UnitProvider = ({ children, id }) => {
                   currentUsername,
                   id,
                   unitAccuracy,
-                  state.grade.id,
+                  gradeStateRef.current.id,
                   undefined,
                   sectionId || undefined,
                 );
@@ -551,8 +572,12 @@ const UnitProvider = ({ children, id }) => {
             })();
 
             // Summarize feedback via GPT-4o-mini (fire-and-forget)
-            summarizeGradeFeedback(data, state.grade.id).catch((err) =>
-              console.error("[unitContext] summarizeGradeFeedback error:", err),
+            summarizeGradeFeedback(data, gradeStateRef.current.id).catch(
+              (err) =>
+                console.error(
+                  "[unitContext] summarizeGradeFeedback error:",
+                  err,
+                ),
             );
 
             // Evaluate skills linked to this unit (fire-and-forget)
@@ -668,6 +693,19 @@ const UnitProvider = ({ children, id }) => {
           console.error("[UnitContext] Failed to parse grade.data:", e);
           currentGrade.data = {};
         }
+      }
+
+      const previousVersion =
+        gradeStateRef.current?.id === currentGrade?.id
+          ? gradeStateRef.current?._version
+          : null;
+      const incomingVersion = currentGrade?._version;
+      if (
+        previousVersion != null &&
+        incomingVersion != null &&
+        incomingVersion <= previousVersion
+      ) {
+        return;
       }
 
       // If there are completed grades but no current incomplete grade,

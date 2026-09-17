@@ -7,6 +7,7 @@ import { Skeleton, Box } from "@mui/material";
 const DataGrid = lazy(() =>
   import("@mui/x-data-grid").then((m) => ({ default: m.DataGrid })),
 );
+import { roundedCheckboxIcons } from "../../RoundedCheckboxIcon";
 import { useTranslations } from "next-intl";
 
 import { Menu, MenuItem, TextField } from "@mui/material";
@@ -398,9 +399,15 @@ export default function PlaylistEditor({
             columns={columns}
             hideFooter
             checkboxSelection
+            disableRowSelectionExcludeModel
+            slotProps={{ baseCheckbox: roundedCheckboxIcons }}
             rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
             onRowSelectionModelChange={(model) => {
-              setGridSelection([...model.ids]);
+              const ids =
+                model.type === "exclude"
+                  ? rows.map((r) => r.id).filter((id) => !model.ids.has(id))
+                  : [...model.ids];
+              setGridSelection(ids);
             }}
           />
         </Suspense>
