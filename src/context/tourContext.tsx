@@ -20,6 +20,7 @@ import React, {
   useCallback,
 } from "react";
 import { setTourTasksData } from "../utils/chatTools";
+import { adaptTourSteps } from "../tours/tourAdapters";
 
 // Import tour tasks and configurations from Storybook code
 // Note: These are TypeScript files but can be imported in JS/TS with proper config
@@ -108,6 +109,47 @@ const ONBOARDING_TASKS = [
     estimatedTime: 240,
   },
   {
+    id: "instructor-assignments-tour",
+    title: "Manage Section Assignments",
+    description: "Create and review assignments for a class section",
+    instructions: [
+      "Open the sections overview",
+      "Review the active class sections",
+      "Open the assignments panel",
+      "Create or edit an assignment",
+    ],
+    steps: [
+      {
+        target:
+          '[data-tour="chat-sidebar-frame"] [data-testid="chat-messages"]',
+        instruction:
+          "Review the assistant conversation and the assignment-tour request.",
+      },
+      {
+        target: '[data-tour="chat-sidebar-frame"] [data-tour="ai-message"]',
+        instruction: "Read the assistant's tour confirmation and guidance.",
+      },
+      {
+        target: '[data-tour="chat-sidebar-frame"] [data-tour="chat-input"]',
+        instruction:
+          "Ask a follow-up question here to continue working with assignments.",
+        interactable: true,
+        advanceWhenTargetAppears:
+          '[data-tour="chat-sidebar-frame"] [data-tour="user-message"]',
+      },
+      {
+        target: '[data-tour="chat-sidebar-frame"] [data-tour="user-message"]',
+        instruction:
+          "Your follow-up is now in the conversation. Continue from here.",
+        targetIndex: -1,
+      },
+    ],
+    persona: "instructor",
+    category: "Assignments",
+    order: 6,
+    estimatedTime: 240,
+  },
+  {
     id: "instructor-use-ai-assistant",
     title: "Use AI to Generate Content",
     description: "Leverage AI assistance for content creation",
@@ -170,6 +212,11 @@ const ONBOARDING_TASKS = [
   },
 ];
 
+const APP_ONBOARDING_TASKS = ONBOARDING_TASKS.map((task) => ({
+  ...task,
+  steps: adaptTourSteps(task.steps || [], "app"),
+}));
+
 interface TourContextValue {
   /** Start a guided tour */
   startTour: (tourId: string, mode?: "tutorial" | "quiz") => void;
@@ -206,7 +253,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({
     (tourId: string, mode: "tutorial" | "quiz" = "tutorial") => {
       console.log("[TourContext] Starting tour:", tourId, "mode:", mode);
 
-      const tour = ONBOARDING_TASKS.find((t) => t.id === tourId);
+      const tour = APP_ONBOARDING_TASKS.find((t) => t.id === tourId);
       if (!tour) {
         console.error("[TourContext] Tour not found:", tourId);
         return;
@@ -238,7 +285,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [currentTour]);
 
   const getAvailableTours = useCallback(() => {
-    return ONBOARDING_TASKS;
+    return APP_ONBOARDING_TASKS;
   }, []);
 
   // Register tour tasks with chatTools on mount
@@ -248,7 +295,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({
       ONBOARDING_TASKS.length,
       "tasks",
     );
-    setTourTasksData(ONBOARDING_TASKS);
+    setTourTasksData(APP_ONBOARDING_TASKS);
   }, []);
 
   const value: TourContextValue = {

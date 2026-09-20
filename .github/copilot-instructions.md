@@ -5,14 +5,17 @@ elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
 ## Core Principles
 
 - **Never choose lazy solutions.** Always choose the most technically correct approach. No shortcuts, workarounds, or "good enough" implementations when a proper solution exists.
-- **Always verify library versions before writing code or answering questions.** Check `package.json` for the installed version, then gather the correct API documentation for that version (use Context7 or official docs). Do not assume API shapes from memory — confirm them first.
+- **Always verify library versions before writing code or answering questions.** Check the range in `package.json` and the exact installed version in `package-lock.json`, then gather the correct API documentation for that version (use Context7 or official docs). Do not assume API shapes from memory — confirm them first.
 - **Never trust internal repo documentation blindly.** Docs, READMEs, and inline comments in this repo can be outdated or mid-upgrade. Always cross-check claims against the actual source code, `package.json`, and current file contents before relying on them.
+- **Keep responses and discovery focused.** For implementation tasks, avoid long preambles and broad repository summaries. Read the nearest owner and test, state assumptions briefly, make the smallest coherent change, and report only material decisions and validation results.
+- **Define contracts before large UI implementations.** Establish typed props and the applicable Storybook variants before generating a substantial component. Reuse nearby interfaces and runtime data shapes instead of inventing properties.
+- **Use abstractions only when earned.** Extract a custom hook when it isolates stateful behavior, is reused, or materially simplifies a component; do not maximize hook count as an end in itself.
 
 ## Architecture Overview
 
-**Stack**: Next.js 20 + AWS Amplify Gen 2 (GraphQL/Data Client) + Material UI + Lexical Editor + OpenAI  
+**Stack**: Next.js 16 (currently 16.2.10 in `package-lock.json`) + AWS Amplify Gen 2 (GraphQL/Data Client) + Material UI 7 + Lexical Editor + OpenAI
 **Database**: DynamoDB via Amplify Data Client with real-time sync and versioning  
-**Auth**: AWS Cognito with user groups (Admins,Moderators, Instructors, Learners)m owner-based auth, and dynamic group auth by creating Cognito groups and including them in the model fields (we use both read and write groups) and @auth directives
+**Auth**: AWS Cognito with user groups (Admins, Moderators, Instructors, Learners), owner-based auth, and dynamic group auth through model fields and authorization rules
 **Storage**: S3 for files (audio/video/PDFs), organized by protection level, however we can use base64 and http(s) URLs for testing without S3 uploads
 **AI Features**: OpenAI API (GPT-4, Whisper, TTS) via Lambda + Vercel AI SDK for streaming chat
 
@@ -22,7 +25,7 @@ elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
 
 - `UnitContext` ([src/context/unitContext.js](src/context/unitContext.js)) - Unit data, dictionary, files, question bank, grading
 - `SectionContext` ([src/context/sectionContext.js](src/context/sectionContext.js)) - Class sections and assignments
-- `FilesContext` ([src/context/filesContext.js](src/context/filesContext.js)) - File management and S3 operations
+- `FilesContext` ([src/context/fileContext.jsx](src/context/fileContext.jsx)) - File management and S3 operations
 - `DictionaryContext` ([src/context/dictionaryContext.js](src/context/dictionaryContext.js)) - Vocabulary words and questions
 - `SettingsContext` ([src/context/settingsContext.js](src/context/settingsContext.js)) - User settings
 
@@ -311,7 +314,7 @@ Component development uses Storybook with mocked AWS services:
 
 ## Gen 2 Versioning Pattern
 
-**All models have versioning fields** (`_version`, `_lastChangedAt`, `_deleted`) for optimistic locking:
+**Models opt into versioning fields explicitly.** Before using `_version`, verify that the model declares it in [amplify/data/resource.ts](amplify/data/resource.ts). For models that declare `_version`, use it for optimistic locking:
 
 ```typescript
 // Schema definition (amplify/data/resource.ts)

@@ -19,6 +19,26 @@
       },
       {
         "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_sec_preflight_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_sec_preflight_001",
+        "state": "output-available",
+        "input": {
+          "query": "Summer Intensive Japanese 102",
+          "type": "section",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "Summer Intensive Japanese 102",
+          "results": []
+        }
+      },
+      {
+        "type": "step-start",
         "toolCall": "create_section",
         "toolCallId": "call_sec_create_001"
       },
@@ -37,6 +57,35 @@
           "name": "Summer Intensive Japanese 102",
           "joinCode": "JP102-SUMMER26",
           "message": "Section created with join code JP102-SUMMER26 and Cognito learner groups"
+        }
+      },
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_sec_lookup_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_sec_lookup_001",
+        "state": "output-available",
+        "input": {
+          "query": "Summer Intensive Japanese 102",
+          "type": "section",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "Summer Intensive Japanese 102",
+          "results": [
+            {
+              "type": "section",
+              "id": "section-summer-102",
+              "similarity": 1,
+              "name": "Summer Intensive Japanese 102",
+              "description": "Accelerated summer course covering basic grammar, katakana, and conversational phrases",
+              "joinCode": "JP102-SUMMER26"
+            }
+          ]
         }
       },
       {
@@ -61,6 +110,26 @@
     "parts": [
       {
         "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_assignment_preflight_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_assignment_preflight_001",
+        "state": "output-available",
+        "input": {
+          "query": "Katakana Restaurant Vocabulary Summer Intensive Japanese 102",
+          "type": "assignment",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "Katakana Restaurant Vocabulary Summer Intensive Japanese 102",
+          "results": []
+        }
+      },
+      {
+        "type": "step-start",
         "toolCall": "create_assignment",
         "toolCallId": "call_assign_create_001"
       },
@@ -80,6 +149,38 @@
           "unitName": "Katakana & Restaurant Vocabulary",
           "dueDate": "2026-07-24T17:00:00.000Z",
           "message": "Unit assigned to Summer Intensive Japanese 102 with due date July 24, 2026 at 5:00 PM"
+        }
+      },
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_assignment_lookup_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_assignment_lookup_001",
+        "state": "output-available",
+        "input": {
+          "query": "Katakana Restaurant Vocabulary assignment",
+          "type": "assignment",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "Katakana Restaurant Vocabulary assignment",
+          "results": [
+            {
+              "type": "assignment",
+              "id": "assign-katakana-summer",
+              "similarity": 1,
+              "name": "Katakana & Restaurant Vocabulary",
+              "unitId": "unit-katakana-102",
+              "unitName": "Katakana & Restaurant Vocabulary",
+              "sectionId": "section-summer-102",
+              "sectionName": "Summer Intensive Japanese 102",
+              "dueDate": "2026-07-24T17:00:00.000Z"
+            }
+          ]
         }
       },
       {

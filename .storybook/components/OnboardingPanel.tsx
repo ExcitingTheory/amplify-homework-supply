@@ -48,6 +48,7 @@ import {
 } from "../code/onboarding-tasks";
 import SpotlightOverlay, { SpotlightStep } from "./SpotlightOverlay";
 import { getSpotlightConfigForTask } from "../code/spotlight-configs";
+import { createNavigationStep } from "../../src/tours/tourAdapters";
 
 import "./OnboardingPanel.css";
 
@@ -502,11 +503,27 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const generateSpotlightSteps = (
     task: OnboardingTaskWithCriteria,
   ): SpotlightStep[] => {
+    const storyId = getStoryIdForMode(task);
     // Try to get configured steps for this task
     const configuredSteps = getSpotlightConfigForTask(task.id, mode);
 
     if (configuredSteps && configuredSteps.length > 0) {
-      return configuredSteps;
+      if (!storyId) return configuredSteps;
+      return [
+        createNavigationStep({
+          id: `${task.id}-navigate`,
+          title:
+            mode === "tutorial"
+              ? "Open the guided story"
+              : "Open the challenge",
+          description:
+            mode === "tutorial"
+              ? "The destination story is opening. The next steps will highlight the controls you need."
+              : "The challenge story is opening. Complete the task there when you are ready.",
+          storyId,
+        }) as SpotlightStep,
+        ...configuredSteps,
+      ];
     }
 
     // Fallback to auto-generated steps if no configuration exists
@@ -527,24 +544,26 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     // If there's a story link, add a step for navigation
     const storyId = getStoryIdForMode(task);
     if (storyId) {
-      steps.push({
-        id: `${task.id}-navigate`,
-        title: mode === "tutorial" ? "View Documentation" : "Try It Out",
-        description:
-          mode === "tutorial"
-            ? "We'll navigate to the component documentation where you can see examples and interact with the component."
-            : "Navigate to the interactive demo and complete the task on your own.",
-        tooltipPosition: "center",
-        actions:
-          mode === "tutorial"
-            ? [
-                "The story will open automatically",
-                "Explore the interactive examples",
-                "Try different configurations",
-                "Read the component documentation",
-              ]
-            : undefined,
-      });
+      steps.push(
+        createNavigationStep({
+          id: `${task.id}-navigate`,
+          title: mode === "tutorial" ? "View Documentation" : "Try It Out",
+          description:
+            mode === "tutorial"
+              ? "We'll navigate to the component documentation where you can see examples and interact with the component."
+              : "Navigate to the interactive demo and complete the task on your own.",
+          storyId,
+          actions:
+            mode === "tutorial"
+              ? [
+                  "The story will open automatically",
+                  "Explore the interactive examples",
+                  "Try different configurations",
+                  "Read the component documentation",
+                ]
+              : undefined,
+        }),
+      );
     }
 
     // Completion step

@@ -19,6 +19,26 @@
       },
       {
         "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_vocab_preflight_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_vocab_preflight_001",
+        "state": "output-available",
+        "input": {
+          "query": "いただきます",
+          "type": "word",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "いただきます",
+          "results": []
+        }
+      },
+      {
+        "type": "step-start",
         "toolCall": "create_vocabulary_word",
         "toolCallId": "call_vocab_create_001"
       },
@@ -39,6 +59,35 @@
           "phonetic": "itadakimasu",
           "definition": "Humble expression of gratitude spoken before eating a meal ('I humbly receive')",
           "message": "Vocabulary word created and linked to unit"
+        }
+      },
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_vocab_lookup_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_vocab_lookup_001",
+        "state": "output-available",
+        "input": {
+          "query": "いただきます",
+          "type": "word",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "いただきます",
+          "results": [
+            {
+              "type": "word",
+              "id": "word-itadakimasu",
+              "similarity": 1,
+              "phrase": "いただきます",
+              "phonetic": "itadakimasu",
+              "definition": "Humble expression of gratitude spoken before eating a meal ('I humbly receive')"
+            }
+          ]
         }
       },
       {
@@ -63,6 +112,26 @@
     "parts": [
       {
         "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_q_preflight_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_q_preflight_001",
+        "state": "output-available",
+        "input": {
+          "query": "when should you say itadakimasu",
+          "type": "question",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "when should you say itadakimasu",
+          "results": []
+        }
+      },
+      {
+        "type": "step-start",
         "toolCall": "create_question",
         "toolCallId": "call_q_create_001"
       },
@@ -81,6 +150,34 @@
           "prompt": "In Japanese cultural etiquette, when should you say 'いただきます' (itadakimasu)?",
           "answer": "Immediately before beginning a meal or receiving food/drinks from someone.",
           "message": "Question created and saved to Question Bank"
+        }
+      },
+      {
+        "type": "step-start",
+        "toolCall": "search_content",
+        "toolCallId": "call_question_lookup_001"
+      },
+      {
+        "type": "tool-search_content",
+        "toolCallId": "call_question_lookup_001",
+        "state": "output-available",
+        "input": {
+          "query": "When should you say itadakimasu",
+          "type": "question",
+          "limit": 5
+        },
+        "output": {
+          "success": true,
+          "query": "When should you say itadakimasu",
+          "results": [
+            {
+              "type": "question",
+              "id": "q-itadakimasu-001",
+              "similarity": 1,
+              "prompt": "In Japanese cultural etiquette, when should you say 'いただきます' (itadakimasu)?",
+              "answer": "Immediately before beginning a meal or receiving food/drinks from someone."
+            }
+          ]
         }
       },
       {

@@ -72,13 +72,48 @@
               "similarity": 0.83,
               "name": "Japanese_Etiquette_Overview.pdf",
               "description": "Comprehensive guide to bowing angles, formal vs casual greetings, and daily manners"
+            },
+            {
+              "type": "file",
+              "id": "file-greetings-conversation-player",
+              "similarity": 0.82,
+              "name": "Japanese Greetings Conversation Player",
+              "description": "Audio conversation player for practicing greeting exchanges",
+              "mimeType": "audio/mpeg"
+            },
+            {
+              "type": "unit",
+              "id": "unit-greetings-101",
+              "similarity": 0.89,
+              "name": "Japanese Greetings & Etiquette",
+              "description": "Unit covering daily greetings, formality, and etiquette",
+              "published": true
+            },
+            {
+              "type": "section",
+              "id": "section-spring-101",
+              "similarity": 0.86,
+              "name": "Spring 2026 Japanese 101",
+              "description": "Beginner Japanese language course",
+              "joinCode": "JP101-S26"
+            },
+            {
+              "type": "assignment",
+              "id": "assignment-greetings-001",
+              "similarity": 0.84,
+              "name": "Greetings & Etiquette Practice",
+              "unitId": "unit-greetings-101",
+              "unitName": "Japanese Greetings & Etiquette",
+              "sectionId": "section-spring-101",
+              "sectionName": "Spring 2026 Japanese 101",
+              "dueDate": "2026-10-02T17:00:00.000Z"
             }
           ]
         }
       },
       {
         "type": "text",
-        "text": "I found 5 relevant resources in your library, including core greeting vocabulary, practice questions, and the Japanese Etiquette guide PDF. Let's create an introductory lesson block first."
+        "text": "I found 9 relevant resources in your library, including greeting vocabulary, practice questions, a conversation player, and linked unit, section, and assignment records. Let's create an introductory lesson block first."
       }
     ]
   },

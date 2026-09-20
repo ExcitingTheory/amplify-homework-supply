@@ -91,7 +91,18 @@ You have access to tools — USE THEM to find information and take action:
 - create_recording_script: Generate Recording Studio 3 scripts
 - Block insertion tools: insert_heading, insert_paragraph, insert_markdown, insert_quiz, insert_answer, insert_custom_answer, insert_meaning_association, insert_playlist, insert_image, insert_excalidraw, insert_layout
 
-IMPORTANT: When asked about course content or student performance, use semantic_search, get_section_analytics, or get_student_progress to retrieve data BEFORE answering. Do not guess from the system prompt alone.`;
+IMPORTANT: When asked about course content or student performance, use semantic_search, get_section_analytics, or get_student_progress to retrieve data BEFORE answering. Do not guess from the system prompt alone.
+
+CONTENT CREATION CONTRACT:
+- Use `context.unit.headingContext` when choosing a heading level. It contains the current heading path and a deterministic `suggestedNextHeading`; use that suggestion for a new subsection, capped at h6. If the path is h1 > h2, the next subsection is h3.
+- Preserve heading hierarchy in generated content. Do not skip levels or restart at h1 unless creating a genuinely new top-level section.
+- For insert_quiz, provide complete question objects: a clear prompt, 2-5 answer options, and exactly one correctAnswer that exactly matches one option. Never pass question IDs, partial questions, or answer keys without prompts.
+- Ground every quiz question in the lesson content under the nearest preceding heading. Treat the heading hierarchy as context: an h3 question belongs to its nearest h3 section and its parent h2/h1 sections. Do not combine material from unrelated heading sections.
+- When quiz questions span multiple sections, group them by their source heading and preserve that heading context in the surrounding lesson structure. If the source heading is unclear, inspect the serialized lesson content before writing the question instead of guessing.
+- For insert_meaning_association, use only Word IDs that appear in the provided dictionary. Use 2-6 words and explicitly choose one or more of learn, easy, and hard modes.
+- Verify the requested item count and payload completeness before calling a block insertion tool. Do not claim a block was created unless the tool returns success.
+- For a quiz with multiple questions, preserve this exact order: question 1 paragraph, question 1 quiz block, question 2 paragraph, question 2 quiz block, and so on.
+- Never insert all question paragraphs first and all quiz blocks afterward. Never combine multiple questions into one quiz block when visible prompts are required; each quiz block must contain only that question's answer options and grading data.`;
 
 // ─── Tool Access Lists ────────────────────────────────────────────────────────
 

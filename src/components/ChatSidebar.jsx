@@ -50,6 +50,7 @@ import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import CloseIcon from "@mui/icons-material/Close";
 import UnitContext from "../context/unitContext";
 import serializeLexicalToSparseText from "../utils/serializeLexicalToSparseText";
+import getHeadingContext from "../utils/headingContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
 import AuthContext from "../context/authContext";
@@ -525,6 +526,7 @@ const ChatSidebar = ({ onClose }) => {
             id: unit.id,
             name: unit.name,
             description: unit.description,
+            headingContext: getHeadingContext(unit.data),
             // Sparse text with resolved word/question content and grade progress
             content: serializeLexicalToSparseText(unit.data, {
               words: wordMap,
@@ -2177,7 +2179,7 @@ const ChatSidebar = ({ onClose }) => {
                           data-role={message.role}
                           {...(message.role === "assistant"
                             ? { "data-tour": "ai-message" }
-                            : {})}
+                            : { "data-tour": "user-message" })}
                           sx={{
                             m: 0.75,
                             p: "0.75rem 1rem",

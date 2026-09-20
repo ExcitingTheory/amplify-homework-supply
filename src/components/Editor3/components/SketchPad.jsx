@@ -7,11 +7,16 @@ import { Button, Box, Typography, Skeleton } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 
+let excalidrawModulePromise;
+const loadExcalidraw = () => {
+  if (!excalidrawModulePromise) {
+    excalidrawModulePromise = import("@excalidraw/excalidraw");
+  }
+  return excalidrawModulePromise;
+};
+
 const LazyExcalidraw = lazy(() =>
-  import("@excalidraw/excalidraw").then((mod) => ({ default: mod.Excalidraw })),
-);
-const exportToCanvasPromise = import("@excalidraw/excalidraw").then(
-  (mod) => mod.exportToCanvas,
+  loadExcalidraw().then((mod) => ({ default: mod.Excalidraw })),
 );
 // TODO Add a version to the data so that we can update the data when the version is higher than the current working copy, which should be one above the last saved version
 
@@ -31,6 +36,27 @@ const SketchPad = ({
   const [countdown, setCountdown] = useState(null);
   const [pendingSubmission, setPendingSubmission] = useState(null);
   const countdownTimer = useRef(null);
+  const drawingPanelRef = useRef(null);
+
+  useEffect(() => {
+    const panel = drawingPanelRef.current;
+    if (!panel || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadExcalidraw().catch((error) => {
+            console.warn("Unable to preload drawing editor:", error);
+          });
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "240px" },
+    );
+
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, []);
 
   const { grade } = useContext(UnitContext);
 
@@ -61,7 +87,7 @@ const SketchPad = ({
     console.log("elements", elements);
     console.log("appState", appState);
 
-    const exportToCanvas = await exportToCanvasPromise;
+    const { exportToCanvas } = await loadExcalidraw();
     const canvas = exportToCanvas({
       elements,
       appState,
@@ -155,6 +181,28 @@ const SketchPad = ({
     setImageData(null); // Clear the image so user can draw again
   };
 
+  const submitCurrentDrawing = async () => {
+    const elements = excalidrawRef.current.elements;
+    const appState = excalidrawRef.current.state;
+    const files = excalidrawAPI?.getFiles();
+    if (!elements || elements.length === 0) return;
+
+    const { exportToCanvas } = await loadExcalidraw();
+    const canvas = await exportToCanvas({ elements, appState, files });
+    const dataUrl = await canvas.toDataURL("image/png");
+    const justBase64 = dataUrl.split(",")[1];
+
+    if (countdownTimer.current) {
+      clearInterval(countdownTimer.current);
+      countdownTimer.current = null;
+    }
+    setCountdown(null);
+    setPendingSubmission(null);
+    setImageData(justBase64);
+    await submitDrawing(justBase64, elements, appState);
+    setIsHovering(false);
+  };
+
   const startSubmissionCountdown = (justBase64, elements, appState) => {
     setPendingSubmission({ justBase64, elements, appState });
     setCountdown(10);
@@ -214,7 +262,25 @@ const SketchPad = ({
   // render canvas when not hovering, excalidraw when hovering
   if (!isHovering) {
     return (
-      <Box sx={{ m: 2, position: "relative" }}>
+      <Box
+        ref={drawingPanelRef}
+        sx={{
+          m: 2,
+          position: "relative",
+          width: "100%",
+          maxWidth: 640,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          bgcolor: "background.paper",
+          overflow: "hidden",
+        }}
+        onMouseEnter={() => {
+          loadExcalidraw().catch((error) => {
+            console.warn("Unable to preload drawing editor:", error);
+          });
+        }}
+      >
         <div
           onMouseEnter={() => {
             if (imageData) {
@@ -223,17 +289,18 @@ const SketchPad = ({
             setIsHovering(true);
           }}
           style={{
-            height: "400px",
-            width: "600px",
+            height: "240px",
+            width: "100%",
             border: "2px dashed #ccc",
             borderRadius: "4px",
+            border: "2px solid #ccc", // Restore the outer panel border in active drawing mode
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
             backgroundColor: "#f9f9f9",
-            minHeight: "400px",
-            minWidth: "600px",
+            minHeight: "240px",
+            maxWidth: "100%",
           }}
         >
           {imageData ? (
@@ -249,41 +316,71 @@ const SketchPad = ({
           )}
         </div>
 
-        {countdown !== null && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 16,
-              right: 16,
-              p: 2,
-              bgcolor: "rgba(255, 243, 205, 0.95)",
-              borderRadius: 1,
-              border: "1px solid #ffc107",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              zIndex: 1000,
-              minWidth: "200px",
-            }}
-          >
-            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-              {t("sketchPad.submittingInSeconds", { countdown })}
-            </Typography>
-            <Button
-              variant="contained"
-              color="warning"
-              size="small"
-              onClick={handleCancelSubmission}
-              sx={{ width: "100%" }}
-            >
-              {t("sketchPad.cancelSubmission")}
-            </Button>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            p: 1.5,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: "action.hover",
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {countdown !== null ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  onClick={handleCancelSubmission}
+                >
+                  {`${t("sketchPad.cancelSubmission")} ${countdown}`}
+                </Button>
+              </Box>
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                Drawing ready to submit.
+              </Typography>
+            )}
           </Box>
-        )}
+          <Button
+            variant="contained"
+            size="small"
+            onClick={submitCurrentDrawing}
+            disabled={!excalidrawRef.current.elements?.length}
+          >
+            Submit
+          </Button>
+        </Box>
       </Box>
     );
   } else {
     return (
-      <Box sx={{ m: 2, position: "relative" }}>
-        <div
+      <Box
+        ref={drawingPanelRef}
+        sx={{
+          m: 2,
+          position: "relative",
+          width: "100%",
+          maxWidth: 640,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          bgcolor: "background.paper",
+          overflow: "hidden",
+        }}
+      >
+        <Box
           onMouseLeave={async () => {
             const elements = excalidrawRef.current.elements;
             const appState = excalidrawRef.current.state;
@@ -295,7 +392,7 @@ const SketchPad = ({
               return;
             }
 
-            const exportToCanvas = await exportToCanvasPromise;
+            const { exportToCanvas } = await loadExcalidraw();
             const canvas = await exportToCanvas({
               elements,
               appState,
@@ -310,13 +407,22 @@ const SketchPad = ({
             // Start 10-second countdown before submitting
             startSubmissionCountdown(justBase64, elements, appState);
           }}
-          style={{
-            height: "400px",
-            width: "600px",
-            border: "3px solid #2196f3",
-            borderRadius: "4px",
-            boxShadow: "0 0 10px rgba(33, 150, 243, 0.5)",
+          sx={{
+            height: 240,
+            width: "100%",
             position: "relative",
+            p: 0.5,
+            boxSizing: "border-box",
+            border: "2px dashed white",
+            borderRadius: 1,
+            transition: "border-color 180ms ease",
+            "& .App-menu_top, & .App-menu_bottom, & .App-toolbar, & .FixedSideContainer, & .Island, & .Sidebar, & .HelpDialog":
+              {
+                display: "none !important",
+              },
+            "& .excalidraw": {
+              "--ui-font-family": "inherit",
+            },
           }}
         >
           <Suspense
@@ -359,6 +465,8 @@ const SketchPad = ({
                   theme: false,
                   saveAsImage: false,
                 },
+                dockedSidebarBreakpoint: Infinity,
+                welcomeScreen: false,
                 tools: {
                   image: false,
                   text: false,
@@ -371,16 +479,61 @@ const SketchPad = ({
                   selection: false,
                   eraser: true,
                 },
-                dockedSidebarBreakpoint: 0,
-                welcomeScreen: false,
+                mainMenu: [],
               }}
               viewModeEnabled={false}
               theme={mode === "dark" ? "dark" : "light"}
-              zenModeEnabled={false}
+              zenModeEnabled={true}
               gridModeEnabled={false}
             ></LazyExcalidraw>
           </Suspense>
-        </div>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            p: 1.5,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: "action.hover",
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {countdown !== null ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  onClick={handleCancelSubmission}
+                >
+                  {`${t("sketchPad.cancelSubmission")} ${countdown}`}
+                </Button>
+              </Box>
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                Draw your answer, then submit when ready.
+              </Typography>
+            )}
+          </Box>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={submitCurrentDrawing}
+            disabled={!excalidrawRef.current.elements?.length}
+          >
+            Submit
+          </Button>
+        </Box>
       </Box>
     );
   }

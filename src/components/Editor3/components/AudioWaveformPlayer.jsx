@@ -91,6 +91,7 @@ export default function AudioWaveformPlayer({
   onRecordingComplete,
   audioFilters = [],
   cleanupStrength = "standard",
+  compact = false,
 }) {
   const t = useTranslations("editor.shared");
   const tEditor = useTranslations("editor");
@@ -1008,13 +1009,14 @@ export default function AudioWaveformPlayer({
         display: "flex",
         flexDirection: "column",
         gap: 1,
-        p: 2,
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
-        backgroundColor: "background.paper",
+        p: compact ? 0 : 2,
+        border: compact ? "none" : "1px solid",
+        borderColor: compact ? "transparent" : "divider",
+        borderRadius: compact ? 0 : 2,
+        backgroundColor: compact ? "transparent" : "background.paper",
         width: "100%",
-        maxWidth: "max-content",
+        maxWidth: "100%",
+        overflow: "hidden",
       }}
     >
       {/* Title */}
@@ -1025,13 +1027,21 @@ export default function AudioWaveformPlayer({
       )}
 
       {/* Waveform with progress overlay */}
-      <Box sx={{ position: "relative", borderRadius: 1, width: "100%" }}>
+      <Box
+        sx={{
+          position: "relative",
+          borderRadius: 1,
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
         {/* Show static waveform when not recording and we have data */}
         {!recording && (computedWaveformData || file) && !audioBlob && (
           <div
             style={{
               position: "relative",
-              width: `${width}px`,
+              width: "100%",
+              maxWidth: `${width}px`,
               height: `${height}px`,
             }}
           >
@@ -1078,7 +1088,8 @@ export default function AudioWaveformPlayer({
               backgroundColor: "var(--mui-palette-background-paper)",
               border: "1px solid var(--mui-palette-divider, #e0e0e0)",
               borderRadius: "4px",
-              width: `${width}px`,
+              width: "100%",
+              maxWidth: `${width}px`,
               height: `${height}px`,
               display: "block",
               boxSizing: "border-box",
@@ -1091,7 +1102,8 @@ export default function AudioWaveformPlayer({
           <div
             style={{
               position: "relative",
-              width: `${width}px`,
+              width: "100%",
+              maxWidth: `${width}px`,
               height: `${height}px`,
             }}
           >
@@ -1136,7 +1148,8 @@ export default function AudioWaveformPlayer({
               backgroundColor: "var(--mui-palette-background-paper)",
               border: "1px solid var(--mui-palette-divider, #e0e0e0)",
               borderRadius: "4px",
-              width: `${width}px`,
+              width: "100%",
+              maxWidth: `${width}px`,
               height: `${height}px`,
               display: "block",
               boxSizing: "border-box",
@@ -1150,8 +1163,14 @@ export default function AudioWaveformPlayer({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
+          gap: 1,
+          flexWrap: "wrap",
           minHeight: 40,
+          justifyContent: "space-between",
+          "& .MuiIconButton-root": {
+            minWidth: 36,
+            minHeight: 36,
+          },
         }}
       >
         {/* Left side: Record/Stop button OR Play/Pause button */}

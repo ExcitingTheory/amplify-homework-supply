@@ -31,6 +31,31 @@ Profile (public), Instructor Grade, Admin Analytics, Admin Moderation, Offline.
 These repeat across pages and are what most hold the UI back. Fixing these a few
 times fixes dozens of screens.
 
+### ChatSidebar Story Coverage
+
+The ChatSidebar stories should model the workflows that instructors actually
+need from the dashboard, not only successful tool-call prose. Keep these as
+explicit fixture requirements:
+
+- **Create and verify records**: search existing units, sections, assignments,
+  vocabulary words, and questions; create only when needed; search again after
+  creation; display the created record in Search Results.
+- **Dashboard analytics**: show aggregate statistics, section analytics,
+  at-risk learners, roster progress, and flagged grade review as searchable or
+  dedicated tool results.
+- **Assignment management**: show a preflight lookup, assignment creation,
+  post-create lookup, due-date change, and confirmation of the resulting
+  assignment record.
+- **Interactive question creation**: fill-in-the-blank requests must produce a
+  custom-answer, answer, or quiz block with a prompt and grading data, never a
+  static `Answer:` paragraph.
+- **Tour behavior**: the tour story must render the actual ChatSidebar and
+  constrain every target and overlay step to that sidebar. A successful
+  `start_tour` message is not sufficient without a visible, actionable overlay.
+- **Removed interesting scenarios to restore**: analytics deep dives,
+  moderation triage (flag → review → resolve), bulk assignment operations,
+  record verification after creation, and conversation-player search results.
+
 ### 1. The card system wastes space and lacks a consistent identity
 - List cards (Sections, Units) have a large **empty vertical gap** between the
   title/metadata and the action buttons — content floats at top, buttons pinned

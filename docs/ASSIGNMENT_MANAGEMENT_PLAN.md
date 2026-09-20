@@ -8,6 +8,22 @@ Date: 2026-09-08
 - Enforce a start/stop availability window: a unit cannot be opened before its window starts. It can still be completed late after the window ends, but the instructor must decide whether to keep or drop the late submission.
 - Allow assignments to optionally target a single student directly instead of the whole section.
 
+## Chat Assistant Integration
+
+Assignment-management stories and the instructor assistant should use the same
+observable workflow as the UI:
+
+1. Search for the requested unit, section, or assignment.
+2. Create or update only after resolving the target record and confirming any
+  required inputs.
+3. Search again using the returned record ID or exact name.
+4. Render the resulting unit, section, or assignment in Search Results.
+
+Planned Sage tools include `get_section_analytics`, `get_at_risk_students`,
+`list_section_students`, `update_assignment_due_date`, and
+`export_section_grades`. Assignment stories should include these records in
+mock data before the tools are implemented so the intended UX is testable.
+
 ## Decisions
 
 - **Direct-to-student assignments require both `sectionID` and `studentID`.** `sectionID` is always required and identifies which class context the assignment belongs to (grading, gamification, dynamic-group authorization). `studentID` is optional; when set, the assignment targets only that learner within the given section. A student enrolled in multiple sections with the same teacher is disambiguated by `sectionID`.

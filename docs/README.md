@@ -7,6 +7,14 @@ Elearning platform built with Next.js 16, AWS Amplify Gen 2, and OpenAI.
 1. **[Quick Start Guide](QUICK_START.md)** — Essential links and communication channels
 2. **[Onboarding Guide](ONBOARDING.md)** — Complete developer setup walkthrough
 3. **[Storybook Onboarding](STORYBOOK_ONBOARDING.md)** — Adding components to Storybook
+4. **[Project Roadmap](ROADMAP.md)** — Current testing phase, component status, priorities, and contributor tasks
+
+## Active Planning
+
+- **[Project Roadmap](ROADMAP.md)** — Release priorities and project-level status
+- **[AI Feedback Coverage](AI_FEEDBACK_COVERAGE_PLAN.md)** — Feedback on every user-visible AI result
+- **[Lexical Additional Blocks](LEXICAL_ADDITIONAL_BLOCKS_PLAN.md)** — Proposed blocks, editor actions, and compatibility requirements
+- **[Phoenix Agent Evaluations](PHOENIX_EVALS.md)** — Local-first tracing, cloud monitoring, and evaluation setup
 
 ## Architecture & Reference
 

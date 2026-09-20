@@ -19,6 +19,8 @@ export interface SpotlightStep {
   id: string;
   /** CSS selector for the element to highlight */
   targetSelector?: string;
+  /** Match index to highlight: 0-based, or -1 for the last match */
+  targetIndex?: number;
   /** Which frame to search for the target element: 'preview' (default) or 'manager' */
   targetFrame?: "preview" | "manager";
   /** Manual position if no target selector */
@@ -61,6 +63,17 @@ export interface SpotlightOverlayProps {
   isNavigating?: boolean;
   /** Mode: tutorial (show steps) or quiz (minimal guidance) */
   mode?: "tutorial" | "quiz";
+}
+
+function selectTarget(
+  doc: Document,
+  selector: string,
+  targetIndex?: number,
+): Element | null {
+  const targets = doc.querySelectorAll(selector);
+  if (targets.length === 0) return null;
+  const index = targetIndex === -1 ? targets.length - 1 : (targetIndex ?? 0);
+  return targets[index] || null;
 }
 
 /**
@@ -209,12 +222,20 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         if (currentStep.targetFrame === "manager") {
           // Search in the manager (parent) document
           targetDoc = document;
-          targetElement = document.querySelector(currentStep.targetSelector);
+          targetElement = selectTarget(
+            document,
+            currentStep.targetSelector,
+            currentStep.targetIndex,
+          );
           isManagerFrame = true;
         } else {
           // Default: search in the preview iframe
           targetDoc = iframe?.contentDocument || document;
-          targetElement = targetDoc.querySelector(currentStep.targetSelector);
+          targetElement = selectTarget(
+            targetDoc,
+            currentStep.targetSelector,
+            currentStep.targetIndex,
+          );
           isManagerFrame = !iframe?.contentDocument;
         }
       } catch (e) {
@@ -226,11 +247,19 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         );
         try {
           if (currentStep.targetFrame === "manager") {
-            targetElement = document.querySelector(firstSelector);
+            targetElement = selectTarget(
+              document,
+              firstSelector,
+              currentStep.targetIndex,
+            );
             isManagerFrame = true;
           } else {
             const doc = iframe?.contentDocument || document;
-            targetElement = doc.querySelector(firstSelector);
+            targetElement = selectTarget(
+              doc,
+              firstSelector,
+              currentStep.targetIndex,
+            );
             isManagerFrame = !iframe?.contentDocument;
           }
         } catch {

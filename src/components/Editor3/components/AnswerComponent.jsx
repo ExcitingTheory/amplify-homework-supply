@@ -234,12 +234,6 @@ export function AnswerView({
         graded={graded}
         sx={{ my: 2 }}
       >
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {thisPrompt}
-          </Typography>
-        </Box>
-
         <ExerciseProgressMeters
           percentComplete={percentComplete}
           accuracy={accuracy}
@@ -248,34 +242,13 @@ export function AnswerView({
           accuracyDescription="Percentage of submitted answers marked correct."
         />
 
-        <ToggleButtonGroup
-          exclusive
-          value={currentInputMethod}
-          onChange={handleInputChange}
-          aria-label={t("answerComponent.inputMethodSelector")}
+        <Typography
+          variant="subtitle1"
+          component="p"
+          sx={{ mt: 1, mb: 1.5, fontWeight: 700, color: "text.primary" }}
         >
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("text")}
-            value="text"
-            aria-label={t("answerComponent.inputMethods.text")}
-          >
-            {t("answerComponent.inputMethods.text")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("audio")}
-            value="audio"
-            aria-label={t("answerComponent.inputMethods.audio")}
-          >
-            {t("answerComponent.inputMethods.audio")}
-          </ToggleButton>
-          <ToggleButton
-            disabled={!allowedInputMethods.includes("writing")}
-            value="writing"
-            aria-label={t("answerComponent.inputMethods.writing")}
-          >
-            {t("answerComponent.inputMethods.writing")}
-          </ToggleButton>
-        </ToggleButtonGroup>
+          {thisPrompt}
+        </Typography>
 
         {!requestDefinition &&
           ByDefinitionWordList(
@@ -308,6 +281,60 @@ export function AnswerView({
             saveGrade,
             sharedHistoryState.current,
           )}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            mt: 1.5,
+            pt: 1.5,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <ToggleButtonGroup
+            exclusive
+            value={currentInputMethod}
+            onChange={handleInputChange}
+            aria-label={t("answerComponent.inputMethodSelector")}
+            size="small"
+            sx={{
+              maxWidth: 360,
+              "& .MuiToggleButton-root": {
+                minHeight: 36,
+                px: 1.5,
+                textTransform: "none",
+                borderColor: "divider",
+                "&.Mui-selected": {
+                  fontWeight: 700,
+                  color: "secondary.main",
+                  bgcolor: "action.selected",
+                },
+              },
+            }}
+          >
+            <ToggleButton
+              disabled={!allowedInputMethods.includes("text")}
+              value="text"
+              aria-label={t("answerComponent.inputMethods.text")}
+            >
+              Type answer
+            </ToggleButton>
+            <ToggleButton
+              disabled={!allowedInputMethods.includes("audio")}
+              value="audio"
+              aria-label={t("answerComponent.inputMethods.audio")}
+            >
+              Speak answer
+            </ToggleButton>
+            <ToggleButton
+              disabled={!allowedInputMethods.includes("writing")}
+              value="writing"
+              aria-label={t("answerComponent.inputMethods.writing")}
+            >
+              Draw answer
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </ExerciseBlockCard>
     </div>
   );
@@ -370,7 +397,25 @@ function ByWordList(
   }
 
   return (
-    <ol>
+    <Box
+      component="ol"
+      sx={{
+        m: 0,
+        pl: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        "& > li": {
+          pl: 1,
+          pr: 1,
+          py: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          bgcolor: "background.paper",
+        },
+      }}
+    >
       {currentInputMethod === "text" &&
         wordIDs.map((wordId, key) => {
           const isCorrect = feedback[key]?.answer;
@@ -383,6 +428,13 @@ function ByWordList(
 
           return (
             <li key={`${wordId}-${key}`}>
+              <Typography
+                variant="subtitle1"
+                component="h3"
+                sx={{ fontWeight: 700, mb: 1 }}
+              >
+                {dictionary[wordId]?.phrase}
+              </Typography>
               {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
@@ -536,47 +588,70 @@ function ByWordList(
                 </Box>
               )}
 
-              <AudioAutoSubmitWrapper>
-                {({ wrapOnRecordingComplete }) => (
-                  <AudioWaveformPlayer
-                    enableRecording={true}
-                    gradeId={grade?.id}
-                    nodeKey={`${nodeKey}-${wordId}`}
-                    title={dictionary[wordId]?.phrase}
-                    onRecordingComplete={wrapOnRecordingComplete(
-                      async (audioFile, uploadResult) => {
-                        // Verify the recorded audio against expected word
-                        try {
-                          const audioUrl =
-                            audioFile?.path || uploadResult?.path;
-                          if (audioUrl) {
-                            const feedbackData = await transcribeAudio({
-                              audioUrl,
-                              expectedAnswer: dictionary[wordId]?.phrase,
-                            });
-                            if (feedbackData) {
-                              setFeedback((prev) => ({
-                                ...prev,
-                                [key]: feedbackData,
-                              }));
-                              // Broadcast to collaborators via Yjs
-                              workbook?.setFeedback?.(nodeKey, {
-                                text: feedbackData?.reason || "",
-                                timestamp: Date.now(),
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 560,
+                  p: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  bgcolor: "background.paper",
+                  overflow: "hidden",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Record your answer
+                </Typography>
+                <AudioAutoSubmitWrapper>
+                  {({ wrapOnRecordingComplete }) => (
+                    <AudioWaveformPlayer
+                      width={480}
+                      height={64}
+                      compact
+                      enableRecording={true}
+                      gradeId={grade?.id}
+                      nodeKey={`${nodeKey}-${wordId}`}
+                      title={dictionary[wordId]?.phrase}
+                      onRecordingComplete={wrapOnRecordingComplete(
+                        async (audioFile, uploadResult) => {
+                          // Verify the recorded audio against expected word
+                          try {
+                            const audioUrl =
+                              audioFile?.path || uploadResult?.path;
+                            if (audioUrl) {
+                              const feedbackData = await transcribeAudio({
+                                audioUrl,
+                                expectedAnswer: dictionary[wordId]?.phrase,
                               });
+                              if (feedbackData) {
+                                setFeedback((prev) => ({
+                                  ...prev,
+                                  [key]: feedbackData,
+                                }));
+                                // Broadcast to collaborators via Yjs
+                                workbook?.setFeedback?.(nodeKey, {
+                                  text: feedbackData?.reason || "",
+                                  timestamp: Date.now(),
+                                });
+                              }
                             }
+                          } catch (err) {
+                            console.error(
+                              "[AnswerComponent] Audio verification error:",
+                              err,
+                            );
                           }
-                        } catch (err) {
-                          console.error(
-                            "[AnswerComponent] Audio verification error:",
-                            err,
-                          );
-                        }
-                      },
-                    )}
-                  />
-                )}
-              </AudioAutoSubmitWrapper>
+                        },
+                      )}
+                    />
+                  )}
+                </AudioAutoSubmitWrapper>
+              </Box>
             </li>
           );
         })}
@@ -673,7 +748,7 @@ function ByWordList(
             </li>
           );
         })}
-    </ol>
+    </Box>
   );
 }
 
@@ -701,7 +776,25 @@ function ByDefinitionWordList(
   }
 
   return (
-    <ol>
+    <Box
+      component="ol"
+      sx={{
+        m: 0,
+        pl: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        "& > li": {
+          pl: 1,
+          pr: 1,
+          py: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          bgcolor: "background.paper",
+        },
+      }}
+    >
       {currentInputMethod === "text" &&
         wordIDs.map((wordId, key) => {
           const isCorrect = feedback[key]?.answer;
@@ -714,6 +807,13 @@ function ByDefinitionWordList(
 
           return (
             <li key={`${wordId}-${key}`}>
+              <Typography
+                variant="subtitle1"
+                component="h3"
+                sx={{ fontWeight: 700, mb: 1 }}
+              >
+                {dictionary[wordId]?.phrase}
+              </Typography>
               {/* Prompt display */}
               {currentPromptMethod === "text" && (
                 <Typography
@@ -870,42 +970,65 @@ function ByDefinitionWordList(
                 </Box>
               )}
 
-              <AudioAutoSubmitWrapper>
-                {({ wrapOnRecordingComplete }) => (
-                  <AudioWaveformPlayer
-                    enableRecording={true}
-                    gradeId={grade?.id}
-                    nodeKey={`${nodeKey}-${wordId}`}
-                    title={dictionary[wordId]?.definition}
-                    onRecordingComplete={wrapOnRecordingComplete(
-                      async (audioFile, uploadResult) => {
-                        // Verify the recorded audio against expected word
-                        try {
-                          const audioUrl =
-                            audioFile?.path || uploadResult?.path;
-                          if (audioUrl) {
-                            const feedbackData = await transcribeAudio({
-                              audioUrl,
-                              expectedAnswer: dictionary[wordId]?.phrase,
-                            });
-                            if (feedbackData) {
-                              setFeedback((prev) => ({
-                                ...prev,
-                                [key]: feedbackData,
-                              }));
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 560,
+                  p: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  bgcolor: "background.paper",
+                  overflow: "hidden",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Record your answer
+                </Typography>
+                <AudioAutoSubmitWrapper>
+                  {({ wrapOnRecordingComplete }) => (
+                    <AudioWaveformPlayer
+                      width={480}
+                      height={64}
+                      compact
+                      enableRecording={true}
+                      gradeId={grade?.id}
+                      nodeKey={`${nodeKey}-${wordId}`}
+                      title={dictionary[wordId]?.definition}
+                      onRecordingComplete={wrapOnRecordingComplete(
+                        async (audioFile, uploadResult) => {
+                          // Verify the recorded audio against expected word
+                          try {
+                            const audioUrl =
+                              audioFile?.path || uploadResult?.path;
+                            if (audioUrl) {
+                              const feedbackData = await transcribeAudio({
+                                audioUrl,
+                                expectedAnswer: dictionary[wordId]?.phrase,
+                              });
+                              if (feedbackData) {
+                                setFeedback((prev) => ({
+                                  ...prev,
+                                  [key]: feedbackData,
+                                }));
+                              }
                             }
+                          } catch (err) {
+                            console.error(
+                              "[AnswerComponent] Audio verification error:",
+                              err,
+                            );
                           }
-                        } catch (err) {
-                          console.error(
-                            "[AnswerComponent] Audio verification error:",
-                            err,
-                          );
-                        }
-                      },
-                    )}
-                  />
-                )}
-              </AudioAutoSubmitWrapper>
+                        },
+                      )}
+                    />
+                  )}
+                </AudioAutoSubmitWrapper>
+              </Box>
             </li>
           );
         })}
@@ -997,6 +1120,6 @@ function ByDefinitionWordList(
             </li>
           );
         })}
-    </ol>
+    </Box>
   );
 }

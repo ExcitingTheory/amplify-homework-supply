@@ -46,18 +46,27 @@ Homework Supply is a web application for interactive Japanese language learning 
 
 ### Software Requirements
 
-- **Node.js** (v16 or later) - [Download here](https://nodejs.org/)
+- **Node.js** (v20.9 or later, required by the installed Next.js version) - [Download here](https://nodejs.org/)
 - **Git** - [Download here](https://git-scm.com/)
+
+#### Optional Software
+
 - **VS Code** (recommended) - [Download here](https://code.visualstudio.com/)
-- **AWS CLI** - [Installation guide](https://aws.amazon.com/cli/)
+- **AWS CLI** - [Installation guide](https://aws.amazon.com/cli/) if you need to interact with AWS services
 
 ### Accounts Needed
 
 - GitHub account (for code access)
-- AWS account access (will be provided)
 - OpenAI API access (for AI features)
 
+#### Optional Accounts
+
+- AWS account (if you need to interact with AWS services)
+
+
 ## 🔧 Development Environment Setup
+
+The development environment setup involves cloning the repository, installing dependencies, and configuring the necessary tools for local development.
 
 ### 1. Clone the Repository
 
@@ -72,12 +81,6 @@ cd amplify-homework-supply
 npm install
 ```
 
-### 3. Install Amplify CLI
-
-```bash
-npm install -g @aws-amplify/cli
-```
-
 ## ☁️ AWS Setup
 
 ### 1. AWS SSO Login
@@ -85,12 +88,12 @@ npm install -g @aws-amplify/cli
 You'll need to log into AWS SSO using a specific URL that will be provided to you:
 
 ```bash
-# The URL will be filled in by your supervisor
+# The URL will be filled in by a maintainer with access
 # Example: https://your-organization.awsapps.com/start
 # Open this URL in your browser and follow the SSO login process
 ```
 
-**Note**: Your supervisor will provide you with:
+**Note**: a maintainer with access will provide you with:
 
 - The specific AWS SSO URL for our organization
 - Your temporary credentials or login instructions
@@ -102,7 +105,7 @@ After SSO login, configure your local AWS CLI:
 
 ```bash
 aws configure sso
-# Follow the prompts with information provided by your supervisor
+# Follow the prompts with information provided by a maintainer with access
 ```
 
 ### 3. Initialize Amplify
@@ -341,8 +344,12 @@ Check [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/
 1. **Complete setup** following this guide
 2. **Review the codebase** - Start with `app/[locale]/page.jsx` (home page)
 3. **Read the docs** - [docs/README.md](./README.md) for architecture overview
-4. **Pick up first issue** - Look for "good first issue" labels
-5. **Join team meetings** - Get familiar with current priorities
+4. **Review the Roadmap** - Understand the project's future plans
+5. **Check GitHub Issues** - Look for existing discussions and solutions
+6. **Look at the Storybook** - Review UI components and their usage
+7. **Pick up first issue** - Look for "good first issue" labels
+8. **Join team meetings** - Get familiar with current priorities
+9. **Chat with us on Discord** - Join the team server for real-time communication
 
 ## 📄 Additional Documentation
 
@@ -350,5 +357,11 @@ Check [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/
 - [API Documentation](./API.md) - Backend API details
 - [Contributing Guidelines](../CONTRIBUTING.md) - Code standards
 - [Storybook Onboarding](./STORYBOOK_ONBOARDING.md) - Component development
+- [Features](./FEATURES.md) - Overview of project features
+- [Roadmap](./ROADMAP.md) - Future plans and priorities
+- [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues) - Track bugs and feature requests
+- [Discord Server](https://discord.com/invite/your-invite-link) - Real-time team communication
+- [Storybook](https://storybook.js.org/) - UI component explorer
+- Other stuff in the [docs](./) folder - Explore additional documentation as needed, tasks are marked as PLAN.md to indicate planned work.
 
-Welcome to the team!
+Welcome to the team! ~coerce~ ~blackmail~ Invite your friends to join too!

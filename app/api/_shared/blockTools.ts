@@ -10,9 +10,11 @@ import { z } from "zod";
 
 export const insert_heading = tool({
   description:
-    "Insert a heading block into the lesson. Use for section titles and subsection headers.",
+    "Insert a heading block into the lesson. Use the provided suggested heading level when available; preserve the existing hierarchy and do not skip levels without a clear reason.",
   inputSchema: z.object({
-    level: z.enum(["h1", "h2", "h3"]).describe("Heading level"),
+    level: z
+      .enum(["h1", "h2", "h3", "h4", "h5", "h6"])
+      .describe("Heading level"),
     text: z.string().describe("The heading text content"),
     reasoning: z
       .string()
@@ -100,12 +102,36 @@ export const insert_markdown = tool({
 
 export const insert_quiz = tool({
   description:
-    "Insert a quiz block with multiple-choice questions. Use Question IDs from the provided question bank.",
+    "Insert a quiz block with complete multiple-choice questions. Provide each question prompt, 2-5 answer options, and one correct answer that exactly matches an option. Do not provide question IDs or omit the answer data.",
   inputSchema: z.object({
-    questionIDs: z
-      .array(z.string())
+    questions: z
+      .array(
+        z
+          .object({
+            prompt: z.string().min(1),
+            options: z
+              .array(z.string().min(1))
+              .min(2)
+              .max(5)
+              .refine(
+                (options) => new Set(options).size === options.length,
+                "Answer options must be unique",
+              ),
+            correctAnswer: z.string().min(1),
+          })
+          .superRefine((question, context) => {
+            if (!question.options.includes(question.correctAnswer)) {
+              context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["correctAnswer"],
+                message: "correctAnswer must exactly match one answer option",
+              });
+            }
+          }),
+      )
+      .min(1)
       .describe(
-        "Question model IDs from the question bank to include in the quiz",
+        "Complete questions. correctAnswer must exactly match one option in the same question.",
       ),
     reasoning: z
       .string()
@@ -114,19 +140,36 @@ export const insert_quiz = tool({
       ),
   }),
   execute: async ({
-    questionIDs,
+    questions,
     reasoning,
   }: {
-    questionIDs: string[];
+    questions: Array<{
+      prompt: string;
+      options: string[];
+      correctAnswer: string;
+    }>;
     reasoning: string;
   }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "quiz",
-    blockData: { questionIDs },
-    preview: { questionCount: questionIDs.length, questionIDs },
+    blockData: questions.flatMap((question, questionIndex) =>
+      question.options.map((answer, optionIndex) => ({
+        id: `generated-q${questionIndex + 1}-a${optionIndex + 1}`,
+        answer,
+        question: question.prompt,
+        correct: answer === question.correctAnswer,
+      })),
+    ),
+    preview: {
+      questionCount: questions.length,
+      questions: questions.map(({ prompt }) => ({
+        prompt,
+        type: "multiple_choice",
+      })),
+    },
     reasoning,
-    message: `Quiz block with ${questionIDs.length} question(s)`,
+    message: `Quiz block with ${questions.length} question(s)`,
   }),
 });
 
@@ -212,29 +255,38 @@ export const insert_custom_answer = tool({
 
 export const insert_meaning_association = tool({
   description:
-    "Insert a meaning association (drag-and-drop matching) block. Use 2-6 Word IDs from the provided dictionary.",
+    "Insert a meaning association (drag-and-drop matching) block. Use 2-6 existing Word IDs from the provided dictionary and enable the requested learner modes.",
   inputSchema: z.object({
     wordIDs: z
       .array(z.string())
+      .min(2)
+      .max(6)
       .describe(
-        "Word model IDs from the dictionary for matching exercise (2-6 recommended)",
+        "Existing Word model IDs from the dictionary for the matching exercise (2-6)",
       ),
+    enabledModes: z
+      .array(z.enum(["learn", "easy", "hard"]))
+      .min(1)
+      .default(["learn", "easy", "hard"])
+      .describe("Learner modes to enable"),
     reasoning: z
       .string()
       .describe("Brief pedagogical explanation for this exercise"),
   }),
   execute: async ({
     wordIDs,
+    enabledModes,
     reasoning,
   }: {
     wordIDs: string[];
+    enabledModes: Array<"learn" | "easy" | "hard">;
     reasoning: string;
   }) => ({
     success: true,
     action: "insert_editor_block",
     blockType: "meaning-association",
-    blockData: { wordIDs },
-    preview: { wordCount: wordIDs.length, wordIDs },
+    blockData: { wordIDs, enabledModes },
+    preview: { wordCount: wordIDs.length, wordIDs, modes: enabledModes },
     reasoning,
     message: `Meaning association block for ${wordIDs.length} word(s)`,
   }),

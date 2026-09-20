@@ -115,6 +115,31 @@ SECURITY (SYSTEM LEVEL):
 | `review_ai_content` | Mark AI content as approved/rejected with notes | **Yes** |
 | `update_ai_model_config` | Change default AI model for platform operations | **Yes** |
 
+### 2.8 Instructor Dashboard Chat Gaps
+
+The instructor dashboard exposes useful operational data and actions that Sage
+cannot currently reach through a dedicated tool call. These should be added to
+the instructor-facing tool backlog rather than inferred from generic search
+results.
+
+| Priority | Proposed tool | Dashboard capability | Suggested contract |
+|----------|---------------|----------------------|--------------------|
+| P0 | `get_aggregate_stats` | Total students, active students, average accuracy, completion rate, and alerts | `{ sectionId?: string }` |
+| P0 | `get_section_analytics` | Section cards, completion, accuracy distribution, and leaderboard summary | `{ sectionId, includeLeaderboard?, includeAtRisk? }` |
+| P0 | `get_at_risk_students` | Students below an accuracy/completion threshold | `{ sectionId?: string, threshold?: number }` |
+| P0 | `list_section_students` | Roster and student progress summaries | `{ sectionId, sortBy?: string }` |
+| P1 | `get_grade` | Open a flagged submission or grade-review detail | `{ gradeId }` |
+| P1 | `update_grade_moderation_status` | Flag, clear, or resolve a review item | `{ gradeId, status, reason? }`, confirmation for destructive changes |
+| P1 | `update_assignment_due_date` | Reschedule an assignment from the management UI | `{ assignmentId, newDueDate, notifyStudents? }` |
+| P1 | `duplicate_section` | Copy a section and its configuration into a new class | `{ sourceSectionId, newName, newDescription? }`, confirmation required |
+| P1 | `get_draft_unit_issues` | Explain draft-content warnings shown on the dashboard | `{ unitId?: string }` |
+| P2 | `export_section_grades` | Export section analytics/grades for offline review | `{ sectionId, format: "csv" | "xlsx", includeDetails? }` |
+
+Each state-changing tool should follow the existing mock and production
+workflow contract: search or list the target first, preview the intended
+change, require confirmation where noted, execute, then search/list again and
+show the resulting record in the chat Search Results UI.
+
 ---
 
 ## 3. Settings Control & Impact

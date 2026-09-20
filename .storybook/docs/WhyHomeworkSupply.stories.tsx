@@ -1,5 +1,5 @@
 /**
- * Why Homework Supply - Value proposition and pain points solved
+ * Why It Exists - Value proposition and pain points solved
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
@@ -20,7 +20,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 const meta: Meta = {
-  title: '🏠 Getting Started/Why Homework Supply',
+  title: '🏠 Getting Started/Why It Exists',
   tags: ['!autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -83,21 +83,21 @@ const comparisons = [
   { feature: '6-Language i18n', us: true, lms: true, docs: false },
 ];
 
-export const WhyHomeworkSupply: Story = {
+export const WhyItExists: Story = {
   render: () => (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 8 }}>
       <Container maxWidth="md">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 2, textAlign: 'center' }}>
-          Why Homework Supply?
+          Why it exists
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 6, textAlign: 'center', maxWidth: 600, mx: 'auto' }}>
-          Built by an educator who was frustrated with existing tools.
-          Here's what makes it different.
+        <Typography variant="h6" color="text.secondary" sx={{ mb: 6, textAlign: 'center', maxWidth: 640, mx: 'auto' }}>
+          It was built for the real frustrations of teaching with static materials, fragmented tools,
+          and slow manual feedback loops.
         </Typography>
 
         {/* Pain points → Solutions */}
         <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
-          Problems We Solve
+          The workflow problems it addresses
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 8 }}>
           {painPoints.map((p, i) => (

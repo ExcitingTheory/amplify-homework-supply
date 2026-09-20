@@ -91,8 +91,45 @@ function buildBlockEditorState(blockType, blockData) {
     return blockData;
   }
 
-  const blockNode = blockNodeFromToolOutput(blockType, blockData);
-  const children = blockNode ? [blockNode, EMPTY_PARAGRAPH] : [EMPTY_PARAGRAPH];
+  const createPromptNode = (text) => ({
+    children: [
+      {
+        detail: 0,
+        format: 0,
+        mode: "normal",
+        style: "",
+        text,
+        type: "text",
+        version: 1,
+      },
+    ],
+    direction: "ltr",
+    format: "",
+    indent: 0,
+    type: "paragraph",
+    version: 1,
+  });
+
+  const children =
+    blockType === "quiz" && Array.isArray(blockData)
+      ? [
+          ...[
+            ...new Set(blockData.map((item) => item.question).filter(Boolean)),
+          ]
+            .map((question) => [
+              createPromptNode(question),
+              blockNodeFromToolOutput(
+                blockType,
+                blockData.filter((item) => item.question === question),
+              ),
+            ])
+            .flat(),
+          EMPTY_PARAGRAPH,
+        ]
+      : (() => {
+          const blockNode = blockNodeFromToolOutput(blockType, blockData);
+          return blockNode ? [blockNode, EMPTY_PARAGRAPH] : [EMPTY_PARAGRAPH];
+        })();
 
   return {
     root: {

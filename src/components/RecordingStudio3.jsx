@@ -670,11 +670,6 @@ export default forwardRef(function RecordingStudio3(
 
   // Delete take
   const handleDeleteTake = (dialogueId, takeIndex) => {
-    const confirmDeleteTake = () => {
-      if (!pendingDelete) return;
-      handleDeleteTake(pendingDelete.dialogueId, pendingDelete.takeIndex);
-      setPendingDelete(null);
-    };
     const dialogue = scriptData.dialogue.find((d) => d.id === dialogueId);
     if (!dialogue) return;
 
@@ -701,6 +696,12 @@ export default forwardRef(function RecordingStudio3(
       "TAKE_DELETED",
       { dialogueId, takeIndex, take: deletedTake },
     );
+  };
+
+  const confirmDeleteTake = () => {
+    if (!pendingDelete) return;
+    handleDeleteTake(pendingDelete.dialogueId, pendingDelete.takeIndex);
+    setPendingDelete(null);
   };
 
   // Rollback take to a previous version (restores audioPath without new S3 write)

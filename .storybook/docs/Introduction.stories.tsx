@@ -1,5 +1,5 @@
 /**
- * Introduction - What is Homework Supply?
+ * Overview - What is Homework Supply?
  * First page new users see explaining the platform at a high level.
  */
 import React from 'react';
@@ -18,7 +18,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import DevicesIcon from '@mui/icons-material/Devices';
 
 const meta: Meta = {
-  title: '🏠 Getting Started/Introduction',
+  title: '🏠 Getting Started/Overview',
   tags: ['!autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -38,7 +38,7 @@ function PillarCard({ icon, title, description }: { icon: React.ReactNode; title
   );
 }
 
-export const Introduction: Story = {
+export const Overview: Story = {
   render: () => (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 8 }}>
       <Container maxWidth="md">
@@ -48,24 +48,22 @@ export const Introduction: Story = {
             Homework Supply
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: 3, maxWidth: 600, mx: 'auto' }}>
-            An AI-powered e-learning platform where instructors create interactive lessons
-            and students learn with real-time feedback.
+            A learning workspace for creating, assigning, and completing interactive lessons
+            with AI support, collaborative feedback, and measurable progress.
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Chip label="Next.js" size="small" />
-            <Chip label="AWS Amplify" size="small" />
-            <Chip label="OpenAI" size="small" />
-            <Chip label="Real-time Collaboration" size="small" />
-            <Chip label="Peer Review" size="small" />
+            <Chip label="Units" size="small" />
+            <Chip label="Sections" size="small" />
+            <Chip label="Assignments" size="small" />
+            <Chip label="AI Feedback" size="small" />
             <Chip label="Practice Drills" size="small" />
-            <Chip label="Gamification" size="small" />
-            <Chip label="Offline Support" size="small" />
+            <Chip label="Real-time Collaboration" size="small" />
           </Box>
         </Box>
 
         {/* What it does */}
         <Typography variant="h4" sx={{ mb: 4, fontWeight: 600, textAlign: 'center' }}>
-          What does it do?
+          What it includes
         </Typography>
 
         <Grid container spacing={3} sx={{ mb: 8 }}>
@@ -102,29 +100,23 @@ export const Introduction: Story = {
         {/* How it works summary */}
         <Paper sx={{ p: 4, bgcolor: 'action.hover' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            How it works
+            How the workflow fits together
           </Typography>
           <Box component="ol" sx={{ pl: 3, '& li': { mb: 2 } }}>
             <li>
-              <Typography><strong>Instructors</strong> create Units (lessons) with rich content and graded blocks</Typography>
+              <Typography><strong>Instructors</strong> create lessons as Units and add interactive graded blocks, media, and vocabulary.</Typography>
             </li>
             <li>
-              <Typography><strong>Instructors</strong> organize students into Sections (classes) and create Assignments</Typography>
+              <Typography><strong>Sections</strong> organize students into classes, and Assignments publish those lessons to a group.</Typography>
             </li>
             <li>
-              <Typography><strong>Students</strong> join via code, open assignments, and complete graded activities</Typography>
+              <Typography><strong>Students</strong> open workbooks, complete the tasks, and receive immediate progress and feedback.</Typography>
             </li>
             <li>
-              <Typography><strong>AI</strong> assists both roles — generating content for instructors and providing feedback to students</Typography>
+              <Typography><strong>AI</strong> supports both sides of the workflow: drafting content, grading patterns, and guiding student practice.</Typography>
             </li>
             <li>
-              <Typography><strong>Practice Drills</strong> let students replay graded content as AI-generated variations for extra practice</Typography>
-            </li>
-            <li>
-              <Typography><strong>Peer Review</strong> enables students to give structured feedback on each other's work in collaborative rooms</Typography>
-            </li>
-            <li>
-              <Typography><strong>Gamification</strong> keeps students engaged with XP, badges, skill trees, boss battles, streaks, squads, and leaderboards</Typography>
+              <Typography><strong>Review loops</strong> like peer feedback, drills, and progression systems help students keep improving.</Typography>
             </li>
           </Box>
         </Paper>

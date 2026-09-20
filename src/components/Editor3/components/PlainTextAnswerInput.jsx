@@ -7,14 +7,14 @@
  * - Grace period countdown before submission (like SketchPad)
  * - Cancel button to abort pending submission
  */
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getRoot,
   $createParagraphNode,
@@ -22,10 +22,10 @@ import {
   BLUR_COMMAND,
   FOCUS_COMMAND,
   COMMAND_PRIORITY_LOW,
-} from 'lexical';
-import { Box, Button } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import SubmissionCountdown from './SubmissionCountdown';
+} from "lexical";
+import { Box, Button } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import SubmissionCountdown from "./SubmissionCountdown";
 
 /**
  * Plugin that fires onBlur with current text when the editor loses focus.
@@ -109,7 +109,7 @@ function SyncValuePlugin({ value }) {
         }
         root.append(paragraph);
       },
-      { tag: 'history-merge' },
+      { tag: "history-merge" },
     );
   }, [value, editor]);
 
@@ -117,14 +117,14 @@ function SyncValuePlugin({ value }) {
 }
 
 export default function PlainTextAnswerInput({
-  value = '',
+  value = "",
   onChange,
   onAutoSubmit,
   historyState,
-  placeholder = '',
-  ariaLabel = '',
-  borderStyle = '1px solid #ccc',
-  textColor = 'inherit',
+  placeholder = "",
+  ariaLabel = "",
+  borderStyle = "1px solid var(--mui-palette-divider)",
+  textColor = "inherit",
   gracePeriod = 10,
   idleTimeout = 3000,
   style = {},
@@ -159,7 +159,7 @@ export default function PlainTextAnswerInput({
 
     setCountdown(gracePeriod);
     countdownTimerRef.current = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(countdownTimerRef.current);
           countdownTimerRef.current = null;
@@ -246,10 +246,11 @@ export default function PlainTextAnswerInput({
   }, []);
 
   const initialConfig = {
-    namespace: `PlainTextAnswer-${wordId || questionId || 'field'}`,
+    namespace: `PlainTextAnswer-${wordId || questionId || "field"}`,
     theme: {},
     editable: !disabled,
-    onError: (error) => console.error('[PlainTextAnswerInput] Lexical error:', error),
+    onError: (error) =>
+      console.error("[PlainTextAnswerInput] Lexical error:", error),
     editorState: () => {
       const root = $getRoot();
       root.clear();
@@ -262,10 +263,18 @@ export default function PlainTextAnswerInput({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, flexBasis: '80%', maxWidth: '50rem' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        width: "100%",
+        maxWidth: "50rem",
+      }}
+    >
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: "relative" }}>
             <PlainTextPlugin
               ErrorBoundary={LexicalErrorBoundary}
               contentEditable={
@@ -276,19 +285,19 @@ export default function PlainTextAnswerInput({
                   aria-label={ariaLabel}
                   style={{
                     border: borderStyle,
-                    borderRadius: '12px',
-                    padding: '16px',
-                    fontSize: '16px',
-                    lineHeight: '1.5',
-                    fontFamily: 'inherit',
-                    resize: 'vertical',
+                    borderRadius: "8px",
+                    padding: "12px 14px",
+                    fontSize: "16px",
+                    lineHeight: "1.5",
+                    fontFamily: "inherit",
+                    resize: "vertical",
                     color: textColor,
-                    minHeight: '72px',
-                    overflow: 'auto',
-                    outline: 'none',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    backgroundColor: 'transparent',
+                    minHeight: "56px",
+                    overflow: "auto",
+                    outline: "none",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
                     ...style,
                   }}
                 />
@@ -297,14 +306,14 @@ export default function PlainTextAnswerInput({
                 placeholder ? (
                   <div
                     style={{
-                      position: 'absolute',
-                      top: '16px',
-                      left: '16px',
-                      color: 'inherit',
+                      position: "absolute",
+                      top: "16px",
+                      left: "16px",
+                      color: "inherit",
                       opacity: 0.5,
-                      pointerEvents: 'none',
-                      fontSize: '16px',
-                      lineHeight: '1.5',
+                      pointerEvents: "none",
+                      fontSize: "16px",
+                      lineHeight: "1.5",
                     }}
                   >
                     {placeholder}
@@ -326,7 +335,15 @@ export default function PlainTextAnswerInput({
         </LexicalComposer>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, pt: '8px', minWidth: 'fit-content' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          pt: 1,
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
+      >
         {countdown === null || countdown === undefined ? (
           <Button
             variant="contained"
@@ -334,11 +351,16 @@ export default function PlainTextAnswerInput({
             endIcon={<SendIcon />}
             onClick={handleManualSubmit}
             disabled={disabled}
+            sx={{ borderRadius: 2, minWidth: 92 }}
           >
             Submit
           </Button>
         ) : (
-          <SubmissionCountdown countdown={countdown} onCancel={cancelCountdown} onSubmitNow={handleManualSubmit} />
+          <SubmissionCountdown
+            countdown={countdown}
+            onCancel={cancelCountdown}
+            onSubmitNow={handleManualSubmit}
+          />
         )}
       </Box>
     </Box>

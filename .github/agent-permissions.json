@@ -49,6 +49,8 @@
           "src",
           ".github/agent-permissions.json",
           "src/**",
+          ".storybook/code/spotlight-configs.ts",
+          ".storybook/components/OnboardingPanel.tsx",
           "pages",
           "pages/**",
           "amplify",

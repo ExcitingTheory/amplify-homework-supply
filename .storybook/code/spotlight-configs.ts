@@ -6,6 +6,7 @@
  */
 
 import { SpotlightStep } from "../components/SpotlightOverlay";
+import { adaptTourSteps } from "../../src/tours/tourAdapters";
 
 export interface SpotlightConfig {
   /** Task ID this config applies to */
@@ -36,7 +37,7 @@ export function getSpotlightConfigForTask(
     return normalizeQuizSteps(taskId, steps);
   }
 
-  return steps;
+  return adaptTourSteps(steps, "storybook");
 }
 
 /**

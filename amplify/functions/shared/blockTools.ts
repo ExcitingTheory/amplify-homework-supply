@@ -15,9 +15,11 @@ import { z } from "zod";
 
 export const insert_heading = tool({
   description:
-    "Insert a heading block into the lesson. Use for section titles and subsection headers.",
+    "Insert a heading block into the lesson. Use the provided suggested heading level when available; preserve the existing hierarchy and do not skip levels without a clear reason.",
   inputSchema: z.object({
-    level: z.enum(["h1", "h2", "h3"]).describe("Heading level"),
+    level: z
+      .enum(["h1", "h2", "h3", "h4", "h5", "h6"])
+      .describe("Heading level"),
     text: z.string().describe("The heading text content"),
     reasoning: z
       .string()

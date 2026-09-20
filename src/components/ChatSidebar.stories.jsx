@@ -15,14 +15,13 @@
  */
 
 import React from "react";
-import { expect } from "storybook/test";
-import { within, waitFor } from "storybook/test";
-import { userEvent } from "storybook/test";
+import { expect, userEvent, within, waitFor } from "storybook/test";
 import ChatSidebar from "./ChatSidebar";
+import TourOverlay from "./TourOverlay";
+import { TourProvider } from "../context/tourContext";
 import { UnitProvider } from "../context/unitContext";
 import FilesContext from "../context/fileContext";
 import { TabProvider } from "../context/tabContext";
-import { DemoBanner } from "@storybook-components/DemoBanner";
 import {
   seedMockAssistantChats,
   seedMockWords,
@@ -93,20 +92,15 @@ Sage helps instructors build and improve content. Sage can generate quiz questio
     (Story) => (
       <div
         style={{
-          height: "600px",
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           position: "relative",
         }}
       >
-        <DemoBanner
-          title="💬 AI Chat Assistant"
-          description="Get help with content creation, translation, and teaching ideas"
-        />
         <div
           style={{
             flex: 1,
-            overflow: "hidden",
             position: "relative",
             minHeight: 0,
           }}
@@ -686,13 +680,16 @@ export const ContentCreation = {
                     success: true,
                     action: "insert_editor_block",
                     blockType: "meaning-association",
-                    blockData: [
-                      "word-ohayou",
-                      "word-konnichiwa",
-                      "word-konbanwa",
-                      "word-sayounara",
-                      "word-arigatou",
-                    ],
+                    blockData: {
+                      wordIDs: [
+                        "word-ohayou",
+                        "word-konnichiwa",
+                        "word-konbanwa",
+                        "word-sayounara",
+                        "word-arigatou",
+                      ],
+                      enabledModes: ["learn", "easy", "hard"],
+                    },
                     preview: {
                       wordCount: 5,
                       instructions:
@@ -1292,11 +1289,16 @@ export const AnswerBlockGenerator = {
                     success: true,
                     action: "insert_editor_block",
                     blockType: "answer",
-                    blockData: ["word-1", "word-2", "word-3"],
+                    blockData: {
+                      wordIDs: ["word-1", "word-2", "word-3"],
+                      requestDefinition: "translation",
+                      allowedInput: ["text", "audio", "image"],
+                      promptMethod: ["phrase"],
+                    },
                     preview: {
                       wordCount: 3,
-                      mode: "translate",
-                      inputMethods: ["text", "audio", "writing"],
+                      mode: "translation",
+                      inputMethods: ["text", "audio", "image"],
                     },
                     message: "Answer block ready to insert",
                   },
@@ -1458,7 +1460,10 @@ export const MeaningAssociationGenerator = {
                     success: true,
                     action: "insert_editor_block",
                     blockType: "meaning-association",
-                    blockData: ["word-1", "word-2", "word-3", "word-4"],
+                    blockData: {
+                      wordIDs: ["word-1", "word-2", "word-3", "word-4"],
+                      enabledModes: ["learn", "easy", "hard"],
+                    },
                     preview: {
                       wordCount: 4,
                       instructions:
@@ -1616,7 +1621,11 @@ export const CustomAnswerGenerator = {
                     success: true,
                     action: "insert_editor_block",
                     blockType: "custom-answer",
-                    blockData: ["q-1", "q-2"],
+                    blockData: {
+                      questionIDs: ["q-1", "q-2"],
+                      allowedInput: ["text"],
+                      promptMethod: ["audio"],
+                    },
                     preview: {
                       questionCount: 2,
                       prompt: "Listen to the audio and type what you hear",
@@ -2078,6 +2087,21 @@ export const ToolCallCreateUnit = {
               parts: [
                 { type: "text", text: "I'll create a new unit for you." },
                 {
+                  type: "tool-search_content",
+                  toolCallId: "call_create_preflight_455",
+                  state: "output-available",
+                  input: {
+                    query: "Katakana Basics",
+                    type: "unit",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Katakana Basics",
+                    results: [],
+                  },
+                },
+                {
                   type: "tool-create_unit",
                   toolCallId: "call_create_456",
                   state: "output-available",
@@ -2091,6 +2115,30 @@ export const ToolCallCreateUnit = {
                     unitId: "unit-new-123",
                     name: "Katakana Basics",
                     message: "Unit created successfully with 20 minute timer",
+                  },
+                },
+                {
+                  type: "tool-search_content",
+                  toolCallId: "call_create_search_455",
+                  state: "output-available",
+                  input: {
+                    query: "Katakana Basics unit",
+                    type: "unit",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Katakana Basics unit",
+                    results: [
+                      {
+                        type: "unit",
+                        id: "unit-new-123",
+                        similarity: 1,
+                        name: "Katakana Basics",
+                        description: "Introduction to katakana syllabary",
+                        published: false,
+                      },
+                    ],
                   },
                 },
               ],
@@ -2272,31 +2320,11 @@ export const ToolCallGenerateContent = {
                             version: 1,
                           },
                           {
-                            children: [
-                              {
-                                detail: 0,
-                                format: 1,
-                                mode: "normal",
-                                style: "",
-                                text: "Answer: ",
-                                type: "text",
-                                version: 1,
-                              },
-                              {
-                                detail: 0,
-                                format: 0,
-                                mode: "normal",
-                                style: "",
-                                text: "は (wa) - topic marker",
-                                type: "text",
-                                version: 1,
-                              },
-                            ],
-                            direction: "ltr",
-                            format: "",
-                            indent: 0,
-                            type: "paragraph",
+                            type: "custom-answer",
                             version: 1,
+                            wordIDs: ["q-particle-1"],
+                            promptMethod: "text",
+                            allowedInput: "text",
                           },
                           {
                             children: [
@@ -2336,31 +2364,11 @@ export const ToolCallGenerateContent = {
                             version: 1,
                           },
                           {
-                            children: [
-                              {
-                                detail: 0,
-                                format: 1,
-                                mode: "normal",
-                                style: "",
-                                text: "Answer: ",
-                                type: "text",
-                                version: 1,
-                              },
-                              {
-                                detail: 0,
-                                format: 0,
-                                mode: "normal",
-                                style: "",
-                                text: "を (wo) - object marker",
-                                type: "text",
-                                version: 1,
-                              },
-                            ],
-                            direction: "ltr",
-                            format: "",
-                            indent: 0,
-                            type: "paragraph",
+                            type: "custom-answer",
                             version: 1,
+                            wordIDs: ["q-particle-2"],
+                            promptMethod: "text",
+                            allowedInput: "text",
                           },
                         ],
                         direction: "ltr",
@@ -2482,6 +2490,30 @@ export const ToolCallMultiStep = {
                   text: "I'll create the section and assignment for you.",
                 },
                 {
+                  type: "tool-search_content",
+                  toolCallId: "call_multistep_search_000",
+                  state: "output-available",
+                  input: {
+                    query: "Hiragana unit and Japanese 101 sections",
+                    type: "all",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Hiragana unit and Japanese 101 sections",
+                    results: [
+                      {
+                        type: "unit",
+                        id: "unit-hiragana-456",
+                        similarity: 0.98,
+                        name: "Hiragana Basics",
+                        description: "Foundational hiragana reading practice",
+                        published: true,
+                      },
+                    ],
+                  },
+                },
+                {
                   type: "tool-create_section",
                   toolCallId: "call_sec_001",
                   state: "output-available",
@@ -2498,6 +2530,30 @@ export const ToolCallMultiStep = {
                     joinCode: "JP101-S26",
                   },
                 },
+                {
+                  type: "tool-search_content",
+                  toolCallId: "call_multistep_section_lookup_001",
+                  state: "output-available",
+                  input: {
+                    query: "Spring 2026 Japanese 101",
+                    type: "section",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Spring 2026 Japanese 101",
+                    results: [
+                      {
+                        type: "section",
+                        id: "section-abc-123",
+                        similarity: 1,
+                        name: "Spring 2026 Japanese 101",
+                        description: "Beginner Japanese language course",
+                        joinCode: "JP101-S26",
+                      },
+                    ],
+                  },
+                },
               ],
             },
             {
@@ -2507,6 +2563,21 @@ export const ToolCallMultiStep = {
                 {
                   type: "text",
                   text: "Section created. Now creating the assignment...",
+                },
+                {
+                  type: "tool-search_content",
+                  toolCallId: "call_multistep_assignment_preflight_001",
+                  state: "output-available",
+                  input: {
+                    query: "Hiragana assignment Spring 2026 Japanese 101",
+                    type: "assignment",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Hiragana assignment Spring 2026 Japanese 101",
+                    results: [],
+                  },
                 },
                 {
                   type: "tool-create_assignment",
@@ -2523,6 +2594,33 @@ export const ToolCallMultiStep = {
                     assignmentId: "assign-xyz-789",
                     message:
                       "Assignment created and learner group added to unit",
+                  },
+                },
+                {
+                  type: "tool-search_content",
+                  toolCallId: "call_multistep_assignment_lookup_001",
+                  state: "output-available",
+                  input: {
+                    query: "Hiragana Reading Practice",
+                    type: "assignment",
+                    limit: 5,
+                  },
+                  output: {
+                    success: true,
+                    query: "Hiragana Reading Practice",
+                    results: [
+                      {
+                        type: "assignment",
+                        id: "assign-xyz-789",
+                        similarity: 1,
+                        name: "Hiragana Reading Practice",
+                        unitId: "unit-hiragana-456",
+                        unitName: "Hiragana Basics",
+                        sectionId: "section-abc-123",
+                        sectionName: "Spring 2026 Japanese 101",
+                        dueDate: "2026-01-31T17:00:00.000Z",
+                      },
+                    ],
                   },
                 },
               ],
@@ -2708,11 +2806,23 @@ const seedComprehensiveVocabulary = () => {
       answer: "Immediately before beginning a meal.",
       owner: "mock-user",
     },
+    {
+      id: "q-particle-1",
+      prompt: "Fill in the blank: 私___学生です。(I am a student)",
+      answer: "は",
+      owner: "mock-user",
+    },
+    {
+      id: "q-particle-2",
+      prompt: "Fill in the blank: 本___読みます。(I read a book)",
+      answer: "を",
+      owner: "mock-user",
+    },
   ]);
 };
 
 export const PageUnitEditor = {
-  name: "📄 Page Mock / Unit Editor (All Blocks & Search)",
+  name: "💬 Chat Sidebar / Unit Editor Context",
   decorators: [
     (Story) => {
       seedComprehensiveVocabulary();
@@ -2736,10 +2846,13 @@ export const PageUnitEditor = {
     docs: {
       description: {
         story: `
-### 📝 Unit Editor Full Conversation Mock
+### 📝 Unit Editor Context in Chat Sidebar
 
-Demonstrates a complete multi-turn curriculum creation session in the Unit Editor page:
+This story renders the Chat Sidebar with Unit Editor context. It does not render the full Unit Editor page.
+
+The conversation demonstrates:
 - 🔍 **search_content**: Semantic vector search finding greetings, audio, and PDF guides.
+- 🔗 Search results link to related unit, section, assignment, and conversation-player file records.
 - 📖 **insert_content_block**: Formatted Lexical rich text lesson introduction explaining aisatsu etiquette.
 - 🔗 **insert_meaning_association**: 5-word matching block with Learn, Easy, and Hard difficulty modes.
 - ❓ **insert_quiz**: 3-question situational multiple-choice quiz with automatic grading.
@@ -2757,11 +2870,34 @@ Demonstrates a complete multi-turn curriculum creation session in the Unit Edito
 };
 
 export const PageDashboard = {
-  name: "📊 Page Mock / Dashboard (Tours & Performance)",
+  name: "💬 Chat Sidebar / Dashboard Context",
   decorators: [
     (Story) => {
-      seedMockAssistantChats([dashboardChatData]);
-      return <Story />;
+      seedMockAssistantChats([
+        {
+          ...dashboardChatData,
+          messages: dashboardChatData.messages.filter((message) =>
+            ["dash-msg-3", "dash-msg-4"].includes(message.id),
+          ),
+        },
+      ]);
+      return (
+        <TourProvider>
+          <div
+            data-tour="chat-sidebar-frame"
+            style={{
+              height: "100vh",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <Story />
+            <TourOverlay
+              containerSelector={'[data-tour="chat-sidebar-frame"]'}
+            />
+          </div>
+        </TourProvider>
+      );
     },
   ],
   play: async ({ canvasElement }) => {
@@ -2769,8 +2905,14 @@ export const PageDashboard = {
     await waitFor(
       () => {
         expect(canvasElement.textContent).toMatch(
-          /Japanese 101|accuracy|tour|Instructor/i,
+          /assignments tour|tour|assistant/i,
         );
+        expect(
+          canvas.getByRole("dialog", { name: /manage section assignments/i }),
+        ).toBeInTheDocument();
+        expect(
+          canvas.getByText(/Review the assistant conversation/i),
+        ).toBeInTheDocument();
       },
       { timeout: 10000 },
     );
@@ -2780,12 +2922,13 @@ export const PageDashboard = {
     docs: {
       description: {
         story: `
-### 📊 Dashboard Full Conversation Mock
+### 📊 Assignment Tour in Chat Sidebar
 
-Demonstrates AI assistant interaction on the Instructor Dashboard:
-- 📋 **list_sections**: Aggregates active section metrics, average accuracy, and pending submissions.
-- 🚀 **start_tour**: Launches the guided interactive walkthrough for assignment workflows.
-- 💡 **Executive Advice**: Generates prioritized daily tasks based on real student performance.
+This story renders only the Chat Sidebar and the real guided-tour overlay. It does not pretend to render the Instructor Dashboard.
+
+It demonstrates:
+- 🚀 **start_tour**: Starts the assignments tour through TourProvider.
+- 🎯 The overlay is constrained to real ChatSidebar controls and advances through the conversation, assistant response, input, and send button.
         `,
       },
     },
@@ -2798,7 +2941,7 @@ Demonstrates AI assistant interaction on the Instructor Dashboard:
 };
 
 export const PageSectionsManagement = {
-  name: "👥 Page Mock / Sections & Assignment Management",
+  name: "💬 Chat Sidebar / Sections Context",
   decorators: [
     (Story) => {
       seedMockAssistantChats([sectionsChatData]);
@@ -2821,9 +2964,9 @@ export const PageSectionsManagement = {
     docs: {
       description: {
         story: `
-### 👥 Sections & Course Management Mock
+### 👥 Sections & Course Management Conversation
 
-Demonstrates automated administrative workflows:
+This story renders the Chat Sidebar with section-management conversation data:
 - ➕ **create_section**: Creates new class section and generates student join codes.
 - 📅 **create_assignment**: Links units to sections with ISO due dates and notifications.
 - 📜 **list_sections**: Verifies active courses and assignment lineups.
@@ -2839,7 +2982,7 @@ Demonstrates automated administrative workflows:
 };
 
 export const PageWorkbookLearner = {
-  name: "🎓 Page Mock / Workbook (Student Tutor Kai)",
+  name: "💬 Chat Sidebar / Workbook Context",
   decorators: [
     (Story) => {
       seedMockAssistantChats([workbookChatData]);
@@ -2862,9 +3005,9 @@ export const PageWorkbookLearner = {
     docs: {
       description: {
         story: `
-### 🎓 Workbook / Student Tutor Mock
+### 🎓 Workbook / Student Tutor Conversation
 
-Demonstrates student interactions with the **Kai** AI persona:
+This story renders the Chat Sidebar with Workbook context; it does not render the full Workbook page. It demonstrates:
 - 💡 **Socratic Tutoring**: Guides students toward grammatical concepts (e.g. は vs が) without giving direct answers away.
 - 📈 **get_student_progress**: Checks live completion percentage and accuracy.
 - 🎯 **start_practice_drill**: Launches an adaptive 5-question review drill popup in the workbook.
@@ -2880,7 +3023,7 @@ Demonstrates student interactions with the **Kai** AI persona:
 };
 
 export const PageRecordingStudio = {
-  name: "🎙️ Page Mock / Recording Studio (Dialogue & Audio Scripts)",
+  name: "💬 Chat Sidebar / Recording Studio Context",
   decorators: [
     (Story) => {
       seedMockAssistantChats([recordingStudioChatData]);
@@ -2903,9 +3046,9 @@ export const PageRecordingStudio = {
     docs: {
       description: {
         story: `
-### 🎙️ Recording Studio 3 Full Conversation Mock
+### 🎙️ Recording Studio 3 Conversation
 
-Demonstrates audio production workflows:
+This story renders the Chat Sidebar with Recording Studio context:
 - 🗣️ **generate_recording_script (conversation preset)**: Generates multi-speaker dialogue tracks with Japanese text, romaji phonetics, and English translation cues.
 - 🔤 **generate_recording_script (word preset)**: Generates pronunciation tracks for dictionary vocabulary words.
 - 🎛️ **RecordingScriptPreview**: Live interactive preview with "Create Record" and "Open in Studio" actions.
@@ -2921,7 +3064,7 @@ Demonstrates audio production workflows:
 };
 
 export const PageDictionaryAndSearch = {
-  name: "📚 Page Mock / Dictionary & Semantic Search",
+  name: "💬 Chat Sidebar / Dictionary & Search Context",
   decorators: [
     (Story) => {
       seedComprehensiveVocabulary();
@@ -2945,9 +3088,9 @@ export const PageDictionaryAndSearch = {
     docs: {
       description: {
         story: `
-### 📚 Dictionary, Question Bank & Semantic Search Mock
+### 📚 Dictionary, Question Bank & Semantic Search Conversation
 
-Demonstrates content creation and discovery:
+This story renders the Chat Sidebar with dictionary and search context:
 - 📖 **create_vocabulary_word**: Adds words with phonetics, definitions, and unit associations.
 - ❓ **create_question**: Adds practice questions with prompt and answer fields.
 - 🔍 **search_content**: Executes semantic search across files, vocabulary words, and question banks.

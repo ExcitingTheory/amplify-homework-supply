@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 
 const meta: Meta = {
-  title: "🏠 Getting Started/For Developers",
+  title: "🏠 Getting Started/Developer Notes",
   tags: ["!autodocs"],
   parameters: {
     layout: "fullscreen",

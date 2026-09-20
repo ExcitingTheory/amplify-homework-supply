@@ -1,5 +1,5 @@
 /**
- * Core Concepts - Units, Sections, Grading, and AI
+ * How It Works - Units, Sections, Grading, and AI
  * Explains the fundamental ideas and how features connect.
  */
 import React from 'react';
@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 
 const meta: Meta = {
-  title: '🏠 Getting Started/Core Concepts',
+  title: '🏠 Getting Started/How It Works',
   tags: ['!autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -33,13 +33,13 @@ function ConceptSection({ title, children }: { title: string; children: React.Re
   );
 }
 
-export const UnitsAndLessons: Story = {
-  name: 'Units & Lessons',
+export const HowItWorks: Story = {
+  name: 'How It Works',
   render: () => (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 6 }}>
       <Container maxWidth="md">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}>
-          Core Concepts
+          How It Works
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 6, textAlign: 'center' }}>
           Understanding the building blocks of Homework Supply

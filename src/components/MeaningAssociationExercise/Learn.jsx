@@ -324,7 +324,13 @@ export const Learn = ({
   };
 
   const accuracyPercent = Math.round(
-    (dropAnswerVisibility.length / (inProgress?.learn?.attemptsCount || 1)) *
+    (verifiedAnswers.length /
+      (Object.values(attemptedAnswersRef.current).reduce(
+        (total, answers) => total + answers.length,
+        0,
+      ) ||
+        inProgress?.learn?.attemptsCount ||
+        1)) *
       100,
   );
 

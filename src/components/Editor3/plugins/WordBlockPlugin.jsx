@@ -431,7 +431,7 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
       {isSelected && (
         // Stop propagation so Lexical's key/click commands don't hijack typing.
         <Box
-          sx={{ p: 1, pb: 0 }}
+          sx={{ p: 1 }}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
@@ -442,22 +442,26 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
             onChange={handleWordChange}
             getOptionLabel={(option) => option?.phrase || ""}
             isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            autoHighlight
+            fullWidth
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Change word"
-                placeholder="Search vocabulary…"
+                autoFocus
+                placeholder="Select a vocabulary word…"
               />
             )}
           />
         </Box>
       )}
-      <WordBlockComponent
-        className={className}
-        format={format}
-        nodeKey={nodeKey}
-        wordID={wordID}
-      />
+      {!isSelected && (
+        <WordBlockComponent
+          className={className}
+          format={format}
+          nodeKey={nodeKey}
+          wordID={wordID}
+        />
+      )}
     </div>
   );
 });

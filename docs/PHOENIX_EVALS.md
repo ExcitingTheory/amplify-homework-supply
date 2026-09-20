@@ -2,6 +2,53 @@
 
 Automated evaluation framework for testing the Kai/Sage AI agents using [Arize Phoenix](https://phoenix.arize.com).
 
+## Start with Open-Source Phoenix
+
+Validate tracing and evaluations against the open-source project before connecting
+shared or production data to Phoenix Cloud. This keeps setup reproducible and gives
+the team a place to verify redaction, project names, span attributes, and failure
+behavior without exporting application data.
+
+Official resources:
+
+- [Phoenix open-source repository and releases](https://github.com/Arize-ai/phoenix)
+- [Phoenix installation and deployment documentation](https://arize.com/docs/phoenix/self-hosting)
+- [Phoenix Cloud portal](https://app.phoenix.arize.com/)
+- [TypeScript tracing quickstart](https://arize.com/docs/phoenix/get-started/ts-get-started-tracing)
+- [Phoenix TypeScript API](https://arize.com/docs/phoenix/resources/typescript-api)
+
+Local setup options:
+
+```bash
+# Python package
+pip install arize-phoenix
+phoenix serve
+
+# Or Docker
+docker run --rm -p 6006:6006 -p 4317:4317 arizephoenix/phoenix:latest
+```
+
+Open `http://localhost:6006`, create a dedicated development project, and send a
+single redaction-safe test trace before running an evaluation dataset. For Phoenix
+Cloud, create a separate project in the portal, obtain its endpoint and API key from
+project settings, and store the key in the repository's approved secret manager.
+Never commit it or expose it through a `NEXT_PUBLIC_*` variable.
+
+The application currently initializes tracing in `instrumentation.ts` and adds manual
+tool spans in `app/api/_shared/agentTools.ts`. Treat monitoring as workable only after
+the following are verified in both local and cloud environments:
+
+- OpenAI calls and manual tool spans appear under the intended environment project.
+- Collector URL handling adds `/v1/traces` exactly once.
+- Authentication uses the header format issued by the selected Phoenix deployment.
+- Prompt, response, user, document, and tool attributes follow the approved redaction
+  and retention policy.
+- Failed exports do not break generation requests, and failures are themselves visible.
+- Dashboards or alerts cover generation errors, latency, token use, tool failures,
+  negative feedback rate, and evaluation regressions.
+- Feedback records correlate to traces through opaque IDs rather than copied secrets
+  or unnecessary personal data.
+
 ## Setup
 
 ### 1. No Extra Dependencies Required
@@ -9,7 +56,7 @@ Automated evaluation framework for testing the Kai/Sage AI agents using [Arize P
 The eval script uses Phoenix's REST API directly and OpenAI (already installed).
 No additional npm packages are needed.
 
-### 2. Start Phoenix
+### 2. Start or Connect to Phoenix
 
 Either run locally:
 ```bash
@@ -19,6 +66,7 @@ phoenix serve
 
 Or connect to a hosted instance by setting:
 ```bash
+ENABLE_TRACING=true
 PHOENIX_COLLECTOR_ENDPOINT=https://your-instance.arize.com
 PHOENIX_API_KEY=your-api-key
 ```
@@ -28,6 +76,7 @@ PHOENIX_API_KEY=your-api-key
 Add to `.env.local` (or export):
 ```bash
 PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006
+ENABLE_TRACING=true
 OPENAI_API_KEY=sk-...
 # Optional: restrict to specific chat API URL
 CHAT_API_URL=http://localhost:3000/api/chat
