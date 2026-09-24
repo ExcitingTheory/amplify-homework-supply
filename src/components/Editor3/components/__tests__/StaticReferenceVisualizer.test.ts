@@ -51,6 +51,24 @@ describe("StaticReferenceVisualizer geometry", () => {
     expect(animatedPath).toMatch(/ Z$/);
   });
 
+  it("breaks the rigid center-symmetric ripple when strand drift changes without altering the base phase", () => {
+    const centeredPath = buildFlowingRingPath(0, {
+      flowingAsymmetry: 0,
+      flowingSwimAmplitude: 0,
+      irregularityPhase: 0,
+      strandOffset: 0,
+    });
+    const offsetPath = buildFlowingRingPath(0, {
+      flowingAsymmetry: 8,
+      flowingSwimAmplitude: 12,
+      irregularityPhase: 0,
+      strandOffset: 0.8,
+    });
+
+    expect(offsetPath).not.toBe(centeredPath);
+    expect(offsetPath).toMatch(/ Z$/);
+  });
+
   it("creates deterministic bounded variation for flowing lines", () => {
     const firstLineNoise = flowingLineNoise(0);
 

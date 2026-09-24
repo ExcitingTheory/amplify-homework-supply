@@ -86,10 +86,25 @@ const meta: Meta<typeof StaticReferenceVisualizer> = {
       if: { arg: "variant", eq: "topCenter" },
       name: "Ripple depth",
     },
+    flowingSwimAmplitude: {
+      control: { type: "range", min: 0, max: 18, step: 0.5 },
+      if: { arg: "variant", eq: "topCenter" },
+      name: "Swim drift",
+    },
+    flowingAsymmetry: {
+      control: { type: "range", min: 0, max: 16, step: 0.5 },
+      if: { arg: "variant", eq: "topCenter" },
+      name: "Peak/valley asymmetry",
+    },
     flowingRotationSpeed: {
       control: { type: "range", min: -180, max: 180, step: 1 },
       if: { arg: "variant", eq: "topCenter" },
       name: "Line rotation speed",
+    },
+    flowingSoftBlur: {
+      control: { type: "range", min: 0, max: 3, step: 0.1 },
+      if: { arg: "variant", eq: "topCenter" },
+      name: "Soft blur",
     },
     flowingStrokeWidth: {
       control: { type: "range", min: 0.2, max: 3, step: 0.1 },
@@ -273,7 +288,10 @@ function AudioReactiveTopCenterDemo() {
         frequencyLevels={frequencyLevels}
         flowingRippleIrregularity={2 + energy * 12}
         flowingRippleAmplitude={3 + energy * 10}
-        flowingRotationSpeed={isPlaying ? 36 + energy * 220 : 0}
+        flowingSwimAmplitude={3 + energy * 7}
+        flowingAsymmetry={1.5 + energy * 4.5}
+        flowingSoftBlur={0.3 + energy * 1.4}
+        flowingRotationSpeed={isPlaying ? 18 + energy * 110 : 0}
         flowingStrokeWidth={0.8 + energy * 1.1}
         flowingWidthNoise={0.2 + energy * 0.65}
         rippleSpeed={0.8 + energy * 2.4}
@@ -324,7 +342,10 @@ export const TopCenter: Story = {
     ],
     flowingRipplePhase: 6.25,
     flowingRippleAmplitude: 7,
-    flowingRotationSpeed: 36,
+    flowingSwimAmplitude: 6,
+    flowingAsymmetry: 3.5,
+    flowingSoftBlur: 0.7,
+    flowingRotationSpeed: 18,
     flowingStrokeWidth: 1.2,
     flowingWidthNoise: 0.9,
     rippleSpeed: 1.6,
@@ -338,6 +359,15 @@ export const AnimatedTopCenter: Story = {
     ...TopCenter.args,
     animated: true,
     title: "Animated layered six-lobed audio waveform",
+    flowingCoilBreakup: 14,
+    flowingOpacityNoise: 0.8,
+    flowingRippleAmplitude: 9.5,
+    flowingSwimAmplitude: 11.5,
+    flowingAsymmetry: 16,
+    flowingSoftBlur: 3,
+    flowingStrokeWidth: 1.8,
+    rippleSpeed: 3.2,
+    frequencyLevels: {}
   },
 };
 

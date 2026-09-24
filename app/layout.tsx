@@ -56,13 +56,17 @@ async function DynamicShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headerStore = await headers();
+  const lang = headerStore.get("x-locale") ?? "en";
+
   return (
     <html
+      lang={lang}
       data-mui-color-scheme="light"
       data-scroll-behavior="smooth"
       suppressHydrationWarning

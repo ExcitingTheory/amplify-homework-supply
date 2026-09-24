@@ -7,6 +7,9 @@ const RADIAL_BAR_COUNT = 168;
 const FLOWING_BASE_RADIUS = 77;
 const FLOWING_LOBE_AMPLITUDE = 22;
 const FLOWING_RIPPLE_AMPLITUDE = 4;
+const FLOWING_SWIM_AMPLITUDE = 10;
+const FLOWING_ASYMMETRY = 5;
+const FLOWING_SOFT_BLUR = 0.9;
 const FLOWING_COIL_BREAKUP = 5;
 const FLOWING_OPACITY_NOISE = 0.26;
 const FLOWING_RIPPLE_IRREGULARITY = 3;
@@ -151,6 +154,9 @@ export interface StaticReferenceVisualizerProps {
   flowingRippleAmplitude?: number;
   flowingRotationSpeed?: number;
   flowingStrokeWidth?: number;
+  flowingSwimAmplitude?: number;
+  flowingAsymmetry?: number;
+  flowingSoftBlur?: number;
   flowingWidthNoise?: number;
   radialBarCount?: number;
   radialBarSectors?: RadialBarSector[];
@@ -177,8 +183,11 @@ interface FlowingPathOptions extends Pick<
   | "flowingRippleAmplitude"
   | "flowingRippleIrregularity"
   | "flowingRippleClumps"
+  | "flowingAsymmetry"
+  | "flowingSwimAmplitude"
 > {
   irregularityPhase?: number;
+  strandOffset?: number;
 }
 
 function formatCoordinate(value: number): string {
@@ -198,7 +207,10 @@ export function buildFlowingRingPath(
     flowingRippleIrregularity: rippleIrregularity = FLOWING_RIPPLE_IRREGULARITY,
     flowingRippleClumps: rippleClumps = DEFAULT_RIPPLE_CLUMPS,
     flowingRippleAmplitude: rippleAmplitude = FLOWING_RIPPLE_AMPLITUDE,
+    flowingAsymmetry: asymmetry = FLOWING_ASYMMETRY,
+    flowingSwimAmplitude: swimAmplitude = FLOWING_SWIM_AMPLITUDE,
     irregularityPhase = 0,
+    strandOffset = 0,
   }: FlowingPathOptions = {},
 ): string {
   const points: string[] = [];
@@ -208,9 +220,18 @@ export function buildFlowingRingPath(
     const angle = (sample / sampleCount) * TAU;
     const lobe = Math.sin(angle * 6 + phase);
     const ripple = Math.sin(angle * 12 - phase * 0.7);
+    const strandDrift = Math.sin(
+      angle * (3.4 + strandOffset * 0.35) + phase * 1.1 + strandOffset * 2.6,
+    );
+    const asymmetryWave =
+      Math.sin(angle * 1.8 + irregularityPhase + strandOffset * 1.5) *
+        (asymmetry * 0.72) +
+      Math.sin(angle * 3.2 - irregularityPhase * 0.8 + strandOffset * 2.1) *
+        (asymmetry * 0.25);
     const irregularRipple =
-      Math.sin(angle * 19 + irregularityPhase) * 0.72 +
-      Math.sin(angle * 29 - irregularityPhase * 1.3) * 0.28;
+      Math.sin(angle * 7.8 + irregularityPhase + strandOffset) * 0.7 +
+      Math.sin(angle * 12.5 - irregularityPhase * 0.8 - strandOffset * 1.2) *
+        0.3;
     const clumpRipple = rippleClumps.reduce((total: number, clump) => {
       const distance = Math.atan2(
         Math.sin(angle - clump.position),
@@ -218,14 +239,20 @@ export function buildFlowingRingPath(
       );
       const envelope = Math.exp(-0.5 * (distance / clump.width) ** 2);
       return (
-        total + envelope * Math.sin(angle * 17 + clump.phase) * clump.intensity
+        total +
+        envelope *
+          Math.sin(angle * 8.2 + clump.phase + strandOffset) *
+          clump.intensity *
+          0.72
       );
     }, 0);
     const radius =
       baseRadius +
       lobe * lobeAmplitude +
       ripple * rippleAmplitude +
-      irregularRipple * rippleIrregularity +
+      strandDrift * swimAmplitude * 0.72 +
+      asymmetryWave +
+      irregularRipple * rippleIrregularity * 0.68 +
       clumpRipple;
     const x = CENTER + Math.cos(angle) * radius;
     const y = CENTER + Math.sin(angle) * radius;
@@ -312,9 +339,13 @@ function FlowingRing({
   rippleSpeed,
   strokeWidth,
   widthNoise,
+  swimAmplitude,
+  asymmetry,
+  softBlur,
 }: {
   animationIntensity: number;
   animationTime: number;
+  asymmetry: number;
   baseRadius: number;
   coilBreakup: number;
   frequencyLevels: FrequencyLevels;
@@ -328,20 +359,26 @@ function FlowingRing({
   rippleAmplitude: number;
   rotationSpeed: number;
   rippleSpeed: number;
+  softBlur: number;
   strokeWidth: number;
+  swimAmplitude: number;
   widthNoise: number;
 }) {
   return (
     <g
       fill="none"
       stroke="url(#flowing-gradient)"
-      transform={`rotate(${animationTime * rotationSpeed} ${CENTER} ${CENTER})`}
+      transform={`rotate(${animationTime * rotationSpeed * 0.22} ${CENTER} ${CENTER})`}
     >
       {Array.from({ length: lineCount }, (_, index) => {
         const progress = index / (lineCount - 1);
         const noise = flowingLineNoise(index);
         const movement =
           Math.sin(animationTime * 1.15 + index * 0.81) * animationIntensity;
+        const strandOffset = index * 0.7 + ripplePhase * 0.9 + animationTime * 0.18;
+        const localRotation =
+          Math.sin(animationTime * 1.3 + index * 0.62) * rotationSpeed * 0.18 +
+          noise * rotationSpeed * 0.08;
         const bundle = lineBundles.reduce(
           (style, clump) => {
             const distance = Math.min(
@@ -363,7 +400,7 @@ function FlowingRing({
           },
           { opacity: 1, width: 1 },
         );
-        const opacity =
+        const opacityBase =
           Math.max(
             0.08,
             Math.min(
@@ -372,15 +409,20 @@ function FlowingRing({
                 (1 + noise * opacityNoise + movement * opacityNoise * 0.35),
             ),
           ) * bundle.opacity;
+        const opacity =
+          opacityBase * (0.78 + 0.22 * Math.sin(animationTime * 1.7 + index * 0.52));
+        const lowOpacity = opacity < 0.28;
         return (
           <path
             d={buildFlowingRingPath(
               progress * TAU + animationTime * animationIntensity * 0.45,
               {
+                flowingAsymmetry: asymmetry,
                 flowingBaseRadius:
                   baseRadius +
                   noise * coilBreakup +
                   movement * coilBreakup * 0.22,
+                flowingSwimAmplitude: swimAmplitude,
                 irregularityPhase:
                   index * 2.31 +
                   noise * TAU +
@@ -397,8 +439,10 @@ function FlowingRing({
                         (clump.gain ?? 1)),
                 })),
                 flowingRippleAmplitude: rippleAmplitude,
+                strandOffset,
               },
             )}
+            filter={lowOpacity ? "url(#flowing-soft-blur)" : undefined}
             key={index}
             opacity={opacity}
             strokeWidth={Math.max(
@@ -407,6 +451,7 @@ function FlowingRing({
                 (1 + noise * widthNoise + movement * widthNoise * 0.3) *
                 bundle.width,
             )}
+            transform={`rotate(${localRotation} ${CENTER} ${CENTER})`}
           />
         );
       })}
@@ -518,6 +563,9 @@ export default function StaticReferenceVisualizer({
   flowingRippleAmplitude = FLOWING_RIPPLE_AMPLITUDE,
   flowingRotationSpeed = 0,
   flowingStrokeWidth = 1.1,
+  flowingSwimAmplitude = FLOWING_SWIM_AMPLITUDE,
+  flowingAsymmetry = FLOWING_ASYMMETRY,
+  flowingSoftBlur = FLOWING_SOFT_BLUR,
   flowingWidthNoise = FLOWING_WIDTH_NOISE,
   radialBarCount = RADIAL_BAR_COUNT,
   radialBarSectors = DEFAULT_RADIAL_BAR_SECTORS,
@@ -574,6 +622,15 @@ export default function StaticReferenceVisualizer({
           <stop offset="0.75" stopColor="#d243d6" />
           <stop offset="1" stopColor="#f82e8d" />
         </linearGradient>
+        <filter
+          id="flowing-soft-blur"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+        >
+          <feGaussianBlur stdDeviation={flowingSoftBlur} />
+        </filter>
       </defs>
       <g
         opacity={transitionProgress}
@@ -583,6 +640,7 @@ export default function StaticReferenceVisualizer({
           <FlowingRing
             animationIntensity={animationIntensity}
             animationTime={animationTime}
+            asymmetry={flowingAsymmetry}
             baseRadius={flowingBaseRadius}
             coilBreakup={flowingCoilBreakup}
             frequencyLevels={frequencyLevels}
@@ -596,7 +654,9 @@ export default function StaticReferenceVisualizer({
             rippleAmplitude={flowingRippleAmplitude}
             rotationSpeed={flowingRotationSpeed}
             rippleSpeed={rippleSpeed}
+            softBlur={flowingSoftBlur}
             strokeWidth={flowingStrokeWidth}
+            swimAmplitude={flowingSwimAmplitude}
             widthNoise={flowingWidthNoise}
           />
         ) : (
