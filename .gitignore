@@ -131,3 +131,8 @@ amplifyconfiguration*
 tsconfig.tsbuildinfo
 test/certificates
 test/journeys-report/
+.storybook/components/Welcome.stories.tsx
+test-results/*
+src/components/Editor3/components/LanguageEditorTheme.css
+PRIVATE*.md
+private*.sh

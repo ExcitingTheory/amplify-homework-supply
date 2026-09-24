@@ -16,6 +16,7 @@ import { HeadingNode } from "@lexical/rich-text";
 
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
 import { AudioPlayerProvider } from "../context/AudioPlayerContext";
+import { SyntaxHighlight } from "../../SyntaxHighlight";
 import {
   seedMockUnit,
   seedMockQuestions,
@@ -560,11 +561,11 @@ const FeatureShowcase = () => (
           backgroundColor: "#f5f5f5",
           padding: "1.5rem",
           borderRadius: "8px",
-          fontFamily: "monospace",
-          fontSize: "14px",
         }}
       >
-        <pre>{`// Create a question with specific input types
+        <SyntaxHighlight
+          language="javascript"
+          code={`// Create a question with specific input types
 const node = $createCustomAnswerNode(
   [questionId],
   ['audio', 'writing'], // allowed input methods
@@ -580,7 +581,8 @@ const node = $createCustomAnswerNode(
 // - 'prompt-text'       : Show text prompt
 // - 'prompt-audio'      : Play audio prompt
 // - 'prompt-both'       : Text + audio
-// - 'prompt-definition' : Show definition`}</pre>
+// - 'prompt-definition' : Show definition`}
+        />
       </div>
     </section>
 

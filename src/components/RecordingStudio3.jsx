@@ -36,6 +36,7 @@ import {
   scriptDataToFountain,
 } from "./RecordingStudio3/parseFountainToScriptData";
 import RecordingStudio3View from "./RecordingStudio3View";
+import ComponentErrorBoundary from "./ComponentErrorBoundary";
 
 /**
  * RecordingStudio3 Component
@@ -50,7 +51,7 @@ import RecordingStudio3View from "./RecordingStudio3View";
  * @param {Object} props.identityId - User identity for S3 uploads
  * @param {boolean} props.readOnly - Disable all editing
  */
-export default forwardRef(function RecordingStudio3(
+const RecordingStudio3Content = forwardRef(function RecordingStudio3(
   {
     scriptData: initialScriptData,
     onScriptChange,
@@ -938,3 +939,15 @@ export default forwardRef(function RecordingStudio3(
     />
   );
 });
+
+const RecordingStudio3 = forwardRef(
+  function RecordingStudio3WithRecovery(props, ref) {
+    return (
+      <ComponentErrorBoundary name="Recording Studio">
+        <RecordingStudio3Content {...props} ref={ref} />
+      </ComponentErrorBoundary>
+    );
+  },
+);
+
+export default RecordingStudio3;

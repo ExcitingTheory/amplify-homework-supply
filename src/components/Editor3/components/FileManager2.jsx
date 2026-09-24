@@ -104,6 +104,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { useSearchParams } from "next/navigation";
 import ShowDeletedToggle from "../../ShowDeletedToggle";
 import { useRecycleBin } from "../../../hooks/useRecycleBin";
+import { PLAYLIST_FILE_DRAG_TYPE } from "./PlaylistFilePickerDialog";
 
 // Lexical imports for inline editing
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -2799,6 +2800,26 @@ const FileRowComponent = React.memo(
       [file.id, setSelectedItems],
     );
 
+    const isPlaylistMedia =
+      file.mimeType?.startsWith("audio/") ||
+      file.mimeType?.startsWith("video/");
+    const handleDragStart = React.useCallback(
+      (event) => {
+        if (!isPlaylistMedia || isEditing) {
+          event.preventDefault();
+          return;
+        }
+
+        event.dataTransfer.effectAllowed = "copy";
+        event.dataTransfer.setData(
+          PLAYLIST_FILE_DRAG_TYPE,
+          JSON.stringify({ fileIDs: [file.id] }),
+        );
+        event.dataTransfer.setData("text/plain", file.name || file.id);
+      },
+      [file.id, file.name, isEditing, isPlaylistMedia],
+    );
+
     const typographySx = React.useMemo(
       () => ({
         fontWeight: 500,
@@ -2816,6 +2837,8 @@ const FileRowComponent = React.memo(
 
     return (
       <Box
+        draggable={isPlaylistMedia && !isEditing}
+        onDragStart={handleDragStart}
         onClick={handleRowClick}
         sx={{
           backgroundColor: isSelected

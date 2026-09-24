@@ -3,7 +3,9 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import { getTranslations } from "next-intl/server";
-import { cacheLife } from "next/cache";
+
+export const dynamic = "force-static";
+export const revalidate = false;
 
 /**
  * Privacy Policy page that displays the privacy policy information.
@@ -11,8 +13,6 @@ import { cacheLife } from "next/cache";
  * Fully cached — content only changes on deployments.
  */
 async function PrivacyContent({ locale }) {
-  "use cache";
-  cacheLife("days");
   const t = await getTranslations({ locale, namespace: "pages" });
 
   return (

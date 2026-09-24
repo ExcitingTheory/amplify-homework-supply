@@ -18,6 +18,8 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { SEMANTIC_THEME } from "../../src/themes/semanticTheme";
+import { SyntaxHighlight } from "../../src/components/SyntaxHighlight";
 
 const meta: Meta = {
   title: "🏠 Getting Started/Developer Notes",
@@ -32,18 +34,29 @@ type Story = StoryObj;
 
 export const Architecture: Story = {
   render: () => (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 6 }}>
-      <Container maxWidth="md">
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        px: { xs: 2, md: 4 },
+        py: {
+          xs: SEMANTIC_THEME.padding.pageMobile / 8,
+          md: SEMANTIC_THEME.padding.pageDesktop / 8,
+        },
+      }}
+    >
+      <Container maxWidth="lg">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 4 }}>
           Architecture
         </Typography>
 
         {/* Stack */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
           Tech Stack
         </Typography>
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 4 }}>
-          <Chip label="Next.js 16 (App Router)" />
+          <Chip label="Next.js 15 (App Router)" />
           <Chip label="React 19" />
           <Chip label="AWS Amplify Gen 2" />
           <Chip label="DynamoDB" />
@@ -59,35 +72,38 @@ export const Architecture: Story = {
 
         {/* Architecture diagram as text */}
         <Paper
+          elevation={SEMANTIC_THEME.elevation.card}
           sx={{
             p: 3,
             mb: 4,
-            bgcolor: "grey.900",
-            color: "grey.100",
-            fontFamily: "monospace",
+            bgcolor: "background.paper",
+            color: "text.primary",
+            border: 1,
+            borderColor: "divider",
             fontSize: 12,
             overflow: "auto",
+            borderRadius: `${SEMANTIC_THEME.radius.card}px`,
           }}
         >
-          <pre style={{ margin: 0 }}>{`
+          <pre>{`
 ┌──────────────────────────────────────────────────────────────┐
-│                        Next.js Frontend                        │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐│
-│  │  App     │ │ Contexts │ │Components│ │  Lexical Editor   ││
-│  │  Router  │ │  (State) │ │  (MUI)   │ │  (Rich Content)  ││
-│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────────┬─────────┘│
-│       │             │            │                 │          │
-│       └─────────────┴────────────┴─────────────────┘          │
-│                              │                                │
-└──────────────────────────────┼────────────────────────────────┘
+│                        Next.js Frontend                      │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│  │  App     │ │ Contexts │ │Components│ │  Lexical Editor  │ │
+│  │  Router  │ │  (State) │ │  (MUI)   │ │  (Rich Content)  │ │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────────┬─────────┘ │
+│       │            │            │                │           │
+│       └────────────┴────────────┴────────────────┘           │
+│                              │                               │
+└──────────────────────────────┼───────────────────────────────┘
                                │ Amplify Data Client
-┌──────────────────────────────┼────────────────────────────────┐
-│                     AWS Amplify Gen 2                          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐│
-│  │  AppSync │ │ Cognito  │ │    S3    │ │  Lambda Functions ││
-│  │ (GraphQL)│ │  (Auth)  │ │ (Files)  │ │  (OpenAI, etc.)  ││
-│  └────┬─────┘ └──────────┘ └──────────┘ └──────────────────┘│
-│       │                                                       │
+┌──────────────────────────────┼───────────────────────────────┐
+│                     AWS Amplify Gen 2                        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│  │  AppSync │ │ Cognito  │ │    S3    │ │ Lambda Functions │ │
+│  │ (GraphQL)│ │  (Auth)  │ │ (Files)  │ │  (OpenAI, etc.)  │ │
+│  └────┬─────┘ └──────────┘ └──────────┘ └──────────────────┘ │
+│       │                                                      │
 │  ┌────┴─────┐                                                │
 │  │ DynamoDB │                                                │
 │  │ (Data)   │                                                │
@@ -97,19 +113,22 @@ export const Architecture: Story = {
         </Paper>
 
         {/* Key directories */}
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
           Project Structure
         </Typography>
         <Paper
+          elevation={SEMANTIC_THEME.elevation.card}
           sx={{
             p: 2,
             mb: 4,
-            fontFamily: "monospace",
             fontSize: 13,
             overflow: "auto",
+            borderRadius: `${SEMANTIC_THEME.radius.card}px`,
+            border: 1,
+            borderColor: "divider",
           }}
         >
-          <pre style={{ margin: 0 }}>{`
+          <pre>{`
 app/                → Next.js App Router routes
   [locale]/         → i18n-prefixed pages
   actions/          → Server actions
@@ -226,14 +245,30 @@ docs/               → Planning documents (architecture decisions)
 export const GettingStarted: Story = {
   name: "Dev Setup",
   render: () => (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 6 }}>
-      <Container maxWidth="md">
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        py: { xs: 5, md: 7 },
+      }}
+    >
+      <Container maxWidth="lg">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 4 }}>
           Developer Setup
         </Typography>
 
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
+        <Paper
+          component="section"
+          aria-labelledby="developer-prerequisites"
+          sx={{ p: 3, mb: 4 }}
+        >
+          <Typography
+            id="developer-prerequisites"
+            variant="h6"
+            component="h2"
+            gutterBottom
+          >
             Prerequisites
           </Typography>
           <Box component="ul" sx={{ pl: 3, "& li": { mb: 0.5 } }}>
@@ -254,20 +289,25 @@ export const GettingStarted: Story = {
           </Box>
         </Paper>
 
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
           Quick Start
         </Typography>
         <Paper
           sx={{
             p: 2,
             mb: 3,
-            bgcolor: "grey.900",
-            color: "grey.100",
-            fontFamily: "monospace",
+            bgcolor: "background.paper",
+            color: "text.primary",
+            border: 1,
+            borderColor: "divider",
             fontSize: 13,
           }}
         >
-          <pre style={{ margin: 0 }}>{`# Clone and install
+          <SyntaxHighlight
+            language="bash"
+            showLineNumbers
+            maxWidthCh={80}
+            code={`# Clone and install
 git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
 cd amplify-homework-supply
 npm install
@@ -285,10 +325,15 @@ npm run dev            # Terminal 2: starts Next.js at https://localhost:3000
 # Run tests
 npm test               # Vitest unit tests
 npm run test:storybook # Storybook render tests
-npm run e2e            # Playwright browser tests`}</pre>
+npm run e2e             # Playwright browser tests`}
+          />
         </Paper>
 
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, mt: 4 }}>
+        <Typography
+          variant="h5"
+          component="h2"
+          sx={{ fontWeight: 600, mb: 2, mt: 4 }}
+        >
           Development Scripts
         </Typography>
         <TableContainer component={Paper}>
@@ -323,8 +368,8 @@ npm run e2e            # Playwright browser tests`}</pre>
                 ],
               ].map(([cmd, desc]) => (
                 <TableRow key={cmd}>
-                  <TableCell sx={{ fontFamily: "monospace", fontSize: 12 }}>
-                    {cmd}
+                  <TableCell sx={{ fontSize: 12 }}>
+                    <code>{cmd}</code>
                   </TableCell>
                   <TableCell>{desc}</TableCell>
                 </TableRow>

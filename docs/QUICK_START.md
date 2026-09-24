@@ -1,52 +1,66 @@
 # Homework Supply — Quick Start
 
-Essential links and resources for getting started with Homework Supply. Homework Supply is a platform for creating and managing interactive learning content.
+Choose the lowest-friction path that fits your goal. The live demo and Storybook require no local setup.
 
-## Setup Steps
+## 1. Just look
 
-### 1. Clone & Install
+- [Live demo](https://www.homework.supply) — try the application.
+- [Storybook](https://excitingtheory.github.io/amplify-homework-supply) — browse the component library and interactive documentation.
 
-```bash
-git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
-cd amplify-homework-supply
-npm install
-```
+## 2. Run in the cloud
 
-### 2. Environment Configuration
+Use your own AWS account for the backend. The Amplify Sandbox creates an isolated development environment with DynamoDB, Cognito, S3, Lambda, and AppSync resources; AWS credentials are never supplied by the project.
 
-Create a `.env.local` file at the project root:
-
-```bash
-OPENAI_API_KEY=your_key_here
-```
-
-AWS credentials are handled via SSO — ask your team lead for the SSO URL and profile config.
-
-### 3. Start the Amplify Sandbox (Backend)
+You need Node.js 20.9 or later, AWS CLI credentials or SSO configured for your account, and an available AWS region. From a local checkout or your own cloud development environment, run:
 
 ```bash
 npx ampx sandbox --stream-function-logs
 ```
 
-This deploys a personal cloud sandbox with DynamoDB, Cognito, S3, and Lambda. It generates `amplify_outputs.json` automatically.
+Keep the sandbox running while developing. It generates the local `amplify_outputs.json` connection configuration used by the application. This repository does not provide a devcontainer; Codespaces users must configure their own Node.js toolchain and AWS credentials.
 
-### 4. Start the Dev Server
+## 3. Run locally
 
-In a separate terminal:
+Use Node.js 20.9 or later, then clone and install the project:
+
+```bash
+git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
+cd amplify-homework-supply
+nvm use
+npm install
+```
+
+Create `.env.local` with the server-side OpenAI key when working on AI features:
+
+```bash
+OPENAI_API_KEY=your_key_here
+```
+
+AWS credentials are handled through SSO. Ask a maintainer for the SSO URL and profile configuration before starting a sandbox:
+
+```bash
+npx ampx sandbox --stream-function-logs
+```
+
+In another terminal, start the application. The Next.js server uses HTTPS on port 3000; the collaborative Yjs server uses port 3001 when started by the development command.
 
 ```bash
 npm run dev
 ```
 
-App runs at `http://localhost:3000`.
-
-### 5. Start Storybook (Component Development)
+The app is available at `https://localhost:3000`. Storybook runs independently on port 6006 and does not require AWS:
 
 ```bash
 npm run storybook
 ```
 
-Storybook runs at `http://localhost:6006`. Mocks are pre-configured — no AWS needed.
+See [Developer Onboarding](./ONBOARDING.md) for environment and AWS details.
+
+## 4. Pick a task
+
+- [Good first issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- [Homework Supply Project board](https://github.com/orgs/ExcitingTheory/projects/1/views/1?sliceBy%5BcolumnId%5D=Labels)
+- [Contributing guide](../CONTRIBUTING.md)
 
 ## Common Commands
 
@@ -104,12 +118,12 @@ This starts both the Yjs WebSocket server and Next.js together.
 ## 📬 Communication & Support
 
 ### Primary Contact
-- **Email**: [info@homework.supply.com](mailto:info@homework.supply.com)
+- **Email**: [info@homework.supply](mailto:info@homework.supply)
 - **Discord**: [Join Discord](https://discord.gg/BNsTK6nvYw)
 
 ### Getting Help
 - **Quick Questions**: Team chat (Discord) or email
 - **Detailed Issues**: Create a GitHub issue in the repository
 - **Bug Reports**: [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
-- **Security Issues**: info@homework.supply.com (see [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md))
+- **Security Issues**: info@homework.supply (see [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md))
 

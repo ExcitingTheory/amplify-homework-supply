@@ -28,13 +28,13 @@ function getPaletteColor(theme, path) {
 
 export function ExerciseBlockCard({
   blockType,
-  accuracy,
+  accuracy = undefined,
   graded = false,
   selected = false,
-  className,
-  dataTour,
+  className = undefined,
+  dataTour = undefined,
   children,
-  sx,
+  sx = undefined,
 }) {
   const accentPath = resolveExerciseAccent(blockType, accuracy, graded);
 

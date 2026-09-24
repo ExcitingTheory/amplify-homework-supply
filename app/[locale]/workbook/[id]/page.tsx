@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
-import { cacheLife } from "next/cache";
 import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
@@ -8,6 +7,9 @@ import { loadPublishedUnitContent } from "@/utils/publishedUnitContent";
 import { generateHtmlFromLexicalState } from "@/utils/lexicalServerRender";
 import WorkbookClient from "./WorkbookClient";
 import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
+
+export const dynamicParams = true;
+export const revalidate = 3600;
 
 interface WorkbookPageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -22,10 +24,6 @@ async function getCachedUnitHtml(
   unitId: string,
   unitVersion: string,
 ): Promise<string> {
-  "use cache";
-  // Keyed by (unitId, unitVersion): publishing bumps publishedContentVersion,
-  // yielding a fresh entry, so no manual revalidation is needed.
-  cacheLife("max");
   try {
     // Load published content from S3 (server-side IAM access)
     const content = await loadPublishedUnitContent(unitId);

@@ -66,8 +66,13 @@ export const ShapesAndMetals: Story = {
   render: () => (
     <Box>
       {SHAPES.map((shape) => (
-        <Box key={shape} sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-          <Typography sx={{ width: 64, textTransform: "capitalize" }}>{shape}</Typography>
+        <Box
+          key={shape}
+          sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}
+        >
+          <Typography sx={{ width: 64, textTransform: "capitalize" }}>
+            {shape}
+          </Typography>
           {METALS.map((metal, i) => (
             <Medallion
               key={metal}

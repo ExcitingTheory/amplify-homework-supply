@@ -49,6 +49,7 @@ import {
   ListGraphqlApisCommand,
 } from "@aws-sdk/client-appsync";
 import { readFile, writeFile } from "node:fs/promises";
+import { createHmac } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Schema } from "../data/resource";
@@ -66,12 +67,23 @@ const region = outputs.auth.aws_region;
 // Uses default AWS credentials from your AWS profile
 const cognitoClient = new CognitoIdentityProviderClient({ region });
 
-// Get the password from environment variable
-const password = process.env.TEST_USER_PASSWORD;
-if (!password) {
+// Derive unique sandbox-only passwords from a secret seed. The seed is never
+// logged or stored in the repository, and derived user passwords are never
+// printed.
+const passwordSeed = process.env.TEST_USER_PASSWORD_SEED;
+if (!passwordSeed) {
   throw new Error(
-    "TEST_USER_PASSWORD env var is required. Run: npx ampx sandbox secret set TEST_USER_PASSWORD",
+    "TEST_USER_PASSWORD_SEED env var is required. Set it in the sandbox environment before seeding.",
   );
+}
+// Rebind so the closure below captures a `string`, not `string | undefined`.
+const seed: string = passwordSeed;
+
+function passwordFor(username: string): string {
+  const digest = createHmac("sha256", seed)
+    .update(username)
+    .digest("base64url");
+  return `Dev!${digest}a1!`;
 }
 
 // Initialize the data client
@@ -237,11 +249,7 @@ try {
 }
 
 console.log("🌱 Starting seed data generation...");
-console.log(`Password: ${password ? "SET" : "NOT SET (using default)"}`);
-
-if (!password) {
-  throw new Error("Password not available");
-}
+console.log("Unique sandbox credentials derived from TEST_USER_PASSWORD_SEED");
 
 const TEST_USERS: Record<
   string,
@@ -302,6 +310,13 @@ const TEST_USERS: Record<
     firstName: "Marcus",
     lastName: "Williams",
   },
+  student5: {
+    username: "student5@example.com",
+    group: "Learners",
+    phone: "+15550000008",
+    firstName: "Sophia",
+    lastName: "Brown",
+  },
 };
 
 /**
@@ -339,7 +354,7 @@ for (const [key, userData] of Object.entries(TEST_USERS)) {
   try {
     const user = await createAndSignUpUser({
       username: userData.username,
-      password: password,
+      password: passwordFor(userData.username),
       signInAfterCreation: false,
       signInFlow: "Password",
       userAttributes: {
@@ -377,7 +392,7 @@ for (const [key, userData] of Object.entries(TEST_USERS)) {
           new AdminSetUserPasswordCommand({
             UserPoolId: userPoolId,
             Username: userData.username,
-            Password: password,
+            Password: passwordFor(userData.username),
             Permanent: true,
           }),
         );
@@ -411,7 +426,7 @@ let instructor1IdentityId: string;
 try {
   await signInUser({
     username: TEST_USERS.instructor1.username,
-    password: password,
+    password: passwordFor(TEST_USERS.instructor1.username),
     signInFlow: "Password",
   });
 
@@ -1197,7 +1212,7 @@ await signOut();
 console.log("  Signing in as student1 for grade creation...");
 await signInUser({
   username: TEST_USERS.student1.username,
-  password: password,
+  password: passwordFor(TEST_USERS.student1.username),
   signInFlow: "Password",
 });
 const student1Session = await fetchAuthSession();
@@ -1241,7 +1256,7 @@ await signOut();
 console.log("  Signing in as student2 for grade creation...");
 await signInUser({
   username: TEST_USERS.student2.username,
-  password: password,
+  password: passwordFor(TEST_USERS.student2.username),
   signInFlow: "Password",
 });
 
@@ -1272,7 +1287,7 @@ await signOut();
 console.log("  Signing in as student3 for grade creation...");
 await signInUser({
   username: TEST_USERS.student3.username,
-  password: password,
+  password: passwordFor(TEST_USERS.student3.username),
   signInFlow: "Password",
 });
 
@@ -1321,7 +1336,7 @@ await signOut();
 console.log("  Signing in as student4 for grade creation...");
 await signInUser({
   username: TEST_USERS.student4.username,
-  password: password,
+  password: passwordFor(TEST_USERS.student4.username),
   signInFlow: "Password",
 });
 
@@ -1353,7 +1368,7 @@ await signOut();
 console.log("  Signing back in as instructor1...");
 await signInUser({
   username: TEST_USERS.instructor1.username,
-  password: password,
+  password: passwordFor(TEST_USERS.instructor1.username),
   signInFlow: "Password",
 });
 
@@ -2054,7 +2069,7 @@ let student1IdentityId: string;
 try {
   await signInUser({
     username: TEST_USERS.student1.username,
-    password: password,
+    password: passwordFor(TEST_USERS.student1.username),
     signInFlow: "Password",
   });
 
@@ -2903,7 +2918,7 @@ console.log("\n📊 Writing instructor insight fields onto practice session...")
 await signOut();
 await signInUser({
   username: TEST_USERS.instructor1.username,
-  password: password,
+  password: passwordFor(TEST_USERS.instructor1.username),
   signInFlow: "Password",
 });
 console.log("✅ Signed back in as instructor1");
@@ -3138,7 +3153,7 @@ console.log("\n🔔 Creating notifications...");
 await signOut();
 await signInUser({
   username: TEST_USERS.admin.username,
-  password: password,
+  password: passwordFor(TEST_USERS.admin.username),
   signInFlow: "Password",
 });
 console.log("  Signed in as admin for notification creation");
@@ -3207,7 +3222,7 @@ console.log(`✅ Created ${notifications.length} notification records`);
 await signOut();
 await signInUser({
   username: TEST_USERS.instructor1.username,
-  password: password,
+  password: passwordFor(TEST_USERS.instructor1.username),
   signInFlow: "Password",
 });
 
@@ -3494,7 +3509,7 @@ let student2OwnerSub: string;
 try {
   await signInUser({
     username: TEST_USERS.student2.username,
-    password: password,
+    password: passwordFor(TEST_USERS.student2.username),
     signInFlow: "Password",
   });
 
@@ -3566,7 +3581,7 @@ console.log("\n🔐 Signing in as admin to create global PlatformSettings...");
 await signOut();
 await signInUser({
   username: TEST_USERS.admin.username,
-  password: password,
+  password: passwordFor(TEST_USERS.admin.username),
   signInFlow: "Password",
 });
 
@@ -3691,7 +3706,7 @@ console.log("\n📈 Creating analytics summary seed data...");
 // Re-authenticate as admin (signOut was called after PlatformSettings)
 await signInUser({
   username: TEST_USERS.admin.username,
-  password: password,
+  password: passwordFor(TEST_USERS.admin.username),
   signInFlow: "Password",
 });
 

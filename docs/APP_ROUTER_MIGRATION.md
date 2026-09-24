@@ -128,7 +128,7 @@ CacheProvider (Emotion)
 
 1. **All AI calls go through Server Actions or Route Handlers** — no direct Lambda invocation from the client. Retained Lambdas (streakResetCron, yjsSync, mediaConvert, notificationCron) are purely event-driven.
 2. **i18n via `next-intl`** — 6 locales (`en`, `es`, `fr`, `de`, `ja`, `zh`), 10 namespaces. Translation files in `public/locales/{locale}/{namespace}.json`.
-3. **No `middleware.ts`** — Next.js 16+ handles locale routing without middleware.
+3. **Root `middleware.ts`** — Next.js 15 uses the middleware entrypoint for locale routing, auth checks, CSP nonces, rewrites, and redirects.
 4. **Emotion SSR** — MUI v7 streaming support, no manual `getInitialProps`.
 5. **Provider nesting** in `app/providers.tsx` (`'use client'`): CacheProvider → ThemeProvider → AuthProvider → SettingsProvider → ChatContextProvider → children.
 

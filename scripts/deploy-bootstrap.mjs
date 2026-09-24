@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 /**
- * Orchestrates a from-scratch `ampx sandbox` deploy across multiple phases
- * to stay under CloudFormation's ~2500-resources-per-deploy-operation cap
- * (this schema's 40+ models exceed that cap in a single shot, and even a
- * 2-phase split — one phase carrying roughly half the schema).
+ * Orchestrates a from-scratch Amplify deploy across multiple phases to stay
+ * under CloudFormation's ~2500-resources-per-deploy-operation cap (this
+ * schema's 40+ models exceed that cap in a single shot, and even a 2-phase
+ * split — one phase carrying roughly half the schema).
+ *
+ * Two modes, chosen via CLI flag (default: sandbox):
+ *   --mode=sandbox                          -> `npx ampx sandbox --once` (local, personal)
+ *   --mode=pipeline --branch=<b> --app-id=<id> -> `npx ampx pipeline-deploy --branch <b> --app-id <id>` (CI, matches amplify.yml)
  *
  * AMPLIFY_BOOTSTRAP_PHASE=<N> with AMPLIFY_BOOTSTRAP_TOTAL_PHASES=<T>
  * deploys the cumulative model set for phase N (see
@@ -11,7 +15,7 @@
  * — each phase is a strict superset of the previous one, so phases only
  * ever ADD models, never remove ones already deployed.
  *
- * If a sandbox stack already exists (any state), phasing is skipped
+ * If a target stack already exists (any state), phasing is skipped
  * entirely and a normal full deploy runs instead — deploying phase 1's
  * reduced schema against an already-fully-deployed stack would look like a
  * request to DELETE the isolated models' tables, which must never happen.
@@ -89,11 +93,16 @@ function sanitizeIdentifier(name) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function isRelevantSandboxStack(stackName, scope) {
+/**
+ * `stackKind` is "sandbox" (personal `ampx sandbox` stacks, named
+ * `amplify-<app>-<identifier>-sandbox-<hash>`) or "branch" (Amplify Gen 2
+ * pipeline/branch deploy stacks, named `amplify-<app>-<branch>-branch-<hash>`).
+ */
+function isRelevantStack(stackName, scope, stackKind) {
   if (!stackName.startsWith("amplify-")) return false;
-  if (!stackName.includes("-sandbox-")) return false;
+  if (!stackName.includes(`-${stackKind}-`)) return false;
   if (!stackName.includes(scope)) return false;
-  return /^amplify-.*-sandbox-[a-f0-9]+$/.test(stackName);
+  return new RegExp(`^amplify-.*-${stackKind}-[a-f0-9]+$`).test(stackName);
 }
 
 function sleep(ms) {
@@ -107,7 +116,7 @@ function sleep(ms) {
  * mixed in among newer DELETE_COMPLETE ones. Group by StackName and keep
  * only the entry with the latest CreationTime.
  */
-async function findExistingSandboxStack(identifier) {
+async function findExistingStack(identifier, stackKind) {
   const scope = sanitizeIdentifier(identifier);
   const entries = [];
   let nextToken;
@@ -116,7 +125,7 @@ async function findExistingSandboxStack(identifier) {
       new ListStacksCommand({ NextToken: nextToken }),
     );
     for (const summary of response.StackSummaries ?? []) {
-      if (isRelevantSandboxStack(summary.StackName, scope)) {
+      if (isRelevantStack(summary.StackName, scope, stackKind)) {
         entries.push({
           name: summary.StackName,
           status: summary.StackStatus,
@@ -280,12 +289,12 @@ async function cleanupOrphanedAppSyncResources(rootStackName) {
 
   const resolversDeleted = await deleteAllResolvers(apiId);
   console.log(
-    `[sandbox-bootstrap] Deleted ${resolversDeleted} orphaned AppSync resolver(s) on API ${apiId}.`,
+    `[deploy-bootstrap] Deleted ${resolversDeleted} orphaned AppSync resolver(s) on API ${apiId}.`,
   );
 
   const deleted = await deleteAllAppSyncFunctions(apiId);
   console.log(
-    `[sandbox-bootstrap] Deleted ${deleted} orphaned AppSync function(s) on API ${apiId}.`,
+    `[deploy-bootstrap] Deleted ${deleted} orphaned AppSync function(s) on API ${apiId}.`,
   );
   await ignoreNotFound(
     appsync.send(new DeleteDataSourceCommand({ apiId, name: "NONE_DS" })),
@@ -330,7 +339,7 @@ async function waitForDeleteSettle(stackName) {
  */
 async function remediateAndDeleteStack(rootStackName, maxAttempts = 5) {
   console.log(
-    `[sandbox-bootstrap] Remediating stuck stack "${rootStackName}"...`,
+    `[deploy-bootstrap] Remediating stuck stack "${rootStackName}"...`,
   );
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     await cleanupOrphanedAppSyncResources(rootStackName);
@@ -346,7 +355,7 @@ async function remediateAndDeleteStack(rootStackName, maxAttempts = 5) {
       );
     }
     console.log(
-      `[sandbox-bootstrap] Stack still DELETE_FAILED after cleanup attempt ${attempt}/${maxAttempts}, retrying...`,
+      `[deploy-bootstrap] Stack still DELETE_FAILED after cleanup attempt ${attempt}/${maxAttempts}, retrying...`,
     );
   }
   throw new Error(
@@ -354,15 +363,16 @@ async function remediateAndDeleteStack(rootStackName, maxAttempts = 5) {
   );
 }
 
-function runSandboxOnce(env) {
+function runDeployOnce(deployArgs, env) {
   return new Promise((resolve, reject) => {
-    const child = spawn("npx", ["ampx", "sandbox", "--once"], {
+    const child = spawn("npx", deployArgs, {
       stdio: "inherit",
       env: { ...process.env, ...env },
     });
     child.on("exit", (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`ampx sandbox exited with code ${code}`));
+      else
+        reject(new Error(`${deployArgs.join(" ")} exited with code ${code}`));
     });
     child.on("error", reject);
   });
@@ -374,20 +384,26 @@ function runSandboxOnce(env) {
  * the underlying CloudFormation deployment failed (e.g. AppSync 429s during
  * rollback), so the child process exit code alone can't be trusted.
  */
-async function deployPhaseWithRetry(env, label, identifier) {
+async function deployPhaseWithRetry(
+  env,
+  label,
+  identifier,
+  deployArgs,
+  stackKind,
+) {
   for (let attempt = 1; attempt <= MAX_PHASE_ATTEMPTS; attempt++) {
     console.log(
-      `[sandbox-bootstrap] ${label} (attempt ${attempt}/${MAX_PHASE_ATTEMPTS})...`,
+      `[deploy-bootstrap] ${label} (attempt ${attempt}/${MAX_PHASE_ATTEMPTS})...`,
     );
     try {
-      await runSandboxOnce(env);
+      await runDeployOnce(deployArgs, env);
     } catch (err) {
       console.warn(
-        `[sandbox-bootstrap] ampx exited non-zero during ${label}: ${err.message}`,
+        `[deploy-bootstrap] ampx exited non-zero during ${label}: ${err.message}`,
       );
     }
 
-    const stack = await findExistingSandboxStack(identifier);
+    const stack = await findExistingStack(identifier, stackKind);
     if (!stack) {
       throw new Error(
         `${label} produced no CloudFormation stack — check ampx output above.`,
@@ -404,7 +420,7 @@ async function deployPhaseWithRetry(env, label, identifier) {
     }
     if (FAILED_STACK_STATUSES.has(stack.status)) {
       console.log(
-        `[sandbox-bootstrap] ${label} left stack in ${stack.status} — cleaning up before retrying.`,
+        `[deploy-bootstrap] ${label} left stack in ${stack.status} — cleaning up before retrying.`,
       );
       await remediateAndDeleteStack(stack.name);
       continue;
@@ -415,29 +431,87 @@ async function deployPhaseWithRetry(env, label, identifier) {
   );
 }
 
-async function main() {
-  const repoName = sanitizeIdentifier(path.basename(process.cwd()));
-  const identifier = sanitizeIdentifier(
-    process.env.AMPLIFY_IDENTIFIER || repoName || os.userInfo().username,
-  );
+/** Parses `--key=value` / `--key value` CLI args into a plain object. */
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i++) {
+    const token = argv[i];
+    if (!token.startsWith("--")) continue;
+    const eq = token.indexOf("=");
+    if (eq !== -1) {
+      args[token.slice(2, eq)] = token.slice(eq + 1);
+    } else {
+      const key = token.slice(2);
+      const next = argv[i + 1];
+      if (next && !next.startsWith("--")) {
+        args[key] = next;
+        i += 1;
+      } else {
+        args[key] = true;
+      }
+    }
+  }
+  return args;
+}
 
-  const existingStack = await findExistingSandboxStack(identifier);
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const mode = args.mode === "pipeline" ? "pipeline" : "sandbox";
+
+  let identifier;
+  let deployArgs;
+  let stackKind;
+
+  if (mode === "pipeline") {
+    const branch = args.branch || process.env.AWS_BRANCH;
+    const appId = args["app-id"] || process.env.AWS_APP_ID;
+    if (!branch || !appId) {
+      throw new Error(
+        "--mode=pipeline requires --branch=<branch> and --app-id=<id> (or AWS_BRANCH/AWS_APP_ID env vars).",
+      );
+    }
+    identifier = sanitizeIdentifier(branch);
+    deployArgs = [
+      "ampx",
+      "pipeline-deploy",
+      "--branch",
+      branch,
+      "--app-id",
+      appId,
+    ];
+    stackKind = "branch";
+  } else {
+    const repoName = sanitizeIdentifier(path.basename(process.cwd()));
+    identifier = sanitizeIdentifier(
+      process.env.AMPLIFY_IDENTIFIER || repoName || os.userInfo().username,
+    );
+    deployArgs = ["ampx", "sandbox", "--once"];
+    stackKind = "sandbox";
+  }
+
+  const existingStack = await findExistingStack(identifier, stackKind);
 
   if (existingStack && FAILED_STACK_STATUSES.has(existingStack.status)) {
     console.log(
-      `[sandbox-bootstrap] Existing stack "${existingStack.name}" is ${existingStack.status} — remediating before continuing.`,
+      `[deploy-bootstrap] Existing stack "${existingStack.name}" is ${existingStack.status} — remediating before continuing.`,
     );
     await remediateAndDeleteStack(existingStack.name);
   } else if (existingStack) {
     console.log(
-      `[sandbox-bootstrap] Found existing stack "${existingStack.name}" — skipping phased bootstrap, running normal full deploy.`,
+      `[deploy-bootstrap] Found existing stack "${existingStack.name}" — skipping phased bootstrap, running normal full deploy.`,
     );
-    await deployPhaseWithRetry({}, "Full deploy", identifier);
+    await deployPhaseWithRetry(
+      {},
+      "Full deploy",
+      identifier,
+      deployArgs,
+      stackKind,
+    );
     return;
   }
 
   console.log(
-    `[sandbox-bootstrap] No existing sandbox stack found — bootstrapping in ${BOOTSTRAP_TOTAL_PHASES} phases.`,
+    `[deploy-bootstrap] No existing ${mode} stack found — bootstrapping in ${BOOTSTRAP_TOTAL_PHASES} phases.`,
   );
 
   for (let phase = 1; phase <= BOOTSTRAP_TOTAL_PHASES; phase++) {
@@ -448,13 +522,15 @@ async function main() {
       },
       `Phase ${phase}/${BOOTSTRAP_TOTAL_PHASES}: deploying cumulative model set ${phase}`,
       identifier,
+      deployArgs,
+      stackKind,
     );
   }
 
-  console.log("[sandbox-bootstrap] Bootstrap complete.");
+  console.log("[deploy-bootstrap] Bootstrap complete.");
 }
 
 main().catch((err) => {
-  console.error("[sandbox-bootstrap] Failed:", err.message);
+  console.error("[deploy-bootstrap] Failed:", err.message);
   process.exit(1);
 });

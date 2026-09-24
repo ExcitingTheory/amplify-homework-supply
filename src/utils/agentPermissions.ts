@@ -252,6 +252,28 @@ export class AgentPermissions {
       }
     }
 
+    // Check modifiable config files (e.g. amplify.yml) - allowed with confirmation
+    const modifiableConfig =
+      this.config.permissions.configurationFiles.modifiable;
+    if (
+      modifiableConfig?.paths &&
+      this.matchesAnyPattern(filePath, modifiableConfig.paths)
+    ) {
+      if (!modifiableConfig.allowed) {
+        return {
+          allowed: false,
+          reason:
+            modifiableConfig.description ||
+            "This configuration file cannot be modified",
+        };
+      }
+      return {
+        allowed: true,
+        requiresConfirmation: modifiableConfig.requiresConfirmation ?? true,
+        reason: modifiableConfig.description,
+      };
+    }
+
     // Check schema changes (highly restricted)
     const schemaConfig = this.config.permissions.schemaChanges;
     for (const [key, config] of Object.entries(schemaConfig)) {
@@ -309,10 +331,10 @@ export class AgentPermissions {
       }
       return {
         allowed: true,
-        requiresConfirmation: !this.config.safeModes?.confirmAll?.enabled
-          ? true
-          : false,
-        reason: "Production code modification requires confirmation",
+        requiresConfirmation: restrictedConfig.requiresConfirmation ?? true,
+        reason: restrictedConfig.requiresConfirmation
+          ? "Production code modification requires confirmation"
+          : "Production code modification allowed by agent policy",
       };
     }
 

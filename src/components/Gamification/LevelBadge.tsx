@@ -111,16 +111,18 @@ export function LevelBadge({
             fontWeight: 700,
             fontSize: isSmall ? "0.6875rem" : "0.875rem",
             "& .MuiChip-icon": { color: "#fff" },
-            ...(isSmall && {
-              height: 20,
-              "& .MuiChip-label": { px: 0.5 },
-              "& .MuiChip-icon": {
-                color: "#fff",
-                fontSize: 14,
-                ml: "4px",
-                mr: "-4px",
-              },
-            }),
+            ...(isSmall
+              ? {
+                  height: 20,
+                  "& .MuiChip-label": { px: 0.5 },
+                  "& .MuiChip-icon": {
+                    color: "#fff",
+                    fontSize: 14,
+                    ml: "4px",
+                    mr: "-4px",
+                  },
+                }
+              : {}),
           }}
         />
         {showProgress && level.xpForNextLevel !== null && (

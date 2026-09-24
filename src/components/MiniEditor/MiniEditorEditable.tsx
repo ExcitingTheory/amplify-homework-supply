@@ -70,6 +70,7 @@ import ImagesPlugin from "../Editor3/plugins/ImagesPlugin";
 import AnswerPlugin from "../Editor3/plugins/AnswerPlugin";
 import CustomAnswerPlugin from "../Editor3/plugins/CustomAnswerPlugin";
 import ArmorEditorPlugin from "../Editor3/plugins/ArmorEditorPlugin";
+import CodeHighlightPlugin from "../Editor3/plugins/CodeHighlightPlugin";
 
 import FloatingToolbarPlugin from "../Editor3/plugins/FloatingToolbarPlugin";
 import FloatingLinkEditorPlugin from "../Editor3/plugins/FloatingLinkEditorPlugin";
@@ -251,6 +252,7 @@ export default function MiniEditorEditable({
       <AnswerPlugin />
       <CustomAnswerPlugin />
       <ArmorEditorPlugin />
+      <CodeHighlightPlugin />
 
       {/* Floating toolbar and link editor */}
       <FloatingToolbarPlugin />

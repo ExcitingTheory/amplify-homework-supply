@@ -151,6 +151,7 @@ function getFormFields(t) {
 export default function MyAuth({ children }) {
   const t = useTranslations("components");
   const formFields = getFormFields(t);
+  const isDevelopment = process.env.NODE_ENV === "development";
   const router = useRouter();
   const { mode } = useColorScheme();
   const { user: authUser } = React.useContext(AuthContext);
@@ -184,7 +185,7 @@ export default function MyAuth({ children }) {
       <Authenticator
         variant="modal"
         formFields={formFields}
-        loginMechanisms={["email", "phone_number"]}
+        loginMechanisms={isDevelopment ? ["email"] : ["email", "phone_number"]}
       >
         {({ signOut, user }) =>
           React.Children.map(children, (child) =>

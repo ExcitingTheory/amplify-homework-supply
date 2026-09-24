@@ -1,7 +1,7 @@
 import * as React from "react";
 import { lazy, Suspense } from "react";
 
-import { Skeleton, Box } from "@mui/material";
+import { Box, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 
 // Lazy-load DataGrid only when PlaylistEditor is rendered (authoring only)
 const DataGrid = lazy(() =>
@@ -10,10 +10,9 @@ const DataGrid = lazy(() =>
 import { roundedCheckboxIcons } from "../../RoundedCheckboxIcon";
 import { useTranslations } from "next-intl";
 
-import { Menu, MenuItem, TextField } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 
 import Button from "@mui/material/Button";
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import { mergeRegister } from "@lexical/utils";
@@ -22,27 +21,24 @@ import {
   $getNodeByKey,
   $getSelection,
   $isNodeSelection,
-  $setSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
-  DRAGSTART_COMMAND,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
-  KEY_ENTER_COMMAND,
-  KEY_ESCAPE_COMMAND,
-  SELECTION_CHANGE_COMMAND,
 } from "lexical";
 
-import DictionaryContext from "../../../context/dictionaryContext";
 import { $isPlaylistNode } from "../plugins/PlaylistPlugin";
 
+import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import { getAmplifyClient } from "../../../utils/amplifyClient";
 import FileContext from "../../../context/fileContext";
 import UnitContext from "../../../context/unitContext";
-
-const filter = createFilterOptions();
+import PlaylistFilePickerDialog, {
+  PLAYLIST_FILE_DRAG_TYPE,
+  parsePlaylistFileDragData,
+} from "./PlaylistFilePickerDialog";
 
 const columns = [
   { field: "title", headerName: "Title", flex: 1, minWidth: 100 },
@@ -104,21 +100,12 @@ export default function PlaylistEditor({
   fileIDs,
 }) {
   const t = useTranslations("editor.shared");
-  const [value, setValue] = React.useState(null);
-  const [open, toggleOpen] = React.useState(false);
-  // const [rows, setRows] = React.useState([]);
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [dragActive, setDragActive] = React.useState(false);
   const [gridSelection, setGridSelection] = React.useState([]);
-  const [dialogValue, setDialogValue] = React.useState({
-    phrase: "",
-    definition: "",
-    pronunciation: "",
-  });
-
-  // const [anchorEl, setAnchorEl] = React.useState(null);
-  // const [openMore, setOpenMore] = React.useState(false);
-
-  // Record previous FileIDs
-  const prevFileIDs = React.useRef(fileIDs);
+  const dropPrompt = dragActive
+    ? "Drop to add files"
+    : "Drag audio or video here";
   const playlistRef = React.useRef(null);
 
   const [editor] = useLexicalComposerContext();
@@ -130,8 +117,14 @@ export default function PlaylistEditor({
 
   const { myPlaylistFiles } = React.useContext(FileContext);
 
-  const _fileOptions = React.useMemo(() => {
-    return Object.values(myPlaylistFiles);
+  const fileOptions = React.useMemo(() => {
+    return Object.values(myPlaylistFiles).filter(
+      (file) =>
+        file != null &&
+        file.id != null &&
+        (file.mimeType?.startsWith("audio/") ||
+          file.mimeType?.startsWith("video/")),
+    );
   }, [myPlaylistFiles]);
 
   const rows = React.useMemo(() => {
@@ -173,23 +166,50 @@ export default function PlaylistEditor({
     [nodeKey],
   );
 
-  const addFileID = (id) => {
-    editor.update(async () => {
-      const node = $getNodeByKey(nodeKey);
-      if ($isPlaylistNode(node)) {
-        node.appendId(id);
-        // Add relationship to file
-        console.log("addFileID", id);
-        const client = getAmplifyClient();
-        const { data: file } = await client.models.File.get({ id });
-        if (file) {
-          await client.models.UnitFile.create({
-            unitID: unit.id,
-            fileID: file.id,
-          });
+  const addFileIDs = React.useCallback(
+    async (ids) => {
+      if (!unit?.id) return;
+
+      const currentIDs = new Set(fileIDs || []);
+      const newIDs = ids.filter(
+        (id) =>
+          !currentIDs.has(id) && fileOptions.some((file) => file.id === id),
+      );
+      if (newIDs.length === 0) return;
+
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isPlaylistNode(node)) {
+          newIDs.forEach((id) => node.appendId(id));
         }
-      }
-    });
+      });
+
+      const client = getAmplifyClient();
+      await Promise.allSettled(
+        newIDs.map((fileID) =>
+          client.models.UnitFile.create({
+            unitID: unit.id,
+            fileID,
+          }),
+        ),
+      );
+    },
+    [editor, fileIDs, fileOptions, nodeKey, unit?.id],
+  );
+
+  const handleDragOver = (event) => {
+    if (!event.dataTransfer.types.includes(PLAYLIST_FILE_DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    setDragActive(true);
+  };
+
+  const handleDrop = (event) => {
+    const payload = parsePlaylistFileDragData(event.dataTransfer);
+    if (!payload) return;
+    event.preventDefault();
+    setDragActive(false);
+    void addFileIDs(payload.fileIDs);
   };
 
   const removeFileIDs = (ids) => {
@@ -285,97 +305,46 @@ export default function PlaylistEditor({
   return (
     <div
       ref={playlistRef}
+      onDragOver={handleDragOver}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setDragActive(false);
+        }
+      }}
+      onDrop={handleDrop}
       style={{
         maxHeight: "32rem",
         maxWidth: "72rem",
         padding: "8px",
+        border: dragActive
+          ? "2px dashed var(--mui-palette-primary-main)"
+          : "2px dashed transparent",
+        borderRadius: "8px",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <Autocomplete
-          value={value}
-          onChange={(event, newValue) => {
-            if (typeof newValue === "string") {
-              // timeout to avoid instant validation of the dialog's form.
-              setTimeout(() => {
-                // toggleOpen(true);
-                setDialogValue({
-                  phrase: newValue,
-                  pronunciation: "",
-                  definition: "",
-                });
-              });
-            } else if (newValue && newValue.inputValue) {
-              // toggleOpen(true);
-              setDialogValue({
-                phrase: newValue.inputValue,
-                pronunciation: "",
-                definition: "",
-              });
-            } else {
-              console.log("Autocomplete.newValue", newValue);
-              // Append wordID to FileIDs
-              const newFileID = newValue?.id;
-              if (newFileID) {
-                addFileID(newFileID);
-                setValue(null);
-                setDialogValue({
-                  phrase: "",
-                  pronunciation: "",
-                  definition: "",
-                });
-              }
-            }
-          }}
-          filterOptions={(options, params) => {
-            const filtered = filter(options, params);
-            return filtered;
-          }}
-          sx={{
-            flexGrow: 1,
-          }}
-          id="add-new-word"
-          options={_fileOptions}
-          getOptionLabel={(option) => {
-            // e.g value selected with enter, right from the input
-            if (typeof option === "string") {
-              return option;
-            }
-            if (option.inputValue) {
-              return option.inputValue;
-            }
-            return option.name;
-          }}
-          selectOnFocus
-          clearOnBlur
-          handleHomeEndKeys
-          renderOption={(props, option) => {
-            const { key, ...otherProps } = props;
-            let phrase = option.name;
-            if (option?.name && option?.mimeType) {
-              phrase = `${option.name} (${option.mimeType})`;
-            }
-
-            return (
-              <li key={key} {...otherProps}>
-                {phrase}
-              </li>
-            );
-          }}
-          // sx={{ width: 300 }}
-          freeSolo
-          renderInput={(params) => (
-            <TextField {...params} label="Add file to playlist" />
-          )}
-        />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Tooltip title="Add files">
+          <IconButton
+            aria-label="Add files to playlist"
+            color="primary"
+            onClick={() => setPickerOpen(true)}
+          >
+            <AddIcon />
+          </IconButton>
+        </Tooltip>
+        <Typography sx={{ flex: 1 }} color="text.secondary" variant="body2">
+          {dropPrompt}
+        </Typography>
         <ActionsMenu removeFileIDs={removeFileIDs} ids={gridSelection} />
-      </div>
+      </Box>
+
+      <PlaylistFilePickerDialog
+        open={pickerOpen}
+        files={fileOptions}
+        excludedFileIDs={fileIDs || []}
+        onClose={() => setPickerOpen(false)}
+        onInsert={(ids) => void addFileIDs(ids)}
+      />
 
       {rows.length === 0 && (
         <div style={{ marginTop: "0.5" }}>

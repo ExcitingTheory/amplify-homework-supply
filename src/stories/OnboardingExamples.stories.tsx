@@ -36,6 +36,7 @@ import {
   useCompleteTask,
   useTrackTask,
 } from "../../.storybook/code/useOnboarding";
+import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
 const meta: Meta = {
   title: "🏠 Getting Started/Onboarding/Task Completion Examples",
@@ -295,8 +296,8 @@ export const DisplayOnboardingStatus: StoryObj = {
                   px: 1,
                   py: 0.5,
                   bgcolor: "primary.main",
-                  color: "white",
-                  borderRadius: 1,
+                  color: "primary.contrastText",
+                  borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                   fontSize: "0.85rem",
                 }}
               >
@@ -474,7 +475,7 @@ export const EventEmissionExample: StoryObj = {
               </Typography>
               <Box
                 sx={{
-                  bgcolor: "grey.50",
+                  bgcolor: "background.paper",
                   p: 2,
                   borderRadius: 1,
                   maxHeight: 400,
@@ -617,15 +618,21 @@ export const SpotlightIntegration: StoryObj = {
                 </Typography>
                 <Box component="ul" sx={{ fontSize: "0.875rem", pl: 2 }}>
                   <li>
-                    <span style={{ color: "#4CAF50", fontWeight: "bold" }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "success.main", fontWeight: "bold" }}
+                    >
                       Green
-                    </span>{" "}
+                    </Box>{" "}
                     - Tutorial Mode
                   </li>
                   <li>
-                    <span style={{ color: "#2196F3", fontWeight: "bold" }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "info.main", fontWeight: "bold" }}
+                    >
                       Blue
-                    </span>{" "}
+                    </Box>{" "}
                     - Quiz Mode
                   </li>
                   <li>Pulsing glow - Active highlight</li>
@@ -634,7 +641,14 @@ export const SpotlightIntegration: StoryObj = {
             </Stack>
 
             <Box
-              sx={{ mt: 3, p: 2, bgcolor: "rgba(0,0,0,0.05)", borderRadius: 1 }}
+              sx={{
+                mt: 3,
+                p: 2,
+                bgcolor: "action.hover",
+                borderRadius: `${SEMANTIC_THEME.radius.card}px`,
+                border: 1,
+                borderColor: "divider",
+              }}
             >
               <Typography
                 variant="caption"

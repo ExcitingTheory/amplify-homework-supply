@@ -103,8 +103,37 @@ import {
   trackChatResponseReceived,
   trackDocumentAnalyzed,
 } from "../utils/analytics";
+import ComponentErrorBoundary from "./ComponentErrorBoundary";
 
-const ChatSidebar = ({ onClose }) => {
+function getChatErrorMessage(error, t) {
+  const status = error?.status;
+  const message = String(error?.message || "").toLowerCase();
+
+  if (status === 429 || message.includes("rate limit")) {
+    return t(
+      "chatSidebar.aiRateLimited",
+      "AI help is temporarily busy. Please wait a moment and try again.",
+    );
+  }
+
+  if (
+    message.includes("timeout") ||
+    message.includes("timed out") ||
+    message.includes("abort")
+  ) {
+    return t(
+      "chatSidebar.aiTimeout",
+      "AI help took too long to respond. Please try again.",
+    );
+  }
+
+  return t(
+    "chatSidebar.aiUnavailable",
+    "AI help is temporarily unavailable. Your work is still safe; please try again.",
+  );
+}
+
+const ChatSidebarContent = ({ onClose }) => {
   const t = useTranslations("components");
   const tCommon = useTranslations("common");
   const ready = true; // next-intl translations are always ready when provider is mounted
@@ -1713,6 +1742,45 @@ const ChatSidebar = ({ onClose }) => {
             overflow: "hidden",
           }}
         >
+          {chatError && !historyDrawerOpen && (
+            <Box
+              role="alert"
+              data-testid="chat-error-message"
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1,
+                p: 1.5,
+              }}
+            >
+              <BotAvatar size={40} />
+              <Box
+                sx={{
+                  flex: 1,
+                  maxWidth: "85%",
+                  p: 1.5,
+                  borderRadius: "1rem",
+                  borderBottomLeftRadius: "0.25rem",
+                  bgcolor: "custom.chatBubbleAssistant",
+                  color: "text.primary",
+                  border: 1,
+                  borderColor: "divider",
+                }}
+              >
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {getChatErrorMessage(chatError, t)}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => void regenerate()}
+                >
+                  {t("chatSidebar.refreshAI", "Refresh")}
+                </Button>
+              </Box>
+            </Box>
+          )}
+
           {historyDrawerOpen ? (
             /* Show chat history list */
             <Box sx={{ p: 2 }}>
@@ -3498,4 +3566,12 @@ const ChatSidebar = ({ onClose }) => {
 };
 
 // Memoize the entire component to prevent re-renders from parent context updates
-export default React.memo(ChatSidebar);
+const ChatSidebar = React.memo(ChatSidebarContent);
+
+export default function ChatSidebarWithRecovery(props) {
+  return (
+    <ComponentErrorBoundary name="AI Assistant">
+      <ChatSidebar {...props} />
+    </ComponentErrorBoundary>
+  );
+}

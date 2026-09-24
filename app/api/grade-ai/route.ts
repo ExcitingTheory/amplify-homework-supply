@@ -18,6 +18,11 @@ import { generateObject, generateText, Output } from "ai";
 import { z } from "zod";
 import { requireAuth } from "../_shared/auth";
 import {
+  checkAiRateLimit,
+  getClientKey,
+  rateLimitResponse,
+} from "../_shared/rateLimit";
+import {
   sanitizeInput,
   buildSecurePrompt,
   filterPII,
@@ -104,6 +109,9 @@ export async function POST(req: Request) {
   // 1. Authenticate
   const authError = await requireAuth();
   if (authError) return authError;
+
+  const rateLimit = checkAiRateLimit(getClientKey(req));
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds);
 
   // 2. Parse and validate body
   let body: unknown;

@@ -6,8 +6,12 @@ import { Box } from "@mui/material";
 import QuestionBlockRo from "./QuizComponent"; // Actual export is QuestionBlockRo
 import AnswerComponent from "./AnswerComponent";
 import ImageComponent from "./ImageComponent";
-import MediaPlayerComponent from "./MediaPlayerComponent";
+import MediaPlayerComponent, {
+  LevelControlSlider,
+} from "./MediaPlayerComponent";
+import FrequencyRingVisualizer from "./FrequencyRingVisualizer";
 import {
+  addMockData,
   seedMockUnit,
   seedMockFiles,
   seedMockWords,
@@ -162,6 +166,26 @@ const MOCK_MEDIA_FILES = [
   },
 ];
 
+function seedMockMediaFiles(unitId, fileIds) {
+  seedMockFiles(
+    fileIds.map((fileId) =>
+      MOCK_MEDIA_FILES.find((file) => file.id === fileId),
+    ),
+  );
+  addMockData(
+    "UnitFile",
+    fileIds.map((fileId) => ({
+      id: `${unitId}-${fileId}`,
+      unitID: unitId,
+      fileID: fileId,
+    })),
+  );
+}
+
+function RecordingMediaPlayer(props) {
+  return <MediaPlayerComponent {...props} recordingMode="audio" />;
+}
+
 // Minimal Lexical config for components that need it
 const minimalLexicalConfig = {
   namespace: "EditorComponentsStory",
@@ -214,6 +238,188 @@ All components integrate with the UnitContext for grading and data persistence.
       </Box>
     ),
   ],
+};
+
+function MockVisualizerPlayer({ designMode = "rings" }) {
+  const audioRef = React.useRef(null);
+  const [player, setPlayer] = React.useState(null);
+
+  React.useEffect(() => {
+    const listeners = {};
+    const nextPlayer = {
+      isDisposed: () => false,
+      on: (eventName, callback) => {
+        listeners[eventName] = callback;
+      },
+      off: (eventName, callback) => {
+        if (listeners[eventName] === callback) {
+          delete listeners[eventName];
+        }
+      },
+      tech: () => ({
+        el: () => audioRef.current,
+      }),
+      load: () => {
+        if (audioRef.current) {
+          audioRef.current.load();
+        }
+      },
+      muted: () => audioRef.current?.muted ?? true,
+      paused: () => audioRef.current?.paused ?? true,
+    };
+
+    Object.defineProperty(nextPlayer, "play", {
+      value: () => {
+        if (!audioRef.current) return null;
+        const mediaPlay = Object.getOwnPropertyDescriptor(
+          HTMLMediaElement.prototype,
+          "play",
+        )?.value;
+        if (typeof mediaPlay !== "function") return null;
+        return Reflect.apply(mediaPlay, audioRef.current, []);
+      },
+      configurable: true,
+    });
+
+    setPlayer(nextPlayer);
+    return () => setPlayer(null);
+  }, []);
+
+  const handlePlayDemo = async () => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    const mediaPlay = Object.getOwnPropertyDescriptor(
+      HTMLMediaElement.prototype,
+      "play",
+    )?.value;
+    if (typeof mediaPlay !== "function") return;
+    await Reflect.apply(mediaPlay, audioRef.current, []);
+  };
+
+  return (
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <button type="button" onClick={handlePlayDemo}>
+          Play demo
+        </button>
+        <Box component="span" sx={{ color: "text.secondary", fontSize: 13 }}>
+          {designMode === "spikes"
+            ? "Spike visualization"
+            : designMode === "center-top"
+              ? "Center-top waveform"
+              : "Ring visualization"}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          height: 320,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
+          overflow: "hidden",
+          bgcolor: "background.default",
+        }}
+      >
+        {player && (
+          <FrequencyRingVisualizer
+            player={player}
+            visible={true}
+            designMode={designMode}
+          />
+        )}
+      </Box>
+
+      <audio
+        ref={audioRef}
+        src="/story-mocks/sound-design-elements-sfx-ps-022-302865.mp3"
+        preload="auto"
+        style={{ display: "none" }}
+      />
+    </Box>
+  );
+}
+
+export const VisualizationRings = {
+  render: () => <MockVisualizerPlayer designMode="rings" />,
+};
+
+export const VisualizationSpikes = {
+  render: () => <MockVisualizerPlayer designMode="spikes" />,
+};
+
+export const VisualizationCenterTop = {
+  render: () => <MockVisualizerPlayer designMode="center-top" />,
+};
+
+export const AudioLevelIndicators = {
+  render: () => (
+    <Box sx={{ display: "flex", gap: 4, alignItems: "flex-end", p: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Box
+          component="span"
+          sx={{ color: "text.secondary", fontSize: 13, fontWeight: 600 }}
+        >
+          Input
+        </Box>
+        <LevelControlSlider
+          label="Input level"
+          value={0.72}
+          orientation="vertical"
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Box
+          component="span"
+          sx={{ color: "text.secondary", fontSize: 13, fontWeight: 600 }}
+        >
+          Output
+        </Box>
+        <LevelControlSlider
+          label="Output level"
+          value={0.54}
+          orientation="vertical"
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+          minWidth: 180,
+        }}
+      >
+        <Box
+          component="span"
+          sx={{ color: "text.secondary", fontSize: 13, fontWeight: 600 }}
+        >
+          Horizontal variant
+        </Box>
+        <LevelControlSlider
+          label="Horizontal level"
+          value={0.38}
+          orientation="horizontal"
+        />
+      </Box>
+    </Box>
+  ),
 };
 
 // Quiz Component Stories
@@ -634,7 +840,7 @@ export const AudioPlayer = {
         _version: 1,
         owner: "mock-user-sub",
       });
-      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1")]);
+      seedMockMediaFiles("audio-player-story-unit", ["audio-whoosh-1"]);
     },
   ],
   render: () => (
@@ -676,11 +882,11 @@ export const AudioPlayerLongWhoosh = {
         _version: 1,
         owner: "mock-user-sub",
       });
-      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2")]);
+      seedMockMediaFiles("audio-long-whoosh-story-unit", ["audio-whoosh-2"]);
     },
   ],
   render: () => (
-    <MediaPlayerComponent
+    <RecordingMediaPlayer
       nodeKey="audio-player-2"
       fileIDs={["audio-whoosh-2"]}
     />
@@ -692,7 +898,27 @@ export const AudioPlayerLongWhoosh = {
     docs: {
       description: {
         story:
-          "Audio player for long cinematic descent whoosh. Demonstrates longer duration audio.",
+          "Audio playback with microphone recording, input mute, and input gain controls.",
+      },
+    },
+  },
+};
+
+export const AudioCompactRecorder = {
+  ...AudioPlayerLongWhoosh,
+  render: () => (
+    <RecordingMediaPlayer
+      variant="compact"
+      nodeKey="audio-compact-recorder"
+      fileIDs={["audio-whoosh-2"]}
+    />
+  ),
+  parameters: {
+    ...AudioPlayerLongWhoosh.parameters,
+    docs: {
+      description: {
+        story:
+          "Compact audio recorder with live horizontal visualization, dropped-audio preview, and static waveform analysis.",
       },
     },
   },
@@ -718,7 +944,7 @@ export const AudioPlayerSFX = {
         _version: 1,
         owner: "mock-user-sub",
       });
-      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx")]);
+      seedMockMediaFiles("audio-sfx-story-unit", ["audio-sfx"]);
     },
   ],
   render: () => (
@@ -757,7 +983,7 @@ export const VideoPlayerComponent = {
         _version: 1,
         owner: "mock-user-sub",
       });
-      seedMockFiles([MOCK_MEDIA_FILES.find((f) => f.id === "video-demo")]);
+      seedMockMediaFiles("video-player-story-unit", ["video-demo"]);
     },
   ],
   render: () => (
@@ -771,6 +997,48 @@ export const VideoPlayerComponent = {
       description: {
         story:
           "Video player for demonstration video. Supports standard video controls.",
+      },
+    },
+  },
+};
+
+export const VideoWithAudioRecording = {
+  loaders: [
+    async () => {
+      clearMockData();
+      seedMockUnit({
+        id: "video-recording-story-unit",
+        name: "Media Story Unit",
+        data: JSON.stringify({
+          root: {
+            children: [],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }),
+        _version: 1,
+        owner: "mock-user-sub",
+      });
+      seedMockMediaFiles("video-recording-story-unit", ["video-demo"]);
+    },
+  ],
+  render: () => (
+    <RecordingMediaPlayer
+      nodeKey="video-recording-player"
+      fileIDs={["video-demo"]}
+    />
+  ),
+  parameters: {
+    unitId: "video-recording-story-unit",
+    disableUnitContext: false,
+    initializeMockData: false,
+    docs: {
+      description: {
+        story:
+          "Video playback with microphone recording, input mute, and input gain controls.",
       },
     },
   },
@@ -796,10 +1064,10 @@ export const AudioMultipleTracks = {
         _version: 1,
         owner: "mock-user-sub",
       });
-      seedMockFiles([
-        MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-1"),
-        MOCK_MEDIA_FILES.find((f) => f.id === "audio-whoosh-2"),
-        MOCK_MEDIA_FILES.find((f) => f.id === "audio-sfx"),
+      seedMockMediaFiles("audio-multi-story-unit", [
+        "audio-whoosh-1",
+        "audio-whoosh-2",
+        "audio-sfx",
       ]);
     },
   ],

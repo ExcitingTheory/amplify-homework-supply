@@ -7,64 +7,64 @@
  * @module SquadCrest
  */
 
-import React, { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import type { IconType } from 'react-icons'
-import { Medallion } from './Medallion'
-import { useReducedMotion } from '@/hooks/useReducedMotion'
+import React, { useMemo } from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import type { IconType } from "react-icons";
+import { Medallion } from "./Medallion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   pickTinctures,
   pickDivision,
   metalForTier,
   readableInk,
-} from '@/themes/heraldry'
+} from "@/themes/heraldry";
 
 export interface SquadCrestProps {
-  squadId: string
-  squadName: string
-  totalXP?: number
-  size?: 'small' | 'medium' | 'large'
-  showName?: boolean
+  squadId: string;
+  squadName: string;
+  totalXP?: number;
+  size?: "small" | "medium" | "large";
+  showName?: boolean;
   /** Optional deterministic charge device drawn in place of initials. */
-  chargeIcon?: IconType
+  chargeIcon?: IconType;
 }
 
 const SIZE_MAP = {
   small: 40,
   medium: 64,
   large: 96,
-}
+};
 
 function getInitials(name: string): string {
   return name
     .split(/\s+/)
     .slice(0, 2)
     .map((w) => w.charAt(0).toUpperCase())
-    .join('')
+    .join("");
 }
 
 export function SquadCrest({
   squadId,
   squadName,
   totalXP,
-  size = 'medium',
+  size = "medium",
   showName = true,
   chargeIcon: ChargeIcon,
 }: SquadCrestProps) {
-  const reducedMotion = useReducedMotion()
-  const px = SIZE_MAP[size]
-  const initials = useMemo(() => getInitials(squadName), [squadName])
-  const { field, charge } = useMemo(() => pickTinctures(squadId), [squadId])
-  const division = useMemo(() => pickDivision(squadId), [squadId])
-  const metal = useMemo(() => metalForTier(totalXP ?? 0), [totalXP])
-  const ink = useMemo(() => readableInk(field.main), [field])
+  const reducedMotion = useReducedMotion();
+  const px = SIZE_MAP[size];
+  const initials = useMemo(() => getInitials(squadName), [squadName]);
+  const { field, charge } = useMemo(() => pickTinctures(squadId), [squadId]);
+  const division = useMemo(() => pickDivision(squadId), [squadId]);
+  const metal = useMemo(() => metalForTier(totalXP ?? 0), [totalXP]);
+  const ink = useMemo(() => readableInk(field.main), [field]);
 
   const chargeNode = ChargeIcon ? (
     <ChargeIcon
       size={Math.round(px * 0.44)}
       color={charge.light}
-      style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }}
+      style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.35))" }}
     />
   ) : (
     <Typography
@@ -75,15 +75,22 @@ export function SquadCrest({
         fontSize: px * 0.4,
         lineHeight: 1,
         color: ink,
-        textShadow: '0 1px 1px rgba(0,0,0,0.25)',
+        textShadow: "0 1px 1px rgba(0,0,0,0.25)",
       }}
     >
       {initials}
     </Typography>
-  )
+  );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 0.5,
+      }}
+    >
       <Medallion
         shape="shield"
         size={px}
@@ -96,7 +103,10 @@ export function SquadCrest({
         reducedMotion={reducedMotion}
       />
       {showName && (
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, textAlign: 'center' }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, textAlign: "center" }}
+        >
           {squadName}
         </Typography>
       )}
@@ -106,8 +116,7 @@ export function SquadCrest({
         </Typography>
       )}
     </Box>
-  )
+  );
 }
 
-export default SquadCrest
-
+export default SquadCrest;

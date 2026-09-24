@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import React, { useState } from "react";
 import { AvatarCustomizer } from "./AvatarCustomizer";
 import type { AvatarOverrides } from "./DiceBearAvatar";
+import { SyntaxHighlight } from "../SyntaxHighlight";
 import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof AvatarCustomizer> = {
@@ -34,9 +35,13 @@ function AvatarCustomizerWrapper({
   return (
     <>
       <button onClick={() => setOpen(true)}>Open Customizer</button>
-      <pre style={{ fontSize: 12, marginTop: 8 }}>
-        Saved overrides: {JSON.stringify(overrides, null, 2)}
-      </pre>
+      <p style={{ fontSize: 12, marginTop: 8, marginBottom: 4 }}>
+        Saved overrides:
+      </p>
+      <SyntaxHighlight
+        language="json"
+        code={JSON.stringify(overrides, null, 2)}
+      />
       <AvatarCustomizer
         open={open}
         onClose={() => setOpen(false)}

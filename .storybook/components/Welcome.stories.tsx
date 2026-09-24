@@ -45,15 +45,13 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import SecurityIcon from "@mui/icons-material/Security";
+import { SEMANTIC_THEME } from "../../src/themes/semanticTheme";
 
 const featureGridSx = {
   display: "grid",
-  gridTemplateColumns: {
-    xs: "1fr",
-    sm: "repeat(2, minmax(0, 1fr))",
-    lg: "repeat(4, minmax(0, 1fr))",
-  },
-  gap: 2,
+  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+  gap: 4,
+  alignItems: "start",
   mb: 4,
 };
 
@@ -76,22 +74,50 @@ function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Paper
+      variant="outlined"
+      component="article"
+      role={storyLink ? "link" : undefined}
+      tabIndex={storyLink ? 0 : undefined}
+      aria-label={storyLink ? `Open ${title}` : undefined}
       sx={{
-        p: 3,
+        p: {
+          xs: SEMANTIC_THEME.padding.cardMobile / 8,
+          md: SEMANTIC_THEME.padding.cardDesktop / 8,
+        },
         height: "100%",
         display: "flex",
         flexDirection: "column",
         cursor: storyLink ? "pointer" : "default",
-        transition: "all 0.2s",
+        borderRadius: `${SEMANTIC_THEME.radius.card}px`,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: SEMANTIC_THEME.elevation.card,
+        transition: "background-color 180ms ease, border-color 180ms ease",
         "&:hover": storyLink
           ? {
               bgcolor: "action.hover",
-              transform: "translateY(-2px)",
-              boxShadow: 4,
+              borderColor: "primary.main",
+            }
+          : {},
+        "&:focus-visible": storyLink
+          ? {
+              outline: "3px solid",
+              outlineColor: "info.main",
+              outlineOffset: 2,
             }
           : {},
       }}
       onClick={storyLink ? linkTo(...storyLink) : undefined}
+      onKeyDown={
+        storyLink
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                linkTo(...storyLink)();
+              }
+            }
+          : undefined
+      }
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
         <Box sx={{ color }}>{icon}</Box>
@@ -158,16 +184,21 @@ export const Welcome: Story = {
   render: () => {
     return (
       <Box
+        component="main"
         sx={{
           minHeight: "100vh",
           bgcolor: "background.default",
           color: "text.primary",
+          px: { xs: 2, md: 4 },
           py: 6,
         }}
       >
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           {/* Hero Section */}
-          <Box sx={{ textAlign: "center", mb: 6 }}>
+          <Box
+            component="header"
+            sx={{ maxWidth: 760, mx: "auto", textAlign: "center", mb: 6 }}
+          >
             <Typography
               variant="h2"
               component="h1"
@@ -177,29 +208,39 @@ export const Welcome: Story = {
                 fontWeight: 700,
               }}
             >
-              📚 Homework Supply
+              Homework Supply
             </Typography>
             <Typography
               variant="h5"
+              component="p"
               sx={{ color: "text.secondary", mb: 4, maxWidth: 600, mx: "auto" }}
             >
-              An interactive e-learning platform for creating, sharing, and
+              An interactive learning workspace for creating, sharing, and
               completing educational content
             </Typography>
           </Box>
 
           {/* Getting Started Instructions */}
           <Paper
+            component="section"
+            aria-labelledby="getting-started-title"
+            elevation={SEMANTIC_THEME.elevation.card}
             sx={{
-              p: 4,
+              p: {
+                xs: SEMANTIC_THEME.padding.panelMobile / 8,
+                md: SEMANTIC_THEME.padding.panelDesktop / 8,
+              },
               mb: 4,
-              bgcolor: "rgba(33, 150, 243, 0.1)",
+              bgcolor: "action.hover",
               border: "1px solid",
-              borderColor: "rgba(33, 150, 243, 0.3)",
+              borderColor: "divider",
+              borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
             }}
           >
             <Typography
+              id="getting-started-title"
               variant="h5"
+              component="h2"
               sx={{
                 color: "text.primary",
                 mb: 3,
@@ -208,7 +249,7 @@ export const Welcome: Story = {
                 gap: 1,
               }}
             >
-              🚀 Getting Started
+              Getting Started
             </Typography>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -242,8 +283,11 @@ export const Welcome: Story = {
                   </Typography>
                   <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     Look at the <strong>Onboarding widget</strong> in the left
-                    sidebar. Choose your authenticated role: <strong>Administrator</strong>, <strong>Instructor</strong>, or <strong>Learner</strong>.
-                    <strong> Translator</strong> is a Storybook-only persona used for localization previews, not a backend auth group.
+                    sidebar. Choose your authenticated role:{" "}
+                    <strong>Administrator</strong>, <strong>Instructor</strong>,
+                    or <strong>Learner</strong>.<strong> Translator</strong> is
+                    a Storybook-only persona used for localization previews, not
+                    a backend auth group.
                   </Typography>
                 </Box>
               </Box>
@@ -392,7 +436,10 @@ export const Welcome: Story = {
           {/* Platform Features — comprehensive marketing overview        */}
           {/* ══════════════════════════════════════════════════════════ */}
           <Typography
+            id="platform-features"
             variant="h4"
+            component="h2"
+            component="h2"
             sx={{ color: "text.primary", mb: 1, fontWeight: 700 }}
           >
             Platform Features
@@ -832,7 +879,8 @@ export const Welcome: Story = {
                   Administrator
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Manage platform settings, moderation, and broad system oversight
+                  Manage platform settings, moderation, and broad system
+                  oversight
                 </Typography>
               </Box>
             </Paper>
@@ -877,7 +925,8 @@ export const Welcome: Story = {
                   Translator (Storybook persona)
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Localization preview and translation testing only; not an authenticated app role
+                  Localization preview and translation testing only; not an
+                  authenticated app role
                 </Typography>
               </Box>
             </Paper>

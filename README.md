@@ -2,6 +2,19 @@
 
 An interactive elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI. Instructors author rich multimedia lessons with a custom Lexical editor; students complete graded workbooks with real-time AI tutoring support.
 
+**[Live demo](https://www.homework.supply) · [Discord](https://discord.gg/BNsTK6nvYw) · [Storybook](https://excitingtheory.github.io/amplify-homework-supply)**
+
+## Start here
+
+- **Just look:** [Try the live demo](https://www.homework.supply) or [browse Storybook](https://excitingtheory.github.io/amplify-homework-supply).
+- **Run in the cloud:** Use your own AWS account with the [Quick Start](./docs/QUICK_START.md) Amplify Sandbox workflow.
+- **Run locally:** Follow the [Quick Start](./docs/QUICK_START.md) guide.
+- **Pick a task:** Browse [good first issues](https://github.com/excitingtheory/amplify-homework-supply/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or [the Project board](https://github.com/orgs/ExcitingTheory/projects/1/views/1?sliceBy%5BcolumnId%5D=Labels).
+- **Get help:** Join [Discord](https://discord.gg/BNsTK6nvYw) or open a [GitHub issue](https://github.com/ExcitingTheory/amplify-homework-supply/issues).
+
+<details>
+<summary>Explore the feature set</summary>
+
 ## Features
 
 ### Rich Content Editor (Lexical)
@@ -49,6 +62,8 @@ Fan-out upload pipeline, S3 with CloudFront signed cookies, PDF analysis with vo
 ### Search
 Semantic search over embeddings (text-embedding-3-small, 512D) with IVF clustering for large bundles, client-side IndexedDB cache. ([details](./docs/SEARCH_ARCHITECTURE.md))
 
+</details>
+
 ---
 
 ## Outstanding Plans (Not Yet Implemented)
@@ -89,6 +104,28 @@ npm run journeys:ui           # Interactive Playwright UI
 
 Start the app first with `npm run dev` (or use `npm run journeys:wait-and-run`).
 
+### Demo login credentials for integration tests
+
+`npm run test:integration` signs in as seeded demo users (`admin@example.com`,
+`instructor1@example.com`, `student1@example.com`, etc. — see
+[test/integration/shared.ts](./test/integration/shared.ts)). Their passwords are derived
+from a private seed, never committed. One-time local setup:
+
+
+```bash
+node -e "console.log(crypto.randomUUID())"
+```
+
+```bash
+echo "TEST_USER_PASSWORD_SEED='<same-value-you-set-above>'" >> .env.test
+npx ampx sandbox secret set TEST_USER_PASSWORD_SEED    # pick a random value
+npx ampx sandbox                                       # keep running in a terminal
+npx ampx sandbox seed                                  # separate terminal, after sandbox is up
+npm run test:integration
+```
+
+See [amplify/seed/README.md](./amplify/seed/README.md) for what the seed script creates.
+
 ## Documentation
 
 ### Getting Started
@@ -113,7 +150,7 @@ Start the app first with `npm run dev` (or use `npm run journeys:wait-and-run`).
 
 ## Communication & Support
 
-- **Email**: [info@homework.supply.com](mailto:info@homework.supply.com)
+- **Email**: [info@homework.supply](mailto:info@homework.supply)
 - **Discord**: [Join Discord](https://discord.gg/BNsTK6nvYw)
 - **Bug Reports**: [GitHub Issues](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
 - **Storybook**: [Component Library](https://main--67e40f1917d7a8ef683541d7.chromatic.com)

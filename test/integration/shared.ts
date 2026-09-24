@@ -1,4 +1,5 @@
 import { signIn, signOut, fetchAuthSession } from "aws-amplify/auth";
+import { passwordForTestUser } from "../devCredentials";
 
 export type SignInParams = {
   username: string;
@@ -29,17 +30,7 @@ export const TEST_USERS = {
   },
 };
 
-// Helper: Sign in as a test user
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || "";
-
 export async function signInAs(user: keyof typeof TEST_USERS) {
-  if (!TEST_PASSWORD) {
-    throw new Error(
-      "TEST_USER_PASSWORD environment variable is required. " +
-        "Set it to the password for test users.",
-    );
-  }
-
   const usr = TEST_USERS[user];
 
   try {
@@ -50,7 +41,10 @@ export async function signInAs(user: keyof typeof TEST_USERS) {
   }
 
   // Sign in with username and password
-  await signIn({ username: usr.username, password: TEST_PASSWORD });
+  await signIn({
+    username: usr.username,
+    password: passwordForTestUser(usr.username),
+  });
 
   const session = await fetchAuthSession();
   return session;

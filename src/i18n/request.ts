@@ -36,6 +36,29 @@ function isSupportedLocale(
   );
 }
 
+function mergeMessages(
+  base: Record<string, any>,
+  override: Record<string, any>,
+): Record<string, any> {
+  const merged = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    const baseValue = merged[key];
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      baseValue &&
+      typeof baseValue === "object" &&
+      !Array.isArray(baseValue)
+    ) {
+      merged[key] = mergeMessages(baseValue, value);
+    } else {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
+
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = isSupportedLocale(requested)
@@ -46,29 +69,39 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Dotted namespaces (e.g. "editor.authoring") are nested so that
   // next-intl can resolve them via useTranslations('editor.authoring').
   const messages: Record<string, any> = {};
-  const localesDir = path.join(process.cwd(), "public", "locales", locale);
+  const localesRoot = path.join(process.cwd(), "public", "locales");
+  const localesToLoad =
+    locale === routing.defaultLocale
+      ? [locale]
+      : [routing.defaultLocale, locale];
 
-  for (const ns of namespaces) {
-    try {
-      const filePath = path.join(localesDir, `${ns}.json`);
-      const content = readFileSync(filePath, "utf-8");
-      const data = JSON.parse(content);
-      const parts = ns.split(".");
-      if (parts.length === 1) {
-        messages[ns] = data;
-      } else {
-        // Nest dotted namespace: "editor.authoring" → messages.editor.authoring
-        let target = messages;
-        for (let i = 0; i < parts.length - 1; i++) {
-          if (!target[parts[i]] || typeof target[parts[i]] !== "object") {
-            target[parts[i]] = {};
+  for (const sourceLocale of localesToLoad) {
+    for (const ns of namespaces) {
+      try {
+        const filePath = path.join(localesRoot, sourceLocale, `${ns}.json`);
+        const content = readFileSync(filePath, "utf-8");
+        const data = JSON.parse(content);
+        const parts = ns.split(".");
+        if (parts.length === 1) {
+          messages[ns] = mergeMessages(messages[ns] ?? {}, data);
+        } else {
+          // Nest dotted namespace: "editor.authoring" → messages.editor.authoring
+          let target = messages;
+          for (let i = 0; i < parts.length - 1; i++) {
+            if (!target[parts[i]] || typeof target[parts[i]] !== "object") {
+              target[parts[i]] = {};
+            }
+            target = target[parts[i]];
           }
-          target = target[parts[i]];
+          const namespaceKey = parts[parts.length - 1];
+          target[namespaceKey] = mergeMessages(
+            target[namespaceKey] ?? {},
+            data,
+          );
         }
-        target[parts[parts.length - 1]] = data;
+      } catch {
+        // Namespace files may be absent for a locale; English remains the fallback.
       }
-    } catch {
-      // Namespace file may not exist for all locales - skip gracefully
     }
   }
 

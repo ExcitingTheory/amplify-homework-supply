@@ -5,14 +5,9 @@ Official Amplify Gen 2 approach to create test users and seed data.
 ## Quick Start
 
 ```bash
-# 1. Set the password secret (only once)
-npx ampx sandbox secret set TEST_USER_PASSWORD
-# Enter a password that meets requirements:
-#   - Min 8 characters
-#   - Uppercase letter
-#   - Lowercase letter
-#   - Number
-#   - Symbol (e.g., !@#$%^&*)
+# 1. Set a private seed secret (never commit or print it)
+npx ampx sandbox secret set TEST_USER_PASSWORD_SEED
+# Use a unique random value. The seed derives a different password per user.
 
 # 2. Start sandbox
 npx ampx sandbox
@@ -32,7 +27,8 @@ The seed script ([seed.ts](./seed.ts)) creates:
 - `student1@example.com` → Learners group
 - `student2@example.com` → Learners group
 
-All users share the same password (set via `TEST_USER_PASSWORD` secret).
+Each user receives a unique password derived from the private
+`TEST_USER_PASSWORD_SEED`; individual passwords are never logged or displayed.
 
 ### **Sample Data**
 - **5 vocabulary words** (Japanese + Biology terms)
@@ -51,8 +47,8 @@ All users share the same password (set via `TEST_USER_PASSWORD` secret).
 After seeding, run integration tests:
 
 ```bash
-# Set password locally for tests (same as the secret)
-echo 'TEST_USER_PASSWORD=YourPassword123!' > ../../.env.test
+# Configure the same private seed for local test tooling without committing it.
+export TEST_USER_PASSWORD_SEED='your-private-random-seed'
 
 # Run tests
 npm run test:integration

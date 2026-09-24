@@ -12,6 +12,11 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, tool } from "ai";
 import { z } from "zod";
 import { requireAuth } from "../_shared/auth";
+import {
+  checkAiRateLimit,
+  getClientKey,
+  rateLimitResponse,
+} from "../_shared/rateLimit";
 
 export const maxDuration = 30;
 
@@ -209,6 +214,9 @@ export async function POST(req: Request) {
     // Verify authentication
     const authError = await requireAuth();
     if (authError) return authError;
+
+    const rateLimit = checkAiRateLimit(getClientKey(req));
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds);
 
     const body = await req.json();
     const {

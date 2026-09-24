@@ -25,8 +25,8 @@ import { AutocompleteProvider } from "./context/SharedAutocompleteContext";
 import { DndWrapper } from "../MeaningAssociationExercise/DndWrapper";
 import LanguageEditorTheme from "./config/LanguageEditorTheme";
 
-import StoryProgressPlugin from "./plugins/StoryProgressPlugin";
 // @ts-ignore - JSX file without proper module exports
+import StoryProgressPlugin from "./plugins/StoryProgressPlugin";
 import WorkbookStatePlugin from "./plugins/WorkbookStatePlugin";
 import ToolBarRoPlugin from "./plugins/ToolBarRoPlugin";
 import YouTubePlugin from "./plugins/YouTubePlugin";
@@ -39,6 +39,7 @@ import ImagesPlugin from "./plugins/ImagesPlugin";
 import AnswerPlugin from "./plugins/AnswerPlugin";
 import CustomAnswerPlugin from "./plugins/CustomAnswerPlugin";
 import UnitCompletedPlugin from "./plugins/UnitCompletedPlugin";
+import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
 
 import {
   EditorNodes,
@@ -177,6 +178,7 @@ export function Workbook({
             <AnswerPlugin />
             <CustomAnswerPlugin />
             <UnitCompletedPlugin />
+            <CodeHighlightPlugin />
 
             <Box
               sx={{

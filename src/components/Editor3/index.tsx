@@ -84,6 +84,7 @@ import {
 } from "./editorConfig";
 import { Drawer } from "./styledComponents";
 import { useAppShell } from "../AppShellContext";
+import ComponentErrorBoundary from "../ComponentErrorBoundary";
 
 /**
  * Custom OnChange Plugin following Lexical best practices
@@ -150,7 +151,7 @@ function EditorRefPlugin(): null {
 /**
  * Main Editor component with collaborative editing support
  */
-export default function Editor(): React.ReactElement {
+function EditorContent(): React.ReactElement {
   const t = useTranslations("common");
   const { unit, session, editorRef, files, dictionary, questionBank } =
     useContext(UnitContext);
@@ -696,6 +697,14 @@ export default function Editor(): React.ReactElement {
         </DndWrapper>
       </SuggestionProvider>
     </TabProvider>
+  );
+}
+
+export default function Editor(): React.ReactElement {
+  return (
+    <ComponentErrorBoundary name="Editor">
+      <EditorContent />
+    </ComponentErrorBoundary>
   );
 }
 

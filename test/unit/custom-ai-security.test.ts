@@ -12,6 +12,19 @@ import {
   filterPII,
   buildSecurePrompt,
 } from "@/components/Editor3/nodes/CustomAINode/security";
+import { JAILBREAK_CORPUS } from "../fixtures/jailbreak-corpus";
+
+describe("shared jailbreak corpus", () => {
+  for (const attack of JAILBREAK_CORPUS) {
+    it(`filters ${attack.id}`, () => {
+      const sanitized = sanitizeInput(attack.prompt);
+      expect(sanitized).toContain("[FILTERED]");
+      for (const forbidden of attack.mustNotContain) {
+        expect(sanitized).not.toContain(forbidden);
+      }
+    });
+  }
+});
 
 describe("sanitizeInput", () => {
   it("returns empty string for null/undefined input", () => {

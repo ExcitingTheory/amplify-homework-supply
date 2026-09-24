@@ -4,8 +4,8 @@ backend:
     build:
       commands:
         - npm ci --cache .npm --prefer-offline
-        - '# Gen 2: Deploy backend'
-        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - "# Gen 2: Deploy backend (phased bootstrap keeps large schema under the CFN resource-count cap)"
+        - node scripts/deploy-bootstrap.mjs --mode=pipeline --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
@@ -17,18 +17,18 @@ frontend:
         - sudo swapon /swapfile
         - sudo swapon -s
         # - npm ci --legacy-peer-deps
-        - npm ci --cache .npm --prefer-offline 
+        - npm ci --cache .npm --prefer-offline
     build:
       commands:
         - env NODE_ENV=production npm run build
   artifacts:
     baseDirectory: .next
     files:
-      - '**/*'
-      - '!dev/**/*'
-      - '!cache/turbopack/**/*'
-      - '!cache/webpack/**/*'
-      - '!**/*.map'
+      - "**/*"
+      - "!dev/**/*"
+      - "!cache/turbopack/**/*"
+      - "!cache/webpack/**/*"
+      - "!**/*.map"
   cache:
     paths:
       - node_modules/**/*

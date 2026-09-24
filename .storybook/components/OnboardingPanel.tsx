@@ -542,7 +542,6 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     });
 
     // If there's a story link, add a step for navigation
-    const storyId = getStoryIdForMode(task);
     if (storyId) {
       steps.push(
         createNavigationStep({

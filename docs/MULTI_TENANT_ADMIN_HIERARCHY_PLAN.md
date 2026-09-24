@@ -37,6 +37,28 @@ Each institution has an Institution Admin over its own walled data; the tiers ab
 | Customer Admin | Subgroup | one subgroup + all below | its institutions and institution admins |
 | Institution Admin | Institution | one walled institution | that institution's users and data |
 
+## Hierarchical AI ceilings
+
+AI limits follow the same authority tree and are inherited downward:
+
+```text
+Platform ceiling
+  -> Group ceiling
+    -> Tenant ceiling
+      -> Section ceiling
+```
+
+- A **Super Admin** adjusts the platform ceiling and any ceilings below it.
+- A **Platform/Staff Admin** adjusts group ceilings and any ceilings below that group.
+- A **Customer Admin** adjusts tenant ceilings and section ceilings within that tenant.
+- An **Institution/Tenant Admin** manages section-level requests and approved section ceilings within the tenant.
+- An **Instructor** may select an allowed model and lower section limits, but cannot raise them directly.
+- A section request records concrete numeric limits and a selected model. Only an authorized admin may approve it.
+- An approved section ceiling may exceed the current tenant ceiling, but never the platform safety ceiling.
+- Raising a parent ceiling does not change an existing approved child ceiling; a further increase requires a new request and approval.
+
+The effective section policy is the instructor's selected values bounded by the applicable approved section ceiling and the platform safety ceiling. Without an approved section exception, the tenant ceiling is the maximum available to the section.
+
 ## Authorization rule
 
 One rule governs every action, and every requirement above is a consequence of it: an actor may act on a target node only if they hold a sufficient role at an ancestor-or-self of that node.

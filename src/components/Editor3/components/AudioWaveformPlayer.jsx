@@ -26,6 +26,8 @@ import { getCleanupFilters } from "../../RecordingStudio3/RecordingSettings";
 // Module-level cache: avoids redundant fetch+decode when the same URL
 // is rendered by multiple players or across remounts.
 const waveformCache = new Map();
+const AUDIO_MIME_PREFIX = "audio/";
+const COPY_DROP_EFFECT = "copy";
 
 /**
  * AudioWaveformPlayer - Complete audio player with waveform visualization and recording
@@ -92,6 +94,7 @@ export default function AudioWaveformPlayer({
   audioFilters = [],
   cleanupStrength = "standard",
   compact = false,
+  acceptDroppedAudio = enableRecording,
 }) {
   const t = useTranslations("editor.shared");
   const tEditor = useTranslations("editor");
@@ -135,6 +138,7 @@ export default function AudioWaveformPlayer({
   const [recordedWaveformData, setRecordedWaveformData] = useState(null);
   const [computedWaveformData, setComputedWaveformData] = useState(null);
   const [pendingRecordingStart, setPendingRecordingStart] = useState(false);
+  const [dropActive, setDropActive] = useState(false);
 
   // Filtered playback cache: keyed by `${url}::${sortedFilters}`
   const filteredBlobCacheRef = useRef(new Map());
@@ -993,6 +997,54 @@ export default function AudioWaveformPlayer({
     }
   }, [mediaRecorder]);
 
+  const handleDroppedAudio = React.useCallback(
+    async (droppedFile) => {
+      if (
+        !acceptDroppedAudio ||
+        !droppedFile?.type?.startsWith(AUDIO_MIME_PREFIX)
+      ) {
+        return;
+      }
+
+      localAudioRef.current?.pause();
+      setLocalTime(0);
+      setLocalProgress(0);
+      setIsReady(false);
+      setAudioBlob(droppedFile);
+      setRecordedWaveformData(null);
+
+      try {
+        const waveform = await calculateWaveformData(droppedFile, width);
+        setRecordedWaveformData(waveform);
+      } catch (error) {
+        console.warn(
+          "[AudioWaveformPlayer] Dropped audio waveform failed:",
+          error,
+        );
+      }
+
+      try {
+        const audioContext = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+        const audioBuffer = await audioContext.decodeAudioData(
+          await droppedFile.arrayBuffer(),
+        );
+        setLocalDuration(audioBuffer.duration);
+        durationRef.current = audioBuffer.duration;
+        await audioContext.close();
+      } catch (error) {
+        console.warn(
+          "[AudioWaveformPlayer] Dropped audio duration failed:",
+          error,
+        );
+      }
+
+      onRecordingComplete?.(droppedFile, null);
+    },
+    [acceptDroppedAudio, onRecordingComplete, width],
+  );
+
   if (!sourceUrl && !file && !enableRecording) {
     return (
       <Box sx={{ p: 2, textAlign: "center", color: "text.secondary" }}>
@@ -1003,6 +1055,43 @@ export default function AudioWaveformPlayer({
 
   return (
     <Box
+      onDragEnter={(event) => {
+        if (!acceptDroppedAudio) return;
+        if (
+          [...event.dataTransfer.items].some((item) =>
+            item.type.startsWith(AUDIO_MIME_PREFIX),
+          )
+        ) {
+          event.preventDefault();
+          setDropActive(true);
+        }
+      }}
+      onDragOver={(event) => {
+        if (!acceptDroppedAudio) return;
+        if (
+          [...event.dataTransfer.items].some((item) =>
+            item.type.startsWith(AUDIO_MIME_PREFIX),
+          )
+        ) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = COPY_DROP_EFFECT;
+        }
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setDropActive(false);
+        }
+      }}
+      onDrop={(event) => {
+        if (!acceptDroppedAudio) return;
+        const droppedFile = [...event.dataTransfer.files].find((item) =>
+          item.type.startsWith(AUDIO_MIME_PREFIX),
+        );
+        if (!droppedFile) return;
+        event.preventDefault();
+        setDropActive(false);
+        void handleDroppedAudio(droppedFile);
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       sx={{
@@ -1010,8 +1099,12 @@ export default function AudioWaveformPlayer({
         flexDirection: "column",
         gap: 1,
         p: compact ? 0 : 2,
-        border: compact ? "none" : "1px solid",
-        borderColor: compact ? "transparent" : "divider",
+        border: dropActive ? "2px dashed" : compact ? "none" : "1px solid",
+        borderColor: dropActive
+          ? "primary.main"
+          : compact
+            ? "transparent"
+            : "divider",
         borderRadius: compact ? 0 : 2,
         backgroundColor: compact ? "transparent" : "background.paper",
         width: "100%",

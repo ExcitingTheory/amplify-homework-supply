@@ -4,6 +4,7 @@ import {
   type Browser,
   expect,
 } from "@playwright/test";
+import { passwordForTestUser } from "../devCredentials";
 
 // ---------------------------------------------------------------------------
 // Test Users
@@ -11,26 +12,18 @@ import {
 
 export const INSTRUCTOR = {
   username: process.env.TEACHER_USERNAME || "instructor1@example.com",
-  password:
-    process.env.TEACHER_PASSWORD ||
-    process.env.TEST_USER_PASSWORD ||
-    (() => {
-      throw new Error(
-        "TEACHER_PASSWORD or TEST_USER_PASSWORD env var required",
-      );
-    })(),
+  password: passwordForTestUser(
+    process.env.TEACHER_USERNAME || "instructor1@example.com",
+    "TEACHER_PASSWORD",
+  ),
 };
 
 export const STUDENT = {
   username: process.env.LEARNER_USERNAME || "student1@example.com",
-  password:
-    process.env.LEARNER_PASSWORD ||
-    process.env.TEST_USER_PASSWORD ||
-    (() => {
-      throw new Error(
-        "LEARNER_PASSWORD or TEST_USER_PASSWORD env var required",
-      );
-    })(),
+  password: passwordForTestUser(
+    process.env.LEARNER_USERNAME || "student1@example.com",
+    "LEARNER_PASSWORD",
+  ),
 };
 
 export type TestUser = { username: string; password: string };

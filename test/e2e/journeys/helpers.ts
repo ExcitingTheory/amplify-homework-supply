@@ -1,26 +1,23 @@
 import { type Page, expect } from "@playwright/test";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
+import { passwordForTestUser } from "../../devCredentials";
 
 // ---------------------------------------------------------------------------
 // Test Users
 // ---------------------------------------------------------------------------
-
-function requirePassword(envVar: string): string {
-  const value = process.env[envVar] || process.env.TEST_USER_PASSWORD;
-  if (!value)
-    throw new Error(
-      `${envVar} or TEST_USER_PASSWORD env var is required for E2E tests`,
-    );
-  return value;
-}
 
 export const ADMIN = {
   username:
     process.env.ADMIN_USERNAME ||
     process.env.CRAWL_ADMIN_USERNAME ||
     "admin@example.com",
-  password: requirePassword("TEST_USER_PASSWORD"),
+  password: passwordForTestUser(
+    process.env.ADMIN_USERNAME ||
+      process.env.CRAWL_ADMIN_USERNAME ||
+      "admin@example.com",
+    "ADMIN_PASSWORD",
+  ),
 };
 
 export const INSTRUCTOR = {
@@ -28,7 +25,12 @@ export const INSTRUCTOR = {
     process.env.TEACHER_USERNAME ||
     process.env.CRAWL_INSTRUCTOR_USERNAME ||
     "instructor1@example.com",
-  password: requirePassword("TEST_USER_PASSWORD"),
+  password: passwordForTestUser(
+    process.env.TEACHER_USERNAME ||
+      process.env.CRAWL_INSTRUCTOR_USERNAME ||
+      "instructor1@example.com",
+    "TEACHER_PASSWORD",
+  ),
 };
 
 export const STUDENT_1 = {
@@ -36,12 +38,17 @@ export const STUDENT_1 = {
     process.env.LEARNER_USERNAME ||
     process.env.CRAWL_LEARNER_USERNAME ||
     "student1@example.com",
-  password: requirePassword("TEST_USER_PASSWORD"),
+  password: passwordForTestUser(
+    process.env.LEARNER_USERNAME ||
+      process.env.CRAWL_LEARNER_USERNAME ||
+      "student1@example.com",
+    "LEARNER_PASSWORD",
+  ),
 };
 
 export const STUDENT_2 = {
   username: "student2@example.com",
-  password: requirePassword("TEST_USER_PASSWORD"),
+  password: passwordForTestUser("student2@example.com", "LEARNER_PASSWORD"),
 };
 
 export type TestUser = { username: string; password: string };

@@ -26,6 +26,11 @@ import { z } from "zod";
 import { blockTools } from "../_shared/blockTools";
 import { validateAuth } from "../_shared/auth";
 import {
+  checkAiRateLimit,
+  getClientKey,
+  rateLimitResponse,
+} from "../_shared/rateLimit";
+import {
   resolvePersona,
   filterToolsByPersona,
   buildPersonaSystemMessage,
@@ -580,6 +585,9 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    const rateLimit = checkAiRateLimit(getClientKey(req));
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds);
 
     const body = await req.json();
     const { messages, context, persona: explicitPersona } = body;

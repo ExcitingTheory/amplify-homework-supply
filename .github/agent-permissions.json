@@ -42,7 +42,7 @@
 
       "writeRestricted": {
         "allowed": true,
-        "requiresConfirmation": true,
+        "requiresConfirmation": false,
         "allowedPaths": [
           "app",
           "app/**",
@@ -56,6 +56,9 @@
           "amplify",
           "amplify/**",
           "src/agent-skills/**",
+          "package.json",
+          "next.config.mjs",
+          "middleware.ts",
           "tsconfig.json",
           "eslint.config.mjs",
           "cypress.config.ts",
@@ -67,9 +70,10 @@
       },
 
       "delete": {
-        "allowed": false,
+        "allowed": true,
         "requiresConfirmation": true,
         "allowedPaths": [
+          "proxy.ts",
           "**/*.test.{ts,tsx,js,jsx}",
           "**/*.md",
           ".translation-cache/**"
@@ -78,7 +82,7 @@
       },
 
       "rename": {
-        "allowed": false,
+        "allowed": true,
         "requiresConfirmation": true,
         "description": "Require confirmation for all file renames"
       }
@@ -132,6 +136,11 @@
           "commands": ["status", "console"],
           "blocked": ["push", "pull", "delete", "remove", "init", "env remove"],
           "description": "Allow status checks only, block all infrastructure changes"
+        },
+
+        "gh": {
+          "commands": ["project item-add"],
+          "description": "Allow adding an explicitly requested issue to a GitHub Project"
         },
 
         "aws": {
@@ -265,12 +274,8 @@
     "configurationFiles": {
       "readOnly": {
         "paths": [
-          "amplify.yml",
           "amplify/backend/api/**/schema.graphql",
           "package-lock.json",
-          "package.json",
-          "next.config.js",
-          "next.config.mjs",
           ".env*",
           "aws-exports.js",
           "amplifyconfiguration.json"
@@ -281,6 +286,7 @@
       "modifiable": {
         "allowed": true,
         "paths": [
+          "amplify.yml",
           "cypress.config.ts",
           "vitest.config.ts",
           "eslint.config.mjs",

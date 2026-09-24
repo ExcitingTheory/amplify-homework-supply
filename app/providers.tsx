@@ -59,7 +59,7 @@ cognitoUserPoolsTokenProvider.setKeyValueStorage(
   new ChunkedCookieStorage({ sameSite: "lax" }),
 );
 
-/** Routes that don't require authentication (defense-in-depth, proxy.ts is primary gate) */
+/** Routes that don't require authentication (defense-in-depth, middleware.ts is primary gate) */
 const PUBLIC_PATHS = ["/", "/privacy", "/offline"];
 
 function AuthGate({ children }: { children: React.ReactNode }) {

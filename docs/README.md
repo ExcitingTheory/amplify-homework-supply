@@ -1,6 +1,6 @@
 # Homework Supply Documentation
 
-Elearning platform built with Next.js 16, AWS Amplify Gen 2, and OpenAI.
+Elearning platform built with Next.js 15, AWS Amplify Gen 2, and OpenAI.
 
 ## Quick Start
 
@@ -30,7 +30,7 @@ Elearning platform built with Next.js 16, AWS Amplify Gen 2, and OpenAI.
 
 ### App Router & Server Actions
 
-> **Next.js 16.x** with App Router | **i18n**: `next-intl` (6 locales, 10 namespaces) | **PWA**: Serwist
+> **Next.js 15.x** with App Router | **i18n**: `next-intl` (6 locales, 10 namespaces) | **PWA**: Serwist
 
 All routes live under `app/[locale]/`.
 
@@ -89,7 +89,7 @@ All routes live under `app/[locale]/`.
 No Lambda functions are called from UI code. Retained Lambdas (streakResetCron, yjsSync, mediaConvert, notificationCron) are purely event-driven.
 
 **Key decisions**:
-1. No `middleware.ts` — Next.js 16+ handles locale routing without it.
+1. Locale routing uses the root `middleware.ts` entrypoint for the Next.js 15 deployment target.
 2. Emotion SSR — MUI v7 streaming support, no manual `getInitialProps`.
 3. Provider nesting in `app/providers.tsx` (`'use client'`): CacheProvider → ThemeProvider → AuthProvider → SettingsProvider → ChatContextProvider → children.
 
@@ -151,7 +151,7 @@ Server: `amplify/functions/yjsSync/botObserver.ts` handles bot streaming via Ope
 ## Support & Contact
 
 - **Discord**: [Join Discord](https://discord.gg/BNsTK6nvYw)
-- **Email**: info@homework.supply.com
+- **Email**: info@homework.supply
 - **GitHub**: [Repository](https://github.com/ExcitingTheory/amplify-homework-supply)
 - **Issues**: [Bug Reports](https://github.com/ExcitingTheory/amplify-homework-supply/issues)
 - **Security**: See [SECURITY.md](https://github.com/ExcitingTheory/amplify-homework-supply/blob/main/SECURITY.md)

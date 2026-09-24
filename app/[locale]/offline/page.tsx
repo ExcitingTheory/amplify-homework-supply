@@ -1,7 +1,7 @@
-"use cache";
-
-import { cacheLife } from "next/cache";
 import { OfflinePageContent } from "./OfflinePageContent";
+
+export const dynamic = "force-static";
+export const revalidate = false;
 
 /**
  * Offline fallback page shown by the service worker when a navigation
@@ -10,6 +10,5 @@ import { OfflinePageContent } from "./OfflinePageContent";
  * the OfflineDataStore (IndexedDB).
  */
 export default async function OfflinePage() {
-  cacheLife("max");
   return <OfflinePageContent />;
 }

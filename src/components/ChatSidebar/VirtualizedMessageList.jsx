@@ -1,10 +1,10 @@
 /**
  * VirtualizedMessageList Component
- * 
+ *
  * Virtualized list for rendering chat messages with optimal performance.
  * Only renders messages that are visible in the viewport + overscan,
  * dramatically improving performance for long chat histories.
- * 
+ *
  * Features:
  * - Virtual scrolling with @tanstack/react-virtual
  * - Dynamic height calculation per message
@@ -14,38 +14,48 @@
  * - Accessibility support
  */
 
-import React, { useRef, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useTranslations } from 'next-intl';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { LexicalMessageRenderer } from './LexicalMessageRenderer';
-import { useAutoScroll } from './hooks/useAutoScroll';
-import styles from './VirtualizedMessageList.module.css';
+import React, { useRef, useMemo } from "react";
+import PropTypes from "prop-types";
+import { useTranslations } from "next-intl";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { LexicalMessageRenderer } from "./LexicalMessageRenderer";
+import { SyntaxHighlight } from "../SyntaxHighlight";
+import { useAutoScroll } from "./hooks/useAutoScroll";
+import styles from "./VirtualizedMessageList.module.css";
 
 /**
  * Message Header Component
  * Shows role and timestamp for each message
  */
 const MessageHeader = ({ role, timestamp }) => {
-  const t = useTranslations('components');
-  const roleLabel = role === 'user' ? t('chatSidebar.messageList.you') : t('chatSidebar.messageList.assistant');
-  const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
-  
+  const t = useTranslations("components");
+  const roleLabel =
+    role === "user"
+      ? t("chatSidebar.messageList.you")
+      : t("chatSidebar.messageList.assistant");
+  const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : "";
+
   return (
-    <div style={{ 
-      fontSize: '12px', 
-      color: 'var(--text-secondary, #666)', 
-      marginBottom: '8px',
-      fontWeight: 500,
-    }}>
+    <div
+      style={{
+        fontSize: "12px",
+        color: "var(--text-secondary, #666)",
+        marginBottom: "8px",
+        fontWeight: 500,
+      }}
+    >
       {roleLabel} {timeStr && `• ${timeStr}`}
     </div>
   );
 };
 
 MessageHeader.propTypes = {
-  role: PropTypes.oneOf(['user', 'assistant']).isRequired,
-  timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
+  role: PropTypes.oneOf(["user", "assistant"]).isRequired,
+  timestamp: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.instanceOf(Date),
+  ]),
 };
 
 /**
@@ -54,32 +64,51 @@ MessageHeader.propTypes = {
  */
 const ToolResults = ({ parts }) => {
   if (!parts || parts.length === 0) return null;
-  
+
   return (
-    <div style={{ marginTop: '8px' }}>
+    <div style={{ marginTop: "8px" }}>
       {parts.map((part, idx) => {
-        if (part.type?.startsWith('tool-') && part.state === 'output-available') {
+        if (
+          part.type?.startsWith("tool-") &&
+          part.state === "output-available"
+        ) {
           return (
-            <div 
+            <div
               key={idx}
               style={{
-                background: 'var(--tool-result-bg, #f6f8fa)',
-                border: '1px solid var(--tool-result-border, #e1e4e8)',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                margin: '4px 0',
-                fontSize: '13px',
+                background: "var(--tool-result-bg, #f6f8fa)",
+                border: "1px solid var(--tool-result-border, #e1e4e8)",
+                borderRadius: "6px",
+                padding: "8px 12px",
+                margin: "4px 0",
+                fontSize: "13px",
               }}
             >
-              <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary, #666)' }}>
-                {part.type.replace('tool-', '')}
+              <div
+                style={{
+                  fontWeight: 600,
+                  marginBottom: "4px",
+                  color: "var(--text-secondary, #666)",
+                }}
+              >
+                {part.type.replace("tool-", "")}
               </div>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {typeof part.output === 'object' 
-                  ? JSON.stringify(part.output, null, 2)
-                  : part.output
-                }
-              </pre>
+              {typeof part.output === "object" ? (
+                <SyntaxHighlight
+                  language="json"
+                  code={JSON.stringify(part.output, null, 2)}
+                />
+              ) : (
+                <pre
+                  style={{
+                    margin: 0,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {part.output}
+                </pre>
+              )}
             </div>
           );
         }
@@ -95,7 +124,7 @@ ToolResults.propTypes = {
 
 /**
  * VirtualizedMessageList Component
- * 
+ *
  * @param {Object} props
  * @param {Array} props.messages - Array of message objects
  * @param {boolean} [props.showScrollButton=true] - Show scroll-to-bottom button
@@ -108,7 +137,7 @@ ToolResults.propTypes = {
  * @param {boolean} [props.useLexicalRenderer=true] - Use Lexical for markdown rendering
  * @param {string} [props['data-testid']] - Test ID for E2E testing
  */
-export const VirtualizedMessageList = ({ 
+export const VirtualizedMessageList = ({
   messages,
   showScrollButton = true,
   estimatedMessageHeight = 150,
@@ -118,18 +147,18 @@ export const VirtualizedMessageList = ({
   renderMessage,
   renderToolPart,
   useLexicalRenderer = true,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
-  const t = useTranslations('components');
+  const t = useTranslations("components");
   const parentRef = useRef(null);
-  
+
   // Auto-scroll hook
-  const { isAtBottom, hasNewMessages, scrollToBottom, handleScroll } = useAutoScroll(
-    messages,
-    parentRef,
-    { bottomThreshold: 50, smoothScroll: true }
-  );
-  
+  const { isAtBottom, hasNewMessages, scrollToBottom, handleScroll } =
+    useAutoScroll(messages, parentRef, {
+      bottomThreshold: 50,
+      smoothScroll: true,
+    });
+
   // Virtual scrolling configuration
   const virtualizer = useVirtualizer({
     count: messages.length,
@@ -137,45 +166,47 @@ export const VirtualizedMessageList = ({
     estimateSize: () => estimatedMessageHeight,
     overscan,
   });
-  
+
   // Memoize virtual items for performance
   const virtualItems = virtualizer.getVirtualItems();
-  
+
   // Empty state
   if (messages.length === 0) {
     if (emptyState) {
       return emptyState;
     }
-    
+
     return (
       <div className={styles.empty}>
         <div className={styles.emptyIcon}>💬</div>
-        <div className={styles.emptyText}>{t('chatSidebar.emptyState')}</div>
-        <div className={styles.emptyHint}>{t('chatSidebar.emptyStateHint')}</div>
+        <div className={styles.emptyText}>{t("chatSidebar.emptyState")}</div>
+        <div className={styles.emptyHint}>
+          {t("chatSidebar.emptyStateHint")}
+        </div>
       </div>
     );
   }
-  
+
   return (
     <div className={styles.container}>
-      <div 
-        ref={parentRef} 
+      <div
+        ref={parentRef}
         className={styles.scrollContainer}
         onScroll={handleScroll}
         role="log"
         aria-live="polite"
-        aria-label={t('chatSidebar.messageList.chatMessagesLabel')}
+        aria-label={t("chatSidebar.messageList.chatMessagesLabel")}
         data-testid={dataTestId}
       >
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
-            position: 'relative',
+            position: "relative",
           }}
         >
           {virtualItems.map((virtualItem) => {
             const message = messages[virtualItem.index];
-            
+
             // Allow custom message rendering
             if (renderMessage) {
               return (
@@ -184,10 +215,10 @@ export const VirtualizedMessageList = ({
                   data-index={virtualItem.index}
                   ref={virtualizer.measureElement}
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    width: '100%',
+                    width: "100%",
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
@@ -195,20 +226,23 @@ export const VirtualizedMessageList = ({
                 </div>
               );
             }
-            
+
             // Default rendering with Lexical
-            const isUser = message.role === 'user';
-            
+            const isUser = message.role === "user";
+
             // Extract text content from message parts
-            const textContent = message.parts
-              ?.filter(p => p.type === 'text')
-              .map(p => p.text)
-              .join('') || message.content || '';
-            
+            const textContent =
+              message.parts
+                ?.filter((p) => p.type === "text")
+                .map((p) => p.text)
+                .join("") ||
+              message.content ||
+              "";
+
             // Extract tool parts
-            const toolParts = message.parts
-              ?.filter(p => p.type?.startsWith('tool-')) || [];
-            
+            const toolParts =
+              message.parts?.filter((p) => p.type?.startsWith("tool-")) || [];
+
             return (
               <div
                 key={virtualItem.key}
@@ -216,59 +250,61 @@ export const VirtualizedMessageList = ({
                 ref={virtualizer.measureElement}
                 className={`${styles.messageWrapper} ${isUser ? styles.user : styles.assistant}`}
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: 0,
                   left: 0,
-                  width: '100%',
+                  width: "100%",
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
                 onClick={() => onMessageClick?.(message)}
                 role="article"
-                aria-label={isUser ? t('chatSidebar.messageList.userMessageLabel') : t('chatSidebar.messageList.assistantMessageLabel')}
+                aria-label={
+                  isUser
+                    ? t("chatSidebar.messageList.userMessageLabel")
+                    : t("chatSidebar.messageList.assistantMessageLabel")
+                }
               >
-                <MessageHeader 
-                  role={message.role} 
-                  timestamp={message.createdAt} 
+                <MessageHeader
+                  role={message.role}
+                  timestamp={message.createdAt}
                 />
-                
+
                 {textContent && useLexicalRenderer && (
                   <LexicalMessageRenderer
                     content={textContent}
                     isStreaming={message.isStreaming}
                   />
                 )}
-                
-                {textContent && !useLexicalRenderer && (
-                  <div>{textContent}</div>
-                )}
-                
+
+                {textContent && !useLexicalRenderer && <div>{textContent}</div>}
+
                 {toolParts.length > 0 && !renderToolPart && (
                   <ToolResults parts={toolParts} />
                 )}
-                
-                {toolParts.length > 0 && renderToolPart && (
+
+                {toolParts.length > 0 &&
+                  renderToolPart &&
                   toolParts.map((part, idx) => (
                     <div key={part.toolCallId || idx}>
                       {renderToolPart(part, message, idx)}
                     </div>
-                  ))
-                )}
+                  ))}
               </div>
             );
           })}
         </div>
       </div>
-      
+
       {/* Scroll to bottom button */}
       {showScrollButton && !isAtBottom && hasNewMessages && (
-        <button 
+        <button
           className={styles.scrollToBottom}
           onClick={() => scrollToBottom()}
-          aria-label={t('chatSidebar.messageList.scrollToBottomLabel')}
+          aria-label={t("chatSidebar.messageList.scrollToBottomLabel")}
           type="button"
         >
           <span>↓</span>
-          <span>{t('chatSidebar.messageList.newMessages')}</span>
+          <span>{t("chatSidebar.messageList.newMessages")}</span>
         </button>
       )}
     </div>
@@ -276,14 +312,20 @@ export const VirtualizedMessageList = ({
 };
 
 VirtualizedMessageList.propTypes = {
-  messages: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    role: PropTypes.oneOf(['user', 'assistant']).isRequired,
-    parts: PropTypes.arrayOf(PropTypes.object),
-    content: PropTypes.string,
-    createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
-    isStreaming: PropTypes.bool,
-  })).isRequired,
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      role: PropTypes.oneOf(["user", "assistant"]).isRequired,
+      parts: PropTypes.arrayOf(PropTypes.object),
+      content: PropTypes.string,
+      createdAt: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+        PropTypes.instanceOf(Date),
+      ]),
+      isStreaming: PropTypes.bool,
+    }),
+  ).isRequired,
   showScrollButton: PropTypes.bool,
   estimatedMessageHeight: PropTypes.number,
   overscan: PropTypes.number,

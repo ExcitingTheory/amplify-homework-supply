@@ -486,7 +486,7 @@ const ReportCard = a.customType({
  * linked by hasMany/hasOne/belongsTo/manyToMany) are never split across
  * phases, and each phase is a strict superset of the previous one, so later
  * phases only ever ADD models, never touching already-created resources.
- * See scripts/sandbox-bootstrap.mjs for the multi-phase orchestration.
+ * See scripts/deploy-bootstrap.mjs for the multi-phase orchestration.
  */
 function filterSchemaForBootstrapPhase<T extends Record<string, unknown>>(
   schemaDefinition: T,

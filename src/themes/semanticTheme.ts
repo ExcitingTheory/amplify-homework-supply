@@ -55,6 +55,8 @@ export const SEMANTIC_THEME = {
   typography: {
     fontFamily:
       '"Source Sans 3", "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    codeFontFamily:
+      '"SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     headingWeight: 700,
     controlWeight: 600,
     denseCaptionSize: "0.75rem",
@@ -323,6 +325,13 @@ const editorRootCssVars = `
   --let-h6-weight: ${editorH.h6.weight};
   --let-heading-line-height: ${SEMANTIC_THEME.typography.lineHeight.heading};
   --let-heading-line-height-dense: ${SEMANTIC_THEME.typography.lineHeight.dense};
+}
+
+pre,
+code,
+kbd,
+samp {
+  font-family: ${SEMANTIC_THEME.typography.codeFontFamily};
 }
 `;
 

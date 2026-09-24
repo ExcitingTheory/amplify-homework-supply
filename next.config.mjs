@@ -1,6 +1,10 @@
 import { readFileSync } from "fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 import withBundleAnalyzerInit from "@next/bundle-analyzer";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -32,17 +36,11 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@mui/x-data-grid"],
 
-  // React Compiler: automatic memoization of all components
-  reactCompiler: true,
-
-  // Cache Components: enables PPR with "use cache" directive
-  cacheComponents: true,
-
   // Disable dev indicators to suppress Turbopack isrManifest HMR warnings
   devIndicators: false,
 
   // Security headers applied to all routes.
-  // CSP is set per-request in proxy.ts (requires a per-request nonce).
+  // CSP is set per-request in middleware.ts (requires a per-request nonce).
   async headers() {
     return [
       {
@@ -86,6 +84,11 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // Skip ESLint during build to avoid OOM; `npm run lint` runs it separately
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Optimize images via CloudFront CDN + pre-generated WebP variants.
   // Uses a custom loader (src/utils/cdnImageLoader.js) that maps next/image
   // width requests to the nearest pre-generated variant (small/medium/large.webp).
@@ -95,20 +98,29 @@ const nextConfig = {
     loaderFile: "./src/utils/cdnImageLoader.js",
   },
 
-  // Turbopack config
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "onnxruntime-node": path.resolve(
+          __dirname,
+          "src/stubs/onnxruntime-node.js",
+        ),
+      };
+    }
+    return config;
+  },
+
+  // Dev-only alias for the native ONNX addon.
   turbopack: {
     resolveAlias: {
-      // Prevent onnxruntime-node (native Node addon) from being bundled into
-      // client chunks. @huggingface/transformers conditionally imports it, but
-      // Turbopack doesn't respect /* webpackIgnore: true */ dynamic import comments.
       "onnxruntime-node": "./src/stubs/onnxruntime-node.js",
     },
   },
 
-  // Persist Turbopack compiler artifacts on disk for faster dev restarts
   // Optimize barrel imports to tree-shake unused exports from large packages
   experimental: {
-    turbopackFileSystemCacheForDev: true,
+    reactCompiler: true,
     optimizePackageImports: [
       "@mui/material",
       "@mui/icons-material",
