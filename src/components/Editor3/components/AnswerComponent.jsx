@@ -38,6 +38,7 @@ const SketchPad = dynamic(async () => (await import("./SketchPad")).default, {
 });
 
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
+import { LEARNER_EXERCISE_WAVEFORM_PRESET } from "../../../utils/waveformDefaults";
 import getCachedUrl from "../../../utils/getCachedUrl";
 
 // Component to handle signed URL for word audio
@@ -610,8 +611,8 @@ function ByWordList(
                 <AudioAutoSubmitWrapper>
                   {({ wrapOnRecordingComplete }) => (
                     <AudioWaveformPlayer
-                      width={480}
-                      height={64}
+                      width={LEARNER_EXERCISE_WAVEFORM_PRESET.width}
+                      height={LEARNER_EXERCISE_WAVEFORM_PRESET.height}
                       compact
                       enableRecording={true}
                       gradeId={grade?.id}
@@ -992,8 +993,8 @@ function ByDefinitionWordList(
                 <AudioAutoSubmitWrapper>
                   {({ wrapOnRecordingComplete }) => (
                     <AudioWaveformPlayer
-                      width={480}
-                      height={64}
+                      width={LEARNER_EXERCISE_WAVEFORM_PRESET.width}
+                      height={LEARNER_EXERCISE_WAVEFORM_PRESET.height}
                       compact
                       enableRecording={true}
                       gradeId={grade?.id}

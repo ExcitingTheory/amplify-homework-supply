@@ -348,6 +348,33 @@ export const semanticComponentOverrides: Components<Theme> = {
       },
     },
   },
+  MuiIconButton: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        border: "1px solid transparent",
+        borderRadius: SEMANTIC_THEME.radius.control,
+        overflow: "hidden",
+        "& .MuiTouchRipple-root": {
+          borderRadius: "inherit",
+        },
+        "& .MuiTouchRipple-ripple, & .MuiTouchRipple-child": {
+          borderRadius: SEMANTIC_THEME.radius.control,
+        },
+        "&:hover": {
+          backgroundColor: theme.palette.action.hover,
+          boxShadow: `inset 0 1px 2px ${alpha(theme.palette.common.black, 0.12)}`,
+        },
+        '&[aria-pressed="true"], &[aria-expanded="true"]': {
+          borderColor: theme.palette.divider,
+          backgroundColor: theme.palette.action.selected,
+          boxShadow: `inset 0 1px 2px ${alpha(theme.palette.common.black, 0.16)}`,
+        },
+        '&.Mui-disabled[aria-pressed="true"]': {
+          opacity: 0.72,
+        },
+      }),
+    },
+  },
   MuiCheckbox: {
     defaultProps: {
       ...roundedCheckboxIcons,

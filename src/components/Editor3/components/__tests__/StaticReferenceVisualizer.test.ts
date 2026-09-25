@@ -12,7 +12,7 @@ describe("StaticReferenceVisualizer geometry", () => {
 
     expect(path).toMatch(/^M /);
     expect(path).toMatch(/ Z$/);
-    expect(path.split(" L ")).toHaveLength(181);
+    expect(path.split(" L ")).toHaveLength(97);
   });
 
   it("adds smooth ripple irregularity when configured", () => {
@@ -67,6 +67,57 @@ describe("StaticReferenceVisualizer geometry", () => {
 
     expect(offsetPath).not.toBe(centeredPath);
     expect(offsetPath).toMatch(/ Z$/);
+  });
+
+  it("keeps flowing paths within the configured bounds box", () => {
+    const path = buildFlowingRingPath(0.5, {
+      flowingAsymmetry: 30,
+      flowingBaseRadius: 130,
+      flowingChaosIntensity: 1,
+      flowingLobeAmplitude: 40,
+      flowingMaxRadius: 120,
+      flowingRippleAmplitude: 20,
+      flowingRippleIrregularity: 20,
+      flowingSwimAmplitude: 20,
+      irregularityPhase: 2,
+      strandOffset: 1.4,
+    });
+    const coordinates = path
+      .replace(/^M /, "")
+      .replace(/ Z$/, "")
+      .split(" L ")
+      .map((point) => point.split(" ").map(Number));
+
+    expect(
+      coordinates.every(
+        ([x, y]) => x >= 39.99 && x <= 280.01 && y >= 39.99 && y <= 280.01,
+      ),
+    ).toBe(true);
+  });
+
+  it("fits oversized flowing paths to the box instead of a circular rim", () => {
+    const path = buildFlowingRingPath(0.5, {
+      flowingAsymmetry: 30,
+      flowingBaseRadius: 130,
+      flowingChaosIntensity: 1,
+      flowingLobeAmplitude: 40,
+      flowingMaxRadius: 120,
+      flowingRippleAmplitude: 20,
+      flowingRippleIrregularity: 20,
+      flowingSwimAmplitude: 20,
+      irregularityPhase: 2,
+      strandOffset: 1.4,
+    });
+    const radii = path
+      .replace(/^M /, "")
+      .replace(/ Z$/, "")
+      .split(" L ")
+      .map((point) => {
+        const [x, y] = point.split(" ").map(Number);
+        return Math.hypot(x - 160, y - 160);
+      });
+
+    expect(Math.max(...radii)).toBeGreaterThan(120);
   });
 
   it("creates deterministic bounded variation for flowing lines", () => {

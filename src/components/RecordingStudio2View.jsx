@@ -10,6 +10,7 @@ import StaticWaveform from "./Editor3/components/StaticWaveform";
 import AudioWaveformPlayer from "./Editor3/components/AudioWaveformPlayer";
 import MicLevelIndicator from "./Editor3/components/MicLevelIndicator";
 import getCachedUrl from "../utils/getCachedUrl";
+import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../utils/waveformDefaults";
 
 // Component to handle async audio URL loading for an existing recording.
 export function AudioRecordingCard({ file, index, identityId }) {
@@ -38,8 +39,6 @@ export function AudioRecordingCard({ file, index, identityId }) {
           <AudioWaveformPlayer
             audioUrl={audioUrl}
             file={file}
-            width={600}
-            height={80}
             title={
               file.name ||
               t("recordingStudio2.recordingNumber", {
@@ -58,8 +57,8 @@ export function AudioRecordingCard({ file, index, identityId }) {
             </Typography>
             <StaticWaveform
               file={file}
-              width={600}
-              height={80}
+              width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
+              height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
               backgroundColor="transparent"
             />
             <Typography variant="caption" color="text.secondary">
@@ -197,7 +196,11 @@ export function RecordingStudio2View({
           <Typography variant="caption" color="text.secondary">
             {t("recordingStudio2.staticWaveformPreview")}
           </Typography>
-          <StaticWaveform file={audioFile} width={600} height={80} />
+          <StaticWaveform
+            file={audioFile}
+            width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
+            height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
+          />
         </Box>
       )}
       {!embedded && waveformData && audioBlob && (
@@ -205,7 +208,11 @@ export function RecordingStudio2View({
           <Typography variant="caption" color="text.secondary">
             {t("recordingStudio2.recordedAudioWaveform")}
           </Typography>
-          <StaticWaveform waveformData={waveformData} width={600} height={80} />
+          <StaticWaveform
+            waveformData={waveformData}
+            width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
+            height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
+          />
         </Box>
       )}
     </>

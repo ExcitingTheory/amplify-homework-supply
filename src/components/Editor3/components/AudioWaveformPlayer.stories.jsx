@@ -9,6 +9,7 @@ import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import { Box } from "@mui/material";
 import { MOCK_AUDIO_URL_1 } from "../../../../.storybook/__mocks__/media";
+import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../utils/waveformDefaults";
 
 export default {
   title: "✏️ Lesson Editor/Media/Audio Waveform Player",
@@ -29,7 +30,7 @@ export default {
     docs: {
       description: {
         component:
-          "Complete audio player with waveform visualization, playback controls, and progress tracking.",
+          "Complete audio player with waveform visualization, an optional prompt, playback controls, and progress tracking.",
       },
     },
   },
@@ -37,10 +38,9 @@ export default {
 
 export const WithWaveformData = {
   args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
     audioUrl: MOCK_AUDIO_URL_1,
-    width: 600,
-    height: 80,
-    title: "Sample Audio with Waveform",
+    prompt: "Listen carefully, then repeat the phrase.",
     showDuration: true,
   },
   parameters: {
@@ -70,18 +70,39 @@ export const CompactPlayer = {
   },
 };
 
-export const WithTitle = {
+export const WithPrompt = {
   args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
     audioUrl: MOCK_AUDIO_URL_1,
-    width: 600,
-    height: 80,
-    title: "Student Recording - December 24, 2025",
+    prompt: "How would you pronounce this phrase in a formal conversation?",
+    promptDefinition:
+      "A polite greeting used when addressing someone formally.",
     showDuration: true,
   },
   parameters: {
     docs: {
       description: {
-        story: "Player with a title displayed above the waveform.",
+        story:
+          "Player with an optional prompt panel between the waveform and playback controls.",
+      },
+    },
+  },
+};
+
+export const WithAudioPrompt = {
+  args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
+    enableRecording: true,
+    prompt: "Listen, then record your answer.",
+    promptAudioUrl: MOCK_AUDIO_URL_1,
+    promptDefinition: "こんばんは — a greeting used in the evening.",
+    showDuration: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Recording player with a full-width prompt band containing text, a word definition, and playable prompt audio.",
       },
     },
   },
@@ -89,9 +110,8 @@ export const WithTitle = {
 
 export const NoDuration = {
   args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
     audioUrl: MOCK_AUDIO_URL_1,
-    width: 600,
-    height: 80,
     showDuration: false,
   },
   parameters: {
@@ -179,10 +199,7 @@ MultiplePlayersInList.parameters = {
 };
 
 export const NoAudioSource = {
-  args: {
-    width: 600,
-    height: 80,
-  },
+  args: { ...AUDIO_WAVEFORM_PLAYER_DEFAULTS },
   parameters: {
     docs: {
       description: {
@@ -195,9 +212,8 @@ export const NoAudioSource = {
 
 export const WithRecording = {
   args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
     enableRecording: true,
-    width: 600,
-    height: 80,
     title: "Record Your Audio",
     showDuration: true,
     gradeId: "test-grade-123",
@@ -228,9 +244,8 @@ export const RecordingWithCallback = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <AudioWaveformPlayer
+        {...AUDIO_WAVEFORM_PLAYER_DEFAULTS}
         enableRecording={true}
-        width={600}
-        height={80}
         title="Record Your Pronunciation"
         showDuration={true}
         gradeId="test-grade-123"
@@ -351,9 +366,8 @@ RecordingWithCallback.play = async ({ canvasElement }) => {
 
 export const RecordingOnly = {
   args: {
+    ...AUDIO_WAVEFORM_PLAYER_DEFAULTS,
     enableRecording: true,
-    width: 600,
-    height: 80,
     title: "Recording Only Mode",
     showDuration: true,
   },
@@ -384,8 +398,6 @@ const UsageExample = () => (
 
 // With pre-calculated waveform data
 <AudioWaveformPlayer
-  width={600}
-  height={80}
   title="Student Recording"
 />
 `}
@@ -403,8 +415,6 @@ const UsageExample = () => (
       {`// With File model object (from DataStore)
 <AudioWaveformPlayer
   file={fileObject}
-  width={600}
-  height={80}
 />
 `}
     </pre>
@@ -421,8 +431,6 @@ const UsageExample = () => (
       {`// With audio URL and separate waveform
 <AudioWaveformPlayer
   audioUrl="https://example.com/audio.mp3"
-  width={600}
-  height={80}
   title="Playable Recording"
 />
 `}

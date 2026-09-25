@@ -8,7 +8,14 @@
  * @module CustomAINode/CustomAIComponent
  */
 
-import React, { useState, useRef, useEffect, useContext, lazy, Suspense } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  lazy,
+  Suspense,
+} from "react";
 import { useTranslations } from "next-intl";
 import {
   Box,
@@ -26,6 +33,7 @@ import AudioWaveformPlayer from "../../components/AudioWaveformPlayer";
 import UnitContext from "../../../../context/unitContext";
 import DictionaryContext from "../../../../context/dictionaryContext";
 import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhancements";
+import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../../utils/waveformDefaults";
 
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
 
@@ -100,9 +108,10 @@ export default function CustomAIComponent({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, GradingResponse>>({});
   const [grading, setGrading] = useState<Record<string, boolean>>({});
-  const [currentInputMethod, setCurrentInputMethod] = useState<CustomAIInputMode>(
-    allowedInput?.[0] || defaultInputMode || "text",
-  );
+  const [currentInputMethod, setCurrentInputMethod] =
+    useState<CustomAIInputMode>(
+      allowedInput?.[0] || defaultInputMode || "text",
+    );
 
   const sharedHistoryState = useRef(createEmptyHistoryState());
   const completionSavedRef = useRef(false);
@@ -377,7 +386,14 @@ export default function CustomAIComponent({
 
                 {/* Grading spinner */}
                 {isGrading && (
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 1, gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: 1,
+                      gap: 1,
+                    }}
+                  >
                     <CircularProgress size={20} />
                     <Typography variant="body2" color="text.secondary">
                       AI is grading your response...
@@ -419,12 +435,16 @@ export default function CustomAIComponent({
                 {currentInputMethod === "audio" && (
                   <Box sx={{ mb: 1 }}>
                     <AudioAutoSubmitWrapper>
-                      {({ wrapOnRecordingComplete }: { wrapOnRecordingComplete: Function }) => (
+                      {({
+                        wrapOnRecordingComplete,
+                      }: {
+                        wrapOnRecordingComplete: Function;
+                      }) => (
                         <AudioWaveformPlayer
                           audioUrl=""
                           file={{}}
-                          width={600}
-                          height={80}
+                          width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
+                          height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
                           showDuration={true}
                           enableRecording={true}
                           gradeId={grade?.id || ""}
@@ -528,7 +548,9 @@ export default function CustomAIComponent({
 
                         const reader = new FileReader();
                         reader.onload = async () => {
-                          const base64 = (reader.result as string).split(",")[1];
+                          const base64 = (reader.result as string).split(
+                            ",",
+                          )[1];
                           if (base64) {
                             setAnswers((prev) => ({
                               ...prev,

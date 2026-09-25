@@ -5,6 +5,15 @@ import { useTranslations } from "next-intl";
 import { hexToRgb } from "../../../utils/hexToRgb";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import { calculateWaveformData } from "../../../utils/calculateWaveformData";
+import {
+  STATIC_WAVEFORM_DEFAULTS,
+  WAVEFORM_COLOR_FALLBACKS,
+  WAVEFORM_CSS_VARIABLES,
+  WAVEFORM_LINE_STYLE,
+  resolveWaveformCssColor,
+  waveformAmplitudeColor,
+  waveformCssColor,
+} from "../../../utils/waveformDefaults";
 
 /**
  * StaticWaveform - Displays a static amplitude waveform for an audio file
@@ -27,18 +36,18 @@ import { calculateWaveformData } from "../../../utils/calculateWaveformData";
  *    is `(canvas.width / data.length) - 0.5` for subtle spacing.
  *
  * @param {Object} props
- * @param {Object} props.file - File object with path, identityId, and optional waveformData
- * @param {number[]} props.waveformData - Pre-calculated waveform data (overrides file calculation)
- * @param {number} props.width - Canvas width (default: 600)
- * @param {number} props.height - Canvas height (default: 100)
- * @param {string} props.backgroundColor - Background color (default: white)
- * @param {boolean} props.showLoading - Show loading indicator (default: true)
+ * @param {Object} [props.file] - File object with path, identityId, and optional waveformData
+ * @param {number[]} [props.waveformData] - Pre-calculated waveform data (overrides file calculation)
+ * @param {number} [props.width] - Canvas width (default: 600)
+ * @param {number} [props.height] - Canvas height (default: 100)
+ * @param {string} [props.backgroundColor] - Background color (default: semantic background.paper)
+ * @param {boolean} [props.showLoading] - Show loading indicator (default: true)
  */
 export default function StaticWaveform({
   file,
   waveformData: propWaveformData,
-  width = 600,
-  height = 100,
+  width = STATIC_WAVEFORM_DEFAULTS.width,
+  height = STATIC_WAVEFORM_DEFAULTS.height,
   backgroundColor,
   showLoading = true,
 }) {
@@ -54,18 +63,14 @@ export default function StaticWaveform({
     // Read CSS variables for canvas (which can't use var())
     const resolvedBg =
       backgroundColor ||
-      (typeof document !== "undefined"
-        ? getComputedStyle(document.documentElement)
-            .getPropertyValue("--mui-palette-background-paper")
-            .trim()
-        : "") ||
-      "#ffffff";
-    const mainColor =
-      (typeof document !== "undefined"
-        ? getComputedStyle(document.documentElement)
-            .getPropertyValue("--mui-palette-primary-main")
-            .trim()
-        : "") || "#556cd6";
+      resolveWaveformCssColor(
+        WAVEFORM_CSS_VARIABLES.background,
+        WAVEFORM_COLOR_FALLBACKS.background,
+      );
+    const mainColor = resolveWaveformCssColor(
+      WAVEFORM_CSS_VARIABLES.color,
+      WAVEFORM_COLOR_FALLBACKS.color,
+    );
     const rgbColor = hexToRgb(mainColor);
 
     const drawWaveform = async () => {
@@ -143,12 +148,19 @@ export default function StaticWaveform({
           const barHeight = displayData[i] * middle;
           const x = i * barWidth;
 
-          // Create gradient for visual appeal
-          const intensity = Math.floor(displayData[i] * 155) + 100;
-          ctx.fillStyle = `rgb(${intensity}, ${rgbColor.g}, ${rgbColor.b})`;
+          ctx.fillStyle = waveformAmplitudeColor(
+            displayData[i],
+            rgbColor.g,
+            rgbColor.b,
+          );
 
           // Draw from middle outward (symmetric)
-          ctx.fillRect(x, middle - barHeight, barWidth - 0.5, barHeight * 2);
+          ctx.fillRect(
+            x,
+            middle - barHeight,
+            barWidth - WAVEFORM_LINE_STYLE.barGap,
+            barHeight * 2,
+          );
         }
 
         setLoading(false);
@@ -167,14 +179,22 @@ export default function StaticWaveform({
 
             // Draw simple placeholder bars
             const middle = height / 2;
-            const bars = 50;
+            const bars = WAVEFORM_LINE_STYLE.placeholderBarCount;
             const barWidth = width / bars;
 
             for (let i = 0; i < bars; i++) {
-              const barHeight = Math.random() * middle * 0.7;
+              const barHeight =
+                Math.random() *
+                middle *
+                WAVEFORM_LINE_STYLE.placeholderMaxAmplitude;
               const x = i * barWidth;
               ctx.fillStyle = `rgb(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b})`;
-              ctx.fillRect(x, middle - barHeight, barWidth - 1, barHeight * 2);
+              ctx.fillRect(
+                x,
+                middle - barHeight,
+                barWidth - WAVEFORM_LINE_STYLE.placeholderBarGap,
+                barHeight * 2,
+              );
             }
           }
         } else {
@@ -219,7 +239,10 @@ export default function StaticWaveform({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "var(--mui-palette-background-paper)",
+            backgroundColor: waveformCssColor(
+              WAVEFORM_CSS_VARIABLES.background,
+              WAVEFORM_COLOR_FALLBACKS.background,
+            ),
             opacity: 0.8,
             zIndex: 1,
           }}
@@ -236,8 +259,11 @@ export default function StaticWaveform({
         ref={canvasRef}
         style={{
           display: "block",
-          border: "1px solid var(--mui-palette-divider)",
-          borderRadius: "4px",
+          border: `${WAVEFORM_LINE_STYLE.borderWidth}px solid ${waveformCssColor(
+            WAVEFORM_CSS_VARIABLES.border,
+            WAVEFORM_COLOR_FALLBACKS.border,
+          )}`,
+          borderRadius: `${WAVEFORM_LINE_STYLE.borderRadius}px`,
         }}
       />
     </Box>

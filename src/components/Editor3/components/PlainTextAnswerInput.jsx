@@ -3,11 +3,9 @@
  *
  * Features:
  * - Shared undo/redo stack via external history state
- * - Auto-submit on blur or idle (no typing for idleTimeout ms)
- * - Grace period countdown before submission (like SketchPad)
- * - Cancel button to abort pending submission
+ * - Explicit submission without a grace-period countdown
  */
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -15,64 +13,9 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {
-  $getRoot,
-  $createParagraphNode,
-  $createTextNode,
-  BLUR_COMMAND,
-  FOCUS_COMMAND,
-  COMMAND_PRIORITY_LOW,
-} from "lexical";
-import { Box, Button } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import SubmissionCountdown from "./SubmissionCountdown";
-
-/**
- * Plugin that fires onBlur with current text when the editor loses focus.
- */
-function BlurPlugin({ onBlur }) {
-  const [editor] = useLexicalComposerContext();
-  const onBlurRef = useRef(onBlur);
-  onBlurRef.current = onBlur;
-
-  useEffect(() => {
-    return editor.registerCommand(
-      BLUR_COMMAND,
-      () => {
-        editor.getEditorState().read(() => {
-          const text = $getRoot().getTextContent();
-          onBlurRef.current?.(text);
-        });
-        return false;
-      },
-      COMMAND_PRIORITY_LOW,
-    );
-  }, [editor]);
-
-  return null;
-}
-
-/**
- * Plugin that fires onFocus when the editor gains focus.
- */
-function FocusPlugin({ onFocus }) {
-  const [editor] = useLexicalComposerContext();
-  const onFocusRef = useRef(onFocus);
-  onFocusRef.current = onFocus;
-
-  useEffect(() => {
-    return editor.registerCommand(
-      FOCUS_COMMAND,
-      () => {
-        onFocusRef.current?.();
-        return false;
-      },
-      COMMAND_PRIORITY_LOW,
-    );
-  }, [editor]);
-
-  return null;
-}
+import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
+import { Box } from "@mui/material";
+import ExerciseResponsePanel from "./ExerciseResponsePanel";
 
 /**
  * Plugin to dynamically toggle editor editability without remounting.
@@ -125,17 +68,12 @@ export default function PlainTextAnswerInput({
   ariaLabel = "",
   borderStyle = "1px solid var(--mui-palette-divider)",
   textColor = "inherit",
-  gracePeriod = 10,
-  idleTimeout = 3000,
   style = {},
   testId,
   wordId,
   questionId,
   disabled = false,
 }) {
-  const [countdown, setCountdown] = useState(null);
-  const countdownTimerRef = useRef(null);
-  const idleTimerRef = useRef(null);
   const currentValueRef = useRef(value);
   const onAutoSubmitRef = useRef(onAutoSubmit);
   onAutoSubmitRef.current = onAutoSubmit;
@@ -144,33 +82,6 @@ export default function PlainTextAnswerInput({
     currentValueRef.current = value;
   }, [value]);
 
-  const cancelCountdown = useCallback(() => {
-    if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
-      countdownTimerRef.current = null;
-    }
-    setCountdown(null);
-  }, []);
-
-  const startCountdown = useCallback(() => {
-    cancelCountdown();
-    const submitValue = currentValueRef.current;
-    if (!submitValue || !submitValue.trim()) return;
-
-    setCountdown(gracePeriod);
-    countdownTimerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownTimerRef.current);
-          countdownTimerRef.current = null;
-          onAutoSubmitRef.current?.(currentValueRef.current);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [gracePeriod, cancelCountdown]);
-
   const handleChange = useCallback(
     (editorState) => {
       editorState.read(() => {
@@ -178,71 +89,15 @@ export default function PlainTextAnswerInput({
         currentValueRef.current = text;
         onChange?.(text);
       });
-
-      // Cancel any running countdown when user types
-      cancelCountdown();
-
-      // Reset idle timer
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-      idleTimerRef.current = setTimeout(() => {
-        startCountdown();
-      }, idleTimeout);
     },
-    [onChange, cancelCountdown, startCountdown, idleTimeout],
+    [onChange],
   );
-
-  const handleBlur = useCallback(
-    (text) => {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-        idleTimerRef.current = null;
-      }
-      if (text && text.trim()) {
-        startCountdown();
-      }
-    },
-    [startCountdown],
-  );
-
-  const handleFocus = useCallback(() => {
-    cancelCountdown();
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = null;
-    }
-  }, [cancelCountdown]);
 
   const handleManualSubmit = useCallback(() => {
-    cancelCountdown();
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = null;
-    }
     const text = currentValueRef.current;
     if (text && text.trim()) {
       onAutoSubmitRef.current?.(text);
     }
-  }, [cancelCountdown]);
-
-  // Cancel timers when disabled
-  useEffect(() => {
-    if (disabled) {
-      cancelCountdown();
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-        idleTimerRef.current = null;
-      }
-    }
-  }, [disabled, cancelCountdown]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
   }, []);
 
   const initialConfig = {
@@ -263,16 +118,13 @@ export default function PlainTextAnswerInput({
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-        width: "100%",
-        maxWidth: "50rem",
-      }}
+    <ExerciseResponsePanel
+      onSubmit={handleManualSubmit}
+      showCancel={false}
+      submitDisabled={disabled}
+      sx={{ border: borderStyle }}
     >
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ minWidth: 0 }}>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ position: "relative" }}>
             <PlainTextPlugin
@@ -284,8 +136,8 @@ export default function PlainTextAnswerInput({
                   data-question-id={questionId}
                   aria-label={ariaLabel}
                   style={{
-                    border: borderStyle,
-                    borderRadius: "8px",
+                    border: "none",
+                    borderRadius: 0,
                     padding: "12px 14px",
                     fontSize: "16px",
                     lineHeight: "1.5",
@@ -294,11 +146,11 @@ export default function PlainTextAnswerInput({
                     color: textColor,
                     minHeight: "56px",
                     overflow: "auto",
-                    outline: "none",
                     width: "100%",
                     boxSizing: "border-box",
                     backgroundColor: "transparent",
                     ...style,
+                    outline: "none",
                   }}
                 />
               }
@@ -327,42 +179,11 @@ export default function PlainTextAnswerInput({
               <HistoryPlugin />
             )}
             <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
-            <BlurPlugin onBlur={handleBlur} />
-            <FocusPlugin onFocus={handleFocus} />
             <SyncValuePlugin value={value} />
             <EditablePlugin editable={!disabled} />
           </div>
         </LexicalComposer>
       </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          pt: 1,
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        {countdown === null || countdown === undefined ? (
-          <Button
-            variant="contained"
-            size="small"
-            endIcon={<SendIcon />}
-            onClick={handleManualSubmit}
-            disabled={disabled}
-            sx={{ borderRadius: 2, minWidth: 92 }}
-          >
-            Submit
-          </Button>
-        ) : (
-          <SubmissionCountdown
-            countdown={countdown}
-            onCancel={cancelCountdown}
-            onSubmitNow={handleManualSubmit}
-          />
-        )}
-      </Box>
-    </Box>
+    </ExerciseResponsePanel>
   );
 }
