@@ -275,6 +275,7 @@
     "fast-xml-parser": "^5.0.0",
     "minimatch": "^9.0.5",
     "ajv": "^8.17.1",
+    "zod": "3.25.17",
     "@eslint/eslintrc": {
       "ajv": "^6.14.0"
     },

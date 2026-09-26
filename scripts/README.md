@@ -69,6 +69,25 @@ npx tsx .github/skills/multi-model-ai-translation/scripts/translate-missing-with
 
 **Documentation**: [Multi-Model AI Translation SKILL.md](../.github/skills/multi-model-ai-translation/SKILL.md)
 
+## Documentation Scripts
+
+### Render a Markdown Doc to PDF
+
+**File**: `render-sales-doc-pdf.sh`  
+**Purpose**: Converts a markdown doc (defaults to [docs/SALES_QUICK_REFERENCE.md](../docs/SALES_QUICK_REFERENCE.md)) to PDF via pandoc (markdown → standalone HTML) followed by a headless Chrome print-to-pdf step.
+
+```bash
+# Default: docs/SALES_QUICK_REFERENCE.md -> docs/SALES_QUICK_REFERENCE.pdf
+./scripts/render-sales-doc-pdf.sh
+
+# Custom input/output
+./scripts/render-sales-doc-pdf.sh docs/FEATURES.md docs/FEATURES.pdf
+```
+
+**Prerequisites**:
+- `pandoc` installed (`brew install pandoc`)
+- Google Chrome installed at the default macOS path, or set `CHROME=/path/to/chrome`
+
 ## Admin Scripts
 
 ### Manage Admins

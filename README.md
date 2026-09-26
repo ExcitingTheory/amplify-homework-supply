@@ -11,6 +11,7 @@ An interactive elearning platform built with Next.js, AWS Amplify Gen 2, and Ope
 - **Run locally:** Follow the [Quick Start](./docs/QUICK_START.md) guide.
 - **Pick a task:** Browse [good first issues](https://github.com/excitingtheory/amplify-homework-supply/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or [the Project board](https://github.com/orgs/ExcitingTheory/projects/1/views/1?sliceBy%5BcolumnId%5D=Labels).
 - **Get help:** Join [Discord](https://discord.gg/BNsTK6nvYw) or open a [GitHub issue](https://github.com/ExcitingTheory/amplify-homework-supply/issues).
+- **Sales reference:** [docs/SALES_QUICK_REFERENCE.md](./docs/SALES_QUICK_REFERENCE.md) — render a PDF copy with `./scripts/render-sales-doc-pdf.sh` (see [scripts/README.md](./scripts/README.md#documentation-scripts)).
 
 <details>
 <summary>Explore the feature set</summary>
