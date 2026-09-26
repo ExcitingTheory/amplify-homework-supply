@@ -9,7 +9,6 @@ import { within, waitFor } from "storybook/test";
 import { userEvent } from "storybook/test";
 import RecordingStudio3 from "./RecordingStudio3";
 import FilesContext from "../context/fileContext";
-import { DemoBanner } from "../../.storybook/components/DemoBanner";
 import {
   createWordPreset,
   createConversationPreset,
@@ -381,10 +380,6 @@ Create professional dialogue and voice recordings for your lessons. Perfect for:
               flexDirection: "column",
             }}
           >
-            <DemoBanner
-              title="🎙️ Recording Studio"
-              description="Create dialogue and voice recordings with text-to-speech or your own voice"
-            />
             <div style={{ flex: 1, overflow: "auto" }}>
               <Story />
             </div>

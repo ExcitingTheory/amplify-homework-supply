@@ -349,8 +349,8 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
         open={timerHelpOpen}
         anchorEl={timerHelpAnchor}
         onClose={() => setTimerHelpAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Box sx={{ p: 2, maxWidth: 340 }}>
           <Typography variant="subtitle2" component="h5" sx={{ mb: 0.5 }}>

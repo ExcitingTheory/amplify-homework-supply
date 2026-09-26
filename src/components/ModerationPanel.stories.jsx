@@ -8,7 +8,6 @@
 import React from "react";
 import ModerationPanel from "./ModerationPanel";
 import { Box, Stack } from "@mui/material";
-import { DemoBanner } from "../../.storybook/components/DemoBanner";
 import { expect, within } from "storybook/test";
 
 // Mock items with different moderation scenarios
@@ -96,10 +95,6 @@ export default {
   decorators: [
     (Story) => (
       <Box sx={{ maxWidth: 800, p: 3 }}>
-        <DemoBanner
-          title="Content Moderation Panel"
-          description="Detailed review interface for flagged content with generic category labels"
-        />
         <Story />
       </Box>
     ),

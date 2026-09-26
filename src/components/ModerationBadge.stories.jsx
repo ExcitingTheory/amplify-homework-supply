@@ -9,7 +9,6 @@ import React from "react";
 import ModerationBadge, { ModerationStatusIcon } from "./ModerationBadge";
 import { Box, Paper, Typography, Stack } from "@mui/material";
 import { expect, within } from "storybook/test";
-import { DemoBanner } from "../../.storybook/components/DemoBanner";
 
 // Mock items with different moderation states
 const mockApprovedItem = {
@@ -77,10 +76,6 @@ export default {
   decorators: [
     (Story) => (
       <Box sx={{ p: 3 }}>
-        <DemoBanner
-          title="Content Moderation Badge"
-          description="Visual indicators for content moderation status using generic category labels"
-        />
         <Story />
       </Box>
     ),

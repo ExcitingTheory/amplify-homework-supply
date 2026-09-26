@@ -40,6 +40,22 @@ describe("AudioTakePlaylist", () => {
     expect(onSelect).toHaveBeenCalledWith("take-2");
   });
 
+  it("deletes a take without selecting it", () => {
+    const onDelete = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <AudioTakePlaylist
+        takes={takes}
+        onDelete={onDelete}
+        onSelect={onSelect}
+      />,
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Delete take" })[0]);
+    expect(onDelete).toHaveBeenCalledWith("take-1");
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("does not render an empty playlist", () => {
     const { container } = render(
       <AudioTakePlaylist takes={[]} onSelect={vi.fn()} />,

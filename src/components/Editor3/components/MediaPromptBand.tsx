@@ -9,6 +9,7 @@ export interface MediaPromptBandProps {
   elapsedTime: string;
   isVideo?: boolean;
   remainingTime: string;
+  thumbnail?: ReactNode;
   title: ReactNode;
 }
 
@@ -18,6 +19,7 @@ export default function MediaPromptBand({
   elapsedTime,
   isVideo = false,
   remainingTime,
+  thumbnail,
   title,
 }: MediaPromptBandProps) {
   return (
@@ -82,7 +84,7 @@ export default function MediaPromptBand({
             borderColor: "divider",
           }}
         >
-          {isVideo ? <MovieIcon /> : <AudiotrackIcon />}
+          {thumbnail || (isVideo ? <MovieIcon /> : <AudiotrackIcon />)}
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography

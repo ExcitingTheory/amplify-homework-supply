@@ -1118,7 +1118,11 @@ const preview = {
 
       return (
         <RouterContext.Provider value={mockRouter}>
-          <ThemeProvider theme={theme}>
+          {/* storageManager={null} disables MUI's default localStorage-backed
+              cross-tab mode sync — every open Storybook tab shares the same
+              origin, so without this, tabs on different colorScheme globals
+              fight over the shared 'mui-mode' key and flicker forever. */}
+          <ThemeProvider theme={theme} storageManager={null}>
             <ColorSchemeSynchronizer scheme={schemeToApply} />
             <CssBaseline />
             <div

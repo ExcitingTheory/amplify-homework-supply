@@ -12,6 +12,7 @@ interface ExerciseResponsePanelProps extends Omit<
   BoxProps,
   "children" | "onSubmit"
 > {
+  actionRowBackground?: string;
   children: ReactNode;
   centerControls?: ReactNode;
   countdown?: number | null;
@@ -33,6 +34,7 @@ const ExerciseResponsePanel = forwardRef<
   ExerciseResponsePanelProps
 >(function ExerciseResponsePanel(
   {
+    actionRowBackground = "action.hover",
     children,
     centerControls,
     countdown = null,
@@ -93,7 +95,7 @@ const ExerciseResponsePanel = forwardRef<
             py: 1,
             borderTop: "1px solid",
             borderColor: "divider",
-            bgcolor: "action.hover",
+            bgcolor: actionRowBackground,
           }}
         >
           <Box sx={{ justifySelf: "start" }}>

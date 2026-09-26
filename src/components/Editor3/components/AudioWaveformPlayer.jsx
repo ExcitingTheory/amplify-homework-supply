@@ -11,6 +11,11 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import RecordIcon from "@mui/icons-material/KeyboardVoice";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import StaticWaveform from "./StaticWaveform";
 import MicLevelIndicator from "./MicLevelIndicator";
 import { useAudioPlayer } from "../context/AudioPlayerContext";
@@ -22,12 +27,17 @@ import { useColorScheme } from "@mui/material/styles";
 import { hexToRgb } from "../../../utils/hexToRgb";
 import FilesContext from "../../../context/fileContext";
 import { getCleanupFilters } from "../../RecordingStudio3/RecordingSettings";
+import {
+  createAudioLevelMonitor,
+  rmsToPercent,
+} from "../../../utils/audioLevelMonitor";
 import ExerciseResponsePanel from "./ExerciseResponsePanel";
 import AudioPromptPanel from "./AudioPromptPanel";
 import AudioTakePlaylist from "./AudioTakePlaylist";
 import {
   clearTemporaryAudioTakes,
   createTemporaryAudioTakeScope,
+  deleteTemporaryAudioTake,
   getTemporaryAudioTakes,
   saveTemporaryAudioTake,
 } from "../../../utils/temporaryAudioTakeStore";
@@ -46,6 +56,90 @@ import {
 const waveformCache = new Map();
 const AUDIO_MIME_PREFIX = "audio/";
 const COPY_DROP_EFFECT = "copy";
+
+function CompactLevelSlider({ label, onChange, value, visualLevel }) {
+  const sliderRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+
+  const updateFromPointer = React.useCallback(
+    (clientX) => {
+      if (!sliderRef.current) return;
+      const rect = sliderRef.current.getBoundingClientRect();
+      onChange(Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)));
+    },
+    [onChange],
+  );
+
+  return (
+    <Box
+      ref={sliderRef}
+      aria-label={label}
+      aria-valuemax={1}
+      aria-valuemin={0}
+      aria-valuenow={value}
+      role="slider"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        const delta =
+          event.key === "ArrowUp" || event.key === "ArrowRight"
+            ? 0.05
+            : event.key === "ArrowDown" || event.key === "ArrowLeft"
+              ? -0.05
+              : 0;
+        if (!delta) return;
+        event.preventDefault();
+        onChange(Math.max(0, Math.min(1, value + delta)));
+      }}
+      onPointerDown={(event) => {
+        event.preventDefault();
+        setDragging(true);
+        updateFromPointer(event.clientX);
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        if (dragging) updateFromPointer(event.clientX);
+      }}
+      onPointerUp={() => setDragging(false)}
+      onPointerCancel={() => setDragging(false)}
+      sx={{
+        position: "relative",
+        width: 28,
+        height: 10,
+        overflow: "hidden",
+        borderRadius: 999,
+        bgcolor: "action.hover",
+        cursor: "pointer",
+        outline: "none",
+        touchAction: "none",
+      }}
+    >
+      <Box
+        aria-hidden={true}
+        sx={{
+          position: "absolute",
+          inset: "0 auto 0 0",
+          width: `${Math.max(0, Math.min(100, value * 100))}%`,
+          borderRadius: 999,
+          bgcolor: "primary.main",
+          opacity: 0.2,
+          pointerEvents: "none",
+        }}
+      />
+      <Box
+        aria-hidden={true}
+        sx={{
+          position: "absolute",
+          inset: "0 auto 0 0",
+          width: `${Math.max(0, Math.min(100, visualLevel * 100))}%`,
+          borderRadius: 999,
+          bgcolor: "primary.main",
+          transition: "width 80ms linear",
+          pointerEvents: "none",
+        }}
+      />
+    </Box>
+  );
+}
 
 /**
  * AudioWaveformPlayer - Complete audio player with waveform visualization and recording
@@ -157,6 +251,11 @@ export default function AudioWaveformPlayer({
   const [isReady, setIsReady] = useState(false);
   const [blobUrl, setBlobUrl] = useState(null);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [outputMuted, setOutputMuted] = useState(false);
+  const [inputMuted, setInputMuted] = useState(false);
+  const [outputVolume, setOutputVolume] = useState(1);
+  const [inputVolume, setInputVolume] = useState(1);
+  const [inputLevel, setInputLevel] = useState(0);
 
   // Recording state
   const [recording, setRecording] = useState(false);
@@ -198,6 +297,19 @@ export default function AudioWaveformPlayer({
   // Shared analyser ref for MicLevelIndicator (points to whichever is active)
   const [activeAnalyser, setActiveAnalyser] = useState(null);
 
+  useEffect(() => {
+    if (!activeAnalyser || inputMuted) {
+      setInputLevel(0);
+      return;
+    }
+    const monitor = createAudioLevelMonitor(activeAnalyser, {
+      intervalMs: 80,
+      onLevel: ({ rms }) => setInputLevel(rmsToPercent(rms) / 100),
+    });
+    monitor.start();
+    return () => monitor.stop();
+  }, [activeAnalyser, inputMuted]);
+
   // Refs
   const loadedSourceRef = useRef(null);
   const currentTimeRef = useRef(0);
@@ -205,7 +317,13 @@ export default function AudioWaveformPlayer({
   const lastFrameTimeRef = useRef(performance.now());
   const recordingCanvasRef = useRef(null);
   const mediaStreamRef = useRef(null);
+  const recordingGainRef = useRef(null);
+  const inputGainValueRef = useRef(1);
   const durationRef = useRef(0); // Always-current duration for RAF callbacks
+  const pendingTakePlaybackRef = useRef(false);
+  const seekPlaybackStartedRef = useRef(false);
+  const previousInputVolumeRef = useRef(1);
+  const previousOutputVolumeRef = useRef(1);
 
   // Context
   const filesContext = useContext(FilesContext);
@@ -214,6 +332,7 @@ export default function AudioWaveformPlayer({
   const selectTake = useCallback((take) => {
     if (!take) return;
     localAudioRef.current?.pause();
+    pendingTakePlaybackRef.current = true;
     setSelectedTakeId(take.id);
     setAudioBlob(take.blob);
     setRecordedWaveformData(take.waveformData);
@@ -311,6 +430,31 @@ export default function AudioWaveformPlayer({
     ],
   );
 
+  // Best-effort submission right after a take finishes recording — failures
+  // leave the take saved locally so it can still be submitted manually.
+  const attemptTakeAutoSubmit = useCallback(
+    async (take) => {
+      if (!take) return;
+      try {
+        if (submissionCountdown !== null) {
+          onSubmitNow?.();
+          return;
+        }
+        if (onRequestSubmission) {
+          onRequestSubmission(() => submitAudioBlob(take.blob, take.mimeType));
+          return;
+        }
+        await submitAudioBlob(take.blob, take.mimeType);
+      } catch (submitError) {
+        console.warn(
+          "[AudioWaveformPlayer] Auto-submit attempt failed:",
+          submitError,
+        );
+      }
+    },
+    [onRequestSubmission, onSubmitNow, submissionCountdown, submitAudioBlob],
+  );
+
   // Keep durationRef in sync with localDuration state for RAF callbacks
   useEffect(() => {
     durationRef.current = localDuration;
@@ -386,6 +530,16 @@ export default function AudioWaveformPlayer({
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
 
+    if (pendingTakePlaybackRef.current) {
+      pendingTakePlaybackRef.current = false;
+      const playResult = audio.play();
+      if (playResult?.catch) {
+        void playResult.catch((error) => {
+          console.warn("[AudioWaveformPlayer] Unable to autoplay take:", error);
+        });
+      }
+    }
+
     return () => {
       audio.removeEventListener("loadedmetadata", onMeta);
       audio.removeEventListener("ended", onEnded);
@@ -435,6 +589,31 @@ export default function AudioWaveformPlayer({
   const isPlaying = useLocalAudio
     ? localIsPlaying
     : isActive && audioPlayer.isPlaying;
+
+  useEffect(() => {
+    const audio = useLocalAudio
+      ? localAudioRef.current
+      : isActive
+        ? audioPlayer.audioElement
+        : null;
+    if (audio) {
+      audio.muted = outputMuted;
+      audio.volume = outputVolume;
+    }
+  }, [
+    audioPlayer.audioElement,
+    isActive,
+    outputMuted,
+    outputVolume,
+    useLocalAudio,
+  ]);
+
+  useEffect(() => {
+    inputGainValueRef.current = inputMuted ? 0 : inputVolume;
+    if (recordingGainRef.current) {
+      recordingGainRef.current.gain.value = inputGainValueRef.current;
+    }
+  }, [inputMuted, inputVolume]);
 
   // Subscribe to shared audio player events (only for non-recording sources)
   useEffect(() => {
@@ -638,10 +817,23 @@ export default function AudioWaveformPlayer({
         dur && isFinite(dur) && dur > 0 ? dur : durationRef.current;
       const newTime =
         effectiveDuration > 0 ? (newValue / 100) * effectiveDuration : 0;
+      if (audioElement && effectiveDuration > 0) {
+        audioElement.currentTime = newTime;
+      }
       setLocalTime(newTime);
+      currentTimeRef.current = newTime;
       displayTimeRef.current = newTime;
+
+      if (compact && !isPlaying && !seekPlaybackStartedRef.current) {
+        seekPlaybackStartedRef.current = true;
+        if (useLocalAudio && localAudioRef.current) {
+          void localAudioRef.current.play();
+        } else if (sourceUrl) {
+          void audioPlayer.play(sourceUrl);
+        }
+      }
     },
-    [isSeeking, useLocalAudio, audioPlayer],
+    [compact, isPlaying, isSeeking, sourceUrl, useLocalAudio, audioPlayer],
   );
 
   const handleSeek = useCallback(
@@ -669,6 +861,7 @@ export default function AudioWaveformPlayer({
       currentTimeRef.current = newTime;
       displayTimeRef.current = newTime;
       setIsSeeking(false);
+      seekPlaybackStartedRef.current = false;
     },
     [isActive, useLocalAudio, audioPlayer],
   );
@@ -786,7 +979,7 @@ export default function AudioWaveformPlayer({
         canvasCtx.fillRect(
           x,
           middle - barHeight,
-          barWidth - WAVEFORM_LINE_STYLE.barGap,
+          Math.max(1, barWidth - WAVEFORM_LINE_STYLE.barGap),
           barHeight * 2,
         );
       }
@@ -892,16 +1085,22 @@ export default function AudioWaveformPlayer({
     setPendingRecordingStart(false);
     const stream = mediaStreamRef.current;
 
-    const recorder = new MediaRecorder(stream);
-    setMediaRecorder(recorder);
-    recorder.start();
-    const audioChunks = [];
-
     // Setup real-time waveform visualization
     const audioContext = new AudioContext();
     const source = audioContext.createMediaStreamSource(stream);
+    const gain = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
+    const destination = audioContext.createMediaStreamDestination();
+    gain.gain.value = inputGainValueRef.current;
+    source.connect(gain);
     source.connect(analyser);
+    gain.connect(destination);
+    recordingGainRef.current = gain;
+
+    const recorder = new MediaRecorder(destination.stream);
+    setMediaRecorder(recorder);
+    recorder.start();
+    const audioChunks = [];
 
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.8;
@@ -922,6 +1121,7 @@ export default function AudioWaveformPlayer({
     recorder.addEventListener("stop", async () => {
       isRecording = false;
       setActiveAnalyser(null);
+      recordingGainRef.current = null;
       audioContext.close();
       // Use the recorder's actual mimeType so decodeAudioData gets a valid container
       const actualMimeType = recorder.mimeType || "audio/webm";
@@ -1003,6 +1203,7 @@ export default function AudioWaveformPlayer({
         await saveTemporaryAudioTake(take);
         setTakes((currentTakes) => [...currentTakes, take]);
         selectTake(take);
+        void attemptTakeAutoSubmit(take);
         return;
       }
 
@@ -1048,7 +1249,7 @@ export default function AudioWaveformPlayer({
         canvasCtx.fillRect(
           x,
           middle - barHeight,
-          barWidth - WAVEFORM_LINE_STYLE.barGap,
+          Math.max(1, barWidth - WAVEFORM_LINE_STYLE.barGap),
           barHeight * 2,
         );
       }
@@ -1068,6 +1269,7 @@ export default function AudioWaveformPlayer({
     nodeKey,
     metadata,
     identityId,
+    attemptTakeAutoSubmit,
     onRecordingComplete,
     selectTake,
     submitAudioBlob,
@@ -1148,6 +1350,35 @@ export default function AudioWaveformPlayer({
     [selectTake, takes],
   );
 
+  const handleTakeDelete = useCallback(
+    (takeId) => {
+      void deleteTemporaryAudioTake(takeId).catch((error) => {
+        console.warn("[AudioWaveformPlayer] Unable to delete take:", error);
+      });
+      setTakes((currentTakes) => {
+        const remainingTakes = currentTakes.filter(
+          (take) => take.id !== takeId,
+        );
+        if (takeId === selectedTakeId) {
+          const nextTake = remainingTakes.at(-1);
+          if (nextTake) {
+            selectTake(nextTake);
+          } else {
+            localAudioRef.current?.pause();
+            setSelectedTakeId(null);
+            setAudioBlob(null);
+            setRecordedWaveformData(null);
+            setLocalDuration(0);
+            setLocalTime(0);
+            setLocalProgress(0);
+          }
+        }
+        return remainingTakes;
+      });
+    },
+    [selectTake, selectedTakeId],
+  );
+
   const submitSelectedTake = useCallback(async () => {
     const selectedTake = takes.find((take) => take.id === selectedTakeId);
     if (!selectedTake) return;
@@ -1176,129 +1407,238 @@ export default function AudioWaveformPlayer({
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1,
-        width: "clamp(7rem, 42vw, 22rem)",
-        minHeight: 40,
+        gap: compact ? 0.25 : 1,
+        width: compact ? "auto" : "clamp(7rem, 42vw, 22rem)",
+        minHeight: compact ? 28 : 40,
         "& .MuiIconButton-root": {
-          minWidth: 36,
-          minHeight: 36,
+          minWidth: compact ? 28 : 36,
+          minHeight: compact ? 28 : 36,
+          p: compact ? 0.5 : undefined,
+        },
+        "& .MuiSvgIcon-root": {
+          fontSize: compact ? "1.05rem" : undefined,
         },
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexShrink: 0,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {enableRecording && (
+      {compact ? (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.25,
+          }}
+        >
+          {enableRecording && (
+            <IconButton
+              aria-label={recording ? "Stop recording" : "Start recording"}
+              aria-pressed={recording}
+              color={recording ? "error" : "primary"}
+              onClick={recording ? stopRecording : startRecording}
+              size="small"
+              title={recording ? "Stop recording" : "Start recording"}
+            >
+              <FiberManualRecordIcon />
+            </IconButton>
+          )}
           <IconButton
-            onClick={startRecording}
-            color="primary"
-            disabled={recording}
-            size="small"
-            title="Start recording"
-          >
-            <RecordIcon />
-          </IconButton>
-        )}
-
-        {enableRecording && (
-          <IconButton
-            onClick={stopRecording}
-            color="error"
-            disabled={!recording}
-            size="small"
-            title="Stop recording"
-          >
-            <StopIcon />
-          </IconButton>
-        )}
-
-        {(enableRecording || sourceUrl || audioBlob) && (
-          <IconButton
-            onClick={togglePlayPause}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            aria-pressed={isPlaying}
             color="primary"
             disabled={recording || (!sourceUrl && !audioBlob)}
+            onClick={togglePlayPause}
             size="small"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
           </IconButton>
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          alignItems: "center",
-          minWidth: 0,
-          minHeight: 20,
-        }}
-      >
-        {!recording && (sourceUrl || audioBlob) && (
-          <Slider
-            value={
-              isNaN(localProgress) || !isFinite(localProgress)
-                ? 0
-                : localProgress
-            }
-            min={0}
-            max={100}
-            step={0.1}
-            onChange={handleSliderChange}
-            onChangeCommitted={handleSeek}
-            aria-label={tEditor("answerComponent.inputMethods.audio")}
-            track="normal"
+          {enableRecording && (
+            <IconButton
+              aria-label={inputMuted ? "Unmute input" : "Mute input"}
+              aria-pressed={inputMuted}
+              onClick={() => {
+                if (inputMuted) {
+                  setInputVolume(previousInputVolumeRef.current);
+                  setInputMuted(false);
+                } else {
+                  previousInputVolumeRef.current = inputVolume || 1;
+                  setInputVolume(0);
+                  setInputMuted(true);
+                }
+              }}
+              size="small"
+              title={inputMuted ? "Unmute input" : "Mute input"}
+            >
+              {inputMuted ? <MicOffIcon /> : <MicIcon />}
+            </IconButton>
+          )}
+          {enableRecording && (
+            <CompactLevelSlider
+              label="Input volume"
+              value={inputMuted ? 0 : inputVolume}
+              visualLevel={inputMuted ? 0 : inputLevel}
+              onChange={(nextVolume) => {
+                if (nextVolume > 0) {
+                  previousInputVolumeRef.current = nextVolume;
+                }
+                setInputVolume(nextVolume);
+                setInputMuted(nextVolume <= 0);
+              }}
+            />
+          )}
+          <IconButton
+            aria-label={outputMuted ? "Unmute output" : "Mute output"}
+            aria-pressed={outputMuted}
+            onClick={() => {
+              if (outputMuted) {
+                setOutputVolume(previousOutputVolumeRef.current);
+                setOutputMuted(false);
+              } else {
+                previousOutputVolumeRef.current = outputVolume || 1;
+                setOutputVolume(0);
+                setOutputMuted(true);
+              }
+            }}
             size="small"
-            sx={{
-              width: "100%",
-              ...(!isSeeking && isPlaying
-                ? {
-                    "& .MuiSlider-thumb": { transition: "none" },
-                    "& .MuiSlider-track": { transition: "none" },
-                  }
-                : {}),
+            title={outputMuted ? "Unmute output" : "Mute output"}
+          >
+            {outputMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+          </IconButton>
+          <CompactLevelSlider
+            label="Output volume"
+            value={outputMuted ? 0 : outputVolume}
+            visualLevel={outputMuted || !isPlaying ? 0 : outputVolume}
+            onChange={(nextVolume) => {
+              if (nextVolume > 0) {
+                previousOutputVolumeRef.current = nextVolume;
+              }
+              setOutputVolume(nextVolume);
+              setOutputMuted(nextVolume <= 0);
             }}
           />
-        )}
-
-        {recording && (
+        </Box>
+      ) : (
+        <>
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
-              gap: 0.5,
-              flexGrow: 1,
-              minWidth: 0,
+              flexShrink: 0,
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <Typography
-              variant="caption"
-              color="error"
-              sx={{ fontWeight: 700 }}
-            >
-              {t("recordingStudio3.record")}
-            </Typography>
-            <MicLevelIndicator analyser={activeAnalyser} />
+            {enableRecording && (
+              <IconButton
+                onClick={startRecording}
+                color="primary"
+                disabled={recording}
+                size="small"
+                title="Start recording"
+              >
+                <RecordIcon />
+              </IconButton>
+            )}
+
+            {enableRecording && (
+              <IconButton
+                onClick={stopRecording}
+                color="error"
+                disabled={!recording}
+                size="small"
+                title="Stop recording"
+              >
+                <StopIcon />
+              </IconButton>
+            )}
+
+            {(enableRecording || sourceUrl || audioBlob) && (
+              <IconButton
+                onClick={togglePlayPause}
+                color="primary"
+                disabled={recording || (!sourceUrl && !audioBlob)}
+                size="small"
+                title={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+              </IconButton>
+            )}
           </Box>
-        )}
 
-        {!recording && !sourceUrl && !audioBlob && previewing && (
-          <MicLevelIndicator analyser={activeAnalyser} />
-        )}
-      </Box>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              alignItems: "center",
+              minWidth: 0,
+              minHeight: 20,
+            }}
+          >
+            {!compact && !recording && (sourceUrl || audioBlob) && (
+              <Slider
+                value={
+                  isNaN(localProgress) || !isFinite(localProgress)
+                    ? 0
+                    : localProgress
+                }
+                min={0}
+                max={100}
+                step={0.1}
+                onChange={handleSliderChange}
+                onChangeCommitted={handleSeek}
+                aria-label={tEditor("answerComponent.inputMethods.audio")}
+                track="normal"
+                size="small"
+                sx={{
+                  width: "100%",
+                  ...(!isSeeking && isPlaying
+                    ? {
+                        "& .MuiSlider-thumb": { transition: "none" },
+                        "& .MuiSlider-track": { transition: "none" },
+                      }
+                    : {}),
+                }}
+              />
+            )}
 
-      <Box sx={{ minWidth: 72, textAlign: "right" }}>
-        {showDuration && !recording && (sourceUrl || audioBlob) && (
-          <Typography variant="caption" color="text.secondary">
-            {formatTime(localTime)} / {formatTime(localDuration)}
-          </Typography>
-        )}
-      </Box>
+            {recording && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.5,
+                  flexGrow: 1,
+                  minWidth: 0,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ fontWeight: 700 }}
+                >
+                  {t("recordingStudio3.record")}
+                </Typography>
+                <MicLevelIndicator analyser={activeAnalyser} />
+              </Box>
+            )}
+
+            {!recording && !sourceUrl && !audioBlob && previewing && (
+              <MicLevelIndicator analyser={activeAnalyser} />
+            )}
+          </Box>
+
+          <Box sx={{ minWidth: 72, textAlign: "right" }}>
+            {showDuration &&
+              !compact &&
+              !recording &&
+              (sourceUrl || audioBlob) && (
+                <Typography variant="caption" color="text.secondary">
+                  {formatTime(localTime)} / {formatTime(localDuration)}
+                </Typography>
+              )}
+          </Box>
+        </>
+      )}
     </Box>
   );
 
@@ -1312,6 +1652,7 @@ export default function AudioWaveformPlayer({
 
   return (
     <ExerciseResponsePanel
+      actionRowBackground={compact ? "background.paper" : undefined}
       centerControls={usesLocalTakes ? undefined : footerControls}
       countdown={submissionCountdown}
       countdownDuration={submissionCountdownDuration}
@@ -1373,15 +1714,16 @@ export default function AudioWaveformPlayer({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       sx={{
-        border: dropActive ? "2px dashed" : compact ? "none" : "1px solid",
-        borderColor: dropActive
-          ? "primary.main"
-          : compact
-            ? "transparent"
-            : "divider",
-        borderRadius: compact ? 0 : 2,
-        backgroundColor: compact ? "transparent" : "background.paper",
+        border: dropActive ? "2px dashed" : "1px solid",
+        borderColor: dropActive ? "primary.main" : "divider",
+        borderRadius: 2,
+        backgroundColor: "background.paper",
         maxWidth: width,
+        ...(compact && {
+          '& [data-testid="audio-prompt-panel"]': {
+            bgcolor: "background.paper",
+          },
+        }),
       }}
     >
       {/* Waveform with progress overlay */}
@@ -1441,9 +1783,7 @@ export default function AudioWaveformPlayer({
 
         {/* Canvas - shown for idle, preview, or recording */}
         {enableRecording &&
-          !computedWaveformData &&
-          !file &&
-          (recording || !audioBlob) && (
+          (recording || (!computedWaveformData && !file && !audioBlob)) && (
             <canvas
               ref={recordingCanvasRef}
               width={width}
@@ -1529,6 +1869,120 @@ export default function AudioWaveformPlayer({
             }}
           />
         )}
+
+        {compact && (recording || sourceUrl || audioBlob) && (
+          <>
+            <Slider
+              value={Number.isFinite(localProgress) ? localProgress : 0}
+              min={0}
+              max={100}
+              step={0.1}
+              onChange={handleSliderChange}
+              onChangeCommitted={handleSeek}
+              aria-label={tEditor("answerComponent.inputMethods.audio")}
+              disabled={recording || !localDuration}
+              sx={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                m: 0,
+                p: 0,
+                zIndex: 3,
+                color: "primary.main",
+                "&.Mui-disabled": { opacity: 1 },
+                "& .MuiSlider-rail, & .MuiSlider-track": {
+                  height: 4,
+                  top: "auto",
+                  bottom: 0,
+                  transform: "none",
+                },
+                "& .MuiSlider-rail": { opacity: 0.7 },
+                "& .MuiSlider-track": { border: 0 },
+                "& .MuiSlider-thumb.MuiSlider-thumb": {
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                  boxShadow: "none",
+                },
+                "& .MuiSlider-thumb::before, & .MuiSlider-thumb::after": {
+                  display: "none",
+                },
+              }}
+            />
+          </>
+        )}
+
+        {compact && (
+          <Box
+            sx={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 4,
+              display: "grid",
+              gridTemplateColumns: "minmax(3rem, 1fr) auto minmax(3rem, 1fr)",
+              alignItems: "center",
+              minHeight: 28,
+              px: 1.5,
+              borderTop: "1px solid",
+              borderColor: "divider",
+              bgcolor:
+                "color-mix(in srgb, var(--mui-palette-background-paper) 38%, transparent)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
+            }}
+          >
+            <Typography
+              aria-label="Elapsed time"
+              component="span"
+              sx={{
+                justifySelf: "start",
+                fontSize: "0.7rem",
+                fontVariantNumeric: "tabular-nums",
+                lineHeight: 1,
+              }}
+            >
+              {showDuration && (recording || sourceUrl || audioBlob)
+                ? formatTime(localTime)
+                : null}
+            </Typography>
+            <Box
+              data-compact-controls
+              sx={{
+                display: "flex",
+                gridColumn: 2,
+                transform: "scale(0.78)",
+                transformOrigin: "center",
+                transition: "transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+                "@media (prefers-reduced-motion: reduce)": {
+                  transition: "none",
+                },
+              }}
+            >
+              {footerControls}
+            </Box>
+            <Typography
+              aria-label="Remaining time"
+              component="span"
+              sx={{
+                gridColumn: 3,
+                justifySelf: "end",
+                fontSize: "0.7rem",
+                fontVariantNumeric: "tabular-nums",
+                lineHeight: 1,
+              }}
+            >
+              {showDuration && (recording || sourceUrl || audioBlob)
+                ? `-${formatTime(Math.max(0, localDuration - localTime))}`
+                : null}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <AudioPromptPanel
@@ -1540,24 +1994,12 @@ export default function AudioWaveformPlayer({
       />
 
       {usesLocalTakes && (
-        <Box
-          sx={{
-            borderTop: "1px solid",
-            borderColor: "divider",
-            px: 1,
-            py: 0.5,
-            overflow: "hidden",
-          }}
-        >
-          {footerControls}
-        </Box>
-      )}
-
-      {usesLocalTakes && (
         <AudioTakePlaylist
+          compact
           takes={takes}
           selectedTakeId={selectedTakeId}
           onSelect={handleTakeSelection}
+          onDelete={handleTakeDelete}
         />
       )}
     </ExerciseResponsePanel>

@@ -3260,23 +3260,72 @@ export const KitchenSink = {
           : "http://localhost:6006";
       const audioUrl = `${baseUrl}${MOCK_AUDIO_BASE64}`;
 
-      seedMockUnit({
-        id: "kitchen-sink-workbook-id",
-        name: "Kitchen Sink - All Workbook Blocks",
-        description:
-          "Comprehensive workbook showing all available interactive exercise types",
-        data: JSON.stringify(kitchenSinkWorkbookState),
-        wordIDs: [
-          "vocab-word-1",
-          "vocab-word-2",
-          "vocab-word-3",
-          "vocab-word-4",
-          "vocab-word-5",
-        ],
-        timeLimitSeconds: 1800, // 30 minutes
-        _version: 1,
-        owner: "mock-user-sub",
-      });
+      // Defined up front so it can seed both the Word records and the
+      // UnitWord join rows (seedMockUnit only links words passed via
+      // `options.words` — a `wordIDs` field on the unit data is not enough).
+      const kitchenSinkVocabularyWords = [
+        {
+          id: "vocab-word-1",
+          phrase: "こんにちは",
+          pronunciation: "kon-ni-chi-wa",
+          definition: "Hello (Japanese)",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+        {
+          id: "vocab-word-2",
+          phrase: "猫",
+          pronunciation: "neko",
+          definition: "Cat (Japanese)",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+        {
+          id: "vocab-word-3",
+          phrase: "ありがとう",
+          pronunciation: "a-ri-ga-tou",
+          definition: "Thank you (Japanese)",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+        {
+          id: "vocab-word-4",
+          phrase: "犬",
+          pronunciation: "inu",
+          definition: "Dog (Japanese)",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+        {
+          id: "vocab-word-5",
+          phrase: "さようなら",
+          pronunciation: "sa-you-na-ra",
+          definition: "Goodbye (Japanese)",
+          owner: "mock-user-sub",
+          _version: 1,
+        },
+      ];
+
+      seedMockUnit(
+        {
+          id: "kitchen-sink-workbook-id",
+          name: "Kitchen Sink - All Workbook Blocks",
+          description:
+            "Comprehensive workbook showing all available interactive exercise types",
+          data: JSON.stringify(kitchenSinkWorkbookState),
+          wordIDs: [
+            "vocab-word-1",
+            "vocab-word-2",
+            "vocab-word-3",
+            "vocab-word-4",
+            "vocab-word-5",
+          ],
+          timeLimitSeconds: 1800, // 30 minutes
+          _version: 1,
+          owner: "mock-user-sub",
+        },
+        { words: kitchenSinkVocabularyWords },
+      );
 
       // Grade 1: Empty/just started (current user)
       seedMockGrade({
@@ -3519,48 +3568,7 @@ export const KitchenSink = {
       });
 
       // Seed vocabulary words
-      seedMockWords([
-        {
-          id: "vocab-word-1",
-          phrase: "こんにちは",
-          pronunciation: "kon-ni-chi-wa",
-          definition: "Hello (Japanese)",
-          owner: "mock-user-sub",
-          _version: 1,
-        },
-        {
-          id: "vocab-word-2",
-          phrase: "猫",
-          pronunciation: "neko",
-          definition: "Cat (Japanese)",
-          owner: "mock-user-sub",
-          _version: 1,
-        },
-        {
-          id: "vocab-word-3",
-          phrase: "ありがとう",
-          pronunciation: "a-ri-ga-tou",
-          definition: "Thank you (Japanese)",
-          owner: "mock-user-sub",
-          _version: 1,
-        },
-        {
-          id: "vocab-word-4",
-          phrase: "犬",
-          pronunciation: "inu",
-          definition: "Dog (Japanese)",
-          owner: "mock-user-sub",
-          _version: 1,
-        },
-        {
-          id: "vocab-word-5",
-          phrase: "さようなら",
-          pronunciation: "sa-you-na-ra",
-          definition: "Goodbye (Japanese)",
-          owner: "mock-user-sub",
-          _version: 1,
-        },
-      ]);
+      seedMockWords(kitchenSinkVocabularyWords);
 
       // Seed audio files for playlist
       seedMockFiles([

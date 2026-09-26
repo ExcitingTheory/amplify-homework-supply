@@ -166,7 +166,6 @@ export function AnswerView({
       if (!grade?.data?.[nodeKey]) {
         setAnswers({});
         setFeedback({});
-        setProgress(0);
       }
     }
   }, [grade?.id, grade?.data, nodeKey]);
@@ -410,10 +409,6 @@ function ByWordList(
           pl: 1,
           pr: 1,
           py: 1,
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          bgcolor: "background.paper",
         },
       }}
     >
@@ -589,18 +584,7 @@ function ByWordList(
                 </Box>
               )}
 
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: 560,
-                  p: 1.5,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                  bgcolor: "background.paper",
-                  overflow: "hidden",
-                }}
-              >
+              <Box sx={{ width: "100%", maxWidth: 560 }}>
                 <Typography
                   variant="subtitle2"
                   color="text.secondary"
@@ -789,10 +773,6 @@ function ByDefinitionWordList(
           pl: 1,
           pr: 1,
           py: 1,
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          bgcolor: "background.paper",
         },
       }}
     >
@@ -808,14 +788,7 @@ function ByDefinitionWordList(
 
           return (
             <li key={`${wordId}-${key}`}>
-              <Typography
-                variant="subtitle1"
-                component="h3"
-                sx={{ fontWeight: 700, mb: 1 }}
-              >
-                {dictionary[wordId]?.phrase}
-              </Typography>
-              {/* Prompt display */}
+              {/* Prompt display — the word (phrase) is the answer here, never shown before grading */}
               {currentPromptMethod === "text" && (
                 <Typography
                   variant="body2"
@@ -971,18 +944,7 @@ function ByDefinitionWordList(
                 </Box>
               )}
 
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: 560,
-                  p: 1.5,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                  bgcolor: "background.paper",
-                  overflow: "hidden",
-                }}
-              >
+              <Box sx={{ width: "100%", maxWidth: 560 }}>
                 <Typography
                   variant="subtitle2"
                   color="text.secondary"

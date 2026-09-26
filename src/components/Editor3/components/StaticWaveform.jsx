@@ -41,6 +41,7 @@ import {
  * @param {number} [props.width] - Canvas width (default: 600)
  * @param {number} [props.height] - Canvas height (default: 100)
  * @param {string} [props.backgroundColor] - Background color (default: semantic background.paper)
+ * @param {boolean} [props.transparentBackground] - Leave the canvas background transparent
  * @param {boolean} [props.showLoading] - Show loading indicator (default: true)
  */
 export default function StaticWaveform({
@@ -50,15 +51,20 @@ export default function StaticWaveform({
   height = STATIC_WAVEFORM_DEFAULTS.height,
   backgroundColor,
   showLoading = true,
+  transparentBackground = false,
 }) {
   const t = useTranslations("editor.shared");
   const canvasRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [revealed, setRevealed] = useState(false);
   const { mode } = useColorScheme();
 
   useEffect(() => {
     if (!file && !propWaveformData) return;
+
+    let cancelled = false;
+    setRevealed(false);
 
     // Read CSS variables for canvas (which can't use var())
     const resolvedBg =
@@ -104,10 +110,16 @@ export default function StaticWaveform({
         canvas.height = height;
 
         const ctx = canvas.getContext("2d");
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = "source-over";
 
         // Clear canvas
-        ctx.fillStyle = resolvedBg;
-        ctx.fillRect(0, 0, width, height);
+        if (transparentBackground) {
+          ctx.clearRect(0, 0, width, height);
+        } else {
+          ctx.fillStyle = resolvedBg;
+          ctx.fillRect(0, 0, width, height);
+        }
 
         // Draw waveform
         const middle = height / 2;
@@ -158,12 +170,17 @@ export default function StaticWaveform({
           ctx.fillRect(
             x,
             middle - barHeight,
-            barWidth - WAVEFORM_LINE_STYLE.barGap,
+            Math.max(1, barWidth - WAVEFORM_LINE_STYLE.barGap),
             barHeight * 2,
           );
         }
 
         setLoading(false);
+        // Wait a frame so the browser paints the collapsed (scaleY(0)) state
+        // before animating in, growing the waveform from the center line.
+        requestAnimationFrame(() => {
+          if (!cancelled) requestAnimationFrame(() => setRevealed(true));
+        });
       } catch (err) {
         console.error("Error drawing waveform:", err);
         // Don't show error for encoding issues in development/storybook
@@ -174,8 +191,14 @@ export default function StaticWaveform({
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d");
-            ctx.fillStyle = resolvedBg;
-            ctx.fillRect(0, 0, width, height);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = "source-over";
+            if (transparentBackground) {
+              ctx.clearRect(0, 0, width, height);
+            } else {
+              ctx.fillStyle = resolvedBg;
+              ctx.fillRect(0, 0, width, height);
+            }
 
             // Draw simple placeholder bars
             const middle = height / 2;
@@ -201,11 +224,26 @@ export default function StaticWaveform({
           setError(err.message);
         }
         setLoading(false);
+        requestAnimationFrame(() => {
+          if (!cancelled) requestAnimationFrame(() => setRevealed(true));
+        });
       }
     };
 
     drawWaveform();
-  }, [file, propWaveformData, width, height, backgroundColor, mode]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    file,
+    propWaveformData,
+    width,
+    height,
+    backgroundColor,
+    mode,
+    transparentBackground,
+  ]);
 
   if (error) {
     return (
@@ -255,17 +293,31 @@ export default function StaticWaveform({
           />
         </Box>
       )}
-      <canvas
-        ref={canvasRef}
-        style={{
-          display: "block",
-          border: `${WAVEFORM_LINE_STYLE.borderWidth}px solid ${waveformCssColor(
-            WAVEFORM_CSS_VARIABLES.border,
-            WAVEFORM_COLOR_FALLBACKS.border,
-          )}`,
-          borderRadius: `${WAVEFORM_LINE_STYLE.borderRadius}px`,
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          transform: revealed ? "scaleY(1)" : "scaleY(0)",
+          transformOrigin: "center",
+          transition: "transform 320ms cubic-bezier(0.77, 0, 0.175, 1)",
+          willChange: "transform",
+          "@media (prefers-reduced-motion: reduce)": { transition: "none" },
         }}
-      />
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            border: `${WAVEFORM_LINE_STYLE.borderWidth}px solid ${waveformCssColor(
+              WAVEFORM_CSS_VARIABLES.border,
+              WAVEFORM_COLOR_FALLBACKS.border,
+            )}`,
+            borderRadius: `${WAVEFORM_LINE_STYLE.borderRadius}px`,
+          }}
+        />
+      </Box>
     </Box>
   );
 }

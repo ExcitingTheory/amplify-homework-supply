@@ -6,6 +6,7 @@ describe("MediaPromptBand", () => {
   it("renders the mandatory title and live time rows", () => {
     render(
       <MediaPromptBand
+        description="video/mp4 • 00:03:57 • 12.40 MB"
         elapsedTime="00:01:23"
         remainingTime="-00:02:34"
         title="Listening prompt"
@@ -21,6 +22,9 @@ describe("MediaPromptBand", () => {
     expect(screen.getByLabelText("Media timecodes")).toHaveTextContent(
       "-00:02:34",
     );
+    expect(
+      screen.getByText("video/mp4 • 00:03:57 • 12.40 MB"),
+    ).toBeInTheDocument();
   });
 
   it("reserves a separate body row for prompt media", () => {

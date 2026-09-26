@@ -19,7 +19,6 @@ import {
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
 import { ImageNode } from "./ImageNode";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { DemoBanner } from "../../../../.storybook/components/DemoBanner";
 
 /**
  * Mock Media Assets for Editor Components
@@ -228,16 +227,6 @@ All components integrate with the UnitContext for grading and data persistence.
     },
   },
   tags: ["!autodocs"],
-  decorators: [
-    (Story) => (
-      <Box>
-        <DemoBanner>
-          Editor components use mocked DataStore and Unit context.
-        </DemoBanner>
-        <Story />
-      </Box>
-    ),
-  ],
 };
 
 function MockVisualizerPlayer({ designMode = "rings" }) {
@@ -886,7 +875,7 @@ export const AudioPlayerLongWhoosh = {
     },
   ],
   render: () => (
-    <RecordingMediaPlayer
+    <MediaPlayerComponent
       nodeKey="audio-player-2"
       fileIDs={["audio-whoosh-2"]}
     />
@@ -897,8 +886,7 @@ export const AudioPlayerLongWhoosh = {
     initializeMockData: false,
     docs: {
       description: {
-        story:
-          "Audio playback with microphone recording, input mute, and input gain controls.",
+        story: "Playback-only audio player for a longer cinematic whoosh.",
       },
     },
   },

@@ -36,22 +36,9 @@ export function UpNextCard({
   onRequestGuidance,
 }: UpNextCardProps) {
   return (
-    <Card
-      component="section"
-      aria-label={`Your next step in ${sectionName}`}
-      elevation={0}
-      sx={{
-        mb: DASHBOARD_TOKENS.spacing.panelGap,
-        borderRadius: DASHBOARD_TOKENS.radius.card,
-        border: "2px solid",
-        borderColor: "primary.main",
-        borderLeft: `4px solid`,
-        borderLeftColor: "primary.main",
-        overflow: "visible",
-        position: "relative",
-      }}
-    >
-      {/* Badge label */}
+    <Box sx={{ position: "relative", mb: DASHBOARD_TOKENS.spacing.panelGap }}>
+      {/* Badge label — kept outside the Card so the card's overflow can stay
+          hidden and clip nested elements to its rounded corners. */}
       <Box
         sx={{
           position: "absolute",
@@ -69,29 +56,45 @@ export function UpNextCard({
         />
       </Box>
 
-      <Box aria-live="polite" aria-atomic="false">
-        {chapterTitle && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ px: 2, pt: 1, display: "block", fontStyle: "italic" }}
-          >
-            📖 {chapterTitle}
-          </Typography>
-        )}
-        <AssignmentCard
-          assignment={assignment}
-          unit={unit}
-          locked={false}
-          lockStatus={lockStatus}
-          isUpNext
-          latestGrade={latestGrade}
-          nailedItCount={nailedItCount}
-          accommodation={accommodation}
-          onOpenDrill={onOpenDrill}
-          onRequestGuidance={onRequestGuidance}
-        />
-      </Box>
-    </Card>
+      <Card
+        component="section"
+        aria-label={`Your next step in ${sectionName}`}
+        elevation={0}
+        sx={{
+          borderRadius: DASHBOARD_TOKENS.radius.card,
+          border: "2px solid",
+          borderColor: "primary.main",
+          borderLeft: `4px solid`,
+          borderLeftColor: "primary.main",
+          // Clip nested content (the flat-cornered AssignmentCard) to this
+          // card's rounded corners instead of letting square edges show.
+          overflow: "hidden",
+        }}
+      >
+        <Box aria-live="polite" aria-atomic="false">
+          {chapterTitle && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ px: 2, pt: 1, display: "block", fontStyle: "italic" }}
+            >
+              📖 {chapterTitle}
+            </Typography>
+          )}
+          <AssignmentCard
+            assignment={assignment}
+            unit={unit}
+            locked={false}
+            lockStatus={lockStatus}
+            isUpNext
+            latestGrade={latestGrade}
+            nailedItCount={nailedItCount}
+            accommodation={accommodation}
+            onOpenDrill={onOpenDrill}
+            onRequestGuidance={onRequestGuidance}
+          />
+        </Box>
+      </Card>
+    </Box>
   );
 }

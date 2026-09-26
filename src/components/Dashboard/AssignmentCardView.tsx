@@ -213,41 +213,7 @@ export function AssignmentCardView({
           : "warning.main";
 
   return (
-    <Card
-      component="article"
-      aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct, (key) => t(key))}` : ""}`}
-      data-tour={
-        isCompleted ? "assignment-card-completed" : "assignment-card-pending"
-      }
-      elevation={0}
-      sx={{
-        // When nested inside UpNextCard, suppress the outer border and elevation
-        // (UpNextCard's own Card provides the highlighted outline treatment).
-        border: isUpNext ? "none" : "1px solid",
-        borderColor: isUpNext ? undefined : "divider",
-        ...(isUpNext ? {} : { borderLeft: "4px solid", borderLeftColor }),
-        borderRadius: isUpNext ? 0 : DASHBOARD_TOKENS.radius.card,
-        display: "flex",
-        overflow: showOverdueBadge ? "visible" : "hidden",
-        position: showOverdueBadge ? "relative" : undefined,
-        minHeight: { xs: 0, sm: 140 },
-        opacity: locked ? 0.7 : 1,
-        transition: justCompleted ? "none" : "box-shadow 0.2s",
-        "&:hover": { boxShadow: locked ? 0 : 4 },
-        ...(isUpNext && {
-          boxShadow: 0,
-          bgcolor: "action.selected",
-        }),
-        ...(justCompleted && {
-          animation: "cardComplete 0.6s ease-out",
-          "@keyframes cardComplete": {
-            "0%": { boxShadow: "0 0 0 0 rgba(76,175,80,0.5)" },
-            "50%": { boxShadow: "0 0 0 8px rgba(76,175,80,0.15)" },
-            "100%": { boxShadow: "0 0 0 0 rgba(76,175,80,0)" },
-          },
-        }),
-      }}
-    >
+    <Box sx={{ position: "relative" }}>
       {showOverdueBadge && (
         <Box
           sx={{
@@ -266,269 +232,302 @@ export function AssignmentCardView({
           />
         </Box>
       )}
-      <Box
+      <Card
+        component="article"
+        aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct, (key) => t(key))}` : ""}`}
+        data-tour={
+          isCompleted ? "assignment-card-completed" : "assignment-card-pending"
+        }
+        elevation={0}
         sx={{
-          width: 120,
-          flexShrink: 0,
-          display: { xs: "none", sm: "block" },
-          borderRadius: isUpNext
-            ? `calc(${DASHBOARD_TOKENS.radius.card}px - 2px) 0 0 calc(${DASHBOARD_TOKENS.radius.card}px - 2px)`
-            : showOverdueBadge
-              ? `${DASHBOARD_TOKENS.radius.card}px 0 0 ${DASHBOARD_TOKENS.radius.card}px`
-              : 0,
+          // When nested inside UpNextCard, suppress the outer border and elevation
+          // (UpNextCard's own Card provides the highlighted outline treatment).
+          border: isUpNext ? "none" : "1px solid",
+          borderColor: isUpNext ? undefined : "divider",
+          ...(isUpNext ? {} : { borderLeft: "4px solid", borderLeftColor }),
+          borderRadius: isUpNext ? 0 : DASHBOARD_TOKENS.radius.card,
+          display: "flex",
+          // Always clip to the card's own radius so nested elements (thumbnail,
+          // chips) never show square corners poking out under the rounded curve.
           overflow: "hidden",
+          minHeight: { xs: 0, sm: 140 },
+          opacity: locked ? 0.7 : 1,
+          transition: justCompleted ? "none" : "box-shadow 0.2s",
+          "&:hover": { boxShadow: locked ? 0 : 4 },
+          ...(isUpNext && {
+            boxShadow: 0,
+            bgcolor: "action.selected",
+          }),
+          ...(justCompleted && {
+            animation: "cardComplete 0.6s ease-out",
+            "@keyframes cardComplete": {
+              "0%": { boxShadow: "0 0 0 0 rgba(76,175,80,0.5)" },
+              "50%": { boxShadow: "0 0 0 8px rgba(76,175,80,0.15)" },
+              "100%": { boxShadow: "0 0 0 0 rgba(76,175,80,0)" },
+            },
+          }),
         }}
       >
-        {thumbnail}
-      </Box>
-      <Box sx={{ flex: 1, p: 2 }}>
         <Box
           sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 1,
-            mb: 0.5,
-            flexWrap: "wrap",
+            width: 120,
+            flexShrink: 0,
+            display: { xs: "none", sm: "block" },
+            overflow: "hidden",
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
-            {unit?.name || ""}
-          </Typography>
-          {unit?.difficulty && (
-            <Tooltip title={`Difficulty: ${unit.difficulty}`}>
-              <Box
-                aria-label={`Difficulty: ${unit.difficulty}`}
+          {thumbnail}
+        </Box>
+        <Box sx={{ flex: 1, p: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 1,
+              mb: 0.5,
+              flexWrap: "wrap",
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
+              {unit?.name || ""}
+            </Typography>
+            {unit?.difficulty && (
+              <Tooltip title={`Difficulty: ${unit.difficulty}`}>
+                <Box
+                  aria-label={`Difficulty: ${unit.difficulty}`}
+                  sx={{
+                    display: "flex",
+                    gap: "3px",
+                    alignItems: "center",
+                    flexShrink: 0,
+                    opacity: 0.65,
+                  }}
+                >
+                  {[1, 2, 3].map((dot) => (
+                    <Box
+                      key={dot}
+                      sx={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        bgcolor:
+                          dot <=
+                          ({ easy: 1, medium: 2, hard: 3 }[unit.difficulty!] ??
+                            0)
+                            ? unit.difficulty === "easy"
+                              ? "success.main"
+                              : unit.difficulty === "medium"
+                                ? "warning.main"
+                                : "error.main"
+                            : "action.disabled",
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Tooltip>
+            )}
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+              {prefetchBadge}
+            </Box>
+            {isCompleted && (
+              <Chip
+                label={`${pct}% · ${gradeLabel(pct, (key) => t(key))}`}
+                size="small"
+                variant="status"
+                color={gradeColor(pct)}
+                icon={<CheckCircleIcon />}
                 sx={{
-                  display: "flex",
-                  gap: "3px",
-                  alignItems: "center",
-                  flexShrink: 0,
-                  opacity: 0.65,
+                  fontWeight: 700,
+                  // Satisfying check pop when the card transitions to completed
+                  ...(justCompleted && {
+                    animation: "chipPop 0.6s ease-out",
+                    "@keyframes chipPop": {
+                      "0%": { transform: "scale(0.8)", opacity: 0 },
+                      "60%": { transform: "scale(1.12)" },
+                      "100%": { transform: "scale(1)", opacity: 1 },
+                    },
+                    "& .MuiChip-icon": {
+                      animation: "checkPop 0.6s ease-out",
+                    },
+                    "@keyframes checkPop": {
+                      "0%": { transform: "scale(0) rotate(-90deg)" },
+                      "70%": { transform: "scale(1.3) rotate(0deg)" },
+                      "100%": { transform: "scale(1) rotate(0deg)" },
+                    },
+                  }),
                 }}
-              >
-                {[1, 2, 3].map((dot) => (
-                  <Box
-                    key={dot}
-                    sx={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: "50%",
-                      bgcolor:
-                        dot <=
-                        ({ easy: 1, medium: 2, hard: 3 }[unit.difficulty!] ?? 0)
-                          ? unit.difficulty === "easy"
-                            ? "success.main"
-                            : unit.difficulty === "medium"
-                              ? "warning.main"
-                              : "error.main"
-                          : "action.disabled",
-                    }}
-                  />
-                ))}
-              </Box>
-            </Tooltip>
-          )}
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            {prefetchBadge}
-          </Box>
-          {isCompleted && (
-            <Chip
-              label={`${pct}% · ${gradeLabel(pct, (key) => t(key))}`}
-              size="small"
-              variant="status"
-              color={gradeColor(pct)}
-              icon={<CheckCircleIcon />}
-              sx={{
-                fontWeight: 700,
-                // Satisfying check pop when the card transitions to completed
-                ...(justCompleted && {
-                  animation: "chipPop 0.6s ease-out",
-                  "@keyframes chipPop": {
-                    "0%": { transform: "scale(0.8)", opacity: 0 },
-                    "60%": { transform: "scale(1.12)" },
-                    "100%": { transform: "scale(1)", opacity: 1 },
-                  },
-                  "& .MuiChip-icon": {
-                    animation: "checkPop 0.6s ease-out",
-                  },
-                  "@keyframes checkPop": {
-                    "0%": { transform: "scale(0) rotate(-90deg)" },
-                    "70%": { transform: "scale(1.3) rotate(0deg)" },
-                    "100%": { transform: "scale(1) rotate(0deg)" },
-                  },
-                }),
-              }}
-            />
-          )}
-          {isCompleted && nailedItCount > 0 && (
-            <Chip
-              label={`🎯 ${nailedItCount}`}
-              size="small"
-              color="success"
-              variant="outlined"
-              sx={{ fontWeight: 700, fontSize: "0.7rem" }}
-            />
-          )}
-          {(locked || windowState.isLocked) && (
-            <Chip
-              label={
-                windowState.opensAt
-                  ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
-                  : lockStatus?.unlockDate
-                    ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
-                    : "Locked"
-              }
-              size="small"
-              color="default"
-              variant="outlined"
-              icon={<LockIcon />}
-              sx={{ fontSize: "0.7rem" }}
-            />
-          )}
-          {windowState.isLate && !isCompleted && (
-            <Chip
-              label="Late"
-              size="small"
-              color="warning"
-              variant="filled"
-              sx={{ fontSize: "0.7rem" }}
-            />
-          )}
-          {assignment.lateStatus === "DROPPED" && (
-            <Chip
-              label="Dropped by instructor"
-              size="small"
-              color="default"
-              variant="outlined"
-              sx={{ fontSize: "0.7rem" }}
-            />
-          )}
-          {!isCompleted &&
-            !(locked || windowState.isLocked) &&
-            dueStatus &&
-            !showOverdueBadge && (
+              />
+            )}
+            {isCompleted && nailedItCount > 0 && (
+              <Chip
+                label={`🎯 ${nailedItCount}`}
+                size="small"
+                color="success"
+                variant="outlined"
+                sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+              />
+            )}
+            {(locked || windowState.isLocked) && (
               <Chip
                 label={
-                  localTime
-                    ? `${dueStatus.label} · ${localTime}`
-                    : dueStatus.label
+                  windowState.opensAt
+                    ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                    : lockStatus?.unlockDate
+                      ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                      : "Locked"
                 }
                 size="small"
-                color={dueStatus.color}
+                color="default"
+                variant="outlined"
+                icon={<LockIcon />}
+                sx={{ fontSize: "0.7rem" }}
+              />
+            )}
+            {windowState.isLate && !isCompleted && (
+              <Chip
+                label="Late"
+                size="small"
+                color="warning"
+                variant="filled"
+                sx={{ fontSize: "0.7rem" }}
+              />
+            )}
+            {assignment.lateStatus === "DROPPED" && (
+              <Chip
+                label="Dropped by instructor"
+                size="small"
+                color="default"
                 variant="outlined"
                 sx={{ fontSize: "0.7rem" }}
               />
             )}
-          {!isCompleted && hasDueExtension && (
-            <Tooltip
-              title={accommodation?.note || "Extended due date accommodation"}
-            >
-              <Chip
-                label="Extended"
-                size="small"
-                color="info"
-                variant="outlined"
-                sx={{ fontSize: "0.7rem" }}
-              />
-            </Tooltip>
-          )}
-        </Box>
-        <Box sx={{ height: "2.625rem", mb: 1.5, overflow: "hidden" }}>
-          {unit?.description && (
+            {!isCompleted &&
+              !(locked || windowState.isLocked) &&
+              dueStatus &&
+              !showOverdueBadge && (
+                <Chip
+                  label={
+                    localTime
+                      ? `${dueStatus.label} · ${localTime}`
+                      : dueStatus.label
+                  }
+                  size="small"
+                  color={dueStatus.color}
+                  variant="outlined"
+                  sx={{ fontSize: "0.7rem" }}
+                />
+              )}
+            {!isCompleted && hasDueExtension && (
+              <Tooltip
+                title={accommodation?.note || "Extended due date accommodation"}
+              >
+                <Chip
+                  label="Extended"
+                  size="small"
+                  color="info"
+                  variant="outlined"
+                  sx={{ fontSize: "0.7rem" }}
+                />
+              </Tooltip>
+            )}
+          </Box>
+          <Box sx={{ height: "2.625rem", mb: 1.5, overflow: "hidden" }}>
+            {unit?.description && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  lineHeight: 1.5,
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
+                {unit.description}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Actions */}
+          {locked || windowState.isLocked ? (
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{
-                lineHeight: 1.5,
-                overflow: "hidden",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
             >
-              {unit.description}
+              <LockIcon fontSize="small" />
+              {windowState.opensAt
+                ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                : lockStatus?.requiredPriorUnitName
+                  ? `Complete "${lockStatus.requiredPriorUnitName}" first`
+                  : "Complete the previous assignment to unlock"}
             </Typography>
+          ) : (
+            <Stack
+              direction="row"
+              spacing={1}
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ alignItems: "center" }}
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<AutoFixHighIcon />}
+                onClick={() => onOpenDrill(assignment.unitID, unit?.name || "")}
+              >
+                {t("practice")}
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ChatBubbleOutlineIcon />}
+                onClick={() => onDiscuss?.()}
+              >
+                {t("discuss")}
+              </Button>
+              {isCompleted && peerReviewButton}
+              {isCompleted && reviewInvitation?.linkPath && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<RateReviewIcon />}
+                  onClick={() => {
+                    const reviewPath = reviewInvitation.linkPath;
+                    if (reviewPath) onJoinReview?.(reviewPath);
+                  }}
+                >
+                  {t("joinReview")}
+                </Button>
+              )}
+              <Tooltip title={t("requestGuidanceTooltip")}>
+                <span>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="secondary"
+                    startIcon={<SupportAgentIcon />}
+                    onClick={() =>
+                      onRequestGuidance(
+                        isCompleted && latestGrade
+                          ? latestGrade.id
+                          : assignment.id,
+                        (isCompleted && latestGrade
+                          ? latestGrade.sectionID
+                          : assignment.sectionID) || "",
+                      )
+                    }
+                  >
+                    {t("requestGuidance")}
+                  </Button>
+                </span>
+              </Tooltip>
+              {startButton}
+            </Stack>
           )}
         </Box>
-
-        {/* Actions */}
-        {locked || windowState.isLocked ? (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-          >
-            <LockIcon fontSize="small" />
-            {windowState.opensAt
-              ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
-              : lockStatus?.requiredPriorUnitName
-                ? `Complete "${lockStatus.requiredPriorUnitName}" first`
-                : "Complete the previous assignment to unlock"}
-          </Typography>
-        ) : (
-          <Stack
-            direction="row"
-            spacing={1}
-            flexWrap="wrap"
-            useFlexGap
-            sx={{ alignItems: "center" }}
-          >
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AutoFixHighIcon />}
-              onClick={() => onOpenDrill(assignment.unitID, unit?.name || "")}
-            >
-              {t("practice")}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<ChatBubbleOutlineIcon />}
-              onClick={() => onDiscuss?.()}
-            >
-              {t("discuss")}
-            </Button>
-            {isCompleted && peerReviewButton}
-            {isCompleted && reviewInvitation?.linkPath && (
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<RateReviewIcon />}
-                onClick={() => {
-                  const reviewPath = reviewInvitation.linkPath;
-                  if (reviewPath) onJoinReview?.(reviewPath);
-                }}
-              >
-                {t("joinReview")}
-              </Button>
-            )}
-            <Tooltip title={t("requestGuidanceTooltip")}>
-              <span>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="secondary"
-                  startIcon={<SupportAgentIcon />}
-                  onClick={() =>
-                    onRequestGuidance(
-                      isCompleted && latestGrade
-                        ? latestGrade.id
-                        : assignment.id,
-                      (isCompleted && latestGrade
-                        ? latestGrade.sectionID
-                        : assignment.sectionID) || "",
-                    )
-                  }
-                >
-                  {t("requestGuidance")}
-                </Button>
-              </span>
-            </Tooltip>
-            {startButton}
-          </Stack>
-        )}
-      </Box>
-    </Card>
+      </Card>
+    </Box>
   );
 }

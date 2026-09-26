@@ -14,43 +14,58 @@ import {
 const FFT_SIZE = 2048;
 const HORIZONTAL_PADDING = 12;
 const VERTICAL_PADDING = 8;
+const MEDIA_ANALYSER_GRAPHS = new WeakMap();
 
 export default function PlaybackWaveformVisualizer({
+  mediaElement: mediaElementProp,
+  muted = false,
   onLevelChange,
   player,
   visible = true,
 }) {
   const canvasRef = React.useRef(null);
   const frameRef = React.useRef(null);
+  const mutedRef = React.useRef(muted);
   const onLevelChangeRef = React.useRef(onLevelChange);
+
+  React.useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
 
   React.useEffect(() => {
     onLevelChangeRef.current = onLevelChange;
   }, [onLevelChange]);
 
   React.useEffect(() => {
-    if (!player || player.isDisposed()) return undefined;
+    if (!mediaElementProp && (!player || player.isDisposed())) return undefined;
 
-    const mediaElement = player.tech(true)?.el();
+    const mediaElement = mediaElementProp || player.tech(true)?.el();
     const canvas = canvasRef.current;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!mediaElement || !canvas || !AudioContextClass) return undefined;
 
-    const audioContext = new AudioContextClass();
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = FFT_SIZE;
-    analyser.smoothingTimeConstant = 0.82;
+    let graph = MEDIA_ANALYSER_GRAPHS.get(mediaElement);
+    if (!graph) {
+      const audioContext = new AudioContextClass();
+      const analyser = audioContext.createAnalyser();
+      const outputGain = audioContext.createGain();
+      analyser.fftSize = FFT_SIZE;
+      analyser.smoothingTimeConstant = 0.82;
 
-    let source;
-    try {
-      source = audioContext.createMediaElementSource(mediaElement);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-    } catch (error) {
-      console.warn("Unable to connect playback waveform:", error);
-      void audioContext.close();
-      return undefined;
+      try {
+        const source = audioContext.createMediaElementSource(mediaElement);
+        source.connect(analyser);
+        analyser.connect(outputGain);
+        outputGain.connect(audioContext.destination);
+        graph = { analyser, audioContext, outputGain };
+        MEDIA_ANALYSER_GRAPHS.set(mediaElement, graph);
+      } catch (error) {
+        console.warn("Unable to connect playback waveform:", error);
+        void audioContext.close();
+        return undefined;
+      }
     }
+    const { analyser, audioContext, outputGain } = graph;
 
     const frequencyData = new Uint8Array(analyser.frequencyBinCount);
     const timeDomainData = new Uint8Array(analyser.fftSize);
@@ -58,12 +73,18 @@ export default function PlaybackWaveformVisualizer({
     const container = canvas.parentElement;
 
     const resizeCanvas = () => {
-      const bounds = container.getBoundingClientRect();
+      // Use offsetWidth/offsetHeight rather than getBoundingClientRect: the
+      // container's ancestor is animated with a CSS scaleY() transform for
+      // show/hide, and getBoundingClientRect reflects that transform. Reading
+      // the untransformed layout box keeps the canvas correctly sized even
+      // while the wrapper is collapsed (scaleY(0)) before playback starts.
+      const width = container.offsetWidth;
+      const height = container.offsetHeight;
       const pixelRatio = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.round(bounds.width * pixelRatio));
-      canvas.height = Math.max(1, Math.round(bounds.height * pixelRatio));
-      canvas.style.width = `${bounds.width}px`;
-      canvas.style.height = `${bounds.height}px`;
+      canvas.width = Math.max(1, Math.round(width * pixelRatio));
+      canvas.height = Math.max(1, Math.round(height * pixelRatio));
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     };
 
@@ -74,7 +95,8 @@ export default function PlaybackWaveformVisualizer({
     const resumeAudioContext = () => {
       if (audioContext.state === "suspended") void audioContext.resume();
     };
-    player.on("play", resumeAudioContext);
+    if (player) player.on("play", resumeAudioContext);
+    else mediaElement.addEventListener("play", resumeAudioContext);
 
     const draw = () => {
       const width = canvas.clientWidth;
@@ -87,9 +109,13 @@ export default function PlaybackWaveformVisualizer({
 
       analyser.getByteFrequencyData(frequencyData);
       analyser.getByteTimeDomainData(timeDomainData);
+      outputGain.gain.value = mutedRef.current ? 0 : 1;
       context.clearRect(0, 0, width, height);
 
-      const isActive = !player.paused() && !player.muted();
+      const isActive = player ? !player.paused() : !mediaElement.paused;
+      if (isActive && audioContext.state === "suspended") {
+        void audioContext.resume();
+      }
       const rms = Math.sqrt(
         timeDomainData.reduce((sum, sample) => {
           const normalizedSample = (sample - 128) / 128;
@@ -98,7 +124,9 @@ export default function PlaybackWaveformVisualizer({
       );
       const outputDb = rms > 0 ? 20 * Math.log10(rms) : -60;
       const outputLevel = Math.max(0, Math.min(1, (outputDb + 60) / 60));
-      onLevelChangeRef.current?.(isActive ? outputLevel : 0);
+      onLevelChangeRef.current?.(
+        isActive && !mutedRef.current ? outputLevel : 0,
+      );
 
       const middle = height / 2;
       const maximumBarHeight = Math.max(0, middle - VERTICAL_PADDING);
@@ -113,7 +141,8 @@ export default function PlaybackWaveformVisualizer({
       );
       const barWidth = drawableWidth / sampleCount;
       const peakAmplitude = Math.max(...frequencyData) / 255;
-      if (!isActive || peakAmplitude < 0.01) {
+      const hasAnalyserSignal = peakAmplitude >= 0.01;
+      if (!isActive || !hasAnalyserSignal) {
         context.fillStyle = waveformAmplitudeColor(0, rgbColor.g, rgbColor.b);
         context.globalAlpha = 0.55;
         context.fillRect(
@@ -147,7 +176,7 @@ export default function PlaybackWaveformVisualizer({
         context.fillRect(
           HORIZONTAL_PADDING + index * barWidth,
           middle - barHeight,
-          Math.max(0.5, barWidth - WAVEFORM_LINE_STYLE.barGap),
+          Math.max(1, barWidth - WAVEFORM_LINE_STYLE.barGap),
           barHeight * 2,
         );
       }
@@ -159,12 +188,10 @@ export default function PlaybackWaveformVisualizer({
     return () => {
       window.cancelAnimationFrame(frameRef.current);
       resizeObserver.disconnect();
-      player.off("play", resumeAudioContext);
-      source.disconnect();
-      analyser.disconnect();
-      void audioContext.close();
+      if (player) player.off("play", resumeAudioContext);
+      else mediaElement.removeEventListener("play", resumeAudioContext);
     };
-  }, [player]);
+  }, [mediaElementProp, player]);
 
   return (
     <Box

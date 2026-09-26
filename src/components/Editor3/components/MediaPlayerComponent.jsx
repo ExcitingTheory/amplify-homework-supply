@@ -9,16 +9,14 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Popover,
   Slider,
-  Tab,
-  Tabs,
   Tooltip,
   Typography,
 } from "@mui/material";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
 import MovieIcon from "@mui/icons-material/Movie";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -75,6 +73,14 @@ function formatTimecode(seconds) {
   return [hours, minutes, remainingSeconds]
     .map((value) => String(value).padStart(2, "0"))
     .join(":");
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value < 0) return null;
+  if (value < 1_000) return `${value} B`;
+  if (value < 1_000_000) return `${(value / 1_000).toFixed(1)} KB`;
+  return `${(value / 1_000_000).toFixed(2)} MB`;
 }
 
 async function resolveTrack({ id, title, path, hlsPath, mimeType, size }) {
@@ -142,6 +148,7 @@ export function LevelControlSlider({
   onChange,
   showValue = false,
   visualLevel,
+  compact = false,
 }) {
   const isVertical = orientation === "vertical";
   const sliderRef = React.useRef(null);
@@ -237,12 +244,12 @@ export function LevelControlSlider({
         }}
         sx={{
           position: "relative",
-          width: isVertical ? 20 : 116,
-          height: isVertical ? 116 : 18,
+          width: compact ? 7 : isVertical ? 20 : 116,
+          height: compact ? 28 : isVertical ? 116 : 18,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          margin: "0 auto",
+          margin: compact ? 0 : "0 auto",
           cursor: disabled ? "default" : "pointer",
           outline: "none",
           touchAction: "none",
@@ -255,9 +262,9 @@ export function LevelControlSlider({
             height: "100%",
             borderRadius: 999,
             background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(146, 136, 170, 0.5)",
+            border: compact ? "none" : "1px solid rgba(146, 136, 170, 0.5)",
             overflow: "hidden",
-            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.08)",
+            boxShadow: compact ? "none" : "inset 0 1px 3px rgba(0,0,0,0.08)",
           }}
         >
           <Box
@@ -312,8 +319,16 @@ export default function MediaPlayerComponent({
   nodeKey,
   recordingMetadata,
   onRecordingComplete,
+  showTakeSubmissionControls = true,
   onHelp,
   onClose,
+  playlistAdjacentControls,
+  playlistOpen: controlledPlaylistOpen,
+  onPlaylistOpenChange,
+  promptDescription: promptDescriptionOverride,
+  promptThumbnail,
+  promptTitle: promptTitleOverride,
+  externalPlaybackActive = false,
 }) {
   const t = useTranslations("editor.shared");
   const tCommon = useTranslations("common");
@@ -329,13 +344,27 @@ export default function MediaPlayerComponent({
   const [volume, setVolume] = React.useState(1);
   const [muted, setMuted] = React.useState(false);
   const [meterLevel, setMeterLevel] = React.useState(0);
-  const [volumeControl, setVolumeControl] = React.useState(null);
-  const [playlistOpen, setPlaylistOpen] = React.useState(true);
+  const [liveSignalReady, setLiveSignalReady] = React.useState(false);
+  const [internalPlaylistOpen, setInternalPlaylistOpen] = React.useState(true);
+  const playlistOpen = controlledPlaylistOpen ?? internalPlaylistOpen;
+  const setPlaylistOpen = React.useCallback(
+    (nextValue) => {
+      const nextOpen =
+        typeof nextValue === "function" ? nextValue(playlistOpen) : nextValue;
+      if (controlledPlaylistOpen === undefined) {
+        setInternalPlaylistOpen(nextOpen);
+      }
+      onPlaylistOpenChange?.(nextOpen);
+    },
+    [controlledPlaylistOpen, onPlaylistOpenChange, playlistOpen],
+  );
   const [activeList, setActiveList] = React.useState("media");
   const [activeWaveformData, setActiveWaveformData] = React.useState(null);
   const [selectedTakeUrl, setSelectedTakeUrl] = React.useState(null);
   const [takePlaybackId, setTakePlaybackId] = React.useState(null);
   const [takePlaybackProgress, setTakePlaybackProgress] = React.useState(0);
+  const [isTakePlaying, setIsTakePlaying] = React.useState(false);
+  const [takeMediaElement, setTakeMediaElement] = React.useState(null);
   const [submissionCountdown, setSubmissionCountdown] = React.useState(null);
   const submissionTimerRef = React.useRef(null);
   const hasAudioRecording = recordingMode === "audio";
@@ -344,6 +373,7 @@ export default function MediaPlayerComponent({
     [gradeId, nodeKey],
   );
   const recordingTakes = useAudioRecordingTakes({ scopeKey: takeScopeKey });
+  const inputMuted = recordingTakes.inputVolume <= 0;
   const playlistId = React.useId();
   const videoRef = React.useRef(null);
   const playerRef = React.useRef(null);
@@ -352,12 +382,32 @@ export default function MediaPlayerComponent({
   const targetTimeRef = React.useRef(0);
   const scrubTimeRef = React.useRef(0);
   const isScrubbingRef = React.useRef(false);
-  const outputVolumeButtonRef = React.useRef(null);
-  const inputVolumeButtonRef = React.useRef(null);
+  const previousInputVolumeRef = React.useRef(1);
   const takePlayerRef = React.useRef(null);
   const pendingTakePlaybackRef = React.useRef(null);
+  const setTakePlayerElement = React.useCallback((element) => {
+    if (takePlayerRef.current === element) return;
+    takePlayerRef.current = element;
+    setTakeMediaElement((currentElement) =>
+      currentElement === element ? currentElement : element,
+    );
+  }, []);
 
   const { unit, files, questionBank } = React.useContext(UnitContext);
+
+  const handleOutputLevel = React.useCallback(
+    (level) => {
+      setMeterLevel(level);
+      if (activeList === "media" && level > 0.001) {
+        setLiveSignalReady(true);
+      }
+    },
+    [activeList],
+  );
+
+  React.useEffect(() => {
+    if (!isPlaying || activeList !== "media") setLiveSignalReady(false);
+  }, [activeList, isPlaying]);
 
   React.useEffect(() => {
     if (!recordingTakes.selectedTake) {
@@ -372,6 +422,7 @@ export default function MediaPlayerComponent({
   const playTake = React.useCallback(
     (takeId) => {
       playerRef.current?.pause();
+      setActiveList("takes");
       recordingTakes.setSelectedTakeId(takeId);
       pendingTakePlaybackRef.current = takeId;
       setTakePlaybackId(takeId);
@@ -387,6 +438,19 @@ export default function MediaPlayerComponent({
       }
     },
     [recordingTakes, selectedTakeUrl],
+  );
+
+  const deleteTake = React.useCallback(
+    async (takeId) => {
+      if (takePlaybackId === takeId) {
+        takePlayerRef.current?.pause();
+        pendingTakePlaybackRef.current = null;
+        setTakePlaybackId(null);
+        setTakePlaybackProgress(0);
+      }
+      await recordingTakes.deleteTake(takeId);
+    },
+    [recordingTakes, takePlaybackId],
   );
 
   React.useEffect(() => {
@@ -407,7 +471,7 @@ export default function MediaPlayerComponent({
   React.useEffect(() => {
     if (!takePlayerRef.current) return;
     takePlayerRef.current.volume = volume;
-    takePlayerRef.current.muted = muted;
+    takePlayerRef.current.muted = false;
   }, [muted, volume]);
 
   const playCurrent = React.useCallback(
@@ -548,6 +612,11 @@ export default function MediaPlayerComponent({
 
   const currentTrack = tracks[currentIndex] || null;
   const activeTrack = currentTrack;
+  const isVideo = Boolean(isVideoTrack(currentTrack || activeTrack));
+
+  React.useEffect(() => {
+    if (externalPlaybackActive) playerRef.current?.pause();
+  }, [externalPlaybackActive]);
   nowPlayingRef.current = activeTrack;
 
   React.useEffect(() => {
@@ -674,7 +743,11 @@ export default function MediaPlayerComponent({
     };
     const updateVolume = () => {
       setVolume(player.volume());
-      setMuted(player.muted());
+      if (isVideo) {
+        setMuted(player.muted());
+      } else if (player.muted()) {
+        player.muted(false);
+      }
     };
     const handlePlay = () => {
       setIsPlaying(true);
@@ -733,15 +806,21 @@ export default function MediaPlayerComponent({
     currentIndex,
     activeList,
     activeTrack,
+    isVideo,
     player,
     selectTrack,
     tracks.length,
     unit?.id,
   ]);
 
-  const isVideo = Boolean(isVideoTrack(currentTrack || activeTrack));
   const isStopped = !isPlaying && currentTime <= 0.01;
   const isPaused = !isPlaying && !isStopped;
+  const isTakeTransport = activeList === "takes" && Boolean(takePlaybackId);
+  const isTakeStopped = takePlaybackProgress <= 0 || takePlaybackProgress >= 1;
+  const isTakePaused = isTakeTransport && !isTakePlaying && !isTakeStopped;
+  const transportIsPlaying = isTakeTransport ? isTakePlaying : isPlaying;
+  const transportIsStopped = isTakeTransport ? isTakeStopped : isStopped;
+  const transportIsPaused = isTakeTransport ? isTakePaused : isPaused;
   const seekTo = React.useCallback((nextTime) => {
     scrubTimeRef.current = nextTime;
     targetTimeRef.current = nextTime;
@@ -760,6 +839,39 @@ export default function MediaPlayerComponent({
   const controlProfile = `${isVideo ? "video" : "audio"}-${
     hasAudioRecording ? "audio-recording" : "playback"
   }`;
+  const promptTake =
+    hasAudioRecording && activeList === "takes"
+      ? recordingTakes.selectedTake
+      : null;
+  const promptDuration = recordingTakes.recording
+    ? recordingTakes.recordingDuration
+    : promptTake?.duration ||
+      trackDurations[activeTrack?.id || activeTrack?.src] ||
+      duration;
+  const defaultPromptDescription = [
+    recordingTakes.recording
+      ? "audio/webm"
+      : promptTake?.mimeType || activeTrack?.type,
+    formatTimecode(promptDuration),
+    formatFileSize(
+      recordingTakes.recording
+        ? undefined
+        : (promptTake?.blob.size ?? activeTrack?.size),
+    ),
+  ]
+    .filter(Boolean)
+    .join(" • ");
+  const defaultPromptTitle = recordingTakes.recording
+    ? t("recordingStudio3.record")
+    : promptTake
+      ? `Take ${
+          recordingTakes.takes.findIndex((take) => take.id === promptTake.id) +
+          1
+        }`
+      : activeTrack?.title || t("mediaPlayerComponent.titleHeader");
+  const promptDescription =
+    promptDescriptionOverride ?? defaultPromptDescription;
+  const promptTitle = promptTitleOverride ?? defaultPromptTitle;
 
   const cancelTakeSubmission = React.useCallback(() => {
     if (submissionTimerRef.current) {
@@ -822,10 +934,13 @@ export default function MediaPlayerComponent({
   }, [submissionCountdown, submitSelectedTake]);
 
   React.useEffect(() => cancelTakeSubmission, [cancelTakeSubmission]);
+
   const controlColor = "rgba(255, 255, 255, 0.92)";
   const watermark = tCommon("app.name");
   const labels = {
     input: "Input",
+    inputMute: "Mute input",
+    inputUnmute: "Unmute input",
     inputVolume: "Input volume",
     mute: "Mute",
     output: "Output",
@@ -838,13 +953,18 @@ export default function MediaPlayerComponent({
     volumeControls: "Volume controls",
   };
 
-  if (variant === "compact" && !isVideo && !hasAudioRecording) {
+  if (variant === "compact" && !isVideo) {
     return (
       <Box className={className} sx={{ width: "min(100%, 48rem)" }}>
         <AudioWaveformPlayer
           audioUrl={currentTrack?.src}
           title={currentTrack?.title}
           compact
+          enableRecording={hasAudioRecording}
+          gradeId={gradeId}
+          nodeKey={nodeKey}
+          metadata={recordingMetadata}
+          onRecordingComplete={onRecordingComplete}
         />
       </Box>
     );
@@ -896,19 +1016,80 @@ export default function MediaPlayerComponent({
           <Box ref={videoRef} sx={{ width: "100%", height: "100%" }} />
         </Box>
 
-        <PlaybackWaveformVisualizer
-          player={player}
-          visible={!isVideo && isPlaying}
-          onLevelChange={setMeterLevel}
-        />
+        {!isVideo && (
+          <Box
+            aria-hidden={true}
+            sx={{
+              position: "absolute",
+              left: 12,
+              right: 12,
+              top: "50%",
+              zIndex: 0,
+              height: "0.5px",
+              bgcolor: "primary.main",
+              opacity: 0.55,
+              transform: "translateY(-50%)",
+              transition: "opacity 120ms ease",
+            }}
+          />
+        )}
 
-        {!isVideo && !isPlaying && activeWaveformData && (
+        {!isVideo && (
           <Box
             sx={{
               position: "absolute",
-              inset: 0,
+              inset: "4px 0",
+              zIndex: 2,
+              overflow: "hidden",
+              opacity: activeList === "media" && isPlaying ? 1 : 0,
+              transform:
+                activeList === "media" && isPlaying ? "scaleY(1)" : "scaleY(0)",
+              transformOrigin: "center",
+              transition:
+                "opacity 240ms cubic-bezier(0.77, 0, 0.175, 1), transform 240ms cubic-bezier(0.77, 0, 0.175, 1)",
+              willChange: "opacity, transform",
+              pointerEvents: "none",
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
+            }}
+          >
+            <PlaybackWaveformVisualizer
+              muted={muted}
+              player={player}
+              visible={true}
+              onLevelChange={handleOutputLevel}
+            />
+          </Box>
+        )}
+
+        {!isVideo && activeWaveformData && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: "4px 0",
               zIndex: 1,
               overflow: "hidden",
+              opacity:
+                activeList === "takes" ||
+                !isPlaying ||
+                (!muted && !liveSignalReady)
+                  ? 1
+                  : 0,
+              transform:
+                activeList === "takes" ||
+                !isPlaying ||
+                (!muted && !liveSignalReady)
+                  ? "scaleY(1)"
+                  : "scaleY(0)",
+              transformOrigin: "center",
+              transition:
+                "opacity 240ms cubic-bezier(0.77, 0, 0.175, 1), transform 240ms cubic-bezier(0.77, 0, 0.175, 1)",
+              willChange: "opacity, transform",
+              pointerEvents: "none",
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
               "& > div": {
                 width: "100% !important",
                 height: "100% !important",
@@ -919,6 +1100,8 @@ export default function MediaPlayerComponent({
                 width: "100% !important",
                 height: "100% !important",
                 maxWidth: "100%",
+                border: "none !important",
+                outline: "none",
               },
             }}
           >
@@ -927,23 +1110,9 @@ export default function MediaPlayerComponent({
               width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
               height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
               showLoading={false}
+              transparentBackground
             />
           </Box>
-        )}
-
-        {!isVideo && !isPlaying && !activeWaveformData && (
-          <Box
-            aria-hidden={true}
-            sx={{
-              position: "absolute",
-              left: 12,
-              right: 12,
-              top: "50%",
-              height: 2,
-              bgcolor: "primary.main",
-              transform: "translateY(-50%)",
-            }}
-          />
         )}
 
         {(onHelp || onClose) && (
@@ -1011,7 +1180,7 @@ export default function MediaPlayerComponent({
       </Box>
 
       <MediaPromptBand
-        description={activeTrack?.type}
+        description={promptDescription}
         elapsedTime={formatTimecode(
           recordingTakes.recording
             ? recordingTakes.recordingDuration
@@ -1022,12 +1191,9 @@ export default function MediaPlayerComponent({
             ? 0
             : Math.max(0, duration - displayCurrentTime),
         )}`}
-        isVideo={isVideo}
-        title={
-          recordingTakes.recording
-            ? t("recordingStudio3.record")
-            : activeTrack?.title || t("mediaPlayerComponent.titleHeader")
-        }
+        isVideo={!promptTake && isVideo}
+        thumbnail={promptThumbnail}
+        title={promptTitle}
       >
         <Box>
           <Box sx={{ position: "relative", height: 12 }}>
@@ -1078,6 +1244,7 @@ export default function MediaPlayerComponent({
                 const nextTime = Array.isArray(value) ? value[0] : value;
                 seekTo(nextTime);
                 isScrubbingRef.current = false;
+                playCurrent();
               }}
               sx={{
                 position: "absolute",
@@ -1112,7 +1279,8 @@ export default function MediaPlayerComponent({
           alignItems: "center",
           gap: 0.25,
           minHeight: 40,
-          p: 0.25,
+          px: { xs: 0.5, sm: 0.75 },
+          py: 0.25,
           position: "relative",
           color: "text.primary",
         }}
@@ -1120,7 +1288,13 @@ export default function MediaPlayerComponent({
         <Box
           role="group"
           aria-label={labels.playlist}
-          sx={{ gridArea: "left", justifySelf: "start" }}
+          sx={{
+            gridArea: "left",
+            justifySelf: "start",
+            display: "flex",
+            alignItems: "center",
+            gap: 0.25,
+          }}
         >
           <ControlButton
             label={labels.playlist}
@@ -1130,6 +1304,7 @@ export default function MediaPlayerComponent({
           >
             <PlaylistPlayIcon />
           </ControlButton>
+          {playlistAdjacentControls}
         </Box>
 
         <Box
@@ -1165,11 +1340,19 @@ export default function MediaPlayerComponent({
           )}
           <ControlButton
             label={t("recordingStudio3.stop")}
-            disabled={!recordingTakes.recording && (!activeTrack || isStopped)}
-            pressed={!recordingTakes.recording && isStopped}
+            disabled={
+              !recordingTakes.recording && (!activeTrack || transportIsStopped)
+            }
+            pressed={!recordingTakes.recording && transportIsStopped}
             onClick={() => {
               if (recordingTakes.recording) {
                 recordingTakes.stopRecording();
+                return;
+              }
+              if (isTakeTransport && takePlayerRef.current) {
+                takePlayerRef.current.pause();
+                takePlayerRef.current.currentTime = 0;
+                setTakePlaybackProgress(0);
                 return;
               }
               playerRef.current?.pause();
@@ -1180,10 +1363,21 @@ export default function MediaPlayerComponent({
           </ControlButton>
           <ControlButton
             label={labels.pause}
-            disabled={recordingTakes.recording || !activeTrack || isStopped}
-            pressed={isPaused}
+            disabled={
+              recordingTakes.recording || !activeTrack || transportIsStopped
+            }
+            pressed={transportIsPaused}
             onClick={() => {
-              if (isPaused) {
+              if (isTakeTransport && takePlayerRef.current) {
+                if (isTakePlaying) {
+                  takePlayerRef.current.pause();
+                  requestTakeSubmission();
+                } else {
+                  void takePlayerRef.current.play();
+                }
+                return;
+              }
+              if (transportIsPaused) {
                 playCurrent();
                 return;
               }
@@ -1194,9 +1388,17 @@ export default function MediaPlayerComponent({
           </ControlButton>
           <ControlButton
             label={t("recordingStudio3.play")}
-            disabled={!activeTrack || isPlaying || recordingTakes.recording}
-            pressed={isPlaying}
-            onClick={() => playCurrent()}
+            disabled={
+              !activeTrack || transportIsPlaying || recordingTakes.recording
+            }
+            pressed={transportIsPlaying}
+            onClick={() => {
+              if (isTakeTransport && takePlayerRef.current) {
+                void takePlayerRef.current.play();
+                return;
+              }
+              playCurrent();
+            }}
           >
             <PlayArrowIcon />
           </ControlButton>
@@ -1222,86 +1424,74 @@ export default function MediaPlayerComponent({
             minWidth: 0,
           }}
         >
-          <Box ref={outputVolumeButtonRef}>
+          <Box>
             <ControlButton
               label={muted ? labels.unmute : labels.mute}
-              disabled={!activeTrack}
               pressed={muted}
               onClick={() => {
                 const nextMuted = !muted;
-                playerRef.current?.muted(nextMuted);
+                playerRef.current?.muted(isVideo ? nextMuted : false);
                 setMuted(nextMuted);
-                setVolumeControl("output");
               }}
             >
               {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
             </ControlButton>
           </Box>
+          <LevelControlSlider
+            compact
+            label={labels.outputVolume}
+            value={muted ? 0 : volume}
+            visualLevel={muted ? 0 : meterLevel}
+            min={0}
+            max={1}
+            step={0.01}
+            orientation="vertical"
+            onChange={(nextVolume) => {
+              const safeVolume = Math.min(1, Math.max(0, nextVolume));
+              playerRef.current?.volume(safeVolume);
+              playerRef.current?.muted(false);
+              setVolume(safeVolume);
+              setMuted(false);
+            }}
+          />
 
           {hasAudioRecording && (
-            <Box ref={inputVolumeButtonRef}>
+            <>
               <ControlButton
-                label={labels.inputVolume}
-                onClick={() => setVolumeControl("input")}
+                label={inputMuted ? labels.inputUnmute : labels.inputMute}
+                pressed={inputMuted}
+                onClick={() => {
+                  if (inputMuted) {
+                    recordingTakes.setInputVolume(
+                      previousInputVolumeRef.current,
+                    );
+                  } else {
+                    previousInputVolumeRef.current =
+                      recordingTakes.inputVolume || 1;
+                    recordingTakes.setInputVolume(0);
+                  }
+                }}
               >
-                <MicIcon />
+                {inputMuted ? <MicOffIcon /> : <MicIcon />}
               </ControlButton>
-            </Box>
-          )}
-
-          <Popover
-            open={volumeControl !== null}
-            anchorEl={
-              volumeControl === "input"
-                ? inputVolumeButtonRef.current
-                : outputVolumeButtonRef.current
-            }
-            onClose={() => setVolumeControl(null)}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            transformOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Box sx={{ display: "grid", gap: 1, p: 1.5, minWidth: 160 }}>
-              <Typography variant="caption" fontWeight={700}>
-                {volumeControl === "input" ? labels.input : labels.output}
-              </Typography>
               <LevelControlSlider
-                label={
-                  volumeControl === "input"
-                    ? labels.inputVolume
-                    : labels.outputVolume
-                }
-                value={
-                  volumeControl === "input"
-                    ? recordingTakes.inputVolume
-                    : muted
-                      ? 0
-                      : volume
-                }
-                visualLevel={
-                  volumeControl === "input"
-                    ? recordingTakes.inputLevel
-                    : muted
-                      ? 0
-                      : meterLevel
-                }
+                compact
+                label={labels.inputVolume}
+                value={recordingTakes.inputVolume}
+                visualLevel={recordingTakes.inputLevel}
                 min={0}
                 max={1}
                 step={0.01}
-                orientation="horizontal"
+                orientation="vertical"
                 onChange={(nextVolume) => {
-                  if (volumeControl === "input") {
-                    recordingTakes.setInputVolume(nextVolume);
-                    return;
+                  if (nextVolume > 0) {
+                    previousInputVolumeRef.current = nextVolume;
                   }
-                  const safeVolume = Math.min(1, Math.max(0, nextVolume));
-                  playerRef.current?.volume(safeVolume);
-                  playerRef.current?.muted(false);
-                  setVolume(safeVolume);
-                  setMuted(false);
+                  recordingTakes.setInputVolume(nextVolume);
                 }}
               />
-            </Box>
-          </Popover>
+            </>
+          )}
         </Box>
       </Box>
 
@@ -1310,33 +1500,8 @@ export default function MediaPlayerComponent({
         in={playlistOpen && (tracks.length > 0 || hasAudioRecording)}
         sx={{ borderTop: "1px solid", borderColor: "divider" }}
       >
-        {hasAudioRecording && (
-          <Tabs
-            aria-label="Media and recorded takes"
-            value={activeList}
-            onChange={(_, value) => setActiveList(value)}
-            variant="fullWidth"
-            sx={{
-              minHeight: 28,
-              "& .MuiTab-root": {
-                minHeight: 28,
-                px: 1,
-                py: 0,
-                fontSize: "0.6875rem",
-                lineHeight: 1,
-              },
-            }}
-          >
-            <Tab label={labels.playlist} value="media" />
-            <Tab
-              label={`${t("recordingStudio3.takes")} (${recordingTakes.takes.length})`}
-              value="takes"
-            />
-          </Tabs>
-        )}
-
         <Box sx={{ minHeight: 112, maxHeight: 160, overflowY: "auto" }}>
-          {(!hasAudioRecording || activeList === "media") && (
+          {tracks.length > 0 && (
             <List dense disablePadding>
               {tracks.map((track, index) => (
                 <ListItemButton
@@ -1387,14 +1552,25 @@ export default function MediaPlayerComponent({
             </List>
           )}
 
-          {hasAudioRecording && activeList === "takes" && (
+          {hasAudioRecording && (
             <AudioTakePlaylist
+              backgroundVisualizer={
+                takeMediaElement ? (
+                  <PlaybackWaveformVisualizer
+                    mediaElement={takeMediaElement}
+                    muted={muted}
+                    onLevelChange={handleOutputLevel}
+                  />
+                ) : undefined
+              }
               takes={recordingTakes.takes}
               selectedTakeId={recordingTakes.selectedTakeId}
               playbackTakeId={takePlaybackId}
               playbackProgress={takePlaybackProgress}
+              playbackActive={isTakePlaying}
               recording={recordingTakes.recording}
               recordingCanvasRef={recordingTakes.canvasRef}
+              onDelete={(takeId) => void deleteTake(takeId)}
               onSelect={playTake}
             />
           )}
@@ -1402,7 +1578,7 @@ export default function MediaPlayerComponent({
       </Collapse>
 
       <audio
-        ref={takePlayerRef}
+        ref={setTakePlayerElement}
         src={selectedTakeUrl || undefined}
         onTimeUpdate={(event) => {
           const takePlayer = event.currentTarget;
@@ -1412,65 +1588,74 @@ export default function MediaPlayerComponent({
               : 0,
           );
         }}
-        onEnded={() => setTakePlaybackProgress(1)}
+        onPlay={() => setIsTakePlaying(true)}
+        onPause={() => setIsTakePlaying(false)}
+        onEnded={() => {
+          setIsTakePlaying(false);
+          setTakePlaybackProgress(1);
+        }}
         hidden
       />
 
-      {hasAudioRecording && recordingTakes.takes.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-            minHeight: 56,
-            px: 1.5,
-            py: 1,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            bgcolor: "action.hover",
-          }}
-        >
-          <Button
-            disabled={submissionCountdown === null}
-            onClick={cancelTakeSubmission}
-            endIcon={
-              submissionCountdown !== null ? (
-                <Box
-                  sx={{
-                    position: "relative",
-                    display: "grid",
-                    placeItems: "center",
-                    width: 24,
-                    height: 24,
-                  }}
-                >
-                  <CircularProgress
-                    size={24}
-                    value={(submissionCountdown / 10) * 100}
-                    variant="determinate"
-                  />
-                  <Typography
-                    component="span"
-                    sx={{ position: "absolute", fontSize: "0.625rem" }}
+      {showTakeSubmissionControls &&
+        hasAudioRecording &&
+        recordingTakes.takes.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+              minHeight: 56,
+              px: 1.5,
+              py: 1,
+              borderTop: "1px solid",
+              borderColor: "divider",
+              bgcolor: "action.hover",
+            }}
+          >
+            <Button
+              disabled={submissionCountdown === null}
+              onClick={cancelTakeSubmission}
+              endIcon={
+                submissionCountdown !== null ? (
+                  <Box
+                    sx={{
+                      position: "relative",
+                      display: "grid",
+                      placeItems: "center",
+                      width: 24,
+                      height: 24,
+                    }}
                   >
-                    {submissionCountdown}
-                  </Typography>
-                </Box>
-              ) : undefined
-            }
-          >
-            {t("autoSubmit.cancelSubmission")}
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!recordingTakes.selectedTake || recordingTakes.recording}
-            onClick={requestTakeSubmission}
-          >
-            {t("questionBlock.submit")}
-          </Button>
-        </Box>
-      )}
+                    <CircularProgress
+                      size={24}
+                      value={(submissionCountdown / 10) * 100}
+                      variant="determinate"
+                    />
+                    <Typography
+                      component="span"
+                      sx={{ position: "absolute", fontSize: "0.625rem" }}
+                    >
+                      {submissionCountdown}
+                    </Typography>
+                  </Box>
+                ) : undefined
+              }
+            >
+              {t("autoSubmit.cancelSubmission")}
+            </Button>
+            <Button
+              variant="contained"
+              disabled={
+                !recordingTakes.selectedTake || recordingTakes.recording
+              }
+              onClick={requestTakeSubmission}
+            >
+              {t("questionBlock.submit")}
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 }

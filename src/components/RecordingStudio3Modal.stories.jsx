@@ -9,7 +9,6 @@ import { within, waitFor } from "storybook/test";
 import { userEvent } from "storybook/test";
 import RecordingStudio3Modal from "./RecordingStudio3Modal";
 import FilesContext from "../context/fileContext";
-import { DemoBanner } from "../../.storybook/components/DemoBanner";
 import {
   createWordPreset,
   createConversationPreset,
@@ -152,10 +151,6 @@ Fullscreen modal wrapper for RecordingStudio3. Used in both **Dictionary** and *
   decorators: [
     (Story) => (
       <FilesContext.Provider value={mockFilesContext}>
-        <DemoBanner
-          title="🎙️ Recording Studio Modal"
-          description="Fullscreen modal wrapper — interactions trigger save/cancel flows"
-        />
         <Story />
       </FilesContext.Provider>
     ),
