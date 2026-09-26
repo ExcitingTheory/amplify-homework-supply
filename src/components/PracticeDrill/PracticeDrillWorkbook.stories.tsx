@@ -56,7 +56,7 @@ const workbookWords = [
 ];
 
 const meta: Meta<PracticeDrillWorkbookProps> = {
-  title: "\ud83c\udfaf Practice Drills/Workbook",
+  title: "🎯 Practice Drills/Workbook",
   component: PracticeDrillWorkbook,
   loaders: [
     async () => {

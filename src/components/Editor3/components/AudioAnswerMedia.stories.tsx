@@ -208,7 +208,7 @@ function AudioAnswerDemo({
 }
 
 const meta = {
-  title: "Editor 3/Components/Audio Answer Media",
+  title: "✏️ Lesson Editor/Components/Audio Answer Media",
   component: AudioAnswerMedia,
   parameters: { layout: "centered" },
   tags: ["autodocs"],

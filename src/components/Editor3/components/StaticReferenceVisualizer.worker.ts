@@ -374,7 +374,7 @@ function computeLineState(
   };
 }
 
-const workerContext = self as DedicatedWorkerGlobalScope;
+const workerContext = self as unknown as DedicatedWorkerGlobalScope;
 
 workerContext.onmessage = ({ data }: MessageEvent<WorkerMessage>) => {
   if (data.type === "configure") {

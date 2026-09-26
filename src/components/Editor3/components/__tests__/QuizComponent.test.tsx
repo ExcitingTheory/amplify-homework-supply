@@ -74,12 +74,12 @@ describe('QuestionBlockRo (QuizComponent)', () => {
 
     it('renders score display showing 0% initially', () => {
       renderQuiz({ data: sampleQuiz, saveGrade });
-      expect(screen.getByText('Score: 0%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
     });
 
     it('renders empty state when data is empty', () => {
       renderQuiz({ data: [], saveGrade });
-      expect(screen.getByText('Score: 0%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
     });
 
     it('renders quiz block data-tour attribute', () => {
@@ -166,7 +166,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
         },
       });
 
-      expect(screen.getByText('Score: 75%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 75%/ })).toBeDefined();
     });
   });
 
@@ -197,12 +197,12 @@ describe('QuestionBlockRo (QuizComponent)', () => {
           'quiz-1': { accuracy: 50, complete: false, attemptedAnswers: {}, correctAnswers: {}, percentComplete: 0 },
         },
       });
-      expect(screen.getByText('Score: 50%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 50%/ })).toBeDefined();
     });
 
     it('handles empty grade data', () => {
       renderQuiz({ data: sampleQuiz, saveGrade, gradeData: {} });
-      expect(screen.getByText('Score: 0%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
     });
 
     it('handles null grade', () => {
@@ -211,7 +211,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
           <QuestionBlockRo nodeKey="quiz-1" data={sampleQuiz} />
         </UnitContext.Provider>
       );
-      expect(screen.getByText('Score: 0%')).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
     });
   });
 });

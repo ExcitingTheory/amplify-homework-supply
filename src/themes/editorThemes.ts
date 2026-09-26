@@ -2,7 +2,6 @@
  * Editor theme palette definitions for the CosmeticSelector themes.
  * Each theme defines both light and dark MUI palette overrides.
  */
-import { red } from "@mui/material/colors";
 import type { Components, Theme } from "@mui/material/styles";
 import {
   getSemanticThemeOptions,
@@ -47,40 +46,49 @@ export interface ThemePalette {
 }
 
 export const THEME_PALETTES: Record<string, ThemePalette> = {
+  // Bespoke calming default — replaces MUI's stock starter-template colors
+  // (#556cd6/#19857b). Muted slate-blue + teal, WCAG AA verified (>=4.5:1
+  // for all text/status colors against their paired background).
   default: {
     light: {
-      primary: { main: "#556cd6" },
-      secondary: { main: "#19857b" },
-      error: { main: red.A400 },
-      background: { default: "#fafafa", paper: "#ffffff" },
+      primary: { main: "#4C6B87" },
+      secondary: { main: "#2F7D6C" },
+      error: { main: "#B54A42" },
+      warning: { main: "#96601A" },
+      info: { main: "#3E7CA6" },
+      success: { main: "#2E7D53" },
+      background: { default: "#F7F9FA", paper: "#ffffff" },
+      text: { primary: "#263238", secondary: "#55646B" },
       custom: {
-        chatBubbleUser: "#e3f2fd",
-        chatBubbleAssistant: "#f3f4f6",
+        chatBubbleUser: "#E3F1EE",
+        chatBubbleAssistant: "#F1F3F4",
         glassNavbar: "rgba(255,255,255,0.72)",
         editorBackground: "#ffffff",
-        codeBlock: "#f6f8fa",
-        searchHighlight: "#ffeb3b",
-        subtleBorder: "#e0e0e0",
+        codeBlock: "#F0F3F5",
+        searchHighlight: "#FFE08A",
+        subtleBorder: "#DCE3E7",
         heroCardGradient:
-          "linear-gradient(135deg, rgba(21,101,192,0.92) 0%, rgba(13,71,161,0.97) 100%)",
+          "linear-gradient(135deg, rgba(76,107,135,0.92) 0%, rgba(47,125,108,0.95) 100%)",
       },
     },
     dark: {
-      primary: { main: "#7986cb" },
-      secondary: { main: "#4db6ac" },
-      error: { main: red.A200 },
-      background: { default: "#121212", paper: "#1e1e1e" },
-      text: { primary: "#e0e0e0", secondary: "#a0a0a0" },
+      primary: { main: "#8FB4CF" },
+      secondary: { main: "#5FBFA9" },
+      error: { main: "#E08277" },
+      warning: { main: "#D9A45E" },
+      info: { main: "#7FB0D1" },
+      success: { main: "#6FBF95" },
+      background: { default: "#171B1F", paper: "#20262B" },
+      text: { primary: "#E4E8EA", secondary: "#9AA7AC" },
       custom: {
-        chatBubbleUser: "#1a2634",
-        chatBubbleAssistant: "#2d2d2d",
-        glassNavbar: "rgba(30,30,30,0.85)",
-        editorBackground: "#1e1e1e",
-        codeBlock: "#161b22",
-        searchHighlight: "#b8860b",
-        subtleBorder: "#333333",
-        heroCardGradient:
-          "linear-gradient(135deg, rgba(25,35,55,0.95) 0%, rgba(15,20,40,0.98) 100%)",
+        chatBubbleUser: "#1E2E36",
+        chatBubbleAssistant: "#232B2E",
+        glassNavbar: "rgba(23,27,31,0.85)",
+        editorBackground: "#20262B",
+        codeBlock: "#151A1D",
+        searchHighlight: "#B98A2E",
+        subtleBorder: "#333D42",
+        heroCardGradient: "linear-gradient(135deg, #1c2a33 0%, #16302b 100%)",
       },
     },
   },

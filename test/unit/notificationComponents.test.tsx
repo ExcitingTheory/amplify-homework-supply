@@ -13,6 +13,12 @@ vi.mock("next-intl", () => ({
   },
 }));
 
+// Mock next/navigation — NotificationList calls useRouter() unconditionally
+// even when onNavigate is provided, and no App Router is mounted in these tests
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 // Mock notificationContext
 const mockUseNotifications = vi.fn();
 const mockUseUnseenCount = vi.fn();

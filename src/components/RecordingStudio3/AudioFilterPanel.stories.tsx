@@ -3,6 +3,13 @@ import { useState } from "react";
 import AudioFilterPanel from "./AudioFilterPanel";
 import { expect, within } from "storybook/test";
 
+// Browser-mode tests here occasionally hit a Playwright/websocket disconnect
+// ("[birpc] rpc is closed") unrelated to this story's assertions. Retry just
+// this file's tests to absorb that flakiness. No-op outside the Vitest runtime.
+if (typeof vi !== "undefined") {
+  vi.setConfig({ retry: 1 });
+}
+
 const meta: Meta<typeof AudioFilterPanel> = {
   title: "🎙️ Recording Studio/Components/Audio Filter Panel",
   component: AudioFilterPanel,

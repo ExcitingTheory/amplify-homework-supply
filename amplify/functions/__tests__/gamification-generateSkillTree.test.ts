@@ -10,7 +10,7 @@ vi.mock("aws-amplify", () => ({
 }));
 
 vi.mock("@aws-sdk/credential-providers", () => ({
-  fromEnv: vi.fn(() =>
+  fromNodeProviderChain: vi.fn(() =>
     vi.fn().mockResolvedValue({
       accessKeyId: "test",
       secretAccessKey: "test",
@@ -359,7 +359,7 @@ describe("gamification handler — generateSkillTree", () => {
       // Existing skills to delete
       .mockResolvedValueOnce({
         data: {
-          listSkillBySection: {
+          listSkillBySectionID: {
             items: [
               { id: "old-1", _version: 1 },
               { id: "old-2", _version: 2 },

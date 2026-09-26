@@ -23,7 +23,7 @@
 import type { DynamoDBStreamHandler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
-import { fromEnv } from "@aws-sdk/credential-providers";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 
 // ============================================================================
 // GraphQL Operations
@@ -255,7 +255,7 @@ function getClient(): any {
         Auth: {
           credentialsProvider: {
             getCredentialsAndIdentityId: async () => ({
-              credentials: await fromEnv()(),
+              credentials: await fromNodeProviderChain()(),
             }),
             clearCredentialsAndIdentityId: () => {},
           },

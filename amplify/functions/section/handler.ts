@@ -20,7 +20,7 @@ import {
   CloudFormationClient,
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
-import { fromEnv } from "@aws-sdk/credential-providers";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import * as crypto from "crypto";
@@ -221,7 +221,7 @@ Amplify.configure(
     Auth: {
       credentialsProvider: {
         getCredentialsAndIdentityId: async () => ({
-          credentials: await fromEnv()(),
+          credentials: await fromNodeProviderChain()(),
         }),
         clearCredentialsAndIdentityId: () => {},
       },

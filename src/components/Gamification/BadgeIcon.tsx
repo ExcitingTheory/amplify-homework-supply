@@ -10,9 +10,10 @@
 
 import React, { useId, useMemo } from "react";
 import Box, { type BoxProps } from "@mui/material/Box";
+import { useTheme } from "@mui/material/styles";
 import { motion, type Variants, type HTMLMotionProps } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { HERALDRY, type MetalKey } from "@/themes/heraldry";
+import { getMetals, type MetalKey } from "@/themes/heraldry";
 
 // Typed wrapper to avoid MUI Box + motion.div type conflicts
 const MotionBox = motion.create(Box) as React.FC<
@@ -20,7 +21,7 @@ const MotionBox = motion.create(Box) as React.FC<
 >;
 import {
   getBadgeConfig,
-  RARITY_EFFECTS,
+  getRarityEffects,
   type BadgeVisualConfig,
   type BadgeShape,
   type BadgeAnimationPreset,
@@ -293,6 +294,7 @@ export function BadgeIcon({
   const sheenId = `badge-sheen-${idBase}`;
   const clipId = `badge-clip-${idBase}`;
   const reducedMotion = useReducedMotion();
+  const theme = useTheme();
 
   // Suppress all animations when reduced motion is active
   const effectiveAnimate = animate && !reducedMotion;
@@ -300,8 +302,8 @@ export function BadgeIcon({
 
   const config =
     configOverride ?? getBadgeConfig(badgeType ?? "FIRST_SUBMISSION");
-  const rarityEffect = RARITY_EFFECTS[config.rarity];
-  const rimMetal = HERALDRY.metals[RARITY_METAL[config.rarity]];
+  const rarityEffect = getRarityEffects(theme)[config.rarity];
+  const rimMetal = getMetals(theme)[RARITY_METAL[config.rarity]];
 
   const mountAnim = animationOverride ?? config.animation;
   const hoverAnim = config.hoverAnimation ?? "pulse";

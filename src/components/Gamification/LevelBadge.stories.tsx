@@ -131,9 +131,9 @@ export const Small: Story = {
     size: "small",
   },
   play: async ({ canvasElement }) => {
-    // Small chip renders
-    const chip = canvasElement.querySelector(".MuiChip-sizeSmall");
-    expect(chip).not.toBeNull();
+    // The "small" size renders a compact icon+number pill, not a MuiChip
+    const badge = canvasElement.querySelector('[aria-label*="Lvl. 3"]');
+    expect(badge).not.toBeNull();
   },
 };
 

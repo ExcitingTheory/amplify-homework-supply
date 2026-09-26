@@ -16,7 +16,7 @@ export type {
   XPLineItemData,
 } from "./HomeworkXPSummary";
 
-export { LevelBadge } from "./LevelBadge";
+export { LevelBadge, getLevelColors } from "./LevelBadge";
 export type { LevelBadgeProps } from "./LevelBadge";
 
 export { StreakIndicator } from "./StreakIndicator";
@@ -70,7 +70,7 @@ export {
   getBadgesByCategory,
   getBadgesByRarity,
   BADGE_REGISTRY,
-  RARITY_EFFECTS,
+  getRarityEffects,
 } from "./badgeRegistry";
 export type {
   BadgeVisualConfig,

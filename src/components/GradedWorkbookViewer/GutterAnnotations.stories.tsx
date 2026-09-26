@@ -7,7 +7,7 @@ import type {
 import { expect, within } from "storybook/test";
 
 const meta: Meta<typeof GutterAnnotations> = {
-  title: "� Instructor Tools/Grading/Gutter Annotations",
+  title: "📊 Instructor Tools/Grading/Gutter Annotations",
   component: GutterAnnotations,
   parameters: { layout: "padded" },
 };

@@ -109,7 +109,7 @@ function normalizeFrequencyLevels(levels: FrequencyLevels): FrequencyLevels {
 }
 
 const meta: Meta<VisualizerStoryArgs> = {
-  title: "Editor3/Static Reference Visualizer",
+  title: "✏️ Lesson Editor/Media/Static Reference Visualizer",
   component: StaticReferenceVisualizer,
   argTypes: {
     animated: {

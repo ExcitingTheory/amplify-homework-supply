@@ -3,7 +3,7 @@ import { expect, fn, within } from "storybook/test";
 import { SkillTreePopupButton } from "./SkillTreePopupButton";
 
 const meta: Meta<typeof SkillTreePopupButton> = {
-  title: "� Gamification/Skill Tree/Skill Tree Popup Button",
+  title: "🏆 Gamification/Skill Tree/Skill Tree Popup Button",
   component: SkillTreePopupButton,
   parameters: { layout: "centered" },
 };
@@ -18,7 +18,8 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("View Skill Tree Skill Tree");
+    // Button always shows a fixed "Skills" label; the `label` prop only affects the dialog title
+    await canvas.findByRole("button", { name: "Skills" });
   },
 };
 
@@ -29,7 +30,7 @@ export const CustomLabel: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Skills & Progress Skill Tree");
+    await canvas.findByRole("button", { name: "Skills" });
   },
 };
 
@@ -41,6 +42,6 @@ export const InstructorEmptyState: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Instructor View Skill Tree");
+    await canvas.findByRole("button", { name: "Skills" });
   },
 };

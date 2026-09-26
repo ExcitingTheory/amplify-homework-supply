@@ -14,7 +14,8 @@ describe("UX implementation contracts", () => {
 
     expect(source).toContain('width: "min(calc(100% - 2rem), 48rem)"');
     expect(source).toContain('maxHeight: "calc(100vh - 2rem)"');
-    expect(source).toContain('aria-labelledby="workbook-timer-title"');
+    // aria-labelledby is built via a ternary (resume vs start overlay), not a literal attribute
+    expect(source).toContain('"workbook-timer-title"');
   });
 
   it("keeps chat messages theme-aware and avoids forced white descendants", () => {
@@ -29,16 +30,18 @@ describe("UX implementation contracts", () => {
   });
 
   it("exposes live status and actionable offline sync contracts", () => {
+    // Live status markup lives in the presentational View split-out component
     const recordingSource = readWorkspaceFile(
-      "src/components/RecordingStudio3.jsx",
+      "src/components/RecordingStudio3View.jsx",
     );
-    const offlineSource = readWorkspaceFile("src/components/OfflineBanner.tsx");
+    // The sync button + aria-label live in the presentational View component
+    const offlineSource = readWorkspaceFile("src/components/OfflineBannerView.tsx");
 
     expect(recordingSource).toContain('role="status"');
     expect(recordingSource).toContain('aria-live="polite"');
-    expect(offlineSource).toContain("onClick={handleManualSync}");
+    expect(offlineSource).toContain("onClick={onSync}");
     expect(offlineSource).toContain(
-      "aria-label={`Sync ${pendingCount} pending changes`}",
+      't("offlineBanner.syncAria", { count: pendingCount })',
     );
   });
 });

@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
+import { createTheme } from "@mui/material/styles";
 import {
-  HERALDRY,
+  getTinctures,
+  getMetals,
   hashSeed,
   pickTinctures,
   pickDivision,
@@ -8,24 +10,38 @@ import {
   readableInk,
 } from "../heraldry";
 
-describe("HERALDRY palette", () => {
-  it("exposes the seven canonical tinctures", () => {
-    expect(Object.keys(HERALDRY.tinctures).sort()).toEqual(
-      ["argent", "azure", "gules", "or", "purpure", "sable", "vert"].sort(),
-    );
+const lightTheme = createTheme({ palette: { mode: "light" } });
+const darkTheme = createTheme({ palette: { mode: "dark" } });
+
+describe("getTinctures", () => {
+  it("exposes the seven canonical tinctures for light and dark themes", () => {
+    for (const theme of [lightTheme, darkTheme]) {
+      expect(Object.keys(getTinctures(theme)).sort()).toEqual(
+        ["argent", "azure", "gules", "or", "purpure", "sable", "vert"].sort(),
+      );
+    }
   });
 
-  it("exposes the four metal ramps", () => {
-    expect(Object.keys(HERALDRY.metals).sort()).toEqual(
-      ["bronze", "gold", "platinum", "silver"].sort(),
-    );
+  it("every tincture has main/shade/light CSS color values", () => {
+    // main comes straight from the theme (usually hex); shade/light are
+    // computed via MUI's darken()/lighten(), which return rgb() strings.
+    const cssColor = /^#[0-9a-f]{6}$|^rgba?\(/i;
+    for (const theme of [lightTheme, darkTheme]) {
+      for (const t of Object.values(getTinctures(theme))) {
+        expect(t.main).toMatch(cssColor);
+        expect(t.shade).toMatch(cssColor);
+        expect(t.light).toMatch(cssColor);
+      }
+    }
   });
+});
 
-  it("every tincture has main/shade/light hex values", () => {
-    for (const t of Object.values(HERALDRY.tinctures)) {
-      expect(t.main).toMatch(/^#[0-9a-f]{6}$/i);
-      expect(t.shade).toMatch(/^#[0-9a-f]{6}$/i);
-      expect(t.light).toMatch(/^#[0-9a-f]{6}$/i);
+describe("getMetals", () => {
+  it("exposes the four metal ramps for light and dark themes", () => {
+    for (const theme of [lightTheme, darkTheme]) {
+      expect(Object.keys(getMetals(theme)).sort()).toEqual(
+        ["bronze", "gold", "platinum", "silver"].sort(),
+      );
     }
   });
 });
@@ -43,14 +59,14 @@ describe("hashSeed", () => {
 
 describe("pickTinctures", () => {
   it("is deterministic for a given seed", () => {
-    const a = pickTinctures("g1");
-    const b = pickTinctures("g1");
+    const a = pickTinctures("g1", lightTheme);
+    const b = pickTinctures("g1", lightTheme);
     expect(a).toEqual(b);
   });
 
   it("always returns a charge tincture distinct from the field", () => {
     for (const seed of ["g1", "g2", "g3", "alpha", "beta", "gamma", "x", ""]) {
-      const { field, charge } = pickTinctures(seed);
+      const { field, charge } = pickTinctures(seed, lightTheme);
       expect(field.name).not.toBe(charge.name);
     }
   });
@@ -69,31 +85,31 @@ describe("pickDivision", () => {
 
 describe("metalForTier", () => {
   it("maps magnitudes to the correct ramp", () => {
-    expect(metalForTier(0).name).toBe("bronze");
-    expect(metalForTier(999).name).toBe("bronze");
-    expect(metalForTier(1000).name).toBe("silver");
-    expect(metalForTier(4999).name).toBe("silver");
-    expect(metalForTier(5000).name).toBe("gold");
-    expect(metalForTier(14999).name).toBe("gold");
-    expect(metalForTier(15000).name).toBe("platinum");
-    expect(metalForTier(999999).name).toBe("platinum");
+    expect(metalForTier(0, lightTheme).name).toBe("bronze");
+    expect(metalForTier(999, lightTheme).name).toBe("bronze");
+    expect(metalForTier(1000, lightTheme).name).toBe("silver");
+    expect(metalForTier(4999, lightTheme).name).toBe("silver");
+    expect(metalForTier(5000, lightTheme).name).toBe("gold");
+    expect(metalForTier(14999, lightTheme).name).toBe("gold");
+    expect(metalForTier(15000, lightTheme).name).toBe("platinum");
+    expect(metalForTier(999999, lightTheme).name).toBe("platinum");
   });
 
   it("clamps negatives and non-finite values to bronze", () => {
-    expect(metalForTier(-500).name).toBe("bronze");
-    expect(metalForTier(Number.NaN).name).toBe("bronze");
+    expect(metalForTier(-500, lightTheme).name).toBe("bronze");
+    expect(metalForTier(Number.NaN, lightTheme).name).toBe("bronze");
   });
 });
 
 describe("readableInk", () => {
   it("returns light ink over dark fields", () => {
     expect(readableInk("#111417")).toBe("#f5f5f5");
-    expect(readableInk(HERALDRY.tinctures.sable.main)).toBe("#f5f5f5");
+    expect(readableInk(getTinctures(lightTheme).sable.main)).toBe("#f5f5f5");
   });
 
   it("returns dark ink over light fields", () => {
     expect(readableInk("#f2f5f8")).toBe("#1a1a1a");
-    expect(readableInk(HERALDRY.tinctures.argent.main)).toBe("#1a1a1a");
+    expect(readableInk(getTinctures(lightTheme).argent.main)).toBe("#1a1a1a");
   });
 
   it("handles shorthand hex", () => {

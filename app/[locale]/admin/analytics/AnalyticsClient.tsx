@@ -10,8 +10,16 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { getAmplifyClient } from "@/utils/amplifyClient";
+import { TrendChart } from "./TrendChart";
+import {
+  detectAnomaliesAcrossMetrics,
+  type Anomaly,
+  type TrendPoint,
+} from "./analyticsInsights";
 
 // ============================================================================
 // Types
@@ -31,7 +39,8 @@ interface AnalyticsSummaryRecord {
   avgAccuracy?: number | null;
   workbooksStarted: number;
   workbooksCompleted: number;
-  chatMessagesSent: number;
+  studentChatMessagesSent?: number;
+  instructorChatMessagesSent?: number;
   documentsAnalyzed: number;
   topPages?: { path: string; views: number }[] | null;
 }
@@ -209,7 +218,10 @@ function AnalyticsDashboard({
           acc.accuracySum + (s.avgAccuracy || 0) * (s.gradesSubmitted || 0),
         started: acc.started + (s.workbooksStarted || 0),
         completed: acc.completed + (s.workbooksCompleted || 0),
-        chatMessages: acc.chatMessages + (s.chatMessagesSent || 0),
+        chatMessages:
+          acc.chatMessages +
+          (s.studentChatMessagesSent || 0) +
+          (s.instructorChatMessagesSent || 0),
         documents: acc.documents + (s.documentsAnalyzed || 0),
       }),
       {
@@ -247,6 +259,73 @@ function AnalyticsDashboard({
       documents: sum.documents,
     };
   }, [summaries]);
+
+  // Per-day trend series for the chart cards
+  const trendSeries = React.useMemo(() => {
+    const toPoints = (
+      extract: (s: AnalyticsSummaryRecord) => number,
+    ): TrendPoint[] => summaries.map((s) => ({ date: s.date, value: extract(s) }));
+    return {
+      dailyActiveUsers: toPoints((s) => s.dailyActiveUsers || 0),
+      totalSessions: toPoints((s) => s.totalSessions || 0),
+      gradesSubmitted: toPoints((s) => s.gradesSubmitted || 0),
+      avgAccuracy: toPoints((s) => s.avgAccuracy || 0),
+    };
+  }, [summaries]);
+
+  // Statistical anomalies (z-score vs. the range's own mean) across trend metrics
+  const anomalies: Anomaly[] = React.useMemo(
+    () =>
+      detectAnomaliesAcrossMetrics([
+        {
+          key: "dailyActiveUsers",
+          label: "Daily Active Users",
+          points: trendSeries.dailyActiveUsers,
+        },
+        {
+          key: "totalSessions",
+          label: "Total Sessions",
+          points: trendSeries.totalSessions,
+        },
+        {
+          key: "gradesSubmitted",
+          label: "Grades Submitted",
+          points: trendSeries.gradesSubmitted,
+        },
+        {
+          key: "avgAccuracy",
+          label: "Avg Accuracy",
+          points: trendSeries.avgAccuracy,
+        },
+      ]),
+    [trendSeries],
+  );
+
+  const anomalyDatesByMetric = React.useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+    for (const a of anomalies) {
+      if (!map[a.metricKey]) map[a.metricKey] = new Set();
+      map[a.metricKey].add(a.date);
+    }
+    return map;
+  }, [anomalies]);
+
+  const formatMetricValue = React.useCallback(
+    (metricKey: string, value: number) =>
+      metricKey === "avgAccuracy"
+        ? `${Math.round(value)}%`
+        : Math.round(value).toLocaleString(),
+    [],
+  );
+
+  const countFormatter = React.useCallback(
+    (v: number) => Math.round(v).toLocaleString(),
+    [],
+  );
+  const percentFormatter = React.useCallback(
+    (v: number) => `${Math.round(v)}%`,
+    [],
+  );
 
   return (
     <Box data-tour="analytics-page" sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
@@ -292,6 +371,34 @@ function AnalyticsDashboard({
           </FormControl>
         </Box>
       </Box>
+
+      {!loading && anomalies.length > 0 && (
+        <Alert
+          severity={
+            anomalies.some((a) => a.severity === "error") ? "error" : "warning"
+          }
+          sx={{ mb: 3 }}
+          data-testid="analytics-anomaly-alert"
+        >
+          <AlertTitle>Unusual activity detected</AlertTitle>
+          <Box component="ul" sx={{ m: 0, pl: 2 }}>
+            {anomalies.slice(0, 5).map((a) => (
+              <li key={`${a.metricKey}-${a.date}`}>
+                <Typography variant="body2">
+                  {a.metricLabel} was unusually {a.direction} on {a.date}:{" "}
+                  {formatMetricValue(a.metricKey, a.value)} (typical ~
+                  {formatMetricValue(a.metricKey, a.mean)})
+                </Typography>
+              </li>
+            ))}
+          </Box>
+          {anomalies.length > 5 && (
+            <Typography variant="caption" color="text.secondary">
+              +{anomalies.length - 5} more
+            </Typography>
+          )}
+        </Alert>
+      )}
 
       {/* User Activity */}
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -399,6 +506,53 @@ function AnalyticsDashboard({
             title="Documents Analyzed"
             value={totals.documents}
             loading={loading}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Trends */}
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Trends
+      </Typography>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TrendChart
+            title="Daily Active Users"
+            points={trendSeries.dailyActiveUsers}
+            formatValue={countFormatter}
+            anomalyDates={anomalyDatesByMetric.dailyActiveUsers}
+            loading={loading}
+            color="#1976d2"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TrendChart
+            title="Total Sessions"
+            points={trendSeries.totalSessions}
+            formatValue={countFormatter}
+            anomalyDates={anomalyDatesByMetric.totalSessions}
+            loading={loading}
+            color="#7b1fa2"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TrendChart
+            title="Grades Submitted"
+            points={trendSeries.gradesSubmitted}
+            formatValue={countFormatter}
+            anomalyDates={anomalyDatesByMetric.gradesSubmitted}
+            loading={loading}
+            color="#2e7d32"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TrendChart
+            title="Avg Accuracy"
+            points={trendSeries.avgAccuracy}
+            formatValue={percentFormatter}
+            anomalyDates={anomalyDatesByMetric.avgAccuracy}
+            loading={loading}
+            color="#ed6c02"
           />
         </Grid>
       </Grid>

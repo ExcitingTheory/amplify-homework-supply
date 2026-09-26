@@ -10,7 +10,7 @@ vi.mock("aws-amplify", () => ({
 
 // Mock AWS SDK credential provider to prevent IMDS timeout in tests
 vi.mock("@aws-sdk/credential-providers", () => ({
-  fromEnv: vi.fn(() =>
+  fromNodeProviderChain: vi.fn(() =>
     vi.fn().mockResolvedValue({
       accessKeyId: "test",
       secretAccessKey: "test",

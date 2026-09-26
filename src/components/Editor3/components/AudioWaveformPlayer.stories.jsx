@@ -285,82 +285,99 @@ RecordingWithCallback.parameters = {
 RecordingWithCallback.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
 
-  // Wait for component to load
-  await waitFor(
-    () => {
-      const recordButton = canvasElement.querySelector(
-        '[title=\"Start recording\"]',
-      );
-      return recordButton !== null;
-    },
-    { timeout: 2000 },
+  // Headless test browsers have no real microphone — substitute a synthetic
+  // tone stream so getUserMedia() succeeds and recording can actually start.
+  const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(
+    navigator.mediaDevices,
   );
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  const micDestination = audioCtx.createMediaStreamDestination();
+  oscillator.connect(micDestination);
+  oscillator.start();
+  navigator.mediaDevices.getUserMedia = async () => micDestination.stream;
 
-  // Click the record button to start recording
-  const recordButton = canvasElement.querySelector(
-    '[title=\"Start recording\"]',
-  );
-  if (recordButton) {
-    await userEvent.click(recordButton);
-
-    // Wait for recording to start (look for stop button or recording indicator)
+  try {
+    // Wait for component to load
     await waitFor(
       () => {
-        const recordingIndicator = canvasElement.querySelector(
-          '[title=\"Stop recording\"]',
+        const recordButton = canvasElement.querySelector(
+          '[title=\"Start recording\"]',
         );
-        const recordingText = canvasElement.textContent.includes("Recording");
-        return recordingIndicator !== null || recordingText;
+        return recordButton !== null;
       },
       { timeout: 2000 },
     );
 
-    // Wait a moment to simulate recording
-    await waitFor(() => true, { timeout: 2000 });
-
-    // Click stop button
-    const stopButton = canvasElement.querySelector(
-      '[title=\"Stop recording\"]',
+    // Click the record button to start recording
+    const recordButton = canvasElement.querySelector(
+      '[title=\"Start recording\"]',
     );
-    if (stopButton) {
-      await userEvent.click(stopButton);
+    if (recordButton) {
+      await userEvent.click(recordButton);
 
-      // Wait for waveform to be calculated and displayed
+      // Wait for recording to start (stop button becomes enabled once recording is active)
       await waitFor(
         () => {
-          const playButton = canvasElement.querySelector(
-            '[aria-label=\"Play\"]',
+          const stopButton = canvasElement.querySelector(
+            '[title=\"Stop recording\"]',
           );
-          return playButton !== null;
+          return stopButton !== null && !stopButton.disabled;
         },
         { timeout: 3000 },
       );
 
-      // Click play to test the recorded audio
-      const playButton = canvasElement.querySelector('[aria-label=\"Play\"]');
-      if (playButton) {
-        await userEvent.click(playButton);
+      // Wait a moment to simulate recording
+      await waitFor(() => true, { timeout: 2000 });
 
-        // Wait a moment
-        await waitFor(() => true, { timeout: 1000 });
+      // Click stop button
+      const stopButton = canvasElement.querySelector(
+        '[title=\"Stop recording\"]',
+      );
+      if (stopButton) {
+        await userEvent.click(stopButton);
 
-        // Click pause
-        const pauseButton = canvasElement.querySelector(
-          '[aria-label=\"Pause\"]',
+        // Wait for waveform to be calculated and displayed
+        await waitFor(
+          () => {
+            const playButton = canvasElement.querySelector(
+              '[aria-label=\"Play\"]',
+            );
+            return playButton !== null;
+          },
+          { timeout: 3000 },
         );
-        if (pauseButton) {
-          await userEvent.click(pauseButton);
+
+        // Click play to test the recorded audio
+        const playButton = canvasElement.querySelector('[aria-label=\"Play\"]');
+        if (playButton) {
+          await userEvent.click(playButton);
+
+          // Wait a moment
+          await waitFor(() => true, { timeout: 1000 });
+
+          // Click pause
+          const pauseButton = canvasElement.querySelector(
+            '[aria-label=\"Pause\"]',
+          );
+          if (pauseButton) {
+            await userEvent.click(pauseButton);
+          }
+        }
+
+        // Test the seek slider
+        const slider = canvasElement.querySelector(
+          'input[type=\"range\"], [role=\"slider\"]',
+        );
+        if (slider) {
+          await userEvent.click(slider);
         }
       }
-
-      // Test the seek slider
-      const slider = canvasElement.querySelector(
-        'input[type=\"range\"], [role=\"slider\"]',
-      );
-      if (slider) {
-        await userEvent.click(slider);
-      }
     }
+  } finally {
+    navigator.mediaDevices.getUserMedia = originalGetUserMedia;
+    oscillator.stop();
+    await audioCtx.close();
   }
 };
 

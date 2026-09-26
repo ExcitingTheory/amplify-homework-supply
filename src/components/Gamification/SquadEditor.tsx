@@ -12,69 +12,95 @@
  * @module SquadEditor
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import EditIcon from '@mui/icons-material/Edit'
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
+import { useTheme, type Theme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import EditIcon from "@mui/icons-material/Edit";
 
-import { LexicalComposer } from '@lexical/react/LexicalComposer'
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
-import { ContentEditable } from '@lexical/react/LexicalContentEditable'
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
-import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
-import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin'
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin'
-import { ListPlugin } from '@lexical/react/LexicalListPlugin'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
-import { TablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import type { EditorState, LexicalEditor as LexicalEditorType } from 'lexical'
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
+import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import type { EditorState, LexicalEditor as LexicalEditorType } from "lexical";
 
-import { AudioPlayerProvider } from '../Editor3/context/AudioPlayerContext'
-import { AutocompleteProvider } from '../Editor3/context/SharedAutocompleteContext'
-import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper'
-import LanguageEditorTheme from '../Editor3/config/LanguageEditorTheme'
-import Placeholder from '../Editor3/components/Placeholder'
-import CodeHighlightPlugin from '../Editor3/plugins/CodeHighlightPlugin'
-import FloatingToolbarPlugin from '../Editor3/plugins/FloatingToolbarPlugin'
-import type { FloatingToolbarConfig } from '../Editor3/plugins/FloatingToolbarPlugin'
-import FloatingLinkEditorPlugin from '../Editor3/plugins/FloatingLinkEditorPlugin'
-import LinkPlugin from '../Editor3/plugins/LinkPlugin'
-import AutoLinkPlugin from '../Editor3/plugins/AutoLinkPlugin'
-import YouTubePlugin from '../Editor3/plugins/YouTubePlugin'
-import WordBlockPlugin from '../Editor3/plugins/WordBlockPlugin'
-import MeaningAssociationPlugin from '../Editor3/plugins/MeaningAssociationPlugin'
-import QuizPlugin from '../Editor3/plugins/QuizPlugin'
-import ImagesPlugin from '../Editor3/plugins/ImagesPlugin'
-import PlaylistPlugin from '../Editor3/plugins/PlaylistPlugin'
-import PdfViewerPlugin from '../Editor3/plugins/PdfViewerPlugin'
-import AnswerPlugin from '../Editor3/plugins/AnswerPlugin'
-import CustomAnswerPlugin from '../Editor3/plugins/CustomAnswerPlugin'
-import ArmorEditorPlugin from '../Editor3/plugins/ArmorEditorPlugin'
-import { EditorNodes, ALL_TRANSFORMERS, onError } from '../Editor3/editorConfig'
-import { sanitizeSvg } from '../../utils/sanitizeHtml'
+import { AudioPlayerProvider } from "../Editor3/context/AudioPlayerContext";
+import { AutocompleteProvider } from "../Editor3/context/SharedAutocompleteContext";
+import { DndWrapper } from "../MeaningAssociationExercise/DndWrapper";
+import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
+import Placeholder from "../Editor3/components/Placeholder";
+import CodeHighlightPlugin from "../Editor3/plugins/CodeHighlightPlugin";
+import FloatingToolbarPlugin from "../Editor3/plugins/FloatingToolbarPlugin";
+import type { FloatingToolbarConfig } from "../Editor3/plugins/FloatingToolbarPlugin";
+import FloatingLinkEditorPlugin from "../Editor3/plugins/FloatingLinkEditorPlugin";
+import LinkPlugin from "../Editor3/plugins/LinkPlugin";
+import AutoLinkPlugin from "../Editor3/plugins/AutoLinkPlugin";
+import YouTubePlugin from "../Editor3/plugins/YouTubePlugin";
+import WordBlockPlugin from "../Editor3/plugins/WordBlockPlugin";
+import MeaningAssociationPlugin from "../Editor3/plugins/MeaningAssociationPlugin";
+import QuizPlugin from "../Editor3/plugins/QuizPlugin";
+import ImagesPlugin from "../Editor3/plugins/ImagesPlugin";
+import PlaylistPlugin from "../Editor3/plugins/PlaylistPlugin";
+import PdfViewerPlugin from "../Editor3/plugins/PdfViewerPlugin";
+import AnswerPlugin from "../Editor3/plugins/AnswerPlugin";
+import CustomAnswerPlugin from "../Editor3/plugins/CustomAnswerPlugin";
+import ArmorEditorPlugin from "../Editor3/plugins/ArmorEditorPlugin";
+import {
+  EditorNodes,
+  ALL_TRANSFORMERS,
+  onError,
+} from "../Editor3/editorConfig";
+import { sanitizeSvg } from "../../utils/sanitizeHtml";
 
 const SQUAD_DESCRIPTION_TOOLBAR_CONFIG: FloatingToolbarConfig = {
-  textFormats: ['bold', 'italic', 'underline', 'strikethrough', 'code'],
+  textFormats: ["bold", "italic", "underline", "strikethrough", "code"],
   showLink: true,
-  advancedFormats: ['fontColor', 'backgroundColor'],
-  insertBlocks: ['meaningAssociation', 'wordBlock', 'answerVocabulary', 'answerCustom', 'quiz', 'playlist', 'horizontalRule'],
-  layouts: ['1fr 1fr', '1fr 3fr', '1fr 1fr 1fr', '1fr 2fr 1fr', '1fr 1fr 1fr 1fr'],
-}
+  advancedFormats: ["fontColor", "backgroundColor"],
+  insertBlocks: [
+    "meaningAssociation",
+    "wordBlock",
+    "answerVocabulary",
+    "answerCustom",
+    "quiz",
+    "playlist",
+    "horizontalRule",
+  ],
+  layouts: [
+    "1fr 1fr",
+    "1fr 3fr",
+    "1fr 1fr 1fr",
+    "1fr 2fr 1fr",
+    "1fr 1fr 1fr 1fr",
+  ],
+};
 
-import ArmorEditor, { renderShieldSvg } from './ArmorEditor'
-import type { ArmorEditorConfig } from './ArmorEditor'
-import { LexicalPlainTextField } from './LexicalPlainTextField'
-import { useArmorUndoRedo } from './useArmorUndoRedo'
-import type { ArmorEditorSnapshot } from './useArmorUndoRedo'
+import ArmorEditor, { renderShieldSvg } from "./ArmorEditor";
+import type { ArmorEditorConfig } from "./ArmorEditor";
+import { LexicalPlainTextField } from "./LexicalPlainTextField";
+import { useArmorUndoRedo } from "./useArmorUndoRedo";
+import type { ArmorEditorSnapshot } from "./useArmorUndoRedo";
+import { getTinctures, getMetals } from "../../themes/heraldry";
 
 // ============================================================================
 // Types
@@ -82,33 +108,41 @@ import type { ArmorEditorSnapshot } from './useArmorUndoRedo'
 
 export interface SquadEditorProps {
   /** Current squad name */
-  squadName: string
+  squadName: string;
   /** Current squad description */
-  squadDescription?: string
+  squadDescription?: string;
   /** Current crest config (null for new squads) */
-  crestConfig?: ArmorEditorConfig | null
+  crestConfig?: ArmorEditorConfig | null;
   /** Called on autosave and manual save */
-  onSave: (data: { name: string; description: string; config: ArmorEditorConfig; svg: string }) => void
+  onSave: (data: {
+    name: string;
+    description: string;
+    config: ArmorEditorConfig;
+    svg: string;
+  }) => void;
   /** Called when the user confirms squad deletion */
-  onDelete?: () => void
+  onDelete?: () => void;
   /** Debounce delay in ms for autosave. Set 0 to disable. Default: 1500 */
-  autoSaveDelay?: number
+  autoSaveDelay?: number;
   /** Whether to show a save status indicator */
-  showSaveStatus?: boolean
+  showSaveStatus?: boolean;
   /** User level — crest editing requires level >= 2 */
-  level?: number
+  level?: number;
 }
 
-const DEFAULT_CONFIG: ArmorEditorConfig = {
-  shape: 'classic',
-  fieldColor: '#1565c0',
-  fieldColor2: '#f9a825',
-  division: 'none',
-  chargeId: 'none',
-  chargeColor: '#f9a825',
-  chargePosition: 'center',
-  chargeScale: 1,
-  charges: [],
+function getDefaultConfig(theme: Theme): ArmorEditorConfig {
+  const tinctures = getTinctures(theme);
+  return {
+    shape: "classic",
+    fieldColor: tinctures.azure.main,
+    fieldColor2: tinctures.or.main,
+    division: "none",
+    chargeId: "none",
+    chargeColor: tinctures.or.main,
+    chargePosition: "center",
+    chargeScale: 1,
+    charges: [],
+  };
 }
 
 // ============================================================================
@@ -116,8 +150,8 @@ const DEFAULT_CONFIG: ArmorEditorConfig = {
 // ============================================================================
 
 interface SquadDescriptionEditorProps {
-  value: string
-  onChange: (json: string) => void
+  value: string;
+  onChange: (json: string) => void;
 }
 
 /** Internal plugin to load initial content and report changes */
@@ -125,52 +159,55 @@ function DescriptionStatePlugin({
   value,
   onChange,
 }: {
-  value: string
-  onChange: (json: string) => void
+  value: string;
+  onChange: (json: string) => void;
 }) {
-  const [editor] = useLexicalComposerContext()
-  const hasLoaded = useRef(false)
-  const isInternalUpdate = useRef(false)
+  const [editor] = useLexicalComposerContext();
+  const hasLoaded = useRef(false);
+  const isInternalUpdate = useRef(false);
 
   // Load initial content
   useEffect(() => {
-    if (hasLoaded.current || !value) return
+    if (hasLoaded.current || !value) return;
     try {
-      const parsed = typeof value === 'string' ? JSON.parse(value) : value
+      const parsed = typeof value === "string" ? JSON.parse(value) : value;
       if (parsed?.root && parsed.root.children?.length > 0) {
-        const editorState = editor.parseEditorState(parsed)
-        isInternalUpdate.current = true
+        const editorState = editor.parseEditorState(parsed);
+        isInternalUpdate.current = true;
         queueMicrotask(() => {
-          editor.setEditorState(editorState)
-          isInternalUpdate.current = false
-        })
-        hasLoaded.current = true
+          editor.setEditorState(editorState);
+          isInternalUpdate.current = false;
+        });
+        hasLoaded.current = true;
       } else {
         // Empty root — skip loading, let the editor use its default state
-        hasLoaded.current = true
+        hasLoaded.current = true;
       }
     } catch {
       // value is plain text (legacy) — don't load, let placeholder show
-      hasLoaded.current = true
+      hasLoaded.current = true;
     }
-  }, [value, editor])
+  }, [value, editor]);
 
   // Report changes
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
-      if (isInternalUpdate.current) return
-      const json = JSON.stringify(editorState.toJSON())
-      onChange(json)
-    })
-  }, [editor, onChange])
+      if (isInternalUpdate.current) return;
+      const json = JSON.stringify(editorState.toJSON());
+      onChange(json);
+    });
+  }, [editor, onChange]);
 
-  return null
+  return null;
 }
 
-function SquadDescriptionEditor({ value, onChange }: SquadDescriptionEditorProps) {
+function SquadDescriptionEditor({
+  value,
+  onChange,
+}: SquadDescriptionEditorProps) {
   const initialConfig = useMemo(
     () => ({
-      namespace: 'SquadDescription',
+      namespace: "SquadDescription",
       theme: LanguageEditorTheme,
       onError,
       editable: true,
@@ -178,11 +215,15 @@ function SquadDescriptionEditor({ value, onChange }: SquadDescriptionEditorProps
       nodes: [...EditorNodes],
     }),
     [],
-  )
+  );
 
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mb: 0.5, display: "block" }}
+      >
         Description
       </Typography>
       <DndWrapper>
@@ -191,28 +232,38 @@ function SquadDescriptionEditor({ value, onChange }: SquadDescriptionEditorProps
             <LexicalComposer initialConfig={initialConfig}>
               <Box
                 sx={{
-                  position: 'relative',
+                  position: "relative",
                   minHeight: 100,
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: 1,
                 }}
               >
-                <FloatingToolbarPlugin config={SQUAD_DESCRIPTION_TOOLBAR_CONFIG} />
-                <FloatingLinkEditorPlugin anchorElem={typeof document !== 'undefined' ? document.body : undefined} />
+                <FloatingToolbarPlugin
+                  config={SQUAD_DESCRIPTION_TOOLBAR_CONFIG}
+                />
+                <FloatingLinkEditorPlugin
+                  anchorElem={
+                    typeof document !== "undefined" ? document.body : undefined
+                  }
+                />
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
                       aria-label="Squad description"
                       style={{
-                        width: '100%',
+                        width: "100%",
                         minHeight: 100,
-                        padding: '0.75rem',
-                        outline: 'none',
+                        padding: "0.75rem",
+                        outline: "none",
                       }}
                     />
                   }
-                  placeholder={<Placeholder className="Placeholder__root">Squad description — add rich content, media, quizzes…</Placeholder>}
+                  placeholder={
+                    <Placeholder className="Placeholder__root">
+                      Squad description — add rich content, media, quizzes…
+                    </Placeholder>
+                  }
                   ErrorBoundary={LexicalErrorBoundary}
                 />
               </Box>
@@ -250,7 +301,7 @@ function SquadDescriptionEditor({ value, onChange }: SquadDescriptionEditorProps
         </AutocompleteProvider>
       </DndWrapper>
     </Box>
-  )
+  );
 }
 
 // ============================================================================
@@ -259,7 +310,7 @@ function SquadDescriptionEditor({ value, onChange }: SquadDescriptionEditorProps
 
 export function SquadEditor({
   squadName,
-  squadDescription = '',
+  squadDescription = "",
   crestConfig,
   onSave,
   onDelete,
@@ -267,112 +318,129 @@ export function SquadEditor({
   showSaveStatus = true,
   level = 1,
 }: SquadEditorProps) {
-  const [armorDialogOpen, setArmorDialogOpen] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [armorDialogOpen, setArmorDialogOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const theme = useTheme();
+  const rimMetal = useMemo(() => getMetals(theme).gold, [theme]);
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(
     () => ({
-      config: crestConfig ? { ...DEFAULT_CONFIG, ...crestConfig } : DEFAULT_CONFIG,
+      config: crestConfig
+        ? { ...getDefaultConfig(theme), ...crestConfig }
+        : getDefaultConfig(theme),
       name: squadName,
       description: squadDescription,
     }),
     // Intentionally only compute once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
-  )
+  );
 
-  const {
-    snapshot,
-    pushAndUpdate,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-  } = useArmorUndoRedo(initialSnapshot)
+  const { snapshot, pushAndUpdate, undo, redo, canUndo, canRedo } =
+    useArmorUndoRedo(initialSnapshot);
 
-  const { config, name, description } = snapshot
-  const previewSvg = useMemo(() => renderShieldSvg(config), [config])
+  const { config, name, description } = snapshot;
+  const previewSvg = useMemo(
+    () => renderShieldSvg(config, rimMetal),
+    [config, rimMetal],
+  );
 
   // --- Autosave ---
-  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const snapshotRef = useRef(snapshot)
-  snapshotRef.current = snapshot
-  const onSaveRef = useRef(onSave)
-  onSaveRef.current = onSave
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const snapshotRef = useRef(snapshot);
+  snapshotRef.current = snapshot;
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+  const rimMetalRef = useRef(rimMetal);
+  rimMetalRef.current = rimMetal;
 
   const doSave = useCallback(() => {
-    const s = snapshotRef.current
-    const svg = renderShieldSvg(s.config)
-    onSaveRef.current({ name: s.name, description: s.description, config: s.config, svg })
-    setSaveStatus('saved')
-    const tid = setTimeout(() => setSaveStatus('idle'), 2000)
-    return () => clearTimeout(tid)
-  }, [])
+    const s = snapshotRef.current;
+    const svg = renderShieldSvg(s.config, rimMetalRef.current);
+    onSaveRef.current({
+      name: s.name,
+      description: s.description,
+      config: s.config,
+      svg,
+    });
+    setSaveStatus("saved");
+    const tid = setTimeout(() => setSaveStatus("idle"), 2000);
+    return () => clearTimeout(tid);
+  }, []);
 
   useEffect(() => {
-    if (autoSaveDelay <= 0) return
-    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
-    setSaveStatus('saving')
-    autoSaveTimerRef.current = setTimeout(doSave, autoSaveDelay)
+    if (autoSaveDelay <= 0) return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setSaveStatus("saving");
+    autoSaveTimerRef.current = setTimeout(doSave, autoSaveDelay);
     return () => {
-      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
-    }
-  }, [snapshot, autoSaveDelay, doSave])
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [snapshot, autoSaveDelay, doSave]);
 
   // --- Keyboard shortcuts (only when NOT inside a contenteditable) ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if inside a contenteditable (Lexical handles its own undo there)
-      const target = e.target as HTMLElement
-      if (target?.isContentEditable) return
+      const target = e.target as HTMLElement;
+      if (target?.isContentEditable) return;
 
-      const isMod = e.metaKey || e.ctrlKey
-      if (!isMod || e.key !== 'z') return
+      const isMod = e.metaKey || e.ctrlKey;
+      if (!isMod || e.key !== "z") return;
 
-      e.preventDefault()
+      e.preventDefault();
       if (e.shiftKey) {
-        redo()
+        redo();
       } else {
-        undo()
+        undo();
       }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo])
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
 
   // --- Armor dialog save handler ---
   const handleArmorSave = useCallback(
-    (armorConfig: ArmorEditorConfig, _svg: string, armorName: string, armorDescription: string) => {
+    (
+      armorConfig: ArmorEditorConfig,
+      _svg: string,
+      armorName: string,
+      armorDescription: string,
+    ) => {
       pushAndUpdate(() => ({
         config: armorConfig,
         name: armorName,
         description: armorDescription,
-      }))
-      setArmorDialogOpen(false)
+      }));
+      setArmorDialogOpen(false);
     },
     [pushAndUpdate],
-  )
+  );
 
   return (
     <Card variant="outlined">
       <CardContent>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
           {/* Crest preview + edit */}
           <Box
             sx={{
-              flex: '0 0 auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              flex: "0 0 auto",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               gap: 1,
             }}
           >
             <Box
               sx={{
-                '& svg': { width: 160, height: 160 },
+                "& svg": { width: 160, height: 160 },
               }}
             >
-              <Box dangerouslySetInnerHTML={{ __html: sanitizeSvg(previewSvg) }} />
+              <Box
+                dangerouslySetInnerHTML={{ __html: sanitizeSvg(previewSvg) }}
+              />
             </Box>
             {level >= 2 ? (
               <Button
@@ -387,7 +455,7 @@ export function SquadEditor({
                 label="Unlock at Level 2"
                 size="small"
                 variant="outlined"
-                sx={{ fontSize: '0.7rem' }}
+                sx={{ fontSize: "0.7rem" }}
               />
             )}
           </Box>
@@ -396,7 +464,9 @@ export function SquadEditor({
           <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
             <LexicalPlainTextField
               value={name}
-              onChange={(text) => pushAndUpdate((prev) => ({ ...prev, name: text }))}
+              onChange={(text) =>
+                pushAndUpdate((prev) => ({ ...prev, name: text }))
+              }
               label="Squad Name"
               placeholder="Enter squad name…"
               ariaLabel="Squad name"
@@ -404,7 +474,9 @@ export function SquadEditor({
             />
             <SquadDescriptionEditor
               value={description}
-              onChange={(json) => pushAndUpdate((prev) => ({ ...prev, description: json }))}
+              onChange={(json) =>
+                pushAndUpdate((prev) => ({ ...prev, description: json }))
+              }
             />
           </Stack>
         </Stack>
@@ -421,7 +493,7 @@ export function SquadEditor({
         autoSaveDelay={0}
       />
     </Card>
-  )
+  );
 }
 
-export default SquadEditor
+export default SquadEditor;

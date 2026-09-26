@@ -20,7 +20,7 @@ import {
   initializePhoenixTracing,
   addTraceAttributes,
 } from "../shared/phoenix-tracer";
-import { fromEnv } from "@aws-sdk/credential-providers";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import OpenAI from "openai";
 
 // Initialize Phoenix tracing at module load
@@ -42,7 +42,7 @@ Amplify.configure(
     Auth: {
       credentialsProvider: {
         getCredentialsAndIdentityId: async () => ({
-          credentials: await fromEnv()(),
+          credentials: await fromNodeProviderChain()(),
         }),
         clearCredentialsAndIdentityId: () => {},
       },

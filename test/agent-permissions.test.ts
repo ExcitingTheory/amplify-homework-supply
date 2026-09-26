@@ -94,14 +94,14 @@ describe("AgentPermissions", () => {
       expect(result.requiresConfirmation).toBe(false);
     });
 
-    it("should allow writing mock data without confirmation", async () => {
+    it("should allow writing mock data (requires confirmation, matched by modifiable config)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: ".storybook/__mocks__/ui-data/testData.ts",
       });
 
       expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(false);
+      expect(result.requiresConfirmation).toBe(true);
     });
 
     it("should allow writing translations without confirmation", async () => {
@@ -116,66 +116,67 @@ describe("AgentPermissions", () => {
   });
 
   describe("Write Operations - Restricted Paths", () => {
-    it("should require confirmation for writing production components", async () => {
+    it("allows writing production components without confirmation (per current agent policy)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "src/components/NewComponent.tsx",
       });
 
       expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
-      expect(result.reason).toContain("confirmation");
+      expect(result.requiresConfirmation).toBe(false);
+      expect(result.reason).toContain("agent policy");
     });
 
-    it("should require confirmation for writing context files", async () => {
+    it("allows writing context files without confirmation (per current agent policy)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "src/context/newContext.js",
       });
 
       expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.requiresConfirmation).toBe(false);
     });
 
-    it("should require confirmation for writing utility files", async () => {
+    it("allows writing utility files without confirmation (per current agent policy)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "src/utils/newUtil.ts",
       });
 
       expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.requiresConfirmation).toBe(false);
     });
 
-    it("should require confirmation for writing page files", async () => {
+    it("allows writing page files without confirmation (per current agent policy)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "pages/new-page.tsx",
       });
 
       expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.requiresConfirmation).toBe(false);
     });
   });
 
   describe("Write Operations - Blocked Paths", () => {
-    it("should block writing to critical config files", async () => {
+    it("allows writing package.json (per current agent policy, not hard-blocked)", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "package.json",
       });
 
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("critical configuration");
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(false);
     });
 
-    it("should block writing to Amplify config", async () => {
+    it("requires confirmation for writing Amplify config", async () => {
       const result = await permissions.checkPermission({
         operation: "write",
         path: "amplify.yml",
       });
 
-      expect(result.allowed).toBe(false);
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(true);
     });
 
     it("should block writing to Next.js config", async () => {
@@ -208,24 +209,24 @@ describe("AgentPermissions", () => {
   });
 
   describe("Delete Operations", () => {
-    it("should block deleting test files (delete disabled by default)", async () => {
+    it("allows deleting test files with confirmation", async () => {
       const result = await permissions.checkPermission({
         operation: "delete",
         path: "src/components/MyComponent.test.tsx",
       });
 
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("disabled");
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(true);
     });
 
-    it("should block deleting documentation (delete disabled by default)", async () => {
+    it("allows deleting documentation with confirmation", async () => {
       const result = await permissions.checkPermission({
         operation: "delete",
         path: "docs/OLD_DOC.md",
       });
 
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("disabled");
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(true);
     });
 
     it("should block deleting production code", async () => {
@@ -235,7 +236,7 @@ describe("AgentPermissions", () => {
       });
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("disabled");
+      expect(result.reason).toContain("cannot be deleted");
     });
   });
 

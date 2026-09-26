@@ -6,7 +6,7 @@ import ConflictResolutionDialog, {
 import { Button } from "@mui/material";
 
 const meta: Meta<typeof ConflictResolutionDialog> = {
-  title: "Components/Offline & Sync/ConflictResolutionDialog",
+  title: "🔌 Offline & Sync/Conflict Resolution Dialog",
   component: ConflictResolutionDialog,
   parameters: {
     // Pure presentational component — skip the app context/subscription stack.

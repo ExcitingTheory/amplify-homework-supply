@@ -227,12 +227,28 @@ export const JoinSectionDemo = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Click the "Add to Section" button to open the dialog (DeferredStory decorator delays initial render)
-    const joinButton = await canvas.findByRole(
+    // Open the user menu (DeferredStory decorator delays initial render)
+    const userButton = await canvas.findByRole(
       "button",
-      { name: /add to section/i },
+      { name: /profile/i },
       { timeout: 10000 },
     );
+    await userEvent.click(userButton);
+
+    // Wait for the menu to open (menu renders in a portal, so use screen)
+    await waitFor(
+      () => {
+        const menu = document.querySelector('[role="menu"]');
+        expect(menu).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    // Click the "Add to Section" menu item to open the dialog
+    const joinButton = document.querySelector(
+      '[data-tour="join-section-button"]',
+    );
+    expect(joinButton).toBeInTheDocument();
     await userEvent.click(joinButton);
 
     // Wait for the dialog to appear

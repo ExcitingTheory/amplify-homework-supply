@@ -152,13 +152,13 @@ respective plugin stories (QuizPlugin, TablePlugin, AutocompletePlugin, etc.).
 - ✅ MiniEditorEditable, MiniEditorReadOnly, BlockInserterPlugin → MiniEditor.stories.tsx
 
 ## PeerReview (0 genuinely missing)
-- ✅ src/components/PeerReview/JoinByCode.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/RoomInvite.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/PeerReviewInvitations.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/PeerReviewChat.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/OpenPeerReviewButton.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/JoinPeerReviewDialog.tsx → PeerReview.stories.tsx
-- ✅ src/components/PeerReview/PeerReviewFeedbackPrompt.tsx → PeerReview.stories.tsx
+- ✅ src/components/PeerReview/JoinByCode.tsx → JoinByCode.stories.tsx
+- ✅ src/components/PeerReview/RoomInvite.tsx → RoomInvite.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewInvitations.tsx → PeerReviewInvitations.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewChat.tsx → PeerReviewChat.stories.tsx
+- ✅ src/components/PeerReview/OpenPeerReviewButton.tsx → OpenPeerReviewButton.stories.tsx
+- ✅ src/components/PeerReview/JoinPeerReviewDialog.tsx → JoinPeerReviewDialog.stories.tsx
+- ✅ src/components/PeerReview/PeerReviewFeedbackPrompt.tsx → PeerReviewFeedbackPrompt.stories.tsx
 - ✅ src/components/PeerReview/PeerReviewAssignmentDialog.tsx → PeerReviewAssignmentDialog.stories.tsx
 
 ## PracticeDrill (0 genuinely missing)

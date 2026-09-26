@@ -8,6 +8,8 @@
  */
 
 import type { IconType } from "react-icons";
+import { alpha } from "@mui/material/styles";
+import type { Theme } from "@mui/material/styles";
 
 // Game Icons (gi) — rich line-art, great for achievements
 import {
@@ -810,35 +812,40 @@ export function getBadgesByRarity(
 }
 
 /**
- * Rarity → CSS border/glow config for rendering
+ * Rarity → CSS border/glow config for rendering. Derived from the live theme
+ * palette (success/info/secondary/warning) so it respects dark mode and any
+ * user theme customization instead of fixed rgba() tuples.
  */
-export const RARITY_EFFECTS: Record<
+export function getRarityEffects(theme: Theme): Record<
   BadgeVisualConfig["rarity"],
   {
     borderWidth: number;
     glowColor: string;
     glowIntensity: number;
   }
-> = {
-  common: { borderWidth: 1, glowColor: "transparent", glowIntensity: 0 },
-  uncommon: {
-    borderWidth: 1.5,
-    glowColor: "rgba(76, 175, 80, 0.3)",
-    glowIntensity: 4,
-  },
-  rare: {
-    borderWidth: 2,
-    glowColor: "rgba(33, 150, 243, 0.4)",
-    glowIntensity: 8,
-  },
-  epic: {
-    borderWidth: 2.5,
-    glowColor: "rgba(156, 39, 176, 0.5)",
-    glowIntensity: 12,
-  },
-  legendary: {
-    borderWidth: 3,
-    glowColor: "rgba(255, 193, 7, 0.6)",
-    glowIntensity: 16,
-  },
-};
+> {
+  const p = theme.palette;
+  return {
+    common: { borderWidth: 1, glowColor: "transparent", glowIntensity: 0 },
+    uncommon: {
+      borderWidth: 1.5,
+      glowColor: alpha(p.success.main, 0.3),
+      glowIntensity: 4,
+    },
+    rare: {
+      borderWidth: 2,
+      glowColor: alpha(p.info.main, 0.4),
+      glowIntensity: 8,
+    },
+    epic: {
+      borderWidth: 2.5,
+      glowColor: alpha(p.secondary.main, 0.5),
+      glowIntensity: 12,
+    },
+    legendary: {
+      borderWidth: 3,
+      glowColor: alpha(p.warning.main, 0.6),
+      glowIntensity: 16,
+    },
+  };
+}

@@ -1,9 +1,9 @@
 /**
  * Index Page Mock Data Examples for Storybook
- * 
+ *
  * This file provides comprehensive mock data for the index page (student dashboard),
  * including Units, Assignments, Sections, and Grades.
- * 
+ *
  * Data Models:
  * - Unit: Learning modules with content
  * - Assignment: Units assigned to students with due dates
@@ -11,7 +11,7 @@
  * - Grade: Student submissions and progress on units
  */
 
-import { MOCK_MEDIA } from './mockMediaData';
+import { MOCK_MEDIA } from "./mockMediaData";
 // Gen 2 API seed functions
 import {
   seedMockUnit,
@@ -19,152 +19,192 @@ import {
   seedMockSections,
   seedMockAssignments,
   seedMockStudentProfiles,
-  seedMockHomeworkRooms
-} from './aws-amplify-data';
+  seedMockHomeworkRooms,
+} from "./aws-amplify-data";
 
 /**
  * Mock Units for Index Page
  */
 export const mockUnits = {
-  'unit-japanese-1': {
-    id: 'unit-japanese-1',
-    name: 'Introduction to Japanese Greetings',
-    description: 'Learn basic Japanese greetings and self-introduction phrases',
-    owner: 'teacher-1',
-    identityId: 'us-east-1:teacher-identity-1',
+  "unit-japanese-1": {
+    id: "unit-japanese-1",
+    name: "Introduction to Japanese Greetings",
+    description: "Learn basic Japanese greetings and self-introduction phrases",
+    owner: "teacher-1",
+    identityId: "us-east-1:teacher-identity-1",
     data: JSON.stringify({
       root: {
-        type: 'root',
+        type: "root",
         children: [
           {
-            type: 'heading',
-            tag: 'h1',
-            direction: 'ltr',
-            format: '',
+            type: "heading",
+            tag: "h1",
+            direction: "ltr",
+            format: "",
             indent: 0,
             version: 1,
-            children: [{ type: 'text', text: 'Japanese Greetings', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
-          }
+            children: [
+              {
+                type: "text",
+                text: "Japanese Greetings",
+                format: 0,
+                detail: 0,
+                mode: "normal",
+                style: "",
+                version: 1,
+              },
+            ],
+          },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        version: 1
-      }
+        version: 1,
+      },
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CLASSROOM,
     published: true,
-    status: 'PUBLISHED',
-    createdAt: new Date('2024-01-01T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-10T15:00:00Z').toISOString(),
+    status: "PUBLISHED",
+    createdAt: new Date("2024-01-01T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-10T15:00:00Z").toISOString(),
     _version: 3,
-    _lastChangedAt: Date.parse('2024-01-10T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-10T15:00:00Z"),
     _deleted: false,
   },
-  'unit-japanese-2': {
-    id: 'unit-japanese-2',
-    name: 'Japanese Numbers and Counting',
-    description: 'Master numbers 1-100 and counting objects in Japanese',
-    owner: 'teacher-1',
-    identityId: 'us-east-1:teacher-identity-1',
+  "unit-japanese-2": {
+    id: "unit-japanese-2",
+    name: "Japanese Numbers and Counting",
+    description: "Master numbers 1-100 and counting objects in Japanese",
+    owner: "teacher-1",
+    identityId: "us-east-1:teacher-identity-1",
     data: JSON.stringify({
       root: {
-        type: 'root',
+        type: "root",
         children: [
           {
-            type: 'heading',
-            tag: 'h1',
-            direction: 'ltr',
-            format: '',
+            type: "heading",
+            tag: "h1",
+            direction: "ltr",
+            format: "",
             indent: 0,
             version: 1,
-            children: [{ type: 'text', text: 'Numbers and Counting', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
-          }
+            children: [
+              {
+                type: "text",
+                text: "Numbers and Counting",
+                format: 0,
+                detail: 0,
+                mode: "normal",
+                style: "",
+                version: 1,
+              },
+            ],
+          },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        version: 1
-      }
+        version: 1,
+      },
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CULTURE,
     published: true,
-    status: 'PUBLISHED',
+    status: "PUBLISHED",
     timeLimitSeconds: 120,
-    createdAt: new Date('2024-01-05T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-12T15:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-05T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-12T15:00:00Z").toISOString(),
     _version: 2,
-    _lastChangedAt: Date.parse('2024-01-12T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-12T15:00:00Z"),
     _deleted: false,
   },
-  'unit-japanese-3': {
-    id: 'unit-japanese-3',
-    name: 'Daily Activities Vocabulary',
-    description: 'Vocabulary for talking about your daily routine',
-    owner: 'teacher-1',
-    identityId: 'us-east-1:teacher-identity-1',
+  "unit-japanese-3": {
+    id: "unit-japanese-3",
+    name: "Daily Activities Vocabulary",
+    description: "Vocabulary for talking about your daily routine",
+    owner: "teacher-1",
+    identityId: "us-east-1:teacher-identity-1",
     data: JSON.stringify({
       root: {
-        type: 'root',
+        type: "root",
         children: [
           {
-            type: 'heading',
-            tag: 'h1',
-            direction: 'ltr',
-            format: '',
+            type: "heading",
+            tag: "h1",
+            direction: "ltr",
+            format: "",
             indent: 0,
             version: 1,
-            children: [{ type: 'text', text: 'Daily Activities', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
-          }
+            children: [
+              {
+                type: "text",
+                text: "Daily Activities",
+                format: 0,
+                detail: 0,
+                mode: "normal",
+                style: "",
+                version: 1,
+              },
+            ],
+          },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        version: 1
-      }
+        version: 1,
+      },
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_MODERN,
     published: true,
-    status: 'PUBLISHED',
-    createdAt: new Date('2024-01-10T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-15T15:00:00Z').toISOString(),
+    status: "PUBLISHED",
+    createdAt: new Date("2024-01-10T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-15T15:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-15T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-15T15:00:00Z"),
     _deleted: false,
   },
-  'unit-kanji-basics': {
-    id: 'unit-kanji-basics',
-    name: 'Kanji Basics - First 50 Characters',
-    description: 'Introduction to the first 50 essential kanji characters',
-    owner: 'teacher-2',
-    identityId: 'us-east-1:teacher-identity-2',
+  "unit-kanji-basics": {
+    id: "unit-kanji-basics",
+    name: "Kanji Basics - First 50 Characters",
+    description: "Introduction to the first 50 essential kanji characters",
+    owner: "teacher-2",
+    identityId: "us-east-1:teacher-identity-2",
     data: JSON.stringify({
       root: {
-        type: 'root',
+        type: "root",
         children: [
           {
-            type: 'heading',
-            tag: 'h1',
-            direction: 'ltr',
-            format: '',
+            type: "heading",
+            tag: "h1",
+            direction: "ltr",
+            format: "",
             indent: 0,
             version: 1,
-            children: [{ type: 'text', text: 'Basic Kanji', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }]
-          }
+            children: [
+              {
+                type: "text",
+                text: "Basic Kanji",
+                format: 0,
+                detail: 0,
+                mode: "normal",
+                style: "",
+                version: 1,
+              },
+            ],
+          },
         ],
-        direction: 'ltr',
-        format: '',
+        direction: "ltr",
+        format: "",
         indent: 0,
-        version: 1
-      }
+        version: 1,
+      },
     }),
     featuredImage: MOCK_MEDIA.IMAGE_JPEG,
     published: true,
-    status: 'PUBLISHED',
-    createdAt: new Date('2024-01-08T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-18T15:00:00Z').toISOString(),
+    status: "PUBLISHED",
+    createdAt: new Date("2024-01-08T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-18T15:00:00Z").toISOString(),
     _version: 4,
-    _lastChangedAt: Date.parse('2024-01-18T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-18T15:00:00Z"),
     _deleted: false,
   },
 };
@@ -173,36 +213,36 @@ export const mockUnits = {
  * Mock Sections (Classes)
  */
 export const mockSections = {
-  'section-jpn-101': {
-    id: 'section-jpn-101',
-    name: 'Japanese 101 - Spring 2024',
-    description: 'Beginner Japanese language course',
-    owner: 'teacher-1',
-    identityId: 'us-east-1:teacher-identity-1',
-    learner: 'section-jpn-101-learners', // Cognito group name for students in this section
-    code: 'JPN101SPRING',
-    status: 'PUBLISHED',
+  "section-jpn-101": {
+    id: "section-jpn-101",
+    name: "Japanese 101 - Spring 2024",
+    description: "Beginner Japanese language course",
+    owner: "teacher-1",
+    identityId: "us-east-1:teacher-identity-1",
+    learner: "section-jpn-101-learners", // Cognito group name for students in this section
+    code: "JPN101SPRING",
+    status: "PUBLISHED",
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.EDUCATION_GENERAL,
-    createdAt: new Date('2024-01-01T08:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-01T08:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-01T08:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-01T08:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-01T08:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-01T08:00:00Z"),
     _deleted: false,
   },
-  'section-jpn-102': {
-    id: 'section-jpn-102',
-    name: 'Japanese 102 - Advanced',
-    description: 'Advanced Japanese with kanji focus',
-    owner: 'teacher-2',
-    identityId: 'us-east-1:teacher-identity-2',
-    learner: 'section-jpn-102-learners', // Cognito group name for students in this section
-    code: 'JPN102ADV',
-    status: 'PUBLISHED',
+  "section-jpn-102": {
+    id: "section-jpn-102",
+    name: "Japanese 102 - Advanced",
+    description: "Advanced Japanese with kanji focus",
+    owner: "teacher-2",
+    identityId: "us-east-1:teacher-identity-2",
+    learner: "section-jpn-102-learners", // Cognito group name for students in this section
+    code: "JPN102ADV",
+    status: "PUBLISHED",
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.ACADEMIC,
-    createdAt: new Date('2024-01-02T08:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-02T08:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-02T08:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-02T08:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-02T08:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-02T08:00:00Z"),
     _deleted: false,
   },
 };
@@ -213,59 +253,59 @@ export const mockSections = {
  */
 export const studentAssignments = [
   {
-    id: 'assignment-1',
-    unitID: 'unit-japanese-1',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1', // Assignment owner is the instructor who created it
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-01-25T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-15T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-15T10:00:00Z').toISOString(),
+    id: "assignment-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1", // Assignment owner is the instructor who created it
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-01-25T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-15T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-15T10:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-15T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-15T10:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'assignment-2',
-    unitID: 'unit-japanese-2',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-01-30T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-16T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-16T10:00:00Z').toISOString(),
+    id: "assignment-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-01-30T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-16T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-16T10:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-16T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-16T10:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'assignment-3',
-    unitID: 'unit-japanese-3',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-02-05T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-18T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-18T10:00:00Z').toISOString(),
+    id: "assignment-3",
+    unitID: "unit-japanese-3",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-02-05T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-18T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-18T10:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-18T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-18T10:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'assignment-4',
-    unitID: 'unit-kanji-basics',
-    sectionID: 'section-jpn-102',
-    owner: 'teacher-2',
-    instructor: 'teacher-2',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-02-10T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-20T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-20T10:00:00Z').toISOString(),
+    id: "assignment-4",
+    unitID: "unit-kanji-basics",
+    sectionID: "section-jpn-102",
+    owner: "teacher-2",
+    instructor: "teacher-2",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-02-10T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-20T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-20T10:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-20T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-20T10:00:00Z"),
     _deleted: false,
   },
 ];
@@ -275,75 +315,75 @@ export const studentAssignments = [
  */
 export const instructorAssignments = [
   {
-    id: 'assignment-instructor-1',
-    unitID: 'unit-japanese-1',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1', // Assignment owner is the instructor who created it
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-01-25T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-15T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-15T09:00:00Z').toISOString(),
+    id: "assignment-instructor-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1", // Assignment owner is the instructor who created it
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-01-25T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-15T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-15T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-15T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-15T09:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'assignment-instructor-2',
-    unitID: 'unit-japanese-2',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-01-30T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-16T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-16T09:00:00Z').toISOString(),
+    id: "assignment-instructor-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-01-30T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-16T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-16T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-16T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-16T09:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'assignment-instructor-3',
-    unitID: 'unit-japanese-3',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2024-02-05T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-18T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-18T09:00:00Z').toISOString(),
+    id: "assignment-instructor-3",
+    unitID: "unit-japanese-3",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2024-02-05T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-18T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-18T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-18T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-18T09:00:00Z"),
     _deleted: false,
   },
   // Future assignment - due in 2050
   {
-    id: 'assignment-instructor-future-1',
-    unitID: 'unit-japanese-1',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'PUBLISHED',
-    dueDate: new Date('2050-12-31T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-19T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-19T09:00:00Z').toISOString(),
+    id: "assignment-instructor-future-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "PUBLISHED",
+    dueDate: new Date("2050-12-31T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-19T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-19T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-19T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-19T09:00:00Z"),
     _deleted: false,
   },
   // Draft assignment - not yet published
   {
-    id: 'assignment-instructor-draft-1',
-    unitID: 'unit-japanese-2',
-    sectionID: 'section-jpn-101',
-    owner: 'teacher-1',
-    instructor: 'teacher-1',
-    status: 'DRAFT',
-    dueDate: new Date('2024-02-15T23:59:00Z').toISOString(),
-    createdAt: new Date('2024-01-20T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-20T09:00:00Z').toISOString(),
+    id: "assignment-instructor-draft-1",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "teacher-1",
+    instructor: "teacher-1",
+    status: "DRAFT",
+    dueDate: new Date("2024-02-15T23:59:00Z").toISOString(),
+    createdAt: new Date("2024-01-20T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-20T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-20T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-20T09:00:00Z"),
     _deleted: false,
   },
 ];
@@ -355,145 +395,249 @@ export const instructorAssignments = [
 export const otherStudentGrades = [
   // Bob - unit-japanese-1
   {
-    id: 'grade-bob-1',
-    unitID: 'unit-japanese-1',
-    owner: 'student-bob-sub',
-    identityId: 'identity-bob',
-    instructor: 'teacher-1',
+    id: "grade-bob-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-bob-sub",
+    identityId: "identity-bob",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 87,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 90 },
-      'meaning-assoc-1': { complete: true, accuracy: 85 },
-      'custom-q-1': { complete: true, accuracy: 86 }
+      "quiz-block-1": { complete: true, accuracy: 90 },
+      "meaning-assoc-1": { complete: true, accuracy: 85 },
+      "custom-q-1": { complete: true, accuracy: 86 },
     }),
     files: [],
-    createdAt: new Date('2024-01-17T11:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-21T10:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-17T11:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-21T10:00:00Z").toISOString(),
     _version: 4,
-    _lastChangedAt: Date.parse('2024-01-21T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-21T10:00:00Z"),
     _deleted: false,
   },
   // Bob - unit-japanese-2
   {
-    id: 'grade-bob-2',
-    unitID: 'unit-japanese-2',
-    owner: 'student-bob-sub',
-    identityId: 'identity-bob',
-    instructor: 'teacher-1',
+    id: "grade-bob-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "student-bob-sub",
+    identityId: "identity-bob",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 82,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 80 },
-      'meaning-assoc-1': { complete: true, accuracy: 85 },
-      'custom-q-1': { complete: true, accuracy: 81 }
+      "quiz-block-1": { complete: true, accuracy: 80 },
+      "meaning-assoc-1": { complete: true, accuracy: 85 },
+      "custom-q-1": { complete: true, accuracy: 81 },
     }),
     files: [],
-    createdAt: new Date('2024-01-18T14:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-22T09:30:00Z').toISOString(),
+    createdAt: new Date("2024-01-18T14:00:00Z").toISOString(),
+    updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     _version: 3,
-    _lastChangedAt: Date.parse('2024-01-22T09:30:00Z'),
+    _lastChangedAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
     _deleted: false,
   },
   // Carol - unit-japanese-1
   {
-    id: 'grade-carol-1',
-    unitID: 'unit-japanese-1',
-    owner: 'student-carol-sub',
-    identityId: 'identity-carol',
-    instructor: 'teacher-1',
+    id: "grade-carol-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-carol-sub",
+    identityId: "identity-carol",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 91,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 95 },
-      'meaning-assoc-1': { complete: true, accuracy: 90 },
-      'custom-q-1': { complete: true, accuracy: 88 }
+      "quiz-block-1": { complete: true, accuracy: 95 },
+      "meaning-assoc-1": { complete: true, accuracy: 90 },
+      "custom-q-1": { complete: true, accuracy: 88 },
     }),
     files: [],
-    createdAt: new Date('2024-01-16T15:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-20T14:15:00Z').toISOString(),
+    createdAt: new Date("2024-01-16T15:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-20T14:15:00Z").toISOString(),
     _version: 5,
-    _lastChangedAt: Date.parse('2024-01-20T14:15:00Z'),
+    _lastChangedAt: Date.parse("2024-01-20T14:15:00Z"),
     _deleted: false,
   },
   // Carol - unit-japanese-2 (in progress)
   {
-    id: 'grade-carol-2',
-    unitID: 'unit-japanese-2',
-    owner: 'student-carol-sub',
-    identityId: 'identity-carol',
-    instructor: 'teacher-1',
+    id: "grade-carol-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "student-carol-sub",
+    identityId: "identity-carol",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 60,
     accuracy: 0,
     complete: false,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 88 },
-      'meaning-assoc-1': { complete: false, accuracy: 0 }
+      "quiz-block-1": { complete: true, accuracy: 88 },
+      "meaning-assoc-1": { complete: false, accuracy: 0 },
     }),
     files: [],
-    createdAt: new Date('2024-01-19T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-19T11:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-19T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-19T11:00:00Z").toISOString(),
     _version: 2,
-    _lastChangedAt: Date.parse('2024-01-19T11:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-19T11:00:00Z"),
     _deleted: false,
   },
   // Dave - unit-japanese-1
   {
-    id: 'grade-dave-1',
-    unitID: 'unit-japanese-1',
-    owner: 'student-dave-sub',
-    identityId: 'identity-dave',
-    instructor: 'teacher-1',
+    id: "grade-dave-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-dave-sub",
+    identityId: "identity-dave",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 78,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 75 },
-      'meaning-assoc-1': { complete: true, accuracy: 80 },
-      'custom-q-1': { complete: true, accuracy: 79 }
+      "quiz-block-1": { complete: true, accuracy: 75 },
+      "meaning-assoc-1": { complete: true, accuracy: 80 },
+      "custom-q-1": { complete: true, accuracy: 79 },
     }),
     files: [],
-    createdAt: new Date('2024-01-18T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-23T08:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-18T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-23T08:00:00Z").toISOString(),
     _version: 6,
-    _lastChangedAt: Date.parse('2024-01-23T08:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-23T08:00:00Z"),
     _deleted: false,
   },
   // Dave - unit-japanese-2
   {
-    id: 'grade-dave-2',
-    unitID: 'unit-japanese-2',
-    owner: 'student-dave-sub',
-    identityId: 'identity-dave',
-    instructor: 'teacher-1',
+    id: "grade-dave-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "student-dave-sub",
+    identityId: "identity-dave",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 84,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 85 },
-      'meaning-assoc-1': { complete: true, accuracy: 83 },
-      'custom-q-1': { complete: true, accuracy: 84 }
+      "quiz-block-1": { complete: true, accuracy: 85 },
+      "meaning-assoc-1": { complete: true, accuracy: 83 },
+      "custom-q-1": { complete: true, accuracy: 84 },
     }),
     files: [],
-    createdAt: new Date('2024-01-22T13:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-24T10:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-22T13:00:00Z").toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     _version: 3,
-    _lastChangedAt: Date.parse('2024-01-24T10:00:00Z'),
+    _lastChangedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
+    _deleted: false,
+  },
+  // Eve - at-risk student, low accuracy across units, inactive for a while
+  {
+    id: "grade-eve-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-eve-sub",
+    identityId: "identity-eve",
+    instructor: "teacher-1",
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 42,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      "quiz-block-1": { complete: true, accuracy: 45 },
+      "meaning-assoc-1": { complete: true, accuracy: 40 },
+      "custom-q-1": { complete: true, accuracy: 41 },
+    }),
+    files: [],
+    createdAt: new Date("2024-01-17T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-19T16:00:00Z").toISOString(),
+    _version: 2,
+    _lastChangedAt: Date.parse("2024-01-19T16:00:00Z"),
+    _deleted: false,
+  },
+  {
+    id: "grade-eve-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "student-eve-sub",
+    identityId: "identity-eve",
+    instructor: "teacher-1",
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 55,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      "quiz-block-1": { complete: true, accuracy: 58 },
+      "meaning-assoc-1": { complete: true, accuracy: 52 },
+      "custom-q-1": { complete: true, accuracy: 55 },
+    }),
+    files: [],
+    createdAt: new Date("2024-01-20T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-21T11:00:00Z").toISOString(),
+    _version: 2,
+    _lastChangedAt: Date.parse("2024-01-21T11:00:00Z"),
+    _deleted: false,
+  },
+  // Frank - mid-range performer (C band), moderately active
+  {
+    id: "grade-frank-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-frank-sub",
+    identityId: "identity-frank",
+    instructor: "teacher-1",
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 68,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      "quiz-block-1": { complete: true, accuracy: 70 },
+      "meaning-assoc-1": { complete: true, accuracy: 65 },
+      "custom-q-1": { complete: true, accuracy: 69 },
+    }),
+    files: [],
+    createdAt: new Date("2024-01-19T09:00:00Z").toISOString(),
+    updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    _version: 2,
+    _lastChangedAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
+    _deleted: false,
+  },
+  {
+    id: "grade-frank-2",
+    unitID: "unit-japanese-3",
+    sectionID: "section-jpn-101",
+    owner: "student-frank-sub",
+    identityId: "identity-frank",
+    instructor: "teacher-1",
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 72,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      "quiz-block-1": { complete: true, accuracy: 74 },
+      "meaning-assoc-1": { complete: true, accuracy: 70 },
+      "custom-q-1": { complete: true, accuracy: 72 },
+    }),
+    files: [],
+    createdAt: new Date("2024-01-21T09:00:00Z").toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    _version: 2,
+    _lastChangedAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
     _deleted: false,
   },
 ];
@@ -505,90 +649,93 @@ export const otherStudentGrades = [
 export const studentGrades = [
   // Alice - Completed assignment with high score
   {
-    id: 'grade-alice-1',
-    unitID: 'unit-japanese-1',
-    owner: 'student-alice-sub',
-    identityId: 'identity-alice',
-    instructor: 'teacher-1',
+    id: "grade-alice-1",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-alice-sub",
+    identityId: "identity-alice",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 94,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 100 },
-      'meaning-assoc-1': { complete: true, accuracy: 95 },
-      'custom-q-1': { complete: true, accuracy: 90 }
+      "quiz-block-1": { complete: true, accuracy: 100 },
+      "meaning-assoc-1": { complete: true, accuracy: 95 },
+      "custom-q-1": { complete: true, accuracy: 90 },
     }),
     feedback: JSON.stringify({
-      overall: 'Excellent work! Great understanding of greetings.',
+      overall: "Excellent work! Great understanding of greetings.",
     }),
     files: [],
-    moderationStatus: 'approved',
+    moderationStatus: "approved",
     moderationFlags: null,
-    moderationCheckedAt: new Date('2024-01-20T14:00:00Z').toISOString(),
-    createdAt: new Date('2024-01-16T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-20T13:30:00Z').toISOString(),
+    moderationCheckedAt: new Date("2024-01-20T14:00:00Z").toISOString(),
+    createdAt: new Date("2024-01-16T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-20T13:30:00Z").toISOString(),
     _version: 8,
-    _lastChangedAt: Date.parse('2024-01-20T13:30:00Z'),
+    _lastChangedAt: Date.parse("2024-01-20T13:30:00Z"),
     _deleted: false,
   },
   // Another attempt at the same unit (showing multiple attempts)
   {
-    id: 'grade-alice-1-attempt2',
-    unitID: 'unit-japanese-1',
-    owner: 'student-alice-sub',
-    identityId: 'identity-alice',
-    instructor: 'teacher-1',
+    id: "grade-alice-1-attempt2",
+    unitID: "unit-japanese-1",
+    sectionID: "section-jpn-101",
+    owner: "student-alice-sub",
+    identityId: "identity-alice",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 100,
     accuracy: 97,
     complete: true,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 100 },
-      'meaning-assoc-1': { complete: true, accuracy: 100 },
-      'custom-q-1': { complete: true, accuracy: 92 }
+      "quiz-block-1": { complete: true, accuracy: 100 },
+      "meaning-assoc-1": { complete: true, accuracy: 100 },
+      "custom-q-1": { complete: true, accuracy: 92 },
     }),
     feedback: JSON.stringify({
-      overall: 'Even better! Perfect score on vocabulary.',
+      overall: "Even better! Perfect score on vocabulary.",
     }),
     files: [],
-    moderationStatus: 'approved',
+    moderationStatus: "approved",
     moderationFlags: null,
-    moderationCheckedAt: new Date('2024-01-22T14:00:00Z').toISOString(),
-    createdAt: new Date('2024-01-22T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-22T13:30:00Z').toISOString(),
+    moderationCheckedAt: new Date("2024-01-22T14:00:00Z").toISOString(),
+    createdAt: new Date("2024-01-22T10:00:00Z").toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     _version: 5,
-    _lastChangedAt: Date.parse('2024-01-22T13:30:00Z'),
+    _lastChangedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
     _deleted: false,
   },
   // In progress on another unit
   {
-    id: 'grade-alice-2',
-    unitID: 'unit-japanese-2',
-    owner: 'student-alice-sub',
-    identityId: 'identity-alice',
-    instructor: 'teacher-1',
+    id: "grade-alice-2",
+    unitID: "unit-japanese-2",
+    sectionID: "section-jpn-101",
+    owner: "student-alice-sub",
+    identityId: "identity-alice",
+    instructor: "teacher-1",
     unitVersion: 1,
     percentComplete: 60,
     accuracy: 88,
     complete: false,
     timerStarted: true,
     data: JSON.stringify({
-      'quiz-block-1': { complete: true, accuracy: 90 },
-      'quiz-block-2': { complete: true, accuracy: 85 },
-      'custom-q-1': { complete: false, accuracy: 0 }
+      "quiz-block-1": { complete: true, accuracy: 90 },
+      "quiz-block-2": { complete: true, accuracy: 85 },
+      "custom-q-1": { complete: false, accuracy: 0 },
     }),
     feedback: null,
     files: [],
     moderationStatus: null,
     moderationFlags: null,
     moderationCheckedAt: null,
-    createdAt: new Date('2024-01-23T10:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-23T15:00:00Z').toISOString(),
+    createdAt: new Date("2024-01-23T10:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-23T15:00:00Z").toISOString(),
     _version: 4,
-    _lastChangedAt: Date.parse('2024-01-23T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-23T15:00:00Z"),
     _deleted: false,
   },
   // Not started yet (unit-japanese-3 has no grade) - will show in "Assignments" section
@@ -600,18 +747,21 @@ export const studentGrades = [
  * - Assignments showing different states (needs grading, completed, in progress, not started)
  * - Grades showing progression over time with multiple attempts
  * - Sections student is enrolled in (owned by teachers, so they appear in "Sections")
- * 
+ *
  * Expected Dashboard Display:
  * - "Assignments" section: unit-japanese-3, unit-kanji-basics (no grades yet)
  * - "Completed Assignments" section: unit-japanese-1 (97% best), unit-japanese-2 (88%, 60% complete)
  * - "Sections" section: Japanese 101, Japanese 102 (enrolled, not owned)
  */
 export const studentDashboardData = {
-  username: 'student-alice-sub',
-  identityId: 'identity-alice',
+  username: "student-alice-sub",
+  identityId: "identity-alice",
   units: mockUnits,
   sections: {
-    enrolled: [mockSections['section-jpn-101'], mockSections['section-jpn-102']], // Student enrolled in these
+    enrolled: [
+      mockSections["section-jpn-101"],
+      mockSections["section-jpn-102"],
+    ], // Student enrolled in these
     owned: [], // Students don't own sections
   },
   assignments: {
@@ -629,11 +779,11 @@ export const studentDashboardData = {
  * - Assignments received (if they're a student in other classes)
  */
 export const instructorDashboardData = {
-  username: 'teacher-1',
+  username: "teacher-1",
   units: mockUnits,
   sections: {
     enrolled: [], // Instructors can be students too
-    owned: [mockSections['section-jpn-101']], // Sections they teach
+    owned: [mockSections["section-jpn-101"]], // Sections they teach
   },
   assignments: {
     received: [], // Usually none unless instructor is also a student
@@ -649,7 +799,7 @@ export const instructorDashboardData = {
  * - No grades
  */
 export const emptyDashboardData = {
-  username: 'new-student',
+  username: "new-student",
   units: {},
   sections: {
     enrolled: [],
@@ -668,67 +818,99 @@ export const emptyDashboardData = {
  */
 export const mockStudentProfiles = [
   {
-    id: 'profile-alice',
-    studentId: 'student-alice-sub',
-    sectionID: 'section-jpn-101',
-    studentName: 'Alice Johnson',
+    id: "profile-alice",
+    studentId: "student-alice-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Alice Johnson",
     totalXP: 450,
     level: 3,
     currentStreak: 5,
     longestStreak: 7,
-    lastActivityDate: '2024-01-23',
+    lastActivityDate: "2024-01-23",
     completedAssignments: 2,
     nailedItCount: 1,
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-23T15:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-23T15:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'profile-bob',
-    studentId: 'student-bob-sub',
-    sectionID: 'section-jpn-101',
-    studentName: 'Bob Smith',
+    id: "profile-bob",
+    studentId: "student-bob-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Bob Smith",
     totalXP: 320,
     level: 2,
     currentStreak: 3,
     longestStreak: 3,
-    lastActivityDate: '2024-01-22',
+    lastActivityDate: "2024-01-22",
     completedAssignments: 2,
     nailedItCount: 0,
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-22T09:30:00Z'),
+    _lastChangedAt: Date.parse("2024-01-22T09:30:00Z"),
     _deleted: false,
   },
   {
-    id: 'profile-carol',
-    studentId: 'student-carol-sub',
-    sectionID: 'section-jpn-101',
-    studentName: 'Carol Davis',
+    id: "profile-carol",
+    studentId: "student-carol-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Carol Davis",
     totalXP: 280,
     level: 2,
     currentStreak: 2,
     longestStreak: 4,
-    lastActivityDate: '2024-01-20',
+    lastActivityDate: "2024-01-20",
     completedAssignments: 1,
     nailedItCount: 1,
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-20T14:15:00Z'),
+    _lastChangedAt: Date.parse("2024-01-20T14:15:00Z"),
     _deleted: false,
   },
   {
-    id: 'profile-dave',
-    studentId: 'student-dave-sub',
-    sectionID: 'section-jpn-101',
-    studentName: 'Dave Wilson',
+    id: "profile-dave",
+    studentId: "student-dave-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Dave Wilson",
     totalXP: 380,
     level: 2,
     currentStreak: 0,
     longestStreak: 2,
-    lastActivityDate: '2024-01-24',
+    lastActivityDate: "2024-01-24",
     completedAssignments: 2,
     nailedItCount: 0,
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-24T10:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-24T10:00:00Z"),
+    _deleted: false,
+  },
+  {
+    id: "profile-eve",
+    studentId: "student-eve-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Eve Martinez",
+    totalXP: 90,
+    level: 1,
+    currentStreak: 0,
+    longestStreak: 1,
+    lastActivityDate: "2024-01-21",
+    completedAssignments: 2,
+    nailedItCount: 0,
+    _version: 1,
+    _lastChangedAt: Date.parse("2024-01-21T11:00:00Z"),
+    _deleted: false,
+  },
+  {
+    id: "profile-frank",
+    studentId: "student-frank-sub",
+    sectionID: "section-jpn-101",
+    studentName: "Frank Nguyen",
+    totalXP: 210,
+    level: 2,
+    currentStreak: 1,
+    longestStreak: 3,
+    lastActivityDate: "2024-01-21",
+    completedAssignments: 2,
+    nailedItCount: 0,
+    _version: 1,
+    _lastChangedAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
     _deleted: false,
   },
 ];
@@ -738,39 +920,39 @@ export const mockStudentProfiles = [
  */
 export const mockHomeworkRooms = [
   {
-    id: 'room-alice-1',
-    gradeId: 'grade-alice-1',
-    ownerId: 'student-alice-sub',
-    sectionID: 'section-jpn-101',
-    status: 'OPEN',
-    code: 'ABC123',
-    invitedUserIds: ['student-bob-sub'],
+    id: "room-alice-1",
+    gradeId: "grade-alice-1",
+    ownerId: "student-alice-sub",
+    sectionID: "section-jpn-101",
+    status: "OPEN",
+    code: "ABC123",
+    invitedUserIds: ["student-bob-sub"],
     messages: null,
     aiReviewSummary: null,
     closedAt: null,
-    peerGroup: 'review-room-alice-1-peers',
-    createdAt: new Date('2024-01-23T14:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-23T14:00:00Z').toISOString(),
+    peerGroup: "review-room-alice-1-peers",
+    createdAt: new Date("2024-01-23T14:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-23T14:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-23T14:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-23T14:00:00Z"),
     _deleted: false,
   },
   {
-    id: 'room-dave-1',
-    gradeId: 'grade-dave-2',
-    ownerId: 'student-dave-sub',
-    sectionID: 'section-jpn-101',
-    status: 'OPEN',
-    code: 'XYZ789',
-    invitedUserIds: ['student-carol-sub'],
+    id: "room-dave-1",
+    gradeId: "grade-dave-2",
+    ownerId: "student-dave-sub",
+    sectionID: "section-jpn-101",
+    status: "OPEN",
+    code: "XYZ789",
+    invitedUserIds: ["student-carol-sub"],
     messages: null,
     aiReviewSummary: null,
     closedAt: null,
-    peerGroup: 'review-room-dave-1-peers',
-    createdAt: new Date('2024-01-24T09:00:00Z').toISOString(),
-    updatedAt: new Date('2024-01-24T09:00:00Z').toISOString(),
+    peerGroup: "review-room-dave-1-peers",
+    createdAt: new Date("2024-01-24T09:00:00Z").toISOString(),
+    updatedAt: new Date("2024-01-24T09:00:00Z").toISOString(),
     _version: 1,
-    _lastChangedAt: Date.parse('2024-01-24T09:00:00Z'),
+    _lastChangedAt: Date.parse("2024-01-24T09:00:00Z"),
     _deleted: false,
   },
 ];
@@ -778,16 +960,16 @@ export const mockHomeworkRooms = [
 /**
  * Helper function to seed index page data in Storybook
  */
-export function seedIndexPageData(scenario = 'student') {
+export function seedIndexPageData(scenario = "student") {
   let data;
   switch (scenario) {
-    case 'student':
+    case "student":
       data = studentDashboardData;
       break;
-    case 'instructor':
+    case "instructor":
       data = instructorDashboardData;
       break;
-    case 'empty':
+    case "empty":
       data = emptyDashboardData;
       break;
     default:
@@ -795,7 +977,7 @@ export function seedIndexPageData(scenario = 'student') {
   }
 
   // Seed units
-  Object.values(data.units).forEach(unit => seedMockUnit(unit));
+  Object.values(data.units).forEach((unit) => seedMockUnit(unit));
 
   // Seed sections
   const allSections = [...data.sections.enrolled, ...data.sections.owned];
@@ -804,18 +986,23 @@ export function seedIndexPageData(scenario = 'student') {
   }
 
   // Seed assignments
-  const allAssignments = [...data.assignments.received, ...data.assignments.created];
+  const allAssignments = [
+    ...data.assignments.received,
+    ...data.assignments.created,
+  ];
   if (allAssignments.length > 0) {
     seedMockAssignments(allAssignments);
   }
 
   // Seed grades - for instructor view, seed ALL student grades
-  if (scenario === 'instructor') {
+  if (scenario === "instructor") {
     // Seed all student grades so gradebook shows data
-    [...studentGrades, ...otherStudentGrades].forEach(grade => seedMockGrade(grade));
+    [...studentGrades, ...otherStudentGrades].forEach((grade) =>
+      seedMockGrade(grade),
+    );
   } else {
     // For student view, just seed their own grades
-    data.grades.forEach(grade => seedMockGrade(grade));
+    data.grades.forEach((grade) => seedMockGrade(grade));
   }
 
   // Seed student profiles (XP / leaderboard data)
@@ -824,11 +1011,14 @@ export function seedIndexPageData(scenario = 'student') {
   // Seed open collaboration rooms
   seedMockHomeworkRooms(mockHomeworkRooms);
 
-  console.log('[IndexPageData] Seeded', scenario, 'dashboard with', {
+  console.log("[IndexPageData] Seeded", scenario, "dashboard with", {
     units: Object.keys(data.units).length,
     sections: allSections.length,
     assignments: allAssignments.length,
-    grades: scenario === 'instructor' ? (studentGrades.length + otherStudentGrades.length) : data.grades.length,
+    grades:
+      scenario === "instructor"
+        ? studentGrades.length + otherStudentGrades.length
+        : data.grades.length,
   });
 }
 

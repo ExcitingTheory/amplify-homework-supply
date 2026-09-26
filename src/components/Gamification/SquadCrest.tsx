@@ -10,6 +10,7 @@
 import React, { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
 import type { IconType } from "react-icons";
 import { Medallion } from "./Medallion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -53,11 +54,18 @@ export function SquadCrest({
   chargeIcon: ChargeIcon,
 }: SquadCrestProps) {
   const reducedMotion = useReducedMotion();
+  const theme = useTheme();
   const px = SIZE_MAP[size];
   const initials = useMemo(() => getInitials(squadName), [squadName]);
-  const { field, charge } = useMemo(() => pickTinctures(squadId), [squadId]);
+  const { field, charge } = useMemo(
+    () => pickTinctures(squadId, theme),
+    [squadId, theme],
+  );
   const division = useMemo(() => pickDivision(squadId), [squadId]);
-  const metal = useMemo(() => metalForTier(totalXP ?? 0), [totalXP]);
+  const metal = useMemo(
+    () => metalForTier(totalXP ?? 0, theme),
+    [totalXP, theme],
+  );
   const ink = useMemo(() => readableInk(field.main), [field]);
 
   const chargeNode = ChargeIcon ? (

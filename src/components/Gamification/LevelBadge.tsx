@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
+import { useTheme, type Theme } from "@mui/material/styles";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
@@ -18,6 +19,7 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import SchoolIcon from "@mui/icons-material/School";
 import type { LevelInfo } from "../../utils/xpCalculation";
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
+import { readableInk } from "../../themes/heraldry";
 
 export interface LevelBadgeProps {
   /** Level information from XP context. */
@@ -28,14 +30,23 @@ export interface LevelBadgeProps {
   size?: "small" | "medium";
 }
 
-const LEVEL_COLORS: Record<number, string> = {
-  1: "#9e9e9e", // Beginner - grey
-  2: "#4caf50", // Explorer - green
-  3: "#2196f3", // Practitioner - blue
-  4: "#9c27b0", // Contributor - purple
-  5: "#ff9800", // Expert - orange
-  6: "#f44336", // Master - red
-};
+/**
+ * Level → color ramp derived from the live theme palette (neutral, then
+ * success/info/secondary/warning/error) so it respects dark mode and any
+ * user theme customization instead of fixed hex. Shared with AvatarDisplay's
+ * level indicator so both stay in sync.
+ */
+export function getLevelColors(theme: Theme): Record<number, string> {
+  const p = theme.palette;
+  return {
+    1: p.grey[theme.palette.mode === "dark" ? 600 : 500],
+    2: p.success.main,
+    3: p.info.main,
+    4: p.secondary.main,
+    5: p.warning.main,
+    6: p.error.main,
+  };
+}
 
 const LEVEL_ICONS: Record<number, React.ReactElement> = {
   1: <AutoStoriesIcon fontSize="small" />, // Beginner — open book
@@ -51,7 +62,10 @@ export function LevelBadge({
   showProgress = true,
   size = "medium",
 }: LevelBadgeProps) {
+  const theme = useTheme();
+  const LEVEL_COLORS = React.useMemo(() => getLevelColors(theme), [theme]);
   const color = LEVEL_COLORS[level.level] || LEVEL_COLORS[1];
+  const textColor = readableInk(color);
   const icon = LEVEL_ICONS[level.level] || LEVEL_ICONS[1];
   const isSmall = size === "small";
 
@@ -74,7 +88,7 @@ export function LevelBadge({
             px: 0.625,
             borderRadius: "10px",
             bgcolor: color,
-            color: "#fff",
+            color: textColor,
             fontWeight: 700,
             fontSize: "0.6875rem",
             lineHeight: 1,
@@ -107,16 +121,16 @@ export function LevelBadge({
           size={isSmall ? "small" : "medium"}
           sx={{
             bgcolor: color,
-            color: "#fff",
+            color: textColor,
             fontWeight: 700,
             fontSize: isSmall ? "0.6875rem" : "0.875rem",
-            "& .MuiChip-icon": { color: "#fff" },
+            "& .MuiChip-icon": { color: textColor },
             ...(isSmall
               ? {
                   height: 20,
                   "& .MuiChip-label": { px: 0.5 },
                   "& .MuiChip-icon": {
-                    color: "#fff",
+                    color: textColor,
                     fontSize: 14,
                     ml: "4px",
                     mr: "-4px",

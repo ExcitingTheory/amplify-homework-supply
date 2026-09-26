@@ -13,7 +13,7 @@
 import type { Handler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
-import { fromEnv } from "@aws-sdk/credential-providers";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import {
   S3Client,
   GetObjectCommand,
@@ -53,7 +53,7 @@ function getClient() {
       Auth: {
         credentialsProvider: {
           getCredentialsAndIdentityId: async () => ({
-            credentials: await fromEnv()(),
+            credentials: await fromNodeProviderChain()(),
           }),
           clearCredentialsAndIdentityId: () => {},
         },

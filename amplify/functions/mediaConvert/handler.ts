@@ -9,25 +9,25 @@
  * Creates HLS (.m3u8) output at: protected/{identityId}/{fileId}/{fileId}.m3u8
  */
 
-import type { Handler } from 'aws-lambda';
-import { type Schema } from '../../data/resource';
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/data';
-import { fromEnv } from '@aws-sdk/credential-providers';
+import type { Handler } from "aws-lambda";
+import { type Schema } from "../../data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import {
   MediaConvertClient,
   CreateJobCommand,
   DescribeEndpointsCommand,
-} from '@aws-sdk/client-mediaconvert';
+} from "@aws-sdk/client-mediaconvert";
 
 // Configure Amplify at module level (same pattern as openai handler)
 Amplify.configure(
   {
     API: {
       GraphQL: {
-        endpoint: process.env.API_ENDPOINT || '',
-        region: process.env.AWS_REGION || 'us-east-1',
-        defaultAuthMode: 'iam',
+        endpoint: process.env.API_ENDPOINT || "",
+        region: process.env.AWS_REGION || "us-east-1",
+        defaultAuthMode: "iam",
       },
     },
   },
@@ -35,12 +35,12 @@ Amplify.configure(
     Auth: {
       credentialsProvider: {
         getCredentialsAndIdentityId: async () => ({
-          credentials: await fromEnv()(),
+          credentials: await fromNodeProviderChain()(),
         }),
         clearCredentialsAndIdentityId: () => {},
       },
     },
-  }
+  },
 );
 
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
@@ -102,7 +102,7 @@ const UPDATE_FILE = /* GraphQL */ `
 
 function getDataClient() {
   if (!dataClient) {
-    dataClient = generateClient<Schema>({ authMode: 'iam' });
+    dataClient = generateClient<Schema>({ authMode: "iam" });
   }
   return dataClient;
 }
@@ -110,19 +110,21 @@ function getDataClient() {
 async function getMediaConvertEndpoint(): Promise<string> {
   if (cachedEndpoint) return cachedEndpoint;
   const client = new MediaConvertClient({});
-  const resp = await client.send(new DescribeEndpointsCommand({ MaxResults: 1 }));
+  const resp = await client.send(
+    new DescribeEndpointsCommand({ MaxResults: 1 }),
+  );
   const endpoint = resp.Endpoints?.[0]?.Url;
-  if (!endpoint) throw new Error('Failed to discover MediaConvert endpoint');
+  if (!endpoint) throw new Error("Failed to discover MediaConvert endpoint");
   cachedEndpoint = endpoint;
   return endpoint;
 }
 
 function isVideo(mimeType: string): boolean {
-  return mimeType.startsWith('video/');
+  return mimeType.startsWith("video/");
 }
 
 function isAudio(mimeType: string): boolean {
-  return mimeType.startsWith('audio/');
+  return mimeType.startsWith("audio/");
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +151,7 @@ async function createMediaConvertJob(
   const inputConfig: Record<string, any> = {
     FileInput: sourceUrl,
     AudioSelectors: {
-      'Audio Selector 1': { DefaultSelection: 'DEFAULT' },
+      "Audio Selector 1": { DefaultSelection: "DEFAULT" },
     },
   };
 
@@ -162,56 +164,78 @@ async function createMediaConvertJob(
   if (isVideo(mimeType)) {
     // Adaptive bitrate — 720p, 480p, 360p renditions
     const videoBitrates = [
-      { modifier: '_720p', w: 1280, h: 720, maxBitrate: 3_000_000, audioBitrate: 128_000 },
-      { modifier: '_480p', w: 854,  h: 480, maxBitrate: 1_500_000, audioBitrate: 96_000 },
-      { modifier: '_360p', w: 640,  h: 360, maxBitrate: 800_000,   audioBitrate: 64_000 },
+      {
+        modifier: "_720p",
+        w: 1280,
+        h: 720,
+        maxBitrate: 3_000_000,
+        audioBitrate: 128_000,
+      },
+      {
+        modifier: "_480p",
+        w: 854,
+        h: 480,
+        maxBitrate: 1_500_000,
+        audioBitrate: 96_000,
+      },
+      {
+        modifier: "_360p",
+        w: 640,
+        h: 360,
+        maxBitrate: 800_000,
+        audioBitrate: 64_000,
+      },
     ];
 
     for (const v of videoBitrates) {
       outputs.push({
         NameModifier: v.modifier,
-        ContainerSettings: { Container: 'M3U8' },
+        ContainerSettings: { Container: "M3U8" },
         VideoDescription: {
           Width: v.w,
           Height: v.h,
           CodecSettings: {
-            Codec: 'H_264',
+            Codec: "H_264",
             H264Settings: {
-              RateControlMode: 'QVBR',
+              RateControlMode: "QVBR",
               MaxBitrate: v.maxBitrate,
               QvbrSettings: { QvbrQualityLevel: 7 },
             },
           },
         },
-        AudioDescriptions: [{
-          AudioSourceName: 'Audio Selector 1',
-          CodecSettings: {
-            Codec: 'AAC',
-            AacSettings: {
-              Bitrate: v.audioBitrate,
-              CodingMode: 'CODING_MODE_2_0',
-              SampleRate: 44100,
+        AudioDescriptions: [
+          {
+            AudioSourceName: "Audio Selector 1",
+            CodecSettings: {
+              Codec: "AAC",
+              AacSettings: {
+                Bitrate: v.audioBitrate,
+                CodingMode: "CODING_MODE_2_0",
+                SampleRate: 44100,
+              },
             },
           },
-        }],
+        ],
       });
     }
   } else {
     // Audio-only — single AAC output
     outputs.push({
-      NameModifier: '',
-      ContainerSettings: { Container: 'M3U8' },
-      AudioDescriptions: [{
-        AudioSourceName: 'Audio Selector 1',
-        CodecSettings: {
-          Codec: 'AAC',
-          AacSettings: {
-            Bitrate: 128_000,
-            CodingMode: 'CODING_MODE_2_0',
-            SampleRate: 44100,
+      NameModifier: "",
+      ContainerSettings: { Container: "M3U8" },
+      AudioDescriptions: [
+        {
+          AudioSourceName: "Audio Selector 1",
+          CodecSettings: {
+            Codec: "AAC",
+            AacSettings: {
+              Bitrate: 128_000,
+              CodingMode: "CODING_MODE_2_0",
+              SampleRate: 44100,
+            },
           },
         },
-      }],
+      ],
     });
   }
 
@@ -220,18 +244,20 @@ async function createMediaConvertJob(
     UserMetadata: { fileId, identityId },
     Settings: {
       Inputs: [inputConfig],
-      OutputGroups: [{
-        Name: 'HLS',
-        OutputGroupSettings: {
-          Type: 'HLS_GROUP_SETTINGS',
-          HlsGroupSettings: {
-            Destination: outputPrefix,
-            SegmentLength: 6,
-            MinSegmentLength: 0,
+      OutputGroups: [
+        {
+          Name: "HLS",
+          OutputGroupSettings: {
+            Type: "HLS_GROUP_SETTINGS",
+            HlsGroupSettings: {
+              Destination: outputPrefix,
+              SegmentLength: 6,
+              MinSegmentLength: 0,
+            },
           },
+          Outputs: outputs,
         },
-        Outputs: outputs,
-      }],
+      ],
     },
   });
 
@@ -248,10 +274,10 @@ async function handleTranscodeMedia(args: any): Promise<string> {
   const { fileID } = args;
   const client = getDataClient();
 
-  const { data, errors } = await client.graphql({
+  const { data, errors } = (await client.graphql({
     query: GET_FILE,
     variables: { id: fileID },
-  }) as any;
+  })) as any;
 
   if (errors || !data?.getFile) {
     throw new Error(`File not found: ${fileID}`);
@@ -275,14 +301,14 @@ async function handleTranscodeMedia(args: any): Promise<string> {
     variables: {
       input: {
         id: file.id,
-        transcodeStatus: 'PROCESSING',
+        transcodeStatus: "PROCESSING",
         mediaConvertJobId: jobId,
         _version: file._version ?? 1,
       },
     },
   });
 
-  return JSON.stringify({ jobId, fileId: file.id, status: 'PROCESSING' });
+  return JSON.stringify({ jobId, fileId: file.id, status: "PROCESSING" });
 }
 
 /** S3 OBJECT_CREATED event */
@@ -290,27 +316,32 @@ async function handleS3Event(event: any): Promise<void> {
   const client = getDataClient();
 
   for (const record of event.Records) {
-    const s3Key = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
+    const s3Key = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
     console.log(`[MediaConvert] S3 upload detected: ${s3Key}`);
 
     // Look up File record by path
-    const { data, errors } = await client.graphql({
+    const { data, errors } = (await client.graphql({
       query: LIST_FILES_BY_PATH,
       variables: { filter: { path: { eq: s3Key } } },
-    }) as any;
+    })) as any;
 
     if (errors) {
-      console.error('[MediaConvert] GraphQL error:', errors);
+      console.error("[MediaConvert] GraphQL error:", errors);
       continue;
     }
 
     const file = data?.listFiles?.items?.[0];
     if (!file) {
-      console.warn(`[MediaConvert] No File record for path: ${s3Key}, skipping`);
+      console.warn(
+        `[MediaConvert] No File record for path: ${s3Key}, skipping`,
+      );
       continue;
     }
 
-    if (!file.mimeType || (!isAudio(file.mimeType) && !isVideo(file.mimeType))) {
+    if (
+      !file.mimeType ||
+      (!isAudio(file.mimeType) && !isVideo(file.mimeType))
+    ) {
       console.log(`[MediaConvert] Skipping non-media file: ${file.mimeType}`);
       continue;
     }
@@ -328,7 +359,7 @@ async function handleS3Event(event: any): Promise<void> {
         variables: {
           input: {
             id: file.id,
-            transcodeStatus: 'PROCESSING',
+            transcodeStatus: "PROCESSING",
             mediaConvertJobId: jobId,
             _version: file._version ?? 1,
           },
@@ -337,7 +368,10 @@ async function handleS3Event(event: any): Promise<void> {
 
       console.log(`[MediaConvert] Job created: ${jobId} for file: ${file.id}`);
     } catch (error) {
-      console.error(`[MediaConvert] Failed to create job for ${file.id}:`, error);
+      console.error(
+        `[MediaConvert] Failed to create job for ${file.id}:`,
+        error,
+      );
     }
   }
 }
@@ -350,20 +384,22 @@ async function handleEventBridge(event: any): Promise<void> {
   const fileId = detail.userMetadata?.fileId;
   const identityId = detail.userMetadata?.identityId;
 
-  console.log(`[MediaConvert] Job ${jobId} status: ${status}, fileId: ${fileId}`);
+  console.log(
+    `[MediaConvert] Job ${jobId} status: ${status}, fileId: ${fileId}`,
+  );
 
   if (!fileId) {
-    console.warn('[MediaConvert] No fileId in userMetadata, skipping');
+    console.warn("[MediaConvert] No fileId in userMetadata, skipping");
     return;
   }
 
   const client = getDataClient();
 
   // Get current file version for optimistic locking
-  const { data: fileData } = await client.graphql({
+  const { data: fileData } = (await client.graphql({
     query: GET_FILE,
     variables: { id: fileId },
-  }) as any;
+  })) as any;
 
   const file = fileData?.getFile;
   if (!file) {
@@ -371,15 +407,15 @@ async function handleEventBridge(event: any): Promise<void> {
     return;
   }
 
-  if (status === 'COMPLETE') {
+  if (status === "COMPLETE") {
     // Extract HLS manifest path from MediaConvert output details
     const outputGroupDetails = detail.outputGroupDetails;
-    let hlsManifestPath = '';
+    let hlsManifestPath = "";
 
     if (outputGroupDetails?.[0]?.playlistFilePaths?.[0]) {
       const fullPath = outputGroupDetails[0].playlistFilePaths[0];
       const bucket = process.env.STORAGE_BUCKET!;
-      hlsManifestPath = fullPath.replace(`s3://${bucket}/`, '');
+      hlsManifestPath = fullPath.replace(`s3://${bucket}/`, "");
     } else {
       // Fall back to convention
       hlsManifestPath = `protected/${identityId}/${fileId}/${fileId}.m3u8`;
@@ -391,15 +427,17 @@ async function handleEventBridge(event: any): Promise<void> {
         input: {
           id: fileId,
           hlsUrl: hlsManifestPath,
-          transcodeStatus: 'COMPLETE',
+          transcodeStatus: "COMPLETE",
           _version: file._version ?? 1,
         },
       },
     });
 
-    console.log(`[MediaConvert] File ${fileId} updated with HLS: ${hlsManifestPath}`);
-  } else if (status === 'ERROR') {
-    const errorMessage = detail.errorMessage || 'Unknown error';
+    console.log(
+      `[MediaConvert] File ${fileId} updated with HLS: ${hlsManifestPath}`,
+    );
+  } else if (status === "ERROR") {
+    const errorMessage = detail.errorMessage || "Unknown error";
     console.error(`[MediaConvert] Job ${jobId} failed: ${errorMessage}`);
 
     await client.graphql({
@@ -407,7 +445,7 @@ async function handleEventBridge(event: any): Promise<void> {
       variables: {
         input: {
           id: fileId,
-          transcodeStatus: 'ERROR',
+          transcodeStatus: "ERROR",
           _version: file._version ?? 1,
         },
       },
@@ -420,34 +458,36 @@ async function handleEventBridge(event: any): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export const handler: Handler = async (event, context) => {
-  console.log('[MediaConvert] Event:', JSON.stringify(event, null, 2));
+  console.log("[MediaConvert] Event:", JSON.stringify(event, null, 2));
 
   // 1. EventBridge MediaConvert completion/error
-  if (event.source === 'aws.mediaconvert') {
+  if (event.source === "aws.mediaconvert") {
     return handleEventBridge(event);
   }
 
   // 2. EventBridge S3 Object Created event (used instead of S3 notifications to avoid circular deps)
-  if (event.source === 'aws.s3' && event['detail-type'] === 'Object Created') {
+  if (event.source === "aws.s3" && event["detail-type"] === "Object Created") {
     const key = event.detail?.object?.key;
     if (!key) {
-      console.warn('[MediaConvert] EventBridge S3 event missing object key');
+      console.warn("[MediaConvert] EventBridge S3 event missing object key");
       return;
     }
     // Check file extension
-    const videoExtensions = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
-    if (!videoExtensions.some(ext => key.toLowerCase().endsWith(ext))) {
+    const videoExtensions = [".mp4", ".mov", ".webm", ".avi", ".mkv"];
+    if (!videoExtensions.some((ext) => key.toLowerCase().endsWith(ext))) {
       console.log(`[MediaConvert] Skipping non-video file: ${key}`);
       return;
     }
     // Convert to S3 notification format and reuse existing handler
     const syntheticEvent = {
-      Records: [{
-        s3: {
-          bucket: { name: event.detail.bucket.name },
-          object: { key },
+      Records: [
+        {
+          s3: {
+            bucket: { name: event.detail.bucket.name },
+            object: { key },
+          },
         },
-      }],
+      ],
     };
     return handleS3Event(syntheticEvent);
   }
@@ -459,9 +499,9 @@ export const handler: Handler = async (event, context) => {
 
   // 3. GraphQL resolver (transcodeMedia mutation)
   const fieldName = event.fieldName || event.info?.fieldName;
-  if (fieldName === 'transcodeMedia') {
+  if (fieldName === "transcodeMedia") {
     return handleTranscodeMedia(event.arguments);
   }
 
-  console.warn('[MediaConvert] Unknown event type');
+  console.warn("[MediaConvert] Unknown event type");
 };

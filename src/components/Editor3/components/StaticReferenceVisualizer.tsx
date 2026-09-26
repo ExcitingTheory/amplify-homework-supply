@@ -779,6 +779,7 @@ function FlowingRing({
             animationTime,
             asymmetry,
             baseRadius,
+            centerRepulsion,
             fillAmount,
             chaosIntensity,
             coilBreakup,

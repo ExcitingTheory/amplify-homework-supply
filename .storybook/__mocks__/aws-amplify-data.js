@@ -56,6 +56,7 @@ const dataStores = {
   HomeworkRoom: new Map(),
   WorkbookComment: new Map(),
   AgentJob: new Map(),
+  AnalyticsSummary: new Map(),
 };
 
 /**
@@ -93,6 +94,7 @@ const activeSubscriptions = {
   HomeworkRoom: [],
   WorkbookComment: [],
   AgentJob: [],
+  AnalyticsSummary: [],
 };
 
 /**
@@ -560,10 +562,22 @@ const createMockModel = (modelName) => ({
     // Apply filter if provided
     if (options?.filter) {
       items = items.filter((item) => {
-        // Simple filter implementation - supports { field: { eq: value } }
+        // Supports { field: { eq, ne, between, attributeExists } }
         return Object.entries(options.filter).every(([field, condition]) => {
+          if (!condition || typeof condition !== "object") return true;
           if (condition.eq !== undefined) {
             return item[field] === condition.eq;
+          }
+          if (condition.ne !== undefined) {
+            return item[field] !== condition.ne;
+          }
+          if (condition.between !== undefined) {
+            const [min, max] = condition.between;
+            return item[field] >= min && item[field] <= max;
+          }
+          if (condition.attributeExists !== undefined) {
+            const exists = item[field] !== undefined && item[field] !== null;
+            return condition.attributeExists ? exists : !exists;
           }
           return true;
         });
@@ -720,6 +734,7 @@ const mockClient = {
     HomeworkRoom: createMockModel("HomeworkRoom"),
     WorkbookComment: createMockModel("WorkbookComment"),
     AgentJob: createMockModel("AgentJob"),
+    AnalyticsSummary: createMockModel("AnalyticsSummary"),
   },
 
   // Mock mutations for custom server-side operations
@@ -1207,6 +1222,20 @@ export const seedMockAssignments = (assignmentsArray) => {
       }, 0);
     });
   }
+};
+
+export const seedMockAnalyticsSummary = (summariesArray) => {
+  console.log(
+    `[Mock Data] seedMockAnalyticsSummary: Adding ${summariesArray.length} analytics summaries`,
+  );
+  summariesArray.forEach((summary) => {
+    const id = summary.id || `${summary.scope}#${summary.scopeId}#${summary.date}`;
+    dataStores.AnalyticsSummary.set(id, { id, ...summary });
+  });
+  console.log(
+    "[Mock Data] Total analytics summaries in store:",
+    dataStores.AnalyticsSummary.size,
+  );
 };
 
 export const seedMockSettings = (settingsData) => {

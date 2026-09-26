@@ -21,7 +21,7 @@ const APP_WAVEFORM_DATA = Array.from(
 );
 
 const meta = {
-  title: "Editor 3/Components/Exercise Response Panel",
+  title: "✏️ Lesson Editor/Components/Exercise Response Panel",
   component: ExerciseResponsePanel,
   parameters: { layout: "centered" },
   tags: ["autodocs"],

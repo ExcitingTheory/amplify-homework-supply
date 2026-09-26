@@ -15,7 +15,7 @@
     "postinstall": "patch-package && node scripts/copy-pdf-worker.js && node scripts/copy-rnnoise-worker.js",
     "deploy": "npx ampx deploy",
     "deploy:prod": "npx ampx deploy --branch main",
-    "sandbox": "npx ampx sandbox --stream-function-log",
+    "sandbox": "npx ampx sandbox --stream-function-logs",
     "deploy:bootstrap": "node scripts/deploy-bootstrap.mjs",
     "sandbox:with-logs": "npx ampx sandbox --stream-function-logs | tee test/logs/sandbox.log",
     "sandbox:seed": "export $(cat .env.test | xargs) && npx ampx sandbox seed",

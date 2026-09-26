@@ -28,9 +28,14 @@ import { CHARGES, CHARGE_VIEWBOX } from "./armoriaCharges";
 import type { ChargeEntry } from "./armoriaCharges";
 import { useArmorUndoRedo } from "./useArmorUndoRedo";
 import { sanitizeSvg } from "../../utils/sanitizeHtml";
-import { HERALDRY, hashSeed } from "../../themes/heraldry";
+import {
+  getTinctures,
+  getMetals,
+  hashSeed,
+  type MetalRamp,
+} from "../../themes/heraldry";
 import type { ArmorEditorSnapshot } from "./useArmorUndoRedo";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, type Theme } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -105,8 +110,8 @@ const SHIELD_SHAPES: ShapeEntry[] = [
 ];
 
 // ============================================================================
-// Colors — curated heraldic tinctures (one of each family). These are tuned to
-// sit well beside one another, so any combination reads as a designed crest.
+// Colors — curated heraldic tinctures (one of each family), derived from the
+// live theme palette so a customized brand still reads as a designed crest.
 // The two "custom" slots (theme primary/secondary) are injected at runtime.
 // ============================================================================
 
@@ -116,18 +121,29 @@ interface ColorEntry {
   hex: string;
 }
 
-const COLORS: ColorEntry[] = [
-  { id: "blue", label: "Blue", hex: HERALDRY.tinctures.azure.main },
-  { id: "red", label: "Red", hex: HERALDRY.tinctures.gules.main },
-  { id: "green", label: "Green", hex: HERALDRY.tinctures.vert.main },
-  { id: "purple", label: "Purple", hex: HERALDRY.tinctures.purpure.main },
-  { id: "gold", label: "Gold", hex: HERALDRY.tinctures.or.main },
-  { id: "silver", label: "Silver", hex: HERALDRY.tinctures.argent.main },
-  { id: "black", label: "Black", hex: HERALDRY.tinctures.sable.main },
-];
+function getColorSwatches(theme: Theme): ColorEntry[] {
+  const tinctures = getTinctures(theme);
+  return [
+    { id: "blue", label: "Blue", hex: tinctures.azure.main },
+    { id: "red", label: "Red", hex: tinctures.gules.main },
+    { id: "green", label: "Green", hex: tinctures.vert.main },
+    { id: "purple", label: "Purple", hex: tinctures.purpure.main },
+    { id: "gold", label: "Gold", hex: tinctures.or.main },
+    { id: "silver", label: "Silver", hex: tinctures.argent.main },
+    { id: "black", label: "Black", hex: tinctures.sable.main },
+  ];
+}
 
 // Metallic rim ramp for the shield border (matches the Medallion finish).
-const RIM_METAL = HERALDRY.metals.gold;
+// `renderShieldSvg` is a pure, exported function used outside React (no theme
+// context), so it keeps this static gold fallback; the live editor overrides
+// it with the current theme's gold via the `rimMetal` param.
+const DEFAULT_RIM_METAL: MetalRamp = {
+  name: "gold",
+  light: "#fbe9a6",
+  mid: "#dfb63f",
+  dark: "#a17b16",
+};
 
 // ============================================================================
 // Field divisions
@@ -256,7 +272,10 @@ export interface ArmorEditorProps {
 // SVG Renderer
 // ============================================================================
 
-export function renderShieldSvg(config: ArmorEditorConfig): string {
+export function renderShieldSvg(
+  config: ArmorEditorConfig,
+  rimMetal: MetalRamp = DEFAULT_RIM_METAL,
+): string {
   const shape =
     SHIELD_SHAPES.find((s) => s.id === config.shape) || SHIELD_SHAPES[0];
   // Unique per-crest suffix so gradient/clip IDs don't collide when several
@@ -349,9 +368,9 @@ export function renderShieldSvg(config: ArmorEditorConfig): string {
       <path d="${shape.path}"/>
     </clipPath>
     <linearGradient id="${rimId}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${RIM_METAL.light}"/>
-      <stop offset="50%" stop-color="${RIM_METAL.mid}"/>
-      <stop offset="100%" stop-color="${RIM_METAL.dark}"/>
+      <stop offset="0%" stop-color="${rimMetal.light}"/>
+      <stop offset="50%" stop-color="${rimMetal.mid}"/>
+      <stop offset="100%" stop-color="${rimMetal.dark}"/>
     </linearGradient>
     <radialGradient id="${glossId}" cx="50%" cy="30%" r="55%">
       <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
@@ -653,12 +672,12 @@ function PositionSelector({
 // Random config generator
 // ============================================================================
 
-function randomConfig(): ArmorEditorConfig {
+function randomConfig(colors: ColorEntry[]): ArmorEditorConfig {
   const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
   const numCharges = pick([1, 1, 2, 2, 3]);
   const charges: ChargeConfig[] = Array.from({ length: numCharges }, () => ({
     chargeId: pick(CHARGES.filter((c) => c.id !== "none")).id,
-    chargeColor: pick(COLORS).hex,
+    chargeColor: pick(colors).hex,
     chargePosition: pick(POSITIONS).id,
     chargeScale: pick([0.75, 1, 1, 1.25, 1.5]),
     offsetX: 0,
@@ -668,8 +687,8 @@ function randomConfig(): ArmorEditorConfig {
   const first = charges[0];
   return {
     shape: pick(SHIELD_SHAPES).id,
-    fieldColor: pick(COLORS).hex,
-    fieldColor2: pick(COLORS).hex,
+    fieldColor: pick(colors).hex,
+    fieldColor2: pick(colors).hex,
     division: pick(DIVISIONS).id,
     chargeId: first.chargeId,
     chargeColor: first.chargeColor,
@@ -683,17 +702,21 @@ function randomConfig(): ArmorEditorConfig {
 // Main Component
 // ============================================================================
 
-const DEFAULT_CONFIG: ArmorEditorConfig = {
-  shape: "classic",
-  fieldColor: HERALDRY.tinctures.azure.main,
-  fieldColor2: HERALDRY.tinctures.or.main,
-  division: "none",
-  chargeId: "none",
-  chargeColor: HERALDRY.tinctures.or.main,
-  chargePosition: "center",
-  chargeScale: 1,
-  charges: [],
-};
+function getDefaultConfig(colors: ColorEntry[]): ArmorEditorConfig {
+  const byId = (id: string) =>
+    colors.find((c) => c.id === id)?.hex ?? colors[0].hex;
+  return {
+    shape: "classic",
+    fieldColor: byId("blue"),
+    fieldColor2: byId("gold"),
+    division: "none",
+    chargeId: "none",
+    chargeColor: byId("gold"),
+    chargePosition: "center",
+    chargeScale: 1,
+    charges: [],
+  };
+}
 
 export function ArmorEditor({
   open,
@@ -706,11 +729,16 @@ export function ArmorEditor({
 }: ArmorEditorProps) {
   const t = useTranslations("components");
   const theme = useTheme();
+  const rimMetal = useMemo(() => getMetals(theme).gold, [theme]);
 
   // Curated heraldic palette + two theme-derived "custom" swatches.
+  const baseColors = useMemo<ColorEntry[]>(
+    () => getColorSwatches(theme),
+    [theme],
+  );
   const palette = useMemo<ColorEntry[]>(
     () => [
-      ...COLORS,
+      ...baseColors,
       {
         id: "theme-primary",
         label: "Theme Primary",
@@ -722,18 +750,23 @@ export function ArmorEditor({
         hex: theme.palette.secondary.main,
       },
     ],
-    [theme.palette.primary.main, theme.palette.secondary.main],
+    [baseColors, theme.palette.primary.main, theme.palette.secondary.main],
+  );
+
+  const defaultConfig = useMemo(
+    () => getDefaultConfig(baseColors),
+    [baseColors],
   );
 
   const initialSnapshot: ArmorEditorSnapshot = useMemo(
     () => ({
       config: initialConfig
-        ? { ...DEFAULT_CONFIG, ...initialConfig }
-        : DEFAULT_CONFIG,
+        ? { ...defaultConfig, ...initialConfig }
+        : defaultConfig,
       name: squadName,
       description: squadDescription,
     }),
-    [initialConfig, squadName, squadDescription],
+    [initialConfig, squadName, squadDescription, defaultConfig],
   );
 
   const {
@@ -770,13 +803,13 @@ export function ArmorEditor({
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => {
       const s = snapshotRef.current;
-      const svg = renderShieldSvg(s.config);
+      const svg = renderShieldSvg(s.config, rimMetal);
       onSave(s.config, svg, s.name, s.description);
     }, autoSaveDelay);
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [snapshot, open, autoSaveDelay, onSave]);
+  }, [snapshot, open, autoSaveDelay, onSave, rimMetal]);
 
   // Keyboard shortcuts: Ctrl/Cmd+Z for undo, Ctrl/Cmd+Shift+Z for redo
   // Intercepts EVERYWHERE including in Lexical editors (shared stack)
@@ -798,8 +831,8 @@ export function ArmorEditor({
   }, [open, handleUndo, handleRedo]);
 
   const handleRandomize = useCallback(() => {
-    pushAndUpdate((prev) => ({ ...prev, config: randomConfig() }));
-  }, [pushAndUpdate]);
+    pushAndUpdate((prev) => ({ ...prev, config: randomConfig(baseColors) }));
+  }, [pushAndUpdate, baseColors]);
 
   const update = useCallback(
     (partial: Partial<ArmorEditorConfig>) => {
@@ -883,7 +916,10 @@ export function ArmorEditor({
     [charges.length, pushAndUpdate, updateActiveCharge],
   );
 
-  const previewSvg = useMemo(() => renderShieldSvg(config), [config]);
+  const previewSvg = useMemo(
+    () => renderShieldSvg(config, rimMetal),
+    [config, rimMetal],
+  );
 
   const handleSave = useCallback(() => {
     const chargesList = getCharges(config);

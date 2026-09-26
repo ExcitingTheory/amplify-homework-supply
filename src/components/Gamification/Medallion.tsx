@@ -16,7 +16,11 @@ import Box, { type BoxProps } from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { SEMANTIC_THEME } from "@/themes/semanticTheme";
-import type { MetalRamp, HeraldicDivision } from "@/themes/heraldry";
+import {
+  emblemGlowFilter,
+  type MetalRamp,
+  type HeraldicDivision,
+} from "@/themes/heraldry";
 import { SHAPE_PATHS } from "./BadgeIcon";
 
 const MotionBox = motion.create(Box) as React.FC<
@@ -77,6 +81,10 @@ export function Medallion({
   const clipId = `med-clip-${uid}`;
 
   const divColor = divisionColor ?? rimMetal.mid;
+
+  // The centered charge can visually sit over either color, so guard against
+  // both — a dark charge ink over either one is protected by the same glow.
+  const chargeGlow = emblemGlowFilter(rimMetal.light, fieldColor, divColor);
 
   const hover = motionOff
     ? undefined
@@ -169,6 +177,7 @@ export function Medallion({
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
+            filter: chargeGlow,
           }}
         >
           {charge}

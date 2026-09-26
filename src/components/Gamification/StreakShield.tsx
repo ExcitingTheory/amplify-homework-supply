@@ -10,8 +10,9 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
+import { useTheme } from "@mui/material/styles";
 import { Medallion } from "./Medallion";
-import { HERALDRY, metalForTier } from "@/themes/heraldry";
+import { getTinctures, getMetals, metalForTier } from "@/themes/heraldry";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export interface StreakShieldProps {
@@ -32,6 +33,7 @@ export function StreakShield({
   showEmpty = false,
 }: StreakShieldProps) {
   const reducedMotion = useReducedMotion();
+  const theme = useTheme();
   if (freezesRemaining <= 0 && freezesUsed <= 0 && !showEmpty) return null;
 
   const isSmall = size === "small";
@@ -39,10 +41,11 @@ export function StreakShield({
   const active = freezesRemaining > 0;
 
   // Active shields read as azure with a progression rim; depleted reads sable/bronze.
-  const field = active ? HERALDRY.tinctures.azure : HERALDRY.tinctures.sable;
+  const tinctures = getTinctures(theme);
+  const field = active ? tinctures.azure : tinctures.sable;
   const metal = active
-    ? metalForTier(freezesRemaining * 2500)
-    : HERALDRY.metals.bronze;
+    ? metalForTier(freezesRemaining * 2500, theme)
+    : getMetals(theme).bronze;
 
   const charge = (
     <Typography

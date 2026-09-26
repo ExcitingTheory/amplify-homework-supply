@@ -169,7 +169,7 @@ describe('AnswerComponent', () => {
 
     it('renders input method chip', () => {
       renderAnswerComponent({ saveGrade });
-      expect(screen.getByText('Text')).toBeDefined();
+      expect(screen.getByRole('button', { name: 'Text' })).toBeDefined();
     });
 
     it('renders progress bar at 0 initially', () => {
@@ -183,8 +183,9 @@ describe('AnswerComponent', () => {
   describe('Dictionary display', () => {
     it('renders word phrases in requestDefinition mode', () => {
       renderAnswerComponent({ saveGrade, requestDefinition: true });
-      expect(screen.getByText('こんにちは')).toBeDefined();
-      expect(screen.getByText('ありがとう')).toBeDefined();
+      // Phrase renders twice (heading + prompt), so use getAllByText
+      expect(screen.getAllByText('こんにちは').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('ありがとう').length).toBeGreaterThan(0);
     });
 
     it('shows error when dictionary is not available', () => {

@@ -57,7 +57,14 @@ import { StreakShield } from "../../src/components/Gamification/StreakShield";
 import { Box, Card, Typography } from "@mui/material";
 
 // Mock helpers
-import { seedIndexPageData } from "../../.storybook/__mocks__/index-page-examples";
+import {
+  mockSections,
+  seedIndexPageData,
+} from "../../.storybook/__mocks__/index-page-examples";
+import {
+  seedMockAnalyticsSummary,
+  seedMockSections,
+} from "../../.storybook/__mocks__/aws-amplify-data";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
 import { FilesProvider } from "../../src/context/fileContext";
 import { withAppShell } from "./withAppShell";
@@ -435,9 +442,79 @@ export const Notifications: Story = {
 // Admin: Analytics
 // ---------------------------------------------------------------------------
 
+/**
+ * Builds a run of daily AnalyticsSummary records matching the real
+ * `amplify/data/resource.ts` schema shape (see docs/ANALYTICS_IMPLEMENTATION.md).
+ */
+function buildMockAnalyticsSummaries(days: number, sectionId?: string) {
+  const scope = sectionId ? "section" : "platform";
+  const scopeId = sectionId || "all";
+  const now = new Date();
+  const summaries = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const date = d.toISOString().split("T")[0];
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const activity = isWeekend ? 0.55 : 1;
+    const dailyActiveUsers = Math.round((40 + (i % 7) * 6) * activity);
+    const totalSessions = Math.round(dailyActiveUsers * 1.8);
+    const gradesSubmitted = Math.round((18 + (i % 5) * 4) * activity);
+    const workbooksStarted = Math.round((10 + (i % 4) * 3) * activity);
+
+    summaries.push({
+      id: `${scope}#${scopeId}#${date}`,
+      date,
+      scope,
+      scopeId,
+      ...(sectionId ? { sectionId } : {}),
+      dailyActiveUsers,
+      totalPageViews: dailyActiveUsers * 12,
+      totalSessions,
+      avgSessionDurationMs: 6 * 60 * 1000 + (i % 5) * 45_000,
+      totalEngagedTimeMs: totalSessions * 3 * 60 * 1000,
+      avgEngagedTimeMs: 3 * 60 * 1000 + (i % 3) * 20_000,
+      gradesSubmitted,
+      avgAccuracy: 78 + (i % 10),
+      workbooksStarted,
+      workbooksCompleted: Math.round(workbooksStarted * 0.72),
+      studentChatMessagesSent: Math.round(gradesSubmitted * 1.4),
+      instructorChatMessagesSent: Math.round(gradesSubmitted * 0.2),
+      documentsAnalyzed: Math.round((i % 4) + (isWeekend ? 0 : 2)),
+      topPages: [
+        { path: "/units", views: dailyActiveUsers * 4 },
+        { path: "/dashboard", views: dailyActiveUsers * 3 },
+      ],
+    });
+  }
+
+  // Deliberate outlier 3 days ago (platform scope only) to demo anomaly detection
+  if (!sectionId) {
+    const outlier = summaries[summaries.length - 4];
+    if (outlier) {
+      outlier.dailyActiveUsers = Math.round(outlier.dailyActiveUsers * 0.25);
+      outlier.totalSessions = Math.round(outlier.totalSessions * 0.25);
+    }
+  }
+  return summaries;
+}
+
 export const AdminAnalytics: Story = {
   decorators: [withAppShell],
-  render: () => <AnalyticsClient initialSections={[]} />,
+  render: () => {
+    seedMockSections([
+      mockSections["section-jpn-101"],
+      mockSections["section-jpn-102"],
+    ]);
+    seedMockAnalyticsSummary(buildMockAnalyticsSummaries(95));
+    seedMockAnalyticsSummary(
+      buildMockAnalyticsSummaries(95, "section-jpn-101"),
+    );
+    seedMockAnalyticsSummary(
+      buildMockAnalyticsSummaries(95, "section-jpn-102"),
+    );
+    return <AnalyticsClient initialSections={[]} />;
+  },
   parameters: {
     mockAuth: {
       user: { attributes: { sub: "admin-1", email: "admin@example.com" } },

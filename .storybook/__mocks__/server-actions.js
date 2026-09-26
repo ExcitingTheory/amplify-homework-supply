@@ -45,6 +45,16 @@ export async function listSectionStudents(code) {
         email: "dave@example.com",
         name: "Dave Wilson",
       },
+      {
+        id: "student-eve-sub",
+        email: "eve@example.com",
+        name: "Eve Martinez",
+      },
+      {
+        id: "student-frank-sub",
+        email: "frank@example.com",
+        name: "Frank Nguyen",
+      },
     ],
   };
 }
