@@ -1,7 +1,6 @@
 /**
  * Educational format extraction: SCORM, IMS Common Cartridge, QTI
  */
-/// <reference path="./html-to-text.d.ts" />
 import type { FormatExtractionResult } from "./formatRegistry.js";
 import { getS3Object } from "./textExtraction.js";
 import { convert } from "html-to-text";
