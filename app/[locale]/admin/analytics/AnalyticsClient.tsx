@@ -264,7 +264,8 @@ function AnalyticsDashboard({
   const trendSeries = React.useMemo(() => {
     const toPoints = (
       extract: (s: AnalyticsSummaryRecord) => number,
-    ): TrendPoint[] => summaries.map((s) => ({ date: s.date, value: extract(s) }));
+    ): TrendPoint[] =>
+      summaries.map((s) => ({ date: s.date, value: extract(s) }));
     return {
       dailyActiveUsers: toPoints((s) => s.dailyActiveUsers || 0),
       totalSessions: toPoints((s) => s.totalSessions || 0),

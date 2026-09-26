@@ -1229,7 +1229,8 @@ export const seedMockAnalyticsSummary = (summariesArray) => {
     `[Mock Data] seedMockAnalyticsSummary: Adding ${summariesArray.length} analytics summaries`,
   );
   summariesArray.forEach((summary) => {
-    const id = summary.id || `${summary.scope}#${summary.scopeId}#${summary.date}`;
+    const id =
+      summary.id || `${summary.scope}#${summary.scopeId}#${summary.date}`;
     dataStores.AnalyticsSummary.set(id, { id, ...summary });
   });
   console.log(
