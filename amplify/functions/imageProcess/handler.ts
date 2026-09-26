@@ -269,7 +269,7 @@ async function processPdfThumbnail(
     const { pdf } = await import("pdf-to-img");
 
     // Get first page as PNG buffer
-    const pages = pdf(sourceBuffer, { scale: 2 });
+    const pages = await pdf(sourceBuffer, { scale: 2 });
     let firstPageBuffer: Buffer | null = null;
 
     for await (const page of pages) {

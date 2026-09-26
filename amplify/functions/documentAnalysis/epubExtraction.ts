@@ -1,3 +1,4 @@
+/// <reference path="./html-to-text.d.ts" />
 /**
  * EPUB extraction — reads EPUB (ZIP-based) ebook files
  * Follows reading order from spine, extracts chapter text

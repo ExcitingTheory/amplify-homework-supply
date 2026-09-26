@@ -282,7 +282,7 @@ function convertToPdf(inputPath: string): string {
  */
 async function pdfPageToWebp(pdfBuffer: Buffer): Promise<Buffer> {
   const { pdf } = await import("pdf-to-img");
-  const pages = pdf(pdfBuffer, { scale: 2 });
+  const pages = await pdf(pdfBuffer, { scale: 2 });
 
   let firstPageBuffer: Buffer | null = null;
   for await (const page of pages) {
