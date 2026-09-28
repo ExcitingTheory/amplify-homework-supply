@@ -68,13 +68,15 @@ export class CfKeyRotationConstruct extends Construct {
   /** The public key PEM as a CDK token (resolved at deploy time from custom resource output) */
   public readonly publicKeyPem: string;
 
-  constructor(scope: Construct, id: string, props: CfKeyRotationConstructProps = {}) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: CfKeyRotationConstructProps = {},
+  ) {
     super(scope, id);
 
-    const {
-      ssmPrefix = "/homework-supply/cloudfront",
-      forceRotate = false,
-    } = props;
+    const { ssmPrefix = "/homework-supply/cloudfront", forceRotate = false } =
+      props;
 
     this.publicKeyParamName = `${ssmPrefix}/public-key`;
     this.privateKeyParamName = `${ssmPrefix}/private-key`;
@@ -97,11 +99,19 @@ export class CfKeyRotationConstruct extends Construct {
         actions: ["ssm:PutParameter", "ssm:GetParameter"],
         resources: [
           cdk.Arn.format(
-            { service: "ssm", resource: "parameter", resourceName: this.publicKeyParamName.replace(/^\//, "") },
+            {
+              service: "ssm",
+              resource: "parameter",
+              resourceName: this.publicKeyParamName.replace(/^\//, ""),
+            },
             cdk.Stack.of(this),
           ),
           cdk.Arn.format(
-            { service: "ssm", resource: "parameter", resourceName: this.privateKeyParamName.replace(/^\//, "") },
+            {
+              service: "ssm",
+              resource: "parameter",
+              resourceName: this.privateKeyParamName.replace(/^\//, ""),
+            },
             cdk.Stack.of(this),
           ),
         ],
@@ -131,12 +141,16 @@ export class CfKeyRotationConstruct extends Construct {
       handler: "handler",
       role,
       timeout: cdk.Duration.minutes(1),
-      description: "CloudFormation CR — generates CloudFront RSA key pair and writes to SSM",
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      description:
+        "CloudFormation CR — generates CloudFront RSA key pair and writes to SSM",
+      logGroup: new logs.LogGroup(this, "HandlerLogGroup", {
+        retention: logs.RetentionDays.ONE_WEEK,
+      }),
       bundling: {
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],
-        banner: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
+        banner:
+          "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
       },
     });
 
@@ -145,7 +159,9 @@ export class CfKeyRotationConstruct extends Construct {
     // -----------------------------------------------------------------------
     const provider = new cr.Provider(this, "Provider", {
       onEventHandler: this.providerFn,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logGroup: new logs.LogGroup(this, "ProviderLogGroup", {
+        retention: logs.RetentionDays.ONE_WEEK,
+      }),
     });
 
     const customResource = new cdk.CustomResource(this, "Resource", {

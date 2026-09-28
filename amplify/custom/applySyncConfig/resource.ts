@@ -76,7 +76,9 @@ export class ApplySyncConfigConstruct extends Construct {
       timeout: cdk.Duration.minutes(10),
       description:
         "Applies AppSync syncConfig to DynamoDB resolvers with rate limiting",
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logGroup: new logs.LogGroup(this, "HandlerLogGroup", {
+        retention: logs.RetentionDays.ONE_WEEK,
+      }),
       bundling: {
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],
@@ -87,7 +89,9 @@ export class ApplySyncConfigConstruct extends Construct {
 
     const provider = new cr.Provider(this, "Provider", {
       onEventHandler: fn,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logGroup: new logs.LogGroup(this, "ProviderLogGroup", {
+        retention: logs.RetentionDays.ONE_WEEK,
+      }),
     });
 
     new cdk.CustomResource(this, "Resource", {
