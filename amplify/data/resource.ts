@@ -2914,6 +2914,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -2930,6 +2931,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -2946,6 +2948,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -2958,6 +2961,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -2974,6 +2978,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -2990,6 +2995,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3002,6 +3008,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3014,6 +3021,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3026,6 +3034,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3041,6 +3050,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3056,6 +3066,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3069,6 +3080,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3082,6 +3094,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3095,6 +3108,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3108,6 +3122,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("File"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3120,6 +3135,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3132,6 +3148,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("File"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(openaiHandler)),
@@ -3148,6 +3165,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(generatePracticeDrillHandler)),
@@ -3159,6 +3177,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("AnalyzeDocumentResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(documentAnalysisHandler)),
@@ -3170,6 +3189,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("CancelDocumentAnalysisResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(documentAnalysisHandler)),
@@ -3182,6 +3202,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("ApproveMediaResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(documentAnalysisHandler)),
@@ -3194,6 +3215,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("GenerateEmbeddingsResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(embeddingsHandler)),
@@ -3207,6 +3229,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("EmbeddingResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(embeddingsHandler)),
@@ -3223,6 +3246,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("ModerationResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(moderationHandler)),
@@ -3236,6 +3260,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("ModerationResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(moderationHandler)),
@@ -3249,6 +3274,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("ModerationResult"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(moderationHandler)),
@@ -3262,6 +3288,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3273,6 +3300,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3287,6 +3315,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
@@ -3301,6 +3330,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
@@ -3315,6 +3345,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3326,6 +3357,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3338,6 +3370,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.ref("StudentInfo").array())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3354,6 +3387,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
@@ -3367,6 +3401,7 @@ const rawSchemaDefinition = {
     .query()
     .returns(a.ref("CdnCookies"))
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(sectionHandler)),
@@ -3381,6 +3416,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
@@ -3393,6 +3429,7 @@ const rawSchemaDefinition = {
     .mutation()
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.group("Admins") */
     ])
     .handler(a.handler.function(rebuildNgramIndexHandler)),
@@ -3410,6 +3447,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3421,6 +3459,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3432,6 +3471,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3443,6 +3483,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3454,6 +3495,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3467,6 +3509,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3478,6 +3521,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3496,6 +3540,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3507,6 +3552,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3520,6 +3566,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3532,6 +3579,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3545,6 +3593,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3557,6 +3606,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3569,6 +3619,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3582,6 +3633,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3594,6 +3646,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3607,6 +3660,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3620,6 +3674,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3632,6 +3687,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(gamificationHandler)),
@@ -3646,6 +3702,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(peerReviewAIHandler)),
@@ -3658,6 +3715,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(peerReviewAIHandler)),
@@ -3670,6 +3728,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(imageProcessHandler)),
@@ -3682,6 +3741,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(documentThumbnailHandler)),
@@ -3698,6 +3758,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(recycleBinHandler)),
@@ -3710,6 +3771,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(recycleBinHandler)),
@@ -3722,6 +3784,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.authenticated() */
     ])
     .handler(a.handler.function(recycleBinHandler)),
@@ -3733,6 +3796,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.group("Admins") */
     ])
     .handler(a.handler.function(recycleBinHandler)),
@@ -3746,6 +3810,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.group("Admins") */
     ])
     .handler(a.handler.function(recycleBinHandler)),
@@ -3757,6 +3822,7 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
+      allow.publicApiKey(),
       /* COGNITO_AUTH_DISABLED: allow.group("Admins") */
     ])
     .handler(a.handler.function(recycleBinHandler)),
