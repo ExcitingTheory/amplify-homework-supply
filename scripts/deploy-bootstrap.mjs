@@ -35,6 +35,7 @@
  * resolvers/functions/data source/API directly via the SDK, and retries.
  */
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -378,6 +379,23 @@ function runDeployOnce(deployArgs, env) {
   });
 }
 
+// `ampx pipeline-deploy`/`sandbox --once` write amplify_outputs.json to the
+// process cwd (no --outputs-out-dir override is passed here), *after* the
+// CloudFormation deploy completes. That client-config generation step can
+// fail on its own (e.g. AppSync throttling right after a large deploy) and
+// throw uncaught, which is exactly the non-zero exit runDeployOnce reports
+// above — but by then the CFN stack itself is already healthy, so the
+// retry loop below must not treat "stack healthy" alone as phase success.
+const outputsPath = path.join(process.cwd(), "amplify_outputs.json");
+
+function outputsWereWritten(sinceMs) {
+  try {
+    return fs.statSync(outputsPath).mtimeMs >= sinceMs;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Runs one deploy phase, then verifies actual CloudFormation stack health
  * directly — `ampx sandbox --once` has been observed to exit 0 even when
@@ -395,6 +413,7 @@ async function deployPhaseWithRetry(
     console.log(
       `[deploy-bootstrap] ${label} (attempt ${attempt}/${MAX_PHASE_ATTEMPTS})...`,
     );
+    const attemptStartedMs = Date.now();
     try {
       await runDeployOnce(deployArgs, env);
     } catch (err) {
@@ -410,6 +429,12 @@ async function deployPhaseWithRetry(
       );
     }
     if (HEALTHY_STACK_STATUSES.has(stack.status)) {
+      if (!outputsWereWritten(attemptStartedMs)) {
+        console.warn(
+          `[deploy-bootstrap] ${label}: stack is healthy but amplify_outputs.json was not (re)written at ${outputsPath} — client-config generation likely failed after the CFN deploy. Retrying.`,
+        );
+        continue;
+      }
       return;
     }
     if (IN_PROGRESS_STACK_STATUSES.has(stack.status)) {
@@ -427,7 +452,7 @@ async function deployPhaseWithRetry(
     }
   }
   throw new Error(
-    `${label} did not reach a healthy state after ${MAX_PHASE_ATTEMPTS} attempts.`,
+    `${label} did not reach a healthy state with a freshly written amplify_outputs.json after ${MAX_PHASE_ATTEMPTS} attempts.`,
   );
 }
 
