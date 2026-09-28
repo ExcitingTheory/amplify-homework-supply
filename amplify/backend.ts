@@ -186,7 +186,7 @@ for (let i = RESOLVER_WAVE_SIZE; i < appSyncControlPlaneResources.length; i++) {
     modelComponents.get(current.modelName) !==
     modelComponents.get(prior.modelName)
   ) {
-    current.resource.addDependency(prior.resource);
+    current.resource.addResourceDependency(prior.resource);
   }
 }
 
@@ -223,7 +223,7 @@ for (const { resource } of appSyncControlPlaneResources) {
 for (const group of intraStackGroups.values()) {
   group.sort((a, b) => a.node.path.localeCompare(b.node.path));
   for (let i = INTRA_STACK_WAVE_SIZE; i < group.length; i++) {
-    group[i].addDependency(group[i - INTRA_STACK_WAVE_SIZE]);
+    group[i].addResourceDependency(group[i - INTRA_STACK_WAVE_SIZE]);
   }
 }
 
@@ -254,7 +254,7 @@ if (noneDataSource) {
       .filter((s): s is cdk.NestedStack => s !== null),
   );
   for (const stack of stacksOwningAppSyncFunctions) {
-    stack.nestedStackResource?.addDependency(noneDataSource);
+    stack.nestedStackResource?.addResourceDependency(noneDataSource);
   }
 }
 
