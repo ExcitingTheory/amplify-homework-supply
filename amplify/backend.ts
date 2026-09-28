@@ -1286,8 +1286,11 @@ backend.notificationCronHandler.resources.lambda.role?.attachInlinePolicy(
 // ==========================================================================
 
 // Kinesis stream for buffered analytics events and Web Vitals
+// No explicit streamName — stream names are unique per AWS account+region, so a
+// hardcoded name collides between the personal sandbox stack and the branch/
+// pipeline stack. CDK auto-generates a unique name; consumers read the actual
+// name from the AnalyticsStream custom output below (amplify_outputs.json).
 const analyticsStream = new Stream(dataStack, "AnalyticsStream", {
-  streamName: "homework-supply-analytics",
   shardCount: 1,
   encryption: StreamEncryption.MANAGED,
   retentionPeriod: cdk.Duration.days(7),

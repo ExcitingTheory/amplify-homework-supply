@@ -14,10 +14,17 @@ import {
   type PutRecordsRequestEntry,
 } from "@aws-sdk/client-kinesis";
 import { validateAuth } from "../_shared/auth";
+import outputs from "../../../amplify_outputs.json";
 
+// CDK auto-generates the stream's physical name (see amplify/backend.ts) to
+// avoid cross-stack name collisions, so the real name only exists in the
+// deployed custom output. ANALYTICS_STREAM_NAME remains a manual override.
 const STREAM_NAME =
-  process.env.ANALYTICS_STREAM_NAME || "homework-supply-analytics";
-const REGION = process.env.AWS_REGION || "us-east-1";
+  process.env.ANALYTICS_STREAM_NAME || outputs.custom?.AnalyticsStream?.name;
+const REGION =
+  process.env.AWS_REGION ||
+  outputs.custom?.AnalyticsStream?.region ||
+  "us-east-1";
 
 let kinesisClient: KinesisClient | null = null;
 
