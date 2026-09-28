@@ -968,6 +968,7 @@ const rawSchemaDefinition = {
       deletedBy: a.string(),
     })
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.owner(),
       // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
       // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
@@ -1565,6 +1566,7 @@ const rawSchemaDefinition = {
       ]),
     })
     .authorization((allow) => [
+      allow.publicApiKey(),
       // COGNITO_AUTH_DISABLED: allow.owner(),
       // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
