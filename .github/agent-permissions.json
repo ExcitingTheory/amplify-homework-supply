@@ -150,27 +150,22 @@
             "aws cloudformation describe-stacks",
             "aws cloudformation describe-stack-events",
             "aws cloudformation describe-stack-resources",
-            "aws cloudformation wait stack-delete-complete --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498",
-            "aws cloudformation delete-stack --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498",
-            "aws cloudformation delete-stack --stack-name amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498-data7552DF31-13XNAY5FW87Q1",
             "aws appsync list-graphql-apis",
             "aws appsync list-functions",
             "aws appsync list-resolvers",
-            "aws appsync get-graphql-api",
-            "aws appsync delete-function",
-            "aws appsync delete-resolver",
-            "aws appsync delete-data-source",
-            "aws appsync delete-graphql-api"
+            "aws appsync get-graphql-api"
           ],
           "blocked": [
             "cancel-",
             "continue-update-rollback",
             "create-",
+            "delete-",
             "deploy",
             "put-",
             "remove-",
             "set-",
-            "update-"
+            "update-",
+            "wait"
           ],
           "description": "Allow read-only AWS inspection commands for deploy diagnostics"
         },
