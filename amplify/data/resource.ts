@@ -633,11 +633,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       number: a.float(),
       name: a.string(),
@@ -742,11 +744,13 @@ const rawSchemaDefinition = {
       writableGroups: a.string().array(),
       // Tracking
       learner: a.string(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
     })
     .authorization((allow) => [
       // Student owns their assignment
@@ -765,11 +769,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       // Completion tracking
       percentComplete: a.float(),
       accuracy: a.float(),
@@ -862,11 +868,13 @@ const rawSchemaDefinition = {
       backgroundColor: a.string(),
       embedding: EmbeddingInfo,
       learner: a.string(), // For student access
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       // Gradebook curve settings — per-assignment
       curveSettings: a.ref("CurveSettings").array(),
@@ -921,11 +929,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       // Question content
       prompt: a.string(),
@@ -996,12 +1006,14 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership - auto-populated by Cognito, controls Data model access
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Instructors").to(["create", "read"]),
-        allow.group("Learners").to(["read"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Instructors").to(["create", "read"]),
+          allow.group("Learners").to(["read"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+        ]),
       identityId: a
         .string()
         .required()
@@ -1075,11 +1087,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       // Content
       phrase: a.string(),
@@ -1121,11 +1135,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       unitID: a
         .id()
         .required()
@@ -1156,11 +1172,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       unitID: a
         .id()
         .required()
@@ -1191,11 +1209,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       questionID: a
         .id()
         .required()
@@ -1226,11 +1246,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       unitID: a
         .id()
         .required()
@@ -1261,11 +1283,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       questionID: a
         .id()
         .required()
@@ -1296,11 +1320,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       wordID: a
         .id()
         .required()
@@ -1331,11 +1357,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       questionID: a
         .id()
         .required()
@@ -1366,11 +1394,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       documentID: a
         .id()
         .required()
@@ -1401,11 +1431,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       documentID: a
         .id()
         .required()
@@ -1436,11 +1468,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       chatID: a
         .id()
         .required()
@@ -1514,11 +1548,13 @@ const rawSchemaDefinition = {
       // Metadata
       grantedAt: a.datetime(),
       // Owner = the unit owner (for auth purposes)
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -1556,11 +1592,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership - auto-populated by Cognito, tracks document creator
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       learner: a.string(), // Alternate learner reference
       // Section context - for section-based authorization
@@ -1642,11 +1680,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       // Foreign keys
       documentID: a
@@ -1689,11 +1729,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       // Job tracking
       type: a
         .string()
@@ -1747,11 +1789,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       // Record type: "chat" (default) or "memory" (aggregated conversation memory)
       type: a.enum(["chat", "memory"]),
       // Scoping — which unit/section this chat or memory belongs to
@@ -1809,11 +1853,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       timingPatterns: a.ref("TimingPattern").array(),
       // Document analysis
@@ -1897,11 +1943,13 @@ const rawSchemaDefinition = {
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
       // Ownership
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       identityId: a.string(),
       // Content type
       contentType: AiContentType,
@@ -1935,11 +1983,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       gradeId: a
         .id()
         .required()
@@ -1986,29 +2036,37 @@ const rawSchemaDefinition = {
 
   HomeworkRoom: a
     .model({
-      _version: a.integer().authorization((allow) => [
-        allow.owner().to(["read"]),
-        allow.group("Admins").to(["read"]),
-        allow.group("Instructors").to(["read"]),
-        allow.groupDefinedIn("peerGroup").to(["read"]),
-      ]),
-      _lastChangedAt: a.timestamp().authorization((allow) => [
-        allow.owner().to(["read"]),
-        allow.group("Admins").to(["read"]),
-        allow.group("Instructors").to(["read"]),
-        allow.groupDefinedIn("peerGroup").to(["read"]),
-      ]),
-      _deleted: a.boolean().authorization((allow) => [
-        allow.owner().to(["read"]),
-        allow.group("Admins").to(["read"]),
-        allow.group("Instructors").to(["read"]),
-        allow.groupDefinedIn("peerGroup").to(["read"]),
-      ]),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      _version: a
+        .integer()
+        .authorization((allow) => [
+          allow.owner().to(["read"]),
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+          allow.groupDefinedIn("peerGroup").to(["read"]),
+        ]),
+      _lastChangedAt: a
+        .timestamp()
+        .authorization((allow) => [
+          allow.owner().to(["read"]),
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+          allow.groupDefinedIn("peerGroup").to(["read"]),
+        ]),
+      _deleted: a
+        .boolean()
+        .authorization((allow) => [
+          allow.owner().to(["read"]),
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+          allow.groupDefinedIn("peerGroup").to(["read"]),
+        ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       gradeId: a
         .id()
         .required()
@@ -2053,11 +2111,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       studentId: a
         .string()
         .required()
@@ -2115,11 +2175,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       studentId: a
         .string()
         .required()
@@ -2259,11 +2321,13 @@ const rawSchemaDefinition = {
       sageTotalTurnBudget: a.integer(),
       enforceTokenBudget: a.boolean(), // Whether to actively enforce totalTurnBudget (default: true)
       // === Ownership ===
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -2322,11 +2386,13 @@ const rawSchemaDefinition = {
       activeDaysCount: a.integer().default(0),
       // Module progress within this section
       moduleProgress: a.ref("ModuleProgressEntry").array(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       // Denormalized avatar config — synced from Settings.metadata on save & rebuild
       avatarStyle: a.string(),
       avatarOverrides: a.json(),
@@ -2347,11 +2413,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       studentId: a
         .string()
         .required()
@@ -2390,11 +2458,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
       triggerValue: a
         .string()
@@ -2440,11 +2510,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       title: a
         .string()
         .required()
@@ -2474,11 +2546,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       name: a
         .string()
         .required()
@@ -2519,11 +2593,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       sectionID: a
         .string()
         .required()
@@ -2588,11 +2664,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       title: a
         .string()
         .required()
@@ -2658,11 +2736,13 @@ const rawSchemaDefinition = {
       // Hydrated per-squad messages [{squadId, squadName, body}]
       resolvedMessages: a.json(),
       sentAt: a.datetime(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
@@ -2681,11 +2761,13 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a.string().authorization((allow) => [
-        allow.owner().to(["create", "read", "delete"]),
-        allow.group("Admins").to(["create", "read", "delete"]),
-        allow.authenticated().to(["read"]),
-      ]),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       unitID: a
         .string()
         .required()
@@ -2811,9 +2893,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyWord: a
@@ -2827,9 +2907,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyShortAnswer: a
@@ -2843,9 +2921,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   transcribe: a
@@ -2855,9 +2931,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyAudio: a
@@ -2871,9 +2945,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyAudioUrl: a
@@ -2887,9 +2959,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   transcribeUrl: a
@@ -2899,9 +2969,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   processImage: a
@@ -2911,9 +2979,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   processImageUrl: a
@@ -2923,9 +2989,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyImage: a
@@ -2938,9 +3002,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   verifyImageUrl: a
@@ -2953,9 +3015,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   summarizeFeedback: a
@@ -2966,9 +3026,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   // Chat & Content Mutations
@@ -2979,9 +3037,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   generateAudio: a
@@ -2992,9 +3048,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   generateAudioFile: a
@@ -3005,9 +3059,7 @@ const rawSchemaDefinition = {
       model: a.string().required(),
     })
     .returns(a.ref("File"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   generateImage: a
@@ -3017,9 +3069,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   generateImageFile: a
@@ -3029,9 +3079,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.ref("File"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(openaiHandler)),
 
   // Document Analysis Mutations
@@ -3045,9 +3093,7 @@ const rawSchemaDefinition = {
       sourcesEnabled: a.json().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(generatePracticeDrillHandler)),
 
   analyzeDocument: a
@@ -3056,9 +3102,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("AnalyzeDocumentResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   cancelDocumentAnalysis: a
@@ -3067,9 +3111,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("CancelDocumentAnalysisResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   approveMedia: a
@@ -3079,9 +3121,7 @@ const rawSchemaDefinition = {
       approvedIndices: a.integer().array().required(),
     })
     .returns(a.ref("ApproveMediaResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   // Embeddings Mutations
@@ -3091,9 +3131,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("GenerateEmbeddingsResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(embeddingsHandler)),
 
   generateEmbedding: a
@@ -3104,9 +3142,7 @@ const rawSchemaDefinition = {
       dimensions: a.integer(),
     })
     .returns(a.ref("EmbeddingResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(embeddingsHandler)),
 
   // Moderation Mutations
@@ -3120,9 +3156,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(moderationHandler)),
 
   moderateImage: a
@@ -3133,9 +3167,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(moderationHandler)),
 
   moderateAudio: a
@@ -3146,9 +3178,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(moderationHandler)),
 
   // Section Management Mutations
@@ -3159,9 +3189,7 @@ const rawSchemaDefinition = {
       description: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   addSelfToSection: a
@@ -3170,9 +3198,7 @@ const rawSchemaDefinition = {
       code: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   // Instructor-initiated bulk enrollment — resolves each email to a Cognito user,
@@ -3212,9 +3238,7 @@ const rawSchemaDefinition = {
       invitedUserIds: a.string().array(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   joinPeerReview: a
@@ -3223,9 +3247,7 @@ const rawSchemaDefinition = {
       code: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   // Section Management Queries
@@ -3235,9 +3257,7 @@ const rawSchemaDefinition = {
       sectionCode: a.string().required(),
     })
     .returns(a.ref("StudentInfo").array())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   // Returns a short-lived presigned/signed URL for a student's private submission file.
@@ -3264,9 +3284,7 @@ const rawSchemaDefinition = {
   getUnitsCdnCookie: a
     .query()
     .returns(a.ref("CdnCookies"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   // Phase 6 — Reads the unit draft from S3, rewrites media paths, and writes
@@ -3290,9 +3308,7 @@ const rawSchemaDefinition = {
   rebuildNgramIndex: a
     .mutation()
     .returns(a.json())
-    .authorization((allow) => [
-      allow.group("Admins"),
-    ])
+    .authorization((allow) => [allow.group("Admins")])
     .handler(a.handler.function(rebuildNgramIndexHandler)),
 
   // Gamification Mutations
@@ -3307,9 +3323,7 @@ const rawSchemaDefinition = {
       accuracy: a.float(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   checkBadges: a
@@ -3318,9 +3332,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   checkBadgesBatch: a
@@ -3329,9 +3341,7 @@ const rawSchemaDefinition = {
       entries: a.json().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   updateStreak: a
@@ -3340,9 +3350,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   rebuildLeaderboard: a
@@ -3351,9 +3359,7 @@ const rawSchemaDefinition = {
       sectionID: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   upsertStudentMemory: a
@@ -3364,9 +3370,7 @@ const rawSchemaDefinition = {
       source: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   bootstrapStudentMemory: a
@@ -3375,9 +3379,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   updateStudentUnitMemoryFromGrade: a
@@ -3393,9 +3395,7 @@ const rawSchemaDefinition = {
       sourceType: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   rebuildStudentMemoryProfile: a
@@ -3404,9 +3404,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   checkPersonalBest: a
@@ -3417,9 +3415,7 @@ const rawSchemaDefinition = {
       score: a.float().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   recomputeProgress: a
@@ -3429,9 +3425,7 @@ const rawSchemaDefinition = {
       moduleId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   checkEasterEggs: a
@@ -3442,9 +3436,7 @@ const rawSchemaDefinition = {
       triggerType: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   discoverEasterEgg: a
@@ -3454,9 +3446,7 @@ const rawSchemaDefinition = {
       eggId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   updateSquadXP: a
@@ -3466,9 +3456,7 @@ const rawSchemaDefinition = {
       xpAmount: a.integer().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   contributeToChallenge: a
@@ -3479,9 +3467,7 @@ const rawSchemaDefinition = {
       xpContributed: a.integer().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   generateSkillTree: a
@@ -3491,9 +3477,7 @@ const rawSchemaDefinition = {
       sectionID: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   advanceSkillProgress: a
@@ -3504,9 +3488,7 @@ const rawSchemaDefinition = {
       newStatus: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   evaluateSkillsForUnit: a
@@ -3517,9 +3499,7 @@ const rawSchemaDefinition = {
       sectionID: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   claimStorybookBadges: a
@@ -3529,9 +3509,7 @@ const rawSchemaDefinition = {
       completedPersonas: a.string().array().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(gamificationHandler)),
 
   // Peer Review AI Mutations
@@ -3543,9 +3521,7 @@ const rawSchemaDefinition = {
       chatHistory: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(peerReviewAIHandler)),
 
   generateReviewSummary: a
@@ -3555,9 +3531,7 @@ const rawSchemaDefinition = {
       chatLog: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(peerReviewAIHandler)),
 
   // Image Processing Mutations
@@ -3567,9 +3541,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(imageProcessHandler)),
 
   // Document Thumbnail Mutations
@@ -3579,9 +3551,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(documentThumbnailHandler)),
 
   // ========================================================================
@@ -3595,9 +3565,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(recycleBinHandler)),
 
   restoreRecord: a
@@ -3607,9 +3575,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(recycleBinHandler)),
 
   permanentDelete: a
@@ -3619,9 +3585,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(recycleBinHandler)),
 
   unarchiveRecord: a
@@ -3630,9 +3594,7 @@ const rawSchemaDefinition = {
       archiveKey: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.group("Admins"),
-    ])
+    .authorization((allow) => [allow.group("Admins")])
     .handler(a.handler.function(recycleBinHandler)),
 
   listArchives: a
@@ -3643,9 +3605,7 @@ const rawSchemaDefinition = {
       continuationToken: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.group("Admins"),
-    ])
+    .authorization((allow) => [allow.group("Admins")])
     .handler(a.handler.function(recycleBinHandler)),
 
   getArchive: a
@@ -3654,9 +3614,7 @@ const rawSchemaDefinition = {
       archiveKey: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [
-      allow.group("Admins"),
-    ])
+    .authorization((allow) => [allow.group("Admins")])
     .handler(a.handler.function(recycleBinHandler)),
 };
 
