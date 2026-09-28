@@ -94,6 +94,18 @@ export const backend = defineBackend({
 const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
 const apiId = backend.data.resources.cfnResources.cfnGraphqlApi.attrApiId;
 
+// Tag every resource in every stack of this app (Tags.of on the App root
+// cascades to all child stacks/constructs) so deployed AWS resources can be
+// traced back to the owning repo and, eventually, the business customer.
+const app = dataStack.node.root as cdk.App;
+cdk.Tags.of(app).add("repo", "ExcitingTheory/amplify-homework-supply");
+// Business customer identifier — storage location (env var vs config vs
+// something else) not yet decided. Once decided, source the value below
+// instead of process.env.CUSTOMER_ID.
+if (process.env.CUSTOMER_ID) {
+  cdk.Tags.of(app).add("customer-id", process.env.CUSTOMER_ID);
+}
+
 // Throttle concurrent nested-stack creation to avoid AppSync 429 rate limits,
 // without risking circular dependencies: only chain nested stacks whose
 // models fall in different relation-graph connected components (see
