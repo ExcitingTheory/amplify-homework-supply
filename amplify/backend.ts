@@ -7,7 +7,6 @@ import {
   LambdaIntegration,
   CfnMethod,
   AuthorizationType,
-  CognitoUserPoolsAuthorizer,
   Cors,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
@@ -18,7 +17,7 @@ import { CfnBucket } from "aws-cdk-lib/aws-s3";
 import { Stream, StreamEncryption } from "aws-cdk-lib/aws-kinesis";
 import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { StartingPosition } from "aws-cdk-lib/aws-lambda";
-import { auth } from "./auth/resource";
+// TEMPORARY: auth removed to force Cognito User Pool recreation (schema attribute change). Restore after redeploy.
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
 import { chatStreamHandler } from "./functions/chatStream/resource";
@@ -66,7 +65,6 @@ import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
  */
 
 export const backend = defineBackend({
-  auth,
   data,
   storage,
   chatStreamHandler,
@@ -271,57 +269,7 @@ const syncConfigCR = new ApplySyncConfigConstruct(
 );
 syncConfigCR.node.addDependency(backend.data.resources.graphqlApi);
 
-// Grant Cognito permissions to section handler via IAM policy (not via auth.access() to avoid circular dependency)
-const cognitoPolicy = new Policy(
-  backend.sectionHandler.resources.lambda.stack,
-  "SectionHandlerCognitoPolicy",
-  {
-    statements: [
-      new PolicyStatement({
-        actions: [
-          "cognito-idp:AdminAddUserToGroup",
-          "cognito-idp:AdminRemoveUserFromGroup",
-          "cognito-idp:AdminGetUser",
-          "cognito-idp:AdminListGroupsForUser",
-          "cognito-idp:ListUsersInGroup",
-          "cognito-idp:GetGroup",
-          "cognito-idp:ListGroups",
-          "cognito-idp:ListUsers",
-          "cognito-idp:CreateGroup",
-          "cognito-idp:DeleteGroup",
-        ],
-        resources: [backend.auth.resources.userPool.userPoolArn],
-      }),
-    ],
-  },
-);
-
-backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(cognitoPolicy);
-
-// Grant Cognito permissions to collaborator handler for instructor search
-const collaboratorCognitoPolicy = new Policy(
-  backend.collaboratorHandler.resources.lambda.stack,
-  "CollaboratorHandlerCognitoPolicy",
-  {
-    statements: [
-      new PolicyStatement({
-        actions: [
-          "cognito-idp:ListUsersInGroup",
-          "cognito-idp:AdminGetUser",
-          "cognito-idp:AdminListGroupsForUser",
-        ],
-        resources: [backend.auth.resources.userPool.userPoolArn],
-      }),
-    ],
-  },
-);
-backend.collaboratorHandler.resources.lambda.role?.attachInlinePolicy(
-  collaboratorCognitoPolicy,
-);
-backend.collaboratorHandler.addEnvironment(
-  "USER_POOL_ID",
-  backend.auth.resources.userPool.userPoolId,
-);
+// TEMPORARY: Cognito IAM grants removed with auth (userPool doesn't exist during this deploy). Restore after redeploy.
 
 // Grant section handler permission to call AppSync GraphQL API
 const sectionHandlerAppSyncPolicy = new Policy(
@@ -344,10 +292,7 @@ backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(
 );
 
 // Set environment variables for section handler
-backend.sectionHandler.addEnvironment(
-  "USER_POOL_ID",
-  backend.auth.resources.userPool.userPoolId,
-);
+// TEMPORARY: USER_POOL_ID env var removed with auth. Restore after redeploy.
 backend.sectionHandler.addEnvironment(
   "API_ENDPOINT",
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
@@ -999,15 +944,8 @@ const restApi = new RestApi(apiStack, "StreamRestApi", {
   },
 });
 
-// Cognito User Pool authorizer for REST API
-const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(
-  apiStack,
-  "StreamApiCognitoAuth",
-  {
-    cognitoUserPools: [backend.auth.resources.userPool],
-    identitySource: "method.request.header.Authorization",
-  },
-);
+// TEMPORARY: Cognito authorizer replaced with IAM while auth is removed (userPool doesn't exist during this deploy).
+// This locks the endpoints down (no anonymous access) rather than leaving them public. Restore Cognito auth after redeploy.
 
 // Lambda integrations (standard proxy — we'll override to streaming below)
 const chatStreamIntegration = new LambdaIntegration(
@@ -1028,8 +966,7 @@ const suggestBlocksIntegration = new LambdaIntegration(
 // Add resources and methods
 const chatResource = restApi.root.addResource("chat");
 const chatMethod = chatResource.addMethod("POST", chatStreamIntegration, {
-  authorizationType: AuthorizationType.COGNITO,
-  authorizer: cognitoAuthorizer,
+  authorizationType: AuthorizationType.IAM,
 });
 
 const contentCompletionResource =
@@ -1038,8 +975,7 @@ const contentCompletionMethod = contentCompletionResource.addMethod(
   "POST",
   contentCompletionIntegration,
   {
-    authorizationType: AuthorizationType.COGNITO,
-    authorizer: cognitoAuthorizer,
+    authorizationType: AuthorizationType.IAM,
   },
 );
 
@@ -1048,8 +984,7 @@ const suggestBlocksMethod = suggestBlocksResource.addMethod(
   "POST",
   suggestBlocksIntegration,
   {
-    authorizationType: AuthorizationType.COGNITO,
-    authorizer: cognitoAuthorizer,
+    authorizationType: AuthorizationType.IAM,
   },
 );
 

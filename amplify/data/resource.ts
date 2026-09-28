@@ -636,9 +636,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       number: a.float(),
@@ -686,13 +686,13 @@ const rawSchemaDefinition = {
     })
     .authorization((allow) => [
       // Owners (creators - typically Instructors) have full control
-      allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
       // Admins have full access
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Instructors can create new units
-      allow.group("Instructors").to(["create"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["create"]),
       // Learners can read all units (for published/assigned content)
-      allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
       // Note: readableGroups/writableGroups used for client-side filtering
       // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
@@ -722,17 +722,17 @@ const rawSchemaDefinition = {
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       section: a.belongsTo("Section", ["sectionID"]),
       unit: a.belongsTo("Unit", ["unitID"]),
@@ -747,19 +747,19 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
     })
     .authorization((allow) => [
       // Student owns their assignment
-      allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
       // Admins have full access
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Instructors and Learners have access based on section membership
-      allow.group("Instructors"),
-      allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
       // Note: readableGroups/writableGroups used for client-side filtering
       // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
@@ -772,9 +772,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Completion tracking
       percentComplete: a.float(),
@@ -805,9 +805,9 @@ const rawSchemaDefinition = {
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       sectionID: a.id(), // Section this grade is for (for section-based authorization)
@@ -825,9 +825,9 @@ const rawSchemaDefinition = {
     ])
     .authorization((allow) => [
       // Student owns their grade
-      allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
       // Admins have full access
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Dynamic group authorization: only instructors of the section can read/update
       // Single group with access to this grade
       allow.groupDefinedIn("instructorGroup").to(["read", "update"]),
@@ -871,9 +871,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       // Gradebook curve settings — per-assignment
@@ -910,11 +910,11 @@ const rawSchemaDefinition = {
       deletedBy: a.string(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.group("Learners").to(["read"]),
-      allow.authenticated().to(["read"]), // Allow authenticated users to find sections by code
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]), // Allow authenticated users to find sections by code
       // Note: readableGroups/writableGroups used for client-side filtering
       // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
@@ -932,9 +932,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       // Question content
@@ -971,9 +971,9 @@ const rawSchemaDefinition = {
       deletedBy: a.string(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Learners").to(["read"]),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   /**
@@ -1009,18 +1009,18 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Instructors").to(["create", "read"]),
-          allow.group("Learners").to(["read"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["create", "read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
         ]),
       identityId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]), // Cognito Identity ID for protected/{identityId}/* paths
       // File metadata
       name: a.string(),
@@ -1036,9 +1036,9 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]), // Full S3 path (e.g., "public/units/file-123.json"),
       size: a.integer(),
       duration: a.integer(),
@@ -1070,13 +1070,13 @@ const rawSchemaDefinition = {
     })
     .authorization((allow) => [
       // Owner has full control
-      allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
       // Instructors can create and manage files
-      allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // Learners can read files (for embedded content, shared resources)
-      allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
       // Admins have full access
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Note: Lambda function access (openai, documentAnalysis, embeddings, mediaConvert)
       // is granted via schema-level .authorization() - see bottom of schema definition
     ]),
@@ -1090,9 +1090,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       // Content
@@ -1121,9 +1121,9 @@ const rawSchemaDefinition = {
       deletedBy: a.string(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Learners").to(["read"]),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   // ========================================================================
@@ -1138,33 +1138,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       fileID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       file: a.belongsTo("File", ["fileID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   UnitWord: a
@@ -1175,33 +1175,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       wordID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   QuestionUnit: a
@@ -1212,33 +1212,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       questionID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
       unitID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   UnitDocument: a
@@ -1249,33 +1249,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       documentID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       document: a.belongsTo("Document", ["documentID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   QuestionFile: a
@@ -1286,33 +1286,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       questionID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
       fileID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       file: a.belongsTo("File", ["fileID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   WordFile: a
@@ -1323,33 +1323,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       wordID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
       fileID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       file: a.belongsTo("File", ["fileID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   QuestionWord: a
@@ -1360,33 +1360,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       questionID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
       wordID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   DocumentWord: a
@@ -1397,33 +1397,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       documentID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       document: a.belongsTo("Document", ["documentID"]),
       wordID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   DocumentQuestion: a
@@ -1434,33 +1434,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       documentID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       document: a.belongsTo("Document", ["documentID"]),
       questionID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   AssistantChatFile: a
@@ -1471,33 +1471,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       chatID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       chat: a.belongsTo("AssistantChat", ["chatID"]),
       fileID: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       file: a.belongsTo("File", ["fileID"]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   // ========================================================================
@@ -1520,9 +1520,9 @@ const rawSchemaDefinition = {
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unit: a.belongsTo("Unit", ["unitID"]),
       // The instructor being granted access
@@ -1530,18 +1530,18 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Who granted the access
       grantedBy: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Permission level
       permission: CollaboratorPermission,
@@ -1551,15 +1551,15 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // ========================================================================
@@ -1595,9 +1595,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       learner: a.string(), // Alternate learner reference
@@ -1614,25 +1614,25 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       s3Key: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       status: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
       // Content (full text stored in S3: private/{identityId}/documents/{id}/extracted-text.txt)
       textExtractedAt: a.timestamp(), // Signals text is available in S3
@@ -1661,13 +1661,13 @@ const rawSchemaDefinition = {
     })
     .authorization((allow) => [
       // Document owner (student) can manage their documents
-      allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
       // Admins have full access
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Instructors can create and manage documents
-      allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
       // Learners can read documents (section-based access controlled by Lambda/client-side)
-      allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
       // Note: Lambda function access (documentAnalysis, embeddings)
       // is granted via schema-level .authorization() - see bottom of schema definition
       // Note: readableGroups/writableGroups used for client-side filtering
@@ -1683,9 +1683,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       // Foreign keys
@@ -1693,9 +1693,9 @@ const rawSchemaDefinition = {
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       document: a.belongsTo("Document", ["documentID"]),
       fileID: a.id(),
@@ -1717,9 +1717,9 @@ const rawSchemaDefinition = {
       importedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Learners").to(["read"]),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
       // Note: Lambda function access (documentAnalysis, embeddings)
       // is granted via schema-level .authorization() - see bottom of schema definition
     ]),
@@ -1732,26 +1732,26 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Job tracking
       type: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]), // pdf_analysis, exercise_generation, vocabulary_extraction
       status: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]), // queued, processing, completed, failed, cancelled
       // Foreign keys
       documentID: a.id(),
@@ -1773,10 +1773,10 @@ const rawSchemaDefinition = {
       identityId: a.string(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Learners").to(["read"]),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Learners").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated(),
     ]),
 
   // ========================================================================
@@ -1792,9 +1792,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Record type: "chat" (default) or "memory" (aggregated conversation memory)
       type: a.enum(["chat", "memory"]),
@@ -1839,8 +1839,8 @@ const rawSchemaDefinition = {
       index("unitID").sortKeys(["type"]).name("byUnit"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   // ========================================================================
@@ -1856,9 +1856,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       timingPatterns: a.ref("TimingPattern").array(),
@@ -1891,9 +1891,9 @@ const rawSchemaDefinition = {
       metadata: a.json(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated(),
     ]),
 
   Notification: a
@@ -1905,8 +1905,8 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.authenticated().to(["read"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
         ]),
       type: NotificationType,
       category: NotificationCategory,
@@ -1914,8 +1914,8 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.authenticated().to(["read"]),
-          allow.group("Admins").to(["create", "read"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read"]),
         ]),
       body: a.string(),
       linkPath: a.string(),
@@ -1933,8 +1933,8 @@ const rawSchemaDefinition = {
       index("type").name("byType"),
     ])
     .authorization((allow) => [
-      allow.ownerDefinedIn("recipientId"),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.ownerDefinedIn("recipientId"),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
     ]),
 
   AIFeedback: a
@@ -1946,9 +1946,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       identityId: a.string(),
       // Content type
@@ -1969,9 +1969,9 @@ const rawSchemaDefinition = {
       metadata: a.json(),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated(),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated(),
     ]),
 
   // ========================================================================
@@ -1986,41 +1986,41 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       gradeId: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       blockId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       threadId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       content: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       resolved: a.boolean(),
       replies: a.ref("CommentReply").array(),
@@ -2029,9 +2029,9 @@ const rawSchemaDefinition = {
       index("gradeId").sortKeys(["blockId"]).name("byGradeBlock"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
     ]),
 
   HomeworkRoom: a
@@ -2039,49 +2039,49 @@ const rawSchemaDefinition = {
       _version: a
         .integer()
         .authorization((allow) => [
-          allow.owner().to(["read"]),
-          allow.group("Admins").to(["read"]),
-          allow.group("Instructors").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
           allow.groupDefinedIn("peerGroup").to(["read"]),
         ]),
       _lastChangedAt: a
         .timestamp()
         .authorization((allow) => [
-          allow.owner().to(["read"]),
-          allow.group("Admins").to(["read"]),
-          allow.group("Instructors").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
           allow.groupDefinedIn("peerGroup").to(["read"]),
         ]),
       _deleted: a
         .boolean()
         .authorization((allow) => [
-          allow.owner().to(["read"]),
-          allow.group("Admins").to(["read"]),
-          allow.group("Instructors").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
           allow.groupDefinedIn("peerGroup").to(["read"]),
         ]),
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       gradeId: a
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       ownerId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       sectionID: a.id(), // Section this room belongs to (for same-section validation)
       status: a.enum(["OPEN", "IN_REVIEW", "REVIEW_COMPLETE"]),
@@ -2099,9 +2099,9 @@ const rawSchemaDefinition = {
       index("code").name("byCode"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
       // Invited peers can read the room
       allow.groupDefinedIn("peerGroup").to(["read"]),
     ]),
@@ -2114,25 +2114,25 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       studentId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       xpAmount: a
         .integer()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       accuracy: a.float(),
       reason: a.enum([
@@ -2164,9 +2164,9 @@ const rawSchemaDefinition = {
       index("sectionID").name("bySection"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // Aggregate student gamification profile (absorbs 7 models)
@@ -2178,17 +2178,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       studentId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       sectionID: a.string(),
       studentName: a.string(),
@@ -2242,9 +2242,9 @@ const rawSchemaDefinition = {
       index("sectionID").name("bySection"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // Global platform settings — admin-only singleton for all platform-wide configuration
@@ -2324,15 +2324,15 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
     })
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // Per-student, per-section progress — enables different XP/level/badges per section
@@ -2345,17 +2345,17 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       sectionId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       studentName: a.string(),
       // XP & Level (scoped to this section, computed using section's leveling curve)
@@ -2389,9 +2389,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Denormalized avatar config — synced from Settings.metadata on save & rebuild
       avatarStyle: a.string(),
@@ -2403,9 +2403,9 @@ const rawSchemaDefinition = {
       index("sectionId").name("bySection"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   StudentMemory: a
@@ -2416,17 +2416,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       studentId: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a.string(), // null = global memory, set = per-unit memory
       memoryMarkdown: a.string(),
@@ -2448,9 +2448,9 @@ const rawSchemaDefinition = {
       index("unitID").name("byUnit"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
     ]),
 
   EasterEgg: a
@@ -2461,35 +2461,35 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       trigger: a.enum(["KEYWORD", "SCHEDULE", "SECRET_LINK", "ACHIEVEMENT"]),
       triggerValue: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       xpReward: a
         .integer()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       badgeId: a.string(),
       revealMessage: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       active: a.boolean().default(true),
       sectionID: a.id(),
@@ -2499,10 +2499,10 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   Skill: a
@@ -2513,17 +2513,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       title: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       description: a.string(),
       prerequisites: a.json(),
@@ -2535,10 +2535,10 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   Squad: a
@@ -2549,25 +2549,25 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       name: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       sectionID: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       totalXP: a.integer().default(0),
       description: a.string(),
@@ -2583,9 +2583,9 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.authenticated().to(["read", "create", "update"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read", "create", "update"]),
     ]),
 
   GroupChallenge: a
@@ -2596,33 +2596,33 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       sectionID: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       title: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       targetXP: a
         .integer()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       currentXP: a.integer().default(0),
       deadline: a.datetime(),
@@ -2653,10 +2653,10 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   Badge: a
@@ -2667,17 +2667,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       title: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       description: a.string(),
       icon: a.string(),
@@ -2691,10 +2691,10 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // ========================================================================
@@ -2710,9 +2710,9 @@ const rawSchemaDefinition = {
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Target squads (one or many)
       recipientSquadIds: a
@@ -2720,18 +2720,18 @@ const rawSchemaDefinition = {
         .array()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Template with {{SQUAD_NAME}}, {{SQUAD_RIVAL}}, {{SQUAD_XP}} vars
       template: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       // Hydrated per-squad messages [{squadId, squadName, body}]
       resolvedMessages: a.json(),
@@ -2739,17 +2739,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors"),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // ========================================================================
@@ -2764,17 +2764,17 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       unitID: a
         .string()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          // COGNITO_AUTH_DISABLED: allow.owner().to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "delete"]),
+          // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
         ]),
       drillType: PracticeDrillType,
       data: a.json(), // Same format as Grade.data — keyed by generated block IDs
@@ -2804,10 +2804,10 @@ const rawSchemaDefinition = {
       index("roomCode").name("byRoomCode"),
     ])
     .authorization((allow) => [
-      allow.owner(),
-      allow.group("Admins").to(["read", "create", "update", "delete"]),
-      allow.group("Instructors").to(["read"]),
-      allow.authenticated().to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.owner(),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["read", "create", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.authenticated().to(["read"]),
     ]),
 
   // ========================================================================
@@ -2873,8 +2873,8 @@ const rawSchemaDefinition = {
       index("country").sortKeys(["date"]).name("byCountry"),
     ])
     .authorization((allow) => [
-      allow.group("Admins").to(["create", "read", "update", "delete"]),
-      allow.group("Instructors").to(["read"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins").to(["create", "read", "update", "delete"]),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors").to(["read"]),
     ]),
 
   // ========================================================================
@@ -2893,7 +2893,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyWord: a
@@ -2907,7 +2907,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyShortAnswer: a
@@ -2921,7 +2921,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   transcribe: a
@@ -2931,7 +2931,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyAudio: a
@@ -2945,7 +2945,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyAudioUrl: a
@@ -2959,7 +2959,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   transcribeUrl: a
@@ -2969,7 +2969,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   processImage: a
@@ -2979,7 +2979,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   processImageUrl: a
@@ -2989,7 +2989,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyImage: a
@@ -3002,7 +3002,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   verifyImageUrl: a
@@ -3015,7 +3015,7 @@ const rawSchemaDefinition = {
       contentContext: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   summarizeFeedback: a
@@ -3026,7 +3026,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   // Chat & Content Mutations
@@ -3037,7 +3037,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   generateAudio: a
@@ -3048,7 +3048,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   generateAudioFile: a
@@ -3059,7 +3059,7 @@ const rawSchemaDefinition = {
       model: a.string().required(),
     })
     .returns(a.ref("File"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   generateImage: a
@@ -3069,7 +3069,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   generateImageFile: a
@@ -3079,7 +3079,7 @@ const rawSchemaDefinition = {
       model: a.string(),
     })
     .returns(a.ref("File"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(openaiHandler)),
 
   // Document Analysis Mutations
@@ -3093,7 +3093,7 @@ const rawSchemaDefinition = {
       sourcesEnabled: a.json().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(generatePracticeDrillHandler)),
 
   analyzeDocument: a
@@ -3102,7 +3102,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("AnalyzeDocumentResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   cancelDocumentAnalysis: a
@@ -3111,7 +3111,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("CancelDocumentAnalysisResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   approveMedia: a
@@ -3121,7 +3121,7 @@ const rawSchemaDefinition = {
       approvedIndices: a.integer().array().required(),
     })
     .returns(a.ref("ApproveMediaResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(documentAnalysisHandler)),
 
   // Embeddings Mutations
@@ -3131,7 +3131,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.ref("GenerateEmbeddingsResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(embeddingsHandler)),
 
   generateEmbedding: a
@@ -3142,7 +3142,7 @@ const rawSchemaDefinition = {
       dimensions: a.integer(),
     })
     .returns(a.ref("EmbeddingResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(embeddingsHandler)),
 
   // Moderation Mutations
@@ -3156,7 +3156,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(moderationHandler)),
 
   moderateImage: a
@@ -3167,7 +3167,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(moderationHandler)),
 
   moderateAudio: a
@@ -3178,7 +3178,7 @@ const rawSchemaDefinition = {
       recordId: a.id(),
     })
     .returns(a.ref("ModerationResult"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(moderationHandler)),
 
   // Section Management Mutations
@@ -3189,7 +3189,7 @@ const rawSchemaDefinition = {
       description: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   addSelfToSection: a
@@ -3198,7 +3198,7 @@ const rawSchemaDefinition = {
       code: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   // Instructor-initiated bulk enrollment — resolves each email to a Cognito user,
@@ -3211,8 +3211,8 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
-      allow.group("Instructors"),
-      allow.group("Admins"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
     .handler(a.handler.function(sectionHandler)),
 
@@ -3225,8 +3225,8 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
-      allow.group("Instructors"),
-      allow.group("Admins"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
     .handler(a.handler.function(sectionHandler)),
 
@@ -3238,7 +3238,7 @@ const rawSchemaDefinition = {
       invitedUserIds: a.string().array(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   joinPeerReview: a
@@ -3247,7 +3247,7 @@ const rawSchemaDefinition = {
       code: a.string().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   // Section Management Queries
@@ -3257,7 +3257,7 @@ const rawSchemaDefinition = {
       sectionCode: a.string().required(),
     })
     .returns(a.ref("StudentInfo").array())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   // Returns a short-lived presigned/signed URL for a student's private submission file.
@@ -3272,8 +3272,8 @@ const rawSchemaDefinition = {
     })
     .returns(a.string())
     .authorization((allow) => [
-      allow.group("Instructors"),
-      allow.group("Admins"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
     .handler(a.handler.function(sectionHandler)),
 
@@ -3284,7 +3284,7 @@ const rawSchemaDefinition = {
   getUnitsCdnCookie: a
     .query()
     .returns(a.ref("CdnCookies"))
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(sectionHandler)),
 
   // Phase 6 — Reads the unit draft from S3, rewrites media paths, and writes
@@ -3297,8 +3297,8 @@ const rawSchemaDefinition = {
     })
     .returns(a.json())
     .authorization((allow) => [
-      allow.group("Instructors"),
-      allow.group("Admins"),
+      // COGNITO_AUTH_DISABLED: allow.group("Instructors"),
+      // COGNITO_AUTH_DISABLED: allow.group("Admins"),
     ])
     .handler(a.handler.function(publishUnitHandler)),
 
@@ -3308,7 +3308,7 @@ const rawSchemaDefinition = {
   rebuildNgramIndex: a
     .mutation()
     .returns(a.json())
-    .authorization((allow) => [allow.group("Admins")])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.group("Admins") */])
     .handler(a.handler.function(rebuildNgramIndexHandler)),
 
   // Gamification Mutations
@@ -3323,7 +3323,7 @@ const rawSchemaDefinition = {
       accuracy: a.float(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   checkBadges: a
@@ -3332,7 +3332,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   checkBadgesBatch: a
@@ -3341,7 +3341,7 @@ const rawSchemaDefinition = {
       entries: a.json().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   updateStreak: a
@@ -3350,7 +3350,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   rebuildLeaderboard: a
@@ -3359,7 +3359,7 @@ const rawSchemaDefinition = {
       sectionID: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   upsertStudentMemory: a
@@ -3370,7 +3370,7 @@ const rawSchemaDefinition = {
       source: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   bootstrapStudentMemory: a
@@ -3379,7 +3379,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   updateStudentUnitMemoryFromGrade: a
@@ -3395,7 +3395,7 @@ const rawSchemaDefinition = {
       sourceType: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   rebuildStudentMemoryProfile: a
@@ -3404,7 +3404,7 @@ const rawSchemaDefinition = {
       studentId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   checkPersonalBest: a
@@ -3415,7 +3415,7 @@ const rawSchemaDefinition = {
       score: a.float().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   recomputeProgress: a
@@ -3425,7 +3425,7 @@ const rawSchemaDefinition = {
       moduleId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   checkEasterEggs: a
@@ -3436,7 +3436,7 @@ const rawSchemaDefinition = {
       triggerType: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   discoverEasterEgg: a
@@ -3446,7 +3446,7 @@ const rawSchemaDefinition = {
       eggId: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   updateSquadXP: a
@@ -3456,7 +3456,7 @@ const rawSchemaDefinition = {
       xpAmount: a.integer().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   contributeToChallenge: a
@@ -3467,7 +3467,7 @@ const rawSchemaDefinition = {
       xpContributed: a.integer().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   generateSkillTree: a
@@ -3477,7 +3477,7 @@ const rawSchemaDefinition = {
       sectionID: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   advanceSkillProgress: a
@@ -3488,7 +3488,7 @@ const rawSchemaDefinition = {
       newStatus: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   evaluateSkillsForUnit: a
@@ -3499,7 +3499,7 @@ const rawSchemaDefinition = {
       sectionID: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   claimStorybookBadges: a
@@ -3509,7 +3509,7 @@ const rawSchemaDefinition = {
       completedPersonas: a.string().array().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(gamificationHandler)),
 
   // Peer Review AI Mutations
@@ -3521,7 +3521,7 @@ const rawSchemaDefinition = {
       chatHistory: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(peerReviewAIHandler)),
 
   generateReviewSummary: a
@@ -3531,7 +3531,7 @@ const rawSchemaDefinition = {
       chatLog: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(peerReviewAIHandler)),
 
   // Image Processing Mutations
@@ -3541,7 +3541,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(imageProcessHandler)),
 
   // Document Thumbnail Mutations
@@ -3551,7 +3551,7 @@ const rawSchemaDefinition = {
       fileID: a.id().required(),
     })
     .returns(a.string())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(documentThumbnailHandler)),
 
   // ========================================================================
@@ -3565,7 +3565,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(recycleBinHandler)),
 
   restoreRecord: a
@@ -3575,7 +3575,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(recycleBinHandler)),
 
   permanentDelete: a
@@ -3585,7 +3585,7 @@ const rawSchemaDefinition = {
       id: a.id().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.authenticated()])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.authenticated() */])
     .handler(a.handler.function(recycleBinHandler)),
 
   unarchiveRecord: a
@@ -3594,7 +3594,7 @@ const rawSchemaDefinition = {
       archiveKey: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.group("Admins")])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.group("Admins") */])
     .handler(a.handler.function(recycleBinHandler)),
 
   listArchives: a
@@ -3605,7 +3605,7 @@ const rawSchemaDefinition = {
       continuationToken: a.string(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.group("Admins")])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.group("Admins") */])
     .handler(a.handler.function(recycleBinHandler)),
 
   getArchive: a
@@ -3614,7 +3614,7 @@ const rawSchemaDefinition = {
       archiveKey: a.string().required(),
     })
     .returns(a.json())
-    .authorization((allow) => [allow.group("Admins")])
+    .authorization((allow) => [/* COGNITO_AUTH_DISABLED: allow.group("Admins") */])
     .handler(a.handler.function(recycleBinHandler)),
 };
 
@@ -3637,7 +3637,8 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "userPool",
+    // COGNITO_AUTH_DISABLED: defaultAuthorizationMode: "userPool",
+    defaultAuthorizationMode: "apiKey",
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
