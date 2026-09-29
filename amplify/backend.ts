@@ -175,7 +175,7 @@ for (let i = WAVE_SIZE; i < modeledStacks.length; i++) {
     modeledStacks[i - WAVE_SIZE].node.id,
   )!;
   if (modelComponents.get(currentModel) !== modelComponents.get(priorModel)) {
-    modeledStacks[i].addDependency(modeledStacks[i - WAVE_SIZE]);
+    modeledStacks[i].addStackDependency(modeledStacks[i - WAVE_SIZE]);
   }
 }
 

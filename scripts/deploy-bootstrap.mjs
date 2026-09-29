@@ -15,10 +15,19 @@
  * — each phase is a strict superset of the previous one, so phases only
  * ever ADD models, never remove ones already deployed.
  *
- * If a target stack already exists (any state), phasing is skipped
- * entirely and a normal full deploy runs instead — deploying phase 1's
- * reduced schema against an already-fully-deployed stack would look like a
- * request to DELETE the isolated models' tables, which must never happen.
+ * The phase loop (1..T) always runs, whether or not a target stack already
+ * exists (as long as it isn't in a FAILED status — see below) — re-running
+ * an already-satisfied phase against a stack that already has those models
+ * is a safe no-op update, since phases are cumulative supersets. An earlier
+ * version skipped straight to an UNFILTERED full deploy whenever any
+ * non-FAILED stack was found, reasoning that a stack must already be fully
+ * deployed by then — but a stack can just as easily be CREATE_IN_PROGRESS
+ * from an overlapping/concurrent build on the same branch (Amplify Hosting
+ * can trigger overlapping builds on rapid successive pushes), and slamming
+ * the full 40+ model schema onto it in one shot can hit CloudFormation's
+ * "Limit on the number of resources in a single stack operation exceeded"
+ * (observed Sept 2026). Always looping the full phase sequence instead
+ * guarantees no single deploy operation ever exceeds one phase's resources.
  *
  * All AWS inspection/cleanup here goes through the AWS SDK v3 clients
  * (@aws-sdk/client-cloudformation, @aws-sdk/client-appsync) instead of
@@ -386,7 +395,12 @@ function runDeployOnce(deployArgs, env) {
   return new Promise((resolve, reject) => {
     const child = spawn("npx", deployArgs, {
       stdio: "inherit",
-      env: { ...process.env, ...env },
+      // JSII_DEPRECATED=quiet silences aws-cdk-lib's internal
+      // CfnResource#addDependency deprecation warning, which fires once per
+      // cross-nested-stack reference (thousands at this schema's size) and
+      // drowns out real errors in CI logs — only suppresses deprecation
+      // noise, never actual failures.
+      env: { ...process.env, JSII_DEPRECATED: "quiet", ...env },
     });
     child.on("exit", (code) => {
       if (code === 0) resolve();
@@ -560,23 +574,30 @@ async function main() {
     );
     await remediateAndDeleteStack(existingStack.name);
   } else if (existingStack) {
+    // A non-FAILED existing stack does NOT mean bootstrapping already
+    // finished — it can be CREATE_IN_PROGRESS/UPDATE_IN_PROGRESS from an
+    // overlapping/concurrent build on the same branch (Amplify Hosting can
+    // trigger overlapping builds on rapid successive pushes), or a healthy
+    // stack that's only partway through the phase sequence. Previously this
+    // branch skipped straight to an UNFILTERED "full deploy" (no
+    // AMPLIFY_BOOTSTRAP_PHASE env vars), which — observed Sept 2026 — can
+    // slam the ENTIRE 40-model schema onto a stack a concurrent build was
+    // still incrementally constructing, hitting CloudFormation's "Limit on
+    // the number of resources in a single stack operation exceeded" even
+    // though phasing was supposedly in effect. Always run the SAME phase
+    // loop below instead: each phase's model set is a strict cumulative
+    // superset, so re-running an already-satisfied phase against a stack
+    // that already has those models is a safe no-op update — this never
+    // deploys more than one phase's worth of NEW resources in a single
+    // operation, regardless of what an existing stack already contains.
     console.log(
-      `[deploy-bootstrap] Found existing stack "${existingStack.name}" — skipping phased bootstrap, running normal full deploy.`,
+      `[deploy-bootstrap] Found existing stack "${existingStack.name}" (${existingStack.status}) — continuing the phased bootstrap instead of an unfiltered full deploy.`,
     );
-    await deployPhaseWithRetry(
-      {},
-      "Full deploy",
-      identifier,
-      deployArgs,
-      stackKind,
-      allowRemediation,
+  } else {
+    console.log(
+      `[deploy-bootstrap] No existing ${mode} stack found — bootstrapping in ${BOOTSTRAP_TOTAL_PHASES} phases.`,
     );
-    return;
   }
-
-  console.log(
-    `[deploy-bootstrap] No existing ${mode} stack found — bootstrapping in ${BOOTSTRAP_TOTAL_PHASES} phases.`,
-  );
 
   for (let phase = 1; phase <= BOOTSTRAP_TOTAL_PHASES; phase++) {
     await deployPhaseWithRetry(
