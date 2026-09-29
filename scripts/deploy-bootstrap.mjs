@@ -73,7 +73,14 @@ import {
 // serialization because that limit caps TOTAL resources touched in one
 // deploy operation, regardless of create order. The only real fix is
 // fewer resources per phase — 40+ models across 2 phases still exceeds it.
-const BOOTSTRAP_TOTAL_PHASES = 6;
+// A single connected component of relations is never split across phases
+// (see computeBootstrapPhases), so raising this mainly thins out the
+// isolated single-model components sharing a phase with it — it can't
+// shrink the largest component's own blast radius. Raised from 6 to 8
+// (Sept 2026) as one of several more-conservative-bootstrap changes,
+// alongside widening backend.ts's throttle to cover the previously-
+// unprotected shared ConnectionStack/FunctionDirectiveStack nested stacks.
+const BOOTSTRAP_TOTAL_PHASES = 8;
 const MAX_PHASE_ATTEMPTS = 3;
 const FAILED_STACK_STATUSES = new Set([
   "CREATE_FAILED",

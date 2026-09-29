@@ -251,12 +251,34 @@ for (let i = RESOLVER_WAVE_SIZE; i < appSyncControlPlaneResources.length; i++) {
 // the relation-inferred nested-stack dependencies CDK creates) and only
 // chains resources of the SAME type (Resolver↔Resolver, Function↔Function),
 // which never depend on one another, so it is provably acyclic.
+//
+// Unlike the cross-component throttle (which legitimately needs "owning
+// model" to check component membership), this only needs "owning nested
+// stack" — so it must NOT reuse the model-filtered `appSyncControlPlaneResources`
+// list. Inspecting the synthesized cdk.out confirmed two large SHARED nested
+// stacks outside any per-model stack — `ConnectionStack` (128
+// FunctionConfigurations backing relation/auth pipeline resolvers, several
+// referencing NONE_DS) and `FunctionDirectiveStack` (132 custom
+// query/mutation Lambda-invoke functions) — neither matches the
+// `<Model>.NestedStack` naming pattern `modelNameFromStackId` expects, so
+// both were SILENTLY EXCLUDED from every throttle above, leaving ~260
+// AppSync control-plane resources creating/deleting with zero serialization.
+const allControlPlaneResources = dataStack.node
+  .findAll()
+  .filter(
+    (c): c is cdk.CfnResource =>
+      cdk.CfnResource.isCfnResource(c) &&
+      (c.cfnResourceType === "AWS::AppSync::Resolver" ||
+        c.cfnResourceType === "AWS::AppSync::FunctionConfiguration"),
+  )
+  .sort((a, b) => a.node.path.localeCompare(b.node.path));
+
 const INTRA_STACK_WAVE_SIZE = Math.max(
   1,
   Number(process.env.AMPLIFY_INTRA_STACK_WAVE_SIZE || 1),
 );
 const intraStackGroups = new Map<string, cdk.CfnResource[]>();
-for (const { resource } of appSyncControlPlaneResources) {
+for (const resource of allControlPlaneResources) {
   const stack = findOwningStack(resource);
   if (!stack) continue;
   const key = `${stack.node.path}::${resource.cfnResourceType}`;
@@ -277,15 +299,21 @@ for (const group of intraStackGroups.values()) {
 // The shared NONE_DS AppSync data source (used by pipeline "init"/auth
 // FunctionConfigurations that don't hit a real backend) lives directly on
 // the core data stack, but is referenced by name — not Ref/GetAtt — from
-// FunctionConfiguration resources scattered across nearly every per-model
-// nested stack. CDK can't infer a delete-order dependency from a plain
-// string reference, so CloudFormation can attempt to delete NONE_DS while a
-// sibling nested stack still has an in-flight FunctionConfiguration
-// pointing at it, causing a recurring DELETE_FAILED: "Data source is still
-// in use by functions: [...]" (observed repeatedly Sept 2026). Force every
-// nested stack that owns an AppSync Resolver/FunctionConfiguration to
-// depend on NONE_DS so CloudFormation always tears those stacks down FIRST
-// (reverse dependency order on delete) before removing NONE_DS itself.
+// FunctionConfiguration resources scattered across nearly every nested
+// stack — including the SHARED `ConnectionStack` (confirmed via cdk.out:
+// its relation/auth pipeline functions reference NONE_DS by a cross-stack
+// `Ref`, e.g. `Unitassignmentsauth0Function`), not just per-model ones. CDK
+// can't infer a delete-order dependency from a plain string/Ref-to-name
+// reference used inside a VTL/JS resolver, so CloudFormation can attempt to
+// delete NONE_DS while a sibling nested stack still has an in-flight
+// FunctionConfiguration pointing at it, causing a recurring DELETE_FAILED:
+// "Data source is still in use by functions: [...]" (observed repeatedly
+// Sept 2026, including on `ConnectionStack` which the model-scoped-only
+// version of this fix never covered). Force every nested stack that owns
+// an AppSync Resolver/FunctionConfiguration — ANY nested stack, not just
+// per-model ones — to depend on NONE_DS so CloudFormation always tears
+// those stacks down FIRST (reverse dependency order on delete) before
+// removing NONE_DS itself.
 const noneDataSource = dataStack.node
   .findAll()
   .find(
@@ -296,8 +324,8 @@ const noneDataSource = dataStack.node
 // with no NONE_DS, there's nothing for a FunctionConfiguration to reference.
 if (noneDataSource) {
   const stacksOwningAppSyncFunctions = new Set(
-    appSyncControlPlaneResources
-      .map(({ resource }) => findOwningStack(resource))
+    allControlPlaneResources
+      .map((resource) => findOwningStack(resource))
       .filter((s): s is cdk.NestedStack => s !== null),
   );
   for (const stack of stacksOwningAppSyncFunctions) {
