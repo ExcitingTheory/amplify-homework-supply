@@ -275,7 +275,6 @@
     "fast-xml-parser": "^5.0.0",
     "minimatch": "^9.0.5",
     "ajv": "^8.17.1",
-    "zod": "3.25.17",
     "@eslint/eslintrc": {
       "ajv": "^6.14.0"
     },
@@ -283,6 +282,21 @@
       "ajv": "^6.14.0"
     },
     "immutable": "^4.3.7",
-    "tmp": "^0.2.3"
+    "tmp": "^0.2.3",
+    "@aws-amplify/backend-cli": {
+      "zod": "3.25.17"
+    },
+    "@aws-amplify/backend-output-schemas": {
+      "zod": "3.25.17"
+    },
+    "@aws-amplify/cli-core": {
+      "zod": "3.25.17"
+    },
+    "@aws-amplify/client-config": {
+      "zod": "3.25.17"
+    },
+    "@aws-amplify/platform-core": {
+      "zod": "3.25.17"
+    }
   }
 }
