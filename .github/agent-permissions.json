@@ -153,7 +153,15 @@
             "aws appsync list-graphql-apis",
             "aws appsync list-functions",
             "aws appsync list-resolvers",
+            "aws appsync list-types",
             "aws appsync get-graphql-api"
+          ],
+          "requiresConfirmation": [
+            "aws appsync delete-function",
+            "aws appsync delete-resolver",
+            "aws appsync delete-data-source",
+            "aws appsync delete-graphql-api",
+            "aws cloudformation delete-stack"
           ],
           "blocked": [
             "cancel-",
@@ -167,7 +175,7 @@
             "update-",
             "wait"
           ],
-          "description": "Allow read-only AWS inspection commands for deploy diagnostics"
+          "description": "Read-only AWS inspection commands run freely for deploy diagnostics. requiresConfirmation commands are for stuck-stack/orphaned-resource remediation (e.g. AppSync NONE_DS delete-failed loops) and must be confirmed by the user for the specific resource/stack each time before running — never run silently, and the blocked delete-/wait prefixes still apply to anything not explicitly listed above."
         },
 
         "readOnly": {

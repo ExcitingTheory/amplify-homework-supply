@@ -25,14 +25,25 @@
  * shelling out to the `aws` CLI — both are already resolvable from the
  * workspace root via npm workspace hoisting (see amplify/package.json).
  *
- * Known recurring failure this script auto-remediates: AppSync's shared
+ * Known recurring failure this script can remediate: AppSync's shared
  * NONE_DS data source (used by pipeline "init"/auth FunctionConfigurations
  * with no real backend) can be left DELETE_FAILED because CloudFormation
  * doesn't know model nested stacks' FunctionConfigurations must be removed
  * first — see the delete-order dependency fix in amplify/backend.ts. If
  * that ordering is ever insufficient (e.g. a differently-shaped failure),
- * this script detects the stuck stack, deletes the orphaned AppSync
- * resolvers/functions/data source/API directly via the SDK, and retries.
+ * this script can detect the stuck stack and delete the orphaned AppSync
+ * resolvers/functions/data source/API directly via the SDK, then retry.
+ *
+ * That remediation deletes a whole CloudFormation stack, which (since none
+ * of this schema's DynamoDB tables have deletion protection or point-in-time
+ * recovery configured) permanently destroys all table data with no backup
+ * path. It must NEVER run unattended in CI, so it is gated behind an
+ * explicit --allow-remediation CLI flag that amplify.yml's pipeline
+ * invocation does not pass. A stuck/DELETE_FAILED stack always fails the CI
+ * build loudly instead of being auto-deleted. To remediate, a human runs
+ * this script locally with AWS credentials and the flag set, e.g.
+ * `node scripts/deploy-bootstrap.mjs --mode=pipeline --branch main
+ * --app-id <appId> --allow-remediation`.
  */
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -408,6 +419,7 @@ async function deployPhaseWithRetry(
   identifier,
   deployArgs,
   stackKind,
+  allowRemediation,
 ) {
   for (let attempt = 1; attempt <= MAX_PHASE_ATTEMPTS; attempt++) {
     console.log(
@@ -444,6 +456,15 @@ async function deployPhaseWithRetry(
       continue;
     }
     if (FAILED_STACK_STATUSES.has(stack.status)) {
+      if (!allowRemediation) {
+        throw new Error(
+          `${label} left stack "${stack.name}" in ${stack.status}. Refusing ` +
+            `to auto-delete it (this destroys all DynamoDB table data with ` +
+            `no backup). Run this script locally with --allow-remediation to ` +
+            `clean up the orphaned AppSync resources and delete the stack, ` +
+            `then re-run the normal pipeline deploy.`,
+        );
+      }
       console.log(
         `[deploy-bootstrap] ${label} left stack in ${stack.status} — cleaning up before retrying.`,
       );
@@ -482,6 +503,7 @@ function parseArgs(argv) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const mode = args.mode === "pipeline" ? "pipeline" : "sandbox";
+  const allowRemediation = Boolean(args["allow-remediation"]);
 
   let identifier;
   let deployArgs;
@@ -517,6 +539,15 @@ async function main() {
   const existingStack = await findExistingStack(identifier, stackKind);
 
   if (existingStack && FAILED_STACK_STATUSES.has(existingStack.status)) {
+    if (!allowRemediation) {
+      throw new Error(
+        `Existing stack "${existingStack.name}" is ${existingStack.status}. ` +
+          `Refusing to auto-delete it (this destroys all DynamoDB table data ` +
+          `with no backup). Run this script locally with --allow-remediation ` +
+          `to clean up the orphaned AppSync resources and delete the stack, ` +
+          `then re-run the normal pipeline deploy.`,
+      );
+    }
     console.log(
       `[deploy-bootstrap] Existing stack "${existingStack.name}" is ${existingStack.status} — remediating before continuing.`,
     );
@@ -531,6 +562,7 @@ async function main() {
       identifier,
       deployArgs,
       stackKind,
+      allowRemediation,
     );
     return;
   }
@@ -549,6 +581,7 @@ async function main() {
       identifier,
       deployArgs,
       stackKind,
+      allowRemediation,
     );
   }
 

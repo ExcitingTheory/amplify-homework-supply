@@ -108,6 +108,39 @@ if (process.env.CUSTOMER_ID) {
   cdk.Tags.of(app).add("customer-id", process.env.CUSTOMER_ID);
 }
 
+// DynamoDB tables default to RemovalPolicy.DESTROY with no point-in-time
+// recovery, so deleting the stack permanently destroys all table data with
+// no backup path. Deletion protection is opt-in only: it requires BOTH the
+// master feature flag AND the current branch/account to be on the explicit
+// allowlist below, so it can never be silently enabled everywhere. Set via
+// Amplify Console app/branch environment variables, not committed here.
+const deletionProtectionFeatureFlag =
+  process.env.AMPLIFY_ENABLE_DELETION_PROTECTION === "true";
+const deletionProtectionAllowlist = (
+  process.env.AMPLIFY_DELETION_PROTECTION_ALLOWLIST || ""
+)
+  .split(",")
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+const currentBranch = process.env.AWS_BRANCH || "";
+const currentAccountAlias =
+  process.env.AMPLIFY_ACCOUNT_ALIAS || dataStack.account;
+const isAllowlistedEnvironment =
+  deletionProtectionAllowlist.includes(currentBranch) ||
+  deletionProtectionAllowlist.includes(currentAccountAlias);
+
+if (deletionProtectionFeatureFlag && isAllowlistedEnvironment) {
+  for (const table of Object.values(
+    backend.data.resources.cfnResources.amplifyDynamoDbTables,
+  )) {
+    table.deletionProtectionEnabled = true;
+    table.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+  }
+  console.log(
+    `[backend] Deletion protection enabled for DynamoDB tables (branch=${currentBranch}, account=${currentAccountAlias}).`,
+  );
+}
+
 // Throttle concurrent nested-stack creation to avoid AppSync 429 rate limits,
 // without risking circular dependencies: only chain nested stacks whose
 // models fall in different relation-graph connected components (see

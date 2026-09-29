@@ -5,30 +5,30 @@
   "description": "Schema for defining non-destructive agent CLI permissions",
   "type": "object",
   "required": ["version", "permissions"],
-  
+
   "properties": {
     "$schema": {
       "type": "string",
       "description": "JSON Schema reference"
     },
-    
+
     "version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "description": "Semantic version of the permissions config"
     },
-    
+
     "description": {
       "type": "string",
       "description": "Human-readable description of this config"
     },
-    
+
     "lastUpdated": {
       "type": "string",
       "format": "date",
       "description": "ISO date when config was last updated"
     },
-    
+
     "permissions": {
       "type": "object",
       "description": "Permission definitions",
@@ -43,13 +43,15 @@
             "rename": { "$ref": "#/definitions/filePermission" }
           }
         },
-        
+
         "terminalCommands": {
           "type": "object",
           "properties": {
             "allowed": {
               "type": "object",
-              "additionalProperties": { "$ref": "#/definitions/commandPermission" }
+              "additionalProperties": {
+                "$ref": "#/definitions/commandPermission"
+              }
             },
             "blocked": {
               "type": "object",
@@ -60,7 +62,7 @@
             }
           }
         },
-        
+
         "dataStoreOperations": {
           "type": "object",
           "properties": {
@@ -70,12 +72,12 @@
             "clear": { "$ref": "#/definitions/simplePermission" }
           }
         },
-        
+
         "schemaChanges": {
           "type": "object",
           "additionalProperties": { "$ref": "#/definitions/filePermission" }
         },
-        
+
         "configurationFiles": {
           "type": "object",
           "properties": {
@@ -92,20 +94,22 @@
             "modifiable": { "$ref": "#/definitions/filePermission" }
           }
         },
-        
+
         "agentSkills": {
           "type": "object",
           "properties": {
             "allowed": { "type": "boolean" },
             "skillPermissions": {
               "type": "object",
-              "additionalProperties": { "$ref": "#/definitions/skillPermission" }
+              "additionalProperties": {
+                "$ref": "#/definitions/skillPermission"
+              }
             }
           }
         }
       }
     },
-    
+
     "safeModes": {
       "type": "object",
       "additionalProperties": {
@@ -117,7 +121,7 @@
         "required": ["enabled"]
       }
     },
-    
+
     "logging": {
       "type": "object",
       "properties": {
@@ -135,7 +139,7 @@
       },
       "required": ["enabled"]
     },
-    
+
     "validation": {
       "type": "object",
       "properties": {
@@ -168,7 +172,7 @@
         }
       }
     },
-    
+
     "exemptions": {
       "type": "object",
       "properties": {
@@ -187,7 +191,7 @@
         "description": { "type": "string" }
       }
     },
-    
+
     "notifications": {
       "type": "object",
       "additionalProperties": {
@@ -203,7 +207,7 @@
       }
     }
   },
-  
+
   "definitions": {
     "filePermission": {
       "type": "object",
@@ -227,13 +231,18 @@
       },
       "required": ["allowed"]
     },
-    
+
     "commandPermission": {
       "type": "object",
       "properties": {
         "commands": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "requiresConfirmation": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Destructive/irreversible command patterns that are permitted only after explicit, per-invocation user confirmation — never run silently even though listed here."
         },
         "blocked": {
           "type": "array",
@@ -242,7 +251,7 @@
         "description": { "type": "string" }
       }
     },
-    
+
     "simplePermission": {
       "type": "object",
       "properties": {
@@ -252,7 +261,7 @@
       },
       "required": ["allowed"]
     },
-    
+
     "skillPermission": {
       "type": "object",
       "properties": {
