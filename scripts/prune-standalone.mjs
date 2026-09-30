@@ -49,7 +49,12 @@ function dirSize(dirPath) {
   let total = 0;
   for (const entry of readdirSync(dirPath, { withFileTypes: true })) {
     const full = path.join(dirPath, entry.name);
-    total += entry.isDirectory() ? dirSize(full) : statSync(full).size;
+    try {
+      total += entry.isDirectory() ? dirSize(full) : statSync(full).size;
+    } catch {
+      // Dangling symlink (e.g. node_modules/.bin/* pointing at a package we just
+      // deleted) or a file removed concurrently — just skip it, not worth 0 bytes.
+    }
   }
   return total;
 }
@@ -116,12 +121,13 @@ function printTree(dirPath, prefix, depth) {
   }
   const sized = entries.map((e) => {
     const full = path.join(dirPath, e.name);
-    return {
-      name: e.name,
-      isDir: e.isDirectory(),
-      size: e.isDirectory() ? dirSize(full) : statSync(full).size,
-      full,
-    };
+    let size = 0;
+    try {
+      size = e.isDirectory() ? dirSize(full) : statSync(full).size;
+    } catch {
+      // dangling symlink — treat as 0
+    }
+    return { name: e.name, isDir: e.isDirectory(), size, full };
   });
   sized.sort((a, b) => b.size - a.size);
   for (const item of sized) {
@@ -211,4 +217,3 @@ console.log(
 // .next/cache (webpack's persistent build cache) is only for speeding up future
 // rebuilds in the SAME environment — dead weight in any deployed artifact.
 removeIfExists(path.join(process.cwd(), ".next/cache"));
-
