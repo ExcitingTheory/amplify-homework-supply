@@ -726,7 +726,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - run: npm ci
+      # - run: npm ci
+      - run: npm install --cache .npm --prefer-offline
       - run: npm run build-storybook
       - run: npm run test -- validate-mocks
 ```
