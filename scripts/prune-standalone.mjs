@@ -48,11 +48,13 @@ function dirSize(dirPath) {
 
 function removeIfExists(itemPath) {
   if (!existsSync(itemPath)) return;
-  const size = statSync(itemPath).isDirectory() ? dirSize(itemPath) : statSync(itemPath).size;
+  const size = statSync(itemPath).isDirectory()
+    ? dirSize(itemPath)
+    : statSync(itemPath).size;
   rmSync(itemPath, { recursive: true, force: true });
   freedBytes += size;
   console.log(
-    `[prune-standalone] removed ${path.relative(root, itemPath)} (${(size / 1e6).toFixed(1)}MB)`,
+    `[prune-standalone] removed ${path.relative(process.cwd(), itemPath)} (${(size / 1e6).toFixed(1)}MB)`,
   );
 }
 
@@ -61,7 +63,8 @@ function removeIfExists(itemPath) {
 // (invisible to `npm pack --dry-run`). Amplify Hosting compute is CPU-only serverless
 // — these are pure dead weight (the CUDA provider alone was 327MB, the actual root
 // cause of onnxruntime-node showing up far larger on CI than expected).
-const gpuProviderPattern = /^libonnxruntime_providers_(cuda|tensorrt|rocm|migraphx|dml)\.so$/;
+const gpuProviderPattern =
+  /^libonnxruntime_providers_(cuda|tensorrt|rocm|migraphx|dml)\.so$/;
 
 function removeGpuProviders(dirPath) {
   let entries;
@@ -108,6 +111,20 @@ for (const [scope, matches] of globTargets) {
 console.log(
   `[prune-standalone] total freed: ${(freedBytes / 1e6).toFixed(1)}MB`,
 );
+
+// .next/cache (webpack's persistent build cache, mainly) is ONLY for speeding up
+// future rebuilds in the SAME environment — it's dead weight in the deployed artifact
+// and was the actual dominant contributor to Amplify's build-output-size check staying
+// stuck at ~534MB no matter how much node_modules pruning we did above (confirmed:
+// .next/cache/webpack alone measured 2.1GB in a from-scratch build). amplify.yml's own
+// artifact "files" excludes already try to skip cache/webpack + cache/turbopack, but
+// since that alone didn't fix the reported size, delete it outright here too so there's
+// no ambiguity about whether that exclude filter is actually honored by Amplify's size
+// check. Trade-off: this also deletes Amplify's OWN build-cache upload target (the
+// "cache: paths: .next/cache/**/*" in amplify.yml), so every future CI build will be a
+// full cold compile instead of incremental — acceptable to unblock deployment.
+const nextCacheDir = path.join(process.cwd(), ".next/cache");
+removeIfExists(nextCacheDir);
 
 // Report what's left so the next CI build reveals the current biggest offenders
 // without needing a separate manual `du`/`find` pass.
@@ -171,11 +188,18 @@ function printTree(dirPath, prefix, depth) {
   }
   const sized = entries.map((e) => {
     const full = path.join(dirPath, e.name);
-    return { name: e.name, isDir: e.isDirectory(), size: e.isDirectory() ? dirSize(full) : statSync(full).size, full };
+    return {
+      name: e.name,
+      isDir: e.isDirectory(),
+      size: e.isDirectory() ? dirSize(full) : statSync(full).size,
+      full,
+    };
   });
   sized.sort((a, b) => b.size - a.size);
   for (const item of sized) {
-    console.log(`[prune-standalone] ${prefix}${(item.size / 1e6).toFixed(1)}MB  ${item.name}${item.isDir ? "/" : ""}`);
+    console.log(
+      `[prune-standalone] ${prefix}${(item.size / 1e6).toFixed(1)}MB  ${item.name}${item.isDir ? "/" : ""}`,
+    );
     if (item.isDir) printTree(item.full, prefix + "  ", depth - 1);
   }
 }
@@ -185,6 +209,8 @@ console.log(
   `[prune-standalone] found ${onnxCopies.length} onnxruntime-node cop${onnxCopies.length === 1 ? "y" : "ies"}:`,
 );
 for (const copyPath of onnxCopies) {
-  console.log(`[prune-standalone] --- ${path.relative(root, copyPath)} (${(dirSize(copyPath) / 1e6).toFixed(1)}MB) ---`);
+  console.log(
+    `[prune-standalone] --- ${path.relative(root, copyPath)} (${(dirSize(copyPath) / 1e6).toFixed(1)}MB) ---`,
+  );
   printTree(copyPath, "  ", 4);
 }
