@@ -1,7 +1,7 @@
 import React from "react";
 import { WorkbookProgress } from "./WorkbookProgress";
 import UnitContext from "../../context/unitContext";
-import { expect, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 
 function withUnitContext(stats = {}, overrides = {}) {
   const base = {
@@ -98,6 +98,10 @@ export const JustStarted = {
 export const Disabled = {
   decorators: [withUnitContext({}, { workbookEnabled: false })],
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // Wait past the deferred-rendering overlay (see .storybook/AGENTS.md) before asserting empty content
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[role="progressbar"]')).toBeNull(),
+    );
     expect(canvasElement.textContent?.trim()).toBe("");
   },
 };

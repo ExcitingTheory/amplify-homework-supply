@@ -26,8 +26,12 @@ export const Active: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("Weekly Sprint");
-    // Progress bar reflects 60% (600/1000)
-    const progressBar = canvasElement.querySelector('[role="progressbar"]');
+    // Progress bar reflects 60% (600/1000). Scoped to the real LinearProgress root —
+    // a bare [role="progressbar"] can match the deferred-rendering overlay's spinner
+    // (see .storybook/AGENTS.md on minimalProviders + progressbar collisions).
+    const progressBar = canvasElement.querySelector(
+      '.MuiLinearProgress-root[role="progressbar"]',
+    );
     expect(progressBar).not.toBeNull();
   },
 };
@@ -69,8 +73,12 @@ export const JustStarted: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("New Challenge");
-    // 0% progress
-    const progressBar = canvasElement.querySelector('[role="progressbar"]');
+    // 0% progress. Scoped to the real LinearProgress root — a bare
+    // [role="progressbar"] can match the deferred-rendering overlay's indeterminate
+    // spinner, which has no aria-valuenow (see .storybook/AGENTS.md).
+    const progressBar = canvasElement.querySelector(
+      '.MuiLinearProgress-root[role="progressbar"]',
+    );
     if (progressBar) {
       expect(progressBar.getAttribute("aria-valuenow")).toBe("0");
     }
