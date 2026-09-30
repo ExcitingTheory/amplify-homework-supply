@@ -80,3 +80,30 @@ for (const [scope, matches] of globTargets) {
 console.log(
   `[prune-standalone] total freed: ${(freedBytes / 1e6).toFixed(1)}MB`,
 );
+
+// Report what's left so the next CI build reveals the current biggest offenders
+// without needing a separate manual `du`/`find` pass.
+const remaining = existsSync(root)
+  ? readdirSync(root, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .flatMap((e) => {
+        if (!e.name.startsWith("@")) {
+          return [{ name: e.name, path: path.join(root, e.name) }];
+        }
+        const scopeDir = path.join(root, e.name);
+        return readdirSync(scopeDir, { withFileTypes: true })
+          .filter((sub) => sub.isDirectory())
+          .map((sub) => ({
+            name: `${e.name}/${sub.name}`,
+            path: path.join(scopeDir, sub.name),
+          }));
+      })
+      .map(({ name, path: p }) => ({ name, size: dirSize(p) }))
+      .sort((a, b) => b.size - a.size)
+      .slice(0, 20)
+  : [];
+
+console.log("[prune-standalone] remaining top 20 node_modules by size:");
+for (const { name, size } of remaining) {
+  console.log(`[prune-standalone]   ${(size / 1e6).toFixed(1)}MB  ${name}`);
+}
