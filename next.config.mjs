@@ -79,6 +79,20 @@ const nextConfig = {
   // Use standalone output for smaller deployments
   output: "standalone",
 
+  // @huggingface/transformers (server actions/agent tools) conditionally requires
+  // onnxruntime-node OR onnxruntime-web; file tracing can't resolve the branch so it
+  // includes both for every platform. Server always takes the Node.js/linux-x64 path
+  // (Amplify Hosting compute is x86_64), so trim everything else — this alone was the
+  // majority of a 601MB standalone build exceeding Amplify's 230686720-byte cache limit.
+  outputFileTracingExcludes: {
+    "/*": [
+      "./node_modules/**/onnxruntime-node/bin/napi-v3/darwin/**",
+      "./node_modules/**/onnxruntime-node/bin/napi-v3/win32/**",
+      "./node_modules/**/onnxruntime-node/bin/napi-v3/linux/arm64/**",
+      "./node_modules/**/onnxruntime-web/**",
+    ],
+  },
+
   // Skip TypeScript type checking during build to avoid OOM
   typescript: {
     ignoreBuildErrors: true,

@@ -100,7 +100,7 @@ class OfflineChatEngineImpl {
       try {
         // String concatenation prevents Vite from statically analyzing this optional dep
         const webllmPath = "@mlc-ai/" + "web-llm";
-        await import(webllmPath);
+        await import(/* webpackIgnore: true */ webllmPath);
         return "webllm";
       } catch {
         // WebLLM not installed or not importable
