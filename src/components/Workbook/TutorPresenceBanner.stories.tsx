@@ -1,7 +1,7 @@
 import React from "react";
 import { TutorPresenceBanner } from "./TutorPresenceBanner";
 import UnitContext from "../../context/unitContext";
-import { expect, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 
 function withUnitContext(overrides: Record<string, any> = {}) {
   const base = {
@@ -76,6 +76,10 @@ export const NoTutors = {
     }),
   ],
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // Wait past the deferred-rendering overlay (see .storybook/AGENTS.md) before asserting empty content
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[role="progressbar"]')).toBeNull(),
+    );
     expect(canvasElement.textContent?.trim()).toBe("");
   },
 };
@@ -83,6 +87,10 @@ export const NoTutors = {
 export const Disabled = {
   decorators: [withUnitContext({ workbookEnabled: false })],
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // Wait past the deferred-rendering overlay (see .storybook/AGENTS.md) before asserting empty content
+    await waitFor(() =>
+      expect(canvasElement.querySelector('[role="progressbar"]')).toBeNull(),
+    );
     expect(canvasElement.textContent?.trim()).toBe("");
   },
 };
