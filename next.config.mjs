@@ -84,12 +84,29 @@ const nextConfig = {
   // includes both for every platform. Server always takes the Node.js/linux-x64 path
   // (Amplify Hosting compute is x86_64), so trim everything else — this alone was the
   // majority of a 601MB standalone build exceeding Amplify's 230686720-byte cache limit.
+  //
+  // The entries below (webpack/terser/uglify-js/typescript/canvas/@swc/@esbuild/
+  // caniuse-lite/babel-plugin-react-compiler/@img sharp) are build-time-only tooling
+  // (verified via `grep` on compiled .next/server output: nothing requires them at
+  // runtime) that ends up hoisted into the shared npm-workspaces node_modules
+  // (this repo's root package.json declares "workspaces") and gets swept into the
+  // standalone trace even though the server never touches them.
   outputFileTracingExcludes: {
     "/*": [
       "./node_modules/**/onnxruntime-node/bin/napi-v3/darwin/**",
       "./node_modules/**/onnxruntime-node/bin/napi-v3/win32/**",
       "./node_modules/**/onnxruntime-node/bin/napi-v3/linux/arm64/**",
       "./node_modules/**/onnxruntime-web/**",
+      "./node_modules/webpack/**",
+      "./node_modules/terser/**",
+      "./node_modules/uglify-js/**",
+      "./node_modules/typescript/**",
+      "./node_modules/canvas/**",
+      "./node_modules/caniuse-lite/**",
+      "./node_modules/babel-plugin-react-compiler/**",
+      "./node_modules/@swc/core-*/**",
+      "./node_modules/@esbuild/*/**",
+      "./node_modules/@img/sharp-*/**",
     ],
   },
 
