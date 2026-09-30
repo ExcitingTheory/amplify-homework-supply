@@ -46,14 +46,38 @@ function dirSize(dirPath) {
   return total;
 }
 
-function removeIfExists(dirPath) {
-  if (!existsSync(dirPath)) return;
-  const size = dirSize(dirPath);
-  rmSync(dirPath, { recursive: true, force: true });
+function removeIfExists(itemPath) {
+  if (!existsSync(itemPath)) return;
+  const size = statSync(itemPath).isDirectory() ? dirSize(itemPath) : statSync(itemPath).size;
+  rmSync(itemPath, { recursive: true, force: true });
   freedBytes += size;
   console.log(
-    `[prune-standalone] removed ${path.relative(root, dirPath)} (${(size / 1e6).toFixed(1)}MB)`,
+    `[prune-standalone] removed ${path.relative(root, itemPath)} (${(size / 1e6).toFixed(1)}MB)`,
   );
+}
+
+// onnxruntime-node's own postinstall script downloads GPU execution provider
+// binaries (CUDA/TensorRT) on Linux x64 that aren't part of the npm package itself
+// (invisible to `npm pack --dry-run`). Amplify Hosting compute is CPU-only serverless
+// — these are pure dead weight (the CUDA provider alone was 327MB, the actual root
+// cause of onnxruntime-node showing up far larger on CI than expected).
+const gpuProviderPattern = /^libonnxruntime_providers_(cuda|tensorrt|rocm|migraphx|dml)\.so$/;
+
+function removeGpuProviders(dirPath) {
+  let entries;
+  try {
+    entries = readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const full = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      removeGpuProviders(full);
+    } else if (gpuProviderPattern.test(entry.name)) {
+      removeIfExists(full);
+    }
+  }
 }
 
 if (!existsSync(root)) {
@@ -65,6 +89,10 @@ if (!existsSync(root)) {
 
 for (const name of targets) {
   removeIfExists(path.join(root, name));
+}
+
+for (const onnxDir of findAllDirsNamed(root, "onnxruntime-node")) {
+  removeGpuProviders(onnxDir);
 }
 
 for (const [scope, matches] of globTargets) {
@@ -106,4 +134,57 @@ const remaining = existsSync(root)
 console.log("[prune-standalone] remaining top 20 node_modules by size:");
 for (const { name, size } of remaining) {
   console.log(`[prune-standalone]   ${(size / 1e6).toFixed(1)}MB  ${name}`);
+}
+
+// onnxruntime-node has repeatedly shown up far larger than expected on CI —
+// dump every copy found anywhere in the tree (not just top-level) plus a
+// full recursive breakdown of each one's own bin/ contents.
+function findAllDirsNamed(dirPath, targetName, found = []) {
+  let entries;
+  try {
+    entries = readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return found;
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const full = path.join(dirPath, entry.name);
+    if (entry.name === targetName) found.push(full);
+    if (entry.name === "node_modules" || entry.name === targetName) {
+      findAllDirsNamed(full, targetName, found);
+    } else if (!entry.name.startsWith(".")) {
+      // descend into nested node_modules only, to avoid walking all source files
+      const nestedNm = path.join(full, "node_modules");
+      if (existsSync(nestedNm)) findAllDirsNamed(nestedNm, targetName, found);
+    }
+  }
+  return found;
+}
+
+function printTree(dirPath, prefix, depth) {
+  if (depth <= 0) return;
+  let entries;
+  try {
+    entries = readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  const sized = entries.map((e) => {
+    const full = path.join(dirPath, e.name);
+    return { name: e.name, isDir: e.isDirectory(), size: e.isDirectory() ? dirSize(full) : statSync(full).size, full };
+  });
+  sized.sort((a, b) => b.size - a.size);
+  for (const item of sized) {
+    console.log(`[prune-standalone] ${prefix}${(item.size / 1e6).toFixed(1)}MB  ${item.name}${item.isDir ? "/" : ""}`);
+    if (item.isDir) printTree(item.full, prefix + "  ", depth - 1);
+  }
+}
+
+const onnxCopies = findAllDirsNamed(root, "onnxruntime-node");
+console.log(
+  `[prune-standalone] found ${onnxCopies.length} onnxruntime-node cop${onnxCopies.length === 1 ? "y" : "ies"}:`,
+);
+for (const copyPath of onnxCopies) {
+  console.log(`[prune-standalone] --- ${path.relative(root, copyPath)} (${(dirSize(copyPath) / 1e6).toFixed(1)}MB) ---`);
+  printTree(copyPath, "  ", 4);
 }
