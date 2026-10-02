@@ -1,4 +1,16 @@
 {
+  "answerEditor": {
+    "addWordLabel": "単語ラベルを追加します",
+    "addWordToDict": "辞書に新しい単語を追加します。",
+    "cancel": "キャンセル",
+    "dialogTitle": "回答を編集",
+    "emptyState": "回答が入力されていません",
+    "instructions": "以下に回答を作成してください",
+    "save": "保存"
+  },
+  "blocks": {
+    "meaning_association": "意味の関連付け"
+  },
   "customAnswerEditor": {
     "add": "追加します",
     "addWordLabel": "演習に単語を追加します",
@@ -46,6 +58,9 @@
     "pronunciationLabel": "発音",
     "removeFromAssignment": "課題から削除します"
   },
+  "questionEditor": {
+    "cancel": "キャンセル"
+  },
   "quizEditor": {
     "addAnswer": "答えを追加",
     "cancel": "キャンセル",
@@ -56,17 +71,5 @@
     "reset": "リセット",
     "save": "保存",
     "status": "ステータス"
-  },
-  "answerEditor": {
-    "addWordLabel": "単語ラベルを追加します",
-    "addWordToDict": "辞書に新しい単語を追加します。",
-    "cancel": "キャンセル",
-    "dialogTitle": "回答を編集",
-    "emptyState": "回答が入力されていません",
-    "instructions": "以下に回答を作成してください",
-    "save": "保存"
-  },
-  "questionEditor": {
-    "cancel": "キャンセル"
   }
 }

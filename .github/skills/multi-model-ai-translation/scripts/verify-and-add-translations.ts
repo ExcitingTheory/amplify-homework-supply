@@ -19,14 +19,36 @@ import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
 
-const SRC_DIR = path.join(process.cwd(), 'src');
+const SRC_DIRS = ['src', 'app'].map((d) => path.join(process.cwd(), d));
 const LOCALE_DIR = path.join(process.cwd(), 'public/locales/en');
+
+// Keep in sync with the `namespaces` array in src/i18n/request.ts.
+// Dotted entries are nested under their parent segment, not separate root keys.
+const KNOWN_NAMESPACES = [
+  'auth',
+  'common',
+  'components',
+  'pages',
+  'editor',
+  'editor.authoring',
+  'editor.files',
+  'editor.ai',
+  'editor.blocks',
+  'editor.shared',
+  'workbook',
+];
 
 interface TranslationCall {
   file: string;
   namespace: string;
   key: string;
   line: number;
+  // Other namespaces the same variable name (e.g. `t`) was bound to
+  // elsewhere in this file. Regex-based extraction can't see JS scoping, so
+  // when a file reuses a varName across multiple components/functions with
+  // different namespaces, we can't tell which scope a given t() call is in -
+  // treat the key as valid if found in any of these sibling namespaces too.
+  ambiguousNamespaces: string[];
 }
 
 interface MissingTranslation {
@@ -50,6 +72,7 @@ interface TranslationReport {
   missingKeys: number;
   addedKeys: MissingTranslation[];
   namespaceMismatches: NamespaceMismatch[];
+  noNamespaceFiles: string[];
   byNamespace: Record<string, {
     total: number;
     existing: number;
@@ -59,108 +82,177 @@ interface TranslationReport {
 }
 
 /**
- * Extract namespace from useTranslation() call
+ * Resolve a useTranslations()/getTranslations() namespace argument to the
+ * locale file and nested key prefix it actually maps to, mirroring the
+ * longest-prefix nesting rules in src/i18n/request.ts (dotted namespaces
+ * nest under their parent segment rather than being separate files).
  */
-function extractNamespaceFromLine(line: string): string | null {
-  const match = line.match(/useTranslation\s*\(\s*['"]([^'"]+)['"]\s*\)/);
-  return match ? match[1] : null;
+function resolveNamespace(used: string): { file: string; prefix: string } {
+  const candidates = KNOWN_NAMESPACES.filter(
+    (ns) => used === ns || used.startsWith(`${ns}.`),
+  ).sort((a, b) => b.length - a.length);
+
+  const file = candidates[0] ?? used;
+  const prefix = used === file ? '' : used.slice(file.length + 1);
+  return { file, prefix };
 }
 
 /**
- * Extract all t('key') calls from a line
+ * Find every useTranslations()/getTranslations() hook binding in a file,
+ * supporting next-intl's string-arg, object-arg, and no-arg call forms.
  */
-function extractTranslationKeys(line: string): string[] {
+function findHookBindings(
+  content: string,
+): Array<{ varName: string; namespace: string | null }> {
+  const bindings: Array<{ varName: string; namespace: string | null }> = [];
+  const seen = new Set<string>();
+  const hookNames = '(?:useTranslations|getTranslations)';
+
+  const stringForm = new RegExp(
+    `(?:const|let)\\s+(\\w+)\\s*=\\s*(?:await\\s+)?${hookNames}\\s*\\(\\s*['"]([^'"]+)['"]\\s*\\)`,
+    'g',
+  );
+  let m: RegExpExecArray | null;
+  while ((m = stringForm.exec(content)) !== null) {
+    bindings.push({ varName: m[1], namespace: m[2] });
+    seen.add(m[1]);
+  }
+
+  const objectForm = new RegExp(
+    `(?:const|let)\\s+(\\w+)\\s*=\\s*(?:await\\s+)?${hookNames}\\s*\\(\\s*\\{[^}]*?namespace:\\s*['"]([^'"]+)['"][^}]*?\\}\\s*\\)`,
+    'g',
+  );
+  while ((m = objectForm.exec(content)) !== null) {
+    if (!seen.has(m[1])) {
+      bindings.push({ varName: m[1], namespace: m[2] });
+      seen.add(m[1]);
+    }
+  }
+
+  const noArgForm = new RegExp(
+    `(?:const|let)\\s+(\\w+)\\s*=\\s*(?:await\\s+)?${hookNames}\\s*\\(\\s*\\)`,
+    'g',
+  );
+  while ((m = noArgForm.exec(content)) !== null) {
+    if (!seen.has(m[1])) {
+      bindings.push({ varName: m[1], namespace: null });
+      seen.add(m[1]);
+    }
+  }
+
+  return bindings;
+}
+
+/**
+ * Extract all `<varName>('key')` calls for a specific bound translator variable.
+ */
+function extractKeysForVar(content: string, varName: string): string[] {
+  const escaped = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`\\b${escaped}\\s*\\(\\s*['"\`]([^'"\`]+)['"\`]`, 'g');
   const keys: string[] = [];
-  const regex = /\bt\s*\(\s*['"`]([^'"`]+)['"`]/g;
-  let match;
-  
-  while ((match = regex.exec(line)) !== null) {
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(content)) !== null) {
     const key = match[1];
-    // Skip template literals and concatenations
     if (!key.includes('${') && !key.includes('+')) {
       keys.push(key);
     }
   }
-  
   return keys;
 }
 
 /**
- * Find namespace usage in a file
+ * Find namespace usage in a file. Returns the resolved per-namespace keys
+ * plus any hook bindings that had no namespace argument at all (a real bug,
+ * not something we can safely auto-resolve - reported separately).
  */
-function findNamespaceUsage(filePath: string): Map<string, Set<string>> {
+function findNamespaceUsage(filePath: string): {
+  keysByNamespace: Map<string, Set<string>>;
+  noNamespace: boolean;
+  siblings: Map<string, Set<string>>;
+} {
   const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
-  
-  const namespaces = new Set<string>();
+  const bindings = findHookBindings(content);
   const keysByNamespace = new Map<string, Set<string>>();
-  
-  // Find all useTranslation declarations
-  for (let i = 0; i < lines.length; i++) {
-    const ns = extractNamespaceFromLine(lines[i]);
-    if (ns) {
-      namespaces.add(ns);
-      if (!keysByNamespace.has(ns)) {
-        keysByNamespace.set(ns, new Set());
+
+  let noNamespace = false;
+
+  // Track which namespaces share a variable name (e.g. multiple components
+  // in one file each doing `const t = useTranslations(...)` with a
+  // different namespace) so mismatch detection can treat them as equivalent.
+  const varNamespaces = new Map<string, Set<string>>();
+  for (const { varName, namespace } of bindings) {
+    if (namespace === null) continue;
+    if (!varNamespaces.has(varName)) varNamespaces.set(varName, new Set());
+    varNamespaces.get(varName)!.add(namespace);
+  }
+  const siblings = new Map<string, Set<string>>();
+  for (const nsSet of varNamespaces.values()) {
+    if (nsSet.size <= 1) continue;
+    for (const ns of nsSet) {
+      if (!siblings.has(ns)) siblings.set(ns, new Set());
+      for (const other of nsSet) {
+        if (other !== ns) siblings.get(ns)!.add(other);
       }
     }
   }
-  
-  // Default to 'common' if no namespace found
-  if (namespaces.size === 0) {
-    namespaces.add('common');
-    keysByNamespace.set('common', new Set());
-  }
-  
-  // Extract all translation keys
-  for (let i = 0; i < lines.length; i++) {
-    const keys = extractTranslationKeys(lines[i]);
-    
+
+  for (const { varName, namespace } of bindings) {
+    if (namespace === null) {
+      noNamespace = true;
+      continue;
+    }
+
+    const keys = extractKeysForVar(content, varName);
+    if (!keysByNamespace.has(namespace)) {
+      keysByNamespace.set(namespace, new Set());
+    }
     for (const key of keys) {
-      // If key has namespace prefix (e.g., "components:key")
-      if (key.includes(':')) {
-        const [ns, actualKey] = key.split(':', 2);
-        if (!keysByNamespace.has(ns)) {
-          keysByNamespace.set(ns, new Set());
-        }
-        keysByNamespace.get(ns)!.add(actualKey);
-      } else {
-        // Assign to first declared namespace (or common)
-        const ns = namespaces.values().next().value || 'common';
-        keysByNamespace.get(ns)!.add(key);
-      }
+      keysByNamespace.get(namespace)!.add(key);
     }
   }
-  
-  return keysByNamespace;
+
+  return { keysByNamespace, noNamespace, siblings };
 }
 
 /**
- * Extract all translation calls from src directory
+ * Extract all translation calls from src/ and app/
  */
-async function extractAllTranslationCalls(): Promise<TranslationCall[]> {
-  const pattern = path.join(SRC_DIR, '**/*.{ts,tsx,js,jsx}');
-  const files = await glob(pattern);
+async function extractAllTranslationCalls(): Promise<{
+  calls: TranslationCall[];
+  noNamespaceFiles: string[];
+}> {
+  const files = (
+    await Promise.all(
+      SRC_DIRS.map((dir) => glob(path.join(dir, '**/*.{ts,tsx,js,jsx}'))),
+    )
+  ).flat();
   
   const calls: TranslationCall[] = [];
+  const noNamespaceFiles: string[] = [];
   
   for (const file of files) {
     const relativePath = path.relative(process.cwd(), file);
     const keysByNamespace = findNamespaceUsage(file);
     
-    for (const [namespace, keys] of keysByNamespace.entries()) {
+    for (const [namespace, keys] of keysByNamespace.keysByNamespace.entries()) {
+      const ambiguousNamespaces = Array.from(keysByNamespace.siblings.get(namespace) ?? []);
       for (const key of keys) {
         calls.push({
           file: relativePath,
           namespace,
           key,
-          line: 0 // Line number not needed for this use case
+          line: 0, // Line number not needed for this use case
+          ambiguousNamespaces,
         });
       }
     }
+
+    if (keysByNamespace.noNamespace) {
+      noNamespaceFiles.push(relativePath);
+    }
   }
   
-  return calls;
+  return { calls, noNamespaceFiles };
 }
 
 /**
@@ -252,10 +344,19 @@ function loadTranslationFile(namespace: string): any {
 }
 
 /**
- * Load all translation files
+ * Load all translation files (excludes .meta.json translator-context files,
+ * .missing.json scratch files, and stray .backup files - none of those are
+ * real next-intl namespaces).
  */
 function loadAllTranslationFiles(): Map<string, any> {
-  const files = fs.readdirSync(LOCALE_DIR).filter(f => f.endsWith('.json'));
+  const files = fs
+    .readdirSync(LOCALE_DIR)
+    .filter(
+      (f) =>
+        f.endsWith('.json') &&
+        !f.endsWith('.meta.json') &&
+        !f.endsWith('.missing.json'),
+    );
   const allTranslations = new Map<string, any>();
   
   for (const file of files) {
@@ -267,7 +368,7 @@ function loadAllTranslationFiles(): Map<string, any> {
 }
 
 /**
- * Find which namespace contains a key
+ * Find which namespace file contains a key
  */
 function findKeyInNamespaces(key: string, allTranslations: Map<string, any>): string | null {
   for (const [namespace, translations] of allTranslations.entries()) {
@@ -291,10 +392,22 @@ function saveTranslationFile(namespace: string, translations: any): void {
  * Main verification and auto-add logic
  */
 async function verifyAndAddTranslations(): Promise<TranslationReport> {
-  console.log('🔍 Scanning src directory for translation calls...\n');
+  console.log('🔍 Scanning src/ and app/ for useTranslations()/getTranslations() calls...\n');
   
-  const calls = await extractAllTranslationCalls();
+  const { calls, noNamespaceFiles } = await extractAllTranslationCalls();
   const allTranslations = loadAllTranslationFiles();
+
+  // Files are loaded lazily and shared across every used-namespace string that
+  // resolves to them (e.g. "components" and "components.aiAgentConfig" both
+  // read/write public/locales/en/components.json).
+  const fileCache = new Map<string, any>();
+  const touchedFiles = new Set<string>();
+  function getFile(file: string): any {
+    if (!fileCache.has(file)) {
+      fileCache.set(file, allTranslations.get(file) ?? loadTranslationFile(file));
+    }
+    return fileCache.get(file);
+  }
   
   const report: TranslationReport = {
     totalFiles: new Set(calls.map(c => c.file)).size,
@@ -303,10 +416,11 @@ async function verifyAndAddTranslations(): Promise<TranslationReport> {
     missingKeys: 0,
     addedKeys: [],
     namespaceMismatches: [],
+    noNamespaceFiles,
     byNamespace: {}
   };
   
-  // Group by namespace
+  // Group by the literal namespace string used in useTranslations()/getTranslations()
   const byNamespace = new Map<string, TranslationCall[]>();
   for (const call of calls) {
     if (!byNamespace.has(call.namespace)) {
@@ -319,22 +433,38 @@ async function verifyAndAddTranslations(): Promise<TranslationReport> {
   for (const [namespace, namespaceCalls] of byNamespace.entries()) {
     console.log(`\n📦 Namespace: ${namespace}`);
     console.log(`   ${namespaceCalls.length} translation calls found`);
-    
-    const translations = loadTranslationFile(namespace);
+
+    const { file, prefix } = resolveNamespace(namespace);
+    const translations = getFile(file);
     const missingInNamespace: Map<string, string[]> = new Map();
     let existing = 0;
     let missing = 0;
     
     // Check each key
     for (const call of namespaceCalls) {
-      if (keyExists(translations, call.key)) {
+      const fullKey = prefix ? `${prefix}.${call.key}` : call.key;
+
+      if (keyExists(translations, fullKey)) {
         existing++;
       } else {
-        // Key not in expected namespace - check all namespaces
-        const foundInNamespace = findKeyInNamespaces(call.key, allTranslations);
+        // Key not in expected namespace file - check all namespace files
+        const foundInNamespace = findKeyInNamespaces(fullKey, allTranslations);
+
+        const ambiguousSiblingFiles = call.ambiguousNamespaces.map(
+          (ns) => resolveNamespace(ns).file,
+        );
+        if (foundInNamespace && ambiguousSiblingFiles.includes(foundInNamespace)) {
+          // The same variable name (e.g. `t`) is reused across multiple
+          // components/scopes in this file with different namespaces, and
+          // regex extraction can't see JS scoping - this key legitimately
+          // belongs to one of the file's OTHER declared namespaces, not a
+          // real cross-file mismatch.
+          existing++;
+          continue;
+        }
         
-        if (foundInNamespace && foundInNamespace !== namespace) {
-          // Key exists in different namespace
+        if (foundInNamespace && foundInNamespace !== file) {
+          // Key exists in a different namespace file
           console.log(`   ⚠️  ${call.key}: found in ${foundInNamespace} (expected ${namespace})`);
           
           // Check if already in mismatches
@@ -371,11 +501,12 @@ async function verifyAndAddTranslations(): Promise<TranslationReport> {
     
     // Add missing keys
     if (missingInNamespace.size > 0) {
-      console.log(`\n   Adding ${missingInNamespace.size} missing keys to ${namespace}.json...`);
+      console.log(`\n   Adding ${missingInNamespace.size} missing keys to ${file}.json...`);
       
       for (const [key, files] of missingInNamespace.entries()) {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
         const placeholder = generatePlaceholder(key);
-        setNestedKey(translations, key, placeholder);
+        setNestedKey(translations, fullKey, placeholder);
         
         report.addedKeys.push({
           namespace,
@@ -387,7 +518,7 @@ async function verifyAndAddTranslations(): Promise<TranslationReport> {
         console.log(`   + ${key}: "${placeholder}" (used in ${files.length} file${files.length > 1 ? 's' : ''})`);
       }
       
-      saveTranslationFile(namespace, translations);
+      touchedFiles.add(file);
     }
     
     report.existingKeys += existing;
@@ -398,6 +529,10 @@ async function verifyAndAddTranslations(): Promise<TranslationReport> {
       missing,
       keys: Array.from(new Set(namespaceCalls.map(c => c.key)))
     };
+  }
+
+  for (const file of touchedFiles) {
+    saveTranslationFile(file, fileCache.get(file));
   }
   
   return report;
@@ -415,14 +550,27 @@ function generateMetadataReport(report: TranslationReport): string {
   md += `- **Total translation calls**: ${report.totalCalls}\n`;
   md += `- **Existing keys**: ${report.existingKeys}\n`;
   md += `- **Missing keys added**: ${report.missingKeys}\n`;
-  md += `- **Namespace mismatches**: ${report.namespaceMismatches.length}\n\n`;
+  md += `- **Namespace mismatches**: ${report.namespaceMismatches.length}\n`;
+  md += `- **Files calling useTranslations()/getTranslations() with no namespace**: ${report.noNamespaceFiles.length}\n\n`;
+
+  if (report.noNamespaceFiles.length > 0) {
+    md += '## 🚨 No-Namespace Hook Calls\n\n';
+    md += 'These files call `useTranslations()`/`getTranslations()` with no namespace argument, so their\n';
+    md += '`t()` keys resolve against the ROOT messages tree, not a specific namespace file. This is almost\n';
+    md += 'always a bug (a dropped namespace argument) rather than an intentional root lookup - verify the\n';
+    md += 'correct namespace from the keys used and restore the argument.\n\n';
+    for (const file of report.noNamespaceFiles) {
+      md += `- \`${file}\`\n`;
+    }
+    md += '\n';
+  }
   
   // Namespace mismatches section
   if (report.namespaceMismatches.length > 0) {
     md += '## ⚠️ Namespace Mismatches\n\n';
-    md += 'These keys exist in a different namespace than expected. This may indicate:\n';
-    md += '- Wrong `useTranslation()` namespace in the component\n';
-    md += '- Key should be moved to the correct namespace\n';
+    md += 'These keys exist in a different namespace file than expected. This may indicate:\n';
+    md += '- Wrong `useTranslations()` namespace in the component\n';
+    md += '- Key should be moved to the correct namespace file\n';
     md += '- Duplicate keys across namespaces\n\n';
     
     for (const mismatch of report.namespaceMismatches) {
@@ -476,6 +624,10 @@ async function main() {
     console.log(`\n✅ Verified ${report.totalCalls} translation calls across ${report.totalFiles} files`);
     console.log(`✅ ${report.existingKeys} keys already exist`);
     console.log(`➕ ${report.missingKeys} missing keys were added`);
+    if (report.noNamespaceFiles.length > 0) {
+      console.log(`🚨 ${report.noNamespaceFiles.length} files call useTranslations()/getTranslations() with no namespace (likely a bug):`);
+      report.noNamespaceFiles.forEach(f => console.log(`     - ${f}`));
+    }
     
     if (report.namespaceMismatches.length > 0) {
       console.log(`⚠️  ${report.namespaceMismatches.length} namespace mismatches found\n`);
@@ -483,7 +635,7 @@ async function main() {
       console.log('');
     }
     
-    if (report.namespaceMismatches.length > 0 || report.addedKeys.length > 0) {
+    if (report.namespaceMismatches.length > 0 || report.addedKeys.length > 0 || report.noNamespaceFiles.length > 0) {
       const reportPath = path.join(process.cwd(), 'translation-verification-report.md');
       const markdown = generateMetadataReport(report);
       fs.writeFileSync(reportPath, markdown, 'utf-8');

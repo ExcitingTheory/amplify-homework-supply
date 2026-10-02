@@ -9,7 +9,6 @@ import {
   Button,
   Chip,
   Collapse,
-  LinearProgress,
   Stack,
   Typography,
 } from "@mui/material";
@@ -17,14 +16,15 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SchoolIcon from "@mui/icons-material/School";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 import { openDiscussion } from "@/utils/chatDiscussBus";
-import { DASHBOARD_TOKENS } from "./constants";
 import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
 import { UpNextCard } from "./UpNextCard";
+import { GradeDonut } from "./GradeDonut";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -115,13 +115,15 @@ export function SectionPanel({
   onRoomCreated,
 }: SectionPanelProps) {
   const [showCompleted, setShowCompleted] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const reducedMotion = useReducedMotion();
   const upNextRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const handleAccordionChange = React.useCallback(
-    (_: React.SyntheticEvent, isExpanded: boolean) => {
-      if (isExpanded) {
+    (_: React.SyntheticEvent, expanded: boolean) => {
+      setIsExpanded(expanded);
+      if (expanded) {
         // On next tick, after accordion animation, move focus to UpNext card
         setTimeout(
           () => {
@@ -149,6 +151,11 @@ export function SectionPanel({
     });
 
   const completed = assignments.filter((a) => gradeMap[a.unitID]?.length > 0);
+
+  // Aggregate overdue count — surfaced as a header chip so it's visible without expanding.
+  const overdueCount = pending.filter(
+    (a) => a.dueDate && new Date(a.dueDate).getTime() < Date.now(),
+  ).length;
 
   // Up-next: first non-locked pending assignment
   const upNext = pending.find((a) => !isLocked(a.unitID));
@@ -179,16 +186,13 @@ export function SectionPanel({
     <Accordion
       component="section"
       aria-labelledby={`section-heading-${section.id}`}
-      defaultExpanded={defaultExpanded}
+      expanded={isExpanded}
       onChange={handleAccordionChange}
       disableGutters
       elevation={0}
       sx={{
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: "12px !important",
-        mb: 2,
-        "&:before": { display: "none" },
         overflow: "hidden",
       }}
     >
@@ -198,102 +202,119 @@ export function SectionPanel({
         id={`section-heading-${section.id}`}
         sx={{
           px: 2.5,
+          py: 1,
+          borderBottom: isExpanded ? "1px solid" : "none",
+          borderColor: "divider",
           "& .MuiAccordionSummary-content": {
-            flexWrap: "wrap",
-            gap: 1,
-            alignItems: "center",
+            display: "flex",
+            flexDirection: { xs: "column", lg: "row" },
+            alignItems: { xs: "stretch", lg: "center" },
+            justifyContent: "space-between",
+            gap: 2,
+            width: "100%",
             my: 1.5,
           },
         }}
       >
-        <SchoolIcon color="primary" sx={{ mr: 1 }} />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            {section.name || "Untitled Section"}
-          </Typography>
-          {section.description && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ lineHeight: 1.3 }}
-            >
-              {section.description}
+        <Box sx={{ display: "flex", alignItems: "flex-start", minWidth: 0 }}>
+          <SchoolIcon color="primary" sx={{ mr: 1, mt: 0.25 }} />
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              {section.name || "Untitled Section"}
             </Typography>
-          )}
-          {nextDueAssignment && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.25 }}
-            >
-              Next: {units[nextDueAssignment.unitID]?.name || "Assignment"}
-              {nextDueAssignment.dueDate
-                ? ` · Due ${new Date(nextDueAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-                : ""}
-            </Typography>
-          )}
+            {section.description && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ lineHeight: 1.3 }}
+              >
+                {section.description}
+              </Typography>
+            )}
+            {nextDueAssignment && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mt: 0.25 }}
+              >
+                Next: {units[nextDueAssignment.unitID]?.name || "Assignment"}
+                {nextDueAssignment.dueDate
+                  ? ` · Due ${new Date(nextDueAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                  : ""}
+              </Typography>
+            )}
+          </Box>
         </Box>
-        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-          <Chip
-            label={`${completionPct}%`}
-            size="small"
-            color={completionPct === 100 ? "success" : "primary"}
-            variant={completionPct === 0 ? "outlined" : "filled"}
-            sx={{ fontWeight: 700 }}
-          />
-          {pending.length > 0 && (
-            <Chip
-              label={`${pending.length} pending`}
-              size="small"
-              color="warning"
-              icon={<HourglassTopIcon />}
-              sx={{ fontWeight: 700 }}
-            />
-          )}
-          {completed.length > 0 && (
-            <Chip
-              label={`${completed.length} done`}
-              size="small"
-              color="success"
-              icon={<CheckCircleIcon />}
-              sx={{ fontWeight: 700 }}
-            />
-          )}
-          {sectionLevel && (
-            <Chip
-              label={`Lv. ${sectionLevel.level}`}
-              size="small"
-              variant="outlined"
-              sx={{ fontWeight: 700 }}
-            />
+
+        {/* Embedded metrics axis: stat chips + progress meter live in the header row */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ justifyContent: "flex-end", width: { xs: "100%", lg: "auto" } }}
+        >
+          <Stack
+            direction="row"
+            spacing={0.75}
+            alignItems="center"
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ justifyContent: { xs: "center", sm: "flex-end" } }}
+          >
+            {pending.length > 0 && (
+              <Chip
+                label={`${pending.length} pending`}
+                size="small"
+                color="warning"
+                icon={<HourglassTopIcon />}
+                sx={{ fontWeight: 700 }}
+              />
+            )}
+            {completed.length > 0 && (
+              <Chip
+                label={`${completed.length} done`}
+                size="small"
+                color="success"
+                icon={<CheckCircleIcon />}
+                sx={{ fontWeight: 700 }}
+              />
+            )}
+            {overdueCount > 0 && (
+              <Chip
+                label={`${overdueCount} overdue`}
+                size="small"
+                color="error"
+                icon={<WarningAmberIcon />}
+                sx={{ fontWeight: 700 }}
+              />
+            )}
+            {sectionLevel && (
+              <Chip
+                label={`Lv. ${sectionLevel.level}`}
+                size="small"
+                variant="outlined"
+                sx={{ fontWeight: 700 }}
+              />
+            )}
+          </Stack>
+
+          {assignments.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "center", sm: "flex-end" },
+              }}
+            >
+              <GradeDonut value={completionPct} size={36} label="Completion" />
+            </Box>
           )}
         </Stack>
       </AccordionSummary>
 
       <AccordionDetails
         id={`section-content-${section.id}`}
-        sx={{ px: 2.5, pb: 2.5, pt: 0 }}
+        sx={{ px: 2.5, pb: 2.5, pt: 1.5 }}
       >
-        {/* Progress bar */}
-        {assignments.length > 0 && (
-          <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-            <LinearProgress
-              variant="determinate"
-              value={completionPct}
-              sx={{ flex: 1, height: 6, borderRadius: 3 }}
-              color={completionPct === 100 ? "success" : "primary"}
-              aria-label={`${completionPct}% complete`}
-            />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ whiteSpace: "nowrap" }}
-            >
-              {completionPct}%
-            </Typography>
-          </Box>
-        )}
-
         {/* Progress summary sentence (Phase 5.4) */}
         {assignments.length > 0 && (
           <Typography

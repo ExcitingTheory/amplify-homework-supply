@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
@@ -7,6 +8,9 @@ import { uploadData } from "aws-amplify/storage";
 import { listSectionStudents } from "../../../actions/section";
 import { formatLastFirst, getInitials } from "@/utils/formatUserName";
 import { trackGradeSubmitted, trackGuildViewed } from "@/utils/analytics";
+import { useAppShell } from "@/components/AppShellContext";
+import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 import {
   Button,
@@ -14,7 +18,6 @@ import {
   Card,
   Typography,
   CardMedia,
-  CardContent,
   CardActions,
   Container,
   TableContainer,
@@ -39,17 +42,28 @@ import {
   Switch,
   Select,
   MenuItem,
+  Menu,
+  Alert,
   FormControl,
   InputLabel,
   Skeleton,
   Chip,
   Tooltip,
   Divider,
+  Tabs,
+  Tab,
+  Checkbox,
+  Toolbar,
+  InputAdornment,
+  Popover,
+  Radio,
+  RadioGroup,
+  FormLabel,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { fuzzyMatch } from "@/utils/fuzzyMatch";
+import { maskEmail } from "@/utils/maskEmail";
 
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import PrefetchBadge from "@/components/PrefetchBadge";
 import {
   InlineGradeCell,
@@ -58,14 +72,23 @@ import {
   GradeCellRegistryContext,
 } from "@/components/InlineGradeCell";
 
-import CameraIcon from "@mui/icons-material/Camera";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VideocamIcon from "@mui/icons-material/Videocam";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getResponsiveImageUrls } from "@/utils/getResponsiveImageUrls";
-import LazyCardMedia from "@/components/LazyCardMedia";
+import { AssignmentFeedCard } from "./components/AssignmentFeedCard";
+import {
+  SectionTitleBar,
+  TITLE_BAR_SETTLE_MS,
+} from "./components/SectionTitleBar";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
+import { EmptyState } from "@/components/EmptyState";
+import { FiImage } from "react-icons/fi";
 import FilesContext from "@/context/fileContext";
 import UnitContext from "@/context/unitContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
@@ -105,6 +128,35 @@ import {
 import { openDiscussion } from "@/utils/chatDiscussBus";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
+
+function HighlightedText({ text, indices }) {
+  if (!indices?.length) return text;
+  const marked = new Set(indices);
+  const segments = [];
+  for (let i = 0; i < text.length; i++) {
+    const match = marked.has(i);
+    const last = segments[segments.length - 1];
+    if (last && last.match === match) last.text += text[i];
+    else segments.push({ text: text[i], match });
+  }
+  return segments.map((segment, i) =>
+    segment.match ? (
+      <Box
+        key={i}
+        component="mark"
+        sx={{
+          bgcolor: "warning.light",
+          color: "warning.contrastText",
+          borderRadius: 0.5,
+        }}
+      >
+        {segment.text}
+      </Box>
+    ) : (
+      <React.Fragment key={i}>{segment.text}</React.Fragment>
+    ),
+  );
+}
 
 function FeaturedImage({ style, s3Key, identityId }) {
   const [url, setUrl] = React.useState(null);
@@ -219,6 +271,20 @@ function SectionDetail({
   const client = getAmplifyClient();
   const t = useTranslations("pages");
   const tCommon = useTranslations("common");
+  const { toolbarPortalRef, appBarHeight } = useAppShell();
+  const isAppBarScrolled = useScrolledAppBar();
+  const reducedMotion = useReducedMotion();
+  // Hide the sticky notice while the AppBar resizes so it doesn't trail the bar.
+  const [noticeTucked, setNoticeTucked] = React.useState(false);
+  const previousAppBarScrolledRef = React.useRef(isAppBarScrolled);
+  React.useEffect(() => {
+    if (previousAppBarScrolledRef.current === isAppBarScrolled) return;
+    previousAppBarScrolledRef.current = isAppBarScrolled;
+    if (reducedMotion) return;
+    setNoticeTucked(true);
+    const timer = setTimeout(() => setNoticeTucked(false), TITLE_BAR_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [isAppBarScrolled, reducedMotion]);
 
   const router = useRouter();
 
@@ -243,6 +309,11 @@ function SectionDetail({
   const [inProgress, setInProgress] = React.useState(false);
   const [curveSettings, setCurveSettings] = React.useState({}); // { [unitID]: { method: 'scale-to-top' | 'linear-adjustment' } }
   const hasCurve = Object.keys(curveSettings).length > 0;
+  // Draft state for the unified "Apply Curve" control (type + target columns)
+  const [curveMethodDraft, setCurveMethodDraft] =
+    React.useState("scale-to-top");
+  const [curveTargetDraft, setCurveTargetDraft] = React.useState([]);
+  const [curveMenuAnchorEl, setCurveMenuAnchorEl] = React.useState(null);
   const [showFutureAssignments, setShowFutureAssignments] =
     React.useState(false);
   const [showDraftAssignments, setShowDraftAssignments] = React.useState(false);
@@ -275,13 +346,61 @@ function SectionDetail({
   const [chapterPopoverData, setChapterPopoverData] = React.useState(null);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
+  const [viewModeNoticeDismissed, setViewModeNoticeDismissed] =
+    React.useState(false);
+  const handleViewAsStudentChange = (nextMode) => {
+    if (nextMode !== viewAsStudent) setViewModeNoticeDismissed(false);
+    setViewAsStudent(nextMode);
+  };
+  const [activeTab, setActiveTab] = React.useState("assignments");
+  // Instructors (and teacher collaborators) see the full gradebook under the
+  // "Gradebook" tab; students (and instructors previewing student view) see
+  // their own assignment/grade table under "Assignments" instead.
+  const gradebookTabKey =
+    (isOwner || isTeacher) && !viewAsStudent ? "gradebook" : "assignments";
   const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
   const [sectionSquads, setSectionSquads] = React.useState([]);
   const [openRooms, setOpenRooms] = React.useState([]);
   // Student sort: "natural" (original order), "first" (first name A-Z), "last" (last name A-Z)
   const [studentSort, setStudentSort] = React.useState("natural");
+  const [studentQuery, setStudentQuery] = React.useState("");
 
   const { id, locale } = useParams();
+
+  // The quick-nav sidebar (MainToolbar) jumps straight to a heading id; since
+  // that content now lives behind Tabs, switch tabs first, then scroll once
+  // the target section has rendered.
+  const pendingScrollIdRef = React.useRef(null);
+  React.useEffect(() => {
+    const headingToTab = {
+      "nav-section-students": "students",
+      "nav-section-gradebook": "gradebook",
+      "nav-section-completion": "gradebook",
+      "nav-section-leaderboard": "leaderboard",
+      "nav-section-assignments": "assignments",
+    };
+    function handleNavJump(event) {
+      const headingId = event?.detail?.headingId;
+      const targetTab = headingId && headingToTab[headingId];
+      if (!targetTab) return;
+      pendingScrollIdRef.current = headingId;
+      setActiveTab(targetTab);
+    }
+    window.addEventListener("section-detail-nav", handleNavJump);
+    return () =>
+      window.removeEventListener("section-detail-nav", handleNavJump);
+  }, []);
+  React.useEffect(() => {
+    if (!pendingScrollIdRef.current) return;
+    const headingId = pendingScrollIdRef.current;
+    pendingScrollIdRef.current = null;
+    const raf = requestAnimationFrame(() => {
+      document
+        .getElementById(headingId)
+        ?.scrollIntoView({ behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [activeTab]);
 
   // Emit a section-viewed engagement event once per section id
   const guildViewTrackedRef = React.useRef(null);
@@ -295,6 +414,24 @@ function SectionDetail({
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
   const [coverVideoUrlInput, setCoverVideoUrlInput] = React.useState("");
+  const [coverVideoDialogOpen, setCoverVideoDialogOpen] = React.useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
+  const [skillTreeOpen, setSkillTreeOpen] = React.useState(false);
+  const [configureAnchorEl, setConfigureAnchorEl] = React.useState(null);
+  const [joinCodeCopied, setJoinCodeCopied] = React.useState(false);
+  const imageFileInputRef = React.useRef(null);
+  const [sectionNameInput, setSectionNameInput] = React.useState("");
+  const [sectionDescriptionInput, setSectionDescriptionInput] =
+    React.useState("");
+
+  // Keep the editable title/description fields in sync with the live section
+  // record (e.g. after a subscription update from another tab/collaborator).
+  React.useEffect(() => {
+    setSectionNameInput(section?.name || "");
+  }, [section?.name]);
+  React.useEffect(() => {
+    setSectionDescriptionInput(section?.description || "");
+  }, [section?.description]);
 
   const { session } = React.useContext(FilesContext);
 
@@ -476,36 +613,52 @@ function SectionDetail({
     setIsDragging(true);
   };
 
-  const handleDrop = async (event) => {
-    console.log("dropped");
-    event.preventDefault();
-    event.stopPropagation();
-
-    console.log(event.dataTransfer.files);
-
-    const files = Array.from(event.dataTransfer.files);
-
-    console.log("files>>>>", files);
-
-    const _toupload = files.map((f, index) => {
-      return {
-        file: f,
-        index,
-      };
-    });
-
+  // Shared by drag-drop and the "browse files" input in the empty state.
+  const processFiles = (files) => {
+    const _toupload = files.map((f, index) => ({ file: f, index }));
     const _fileOperations = files.map((f) => ({
       name: f.name,
       progress: "0%",
     }));
-
-    console.log("_toupload", _toupload);
-    console.log("_fileOperations", _fileOperations);
-
     setFilesToUpload(_toupload);
     setFileOperations(_fileOperations);
+  };
 
+  const handleDrop = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    processFiles(Array.from(event.dataTransfer.files));
     setIsDragging(false);
+  };
+
+  const handleImageFileInputChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length) processFiles(files);
+    event.target.value = "";
+  };
+
+  const handleRemoveSectionFeaturedImage = async () => {
+    if (!section?.id) return;
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        featuredImage: null,
+        _version: section._version,
+      });
+    } catch (error) {
+      console.error("Error removing section featured image:", error);
+    }
+  };
+
+  const handleCopyJoinCode = async () => {
+    if (!section?.code) return;
+    try {
+      await navigator.clipboard.writeText(section.code);
+      setJoinCodeCopied(true);
+      setTimeout(() => setJoinCodeCopied(false), 2000);
+    } catch (error) {
+      console.error("Error copying join code:", error);
+    }
   };
 
   const handleSaveSectionCoverVideo = async () => {
@@ -533,6 +686,39 @@ function SectionDetail({
       });
     } catch (error) {
       console.error("Error removing section cover video:", error);
+    }
+  };
+
+  const handleSaveSectionName = async () => {
+    const trimmed = sectionNameInput.trim();
+    if (!section?.id || !trimmed || trimmed === section?.name) {
+      setSectionNameInput(section?.name || "");
+      return;
+    }
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        name: trimmed,
+        _version: section._version,
+      });
+    } catch (error) {
+      console.error("Error saving section name:", error);
+      setSectionNameInput(section?.name || "");
+    }
+  };
+
+  const handleSaveSectionDescription = async () => {
+    const trimmed = sectionDescriptionInput.trim();
+    if (!section?.id || trimmed === (section?.description || "")) return;
+    try {
+      await client.models.Section.update({
+        id: section.id,
+        description: trimmed,
+        _version: section._version,
+      });
+    } catch (error) {
+      console.error("Error saving section description:", error);
+      setSectionDescriptionInput(section?.description || "");
     }
   };
 
@@ -1202,40 +1388,40 @@ function SectionDetail({
     return grade;
   };
 
-  // Toggle assignment curve on/off (adds with default method or removes)
-  const toggleCurveAssignment = (assignmentId) => {
+  // Resolve a curve method key to a human-readable name for tooltips/labels.
+  const getCurveMethodLabel = (method) => {
+    if (method === "scale-to-top") return t("sectionDetail.scaleToTopMethod");
+    if (method === "linear-adjustment")
+      return t("sectionDetail.linearAdjustmentMethod");
+    return method;
+  };
+
+  // Apply the drafted curve type to every selected target column — "no-curve"
+  // clears those columns instead of setting a method.
+  const handleApplyCurve = () => {
     setCurveSettings((prev) => {
       const next = { ...prev };
-      if (next[assignmentId]) {
-        delete next[assignmentId];
-      } else {
-        next[assignmentId] = { method: "scale-to-top" };
-      }
+      curveTargetDraft.forEach((unitId) => {
+        if (curveMethodDraft === "no-curve") {
+          delete next[unitId];
+        } else {
+          next[unitId] = { method: curveMethodDraft };
+        }
+      });
       return next;
     });
+    setCurveMenuAnchorEl(null);
   };
 
-  // Change curve method for a specific assignment
-  const setCurveMethodForAssignment = (assignmentId, method) => {
-    setCurveSettings((prev) => ({
-      ...prev,
-      [assignmentId]: { method },
-    }));
-  };
-
-  // Select all assignments for curve (with default method)
-  const selectAllCurveAssignments = () => {
-    const all = {};
-    visibleAssignments.forEach((a) => {
-      all[a.unitID] = curveSettings[a.unitID] || { method: "scale-to-top" };
-    });
-    setCurveSettings(all);
-  };
-
-  // Clear all curve selections
-  const clearAllCurveAssignments = () => {
-    setCurveSettings({});
-  };
+  const appliedCurveMethods = [
+    ...new Set(Object.values(curveSettings).map((setting) => setting.method)),
+  ];
+  const curveButtonLabel =
+    appliedCurveMethods.length === 0
+      ? t("sectionDetail.noCurve", "No Curve")
+      : appliedCurveMethods.length === 1
+        ? getCurveMethodLabel(appliedCurveMethods[0])
+        : t("sectionDetail.mixedCurves", "Mixed curves");
 
   // Save curve settings to section when they change
   useEffect(() => {
@@ -1423,32 +1609,34 @@ function SectionDetail({
   const sortStudents = React.useCallback(
     (students) => {
       if (studentSort === "natural") return students;
+      // Many roster records only carry the legacy `name` field, so derive
+      // first/last from it when the structured fields are missing.
+      const nameParts = (student) => {
+        const parts = (student.name || "").trim().split(/\s+/).filter(Boolean);
+        const fallback = student.email || student.id || "";
+        return {
+          first: (
+            student.preferredName ||
+            student.firstName ||
+            parts[0] ||
+            fallback
+          ).trim(),
+          last: (
+            student.lastName ||
+            parts[parts.length - 1] ||
+            fallback
+          ).trim(),
+        };
+      };
+      const compare = (x, y) =>
+        x.localeCompare(y, undefined, { sensitivity: "base" });
       return [...students].sort((a, b) => {
-        if (studentSort === "first") {
-          const firstA = (
-            a.preferredName ||
-            a.firstName ||
-            a.name ||
-            a.email ||
-            a.id ||
-            ""
-          ).trim();
-          const firstB = (
-            b.preferredName ||
-            b.firstName ||
-            b.name ||
-            b.email ||
-            b.id ||
-            ""
-          ).trim();
-          return firstA.localeCompare(firstB);
-        }
-        // "last" — sort by last name, then first/preferred name
-        const lastA = (a.lastName || "").trim();
-        const lastB = (b.lastName || "").trim();
-        const firstA = (a.preferredName || a.firstName || "").trim();
-        const firstB = (b.preferredName || b.firstName || "").trim();
-        return lastA.localeCompare(lastB) || firstA.localeCompare(firstB);
+        const nameA = nameParts(a);
+        const nameB = nameParts(b);
+        return studentSort === "first"
+          ? compare(nameA.first, nameB.first) || compare(nameA.last, nameB.last)
+          : compare(nameA.last, nameB.last) ||
+              compare(nameA.first, nameB.first);
       });
     },
     [studentSort],
@@ -1457,6 +1645,20 @@ function SectionDetail({
   const sortedStudents = React.useMemo(
     () => sortStudents(Object.values(sectionStudents)),
     [sectionStudents, sortStudents],
+  );
+
+  const rosterRows = React.useMemo(
+    () =>
+      sortedStudents.flatMap((student) => {
+        const name = formatLastFirst(student);
+        // Search the masked value so the query can't reveal hidden characters.
+        const email = maskEmail(student.email || "");
+        const nameMatch = fuzzyMatch(studentQuery, name);
+        const emailMatch = fuzzyMatch(studentQuery, email);
+        if (!nameMatch && !emailMatch) return [];
+        return [{ student, name, email, nameMatch, emailMatch }];
+      }),
+    [sortedStudents, studentQuery],
   );
 
   React.useEffect(() => {
@@ -1468,13 +1670,74 @@ function SectionDetail({
 
   return (
     <>
+      {/* Title/description live in the main AppBar (same pattern as the Workbook/Unit editor) */}
+      {section &&
+        toolbarPortalRef?.current &&
+        createPortal(
+          <SectionTitleBar
+            name={sectionNameInput}
+            description={sectionDescriptionInput}
+            editable={(isOwner || isTeacher) && !viewAsStudent}
+            isScrolled={isAppBarScrolled}
+            untitledLabel={t(
+              "sectionDetail.untitledSection",
+              "Untitled Section",
+            )}
+            addDescriptionLabel={t(
+              "sectionDetail.descriptionPlaceholder",
+              "Add a description…",
+            )}
+            onNameChange={setSectionNameInput}
+            onNameBlur={handleSaveSectionName}
+            onDescriptionChange={setSectionDescriptionInput}
+            onDescriptionBlur={handleSaveSectionDescription}
+          />,
+          toolbarPortalRef.current,
+        )}
+
+      {section && (isOwner || isTeacher) && !viewModeNoticeDismissed && (
+        <Alert
+          severity={viewAsStudent ? "info" : "warning"}
+          onClose={() => setViewModeNoticeDismissed(true)}
+          sx={{
+            position: "sticky",
+            top: appBarHeight || 48,
+            zIndex: (theme) => theme.zIndex.appBar - 1,
+            transform: noticeTucked
+              ? `translateY(calc(-100% - ${appBarHeight || 48}px))`
+              : "none",
+            transition: reducedMotion
+              ? "none"
+              : noticeTucked
+                ? "transform 150ms cubic-bezier(0.4, 0, 1, 1)"
+                : "transform 250ms cubic-bezier(0, 0, 0.2, 1)",
+            width: "calc(100% - 2rem)",
+            maxWidth: "80rem",
+            mx: "auto",
+            py: 0,
+            borderRadius: 0,
+            "& .MuiAlert-message": { py: 0.5 },
+          }}
+        >
+          {viewAsStudent
+            ? t(
+                "sectionDetail.studentViewNotice",
+                "You are previewing student view.",
+              )
+            : t(
+                "sectionDetail.instructorViewNotice",
+                "Instructor view is active.",
+              )}
+        </Alert>
+      )}
+
       {/* Show skeleton while section data is loading — matches loading.tsx */}
       {!section && (
         <Box>
           {/* Section hero card */}
           <Box
             sx={{
-              width: "90vw",
+              width: "90%",
               maxWidth: "80rem",
               margin: "5rem auto 2rem",
               borderRadius: 2,
@@ -1505,7 +1768,7 @@ function SectionDetail({
           </Box>
 
           {/* Students table */}
-          <Box sx={{ width: "90vw", maxWidth: "90vw", margin: "2rem auto" }}>
+          <Box sx={{ width: "90%", margin: "2rem auto" }}>
             <Skeleton variant="text" width={120} height={28} sx={{ mb: 1 }} />
             <Box
               sx={{
@@ -1553,7 +1816,7 @@ function SectionDetail({
           </Box>
 
           {/* Gradebook area */}
-          <Box sx={{ width: "90vw", maxWidth: "90vw", margin: "2rem auto" }}>
+          <Box sx={{ width: "90%", margin: "2rem auto" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
               <Skeleton variant="text" width={120} height={28} />
               <Box sx={{ flexGrow: 1 }} />
@@ -1584,24 +1847,19 @@ function SectionDetail({
           data-tour="section-card"
           variant="assignment"
           sx={{
-            width: "90vw",
+            width: "90%",
             margin: "5rem auto",
             maxWidth: "80rem",
+            // Keep the hover-lifted elevation while the Configure menu is open —
+            // otherwise the mouse leaving for the (portaled) menu drops the card
+            // back down mid-interaction, shifting the anchor and clipping the menu.
+            ...(Boolean(configureAnchorEl) && {
+              boxShadow: (theme) =>
+                theme.shadows[SEMANTIC_THEME.elevation.cardHover],
+              transform: "translateY(-2px)",
+            }),
           }}
         >
-          {/* Section-scoped Skill Tree modal button */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              padding: "1rem",
-            }}
-          >
-            <React.Suspense fallback={null}>
-              {/* Dynamically import to avoid SSR issues if needed */}
-              {id && <SkillTreePopupButton sectionId={id} />}
-            </React.Suspense>
-          </div>
           {/* {section?.featuredImage &&
           <CardMediaComponent
           s3Key={section?.featuredImage}
@@ -1698,137 +1956,40 @@ function SectionDetail({
               // </Box>
             }
             {!section?.featuredImage && (
-              <Box
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "1rem",
-                  // height: '100%',
-                  // width: '100%',
-                  border: "1px dashed currentColor",
-                  opacity: 0.5,
+              <EmptyState
+                icon={<FiImage />}
+                title={t("sectionDetail.noFeaturedImage")}
+                description={t("sectionDetail.dragAndDropPrompt")}
+                dense
+                isDragActive={isDragging}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(false);
                 }}
-              >
-                <Typography
-                  variant="body1"
-                  component="div"
-                  sx={{
-                    flexGrow: 1,
-                    textWrap: "wrap",
-                  }}
-                >
-                  <CameraIcon
-                    sx={{
-                      fontSize: "2rem",
-                      margin: "1rem auto",
-                      display: "block",
-                    }}
-                  />
-                  <br />
-                  <span>
-                    {t("sectionDetail.noFeaturedImage")}.
-                    {t("sectionDetail.dragAndDropPrompt")}
-                  </span>
-                </Typography>
-              </Box>
+                ctaLabel={t("sectionDetail.browseFiles", "or browse files")}
+                onCtaClick={() => imageFileInputRef.current?.click()}
+                sx={{ m: 2 }}
+              />
             )}
+            <input
+              ref={imageFileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageFileInputChange}
+            />
           </div>
 
-          <CardContent>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-                marginBottom: "1rem",
-              }}
-            >
-              <Box>
-                <Typography gutterBottom variant="h3" component="div">
-                  {section?.name}
-                </Typography>
-
-                <Typography gutterBottom variant="h5" component="div">
-                  {t("sectionDetail.joinCode")}{" "}
-                  <Box
-                    component="code"
-                    data-tour="join-code"
-                    sx={{
-                      fontFamily: "monospace",
-                      fontWeight: 600,
-                      backgroundColor: "action.hover",
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1,
-                    }}
-                  >
-                    {section?.code}
-                  </Box>
-                </Typography>
-
-                <Typography variant="body2" color="text.secondary">
-                  {section?.description}
-                </Typography>
-              </Box>
-              {isOwner && (
-                <Tooltip
-                  title={
-                    viewAsStudent
-                      ? t("sectionDetail.switchToInstructorView")
-                      : t("sectionDetail.previewStudentView")
-                  }
-                >
-                  <Button
-                    variant={viewAsStudent ? "contained" : "outlined"}
-                    size="small"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => setViewAsStudent(!viewAsStudent)}
-                    sx={{ minWidth: 180 }}
-                  >
-                    {viewAsStudent
-                      ? t("sectionDetail.studentView")
-                      : t("sectionDetail.instructorView")}
-                  </Button>
-                </Tooltip>
-              )}
-            </Box>
-          </CardContent>
-          {/* Cover Video — instructor only */}
-          {(isOwner || isTeacher) && !viewAsStudent && (
-            <Box sx={{ px: 2, pb: 2 }}>
-              <Divider sx={{ mb: 2 }} />
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="h6">
-                  {t("sectionDetail.setCoverVideo")}
-                </Typography>
-                {section?.featuredVideo && (
-                  <IconButton
-                    size="small"
-                    title={t("sectionDetail.removeCoverVideo")}
-                    onClick={handleRemoveSectionCoverVideo}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </Box>
-              {section?.featuredVideo ? (
+          {/* Cover video — display only; editing happens via the Configure menu's modal */}
+          {section?.featuredVideo &&
+            (isOwner || isTeacher) &&
+            !viewAsStudent && (
+              <Box sx={{ px: 2, pt: 2 }}>
                 <Box
-                  sx={{
-                    width: "100%",
-                    borderRadius: 1,
-                    overflow: "hidden",
-                    mb: 1,
-                  }}
+                  sx={{ width: "100%", borderRadius: 1, overflow: "hidden" }}
                 >
                   <video
                     src={section.featuredVideo}
@@ -1836,911 +1997,946 @@ function SectionDetail({
                     style={{ width: "100%", maxHeight: 200, display: "block" }}
                   />
                 </Box>
-              ) : (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    p: 2,
-                    border: "1px dashed currentColor",
-                    opacity: 0.6,
-                    borderRadius: 1,
-                    mb: 1,
-                  }}
-                >
-                  <VideocamIcon />
-                  <Typography variant="body2">
-                    {t("sectionDetail.noCoverVideo")}
-                  </Typography>
-                </Box>
-              )}
-              <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  label={t("sectionDetail.coverVideoUrlLabel")}
-                  placeholder={t("sectionDetail.coverVideoUrlPlaceholder")}
-                  value={coverVideoUrlInput}
-                  onChange={(e) => setCoverVideoUrlInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSaveSectionCoverVideo();
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleSaveSectionCoverVideo}
-                  disabled={!coverVideoUrlInput.trim()}
-                  sx={{ whiteSpace: "nowrap", minWidth: "auto", flexShrink: 0 }}
-                >
-                  {t("sectionDetail.saveCoverVideo")}
-                </Button>
               </Box>
-            </Box>
-          )}
-          {/* <CardActions>
-        <Button size="small">Share</Button>
-        <Button size="small">Learn More</Button>
-      </CardActions> */}
+            )}
+
+          {/* Footer — Configure (secondary, left) and Copy Join Code (primary, right) */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 1,
+              p: 2,
+              mt: 1,
+            }}
+          >
+            {isOwner || isTeacher ? (
+              <>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  endIcon={<ArrowDropDownIcon />}
+                  onClick={(event) => setConfigureAnchorEl(event.currentTarget)}
+                >
+                  {t("sectionDetail.configure", "Configure")}
+                </Button>
+                <Menu
+                  anchorEl={configureAnchorEl}
+                  open={Boolean(configureAnchorEl)}
+                  onClose={() => setConfigureAnchorEl(null)}
+                  // Force a real portal: Card always has `overflow: hidden`
+                  // baked in by MUI, so an inline-rendered menu gets clipped
+                  // at the card's edge (Storybook's MuiModal default even
+                  // disables portals globally — override it here).
+                  disablePortal={false}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setSkillTreeOpen(true);
+                      setConfigureAnchorEl(null);
+                    }}
+                  >
+                    <AccountTreeIcon fontSize="small" sx={{ mr: 1 }} />
+                    {t("sectionDetail.skills", "Skills")}
+                  </MenuItem>
+                  {isOwner && [
+                    <Divider key="view-mode-divider" />,
+                    <MenuItem
+                      key="instructor-view"
+                      selected={!viewAsStudent}
+                      onClick={() => {
+                        handleViewAsStudentChange(false);
+                        setConfigureAnchorEl(null);
+                      }}
+                    >
+                      {t(
+                        "sectionDetail.showInstructorView",
+                        "Show Instructor View",
+                      )}
+                    </MenuItem>,
+                    <MenuItem
+                      key="student-view"
+                      selected={viewAsStudent}
+                      onClick={() => {
+                        handleViewAsStudentChange(true);
+                        setConfigureAnchorEl(null);
+                      }}
+                    >
+                      {t("sectionDetail.showStudentView", "Show Student View")}
+                    </MenuItem>,
+                  ]}
+                  <Divider />
+                  <MenuItem
+                    onClick={() => {
+                      setImageDialogOpen(true);
+                      setConfigureAnchorEl(null);
+                    }}
+                  >
+                    {t(
+                      "sectionDetail.editFeaturedImage",
+                      "Edit featured image",
+                    )}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setCoverVideoUrlInput(section?.featuredVideo || "");
+                      setCoverVideoDialogOpen(true);
+                      setConfigureAnchorEl(null);
+                    }}
+                  >
+                    {t(
+                      "sectionDetail.editFeaturedVideo",
+                      "Edit featured video",
+                    )}
+                  </MenuItem>
+                  {isOwner && [
+                    <Divider key="delete-divider" />,
+                    <MenuItem
+                      key="delete-section"
+                      onClick={() => {
+                        setConfigureAnchorEl(null);
+                        handleDeleteSection();
+                      }}
+                      sx={{ color: "error.main" }}
+                    >
+                      <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                      {t("sectionDetail.deleteSection")}
+                    </MenuItem>,
+                  ]}
+                </Menu>
+                <React.Suspense fallback={null}>
+                  {id && (
+                    <SkillTreePopupButton
+                      sectionId={id}
+                      hideTrigger
+                      open={skillTreeOpen}
+                      onOpenChange={setSkillTreeOpen}
+                    />
+                  )}
+                </React.Suspense>
+              </>
+            ) : (
+              <span />
+            )}
+            <Tooltip
+              title={
+                joinCodeCopied
+                  ? t("sectionDetail.copied", "Copied!")
+                  : t("sectionDetail.copyJoinCode", "Copy Join Code")
+              }
+              arrow
+            >
+              <Button
+                data-tour="join-code"
+                variant="contained"
+                size="small"
+                startIcon={joinCodeCopied ? <CheckIcon /> : <ContentCopyIcon />}
+                onClick={handleCopyJoinCode}
+                aria-label={`${t("sectionDetail.copyJoinCode", "Copy Join Code")}: ${section?.code || ""}`}
+                sx={{ fontFamily: "monospace", letterSpacing: "0.05em" }}
+              >
+                {section?.code || ""}
+              </Button>
+            </Tooltip>
+          </Box>
         </Card>
       )}
 
-      {/* Campaign progress panel — instructor only */}
-      {section && (isOwner || isTeacher) && !viewAsStudent && (
+      {/* Edit featured image — drop/upload target + remove */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {t("sectionDetail.editFeaturedImage", "Edit featured image")}
+        </DialogTitle>
+        <DialogContent>
+          {section?.featuredImage && (
+            <Box sx={{ mb: 2, borderRadius: 1, overflow: "hidden" }}>
+              <FeaturedImage
+                s3Key={section.featuredImage}
+                identityId={section?.identityId}
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  maxHeight: 200,
+                  display: "block",
+                }}
+              />
+            </Box>
+          )}
+          <EmptyState
+            icon={<FiImage />}
+            title={t("sectionDetail.noFeaturedImage")}
+            description={t("sectionDetail.dragAndDropPrompt")}
+            dense
+            isDragActive={isDragging}
+            onDragOver={handleDragOver}
+            onDrop={(event) => {
+              handleDrop(event);
+              setImageDialogOpen(false);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            ctaLabel={t("sectionDetail.browseFiles", "or browse files")}
+            onCtaClick={() => imageFileInputRef.current?.click()}
+          />
+        </DialogContent>
+        <DialogActions>
+          {section?.featuredImage && (
+            <Button
+              color="error"
+              onClick={() => {
+                handleRemoveSectionFeaturedImage();
+                setImageDialogOpen(false);
+              }}
+              sx={{ mr: "auto" }}
+            >
+              {t("sectionDetail.removeFeaturedImage", "Remove image")}
+            </Button>
+          )}
+          <Button onClick={() => setImageDialogOpen(false)}>
+            {tCommon("actions.close", "Close")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={coverVideoDialogOpen}
+        onClose={() => setCoverVideoDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{t("sectionDetail.setCoverVideo")}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            size="small"
+            fullWidth
+            label={t("sectionDetail.coverVideoUrlLabel")}
+            placeholder={t("sectionDetail.coverVideoUrlPlaceholder")}
+            value={coverVideoUrlInput}
+            onChange={(e) => setCoverVideoUrlInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && coverVideoUrlInput.trim()) {
+                handleSaveSectionCoverVideo();
+                setCoverVideoDialogOpen(false);
+              }
+            }}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          {section?.featuredVideo && (
+            <Button
+              color="error"
+              onClick={() => {
+                handleRemoveSectionCoverVideo();
+                setCoverVideoDialogOpen(false);
+              }}
+              sx={{ mr: "auto" }}
+            >
+              {t("sectionDetail.removeCoverVideo")}
+            </Button>
+          )}
+          <Button onClick={() => setCoverVideoDialogOpen(false)}>
+            {tCommon("actions.cancel", "Cancel")}
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!coverVideoUrlInput.trim()}
+            onClick={() => {
+              handleSaveSectionCoverVideo();
+              setCoverVideoDialogOpen(false);
+            }}
+          >
+            {t("sectionDetail.saveCoverVideo")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Tab navigation — keeps the Gradebook/Leaderboard/Collaboration modules
+          from all stacking on one scroll axis. Defaults to Assignments. */}
+      {section && (
         <Box
-          id="gamification-section"
-          sx={{ width: "90vw", maxWidth: "80rem", mx: "auto", mt: 2 }}
+          sx={{
+            width: "90%",
+            maxWidth: "80rem",
+            mx: "auto",
+            mt: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
         >
-          <GamificationQuickPanel sectionId={id} locale={locale} />
+          <Tabs
+            value={activeTab}
+            onChange={(_event, value) => setActiveTab(value)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab label={t("sectionDetail.assignments")} value="assignments" />
+            {(isOwner || isTeacher) && !viewAsStudent && (
+              <Tab label={t("sectionDetail.students")} value="students" />
+            )}
+            {(isOwner || isTeacher) && !viewAsStudent && (
+              <Tab label={t("sectionDetail.gradebook")} value="gradebook" />
+            )}
+            {(isOwner || isTeacher) && !viewAsStudent && (
+              <Tab
+                label={t("sectionDetail.campaign", "Campaign")}
+                value="campaign"
+              />
+            )}
+            {leaderboardEnabledLocal && (
+              <Tab
+                label={t("sectionDetail.leaderboard", "Leaderboard")}
+                value="leaderboard"
+              />
+            )}
+            <Tab
+              label={t("sectionDetail.collaboration", "Collaboration")}
+              value="collaboration"
+            />
+          </Tabs>
         </Box>
       )}
 
+      {/* Campaign progress panel — instructor only */}
+      {section &&
+        (isOwner || isTeacher) &&
+        !viewAsStudent &&
+        activeTab === "campaign" && (
+          <Box
+            id="gamification-section"
+            sx={{ width: "90%", maxWidth: "80rem", mx: "auto", mt: 2 }}
+          >
+            <GamificationQuickPanel sectionId={id} locale={locale} />
+          </Box>
+        )}
+
       {Object.keys(sectionStudents).length > 0 &&
         (isOwner || isTeacher) &&
-        !viewAsStudent && (
-          <Box
+        !viewAsStudent &&
+        activeTab === "students" && (
+          <Paper
+            id="nav-section-students"
+            variant="outlined"
             sx={{
-              width: "90vw",
-              maxWidth: "90vw",
-              padding: "1rem",
-              marginBottom: "3rem",
-              margin: "0 auto",
+              width: "90%",
+              maxWidth: "80rem",
+              mx: "auto",
+              mt: 2,
+              mb: 6,
+              overflow: "hidden",
             }}
           >
-            <Box
+            <Toolbar
+              disableGutters
               sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "1rem",
+                px: 1.5,
+                py: 1,
+                gap: 1,
+                flexWrap: "wrap",
+                minHeight: "auto !important",
+                borderBottom: 1,
+                borderColor: "divider",
               }}
             >
-              <Typography
-                id="nav-section-students"
-                variant="h5"
-                component="div"
-                sx={{ flexGrow: 1 }}
-              >
-                {t("sectionDetail.students")}
-              </Typography>
-              <Box
+              {isOwner && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<AccessibilityNewIcon />}
+                  onClick={() => setAccommodationsDialogOpen(true)}
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  {t("sectionDetail.accommodations", "Accommodations")}
+                </Button>
+              )}
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel id="student-sort-label">Sort by</InputLabel>
+                <Select
+                  labelId="student-sort-label"
+                  value={studentSort}
+                  label="Sort by"
+                  onChange={(e) => setStudentSort(e.target.value)}
+                >
+                  <MenuItem value="natural">Original</MenuItem>
+                  <MenuItem value="first">First Name</MenuItem>
+                  <MenuItem value="last">Last Name</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                type="search"
+                size="small"
+                value={studentQuery}
+                onChange={(e) => setStudentQuery(e.target.value)}
+                placeholder={t(
+                  "sectionDetail.searchStudents",
+                  "Search students",
+                )}
+                sx={{ flex: "1 1 220px", minWidth: 180 }}
+                slotProps={{
+                  htmlInput: {
+                    "aria-label": t(
+                      "sectionDetail.searchStudents",
+                      "Search students",
+                    ),
+                  },
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              {isOwner && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<PersonAddAlt1Icon />}
+                  onClick={() => setEnrollDialogOpen(true)}
+                  sx={{ whiteSpace: "nowrap", ml: "auto" }}
+                >
+                  {t("sectionDetail.addStudents", "Add students")}
+                </Button>
+              )}
+            </Toolbar>
+
+            <TableContainer
+              data-testid="roster-table"
+              sx={{ overflowX: "auto" }}
+            >
+              <Table
+                aria-label={t("sectionDetail.students")}
+                size="small"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  flexWrap: "wrap",
-                  justifyContent: "flex-end",
+                  "& .MuiTableCell-root": { py: 0.5, whiteSpace: "nowrap" },
+                  "& .roster-name, & .roster-actions": { width: "1%" },
                 }}
               >
-                {isOwner && (
-                  <>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<PersonAddAlt1Icon />}
-                      onClick={() => setEnrollDialogOpen(true)}
-                      sx={{ whiteSpace: "nowrap" }}
-                    >
-                      {t("sectionDetail.addStudents", "Add students")}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AccessibilityNewIcon />}
-                      onClick={() => setAccommodationsDialogOpen(true)}
-                      sx={{ whiteSpace: "nowrap" }}
-                    >
-                      {t("sectionDetail.accommodations", "Accommodations")}
-                    </Button>
-                  </>
-                )}
-                <FormControl size="small" sx={{ minWidth: 140 }}>
-                  <InputLabel id="student-sort-label">Sort by</InputLabel>
-                  <Select
-                    labelId="student-sort-label"
-                    value={studentSort}
-                    label="Sort by"
-                    onChange={(e) => setStudentSort(e.target.value)}
-                  >
-                    <MenuItem value="natural">Original</MenuItem>
-                    <MenuItem value="first">First Name</MenuItem>
-                    <MenuItem value="last">Last Name</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            </Box>
-
-            <TableContainer component={Paper} data-testid="roster-table">
-              <Table aria-label={t("sectionDetail.students")} size="small">
-                <TableHead>
+                <TableHead
+                  sx={{
+                    "& .MuiTableCell-head": {
+                      typography: "subtitle1",
+                      fontWeight: 600,
+                      py: 1,
+                    },
+                  }}
+                >
                   <TableRow>
-                    <TableCell>{t("sectionDetail.studentHeader")}</TableCell>
-                    <TableCell align="right">
-                      {t("sectionDetail.emailHeader")}
+                    <TableCell className="roster-name">
+                      {t("sectionDetail.studentHeader")}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell>{t("sectionDetail.emailHeader")}</TableCell>
+                    <TableCell align="right" className="roster-actions">
                       {t("sectionDetail.actionsHeader")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {sortedStudents.map((student, studentKey) => {
-                    const accommodation = getStudentAccommodation(
-                      accommodations,
-                      student.id,
-                    );
-                    const showAccommodation = hasAccommodation(accommodation);
-                    const accommodationLabel = showAccommodation
-                      ? [
-                          Number(accommodation.dueDateExtensionDays) > 0
-                            ? `+${accommodation.dueDateExtensionDays}d`
-                            : null,
-                          Number(accommodation.timeMultiplier) > 1
-                            ? `${accommodation.timeMultiplier}×`
-                            : null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")
-                      : "";
-                    return (
-                      <TableRow
-                        key={student.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                          "&:nth-of-type(odd)": {
-                            backgroundColor: "action.hover",
-                          },
-                          "& td, & th": { backgroundColor: "inherit" },
-                        }}
-                      >
-                        <TableCell component="th" scope="row" key={studentKey}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
+                  {rosterRows.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {t(
+                            "sectionDetail.noStudentsMatch",
+                            "No students match your search.",
+                          )}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {rosterRows.map(
+                    ({ student, name, email, nameMatch, emailMatch }) => {
+                      const accommodation = getStudentAccommodation(
+                        accommodations,
+                        student.id,
+                      );
+                      const showAccommodation = hasAccommodation(accommodation);
+                      const accommodationLabel = showAccommodation
+                        ? [
+                            Number(accommodation.dueDateExtensionDays) > 0
+                              ? `+${accommodation.dueDateExtensionDays}d`
+                              : null,
+                            Number(accommodation.timeMultiplier) > 1
+                              ? `${accommodation.timeMultiplier}×`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
+                        : "";
+                      return (
+                        <TableRow
+                          key={student.id}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "action.hover",
+                            },
+                            "& td, & th": { backgroundColor: "inherit" },
+                          }}
+                        >
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            className="roster-name"
                           >
-                            {formatLastFirst(student)}
-                            {showAccommodation && (
-                              <Tooltip
-                                title={
-                                  accommodation.note ||
-                                  t(
-                                    "sectionDetail.accommodations",
-                                    "Accommodations",
-                                  )
-                                }
-                              >
-                                <Chip
-                                  size="small"
-                                  color="info"
-                                  variant="outlined"
-                                  icon={
-                                    <AccessibilityNewIcon fontSize="small" />
-                                  }
-                                  label={
-                                    accommodationLabel ||
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <span>
+                                <HighlightedText
+                                  text={name}
+                                  indices={nameMatch?.indices}
+                                />
+                              </span>
+                              {showAccommodation && (
+                                <Tooltip
+                                  title={
+                                    accommodation.note ||
                                     t(
                                       "sectionDetail.accommodations",
                                       "Accommodations",
                                     )
                                   }
-                                  onClick={
-                                    isOwner
-                                      ? () => setAccommodationsDialogOpen(true)
-                                      : undefined
-                                  }
-                                />
-                              </Tooltip>
-                            )}
-                          </Box>
-                        </TableCell>
-                        <TableCell align="right">{student.email}</TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            edge="end"
-                            aria-label={tCommon("actions.delete")}
-                            onClick={() => handleDelete(student)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                                >
+                                  <Chip
+                                    size="small"
+                                    color="info"
+                                    variant="outlined"
+                                    icon={
+                                      <AccessibilityNewIcon fontSize="small" />
+                                    }
+                                    label={
+                                      accommodationLabel ||
+                                      t(
+                                        "sectionDetail.accommodations",
+                                        "Accommodations",
+                                      )
+                                    }
+                                    onClick={
+                                      isOwner
+                                        ? () =>
+                                            setAccommodationsDialogOpen(true)
+                                        : undefined
+                                    }
+                                  />
+                                </Tooltip>
+                              )}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <HighlightedText
+                              text={email}
+                              indices={emailMatch?.indices}
+                            />
+                          </TableCell>
+                          <TableCell align="right" className="roster-actions">
+                            <IconButton
+                              size="small"
+                              edge="end"
+                              aria-label={tCommon("actions.delete")}
+                              onClick={() => handleDelete(student)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    },
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
+          </Paper>
         )}
 
-      <Box
-        sx={{
-          width: "90vw",
-          maxWidth: "90vw",
-          padding: "1rem",
-          marginBottom: "3rem",
-          margin: "0 auto",
-        }}
-      >
-        {/* Needs Attention strip — instructor action queue (Item 7) */}
-        {isOwner && !viewAsStudent && (
-          <NeedsAttention
-            sectionID={section?.id}
-            assignments={sectionAssignments}
-            grades={grades}
-            students={sortedStudents}
-            openRooms={openRooms}
-            onAssignUnit={() => setAssignmentComposerOpen(true)}
-          />
-        )}
-
+      {activeTab === gradebookTabKey && (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
+            width: "90%",
+            maxWidth: "80rem",
             padding: "1rem",
-            gap: 2,
+            marginBottom: "3rem",
+            margin: "0 auto",
           }}
         >
-          <Box>
-            <Typography
-              id="nav-section-gradebook"
-              variant="h5"
-              component="div"
-              sx={{ lineHeight: 1.2 }}
-            >
-              {t("sectionDetail.gradebook")}
-            </Typography>
-            {visibleAssignmentsCount < totalAssignments && isOwner && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                component="div"
-              >
-                {t("sectionDetail.showingAssignments", {
-                  visible: visibleAssignmentsCount,
-                  total: totalAssignments,
-                })}
-              </Typography>
-            )}
-          </Box>
-
-          {/* Instructor-only controls */}
+          {/* Needs Attention strip — instructor action queue (Item 7) */}
           {isOwner && !viewAsStudent && (
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                alignItems: "center",
-                flexWrap: "wrap",
-                justifyContent: "flex-end",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showFutureAssignments}
-                    onChange={(e) => setShowFutureAssignments(e.target.checked)}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={t("sectionDetail.showFutureAssignments")}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showDraftAssignments}
-                    onChange={(e) => setShowDraftAssignments(e.target.checked)}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={t("sectionDetail.showDraftAssignments")}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={leaderboardEnabledLocal}
-                    onChange={async (e) => {
-                      const checked = e.target.checked;
-                      setLeaderboardEnabledLocal(checked);
-                      try {
-                        const client = getAmplifyClient();
-                        await client.models.Section.update({
-                          id: section.id,
-                          leaderboardEnabled: checked,
-                          _version: section._version,
-                        });
-                      } catch (err) {
-                        console.error(
-                          "Error updating leaderboardEnabled:",
-                          err,
-                        );
-                        setLeaderboardEnabledLocal(!checked);
-                      }
-                    }}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={t(
-                  "sectionDetail.leaderboardEnabled",
-                  "Show Leaderboard",
-                )}
-              />
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setAssignmentComposerOpen(true)}
-                startIcon={<AddIcon />}
-                sx={{ whiteSpace: "nowrap" }}
-              >
-                {t("sectionDetail.assignUnit", "Assign Unit")}
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setBulkDueDateOpen(true)}
-                startIcon={<EditCalendarIcon />}
-                disabled={sectionAssignments.length === 0}
-                sx={{ whiteSpace: "nowrap" }}
-              >
-                {t("sectionDetail.shiftDueDates", "Shift dates")}
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<ChatBubbleOutlineIcon />}
-                onClick={() =>
-                  openDiscussion({
-                    sectionID: section?.id,
-                    scope: "section",
-                    topicName: section?.name || "Section discussion",
-                  })
-                }
-                sx={{ whiteSpace: "nowrap" }}
-              >
-                {t("sectionDetail.discuss", "Discuss")}
-              </Button>
-            </Box>
+            <NeedsAttention
+              sectionID={section?.id}
+              assignments={sectionAssignments}
+              grades={grades}
+              students={sortedStudents}
+              openRooms={openRooms}
+              onAssignUnit={() => setAssignmentComposerOpen(true)}
+            />
           )}
-        </Box>
 
-        {/* Curve controls — select/clear all */}
-        {isOwner && !viewAsStudent && (
           <Box
             sx={{
-              padding: "0 1rem 0.5rem 1rem",
               display: "flex",
-              alignItems: "center",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              padding: "1rem",
               gap: 2,
             }}
           >
-            <Typography variant="subtitle2" color="text.secondary">
-              {t("sectionDetail.selectAssignmentsToCurve")} (
-              {Object.keys(curveSettings).length}/{visibleAssignments.length})
-            </Typography>
-            <Button
-              size="small"
-              onClick={selectAllCurveAssignments}
-              disabled={
-                Object.keys(curveSettings).length === visibleAssignments.length
-              }
-            >
-              {t("sectionDetail.selectAll")}
-            </Button>
-            <Button
-              size="small"
-              onClick={clearAllCurveAssignments}
-              disabled={Object.keys(curveSettings).length === 0}
-            >
-              {t("sectionDetail.clearAll")}
-            </Button>
-          </Box>
-        )}
-
-        {/* Curve Debug Information - only show for selected assignments */}
-        {isOwner && !viewAsStudent && hasCurve && (
-          <Box sx={{ padding: "0 1rem 1rem 1rem" }}>
-            <Typography variant="caption" color="text.secondary">
-              {t("sectionDetail.curveDebugInfo")}
-              {Object.entries(curveSettings)
-                .map(([unitId, setting]) => {
-                  const data = curveData[unitId];
-                  if (!data) return "";
-                  const unitName = units[unitId]?.name || unitId;
-                  if (setting.method === "scale-to-top") {
-                    return ` ${unitName}: max=${data.maxScore.toFixed(1)}%, scale=${data.adjustment.toFixed(2)}x`;
-                  } else {
-                    return ` ${unitName}: avg=${data.avgScore.toFixed(1)}%, adjust=+${data.adjustment.toFixed(1)}%`;
-                  }
-                })
-                .filter(Boolean)
-                .join(" | ")}
-            </Typography>
-          </Box>
-        )}
-
-        {/* Student View - Assignments with lock progression + Chapters */}
-        {(!isOwner || viewAsStudent) && (
-          <>
-            <TableContainer
-              component={Paper}
-              sx={{ overflowX: "auto" }}
-              data-testid="student-grade-table"
-            >
-              <Table
-                aria-label={t("sectionDetail.gradebook")}
-                size="small"
-                sx={{ minWidth: 400 }}
+            <Box>
+              <Typography
+                id="nav-section-gradebook"
+                variant="h5"
+                component="div"
+                sx={{ lineHeight: 1.2 }}
               >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("sectionDetail.assignmentHeader")}</TableCell>
-                    <TableCell>
-                      {t("sectionDetail.chapterHeader", {
-                        defaultValue: "Chapter",
-                      })}
-                    </TableCell>
-                    <TableCell align="right">
-                      {t("sectionDetail.gradeHeader")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {visibleAssignments.map((assignment) => {
-                    const isDraft = assignment.status === "DRAFT";
-                    const isFuture =
-                      clientNow &&
-                      assignment.dueDate &&
-                      new Date(assignment.dueDate) > clientNow;
-                    const canHaveGrades = !isDraft && !isFuture;
+                {t("sectionDetail.gradebook")}
+              </Typography>
+              {visibleAssignmentsCount < totalAssignments && isOwner && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  component="div"
+                >
+                  {t("sectionDetail.showingAssignments", {
+                    visible: visibleAssignmentsCount,
+                    total: totalAssignments,
+                  })}
+                </Typography>
+              )}
+            </Box>
 
-                    const locked = isLocked(assignment.unitID);
-                    const lockStatus = getLockStatus(assignment.unitID);
+            {/* Instructor-only controls */}
+            {isOwner && !viewAsStudent && (
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showFutureAssignments}
+                      onChange={(e) =>
+                        setShowFutureAssignments(e.target.checked)
+                      }
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={t("sectionDetail.showFutureAssignments")}
+                />
 
-                    const studentId = currentUser?.username;
-                    const rawHighest = canHaveGrades
-                      ? myGradeMap[assignment.unitID]?.highest?.accuracy
-                      : undefined;
-                    const grade =
-                      rawHighest !== undefined &&
-                      rawHighest !== null &&
-                      !isNaN(rawHighest)
-                        ? `${Math.round(rawHighest)}%`
-                        : "-";
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showDraftAssignments}
+                      onChange={(e) =>
+                        setShowDraftAssignments(e.target.checked)
+                      }
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={t("sectionDetail.showDraftAssignments")}
+                />
 
-                    // Find which campaign chapter links to this unit
-                    const rowLinkedChapter = [
-                      ...(activeChallenges || []),
-                      ...(completedChallenges || []),
-                    ]
-                      .filter((c) => c.sectionID === id)
-                      .find(
-                        (c) =>
-                          Array.isArray(c.linkedUnitIds) &&
-                          c.linkedUnitIds.includes(assignment.unitID),
-                      );
-
-                    return (
-                      <TableRow
-                        key={assignment.id}
-                        onClick={() =>
-                          !locked &&
-                          setSelectedRow(
-                            selectedRow === assignment.id
-                              ? null
-                              : assignment.id,
-                          )
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={leaderboardEnabledLocal}
+                      onChange={async (e) => {
+                        const checked = e.target.checked;
+                        setLeaderboardEnabledLocal(checked);
+                        try {
+                          const client = getAmplifyClient();
+                          await client.models.Section.update({
+                            id: section.id,
+                            leaderboardEnabled: checked,
+                            _version: section._version,
+                          });
+                        } catch (err) {
+                          console.error(
+                            "Error updating leaderboardEnabled:",
+                            err,
+                          );
+                          setLeaderboardEnabledLocal(!checked);
                         }
-                        sx={{
-                          cursor: locked ? "not-allowed" : "pointer",
-                          opacity: locked ? 0.6 : 1,
-                          backgroundColor:
-                            selectedRow === assignment.id
-                              ? "action.selected"
-                              : "transparent",
-                          "&:nth-of-type(odd)": {
-                            backgroundColor:
-                              selectedRow === assignment.id
-                                ? "action.selected"
-                                : "action.hover",
-                          },
-                          "&:hover": {
-                            backgroundColor: locked
-                              ? "transparent"
-                              : selectedRow === assignment.id
-                                ? "action.selected"
-                                : "action.hover",
-                          },
-                          "& td": { backgroundColor: "inherit" },
-                          transition: "background-color 0.2s ease",
-                        }}
-                      >
-                        <TableCell>
+                      }}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={t(
+                    "sectionDetail.leaderboardEnabled",
+                    "Show Leaderboard",
+                  )}
+                />
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setAssignmentComposerOpen(true)}
+                  startIcon={<AddIcon />}
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  {t("sectionDetail.assignUnit", "Assign Unit")}
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setBulkDueDateOpen(true)}
+                  startIcon={<EditCalendarIcon />}
+                  disabled={sectionAssignments.length === 0}
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  {t("sectionDetail.shiftDueDates", "Shift dates")}
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<ChatBubbleOutlineIcon />}
+                  onClick={() =>
+                    openDiscussion({
+                      sectionID: section?.id,
+                      scope: "section",
+                      topicName: section?.name || "Section discussion",
+                    })
+                  }
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  {t("sectionDetail.discuss", "Discuss")}
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {/* Curve controls — unified type + target dropdown replaces the old select/clear-all toggles */}
+          {isOwner && !viewAsStudent && (
+            <Box
+              sx={{
+                padding: "0 1rem 0.5rem 1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <Button
+                variant={hasCurve ? "contained" : "outlined"}
+                size="small"
+                endIcon={<ArrowDropDownIcon />}
+                aria-haspopup="dialog"
+                aria-expanded={Boolean(curveMenuAnchorEl)}
+                onClick={(event) => setCurveMenuAnchorEl(event.currentTarget)}
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {t("sectionDetail.curve", "Curve")}: {curveButtonLabel}
+                {hasCurve &&
+                  ` (${Object.keys(curveSettings).length}/${visibleAssignments.length})`}
+              </Button>
+              <Popover
+                open={Boolean(curveMenuAnchorEl)}
+                anchorEl={curveMenuAnchorEl}
+                onClose={() => setCurveMenuAnchorEl(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                disablePortal={false}
+                slotProps={{
+                  paper: { sx: { p: 2, width: 320, maxWidth: "90vw" } },
+                }}
+              >
+                <FormLabel
+                  id="curve-method-label"
+                  sx={{ typography: "subtitle2" }}
+                >
+                  {t("sectionDetail.curveType", "Curve type")}
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="curve-method-label"
+                  value={curveMethodDraft}
+                  onChange={(e) => setCurveMethodDraft(e.target.value)}
+                  sx={{ mb: 1 }}
+                >
+                  <FormControlLabel
+                    value="no-curve"
+                    control={<Radio size="small" />}
+                    label={t("sectionDetail.noCurve", "No Curve")}
+                  />
+                  <FormControlLabel
+                    value="scale-to-top"
+                    control={<Radio size="small" />}
+                    label={t("sectionDetail.scaleToTopMethod")}
+                  />
+                  <FormControlLabel
+                    value="linear-adjustment"
+                    control={<Radio size="small" />}
+                    label={t("sectionDetail.linearAdjustmentMethod")}
+                  />
+                </RadioGroup>
+                <Divider sx={{ mb: 1 }} />
+                <FormLabel component="div" sx={{ typography: "subtitle2" }}>
+                  {t("sectionDetail.applyTo", "Apply to")}
+                </FormLabel>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={
+                        visibleAssignments.length > 0 &&
+                        curveTargetDraft.length === visibleAssignments.length
+                      }
+                      indeterminate={
+                        curveTargetDraft.length > 0 &&
+                        curveTargetDraft.length < visibleAssignments.length
+                      }
+                      onChange={(e) =>
+                        setCurveTargetDraft(
+                          e.target.checked
+                            ? visibleAssignments.map((a) => a.unitID)
+                            : [],
+                        )
+                      }
+                    />
+                  }
+                  label={t("sectionDetail.allAssignments", "All Assignments")}
+                />
+                <Box sx={{ pl: 2, maxHeight: 220, overflowY: "auto" }}>
+                  {visibleAssignments.map((a) => {
+                    const appliedMethod = curveSettings[a.unitID]?.method;
+                    return (
+                      <FormControlLabel
+                        key={a.unitID}
+                        sx={{ display: "flex", mr: 0 }}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={curveTargetDraft.includes(a.unitID)}
+                            onChange={(e) =>
+                              setCurveTargetDraft((prev) =>
+                                e.target.checked
+                                  ? [...prev, a.unitID]
+                                  : prev.filter((id) => id !== a.unitID),
+                              )
+                            }
+                          />
+                        }
+                        label={
                           <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
+                            component="span"
+                            sx={{ display: "flex", gap: 1 }}
                           >
-                            {locked && (
-                              <Tooltip
-                                title={
-                                  lockStatus?.unlockDate
-                                    ? `Unlocks on ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
-                                    : lockStatus?.requiredPriorUnitName
-                                      ? `Complete "${lockStatus.requiredPriorUnitName}" first`
-                                      : "Complete the previous assignment first"
-                                }
+                            <span>{units[a.unitID]?.name || a.unitID}</span>
+                            {appliedMethod && (
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                color="primary"
                               >
-                                <LockIcon fontSize="small" color="action" />
-                              </Tooltip>
-                            )}
-                            {units[assignment.unitID]?.name}
-                            {!locked && (
-                              <PrefetchBadge
-                                unitId={assignment.unitID}
-                                client={client}
-                                username={currentUser?.username}
-                                section={section}
-                                assignment={assignment}
-                              />
+                                {getCurveMethodLabel(appliedMethod)}
+                              </Typography>
                             )}
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          {rowLinkedChapter ? (
-                            <Chip
-                              label={
-                                rowLinkedChapter.chapterOrder != null
-                                  ? `Ch. ${rowLinkedChapter.chapterOrder}: ${rowLinkedChapter.title}`
-                                  : rowLinkedChapter.title
-                              }
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                              clickable
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setChapterPopoverAnchor(e.currentTarget);
-                                setChapterPopoverData(rowLinkedChapter);
-                              }}
-                              sx={{
-                                fontSize: "0.7rem",
-                                height: 22,
-                                cursor: "pointer",
-                              }}
-                            />
-                          ) : (
-                            <Typography variant="caption" color="text.disabled">
-                              —
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                              gap: 0.5,
-                            }}
-                          >
-                            {locked ? (
-                              <Chip
-                                size="small"
-                                label={
-                                  lockStatus?.unlockDate
-                                    ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
-                                    : "Locked"
-                                }
-                                color="default"
-                                variant="outlined"
-                                icon={<LockIcon />}
-                              />
-                            ) : (
-                              <>
-                                {grade}
-                                {canHaveGrades && (
-                                  <Tooltip title="Open Workbook">
-                                    <IconButton
-                                      size="small"
-                                      component="a"
-                                      href={`/workbook/${assignment.unitID}`}
-                                      onClick={(e) => e.stopPropagation()}
-                                      sx={{ p: 0.25 }}
-                                    >
-                                      <MenuBookIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                )}
-                              </>
-                            )}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
+                        }
+                      />
                     );
                   })}
-
-                  {/* Total Row */}
-                  <TableRow
-                    sx={{
-                      backgroundColor: "action.hover",
-                      "& td": { backgroundColor: "inherit" },
-                    }}
-                  >
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      {t("sectionDetail.totalAverage")}
-                    </TableCell>
-                    <TableCell />
-                    {/* Chapter column — no total */}
-                    <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                      {(() => {
-                        let totalGrade = 0;
-                        let completedCount = 0;
-
-                        visibleAssignments.forEach((assignment) => {
-                          const isDraft = assignment.status === "DRAFT";
-                          const isFuture =
-                            clientNow &&
-                            assignment.dueDate &&
-                            new Date(assignment.dueDate) > clientNow;
-                          const canHaveGrades = !isDraft && !isFuture;
-
-                          if (canHaveGrades) {
-                            const grade =
-                              myGradeMap[assignment.unitID]?.highest?.accuracy;
-                            if (
-                              grade !== undefined &&
-                              grade !== null &&
-                              !isNaN(grade)
-                            ) {
-                              totalGrade += grade;
-                              completedCount++;
-                            }
-                          }
-                        });
-
-                        const average =
-                          completedCount > 0
-                            ? Math.round(totalGrade / completedCount)
-                            : 0;
-                        const completion =
-                          visibleAssignments.length > 0
-                            ? Math.round(
-                                (completedCount / visibleAssignments.length) *
-                                  100,
-                              )
-                            : 0;
-
-                        return completedCount > 0
-                          ? `${average}% (${completion}% complete)`
-                          : "- (0% complete)";
-                      })()}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            {/* Campaign Chapters */}
-            {(() => {
-              const allChallenges = [
-                ...(activeChallenges || []),
-                ...(completedChallenges || []),
-              ];
-              const sectionChallenges = allChallenges.filter(
-                (ch) => ch.sectionID === id,
-              );
-              if (sectionChallenges.length === 0) return null;
-
-              const chapters = sectionChallenges
-                .sort((a, b) => (a.chapterOrder ?? 0) - (b.chapterOrder ?? 0))
-                .map((ch) => {
-                  const challengeLocked = isLocked(ch.id);
-                  return {
-                    id: ch.id,
-                    title: ch.title,
-                    setting: ch.setting || undefined,
-                    targetXP: ch.targetXP,
-                    currentXP: ch.currentXP || 0,
-                    // If locked by progression, override active to false so timeline shows lock icon
-                    active: challengeLocked ? false : ch.active,
-                  };
-                });
-
-              return (
-                <Box sx={{ mt: 3 }}>
-                  <CampaignTimeline chapters={chapters} />
                 </Box>
-              );
-            })()}
-          </>
-        )}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 1,
+                    mt: 1,
+                  }}
+                >
+                  <Button
+                    size="small"
+                    onClick={() => setCurveMenuAnchorEl(null)}
+                  >
+                    {tCommon("actions.cancel", "Cancel")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    disabled={curveTargetDraft.length === 0}
+                    onClick={handleApplyCurve}
+                  >
+                    {t("sectionDetail.applyCurve", "Apply Curve")}
+                  </Button>
+                </Box>
+              </Popover>
+            </Box>
+          )}
 
-        {/* Instructor View - Full Gradebook */}
-        {isOwner && !viewAsStudent && (
-          <GradeCellRegistryContext.Provider
-            value={gradeCellRegistryRef.current}
-          >
-            <TableContainer
-              component={Paper}
-              sx={{ overflowX: "auto" }}
-              data-testid="gradebook-table"
-            >
-              <Table
-                aria-label={t("sectionDetail.assignments")}
-                size="small"
-                sx={{ minWidth: 650, tableLayout: "auto" }}
+          {/* Curve Debug Information - only show for selected assignments */}
+          {isOwner && !viewAsStudent && hasCurve && (
+            <Box sx={{ padding: "0 1rem 1rem 1rem" }}>
+              <Typography variant="caption" color="text.secondary">
+                {t("sectionDetail.curveDebugInfo")}
+                {Object.entries(curveSettings)
+                  .map(([unitId, setting]) => {
+                    const data = curveData[unitId];
+                    if (!data) return "";
+                    const unitName = units[unitId]?.name || unitId;
+                    if (setting.method === "scale-to-top") {
+                      return ` ${unitName}: max=${data.maxScore.toFixed(1)}%, scale=${data.adjustment.toFixed(2)}x`;
+                    } else {
+                      return ` ${unitName}: avg=${data.avgScore.toFixed(1)}%, adjust=+${data.adjustment.toFixed(1)}%`;
+                    }
+                  })
+                  .filter(Boolean)
+                  .join(" | ")}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Student View - Assignments with lock progression + Chapters */}
+          {(!isOwner || viewAsStudent) && (
+            <>
+              <TableContainer
+                component={Paper}
+                sx={{ overflowX: "auto" }}
+                data-testid="student-grade-table"
               >
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        position: "sticky",
-                        left: 0,
-                        backgroundColor: "background.paper",
-                        zIndex: 10,
-                        minWidth: 150,
-                        boxSizing: "border-box",
-                        boxShadow: "2px 0 4px rgba(0,0,0,0.1)",
-                        borderRight: 2,
-                        borderRightColor: "divider",
-                      }}
-                    >
-                      {t("sectionDetail.learnerHeader")}
-                    </TableCell>
+                <Table
+                  aria-label={t("sectionDetail.gradebook")}
+                  size="small"
+                  sx={{ minWidth: 400 }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        {t("sectionDetail.assignmentHeader")}
+                      </TableCell>
+                      <TableCell>
+                        {t("sectionDetail.chapterHeader", {
+                          defaultValue: "Chapter",
+                        })}
+                      </TableCell>
+                      <TableCell align="right">
+                        {t("sectionDetail.gradeHeader")}
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
                     {visibleAssignments.map((assignment) => {
-                      const unitName = units[assignment.unitID]?.name;
-                      const isDraft = assignment.status === "DRAFT";
-                      const isFuture =
-                        clientNow &&
-                        assignment.dueDate &&
-                        new Date(assignment.dueDate) > clientNow;
-                      const curveMethod =
-                        curveSettings[assignment.unitID]?.method || "";
-
-                      return (
-                        <TableCell
-                          align="right"
-                          key={assignment.id}
-                          sx={
-                            curveMethod
-                              ? {
-                                  backgroundColor: "primary.50",
-                                  borderBottom: "2px solid",
-                                  borderBottomColor: "primary.main",
-                                }
-                              : undefined
-                          }
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "flex-end",
-                              gap: 0.5,
-                            }}
-                          >
-                            {unitName}
-                            <Box sx={{ display: "flex", gap: 0.5 }}>
-                              {isDraft && (
-                                <Chip
-                                  label="Draft"
-                                  size="small"
-                                  color="warning"
-                                />
-                              )}
-                              {isFuture && (
-                                <Chip
-                                  label="Future"
-                                  size="small"
-                                  color="info"
-                                />
-                              )}
-                              {assignment.lateStatus && (
-                                <Chip
-                                  label={`Late: ${assignment.lateStatus}`}
-                                  size="small"
-                                  color={
-                                    assignment.lateStatus === "DROPPED"
-                                      ? "default"
-                                      : "warning"
-                                  }
-                                />
-                              )}
-                            </Box>
-                            <FormControl size="small" sx={{ minWidth: 100 }}>
-                              <Select
-                                value={curveMethod}
-                                displayEmpty
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  if (val === "") {
-                                    // Remove from curve
-                                    setCurveSettings((prev) => {
-                                      const next = { ...prev };
-                                      delete next[assignment.unitID];
-                                      return next;
-                                    });
-                                  } else {
-                                    setCurveMethodForAssignment(
-                                      assignment.unitID,
-                                      val,
-                                    );
-                                  }
-                                }}
-                                size="small"
-                                variant="standard"
-                                sx={{ fontSize: "0.7rem" }}
-                              >
-                                <MenuItem value="">
-                                  <em>
-                                    {t("sectionDetail.noCurve", "No Curve")}
-                                  </em>
-                                </MenuItem>
-                                <MenuItem value="scale-to-top">
-                                  {t("sectionDetail.scaleToTopMethod")}
-                                </MenuItem>
-                                <MenuItem value="linear-adjustment">
-                                  {t("sectionDetail.linearAdjustmentMethod")}
-                                </MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Box>
-                        </TableCell>
-                      );
-                    })}
-                    <TableCell
-                      align="right"
-                      sx={{
-                        fontWeight: "bold",
-                        backgroundColor: "action.hover",
-                      }}
-                    >
-                      Total (Completion)
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {sortedStudents.map((student, studentKey) => {
-                    // Calculate totals for this student
-                    let totalGrade = 0;
-                    let totalCurvedGrade = 0;
-                    let completedAssignments = 0;
-
-                    visibleAssignments.forEach((assignment) => {
-                      // Only count grades for published, non-future assignments
                       const isDraft = assignment.status === "DRAFT";
                       const isFuture =
                         clientNow &&
@@ -2748,256 +2944,723 @@ function SectionDetail({
                         new Date(assignment.dueDate) > clientNow;
                       const canHaveGrades = !isDraft && !isFuture;
 
-                      if (canHaveGrades) {
-                        const highest =
-                          gradeMap[student.id]?.[assignment.unitID]?.highest
-                            ?.accuracy;
-                        if (
-                          highest !== undefined &&
-                          highest !== null &&
-                          !isNaN(highest)
-                        ) {
-                          totalGrade += highest;
-                          const curvedGrade = applyCurve(
-                            highest,
-                            assignment.unitID,
-                          );
-                          totalCurvedGrade += curvedGrade;
-                          completedAssignments++;
-                        }
-                      }
-                    });
+                      const locked = isLocked(assignment.unitID);
+                      const lockStatus = getLockStatus(assignment.unitID);
 
-                    const averageGrade =
-                      completedAssignments > 0
-                        ? Math.round(totalGrade / completedAssignments)
-                        : 0;
-                    const averageCurvedGrade =
-                      completedAssignments > 0
-                        ? Math.round(totalCurvedGrade / completedAssignments)
-                        : 0;
-                    const completionPercentage =
-                      visibleAssignments.length > 0
-                        ? Math.round(
-                            (completedAssignments / visibleAssignments.length) *
-                              100,
-                          )
-                        : 0;
+                      const studentId = currentUser?.username;
+                      const rawHighest = canHaveGrades
+                        ? myGradeMap[assignment.unitID]?.highest?.accuracy
+                        : undefined;
+                      const grade =
+                        rawHighest !== undefined &&
+                        rawHighest !== null &&
+                        !isNaN(rawHighest)
+                          ? `${Math.round(rawHighest)}%`
+                          : "-";
 
-                    const displayAverage = hasCurve
-                      ? averageCurvedGrade
-                      : averageGrade;
+                      // Find which campaign chapter links to this unit
+                      const rowLinkedChapter = [
+                        ...(activeChallenges || []),
+                        ...(completedChallenges || []),
+                      ]
+                        .filter((c) => c.sectionID === id)
+                        .find(
+                          (c) =>
+                            Array.isArray(c.linkedUnitIds) &&
+                            c.linkedUnitIds.includes(assignment.unitID),
+                        );
 
-                    return (
-                      <TableRow
-                        key={student.id}
-                        onClick={() =>
-                          setSelectedRow(
-                            selectedRow === student.id ? null : student.id,
-                          )
-                        }
+                      return (
+                        <TableRow
+                          key={assignment.id}
+                          onClick={() =>
+                            !locked &&
+                            setSelectedRow(
+                              selectedRow === assignment.id
+                                ? null
+                                : assignment.id,
+                            )
+                          }
+                          sx={{
+                            cursor: locked ? "not-allowed" : "pointer",
+                            opacity: locked ? 0.6 : 1,
+                            backgroundColor:
+                              selectedRow === assignment.id
+                                ? "action.selected"
+                                : "transparent",
+                            "&:nth-of-type(odd)": {
+                              backgroundColor:
+                                selectedRow === assignment.id
+                                  ? "action.selected"
+                                  : "action.hover",
+                            },
+                            "&:hover": {
+                              backgroundColor: locked
+                                ? "transparent"
+                                : selectedRow === assignment.id
+                                  ? "action.selected"
+                                  : "action.hover",
+                            },
+                            "& td": { backgroundColor: "inherit" },
+                            transition: "background-color 0.2s ease",
+                          }}
+                        >
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                minWidth: 0,
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                component="span"
+                                sx={{
+                                  minWidth: 0,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {units[assignment.unitID]?.name}
+                              </Box>
+                              {locked && (
+                                <Tooltip
+                                  title={
+                                    lockStatus?.unlockDate
+                                      ? `Unlocks on ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                                      : lockStatus?.requiredPriorUnitName
+                                        ? `Complete "${lockStatus.requiredPriorUnitName}" first`
+                                        : "Complete the previous assignment first"
+                                  }
+                                >
+                                  <LockIcon fontSize="small" color="action" />
+                                </Tooltip>
+                              )}
+                              {!locked && (
+                                <PrefetchBadge
+                                  unitId={assignment.unitID}
+                                  client={client}
+                                  username={currentUser?.username}
+                                  section={section}
+                                  assignment={assignment}
+                                  iconOnly
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            {rowLinkedChapter ? (
+                              <Chip
+                                label={
+                                  rowLinkedChapter.chapterOrder != null
+                                    ? `Ch. ${rowLinkedChapter.chapterOrder}: ${rowLinkedChapter.title}`
+                                    : rowLinkedChapter.title
+                                }
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                clickable
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setChapterPopoverAnchor(e.currentTarget);
+                                  setChapterPopoverData(rowLinkedChapter);
+                                }}
+                                sx={{
+                                  fontSize: "0.7rem",
+                                  height: 22,
+                                  cursor: "pointer",
+                                }}
+                              />
+                            ) : (
+                              <Typography
+                                variant="caption"
+                                color="text.disabled"
+                              >
+                                —
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                                gap: 0.5,
+                              }}
+                            >
+                              {locked ? (
+                                <Chip
+                                  size="small"
+                                  label={
+                                    lockStatus?.unlockDate
+                                      ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                                      : "Locked"
+                                  }
+                                  color="default"
+                                  variant="outlined"
+                                  icon={<LockIcon />}
+                                />
+                              ) : (
+                                <>
+                                  {grade}
+                                  {canHaveGrades && (
+                                    <Tooltip title="Open Workbook">
+                                      <IconButton
+                                        size="small"
+                                        component="a"
+                                        href={`/workbook/${assignment.unitID}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        sx={{ p: 0.25 }}
+                                      >
+                                        <MenuBookIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                </>
+                              )}
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+
+                    {/* Total Row */}
+                    <TableRow
+                      sx={{
+                        backgroundColor: "action.hover",
+                        "& td": { backgroundColor: "inherit" },
+                      }}
+                    >
+                      <TableCell sx={{ fontWeight: "bold" }}>
+                        {t("sectionDetail.totalAverage")}
+                      </TableCell>
+                      <TableCell />
+                      {/* Chapter column — no total */}
+                      <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                        {(() => {
+                          let totalGrade = 0;
+                          let completedCount = 0;
+
+                          visibleAssignments.forEach((assignment) => {
+                            const isDraft = assignment.status === "DRAFT";
+                            const isFuture =
+                              clientNow &&
+                              assignment.dueDate &&
+                              new Date(assignment.dueDate) > clientNow;
+                            const canHaveGrades = !isDraft && !isFuture;
+
+                            if (canHaveGrades) {
+                              const grade =
+                                myGradeMap[assignment.unitID]?.highest
+                                  ?.accuracy;
+                              if (
+                                grade !== undefined &&
+                                grade !== null &&
+                                !isNaN(grade)
+                              ) {
+                                totalGrade += grade;
+                                completedCount++;
+                              }
+                            }
+                          });
+
+                          const average =
+                            completedCount > 0
+                              ? Math.round(totalGrade / completedCount)
+                              : 0;
+                          const completion =
+                            visibleAssignments.length > 0
+                              ? Math.round(
+                                  (completedCount / visibleAssignments.length) *
+                                    100,
+                                )
+                              : 0;
+
+                          return completedCount > 0
+                            ? `${average}% (${completion}% complete)`
+                            : "- (0% complete)";
+                        })()}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Campaign Chapters */}
+              {(() => {
+                const allChallenges = [
+                  ...(activeChallenges || []),
+                  ...(completedChallenges || []),
+                ];
+                const sectionChallenges = allChallenges.filter(
+                  (ch) => ch.sectionID === id,
+                );
+                if (sectionChallenges.length === 0) return null;
+
+                const chapters = sectionChallenges
+                  .sort((a, b) => (a.chapterOrder ?? 0) - (b.chapterOrder ?? 0))
+                  .map((ch) => {
+                    const challengeLocked = isLocked(ch.id);
+                    return {
+                      id: ch.id,
+                      title: ch.title,
+                      setting: ch.setting || undefined,
+                      targetXP: ch.targetXP,
+                      currentXP: ch.currentXP || 0,
+                      // If locked by progression, override active to false so timeline shows lock icon
+                      active: challengeLocked ? false : ch.active,
+                    };
+                  });
+
+                return (
+                  <Box sx={{ mt: 3 }}>
+                    <CampaignTimeline chapters={chapters} />
+                  </Box>
+                );
+              })()}
+            </>
+          )}
+
+          {/* Instructor View - Full Gradebook */}
+          {isOwner && !viewAsStudent && (
+            <GradeCellRegistryContext.Provider
+              value={gradeCellRegistryRef.current}
+            >
+              <TableContainer
+                component={Paper}
+                sx={{ overflowX: "auto" }}
+                data-testid="gradebook-table"
+              >
+                <Table
+                  aria-label={t("sectionDetail.assignments")}
+                  size="small"
+                  sx={{ minWidth: 650, tableLayout: "auto" }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
                         sx={{
-                          "&:last-child td, &:last-child th": {
-                            borderBottom: 0,
-                          },
-                          cursor: "pointer",
-                          backgroundColor:
-                            selectedRow === student.id
-                              ? "action.selected"
-                              : "background.paper",
-                          "&:nth-of-type(odd)": {
-                            backgroundColor:
-                              selectedRow === student.id
-                                ? "action.selected"
-                                : "action.hover",
-                          },
-                          "&:hover": {
-                            backgroundColor:
-                              selectedRow === student.id
-                                ? "action.selected"
-                                : "action.hover",
-                          },
-                          "& td, & th": { backgroundColor: "inherit" },
-                          transition: "background-color 0.2s ease",
+                          position: "sticky",
+                          left: 0,
+                          top: 0,
+                          backgroundColor: "background.paper",
+                          zIndex: 11,
+                          minWidth: 150,
+                          boxSizing: "border-box",
+                          boxShadow: "2px 0 4px rgba(0,0,0,0.1)",
+                          borderRight: 2,
+                          borderRightColor: "divider",
                         }}
                       >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          key={studentKey}
-                          sx={{
-                            position: "sticky",
-                            left: 0,
-                            backgroundColor: "inherit",
-                            zIndex: 9,
-                            minWidth: 150,
-                            boxSizing: "border-box",
-                            boxShadow: "2px 0 4px rgba(0,0,0,0.1)",
-                            borderRight: 2,
-                            borderRightColor: "divider",
-                          }}
+                        {t("sectionDetail.learnerHeader")}
+                      </TableCell>
+                      {visibleAssignments.map((assignment) => {
+                        const unitName = units[assignment.unitID]?.name;
+                        const isDraft = assignment.status === "DRAFT";
+                        const isFuture =
+                          clientNow &&
+                          assignment.dueDate &&
+                          new Date(assignment.dueDate) > clientNow;
+                        const curveMethod =
+                          curveSettings[assignment.unitID]?.method || "";
+
+                        return (
+                          <TableCell
+                            align="right"
+                            key={assignment.id}
+                            sx={{
+                              position: "sticky",
+                              top: 0,
+                              zIndex: 2,
+                              backgroundColor: curveMethod
+                                ? "primary.50"
+                                : "background.paper",
+                              ...(curveMethod && {
+                                borderBottom: "2px solid",
+                                borderBottomColor: "primary.main",
+                              }),
+                            }}
+                          >
+                            <Tooltip
+                              title={
+                                curveMethod
+                                  ? `${t("sectionDetail.curveApplied", "Curve applied")}: ${getCurveMethodLabel(curveMethod)}`
+                                  : ""
+                              }
+                              arrow
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "flex-end",
+                                  gap: 0.5,
+                                }}
+                              >
+                                {unitName}
+                                <Box sx={{ display: "flex", gap: 0.5 }}>
+                                  {isDraft && (
+                                    <Chip
+                                      label="Draft"
+                                      size="small"
+                                      color="warning"
+                                    />
+                                  )}
+                                  {isFuture && (
+                                    <Chip
+                                      label="Future"
+                                      size="small"
+                                      color="info"
+                                    />
+                                  )}
+                                  {assignment.lateStatus && (
+                                    <Chip
+                                      label={`Late: ${assignment.lateStatus}`}
+                                      size="small"
+                                      color={
+                                        assignment.lateStatus === "DROPPED"
+                                          ? "default"
+                                          : "warning"
+                                      }
+                                    />
+                                  )}
+                                </Box>
+                                {curveMethod && (
+                                  <Typography
+                                    variant="caption"
+                                    color="primary"
+                                    sx={{ fontWeight: 600 }}
+                                  >
+                                    {getCurveMethodLabel(curveMethod)}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Tooltip>
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell
+                        align="right"
+                        sx={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 2,
+                          fontWeight: "bold",
+                          backgroundColor: "action.hover",
+                        }}
+                      >
+                        {t("sectionDetail.totalHeader", "Total")}{" "}
+                        <Typography
+                          component="span"
+                          variant="inherit"
+                          sx={{ fontWeight: 400, color: "text.disabled" }}
                         >
-                          {formatLastFirst(student)}
-                        </TableCell>
-                        {visibleAssignments.map((assignment, colIndex) => {
-                          console.log("student.id", student.id);
-                          console.log("assignment.unitID", assignment.unitID);
+                          ({t("sectionDetail.completionHeader", "Completion")})
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {sortedStudents.map((student, studentKey) => {
+                      // Calculate totals for this student
+                      let totalGrade = 0;
+                      let totalCurvedGrade = 0;
+                      let completedAssignments = 0;
 
-                          // Future and draft assignments cannot have grades yet
-                          const isDraft = assignment.status === "DRAFT";
-                          const isFuture =
-                            clientNow &&
-                            assignment.dueDate &&
-                            new Date(assignment.dueDate) > clientNow;
-                          const canHaveGrades = !isDraft && !isFuture;
+                      visibleAssignments.forEach((assignment) => {
+                        // Only count grades for published, non-future assignments
+                        const isDraft = assignment.status === "DRAFT";
+                        const isFuture =
+                          clientNow &&
+                          assignment.dueDate &&
+                          new Date(assignment.dueDate) > clientNow;
+                        const canHaveGrades = !isDraft && !isFuture;
 
-                          console.log(
-                            "gradeMap[student.id]?.[assignment.unitID]",
-                            gradeMap[student.id]?.[assignment.unitID],
-                          );
-                          const rawHighest = canHaveGrades
-                            ? gradeMap[student.id]?.[assignment.unitID]?.highest
-                                ?.accuracy
-                            : undefined;
-                          const rawAverage = canHaveGrades
-                            ? gradeMap[student.id]?.[assignment.unitID]?.average
-                            : undefined;
-
+                        if (canHaveGrades) {
                           const highest =
-                            rawHighest !== undefined &&
-                            rawHighest !== null &&
-                            !isNaN(rawHighest)
-                              ? Math.round(
-                                  applyCurve(rawHighest, assignment.unitID),
-                                )
-                              : "-";
-                          const average =
-                            rawAverage !== undefined &&
-                            rawAverage !== null &&
-                            !isNaN(rawAverage)
-                              ? Math.round(
-                                  applyCurve(rawAverage, assignment.unitID),
-                                )
-                              : "-";
-
-                          // Debug logging for curve verification
+                            gradeMap[student.id]?.[assignment.unitID]?.highest
+                              ?.accuracy;
                           if (
-                            hasCurve &&
-                            rawHighest !== undefined &&
-                            rawHighest !== null
+                            highest !== undefined &&
+                            highest !== null &&
+                            !isNaN(highest)
                           ) {
-                            console.log(
-                              `[CURVE] Student: ${student.name}, Assignment: ${units[assignment.unitID]?.name}`,
+                            totalGrade += highest;
+                            const curvedGrade = applyCurve(
+                              highest,
+                              assignment.unitID,
                             );
-                            console.log(
-                              `  Raw Highest: ${rawHighest}%, Curved: ${highest}%`,
-                            );
-                            console.log(
-                              `  Curve Data:`,
-                              curveData[assignment.unitID],
-                            );
+                            totalCurvedGrade += curvedGrade;
+                            completedAssignments++;
                           }
+                        }
+                      });
 
-                          const colGrade =
-                            highest !== "-" ? `${highest}%` : "—";
-                          const gradeRecord =
-                            gradeMap[student.id]?.[assignment.unitID]?.highest;
-                          const override =
-                            gradeOverrides[student.id]?.[assignment.unitID];
+                      const averageGrade =
+                        completedAssignments > 0
+                          ? Math.round(totalGrade / completedAssignments)
+                          : 0;
+                      const averageCurvedGrade =
+                        completedAssignments > 0
+                          ? Math.round(totalCurvedGrade / completedAssignments)
+                          : 0;
+                      const completionPercentage =
+                        visibleAssignments.length > 0
+                          ? Math.round(
+                              (completedAssignments /
+                                visibleAssignments.length) *
+                                100,
+                            )
+                          : 0;
 
-                          return (
-                            <TableCell align="right" key={assignment.id}>
-                              <InlineGradeCell
-                                computedGrade={colGrade}
-                                rawHighest={rawHighest}
-                                overrideScore={override?.score}
-                                sharedHistory={gradebookHistoryRef.current}
-                                isOwner={isOwner}
-                                row={studentKey}
-                                col={colIndex}
-                                onOverride={(score) =>
-                                  handleInlineOverride(
-                                    student.id,
-                                    assignment.unitID,
-                                    score,
-                                  )
-                                }
-                                onRemoveOverride={() =>
-                                  handleInlineRemoveOverride(
-                                    student.id,
-                                    assignment.unitID,
-                                  )
-                                }
-                                onGradeClick={() =>
-                                  handleGradeCellClick(
-                                    student,
-                                    assignment,
-                                    gradeRecord,
-                                  )
-                                }
-                              />
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell
-                          align="right"
+                      const displayAverage = hasCurve
+                        ? averageCurvedGrade
+                        : averageGrade;
+
+                      return (
+                        <TableRow
+                          key={student.id}
+                          onClick={() =>
+                            setSelectedRow(
+                              selectedRow === student.id ? null : student.id,
+                            )
+                          }
                           sx={{
-                            fontWeight: "bold",
-                            backgroundColor: "action.hover",
-                            color:
-                              completionPercentage === 100
-                                ? "success.main"
-                                : "text.secondary",
+                            "&:last-child td, &:last-child th": {
+                              borderBottom: 0,
+                            },
+                            cursor: "pointer",
+                            backgroundColor:
+                              selectedRow === student.id
+                                ? "action.selected"
+                                : "background.paper",
+                            "&:nth-of-type(odd)": {
+                              backgroundColor:
+                                selectedRow === student.id
+                                  ? "action.selected"
+                                  : "action.hover",
+                            },
+                            "&:hover": {
+                              backgroundColor:
+                                selectedRow === student.id
+                                  ? "action.selected"
+                                  : "action.hover",
+                            },
+                            "& td, & th": { backgroundColor: "inherit" },
+                            transition: "background-color 0.2s ease",
                           }}
                         >
-                          {completedAssignments > 0
-                            ? `${displayAverage}%`
-                            : "-"}{" "}
-                          ({completionPercentage}%)
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </GradeCellRegistryContext.Provider>
-        )}
-      </Box>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            key={studentKey}
+                            sx={{
+                              position: "sticky",
+                              left: 0,
+                              backgroundColor: "inherit",
+                              zIndex: 9,
+                              minWidth: 150,
+                              boxSizing: "border-box",
+                              boxShadow: "2px 0 4px rgba(0,0,0,0.1)",
+                              borderRight: 2,
+                              borderRightColor: "divider",
+                            }}
+                          >
+                            {formatLastFirst(student)}
+                          </TableCell>
+                          {visibleAssignments.map((assignment, colIndex) => {
+                            console.log("student.id", student.id);
+                            console.log("assignment.unitID", assignment.unitID);
 
-      {/* Completion Grid — shows assignment completion status per student */}
-      {sectionAssignments && Object.keys(sectionStudents).length > 0 && (
-        <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-          <Typography id="nav-section-completion" variant="h6" sx={{ mb: 1 }}>
-            {t("sectionDetail.completionGrid", "Completion Overview")}
-          </Typography>
-          <CompletionGrid
-            assignments={visibleAssignments.map((a) => ({
-              id: a.id || a.unitID,
-              title: units[a.unitID]?.name || a.unitID,
-            }))}
-            students={sortedStudents.map((student) => ({
-              studentId: student.id,
-              studentName: formatLastFirst(student),
-              assignments: visibleAssignments.reduce((acc, assignment) => {
-                const allGrade = allGradeMap[student.id]?.[assignment.unitID];
-                if (allGrade?.hasComplete) {
-                  acc[assignment.id || assignment.unitID] = "completed";
-                } else if (allGrade?.hasAny) {
-                  acc[assignment.id || assignment.unitID] = "in_progress";
-                } else {
-                  acc[assignment.id || assignment.unitID] = "not_started";
-                }
-                return acc;
-              }, {}),
-            }))}
-            currentStudentId={currentUser?.username || ""}
-          />
+                            // Future and draft assignments cannot have grades yet
+                            const isDraft = assignment.status === "DRAFT";
+                            const isFuture =
+                              clientNow &&
+                              assignment.dueDate &&
+                              new Date(assignment.dueDate) > clientNow;
+                            const canHaveGrades = !isDraft && !isFuture;
+
+                            console.log(
+                              "gradeMap[student.id]?.[assignment.unitID]",
+                              gradeMap[student.id]?.[assignment.unitID],
+                            );
+                            const rawHighest = canHaveGrades
+                              ? gradeMap[student.id]?.[assignment.unitID]
+                                  ?.highest?.accuracy
+                              : undefined;
+                            const rawAverage = canHaveGrades
+                              ? gradeMap[student.id]?.[assignment.unitID]
+                                  ?.average
+                              : undefined;
+
+                            const highest =
+                              rawHighest !== undefined &&
+                              rawHighest !== null &&
+                              !isNaN(rawHighest)
+                                ? Math.round(
+                                    applyCurve(rawHighest, assignment.unitID),
+                                  )
+                                : "-";
+                            const average =
+                              rawAverage !== undefined &&
+                              rawAverage !== null &&
+                              !isNaN(rawAverage)
+                                ? Math.round(
+                                    applyCurve(rawAverage, assignment.unitID),
+                                  )
+                                : "-";
+
+                            // Debug logging for curve verification
+                            if (
+                              hasCurve &&
+                              rawHighest !== undefined &&
+                              rawHighest !== null
+                            ) {
+                              console.log(
+                                `[CURVE] Student: ${student.name}, Assignment: ${units[assignment.unitID]?.name}`,
+                              );
+                              console.log(
+                                `  Raw Highest: ${rawHighest}%, Curved: ${highest}%`,
+                              );
+                              console.log(
+                                `  Curve Data:`,
+                                curveData[assignment.unitID],
+                              );
+                            }
+
+                            const colGrade =
+                              highest !== "-" ? `${highest}%` : "—";
+                            const gradeRecord =
+                              gradeMap[student.id]?.[assignment.unitID]
+                                ?.highest;
+                            const override =
+                              gradeOverrides[student.id]?.[assignment.unitID];
+                            const preCurveLabel =
+                              rawHighest !== undefined &&
+                              rawHighest !== null &&
+                              !isNaN(rawHighest)
+                                ? `${Math.round(rawHighest)}%`
+                                : undefined;
+
+                            return (
+                              <TableCell align="right" key={assignment.id}>
+                                <InlineGradeCell
+                                  computedGrade={colGrade}
+                                  rawHighest={rawHighest}
+                                  preCurveLabel={preCurveLabel}
+                                  curveApplied={Boolean(
+                                    curveSettings[assignment.unitID],
+                                  )}
+                                  overrideScore={override?.score}
+                                  sharedHistory={gradebookHistoryRef.current}
+                                  isOwner={isOwner}
+                                  row={studentKey}
+                                  col={colIndex}
+                                  onOverride={(score) =>
+                                    handleInlineOverride(
+                                      student.id,
+                                      assignment.unitID,
+                                      score,
+                                    )
+                                  }
+                                  onRemoveOverride={() =>
+                                    handleInlineRemoveOverride(
+                                      student.id,
+                                      assignment.unitID,
+                                    )
+                                  }
+                                  onGradeClick={() =>
+                                    handleGradeCellClick(
+                                      student,
+                                      assignment,
+                                      gradeRecord,
+                                    )
+                                  }
+                                />
+                              </TableCell>
+                            );
+                          })}
+                          <TableCell
+                            align="right"
+                            sx={{
+                              fontWeight: "bold",
+                              backgroundColor: "action.hover",
+                              color:
+                                completionPercentage === 100
+                                  ? "success.main"
+                                  : "text.secondary",
+                            }}
+                          >
+                            {completedAssignments > 0
+                              ? `${displayAverage}%`
+                              : "-"}{" "}
+                            <Typography
+                              component="span"
+                              variant="inherit"
+                              sx={{ fontWeight: 400, color: "text.disabled" }}
+                            >
+                              ({completionPercentage}%)
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </GradeCellRegistryContext.Provider>
+          )}
         </Box>
       )}
 
+      {/* Completion Grid — folded into the Gradebook/Assignments tab content
+          (same data scope as the grid above) instead of a separate module. */}
+      {activeTab === gradebookTabKey &&
+        sectionAssignments &&
+        Object.keys(sectionStudents).length > 0 && (
+          <Box
+            sx={{ width: "90%", maxWidth: "80rem", mx: "auto", mt: 2, mb: 3 }}
+          >
+            <Typography id="nav-section-completion" variant="h6" sx={{ mb: 1 }}>
+              {t("sectionDetail.completionGrid", "Completion Overview")}
+            </Typography>
+            <CompletionGrid
+              assignments={visibleAssignments.map((a) => ({
+                id: a.id || a.unitID,
+                title: units[a.unitID]?.name || a.unitID,
+              }))}
+              students={((isOwner || isTeacher) && !viewAsStudent
+                ? sortedStudents
+                : sortedStudents.filter(
+                    (student) => student.id === currentUser?.username,
+                  )
+              ).map((student) => ({
+                studentId: student.id,
+                studentName: formatLastFirst(student),
+                assignments: visibleAssignments.reduce((acc, assignment) => {
+                  const allGrade = allGradeMap[student.id]?.[assignment.unitID];
+                  if (allGrade?.hasComplete) {
+                    acc[assignment.id || assignment.unitID] = "completed";
+                  } else if (allGrade?.hasAny) {
+                    acc[assignment.id || assignment.unitID] = "in_progress";
+                  } else {
+                    acc[assignment.id || assignment.unitID] = "not_started";
+                  }
+                  return acc;
+                }, {}),
+              }))}
+              currentStudentId={currentUser?.username || ""}
+            />
+          </Box>
+        )}
+
       {/* Leaderboard — XP-based ranking per section (shows when enabled) */}
-      {leaderboardEnabledLocal && (
+      {activeTab === "leaderboard" && leaderboardEnabledLocal && (
         <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
           <Typography id="nav-section-leaderboard" variant="h6" sx={{ mb: 1 }}>
             {t("sectionDetail.leaderboard", "Leaderboard")}
@@ -3019,7 +3682,7 @@ function SectionDetail({
       )}
 
       {/* Squads — show squads belonging to this section */}
-      {isOwner && sectionSquads.length > 0 && (
+      {activeTab === "leaderboard" && isOwner && sectionSquads.length > 0 && (
         <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
           <Typography variant="h6" sx={{ mb: 1 }}>
             {t("sectionDetail.squads", "Squads")}
@@ -3029,39 +3692,50 @@ function SectionDetail({
       )}
 
       {/* Open Collaboration Rooms */}
-      <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-        <OpenCollaborationRooms
-          rooms={openRooms}
-          grades={grades}
-          units={units}
-          sectionStudents={sectionStudents || {}}
-          sectionId={id}
-          isInstructor={isOwner}
-          onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
-          onAssignPeerReview={async (gradeId, ownerId, reviewerIds) => {
-            const result = await createPeerReviewRoom(
-              gradeId,
-              reviewerIds,
-              id,
-              ownerId,
-            );
-            if (!result.success)
-              throw new Error(result.error || "Failed to create room");
+      {activeTab === "collaboration" && (
+        <Box
+          sx={{
+            p: 2,
+            mx: "auto",
+            maxWidth: "80rem",
+            mt: 2,
+            bgcolor: "action.hover",
+            borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
           }}
-          onRandomAssign={async (unitId) => {
-            const result = await randomAssignPeerReview(id, unitId);
-            if (!result.success)
-              throw new Error(result.error || "Failed to random assign");
-          }}
-          onAwardTopReviewer={async (unitId) => {
-            const result = await awardTopReviewerXP(id, unitId);
-            if (!result.success)
-              throw new Error(result.error || "Failed to award XP");
-          }}
-        />
-      </Box>
+        >
+          <OpenCollaborationRooms
+            rooms={openRooms}
+            grades={grades}
+            units={units}
+            sectionStudents={sectionStudents || {}}
+            sectionId={id}
+            isInstructor={isOwner}
+            onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
+            onAssignPeerReview={async (gradeId, ownerId, reviewerIds) => {
+              const result = await createPeerReviewRoom(
+                gradeId,
+                reviewerIds,
+                id,
+                ownerId,
+              );
+              if (!result.success)
+                throw new Error(result.error || "Failed to create room");
+            }}
+            onRandomAssign={async (unitId) => {
+              const result = await randomAssignPeerReview(id, unitId);
+              if (!result.success)
+                throw new Error(result.error || "Failed to random assign");
+            }}
+            onAwardTopReviewer={async (unitId) => {
+              const result = await awardTopReviewerXP(id, unitId);
+              if (!result.success)
+                throw new Error(result.error || "Failed to award XP");
+            }}
+          />
+        </Box>
+      )}
 
-      {!sectionAssignments && section && (
+      {!sectionAssignments && section && activeTab === "assignments" && (
         <Box sx={{ p: 3, maxWidth: "80rem", mx: "auto" }}>
           <Skeleton variant="text" width="30%" height={36} sx={{ mb: 2 }} />
           {[0, 1, 2].map((i) => (
@@ -3074,7 +3748,7 @@ function SectionDetail({
           ))}
         </Box>
       )}
-      {sectionAssignments && (
+      {sectionAssignments && activeTab === "assignments" && (
         <Box
           data-tour="assignments-section"
           style={{
@@ -3093,159 +3767,63 @@ function SectionDetail({
             {t("sectionDetail.assignments")}
           </Typography>
 
-          {sectionAssignments.map(function (assignment) {
-            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            // get timezone from user profile TBD
-            // Convert time
-            const localTime = new Date(assignment.dueDate).toLocaleString(
-              undefined,
-              {
-                timeZone,
-              },
-            );
+          {[...sectionAssignments]
+            .sort((a, b) => {
+              // Chronological order; undated assignments sink to the bottom.
+              const aTime = a.dueDate
+                ? new Date(a.dueDate).getTime()
+                : Infinity;
+              const bTime = b.dueDate
+                ? new Date(b.dueDate).getTime()
+                : Infinity;
+              return aTime - bTime;
+            })
+            .map(function (assignment) {
+              const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              const dueLabel = assignment.dueDate
+                ? `Due: ${new Date(assignment.dueDate).toLocaleString(undefined, { timeZone })}`
+                : t("sectionDetail.noDueDate", "No due date");
+              const featuredImage = units[assignment.unitID]?.featuredImage;
+              const identityId = units[assignment.unitID]?.identityId;
 
-            const itemPrimary = `${localTime} - ${units[assignment.unitID]?.name}`;
-            const itemSecondary = units[assignment.unitID]?.description;
-            const featuredImage = units[assignment.unitID]?.featuredImage;
-            const identityId = units[assignment.unitID]?.identityId;
+              const workbookUrl = `/workbook/${assignment.unitID}`;
 
-            const workbookUrl = `/workbook/${assignment.unitID}`;
+              // Find which campaign chapter links to this unit
+              const allSectionChallenges = [
+                ...(activeChallenges || []),
+                ...(completedChallenges || []),
+              ].filter((c) => c.sectionID === id);
+              const linkedChapter = allSectionChallenges.find(
+                (c) =>
+                  Array.isArray(c.linkedUnitIds) &&
+                  c.linkedUnitIds.includes(assignment.unitID),
+              );
 
-            // Find which campaign chapter links to this unit
-            const allSectionChallenges = [
-              ...(activeChallenges || []),
-              ...(completedChallenges || []),
-            ].filter((c) => c.sectionID === id);
-            const linkedChapter = allSectionChallenges.find(
-              (c) =>
-                Array.isArray(c.linkedUnitIds) &&
-                c.linkedUnitIds.includes(assignment.unitID),
-            );
-
-            return (
-              <React.Fragment key={assignment.id || assignment.unitID}>
-                <Card
-                  data-tour="assignment-card"
-                  variant="assignment"
-                  sx={{
-                    display: "flex",
-                    margin: "1rem auto",
-                    width: "90vw",
-                    maxWidth: "80rem",
-                    height: 180,
-                    overflow: "hidden",
+              return (
+                <AssignmentFeedCard
+                  key={assignment.id || assignment.unitID}
+                  unitName={units[assignment.unitID]?.name}
+                  description={units[assignment.unitID]?.description}
+                  dueLabel={dueLabel}
+                  featuredImage={featuredImage}
+                  identityId={identityId}
+                  workbookUrl={workbookUrl}
+                  viewWorkbookLabel={t("sectionDetail.viewWorkbook")}
+                  disabled={work}
+                  linkedChapter={linkedChapter}
+                  onOpenChapter={(event) => {
+                    setChapterPopoverAnchor(event.currentTarget);
+                    setChapterPopoverData(linkedChapter);
                   }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      flexGrow: "1",
-                    }}
-                  >
-                    <CardContent sx={{ flex: "1 0 auto" }}>
-                      <Typography component="div" variant="h5">
-                        {itemPrimary}
-                      </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        color="text.secondary"
-                        component="div"
-                      >
-                        {itemSecondary}
-                      </Typography>
-                      {linkedChapter && (
-                        <Chip
-                          label={
-                            linkedChapter.chapterOrder != null
-                              ? `Ch. ${linkedChapter.chapterOrder}: ${linkedChapter.title}`
-                              : linkedChapter.title
-                          }
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          icon={
-                            <span
-                              style={{ fontSize: "0.85rem", paddingLeft: 4 }}
-                            >
-                              📖
-                            </span>
-                          }
-                          sx={{ mt: 0.75, fontSize: "0.7rem", height: 22 }}
-                        />
-                      )}
-                    </CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        pl: 1,
-                        pb: 1,
-                      }}
-                    >
-                      <Button
-                        variant="text"
-                        color="inherit"
-                        data-tour="view-workbook-button"
-                        href={workbookUrl}
-                        disabled={work}
-                        style={{
-                          maxWidth: "fit-content",
-                        }}
-                      >
-                        <EditNoteIcon />
-                        &nbsp;{t("sectionDetail.viewWorkbook")}
-                      </Button>
-                    </Box>
-                  </Box>
-                  {/* <CardMedia
-                                component="img"
-                                sx={{ width: 151 }}
-                                image="/static/images/cards/live-from-space.jpg"
-                                alt="Live from space album cover"
-                              /> */}
-                  {featuredImage && (
-                    <Box
-                      sx={{
-                        maxWidth: "50%",
-                        flexShrink: 0,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <LazyCardMedia
-                        s3Key={featuredImage}
-                        identityId={identityId}
-                      />
-                    </Box>
-                  )}
-                </Card>
-              </React.Fragment>
-            );
-          })}
-        </Box>
-      )}
-      {isOwner && !viewAsStudent && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
-        >
-          <Button
-            sx={{
-              flexGrow: 1,
-              margin: "5rem auto",
-              padding: "1rem 3rem",
-            }}
-            variant="outlined"
-            color="error"
-            onClick={handleDeleteSection}
-          >
-            {t("sectionDetail.deleteSection")}
-          </Button>
+                  editUnitUrl={
+                    (isOwner || isTeacher) && !viewAsStudent
+                      ? `/unit/${assignment.unitID}`
+                      : undefined
+                  }
+                  editUnitLabel={t("sectionDetail.editUnit", "Edit Unit")}
+                />
+              );
+            })}
         </Box>
       )}
 

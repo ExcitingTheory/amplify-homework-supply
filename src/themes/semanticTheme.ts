@@ -386,10 +386,26 @@ export const semanticComponentOverrides: Components<Theme> = {
       },
     },
   },
+  MuiPaper: {
+    styleOverrides: {
+      // Function form so this is guaranteed to run for every Paper-based
+      // surface (Card, Accordion, Paper, etc.) regardless of variants
+      // matching — unelevated surfaces get a thin border instead of a shadow.
+      root: ({ ownerState, theme }) => ({
+        ...(ownerState.elevation === 0 && {
+          border: `1px solid ${theme.palette.divider}`,
+        }),
+      }),
+    },
+  },
   MuiCard: {
     styleOverrides: {
       root: {
         borderRadius: SEMANTIC_THEME.radius.card,
+        "&:not(.MuiCard-root *)": {
+          maxWidth: "min(80rem, calc(100% - 2rem))",
+          marginInline: "auto",
+        },
       },
     },
     variants: [
@@ -397,6 +413,7 @@ export const semanticComponentOverrides: Components<Theme> = {
         props: { variant: "assignment" },
         style: ({ theme }) => ({
           borderRadius: SEMANTIC_THEME.radius.card,
+          border: `1px solid ${theme.palette.divider}`,
           borderLeft: `4px solid ${theme.palette.primary.main}`,
           backgroundColor: alpha(theme.palette.primary.main, 0.02),
           boxShadow: theme.shadows[SEMANTIC_THEME.elevation.card],
@@ -419,6 +436,14 @@ export const semanticComponentOverrides: Components<Theme> = {
           borderRadius: SEMANTIC_THEME.radius.panel,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: "none",
+        }),
+      },
+      {
+        // Unelevated cards have no shadow to separate them from the page —
+        // give them a thin border by default instead.
+        props: { elevation: 0 },
+        style: ({ theme }) => ({
+          border: `1px solid ${theme.palette.divider}`,
         }),
       },
     ],
@@ -446,6 +471,37 @@ export const semanticComponentOverrides: Components<Theme> = {
       bar: {
         borderRadius: SEMANTIC_THEME.radius.progress,
       },
+    },
+  },
+  MuiAccordion: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        // Theme-level override wins over the component's own first/last-of-type
+        // radius rules, so instances don't need an inline !important.
+        borderRadius: SEMANTIC_THEME.radius.panel,
+        "&:before": { display: "none" },
+        // Stacked accordions sit flush (no gap) — only the group's outer
+        // corners are rounded; subtle zebra striping tells rows apart instead.
+        "&:first-of-type": {
+          borderTopLeftRadius: SEMANTIC_THEME.radius.panel,
+          borderTopRightRadius: SEMANTIC_THEME.radius.panel,
+        },
+        "&:last-of-type": {
+          borderBottomLeftRadius: SEMANTIC_THEME.radius.panel,
+          borderBottomRightRadius: SEMANTIC_THEME.radius.panel,
+        },
+        "&:not(:first-of-type)": {
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+        },
+        "&:not(:last-of-type)": {
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+        },
+        "&:nth-of-type(even)": {
+          backgroundColor: theme.palette.action.hover,
+        },
+      }),
     },
   },
   MuiToggleButton: {

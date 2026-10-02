@@ -202,6 +202,11 @@ export function AssignmentCardView({
   const showOverdueBadge =
     !!isOverdue && !isUpNext && !locked && !windowState.isLocked;
 
+  // "Late" and the overdue indicator (floating badge or inline chip) both mean
+  // "this is overdue" — show only one, not both, on the same card.
+  const showsOverdueIndicator =
+    showOverdueBadge || dueStatus?.color === "error";
+
   const borderLeftColor = isCompleted
     ? `${gradeColor(pct)}.main`
     : locked || windowState.isLocked
@@ -242,15 +247,16 @@ export function AssignmentCardView({
         sx={{
           // When nested inside UpNextCard, suppress the outer border and elevation
           // (UpNextCard's own Card provides the highlighted outline treatment).
-          border: isUpNext ? "none" : "1px solid",
+          border: isUpNext ? "none" : "1px outset",
           borderColor: isUpNext ? undefined : "divider",
           ...(isUpNext ? {} : { borderLeft: "4px solid", borderLeftColor }),
           borderRadius: isUpNext ? 0 : DASHBOARD_TOKENS.radius.card,
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
           // Always clip to the card's own radius so nested elements (thumbnail,
           // chips) never show square corners poking out under the rounded curve.
           overflow: "hidden",
-          minHeight: { xs: 0, sm: 140 },
+          minHeight: { xs: 0, sm: 160 },
           opacity: locked ? 0.7 : 1,
           transition: justCompleted ? "none" : "box-shadow 0.2s",
           "&:hover": { boxShadow: locked ? 0 : 4 },
@@ -268,16 +274,7 @@ export function AssignmentCardView({
           }),
         }}
       >
-        <Box
-          sx={{
-            width: 120,
-            flexShrink: 0,
-            display: { xs: "none", sm: "block" },
-            overflow: "hidden",
-          }}
-        >
-          {thumbnail}
-        </Box>
+        {thumbnail}
         <Box sx={{ flex: 1, p: 2 }}>
           <Box
             sx={{
@@ -383,7 +380,7 @@ export function AssignmentCardView({
                 sx={{ fontSize: "0.7rem" }}
               />
             )}
-            {windowState.isLate && !isCompleted && (
+            {windowState.isLate && !isCompleted && !showsOverdueIndicator && (
               <Chip
                 label="Late"
                 size="small"
@@ -465,64 +462,73 @@ export function AssignmentCardView({
             </Typography>
           ) : (
             <Stack
-              direction="row"
-              spacing={1}
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ alignItems: "center" }}
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              justifyContent="space-between"
+              alignItems={{ xs: "stretch", sm: "center" }}
             >
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<AutoFixHighIcon />}
-                onClick={() => onOpenDrill(assignment.unitID, unit?.name || "")}
+              <Stack
+                direction="row"
+                spacing={1}
+                flexWrap="wrap"
+                useFlexGap
+                sx={{ alignItems: "center" }}
               >
-                {t("practice")}
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<ChatBubbleOutlineIcon />}
-                onClick={() => onDiscuss?.()}
-              >
-                {t("discuss")}
-              </Button>
-              {isCompleted && peerReviewButton}
-              {isCompleted && reviewInvitation?.linkPath && (
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   size="small"
-                  startIcon={<RateReviewIcon />}
-                  onClick={() => {
-                    const reviewPath = reviewInvitation.linkPath;
-                    if (reviewPath) onJoinReview?.(reviewPath);
-                  }}
+                  startIcon={<AutoFixHighIcon />}
+                  onClick={() =>
+                    onOpenDrill(assignment.unitID, unit?.name || "")
+                  }
                 >
-                  {t("joinReview")}
+                  {t("practice")}
                 </Button>
-              )}
-              <Tooltip title={t("requestGuidanceTooltip")}>
-                <span>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ChatBubbleOutlineIcon />}
+                  onClick={() => onDiscuss?.()}
+                >
+                  {t("discuss")}
+                </Button>
+                {isCompleted && peerReviewButton}
+                {isCompleted && reviewInvitation?.linkPath && (
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     size="small"
-                    color="secondary"
-                    startIcon={<SupportAgentIcon />}
-                    onClick={() =>
-                      onRequestGuidance(
-                        isCompleted && latestGrade
-                          ? latestGrade.id
-                          : assignment.id,
-                        (isCompleted && latestGrade
-                          ? latestGrade.sectionID
-                          : assignment.sectionID) || "",
-                      )
-                    }
+                    startIcon={<RateReviewIcon />}
+                    onClick={() => {
+                      const reviewPath = reviewInvitation.linkPath;
+                      if (reviewPath) onJoinReview?.(reviewPath);
+                    }}
                   >
-                    {t("requestGuidance")}
+                    {t("joinReview")}
                   </Button>
-                </span>
-              </Tooltip>
+                )}
+                <Tooltip title={t("requestGuidanceTooltip")}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="secondary"
+                      startIcon={<SupportAgentIcon />}
+                      onClick={() =>
+                        onRequestGuidance(
+                          isCompleted && latestGrade
+                            ? latestGrade.id
+                            : assignment.id,
+                          (isCompleted && latestGrade
+                            ? latestGrade.sectionID
+                            : assignment.sectionID) || "",
+                        )
+                      }
+                    >
+                      {t("requestGuidance")}
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Stack>
               {startButton}
             </Stack>
           )}

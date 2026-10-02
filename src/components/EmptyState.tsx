@@ -15,12 +15,13 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
 import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
 export interface EmptyStateProps {
-  /** Leading illustration / icon. Defaults to an outlined inbox glyph. */
+  /** Leading illustration / icon. Defaults to an outlined inbox glyph. Accepts any svg icon, including react-icons. */
   icon?: React.ReactNode;
   /** Primary headline. */
   title: React.ReactNode;
@@ -30,14 +31,27 @@ export interface EmptyStateProps {
   action?: React.ReactNode;
   /** Optional secondary action slot rendered next to the primary action. */
   secondaryAction?: React.ReactNode;
+  /** Convenience text-link CTA, rendered after `action`/`secondaryAction`. */
+  ctaLabel?: React.ReactNode;
+  /** Href for the convenience link CTA. Omit and use `onCtaClick` for a button-like link instead. */
+  ctaHref?: string;
+  onCtaClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   /** Tighter padding for use inside cards/panels. */
   dense?: boolean;
   /** Escape hatch for layout tweaks at the call site. */
   sx?: SxProps<Theme>;
+  /** Wire up native drag-and-drop on the root — pass handlers to accept dropped files. */
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
+  /** Highlights the dashed border while a drag is in progress over this target. */
+  isDragActive?: boolean;
 }
 
 /**
  * EmptyState — centered icon + title + optional description and action slots.
+ * Every instance renders the same dashed border + rounded corners so "nothing
+ * here yet" and drag-and-drop targets look consistent across the app.
  */
 export function EmptyState({
   icon,
@@ -45,11 +59,21 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
+  ctaLabel,
+  ctaHref,
+  onCtaClick,
   dense = false,
   sx,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  isDragActive = false,
 }: EmptyStateProps) {
+  const isDropzone = Boolean(onDragOver || onDrop);
+
   return (
     <Box
+      {...(isDropzone && { onDragOver, onDragLeave, onDrop })}
       sx={[
         {
           display: "flex",
@@ -62,6 +86,10 @@ export function EmptyState({
           py: dense
             ? `${SEMANTIC_THEME.padding.cardDesktop}px`
             : `${SEMANTIC_THEME.padding.panelDesktop}px`,
+          border: "2px dashed",
+          borderColor: isDragActive ? "primary.main" : "divider",
+          borderRadius: `${SEMANTIC_THEME.radius.card}px`,
+          transition: "border-color 0.15s ease",
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
@@ -105,6 +133,19 @@ export function EmptyState({
           {secondaryAction}
           {action}
         </Stack>
+      )}
+
+      {ctaLabel != null && (
+        <Link
+          component={ctaHref ? "a" : "button"}
+          type={ctaHref ? undefined : "button"}
+          href={ctaHref}
+          onClick={onCtaClick}
+          underline="hover"
+          sx={{ fontWeight: 600, mt: action || secondaryAction ? 0 : 0.5 }}
+        >
+          {ctaLabel}
+        </Link>
       )}
     </Box>
   );

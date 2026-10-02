@@ -2,11 +2,13 @@ import { chromium } from 'playwright';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
 import { resolve, dirname, join, relative } from 'path';
 import { fileURLToPath } from 'url';
+import { spawn } from 'node:child_process';
 import { Amplify } from 'aws-amplify';
 import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth';
 import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(__dirname, '..');
 const RESULTS_DIR = resolve(__dirname, '../test/results');
 const SCREENSHOTS_DIR = resolve(RESULTS_DIR, 'screenshots');
 
@@ -34,6 +36,84 @@ const BASE_URL = process.env.CRAWL_BASE_URL || 'https://localhost:3000';
 const PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
 const PAGE_SETTLE_MS = parseInt(process.env.CRAWL_PAGE_SETTLE_MS || '2000', 10);
 const NETWORKIDLE_TIMEOUT = parseInt(process.env.CRAWL_NETWORKIDLE_TIMEOUT || '10000', 10);
+
+// ── Managed dev server (so server-rendered [i18n] MISSING_MESSAGE logs are captured) ──
+const SKIP_DEV_SERVER = process.env.CRAWL_SKIP_DEV_SERVER === '1';
+const DEV_SERVER_READY_TIMEOUT_MS = parseInt(process.env.CRAWL_DEV_SERVER_TIMEOUT_MS || '120000', 10);
+const DEV_SERVER_READY_RE = /ready in/i;
+const SERVER_I18N_RE = /\[i18n\]\s*MISSING_MESSAGE:\s*Could not resolve `([^`]+)` in messages for locale `([^`]+)`/;
+
+function isLocalBaseUrl(url) {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+// Spawns `npm run dev` in its own process group and resolves once Next.js logs readiness.
+// Returns the child process plus a live array that keeps collecting [i18n] server logs for the whole run.
+function startDevServer() {
+  return new Promise((resolvePromise, rejectPromise) => {
+    console.log('[dev-server] Starting `npm run dev`...');
+    const child = spawn('npm', ['run', 'dev'], {
+      cwd: REPO_ROOT,
+      env: process.env,
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    const serverI18nMessages = [];
+    let settled = false;
+
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      rejectPromise(new Error(`Dev server did not become ready within ${DEV_SERVER_READY_TIMEOUT_MS}ms`));
+    }, DEV_SERVER_READY_TIMEOUT_MS);
+
+    function handleOutput(buf) {
+      const text = buf.toString();
+      process.stdout.write(text.split('\n').map(l => l ? `[dev-server] ${l}` : l).join('\n'));
+      for (const line of text.split('\n')) {
+        if (line.includes('[i18n]') && line.includes('MISSING_MESSAGE')) {
+          serverI18nMessages.push(line.trim());
+        }
+      }
+      if (!settled && DEV_SERVER_READY_RE.test(text)) {
+        settled = true;
+        clearTimeout(timeout);
+        resolvePromise({ child, serverI18nMessages });
+      }
+    }
+
+    child.stdout.on('data', handleOutput);
+    child.stderr.on('data', handleOutput);
+    child.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      rejectPromise(err);
+    });
+    child.on('exit', (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      rejectPromise(new Error(`Dev server exited early with code ${code}`));
+    });
+  });
+}
+
+function stopDevServer(child) {
+  if (!child || child.killed) return;
+  console.log('\n[dev-server] Shutting down...');
+  try {
+    process.kill(-child.pid, 'SIGTERM');
+  } catch {
+    try { child.kill('SIGTERM'); } catch { /* already gone */ }
+  }
+}
 
 // Users per role
 const USERS = [
@@ -153,8 +233,11 @@ function resolveDynamicRoutes(role, dynamicPatterns) {
 
 // ── Subscription storm detection ────────────────────────────────────────────
 
+// next-intl logs `IntlError: MISSING_MESSAGE: Could not resolve \`ns.key\` in messages for locale \`xx\`.` via console.error()
+const MISSING_MESSAGE_RE = /MISSING_MESSAGE:\s*Could not resolve `([^`]+)` in messages for locale `([^`]+)`/;
+
 function analyzeMessages(messages) {
-  const analysis = { storms: [], resubscribes: [], extraDispatches: [], rerenders: [], wsIssues: [] };
+  const analysis = { storms: [], resubscribes: [], extraDispatches: [], rerenders: [], wsIssues: [], missingTranslations: [] };
 
   // Detect subscription storms: same message repeated rapidly
   const msgCounts = {};
@@ -199,6 +282,17 @@ function analyzeMessages(messages) {
   );
   if (rerenderPatterns.length > 0) {
     analysis.rerenders = rerenderPatterns.map(m => m.text.substring(0, 200));
+  }
+
+  // Detect missing i18n translations (next-intl MISSING_MESSAGE errors)
+  for (const m of messages) {
+    if (!m.text.includes('MISSING_MESSAGE')) continue;
+    const match = m.text.match(MISSING_MESSAGE_RE);
+    analysis.missingTranslations.push({
+      key: match ? match[1] : null,
+      locale: match ? match[2] : null,
+      text: m.text.substring(0, 200),
+    });
   }
 
   // Separate WebSocket issues: benign race vs protocol errors
@@ -471,6 +565,7 @@ async function crawlAsUser(browser, user, storageItems) {
       resubscribes: stormAnalysis.resubscribes,
       rerenders: stormAnalysis.rerenders,
       wsIssues: stormAnalysis.wsIssues,
+      missingTranslations: stormAnalysis.missingTranslations,
       failedRequests,
       screenshotPath: screenshotPath ? relative(RESULTS_DIR, screenshotPath) : null,
       messages: [...currentPageMessages],
@@ -484,6 +579,7 @@ async function crawlAsUser(browser, user, storageItems) {
     if (stormAnalysis.storms.length > 0) issues.push(`${stormAnalysis.storms.length} storms`);
     if (stormAnalysis.resubscribes.length > 0) issues.push('resubscribes');
     if (stormAnalysis.rerenders.length > 0) issues.push('rerenders');
+    if (stormAnalysis.missingTranslations.length > 0) issues.push(`${stormAnalysis.missingTranslations.length} missing translations`);
     if (failedRequests.length > 0) issues.push(`${failedRequests.length} failed requests`);
 
     const timingStr = loadTimeMs > 8000 ? `${(loadTimeMs / 1000).toFixed(1)}s SLOW` :
@@ -497,6 +593,7 @@ async function crawlAsUser(browser, user, storageItems) {
       warnings.slice(0, 2).forEach(w => console.log(`    [WARN] ${w.text.substring(0, 200)}`));
       stormAnalysis.storms.forEach(s => console.log(`    [STORM] "${s.message}" x${s.count}`));
       stormAnalysis.rerenders.forEach(r => console.log(`    [RERENDER] ${r}`));
+      stormAnalysis.missingTranslations.forEach(mt => console.log(`    [I18N] Missing \`${mt.key ?? '?'}\` for locale \`${mt.locale ?? '?'}\``));
       failedRequests.slice(0, 3).forEach(r => console.log(`    [${r.status}] ${r.url}`));
       const wsProtocolErrors = stormAnalysis.wsIssues.filter(w => w.type === 'protocol-error');
       wsProtocolErrors.forEach(w => console.log(`    [WS-PROTOCOL] ${w.text}`));
@@ -525,16 +622,30 @@ async function main() {
   mkdirSync(RESULTS_DIR, { recursive: true });
   mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
-  const browser = await chromium.launch({ headless: true });
+  let devServerChild = null;
+  let serverI18nMessages = [];
+  const manageDevServer = !SKIP_DEV_SERVER && isLocalBaseUrl(BASE_URL);
 
-  // Pre-authenticate all users sequentially (Amplify signIn is stateful)
-  const tokenMap = await preAuthenticateAll(USERS, PASSWORD);
+  if (manageDevServer) {
+    const started = await startDevServer();
+    devServerChild = started.child;
+    serverI18nMessages = started.serverI18nMessages;
+    console.log('[dev-server] Ready.\n');
+  } else {
+    console.log('[dev-server] Skipping managed dev server (CRAWL_SKIP_DEV_SERVER=1 or non-local BASE_URL) - assuming one is already running.\n');
+  }
 
-  // Run all roles simultaneously with separate browser contexts (isolated IndexedDB/cache)
-  const results = await Promise.all(USERS.map(user => crawlAsUser(browser, user, tokenMap[user.role])));
+  try {
+    const browser = await chromium.launch({ headless: true });
 
-  await browser.close();
-  const totalTimeMs = Date.now() - startTime;
+    // Pre-authenticate all users sequentially (Amplify signIn is stateful)
+    const tokenMap = await preAuthenticateAll(USERS, PASSWORD);
+
+    // Run all roles simultaneously with separate browser contexts (isolated IndexedDB/cache)
+    const results = await Promise.all(USERS.map(user => crawlAsUser(browser, user, tokenMap[user.role])));
+
+    await browser.close();
+    const totalTimeMs = Date.now() - startTime;
 
   // ── Summary ─────────────────────────────────────────────────────────────
   console.log(`\n\n${'='.repeat(70)}`);
@@ -545,8 +656,10 @@ async function main() {
   let grandTotalWarnings = 0;
   let grandTotalStorms = 0;
   let grandTotalFailedRequests = 0;
+  let grandTotalMissingTranslations = 0;
   const slowPages = [];
   const leakyPages = [];
+  const missingTranslationKeys = new Map(); // "locale:key" -> { locale, key, pages: Set }
 
   // JSON output structure
   const jsonReport = {
@@ -572,17 +685,27 @@ async function main() {
     let roleWarnings = 0;
     let roleStorms = 0;
     let roleFailedRequests = 0;
+    let roleMissingTranslations = 0;
     const problemPages = [];
 
     const roleJson = { pages: {}, totals: {} };
 
     for (const [path, pageResult] of Object.entries(result.pages)) {
-      const { errors, warnings, storms, failedRequests, domContentLoadedMs, loadTimeMs, heapDeltaMB } = pageResult;
+      const { errors, warnings, storms, failedRequests, missingTranslations, domContentLoadedMs, loadTimeMs, heapDeltaMB } = pageResult;
 
       roleErrors += errors.length;
       roleWarnings += warnings.length;
       roleStorms += storms.length;
       roleFailedRequests += failedRequests.length;
+      roleMissingTranslations += missingTranslations.length;
+
+      for (const mt of missingTranslations) {
+        const dedupeKey = `${mt.locale ?? '?'}:${mt.key ?? mt.text}`;
+        if (!missingTranslationKeys.has(dedupeKey)) {
+          missingTranslationKeys.set(dedupeKey, { locale: mt.locale, key: mt.key, pages: new Set() });
+        }
+        missingTranslationKeys.get(dedupeKey).pages.add(`${result.role}:${path}`);
+      }
 
       if (loadTimeMs > 8000) {
         slowPages.push({ role: result.role, path, loadTimeMs });
@@ -591,7 +714,7 @@ async function main() {
         leakyPages.push({ role: result.role, path, heapDeltaMB });
       }
 
-      if (errors.length > 0 || storms.length > 0 || pageResult.rerenders.length > 0 || failedRequests.length > 0) {
+      if (errors.length > 0 || storms.length > 0 || pageResult.rerenders.length > 0 || failedRequests.length > 0 || missingTranslations.length > 0) {
         problemPages.push(pageResult);
       }
 
@@ -604,9 +727,11 @@ async function main() {
         warningCount: warnings.length,
         stormCount: storms.length,
         failedRequestCount: failedRequests.length,
+        missingTranslationCount: missingTranslations.length,
         errors: errors.slice(0, 5),
         storms,
         failedRequests,
+        missingTranslations,
         wsIssues: pageResult.wsIssues.filter(w => w.type !== 'race'), // Only non-benign
         screenshot: pageResult.screenshotPath,
       };
@@ -616,18 +741,20 @@ async function main() {
     grandTotalWarnings += roleWarnings;
     grandTotalStorms += roleStorms;
     grandTotalFailedRequests += roleFailedRequests;
+    grandTotalMissingTranslations += roleMissingTranslations;
 
-    roleJson.totals = { errors: roleErrors, warnings: roleWarnings, storms: roleStorms, failedRequests: roleFailedRequests };
+    roleJson.totals = { errors: roleErrors, warnings: roleWarnings, storms: roleStorms, failedRequests: roleFailedRequests, missingTranslations: roleMissingTranslations };
     jsonReport.roles[result.role] = roleJson;
 
     const pageCount = Object.keys(result.pages).length;
-    console.log(`[${result.role}] ${pageCount} pages — ${roleErrors} errors, ${roleWarnings} warnings, ${roleStorms} storms, ${roleFailedRequests} failed requests`);
+    console.log(`[${result.role}] ${pageCount} pages — ${roleErrors} errors, ${roleWarnings} warnings, ${roleStorms} storms, ${roleFailedRequests} failed requests, ${roleMissingTranslations} missing translations`);
 
     for (const pageResult of problemPages) {
       console.log(`  ${pageResult.path}: (${(pageResult.loadTimeMs / 1000).toFixed(1)}s)`);
       pageResult.errors.slice(0, 3).forEach(e => console.log(`    [ERROR] ${e.substring(0, 200)}`));
       pageResult.storms.forEach(s => console.log(`    [STORM] "${s.message}" x${s.count}`));
       pageResult.rerenders.forEach(r => console.log(`    [RERENDER] ${r}`));
+      pageResult.missingTranslations.forEach(mt => console.log(`    [I18N] Missing \`${mt.key ?? '?'}\` for locale \`${mt.locale ?? '?'}\``));
       pageResult.failedRequests.slice(0, 3).forEach(r => console.log(`    [${r.status}] ${r.url}`));
       const wsProto = pageResult.wsIssues.filter(w => w.type === 'protocol-error');
       wsProto.forEach(w => console.log(`    [WS-PROTOCOL] ${w.text}`));
@@ -651,8 +778,30 @@ async function main() {
     console.log('');
   }
 
+  // Merge server-rendered (RSC) missing translations captured from the dev server's stdout/stderr
+  const dedupedServerI18n = new Set();
+  for (const line of serverI18nMessages) {
+    const match = line.match(SERVER_I18N_RE);
+    const key = match ? match[1] : null;
+    const locale = match ? match[2] : null;
+    dedupedServerI18n.add(`${locale ?? '?'}:${key ?? line}`);
+    const dedupeKey = `${locale ?? '?'}:${key ?? line}`;
+    if (!missingTranslationKeys.has(dedupeKey)) {
+      missingTranslationKeys.set(dedupeKey, { locale, key, pages: new Set() });
+    }
+    missingTranslationKeys.get(dedupeKey).pages.add('server (SSR)');
+  }
+
+  if (missingTranslationKeys.size > 0) {
+    console.log('  MISSING TRANSLATIONS (deduped, client + server):');
+    for (const { locale, key, pages } of missingTranslationKeys.values()) {
+      console.log(`    \`${key ?? '?'}\` (locale: ${locale ?? '?'}) — ${pages.size} page hit(s)`);
+    }
+    console.log('');
+  }
+
   console.log(`--------------------------------------------------------------`);
-  console.log(`Total: ${grandTotalErrors} errors, ${grandTotalWarnings} warnings, ${grandTotalStorms} storms, ${grandTotalFailedRequests} failed requests`);
+  console.log(`Total: ${grandTotalErrors} errors, ${grandTotalWarnings} warnings, ${grandTotalStorms} storms, ${grandTotalFailedRequests} failed requests, ${grandTotalMissingTranslations} client missing translations, ${serverI18nMessages.length} server missing translations (${dedupedServerI18n.size} unique)`);
   console.log(`Across ${results.filter(r => !r.loginFailed).length} roles in ${(totalTimeMs / 1000).toFixed(1)}s`);
   console.log(`--------------------------------------------------------------\n`);
 
@@ -662,17 +811,29 @@ async function main() {
     warnings: grandTotalWarnings,
     storms: grandTotalStorms,
     failedRequests: grandTotalFailedRequests,
+    missingTranslations: grandTotalMissingTranslations,
+    serverMissingTranslations: serverI18nMessages.length,
   };
   jsonReport.slowPages = slowPages;
   jsonReport.leakyPages = leakyPages;
+  jsonReport.missingTranslationKeys = Array.from(missingTranslationKeys.values()).map(({ locale, key, pages }) => ({
+    locale,
+    key,
+    pages: Array.from(pages),
+  }));
 
   // Write structured JSON output
   const jsonPath = join(RESULTS_DIR, 'crawl-results.json');
   writeFileSync(jsonPath, JSON.stringify(jsonReport, null, 2));
   console.log(`JSON report: ${relative(process.cwd(), jsonPath)}`);
 
-  if (grandTotalErrors > 0 || grandTotalStorms > 0) {
-    process.exitCode = 1;
+    if (grandTotalErrors > 0 || grandTotalStorms > 0) {
+      process.exitCode = 1;
+    }
+  } finally {
+    if (manageDevServer) {
+      stopDevServer(devServerChild);
+    }
   }
 }
 

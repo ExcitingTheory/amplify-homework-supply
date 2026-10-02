@@ -54,7 +54,7 @@ export function BulkDueDateDialog({
   getUnitName,
   onUpdated,
 }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
   const [selected, setSelected] = React.useState(() => new Set());
   const [mode, setMode] = React.useState("shift");
   const [shiftDays, setShiftDays] = React.useState("7");

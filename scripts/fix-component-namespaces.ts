@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 /**
- * Fix component useTranslation() calls to use correct namespace
+ * Fix component useTranslations() calls to use the correct namespace
  * Based on namespace mismatches from verification report
  */
 
@@ -43,7 +43,7 @@ function parseReportForFixes(): Map<string, NamespaceFix> {
 }
 
 /**
- * Fix useTranslation() call in a file
+ * Fix useTranslations() call in a file
  */
 function fixNamespaceInFile(filePath: string, from: string, to: string): boolean {
   const absolutePath = path.join(process.cwd(), filePath);
@@ -55,16 +55,16 @@ function fixNamespaceInFile(filePath: string, from: string, to: string): boolean
   
   let content = fs.readFileSync(absolutePath, 'utf-8');
   
-  // Pattern to match: useTranslation('from')
-  const regex = new RegExp(`useTranslation\\s*\\(\\s*['"]${from}['"]\\s*\\)`, 'g');
+  // Pattern to match: useTranslations('from') or useTranslations("from")
+  const regex = new RegExp(`useTranslations\\s*\\(\\s*(['"])${from}\\1\\s*\\)`, 'g');
   
   if (!regex.test(content)) {
-    console.log(`  ⚠️  No useTranslation('${from}') found in ${path.basename(filePath)}`);
+    console.log(`  ⚠️  No useTranslations('${from}') found in ${path.basename(filePath)}`);
     return false;
   }
   
-  // Replace the namespace
-  content = content.replace(regex, `useTranslation('${to}')`);
+  // Replace the namespace, preserving the original quote style
+  content = content.replace(regex, (_match, quote) => `useTranslations(${quote}${to}${quote})`);
   
   fs.writeFileSync(absolutePath, content, 'utf-8');
   return true;

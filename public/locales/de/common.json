@@ -28,6 +28,10 @@
     "name": "Hausaufgabenmaterial",
     "tagline": "E-Learning-Plattform"
   },
+  "chat": {
+    "aiAssistant": "KI-Assistent",
+    "openAssistant": "KI-Assistent öffnen"
+  },
   "common": {
     "about": "Über",
     "filter": "Filter",
@@ -47,36 +51,43 @@
       "description": "Beschreibung",
       "title": "Titel"
     },
+    "collaboration": "Zusammenarbeit",
     "help": "Hilfe",
     "settings": {
+      "colorMode": "Farbmodus",
       "darkMode": "Dunkelmodus",
       "disableNotifications": "Benachrichtigungen deaktivieren",
       "experimentalFeatures": "Experimentelle Funktionen",
-      "studentMode": "Schülermodus",
-      "colorMode": "Farbmodus"
-    },
-    "collaboration": "Zusammenarbeit"
+      "studentMode": "Schülermodus"
+    }
   },
   "navigation": {
-    "grades": "Noten",
-    "home": "Startseite",
-    "profile": "Profil",
-    "sections": "Bereiche",
-    "units": "Einheiten",
-    "workbook": "Arbeitsbuch",
-    "squads": "Squads",
-    "leaderboard": "Rangliste",
-    "published": "Veröffentlicht",
-    "settings": "Einstellungen",
-    "drafts": "Entwürfe",
-    "notifications": "Benachrichtigungen",
     "collaboration": "Zusammenarbeit",
     "collaborationDesc": "Einladungen & Sitzungen beitreten",
+    "drafts": "Entwürfe",
+    "gamification": "Gamification",
+    "grades": "Noten",
+    "home": "Startseite",
+    "leaderboard": "Rangliste",
+    "notifications": "Benachrichtigungen",
+    "profile": "Profil",
+    "published": "Veröffentlicht",
+    "sections": "Bereiche",
+    "settings": "Einstellungen",
     "skills": "Kompetenzbaum",
-    "gamification": "Gamification"
+    "squads": "Squads",
+    "units": "Einheiten",
+    "workbook": "Arbeitsbuch"
+  },
+  "peerReview": {
+    "helpful": "Die Peer-Review war hilfreich",
+    "notHelpful": "Die Peer-Review war nicht hilfreich"
   },
   "quizComponent": {
     "grade": "Note: {grade}"
+  },
+  "sectionDetail": {
+    "studentHeader": "Schüler"
   },
   "status": {
     "complete": "Abschließen",
@@ -90,25 +101,38 @@
     "success": "Erfolg",
     "uploading": "Hochladen..."
   },
+  "tableComponent": {
+    "cellActionsLabel": "Zellenaktionen",
+    "cellActionsTitle": "Zellenaktionen-Menü öffnen",
+    "clearCell": "Zelle löschen",
+    "deleteColumn": "Spalte löschen",
+    "deleteRow": "Zeile löschen",
+    "deleteTable": "Tabelle löschen",
+    "insertColumnLeft": "Spalte links einfügen",
+    "insertColumnRight": "Spalte rechts einfügen",
+    "insertRowAbove": "Zeile oberhalb einfügen",
+    "insertRowBelow": "Zeile darunter einfügen",
+    "makeColumnHeader": "Spaltenüberschrift erstellen",
+    "makeHeader": "Kopfzeile erstellen",
+    "makeRowHeader": "Zeilenüberschrift erstellen",
+    "removeColumnHeader": "Spaltenüberschrift entfernen",
+    "removeHeader": "Kopfzeile entfernen",
+    "removeRowHeader": "Zeilenüberschrift entfernen",
+    "removeSorting": "Sortierung entfernen",
+    "sortAscending": "Aufsteigend sortieren",
+    "sortDescending": "Absteigend sortieren"
+  },
   "time": {
     "completed": "Abgeschlossen",
     "created": "Erstellt",
     "due": "Fällig",
     "updated": "Aktualisiert"
   },
-  "chat": {
-    "aiAssistant": "KI-Assistent",
-    "openAssistant": "KI-Assistent öffnen"
-  },
   "timer": {
+    "decrease": "Verringern Sie das ausgewählte Zeitsegment",
     "hours": "Stunden",
-    "minutes": "Minuten",
-    "seconds": "Sekunden",
     "increase": "Ausgewähltes Zeitsegment erhöhen",
-    "decrease": "Verringern Sie das ausgewählte Zeitsegment"
-  },
-  "peerReview": {
-    "notHelpful": "Die Peer-Review war nicht hilfreich",
-    "helpful": "Die Peer-Review war hilfreich"
+    "minutes": "Minuten",
+    "seconds": "Sekunden"
   }
 }

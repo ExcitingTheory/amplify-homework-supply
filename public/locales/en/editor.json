@@ -74,7 +74,6 @@
   "blocks": {
     "answer": "Answer Block",
     "custom_answer": "Custom Answer",
-    "meaning_association": "Meaning Association",
     "quiz": "Quiz Block"
   },
   "configurationManager": {
@@ -189,6 +188,10 @@
       "deselectAll": "Deselect All",
       "reAnalyzeSelected": "Re-analyze Selected ({count})"
     },
+    "dragDrop": {
+      "dropFilesHere": "Drop files here to upload",
+      "supportedFormats": "Audio, Images, PDFs, Documents and more"
+    },
     "expandedContent": {
       "descriptionLabel": "Description:",
       "extractedContentHeading": "Extracted Content",
@@ -247,10 +250,6 @@
       "searchPlaceholder": "Search files...",
       "selectAllTooltip": "Select All",
       "uploadTooltip": "Upload Files"
-    },
-    "dragDrop": {
-      "dropFilesHere": "Drop files here to upload",
-      "supportedFormats": "Audio, Images, PDFs, Documents and more"
     }
   },
   "fileMetadataComponent": {
@@ -440,12 +439,6 @@
     "add": "Add",
     "addLine": "Add Line",
     "addSpeakerFirst": "Please add a speaker first",
-    "description": "Description",
-    "descriptionPlaceholder": "e.g., 30s, energetic, professional",
-    "direction": "Direction",
-    "directionPlaceholder": "e.g., entering, out of breath",
-    "emotion": "Emotion",
-    "emotionPlaceholder": "e.g., cheerful, tired",
     "empty": "(empty)",
     "exportJSON": "Export JSON",
     "generateAllMissingTTS": "Generate All Missing TTS",
@@ -453,12 +446,9 @@
     "importFailed": "Failed to import JSON file",
     "importJSON": "Import JSON",
     "lineNumber": "Line #{number} - {speaker}",
-    "lockedTrack": "Locked track",
     "micAccessFailed": "Failed to access microphone",
-    "name": "Name",
     "noMissingAudio": "No missing audio to generate",
     "noTextToGenerate": "No text to generate",
-    "play": "Play",
     "processing": "Processing {count} lines...",
     "record": "Record",
     "recordingSaveFailed": "Failed to save recording",
@@ -471,7 +461,6 @@
     "stop": "Stop",
     "takeNumber": "Take {number} ({type})",
     "takes": "Takes",
-    "text": "Text",
     "timeline": "Timeline",
     "ttsGenerationFailed": "Failed to generate TTS audio",
     "unknown": "Unknown",
@@ -505,27 +494,8 @@
     "ownerPlaceholder": "Owner ID"
   },
   "tableComponent": {
-    "cellActionsLabel": "Cell Actions Label",
-    "cellActionsTitle": "Cell Actions Title",
-    "clearCell": "Clear Cell",
-    "deleteColumn": "Delete Column",
-    "deleteRow": "Delete Row",
-    "deleteTable": "Delete Table",
     "insertColumn": "Insert Column",
-    "insertColumnLeft": "Insert Column Left",
-    "insertColumnRight": "Insert Column Right",
-    "insertRow": "Insert Row",
-    "insertRowAbove": "Insert Row Above",
-    "insertRowBelow": "Insert Row Below",
-    "makeColumnHeader": "Make Column Header",
-    "makeHeader": "Make Header",
-    "makeRowHeader": "Make Row Header",
-    "removeColumnHeader": "Remove Column Header",
-    "removeHeader": "Remove Header",
-    "removeRowHeader": "Remove Row Header",
-    "removeSorting": "Remove Sorting",
-    "sortAscending": "Sort Ascending",
-    "sortDescending": "Sort Descending"
+    "insertRow": "Insert Row"
   },
   "tableOfContents": {
     "emptyState": "No headings found. Add headings to your document to see the table of contents.",

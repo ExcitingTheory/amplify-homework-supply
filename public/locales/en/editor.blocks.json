@@ -1,4 +1,16 @@
 {
+  "answerEditor": {
+    "addWordLabel": "Add label",
+    "addWordToDict": "Add a new word to the dictionary.",
+    "cancel": "Cancel",
+    "dialogTitle": "Edit Answer",
+    "emptyState": "No answer provided",
+    "instructions": "Create your answer below",
+    "save": "Save"
+  },
+  "blocks": {
+    "meaning_association": "Meaning Association"
+  },
   "customAnswerEditor": {
     "add": "Add",
     "addWordLabel": "Add word to exercise",
@@ -46,6 +58,9 @@
     "pronunciationLabel": "pronunciation",
     "removeFromAssignment": "Remove from Assignment"
   },
+  "questionEditor": {
+    "cancel": "Cancel"
+  },
   "quizEditor": {
     "addAnswer": "Add Answer",
     "cancel": "Cancel",
@@ -56,17 +71,5 @@
     "reset": "Reset",
     "save": "Save",
     "status": "Status"
-  },
-  "answerEditor": {
-    "addWordLabel": "Add label",
-    "addWordToDict": "Add a new word to the dictionary.",
-    "cancel": "Cancel",
-    "dialogTitle": "Edit Answer",
-    "emptyState": "No answer provided",
-    "instructions": "Create your answer below",
-    "save": "Save"
-  },
-  "questionEditor": {
-    "cancel": "Cancel"
   }
 }

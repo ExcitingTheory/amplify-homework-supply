@@ -1,252 +1,77 @@
 {
+  "Peer Review": "Peer Review",
+  "common": {
+    "cancel": "Cancel"
+  },
   "grades": {
-    "title": "Grades",
-    "sections": "Sections",
-    "mySections": "My Sections",
-    "studentHeader": "Student",
-    "assignmentHeader": "Assignment",
-    "gradeHeader": "Grade"
-  },
-  "squads": {
-    "title": "Squads",
-    "heading": "All Squads",
-    "description": "Join a squad to compete with your team and climb the leaderboard together.",
-    "selectSection": "Select a Section",
-    "noSections": "No sections found",
-    "createSquad": "Start a New Squad",
-    "squadPosts": "Squad Posts"
-  },
-  "index": {
-    "title": "Homework Supply",
-    "greetingMorning": "Good morning, {name}",
-    "greetingAfternoon": "Good afternoon, {name}",
-    "greetingEvening": "Good evening, {name}",
-    "assignments": "Assignments",
-    "viewWorkbook": "View Workbook",
-    "completedAssignments": "Completed Assignments",
-    "myAssignments": "My Assignments",
-    "editUnit": "Edit Unit",
-    "noSectionsYet": "No Sections Yet",
-    "joinSection": "Join Section?",
-    "createNewSection": "Create New Section",
-    "mySections": "My Sections",
-    "untitledSection": "Untitled Section",
-    "noDescription": "No description",
-    "viewSection": "View Section",
-    "sections": "Sections",
-    "learningPathway": "Skill Tree"
-  },
-  "leaderboard": {
-    "title": "Leaderboard",
-    "heading": "Overall Leaderboard",
-    "xpMode": "XP",
-    "completionMode": "Completion",
-    "fastestMode": "Fastest",
-    "squadsMode": "Squads",
-    "empty": "No leaderboard data yet. Complete assignments to earn XP!"
-  },
-  "settings": {
-    "title": "Settings",
-    "heading": "Settings",
-    "description": "Manage your account settings and preferences",
-    "privacy": {
-      "heading": "Privacy",
-      "leaderboardOptIn": "Show my name on leaderboards",
-      "leaderboardOptInHint": "When off, your name appears as \"Anonymous Student\" on leaderboards."
-    },
-    "customization": {
-      "heading": "Customization",
-      "description": "Unlock new avatar styles and editor themes as you level up."
-    },
-    "botCustomizer": {
-      "heading": "AI Assistant Avatar",
-      "description": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges."
-    },
-    "profileInfo": {
-      "heading": "Profile Information",
-      "description": "Update your display name and email address"
-    }
-  },
-  "profile": {
-    "title": "My Profile",
-    "heading": "Profile",
-    "description": "View and update your profile information",
-    "progress": "Progress",
-    "activity": "Activity",
-    "badges": "Badges",
-    "nailedItWall": "Nailed It Wall",
-    "userId": "User Id",
-    "identityId": "Identity Id",
-    "cancel": "Cancel",
-    "name": "Name",
-    "updateProfile": "Update Profile",
-    "confirmEmail": {
-      "title": "Confirm your email",
-      "message": "Please check your email and enter the confirmation code to verify your email address.",
-      "button": "Confirm Email"
-    },
-    "changePassword": {
-      "heading": "Change Password",
-      "description": "Update your account password for security",
-      "button": "Change Password"
-    },
-    "languagePreference": {
-      "heading": "Language Preference",
-      "description": "Select your preferred language for the website interface",
-      "selectLanguage": "Select Language",
-      "changeSuccess": "Language preference saved successfully"
-    },
-    "advanced": {
-      "heading": "Advanced",
-      "description": "Manage advanced settings and clear local data cache",
-      "clearCache": "Clear Local Cache",
-      "clearCacheDialog": {
-        "title": "Clear Local Data Cache?",
-        "message": "This will clear all locally cached data including offline assignments and synchronized content. You will need to reload data from the server.",
-        "cancel": "Cancel",
-        "confirm": "Clear Cache"
-      }
-    }
-  },
-  "sectionDetail": {
-    "noFeaturedImage": "No featured image set",
-    "dragAndDropPrompt": "Drag and drop an image here to set it as the featured image.",
-    "uploadingImage": "Uploading Image",
-    "uploadImagePrompt": "Upload Image",
-    "uploadImageInvalidFile": "Please upload an image file with a valid extension.",
-    "setCoverVideo": "Set Cover Video",
-    "noCoverVideo": "No cover video set.",
-    "coverVideoUrlPlaceholder": "Paste a video URL (https://...)",
-    "coverVideoUrlLabel": "Video URL",
-    "saveCoverVideo": "Save",
-    "removeCoverVideo": "Remove",
-    "joinCode": "Join Code:",
-    "studentView": "Student View",
-    "instructorView": "Instructor View",
-    "switchToInstructorView": "Switch to Instructor View",
-    "previewStudentView": "Preview Student View",
-    "students": "Students",
-    "studentHeader": "Student",
-    "emailHeader": "Email",
-    "actionsHeader": "Actions",
-    "gradebook": "Gradebook",
-    "showingAssignments": "(Showing {visible} of {total} assignments)",
-    "showFutureAssignments": "Show Future",
-    "showDraftAssignments": "Show Drafts",
-    "applyCurve": "Apply Curve",
-    "curveMethod": "Curve Method",
-    "noCurve": "No Curve",
-    "scaleToTopMethod": "Scale to Top Score (100%)",
-    "linearAdjustmentMethod": "Linear Adjustment (75% avg)",
-    "curveDebugInfo": "Curve Debug:",
-    "selectAssignmentsToCurve": "Select assignments to curve",
-    "selectAll": "Select All",
-    "clearAll": "Clear All",
     "assignmentHeader": "Assignment",
     "gradeHeader": "Grade",
-    "totalAverage": "Total Average",
-    "learnerHeader": "Learner",
-    "totalCompletion": "Total (Completion)",
-    "editTooltip": "Edit",
-    "assignments": "Assignments",
-    "viewWorkbook": "View Workbook",
-    "completionGrid": "Completion Overview",
-    "deleteSection": "Delete Section",
-    "deleteSectionConfirm": "Are you sure you want to delete this section?",
-    "loading": "Loading...",
-    "overrideGrade": {
-      "title": "Override Grade",
-      "student": "Student:",
-      "assignment": "Assignment:",
-      "currentGrade": "Current Grade:",
-      "noGrade": "No grade",
-      "prompt": "Enter new grade (0-100):",
-      "label": "Grade (%)",
-      "invalidScore": "Please enter a valid score between 0 and 100",
-      "saveFailed": "Failed to save grade. Please try again.",
-      "cancel": "Cancel",
-      "save": "Save Grade"
-    },
-    "leaderboard": "Leaderboard",
-    "noLeaderboardEntries": "No leaderboard data yet. Students will appear here as they earn XP.",
-    "leaderboardEnabled": "Show Leaderboard",
-    "squads": "Squads"
+    "mySections": "My Sections",
+    "sections": "Sections",
+    "studentHeader": "Student",
+    "title": "Grades"
   },
-  "sections": {
-    "title": "Sections",
-    "createNew": "Create New",
-    "noSectionsYet": "No Sections Yet",
+  "index": {
+    "assignments": "Assignments",
+    "completedAssignments": "Completed Assignments",
     "createNewSection": "Create New Section",
+    "editUnit": "Edit Unit",
+    "greetingAfternoon": "Good afternoon, {name}",
+    "greetingEvening": "Good evening, {name}",
+    "greetingMorning": "Good morning, {name}",
+    "joinSection": "Join Section?",
+    "learningPathway": "Skill Tree",
+    "myAssignments": "My Assignments",
+    "mySections": "My Sections",
+    "noDescription": "No description",
+    "noSectionsYet": "No Sections Yet",
+    "sections": "Sections",
+    "title": "Homework Supply",
     "untitledSection": "Untitled Section",
     "viewSection": "View Section",
-    "loading": "Loading...",
-    "joinCode": "Join Code",
-    "archive": "Archive",
-    "unarchive": "Unarchive",
-    "archived": "Archived",
-    "showArchived": "Show Archived ({count})",
-    "archivedSuccess": "Section archived successfully",
-    "unarchivedSuccess": "Section unarchived successfully",
-    "archiveError": "Failed to update section. Please try again.",
-    "newSection": {
-      "title": "New Section",
-      "description": "Create a new Section by entering the following information",
-      "nameLabel": "Name",
-      "descriptionLabel": "Description",
-      "cancel": "Cancel",
-      "create": "Create"
-    }
+    "viewWorkbook": "View Workbook"
   },
-  "unitDetail": {
-    "loading": "Loading…"
-  },
-  "units": {
-    "title": "Units",
-    "createNew": "Create New",
-    "noPublishedUnits": "No Published Units Yet",
-    "createNewUnit": "Create New Unit",
-    "publishedUnits": "Published Units",
-    "untitledUnit": "Untitled Unit",
-    "viewWorkbook": "View Workbook",
-    "editUnit": "Edit Unit",
-    "practice": "Practice",
-    "myDrafts": "My Drafts",
-    "archivedUnits": "Archived Units",
-    "tabMyUnits": "My Units",
-    "tabSharedWithMe": "Shared With Me",
-    "tabCommunity": "Community",
-    "forkUnit": "Fork",
-    "forking": "Forking...",
-    "noSharedUnits": "No units have been shared with you yet",
-    "noCommunityUnits": "No community units available",
-    "forkSuccess": "Unit forked successfully",
-    "forkError": "Failed to fork unit"
-  },
-  "workbook": {
-    "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
-    "start": "Start",
-    "loading": "Loading…",
-    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
-    "reload": "Reload"
+  "leaderboard": {
+    "completionMode": "Completion",
+    "empty": "No leaderboard data yet. Complete assignments to earn XP!",
+    "fastestMode": "Fastest",
+    "heading": "Overall Leaderboard",
+    "squadsMode": "Squads",
+    "title": "Leaderboard",
+    "xpMode": "XP"
   },
   "privacy": {
-    "title": "Privacy Policy",
-    "lastUpdated": "Last updated: May 2026",
-    "introduction": {
-      "heading": "Introduction",
-      "content": "Welcome to Homework Supply. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and share your information when you use our educational platform."
+    "childrensPrivacy": {
+      "content": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent.",
+      "heading": "Children's Privacy"
     },
-    "informationWeCollect": {
-      "heading": "Information We Collect",
-      "intro": "We collect the following types of information to provide and improve our educational services:",
-      "accountInfo": "Account Information:",
-      "accountInfoText": "Email address, display name, and authentication credentials when you create an account.",
-      "learningData": "Learning Data:",
-      "learningDataText": "Assignment submissions, grades, progress tracking, XP earned, and learning analytics.",
-      "userContent": "User-Generated Content:",
-      "userContentText": "Audio recordings, text responses, uploaded files, and chat messages created during learning activities.",
-      "usageInfo": "Usage Information:",
-      "usageInfoText": "Device information, browser type, pages visited, and interaction patterns to improve the platform experience."
+    "contactUs": {
+      "content": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform.",
+      "heading": "Contact Us"
+    },
+    "cookies": {
+      "content": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access.",
+      "heading": "Cookies & Local Storage"
+    },
+    "dataSharing": {
+      "aiProcessing": "AI Processing:",
+      "aiProcessingText": "Audio and text content is sent to OpenAI for transcription, feedback, and assessment. OpenAI does not use this data for training.",
+      "classmates": "Classmates:",
+      "classmatesText": "Leaderboard rankings and squad activity may be visible to other students in your section (you can opt out).",
+      "heading": "Data Sharing",
+      "instructors": "Instructors:",
+      "instructorsText": "Your instructors can view your submissions, grades, and learning progress within their sections.",
+      "intro": "We do not sell your personal information. We may share data in the following limited circumstances:",
+      "legal": "Legal Requirements:",
+      "legalText": "We may disclose information if required by law or to protect the safety of our users."
+    },
+    "dataStorage": {
+      "heading": "Data Storage & Security",
+      "intro": "Your data is stored securely using industry-standard practices:",
+      "item1": "All data is encrypted in transit (TLS/SSL) and at rest using AWS encryption services",
+      "item2": "Files are stored in Amazon S3 with access controls based on your role and ownership",
+      "item3": "Database records are managed through AWS DynamoDB with fine-grained access control",
+      "outro": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your data at any time."
     },
     "howWeUseInfo": {
       "heading": "How We Use Your Information",
@@ -257,26 +82,28 @@
       "item4": "Enabling real-time collaboration features between students and instructors",
       "item5": "Improving platform features, fixing bugs, and enhancing educational outcomes"
     },
-    "dataStorage": {
-      "heading": "Data Storage & Security",
-      "intro": "Your data is stored securely using industry-standard practices:",
-      "item1": "All data is encrypted in transit (TLS/SSL) and at rest using AWS encryption services",
-      "item2": "Files are stored in Amazon S3 with access controls based on your role and ownership",
-      "item3": "Database records are managed through AWS DynamoDB with fine-grained access control",
-      "outro": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your data at any time."
+    "informationWeCollect": {
+      "accountInfo": "Account Information:",
+      "accountInfoText": "Email address, display name, and authentication credentials when you create an account.",
+      "heading": "Information We Collect",
+      "intro": "We collect the following types of information to provide and improve our educational services:",
+      "learningData": "Learning Data:",
+      "learningDataText": "Assignment submissions, grades, progress tracking, XP earned, and learning analytics.",
+      "usageInfo": "Usage Information:",
+      "usageInfoText": "Device information, browser type, pages visited, and interaction patterns to improve the platform experience.",
+      "userContent": "User-Generated Content:",
+      "userContentText": "Audio recordings, text responses, uploaded files, and chat messages created during learning activities."
     },
-    "dataSharing": {
-      "heading": "Data Sharing",
-      "intro": "We do not sell your personal information. We may share data in the following limited circumstances:",
-      "instructors": "Instructors:",
-      "instructorsText": "Your instructors can view your submissions, grades, and learning progress within their sections.",
-      "classmates": "Classmates:",
-      "classmatesText": "Leaderboard rankings and squad activity may be visible to other students in your section (you can opt out).",
-      "aiProcessing": "AI Processing:",
-      "aiProcessingText": "Audio and text content is sent to OpenAI for transcription, feedback, and assessment. OpenAI does not use this data for training.",
-      "legal": "Legal Requirements:",
-      "legalText": "We may disclose information if required by law or to protect the safety of our users."
+    "introduction": {
+      "content": "Welcome to Homework Supply. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and share your information when you use our educational platform.",
+      "heading": "Introduction"
     },
+    "lastUpdated": "Last updated: May 2026",
+    "policyChanges": {
+      "content": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy.",
+      "heading": "Changes to This Policy"
+    },
+    "title": "Privacy Policy",
     "yourRights": {
       "heading": "Your Rights",
       "intro": "You have the following rights regarding your personal data:",
@@ -286,23 +113,219 @@
       "item4": "Export: Download your learning data in a portable format",
       "item5": "Opt-out: Disable leaderboard visibility and certain data sharing features",
       "outro": "To exercise these rights, contact your instructor or reach out to us using the contact information below."
-    },
-    "cookies": {
-      "heading": "Cookies & Local Storage",
-      "content": "We use essential cookies and local storage for authentication, session management, and offline functionality. We do not use third-party tracking cookies or advertising cookies. Local storage is used to cache learning content for offline access."
-    },
-    "childrensPrivacy": {
-      "heading": "Children's Privacy",
-      "content": "Homework Supply is designed for educational use and may be used by students under 13 with parental or school consent. We comply with COPPA requirements and do not knowingly collect personal information from children without appropriate consent. Schools and instructors are responsible for obtaining necessary parental consent."
-    },
-    "policyChanges": {
-      "heading": "Changes to This Policy",
-      "content": "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes through the platform. Continued use of the platform after changes constitutes acceptance of the updated policy."
-    },
-    "contactUs": {
-      "heading": "Contact Us",
-      "content": "If you have questions about this Privacy Policy or wish to exercise your data rights, please contact your instructor or the platform administrator. For general inquiries, you can reach us through the support channels available in the platform."
     }
   },
-  "Peer Review": "Peer Review"
+  "profile": {
+    "activity": "Activity",
+    "advanced": {
+      "clearCache": "Clear Local Cache",
+      "clearCacheDialog": {
+        "cancel": "Cancel",
+        "confirm": "Clear Cache",
+        "message": "This will clear all locally cached data including offline assignments and synchronized content. You will need to reload data from the server.",
+        "title": "Clear Local Data Cache?"
+      },
+      "description": "Manage advanced settings and clear local data cache",
+      "heading": "Advanced"
+    },
+    "badges": "Badges",
+    "cancel": "Cancel",
+    "changePassword": {
+      "button": "Change Password",
+      "description": "Update your account password for security",
+      "heading": "Change Password"
+    },
+    "completePriorUnit": "Complete Prior Unit",
+    "completionRequired": "Completion Required",
+    "confirmEmail": {
+      "button": "Confirm Email",
+      "message": "Please check your email and enter the confirmation code to verify your email address.",
+      "title": "Confirm your email"
+    },
+    "description": "View and update your profile information",
+    "heading": "Profile",
+    "identityId": "Identity Id",
+    "languagePreference": {
+      "changeSuccess": "Language preference saved successfully",
+      "description": "Select your preferred language for the website interface",
+      "heading": "Language Preference",
+      "selectLanguage": "Select Language"
+    },
+    "nailedItWall": "Nailed It Wall",
+    "name": "Name",
+    "progress": "Progress",
+    "title": "My Profile",
+    "unlockRoadmap": "Unlock Roadmap",
+    "updateProfile": "Update Profile",
+    "userId": "User Id",
+    "xpRequired": "Xp Required"
+  },
+  "sectionDetail": {
+    "accommodations": "Accommodations",
+    "actionsHeader": "Actions",
+    "addStudents": "Add Students",
+    "applyCurve": "Apply Curve",
+    "assignUnit": "Assign Unit",
+    "assignmentHeader": "Assignment",
+    "assignments": "Assignments",
+    "chapterHeader": "Chapter Header",
+    "clearAll": "Clear All",
+    "completionGrid": "Completion Overview",
+    "coverVideoUrlLabel": "Video URL",
+    "coverVideoUrlPlaceholder": "Paste a video URL (https://...)",
+    "curveDebugInfo": "Curve Debug:",
+    "curveMethod": "Curve Method",
+    "deleteSection": "Delete Section",
+    "deleteSectionConfirm": "Are you sure you want to delete this section?",
+    "discuss": "Discuss",
+    "dragAndDropPrompt": "Drag and drop an image here to set it as the featured image.",
+    "editTooltip": "Edit",
+    "emailHeader": "Email",
+    "gradeHeader": "Grade",
+    "gradebook": "Gradebook",
+    "instructorView": "Instructor View",
+    "joinCode": "Join Code:",
+    "leaderboard": "Leaderboard",
+    "leaderboardEnabled": "Show Leaderboard",
+    "learnerHeader": "Learner",
+    "linearAdjustmentMethod": "Linear Adjustment (75% avg)",
+    "loading": "Loading...",
+    "noCoverVideo": "No cover video set.",
+    "noCurve": "No Curve",
+    "noFeaturedImage": "No featured image set",
+    "noLeaderboardEntries": "No leaderboard data yet. Students will appear here as they earn XP.",
+    "overrideGrade": {
+      "assignment": "Assignment:",
+      "cancel": "Cancel",
+      "currentGrade": "Current Grade:",
+      "invalidScore": "Please enter a valid score between 0 and 100",
+      "label": "Grade (%)",
+      "noGrade": "No grade",
+      "prompt": "Enter new grade (0-100):",
+      "save": "Save Grade",
+      "saveFailed": "Failed to save grade. Please try again.",
+      "student": "Student:",
+      "title": "Override Grade"
+    },
+    "previewStudentView": "Preview Student View",
+    "removeCoverVideo": "Remove",
+    "removeStudentConfirm": "Remove Student Confirm",
+    "saveCoverVideo": "Save",
+    "scaleToTopMethod": "Scale to Top Score (100%)",
+    "selectAll": "Select All",
+    "selectAssignmentsToCurve": "Select assignments to curve",
+    "setCoverVideo": "Set Cover Video",
+    "shiftDueDates": "Shift Due Dates",
+    "showDraftAssignments": "Show Drafts",
+    "showFutureAssignments": "Show Future",
+    "showingAssignments": "(Showing {visible} of {total} assignments)",
+    "squads": "Squads",
+    "studentHeader": "Student",
+    "studentView": "Student View",
+    "students": "Students",
+    "switchToInstructorView": "Switch to Instructor View",
+    "totalAverage": "Total Average",
+    "totalCompletion": "Total (Completion)",
+    "uploadImageInvalidFile": "Please upload an image file with a valid extension.",
+    "uploadImagePrompt": "Upload Image",
+    "uploadingImage": "Uploading Image",
+    "viewWorkbook": "View Workbook"
+  },
+  "sections": {
+    "archive": "Archive",
+    "archiveError": "Failed to update section. Please try again.",
+    "archived": "Archived",
+    "archivedSuccess": "Section archived successfully",
+    "assignUnit": "Assign Unit",
+    "createNew": "Create New",
+    "createNewSection": "Create New Section",
+    "joinCode": "Join Code",
+    "loading": "Loading...",
+    "newSection": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "description": "Create a new Section by entering the following information",
+      "descriptionLabel": "Description",
+      "nameLabel": "Name",
+      "title": "New Section"
+    },
+    "noSectionsYet": "No Sections Yet",
+    "showArchived": "Show Archived ({count})",
+    "title": "Sections",
+    "unarchive": "Unarchive",
+    "unarchivedSuccess": "Section unarchived successfully",
+    "untitledSection": "Untitled Section",
+    "viewSection": "View Section"
+  },
+  "settings": {
+    "botCustomizer": {
+      "description": "Customize your AI tutor's appearance. Unlock more options with Bot Whisperer badges.",
+      "heading": "AI Assistant Avatar"
+    },
+    "customization": {
+      "description": "Unlock new avatar styles and editor themes as you level up.",
+      "heading": "Customization"
+    },
+    "description": "Manage your account settings and preferences",
+    "heading": "Settings",
+    "privacy": {
+      "heading": "Privacy",
+      "leaderboardOptIn": "Show my name on leaderboards",
+      "leaderboardOptInHint": "When off, your name appears as \"Anonymous Student\" on leaderboards."
+    },
+    "profileInfo": {
+      "description": "Update your display name and email address",
+      "heading": "Profile Information"
+    },
+    "title": "Settings"
+  },
+  "squads": {
+    "create": "Create",
+    "createDescription": "Create Description",
+    "createSquad": "Start a New Squad",
+    "description": "Join a squad to compete with your team and climb the leaderboard together.",
+    "filterByName": "Filter By Name",
+    "flat": "Flat",
+    "groupBySection": "Group By Section",
+    "heading": "All Squads",
+    "noSections": "No sections found",
+    "sectionName": "Section Name",
+    "selectSection": "Select a Section",
+    "sortBy": "Sort By",
+    "squadName": "Squad Name",
+    "squadPosts": "Squad Posts",
+    "title": "Squads"
+  },
+  "unitDetail": {
+    "loading": "Loading…"
+  },
+  "units": {
+    "archivedUnits": "Archived Units",
+    "createNew": "Create New",
+    "createNewUnit": "Create New Unit",
+    "editUnit": "Edit Unit",
+    "forkError": "Failed to fork unit",
+    "forkSuccess": "Unit forked successfully",
+    "forkUnit": "Fork",
+    "forking": "Forking...",
+    "myDrafts": "My Drafts",
+    "noCommunityUnits": "No community units available",
+    "noPublishedUnits": "No Published Units Yet",
+    "noSharedUnits": "No units have been shared with you yet",
+    "practice": "Practice",
+    "publishedUnits": "Published Units",
+    "tabCommunity": "Community",
+    "tabMyUnits": "My Units",
+    "tabSharedWithMe": "Shared With Me",
+    "title": "Units",
+    "untitledUnit": "Untitled Unit",
+    "viewWorkbook": "View Workbook"
+  },
+  "workbook": {
+    "loading": "Loading…",
+    "reload": "Reload",
+    "start": "Start",
+    "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
+    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?"
+  }
 }

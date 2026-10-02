@@ -1,4 +1,41 @@
 {
+  "aiAgentConfig": {
+    "behaviorTuning": "Behavior Tuning",
+    "conversationMemory": "Conversation Memory",
+    "defaultModel": "Default Model",
+    "defaultResultLimitLabel": "Default Result Limit",
+    "enableConversationMemory": "Enable conversation memory",
+    "enforceTokenBudget": "Enforce token budgets",
+    "enforceTokenBudgetNote": "When enabled, the agent will truncate system prompts and tool results to their budget limits, and abort multi-step turns that exceed the total turn budget.",
+    "kaiMaxTokensLabel": "Kai Max Tokens",
+    "kaiModel": "Kai Model",
+    "kaiSystemPromptLabel": "Kai System Prompt",
+    "kaiTemperatureLabel": "Kai Temperature:",
+    "kaiToolResultLabel": "Kai Tool Result",
+    "maxAgentStepsHint": "Maximum tool-calling rounds per conversation turn",
+    "maxAgentStepsLabel": "Max Agent Steps",
+    "modelSelection": "Model Selection",
+    "perPersonaOverrides": "Per-Persona Overrides",
+    "sageMaxTokensLabel": "Sage Max Tokens",
+    "sageModel": "Sage Model",
+    "sageSystemPromptLabel": "Sage System Prompt",
+    "sageTemperatureLabel": "Sage Temperature:",
+    "sageToolResultLabel": "Sage Tool Result",
+    "searchTuning": "Search Tuning",
+    "similarityThresholdLabel": "Similarity Threshold:",
+    "summarizationModelLabel": "Summarization Model",
+    "systemPromptBudgetHint": "Max tokens for Tier 1 context in system prompt (default: 2000)",
+    "systemPromptBudgetLabel": "System Prompt Budget",
+    "title": "Title",
+    "tokenBudgets": "Token Budgets",
+    "tokenBudgetsDescription": "Control how many tokens are allocated to each part of an agent turn. Lower budgets reduce cost; higher budgets allow richer context.",
+    "tokensUnit": "tokens",
+    "toolResultBudgetHint": "Max tokens per tool result returned to model (default: 4000)",
+    "toolResultBudgetLabel": "Tool Result Budget",
+    "totalTurnBudgetHint": "Max total tokens consumed per agent turn across all steps (default: 16000)",
+    "totalTurnBudgetLabel": "Total Turn Budget",
+    "useDefaultPlaceholder": "Use default"
+  },
   "aiFeedbackWidget": {
     "cancel": "Cancel",
     "helpful": "Helpful",
@@ -7,13 +44,55 @@
     "submit": "Submit",
     "whatToImprove": "What could be improved?"
   },
+  "amblifyAuthenticator": {
+    "emailPhoneOptions": "Email or phone number"
+  },
+  "armorEditor": {
+    "addCharge": "Add charge",
+    "chargeRotation": "Charge rotation",
+    "chargeSize": "Charge size",
+    "shieldPreview": "Shield preview",
+    "xOffset": "X offset",
+    "yOffset": "Y offset"
+  },
+  "assignmentCard": {
+    "difficulty": "Difficulty: {level}",
+    "discuss": "Discuss",
+    "dropped": "Dropped by instructor",
+    "due": "Due",
+    "dueSoon": "Due soon",
+    "excellent": "Excellent",
+    "fair": "Fair",
+    "good": "Good",
+    "joinReview": "Join Review",
+    "late": "Late",
+    "locked": "Locked",
+    "needsWork": "Needs work",
+    "noDueDate": "No due date",
+    "opensAt": "Opens {date}",
+    "overdue": "Overdue",
+    "practice": "Practice",
+    "requestGuidance": "Request Guidance",
+    "requestGuidanceTooltip": "Create a room and share the code with your instructor to get personal guidance",
+    "review": "Review",
+    "startWorkbook": "Start"
+  },
+  "assignmentConfiguration": {
+    "createSectionLabel": "Create new section",
+    "friday": "Next Friday",
+    "nextClass": "Next class",
+    "publishFirstAlert": "Note: Must publish unit first to create assignments",
+    "retryToggle": "Allow student retries",
+    "timerDescription": "Timer configuration for timed assignments",
+    "timerQuestion": "Add Timer Question",
+    "tomorrow": "Tomorrow",
+    "undoSnackbar": "Assignments created. {count} assignment{plural} created."
+  },
   "authenticator": {
     "confirmPasswordLabel": "Confirm Password:",
     "confirmPasswordPlaceholder": "Please confirm your Password",
     "displayNameLabel": "Display Name:",
     "displayNamePlaceholder": "Choose a display name",
-    "preferredNameLabel": "Preferred Name (optional):",
-    "preferredNamePlaceholder": "Name you'd like to go by in class",
     "emailLabel": "Email:",
     "emailPlaceholder": "Enter your Email:",
     "firstNameLabel": "First Name:",
@@ -25,39 +104,74 @@
     "passwordLabel": "Password:",
     "passwordPlaceholder": "Enter your Password:",
     "phoneLabel": "Phone Number:",
-    "phonePlaceholder": "Enter your phone number"
+    "phonePlaceholder": "Enter your phone number",
+    "preferredNameLabel": "Preferred Name (optional):",
+    "preferredNamePlaceholder": "Name you'd like to go by in class"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "Customize Avatar"
+  },
+  "botCustomizer": {
+    "backgroundColorLabel": "Background Color",
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "gold": "Gold",
+      "lavender": "Lavender",
+      "mint": "Mint",
+      "peach": "Peach",
+      "rose": "Rose",
+      "sky": "Sky"
+    },
+    "lockedMessage": "Earn the Bot Whisperer I badge to customize your AI assistant.",
+    "previewTitle": "Your AI Assistant",
+    "styleLabel": "Style",
+    "styles": {
+      "bottts": "Robot",
+      "botttsNeutral": "Mini Robot"
+    }
+  },
+  "cadenceCopyDialog": {
+    "close": "Close",
+    "copyCadence": "Copy cadence",
+    "copyFromClass": "Copy from class",
+    "copyToClasses": "Copy to classes",
+    "copying": "Copying...",
+    "firstMeetingDate": "First meeting date",
+    "loadingCadence": "Loading source cadence...",
+    "missingMetadata": "source assignment missing cadence metadata and cannot be copied.",
+    "noAssignments": "The source class has no dated assignments to copy.",
+    "title": "Title",
+    "weeklyMeetingHint": "1 = first, 2 = second, 0 = last",
+    "weeklyMeetingLabel": "Weekly meeting",
+    "weeksLabel": "Weeks"
   },
   "chat": {
     "aiAssistant": "AI Assistant",
     "close": "Close",
+    "navigationRequired": "Navigation Required",
     "openAssistant": "Open AI Assistant"
   },
   "chatMessageList": {
-    "tool": "Tool",
-    "thinking": "Thinking…",
     "input": "Input",
-    "result": "Result"
+    "result": "Result",
+    "thinking": "Thinking…",
+    "tool": "Tool"
   },
-  "editableBlockPreview": {
-    "quiz": "Generated quiz block",
-    "answer": "Generated answer block",
-    "meaningAssociation": "Generated meaning-association block",
-    "customAnswer": "Generated custom-answer block",
-    "content": "Generated content block",
-    "block": "Generated block",
-    "copy": "Copy to clipboard",
-    "copied": "Copied!",
-    "regenerate": "Regenerate",
-    "editHint": "Edit the block below, then insert it into your lesson.",
-    "reject": "Reject",
-    "insert": "Insert into lesson",
-    "inserted": "Inserted into lesson",
-    "rejected": "Rejected",
-    "undo": "Undo"
+  "chatPanel": {
+    "backButton": "Back",
+    "defaultTitle": "Chat",
+    "onlineCount": "{count} online",
+    "topicsLabel": "Topics"
   },
   "chatSidebar": {
     "activeChats": "Active Chats",
     "aiAssistant": "AI Assistant",
+    "aiRateLimited": "Ai Rate Limited",
+    "aiTimeout": "Ai Timeout",
+    "aiUnavailable": "Ai Unavailable",
     "analysisCancelled": "Analysis cancelled",
     "analyzing": "analyzing",
     "archiveChat": "Archive chat",
@@ -115,6 +229,7 @@
     "noHistoryAvailable": "No history available",
     "noResultsFound": "No results found",
     "ready": "Ready",
+    "refreshAI": "Refresh A I",
     "removeFile": "Remove file",
     "reviewImportVocabulary": "Review & Import Vocabulary",
     "reviewVocabulary": "Review vocabulary",
@@ -165,16 +280,89 @@
     "welcomeMessage": "Ask me anything about your curriculum, files, or content!",
     "yesterday": "Yesterday"
   },
+  "collaboration": {
+    "emptyInput": "Please enter a code or link",
+    "error": "Failed to join session",
+    "joinButton": "Join",
+    "joining": "Joining...",
+    "noInvitations": "No pending collaboration invitations",
+    "tabInvitations": "Invitations",
+    "tabJoin": "Join by Code",
+    "title": "Collaboration",
+    "typePeerReview": "Peer Review",
+    "typePractice": "Practice",
+    "typeWorkbook": "Workbook"
+  },
+  "collaboratorManager": {
+    "add": "Add",
+    "addCollaborator": "Add Collaborator",
+    "cancel": "Cancel",
+    "editPermission": "Edit",
+    "failedToAdd": "Failed to add collaborator",
+    "failedToLoad": "Failed to load collaborators",
+    "failedToRemove": "Failed to remove collaborator",
+    "noCollaborators": "No collaborators yet",
+    "noInstructorsFound": "No instructors found",
+    "permissionEdit": "Edit — Can modify content",
+    "permissionLevel": "Permission Level",
+    "permissionRead": "Read — View content only",
+    "readPermission": "Read",
+    "removeCollaborator": "Remove {name}",
+    "searchInstructors": "Search Instructors",
+    "searchPlaceholder": "Search by name, username, or email",
+    "title": "Collaborators",
+    "typeAtLeast": "Type at least 2 characters"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete"
+  },
+  "communityUnitCard": {
+    "byAuthor": "By: {author}",
+    "fork": "Fork",
+    "forking": "Forking...",
+    "noDescription": "No description",
+    "untitledUnit": "Untitled Unit"
+  },
+  "conversationPlayer": {
+    "defaultTitle": "Default Title",
+    "generateMovie": "Generate Movie",
+    "generateMovieSoon": "Generate Movie Soon",
+    "generateMovieTooltip": "Generate Movie Tooltip",
+    "nextTrack": "Next Track",
+    "noSubtitle": "No Subtitle",
+    "noTracks": "No Tracks",
+    "playMovie": "Play Movie",
+    "previousTrack": "Previous Track",
+    "seekBar": "Seek Bar",
+    "toggleSubtitles": "Toggle Subtitles"
+  },
+  "conversationPlaylistEditor": {
+    "audioTracks": "Audio Tracks",
+    "defaultTitle": "Default Title",
+    "editLine": "Edit Line",
+    "noTracks": "No Tracks",
+    "removeTrack": "Remove Track",
+    "saveLine": "Save Line",
+    "subtitleLines": "Subtitle Lines",
+    "tracks": "Tracks"
+  },
   "copyright": {
     "text": "Copyright ©",
     "website": "Your Website"
   },
   "dictionaryEditor": {
+    "actionsButton": "Actions Button",
     "audioStudioTitle": "Audio Recording Studio",
     "cancel": "Cancel",
+    "collapseAll": "Collapse All",
     "confirmButton": "Confirm",
     "createNewWordTitle": "Create New Word",
     "createWordButton": "Create Word",
+    "expandAll": "Expand All",
+    "newWordButton": "New Word Button",
+    "noRubyTags": "No ruby tags yet",
     "phraseLabel": "Phrase (select second):",
     "pronunciationLabel": "Pronunciation (select first):",
     "rubyTagEditorTitle": "Ruby Tag Editor",
@@ -186,39 +374,83 @@
     "rubyTagsStep4": "4. Click Save to apply the ruby tags",
     "rubyTagsTitle": "How to create ruby tags:",
     "save": "Save",
-    "noRubyTags": "No ruby tags yet",
     "saveRubyTags": "Save ruby tags"
-  },
-  "chatPanel": {
-    "defaultTitle": "Chat",
-    "topicsLabel": "Topics",
-    "backButton": "Back",
-    "onlineCount": "{count} online"
-  },
-  "threadView": {
-    "emptyState": "No messages yet. Start the conversation!",
-    "replyCount": {
-      "singular": "reply",
-      "plural": "replies"
-    },
-    "typingIndicator": "{names} {count, plural, one {is} other {are}} typing...",
-    "edited": "(edited)",
-    "justNow": "just now",
-    "minutesAgo": "{minutes}m ago",
-    "hoursAgo": "{hours}h ago"
-  },
-  "messageComposer": {
-    "defaultPlaceholder": "Type a message... (@kai for AI)",
-    "replyingTo": "Replying to {name}"
-  },
-  "topicList": {
-    "header": "Topics",
-    "newTopicPlaceholder": "#new-topic",
-    "emptyState": "No topics yet. Create one to start chatting."
   },
   "documentSourceBadge": {
     "pagePrefix": "Page",
     "sourcePrefix": "Source:"
+  },
+  "editableBlockPreview": {
+    "answer": "Generated answer block",
+    "block": "Generated block",
+    "content": "Generated content block",
+    "copied": "Copied!",
+    "copy": "Copy to clipboard",
+    "customAnswer": "Generated custom-answer block",
+    "editHint": "Edit the block below, then insert it into your lesson.",
+    "insert": "Insert into lesson",
+    "inserted": "Inserted into lesson",
+    "meaningAssociation": "Generated meaning-association block",
+    "quiz": "Generated quiz block",
+    "regenerate": "Regenerate",
+    "reject": "Reject",
+    "rejected": "Rejected",
+    "undo": "Undo"
+  },
+  "instructorDashboard": {
+    "average": "Average",
+    "averageCompletion": "Average Completion",
+    "averageGrade": "Average Grade",
+    "avg": "avg",
+    "completed": "Completed",
+    "completion": "Completion",
+    "noDataYet": "No student data available yet",
+    "overallPerformance": "Overall Performance",
+    "rank": "Rank",
+    "sectionLeaderboards": "Section Leaderboards",
+    "student": "Student",
+    "students": "students",
+    "totalAssignments": "Total Assignments",
+    "totalStudents": "Total Students"
+  },
+  "jobsDashboard": {
+    "active": "{count} active",
+    "activeFailed": "Active / Failed",
+    "agentJobs": "Agent Jobs",
+    "allStatuses": "All Statuses",
+    "allTypes": "All Types",
+    "cancel": "Cancel",
+    "cancelled": "Cancelled",
+    "colActions": "Actions",
+    "colDuration": "Duration",
+    "colError": "Error",
+    "colOwner": "Owner",
+    "colResource": "Resource",
+    "colRetries": "Retries",
+    "colStarted": "Started",
+    "colStatus": "Status",
+    "colType": "Type",
+    "completed": "Completed",
+    "docAnalysis": "Doc Analysis",
+    "failed": "{count} failed",
+    "failedStatus": "Failed",
+    "mediaTranscode": "Media Transcode",
+    "noJobs": "No jobs matching the current filters",
+    "processing": "Processing",
+    "queued": "Queued",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "retryAllFailed": "Retry All Failed ({count})",
+    "status": "Status",
+    "totalJobs": "{count} total jobs",
+    "type": "Type",
+    "typeAgentJob": "Agent Job",
+    "typeDocumentAnalysis": "Document Analysis",
+    "typeMediaTranscode": "Media Transcode"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "Type a message... (@kai for AI)",
+    "replyingTo": "Replying to {name}"
   },
   "moderationBadge": {
     "approved": "Content Approved",
@@ -252,9 +484,148 @@
     "model": "Model: {model}",
     "title": "Content Moderation"
   },
+  "notification": {
+    "category": {
+      "all": "All",
+      "assignment": "Assignments",
+      "chat": "Chat",
+      "collaboration": "Collaboration",
+      "gamification": "Gamification",
+      "squad": "Squads",
+      "system": "System"
+    },
+    "delete": "Delete",
+    "empty": "No notifications yet",
+    "emptyDescription": "You'll see notifications for assignments, grades, badges, and more here.",
+    "markAllRead": "Mark all read",
+    "title": "Notifications"
+  },
+  "offlineBanner": {
+    "backOnline": "Back online — syncing {count} pending changes",
+    "offline": "You're offline — your work is saved locally",
+    "pending": "{count} pending",
+    "syncAria": "Sync {count} pending changes",
+    "syncNow": "Sync now"
+  },
   "pdfThumbnail": {
     "failedToLoad": "Failed to load PDF",
     "pageNumber": "{current} / {total}"
+  },
+  "peerReview": {
+    "joinDialog": {
+      "codeLabel": "Review Room Code",
+      "description": "Enter the review room code shared by your classmate to join their peer review session.",
+      "emptyCode": "Empty Code",
+      "error": "Error",
+      "joinButton": "Join Review",
+      "joining": "Joining...",
+      "noInvitations": "No pending review invitations",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "title": "Join Peer Review"
+    }
+  },
+  "permissionError": {
+    "contactInfo": "If you believe this is an error, please contact your instructor or administrator.",
+    "defaultMessage": "You don't have permission to access this {resourceType}.",
+    "explanation": "This content is restricted. You need to be the owner or have instructor permissions to access it.",
+    "goBack": "Go Back",
+    "goHome": "Go to Home",
+    "resourceTypes": {
+      "assignment": "assignment",
+      "grade": "grade",
+      "section": "section",
+      "unit": "unit"
+    },
+    "title": "Access Denied"
+  },
+  "practiceDrill": {
+    "collab": {
+      "connected": "Connected",
+      "copied": "Copied!",
+      "copyCode": "Copy room code to share",
+      "disconnected": "Disconnected",
+      "groupAccuracy": "Group accuracy: {accuracy}%",
+      "groupAccuracyTip": "Average accuracy across all participants",
+      "groupProgress": "Group progress",
+      "participants": "{count} participants"
+    },
+    "config": {
+      "cancel": "Cancel",
+      "comprehension": "Comprehension",
+      "coverage": "Coverage: {covered}/{total} items practiced ({percent}%)",
+      "documents": "Documents",
+      "documentsDesc": "From uploaded PDFs and parsed content",
+      "drillType": "Drill type",
+      "generating": "Generating...",
+      "maxParticipants": "Max participants",
+      "mixed": "Mixed",
+      "noSourcesWarning": "Enable at least one content source to start practicing.",
+      "questionCount": "Number of questions",
+      "questions": "Questions",
+      "questionsDesc": "From the question bank",
+      "review": "Review mistakes",
+      "start": "Start Practice",
+      "studyTogether": "Study Together",
+      "studyTogetherDesc": "Practice with classmates in real-time. A room code will be created to share.",
+      "subtitle": "Choose what to practice:",
+      "text": "Text Content",
+      "textDesc": "From lesson text and graded blocks",
+      "title": "Practice: {unitName}",
+      "vocabulary": "Vocabulary",
+      "vocabularyDesc": "Words, definitions, matching",
+      "vocabularyType": "Vocabulary"
+    },
+    "dialog": {
+      "back": "Back",
+      "cancel": "Cancel",
+      "close": "Close",
+      "complete": "Drill Complete!",
+      "completeSummary": "You scored {accuracy}% and earned {xp} XP!",
+      "done": "Done",
+      "finish": "Finish & Earn XP",
+      "generating": "Generating drill...",
+      "practiceAgain": "Practice Again",
+      "retry": "Retry",
+      "returnToLibrary": "Return To Library",
+      "saving": "Saving",
+      "title": "Practice",
+      "titleWithUnit": "Practice: {unit}"
+    },
+    "join": {
+      "cancel": "Cancel",
+      "codeLabel": "Room Code",
+      "codeTooShort": "Room code must be at least 4 characters",
+      "description": "Enter the room code shared by your instructor or classmate to join their study session.",
+      "error": "Failed to join session",
+      "full": "This session is full ({max} participants)",
+      "joinButton": "Join Session",
+      "joining": "Joining...",
+      "noInvitations": "No pending session invitations",
+      "notFound": "No active session found with that code",
+      "tabCode": "Enter Code",
+      "tabInvitations": "Invitations",
+      "title": "Join Study Session"
+    },
+    "library": {
+      "emptyDescription": "Empty Description",
+      "emptyTitle": "Empty Title",
+      "generateNew": "Generate new drill",
+      "resumeLabel": "Resume ({completed}/{total} completed)",
+      "resumeTitle": "Continue where you left off",
+      "templatesTitle": "Drill library",
+      "title": "Practice Drill"
+    },
+    "progress": {
+      "questions": "questions",
+      "streakTooltip": "Current streak: {count}",
+      "xpDiminishedTooltip": "XP reduced due to repeated attempts",
+      "xpTooltip": "Estimated XP for this drill"
+    },
+    "workbook": {
+      "label": "Practice drill workbook",
+      "noBlocks": "No drill blocks yet"
+    }
   },
   "proTip": {
     "message": "Pro tip: Use the editor to create engaging learning materials!"
@@ -298,6 +669,7 @@
     "questionPrompt": "Question Prompt",
     "sectionHeading": "Questions Review",
     "selectAll": "Select All",
+    "selectQuestion": "Select Question",
     "selectedCount": "{count} of {total} selected",
     "show": "Show",
     "summaries": "Summaries",
@@ -313,17 +685,37 @@
     "add": "Add",
     "addLine": "Add Line",
     "addSpeakerFirst": "Please add a speaker first",
+    "aiGenerationFailed": "Ai Generation Failed",
+    "audioGenerated": "Audio Generated",
+    "deleteSpeaker": "Delete Speaker",
+    "deleteTake": "Delete Take",
+    "deleteTakeMessage": "Delete Take Message",
+    "deleteTakeTitle": "Delete Take Title",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g., 30s, energetic, professional",
+    "direction": "Direction",
+    "directionPlaceholder": "e.g., entering, out of breath",
+    "emotion": "Emotion",
+    "emotionPlaceholder": "e.g., cheerful, tired",
     "exportJson": "Export JSON",
     "generateAllMissing": "Generate All Missing TTS",
     "generateTts": "Generate TTS",
+    "generatingAudio": "Generating Audio",
     "importFailed": "Failed to import JSON file",
     "importJson": "Import JSON",
     "lineNumber": "Line #{number} - {speaker}",
+    "lockedTrack": "Locked track",
     "micAccessFailed": "Failed to access microphone",
+    "name": "Name",
     "noMissingAudio": "No missing audio to generate",
     "noTextToGenerate": "No text to generate",
+    "noVersionHistory": "No Version History",
+    "openVersionHistory": "Open Version History",
+    "play": "Play",
     "processingLines": "Processing {count} lines...",
     "record": "Record",
+    "recordingSaved": "Recording Saved",
+    "restore": "Restore",
     "saveRecordingFailed": "Failed to save recording",
     "script": "Script",
     "selectDialogueFirst": "Please select a dialogue line first",
@@ -331,9 +723,30 @@
     "speakers": "Speakers",
     "stop": "Stop",
     "takes": "Takes:",
+    "text": "Text",
     "timeline": "Timeline",
     "ttsGenerationFailed": "Failed to generate TTS audio",
+    "versionHistory": "Version History",
+    "versionHistoryFailed": "Version History Failed",
     "voice": "Voice"
+  },
+  "recordingStudio3Modal": {
+    "backToStudio": "Back to Studio",
+    "confirmSave": "Save",
+    "confirmTitle": "Confirm Save",
+    "conversationSaveInfo": "Audio files will be saved as File records attached to this unit.",
+    "discard": "Discard",
+    "done": "Done",
+    "generateMissingTts": "Generate Missing ({count})",
+    "generatingTts": "Generating...",
+    "generatingTtsProgress": "Generating TTS audio...",
+    "missingTakesWarning": "{count} lines have no active take and will not be saved.",
+    "noActiveTake": "No active take",
+    "recording": "Recording",
+    "saving": "Saving...",
+    "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
+    "unsavedChangesTitle": "Unsaved Changes",
+    "wordSaveInfo": "Audio will be saved to the Word model's audio and definitionAudio fields."
   },
   "recordingStudioEnhanced": {
     "addTrack": "Add Track",
@@ -369,13 +782,22 @@
     "ttsNotImplemented": "Text-to-speech generation not yet implemented",
     "voice": "Voice"
   },
+  "recordingStudioEnhancedModal": {
+    "cancel": "Cancel",
+    "defaultTitle": "Generate Conversation",
+    "saveConversation": "Save Conversation"
+  },
   "savedPdfThumbnail": {
     "errorMessage": "Error loading PDF",
     "pageOverlay": "Page {number}"
   },
   "screenplayEditor": {
+    "editorLabel": "Editor Label",
+    "examples": "Examples",
     "formatLabel": "Format",
-    "placeholder": "FADE IN:"
+    "placeholder": "FADE IN:",
+    "promptPlaceholder": "Prompt Placeholder",
+    "send": "Send"
   },
   "sectionAssigner": {
     "assign": "Assign",
@@ -388,75 +810,73 @@
     "selectSection": "Select Section",
     "selectSectionHelper": "Select a section to assign the due date to"
   },
+  "sectionDetail": {
+    "assignments": "Assignments",
+    "completionGrid": "Completion Grid",
+    "gradebook": "Gradebook",
+    "leaderboard": "Leaderboard",
+    "students": "Students"
+  },
+  "sharedUnitCard": {
+    "edit": "Edit",
+    "editAccess": "Edit Access",
+    "noDescription": "No description",
+    "readOnly": "Read Only",
+    "sharedBy": "Shared by: {owner}",
+    "showDeletedItems": "Show deleted items",
+    "untitledUnit": "Untitled Unit",
+    "view": "View"
+  },
+  "showDeletedItems": "Show deleted items",
+  "skillTree": {
+    "empty": "No skills available yet. Your instructor will set up the skill tree.",
+    "title": "Skill Tree"
+  },
   "sortableAnswers": {
     "answerLabel": "Answer {number}",
     "correct": "Correct",
     "incorrect": "Incorrect"
   },
+  "storageManagement": {
+    "aiModelForOffline": "AI Model for Offline Use",
+    "builtIn": "Built-in",
+    "cacheStatusUpdated": "{status} · Last updated {date}",
+    "cachedAssignments": "Cached Assignments",
+    "download": "Download",
+    "downloaded": "Downloaded",
+    "downloadingModel": "Downloading AI model... {percent}%",
+    "modelSizeStatus": "{size} · {status}",
+    "noCachedAssignments": "No assignments cached for offline use yet. Open an assignment to cache it automatically.",
+    "notDownloaded": "Not downloaded",
+    "offlineStorage": "Offline Storage",
+    "preInstalled": "Pre-installed — no download needed",
+    "removeModel": "Remove model",
+    "removeOfflineData": "Remove offline data",
+    "storageFullWarning": "Storage is getting full. Consider removing cached assignments or the AI model to free space.",
+    "unitLabel": "Unit: {id}...",
+    "usedOfQuota": "{used} of {quota} used ({percent}%)"
+  },
   "svgPreview": {
     "caption": "Caption",
     "emptyState": "No SVG to preview"
   },
-  "offlineBanner": {
-    "offline": "You're offline — your work is saved locally",
-    "pending": "{count} pending",
-    "syncAria": "Sync {count} pending changes",
-    "backOnline": "Back online — syncing {count} pending changes",
-    "syncNow": "Sync now"
+  "threadView": {
+    "aiLabel": "Ai Label",
+    "edited": "(edited)",
+    "emptyState": "No messages yet. Start the conversation!",
+    "hoursAgo": "{hours}h ago",
+    "justNow": "just now",
+    "minutesAgo": "{minutes}m ago",
+    "replyCount": {
+      "plural": "replies",
+      "singular": "reply"
+    },
+    "typingIndicator": "{names} {count, plural, one {is} other {are}} typing..."
   },
-  "jobsDashboard": {
-    "active": "{count} active",
-    "failed": "{count} failed",
-    "totalJobs": "{count} total jobs",
-    "type": "Type",
-    "allTypes": "All Types",
-    "agentJobs": "Agent Jobs",
-    "docAnalysis": "Doc Analysis",
-    "mediaTranscode": "Media Transcode",
-    "status": "Status",
-    "activeFailed": "Active / Failed",
-    "allStatuses": "All Statuses",
-    "queued": "Queued",
-    "processing": "Processing",
-    "failedStatus": "Failed",
-    "completed": "Completed",
-    "cancelled": "Cancelled",
-    "refresh": "Refresh",
-    "colType": "Type",
-    "colStatus": "Status",
-    "colOwner": "Owner",
-    "colResource": "Resource",
-    "colStarted": "Started",
-    "colDuration": "Duration",
-    "colRetries": "Retries",
-    "colError": "Error",
-    "colActions": "Actions",
-    "noJobs": "No jobs matching the current filters",
-    "retry": "Retry",
-    "cancel": "Cancel",
-    "retryAllFailed": "Retry All Failed ({count})",
-    "typeAgentJob": "Agent Job",
-    "typeDocumentAnalysis": "Document Analysis",
-    "typeMediaTranscode": "Media Transcode"
-  },
-  "storageManagement": {
-    "offlineStorage": "Offline Storage",
-    "usedOfQuota": "{used} of {quota} used ({percent}%)",
-    "storageFullWarning": "Storage is getting full. Consider removing cached assignments or the AI model to free space.",
-    "aiModelForOffline": "AI Model for Offline Use",
-    "downloaded": "Downloaded",
-    "notDownloaded": "Not downloaded",
-    "modelSizeStatus": "{size} · {status}",
-    "preInstalled": "Pre-installed — no download needed",
-    "builtIn": "Built-in",
-    "removeModel": "Remove model",
-    "download": "Download",
-    "downloadingModel": "Downloading AI model... {percent}%",
-    "cachedAssignments": "Cached Assignments",
-    "noCachedAssignments": "No assignments cached for offline use yet. Open an assignment to cache it automatically.",
-    "unitLabel": "Unit: {id}...",
-    "cacheStatusUpdated": "{status} · Last updated {date}",
-    "removeOfflineData": "Remove offline data"
+  "topicList": {
+    "emptyState": "No topics yet. Create one to start chatting.",
+    "header": "Topics",
+    "newTopicPlaceholder": "#new-topic"
   },
   "unitEmbedding": {
     "embeddingFresh": "Embedding fresh",
@@ -495,374 +915,30 @@
     "embeddingFailed": "Embedding Failed",
     "embeddingGenerated": "Embedding Generated"
   },
-  "instructorDashboard": {
-    "overallPerformance": "Overall Performance",
-    "totalStudents": "Total Students",
-    "totalAssignments": "Total Assignments",
-    "averageGrade": "Average Grade",
-    "averageCompletion": "Average Completion",
-    "sectionLeaderboards": "Section Leaderboards",
-    "students": "students",
-    "avg": "avg",
-    "noDataYet": "No student data available yet",
-    "rank": "Rank",
-    "student": "Student",
-    "average": "Average",
-    "completed": "Completed",
-    "completion": "Completion"
-  },
-  "permissionError": {
-    "title": "Access Denied",
-    "defaultMessage": "You don't have permission to access this {resourceType}.",
-    "explanation": "This content is restricted. You need to be the owner or have instructor permissions to access it.",
-    "contactInfo": "If you believe this is an error, please contact your instructor or administrator.",
-    "goBack": "Go Back",
-    "goHome": "Go to Home",
-    "resourceTypes": {
-      "unit": "unit",
-      "section": "section",
-      "assignment": "assignment",
-      "grade": "grade"
-    }
-  },
-  "collaboration": {
-    "title": "Collaboration",
-    "tabInvitations": "Invitations",
-    "tabJoin": "Join by Code",
-    "typePractice": "Practice",
-    "typeWorkbook": "Workbook",
-    "typePeerReview": "Peer Review",
-    "joinButton": "Join",
-    "joining": "Joining...",
-    "noInvitations": "No pending collaboration invitations",
-    "emptyInput": "Please enter a code or link",
-    "error": "Failed to join session"
-  },
-  "practiceDrill": {
-    "config": {
-      "title": "Practice: {unitName}",
-      "subtitle": "Choose what to practice:",
-      "vocabulary": "Vocabulary",
-      "vocabularyDesc": "Words, definitions, matching",
-      "questions": "Questions",
-      "questionsDesc": "From the question bank",
-      "text": "Text Content",
-      "textDesc": "From lesson text and graded blocks",
-      "documents": "Documents",
-      "documentsDesc": "From uploaded PDFs and parsed content",
-      "coverage": "Coverage: {covered}/{total} items practiced ({percent}%)",
-      "questionCount": "Number of questions",
-      "drillType": "Drill type",
-      "mixed": "Mixed",
-      "vocabularyType": "Vocabulary",
-      "comprehension": "Comprehension",
-      "review": "Review mistakes",
-      "studyTogether": "Study Together",
-      "studyTogetherDesc": "Practice with classmates in real-time. A room code will be created to share.",
-      "maxParticipants": "Max participants",
-      "noSourcesWarning": "Enable at least one content source to start practicing.",
-      "cancel": "Cancel",
-      "start": "Start Practice",
-      "generating": "Generating..."
-    },
-    "library": {
-      "title": "Practice Drill",
-      "resumeTitle": "Continue where you left off",
-      "resumeLabel": "Resume ({completed}/{total} completed)",
-      "templatesTitle": "Drill library",
-      "generateNew": "Generate new drill"
-    },
-    "progress": {
-      "questions": "questions",
-      "xpTooltip": "Estimated XP for this drill",
-      "xpDiminishedTooltip": "XP reduced due to repeated attempts",
-      "streakTooltip": "Current streak: {count}"
-    },
-    "collab": {
-      "connected": "Connected",
-      "disconnected": "Disconnected",
-      "participants": "{count} participants",
-      "groupAccuracyTip": "Average accuracy across all participants",
-      "groupAccuracy": "Group accuracy: {accuracy}%",
-      "copied": "Copied!",
-      "copyCode": "Copy room code to share",
-      "groupProgress": "Group progress"
-    },
-    "workbook": {
-      "noBlocks": "No drill blocks yet",
-      "label": "Practice drill workbook"
-    },
-    "dialog": {
-      "title": "Practice",
-      "titleWithUnit": "Practice: {unit}",
-      "close": "Close",
-      "retry": "Retry",
-      "back": "Back",
-      "generating": "Generating drill...",
-      "complete": "Drill Complete!",
-      "completeSummary": "You scored {accuracy}% and earned {xp} XP!",
-      "done": "Done",
-      "cancel": "Cancel",
-      "finish": "Finish & Earn XP"
-    },
-    "join": {
-      "title": "Join Study Session",
-      "tabCode": "Enter Code",
-      "tabInvitations": "Invitations",
-      "description": "Enter the room code shared by your instructor or classmate to join their study session.",
-      "codeLabel": "Room Code",
-      "codeTooShort": "Room code must be at least 4 characters",
-      "notFound": "No active session found with that code",
-      "full": "This session is full ({max} participants)",
-      "error": "Failed to join session",
-      "cancel": "Cancel",
-      "joinButton": "Join Session",
-      "joining": "Joining...",
-      "noInvitations": "No pending session invitations"
-    }
-  },
   "workbook": {
+    "invite": {
+      "copied": "Copied!",
+      "copy": "Copy link",
+      "copyLink": "Copy Link",
+      "currentlyOnline": "Currently online",
+      "description": "Anyone with this link who is enrolled in the same section can join and work together in real-time.",
+      "idle": "idle",
+      "noOthers": "No one else is here yet",
+      "shareTooltip": "Invite others to this workbook",
+      "title": "Share Workbook"
+    },
     "joinDialog": {
-      "title": "Join Workbook Session",
-      "tabLink": "Enter Link",
-      "tabInvitations": "Invitations",
       "description": "Paste a workbook link or enter a unit ID to join a collaborative editing session.",
+      "emptyInput": "Empty Input",
+      "error": "Error",
       "inputLabel": "Workbook link or unit ID",
       "joinButton": "Join Workbook",
       "joining": "Finding...",
-      "noInvitations": "No pending workbook invitations"
-    },
-    "invite": {
-      "shareTooltip": "Invite others to this workbook",
-      "title": "Share Workbook",
-      "description": "Anyone with this link who is enrolled in the same section can join and work together in real-time.",
-      "copy": "Copy link",
-      "copied": "Copied!",
-      "copyLink": "Copy Link",
-      "currentlyOnline": "Currently online",
-      "noOthers": "No one else is here yet",
-      "idle": "idle"
-    }
-  },
-  "peerReview": {
-    "joinDialog": {
-      "title": "Join Peer Review",
-      "tabCode": "Enter Code",
+      "noInvitations": "No pending workbook invitations",
+      "notFound": "Not Found",
       "tabInvitations": "Invitations",
-      "description": "Enter the review room code shared by your classmate to join their peer review session.",
-      "codeLabel": "Review Room Code",
-      "joinButton": "Join Review",
-      "joining": "Joining...",
-      "noInvitations": "No pending review invitations"
+      "tabLink": "Enter Link",
+      "title": "Join Workbook Session"
     }
-  },
-  "notification": {
-    "title": "Notifications",
-    "markAllRead": "Mark all read",
-    "delete": "Delete",
-    "empty": "No notifications yet",
-    "emptyDescription": "You'll see notifications for assignments, grades, badges, and more here.",
-    "category": {
-      "all": "All",
-      "assignment": "Assignments",
-      "collaboration": "Collaboration",
-      "gamification": "Gamification",
-      "squad": "Squads",
-      "chat": "Chat",
-      "system": "System"
-    }
-  },
-  "common": {
-    "close": "Close"
-  },
-  "recordingStudio3Modal": {
-    "backToStudio": "Back to Studio",
-    "confirmSave": "Save",
-    "confirmTitle": "Confirm Save",
-    "conversationSaveInfo": "Audio files will be saved as File records attached to this unit.",
-    "done": "Done",
-    "generateMissingTts": "Generate Missing ({count})",
-    "generatingTts": "Generating...",
-    "generatingTtsProgress": "Generating TTS audio...",
-    "missingTakesWarning": "{count} lines have no active take and will not be saved.",
-    "noActiveTake": "No active take",
-    "recording": "Recording",
-    "saving": "Saving...",
-    "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
-    "unsavedChangesTitle": "Unsaved Changes",
-    "discard": "Discard",
-    "wordSaveInfo": "Audio will be saved to the Word model's audio and definitionAudio fields."
-  },
-  "sectionDetail": {
-    "students": "Students",
-    "gradebook": "Gradebook",
-    "completionGrid": "Completion Grid",
-    "leaderboard": "Leaderboard",
-    "assignments": "Assignments"
-  },
-  "armorEditor": {
-    "shieldPreview": "Shield preview",
-    "addCharge": "Add charge",
-    "chargeSize": "Charge size",
-    "chargeRotation": "Charge rotation",
-    "xOffset": "X offset",
-    "yOffset": "Y offset"
-  },
-  "skillTree": {
-    "title": "Skill Tree",
-    "empty": "No skills available yet. Your instructor will set up the skill tree."
-  },
-  "collaboratorManager": {
-    "title": "Collaborators",
-    "addCollaborator": "Add Collaborator",
-    "noCollaborators": "No collaborators yet",
-    "searchInstructors": "Search Instructors",
-    "searchPlaceholder": "Search by name, username, or email",
-    "typeAtLeast": "Type at least 2 characters",
-    "noInstructorsFound": "No instructors found",
-    "permissionLevel": "Permission Level",
-    "permissionRead": "Read — View content only",
-    "permissionEdit": "Edit — Can modify content",
-    "add": "Add",
-    "cancel": "Cancel",
-    "removeCollaborator": "Remove {name}",
-    "failedToLoad": "Failed to load collaborators",
-    "failedToAdd": "Failed to add collaborator",
-    "failedToRemove": "Failed to remove collaborator",
-    "editPermission": "Edit",
-    "readPermission": "Read"
-  },
-  "communityUnitCard": {
-    "untitledUnit": "Untitled Unit",
-    "noDescription": "No description",
-    "byAuthor": "By: {author}",
-    "fork": "Fork",
-    "forking": "Forking..."
-  },
-  "sharedUnitCard": {
-    "untitledUnit": "Untitled Unit",
-    "noDescription": "No description",
-    "editAccess": "Edit Access",
-    "readOnly": "Read Only",
-    "sharedBy": "Shared by: {owner}",
-    "edit": "Edit",
-    "view": "View",
-    "showDeletedItems": "Show deleted items"
-  },
-  "showDeletedItems": "Show deleted items",
-  "recordingStudioEnhancedModal": {
-    "cancel": "Cancel",
-    "saveConversation": "Save Conversation",
-    "defaultTitle": "Generate Conversation"
-  },
-  "aiAgentConfig": {
-    "sageModel": "Sage Model",
-    "behaviorTuning": "Behavior Tuning",
-    "kaiTemperatureLabel": "Kai Temperature:",
-    "sageTemperatureLabel": "Sage Temperature:",
-    "kaiMaxTokensLabel": "Kai Max Tokens",
-    "sageMaxTokensLabel": "Sage Max Tokens",
-    "maxAgentStepsLabel": "Max Agent Steps",
-    "maxAgentStepsHint": "Maximum tool-calling rounds per conversation turn",
-    "searchTuning": "Search Tuning",
-    "similarityThresholdLabel": "Similarity Threshold:",
-    "defaultResultLimitLabel": "Default Result Limit",
-    "conversationMemory": "Conversation Memory",
-    "enableConversationMemory": "Enable conversation memory",
-    "summarizationModelLabel": "Summarization Model",
-    "tokenBudgets": "Token Budgets",
-    "tokenBudgetsDescription": "Control how many tokens are allocated to each part of an agent turn. Lower budgets reduce cost; higher budgets allow richer context.",
-    "enforceTokenBudget": "Enforce token budgets",
-    "enforceTokenBudgetNote": "When enabled, the agent will truncate system prompts and tool results to their budget limits, and abort multi-step turns that exceed the total turn budget.",
-    "systemPromptBudgetLabel": "System Prompt Budget",
-    "systemPromptBudgetHint": "Max tokens for Tier 1 context in system prompt (default: 2000)",
-    "toolResultBudgetLabel": "Tool Result Budget",
-    "toolResultBudgetHint": "Max tokens per tool result returned to model (default: 4000)",
-    "totalTurnBudgetLabel": "Total Turn Budget",
-    "totalTurnBudgetHint": "Max total tokens consumed per agent turn across all steps (default: 16000)",
-    "perPersonaOverrides": "Per-Persona Overrides",
-    "kaiSystemPromptLabel": "Kai System Prompt",
-    "tokensUnit": "tokens",
-    "useDefaultPlaceholder": "Use default",
-    "sageSystemPromptLabel": "Sage System Prompt",
-    "kaiToolResultLabel": "Kai Tool Result",
-    "sageToolResultLabel": "Sage Tool Result"
-  },
-  "avatarEditor": {
-    "customizeAvatar": "Customize Avatar"
-  },
-  "botCustomizer": {
-    "badgeNames": {
-      "tier1": "Bot Whisperer I",
-      "tier2": "Bot Whisperer II"
-    },
-    "colors": {
-      "sky": "Sky",
-      "mint": "Mint",
-      "lavender": "Lavender",
-      "peach": "Peach",
-      "rose": "Rose",
-      "gold": "Gold"
-    },
-    "styles": {
-      "bottts": "Robot",
-      "botttsNeutral": "Mini Robot"
-    },
-    "lockedMessage": "Earn the Bot Whisperer I badge to customize your AI assistant.",
-    "previewTitle": "Your AI Assistant",
-    "styleLabel": "Style",
-    "backgroundColorLabel": "Background Color"
-  },
-  "cadenceCopyDialog": {
-    "copyFromClass": "Copy from class",
-    "copyToClasses": "Copy to classes",
-    "firstMeetingDate": "First meeting date",
-    "weeksLabel": "Weeks",
-    "weeklyMeetingLabel": "Weekly meeting",
-    "weeklyMeetingHint": "1 = first, 2 = second, 0 = last",
-    "loadingCadence": "Loading source cadence...",
-    "noAssignments": "The source class has no dated assignments to copy.",
-    "missingMetadata": "source assignment missing cadence metadata and cannot be copied.",
-    "close": "Close",
-    "copyCadence": "Copy cadence",
-    "copying": "Copying..."
-  },
-  "amblifyAuthenticator": {
-    "emailPhoneOptions": "Email or phone number"
-  },
-  "assignmentCard": {
-    "excellent": "Excellent",
-    "good": "Good",
-    "fair": "Fair",
-    "needsWork": "Needs work",
-    "noDueDate": "No due date",
-    "overdue": "Overdue",
-    "dueSoon": "Due soon",
-    "due": "Due",
-    "locked": "Locked",
-    "opensAt": "Opens {date}",
-    "late": "Late",
-    "dropped": "Dropped by instructor",
-    "difficulty": "Difficulty: {level}",
-    "review": "Review",
-    "startWorkbook": "Start",
-    "practice": "Practice",
-    "discuss": "Discuss",
-    "joinReview": "Join Review",
-    "requestGuidance": "Request Guidance",
-    "requestGuidanceTooltip": "Create a room and share the code with your instructor to get personal guidance"
-  },
-  "assignmentConfiguration": {
-    "timerQuestion": "Add Timer Question",
-    "timerDescription": "Timer configuration for timed assignments",
-    "retryToggle": "Allow student retries",
-    "publishFirstAlert": "Note: Must publish unit first to create assignments",
-    "meetingCalendar": "Due date",
-    "meetingDayHint": "Dots mark section meeting days.",
-    "tomorrow": "Tomorrow",
-    "nextClass": "Next class",
-    "friday": "Next Friday",
-    "createSectionLabel": "Create new section",
-    "undoSnackbar": "Assignments created. {count} assignment{plural} created."
   }
 }

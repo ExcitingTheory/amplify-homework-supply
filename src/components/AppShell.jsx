@@ -188,6 +188,9 @@ export default function AppShell({ children, toolbarChildren }) {
           component="main"
           sx={{
             flexGrow: 1,
+            // Lets oversized children (wide tables) scroll inside themselves
+            // instead of stretching main past the drawer offset.
+            minWidth: 0,
             transition: theme.transitions.create(["margin", "width"], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,

@@ -48,7 +48,36 @@ export interface LeaderboardTableProps {
   topN?: number;
 }
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDAL_COLORS = ["#FFD700", "#C0C0C0", "#CD7F32"];
+
+function RankBadge({ rank }: { rank: number }) {
+  if (rank > 3) {
+    return (
+      <Typography variant="body2" sx={{ textAlign: "center", fontWeight: 600 }}>
+        {rank}
+      </Typography>
+    );
+  }
+  return (
+    <Box
+      sx={{
+        width: 26,
+        height: 26,
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: MEDAL_COLORS[rank - 1],
+        color: "rgba(0,0,0,0.75)",
+        fontWeight: 800,
+        fontSize: "0.75rem",
+      }}
+      aria-label={`Rank ${rank}`}
+    >
+      {rank}
+    </Box>
+  );
+}
 
 function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
   if (!entry.avatarLoaded) {
@@ -109,7 +138,9 @@ export function LeaderboardTable({
                   fontWeight: isCurrentUser ? 700 : 400,
                 }}
               >
-                <TableCell>{index < 3 ? MEDALS[index] : rank}</TableCell>
+                <TableCell>
+                  <RankBadge rank={rank} />
+                </TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <StudentAvatar entry={entry} />

@@ -11,8 +11,9 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import LazyCardMedia from "@/components/LazyCardMedia";
+import CardMediaThumbnail from "@/components/CardMediaThumbnail";
 import { useTranslations } from "next-intl";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
 
 interface SharedUnitCardProps {
   unit: {
@@ -41,11 +42,12 @@ export default function SharedUnitCard({ unit, onOpen }: SharedUnitCardProps) {
       elevation={2}
       sx={{
         display: "flex",
+        flexDirection: { xs: "column", md: "row" },
         margin: "1rem auto",
         width: "90vw",
         maxWidth: "80rem",
-        height: 180,
-        borderRadius: 2,
+        height: { xs: "auto", md: 180 },
+        borderRadius: `${SEMANTIC_THEME.radius.card}px`,
         borderLeft: "4px solid",
         borderLeftColor: canEdit ? "success.main" : "warning.main",
         transition: "all 0.3s ease-in-out",
@@ -56,6 +58,10 @@ export default function SharedUnitCard({ unit, onOpen }: SharedUnitCardProps) {
         },
       }}
     >
+      <CardMediaThumbnail
+        s3Key={unit.featuredImage}
+        identityId={unit.identityId}
+      />
       <Box
         sx={{
           display: "flex",
@@ -66,11 +72,20 @@ export default function SharedUnitCard({ unit, onOpen }: SharedUnitCardProps) {
       >
         <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <Typography variant="h6" component="div" noWrap sx={{ flexGrow: 1 }}>
+            <Typography
+              variant="h6"
+              component="div"
+              noWrap
+              sx={{ flexGrow: 1 }}
+            >
               {unit.name || t("sharedUnitCard.untitledUnit")}
             </Typography>
             <Chip
-              label={canEdit ? t("sharedUnitCard.editAccess") : t("sharedUnitCard.readOnly")}
+              label={
+                canEdit
+                  ? t("sharedUnitCard.editAccess")
+                  : t("sharedUnitCard.readOnly")
+              }
               size="small"
               color={canEdit ? "success" : "warning"}
               variant="filled"
@@ -94,7 +109,9 @@ export default function SharedUnitCard({ unit, onOpen }: SharedUnitCardProps) {
             {t("sharedUnitCard.sharedBy", { owner: unit.owner || "Unknown" })}
           </Typography>
         </CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 2, pb: 1, gap: 1 }}>
+        <Box
+          sx={{ display: "flex", alignItems: "center", pl: 2, pb: 1, gap: 1 }}
+        >
           <Button
             variant="outlined"
             size="small"
@@ -105,13 +122,6 @@ export default function SharedUnitCard({ unit, onOpen }: SharedUnitCardProps) {
           </Button>
         </Box>
       </Box>
-      {unit?.featuredImage && (
-        <LazyCardMedia
-          s3Key={unit.featuredImage}
-          identityId={unit.identityId}
-          fileId={null}
-        />
-      )}
     </Card>
   );
 }

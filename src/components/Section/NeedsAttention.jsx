@@ -41,7 +41,7 @@ export function NeedsAttention({
   openRooms = [],
   onAssignUnit,
 }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
 
   // Calculate unreviewed submissions (completed but not reviewed)
   const unreviewedCount = useMemo(() => {

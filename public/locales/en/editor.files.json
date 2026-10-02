@@ -1,109 +1,4 @@
 {
-  "fileManager2": {
-    "contextMenu": {
-      "deleteConfirmMessage": "Delete {count} selected file(s)?",
-      "deleteSelected": "Delete Selected ({count})",
-      "deselectAll": "Deselect All",
-      "reAnalyzeSelected": "Re-analyze Selected ({count})"
-    },
-    "expandedContent": {
-      "descriptionLabel": "Description:",
-      "extractedContentHeading": "Extracted Content",
-      "noConceptsExtracted": "No concepts extracted",
-      "noContentAvailable": "No extracted content available",
-      "noObjectivesExtracted": "No objectives extracted",
-      "noQuestionsExtracted": "No questions extracted",
-      "noSummariesExtracted": "No summaries extracted",
-      "noVocabularyExtracted": "No vocabulary extracted",
-      "reviewQuestionsMessage": "Review and import questions from the document",
-      "reviewVocabularyMessage": "Review and import vocabulary from the document",
-      "transcriptionLabel": "Transcription:"
-    },
-    "fileDetails": {
-      "deleteTooltip": "Delete",
-      "downloadTooltip": "Download",
-      "insertTooltip": "Insert into editor",
-      "noWaveformAvailable": "No waveform available",
-      "reAnalyzeTooltip": "Re-analyze",
-      "videoNotSupported": "Your browser does not support the video tag."
-    },
-    "generators": {
-      "audioPromptPlaceholder": "Text to transform into audio file.",
-      "errorGeneratingAudio": "Error generating audio file",
-      "errorGeneratingImage": "Error generating image file",
-      "generatingAudio": "Generating audio file...",
-      "generatingImage": "Generating image file...",
-      "imagePromptPlaceholder": "Text to transform into image file.",
-      "successfullyGeneratedAudio": "Successfully generated audio file",
-      "successfullyGeneratedImage": "Successfully generated image file"
-    },
-    "mainView": {
-      "noFilesMessage": "No files available. Upload files to get started."
-    },
-    "metadataEditor": {
-      "cancelButton": "Cancel",
-      "createdLabel": "Created",
-      "descriptionLabel": "Description",
-      "heading": "File Metadata",
-      "modelLabel": "Model",
-      "nameLabel": "Name",
-      "pathLabel": "Path",
-      "promptLabel": "Prompt (for AI-generated files)",
-      "protectionLevelLabel": "Protection Level",
-      "saveButton": "Save",
-      "sizeLabel": "Size",
-      "typeLabel": "Type",
-      "unknown": "Unknown",
-      "variantLabel": "Variant"
-    },
-    "selectedFileDetails": {
-      "emptyState": "Select a file to view details and metadata"
-    },
-    "toolbar": {
-      "actionsTooltip": "Actions",
-      "searchPlaceholder": "Search files...",
-      "selectAllTooltip": "Select All",
-      "uploadTooltip": "Upload Files",
-      "recordConversation": "Record Conversation"
-    },
-    "dragDrop": {
-      "dropFilesHere": "Drop files here to upload",
-      "supportedFormats": "Audio, Images, PDFs, Documents and more"
-    }
-  },
-  "fileMetadataComponent": {
-    "basicInfo": "Basic Info",
-    "cancel": "Cancel",
-    "collapse": "Collapse",
-    "concepts": "Concepts",
-    "conceptsCount": "Concepts ({count})",
-    "confirm": "Confirm",
-    "created": "Created:",
-    "deleteConfirmation": "Delete file: \"{fileName}\"?",
-    "deleteFile": "Delete File",
-    "expand": "Expand",
-    "fileInfo": "File Info",
-    "filename": "Filename:",
-    "noMetadataAvailable": "No metadata available for this file.",
-    "noParsedContentAvailable": "No parsed content available for this file.",
-    "objectives": "Objectives",
-    "objectivesCount": "Objectives ({count})",
-    "parsedContent": "Parsed Content",
-    "path": "Path:",
-    "protectionLevel": "Protection Level:",
-    "questions": "Questions",
-    "questionsCount": "Questions ({count})",
-    "rawMetadata": "Raw Metadata",
-    "searchPlaceholder": "Search file content...",
-    "summaries": "Summaries",
-    "summariesCount": "Summaries ({count})",
-    "type": "Type:",
-    "unknown": "Unknown",
-    "unknownSize": "Unknown size",
-    "unset": "UNSET",
-    "vocabulary": "Vocabulary",
-    "vocabularyCount": "Vocabulary ({count})"
-  },
   "documentUploader": {
     "browseFiles": "Browse Files",
     "dragDropPrompt": "Drag and drop documents here",
@@ -144,5 +39,115 @@
     "save": "Save",
     "textToImagePreview": "Text to Image Preview",
     "textToSpeechPreview": "Text to Speech Preview"
+  },
+  "fileManager2": {
+    "contextMenu": {
+      "deleteConfirmMessage": "Delete {count} selected file(s)?",
+      "deleteSelected": "Delete Selected ({count})",
+      "deselectAll": "Deselect All",
+      "reAnalyzeSelected": "Re-analyze Selected ({count})"
+    },
+    "dragDrop": {
+      "dropFilesHere": "Drop files here to upload",
+      "supportedFormats": "Audio, Images, PDFs, Documents and more"
+    },
+    "expandedContent": {
+      "descriptionLabel": "Description:",
+      "durationLabel": "Duration Label",
+      "extractedContentHeading": "Extracted Content",
+      "fileInfoHeading": "File Info Heading",
+      "noConceptsExtracted": "No concepts extracted",
+      "noContentAvailable": "No extracted content available",
+      "noObjectivesExtracted": "No objectives extracted",
+      "noQuestionsExtracted": "No questions extracted",
+      "noSummariesExtracted": "No summaries extracted",
+      "noVocabularyExtracted": "No vocabulary extracted",
+      "reviewQuestionsMessage": "Review and import questions from the document",
+      "reviewVocabularyMessage": "Review and import vocabulary from the document",
+      "sizeLabel": "Size Label",
+      "transcriptionLabel": "Transcription:"
+    },
+    "fileDetails": {
+      "deleteTooltip": "Delete",
+      "downloadTooltip": "Download",
+      "insertTooltip": "Insert into editor",
+      "noWaveformAvailable": "No waveform available",
+      "reAnalyzeTooltip": "Re-analyze",
+      "videoNotSupported": "Your browser does not support the video tag."
+    },
+    "generators": {
+      "audioPromptPlaceholder": "Text to transform into audio file.",
+      "errorGeneratingAudio": "Error generating audio file",
+      "errorGeneratingImage": "Error generating image file",
+      "generatingAudio": "Generating audio file...",
+      "generatingImage": "Generating image file...",
+      "imagePromptPlaceholder": "Text to transform into image file.",
+      "successfullyGeneratedAudio": "Successfully generated audio file",
+      "successfullyGeneratedImage": "Successfully generated image file"
+    },
+    "mainView": {
+      "noFilesMessage": "No files available. Upload files to get started."
+    },
+    "metadataEditor": {
+      "cancelButton": "Cancel",
+      "createdLabel": "Created",
+      "descriptionLabel": "Description",
+      "heading": "File Metadata",
+      "modelLabel": "Model",
+      "nameLabel": "Name",
+      "pathLabel": "Path",
+      "promptLabel": "Prompt (for AI-generated files)",
+      "protectionLevelLabel": "Protection Level",
+      "saveButton": "Save",
+      "sizeLabel": "Size",
+      "typeLabel": "Type",
+      "unknown": "Unknown",
+      "variantLabel": "Variant"
+    },
+    "selectedFileDetails": {
+      "emptyState": "Select a file to view details and metadata",
+      "multiSelectHeading": "Multi Select Heading",
+      "totalSize": "Total Size"
+    },
+    "toolbar": {
+      "actionsTooltip": "Actions",
+      "recordConversation": "Record Conversation",
+      "searchPlaceholder": "Search files...",
+      "selectAllTooltip": "Select All",
+      "uploadTooltip": "Upload Files"
+    }
+  },
+  "fileMetadataComponent": {
+    "basicInfo": "Basic Info",
+    "cancel": "Cancel",
+    "collapse": "Collapse",
+    "concepts": "Concepts",
+    "conceptsCount": "Concepts ({count})",
+    "confirm": "Confirm",
+    "created": "Created:",
+    "deleteConfirmation": "Delete file: \"{fileName}\"?",
+    "deleteFile": "Delete File",
+    "expand": "Expand",
+    "fileInfo": "File Info",
+    "filename": "Filename:",
+    "noMetadataAvailable": "No metadata available for this file.",
+    "noParsedContentAvailable": "No parsed content available for this file.",
+    "objectives": "Objectives",
+    "objectivesCount": "Objectives ({count})",
+    "parsedContent": "Parsed Content",
+    "path": "Path:",
+    "protectionLevel": "Protection Level:",
+    "questions": "Questions",
+    "questionsCount": "Questions ({count})",
+    "rawMetadata": "Raw Metadata",
+    "searchPlaceholder": "Search file content...",
+    "summaries": "Summaries",
+    "summariesCount": "Summaries ({count})",
+    "type": "Type:",
+    "unknown": "Unknown",
+    "unknownSize": "Unknown size",
+    "unset": "UNSET",
+    "vocabulary": "Vocabulary",
+    "vocabularyCount": "Vocabulary ({count})"
   }
 }

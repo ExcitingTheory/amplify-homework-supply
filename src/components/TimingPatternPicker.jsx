@@ -7,7 +7,7 @@ import { BUILT_IN_TIMING_PATTERNS } from "@/utils/assignmentTiming";
 import SettingsContext from "@/context/settingsContext";
 
 export function TimingPatternPicker({ value, onChange, disabled = false }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
   const { settings, updateSettings } = React.useContext(SettingsContext) || {};
   const savedPatterns = Array.isArray(settings?.timingPatterns)
     ? settings.timingPatterns

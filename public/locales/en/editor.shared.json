@@ -1,4 +1,132 @@
 {
+  "audioWaveformPlayer": {
+    "noAudioSource": "No audio source provided"
+  },
+  "autoEmbedPlugin": {
+    "dismiss": "Dismiss",
+    "embed": "Embed",
+    "embedOption": "Embed {contentName}",
+    "embedTitle": "Embed {contentName}",
+    "youtubeVideo": "Youtube Video"
+  },
+  "autoSubmit": {
+    "cancelSubmission": "Cancel",
+    "submitNow": "Submit Now",
+    "submittingInSeconds": "Submitting answer in {countdown} seconds..."
+  },
+  "autocompleteNode": {
+    "desktopHint": "(TAB)",
+    "mobileHint": "(SWIPE ⮕)"
+  },
+  "blocks": {
+    "answer": "Answer Block",
+    "custom_answer": "Custom Answer",
+    "meaning_association": "Meaning Association",
+    "quiz": "Quiz Block"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "Cancel link editing",
+    "closeLinkEditor": "Close link editor",
+    "confirmLink": "Confirm link",
+    "convertToYoutubeEmbed": "Convert to YouTube embed",
+    "editLink": "Edit link",
+    "linkUrl": "Link URL",
+    "removeLink": "Remove link",
+    "youtubeEmbed": "YouTube Embed"
+  },
+  "freeSoloCreateOptionDialog": {
+    "cancel": "Cancel",
+    "create": "Add",
+    "description": "Add a new word to the dictionary.",
+    "dialogTitle": "Add a new word",
+    "label": "Free solo dialog"
+  },
+  "imageMaskEditor": {
+    "applyMask": "Apply Mask & Regenerate",
+    "brushSize": "Brush Size: {size}",
+    "cancel": "Cancel",
+    "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
+    "save": "Save",
+    "zoomInfo": "Zoom: {level}% | Hold Shift to pan"
+  },
+  "imageResizer": {
+    "addCaption": "Add Caption"
+  },
+  "imagesPlugin": {
+    "altText": "Alt Text",
+    "altTextDescriptive": "Descriptive alternative text",
+    "altTextPlaceholder": "Random unsplash image",
+    "confirm": "Confirm",
+    "dropImagesHere": "Drop images here",
+    "file": "File",
+    "imageUpload": "Image Upload",
+    "imageUrl": "Image URL",
+    "imageUrlPlaceholder": "i.e. https://source.unsplash.com/random",
+    "insertFromUrl": "Insert from URL",
+    "sample": "Sample",
+    "upload": "Upload Image",
+    "url": "URL"
+  },
+  "insertLayoutDialog": {
+    "cancel": "Cancel",
+    "insert": "Insert"
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "Title"
+  },
+  "metadataEditor": {
+    "aiGenerationInfo": "AI Generation Information",
+    "createdLabel": "Created:",
+    "fileInfo": "File Information",
+    "fileMetadataHeading": "File Metadata",
+    "modelLabel": "Model",
+    "notSet": "Not set",
+    "pathLabel": "Path:",
+    "promptLabel": "Prompt",
+    "protectionLabel": "Protection:",
+    "sizeLabel": "Size:",
+    "typeLabel": "Type:",
+    "unknown": "Unknown",
+    "updatedLabel": "Updated:",
+    "variantLabel": "Variant"
+  },
+  "metadataField": {
+    "unsavedChanges": "unsaved changes"
+  },
+  "micLevelIndicator": {
+    "noSignal": "No microphone signal detected. Check that your microphone is connected and not muted.",
+    "noSignalShort": "No signal",
+    "tooLow": "Microphone input is very low. Try speaking louder or moving closer to the microphone.",
+    "tooLowShort": "Too quiet"
+  },
+  "pdfViewerComponent": {
+    "loadingPdf": "Loading PDF: {filename}",
+    "noPdfToDisplay": "No PDF to display"
+  },
+  "placeholders": {
+    "enter_text": "Enter text",
+    "search_words": "Search words...",
+    "type_here": "Type here..."
+  },
+  "playlistEditor": {
+    "emptyState": "No items in playlist",
+    "menuAttribute": "Menu",
+    "noFilesMessage": "No files have been added yet. Use the input above to add files to the playlist."
+  },
+  "questionBlock": {
+    "status": "Status",
+    "submit": "Submit"
+  },
+  "questionsReview": {
+    "alertMessage": "Review all questions before submitting",
+    "cancel": "Cancel",
+    "filterBy": "Filter by",
+    "submit": "Submit"
+  },
+  "recordingStudio": {
+    "preview": "Preview",
+    "sectionHeading": "Recording Studio"
+  },
   "recordingStudio3": {
     "add": "Add",
     "addLine": "Add Line",
@@ -54,102 +182,17 @@
     "stop": "Stop",
     "tracks": "Tracks"
   },
-  "recordingStudio": {
-    "preview": "Preview",
-    "sectionHeading": "Recording Studio"
-  },
-  "audioWaveformPlayer": {
-    "noAudioSource": "No audio source provided"
-  },
-  "micLevelIndicator": {
-    "noSignal": "No microphone signal detected. Check that your microphone is connected and not muted.",
-    "noSignalShort": "No signal",
-    "tooLow": "Microphone input is very low. Try speaking louder or moving closer to the microphone.",
-    "tooLowShort": "Too quiet"
-  },
-  "staticWaveform": {
-    "errorLoading": "Error loading waveform"
-  },
   "sketchPad": {
     "cancelSubmission": "Cancel Submission",
     "hoverToStartDrawing": "Hover to start drawing",
     "submittingInSeconds": "Submitting drawing for grading in {countdown} seconds..."
   },
-  "autoSubmit": {
-    "cancelSubmission": "Cancel",
-    "submittingInSeconds": "Submitting answer in {countdown} seconds..."
+  "staticWaveform": {
+    "errorLoading": "Error loading waveform"
   },
-  "unitEmbedding": {
-    "allSectionsComplete": "All sections complete!",
-    "cached": "Cached",
-    "completedCount": "{completed}/{total} completed",
-    "generateEmbeddings": "Generate Embeddings",
-    "generating": "Generating...",
-    "publishSuccess": "Unit published with embeddings generated!",
-    "publishUnit": "Publish Unit",
-    "publishing": "Publishing...",
-    "wordsEmbedded": "{count} words embedded"
-  },
-  "autoEmbedPlugin": {
-    "dismiss": "Dismiss",
-    "embed": "Embed",
-    "embedOption": "Embed {contentName}",
-    "embedTitle": "Embed {contentName}",
-    "youtubeVideo": "Youtube Video"
-  },
-  "unitEmbeddingComponents": {
-    "errorMessage": "Error generating embeddings",
-    "generateButton": "Generate Embeddings",
-    "successMessage": "Embeddings generated"
-  },
-  "wordEmbeddingIntegration": {
-    "alertMessage": "Embeddings will be generated",
-    "successConfirmation": "Embeddings generated successfully"
-  },
-  "wordEmbedding": {
-    "embeddingGenerated": "Embedding generated: {count} words processed"
-  },
-  "imagesPlugin": {
-    "altText": "Alt Text",
-    "altTextDescriptive": "Descriptive alternative text",
-    "altTextPlaceholder": "Random unsplash image",
-    "confirm": "Confirm",
-    "dropImagesHere": "Drop images here",
-    "file": "File",
-    "imageUpload": "Image Upload",
-    "imageUrl": "Image URL",
-    "imageUrlPlaceholder": "i.e. https://source.unsplash.com/random",
-    "insertFromUrl": "Insert from URL",
-    "sample": "Sample",
-    "upload": "Upload Image",
-    "url": "URL"
-  },
-  "tablePlugin": {
-    "chooseLayout": "Choose a layout",
-    "columns": "Columns",
-    "columnsPlaceholder": "# of columns (1-50)",
-    "insert": "Insert",
-    "insertTable": "Insert Table",
-    "rows": "Rows",
-    "rowsPlaceholder": "# of rows (1-500)",
-    "table": "Table"
-  },
-  "wordBlockPlugin": {
-    "audioUnavailable": "Audio not available",
-    "loadingAudio": "Loading audio...",
-    "wordNotFound": "Word not found: {wordID}"
-  },
-  "vocabularyReview": {
-    "alertMessage": "Review vocabulary before continuing",
-    "cancel": "Cancel",
-    "continue": "Continue",
-    "summary": "Summary"
-  },
-  "questionsReview": {
-    "alertMessage": "Review all questions before submitting",
-    "cancel": "Cancel",
-    "filterBy": "Filter by",
-    "submit": "Submit"
+  "table": {
+    "addColumn": "Add Column",
+    "addRow": "Add Row"
   },
   "tableComponent": {
     "cellActionsLabel": "Table cell actions",
@@ -174,90 +217,52 @@
     "sortAscending": "Sort Ascending",
     "sortDescending": "Sort Descending"
   },
-  "mediaPlayerComponent": {
-    "titleHeader": "Title"
-  },
-  "pdfViewerComponent": {
-    "loadingPdf": "Loading PDF: {filename}",
-    "noPdfToDisplay": "No PDF to display"
-  },
-  "metadataEditor": {
-    "aiGenerationInfo": "AI Generation Information",
-    "createdLabel": "Created:",
-    "fileInfo": "File Information",
-    "fileMetadataHeading": "File Metadata",
-    "modelLabel": "Model",
-    "notSet": "Not set",
-    "pathLabel": "Path:",
-    "promptLabel": "Prompt",
-    "protectionLabel": "Protection:",
-    "sizeLabel": "Size:",
-    "typeLabel": "Type:",
-    "unknown": "Unknown",
-    "updatedLabel": "Updated:",
-    "variantLabel": "Variant"
-  },
-  "metadataField": {
-    "unsavedChanges": "unsaved changes"
-  },
-  "floatingLinkEditorPlugin": {
-    "cancelLinkEditing": "Cancel link editing",
-    "closeLinkEditor": "Close link editor",
-    "confirmLink": "Confirm link",
-    "convertToYoutubeEmbed": "Convert to YouTube embed",
-    "editLink": "Edit link",
-    "linkUrl": "Link URL",
-    "removeLink": "Remove link",
-    "youtubeEmbed": "YouTube Embed"
-  },
-  "imageMaskEditor": {
-    "applyMask": "Apply Mask & Regenerate",
-    "brushSize": "Brush Size: {size}",
-    "cancel": "Cancel",
-    "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
-    "save": "Save",
-    "zoomInfo": "Zoom: {level}% | Hold Shift to pan"
-  },
-  "freeSoloCreateOptionDialog": {
-    "cancel": "Cancel",
-    "create": "Add",
-    "description": "Add a new word to the dictionary.",
-    "dialogTitle": "Add a new word",
-    "label": "Free solo dialog"
-  },
-  "insertLayoutDialog": {
-    "cancel": "Cancel",
-    "insert": "Insert"
-  },
-  "placeholders": {
-    "enter_text": "Enter text",
-    "search_words": "Search words...",
-    "type_here": "Type here..."
-  },
-  "blocks": {
-    "answer": "Answer Block",
-    "custom_answer": "Custom Answer",
-    "meaning_association": "Meaning Association",
-    "quiz": "Quiz Block"
-  },
-  "questionBlock": {
-    "status": "Status",
-    "submit": "Submit"
-  },
-  "autocompleteNode": {
-    "desktopHint": "(TAB)",
-    "mobileHint": "(SWIPE ⮕)"
-  },
   "tableOfContents": {
     "emptyState": "No headings found. Add headings to your document to see the table of contents.",
     "title": "Table of Contents"
   },
-  "imageResizer": {
-    "addCaption": "Add Caption"
+  "tablePlugin": {
+    "chooseLayout": "Choose a layout",
+    "columns": "Columns",
+    "columnsPlaceholder": "# of columns (1-50)",
+    "insert": "Insert",
+    "insertTable": "Insert Table",
+    "rows": "Rows",
+    "rowsPlaceholder": "# of rows (1-500)",
+    "table": "Table"
   },
-  "playlistEditor": {
-    "emptyState": "No items in playlist",
-    "menuAttribute": "Menu",
-    "noFilesMessage": "No files have been added yet. Use the input above to add files to the playlist."
+  "unitEmbedding": {
+    "allSectionsComplete": "All sections complete!",
+    "cached": "Cached",
+    "completedCount": "{completed}/{total} completed",
+    "generateEmbeddings": "Generate Embeddings",
+    "generating": "Generating...",
+    "publishSuccess": "Unit published with embeddings generated!",
+    "publishUnit": "Publish Unit",
+    "publishing": "Publishing...",
+    "wordsEmbedded": "{count} words embedded"
+  },
+  "unitEmbeddingComponents": {
+    "errorMessage": "Error generating embeddings",
+    "generateButton": "Generate Embeddings",
+    "successMessage": "Embeddings generated"
+  },
+  "vocabularyReview": {
+    "alertMessage": "Review vocabulary before continuing",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "summary": "Summary"
+  },
+  "wordBlockPlugin": {
+    "audioUnavailable": "Audio not available",
+    "loadingAudio": "Loading audio...",
+    "wordNotFound": "Word not found: {wordID}"
+  },
+  "wordEmbedding": {
+    "embeddingGenerated": "Embedding generated: {count} words processed"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "Embeddings will be generated",
+    "successConfirmation": "Embeddings generated successfully"
   }
 }

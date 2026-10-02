@@ -2580,6 +2580,7 @@ const ChatSidebarContent = ({ onClose }) => {
                             key={callId || toolIdx}
                             sx={{
                               width: "100%",
+                              maxWidth: "85%",
                               mb: 2,
                               overflow: "hidden",
                               overflowWrap: "break-word",

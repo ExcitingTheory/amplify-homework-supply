@@ -2,6 +2,7 @@ import { getRequestConfig } from "next-intl/server";
 import { readFileSync } from "fs";
 import path from "path";
 import { routing } from "./routing";
+import { onError, getMessageFallback } from "./errorHandling";
 
 /**
  * Loads all namespace translation files for the resolved locale.
@@ -108,5 +109,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages,
+    onError,
+    getMessageFallback,
   };
 });

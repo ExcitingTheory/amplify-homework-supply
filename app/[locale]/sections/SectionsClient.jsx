@@ -41,8 +41,9 @@ import AddIcon from "@mui/icons-material/Add";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import { useAppShell } from "@/components/AppShellContext";
-import LazyCardMedia from "@/components/LazyCardMedia";
+import CardMediaThumbnail from "@/components/CardMediaThumbnail";
 import InstructorDashboard from "@/components/InstructorDashboard";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { CampaignSetupWizard } from "@/components/Gamification/CampaignSetupWizard";
 import { AssignmentComposer } from "@/components/AssignmentComposer";
@@ -426,7 +427,10 @@ function Sections({ user }) {
                       variant="rectangular"
                       width={140}
                       height={40}
-                      sx={{ borderRadius: 2, mt: 1 }}
+                      sx={{
+                        borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+                        mt: 1,
+                      }}
                     />
                   </Box>
                 </Card>
@@ -443,7 +447,7 @@ function Sections({ user }) {
                 margin: "1rem auto",
                 maxWidth: "500px",
                 minHeight: "300px",
-                borderRadius: 3,
+                borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
               }}
             >
               <Box
@@ -479,7 +483,7 @@ function Sections({ user }) {
                       fontWeight: 600,
                       px: 3,
                       py: 1,
-                      borderRadius: 2,
+                      borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                     }}
                   >
                     {t("sections.createNewSection")}
@@ -497,6 +501,7 @@ function Sections({ user }) {
                   variant="assignment"
                   sx={{
                     display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
                     margin: "1rem auto",
                     width:
                       isDesktop && drawerOpen
@@ -505,6 +510,10 @@ function Sections({ user }) {
                     maxWidth: "80rem",
                   }}
                 >
+                  <CardMediaThumbnail
+                    s3Key={section?.featuredImage}
+                    identityId={section?.identityId}
+                  />
                   <Box
                     sx={{
                       display: "flex",
@@ -605,7 +614,7 @@ function Sections({ user }) {
                           fontWeight: 600,
                           px: 3,
                           py: 1,
-                          borderRadius: 2,
+                          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                           boxShadow: 2,
                           color: "primary.main",
                           borderColor: "primary.main",
@@ -632,7 +641,7 @@ function Sections({ user }) {
                               fontWeight: 600,
                               px: 3,
                               py: 1,
-                              borderRadius: 2,
+                              borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                               boxShadow: 2,
                             }}
                           >
@@ -655,20 +664,6 @@ function Sections({ user }) {
                       )}
                     </Box>
                   </Box>
-                  {section?.featuredImage && (
-                    <Box
-                      sx={{
-                        maxWidth: "50%",
-                        flexShrink: 0,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <LazyCardMedia
-                        s3Key={section?.featuredImage}
-                        identityId={section?.identityId}
-                      />
-                    </Box>
-                  )}
                 </Card>
               );
             })}

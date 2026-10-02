@@ -1,4 +1,16 @@
 {
+  "answerEditor": {
+    "addWordLabel": "Agregar Etiqueta de Palabra",
+    "addWordToDict": "Agregar una nueva palabra al diccionario.",
+    "cancel": "Cancelar",
+    "dialogTitle": "Editar respuesta",
+    "emptyState": "No se proporcionó respuesta",
+    "instructions": "Crea tu respuesta a continuación",
+    "save": "Guardar"
+  },
+  "blocks": {
+    "meaning_association": "Asociación de Significados"
+  },
   "customAnswerEditor": {
     "add": "Agregar",
     "addWordLabel": "Agregar palabra al ejercicio",
@@ -46,6 +58,9 @@
     "pronunciationLabel": "pronunciación",
     "removeFromAssignment": "Quitar de la tarea"
   },
+  "questionEditor": {
+    "cancel": "Cancelar"
+  },
   "quizEditor": {
     "addAnswer": "Agregar Respuesta",
     "cancel": "Cancelar",
@@ -56,17 +71,5 @@
     "reset": "Restablecer",
     "save": "Guardar",
     "status": "Estado"
-  },
-  "answerEditor": {
-    "addWordLabel": "Agregar Etiqueta de Palabra",
-    "addWordToDict": "Agregar una nueva palabra al diccionario.",
-    "cancel": "Cancelar",
-    "dialogTitle": "Editar respuesta",
-    "emptyState": "No se proporcionó respuesta",
-    "instructions": "Crea tu respuesta a continuación",
-    "save": "Guardar"
-  },
-  "questionEditor": {
-    "cancel": "Cancelar"
   }
 }

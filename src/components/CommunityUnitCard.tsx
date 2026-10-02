@@ -10,8 +10,9 @@ import {
   Chip,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import LazyCardMedia from "@/components/LazyCardMedia";
+import CardMediaThumbnail from "@/components/CardMediaThumbnail";
 import { useTranslations } from "next-intl";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
 
 interface CommunityUnitCardProps {
   unit: {
@@ -43,11 +44,12 @@ export default function CommunityUnitCard({
       elevation={2}
       sx={{
         display: "flex",
+        flexDirection: { xs: "column", md: "row" },
         margin: "1rem auto",
         width: "90vw",
         maxWidth: "80rem",
-        height: 180,
-        borderRadius: 2,
+        height: { xs: "auto", md: 180 },
+        borderRadius: `${SEMANTIC_THEME.radius.card}px`,
         borderLeft: "4px solid",
         borderLeftColor: "info.main",
         transition: "all 0.3s ease-in-out",
@@ -58,6 +60,10 @@ export default function CommunityUnitCard({
         },
       }}
     >
+      <CardMediaThumbnail
+        s3Key={unit.featuredImage}
+        identityId={unit.identityId}
+      />
       <Box
         sx={{
           display: "flex",
@@ -85,7 +91,9 @@ export default function CommunityUnitCard({
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
             <Chip
-              label={t("communityUnitCard.byAuthor", { author: unit.owner || "Unknown" })}
+              label={t("communityUnitCard.byAuthor", {
+                author: unit.owner || "Unknown",
+              })}
               size="small"
               variant="outlined"
             />
@@ -96,7 +104,9 @@ export default function CommunityUnitCard({
             )}
           </Box>
         </CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 2, pb: 1, gap: 1 }}>
+        <Box
+          sx={{ display: "flex", alignItems: "center", pl: 2, pb: 1, gap: 1 }}
+        >
           <Button
             variant="outlined"
             size="small"
@@ -104,17 +114,12 @@ export default function CommunityUnitCard({
             onClick={() => onFork(unit.id)}
             disabled={forking}
           >
-            {forking ? t("communityUnitCard.forking") : t("communityUnitCard.fork")}
+            {forking
+              ? t("communityUnitCard.forking")
+              : t("communityUnitCard.fork")}
           </Button>
         </Box>
       </Box>
-      {unit?.featuredImage && (
-        <LazyCardMedia
-          s3Key={unit.featuredImage}
-          identityId={unit.identityId}
-          fileId={null}
-        />
-      )}
     </Card>
   );
 }

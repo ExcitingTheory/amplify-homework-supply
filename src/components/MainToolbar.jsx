@@ -844,6 +844,13 @@ export default function MainToolbar({ children }) {
                             sx={{ pl: 6 }}
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Section detail content is now tabbed — ask the
+                              // page to switch to the right tab before scrolling.
+                              window.dispatchEvent(
+                                new CustomEvent("section-detail-nav", {
+                                  detail: { headingId: heading.id },
+                                }),
+                              );
                               document
                                 .getElementById(heading.id)
                                 ?.scrollIntoView({ behavior: "smooth" });

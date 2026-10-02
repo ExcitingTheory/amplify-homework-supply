@@ -28,6 +28,10 @@
     "name": "宿題教材",
     "tagline": "日本語学習プラットフォーム"
   },
+  "chat": {
+    "aiAssistant": "AIアシスタント",
+    "openAssistant": "AIアシスタントを開く"
+  },
   "common": {
     "about": "概要",
     "filter": "フィルター",
@@ -47,36 +51,43 @@
       "description": "説明",
       "title": "タイトル"
     },
+    "collaboration": "コラボレーション",
     "help": "ヘルプ",
     "settings": {
+      "colorMode": "カラーモード",
       "darkMode": "ダークモード",
       "disableNotifications": "通知を無効にする",
       "experimentalFeatures": "実験的機能",
-      "studentMode": "学習者モード",
-      "colorMode": "カラーモード"
-    },
-    "collaboration": "コラボレーション"
+      "studentMode": "学習者モード"
+    }
   },
   "navigation": {
+    "collaboration": "コラボレーション",
+    "collaborationDesc": "招待とセッション参加",
+    "drafts": "下書き",
+    "gamification": "ゲーミフィケーション",
     "grades": "成績",
     "home": "ホーム",
-    "profile": "プロフィール",
-    "sections": "セクション",
-    "units": "ユニット",
-    "workbook": "ワークブック",
-    "squads": "チーム",
     "leaderboard": "ランキング",
-    "published": "公開済み",
-    "settings": "設定",
-    "gamification": "ゲーミフィケーション",
-    "drafts": "下書き",
     "notifications": "通知",
-    "collaboration": "コラボレーション",
+    "profile": "プロフィール",
+    "published": "公開済み",
+    "sections": "セクション",
+    "settings": "設定",
     "skills": "スキルツリー",
-    "collaborationDesc": "招待とセッション参加"
+    "squads": "チーム",
+    "units": "ユニット",
+    "workbook": "ワークブック"
+  },
+  "peerReview": {
+    "helpful": "ピアレビューは役に立ちました",
+    "notHelpful": "ピアレビューは役に立ちませんでした"
   },
   "quizComponent": {
     "grade": "成績: {grade}"
+  },
+  "sectionDetail": {
+    "studentHeader": "学生"
   },
   "status": {
     "complete": "完了しました",
@@ -90,25 +101,38 @@
     "success": "成功しました",
     "uploading": "アップロード中です..."
   },
+  "tableComponent": {
+    "cellActionsLabel": "セルの操作ラベル",
+    "cellActionsTitle": "セルアクション タイトル",
+    "clearCell": "セルをクリア",
+    "deleteColumn": "列を削除します",
+    "deleteRow": "行を削除します",
+    "deleteTable": "テーブルを削除します",
+    "insertColumnLeft": "列を左に挿入します",
+    "insertColumnRight": "右に列を挿入",
+    "insertRowAbove": "上に行を挿入します",
+    "insertRowBelow": "下に行を挿入",
+    "makeColumnHeader": "列ヘッダーを作成します",
+    "makeHeader": "ヘッダーを作成します",
+    "makeRowHeader": "行ヘッダーを作成します",
+    "removeColumnHeader": "列ヘッダーを削除します",
+    "removeHeader": "ヘッダーを削除",
+    "removeRowHeader": "行ヘッダーを削除",
+    "removeSorting": "ソートを解除",
+    "sortAscending": "昇順で並び替え",
+    "sortDescending": "降順で並び替え"
+  },
   "time": {
     "completed": "完了しました",
     "created": "作成済み",
     "due": "期限",
     "updated": "更新されました"
   },
-  "chat": {
-    "aiAssistant": "AIアシスタント",
-    "openAssistant": "AIアシスタントを開く"
-  },
   "timer": {
-    "minutes": "分",
-    "seconds": "秒",
-    "increase": "選択した時間セグメントを増やす",
     "decrease": "選択した時間セグメントを減らします",
-    "hours": "時間"
-  },
-  "peerReview": {
-    "helpful": "ピアレビューは役に立ちました",
-    "notHelpful": "ピアレビューは役に立ちませんでした"
+    "hours": "時間",
+    "increase": "選択した時間セグメントを増やす",
+    "minutes": "分",
+    "seconds": "秒"
   }
 }

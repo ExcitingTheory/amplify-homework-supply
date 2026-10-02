@@ -20,31 +20,8 @@
     "placeholder": "Enter answer here",
     "submit": "Submit"
   },
-  "toolBarRoPlugin": {
-    "fallbackText": "Format",
-    "noDescription": "No Description",
-    "untitledUnit": "Untitled Unit"
-  },
-  "verticalTabsRo": {
-    "aiAssistant": "AI Assistant",
-    "previousAttempts": "Previous Attempts",
-    "settings": "Settings",
-    "tableOfContents": "Table of Contents"
-  },
-  "unitCompletedPlugin": {
-    "allCaughtUp": "All caught up! No more assignments.",
-    "completionMessage": "Unit completed!",
-    "continueButton": "Continue",
-    "nextAssignment": "Next Assignment",
-    "retrying": "Starting new attempt...",
-    "sectionHeading": "Next Steps",
-    "tryAgain": "Try Again"
-  },
-  "quizComponent": {
-    "gradeDisplay": "Grade: {score}%"
-  },
-  "meaningAssociationExercise": {
-    "layoutDirection": "row"
+  "common": {
+    "copied": "Copied"
   },
   "customAnswerComponent": {
     "answerPlaceholder": "Answer Placeholder",
@@ -62,35 +39,70 @@
     "yourAnswer": "Your Answer"
   },
   "gradeHistory": {
-    "title": "Grade History",
-    "noAttempts": "No previous attempts",
-    "completeFirstAttempt": "Complete this assignment to see your progress here.",
     "attempts": "attempts",
-    "trend": {
-      "up": "Improving",
-      "down": "Review needed",
-      "flat": "Steady"
-    },
-    "bestScore": "Best Score",
     "averageScore": "Average Score",
-    "recentAttempts": "Recent Attempts",
+    "best": "Best",
+    "bestScore": "Best Score",
     "complete": "complete",
-    "best": "Best"
+    "completeFirstAttempt": "Complete this assignment to see your progress here.",
+    "noAttempts": "No previous attempts",
+    "recentAttempts": "Recent Attempts",
+    "title": "Grade History",
+    "trend": {
+      "down": "Review needed",
+      "flat": "Steady",
+      "up": "Improving"
+    }
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "row"
+  },
+  "quizComponent": {
+    "gradeDisplay": "Grade: {score}%"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "Format",
+    "noDescription": "No Description",
+    "scrollLeft": "Scroll Left",
+    "scrollRight": "Scroll Right",
+    "untitledUnit": "Untitled Unit"
+  },
+  "unitCompletedPlugin": {
+    "allCaughtUp": "All caught up! No more assignments.",
+    "completionMessage": "Unit completed!",
+    "continueButton": "Continue",
+    "copyInvite": "Copy Invite",
+    "goToRoom": "Go To Room",
+    "nextAssignment": "Next Assignment",
+    "practiceMistakes": "Practice Mistakes",
+    "requestGuidance": "Request Guidance",
+    "requestingGuidance": "Requesting Guidance",
+    "retrying": "Starting new attempt...",
+    "reviewAnswers": "Review Answers",
+    "roomCreated": "Room Created",
+    "sectionHeading": "Next Steps",
+    "tryAgain": "Try Again"
+  },
+  "verticalTabsRo": {
+    "aiAssistant": "AI Assistant",
+    "previousAttempts": "Previous Attempts",
+    "settings": "Settings",
+    "tableOfContents": "Table of Contents"
   },
   "workbookSettings": {
-    "title": "Settings",
-    "displayPreferences": "Display Preferences",
-    "highContrastMode": "High Contrast Mode",
-    "highContrastModeDescription": "Increases color contrast for better visibility",
-    "reducedMotion": "Reduced Motion",
-    "reducedMotionDescription": "Minimizes animations and transitions",
     "audioPreferences": "Audio Preferences",
     "autoPlayAudio": "Auto-play Audio",
     "autoPlayAudioDescription": "Automatically play audio when available",
+    "displayPreferences": "Display Preferences",
+    "feedbackPreferences": "Feedback Preferences",
+    "highContrastMode": "High Contrast Mode",
+    "highContrastModeDescription": "Increases color contrast for better visibility",
+    "immediateFeedback": "Immediate Feedback",
+    "immediateFeedbackDescription": "Show correct/incorrect feedback right away",
+    "reducedMotion": "Reduced Motion",
+    "reducedMotionDescription": "Minimizes animations and transitions",
     "showWaveforms": "Show Audio Waveforms",
     "showWaveformsDescription": "Display visual waveforms for audio content",
-    "feedbackPreferences": "Feedback Preferences",
-    "immediateFeedback": "Immediate Feedback",
-    "immediateFeedbackDescription": "Show correct/incorrect feedback right away"
+    "title": "Settings"
   }
 }

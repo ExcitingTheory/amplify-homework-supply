@@ -29,7 +29,7 @@ import { addStudentsToSection } from "../../../app/actions/section";
  *   - onEnrolled: () => void   // called after a successful enroll (to refetch roster)
  */
 export function RosterEnrollDialog({ open, onClose, sectionId, onEnrolled }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
   const [value, setValue] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState(null);

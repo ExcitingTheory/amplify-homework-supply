@@ -28,6 +28,10 @@
     "name": "作业资源",
     "tagline": "日语学习平台"
   },
+  "chat": {
+    "aiAssistant": "AI助手",
+    "openAssistant": "打开AI助手"
+  },
   "common": {
     "about": "关于",
     "filter": "筛选",
@@ -47,36 +51,43 @@
       "description": "描述",
       "title": "标题"
     },
+    "collaboration": "协作",
     "help": "帮助",
     "settings": {
+      "colorMode": "颜色模式",
       "darkMode": "深色模式",
       "disableNotifications": "禁用通知",
       "experimentalFeatures": "实验性功能",
-      "studentMode": "学生模式",
-      "colorMode": "颜色模式"
-    },
-    "collaboration": "协作"
+      "studentMode": "学生模式"
+    }
   },
   "navigation": {
+    "collaboration": "协作",
+    "collaborationDesc": "邀请与加入会话",
+    "drafts": "草稿",
+    "gamification": "游戏化",
     "grades": "成绩",
     "home": "首页",
-    "profile": "个人资料",
-    "sections": "章节",
-    "units": "单元",
-    "workbook": "作业本",
-    "squads": "小队",
     "leaderboard": "排行榜",
-    "published": "已发布",
-    "settings": "设置",
-    "collaboration": "协作",
-    "gamification": "游戏化",
-    "drafts": "草稿",
-    "skills": "技能树",
     "notifications": "通知",
-    "collaborationDesc": "邀请与加入会话"
+    "profile": "个人资料",
+    "published": "已发布",
+    "sections": "章节",
+    "settings": "设置",
+    "skills": "技能树",
+    "squads": "小队",
+    "units": "单元",
+    "workbook": "作业本"
+  },
+  "peerReview": {
+    "helpful": "同行评审很有帮助",
+    "notHelpful": "同行评审没有帮助"
   },
   "quizComponent": {
     "grade": "成绩：{grade}"
+  },
+  "sectionDetail": {
+    "studentHeader": "学生"
   },
   "status": {
     "complete": "完成",
@@ -90,25 +101,38 @@
     "success": "成功",
     "uploading": "正在上传..."
   },
+  "tableComponent": {
+    "cellActionsLabel": "单元格操作标签",
+    "cellActionsTitle": "单元格操作标题",
+    "clearCell": "清除单元格",
+    "deleteColumn": "删除列",
+    "deleteRow": "删除行",
+    "deleteTable": "删除表格",
+    "insertColumnLeft": "在左侧插入列",
+    "insertColumnRight": "插入右侧列",
+    "insertRowAbove": "在上方插入行",
+    "insertRowBelow": "在下方插入行",
+    "makeColumnHeader": "设为列标题",
+    "makeHeader": "设为标题",
+    "makeRowHeader": "设为行标题",
+    "removeColumnHeader": "删除列标题",
+    "removeHeader": "移除标题",
+    "removeRowHeader": "删除行标题",
+    "removeSorting": "移除排序",
+    "sortAscending": "升序排列",
+    "sortDescending": "降序排列"
+  },
   "time": {
     "completed": "已完成",
     "created": "已创建",
     "due": "截止",
     "updated": "已更新"
   },
-  "chat": {
-    "aiAssistant": "AI助手",
-    "openAssistant": "打开AI助手"
-  },
   "timer": {
-    "minutes": "分钟",
-    "seconds": "秒",
-    "hours": "小时",
     "decrease": "减少所选时间段",
-    "increase": "增加所选时间段"
-  },
-  "peerReview": {
-    "helpful": "同行评审很有帮助",
-    "notHelpful": "同行评审没有帮助"
+    "hours": "小时",
+    "increase": "增加所选时间段",
+    "minutes": "分钟",
+    "seconds": "秒"
   }
 }

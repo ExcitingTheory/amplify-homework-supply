@@ -53,7 +53,7 @@ export function AssignmentComposer({
   onSuccess,
   inline = false,
 }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
   const [unit, setUnit] = useState(selectedUnit || null);
   const [selectedSections, setSelectedSections] = useState(
     selectedSectionIds || [],

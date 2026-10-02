@@ -74,7 +74,6 @@
   "blocks": {
     "answer": "Bloc de réponse",
     "custom_answer": "Réponse personnalisée",
-    "meaning_association": "Association de sens",
     "quiz": "Bloc de Quiz"
   },
   "configurationManager": {
@@ -189,6 +188,10 @@
       "deselectAll": "Tout désélectionner",
       "reAnalyzeSelected": "Ré-analyser la sélection ({count})"
     },
+    "dragDrop": {
+      "dropFilesHere": "Déposez les fichiers ici pour les téléverser",
+      "supportedFormats": "Audio, Images, PDFs, Documents et plus"
+    },
     "expandedContent": {
       "descriptionLabel": "Description :",
       "extractedContentHeading": "Contenu extrait",
@@ -247,10 +250,6 @@
       "searchPlaceholder": "Rechercher des fichiers...",
       "selectAllTooltip": "Tout sélectionner",
       "uploadTooltip": "Télécharger des fichiers"
-    },
-    "dragDrop": {
-      "dropFilesHere": "Déposez les fichiers ici pour les téléverser",
-      "supportedFormats": "Audio, Images, PDFs, Documents et plus"
     }
   },
   "fileMetadataComponent": {
@@ -440,12 +439,6 @@
     "add": "Ajouter",
     "addLine": "Ajouter une ligne",
     "addSpeakerFirst": "Veuillez d'abord ajouter un intervenant",
-    "description": "Description",
-    "descriptionPlaceholder": "p. ex., 30 ans, énergique, professionnel",
-    "direction": "Direction",
-    "directionPlaceholder": "p. ex., entrant, essoufflé",
-    "emotion": "Émotion",
-    "emotionPlaceholder": "p. ex., joyeux, fatigué",
     "empty": "(vide)",
     "exportJSON": "Exporter JSON",
     "generateAllMissingTTS": "Générer toutes les synthèses vocales manquantes",
@@ -453,12 +446,9 @@
     "importFailed": "Échec de l'importation du fichier JSON",
     "importJSON": "Importer JSON",
     "lineNumber": "Ligne #{number} - {speaker}",
-    "lockedTrack": "Piste verrouillée",
     "micAccessFailed": "Échec d'accès au microphone",
-    "name": "Nom",
     "noMissingAudio": "Aucun audio manquant à générer",
     "noTextToGenerate": "Aucun texte à générer",
-    "play": "Lire",
     "processing": "Traitement de {count} lignes...",
     "record": "Enregistrer",
     "recordingSaveFailed": "Échec de l'enregistrement",
@@ -471,7 +461,6 @@
     "stop": "Arrêter",
     "takeNumber": "Prise {number} ({type})",
     "takes": "Prend",
-    "text": "Texte",
     "timeline": "Chronologie",
     "ttsGenerationFailed": "Échec de la génération audio TTS",
     "unknown": "Inconnu",
@@ -505,27 +494,8 @@
     "ownerPlaceholder": "ID du propriétaire"
   },
   "tableComponent": {
-    "cellActionsLabel": "Libellé des actions de cellule",
-    "cellActionsTitle": "Titre des actions de cellule",
-    "clearCell": "Vider la cellule",
-    "deleteColumn": "Supprimer la colonne",
-    "deleteRow": "Supprimer la ligne",
-    "deleteTable": "Supprimer le tableau",
     "insertColumn": "Insérer une colonne",
-    "insertColumnLeft": "Insérer une colonne à gauche",
-    "insertColumnRight": "Insérer une colonne à droite",
-    "insertRow": "Insérer une ligne",
-    "insertRowAbove": "Insérer une ligne au-dessus",
-    "insertRowBelow": "Insérer une ligne en dessous",
-    "makeColumnHeader": "Créer un en-tête de colonne",
-    "makeHeader": "Créer un en-tête",
-    "makeRowHeader": "Définir comme en-tête de ligne",
-    "removeColumnHeader": "Supprimer l'en-tête de colonne",
-    "removeHeader": "Supprimer l'en-tête",
-    "removeRowHeader": "Supprimer l'en-tête de ligne",
-    "removeSorting": "Supprimer le tri",
-    "sortAscending": "Trier par ordre croissant",
-    "sortDescending": "Trier par ordre décroissant"
+    "insertRow": "Insérer une ligne"
   },
   "tableOfContents": {
     "emptyState": "Aucun titre trouvé. Ajoutez des titres à votre document pour voir la table des matières.",

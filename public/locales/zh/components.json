@@ -1,4 +1,37 @@
 {
+  "aiAgentConfig": {
+    "behaviorTuning": "行为调优",
+    "conversationMemory": "会话记忆",
+    "defaultResultLimitLabel": "默认结果限制",
+    "enableConversationMemory": "启用会话记忆",
+    "enforceTokenBudget": "执行令牌预算",
+    "enforceTokenBudgetNote": "启用后，代理会将系统提示词和工具结果截断到预算限制，并在超过总轮次预算时中止多步骤流程。",
+    "kaiMaxTokensLabel": "Kai 最大令牌数",
+    "kaiSystemPromptLabel": "Kai 系统提示词",
+    "kaiTemperatureLabel": "Kai 温度：",
+    "kaiToolResultLabel": "Kai 工具结果",
+    "maxAgentStepsHint": "每轮会话中工具调用的最大轮次",
+    "maxAgentStepsLabel": "代理最大步骤数",
+    "perPersonaOverrides": "按角色覆盖",
+    "sageMaxTokensLabel": "Sage 最大令牌数",
+    "sageModel": "Sage 模型",
+    "sageSystemPromptLabel": "Sage 系统提示词",
+    "sageTemperatureLabel": "Sage 温度：",
+    "sageToolResultLabel": "Sage 工具结果",
+    "searchTuning": "搜索调优",
+    "similarityThresholdLabel": "相似度阈值：",
+    "summarizationModelLabel": "总结模型",
+    "systemPromptBudgetHint": "系统提示词中 Tier 1 上下文的最大令牌数（默认：2000）",
+    "systemPromptBudgetLabel": "系统提示词预算",
+    "tokenBudgets": "令牌预算",
+    "tokenBudgetsDescription": "控制代理每一轮中各部分分配的令牌数量。预算越低，成本越低；预算越高，可用上下文越丰富。",
+    "tokensUnit": "令牌",
+    "toolResultBudgetHint": "返回给模型的每个工具结果的最大令牌数（默认：4000）",
+    "toolResultBudgetLabel": "工具结果预算",
+    "totalTurnBudgetHint": "跨所有步骤的单轮代理最大总令牌消耗（默认：16000）",
+    "totalTurnBudgetLabel": "单轮总预算",
+    "useDefaultPlaceholder": "使用默认值"
+  },
   "aiFeedbackWidget": {
     "cancel": "取消",
     "helpful": "有用的",
@@ -7,6 +40,50 @@
     "submit": "提交",
     "whatToImprove": "可以改进什么？"
   },
+  "amblifyAuthenticator": {
+    "emailPhoneOptions": "电子邮件或电话号码"
+  },
+  "armorEditor": {
+    "addCharge": "添加充能",
+    "chargeRotation": "充能轮换",
+    "chargeSize": "装药量",
+    "shieldPreview": "盾牌预览",
+    "xOffset": "X 偏移量",
+    "yOffset": "Y轴偏移量"
+  },
+  "assignmentCard": {
+    "difficulty": "难度：{level}",
+    "discuss": "讨论",
+    "dropped": "已被教师移除",
+    "due": "到期",
+    "dueSoon": "即将到期",
+    "excellent": "优秀",
+    "fair": "一般",
+    "good": "良好",
+    "joinReview": "加入复习",
+    "late": "迟交",
+    "locked": "已锁定",
+    "needsWork": "需改进",
+    "noDueDate": "无截止日期",
+    "opensAt": "{date} 开始",
+    "overdue": "逾期",
+    "practice": "练习",
+    "requestGuidance": "请求指导",
+    "requestGuidanceTooltip": "创建房间并与老师分享代码，以获得个性化指导",
+    "review": "复习",
+    "startWorkbook": "开始"
+  },
+  "assignmentConfiguration": {
+    "createSectionLabel": "创建新分组",
+    "friday": "下周五",
+    "nextClass": "下一节课",
+    "publishFirstAlert": "注意：必须先发布单元内容才能创建作业",
+    "retryToggle": "允许学生重试",
+    "timerDescription": "限时作业的计时器配置",
+    "timerQuestion": "添加计时器问题",
+    "tomorrow": "明天",
+    "undoSnackbar": "作业已创建。已创建 {count} 个作业{plural}。"
+  },
   "authenticator": {
     "confirmPasswordLabel": "确认密码：",
     "confirmPasswordPlaceholder": "请确认您的密码",
@@ -14,18 +91,81 @@
     "displayNamePlaceholder": "选择一个显示名称",
     "emailLabel": "电子邮箱：",
     "emailPlaceholder": "输入您的邮箱：",
+    "firstNameLabel": "名字：",
+    "firstNamePlaceholder": "请输入您的名字",
+    "lastNameLabel": "姓氏：",
+    "lastNamePlaceholder": "请输入您的姓氏",
     "nameLabel": "姓名：",
     "namePlaceholder": "请输入您的姓名：",
     "passwordLabel": "密码：",
     "passwordPlaceholder": "请输入您的密码：",
     "phoneLabel": "电话号码：",
     "phonePlaceholder": "请输入您的电话号码",
-    "lastNamePlaceholder": "请输入您的姓氏",
-    "firstNameLabel": "名字：",
     "preferredNameLabel": "常用名（可选）：",
-    "preferredNamePlaceholder": "您希望在课堂中使用的称呼",
-    "firstNamePlaceholder": "请输入您的名字",
-    "lastNameLabel": "姓氏："
+    "preferredNamePlaceholder": "您希望在课堂中使用的称呼"
+  },
+  "avatarEditor": {
+    "customizeAvatar": "自定义头像"
+  },
+  "botCustomizer": {
+    "backgroundColorLabel": "背景颜色",
+    "badgeNames": {
+      "tier1": "Bot Whisperer I",
+      "tier2": "Bot Whisperer II"
+    },
+    "colors": {
+      "gold": "金色",
+      "lavender": "薰衣草",
+      "mint": "薄荷",
+      "peach": "桃色",
+      "rose": "玫瑰",
+      "sky": "天空"
+    },
+    "lockedMessage": "获得 Bot Whisperer I 徽章后，即可自定义您的 AI 助手。",
+    "previewTitle": "您的 AI 助手",
+    "styleLabel": "风格",
+    "styles": {
+      "bottts": "机器人",
+      "botttsNeutral": "迷你机器人"
+    }
+  },
+  "cadenceCopyDialog": {
+    "close": "关闭",
+    "copyCadence": "复制节奏",
+    "copyFromClass": "从班级复制",
+    "copyToClasses": "复制到班级",
+    "copying": "正在复制...",
+    "firstMeetingDate": "第一次会议日期",
+    "loadingCadence": "正在加载源节奏...",
+    "missingMetadata": "源作业缺少节奏元数据，无法复制。",
+    "noAssignments": "源班级没有可复制的带日期作业。",
+    "weeklyMeetingHint": "1 = 第一次，2 = 第二次，0 = 最后一次",
+    "weeklyMeetingLabel": "每周会议",
+    "weeksLabel": "周数"
+  },
+  "campaignProgress": {
+    "bonus": "奖励",
+    "chapterProgression": "章节进度",
+    "completion": "完成情况",
+    "ended": "已结束",
+    "endedChip": "已结束"
+  },
+  "chat": {
+    "aiAssistant": "AI助手",
+    "close": "关闭",
+    "openAssistant": "打开AI助手"
+  },
+  "chatMessageList": {
+    "input": "输入",
+    "result": "结果",
+    "thinking": "思考中…",
+    "tool": "工具"
+  },
+  "chatPanel": {
+    "backButton": "返回",
+    "defaultTitle": "聊天",
+    "onlineCount": "{count} 人在线",
+    "topicsLabel": "主题"
   },
   "chatSidebar": {
     "activeChats": "活跃聊天",
@@ -43,6 +183,7 @@
     "cancellingMessage": "正在取消...",
     "chatHistory": "聊天记录",
     "chatInitFailure": "聊天初始化失败。请刷新页面。",
+    "close": "关闭",
     "complete": "✓ 完成",
     "confirm": "确认",
     "confirmAndExecute": "确认并执行",
@@ -134,8 +275,50 @@
     "unknown": "未知",
     "uploading": "上传中",
     "welcomeMessage": "关于您的课程、文件或内容，您可以问我任何问题！",
-    "yesterday": "昨天",
+    "yesterday": "昨天"
+  },
+  "collaboration": {
+    "emptyInput": "请输入代码或链接",
+    "error": "加入会话失败",
+    "joinButton": "加入",
+    "joining": "正在加入...",
+    "noInvitations": "暂无待处理的协作邀请",
+    "tabInvitations": "邀请",
+    "tabJoin": "通过代码加入",
+    "title": "协作",
+    "typePeerReview": "同行评审",
+    "typePractice": "练习",
+    "typeWorkbook": "作业本"
+  },
+  "collaboratorManager": {
+    "add": "添加",
+    "addCollaborator": "添加协作者",
+    "cancel": "取消",
+    "editPermission": "编辑",
+    "failedToAdd": "添加协作者失败",
+    "failedToLoad": "加载协作者失败",
+    "failedToRemove": "移除协作者失败",
+    "noCollaborators": "暂无协作者",
+    "noInstructorsFound": "未找到讲师",
+    "permissionEdit": "编辑 — 可以修改内容",
+    "permissionLevel": "权限级别",
+    "permissionRead": "只读 — 仅可查看内容",
+    "readPermission": "读取",
+    "removeCollaborator": "移除 {name}",
+    "searchInstructors": "搜索讲师",
+    "searchPlaceholder": "按姓名、用户名或电子邮件搜索",
+    "title": "协作者",
+    "typeAtLeast": "请至少输入2个字符"
+  },
+  "common": {
     "close": "关闭"
+  },
+  "communityUnitCard": {
+    "byAuthor": "作者：{author}",
+    "fork": "复刻",
+    "forking": "正在复刻...",
+    "noDescription": "无描述",
+    "untitledUnit": "未命名单元"
   },
   "copyright": {
     "text": "版权所有 ©",
@@ -147,6 +330,7 @@
     "confirmButton": "确认",
     "createNewWordTitle": "创建新词",
     "createWordButton": "创建单词",
+    "noRubyTags": "暂无注音标签",
     "phraseLabel": "短语（选择第二个）：",
     "pronunciationLabel": "发音（请先选择）：",
     "rubyTagEditorTitle": "Ruby标签编辑器",
@@ -158,17 +342,88 @@
     "rubyTagsStep4": "4. 点击保存以应用ruby标签",
     "rubyTagsTitle": "如何创建ruby标签：",
     "save": "保存",
-    "title": "词典编辑器",
+    "saveRubyTags": "保存注音标签",
     "step1": "1. 在发音字段（上方）中选择文本，然后在短语字段（下方）中选择对应文本",
     "step2": "2. 所选部分将成对匹配并移动到 ruby 标签预览中",
     "step3": "3. 继续选择成对内容，直到两个字段都为空",
     "step4": "4. 点击“保存”应用 ruby 标签",
-    "noRubyTags": "暂无注音标签",
-    "saveRubyTags": "保存注音标签"
+    "title": "词典编辑器"
   },
   "documentSourceBadge": {
     "pagePrefix": "页面",
     "sourcePrefix": "来源："
+  },
+  "editableBlockPreview": {
+    "answer": "已生成答案块",
+    "block": "已生成块",
+    "content": "已生成内容块",
+    "copied": "已复制！",
+    "copy": "复制到剪贴板",
+    "customAnswer": "已生成自定义答案块",
+    "editHint": "编辑下面的块，然后将其插入到您的课程中。",
+    "insert": "插入到课程",
+    "inserted": "已插入到课程",
+    "meaningAssociation": "已生成含义关联块",
+    "quiz": "已生成测验块",
+    "regenerate": "重新生成",
+    "reject": "拒绝",
+    "rejected": "已拒绝",
+    "undo": "撤销"
+  },
+  "instructorDashboard": {
+    "average": "平均",
+    "averageCompletion": "平均完成率",
+    "averageGrade": "平均成绩",
+    "avg": "平均",
+    "completed": "已完成",
+    "completion": "完成",
+    "noDataYet": "暂无学生数据",
+    "overallPerformance": "总体表现",
+    "rank": "排名",
+    "sectionLeaderboards": "章节排行榜",
+    "student": "学生",
+    "students": "学生",
+    "totalAssignments": "总作业数",
+    "totalStudents": "学生总数"
+  },
+  "jobsDashboard": {
+    "active": "{count} 个进行中",
+    "activeFailed": "进行中 / 失败",
+    "agentJobs": "智能体任务",
+    "allStatuses": "所有状态",
+    "allTypes": "所有类型",
+    "cancel": "取消",
+    "cancelled": "已取消",
+    "colActions": "操作",
+    "colDuration": "时长",
+    "colError": "错误",
+    "colOwner": "所有者",
+    "colResource": "资源",
+    "colRetries": "重试次数",
+    "colStarted": "开始时间",
+    "colStatus": "状态",
+    "colType": "类型",
+    "completed": "已完成",
+    "docAnalysis": "文档分析",
+    "failed": "{count} 个失败",
+    "failedStatus": "失败",
+    "mediaTranscode": "媒体转码",
+    "noJobs": "没有符合当前筛选条件的任务",
+    "processing": "处理中",
+    "queued": "排队中",
+    "refresh": "刷新",
+    "retry": "重试",
+    "retryAllFailed": "重试所有失败项 ({count})",
+    "status": "状态",
+    "totalJobs": "共 {count} 个任务",
+    "type": "类型",
+    "typeAgentJob": "智能体任务",
+    "typeDocumentAnalysis": "文档分析",
+    "typeMediaTranscode": "媒体转码"
+  },
+  "messageComposer": {
+    "defaultPlaceholder": "输入消息...（AI 请使用 @kai）",
+    "replyingTo": "回复 {name}"
   },
   "moderationBadge": {
     "approved": "内容已批准",
@@ -202,9 +457,141 @@
     "model": "模型：{model}",
     "title": "内容审核"
   },
+  "notification": {
+    "category": {
+      "all": "全部",
+      "assignment": "作业",
+      "chat": "聊天",
+      "collaboration": "协作",
+      "gamification": "游戏化",
+      "squad": "小队",
+      "system": "系统"
+    },
+    "delete": "删除",
+    "empty": "暂无通知",
+    "emptyDescription": "您将在此处看到作业、成绩、徽章等相关通知。",
+    "markAllRead": "全部标记为已读",
+    "title": "通知"
+  },
+  "offlineBanner": {
+    "backOnline": "已恢复在线 — 正在同步 {count} 项待处理的更改",
+    "offline": "您已离线 — 您的工作已保存在本地",
+    "pending": "{count} 项待处理",
+    "syncAria": "同步 {count} 项待处理的更改",
+    "syncNow": "立即同步"
+  },
   "pdfThumbnail": {
     "failedToLoad": "PDF加载失败",
     "pageNumber": "{current} / {total}"
+  },
+  "peerReview": {
+    "joinDialog": {
+      "codeLabel": "评审室代码",
+      "description": "请输入同学分享的评审室代码以加入其同行评审会话。",
+      "joinButton": "加入复习",
+      "joining": "正在加入...",
+      "noInvitations": "暂无待处理的评审邀请",
+      "tabCode": "输入代码",
+      "tabInvitations": "邀请",
+      "title": "加入同行评审"
+    }
+  },
+  "permissionError": {
+    "contactInfo": "如果您认为这是一个错误，请联系您的讲师或管理员。",
+    "defaultMessage": "您没有权限访问此{resourceType}。",
+    "explanation": "此内容访问受限。您需要成为所有者或拥有教师权限才能访问。",
+    "goBack": "返回",
+    "goHome": "返回主页",
+    "resourceTypes": {
+      "assignment": "作业",
+      "grade": "成绩",
+      "section": "章节",
+      "unit": "单元"
+    },
+    "title": "访问被拒绝"
+  },
+  "practiceDrill": {
+    "collab": {
+      "connected": "已连接",
+      "copied": "已复制！",
+      "copyCode": "复制房间代码以分享",
+      "disconnected": "已断开连接",
+      "groupAccuracy": "小组准确率：{accuracy}%",
+      "groupAccuracyTip": "所有参与者的平均准确率",
+      "groupProgress": "小组进度",
+      "participants": "{count} 位参与者"
+    },
+    "config": {
+      "cancel": "取消",
+      "comprehension": "理解能力",
+      "coverage": "覆盖率：已练习 {covered}/{total} 个项目（{percent}%）",
+      "documents": "文档",
+      "documentsDesc": "来自已上传的PDF和已解析的内容",
+      "drillType": "练习类型",
+      "generating": "生成中...",
+      "maxParticipants": "最多参与人数",
+      "mixed": "混合",
+      "noSourcesWarning": "请至少启用一个内容源以开始练习。",
+      "questionCount": "题目数量",
+      "questions": "问题",
+      "questionsDesc": "来自题库",
+      "review": "复习错题",
+      "start": "开始练习",
+      "studyTogether": "一起学习",
+      "studyTogetherDesc": "与同学实时练习。系统将创建房间代码以供分享。",
+      "subtitle": "请选择要练习的内容：",
+      "text": "文本内容",
+      "textDesc": "来自课程文本和评分模块",
+      "title": "练习：{unitName}",
+      "vocabulary": "词汇",
+      "vocabularyDesc": "词汇、定义、匹配",
+      "vocabularyType": "词汇"
+    },
+    "dialog": {
+      "back": "返回",
+      "cancel": "取消",
+      "close": "关闭",
+      "complete": "练习完成！",
+      "completeSummary": "您的正确率为 {accuracy}%，获得了 {xp} 经验值！",
+      "done": "完成",
+      "finish": "完成并获取经验值",
+      "generating": "正在生成练习...",
+      "retry": "重试",
+      "title": "练习",
+      "titleWithUnit": "练习：{unit}"
+    },
+    "join": {
+      "cancel": "取消",
+      "codeLabel": "房间代码",
+      "codeTooShort": "房间代码必须至少包含4个字符",
+      "description": "请输入您的老师或同学分享的房间代码以加入他们的学习会话。",
+      "error": "加入会话失败",
+      "full": "本场练习已满员（{max}位参与者）",
+      "joinButton": "加入会话",
+      "joining": "正在加入...",
+      "noInvitations": "暂无待处理的会话邀请",
+      "notFound": "未找到使用该代码的活动会话",
+      "tabCode": "输入代码",
+      "tabInvitations": "邀请",
+      "title": "加入学习会话"
+    },
+    "library": {
+      "generateNew": "生成新练习",
+      "resumeLabel": "继续 ({completed}/{total} 已完成)",
+      "resumeTitle": "从上次停下的地方继续",
+      "templatesTitle": "练习库",
+      "title": "练习训练"
+    },
+    "progress": {
+      "questions": "问题",
+      "streakTooltip": "当前连续完成次数：{count}",
+      "xpDiminishedTooltip": "由于多次尝试，经验值已减少",
+      "xpTooltip": "此练习的预估经验值"
+    },
+    "workbook": {
+      "label": "练习题册",
+      "noBlocks": "暂无练习模块"
+    }
   },
   "proTip": {
     "message": "专业提示：使用编辑器创建引人入胜的学习材料！"
@@ -263,15 +650,24 @@
     "add": "添加",
     "addLine": "添加行",
     "addSpeakerFirst": "请先添加演讲者",
+    "description": "描述",
+    "descriptionPlaceholder": "例如，30多岁，精力充沛，专业",
+    "direction": "方向",
+    "directionPlaceholder": "例如，进入时、上气不接下气",
+    "emotion": "情感",
+    "emotionPlaceholder": "例如：开朗、疲倦",
     "exportJson": "导出JSON",
     "generateAllMissing": "生成所有缺失的TTS",
     "generateTts": "生成TTS",
     "importFailed": "导入JSON文件失败",
     "importJson": "导入JSON",
     "lineNumber": "第{number}行 - {speaker}",
+    "lockedTrack": "锁定课程",
     "micAccessFailed": "无法访问麦克风",
+    "name": "姓名",
     "noMissingAudio": "没有缺失的音频需要生成",
     "noTextToGenerate": "无文本可生成",
+    "play": "播放",
     "processingLines": "正在处理 {count} 行...",
     "record": "记录",
     "saveRecordingFailed": "录制保存失败",
@@ -281,9 +677,28 @@
     "speakers": "演讲者",
     "stop": "停止",
     "takes": "需要时间：",
+    "text": "文本",
     "timeline": "时间轴",
     "ttsGenerationFailed": "生成 TTS 音频失败",
     "voice": "语音"
+  },
+  "recordingStudio3Modal": {
+    "backToStudio": "返回工作室",
+    "confirmSave": "保存",
+    "confirmTitle": "确认保存",
+    "conversationSaveInfo": "音频文件将作为文件记录保存并附加到此单元中。",
+    "discard": "丢弃",
+    "done": "完成",
+    "generateMissingTts": "生成缺失项 ({count})",
+    "generatingTts": "生成中...",
+    "generatingTtsProgress": "正在生成TTS音频...",
+    "missingTakesWarning": "{count} 行没有活动录音，将不会被保存。",
+    "noActiveTake": "暂无活动录制片段",
+    "recording": "录制",
+    "saving": "正在保存...",
+    "unsavedChanges": "您有未保存的更改。确定要关闭吗？",
+    "unsavedChangesTitle": "未保存的更改",
+    "wordSaveInfo": "音频将保存到单词模型的 audio 和 definitionAudio 字段中。"
   },
   "recordingStudioEnhanced": {
     "addTrack": "添加轨道",
@@ -319,6 +734,11 @@
     "ttsNotImplemented": "文本转语音功能尚未实现",
     "voice": "语音"
   },
+  "recordingStudioEnhancedModal": {
+    "cancel": "取消",
+    "defaultTitle": "生成对话",
+    "saveConversation": "保存对话"
+  },
   "savedPdfThumbnail": {
     "errorMessage": "PDF加载错误",
     "pageOverlay": "第{number}页"
@@ -338,14 +758,72 @@
     "selectSection": "选择章节",
     "selectSectionHelper": "选择要分配截止日期的部分"
   },
+  "sectionDetail": {
+    "assignments": "作业",
+    "completionGrid": "完成情况表格",
+    "gradebook": "成绩册",
+    "leaderboard": "排行榜",
+    "students": "学生"
+  },
+  "sharedUnitCard": {
+    "edit": "编辑",
+    "editAccess": "编辑访问权限",
+    "noDescription": "无描述",
+    "readOnly": "只读",
+    "sharedBy": "分享者：{owner}",
+    "showDeletedItems": "显示已删除的项目",
+    "untitledUnit": "未命名单元",
+    "view": "查看"
+  },
+  "showDeletedItems": "显示已删除的项目",
+  "skillTree": {
+    "empty": "暂无可用技能。您的授课老师将设置技能树。",
+    "title": "技能树"
+  },
   "sortableAnswers": {
     "answerLabel": "答案 {number}",
     "correct": "正确",
     "incorrect": "错误"
   },
+  "storageManagement": {
+    "aiModelForOffline": "离线使用的 AI 模型",
+    "builtIn": "内置",
+    "cacheStatusUpdated": "{status} · 最后更新 {date}",
+    "cachedAssignments": "已缓存的作业",
+    "download": "下载",
+    "downloaded": "已下载",
+    "downloadingModel": "正在下载 AI 模型... {percent}%",
+    "modelSizeStatus": "{size} · {status}",
+    "noCachedAssignments": "尚未缓存任何作业以供离线使用。打开一个作业即可自动缓存。",
+    "notDownloaded": "未下载",
+    "offlineStorage": "离线存储",
+    "preInstalled": "已预装 — 无需下载",
+    "removeModel": "移除模型",
+    "removeOfflineData": "移除离线数据",
+    "storageFullWarning": "存储空间即将用尽。请考虑删除已缓存的作业或 AI 模型以释放空间。",
+    "unitLabel": "单元：{id}...",
+    "usedOfQuota": "已使用 {used}／共 {quota}（{percent}%）"
+  },
   "svgPreview": {
     "caption": "字幕",
     "emptyState": "无SVG可预览"
+  },
+  "threadView": {
+    "edited": "（已编辑）",
+    "emptyState": "还没有消息。开始对话吧！",
+    "hoursAgo": "{hours} 小时前",
+    "justNow": "刚刚",
+    "minutesAgo": "{minutes} 分钟前",
+    "replyCount": {
+      "plural": "回复",
+      "singular": "回复"
+    },
+    "typingIndicator": "{names} 正在输入..."
+  },
+  "topicList": {
+    "emptyState": "还没有主题。创建一个主题即可开始聊天。",
+    "header": "主题",
+    "newTopicPlaceholder": "#新主题"
   },
   "unitEmbedding": {
     "embeddingFresh": "嵌入刷新",
@@ -384,497 +862,27 @@
     "embeddingFailed": "嵌入失败",
     "embeddingGenerated": "嵌入生成"
   },
-  "instructorDashboard": {
-    "overallPerformance": "总体表现",
-    "totalStudents": "学生总数",
-    "totalAssignments": "总作业数",
-    "averageGrade": "平均成绩",
-    "averageCompletion": "平均完成率",
-    "sectionLeaderboards": "章节排行榜",
-    "students": "学生",
-    "avg": "平均",
-    "noDataYet": "暂无学生数据",
-    "rank": "排名",
-    "student": "学生",
-    "average": "平均",
-    "completed": "已完成",
-    "completion": "完成"
-  },
-  "aiAgentConfig": {
-    "sageModel": "Sage 模型",
-    "behaviorTuning": "行为调优",
-    "kaiTemperatureLabel": "Kai 温度：",
-    "sageTemperatureLabel": "Sage 温度：",
-    "kaiMaxTokensLabel": "Kai 最大令牌数",
-    "sageMaxTokensLabel": "Sage 最大令牌数",
-    "maxAgentStepsLabel": "代理最大步骤数",
-    "maxAgentStepsHint": "每轮会话中工具调用的最大轮次",
-    "searchTuning": "搜索调优",
-    "similarityThresholdLabel": "相似度阈值：",
-    "defaultResultLimitLabel": "默认结果限制",
-    "conversationMemory": "会话记忆",
-    "enableConversationMemory": "启用会话记忆",
-    "summarizationModelLabel": "总结模型",
-    "tokenBudgets": "令牌预算",
-    "tokenBudgetsDescription": "控制代理每一轮中各部分分配的令牌数量。预算越低，成本越低；预算越高，可用上下文越丰富。",
-    "enforceTokenBudget": "执行令牌预算",
-    "enforceTokenBudgetNote": "启用后，代理会将系统提示词和工具结果截断到预算限制，并在超过总轮次预算时中止多步骤流程。",
-    "systemPromptBudgetLabel": "系统提示词预算",
-    "systemPromptBudgetHint": "系统提示词中 Tier 1 上下文的最大令牌数（默认：2000）",
-    "toolResultBudgetLabel": "工具结果预算",
-    "toolResultBudgetHint": "返回给模型的每个工具结果的最大令牌数（默认：4000）",
-    "totalTurnBudgetLabel": "单轮总预算",
-    "totalTurnBudgetHint": "跨所有步骤的单轮代理最大总令牌消耗（默认：16000）",
-    "perPersonaOverrides": "按角色覆盖",
-    "kaiSystemPromptLabel": "Kai 系统提示词",
-    "tokensUnit": "令牌",
-    "useDefaultPlaceholder": "使用默认值",
-    "sageSystemPromptLabel": "Sage 系统提示词",
-    "kaiToolResultLabel": "Kai 工具结果",
-    "sageToolResultLabel": "Sage 工具结果"
-  },
-  "botCustomizer": {
-    "badgeNames": {
-      "tier1": "Bot Whisperer I",
-      "tier2": "Bot Whisperer II"
-    },
-    "colors": {
-      "sky": "天空",
-      "mint": "薄荷",
-      "lavender": "薰衣草",
-      "peach": "桃色",
-      "rose": "玫瑰",
-      "gold": "金色"
-    },
-    "styles": {
-      "bottts": "机器人",
-      "botttsNeutral": "迷你机器人"
-    },
-    "lockedMessage": "获得 Bot Whisperer I 徽章后，即可自定义您的 AI 助手。",
-    "previewTitle": "您的 AI 助手",
-    "styleLabel": "风格",
-    "backgroundColorLabel": "背景颜色"
-  },
-  "chatMessageList": {
-    "tool": "工具",
-    "thinking": "思考中…",
-    "input": "输入",
-    "result": "结果"
-  },
-  "editableBlockPreview": {
-    "quiz": "已生成测验块",
-    "answer": "已生成答案块",
-    "meaningAssociation": "已生成含义关联块",
-    "customAnswer": "已生成自定义答案块",
-    "content": "已生成内容块",
-    "block": "已生成块",
-    "copy": "复制到剪贴板",
-    "copied": "已复制！",
-    "regenerate": "重新生成",
-    "editHint": "编辑下面的块，然后将其插入到您的课程中。",
-    "reject": "拒绝",
-    "insert": "插入到课程",
-    "inserted": "已插入到课程",
-    "rejected": "已拒绝",
-    "undo": "撤销"
-  },
-  "offlineBanner": {
-    "offline": "您已离线 — 您的工作已保存在本地",
-    "pending": "{count} 项待处理",
-    "syncAria": "同步 {count} 项待处理的更改",
-    "backOnline": "已恢复在线 — 正在同步 {count} 项待处理的更改",
-    "syncNow": "立即同步"
-  },
-  "jobsDashboard": {
-    "active": "{count} 个进行中",
-    "failed": "{count} 个失败",
-    "totalJobs": "共 {count} 个任务",
-    "type": "类型",
-    "allTypes": "所有类型",
-    "agentJobs": "智能体任务",
-    "docAnalysis": "文档分析",
-    "mediaTranscode": "媒体转码",
-    "status": "状态",
-    "activeFailed": "进行中 / 失败",
-    "allStatuses": "所有状态",
-    "queued": "排队中",
-    "processing": "处理中",
-    "failedStatus": "失败",
-    "completed": "已完成",
-    "cancelled": "已取消",
-    "refresh": "刷新",
-    "colType": "类型",
-    "colStatus": "状态",
-    "colOwner": "所有者",
-    "colResource": "资源",
-    "colStarted": "开始时间",
-    "colDuration": "时长",
-    "colRetries": "重试次数",
-    "colError": "错误",
-    "colActions": "操作",
-    "noJobs": "没有符合当前筛选条件的任务",
-    "retry": "重试",
-    "cancel": "取消",
-    "retryAllFailed": "重试所有失败项 ({count})",
-    "typeAgentJob": "智能体任务",
-    "typeDocumentAnalysis": "文档分析",
-    "typeMediaTranscode": "媒体转码"
-  },
-  "storageManagement": {
-    "offlineStorage": "离线存储",
-    "usedOfQuota": "已使用 {used}／共 {quota}（{percent}%）",
-    "storageFullWarning": "存储空间即将用尽。请考虑删除已缓存的作业或 AI 模型以释放空间。",
-    "aiModelForOffline": "离线使用的 AI 模型",
-    "downloaded": "已下载",
-    "notDownloaded": "未下载",
-    "modelSizeStatus": "{size} · {status}",
-    "preInstalled": "已预装 — 无需下载",
-    "builtIn": "内置",
-    "removeModel": "移除模型",
-    "download": "下载",
-    "downloadingModel": "正在下载 AI 模型... {percent}%",
-    "cachedAssignments": "已缓存的作业",
-    "noCachedAssignments": "尚未缓存任何作业以供离线使用。打开一个作业即可自动缓存。",
-    "unitLabel": "单元：{id}...",
-    "cacheStatusUpdated": "{status} · 最后更新 {date}",
-    "removeOfflineData": "移除离线数据"
-  },
-  "cadenceCopyDialog": {
-    "copyFromClass": "从班级复制",
-    "copyToClasses": "复制到班级",
-    "firstMeetingDate": "第一次会议日期",
-    "weeksLabel": "周数",
-    "weeklyMeetingLabel": "每周会议",
-    "weeklyMeetingHint": "1 = 第一次，2 = 第二次，0 = 最后一次",
-    "loadingCadence": "正在加载源节奏...",
-    "noAssignments": "源班级没有可复制的带日期作业。",
-    "missingMetadata": "源作业缺少节奏元数据，无法复制。",
-    "close": "关闭",
-    "copyCadence": "复制节奏",
-    "copying": "正在复制..."
-  },
-  "assignmentCard": {
-    "excellent": "优秀",
-    "good": "良好",
-    "fair": "一般",
-    "needsWork": "需改进",
-    "noDueDate": "无截止日期",
-    "overdue": "逾期",
-    "dueSoon": "即将到期",
-    "due": "到期",
-    "locked": "已锁定",
-    "opensAt": "{date} 开始",
-    "late": "迟交",
-    "dropped": "已被教师移除",
-    "difficulty": "难度：{level}",
-    "review": "复习",
-    "startWorkbook": "开始",
-    "practice": "练习",
-    "discuss": "讨论",
-    "joinReview": "加入复习",
-    "requestGuidance": "请求指导",
-    "requestGuidanceTooltip": "创建房间并与老师分享代码，以获得个性化指导"
-  },
-  "avatarEditor": {
-    "customizeAvatar": "自定义头像"
-  },
-  "campaignProgress": {
-    "ended": "已结束",
-    "endedChip": "已结束",
-    "bonus": "奖励",
-    "chapterProgression": "章节进度",
-    "completion": "完成情况"
-  },
-  "chatPanel": {
-    "defaultTitle": "聊天",
-    "topicsLabel": "主题",
-    "backButton": "返回",
-    "onlineCount": "{count} 人在线"
-  },
-  "messageComposer": {
-    "defaultPlaceholder": "输入消息...（AI 请使用 @kai）",
-    "replyingTo": "回复 {name}"
-  },
-  "threadView": {
-    "emptyState": "还没有消息。开始对话吧！",
-    "replyCount": {
-      "singular": "回复",
-      "plural": "回复"
-    },
-    "typingIndicator": "{names} 正在输入...",
-    "edited": "（已编辑）",
-    "justNow": "刚刚",
-    "minutesAgo": "{minutes} 分钟前",
-    "hoursAgo": "{hours} 小时前"
-  },
-  "topicList": {
-    "header": "主题",
-    "newTopicPlaceholder": "#新主题",
-    "emptyState": "还没有主题。创建一个主题即可开始聊天。"
-  },
-  "assignmentConfiguration": {
-    "timerQuestion": "添加计时器问题",
-    "timerDescription": "限时作业的计时器配置",
-    "retryToggle": "允许学生重试",
-    "publishFirstAlert": "注意：必须先发布单元内容才能创建作业",
-    "meetingCalendar": "截止日期",
-    "meetingDayHint": "圆点标记课程分组的会议日期。",
-    "tomorrow": "明天",
-    "nextClass": "下一节课",
-    "friday": "下周五",
-    "createSectionLabel": "创建新分组",
-    "undoSnackbar": "作业已创建。已创建 {count} 个作业{plural}。"
-  },
-  "chat": {
-    "aiAssistant": "AI助手",
-    "close": "关闭",
-    "openAssistant": "打开AI助手"
-  },
-  "collaboration": {
-    "typePractice": "练习",
-    "typeWorkbook": "作业本",
-    "title": "协作",
-    "tabInvitations": "邀请",
-    "joinButton": "加入",
-    "joining": "正在加入...",
-    "tabJoin": "通过代码加入",
-    "noInvitations": "暂无待处理的协作邀请",
-    "emptyInput": "请输入代码或链接",
-    "error": "加入会话失败",
-    "typePeerReview": "同行评审"
-  },
-  "practiceDrill": {
-    "config": {
-      "vocabulary": "词汇",
-      "questions": "问题",
-      "vocabularyType": "词汇",
-      "cancel": "取消",
-      "generating": "生成中...",
-      "title": "练习：{unitName}",
-      "questionsDesc": "来自题库",
-      "documents": "文档",
-      "subtitle": "请选择要练习的内容：",
-      "documentsDesc": "来自已上传的PDF和已解析的内容",
-      "textDesc": "来自课程文本和评分模块",
-      "text": "文本内容",
-      "questionCount": "题目数量",
-      "coverage": "覆盖率：已练习 {covered}/{total} 个项目（{percent}%）",
-      "drillType": "练习类型",
-      "studyTogether": "一起学习",
-      "mixed": "混合",
-      "comprehension": "理解能力",
-      "maxParticipants": "最多参与人数",
-      "review": "复习错题",
-      "studyTogetherDesc": "与同学实时练习。系统将创建房间代码以供分享。",
-      "start": "开始练习",
-      "vocabularyDesc": "词汇、定义、匹配",
-      "noSourcesWarning": "请至少启用一个内容源以开始练习。"
-    },
-    "progress": {
-      "questions": "问题",
-      "streakTooltip": "当前连续完成次数：{count}",
-      "xpTooltip": "此练习的预估经验值",
-      "xpDiminishedTooltip": "由于多次尝试，经验值已减少"
-    },
-    "collab": {
-      "copied": "已复制！",
-      "disconnected": "已断开连接",
-      "connected": "已连接",
-      "groupAccuracy": "小组准确率：{accuracy}%",
-      "participants": "{count} 位参与者",
-      "groupAccuracyTip": "所有参与者的平均准确率",
-      "groupProgress": "小组进度",
-      "copyCode": "复制房间代码以分享"
-    },
-    "dialog": {
-      "title": "练习",
-      "close": "关闭",
-      "retry": "重试",
-      "back": "返回",
-      "done": "完成",
-      "cancel": "取消",
-      "titleWithUnit": "练习：{unit}",
-      "complete": "练习完成！",
-      "generating": "正在生成练习...",
-      "finish": "完成并获取经验值",
-      "completeSummary": "您的正确率为 {accuracy}%，获得了 {xp} 经验值！"
-    },
-    "join": {
-      "cancel": "取消",
-      "tabInvitations": "邀请",
-      "tabCode": "输入代码",
-      "codeLabel": "房间代码",
-      "description": "请输入您的老师或同学分享的房间代码以加入他们的学习会话。",
-      "codeTooShort": "房间代码必须至少包含4个字符",
-      "full": "本场练习已满员（{max}位参与者）",
-      "error": "加入会话失败",
-      "joinButton": "加入会话",
-      "joining": "正在加入...",
-      "noInvitations": "暂无待处理的会话邀请",
-      "title": "加入学习会话",
-      "notFound": "未找到使用该代码的活动会话"
-    },
-    "library": {
-      "templatesTitle": "练习库",
-      "resumeLabel": "继续 ({completed}/{total} 已完成)",
-      "generateNew": "生成新练习",
-      "title": "练习训练",
-      "resumeTitle": "从上次停下的地方继续"
-    },
-    "workbook": {
-      "noBlocks": "暂无练习模块",
-      "label": "练习题册"
-    }
-  },
   "workbook": {
     "invite": {
       "copied": "已复制！",
-      "title": "分享工作簿",
-      "shareTooltip": "邀请他人访问此工作簿",
       "copy": "复制链接",
       "copyLink": "复制链接",
       "currentlyOnline": "当前在线",
       "description": "任何拥有此链接且已注册同一班级的用户均可加入并实时协作。",
       "idle": "空闲",
-      "noOthers": "暂时还没有其他人"
+      "noOthers": "暂时还没有其他人",
+      "shareTooltip": "邀请他人访问此工作簿",
+      "title": "分享工作簿"
     },
     "joinDialog": {
-      "tabLink": "输入链接",
-      "tabInvitations": "邀请",
-      "inputLabel": "练习册链接或单元 ID",
       "description": "粘贴工作簿链接或输入单元ID以加入协作编辑会话。",
+      "inputLabel": "练习册链接或单元 ID",
       "joinButton": "加入作业本",
       "joining": "正在查找...",
       "noInvitations": "暂无待处理的作业本邀请",
+      "tabInvitations": "邀请",
+      "tabLink": "输入链接",
       "title": "加入工作簿会话"
     }
-  },
-  "peerReview": {
-    "joinDialog": {
-      "joinButton": "加入复习",
-      "tabCode": "输入代码",
-      "title": "加入同行评审",
-      "tabInvitations": "邀请",
-      "codeLabel": "评审室代码",
-      "joining": "正在加入...",
-      "description": "请输入同学分享的评审室代码以加入其同行评审会话。",
-      "noInvitations": "暂无待处理的评审邀请"
-    }
-  },
-  "notification": {
-    "delete": "删除",
-    "category": {
-      "assignment": "作业",
-      "squad": "小队",
-      "chat": "聊天",
-      "all": "全部",
-      "gamification": "游戏化",
-      "collaboration": "协作",
-      "system": "系统"
-    },
-    "title": "通知",
-    "markAllRead": "全部标记为已读",
-    "empty": "暂无通知",
-    "emptyDescription": "您将在此处看到作业、成绩、徽章等相关通知。"
-  },
-  "common": {
-    "close": "关闭"
-  },
-  "recordingStudio3Modal": {
-    "confirmSave": "保存",
-    "done": "完成",
-    "generatingTts": "生成中...",
-    "recording": "录制",
-    "saving": "正在保存...",
-    "discard": "丢弃",
-    "backToStudio": "返回工作室",
-    "confirmTitle": "确认保存",
-    "conversationSaveInfo": "音频文件将作为文件记录保存并附加到此单元中。",
-    "generatingTtsProgress": "正在生成TTS音频...",
-    "generateMissingTts": "生成缺失项 ({count})",
-    "unsavedChanges": "您有未保存的更改。确定要关闭吗？",
-    "unsavedChangesTitle": "未保存的更改",
-    "missingTakesWarning": "{count} 行没有活动录音，将不会被保存。",
-    "wordSaveInfo": "音频将保存到单词模型的 audio 和 definitionAudio 字段中。",
-    "noActiveTake": "暂无活动录制片段"
-  },
-  "sectionDetail": {
-    "students": "学生",
-    "gradebook": "成绩册",
-    "leaderboard": "排行榜",
-    "assignments": "作业",
-    "completionGrid": "完成情况表格"
-  },
-  "collaboratorManager": {
-    "add": "添加",
-    "cancel": "取消",
-    "editPermission": "编辑",
-    "addCollaborator": "添加协作者",
-    "title": "协作者",
-    "noCollaborators": "暂无协作者",
-    "searchInstructors": "搜索讲师",
-    "typeAtLeast": "请至少输入2个字符",
-    "noInstructorsFound": "未找到讲师",
-    "permissionLevel": "权限级别",
-    "searchPlaceholder": "按姓名、用户名或电子邮件搜索",
-    "permissionEdit": "编辑 — 可以修改内容",
-    "removeCollaborator": "移除 {name}",
-    "failedToLoad": "加载协作者失败",
-    "permissionRead": "只读 — 仅可查看内容",
-    "failedToRemove": "移除协作者失败",
-    "failedToAdd": "添加协作者失败",
-    "readPermission": "读取"
-  },
-  "communityUnitCard": {
-    "untitledUnit": "未命名单元",
-    "noDescription": "无描述",
-    "byAuthor": "作者：{author}",
-    "forking": "正在复刻...",
-    "fork": "复刻"
-  },
-  "sharedUnitCard": {
-    "untitledUnit": "未命名单元",
-    "noDescription": "无描述",
-    "edit": "编辑",
-    "view": "查看",
-    "editAccess": "编辑访问权限",
-    "readOnly": "只读",
-    "showDeletedItems": "显示已删除的项目",
-    "sharedBy": "分享者：{owner}"
-  },
-  "recordingStudioEnhancedModal": {
-    "cancel": "取消",
-    "saveConversation": "保存对话",
-    "defaultTitle": "生成对话"
-  },
-  "permissionError": {
-    "title": "访问被拒绝",
-    "contactInfo": "如果您认为这是一个错误，请联系您的讲师或管理员。",
-    "explanation": "此内容访问受限。您需要成为所有者或拥有教师权限才能访问。",
-    "goBack": "返回",
-    "resourceTypes": {
-      "unit": "单元",
-      "section": "章节",
-      "assignment": "作业",
-      "grade": "成绩"
-    },
-    "defaultMessage": "您没有权限访问此{resourceType}。",
-    "goHome": "返回主页"
-  },
-  "armorEditor": {
-    "shieldPreview": "盾牌预览",
-    "chargeRotation": "充能轮换",
-    "addCharge": "添加充能",
-    "xOffset": "X 偏移量",
-    "yOffset": "Y轴偏移量",
-    "chargeSize": "装药量"
-  },
-  "skillTree": {
-    "title": "技能树",
-    "empty": "暂无可用技能。您的授课老师将设置技能树。"
-  },
-  "showDeletedItems": "显示已删除的项目",
-  "amblifyAuthenticator": {
-    "emailPhoneOptions": "电子邮件或电话号码"
   }
 }

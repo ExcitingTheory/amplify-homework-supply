@@ -28,6 +28,10 @@
     "name": "Ressources de devoirs",
     "tagline": "Plateforme d'apprentissage de la langue japonaise"
   },
+  "chat": {
+    "aiAssistant": "Assistant IA",
+    "openAssistant": "Ouvrir l'assistant IA"
+  },
   "common": {
     "about": "À propos",
     "filter": "Filtrer",
@@ -47,36 +51,43 @@
       "description": "Description",
       "title": "Titre"
     },
+    "collaboration": "Collaboration",
     "help": "Aide",
     "settings": {
+      "colorMode": "Mode de couleur",
       "darkMode": "Mode sombre",
       "disableNotifications": "Désactiver les notifications",
       "experimentalFeatures": "Fonctionnalités expérimentales",
-      "studentMode": "Mode Étudiant",
-      "colorMode": "Mode de couleur"
-    },
-    "collaboration": "Collaboration"
+      "studentMode": "Mode Étudiant"
+    }
   },
   "navigation": {
-    "grades": "Notes",
-    "home": "Accueil",
-    "profile": "Profil",
-    "sections": "Sections",
-    "units": "Unités",
-    "workbook": "Cahier d'exercices",
-    "squads": "Équipes",
-    "leaderboard": "Classement",
-    "published": "Publié",
-    "settings": "Paramètres",
     "collaboration": "Collaboration",
-    "notifications": "Notifications",
+    "collaborationDesc": "Invitations et sessions à rejoindre",
     "drafts": "Brouillons",
     "gamification": "Ludification",
+    "grades": "Notes",
+    "home": "Accueil",
+    "leaderboard": "Classement",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "published": "Publié",
+    "sections": "Sections",
+    "settings": "Paramètres",
     "skills": "Arbre de compétences",
-    "collaborationDesc": "Invitations et sessions à rejoindre"
+    "squads": "Équipes",
+    "units": "Unités",
+    "workbook": "Cahier d'exercices"
+  },
+  "peerReview": {
+    "helpful": "L'évaluation par les pairs a été utile",
+    "notHelpful": "L'évaluation par les pairs n'a pas été utile"
   },
   "quizComponent": {
     "grade": "Note : {grade}"
+  },
+  "sectionDetail": {
+    "studentHeader": "Étudiant"
   },
   "status": {
     "complete": "Terminer",
@@ -90,25 +101,38 @@
     "success": "Succès",
     "uploading": "Téléchargement..."
   },
+  "tableComponent": {
+    "cellActionsLabel": "Libellé des actions de cellule",
+    "cellActionsTitle": "Titre des actions de cellule",
+    "clearCell": "Vider la cellule",
+    "deleteColumn": "Supprimer la colonne",
+    "deleteRow": "Supprimer la ligne",
+    "deleteTable": "Supprimer le tableau",
+    "insertColumnLeft": "Insérer une colonne à gauche",
+    "insertColumnRight": "Insérer une colonne à droite",
+    "insertRowAbove": "Insérer une ligne au-dessus",
+    "insertRowBelow": "Insérer une ligne en dessous",
+    "makeColumnHeader": "Créer un en-tête de colonne",
+    "makeHeader": "Créer un en-tête",
+    "makeRowHeader": "Définir comme en-tête de ligne",
+    "removeColumnHeader": "Supprimer l'en-tête de colonne",
+    "removeHeader": "Supprimer l'en-tête",
+    "removeRowHeader": "Supprimer l'en-tête de ligne",
+    "removeSorting": "Supprimer le tri",
+    "sortAscending": "Trier par ordre croissant",
+    "sortDescending": "Trier par ordre décroissant"
+  },
   "time": {
     "completed": "Terminé",
     "created": "Créé",
     "due": "À rendre",
     "updated": "Mis à jour"
   },
-  "chat": {
-    "aiAssistant": "Assistant IA",
-    "openAssistant": "Ouvrir l'assistant IA"
-  },
   "timer": {
+    "decrease": "Diminuer le segment de temps sélectionné",
     "hours": "Heures",
-    "minutes": "Minutes",
-    "seconds": "Secondes",
     "increase": "Augmenter le segment de temps sélectionné",
-    "decrease": "Diminuer le segment de temps sélectionné"
-  },
-  "peerReview": {
-    "helpful": "L'évaluation par les pairs a été utile",
-    "notHelpful": "L'évaluation par les pairs n'a pas été utile"
+    "minutes": "Minutes",
+    "seconds": "Secondes"
   }
 }

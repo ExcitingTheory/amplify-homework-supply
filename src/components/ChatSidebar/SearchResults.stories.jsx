@@ -44,6 +44,7 @@ Enhanced display for AI Assistant search results with improved visual hierarchy,
 - **Questions**: Quiz items with answers
 - **Sections**: Student cohorts/classes with join codes
 - **Units**: Learning modules with published status
+- **Assignments**: Units assigned to a section with due dates
                 `,
       },
     },
@@ -209,6 +210,42 @@ const mockUnits = [
   },
 ];
 
+const mockAssignments = [
+  {
+    id: "assignment-1",
+    type: "assignment",
+    name: "Introduction to Particles",
+    unitName: "Introduction to Particles",
+    unitId: "unit-1",
+    sectionName: "Japanese 101 - Spring 2026",
+    sectionId: "section-1",
+    dueDate: "2026-10-15",
+    similarity: 0.87,
+  },
+  {
+    id: "assignment-2",
+    type: "assignment",
+    name: "Daily Routines Vocabulary",
+    unitName: "Daily Routines Vocabulary",
+    unitId: "unit-2",
+    sectionName: "Advanced Grammar Study Group",
+    sectionId: "section-2",
+    dueDate: "2026-10-22",
+    similarity: 0.73,
+  },
+  {
+    id: "assignment-3",
+    type: "assignment",
+    name: "Keigo (Honorific Speech) - Draft",
+    unitName: "Keigo (Honorific Speech) - Draft",
+    unitId: "unit-3",
+    sectionName: "JLPT N3 Preparation",
+    sectionId: "section-3",
+    dueDate: "2026-11-01",
+    similarity: 0.6,
+  },
+];
+
 // Mock tab handlers
 const mockTabHandlers = {
   setLeftTab: (index) => console.log("Set left tab:", index),
@@ -226,6 +263,7 @@ export const AllResultTypes = {
       ...mockQuestions,
       ...mockSections,
       ...mockUnits,
+      ...mockAssignments,
     ],
     unitId: "unit-123",
     searchQuery: "Japanese",
@@ -315,6 +353,20 @@ export const UnitsOnly = {
   },
 };
 
+// Only assignments
+export const AssignmentsOnly = {
+  args: {
+    results: mockAssignments,
+    searchQuery: "particles",
+    tabHandlers: mockTabHandlers,
+    isLoading: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Introduction to Particles/i);
+  },
+};
+
 // Loading state
 export const LoadingState = {
   args: {
@@ -355,6 +407,7 @@ export const HighRelevanceScores = {
       { ...mockQuestions[0], similarity: 0.94 },
       { ...mockSections[0], similarity: 0.92 },
       { ...mockUnits[0], similarity: 0.95 },
+      { ...mockAssignments[0], similarity: 0.93 },
     ],
     unitId: "unit-123",
     searchQuery: "Japanese",
@@ -437,6 +490,7 @@ export const LargeResultSet = {
         })),
       ...mockSections,
       ...mockUnits,
+      ...mockAssignments,
     ],
     unitId: "unit-123",
     searchQuery: "Japanese",

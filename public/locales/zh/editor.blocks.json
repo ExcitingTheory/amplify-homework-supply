@@ -1,4 +1,16 @@
 {
+  "answerEditor": {
+    "addWordLabel": "添加词汇标签",
+    "addWordToDict": "向词典添加新单词。",
+    "cancel": "取消",
+    "dialogTitle": "编辑答案",
+    "emptyState": "未提供答案",
+    "instructions": "在下方创建您的答案",
+    "save": "保存"
+  },
+  "blocks": {
+    "meaning_association": "意义关联"
+  },
   "customAnswerEditor": {
     "add": "添加",
     "addWordLabel": "将单词添加到练习",
@@ -46,6 +58,9 @@
     "pronunciationLabel": "发音",
     "removeFromAssignment": "从作业中移除"
   },
+  "questionEditor": {
+    "cancel": "取消"
+  },
   "quizEditor": {
     "addAnswer": "添加答案",
     "cancel": "取消",
@@ -56,17 +71,5 @@
     "reset": "重置",
     "save": "保存",
     "status": "状态"
-  },
-  "answerEditor": {
-    "addWordLabel": "添加词汇标签",
-    "addWordToDict": "向词典添加新单词。",
-    "cancel": "取消",
-    "dialogTitle": "编辑答案",
-    "emptyState": "未提供答案",
-    "instructions": "在下方创建您的答案",
-    "save": "保存"
-  },
-  "questionEditor": {
-    "cancel": "取消"
   }
 }

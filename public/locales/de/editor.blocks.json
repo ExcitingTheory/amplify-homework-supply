@@ -1,4 +1,16 @@
 {
+  "answerEditor": {
+    "addWordLabel": "Wort-Label hinzufügen",
+    "addWordToDict": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+    "cancel": "Abbrechen",
+    "dialogTitle": "Antwort bearbeiten",
+    "emptyState": "Keine Antwort angegeben",
+    "instructions": "Erstellen Sie Ihre Antwort unten",
+    "save": "Speichern"
+  },
+  "blocks": {
+    "meaning_association": "Bedeutungszuordnung"
+  },
   "customAnswerEditor": {
     "add": "Hinzufügen",
     "addWordLabel": "Wort zur Übung hinzufügen",
@@ -46,6 +58,9 @@
     "pronunciationLabel": "Aussprache",
     "removeFromAssignment": "Aus Aufgabe entfernen"
   },
+  "questionEditor": {
+    "cancel": "Abbrechen"
+  },
   "quizEditor": {
     "addAnswer": "Antwort hinzufügen",
     "cancel": "Abbrechen",
@@ -56,17 +71,5 @@
     "reset": "Zurücksetzen",
     "save": "Speichern",
     "status": "Status"
-  },
-  "answerEditor": {
-    "addWordLabel": "Wort-Label hinzufügen",
-    "addWordToDict": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
-    "cancel": "Abbrechen",
-    "dialogTitle": "Antwort bearbeiten",
-    "emptyState": "Keine Antwort angegeben",
-    "instructions": "Erstellen Sie Ihre Antwort unten",
-    "save": "Speichern"
-  },
-  "questionEditor": {
-    "cancel": "Abbrechen"
   }
 }

@@ -16,18 +16,14 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-import IconEdit from "@mui/icons-material/Edit";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-
-import LazyCardMedia from "@/components/LazyCardMedia";
 import CommunityUnitCard from "@/components/CommunityUnitCard";
 import SharedUnitCard from "@/components/SharedUnitCard";
 import { EmptyState } from "@/components/EmptyState";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
 import AuthContext from "@/context/authContext";
-import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { ContentLockCard } from "@/components/Gamification/ContentLockCard";
+import { UnitCard } from "./UnitCard";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
 import {
   useContentLock,
   useXP,
@@ -576,7 +572,7 @@ function Units({ initialUnits = [] }) {
                       margin: "1rem auto",
                       width: "90vw",
                       maxWidth: "80rem",
-                      borderRadius: 2,
+                      borderRadius: `${SEMANTIC_THEME.radius.card}px`,
                       borderLeft: "4px solid",
                       borderLeftColor: "action.disabled",
                     }}
@@ -617,7 +613,7 @@ function Units({ initialUnits = [] }) {
                   width: "fit-content",
                   maxWidth: "500px",
                   minHeight: "300px",
-                  borderRadius: 3,
+                  borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
                 }}
               >
                 <Box
@@ -654,7 +650,7 @@ function Units({ initialUnits = [] }) {
                         fontWeight: 600,
                         px: 3,
                         py: 1,
-                        borderRadius: 2,
+                        borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                       }}
                     >
                       {t("units.createNewUnit")}
@@ -693,149 +689,19 @@ function Units({ initialUnits = [] }) {
                       requiredBadge={lockStatus?.requiredBadge}
                       requiredPriorUnitId={lockStatus?.requiredPriorUnitId}
                     >
-                      <Card
-                        variant="assignment"
-                        sx={{
-                          display: "flex",
-                          margin: "1rem auto",
-                          width: "90vw",
-                          maxWidth: "80rem",
-                          overflow: "hidden",
+                      <UnitCard
+                        unit={unit}
+                        badges={badgesByUnit[unit.id]}
+                        disabled={work}
+                        showPractice
+                        onPractice={() => handleOpenPractice(unit)}
+                        labels={{
+                          untitledUnit: t("units.untitledUnit"),
+                          viewWorkbook: t("units.viewWorkbook"),
+                          practice: t("units.practice", "Practice"),
+                          editUnit: t("units.editUnit"),
                         }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            flexGrow: "1",
-                            p: 0.5,
-                          }}
-                        >
-                          <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                            <Typography
-                              component="div"
-                              variant="h5"
-                              sx={{ fontWeight: 600, mb: 0.5 }}
-                            >
-                              {unit.name || t("units.untitledUnit")}
-                            </Typography>
-                            <Typography
-                              variant="body1"
-                              color="text.secondary"
-                              component="div"
-                              sx={{ lineHeight: 1.6 }}
-                            >
-                              {unit.description || ""}
-                            </Typography>
-                            {badgesByUnit[unit.id]?.length > 0 && (
-                              <Box sx={{ mt: 1 }}>
-                                <BadgeShelf
-                                  earnedBadges={badgesByUnit[unit.id]}
-                                  columns={Math.min(
-                                    badgesByUnit[unit.id].length,
-                                    5,
-                                  )}
-                                  earnedOnly
-                                />
-                              </Box>
-                            )}
-                          </CardContent>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              pl: 2,
-                              pb: 1.5,
-                              flexWrap: "wrap",
-                              gap: 1,
-                            }}
-                          >
-                            <Button
-                              variant="outlined"
-                              href={`/workbook/${unit.id}`}
-                              disabled={work}
-                              startIcon={<EditNoteIcon />}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                px: 3,
-                                py: 1,
-                                borderRadius: 2,
-                                boxShadow: 2,
-                                color: "primary.main",
-                                borderColor: "primary.main",
-                                "&:hover": {
-                                  boxShadow: 4,
-                                  borderColor: "primary.main",
-                                  backgroundColor: "action.hover",
-                                },
-                              }}
-                            >
-                              {t("units.viewWorkbook")}
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              disabled={work}
-                              onClick={() => handleOpenPractice(unit)}
-                              startIcon={<FitnessCenterIcon />}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                px: 3,
-                                py: 1,
-                                borderRadius: 2,
-                                boxShadow: 2,
-                                color: "primary.main",
-                                borderColor: "primary.main",
-                                "&:hover": {
-                                  boxShadow: 4,
-                                  borderColor: "primary.main",
-                                  backgroundColor: "action.hover",
-                                },
-                              }}
-                            >
-                              {t("units.practice", "Practice")}
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              href={`/unit/${unit.id}`}
-                              disabled={work}
-                              startIcon={<IconEdit />}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                px: 3,
-                                py: 1,
-                                borderRadius: 2,
-                                boxShadow: 2,
-                                color: "primary.main",
-                                borderColor: "primary.main",
-                                "&:hover": {
-                                  boxShadow: 4,
-                                  borderColor: "primary.main",
-                                  backgroundColor: "action.hover",
-                                },
-                              }}
-                            >
-                              {t("units.editUnit")}
-                            </Button>
-                          </Box>
-                        </Box>
-                        {unit?.featuredImage && (
-                          <Box
-                            sx={{
-                              maxWidth: "50%",
-                              flexShrink: 0,
-                              overflow: "hidden",
-                            }}
-                          >
-                            <LazyCardMedia
-                              s3Key={unit?.featuredImage}
-                              identityId={unit?.identityId}
-                            />
-                          </Box>
-                        )}
-                      </Card>
+                      />
                     </ContentLockCard>
                   );
                 })}
@@ -857,126 +723,18 @@ function Units({ initialUnits = [] }) {
                 </Typography>
                 {draftUnits.map(function (unit) {
                   return (
-                    <Card
+                    <UnitCard
                       key={unit.id}
-                      id={`unit-${unit.id}`}
-                      variant="assignment"
-                      sx={{
-                        display: "flex",
-                        margin: "1rem auto",
-                        width: "90vw",
-                        maxWidth: "80rem",
+                      unit={unit}
+                      badges={badgesByUnit[unit.id]}
+                      disabled={work}
+                      labels={{
+                        untitledUnit: t("units.untitledUnit"),
+                        viewWorkbook: t("units.viewWorkbook"),
+                        practice: t("units.practice", "Practice"),
+                        editUnit: t("units.editUnit"),
                       }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          flexGrow: "1",
-                          p: 0.5,
-                        }}
-                      >
-                        <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                          <Typography
-                            component="div"
-                            variant="h5"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            {unit.name || t("units.untitledUnit")}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            color="text.secondary"
-                            component="div"
-                            sx={{ lineHeight: 1.6 }}
-                          >
-                            {unit.description || ""}
-                          </Typography>
-                          {badgesByUnit[unit.id]?.length > 0 && (
-                            <Box sx={{ mt: 1 }}>
-                              <BadgeShelf
-                                earnedBadges={badgesByUnit[unit.id]}
-                                columns={Math.min(
-                                  badgesByUnit[unit.id].length,
-                                  5,
-                                )}
-                                earnedOnly
-                              />
-                            </Box>
-                          )}
-                        </CardContent>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 2,
-                            pb: 1.5,
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            href={`/workbook/${unit.id}`}
-                            disabled={work}
-                            startIcon={<EditNoteIcon />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              mr: 1,
-                              borderRadius: 2,
-                              boxShadow: 2,
-                              color: "primary.main",
-                              borderColor: "primary.main",
-                              "&:hover": {
-                                boxShadow: 4,
-                                borderColor: "primary.main",
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            {t("units.viewWorkbook")}
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            href={`/unit/${unit.id}`}
-                            disabled={work}
-                            startIcon={<IconEdit />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              borderRadius: 2,
-                              boxShadow: 2,
-                              color: "primary.main",
-                              borderColor: "primary.main",
-                              "&:hover": {
-                                boxShadow: 4,
-                                borderColor: "primary.main",
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            {t("units.editUnit")}
-                          </Button>
-                        </Box>
-                      </Box>
-                      {unit?.featuredImage && (
-                        <Box
-                          sx={{
-                            maxWidth: "50%",
-                            flexShrink: 0,
-                            overflow: "hidden",
-                          }}
-                        >
-                          <LazyCardMedia
-                            s3Key={unit?.featuredImage}
-                            identityId={unit?.identityId}
-                          />
-                        </Box>
-                      )}
-                    </Card>
+                    />
                   );
                 })}
               </>
@@ -997,127 +755,18 @@ function Units({ initialUnits = [] }) {
                 </Typography>
                 {archivedUnits.map(function (unit) {
                   return (
-                    <Card
+                    <UnitCard
                       key={unit.id}
-                      id={`unit-${unit.id}`}
-                      variant="assignment"
-                      sx={{
-                        display: "flex",
-                        margin: "1rem auto",
-                        width: "90vw",
-                        maxWidth: "80rem",
-                        overflow: "hidden",
+                      unit={unit}
+                      badges={badgesByUnit[unit.id]}
+                      disabled={work}
+                      labels={{
+                        untitledUnit: t("units.untitledUnit"),
+                        viewWorkbook: t("units.viewWorkbook"),
+                        practice: t("units.practice", "Practice"),
+                        editUnit: t("units.editUnit"),
                       }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          flexGrow: "1",
-                          p: 0.5,
-                        }}
-                      >
-                        <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                          <Typography
-                            component="div"
-                            variant="h5"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            {unit.name || t("units.untitledUnit")}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            color="text.secondary"
-                            component="div"
-                            sx={{ lineHeight: 1.6 }}
-                          >
-                            {unit.description || ""}
-                          </Typography>
-                          {badgesByUnit[unit.id]?.length > 0 && (
-                            <Box sx={{ mt: 1 }}>
-                              <BadgeShelf
-                                earnedBadges={badgesByUnit[unit.id]}
-                                columns={Math.min(
-                                  badgesByUnit[unit.id].length,
-                                  5,
-                                )}
-                                earnedOnly
-                              />
-                            </Box>
-                          )}
-                        </CardContent>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 2,
-                            pb: 1.5,
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            href={`/workbook/${unit.id}`}
-                            disabled={work}
-                            startIcon={<EditNoteIcon />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              mr: 1,
-                              borderRadius: 2,
-                              boxShadow: 2,
-                              color: "primary.main",
-                              borderColor: "primary.main",
-                              "&:hover": {
-                                boxShadow: 4,
-                                borderColor: "primary.main",
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            {t("units.viewWorkbook")}
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            href={`/unit/${unit.id}`}
-                            disabled={work}
-                            startIcon={<IconEdit />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              borderRadius: 2,
-                              boxShadow: 2,
-                              color: "primary.main",
-                              borderColor: "primary.main",
-                              "&:hover": {
-                                boxShadow: 4,
-                                borderColor: "primary.main",
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            {t("units.editUnit")}
-                          </Button>
-                        </Box>
-                      </Box>
-                      {unit?.featuredImage && (
-                        <Box
-                          sx={{
-                            maxWidth: "50%",
-                            flexShrink: 0,
-                            overflow: "hidden",
-                          }}
-                        >
-                          <LazyCardMedia
-                            s3Key={unit?.featuredImage}
-                            identityId={unit?.identityId}
-                          />
-                        </Box>
-                      )}
-                    </Card>
+                    />
                   );
                 })}
               </>

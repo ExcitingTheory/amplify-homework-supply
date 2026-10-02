@@ -1,308 +1,307 @@
 {
+  "Peer Review": "ピアレビュー",
   "grades": {
-    "title": "成績",
-    "sections": "セクション",
-    "mySections": "私のセクション",
-    "studentHeader": "学生",
-    "assignmentHeader": "課題",
-    "gradeHeader": "成績"
-  },
-  "index": {
-    "title": "宿題教材",
-    "assignments": "課題",
-    "viewWorkbook": "ワークブックを表示",
-    "completedAssignments": "完了した課題",
-    "myAssignments": "私の課題",
-    "editUnit": "ユニットを編集",
-    "noSectionsYet": "セクションはまだありません",
-    "joinSection": "セクションに参加しますか？",
-    "createNewSection": "新しいセクションを作成",
-    "mySections": "マイセクション",
-    "untitledSection": "無題のセクション",
-    "noDescription": "説明がありません",
-    "viewSection": "セクションを表示",
-    "sections": "セクション",
-    "greetingMorning": "おはようございます、{name}さん",
-    "learningPathway": "スキルツリー",
-    "greetingAfternoon": "こんにちは、{name}さん",
-    "greetingEvening": "こんばんは、{name}さん"
-  },
-  "profile": {
-    "title": "マイプロフィール",
-    "heading": "マイプロフィール",
-    "description": "プロフィール情報を表示・更新します",
-    "userId": "ユーザーID",
-    "identityId": "アイデンティティID",
-    "cancel": "キャンセル",
-    "name": "名前",
-    "updateProfile": "プロフィールを更新",
-    "confirmEmail": {
-      "title": "メールアドレスを確認してください",
-      "message": "メールをご確認いただき、確認コードを入力してメールアドレスを認証してください。",
-      "button": "メールアドレスを確認する"
-    },
-    "changePassword": {
-      "heading": "パスワードを変更",
-      "description": "セキュリティのためにアカウントのパスワードを更新してください",
-      "button": "パスワードを変更"
-    },
-    "languagePreference": {
-      "heading": "言語設定",
-      "description": "ウェブサイトのインターフェースで使用する言語を選択します",
-      "selectLanguage": "言語を選択",
-      "changeSuccess": "言語設定が正常に保存されました"
-    },
-    "advanced": {
-      "heading": "上級",
-      "description": "高度な設定を管理し、ローカルデータキャッシュをクリアします",
-      "clearCache": "ローカルキャッシュをクリアします",
-      "clearCacheDialog": {
-        "title": "ローカルデータキャッシュをクリアしますか？",
-        "message": "これにより、オフライン課題や同期済みコンテンツを含む、ローカルにキャッシュされたすべてのデータが削除されます。サーバーからデータを再読み込みする必要があります。",
-        "cancel": "キャンセル",
-        "confirm": "キャッシュをクリアします"
-      }
-    },
-    "progress": "進捗状況",
-    "badges": "バッジ",
-    "activity": "アクティビティ",
-    "nailedItWall": "達成の壁"
-  },
-  "sections": {
-    "title": "セクション",
-    "createNew": "新規作成",
-    "noSectionsYet": "セクションがまだありません",
-    "createNewSection": "新しいセクションを作成",
-    "untitledSection": "無題のセクション",
-    "viewSection": "セクションを表示",
-    "loading": "読み込み中です...",
-    "newSection": {
-      "title": "新しいセクション",
-      "description": "以下の情報を入力して新しいセクションを作成してください",
-      "nameLabel": "名前",
-      "descriptionLabel": "説明",
-      "cancel": "キャンセルします",
-      "create": "作成します"
-    },
-    "joinCode": "コードラベル",
-    "archived": "アーカイブ済み",
-    "archive": "アーカイブ",
-    "unarchive": "アーカイブ解除",
-    "showArchived": "アーカイブ済みを表示 ({count})",
-    "archivedSuccess": "セクションが正常にアーカイブされました",
-    "unarchivedSuccess": "セクションのアーカイブ解除が完了しました",
-    "archiveError": "セクションの更新に失敗しました。もう一度お試しください。"
-  },
-  "sectionDetail": {
-    "noFeaturedImage": "アイキャッチ画像が設定されていません",
-    "dragAndDropPrompt": "ここに画像をドラッグ&ドロップして、注目画像として設定してください。",
-    "uploadingImage": "画像をアップロード中です",
-    "uploadImagePrompt": "画像をアップロードしてください",
-    "uploadImageInvalidFile": "有効な拡張子の画像ファイルをアップロードしてください。",
-    "joinCode": "参加コード：",
-    "studentView": "受講者ビュー",
-    "instructorView": "講師ビュー",
-    "switchToInstructorView": "インストラクター表示に切り替え",
-    "previewStudentView": "生徒ビューをプレビュー",
-    "students": "学生",
-    "studentHeader": "学生",
-    "emailHeader": "メール",
-    "actionsHeader": "操作",
-    "gradebook": "成績表",
-    "showingAssignments": "({total}件中{visible}件の課題を表示)",
-    "showFutureAssignments": "今後の課題を表示",
-    "showDraftAssignments": "下書きを表示します",
-    "applyCurve": "カーブを適用",
-    "curveMethod": "カーブ法",
-    "scaleToTopMethod": "最高得点に合わせる (100%)",
-    "linearAdjustmentMethod": "線形調整（平均75%）",
-    "curveDebugInfo": "カーブデバッグ：",
-    "selectAssignmentsToCurve": "カーブを適用する課題を選択してください",
-    "selectAll": "すべて選択",
-    "clearAll": "すべてクリア",
     "assignmentHeader": "課題",
     "gradeHeader": "成績",
-    "totalAverage": "総合平均",
-    "learnerHeader": "学習者",
-    "totalCompletion": "合計（完了）",
-    "editTooltip": "編集します",
+    "mySections": "私のセクション",
+    "sections": "セクション",
+    "studentHeader": "学生",
+    "title": "成績"
+  },
+  "index": {
     "assignments": "課題",
-    "viewWorkbook": "ワークブックを表示",
-    "deleteSection": "セクションを削除",
-    "deleteSectionConfirm": "このセクションを削除してもよろしいですか？",
-    "loading": "読み込み中...",
-    "overrideGrade": {
-      "title": "成績を上書き",
-      "student": "受講者:",
-      "assignment": "課題：",
-      "currentGrade": "現在の成績:",
-      "noGrade": "評価なし",
-      "prompt": "新しい成績を入力してください（0-100）：",
-      "label": "成績（％）",
-      "invalidScore": "0から100の間の有効なスコアを入力してください",
-      "saveFailed": "成績の保存に失敗しました。もう一度お試しください。",
-      "cancel": "キャンセル",
-      "save": "成績を保存します"
-    },
-    "saveCoverVideo": "保存",
-    "removeCoverVideo": "削除します",
-    "leaderboard": "ランキング",
-    "squads": "チーム",
-    "noCoverVideo": "カバー動画が設定されていません。",
-    "coverVideoUrlPlaceholder": "動画のURLを貼り付けてください（https://...）",
-    "noCurve": "カーブなし",
-    "completionGrid": "完了状況の概要",
-    "noLeaderboardEntries": "まだリーダーボードのデータがありません。生徒がXPを獲得すると、ここに表示されます。",
-    "leaderboardEnabled": "リーダーボードを表示します",
-    "setCoverVideo": "カバー動画を設定",
-    "coverVideoUrlLabel": "動画URL"
-  },
-  "units": {
-    "title": "ユニット",
-    "createNew": "新規作成",
-    "noPublishedUnits": "公開済みユニットはまだありません",
-    "createNewUnit": "新しい単元を作成する",
-    "publishedUnits": "公開済みユニット",
-    "untitledUnit": "無題のユニット",
-    "viewWorkbook": "ワークブックを表示",
+    "completedAssignments": "完了した課題",
+    "createNewSection": "新しいセクションを作成",
     "editUnit": "ユニットを編集",
-    "myDrafts": "下書き",
-    "practice": "練習",
-    "archivedUnits": "アーカイブされたユニット",
-    "tabMyUnits": "マイユニット",
-    "tabCommunity": "コミュニティ",
-    "forking": "フォーク中...",
-    "noCommunityUnits": "コミュニティユニットは利用できません",
-    "forkSuccess": "ユニットが正常に分岐されました",
-    "forkError": "ユニットの複製に失敗しました",
-    "tabSharedWithMe": "共有されたコンテンツ",
-    "forkUnit": "コピーを作成する",
-    "noSharedUnits": "まだ共有されているユニットはありません"
-  },
-  "unitDetail": {
-    "loading": "読み込み中…"
-  },
-  "workbook": {
-    "timerInstructions": "これは時間制限のある練習問題です。スタートを押してタイマーを開始し、問題に答えてください。",
-    "start": "開始",
-    "loading": "読み込み中…",
-    "unitUpdated": "このユニットは講師によって更新されました。最新バージョンで再読み込みしますか？",
-    "reload": "再読み込み"
+    "greetingAfternoon": "こんにちは、{name}さん",
+    "greetingEvening": "こんばんは、{name}さん",
+    "greetingMorning": "おはようございます、{name}さん",
+    "joinSection": "セクションに参加しますか？",
+    "learningPathway": "スキルツリー",
+    "myAssignments": "私の課題",
+    "mySections": "マイセクション",
+    "noDescription": "説明がありません",
+    "noSectionsYet": "セクションはまだありません",
+    "sections": "セクション",
+    "title": "宿題教材",
+    "untitledSection": "無題のセクション",
+    "viewSection": "セクションを表示",
+    "viewWorkbook": "ワークブックを表示"
   },
   "leaderboard": {
-    "title": "ランキング",
-    "heading": "総合ランキング",
-    "xpMode": "XP",
     "completionMode": "完了",
+    "empty": "まだランキングデータがありません。課題を完了してXPを獲得しましょう！",
     "fastestMode": "最速",
+    "heading": "総合ランキング",
     "squadsMode": "チーム",
-    "empty": "まだランキングデータがありません。課題を完了してXPを獲得しましょう！"
-  },
-  "squads": {
-    "title": "チーム",
-    "selectSection": "セクションを選択してください",
-    "heading": "すべてのスクワッド",
-    "createSquad": "新しいスクワッドを開始します",
-    "description": "チームで競い合い、一緒にリーダーボードを駆け上がるために、スクワッドに参加しましょう。",
-    "noSections": "セクションが見つかりません",
-    "squadPosts": "スクワッド投稿"
-  },
-  "settings": {
-    "title": "設定",
-    "heading": "設定",
-    "description": "アカウント設定と環境設定を管理します",
-    "privacy": {
-      "heading": "プライバシー",
-      "leaderboardOptIn": "リーダーボードに自分の名前を表示する",
-      "leaderboardOptInHint": "オフにすると、リーダーボードでお客様の名前は「匿名の受講者」と表示されます。"
-    },
-    "customization": {
-      "heading": "カスタマイズ",
-      "description": "レベルアップすると、新しいアバタースタイルやエディターテーマがアンロックされます。"
-    },
-    "profileInfo": {
-      "heading": "プロフィール情報",
-      "description": "表示名とメールアドレスを更新してください"
-    },
-    "botCustomizer": {
-      "description": "AIチューターの外観をカスタマイズできます。Bot Whispererバッジを獲得すると、さらに多くのオプションがご利用いただけます。",
-      "heading": "AIアシスタントのアバター"
-    }
+    "title": "ランキング",
+    "xpMode": "XP"
   },
   "privacy": {
-    "title": "プライバシーポリシー",
-    "introduction": {
-      "heading": "はじめに",
-      "content": "Homework Supplyへようこそ。私たちは、お客様のプライバシーを保護し、個人情報のセキュリティを確保することに尽力しています。本プライバシーポリシーでは、お客様が当社の教育プラットフォームをご利用される際に、私たちがどのように情報を収集、使用、保存、共有するかについて説明いたします。"
+    "childrensPrivacy": {
+      "content": "Homework Supplyは教育目的で設計されており、13歳未満の生徒も保護者または学校の同意のもとで利用することができます。当社はCOPPAの要件に準拠しており、適切な同意なしに児童から個人情報を故意に収集することはありません。必要な保護者の同意を得る責任は、学校および指導者にあります。",
+      "heading": "お子様のプライバシー"
     },
-    "lastUpdated": "最終更新日：2026年5月",
-    "informationWeCollect": {
-      "heading": "収集する情報",
-      "learningData": "学習データ：",
-      "accountInfoText": "アカウント作成時のメールアドレス、表示名、および認証情報。",
-      "userContent": "ユーザー生成コンテンツ：",
-      "usageInfo": "利用情報：",
-      "userContentText": "学習活動中に作成された音声録音、テキスト回答、アップロードされたファイル、およびチャットメッセージ。",
-      "learningDataText": "課題の提出物、成績、進捗状況の追跡、獲得したXP、および学習分析データ。",
-      "usageInfoText": "プラットフォームの利用体験を向上させるため、デバイス情報、ブラウザの種類、閲覧したページ、および操作パターンを収集します。",
-      "intro": "教育サービスの提供および改善のため、以下の種類の情報を収集しています。",
-      "accountInfo": "アカウント情報："
-    },
-    "howWeUseInfo": {
-      "item1": "パーソナライズされた学習体験とAI搭載の個別指導を提供すること",
-      "item2": "学習進捗を追跡し、インストラクター向けに成績レポートを生成するため",
-      "item3": "フィードバックと評価のために、AIサービス（OpenAI）を通じて音声とテキストを処理しています",
-      "item4": "学生と講師間のリアルタイムコラボレーション機能を有効にするため",
-      "item5": "プラットフォーム機能の改善、バグの修正、および教育成果の向上",
-      "heading": "お客様の情報の利用方法",
-      "intro": "お客様の情報は以下の目的で使用いたします："
-    },
-    "dataStorage": {
-      "intro": "お客様のデータは、業界標準の方法により安全に保管されています：",
-      "item1": "すべてのデータは、転送中（TLS/SSL）および保存時にAWS暗号化サービスを使用して暗号化されています",
-      "heading": "データの保管とセキュリティ",
-      "item3": "データベースレコードは、きめ細かいアクセス制御を備えたAWS DynamoDBを通じて管理されています",
-      "item2": "ファイルはAmazon S3に保存され、お客様の役割と所有権に基づいてアクセス制御が適用されます",
-      "outro": "お客様のデータは、アカウントが有効である限り、またはサービスの提供に必要な期間保持されます。お客様はいつでもデータの削除を請求することができます。"
-    },
-    "dataSharing": {
-      "heading": "データ共有",
-      "intro": "当社はお客様の個人情報を販売することはございません。以下の限定的な状況においてのみ、データを共有する場合がございます。",
-      "instructorsText": "あなたの講師は、担当するセクション内であなたの提出物、成績、学習進捗状況を閲覧することができます。",
-      "classmatesText": "リーダーボードのランキングとチーム活動は、同じセクションの他の受講生に表示される場合があります（オプトアウトすることができます）。",
-      "instructors": "講師：",
-      "aiProcessingText": "音声およびテキストコンテンツは、文字起こし、フィードバック、評価のためにOpenAIに送信されます。OpenAIはこのデータをトレーニングには使用しません。",
-      "classmates": "クラスメート：",
-      "legalText": "法律で義務付けられている場合、またはユーザーの皆様の安全を保護するために必要な場合、情報を開示することがあります。",
-      "legal": "法的要件:",
-      "aiProcessing": "AI処理："
-    },
-    "yourRights": {
-      "heading": "あなたの権利",
-      "intro": "お客様の個人データに関して、以下の権利を有しております。",
-      "item5": "オプトアウト：リーダーボードの表示と特定のデータ共有機能を無効にすることができます",
-      "item4": "エクスポート：学習データをポータブル形式でダウンロードできます",
-      "outro": "これらの権利を行使するには、担当の講師にご連絡いただくか、以下の連絡先情報を使用して当方までお問い合わせください。",
-      "item3": "削除：アカウントおよび関連データの削除をリクエストできます",
-      "item1": "アクセス：お客様に関して当社が保有するすべての個人データのコピーをリクエストできます",
-      "item2": "訂正：不正確な個人情報の更新または修正"
+    "contactUs": {
+      "content": "このプライバシーポリシーに関してご質問がある場合、またはデータに関する権利を行使されたい場合は、担当講師またはプラットフォーム管理者にご連絡ください。一般的なお問い合わせにつきましては、プラットフォーム内で利用可能なサポートチャンネルを通じてご連絡いただけます。",
+      "heading": "お問い合わせ"
     },
     "cookies": {
       "content": "当サービスでは、認証、セッション管理、およびオフライン機能のために必須のCookieとローカルストレージを使用しています。第三者によるトラッキングCookieや広告Cookieは使用していません。ローカルストレージは、オフラインアクセスのための学習コンテンツのキャッシュに使用されます。",
       "heading": "Cookieとローカルストレージ"
     },
-    "childrensPrivacy": {
-      "heading": "お子様のプライバシー",
-      "content": "Homework Supplyは教育目的で設計されており、13歳未満の生徒も保護者または学校の同意のもとで利用することができます。当社はCOPPAの要件に準拠しており、適切な同意なしに児童から個人情報を故意に収集することはありません。必要な保護者の同意を得る責任は、学校および指導者にあります。"
+    "dataSharing": {
+      "aiProcessing": "AI処理：",
+      "aiProcessingText": "音声およびテキストコンテンツは、文字起こし、フィードバック、評価のためにOpenAIに送信されます。OpenAIはこのデータをトレーニングには使用しません。",
+      "classmates": "クラスメート：",
+      "classmatesText": "リーダーボードのランキングとチーム活動は、同じセクションの他の受講生に表示される場合があります（オプトアウトすることができます）。",
+      "heading": "データ共有",
+      "instructors": "講師：",
+      "instructorsText": "あなたの講師は、担当するセクション内であなたの提出物、成績、学習進捗状況を閲覧することができます。",
+      "intro": "当社はお客様の個人情報を販売することはございません。以下の限定的な状況においてのみ、データを共有する場合がございます。",
+      "legal": "法的要件:",
+      "legalText": "法律で義務付けられている場合、またはユーザーの皆様の安全を保護するために必要な場合、情報を開示することがあります。"
     },
-    "contactUs": {
-      "heading": "お問い合わせ",
-      "content": "このプライバシーポリシーに関してご質問がある場合、またはデータに関する権利を行使されたい場合は、担当講師またはプラットフォーム管理者にご連絡ください。一般的なお問い合わせにつきましては、プラットフォーム内で利用可能なサポートチャンネルを通じてご連絡いただけます。"
+    "dataStorage": {
+      "heading": "データの保管とセキュリティ",
+      "intro": "お客様のデータは、業界標準の方法により安全に保管されています：",
+      "item1": "すべてのデータは、転送中（TLS/SSL）および保存時にAWS暗号化サービスを使用して暗号化されています",
+      "item2": "ファイルはAmazon S3に保存され、お客様の役割と所有権に基づいてアクセス制御が適用されます",
+      "item3": "データベースレコードは、きめ細かいアクセス制御を備えたAWS DynamoDBを通じて管理されています",
+      "outro": "お客様のデータは、アカウントが有効である限り、またはサービスの提供に必要な期間保持されます。お客様はいつでもデータの削除を請求することができます。"
     },
+    "howWeUseInfo": {
+      "heading": "お客様の情報の利用方法",
+      "intro": "お客様の情報は以下の目的で使用いたします：",
+      "item1": "パーソナライズされた学習体験とAI搭載の個別指導を提供すること",
+      "item2": "学習進捗を追跡し、インストラクター向けに成績レポートを生成するため",
+      "item3": "フィードバックと評価のために、AIサービス（OpenAI）を通じて音声とテキストを処理しています",
+      "item4": "学生と講師間のリアルタイムコラボレーション機能を有効にするため",
+      "item5": "プラットフォーム機能の改善、バグの修正、および教育成果の向上"
+    },
+    "informationWeCollect": {
+      "accountInfo": "アカウント情報：",
+      "accountInfoText": "アカウント作成時のメールアドレス、表示名、および認証情報。",
+      "heading": "収集する情報",
+      "intro": "教育サービスの提供および改善のため、以下の種類の情報を収集しています。",
+      "learningData": "学習データ：",
+      "learningDataText": "課題の提出物、成績、進捗状況の追跡、獲得したXP、および学習分析データ。",
+      "usageInfo": "利用情報：",
+      "usageInfoText": "プラットフォームの利用体験を向上させるため、デバイス情報、ブラウザの種類、閲覧したページ、および操作パターンを収集します。",
+      "userContent": "ユーザー生成コンテンツ：",
+      "userContentText": "学習活動中に作成された音声録音、テキスト回答、アップロードされたファイル、およびチャットメッセージ。"
+    },
+    "introduction": {
+      "content": "Homework Supplyへようこそ。私たちは、お客様のプライバシーを保護し、個人情報のセキュリティを確保することに尽力しています。本プライバシーポリシーでは、お客様が当社の教育プラットフォームをご利用される際に、私たちがどのように情報を収集、使用、保存、共有するかについて説明いたします。",
+      "heading": "はじめに"
+    },
+    "lastUpdated": "最終更新日：2026年5月",
     "policyChanges": {
-      "heading": "本ポリシーの変更",
-      "content": "当社は、業務慣行や法的要件の変更を反映するため、本プライバシーポリシーを随時更新することがあります。重要な変更については、プラットフォームを通じてユーザーの皆様にお知らせいたします。変更後もプラットフォームを継続してご利用いただくことで、更新されたポリシーに同意したものとみなされます。"
+      "content": "当社は、業務慣行や法的要件の変更を反映するため、本プライバシーポリシーを随時更新することがあります。重要な変更については、プラットフォームを通じてユーザーの皆様にお知らせいたします。変更後もプラットフォームを継続してご利用いただくことで、更新されたポリシーに同意したものとみなされます。",
+      "heading": "本ポリシーの変更"
+    },
+    "title": "プライバシーポリシー",
+    "yourRights": {
+      "heading": "あなたの権利",
+      "intro": "お客様の個人データに関して、以下の権利を有しております。",
+      "item1": "アクセス：お客様に関して当社が保有するすべての個人データのコピーをリクエストできます",
+      "item2": "訂正：不正確な個人情報の更新または修正",
+      "item3": "削除：アカウントおよび関連データの削除をリクエストできます",
+      "item4": "エクスポート：学習データをポータブル形式でダウンロードできます",
+      "item5": "オプトアウト：リーダーボードの表示と特定のデータ共有機能を無効にすることができます",
+      "outro": "これらの権利を行使するには、担当の講師にご連絡いただくか、以下の連絡先情報を使用して当方までお問い合わせください。"
     }
   },
-  "Peer Review": "ピアレビュー"
+  "profile": {
+    "activity": "アクティビティ",
+    "advanced": {
+      "clearCache": "ローカルキャッシュをクリアします",
+      "clearCacheDialog": {
+        "cancel": "キャンセル",
+        "confirm": "キャッシュをクリアします",
+        "message": "これにより、オフライン課題や同期済みコンテンツを含む、ローカルにキャッシュされたすべてのデータが削除されます。サーバーからデータを再読み込みする必要があります。",
+        "title": "ローカルデータキャッシュをクリアしますか？"
+      },
+      "description": "高度な設定を管理し、ローカルデータキャッシュをクリアします",
+      "heading": "上級"
+    },
+    "badges": "バッジ",
+    "cancel": "キャンセル",
+    "changePassword": {
+      "button": "パスワードを変更",
+      "description": "セキュリティのためにアカウントのパスワードを更新してください",
+      "heading": "パスワードを変更"
+    },
+    "confirmEmail": {
+      "button": "メールアドレスを確認する",
+      "message": "メールをご確認いただき、確認コードを入力してメールアドレスを認証してください。",
+      "title": "メールアドレスを確認してください"
+    },
+    "description": "プロフィール情報を表示・更新します",
+    "heading": "マイプロフィール",
+    "identityId": "アイデンティティID",
+    "languagePreference": {
+      "changeSuccess": "言語設定が正常に保存されました",
+      "description": "ウェブサイトのインターフェースで使用する言語を選択します",
+      "heading": "言語設定",
+      "selectLanguage": "言語を選択"
+    },
+    "nailedItWall": "達成の壁",
+    "name": "名前",
+    "progress": "進捗状況",
+    "title": "マイプロフィール",
+    "updateProfile": "プロフィールを更新",
+    "userId": "ユーザーID"
+  },
+  "sectionDetail": {
+    "actionsHeader": "操作",
+    "applyCurve": "カーブを適用",
+    "assignmentHeader": "課題",
+    "assignments": "課題",
+    "clearAll": "すべてクリア",
+    "completionGrid": "完了状況の概要",
+    "coverVideoUrlLabel": "動画URL",
+    "coverVideoUrlPlaceholder": "動画のURLを貼り付けてください（https://...）",
+    "curveDebugInfo": "カーブデバッグ：",
+    "curveMethod": "カーブ法",
+    "deleteSection": "セクションを削除",
+    "deleteSectionConfirm": "このセクションを削除してもよろしいですか？",
+    "dragAndDropPrompt": "ここに画像をドラッグ&ドロップして、注目画像として設定してください。",
+    "editTooltip": "編集します",
+    "emailHeader": "メール",
+    "gradeHeader": "成績",
+    "gradebook": "成績表",
+    "instructorView": "講師ビュー",
+    "joinCode": "参加コード：",
+    "leaderboard": "ランキング",
+    "leaderboardEnabled": "リーダーボードを表示します",
+    "learnerHeader": "学習者",
+    "linearAdjustmentMethod": "線形調整（平均75%）",
+    "loading": "読み込み中...",
+    "noCoverVideo": "カバー動画が設定されていません。",
+    "noCurve": "カーブなし",
+    "noFeaturedImage": "アイキャッチ画像が設定されていません",
+    "noLeaderboardEntries": "まだリーダーボードのデータがありません。生徒がXPを獲得すると、ここに表示されます。",
+    "overrideGrade": {
+      "assignment": "課題：",
+      "cancel": "キャンセル",
+      "currentGrade": "現在の成績:",
+      "invalidScore": "0から100の間の有効なスコアを入力してください",
+      "label": "成績（％）",
+      "noGrade": "評価なし",
+      "prompt": "新しい成績を入力してください（0-100）：",
+      "save": "成績を保存します",
+      "saveFailed": "成績の保存に失敗しました。もう一度お試しください。",
+      "student": "受講者:",
+      "title": "成績を上書き"
+    },
+    "previewStudentView": "生徒ビューをプレビュー",
+    "removeCoverVideo": "削除します",
+    "saveCoverVideo": "保存",
+    "scaleToTopMethod": "最高得点に合わせる (100%)",
+    "selectAll": "すべて選択",
+    "selectAssignmentsToCurve": "カーブを適用する課題を選択してください",
+    "setCoverVideo": "カバー動画を設定",
+    "showDraftAssignments": "下書きを表示します",
+    "showFutureAssignments": "今後の課題を表示",
+    "showingAssignments": "({total}件中{visible}件の課題を表示)",
+    "squads": "チーム",
+    "studentView": "受講者ビュー",
+    "students": "学生",
+    "switchToInstructorView": "インストラクター表示に切り替え",
+    "totalAverage": "総合平均",
+    "totalCompletion": "合計（完了）",
+    "uploadImageInvalidFile": "有効な拡張子の画像ファイルをアップロードしてください。",
+    "uploadImagePrompt": "画像をアップロードしてください",
+    "uploadingImage": "画像をアップロード中です",
+    "viewWorkbook": "ワークブックを表示"
+  },
+  "sections": {
+    "archive": "アーカイブ",
+    "archiveError": "セクションの更新に失敗しました。もう一度お試しください。",
+    "archived": "アーカイブ済み",
+    "archivedSuccess": "セクションが正常にアーカイブされました",
+    "createNew": "新規作成",
+    "createNewSection": "新しいセクションを作成",
+    "joinCode": "コードラベル",
+    "loading": "読み込み中です...",
+    "newSection": {
+      "cancel": "キャンセルします",
+      "create": "作成します",
+      "description": "以下の情報を入力して新しいセクションを作成してください",
+      "descriptionLabel": "説明",
+      "nameLabel": "名前",
+      "title": "新しいセクション"
+    },
+    "noSectionsYet": "セクションがまだありません",
+    "showArchived": "アーカイブ済みを表示 ({count})",
+    "title": "セクション",
+    "unarchive": "アーカイブ解除",
+    "unarchivedSuccess": "セクションのアーカイブ解除が完了しました",
+    "untitledSection": "無題のセクション",
+    "viewSection": "セクションを表示"
+  },
+  "settings": {
+    "botCustomizer": {
+      "description": "AIチューターの外観をカスタマイズできます。Bot Whispererバッジを獲得すると、さらに多くのオプションがご利用いただけます。",
+      "heading": "AIアシスタントのアバター"
+    },
+    "customization": {
+      "description": "レベルアップすると、新しいアバタースタイルやエディターテーマがアンロックされます。",
+      "heading": "カスタマイズ"
+    },
+    "description": "アカウント設定と環境設定を管理します",
+    "heading": "設定",
+    "privacy": {
+      "heading": "プライバシー",
+      "leaderboardOptIn": "リーダーボードに自分の名前を表示する",
+      "leaderboardOptInHint": "オフにすると、リーダーボードでお客様の名前は「匿名の受講者」と表示されます。"
+    },
+    "profileInfo": {
+      "description": "表示名とメールアドレスを更新してください",
+      "heading": "プロフィール情報"
+    },
+    "title": "設定"
+  },
+  "squads": {
+    "createSquad": "新しいスクワッドを開始します",
+    "description": "チームで競い合い、一緒にリーダーボードを駆け上がるために、スクワッドに参加しましょう。",
+    "heading": "すべてのスクワッド",
+    "noSections": "セクションが見つかりません",
+    "selectSection": "セクションを選択してください",
+    "squadPosts": "スクワッド投稿",
+    "title": "チーム"
+  },
+  "unitDetail": {
+    "loading": "読み込み中…"
+  },
+  "units": {
+    "archivedUnits": "アーカイブされたユニット",
+    "createNew": "新規作成",
+    "createNewUnit": "新しい単元を作成する",
+    "editUnit": "ユニットを編集",
+    "forkError": "ユニットの複製に失敗しました",
+    "forkSuccess": "ユニットが正常に分岐されました",
+    "forkUnit": "コピーを作成する",
+    "forking": "フォーク中...",
+    "myDrafts": "下書き",
+    "noCommunityUnits": "コミュニティユニットは利用できません",
+    "noPublishedUnits": "公開済みユニットはまだありません",
+    "noSharedUnits": "まだ共有されているユニットはありません",
+    "practice": "練習",
+    "publishedUnits": "公開済みユニット",
+    "tabCommunity": "コミュニティ",
+    "tabMyUnits": "マイユニット",
+    "tabSharedWithMe": "共有されたコンテンツ",
+    "title": "ユニット",
+    "untitledUnit": "無題のユニット",
+    "viewWorkbook": "ワークブックを表示"
+  },
+  "workbook": {
+    "loading": "読み込み中…",
+    "reload": "再読み込み",
+    "start": "開始",
+    "timerInstructions": "これは時間制限のある練習問題です。スタートを押してタイマーを開始し、問題に答えてください。",
+    "unitUpdated": "このユニットは講師によって更新されました。最新バージョンで再読み込みしますか？"
+  }
 }

@@ -41,23 +41,35 @@ export function SkillTreePopupButton({
   isInstructor: isInstructorProp = undefined,
   size = "medium",
   sx = undefined,
+  /** Hide the built-in trigger button — use when a parent (e.g. a menu item) opens this instead. */
+  hideTrigger = false,
+  /** Controlled open state. Omit to let the component manage its own state. */
+  open: openProp = undefined,
+  onOpenChange = undefined,
 }) {
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  const open = openProp !== undefined ? openProp : openState;
+  const setOpen = (value) => {
+    onOpenChange?.(value);
+    if (openProp === undefined) setOpenState(value);
+  };
   const buttonLabel = "Skills";
   const dialogTitle = label ? `Skill Tree — ${label}` : "Skill Tree";
   return (
     <>
-      <Button
-        variant="outlined"
-        color="primary"
-        size={size}
-        startIcon={<AccountTreeIcon />}
-        onClick={() => setOpen(true)}
-        disabled={!sectionId}
-        sx={sx}
-      >
-        {buttonLabel}
-      </Button>
+      {!hideTrigger && (
+        <Button
+          variant="outlined"
+          color="primary"
+          size={size}
+          startIcon={<AccountTreeIcon />}
+          onClick={() => setOpen(true)}
+          disabled={!sectionId}
+          sx={sx}
+        >
+          {buttonLabel}
+        </Button>
+      )}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}

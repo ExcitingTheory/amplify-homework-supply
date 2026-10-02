@@ -54,7 +54,7 @@ export function AccommodationsDialog({
   onSave,
   formatName,
 }) {
-  const t = useTranslations();
+  const t = useTranslations("common");
   const [draft, setDraft] = React.useState({});
   const [selected, setSelected] = React.useState(() => new Set());
   const [saving, setSaving] = React.useState(false);

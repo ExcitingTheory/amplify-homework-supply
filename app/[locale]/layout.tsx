@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import { ViewTransition } from 'react';
 import { headers } from 'next/headers';
 import { routing } from '../../src/i18n/routing';
+import { onError, getMessageFallback } from '../../src/i18n/errorHandling';
 import Providers from '../providers';
 
 export function generateStaticParams() {
@@ -28,7 +29,12 @@ async function LocaleContent({
   const nonce = headerStore.get('x-nonce') || undefined;
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={messages}
+      onError={onError}
+      getMessageFallback={getMessageFallback}
+    >
       <Providers nonce={nonce}>
         <Suspense>
           <ViewTransition>{children}</ViewTransition>
